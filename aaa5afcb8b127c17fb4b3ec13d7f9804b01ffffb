@@ -1,0 +1,395 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "afc678d4_da816e29",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "Put behind a debug print macro",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 92,
+        "endChar": 74
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8899607_c19f80ee",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "Document this struct?",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 19
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "946e2793_b20349ac",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "please use androidemu lock/cv",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 24
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4dafb24_5ed02de7",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 1
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c1b4d63_3d4d4ec7",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "if this takes a nontrivial amount of time, please do this on a separate thread through a message channel",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 92,
+        "endChar": 65
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f15c98a5_4460c57b",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "Where is this used? can you add documentation on the decoding / converting pipeline? doesn\u0027t sdl do this?",
+      "range": {
+        "startLine": 220,
+        "startChar": 0,
+        "endLine": 220,
+        "endChar": 40
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "06f6bcda_4ed95cd2",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "nit:remove",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 107,
+        "endChar": 4
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37d8270b_944376e7",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "Please at least do this on a separate thread. Let\u0027s not do anything expensive in vcpu threads",
+      "range": {
+        "startLine": 195,
+        "startChar": 0,
+        "endLine": 196,
+        "endChar": 64
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d84c6db5_eeec56d7",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "nit:remove",
+      "range": {
+        "startLine": 224,
+        "startChar": 28,
+        "endLine": 224,
+        "endChar": 30
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "686d65c3_7336f2a2",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "nit:remove",
+      "range": {
+        "startLine": 45,
+        "startChar": 53,
+        "endLine": 45,
+        "endChar": 57
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78c3ad39_530aacce",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 49,
+        "startChar": 8,
+        "endLine": 49,
+        "endChar": 12
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "71519890_fe8684bb",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 37
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b09c125e_ad21ddcf",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "Final version should use Qt, right? Why do you need SDL in particular?\n\nIf it\u0027s converting YUV to RGB, see:\n\nandroid-emugl/host/libs/libOpenglRender/YUVConverter.cpp: YUV-\u003eRGB conversion with a shader (Or pull in libyuv)\nandroid/skin/qt/accelerometer-3d-widget.cpp: GL context setup in Qt",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 40
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af9ff915_0e987b2a",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "please use androidemu synchronization primitives",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 20
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5a74a79_5982e857",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 155,
+        "startChar": 26,
+        "endLine": 155,
+        "endChar": 34
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4babeb5d_d4ac5e0f",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "What\u0027s the word on touch event support?",
+      "range": {
+        "startLine": 171,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 31
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c3deaa4_d3d32ab9",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 351,
+        "startChar": 28,
+        "endLine": 351,
+        "endChar": 35
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e54c12ae_44f6f9d4",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-11T23:52:14Z",
+      "side": 1,
+      "message": "please use android::base::Lock / android::base::AutoLock / android::base::ConditionVariable",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 42
+      },
+      "revId": "86511ee092ad954e11d1a069bd522ae891768af2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
