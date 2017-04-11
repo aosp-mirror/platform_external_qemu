@@ -618,6 +618,8 @@ GL_APICALL void GL_APIENTRY glGenSamplers(GLsizei n, GLuint * samplers) {
         for(int i=0; i<n ;i++) {
             samplers[i] = ctx->shareGroup()->genName(NamedObjectType::SAMPLER,
                                                      0, true);
+            ctx->shareGroup()->setObjectData(NamedObjectType::SAMPLER,
+                    samplers[i], ObjectDataPtr(new SamplerData()));
         }
     }
 }
@@ -637,8 +639,8 @@ GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
-
         SET_ERROR_IF(sampler && !globalSampler, GL_INVALID_OPERATION);
+        ctx->setBindSampler(unit, sampler);
         ctx->dispatcher().glBindSampler(unit, globalSampler);
     }
 }
@@ -646,7 +648,12 @@ GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
 GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
-        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
+        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
+                NamedObjectType::SAMPLER, sampler);
+        SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
+        SamplerData* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::SAMPLER, sampler);
+        samplerData->setParamf(pname, param);
         ctx->dispatcher().glSamplerParameterf(globalSampler, pname, param);
     }
 }
@@ -654,7 +661,12 @@ GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GL
 GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GLint param) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
-        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
+        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
+        NamedObjectType::SAMPLER, sampler);
+        SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
+        SamplerData* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::SAMPLER, sampler);
+        samplerData->setParami(pname, param);
         ctx->dispatcher().glSamplerParameteri(globalSampler, pname, param);
     }
 }

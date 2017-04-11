@@ -32,6 +32,7 @@
 #include "GLcommon/TranslatorIfaces.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
+#include "SamplerData.h"
 #include "ShaderParser.h"
 #include "ProgramData.h"
 #include "GLcommon/TextureUtils.h"
@@ -623,7 +624,6 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
-
 
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
