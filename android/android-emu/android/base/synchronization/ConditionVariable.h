@@ -51,6 +51,36 @@ public:
         wait(&userLock->mLock);
     }
 
+    //
+    // Convenience functions to get rid of the loop in condition variable usage
+    // Instead of hand-writing a loop, e.g.
+    //
+    //      while (mRefCount < 3) {
+    //          mCv.wait(&mLock);
+    //      }
+    //
+    // use the following two wait() overloads:
+    //
+    //      mCv.wait(&mLock, [this]() { return mRefCount >= 3; });
+    //
+    // Parameters:
+    // |lock| - a Lock or AutoLock pointer used with the condition variable.
+    // |pred| - a functor predicate that's compatible with "bool pred()"
+    //          signature and returns a condition when one should stop waiting.
+    //
+
+    template <class Predicate>
+    void wait(Lock* lock, Predicate pred) {
+        while (!pred()) {
+            this->wait(lock);
+        }
+    }
+
+    template <class Predicate>
+    void wait(AutoLock* lock, Predicate pred) {
+        this->wait(&lock->mLock, pred);
+    }
+
 #ifdef _WIN32
 
     ConditionVariable() {
