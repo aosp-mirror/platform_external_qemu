@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ccd7a3be_444be918",
+        "filename": "android/android-emu/android/base/synchronization/ConditionVariable.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-11T20:59:04Z",
+      "side": 1,
+      "message": "I\u0027d prefer not to have one\nif a wait wakes up early, repeating with absolute wait time is simple: just call it again. If you pass a timeout you _must_ recalculate it; and that\u0027s where many bugs happen.",
+      "parentUuid": "a6fb772a_9526f3f9",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 66
+      },
+      "revId": "2e0fb5c13c60489b9e2aef78b980d67ada666bd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "286bd19a_7e43187b",
         "filename": "android/android-emu/android/base/synchronization/MessageChannel_unittest.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-11T19:24:15Z",
       "side": 1,
       "message": "What about just the current unix time + 16K us, if the test doesn\u0027t hang we\u0027re good",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 25
+      },
+      "revId": "2e0fb5c13c60489b9e2aef78b980d67ada666bd2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1da08ba9_e3188570",
+        "filename": "android/android-emu/android/base/synchronization/MessageChannel_unittest.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-11T20:59:04Z",
+      "side": 1,
+      "message": "well, it doesn\u0027t really test a lot, and most probably it would be the same as with current unix time.",
+      "parentUuid": "286bd19a_7e43187b",
       "range": {
         "startLine": 170,
         "startChar": 0,
