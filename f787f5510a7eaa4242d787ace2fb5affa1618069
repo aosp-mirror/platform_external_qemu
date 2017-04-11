@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c1a1a8a4_2727b2a3",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-11T18:41:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a2a0e58d_32f1d69c",
+      "range": {
+        "startLine": 688,
+        "startChar": 68,
+        "endLine": 688,
+        "endChar": 69
+      },
+      "revId": "f787f5510a7eaa4242d787ace2fb5affa1618069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f73e665_642065b9",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "d57bdf60_407a4468",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-11T18:41:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f73e665_642065b9",
+      "range": {
+        "startLine": 46,
+        "startChar": 25,
+        "endLine": 47,
+        "endChar": 52
+      },
+      "revId": "f787f5510a7eaa4242d787ace2fb5affa1618069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5c60829c_db6ec844",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2017-04-11T16:40:42Z",
       "side": 1,
       "message": "nit: sizeof(short/int/...) is implementation-defined, e.g. sizeof(long) is different on different platforms\nI\u0027d prefer to have hardcoded 1-2-4-... sizes here",
+      "range": {
+        "startLine": 101,
+        "startChar": 47,
+        "endLine": 101,
+        "endChar": 52
+      },
+      "revId": "f787f5510a7eaa4242d787ace2fb5affa1618069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18f23b46_357606ce",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-11T18:41:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c60829c_db6ec844",
       "range": {
         "startLine": 101,
         "startChar": 47,
