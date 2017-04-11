@@ -17,13 +17,13 @@
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidHttpProxyAgent {
-    // Say not to use a proxy
-    void (*httpProxyNone)();
-
     // Provide HTTP Proxy information to the AVD
     // The 'proxy' input string is of the form
     // username:password@host:port. Example:
-    // "admin:passw0rd@proxx.mycorp.com:80"
+    // "admin:passw0rd@mycorp.com:80"
+    //
+    // If |proxy| is null, no HTTP proxy should be used.
+    //
     // CAUTION: The 'proxy' character string is volatile
     //          and must be copied if it is needed after
     //          httpProxySet() returns.
