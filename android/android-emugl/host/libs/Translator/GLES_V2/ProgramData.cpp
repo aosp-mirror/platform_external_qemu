@@ -26,16 +26,17 @@
 #include <string.h>
 #include <unordered_set>
 
-GLUniformDesc::GLUniformDesc(GLint location, GLsizei count, GLboolean transpose,
+GLUniformDesc::GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
             GLenum type, GLsizei size, unsigned char* val)
         : mCount(count), mTranspose(transpose), mType(type)
-        , mVal(val, val + size) { }
+        , mVal(val, val + size), mName(name) { }
 
 GLUniformDesc::GLUniformDesc(android::base::Stream* stream) {
     mCount = stream->getBe32();
     mTranspose = stream->getByte();
     mType = stream->getBe32();
     loadBuffer(stream, &mVal);
+    mName = stream->getString();
 }
 
 void GLUniformDesc::onSave(android::base::Stream* stream) const {
@@ -43,6 +44,7 @@ void GLUniformDesc::onSave(android::base::Stream* stream) const {
     stream->putByte(mTranspose);
     stream->putBe32(mType);
     saveBuffer(stream, mVal);
+    stream->putString(mName);
 }
 
 static int s_glShaderType2ShaderType(GLenum type) {
@@ -109,6 +111,10 @@ static void getUniformValue(GLuint pname, const GLchar *name, GLenum type,
     GLDispatch& dispatcher = GLEScontext::dispatcher();
 
     GLint location = dispatcher.glGetUniformLocation(pname, name);
+    if (location <= 0) {
+        fprintf(stderr, "ERR: bad uniform location changed (%s: %d)\n",
+                name, location);
+    }
     switch(type) {
     case GL_FLOAT:
     case GL_FLOAT_VEC2:
@@ -161,7 +167,7 @@ static void getUniformValue(GLuint pname, const GLchar *name, GLenum type,
                 "unsupported uniform type 0x%x\n", type);
         return;
     }
-    GLUniformDesc uniformDesc(location, 1, 0, /*transpose*/
+    GLUniformDesc uniformDesc(name, location, 1, 0, /*transpose*/
         type, glSizeof(type), val);
     uniformsOnSave[location] = std::move(uniformDesc);
 }
@@ -237,6 +243,12 @@ void ProgramData::onSave(android::base::Stream* stream) const {
             collectUniformInfo(ProgramName);
         saveCollection(stream, uniformsOnSave, saveUniform);
     }
+    for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+        if (!attachedShaders[i].linkedSource.empty()) {
+            fprintf(stderr, "shader %d src\n%s",
+                    i, attachedShaders[i].linkedSource.c_str());
+        }
+    }
 
     for (const auto& s : attachedShaders) {
         stream->putBe32(s.localName);
@@ -304,6 +316,18 @@ void ProgramData::restore(ObjectLocalName localName,
         dispatcher.glUseProgram(globalName);
         for (const auto& uniformEntry : uniforms) {
             const auto& uniform = uniformEntry.second;
+            GLint location = dispatcher.glGetUniformLocation(globalName, uniform.mName.c_str());
+            (void)location;
+            if (location != (GLint)uniformEntry.first) {
+                fprintf(stderr, "ERR: uniform location changed (%s: %d->%d)\n",
+                        uniform.mName.c_str(), (GLint)uniformEntry.first, location);
+                for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+                    if (!attachedShaders[i].linkedSource.empty()) {
+                        fprintf(stderr, "shader %d src\n%s",
+                                i, attachedShaders[i].linkedSource.c_str());
+                    }
+                }
+            }
             switch (uniform.mType) {
                 case GL_FLOAT:
                     dispatcher.glUniform1fv(uniformEntry.first, uniform.mCount,
@@ -338,6 +362,9 @@ void ProgramData::restore(ObjectLocalName localName,
                 case GL_UNSIGNED_INT_SAMPLER_3D:
                 case GL_UNSIGNED_INT_SAMPLER_CUBE:
                 case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
+                    assert(uniform.mVal.data());
+                    printf("%d %d %d %p %i\n", uniformEntry.first, uniform.mCount,
+                            uniform.mType, uniform.mVal.data(), uniform.mVal[0]);
                     dispatcher.glUniform1iv(uniformEntry.first, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;

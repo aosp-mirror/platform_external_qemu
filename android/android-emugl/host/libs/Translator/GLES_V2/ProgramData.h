@@ -25,7 +25,7 @@
 
 struct GLUniformDesc {
     GLUniformDesc() = default;
-    GLUniformDesc(GLint location, GLsizei count, GLboolean transpose,
+    GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
             GLenum type, GLsizei size, unsigned char* val);
     GLUniformDesc(android::base::Stream* stream);
     GLUniformDesc(GLUniformDesc&&) = default;
@@ -35,6 +35,8 @@ struct GLUniformDesc {
     GLboolean mTranspose = GL_FALSE;
     GLenum mType = (GLenum)0;
     std::vector<unsigned char> mVal;
+
+    std::string mName = {};
 
     void onSave(android::base::Stream* stream) const;
 };
