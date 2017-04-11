@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2a0e58d_32f1d69c",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-11T16:40:42Z",
+      "side": 1,
+      "message": "print |j| here as well?",
+      "range": {
+        "startLine": 688,
+        "startChar": 68,
+        "endLine": 688,
+        "endChar": 69
+      },
+      "revId": "f787f5510a7eaa4242d787ace2fb5affa1618069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f73e665_642065b9",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-11T16:40:42Z",
+      "side": 1,
+      "message": "nit: sizeof(\u003cany\u003e char) is 1 by definition :)",
+      "range": {
+        "startLine": 46,
+        "startChar": 25,
+        "endLine": 47,
+        "endChar": 52
+      },
+      "revId": "f787f5510a7eaa4242d787ace2fb5affa1618069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c60829c_db6ec844",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-11T16:40:42Z",
+      "side": 1,
+      "message": "nit: sizeof(short/int/...) is implementation-defined, e.g. sizeof(long) is different on different platforms\nI\u0027d prefer to have hardcoded 1-2-4-... sizes here",
+      "range": {
+        "startLine": 101,
+        "startChar": 47,
+        "endLine": 101,
+        "endChar": 52
+      },
+      "revId": "f787f5510a7eaa4242d787ace2fb5affa1618069",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
