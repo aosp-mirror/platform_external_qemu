@@ -46,6 +46,30 @@
       "revId": "8e7a32728b9c0d9b5ad710fbb144b5fdb3b5a91e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d294a01c_a9a10014",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page-proxy.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-11T22:27:54Z",
+      "side": 1,
+      "message": "My misunderstanding. This call is not necessary at all.\nDone.",
+      "parentUuid": "86ac834d_45707e4b",
+      "range": {
+        "startLine": 160,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 8
+      },
+      "revId": "8e7a32728b9c0d9b5ad710fbb144b5fdb3b5a91e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
