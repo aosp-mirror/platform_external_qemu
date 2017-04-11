@@ -273,6 +273,7 @@ void GLEScontext::addVertexArrayObject(GLuint array) {
                     i,
                     new GLESpointer()));
     }
+    assert(m_vaoStateMap.count(array) == 0);  // Overwriting existing entry, leaking memory
     m_vaoStateMap[array] = VAOState(0, map, std::max(s_glSupport.maxVertexAttribs, s_glSupport.maxVertexAttribBindings));
 }
 
@@ -286,8 +287,8 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
 
     ArraysMap* map = m_vaoStateMap[array].arraysMap;
 
-    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
-        if ((*map)[i]) delete (*map)[i];
+    for (auto elem : *map) {
+        delete elem.second;
     }
     delete map;
 
@@ -501,12 +502,14 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
 }
 
 GLEScontext::~GLEScontext() {
-    std::vector<GLuint> vaos_to_remove;
-    for (VAOStateMap::iterator it = m_vaoStateMap.begin(); it != m_vaoStateMap.end(); ++it) {
-        vaos_to_remove.push_back(it->first);
-    }
-    for (auto vao : vaos_to_remove) {
-        removeVertexArrayObject(vao);
+    for (auto vao : m_vaoStateMap) {
+        ArraysMap* map = vao.second.arraysMap;
+        if (map) {
+            for (auto elem : *map) {
+                delete elem.second;
+            }
+            delete map;
+        }
     }
     delete[] m_texState;
     m_texState = nullptr;
