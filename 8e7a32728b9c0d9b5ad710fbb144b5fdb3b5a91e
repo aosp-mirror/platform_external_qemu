@@ -22,6 +22,30 @@
       "revId": "8e7a32728b9c0d9b5ad710fbb144b5fdb3b5a91e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86ac834d_45707e4b",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page-proxy.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-11T22:08:42Z",
+      "side": 1,
+      "message": "I could add a flag to remember if I\u0027ve already sent this, but I don\u0027t think this situation will happen often.\n\nIf the Emulator is launched manually with proxy settings on the command line, the user probably will not change the proxy settings on the UI. Only if they do both will the settings be sent again.",
+      "parentUuid": "22d9069d_694b72d9",
+      "range": {
+        "startLine": 160,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 8
+      },
+      "revId": "8e7a32728b9c0d9b5ad710fbb144b5fdb3b5a91e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
