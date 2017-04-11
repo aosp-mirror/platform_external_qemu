@@ -115,7 +115,7 @@ TEST(ConditionVariable, basicWaitBroadcast) {
 
 TEST(ConditionVariable, waitBroadcast) {
     TestThreadParams p;
-    const size_t kNumThreads = 200;
+    const size_t kNumThreads = 20;
 
     std::vector<TestThread> testThreads;
     testThreads.reserve(kNumThreads);
