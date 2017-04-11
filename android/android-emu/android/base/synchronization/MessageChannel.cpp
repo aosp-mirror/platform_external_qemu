@@ -95,6 +95,18 @@ Optional<size_t> MessageChannelBase::beforeTryRead() {
     return mPos;
 }
 
+Optional<size_t> MessageChannelBase::beforeTimedRead(
+        System::Duration wallTimeUs) {
+    mLock.lock();
+
+    while (mCount == 0 && !mStopped) {
+        if (!mCanRead.timedWait(&mLock, wallTimeUs)) {
+            return {};
+        }
+    }
+    return mPos;
+}
+
 void MessageChannelBase::afterRead(bool success) {
     if (success) {
         if (++mPos == mCapacity) {

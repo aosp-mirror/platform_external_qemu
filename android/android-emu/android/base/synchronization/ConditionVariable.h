@@ -74,6 +74,14 @@ public:
         ::SleepConditionVariableSRW(&mCond, &userLock->mLock, INFINITE, 0);
     }
 
+    bool timedWait(Lock *userLock, System::Duration waitUntilUs) {
+        const auto now = System::get()->getUnixTimeUs();
+        const auto timeout =
+                std::max<System::Duration>(0, waitUntilUs  - now) / 1000;
+        return ::SleepConditionVariableSRW(
+                    &mCond, &userLock->mLock, timeout, 0) != 0;
+    }
+
     // Signal that a condition was reached. This will wake at least (and
     // preferrably) one waiting thread that is blocked on wait().
     void signal() {
@@ -102,6 +110,13 @@ private:
 
     void wait(Lock* userLock) {
         pthread_cond_wait(&mCond, &userLock->mLock);
+    }
+
+    bool timedWait(Lock* userLock, System::Duration waitUntilUs) {
+        timespec abstime;
+        abstime.tv_sec = waitUntilUs / 1000000LL;
+        abstime.tv_nsec = (waitUntilUs % 1000000LL) * 1000;
+        return pthread_cond_timedwait(&mCond, &userLock->mLock, &abstime) == 0;
     }
 
     void signal() {
