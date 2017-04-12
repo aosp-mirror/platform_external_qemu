@@ -22,6 +22,30 @@
       "revId": "3525cf6978aa2815b082d50dbc37cc9d644ad502",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b1795fd_4af6a068",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-12T19:30:28Z",
+      "side": 1,
+      "message": "api23/24 has two modes: one is encrypted and one is not; so \nit is not mandatory;\n\nolder images I am not sure how encryption is supported.",
+      "parentUuid": "b3a14db3_b4f2b1ea",
+      "range": {
+        "startLine": 1022,
+        "startChar": 0,
+        "endLine": 1022,
+        "endChar": 26
+      },
+      "revId": "3525cf6978aa2815b082d50dbc37cc9d644ad502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
