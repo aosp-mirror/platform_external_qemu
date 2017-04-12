@@ -216,7 +216,7 @@ static std::string getNthParentDir(const char* path, size_t n) {
 
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
                              AndroidHwConfig* hw, ImageType type, bool writable,
-                             int apiLevel, const char* avdContentPath) {
+                             int apiLevel, AvdInfo* avd) {
     int n   = *argsPosition;
     int idx = *driveIndex;
 
@@ -235,7 +235,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
     StringView filePath;
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            filePath = avdContentPath;
+            filePath = avdInfo_getContentPath(avd);
             driveParam += StringFormat("index=%d,id=system,file=%s"
                                        PATH_SEP "system.img.qcow2",
                                         idx++, filePath);
@@ -280,7 +280,8 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             }
             break;
         case IMAGE_TYPE_ENCRYPTION_KEY:
-            if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) &&
+            if ((android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
+                avdInfo_isEncryptionEnabledInBuild(avd)) &&
                 hw->disk_encryptionKeyPartition_path != NULL && strcmp(hw->disk_encryptionKeyPartition_path, "")) {
                 filePath = hw->disk_encryptionKeyPartition_path;
                 driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
@@ -723,7 +724,8 @@ extern "C" int main(int argc, char **argv) {
     }
 
     // create encryptionkey.img file if needed
-    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
+            avdInfo_isEncryptionEnabledInBuild(avd)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
                 derror("Encryption is requested but failed to create encrypt partition.");
@@ -865,8 +867,7 @@ extern "C" int main(int argc, char **argv) {
         bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
                     android_op_writable_system : true;
         makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s], writable, apiLevel,
-                         avdInfo_getContentPath(avd));
+                         kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
     }
 
     // Network
