@@ -236,6 +236,7 @@ GL_APICALL void  GL_APIENTRY glAttachShader(GLuint program, GLuint shader){
                      !(programData->getDataType()==PROGRAM_DATA) ,GL_INVALID_OPERATION);
 
         GLenum shaderType = ((ShaderParser*)shaderData)->getType();
+        if (program == 76) fprintf(stderr, "%s %d 0x%x %d\n", __FUNCTION__, program, shaderType, shader);
         ProgramData* pData = (ProgramData*)programData;
         SET_ERROR_IF((pData->getAttachedShader(shaderType)!=0), GL_INVALID_OPERATION);
         pData->attachShader(shader, (ShaderParser*)shaderData, shaderType);
@@ -617,6 +618,9 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             }
         }
     }
+    if (shader == 74 || shader == 75) {
+            fprintf(stderr, "compile shader %d\n", shader);
+        }
 }
 
 GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
@@ -997,6 +1001,10 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
             ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM, shader);
         }
     }
+        if (shader == 74 || shader == 75) {
+            fprintf(stderr, "glDeleteShader %d\n", shader);
+    }
+
 }
 
 GL_APICALL void  GL_APIENTRY glDepthFunc(GLenum func){
@@ -1038,6 +1046,9 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
         s_detachShader(ctx, program, shader);
 
         ctx->dispatcher().glDetachShader(globalProgramName,globalShaderName);
+    }
+    if (shader == 74 || shader == 75) {
+            fprintf(stderr, "glDetachShader %d\n", shader);
     }
 }
 
@@ -2498,6 +2509,12 @@ GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
                 }
             }
         }
+            if (program == 76) {
+                GLuint location = ctx->dispatcher().glGetUniformLocation(globalProgramName,
+                        "RandomValueTexture");
+                fprintf(stderr, "RandomValueTexture:%d\n", location);
+            }
+
 
         programData->setLinkStatus(linkStatus);
 
@@ -2607,6 +2624,8 @@ GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
     {
         ctx->dispatcher().glReleaseShaderCompiler();
     }
+            fprintf(stderr, "glReleaseShaderCompiler\n");
+
 #endif // !__APPLE__
 }
 
@@ -2676,6 +2695,7 @@ GL_APICALL void  GL_APIENTRY glScissor(GLint x, GLint y, GLsizei width, GLsizei 
 GL_APICALL void  GL_APIENTRY glShaderBinary(GLsizei n, const GLuint* shaders, GLenum binaryformat, const GLvoid* binary, GLsizei length){
     GET_CTX();
 
+    /*
     SET_ERROR_IF( (ctx->dispatcher().glShaderBinary == NULL), GL_INVALID_OPERATION);
 
     if(ctx->shareGroup().get()){
@@ -2685,7 +2705,7 @@ GL_APICALL void  GL_APIENTRY glShaderBinary(GLsizei n, const GLuint* shaders, GL
             SET_ERROR_IF(globalShaderName == 0,GL_INVALID_VALUE);
             ctx->dispatcher().glShaderBinary(1,&globalShaderName,binaryformat,binary,length);
         }
-    }
+    }*/
 }
 
 static int sDetectShaderESSLVersion(GLESv2Context* ctx, const GLchar* const* strings) {
@@ -2721,6 +2741,9 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         sp->setSrc(esslVersion, count, string, length);
         ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
+        if (shader == 74 || shader == 75) {
+            fprintf(stderr, "shader %d\n", shader);
+        }
     }
 }
 
@@ -3047,6 +3070,7 @@ GL_APICALL void  GL_APIENTRY glUseProgram(GLuint program){
 
 GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
     GET_CTX();
+    if (program == 76) fprintf(stderr, "%s %d", __FUNCTION__, program);
     if(ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, program);

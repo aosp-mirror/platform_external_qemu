@@ -303,6 +303,7 @@ GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsi
     } else {
         GLESConversionArrays tmpArrs;
         s_glDrawSetupArraysPre(ctx, tmpArrs, first, count, 0, NULL, true);
+        //printf("glDrawArraysInstanced %d %d %u %u\n", mode, first, count, primcount);
         ctx->dispatcher().glDrawArraysInstanced(mode,first,count, primcount);
         s_glDrawSetupArraysPost(ctx);
     }
@@ -776,6 +777,10 @@ GL_APICALL void GL_APIENTRY glProgramParameteri(GLuint program, GLenum pname, GL
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramParameteri(globalProgramName, pname, value);
     }
+            if (program == 76) {
+             
+                fprintf(stderr, "glProgramParameteri\n");
+            }
 }
 
 GL_APICALL void GL_APIENTRY glProgramBinary(GLuint program, GLenum binaryFormat, const void * binary, GLsizei length) {
