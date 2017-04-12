@@ -35,9 +35,6 @@ GLESv1Decoder::GLESv1Decoder()
 
 GLESv1Decoder::~GLESv1Decoder()
 {
-    if (m_glesDso != NULL) {
-        delete m_glesDso;
-    }
 }
 
 
