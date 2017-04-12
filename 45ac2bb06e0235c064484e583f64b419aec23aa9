@@ -1,0 +1,118 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f6cd432_693a02a1",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-12T23:28:17Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 1
+      },
+      "revId": "45ac2bb06e0235c064484e583f64b419aec23aa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c13f8fa0_e3e0c6e2",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-12T23:28:17Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "45ac2bb06e0235c064484e583f64b419aec23aa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3533aa0e_661f15b3",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-12T23:28:17Z",
+      "side": 1,
+      "message": "nit: line width",
+      "revId": "45ac2bb06e0235c064484e583f64b419aec23aa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bfb0c104_bfe78d04",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-12T23:28:17Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "45ac2bb06e0235c064484e583f64b419aec23aa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd775f6c_62b03023",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-12T23:28:17Z",
+      "side": 1,
+      "message": "nit: line length",
+      "revId": "45ac2bb06e0235c064484e583f64b419aec23aa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "43fd7db7_181a2168",
+        "filename": "android/android-emugl/shared/emugl/common/shared_library.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-12T23:28:17Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 4
+      },
+      "revId": "45ac2bb06e0235c064484e583f64b419aec23aa9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
