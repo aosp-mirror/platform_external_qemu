@@ -34,11 +34,11 @@ help_list_avds( stralloc_t* out ) {
 }
 
 static void
-help_studio(stralloc_t*  out)
+help_studio_params(stralloc_t*  out)
 {
     PRINTF(
-    "  This flag indicates that the AVD was launched by Android Studio\n\n"
-    "  This flag should be used only by Android Studio\n\n"
+    "  Indicates a temporary file containing parameters from Android Studio.\n\n"
+    "  This should be used only by Android Studio.\n\n"
     );
 }
 
