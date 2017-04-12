@@ -75,6 +75,7 @@ private slots:
     void on_cellularButton_clicked();
     void on_dpadButton_clicked();
     void on_fingerButton_clicked();
+    void on_googlePlayButton_clicked();
     void on_helpButton_clicked();
     void on_locationButton_clicked();
     void on_microphoneButton_clicked();

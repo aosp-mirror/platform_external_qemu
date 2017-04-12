@@ -72,6 +72,7 @@
         <file alias="file_upload">images/light/ic_file_upload_678_48dp.svg</file>
         <file alias="fingerprint">images/light/ic_fingerprint_678_48dp.svg</file>
         <file alias="folder">images/light/ic_folder_777_48dp.svg</file>
+        <file alias="google_play">images/light/ic_play_prism_678_48dp.svg</file>
         <file alias="help_outline">images/light/ic_help_outline_grey600_48dp.svg</file>
         <file alias="hwSensors">images/light/ic_filter_tilt_shift_678_48dp.svg</file>
         <file alias="keyboard">images/light/ic_keyboard_678_48dp.svg</file>
@@ -164,6 +165,7 @@
         <file alias="file_upload">images/dark/ic_file_upload_677_48dp.svg</file>
         <file alias="fingerprint">images/dark/ic_fingerprint_677_48dp.svg</file>
         <file alias="folder">images/dark/ic_folder_bcc_48dp.svg</file>
+        <file alias="google_play">images/dark/ic_play_prism_677_48dp.svg</file>
         <file alias="help_outline">images/dark/ic_help_outline_white_48dp.svg</file>
         <file alias="hwSensors">images/dark/ic_filter_tilt_shift_677_48dp.svg</file>
         <file alias="keyboard">images/dark/ic_keyboard_677_48dp.svg</file>

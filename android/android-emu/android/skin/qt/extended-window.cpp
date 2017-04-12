@@ -14,6 +14,7 @@
 #include "android/skin/qt/extended-window-styles.h"
 
 #include "android/emulation/control/user_event_agent.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -96,6 +97,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_SETTINGS,      mExtendedUi->settingsButton},
         {PANE_IDX_HELP,          mExtendedUi->helpButton},
         {PANE_IDX_RECORD_SCREEN, mExtendedUi->recordScreenButton},
+        {PANE_IDX_GOOGLE_PLAY,   mExtendedUi->googlePlayButton},
     };
 
     setObjectName("ExtendedControls");
@@ -116,6 +118,13 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
+
+    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
+        mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
+        mExtendedUi->googlePlayPage->initialize(
+                mEmulatorWindow->getAdbInterface());
+        mExtendedUi->googlePlayButton->setVisible(true);
+    }
 
 #ifdef __APPLE__
     for (QWidget* w : findChildren<QWidget*>()) {
@@ -218,6 +227,7 @@ void ExtendedWindow::on_settingsButton_clicked()     { adjustTabs(PANE_IDX_SETTI
 void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEPHONE); }
 void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
 void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
+void ExtendedWindow::on_googlePlayButton_clicked() { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
 
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {

@@ -73,6 +73,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
    <widget class="RecordScreenPage" name="recordScreenPage"/>
+   <widget class="GooglePlayPage" name="googlePlayPage"/>
    <widget class="SettingsPage" name="settingsPage"/>
    <widget class="HelpPage" name="helpPage"/>
    <widget class="QWidget" name="page">
@@ -844,6 +845,55 @@ padding: 10px 0px 10px 16px;</string>
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="googlePlayButton">
+        <property name="visible">
+         <bool>false</bool>
+        </property>
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Google Play</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/google_play</normaloff>:/light/google_play</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>google_play</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="settingsButton">
         <property name="font">
          <font>
@@ -1026,6 +1076,12 @@ padding: 10px 0px 10px 16px;</string>
    <header>android/skin/qt/extended-pages/record-screen-page.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>GooglePlayPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/google-play-page.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>locationButton</tabstop>
@@ -1037,6 +1093,8 @@ padding: 10px 0px 10px 16px;</string>
   <!--<tabstop>microphoneButton</tabstop>-->
   <tabstop>fingerButton</tabstop>
   <tabstop>virtSensorsButton</tabstop>
+  <!-- TODO(joshuaduong): Enable once gplay is ready. -->
+  <!-- <tabstop>googlePlayButton</tabstop> -->
   <tabstop>settingsButton</tabstop>
   <!-- <tabstop>recordScreenButton</tabstop> -->
   <tabstop>helpButton</tabstop>
