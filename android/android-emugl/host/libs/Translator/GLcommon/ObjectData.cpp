@@ -29,6 +29,8 @@ NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
             return NamedObjectType::RENDERBUFFER;
         case FRAMEBUFFER_DATA:
             return NamedObjectType::FRAMEBUFFER;
+        case SAMPLER_DATA:
+            return NamedObjectType::SAMPLER;
         default:
             return NamedObjectType::NULLTYPE;
     }
