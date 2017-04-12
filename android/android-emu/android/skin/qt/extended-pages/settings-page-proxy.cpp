@@ -147,9 +147,7 @@ void SettingsPage::sendProxySettingsToAgent() {
         return;
     }
 
-    if (mHttpProxyAgent == nullptr
-        || mHttpProxyAgent->httpProxyNone == nullptr
-        || mHttpProxyAgent->httpProxySet == nullptr) {
+    if (mHttpProxyAgent == nullptr || mHttpProxyAgent->httpProxySet == nullptr) {
         return;
     }
 
@@ -164,13 +162,13 @@ void SettingsPage::sendProxySettingsToAgent() {
     if (mUi->set_useStudio->isChecked()) {
         // Use the settings from Android Studio
         // TODO: jameskaye Read the actual settings from AS
-        mHttpProxyAgent->httpProxyNone();
+        mHttpProxyAgent->httpProxySet(nullptr);
         return;
     }
 
     // Use our local settings
     if (mUi->set_noProxy->isChecked()) {
-        mHttpProxyAgent->httpProxyNone();
+        mHttpProxyAgent->httpProxySet(nullptr);
         return;
     }
 
@@ -181,7 +179,7 @@ void SettingsPage::sendProxySettingsToAgent() {
         QString host = mUi->set_hostName->text();
         if (host.isEmpty()) {
             // Without a host name, we cannot proxy.
-            mHttpProxyAgent->httpProxyNone();
+            mHttpProxyAgent->httpProxySet(nullptr);
             return;
         }
         QString paramString = "";

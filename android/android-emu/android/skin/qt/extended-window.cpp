@@ -157,6 +157,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->microphonePage->setMicrophoneAgent(agentPtr->userEvents);
+        mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_isAndroidAuto(android_avdInfo)) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
