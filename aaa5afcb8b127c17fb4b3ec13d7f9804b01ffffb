@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "cf895c46_6e7f734f",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "curious why do you need to add a whole new rendering framework to show another window, instead of creating one more Qt window and rendering there? It all looks really complicated now - extra thread, inter-thread communication, a framework that\u0027s foreign to our main platform (Windows), just one more framework that we need to learn.",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 1
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "afc678d4_da816e29",
         "filename": "android/android-emu/android/external-display/DisplayWindow.cpp",
         "patchSetId": 5
@@ -25,6 +48,52 @@
     },
     {
       "key": {
+        "uuid": "b5a416bb_dbbbf7c8",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "nit: what is this about?",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 12,
+        "endChar": 11
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae9f79af_7e06c9d1",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "don\u0027t include pthread - I\u0027m sure it sucks in MinGW",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 20
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8899607_c19f80ee",
         "filename": "android/android-emu/android/external-display/DisplayWindow.h",
         "patchSetId": 5
@@ -39,6 +108,29 @@
       "range": {
         "startLine": 30,
         "startChar": 0,
+        "endLine": 30,
+        "endChar": 19
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20a47b5f_b5237d5e",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "I don\u0027t see why it needs to be in this header - nothing needs it here",
+      "range": {
+        "startLine": 30,
+        "startChar": 7,
         "endLine": 30,
         "endChar": 19
       },
@@ -71,6 +163,98 @@
     },
     {
       "key": {
+        "uuid": "211ba863_1bc2b3a7",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "why is it virtual? Are you going to inherit DisplayWindow and delete it using a pointer to base? Then please make DisplayWindow abstract",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 11
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "006a2080_9c5c42f5",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "unique_ptr\u003c\u003e, please",
+      "range": {
+        "startLine": 43,
+        "startChar": 11,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5d6931d_e39b6a6d",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "class members should use |mMemberName| style",
+      "range": {
+        "startLine": 62,
+        "startChar": 8,
+        "endLine": 62,
+        "endChar": 13
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75adf058_f46a187f",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "please mention who owns these. defaulted dtor suggests they either leak or aren\u0027t owned by the class",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 66,
+        "endChar": 31
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f4dafb24_5ed02de7",
         "filename": "android/android-emu/android/external-display/DisplayWindow.h",
         "patchSetId": 5
@@ -87,6 +271,144 @@
         "startChar": 0,
         "endLine": 68,
         "endChar": 1
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29a15d0b_9fc573e0",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "please only use android/base/synchronization/ primitives",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 30
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9dfc1325_ec439e5b",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "this check makes no sense in constructor",
+      "range": {
+        "startLine": 51,
+        "startChar": 8,
+        "endLine": 52,
+        "endChar": 30
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b1760797_866eb0a0",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "1. Looks like Mirroring could be help by value in the pipe, not by pointer. If you actually need to be able to destroy it mid-flight, use std::unique_ptr\u003c\u003e instead of raw new/delete calls\n\n2. Use constructor initializer lists instead of the ctor body",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 37
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4fc9b591_d399a209",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "assume new never fails. in C++ it throws exception instead of returning nullptr, but we compile with exceptions disabled. That\u0027s why it will just silently terminate the app",
+      "range": {
+        "startLine": 55,
+        "startChar": 23,
+        "endLine": 55,
+        "endChar": 33
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a7d5fab8_255ccf76",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "this needs to make sure it sends the data buffer by buffer, as pipe driver can split even a 2-byte buffer in half if it happens to lay across two different physical memory pages. Please use the pattern other pipe implementations use - loop over the buffers and copy data chunk-by-chunk",
+      "range": {
+        "startLine": 78,
+        "startChar": 62,
+        "endLine": 78,
+        "endChar": 71
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb9a3000_e8439471",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "buffer\u0027s |size| is an input parameter, not output. It\u0027s the size of the buffer in guest memory where pipe needs to place the data",
+      "range": {
+        "startLine": 79,
+        "startChar": 22,
+        "endLine": 79,
+        "endChar": 27
       },
       "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -117,6 +439,213 @@
     },
     {
       "key": {
+        "uuid": "e7fbd503_dfe5670c",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "well, we need to do at least something :)",
+      "range": {
+        "startLine": 93,
+        "startChar": 12,
+        "endLine": 94,
+        "endChar": 13
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e14004f0_a09c2c3b",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "pipe device calls this function when guest goes to sleep in kernel mode waiting for the pipe to wake it when it can do an operation in |flags|. As I see from the onPoll(), this pipe potentially could have no data for guest to read. In that case you need to remember that there\u0027s a guest sleeping waiting for data to read, and when that data becomes available you need to call AndroidPipe::signalWake() to wake it, so it calls onGuestRecv() again",
+      "range": {
+        "startLine": 100,
+        "startChar": 8,
+        "endLine": 100,
+        "endChar": 58
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "147974de_1b9f8b4b",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "nit: much",
+      "range": {
+        "startLine": 109,
+        "startChar": 45,
+        "endLine": 109,
+        "endChar": 49
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd359c18_4a4438fb",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "this is a part of the pipe internal logic, imo, so it needs to check call it if there\u0027s a guest waiting for a signal",
+      "range": {
+        "startLine": 143,
+        "startChar": 4,
+        "endLine": 143,
+        "endChar": 35
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f0bc339_52be5fdf",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "this isn\u0027t thread-safe. You could use LazyInstance\u003c\u003e to make it thread safe by putting avcodec_register_all() into a constructor of a struct inside LazyInstance\u003c\u003e global static object",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 44,
+        "endChar": 5
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31d7e958_200310b0",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "it\u0027s OK to have debug prints under custom flags",
+      "range": {
+        "startLine": 169,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 2
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75494163_04713442",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "we\u0027ve got at least two more functions to convert to yuv, as I remember. Please make sure to reuse one of those",
+      "range": {
+        "startLine": 193,
+        "startChar": 20,
+        "endLine": 193,
+        "endChar": 30
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d24db4df_74f04f9c",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "why is this a member if it\u0027s only used inside this function?",
+      "range": {
+        "startLine": 197,
+        "startChar": 23,
+        "endLine": 197,
+        "endChar": 35
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4c0ebc6_532af15e",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "is there a way to reuse the objects instead of allocating/deallocating them each frame?",
+      "range": {
+        "startLine": 200,
+        "startChar": 12,
+        "endLine": 200,
+        "endChar": 32
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f15c98a5_4460c57b",
         "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
         "patchSetId": 5
@@ -140,6 +669,98 @@
     },
     {
       "key": {
+        "uuid": "f2027d30_7665e9a9",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "use |mMediaType| or |m_media_type| naming for members",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 18
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7055ec75_c64cc2ac",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "\"enum\" prefix isn\u0027t needed in C++",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 9
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f69e0d0_00ee0bda",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "this looks like an std::vector\u003cchar\u003e or std::string to me",
+      "range": {
+        "startLine": 66,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 25
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2c5b7566_473b3489",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "please use c++ smart pointers for all members this class owns and allocates dynamically. android/base/memory provides you with some helper classes",
+      "range": {
+        "startLine": 56,
+        "startChar": 2,
+        "endLine": 71,
+        "endChar": 27
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "06f6bcda_4ed95cd2",
         "filename": "android/android-emu/android/external-display/Mirroring.cpp",
         "patchSetId": 5
@@ -156,6 +777,75 @@
         "startChar": 0,
         "endLine": 107,
         "endChar": 4
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f1459ff_bea299ba",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "use std::min\u003c\u003e from \u003calgorithm\u003e",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 6
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "203bfbf8_d8b50c23",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "btw, there\u0027s a CircularBuffer class in android/base/containers/ that allows you to not copy or memmove too much",
+      "range": {
+        "startLine": 147,
+        "startChar": 14,
+        "endLine": 147,
+        "endChar": 23
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8566b757_4fc732a3",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "why do you need to make sure it\u0027s overaligned?",
+      "range": {
+        "startLine": 147,
+        "startChar": 8,
+        "endLine": 152,
+        "endChar": 5
       },
       "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -202,6 +892,75 @@
         "startChar": 28,
         "endLine": 224,
         "endChar": 30
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "97ecb8f5_cd9583f9",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "use C++ enum class:\n\nenum class MirroringDevState {\n    Unknown, DeviceConnected, ...\n};",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 25
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "efca331d_860ab7bc",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "could you please document this class? Mirroring doesn\u0027t sound like anything to me",
+      "range": {
+        "startLine": 38,
+        "startChar": 6,
+        "endLine": 38,
+        "endChar": 15
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3341939a_476aac1d",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "it looks to me like this has to be a constructor parameter. Also what is this platform private? should it be some type, or some callback, or whatever?",
+      "range": {
+        "startLine": 43,
+        "startChar": 3,
+        "endLine": 43,
+        "endChar": 74
       },
       "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -301,6 +1060,30 @@
     },
     {
       "key": {
+        "uuid": "59eb892e_dfb60408",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "+100, as mentioned in another comment",
+      "parentUuid": "b09c125e_ad21ddcf",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 40
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af9ff915_0e987b2a",
         "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
         "patchSetId": 5
@@ -317,6 +1100,52 @@
         "startChar": 0,
         "endLine": 34,
         "endChar": 20
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "924a5102_51790ccd",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "this is a dirty hack that happens to work in some Windows versions, and sometimes makes a window pop up in front of you while you were typing something\nWhy do you need this function?",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 9
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c6b6747_c100df87",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "if emulator gets one more event loop then it\u0027s a desktop environment on its own :)",
+      "range": {
+        "startLine": 148,
+        "startChar": 13,
+        "endLine": 148,
+        "endChar": 23
       },
       "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -386,6 +1215,52 @@
         "startChar": 28,
         "endLine": 351,
         "endChar": 35
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38ac8673_683276a5",
+        "filename": "android/android-emu/android/external-display/protocol.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "I didn\u0027t know we support MSVC, and just in this particular header only",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 6
+      },
+      "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f6c4c85_98c15ec1",
+        "filename": "android/android-emu/android/external-display/protocol.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-12T03:25:37Z",
+      "side": 1,
+      "message": "no need for this __attribute__ here - it\u0027s properly aligned already",
+      "range": {
+        "startLine": 39,
+        "startChar": 7,
+        "endLine": 39,
+        "endChar": 34
       },
       "revId": "aaa5afcb8b127c17fb4b3ec13d7f9804b01ffffb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
