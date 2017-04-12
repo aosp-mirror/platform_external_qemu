@@ -116,8 +116,6 @@ OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
 OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
 #endif  // __linux__
 
-OPT_FLAG( studio, "indicates that the emulator was launched by Android Studio" )
-
 OPT_FLAG ( no_audio, "disable audio support" )
 OPT_FLAG ( noaudio,  "same as -no-audio" )
 OPT_PARAM( audio,    "<backend>", "use specific audio backend" )
@@ -150,6 +148,7 @@ OPT_PARAM( tcpdump, "<file>", "capture network packets to file" )
 OPT_PARAM( bootchart, "<timeout>", "enable bootcharting")
 
 OPT_PARAM( charmap, "<file>", "use specific key character map")
+OPT_PARAM( studio_params, "<file>", "used by Android Studio to provide parameters" )
 
 OPT_LIST(  prop, "<name>=<value>", "set system property on boot")
 
