@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3a14db3_b4f2b1ea",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1022,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-12T19:26:28Z",
+      "side": 1,
+      "message": "why not for other api levels as well?",
+      "range": {
+        "startLine": 1022,
+        "startChar": 0,
+        "endLine": 1022,
+        "endChar": 26
+      },
+      "revId": "3525cf6978aa2815b082d50dbc37cc9d644ad502",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
