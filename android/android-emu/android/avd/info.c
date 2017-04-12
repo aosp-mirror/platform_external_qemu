@@ -102,6 +102,7 @@ typedef enum {
 struct AvdInfo {
     /* for the Android build system case */
     char      inAndroidBuild;
+    char      isEncryptionEnabled;
     char*     androidOut;
     char*     androidBuildRoot;
     char*     targetArch;
@@ -982,6 +983,10 @@ int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath)
     return 0;
 }
 
+int avdInfo_isEncryptionEnabledInBuild(const AvdInfo* i) {
+    return (i->inAndroidBuild && i->isEncryptionEnabled);
+}
+
 AvdInfo*
 avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
                             const char*     androidOut,
@@ -1012,6 +1017,33 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
 
     _avdInfo_extractBuildProperties(i);
 
+    if (i->apiLevel >= 25) {
+         /*
+           copy encryptionkey.img
+        */
+        char encryptionimg_path[1024];
+        snprintf(encryptionimg_path, sizeof(encryptionimg_path),
+                "%s/device/generic/goldfish/data/etc/encryptionkey.img",
+                androidBuildRoot);
+        const bool encryption_enabled = path_exists(encryptionimg_path);
+        if (!encryption_enabled) {
+            dwarning("%s does not exists\n", encryptionimg_path);
+            i->isEncryptionEnabled = 0;
+        } else {
+            i->isEncryptionEnabled = 1;
+            char dest_encryptionimg_path[1024];
+            snprintf(dest_encryptionimg_path, sizeof(dest_encryptionimg_path),
+                    "%s/encryptionkey.img",
+                    androidOut);
+            if (!path_exists(dest_encryptionimg_path)) {
+                if(path_copy_file(dest_encryptionimg_path, encryptionimg_path) != 0) {
+                    derror("cannot copy from %s to %s\n", encryptionimg_path,
+                            dest_encryptionimg_path);
+                    goto FAIL;
+                }
+            }
+        }
+    }
     str_reset(&i->deviceName, "<build>");
 
     /* out/target/product/<name>/config.ini, if exists, provide configuration
