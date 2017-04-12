@@ -41,7 +41,6 @@ GLESv2Decoder::GLESv2Decoder()
 
 GLESv2Decoder::~GLESv2Decoder()
 {
-    delete m_GL2library;
 }
 
 void *GLESv2Decoder::s_getProc(const char *name, void *userData)
