@@ -512,7 +512,7 @@ public:
 
         if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO,
                                       (task_info_t)&info, &info_count)) {
-            size = info.virtual_size * 4096;
+            size = info.virtual_size;
         }
 #endif
         mMemorySize = std::max(size, mMemorySize);
