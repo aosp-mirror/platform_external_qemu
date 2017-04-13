@@ -604,7 +604,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           getCaps().has_eglimage_texture_2d,
                                           ret, m_colorBufferHelper));
     if (cb.get() != NULL) {
-        m_colorbuffers[ret] = { std::move(cb), 1 };
+        m_colorbuffers[ret] = { std::move(cb), 1, false };
 
         RenderThreadInfo* tInfo = RenderThreadInfo::get();
         uint64_t puid = tInfo->m_puid;
@@ -778,6 +778,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
         return -1;
     }
     (*c).second.refcount++;
+    (*c).second.opened = true;
 
     uint64_t puid = tInfo->m_puid;
     if (puid) {
@@ -790,7 +791,8 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     emugl::Mutex::AutoLock mutex(m_lock);
-    closeColorBufferLocked(p_colorbuffer);
+    if (!closeColorBufferLocked(p_colorbuffer)) return;
+
     uint64_t puid = tInfo->m_puid;
     if (puid) {
         auto ite = m_procOwnedColorBuffers.find(puid);
@@ -800,18 +802,29 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     }
 }
 
-void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
+bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
         // closeColorBuffer command when the color buffer is already
         // garbage collected on the host. (we dont have a mechanism
         // to give guest a notice yet)
-        return;
+        return true;
     }
-    if (--(*c).second.refcount == 0) {
+    // The guest can and will gralloc_alloc/gralloc_free and then
+    // gralloc_register a buffer, due to API level (O+) or
+    // timing issues.
+    // So, we don't actually close the color buffer when refcount
+    // reached zero, unless it has been opened at least once already.
+    if (--(*c).second.refcount == 0 &&
+        (*c).second.opened) {
         m_colorbuffers.erase(c);
+        return true;
     }
+
+    DBG("%s: warning: possibly leaked color buffer 0x%x\n",
+        __FUNCTION__, p_colorbuffer);
+    return false;
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
@@ -1252,6 +1265,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     m_lastPostedColorBuffer = p_colorbuffer;
 
     if (m_subWin) {
+        c->second.opened = true;
         GLuint tex = c->second.cb->scale();
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
