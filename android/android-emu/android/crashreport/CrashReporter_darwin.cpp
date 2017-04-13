@@ -16,10 +16,13 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
+#include "android/crashreport/StructuredInfo.h"
 #include "android/utils/debug.h"
 #include "client/mac/handler/exception_handler.h"
 
 #include <mach/mach.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #include <memory>
 
@@ -101,6 +104,19 @@ static void attachMemoryInfo()
     mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
     task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
             reinterpret_cast<task_info_t>(&info), &infoCount);
+
+    int mib[2] = { CTL_HW, HW_MEMSIZE };
+    uint64_t total_phys = 0;
+    size_t len = sizeof(uint64_t);
+    sysctl(mib, 2, &total_phys, &len, nullptr, 0);
+
+    StructuredInfo::get()->setMemUsage(
+            info.resident_size,
+            info.resident_size_max,
+            info.virtual_size,
+            0 /* max virtual size not included in this struct */,
+            total_phys,
+            0 /* total page file not included */);
 
     char buf[1024] = {};
     snprintf(buf, sizeof(buf) - 1,
