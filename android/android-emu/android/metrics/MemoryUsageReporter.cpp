@@ -71,7 +71,8 @@ MemoryUsageReporter::MemoryUsageReporter(
 
             // TODO: Move performance stats setter to a separate location
             // once we are tracking more performance stats
-            CommonReportedInfo::get()->setPerformanceStats(event->emulator_performance_stats());
+            CommonReportedInfo::get()->setPerformanceStats(
+                event->emulator_performance_stats());
             return true;
         });
 

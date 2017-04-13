@@ -35,13 +35,13 @@ public:
         const GpuInfoList* gpuinfolist;
     };
 
-    static Info query();
+    static const Info query();
 
-    Info info;
 private:
     void setInitialized() { mInitialized = true; }
     bool isInitialized() const { return mInitialized; }
 
+    Info info;
     bool mInitialized = false;
     DISALLOW_COPY_AND_ASSIGN(HostHwInfo);
 };
