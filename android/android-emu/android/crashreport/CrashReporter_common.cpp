@@ -59,11 +59,19 @@ const char* const CrashReporter::kCrashOnExitFileName =
         "crash-on-exit.txt";
 const char* const CrashReporter::kProcessListFileName =
         "system-process-list.txt";
+const char* const CrashReporter::kEmulatorHostFileName =
+        "emulator-host.proto";
+const char* const CrashReporter::kEmulatorDetailsFileName =
+        "emulator-details.proto";
+const char* const CrashReporter::kEmulatorPerformanceStatsFileName =
+        "emulator-performance-stats.proto";
 const char* const CrashReporter::kCrashOnExitPattern =
         "Crash on exit";
 
 const char* const CrashReporter::kProcessCrashesQuietlyKey =
         "set/processCrashesQuietly";
+
+const int CrashReporter::kCrashInfoProtobufStrInitialSize = 4096;
 
 CrashReporter::CrashReporter()
     : mDumpDir(System::get()->getTempDir()),
@@ -72,6 +80,7 @@ CrashReporter::CrashReporter()
       // job to keep these unique
       mDataExchangeDir(
               PathUtils::join(mDumpDir, Uuid::generateFast().toString())) {
+    mProtobufData.reserve(kCrashInfoProtobufStrInitialSize);
     const auto res = path_mkdir_if_needed(mDataExchangeDir.c_str(), 0744);
     if (res < 0) {
         E("Failed to create temp directory for crash service communication: "
@@ -150,6 +159,11 @@ void CrashReporter::attachData(StringView name, StringView data, bool replace) {
     HANDLE_EINTR(write(fd.get(), "\n", 1));
 }
 
+void CrashReporter::attachBinaryData(StringView name, StringView data, bool replace) {
+    auto fd = openDataAttachFile(name, replace);
+    HANDLE_EINTR(write(fd.get(), data.data(), data.size()));
+}
+
 bool CrashReporter::attachFile(StringView sourceFullName,
                                StringView destBaseName) {
     char fullName[PATH_MAX + 1];
@@ -187,7 +201,8 @@ ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace) {
 }
 
 static void attachUptime() {
-    const uint64_t wallClockTime = System::get()->getProcessTimes().wallClockMs;
+    const uint64_t wallClockTime= System::get()->getProcessTimes().wallClockMs;
+    CommonReportedInfo::setUptime(wallClockTime);
 
     // format the time into a string buffer (no allocations, we've just crashed)
     // and put it both into the file and into the file name. This way
@@ -209,7 +224,31 @@ bool CrashReporter::onCrash() {
         callback();
     }
 
-    return CrashReporter::get()->onCrashPlatformSpecific();
+    bool platform_specific_res =
+        CrashReporter::get()->onCrashPlatformSpecific();
+
+    // By now, we assumed that structured info has collected every
+    // possible piece of information. Record it here.
+    {
+        // Note that we cannot use attachData as that only works with
+        // ASCII and not binary data, especially on Windows.
+        {
+            CommonReportedInfo::writeHostInfo(&mProtobufData);
+            attachBinaryData(kEmulatorHostFileName, mProtobufData, true);
+            mProtobufData.clear();
+
+            CommonReportedInfo::writeDetails(&mProtobufData);
+            attachBinaryData(kEmulatorDetailsFileName, mProtobufData, true);
+            mProtobufData.clear();
+
+            CommonReportedInfo::writePerformanceStats(&mProtobufData);
+            attachBinaryData(kEmulatorPerformanceStatsFileName, mProtobufData, true);
+            mProtobufData.clear();
+        }
+
+    }
+
+    return platform_specific_res;
 }
 
 }  // namespace crashreport
@@ -296,4 +335,3 @@ bool crashhandler_copy_attachment(const char* destination, const char* source) {
 }
 
 }  // extern "C"
-

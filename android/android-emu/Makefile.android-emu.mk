@@ -60,6 +60,11 @@ include $(_ANDROID_EMU_ROOT)/android/emulation/proto/VehicleHalProto.mk
 # Feature control protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
 
+###############################################################################
+#
+# Crash report protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -382,6 +387,7 @@ LOCAL_SRC_FILES := \
     android/resource.c \
     android/sdk-controller-socket.c \
     android/sensors-port.c \
+    android/session_phase_reporter.cpp \
     android/shaper.c \
     android/snaphost-android.c \
     android/snapshot.c \
@@ -463,7 +469,8 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
-    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES)
+    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
+    $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
