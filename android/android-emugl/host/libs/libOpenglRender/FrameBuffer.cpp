@@ -791,7 +791,7 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
     emugl::Mutex::AutoLock mutex(m_lock);
-    if (!closeColorBufferLocked(p_colorbuffer)) return;
+    closeColorBufferLocked(p_colorbuffer);
 
     uint64_t puid = tInfo->m_puid;
     if (puid) {
