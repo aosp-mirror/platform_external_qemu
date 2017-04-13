@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "906f4246_82fdcde9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 794,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-13T20:00:35Z",
+      "side": 1,
+      "message": "why do we return here?",
+      "range": {
+        "startLine": 794,
+        "startChar": 48,
+        "endLine": 794,
+        "endChar": 54
+      },
+      "revId": "b2f69d97c5c0547100bc22826433d27b33fba7cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10782d46_287689a9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-13T20:00:35Z",
+      "side": 1,
+      "message": "I don\u0027t quite get this one. create buffer implies that the buffer is opened.",
+      "range": {
+        "startLine": 41,
+        "startChar": 9,
+        "endLine": 41,
+        "endChar": 15
+      },
+      "revId": "b2f69d97c5c0547100bc22826433d27b33fba7cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
