@@ -37,7 +37,10 @@
 
 struct ColorBufferRef {
     ColorBufferPtr cb;
-    uint32_t refcount;  // number of client-side references
+    uint32_t refcount = 0;  // number of client-side references
+    bool opened = false; // tracks whether opened at least once. In O+,
+    // color buffers can be created/closed immediately,
+    // but then registered (opened) afterwards
 };
 
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
@@ -206,7 +209,7 @@ public:
     // createColorBuffer(). Note that if the reference count reaches 0,
     // the instance is destroyed automatically.
     void closeColorBuffer(HandleType p_colorbuffer);
-    void closeColorBufferLocked(HandleType p_colorbuffer);
+    bool closeColorBufferLocked(HandleType p_colorbuffer);
 
     void cleanupProcGLObjects(uint64_t puid);
     // Equivalent for eglMakeCurrent() for the current display.
