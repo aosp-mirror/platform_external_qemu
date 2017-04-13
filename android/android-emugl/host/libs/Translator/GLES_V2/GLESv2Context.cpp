@@ -158,7 +158,7 @@ void GLESv2Context::postLoadRestoreCtx() {
             if (vaoIte.first != 0) {
                 genVAOName(vaoIte.first, false);
             }
-            dispatcher.glBindVertexArray(vaoIte.first);
+            dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
         for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
             const GLESpointer* glesPointer = glesPointerIte.second;
