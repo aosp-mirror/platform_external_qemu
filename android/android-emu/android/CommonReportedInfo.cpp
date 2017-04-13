@@ -57,9 +57,33 @@ void setPerformanceStats(const android_studio::EmulatorPerformanceStats* stats) 
     get()->performanceStats = *stats;
 }
 
+void appendMemoryUsage() {
+    AutoLock lock(get()->lock);
+
+    android_studio::EmulatorMemoryUsage* memUsageProto =
+        get()->performanceStats.add_memory_usage();
+
+    base::System::MemUsage usage = base::System::get()->getMemUsage();
+    memUsageProto->set_resident_memory(usage.resident);
+    memUsageProto->set_resident_memory_max(usage.resident_max);
+    memUsageProto->set_virtual_memory(usage.virt);
+    memUsageProto->set_virtual_memory_max(usage.virt_max);
+    memUsageProto->set_total_phys_memory(usage.total_phys_memory);
+    memUsageProto->set_total_page_file(usage.total_page_file);
+}
+
 void setUptime(base::System::Duration uptime) {
     AutoLock lock(get()->lock);
     get()->details.set_wall_time((uint64_t)uptime);
+}
+
+void setSessionPhase(AndroidSessionPhase phase) {
+    AutoLock lock(get()->lock);
+    // AndroidSessionPhase has same bits as
+    // the proto's android_studio::EmulatorDetails::EmulatorSessionPhase,
+    // at least for now.
+    get()->details.set_session_phase(
+        (android_studio::EmulatorDetails::EmulatorSessionPhase)phase);
 }
 
 void writeHostInfo(std::string* res) {
