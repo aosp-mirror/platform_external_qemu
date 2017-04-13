@@ -15,8 +15,10 @@
 
 #include "android/base/Compiler.h"
 
-#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/session_phase_reporter.h"
+
+#include "android/metrics/proto/studio_stats.pb.h"
 
 #include <fstream>
 
@@ -33,7 +35,10 @@ public:
     void setHostInfo(const android_studio::EmulatorHost& hostinfo);
     void setDetails(const android_studio::EmulatorDetails& details);
     void setPerformanceStats(const android_studio::EmulatorPerformanceStats& stats);
+
+    // Both in emulatordetails, so we don't need to (de)serialized those.
     void setUptime(uint64_t uptime);
+    void setSessionPhase(AndroidSessionPhase phase);
 
     // TODO: UI-related stuff
 
