@@ -54,6 +54,15 @@ void CommonReportedInfo::setUptime(uint64_t uptime) {
     sCommonInfoProto.get().details.set_wall_time(uptime);
 }
 
+void CommonReportedInfo::setSessionPhase(AndroidSessionPhase phase) {
+    AutoLock lock(mLock);
+    // AndroidSessionPhase has same bits as
+    // the proto's android_studio::EmulatorDetails::EmulatorSessionPhase,
+    // at least for now.
+    sCommonInfoProto.get().details.set_session_phase(
+        (android_studio::EmulatorDetails::EmulatorSessionPhase)phase);
+}
+
 void CommonReportedInfo::writeHostInfo(std::string* res) {
     AutoLock lock(mLock);
     sCommonInfoProto.get().hostinfo.SerializeToString(res);

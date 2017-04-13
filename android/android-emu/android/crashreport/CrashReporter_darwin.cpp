@@ -20,6 +20,8 @@
 #include "client/mac/handler/exception_handler.h"
 
 #include <mach/mach.h>
+#include <sys/types.h>
+#include <sys/sysctl.h>
 
 #include <memory>
 
@@ -101,6 +103,11 @@ static void attachMemoryInfo()
     mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
     task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
             reinterpret_cast<task_info_t>(&info), &infoCount);
+
+    int mib[2] = { CTL_HW, HW_MEMSIZE };
+    uint64_t total_phys = 0;
+    size_t len = sizeof(uint64_t);
+    sysctl(mib, 2, &total_phys, &len, nullptr, 0);
 
     char buf[1024] = {};
     snprintf(buf, sizeof(buf) - 1,
