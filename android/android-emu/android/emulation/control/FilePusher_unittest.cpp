@@ -19,6 +19,7 @@
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
 #include "android/emulation/control/TestAdbInterface.h"
+#include "android/utils/path.h"
 
 #include <gtest/gtest.h>
 
@@ -43,7 +44,7 @@ public:
 
     void SetUp() override {
         mTestSystem.reset(new android::base::TestSystem(
-                "/progdir", System::kProgramBitness, "/homedir", "/appdir"));
+                PATH_SEP "progdir", System::kProgramBitness, PATH_SEP "homedir", PATH_SEP "appdir"));
         mLooper = new android::base::TestLooper();
         mAdb.reset(new TestAdbInterface(mLooper, "adb"));
         mFilePusher.reset(
@@ -105,7 +106,7 @@ public:
             if (f.second) {
                 EXPECT_TRUE(mTestSystem->getTempRoot()->makeSubFile(f.first.c_str()));
             }
-            push_pairs.push_back(std::make_pair(f.first, "/tmp"));
+            push_pairs.push_back(std::make_pair(f.first, PATH_SEP "tmp"));
         }
         mFilePusher->pushFiles(push_pairs);
     }
@@ -129,15 +130,15 @@ TEST_F(FilePusherTest, success) {
             {0, false}, {0.25, false}, {0.5, false},
             {0.75, false}, {1.0, true}};
     const vector<ResultPair> kExpectedResults = {
-            {"file1", FilePusher::Result::Success},
-            {"file2", FilePusher::Result::Success},
-            {"file3", FilePusher::Result::Success},
-            {"file4", FilePusher::Result::Success}};
+            {PATH_SEP "file1", FilePusher::Result::Success},
+            {PATH_SEP "file2", FilePusher::Result::Success},
+            {PATH_SEP "file3", FilePusher::Result::Success},
+            {PATH_SEP "file4", FilePusher::Result::Success}};
     createAndPushFiles({
-        {"file1", true},
-        {"file2", true},
-        {"file3", true},
-        {"file4", true}});
+        {PATH_SEP "file1", true},
+        {PATH_SEP "file2", true},
+        {PATH_SEP "file3", true},
+        {PATH_SEP "file4", true}});
     looperAdvance(4);
     EXPECT_EQ(kExpectedProgress, mProgresses);
     EXPECT_EQ(kExpectedResults, mResults);
@@ -147,11 +148,11 @@ TEST_F(FilePusherTest, fileNotReadable) {
     const vector<ProgressPair> kExpectedProgress = {
             {0, false}, {0.5, false}, {1.0, true}};
     const vector<ResultPair> kExpectedResults = {
-            {"file1", FilePusher::Result::FileReadError},
-            {"file2", FilePusher::Result::Success}};
+            {PATH_SEP "file1", FilePusher::Result::FileReadError},
+            {PATH_SEP "file2", FilePusher::Result::Success}};
     createAndPushFiles({
-        {"file1", false},
-        {"file2", true}});
+        {PATH_SEP "file1", false},
+        {PATH_SEP "file2", true}});
 
     // Only file2 will actually be pushed.
     looperAdvance(1);
@@ -164,15 +165,15 @@ TEST_F(FilePusherTest, commandFailures) {
     const vector<ProgressPair> kExpectedProgress = {
             {0, false}, {0.25, false}, {0.5, false}, {0.75, false}, {1.0, true}};
     const vector<ResultPair> kExpectedResults = {
-            {"file1", FilePusher::Result::Success},
-            {"file2", FilePusher::Result::UnknownError},
-            {"file3", FilePusher::Result::AdbPushFailure},
-            {"file4", FilePusher::Result::Success}};
+            {PATH_SEP "file1", FilePusher::Result::Success},
+            {PATH_SEP "file2", FilePusher::Result::UnknownError},
+            {PATH_SEP "file3", FilePusher::Result::AdbPushFailure},
+            {PATH_SEP "file4", FilePusher::Result::Success}};
     createAndPushFiles({
-        {"file1", true},
-        {"file2", true},
-        {"file3", true},
-        {"file4", true}});
+        {PATH_SEP "file1", true},
+        {PATH_SEP "file2", true},
+        {PATH_SEP "file3", true},
+        {PATH_SEP "file4", true}});
 
     looperAdvance(1);
     mFakeRunCommandResult = false;
@@ -193,18 +194,18 @@ TEST_F(FilePusherTest, enqueueWhilePushing) {
     const vector<ProgressPair> kExpectedProgress =
         { {0, false}, {0.5, false}, {0.5, false}, {0.75, false}, {1, true} };
     const vector<ResultPair> kExpectedResults = {
-            {"file1", FilePusher::Result::Success},
-            {"file2", FilePusher::Result::Success},
-            {"file3", FilePusher::Result::Success},
-            {"file4", FilePusher::Result::Success}};
+            {PATH_SEP "file1", FilePusher::Result::Success},
+            {PATH_SEP "file2", FilePusher::Result::Success},
+            {PATH_SEP "file3", FilePusher::Result::Success},
+            {PATH_SEP "file4", FilePusher::Result::Success}};
     createAndPushFiles({
-        {"file1", true},
-        {"file2", true}});
+        {PATH_SEP "file1", true},
+        {PATH_SEP "file2", true}});
     looperAdvance(1);
 
     createAndPushFiles({
-        {"file3", true},
-        {"file4", true}});
+        {PATH_SEP "file3", true},
+        {PATH_SEP "file4", true}});
     looperAdvance(3);
 
     EXPECT_EQ(kExpectedProgress, mProgresses);
@@ -214,12 +215,12 @@ TEST_F(FilePusherTest, enqueueWhilePushing) {
 TEST_F(FilePusherTest, cancelWhilePushing) {
     const vector<ProgressPair> kExpectedProgress = {{0, false}, {1.0 / 3, false}};
     const vector<ResultPair> kExpectedResults = {
-            {"file1", FilePusher::Result::Success},
+            {PATH_SEP "file1", FilePusher::Result::Success},
     };
     createAndPushFiles({
-        {"file1", true},
-        {"file2", true},
-        {"file3", true}});
+        {PATH_SEP "file1", true},
+        {PATH_SEP "file2", true},
+        {PATH_SEP "file3", true}});
     looperAdvance(1);
     mFilePusher->cancel(); // This will cancel file2 and file3.
     EXPECT_EQ(kExpectedProgress, mProgresses);
