@@ -16,6 +16,7 @@
 
 #include "android/base/StringView.h"
 #include "android/base/files/ScopedFd.h"
+#include "android/CommonReportedInfo.h"
 #include "android/crashreport/CrashSystem.h"
 
 #include <functional>
@@ -50,11 +51,19 @@ public:
     // File to log the process list
     static const char* const kProcessListFileName;
 
+    static const char* const kEmulatorHostFileName;
+    static const char* const kEmulatorDetailsFileName;
+    static const char* const kEmulatorPerformanceStatsFileName;
+
     // Pattern to check for when detecting crashes on exit
     static const char* const kCrashOnExitPattern;
 
     // QSetting key that is saved when crash reporting automatically or not
     static const char* const kProcessCrashesQuietlyKey;
+
+    // Preallocation size for a chunk of memory for the crash info protobuf
+    // binary data. Let's try not to increase memory usage during the crash.
+    static const int kCrashInfoProtobufStrInitialSize;
 
     CrashReporter();
 
@@ -93,6 +102,11 @@ public:
     void attachData(android::base::StringView name,
                     android::base::StringView data,
                     bool replace = false);
+
+    // Same as attachData, but for binary data, so there is no text processing.
+    void attachBinaryData(android::base::StringView name,
+                          android::base::StringView data,
+                          bool replace = true);
 
     // Pass some file to the crash reporter to upload it with the dump
     bool attachFile(android::base::StringView sourceFullName,
@@ -133,6 +147,7 @@ private:
     std::vector<CrashCallback> mCrashCallbacks;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;
+    std::string mProtobufData;
     std::atomic<bool> mIsInExitMode { false };
 };
 
