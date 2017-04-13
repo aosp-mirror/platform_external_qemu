@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "772cca56_1d6f9da0",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-13T17:34:04Z",
+      "side": 1,
+      "message": "Isn\u0027t this defined already on line 31?",
+      "revId": "6412f6ffd548d6b6607ee843a2cbab57bc528cd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
