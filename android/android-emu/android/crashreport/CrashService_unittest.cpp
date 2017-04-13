@@ -152,6 +152,9 @@ TEST(CrashService, startWaitNoAttach) {
     EXPECT_EQ(waitduration, -1);
 }
 
+TEST(CrashService, testCollectStructuredInfo) {
+}
+
 // Test fails regularly on one of the linux build machines
 // failure happens when waitForDumpFile times out instead of
 // finding a crash

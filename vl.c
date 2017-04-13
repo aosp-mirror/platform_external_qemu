@@ -135,6 +135,7 @@ int main(int argc, char **argv)
 #include "android/android.h"
 #include "android/boot-properties.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/crashreport/structured_info.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/feature_control.h"
@@ -3315,6 +3316,10 @@ static bool android_reporting_setup(void)
     }
 
     android_check_for_updates();
+
+    android_structured_info_init();
+    android_structured_info_set_avd_info(android_avdInfo);
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_RUNNING);
     return true;
 }
 
@@ -3373,7 +3378,9 @@ static int main_impl(int argc, char** argv)
     Error *err = NULL;
     bool list_data_dirs = false;
 
+
 #ifdef CONFIG_ANDROID
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
     char* android_op_dns_server = NULL;
 #endif
     module_call_init(MODULE_INIT_TRACE);
@@ -4491,6 +4498,10 @@ static int main_impl(int argc, char** argv)
 
     replay_configure(icount_opts);
 
+#ifdef CONFIG_ANDROID
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
+#endif
+
     machine_class = select_machine();
     if (!machine_class) {
         return 1;
@@ -5424,6 +5435,7 @@ static int main_impl(int argc, char** argv)
     iothread_stop_all();
 
 #ifdef CONFIG_ANDROID
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_EXIT);
     crashhandler_exitmode("after main_loop");
     android_wear_agent_stop();
     socket_drainer_stop();

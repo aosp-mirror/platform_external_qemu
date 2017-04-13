@@ -118,9 +118,28 @@ static void attachMemoryInfo()
     PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
     char buf[1024] = {};
     char* bufptr = buf;
+
+    uint64_t resident = 0;
+    uint64_t resident_max = 0;
+    uint64_t virt = 0;
+    uint64_t virt_max = 0;
+    uint64_t total_phys_memory = 0;
+    uint64_t total_page_file = 0;
+
     if (::GetProcessMemoryInfo(::GetCurrentProcess(),
                 reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCounters),
                 sizeof(memCounters))) {
+
+        uint64_t pageFileUsageCommit =
+            memCounters.PagefileUsage
+            ? memCounters.PagefileUsage
+            : memCounters.PrivateUsage;
+
+        resident = memCounters.WorkingSetSize;
+        resident_max = memCounters.PeakWorkingSetSize;
+        virt = pageFileUsageCommit;
+        virt_max = memCounters.PeakPagefileUsage;
+        
         bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
             "PageFaultCount: %" PRIu64 "\n"
             "PeakWorkingSetSize: %" PRIu64 " kB\n"
@@ -138,9 +157,7 @@ static void attachMemoryInfo()
             toKB(memCounters.QuotaPagedPoolUsage),
             toKB(memCounters.QuotaPeakNonPagedPoolUsage),
             toKB(memCounters.QuotaNonPagedPoolUsage),
-            toKB(memCounters.PagefileUsage
-                ? memCounters.PagefileUsage
-                : memCounters.PrivateUsage),
+            toKB(pageFileUsageCommit),
             toKB(memCounters.PeakPagefileUsage));
     } else {
         bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
@@ -164,11 +181,22 @@ static void attachMemoryInfo()
           toKB(mem.ullAvailPageFile),
           toKB(mem.ullTotalVirtual),
           toKB(mem.ullAvailVirtual));
+
+        total_phys_memory = mem.ullTotalPhys;
+        total_page_file = mem.ullTotalPageFile;
     } else {
         bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
                            "\nGlobalMemoryStatusEx() failed with error %u\n",
                            (unsigned)::GetLastError());
     }
+
+    StructuredInfo::get()->setMemUsage(
+            resident,
+            resident_max,
+            virt,
+            virt_max,
+            total_phys_memory,
+            total_page_file);
 
     if (bufptr > buf) {
         CrashReporter::get()->attachData(
