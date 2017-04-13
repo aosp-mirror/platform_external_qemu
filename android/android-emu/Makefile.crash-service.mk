@@ -38,6 +38,8 @@ LOCAL_STATIC_LIBRARIES := \
     emulator-libui \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
+    $(PROTOBUF_STATIC_LIBRARIES) \
 
 LOCAL_QT_UI_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.ui \
@@ -72,6 +74,7 @@ endif
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
+    $(generated-proto-sources-dir) \
     $(LIBCURL_INCLUDES) \
     $(BREAKPAD_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
@@ -93,6 +96,7 @@ $(call end-emulator-program)
 #
 
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_test_crasher)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -106,9 +110,13 @@ LOCAL_SRC_FILES += \
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(PROTOBUF_STATIC_LIBRARIES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
+
+LOCAL_C_INCLUDES += \
+    $(generated-proto-sources-dir) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from
@@ -127,6 +135,7 @@ $(call end-emulator-program)
 #
 
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_crashreport_unittests)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -145,10 +154,14 @@ LOCAL_SRC_FILES := \
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(PROTOBUF_STATIC_LIBRARIES) \
     emulator-libgtest \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
+
+LOCAL_C_INCLUDES += \
+    $(generated-proto-sources-dir) \
 
 # Link against static libstdc++ on Linux and Windows since the unit-tests
 # cannot pick up our custom versions of the library from

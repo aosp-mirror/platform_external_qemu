@@ -62,6 +62,15 @@ void setUptime(base::System::Duration uptime) {
     get()->details.set_wall_time((uint64_t)uptime);
 }
 
+void setSessionPhase(AndroidSessionPhase phase) {
+    AutoLock lock(get()->lock);
+    // AndroidSessionPhase has same bits as
+    // the proto's android_studio::EmulatorDetails::EmulatorSessionPhase,
+    // at least for now.
+    get()->details.set_session_phase(
+        (android_studio::EmulatorDetails::EmulatorSessionPhase)phase);
+}
+
 void writeHostInfo(std::string* res) {
     AutoLock lock(get()->lock);
     get()->hostinfo.SerializeToString(res);
