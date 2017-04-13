@@ -1252,6 +1252,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                 }
 
                 if (hvf_is_ok) {
+                    androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_HVF);
                     *accel_mode = ACCEL_HVF;
                 }
             }

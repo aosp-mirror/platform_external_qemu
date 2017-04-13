@@ -17,6 +17,7 @@
 #include "android/base/StringView.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/crashreport/CrashSystem.h"
+#include "android/crashreport/StructuredInfo.h"
 
 #include <functional>
 
@@ -49,6 +50,9 @@ public:
 
     // File to log the process list
     static const char* const kProcessListFileName;
+
+    // File to log the structued info protobuf
+    static const char* const kStructuredInfoFileName;
 
     // Pattern to check for when detecting crashes on exit
     static const char* const kCrashOnExitPattern;
@@ -133,6 +137,7 @@ private:
     std::vector<CrashCallback> mCrashCallbacks;
     const std::string mDumpDir;
     const std::string mDataExchangeDir;
+    std::string mCrashInfoProtobuf;
     std::atomic<bool> mIsInExitMode { false };
 };
 
