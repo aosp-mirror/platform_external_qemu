@@ -115,6 +115,8 @@ static uint64_t toKB(uint64_t value) {
 
 static void attachMemoryInfo()
 {
+    CommonReportedInfo::appendMemoryUsage();
+
     PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
     char buf[1024] = {};
     char* bufptr = buf;

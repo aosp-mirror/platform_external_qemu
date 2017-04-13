@@ -150,6 +150,7 @@ int main(int argc, char **argv)
 #include "android/network/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengles.h"
+#include "android/session_phase_reporter.h"
 #include "android/skin/winsys.h"
 #include "android/snapshot.h"
 #include "android/snaphost-android.h"
@@ -3315,6 +3316,8 @@ static bool android_reporting_setup(void)
     }
 
     android_check_for_updates();
+
+    android_report_session_phase(ANDROID_SESSION_PHASE_RUNNING);
     return true;
 }
 
@@ -3373,7 +3376,9 @@ static int main_impl(int argc, char** argv)
     Error *err = NULL;
     bool list_data_dirs = false;
 
+
 #ifdef CONFIG_ANDROID
+    android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
     char* android_op_dns_server = NULL;
 #endif
     module_call_init(MODULE_INIT_TRACE);
@@ -4491,6 +4496,10 @@ static int main_impl(int argc, char** argv)
 
     replay_configure(icount_opts);
 
+#ifdef CONFIG_ANDROID
+    android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
+#endif
+
     machine_class = select_machine();
     if (!machine_class) {
         return 1;
@@ -5424,6 +5433,7 @@ static int main_impl(int argc, char** argv)
     iothread_stop_all();
 
 #ifdef CONFIG_ANDROID
+    android_report_session_phase(ANDROID_SESSION_PHASE_EXIT);
     crashhandler_exitmode("after main_loop");
     android_wear_agent_stop();
     socket_drainer_stop();

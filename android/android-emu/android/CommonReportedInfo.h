@@ -16,6 +16,7 @@
 #include "android/base/Compiler.h"
 
 #include "android/base/system/System.h"
+#include "android/session_phase_reporter.h"
 
 #include <iosfwd>
 
@@ -36,6 +37,8 @@ void setHostInfo(const android_studio::EmulatorHost* hostinfo);
 void setDetails(const android_studio::EmulatorDetails* details);
 void setPerformanceStats(const android_studio::EmulatorPerformanceStats* stats);
 void setUptime(base::System::Duration uptime);
+void setSessionPhase(AndroidSessionPhase phase);
+void appendMemoryUsage();
 
 // For testing and crash reporter integration
 void writeHostInfo(std::string* res);
