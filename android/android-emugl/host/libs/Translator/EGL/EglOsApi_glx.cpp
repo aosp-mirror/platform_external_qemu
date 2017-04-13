@@ -415,13 +415,11 @@ public:
         if (!mResolver) {
             ERR("%s: Could not find resolver %s in %s\n",
                 __FUNCTION__, kResolverName, kLibName);
-            delete mLib;
             mLib = NULL;
         }
     }
 
     ~GlxLibrary() {
-        delete mLib;
     }
 
     // override

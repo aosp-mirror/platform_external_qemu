@@ -95,14 +95,12 @@ class ScopedSharedLibrary {
 public:
     explicit ScopedSharedLibrary(const SharedLibrary* lib) : mLib(lib) {}
     ~ScopedSharedLibrary() {
-        delete mLib;
     }
     const SharedLibrary* get() const { return mLib; }
 
     const SharedLibrary* operator->() { return mLib; }
 
     void release() {
-        delete mLib;
         mLib = NULL;
     }
 
