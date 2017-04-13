@@ -14,34 +14,23 @@
 
 #pragma once
 
-#include "android/HostHwInfo.h"
+#include "android/avd/info.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/emulation/CpuAccelerator.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/opengl/gpuinfo.h"
 
 #include <string>
-#include <vector>
-
-namespace emulator_features {
-class EmulatorFeaturePattern;
-class EmulatorFeaturePatterns;
-}
 
 namespace android {
-namespace featurecontrol {
+namespace crashreport {
 
-// These are only exposed in the header file
-// for unit testing purposes.
-
-struct FeatureAction {
-    std::string name;
-    bool enable;
+class StructuredInfo {
+public:
+    StructuredInfo();
+    static StructuredInfo* get();
+    void addHostHwInfo(const HostHwInfo::Info& info);
 };
 
-bool matchFeaturePattern(
-    const HostHwInfo::Info& hostinfo,
-    const emulator_features::EmulatorFeaturePattern* pattern);
-
-std::vector<FeatureAction> matchFeaturePatterns(
-    const HostHwInfo::Info& hostinfo,
-    const emulator_features::EmulatorFeaturePatterns* input);
-
-}  // namespace featurecontrol
-}  // namespace android
+}  // crashreport
+}  // android
