@@ -217,11 +217,11 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 }
 
 static bool shouldEnableAsyncSwap() {
-    bool isPhoneApi;
-    emugl::getAvdInfo(&isPhoneApi, NULL);
+    bool isPhone;
+    emugl::getAvdInfo(&isPhone, NULL);
     return emugl_feature_is_enabled(android::featurecontrol::GLAsyncSwap) &&
            emugl_sync_device_exists() &&
-           isPhoneApi &&
+           isPhone &&
            sizeof(void*) == 8;
 }
 
