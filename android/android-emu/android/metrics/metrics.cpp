@@ -22,6 +22,7 @@
 #include "android/base/system/System.h"
 #include "android/base/Uuid.h"
 #include "android/cmdline-option.h"
+#include "android/crashreport/StructuredInfo.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
@@ -198,6 +199,9 @@ static void fillGuestGlMetrics(android_studio::AndroidStudioEvent* event) {
     // This call is only sensible after android_startOpenglesRenderer()
     // has been called.
     android_getOpenglesHardwareStrings(&glVendor, &glRenderer, &glVersion);
+    // Also log to StructuredInfo for crash data.
+    android::crashreport::StructuredInfo::get()->
+        addGuestGlInfo(glVendor, glRenderer, glVersion);
     if (glVendor) {
         event->mutable_emulator_details()->mutable_guest_gl()->set_vendor(
                 glVendor);

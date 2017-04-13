@@ -59,11 +59,15 @@ const char* const CrashReporter::kCrashOnExitFileName =
         "crash-on-exit.txt";
 const char* const CrashReporter::kProcessListFileName =
         "system-process-list.txt";
+const char* const CrashReporter::kStructuredInfoFileName =
+        "structured-info.proto";
 const char* const CrashReporter::kCrashOnExitPattern =
         "Crash on exit";
 
 const char* const CrashReporter::kProcessCrashesQuietlyKey =
         "set/processCrashesQuietly";
+
+static const uint64_t kCrashInfoProtobufStrInitialSize = 4096 * 4; // 4 pages
 
 CrashReporter::CrashReporter()
     : mDumpDir(System::get()->getTempDir()),
@@ -188,6 +192,7 @@ ScopedFd CrashReporter::openDataAttachFile(StringView name, bool replace) {
 
 static void attachUptime() {
     const uint64_t wallClockTime = System::get()->getProcessTimes().wallClockMs;
+    StructuredInfo::get()->addUptime(wallClockTime);
 
     // format the time into a string buffer (no allocations, we've just crashed)
     // and put it both into the file and into the file name. This way
@@ -209,7 +214,22 @@ bool CrashReporter::onCrash() {
         callback();
     }
 
-    return CrashReporter::get()->onCrashPlatformSpecific();
+    bool platform_specific_res =
+        CrashReporter::get()->onCrashPlatformSpecific();
+
+    // By now, we assumed that structured info has collected every
+    // possible piece of information. Record it here.
+    // Note that attachData could have been used, but it seems to be
+    // unreliable for protobuf data (gets cut off easily)
+    const int bufferLength = PATH_MAX + 1;
+    char fullName[bufferLength];
+    formatDataFileName(fullName, kStructuredInfoFileName);
+    {
+        std::ofstream out(fullName);
+        StructuredInfo::get()->toOstream(&out);
+    }
+    
+    return platform_specific_res;
 }
 
 }  // namespace crashreport
@@ -296,4 +316,3 @@ bool crashhandler_copy_attachment(const char* destination, const char* source) {
 }
 
 }  // extern "C"
-
