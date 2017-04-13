@@ -42,4 +42,8 @@ bool androidCpuAcceleration_isAcceleratorSupported(AndroidCpuAccelerator type) {
     return android::GetCurrentAcceleratorSupport((android::CpuAccelerator)type);
 }
 
+void androidCpuAcceleration_resetCpuAccelerator(AndroidCpuAccelerator type) {
+    android::ResetCurrentCpuAccelerator((android::CpuAccelerator)type);
+}
+
 } // extern "C"

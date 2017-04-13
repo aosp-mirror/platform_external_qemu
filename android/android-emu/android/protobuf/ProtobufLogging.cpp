@@ -23,7 +23,7 @@ void initProtobufLogger() {
     // connected to the internet.
     // (LogSilencer doesn't work, since it's for non-fatal
     // messages only)
-    google::protobuf::SetLogHandler(nullptr);
+    // google::protobuf::SetLogHandler(nullptr);
 #endif
 }
 
