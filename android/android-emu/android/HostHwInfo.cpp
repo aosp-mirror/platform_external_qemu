@@ -110,7 +110,7 @@ HostHwInfo* HostHwInfo::get() {
 }
 
 // static
-HostHwInfo::Info HostHwInfo::query() {
+const HostHwInfo::Info HostHwInfo::query() {
     HostHwInfo::init();
     return sHostHwInfo.get().info;
 }
