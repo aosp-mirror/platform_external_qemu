@@ -22,6 +22,7 @@
 #include "android/cmdline-option.h"
 #include "android/constants.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/crashreport/structured_info.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/feature_control.h"
@@ -393,6 +394,8 @@ extern AndroidProxyCB *gAndroidProxyCB;
 extern "C" int main(int argc, char **argv) {
     process_early_setup(argc, argv);
 
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
+
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
@@ -660,6 +663,8 @@ extern "C" int main(int argc, char **argv) {
     }
 #endif
 
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
+
     // Create userdata file from init version if needed.
     if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
         std::unique_ptr<char[]> initDir(avdInfo_getDataInitDirPath(avd));
@@ -766,6 +771,8 @@ extern "C" int main(int argc, char **argv) {
             return 1;
         }
     }
+
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_INITACCEL);
 
     // Make sure we always use the custom Android CPU definition.
     args[n++] = "-cpu";
@@ -930,6 +937,8 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = kTarget.qemuExtraArgs[idx];
     }
 
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_INITGPU);
+
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
     const UiEmuAgent uiEmuAgent = {
@@ -1029,6 +1038,8 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = "-append";
         args[n++] = ASTRDUP(append_arg.c_str());
     }
+
+    android_structured_info_set_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
 
     /* Generate a hardware-qemu.ini for this AVD. The real hardware
      * configuration is ususally stored in several files, e.g. the AVD's

@@ -60,6 +60,11 @@ include $(_ANDROID_EMU_ROOT)/android/emulation/proto/VehicleHalProto.mk
 # Feature control protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
 
+###############################################################################
+#
+# Crash report protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -257,6 +262,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
+    android/crashreport/StructuredInfo.cpp \
     android/curl-support.c \
     android/emuctl-client.cpp \
     android/emulation/AdbDebugPipe.cpp \
@@ -318,6 +324,7 @@ LOCAL_SRC_FILES := \
     android/gpu_frame.cpp \
     android/help.c \
     android/http_proxy.c \
+    android/HostHwInfo.cpp \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
@@ -461,7 +468,8 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
-    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES)
+    $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
+    $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -487,6 +495,7 @@ endif
 #
 
 $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -551,6 +560,7 @@ LOCAL_SRC_FILES := \
   android/base/Version_unittest.cpp \
   android/cmdline-option_unittest.cpp \
   android/console_auth_unittest.cpp \
+  android/crashreport/StructuredInfo_unittest.cpp \
   android/emulation/AdbDebugPipe_unittest.cpp \
   android/emulation/AdbGuestPipe_unittest.cpp \
   android/emulation/AdbHostListener_unittest.cpp \

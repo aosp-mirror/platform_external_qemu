@@ -167,10 +167,10 @@ bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 /* Returns true if the AVD is a user build. */
 bool avdInfo_isUserBuild(const AvdInfo* i);
 
-/* Returns true if is a phone API. */
-bool   avdInfo_isPhoneApi( const AvdInfo*  i );
-
-/* Returns true if the AVD is running Android Auto. */
+/* Querying AVD flavors. */
+bool avdInfo_isPhone( const AvdInfo*  i );
+bool avdInfo_isTv( const AvdInfo*  i );
+bool avdInfo_isWear( const AvdInfo*  i );
 bool avdInfo_isAndroidAuto(const AvdInfo* i);
 
 /* Returns the path to various images corresponding to a given AVD.
