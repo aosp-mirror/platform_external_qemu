@@ -11,6 +11,7 @@
 */
 #include "qemu/osdep.h"
 #include "qemu/rcu.h"
+#include "qapi/error.h"
 #include "cpu.h"
 #include "exec/cpu-all.h"
 #include "exec/memory.h"
@@ -43,6 +44,7 @@ enum {
 
 struct tty_state {
     SysBusDevice parent;
+    CharBackend chr_be;
 
     MemoryRegion iomem;
     qemu_irq irq;
@@ -53,6 +55,7 @@ struct tty_state {
     uint32_t ready;
     uint8_t data[128];
     uint32_t data_count;
+    uint32_t index;
 };
 
 #define  GOLDFISH_TTY_SAVE_VERSION  2
@@ -60,43 +63,30 @@ struct tty_state {
 #define TYPE_GOLDFISH_TTY "goldfish_tty"
 #define GOLDFISH_TTY(obj) OBJECT_CHECK(struct tty_state, (obj), TYPE_GOLDFISH_TTY)
 
+static const VMStateDescription vmstate_goldfish_tty = {
+    .name = "goldfish_tty",
+    .version_id = GOLDFISH_TTY_SAVE_VERSION,
+    .minimum_version_id = GOLDFISH_TTY_SAVE_VERSION,
+    .minimum_version_id_old = GOLDFISH_TTY_SAVE_VERSION,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT64(ptr,         struct tty_state),
+        VMSTATE_UINT32(ptr_len,     struct tty_state),
+        VMSTATE_UINT32(ready,       struct tty_state),
+        VMSTATE_UINT32(data_count,  struct tty_state),
+        VMSTATE_UINT32(index,       struct tty_state),
+        VMSTATE_UINT8_ARRAY(data,   struct tty_state, 128),
+        VMSTATE_END_OF_LIST()
+    }
+};
+
+static Property goldfish_tty_properties[] = {
+    DEFINE_PROP_UINT32("index",  struct tty_state, index,   -1),
+    DEFINE_PROP_CHR("chardev",   struct tty_state, chr_be),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
 /* Number of instantiated TTYs */
 static int  instance_id = 0;
-
-static void goldfish_tty_save(QEMUFile*  f, void*  opaque)
-{
-    struct tty_state*  s = opaque;
-
-    qemu_put_be64( f, s->ptr );
-    qemu_put_be32( f, s->ptr_len );
-    qemu_put_byte( f, s->ready );
-    qemu_put_byte( f, s->data_count );
-    qemu_put_buffer( f, s->data, s->data_count );
-}
-
-static int goldfish_tty_load(QEMUFile*  f, void*  opaque, int  version_id)
-{
-    struct tty_state*  s = opaque;
-
-    if ((version_id != GOLDFISH_TTY_SAVE_VERSION) &&
-        (version_id != (GOLDFISH_TTY_SAVE_VERSION - 1))) {
-        return -1;
-    }
-    if (version_id == (GOLDFISH_TTY_SAVE_VERSION - 1)) {
-        s->ptr    = (uint64_t)qemu_get_be32(f);
-    } else {
-        s->ptr    = qemu_get_be64(f);
-    }
-    s->ptr_len    = qemu_get_be32(f);
-    s->ready      = qemu_get_byte(f);
-    s->data_count = qemu_get_byte(f);
-
-    if (qemu_get_buffer(f, s->data, s->data_count) < s->data_count)
-        return -1;
-
-    qemu_set_irq(s->irq, s->ready && s->data_count > 0);
-    return 0;
-}
 
 static uint64_t goldfish_tty_read(void *opaque, hwaddr offset, unsigned size)
 {
@@ -236,7 +226,6 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
 {
     SysBusDevice *sbdev = SYS_BUS_DEVICE(dev);
     struct tty_state *s = GOLDFISH_TTY(dev);
-    int i;
 
     if ((instance_id + 1) == MAX_SERIAL_PORTS) {
         cpu_abort(current_cpu,
@@ -244,27 +233,23 @@ static void goldfish_tty_realize(DeviceState *dev, Error **errp)
                   MAX_SERIAL_PORTS);
     }
 
+    s->index = instance_id;
+
     memory_region_init_io(&s->iomem, OBJECT(s), &mips_qemu_ops, s,
-            "goldfish_tty", 0x1000);
+            TYPE_GOLDFISH_TTY, 0x1000);
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
-    for(i = 0; i < MAX_SERIAL_PORTS; i++) {
-        if(serial_hds[i]) {
-            s->cs = serial_hds[i];
-            qemu_chr_fe_set_handlers(serial_hds[i]->be, tty_can_receive,
-                                     tty_receive, NULL, s, NULL, false);
-            break;
-        }
+    if (serial_hds[s->index]) {
+        s->cs = serial_hds[s->index];
+        s->cs->be = NULL;
+
+        qemu_chr_fe_init(&s->chr_be, s->cs, &error_abort);
+        qemu_chr_fe_set_handlers(s->cs->be, tty_can_receive,
+                                 tty_receive, NULL, s, NULL, false);
     }
 
-    register_savevm(NULL,
-                    "goldfish_tty",
-                    instance_id++,
-                    GOLDFISH_TTY_SAVE_VERSION,
-                    goldfish_tty_save,
-                    goldfish_tty_load,
-                    s);
+    instance_id++;
 }
 
 static void goldfish_tty_class_init(ObjectClass *klass, void *data)
@@ -272,6 +257,8 @@ static void goldfish_tty_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
 
     dc->realize = goldfish_tty_realize;
+    dc->vmsd = &vmstate_goldfish_tty;
+    dc->props = goldfish_tty_properties;
     dc->desc = "goldfish tty";
 }
 
