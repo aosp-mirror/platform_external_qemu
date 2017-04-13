@@ -336,6 +336,8 @@ for opt do
   ;;
   --lto) OPTION_LTO=true
   ;;
+  --snapshot-profile) OPTION_SNAPSHOT_PROFILE=yes
+;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -1088,6 +1090,9 @@ if [ $OPTION_SANITIZER != "no" ] ; then
 fi
 if [ $OPTION_EMUGL_PRINTOUT = "yes" ] ; then
     echo "BUILD_EMUGL_PRINTOUT := true" >> $config_mk
+fi
+if [ $OPTION_SNAPSHOT_PROFILE = "yes" ] ; then
+    echo "BUILD_SNAPSHOT_PROFILE := true" >> $config_mk
 fi
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "BUILD_STRIP_BINARIES := true" >> $config_mk

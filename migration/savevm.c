@@ -2050,6 +2050,9 @@ int qemu_loadvm_state(QEMUFile *f)
 
 void hmp_savevm(Monitor *mon, const QDict *qdict)
 {
+#ifdef SNAPSHOT_PROFILE
+    int64_t beginTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+#endif
     BlockDriverState *bs, *bs1;
     QEMUSnapshotInfo sn1, *sn = &sn1, old_sn1, *old_sn = &old_sn1;
     int ret;
@@ -2138,6 +2141,10 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
 
  the_end:
     aio_context_release(aio_context);
+#ifdef SNAPSHOT_PROFILE
+    printf("savevm time %ld ms\n",
+            (qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - beginTime)/1000000);
+#endif
     if (saved_vm_running) {
         vm_start();
     }
@@ -2205,6 +2212,9 @@ void qmp_xen_load_devices_state(const char *filename, Error **errp)
 
 int load_vmstate(const char *name)
 {
+#ifdef SNAPSHOT_PROFILE
+    int64_t beginTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+#endif
     BlockDriverState *bs, *bs_vm_state;
     QEMUSnapshotInfo sn;
     QEMUFile *f;
@@ -2272,6 +2282,11 @@ int load_vmstate(const char *name)
         error_report("Error %d while loading VM state", ret);
         return ret;
     }
+
+#ifdef SNAPSHOT_PROFILE
+    printf("loadvm time %ld ms\n",
+            (qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - beginTime)/1000000);
+#endif
 
     return 0;
 }

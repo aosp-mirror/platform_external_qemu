@@ -57,6 +57,10 @@ ifdef EMULATOR_CRASHUPLOAD
     EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
 endif
 
+ifeq (true,$(BUILD_SNAPSHOT_PROFILE))
+    EMULATOR_COMMON_CFLAGS += -DSNAPSHOT_PROFILE
+endif
+
 # $(BUILD_OBJS_DIR)/build is required to access config-host.h
 # $(generated-proto-sources-dir) is needed to access generated
 # protobuff headers.
