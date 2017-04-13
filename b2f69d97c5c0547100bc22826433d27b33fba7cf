@@ -93,6 +93,30 @@
       "revId": "b2f69d97c5c0547100bc22826433d27b33fba7cf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "95b7f0f8_8edc1aa9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-13T20:18:26Z",
+      "side": 1,
+      "message": "(gralloc_alloc is create; gralloc_register_buffer is open)",
+      "parentUuid": "e05d309c_07f3fb29",
+      "range": {
+        "startLine": 41,
+        "startChar": 9,
+        "endLine": 41,
+        "endChar": 15
+      },
+      "revId": "b2f69d97c5c0547100bc22826433d27b33fba7cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
