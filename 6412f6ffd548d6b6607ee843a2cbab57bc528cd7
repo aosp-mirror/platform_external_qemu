@@ -16,6 +16,24 @@
       "revId": "6412f6ffd548d6b6607ee843a2cbab57bc528cd7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e730b3d7_2401d084",
+        "filename": "android/android-emu/android/emulation/ConfigDirs.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-13T18:10:04Z",
+      "side": 1,
+      "message": "(and line 29)\nGood catch!",
+      "parentUuid": "772cca56_1d6f9da0",
+      "revId": "6412f6ffd548d6b6607ee843a2cbab57bc528cd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
