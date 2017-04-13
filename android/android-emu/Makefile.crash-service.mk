@@ -33,11 +33,15 @@ LOCAL_SRC_FILES := \
     android/resource.c \
     android/skin/resource.c \
 
+LOCAL_PROTO_SOURCES := \
+	android/crashreport/proto/crash_info.proto \
+
 LOCAL_STATIC_LIBRARIES := \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     emulator-libui \
     $(EMULATOR_LIBUI_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(PROTOBUF_STATIC_LIBRARIES) \
 
 LOCAL_QT_UI_SRC_FILES := \
     android/crashreport/ui/ConfirmDialog.ui \
@@ -93,6 +97,7 @@ $(call end-emulator-program)
 #
 
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_test_crasher)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -106,6 +111,7 @@ LOCAL_SRC_FILES += \
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(PROTOBUF_STATIC_LIBRARIES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -127,6 +133,7 @@ $(call end-emulator-program)
 #
 
 $(call start-emulator-program, emulator$(BUILD_TARGET_SUFFIX)_crashreport_unittests)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -145,6 +152,7 @@ LOCAL_SRC_FILES := \
 LOCAL_STATIC_LIBRARIES += \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
     $(BREAKPAD_STATIC_LIBRARIES) \
+    $(PROTOBUF_STATIC_LIBRARIES) \
     emulator-libgtest \
 
 LOCAL_LDLIBS += \
