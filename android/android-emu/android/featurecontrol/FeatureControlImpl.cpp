@@ -270,5 +270,63 @@ void FeatureControlImpl::initEnabledDefault(Feature feature, bool isEnabled) {
     currFeature.isOverridden = false;
 }
 
+std::vector<Feature> FeatureControlImpl::getEnabledNonOverride() const {
+    std::vector<Feature> res;
+
+#define FEATURE_CONTROL_ITEM(feature) \
+    if (mFeatures[feature].defaultVal) \
+        res.push_back(feature); \
+
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+
+    return res;
+}
+
+std::vector<Feature> FeatureControlImpl::getEnabledOverride() const {
+    std::vector<Feature> res;
+
+#define FEATURE_CONTROL_ITEM(feature) \
+    if (mFeatures[feature].isOverridden && \
+        mFeatures[feature].currentVal) \
+        res.push_back(feature); \
+
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+
+    return res;
+}
+
+std::vector<Feature> FeatureControlImpl::getDisabledOverride() const {
+    std::vector<Feature> res;
+
+#define FEATURE_CONTROL_ITEM(feature) \
+    if (mFeatures[feature].isOverridden && \
+        !mFeatures[feature].currentVal) \
+        res.push_back(feature); \
+
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+
+    return res;
+}
+
+std::vector<Feature> FeatureControlImpl::getEnabled() const {
+    std::vector<Feature> res;
+
+#define FEATURE_CONTROL_ITEM(feature) \
+    if (mFeatures[feature].currentVal) \
+        res.push_back(feature); \
+
+#include "FeatureControlDefHost.h"
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+
+    return res;
+}
+
 }  // namespace featurecontrol
 }  // namespace android
