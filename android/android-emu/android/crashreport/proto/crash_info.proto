@@ -1,0 +1,124 @@
+syntax = "proto2";
+package android_emulator;
+
+import "studio_stats.proto";
+
+// Usage of emulator feature flags.
+message EmulatorFeatureFlagUsage {
+  enum Flag {
+    EMULATOR_FEATURE_FLAG_UNSPECIFIED = 0;
+    GL_PIPE_CHECKSUM = 1;
+    GRALLOC_SYNC = 2;
+    ENCRYPT_USER_DATA = 3;
+    INTEL_PERFORMANCE_MONITORING_UNIT = 4;
+    GL_ASYNC_SWAP = 5;
+    GLDMA = 6;
+    GLES_DYNAMIC_VERSION = 7;
+    FORCE_ANGLE = 8;
+    FORCE_SWIFTSHADER = 9;
+    WIFI = 10;
+    PLAY_STORE_IMAGE = 11;
+    LOGCAT_PIPE = 12;
+    // Hypervisor "allowed" flags (different from actual using)
+    HYPERV = 13;
+    HVF = 14;
+    KVM = 15;
+    HAXM = 16;
+    // Next tag: 17
+  }
+  // Which features were enabled by default or through the server-side config.
+  repeated Flag attempted_enabled_feature_flags = 1;
+  // Which features were enabled through user override.
+  repeated Flag user_overridden_enabled_features = 2;
+  // Which features were disabled through user override.
+  repeated Flag user_overridden_disabled_features = 3;
+  // Which features ended up being enabled overall.
+  repeated Flag resulting_enabled_features = 4;
+  // Next tag: 5
+}
+
+message EmulatorCrashInfoDetails {
+    enum EmulatorCrashInfoAvdProp {
+        UNKNOWN_EMULATOR_AVD_FLAG = 0;
+        PLAY_STORE_AVD = 1;
+        PHONE_AVD = 2;
+        TV_AVD = 3;
+        WEAR_AVD = 4;
+        ANDROIDAUTO_AVD = 5;
+        THING_AVD = 6;
+        TABLET_AVD = 7;
+        LAPTOP_AVD = 8;
+        DESKTOP_AVD = 9;
+        CHROMEOS = 10;
+        // Next tag: 11
+    }
+
+    // Hypervisor in use currently.
+    enum Hypervisor {
+        UNKNOWN_HYPERVISOR = 0;
+        NO_HYPERVISOR = 1;
+        KVM = 2; // KVM
+        HAXM = 3; // Intel HAXM
+        HVF = 4; // Apple Hypervisor.Framework
+        HYPERV = 5; // Microsoft Hyper-V
+        // Next tag: 6
+    }
+
+    optional .android_studio.EmulatorDetails metrics_emulator_details = 1;
+
+    optional EmulatorFeatureFlagUsage used_feature_flags = 2;
+
+    // The hypervisor in use.
+    optional Hypervisor current_hypervisor = 3;
+    repeated EmulatorCrashInfoAvdProp avd_props = 4;
+    // RAM usage info
+    optional uint64 resident_memory = 5;
+    optional uint64 resident_memory_max = 6;
+    optional uint64 virtual_memory = 7;
+    optional uint64 virtual_memory_max = 8;
+    optional uint64 total_phys_memory = 9;
+    optional uint64 total_page_file = 10;
+    // Metrics report ID if any.
+    optional uint64 metrics_report_id = 11;
+    // Reserved fields in case we find something new to send over
+    // before crash server updates
+    optional uint64 reserved_field_01 = 20;
+    optional uint64 reserved_field_02 = 21;
+    optional uint64 reserved_field_03 = 22;
+    optional uint64 reserved_field_04 = 23;
+    optional uint64 reserved_field_05 = 24;
+    optional uint64 reserved_field_06 = 25;
+    optional uint64 reserved_field_07 = 26;
+    optional uint64 reserved_field_08 = 27;
+    optional uint64 reserved_field_09 = 28;
+    optional uint64 reserved_field_10 = 29;
+    optional uint64 reserved_field_11 = 30;
+    optional uint64 reserved_field_12 = 31;
+    optional uint64 reserved_field_13 = 32;
+    optional uint64 reserved_field_14 = 33;
+    optional uint64 reserved_field_15 = 34;
+    optional uint64 reserved_field_16 = 35;
+    optional uint64 reserved_field_17 = 36;
+    optional uint64 reserved_field_18 = 37;
+    optional uint64 reserved_field_19 = 38;
+    optional uint64 reserved_field_20 = 39;
+    optional uint64 reserved_field_21 = 41;
+    optional uint64 reserved_field_22 = 42;
+    optional uint64 reserved_field_23 = 43;
+    optional uint64 reserved_field_24 = 44;
+    optional uint64 reserved_field_25 = 45;
+    optional uint64 reserved_field_26 = 46;
+    optional uint64 reserved_field_27 = 47;
+    optional uint64 reserved_field_28 = 48;
+    optional uint64 reserved_field_29 = 49;
+    optional uint64 reserved_field_30 = 50;
+    optional uint64 reserved_field_31 = 51;
+    // Next tag: 52
+}
+
+// The single top-level message to be transmitted to the crash service.
+message EmulatorCrashInfo {
+    optional .android_studio.EmulatorHost metrics_host_info = 1;
+    optional EmulatorCrashInfoDetails emulator_details = 2;
+    // Next tag: 3
+}
