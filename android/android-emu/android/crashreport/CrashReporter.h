@@ -17,6 +17,7 @@
 #include "android/base/StringView.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/crashreport/CrashSystem.h"
+#include "android/crashreport/StructuredInfo.h"
 
 #include <functional>
 

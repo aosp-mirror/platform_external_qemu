@@ -257,6 +257,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
+    android/crashreport/StructuredInfo.cpp \
     android/curl-support.c \
     android/emuctl-client.cpp \
     android/emulation/AdbDebugPipe.cpp \
@@ -317,6 +318,7 @@ LOCAL_SRC_FILES := \
     android/gps.c \
     android/gpu_frame.cpp \
     android/help.c \
+    android/HostHwInfo.cpp \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
@@ -486,6 +488,7 @@ endif
 #
 
 $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -550,6 +553,7 @@ LOCAL_SRC_FILES := \
   android/base/Version_unittest.cpp \
   android/cmdline-option_unittest.cpp \
   android/console_auth_unittest.cpp \
+  android/crashreport/StructuredInfo_unittest.cpp \
   android/emulation/AdbDebugPipe_unittest.cpp \
   android/emulation/AdbGuestPipe_unittest.cpp \
   android/emulation/AdbHostListener_unittest.cpp \

@@ -109,7 +109,7 @@ TEST(HWMatching, basicCpuMatch) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo testinfo = {
+    HostHwInfo::Info testinfo = {
         "KVMKVMKVM",
         0, 1, 64, 0xf,
         "Linux",
@@ -165,7 +165,7 @@ TEST(HWMatching, basicGpuMatch) {
                 "", "", "", ""),
     };
 
-    HostHwInfo testinfo = {
+    HostHwInfo::Info testinfo = {
         "KVMKVMKVM",
         0, 1, 64, 0xf,
         "Linux",
@@ -202,7 +202,7 @@ TEST(HWMatching, basicFeatureActions) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo testinfo = {
+    HostHwInfo::Info testinfo = {
         "KVMKVMKVM",
         0, 1, 64, 0xf,
         "Linux",
@@ -237,7 +237,7 @@ TEST(HWMatching, basicDisjunction) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo testinfo = {
+    HostHwInfo::Info testinfo = {
         "KVMKVMKVM",
         0, 1, 64, 0xf,
         "Linux",
@@ -254,7 +254,7 @@ TEST(HWMatching, trivialMatch) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo testinfo = {
+    HostHwInfo::Info testinfo = {
         "KVMKVMKVM",
         0, 1, 64, 0xf,
         "Linux",
@@ -271,7 +271,7 @@ TEST(HWMatching, trivialMismatch) {
                 kTestFeaturePatterns, &patterns));
     EXPECT_TRUE(patterns.pattern_size() == kTestFeaturePatternsCount);
 
-    HostHwInfo testinfo = {
+    HostHwInfo::Info testinfo = {
         "KVMKVMKVM",
         0, 1, 64, 0xf,
         "Linux",
