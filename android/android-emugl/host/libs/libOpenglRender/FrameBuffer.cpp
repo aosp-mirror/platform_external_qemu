@@ -822,8 +822,6 @@ bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
         return true;
     }
 
-    DBG("%s: warning: possibly leaked color buffer 0x%x\n",
-        __FUNCTION__, p_colorbuffer);
     return false;
 }
 
@@ -1473,13 +1471,21 @@ bool FrameBuffer::onLoad(Stream* stream) {
         while (m_procOwnedRenderContext.size()) {
             cleanupProcGLObjects_locked(m_procOwnedRenderContext.begin()->first);
         }
-
         assert(m_contexts.empty());
         assert(m_windows.empty());
         assert(m_colorbuffers.empty());
+#ifdef SNAPSHOT_PROFILE
+        android::base::System::Duration imgStartTime =
+                android::base::System::get()->getUnixTimeUs();
+#endif
         if (s_egl.eglLoadAllImages) {
             s_egl.eglLoadAllImages(m_eglDisplay, stream);
         }
+#ifdef SNAPSHOT_PROFILE
+        printf("Texture load time: %ld ms\n",
+                    (android::base::System::get()->getUnixTimeUs()
+                    - imgStartTime) / 1000);
+#endif
     }
     // See comment about subwindow position in onSave().
     m_framebufferWidth = stream->getBe32();
