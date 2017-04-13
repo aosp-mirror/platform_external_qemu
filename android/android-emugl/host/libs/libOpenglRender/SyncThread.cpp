@@ -230,6 +230,7 @@ void SyncThread::doExit() {
     // This sequence parallels the exit sequence
     // in RenderThread.
     FrameBuffer::getFB()->bindContext(0, 0, 0);
+    FrameBuffer::getFB()->DestroyWindowSurface(mSurf);
     FrameBuffer::getFB()->drainWindowSurface();
     FrameBuffer::getFB()->drainRenderContext();
     delete mTLS;
