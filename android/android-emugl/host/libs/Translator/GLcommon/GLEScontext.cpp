@@ -501,6 +501,27 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
 }
 
 GLEScontext::~GLEScontext() {
+    if (m_defaultFBO) {
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        dispatcher().glDeleteFramebuffers(1, &m_defaultFBO);
+    }
+
+    if (m_defaultReadFBO && (m_defaultReadFBO != m_defaultFBO)) {
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        dispatcher().glDeleteFramebuffers(1, &m_defaultReadFBO);
+    }
+
+    m_defaultFBO = 0;
+    m_defaultReadFBO = 0;
+
     std::vector<GLuint> vaos_to_remove;
     for (VAOStateMap::iterator it = m_vaoStateMap.begin(); it != m_vaoStateMap.end(); ++it) {
         vaos_to_remove.push_back(it->first);
