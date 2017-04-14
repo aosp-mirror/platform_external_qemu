@@ -119,12 +119,14 @@ struct VAOState {
     VAOState(GLuint ibo, ArraysMap* arr, int numVertexAttribBindings) :
         element_array_buffer_binding(ibo),
         arraysMap(arr),
-        bindingState(numVertexAttribBindings) { }
+        bindingState(numVertexAttribBindings),
+        everBound(false) { }
     VAOState(android::base::Stream* stream);
     GLuint element_array_buffer_binding;
     ArraysMap* arraysMap;
     VertexAttribBindingVector bindingState;
     bool bufferBacked;
+    bool everBound;
     void onSave(android::base::Stream* stream) const;
 };
 
@@ -151,6 +153,12 @@ struct VAOStateRef {
     }
     VertexAttribBindingVector& bufferBindings() {
         return it->second.bindingState;
+    }
+    void setEverBound() {
+        it->second.everBound = true;
+    }
+    bool isEverBound() {
+        return it->second.everBound;
     }
     VAOStateMap::iterator it;
 };
@@ -202,7 +210,8 @@ public:
 
     void addVertexArrayObjects(GLsizei n, GLuint* arrays);
     void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
-    void setVertexArrayObject(GLuint array);
+    bool setVertexArrayObject(GLuint array);
+    void setVAOEverBound();
     GLuint getVertexArrayObject() const;
     bool vertexAttributesBufferBacked();
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize = false, bool isInt = false);
@@ -355,6 +364,7 @@ public:
             bool genLocal = 0);
     void deleteVAO(ObjectLocalName p_localName);
     unsigned int getVAOGlobalName(ObjectLocalName p_localName);
+    ObjectLocalName getVAOLocalName(unsigned int p_globalName);
 
     // Snapshot save
     virtual void onSave(android::base::Stream* stream) const;
