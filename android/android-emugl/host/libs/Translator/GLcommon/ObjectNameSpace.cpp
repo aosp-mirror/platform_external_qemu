@@ -244,11 +244,11 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
                              SaveableTexture::loader_t loader) {
     assert(m_textureMap.size() == 0);
-    android::base::SmallFixedVector<unsigned char, 128> buffer;
-    loadCollection(stream, &m_textureMap, [loader, &buffer, this](
+    //android::base::SmallFixedVector<unsigned char, 128> buffer;
+    loadCollection(stream, &m_textureMap, [loader, this](
             android::base::Stream* stream) {
         unsigned int globalName = stream->getBe32();
-        SaveableTexture* saveableTexture = loader(stream, this, &buffer);
+        SaveableTexture* saveableTexture = loader(stream, this);
         return std::make_pair(globalName, SaveableTexturePtr(saveableTexture));
     });
 }
