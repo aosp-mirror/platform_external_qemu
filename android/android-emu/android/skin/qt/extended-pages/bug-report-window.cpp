@@ -15,6 +15,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/Uri.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/CpuAccelerator.h"
@@ -41,6 +42,7 @@ using android::base::PathUtils;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
+using android::base::trim;
 using android::base::Uri;
 using android::base::Version;
 using android::emulation::AdbInterface;
@@ -48,8 +50,8 @@ using android::emulation::AdbBugReportServices;
 using android::emulation::ScreenCapturer;
 
 static const char FILE_BUG_URL[] =
-        "https://code.google.com/p/android/issues/"
-        "entry?template=%s&comment=%s";
+        "https://issuetracker.google.com/issues/new"
+        "?component=192727&description=%s";
 
 // In reference to
 // https://developer.android.com/studio/report-bugs.html#emulator-bugs
@@ -74,9 +76,7 @@ Steps to Reproduce Bug:
 
 Expected Behavior:
 
-
 Observed Behavior:
-
 
 )";
 
@@ -282,7 +282,7 @@ void BugReportWindow::saveBugreportFolderStarted() {
 void BugReportWindow::issueTrackerTaskFinished(bool success, QString error) {
     if (!success) {
         QString errMsg =
-                tr("There was an error while opening the Android issue "
+                tr("There was an error while opening the Google issue "
                    "tracker.<br/>");
         errMsg.append(error);
         showErrorDialog(errMsg, tr("File a Bug for Google"));
@@ -303,7 +303,7 @@ void BugReportWindow::on_bug_fileBugButton_clicked() {
         // launch the issue tracker in a separate thread
         launchIssueTrackerThread();
         QString dirName = QFileDialog::getOpenFileName(
-                Q_NULLPTR, tr("Bugreport Save location"),
+                Q_NULLPTR, tr("Report Saving Location"),
                 QString::fromStdString(mSavingStates.bugreportFolderPath));
     }
 }
@@ -546,10 +546,10 @@ void IssueTrackerTask::run() {
     std::string bugTemplate = StringFormat(
             BUG_REPORT_TEMPLATE, emulatorAndHypervisor,
             mReportingFields.sdkToolsVer, mReportingFields.hostOsName,
-            mReportingFields.cpuModel, mReportingFields.deviceName,
+            trim(mReportingFields.cpuModel), mReportingFields.deviceName,
             mReportingFields.reproSteps);
-    std::string unEncodedUrl = Uri::FormatEncodeArguments(
-            FILE_BUG_URL, "Android Emulator Bug", bugTemplate);
+    std::string unEncodedUrl =
+            Uri::FormatEncodeArguments(FILE_BUG_URL, bugTemplate);
     QUrl url(QString::fromStdString(unEncodedUrl));
     if (!url.isValid() || !QDesktopServices::openUrl(url)) {
         emit finished(false, Q_NULLPTR);
