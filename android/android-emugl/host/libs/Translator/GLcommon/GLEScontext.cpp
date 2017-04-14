@@ -69,6 +69,7 @@ VAOState::VAOState(android::base::Stream* stream) {
 
     loadContainer(stream, bindingState);
     bufferBacked = stream->getByte();
+    everBound = stream->getByte();
 }
 
 void VAOState::onSave(android::base::Stream* stream) const {
@@ -83,6 +84,7 @@ void VAOState::onSave(android::base::Stream* stream) const {
 
     saveContainer(stream, bindingState);
     stream->putByte(bufferBacked);
+    stream->putByte(everBound);
 }
 
 GLESConversionArrays::~GLESConversionArrays() {
@@ -295,10 +297,17 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
     m_vaoStateMap.erase(array);
 }
 
-void GLEScontext::setVertexArrayObject(GLuint array) {
+bool GLEScontext::setVertexArrayObject(GLuint array) {
     VAOStateMap::iterator it = m_vaoStateMap.find(array);
-    if (it != m_vaoStateMap.end())
+    if (it != m_vaoStateMap.end()) {
         m_currVaoState = VAOStateRef(it);
+        return true;
+    }
+    return false;
+}
+
+void GLEScontext::setVAOEverBound() {
+    m_currVaoState.setEverBound();
 }
 
 GLuint GLEScontext::getVertexArrayObject() const {
@@ -1946,8 +1955,10 @@ ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) {
 }
 
 bool GLEScontext::isVAO(ObjectLocalName p_localName) {
-    if (p_localName == 0) return true;
-    return m_vaoNameSpace->isObject(p_localName);
+    VAOStateMap::iterator it = m_vaoStateMap.find(p_localName);
+    if (it == m_vaoStateMap.end()) return false;
+    VAOStateRef vao(it);
+    return vao.isEverBound();
 }
 
 ObjectLocalName GLEScontext::genVAOName(ObjectLocalName p_localName,
@@ -1964,6 +1975,11 @@ void GLEScontext::deleteVAO(ObjectLocalName p_localName) {
 unsigned int GLEScontext::getVAOGlobalName(ObjectLocalName p_localName) {
     if (p_localName == 0) return 0;
     return m_vaoNameSpace->getGlobalName(p_localName);
+}
+
+ObjectLocalName GLEScontext::getVAOLocalName(unsigned int p_globalName) {
+    if (p_globalName == 0) return 0;
+    return m_vaoNameSpace->getLocalName(p_globalName);
 }
 
 void GLEScontext::setDefaultFBODrawBuffer(GLenum buffer) {
