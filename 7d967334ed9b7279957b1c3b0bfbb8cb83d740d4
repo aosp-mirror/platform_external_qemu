@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "29ded4ad_b9c4ef40",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-14T17:05:43Z",
+      "side": 1,
+      "message": "Those fields are supposed to be set in the callback function in doCompressedTexImage2D. It forgot to set compressed texture fields, though.",
+      "range": {
+        "startLine": 634,
+        "startChar": 0,
+        "endLine": 639,
+        "endChar": 35
+      },
+      "revId": "7d967334ed9b7279957b1c3b0bfbb8cb83d740d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
