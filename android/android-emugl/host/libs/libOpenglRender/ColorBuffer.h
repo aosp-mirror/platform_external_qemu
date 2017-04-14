@@ -20,6 +20,7 @@
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
 #include "android/base/files/Stream.h"
+#include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
 #include "RenderContext.h"
 
@@ -59,7 +60,7 @@ class YUVConverter;
 //
 // As an additional twist.
 
-class ColorBuffer {
+class ColorBuffer : public android::snapshot::LazySnapshotObj {
 public:
     // Helper interface class used during ColorBuffer operations. This is
     // introduced to remove coupling from the FrameBuffer class implementation.
@@ -202,6 +203,10 @@ public:
                                Helper* helper);
 
     HandleType getHndl() const;
+
+protected:
+    void restore() override;
+
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
 
