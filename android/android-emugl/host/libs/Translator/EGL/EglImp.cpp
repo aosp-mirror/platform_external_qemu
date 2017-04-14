@@ -1253,7 +1253,9 @@ ImagePtr getEGLImage(unsigned int imageId)
     EglDisplay* dpy     = static_cast<EglDisplay*>(thread->eglDisplay);
     ContextPtr  ctx     = thread->eglContext;
     if (ctx.get()) {
-        return dpy->getImage(reinterpret_cast<EGLImageKHR>(imageId));
+        const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+        return dpy->getImage(reinterpret_cast<EGLImageKHR>(imageId),
+                iface->restoreTexture);
     }
     return nullptr;
 }

@@ -19,8 +19,12 @@
 #include "android/base/files/Stream.h"
 #include "GLcommon/ObjectData.h"
 
+#include <memory>
 #include <unordered_map>
 #include <vector>
+
+class SaveableTexture;
+typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
 
 class TextureData : public ObjectData
 {
@@ -65,10 +69,10 @@ public:
     virtual void onSave(android::base::Stream* stream) const override;
     virtual void restore(ObjectLocalName localName,
             getGlobalName_t getGlobalName) override;
+    void setSaveableTexture(SaveableTexturePtr&& saveableTexture);
+    SaveableTexturePtr releaseSaveableTexture();
     void setTexParam(GLenum pname, GLint param);
 protected:
     std::unordered_map<GLenum, GLint> m_texParam;
-    // loadedData is a temporary buffer used between loading from a snapshot
-    // and restoring hardware GPU states
-    std::vector<unsigned char> loadedData;
+    SaveableTexturePtr m_saveableTexture;
 };

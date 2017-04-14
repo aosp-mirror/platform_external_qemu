@@ -37,6 +37,9 @@ typedef struct {
   __translatorMustCastToProperFunctionPointerType address;
 } ExtensionDescriptor;
 
+class SaveableTexture;
+typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
+
 struct EglImage
 {
     ~EglImage(){};
@@ -48,6 +51,7 @@ struct EglImage
     unsigned int border;
     unsigned int format;
     unsigned int type;
+    SaveableTexturePtr saveableTexture;
 };
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
@@ -71,6 +75,7 @@ typedef struct {
     void                                            (*deleteSync)(GLsync);
     void                                            (*saveTexture)(SaveableTexture*, android::base::Stream*);
     SaveableTexture*                                (*loadTexture)(android::base::Stream*, GlobalNameSpace*);
+    void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
 } GLESiface;
 

@@ -89,7 +89,8 @@ public:
     void terminate();
     bool isInitialize();
 
-    ImagePtr getImage(EGLImageKHR img) const;
+    ImagePtr getImage(EGLImageKHR img,
+        SaveableTexture::restorer_t restorer) const;
     EGLImageKHR addImageKHR(ImagePtr);
     bool destroyImageKHR(EGLImageKHR img);
     EglOS::Context* getGlobalSharedContext() const;

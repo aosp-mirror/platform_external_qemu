@@ -233,6 +233,7 @@ void ColorBuffer::readPixels(int x,
         return;
     }
 
+    touch();
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glReadPixels(x, y, width, height, p_format, p_type, pixels);
         unbindFbo();
@@ -251,6 +252,7 @@ void ColorBuffer::subUpdate(int x,
         return;
     }
 
+    touch();
     if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
         m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
         assert(m_yuv_converter.get());
@@ -278,6 +280,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         return false;
     }
 
+    touch();
     // Copy the content of the current read surface into m_blitEGLImage.
     // This is done by creating a temporary texture, bind it to the EGLImage
     // then call glCopyTexSubImage2D().
@@ -375,6 +378,7 @@ bool ColorBuffer::bindToTexture() {
     if (!tInfo->currContext.get()) {
         return false;
     }
+    touch();
     if (tInfo->currContext->version() > GLESApi_CM) {
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     } else {
@@ -391,6 +395,7 @@ bool ColorBuffer::bindToRenderbuffer() {
     if (!tInfo->currContext.get()) {
         return false;
     }
+    touch();
     if (tInfo->currContext->version() > GLESApi_CM) {
         s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES,
                                                        m_eglImage);
@@ -403,6 +408,7 @@ bool ColorBuffer::bindToRenderbuffer() {
 
 GLuint ColorBuffer::scale() {
     RecursiveScopedHelperContext context(m_helper);
+    touch();
     return m_resizer->update(m_tex);
 }
 
@@ -416,6 +422,7 @@ void ColorBuffer::readback(unsigned char* img) {
     if (!context.isOk()) {
         return;
     }
+    touch();
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE,
                              img);
@@ -456,44 +463,39 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
         return create(p_display, width, height, internalFormat, frameworkFormat,
                 has_eglimage_texture_2d, hndl, helper);
     }
-    assert(has_eglimage_texture_2d);
-    assert(eglImage && blitEGLImage);
-
-    RecursiveScopedHelperContext context(helper);
-    if (!context.isOk()) {
-        return NULL;
-    }
-
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
+    cb->mNeedRestore = true;
     cb->m_eglImage = eglImage;
     cb->m_blitEGLImage = blitEGLImage;
-
-    s_gles2.glGenTextures(1, &cb->m_tex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
-    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, eglImage);
-
-    s_gles2.glGenTextures(1, &cb->m_blitTex);
-    s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
-    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, blitEGLImage);
-
+    assert(has_eglimage_texture_2d);
+    assert(eglImage && blitEGLImage);
     cb->m_width = width;
     cb->m_height = height;
     cb->m_internalFormat = internalFormat;
-
-    cb->m_resizer = new TextureResize(width, height);
     cb->m_frameworkFormat = frameworkFormat;
-    switch (cb->m_frameworkFormat) {
+    return cb;
+}
+
+void ColorBuffer::restore() {
+    RecursiveScopedHelperContext context(m_helper);
+    s_gles2.glGenTextures(1, &m_tex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+
+    s_gles2.glGenTextures(1, &m_blitTex);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
+    s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+
+    m_resizer = new TextureResize(m_width, m_height);
+    switch (m_frameworkFormat) {
         case FRAMEWORK_FORMAT_GL_COMPATIBLE:
             break;
         case FRAMEWORK_FORMAT_YV12:
         case FRAMEWORK_FORMAT_YUV_420_888:
-            cb->m_yuv_converter.reset(
-                    new YUVConverter(width, height, cb->m_frameworkFormat));
+            m_yuv_converter.reset(
+                    new YUVConverter(m_width, m_height, m_frameworkFormat));
             break;
         default:
             break;
     }
-
-    s_gles2.glFinish();
-    return cb;
 }
