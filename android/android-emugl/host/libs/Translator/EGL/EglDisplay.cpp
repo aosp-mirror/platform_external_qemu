@@ -491,12 +491,20 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
     return reinterpret_cast<EGLImageKHR>(m_nextEglImageId);
 }
 
-ImagePtr EglDisplay::getImage(EGLImageKHR img) const {
+ImagePtr EglDisplay::getImage(EGLImageKHR img,
+        SaveableTexture::restorer_t restorer) const {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);
     ImagesHndlMap::const_iterator i( m_eglImages.find(hndl) );
-    return (i != m_eglImages.end()) ? (*i).second :ImagePtr();
+    if (i == m_eglImages.end()) {
+        return ImagePtr();
+    }
+    if (i->second->saveableTexture) {
+        i->second->globalTexObj = i->second->saveableTexture->getGlobalObject();
+        i->second->saveableTexture.reset();
+    }
+    return i->second;
 }
 
 bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {
@@ -599,7 +607,16 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
     // but it would introduce overheads because not all share groups need to be
     // saved
     emugl::Mutex::AutoLock mutex(m_lock);
-    for (const auto& image : m_eglImages) {
+    for (auto& image : m_eglImages) {
+        if (image.second->saveableTexture) {
+            // In case we loaded textures from a previous snapshot and have not
+            // yet restore them to GPU, we do the restoration here.
+            // TODO: skip restoration and write saveableTexture directly to the
+            // new snapshot for better performance
+            image.second->globalTexObj =
+                    image.second->saveableTexture->getGlobalObject();
+            image.second->saveableTexture.reset();
+        }
         getGlobalNameSpace()->preSaveAddEglImage(image.second.get());
     }
     m_globalNameSpace.onSave(stream, saver);
