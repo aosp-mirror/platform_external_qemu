@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "71fa5088_f8607bd8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderThread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-14T19:54:25Z",
+      "side": 1,
+      "message": "nit:revise this comment",
+      "range": {
+        "startLine": 215,
+        "startChar": 0,
+        "endLine": 215,
+        "endChar": 65
+      },
+      "revId": "b685779efaaeec5c232b2d7b3a9d093cde242af9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
