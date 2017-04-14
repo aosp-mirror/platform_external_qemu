@@ -63,6 +63,7 @@ ShareGroup::ShareGroup(GlobalNameSpace *globalNameSpace,
 void ShareGroup::preSave(GlobalNameSpace *globalNameSpace) {
     ObjectDataAutoLock lock(this);
     if (m_saveStage == PreSaved) return;
+    if (m_needLoadRestore) printf("warning: unrestored share group\n");
     assert(m_saveStage == Empty);
     m_saveStage = PreSaved;
     m_nameSpace[(int)NamedObjectType::TEXTURE]->preSave(globalNameSpace);
