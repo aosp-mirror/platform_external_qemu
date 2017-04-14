@@ -226,7 +226,8 @@ static uint32_t s_texImageSize(GLenum internalformat,
 }
 
 SaveableTexture::SaveableTexture(const EglImage& eglImage)
-    : m_width(eglImage.width)
+    : LazySnapshotObj()
+    , m_width(eglImage.width)
     , m_height(eglImage.height)
     , m_format(eglImage.format)
     , m_internalFormat(eglImage.internalFormat)
@@ -235,7 +236,8 @@ SaveableTexture::SaveableTexture(const EglImage& eglImage)
     , m_globalName(eglImage.globalTexObj->getGlobalName()) { }
 
 SaveableTexture::SaveableTexture(const TextureData& texture)
-    : m_target(texture.target)
+    : LazySnapshotObj()
+    , m_target(texture.target)
     , m_width(texture.width)
     , m_height(texture.height)
     , m_depth(texture.depth)
@@ -247,7 +249,8 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
 
 SaveableTexture::SaveableTexture(android::base::Stream* stream,
         GlobalNameSpace* globalNameSpace)
-    : m_globalTexObj(new NamedObject(GenNameInfo(NamedObjectType::TEXTURE),
+    : LazySnapshotObj(stream)
+    , m_globalTexObj(new NamedObject(GenNameInfo(NamedObjectType::TEXTURE),
         globalNameSpace)) {
     m_target = stream->getBe32();
     m_width = stream->getBe32();
@@ -260,114 +263,53 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP
             || m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
-        // restore the texture
-        // TODO: move this to higher level for performance
-        std::unordered_map<GLenum, GLint> desiredPixelStori = {
-            {GL_UNPACK_ROW_LENGTH, 0},
-            {GL_UNPACK_IMAGE_HEIGHT, 0},
-            {GL_UNPACK_SKIP_PIXELS, 0},
-            {GL_UNPACK_SKIP_ROWS, 0},
-            {GL_UNPACK_SKIP_IMAGES, 0},
-            {GL_UNPACK_ALIGNMENT, 1},
-        };
-        std::unordered_map<GLenum, GLint> prevPixelStori = desiredPixelStori;
-        GLDispatch& dispatcher = GLEScontext::dispatcher();
-        for (auto& ps : prevPixelStori) {
-            dispatcher.glGetIntegerv(ps.first, &ps.second);
-        }
-        for (auto& ps : desiredPixelStori) {
-            dispatcher.glPixelStorei(ps.first, ps.second);
-        }
-        m_globalName = m_globalTexObj->getGlobalName();
-        GLint prevTex = 0;
-        switch (m_target) {
-            case GL_TEXTURE_2D:
-                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
-                break;
-            case GL_TEXTURE_CUBE_MAP:
-                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &prevTex);
-                break;
-            case GL_TEXTURE_3D:
-                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_3D, &prevTex);
-                break;
-            case GL_TEXTURE_2D_ARRAY:
-                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &prevTex);
-                break;
-            default:
-                break;
-        }
-        dispatcher.glBindTexture(m_target, m_globalName);
-        // Restore texture data
-        dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        // Get the number of mipmap levels.
         unsigned int numLevels = 1 + floor(log2(
                 (float)std::max(m_width, m_height)));
-        auto restoreTex2D = [stream, internalFormat=m_internalFormat,
-                border=m_border, format=m_format, type=m_type, numLevels,
-                &dispatcher] (GLenum target) {
+        auto loadTex2D = [stream, numLevels] (
+                std::unique_ptr<LevelImageData[]>& levelData) {
+                levelData.reset(new LevelImageData[numLevels]);
                 for (unsigned int level = 0; level < numLevels; level++) {
-                    GLint width = stream->getBe32();
-                    GLint height = stream->getBe32();
-                    std::vector<unsigned char> loadedData;
-                    loadBuffer(stream, &loadedData);
-                    const void* pixels = loadedData.empty() ? nullptr :
-                                                              loadedData.data();
-                    dispatcher.glTexImage2D(target, level, internalFormat,
-                            width, height, border, format, type, pixels);
+                    levelData[level].m_width = stream->getBe32();
+                    levelData[level].m_height = stream->getBe32();
+                    loadBuffer(stream, &levelData[level].m_data);
                 }
         };
-        auto restoreTex3D = [stream, internalFormat=m_internalFormat,
-                border=m_border, format=m_format, type=m_type, numLevels,
-                &dispatcher] (GLenum target) {
+        auto loadTex3D = [stream, numLevels] (
+                std::unique_ptr<LevelImageData[]>& levelData) {
+                levelData.reset(new LevelImageData[numLevels]);
                 for (unsigned int level = 0; level < numLevels; level++) {
-                    GLint width = stream->getBe32();
-                    GLint height = stream->getBe32();
-                    GLint depth = stream->getBe32();
-                    std::vector<unsigned char> loadedData;
-                    loadBuffer(stream, &loadedData);
-                    const void* pixels = loadedData.empty() ? nullptr :
-                                                              loadedData.data();
-                    dispatcher.glTexImage3D(target, level, internalFormat,
-                            width, height, depth, border, format, type, pixels);
+                    levelData[level].m_width = stream->getBe32();
+                    levelData[level].m_height = stream->getBe32();
+                    levelData[level].m_depth = stream->getBe32();
+                    loadBuffer(stream, &levelData[level].m_data);
                 }
         };
         switch (m_target) {
             case GL_TEXTURE_2D:
-                restoreTex2D(GL_TEXTURE_2D);
+                loadTex2D(m_levelData);
                 break;
             case GL_TEXTURE_CUBE_MAP:
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z);
+                for (int i = 0; i < 6; i++) {
+                    loadTex2D(m_cubeLevelData[i]);
+                }
                 break;
             case GL_TEXTURE_3D:
             case GL_TEXTURE_2D_ARRAY:
-                restoreTex3D(GL_TEXTURE_3D);
+                loadTex3D(m_levelData);
                 break;
             default:
                 break;
 
         }
-        // Restore tex param
-        auto loadParam = [stream, target=m_target, &dispatcher](GLenum pname) {
-            GLint param = stream->getBe32();
-            dispatcher.glTexParameteri(target, pname, param);
-        };
-        loadParam(GL_TEXTURE_MAG_FILTER);
-        loadParam(GL_TEXTURE_MIN_FILTER);
-        loadParam(GL_TEXTURE_WRAP_S);
-        loadParam(GL_TEXTURE_WRAP_T);
-        // Restore environment
-        for (auto& ps : prevPixelStori) {
-            dispatcher.glPixelStorei(ps.first, ps.second);
-        }
-        dispatcher.glBindTexture(m_target, prevTex);
+        // Load tex param
+        mTexMagFilter = stream->getBe32();
+        mTexMinFilter = stream->getBe32();
+        mTexWrapS = stream->getBe32();
+        mTexWrapT = stream->getBe32();
     } else {
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
+    touch();
 }
 
 void SaveableTexture::onSave(android::base::Stream* stream) const {
@@ -497,6 +439,111 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         dispatcher.glBindTexture(m_target, prevTex);
     } else {
         fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
+    }
+}
+
+void SaveableTexture::restore() {
+    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP
+            || m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
+        // restore the texture
+        // TODO: move this to higher level for performance
+        std::unordered_map<GLenum, GLint> desiredPixelStori = {
+            {GL_UNPACK_ROW_LENGTH, 0},
+            {GL_UNPACK_IMAGE_HEIGHT, 0},
+            {GL_UNPACK_SKIP_PIXELS, 0},
+            {GL_UNPACK_SKIP_ROWS, 0},
+            {GL_UNPACK_SKIP_IMAGES, 0},
+            {GL_UNPACK_ALIGNMENT, 1},
+        };
+        std::unordered_map<GLenum, GLint> prevPixelStori = desiredPixelStori;
+        GLDispatch& dispatcher = GLEScontext::dispatcher();
+        for (auto& ps : prevPixelStori) {
+            dispatcher.glGetIntegerv(ps.first, &ps.second);
+        }
+        for (auto& ps : desiredPixelStori) {
+            dispatcher.glPixelStorei(ps.first, ps.second);
+        }
+        m_globalName = m_globalTexObj->getGlobalName();
+        GLint prevTex = 0;
+        switch (m_target) {
+            case GL_TEXTURE_2D:
+                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D, &prevTex);
+                break;
+            case GL_TEXTURE_CUBE_MAP:
+                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_CUBE_MAP, &prevTex);
+                break;
+            case GL_TEXTURE_3D:
+                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_3D, &prevTex);
+                break;
+            case GL_TEXTURE_2D_ARRAY:
+                dispatcher.glGetIntegerv(GL_TEXTURE_BINDING_2D_ARRAY, &prevTex);
+                break;
+            default:
+                break;
+        }
+        dispatcher.glBindTexture(m_target, m_globalName);
+        // Restore texture data
+        dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        // Get the number of mipmap levels.
+        unsigned int numLevels = 1 + floor(log2(
+                (float)std::max(m_width, m_height)));
+        auto restoreTex2D = [internalFormat=m_internalFormat, border=m_border,
+                format=m_format, type=m_type, numLevels, &dispatcher] (
+                    GLenum target, std::unique_ptr<LevelImageData[]>& levelData) {
+                for (unsigned int level = 0; level < numLevels; level++) {
+                    const void* pixels = levelData[level].m_data.empty() ?
+                            nullptr : levelData[level].m_data.data();
+                    dispatcher.glTexImage2D(target, level, internalFormat,
+                            levelData[level].m_width, levelData[level].m_height,
+                            border, format, type, pixels);
+                }
+                levelData.reset();
+        };
+        auto restoreTex3D = [internalFormat=m_internalFormat, border=m_border,
+                format=m_format, type=m_type, numLevels, &dispatcher] (
+                    GLenum target, std::unique_ptr<LevelImageData[]>& levelData) {
+                for (unsigned int level = 0; level < numLevels; level++) {
+                    const void* pixels = levelData[level].m_data.empty() ?
+                            nullptr : levelData[level].m_data.data();
+                    dispatcher.glTexImage3D(target, level, internalFormat,
+                            levelData[level].m_width, levelData[level].m_height,
+                            levelData[level].m_depth, border, format, type,
+                            pixels);
+                }
+                levelData.reset();
+        };
+        switch (m_target) {
+            case GL_TEXTURE_2D:
+                restoreTex2D(GL_TEXTURE_2D, m_levelData);
+                break;
+            case GL_TEXTURE_CUBE_MAP:
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_cubeLevelData[0]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, m_cubeLevelData[1]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, m_cubeLevelData[2]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, m_cubeLevelData[3]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, m_cubeLevelData[4]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, m_cubeLevelData[5]);
+                break;
+            case GL_TEXTURE_3D:
+                restoreTex3D(GL_TEXTURE_3D, m_levelData);
+                break;
+            case GL_TEXTURE_2D_ARRAY:
+                restoreTex3D(GL_TEXTURE_2D_ARRAY, m_levelData);
+                break;
+            default:
+                break;
+
+        }
+        // Restore tex param
+        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, mTexMagFilter);
+        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, mTexMinFilter);
+        dispatcher.glTexParameteri(m_target, GL_TEXTURE_WRAP_S, mTexWrapS);
+        dispatcher.glTexParameteri(m_target, GL_TEXTURE_WRAP_T, mTexWrapT);
+        // Restore environment
+        for (auto& ps : prevPixelStori) {
+            dispatcher.glPixelStorei(ps.first, ps.second);
+        }
+        dispatcher.glBindTexture(m_target, prevTex);
     }
 }
 

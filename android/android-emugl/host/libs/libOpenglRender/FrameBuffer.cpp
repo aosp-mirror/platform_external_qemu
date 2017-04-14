@@ -822,8 +822,8 @@ bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
         return true;
     }
 
-    DBG("%s: warning: possibly leaked color buffer 0x%x\n",
-        __FUNCTION__, p_colorbuffer);
+    //DBG("%s: warning: possibly leaked color buffer 0x%x\n",
+    //    __FUNCTION__, p_colorbuffer);
     return false;
 }
 

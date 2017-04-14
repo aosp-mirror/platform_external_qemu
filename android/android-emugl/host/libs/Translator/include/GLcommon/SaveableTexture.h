@@ -17,6 +17,7 @@
 #pragma once
 
 #include "android/base/files/Stream.h"
+#include "GLcommon/LazySnapshotObj.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
@@ -39,7 +40,7 @@ class GlobalNameSpace;
 // EglImages and GLES textures are being loaded. Then TextureGlobal will be
 // destroyed.
 
-class SaveableTexture {
+class SaveableTexture : public LazySnapshotObj {
 public:
     typedef std::function<void(SaveableTexture*, android::base::Stream*)> saver_t;
     typedef std::function<SaveableTexture*(android::base::Stream*,
@@ -58,6 +59,8 @@ public:
     NamedObjectPtr getGlobalObject() const;
     EglImage* makeEglImage() const;
     // TODO: makeTextureData as well
+protected:
+    virtual void restore();
 private:
     unsigned int m_target = GL_TEXTURE_2D;
     unsigned int m_width = 0;
@@ -71,6 +74,18 @@ private:
     unsigned int m_globalName = 0;
     // Attributes used when loaded from a snapshot
     NamedObjectPtr m_globalTexObj = nullptr;
+    struct LevelImageData {
+        unsigned int m_width = 0;
+        unsigned int m_height = 0;
+        unsigned int m_depth = 0;
+        std::vector<unsigned char> m_data = {};
+    };
+    std::unique_ptr<LevelImageData[]> m_levelData = {};
+    std::unique_ptr<LevelImageData[]> m_cubeLevelData[6] = {};
+    GLint mTexMagFilter;
+    GLint mTexMinFilter;
+    GLint mTexWrapS;
+    GLint mTexWrapT;
 };
 
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
