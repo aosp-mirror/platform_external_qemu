@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c02bcc2_ea21552c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-14T19:10:58Z",
+      "side": 1,
+      "message": "does this include the following ?\nandroid-tv / android / google_api / google_api_playstore",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 37
+      },
+      "revId": "bb6767a88586e22622441d42f7a275e54d54a3bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
