@@ -17,6 +17,7 @@
 #pragma once
 
 #include "android/base/files/Stream.h"
+#include "android/snapshot/LazySnapshotObj.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
@@ -25,6 +26,7 @@
 
 class GLDispatch;
 class GlobalNameSpace;
+class TextureData;
 
 // TextureGlobal is an auxiliary class when save and load a texture / EglImage.
 // We need it only for texture because texture is the only GL object that can be
@@ -39,11 +41,12 @@ class GlobalNameSpace;
 // EglImages and GLES textures are being loaded. Then TextureGlobal will be
 // destroyed.
 
-class SaveableTexture {
+class SaveableTexture : public android::snapshot::LazySnapshotObj {
 public:
     typedef std::function<void(SaveableTexture*, android::base::Stream*)> saver_t;
     typedef std::function<SaveableTexture*(android::base::Stream*,
             GlobalNameSpace*)> loader_t;
+    typedef std::function<void(SaveableTexture*)> restorer_t;
 
     SaveableTexture() = default;
     SaveableTexture(SaveableTexture&&) = default;
@@ -55,10 +58,12 @@ public:
         GlobalNameSpace* globalNameSpace);
     // precondition: a context must be properly bound
     void onSave(android::base::Stream* stream) const;
-    NamedObjectPtr getGlobalObject() const;
+    // getGlobalObject() will touch and load data onto GPU if it is not yet
+    // restored
+    NamedObjectPtr getGlobalObject();
     EglImage* makeEglImage() const;
-    // TODO: makeTextureData as well
 private:
+    void restore() override;
     unsigned int m_target = GL_TEXTURE_2D;
     unsigned int m_width = 0;
     unsigned int m_height = 0;
@@ -71,6 +76,19 @@ private:
     unsigned int m_globalName = 0;
     // Attributes used when loaded from a snapshot
     NamedObjectPtr m_globalTexObj = nullptr;
+    struct LevelImageData {
+        unsigned int m_width = 0;
+        unsigned int m_height = 0;
+        unsigned int m_depth = 0;
+        std::vector<unsigned char> m_data = {};
+    };
+    std::unique_ptr<LevelImageData[]> m_levelData = {};
+    std::unique_ptr<LevelImageData[]> m_cubeLevelData[6] = {};
+    GLint mTexMagFilter;
+    GLint mTexMinFilter;
+    GLint mTexWrapS;
+    GLint mTexWrapT;
+    GlobalNameSpace* m_globalNamespace = nullptr;
 };
 
-typedef std::unique_ptr<SaveableTexture> SaveableTexturePtr;
+typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
