@@ -57,6 +57,7 @@ static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* global
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream);
 static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace);
+static void restoreTexture(SaveableTexture* texture);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -80,6 +81,7 @@ static GLESiface  s_glesIface = {
     .deleteSync                 = (FUNCPTR_DELETE_SYNC)glDeleteSync,
     .saveTexture                = saveTexture,
     .loadTexture                = loadTexture,
+    .restoreTexture             = restoreTexture,
     .deleteRbo                  = deleteRenderbufferGlobal,
 };
 
@@ -157,6 +159,10 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream)
 static SaveableTexture* loadTexture(android::base::Stream* stream,
         GlobalNameSpace* globalNameSpace) {
     return new SaveableTexture(stream, globalNameSpace);
+}
+
+static void restoreTexture(SaveableTexture* texture) {
+    texture->touch();
 }
 
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);

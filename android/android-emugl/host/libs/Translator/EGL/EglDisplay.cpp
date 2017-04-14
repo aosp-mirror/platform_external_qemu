@@ -491,12 +491,24 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
     return reinterpret_cast<EGLImageKHR>(m_nextEglImageId);
 }
 
-ImagePtr EglDisplay::getImage(EGLImageKHR img) const {
+ImagePtr EglDisplay::getImage(EGLImageKHR img,
+        SaveableTexture::restorer_t restorer) const {
     emugl::Mutex::AutoLock mutex(m_lock);
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);
     ImagesHndlMap::const_iterator i( m_eglImages.find(hndl) );
-    return (i != m_eglImages.end()) ? (*i).second :ImagePtr();
+    if (i == m_eglImages.end()) {
+        return ImagePtr();
+    }
+    if (i->second->saveableTexture) {
+        i->second->saveableTexture->touch();
+        /*if (i->second->saveableTexture->needRestore()) {
+            restorer(i->second->saveableTexture.get());
+        }*/
+        i->second->globalTexObj = i->second->saveableTexture->getGlobalObject();
+        i->second->saveableTexture.reset();
+    }
+    return i->second;
 }
 
 bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {

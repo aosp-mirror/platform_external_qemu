@@ -79,6 +79,14 @@ void TextureData::restore(ObjectLocalName localName,
             getGlobalName_t getGlobalName) {
 }
 
+void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {
+    m_saveableTexture = saveableTexture;
+}
+
+SaveableTexturePtr&& TextureData::releaseSaveableTexture() {
+    return std::move(m_saveableTexture);
+}
+
 void TextureData::setTexParam(GLenum pname, GLint param) {
     m_texParam[pname] = param;
 }
