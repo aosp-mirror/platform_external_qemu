@@ -72,15 +72,11 @@ void hvf_get_segment(SegmentCache *qseg, struct vmx_segment *vmx_seg)
                   (((vmx_seg->ar >> 15) & 1) << DESC_G_SHIFT);
 }
 
-struct xsave_struct {
-    uint32_t data[1024];
-};
-
 void hvf_put_xsave(CPUState *cpu_state)
 {
 
     int x;
-    struct xsave_struct *xsave;
+    struct hvf_xsave_buf *xsave;
     
     xsave = X86_CPU(cpu_state)->env.kvm_xsave_buf;
     memset(xsave, 0, sizeof(*xsave)); 
@@ -189,7 +185,7 @@ void hvf_put_msrs(CPUState *cpu_state)
 void hvf_get_xsave(CPUState *cpu_state)
 {
     int x;
-    struct xsave_struct *xsave;
+    struct hvf_xsave_buf *xsave;
     
     xsave = X86_CPU(cpu_state)->env.kvm_xsave_buf;
     
