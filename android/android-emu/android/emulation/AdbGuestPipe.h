@@ -96,15 +96,17 @@ public:
         // Called when the guest closes a pipe. This must delete the instance.
         void onPipeClose(AdbGuestPipe* pipe);
 
-        // If there is no active pipe, search for an item in |mPipes| that
-        // is in the WaitingForHostAdbConnection state, when found record
-        // it as the active pipe and tell the host agent to start listening
-        // for host connections.
-        void searchForActivePipe();
+        // search for an item in |mPipes| that is in the WaitingForHostAdbConnection state,
+        // remove it from |mPipes| and return it.
+
+        AdbGuestPipe* searchForActivePipe();
 
     private:
+
+        // remove the pipe from the list
+        void removeAdbGuestPipe(AdbGuestPipe* pipe);
+
         AdbHostAgent* mHostAgent;
-        AdbGuestPipe* mActivePipe = nullptr;
         std::vector<AdbGuestPipe*> mPipes;
     };
 
