@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1277a061_c4d65489",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-16T06:55:23Z",
+      "side": 1,
+      "message": "Please use the run_on_cpu pattern to be safe.",
+      "range": {
+        "startLine": 426,
+        "startChar": 0,
+        "endLine": 426,
+        "endChar": 38
+      },
+      "revId": "da4ddb2af0d5cad325a3ed90f030d90ce0c2e829",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
