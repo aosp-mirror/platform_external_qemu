@@ -416,8 +416,25 @@ int hvf_vcpu_emulation_mode(CPUState* cpu) {
     return !(env->cr[0] & CR0_PG_MASK);
 }
 
+void _hvf_vcpu_destroy(void *data)
+{
+    CPUState *cpu_state = (CPUState *)data;
+    hv_vcpu_destroy(cpu_state->hvf_fd);
+    g_free(cpu_state->hvf_caps);
+    g_free(cpu_state->hvf_x86);
+}
+
 int hvf_vcpu_destroy(CPUState* cpu) {
-    // TODO
+
+    if (!hvf_global.vm){
+        fprintf(stderr, "vcpu destroy failed, vm is null\n");
+        return -1;
+    }
+
+    // must be called by owning thread
+    run_on_cpu(cpu,_hvf_vcpu_destroy, RUN_ON_CPU_NULL);
+    return 0;
+
 }
 
 void hvf_raise_event(CPUState* cpu) {
