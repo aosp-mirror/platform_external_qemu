@@ -99,7 +99,7 @@ static void* readThreadFunction(void* param) {
 TEST(ReadWriteLock, SyncWrite) {
     ReadWriteLock rwl;
 
-    const size_t kNumWriteThreads = 2000;
+    const size_t kNumWriteThreads = 200;
     std::vector<TestThread> write_threads;
     write_threads.reserve(kNumWriteThreads);
     RWThreadParams p;
@@ -122,7 +122,7 @@ TEST(ReadWriteLock, SyncWrite) {
 // all writes first, all reads first, random)
 
 TEST(ReadWriteLock, SyncReadWrite) {
-    const size_t kNumThreads = 1000;
+    const size_t kNumThreads = 100;
     std::vector<TestThread> write_threads;
     std::vector<TestThread> read_threads;
     write_threads.reserve(kNumThreads);
@@ -191,7 +191,7 @@ TEST(ReadWriteLock, SyncReadWrite) {
 }
 
 TEST(ReadWriteLock, SyncReadWriteRandom) {
-    const size_t kTrials = 100;
+    const size_t kTrials = 10;
     const size_t kNumThreadsPerTrial = 100;
     RWThreadParams p;
 

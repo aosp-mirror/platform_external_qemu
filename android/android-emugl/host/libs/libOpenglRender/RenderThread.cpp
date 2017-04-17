@@ -143,14 +143,6 @@ void RenderThread::loadImpl(AutoLock* lock, const SnapshotObjects& objects) {
         objects.channelStream->load(&*mStream);
         objects.checksumCalc->load(&*mStream);
         objects.threadInfo->onLoad(&*mStream);
-        const RenderThreadInfo& tInfo = *objects.threadInfo;
-        HandleType ctx = tInfo.currContext ? tInfo.currContext->getHndl()
-                : 0;
-        HandleType draw = tInfo.currDrawSurf ? tInfo.currDrawSurf->getHndl()
-                : 0;
-        HandleType read = tInfo.currReadSurf ? tInfo.currReadSurf->getHndl()
-                : 0;
-        FrameBuffer::getFB()->bindContext(ctx, draw, read);
     });
 }
 
@@ -197,12 +189,14 @@ void RenderThread::setFinished() {
 
 intptr_t RenderThread::main() {
     if (mFinished) {
+        DBG("Error: fail loading a RenderThread @%p\n", this);
         return 0;
     }
 
     RenderThreadInfo tInfo;
     ChecksumCalculatorThreadInfo tChecksumInfo;
     ChecksumCalculator& checksumCalc = tChecksumInfo.get();
+    bool needRestoreFromSnapshot = false;
 
     //
     // initialize decoders
@@ -219,8 +213,11 @@ intptr_t RenderThread::main() {
     };
 
     // This is the only place where we try loading from snapshot.
+    // But the context bind / restoration will be delayed after receiving
+    // the first GL command.
     if (doSnapshotOperation(snapshotObjects, SnapshotState::StartLoading)) {
         DBG("Loaded RenderThread @%p from snapshot\n", this);
+        needRestoreFromSnapshot = true;
     } else {
         // Not loading from a snapshot: continue regular startup, read
         // the |flags|.
@@ -229,6 +226,7 @@ intptr_t RenderThread::main() {
             // Stream read may fail because of a pending snapshot.
             if (!doSnapshotOperation(snapshotObjects, SnapshotState::StartSaving)) {
                 setFinished();
+                DBG("Exited a RenderThread @%p early\n", this);
                 return 0;
             }
         }
@@ -279,6 +277,17 @@ intptr_t RenderThread::main() {
                     D("Warning: render thread could not read data from stream");
                     break;
                 }
+            } else if (needRestoreFromSnapshot) {
+                // We just loaded from a snapshot, need to initialize / bind
+                // the contexts.
+                needRestoreFromSnapshot = false;
+                HandleType ctx = tInfo.currContext ? tInfo.currContext->getHndl()
+                        : 0;
+                HandleType draw = tInfo.currDrawSurf ? tInfo.currDrawSurf->getHndl()
+                        : 0;
+                HandleType read = tInfo.currReadSurf ? tInfo.currReadSurf->getHndl()
+                        : 0;
+                FrameBuffer::getFB()->bindContext(ctx, draw, read);
             }
         }
 

@@ -68,8 +68,7 @@ static CURLMcode __curl_multi_socket_action(CURLM *multi_handle,
 #endif
 
 #define PROTOCOLS (CURLPROTO_HTTP | CURLPROTO_HTTPS | \
-                   CURLPROTO_FTP | CURLPROTO_FTPS | \
-                   CURLPROTO_TFTP)
+                   CURLPROTO_FTP | CURLPROTO_FTPS)
 
 #define CURL_NUM_STATES 8
 #define CURL_NUM_ACB    8
@@ -95,7 +94,6 @@ struct BDRVCURLState;
 
 typedef struct CURLAIOCB {
     BlockAIOCB common;
-    QEMUBH *bh;
     QEMUIOVector *qiov;
 
     int64_t sector_num;
@@ -726,11 +724,28 @@ static int curl_open(BlockDriverState *bs, QDict *options, int flags,
     curl_easy_setopt(state->curl, CURLOPT_HEADERDATA, s);
     if (curl_easy_perform(state->curl))
         goto out;
-    curl_easy_getinfo(state->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &d);
-    if (d)
-        s->len = (size_t)d;
-    else if(!s->len)
+    if (curl_easy_getinfo(state->curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &d)) {
         goto out;
+    }
+    /* Prior CURL 7.19.4 return value of 0 could mean that the file size is not
+     * know or the size is zero. From 7.19.4 CURL returns -1 if size is not
+     * known and zero if it is realy zero-length file. */
+#if LIBCURL_VERSION_NUM >= 0x071304
+    if (d < 0) {
+        pstrcpy(state->errmsg, CURL_ERROR_SIZE,
+                "Server didn't report file size.");
+        goto out;
+    }
+#else
+    if (d <= 0) {
+        pstrcpy(state->errmsg, CURL_ERROR_SIZE,
+                "Unknown file size or zero-length file.");
+        goto out;
+    }
+#endif
+
+    s->len = (size_t)d;
+
     if ((!strncasecmp(s->url, "http://", strlen("http://"))
         || !strncasecmp(s->url, "https://", strlen("https://")))
         && !s->accept_range) {
@@ -839,8 +854,7 @@ static BlockAIOCB *curl_aio_readv(BlockDriverState *bs,
     acb->sector_num = sector_num;
     acb->nb_sectors = nb_sectors;
 
-    acb->bh = aio_bh_new(bdrv_get_aio_context(bs), curl_readv_bh_cb, acb);
-    qemu_bh_schedule(acb->bh);
+    aio_bh_schedule_oneshot(bdrv_get_aio_context(bs), curl_readv_bh_cb, acb);
     return &acb->common;
 }
 
@@ -925,29 +939,12 @@ static BlockDriver bdrv_ftps = {
     .bdrv_attach_aio_context    = curl_attach_aio_context,
 };
 
-static BlockDriver bdrv_tftp = {
-    .format_name                = "tftp",
-    .protocol_name              = "tftp",
-
-    .instance_size              = sizeof(BDRVCURLState),
-    .bdrv_parse_filename        = curl_parse_filename,
-    .bdrv_file_open             = curl_open,
-    .bdrv_close                 = curl_close,
-    .bdrv_getlength             = curl_getlength,
-
-    .bdrv_aio_readv             = curl_aio_readv,
-
-    .bdrv_detach_aio_context    = curl_detach_aio_context,
-    .bdrv_attach_aio_context    = curl_attach_aio_context,
-};
-
 static void curl_block_init(void)
 {
     bdrv_register(&bdrv_http);
     bdrv_register(&bdrv_https);
     bdrv_register(&bdrv_ftp);
     bdrv_register(&bdrv_ftps);
-    bdrv_register(&bdrv_tftp);
 }
 
 block_init(curl_block_init);

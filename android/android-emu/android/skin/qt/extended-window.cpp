@@ -13,6 +13,7 @@
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -77,6 +78,13 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
         this, SLOT(switchToTheme(SettingsTheme)));
 
+    connect(
+        mExtendedUi->settingsPage, SIGNAL(enableClipboardSharingChanged(bool)),
+        mToolWindow, SLOT(switchClipboardSharing(bool)));
+    connect(
+        mToolWindow, SIGNAL(haveClipboardSharingKnown(bool)),
+        mExtendedUi->settingsPage, SLOT(setHaveClipboardSharing(bool)));
+
     mPaneButtonMap = {
         {PANE_IDX_CAR,           mExtendedUi->carDataButton},
         {PANE_IDX_LOCATION,      mExtendedUi->locationButton},
@@ -113,19 +121,11 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
-    // For now, we are only shipping play store images with
-    // >= API 24 Google images.
-    const int MIN_GOOGLE_PLAY_API = 24;
-    const int DEFAULT_API = 1000; // returned if getApiLevel() fails
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    if (apiLevel >= MIN_GOOGLE_PLAY_API
-        && apiLevel != DEFAULT_API
-        && avdInfo_isGoogleApis(android_avdInfo)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
-    } else {
-        mExtendedUi->googlePlayButton->hide();
+        mExtendedUi->googlePlayButton->setVisible(true);
     }
 
     if (avdInfo_isAndroidAuto(android_avdInfo)) {
@@ -157,6 +157,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->microphonePage->setMicrophoneAgent(agentPtr->userEvents);
+        mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_isAndroidAuto(android_avdInfo)) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);

@@ -21,6 +21,8 @@ include $(LOCAL_PATH)/android/third_party/Protobuf.mk
 include $(LOCAL_PATH)/android/third_party/liblz4.mk
 include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
 include $(LOCAL_PATH)/android/third_party/libx264.mk
+include $(LOCAL_PATH)/android/third_party/libvpx.mk
+include $(LOCAL_PATH)/android/third_party/libsdl2.mk
 
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
@@ -53,6 +55,10 @@ endif
 EMULATOR_CRASHUPLOAD := $(strip $(EMULATOR_CRASHUPLOAD))
 ifdef EMULATOR_CRASHUPLOAD
     EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
+endif
+
+ifeq (true,$(BUILD_SNAPSHOT_PROFILE))
+    EMULATOR_COMMON_CFLAGS += -DSNAPSHOT_PROFILE
 endif
 
 # $(BUILD_OBJS_DIR)/build is required to access config-host.h

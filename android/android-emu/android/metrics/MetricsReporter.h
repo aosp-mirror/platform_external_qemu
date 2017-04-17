@@ -14,6 +14,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
+#include "android/metrics/metrics.h"
 #include "android/metrics/MetricsWriter.h"
 
 #include <functional>
@@ -67,7 +68,7 @@ public:
                       base::StringView emulatorVersion,
                       base::StringView emulatorFullVersion,
                       base::StringView qemuVersion);
-    static void stop();
+    static void stop(MetricsStopReason reason);
     static MetricsReporter& get();
 
     virtual ~MetricsReporter();

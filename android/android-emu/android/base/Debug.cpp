@@ -86,5 +86,13 @@ bool WaitForDebugger(System::Duration timeoutMs) {
     return IsDebuggerAttached();
 }
 
+void DebugBreak() {
+#ifdef _WIN32
+    ::DebugBreak();
+#else
+    asm("int $3");
+#endif
+}
+
 }  // namespace base
 }  // namespace android

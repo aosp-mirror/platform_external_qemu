@@ -4,6 +4,7 @@ host_common_SRC_FILES := \
      GLESv2Imp.cpp       \
      GLESv2Context.cpp   \
      GLESv2Validate.cpp  \
+     SamplerData.cpp    \
      ShaderParser.cpp    \
      ShaderValidator.cpp \
      ProgramData.cpp

@@ -13,11 +13,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
+#include "GLcommon/FramebufferData.h"
+
+#include "android/base/files/StreamSerializing.h"
+#include "GLcommon/GLEScontext.h"
+
 #include <GLES/gl.h>
 #include <GLES/glext.h>
-#include <GLES3/gl3.h>
-#include <GLcommon/FramebufferData.h>
-#include <GLcommon/GLEScontext.h>
 
 RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     ObjectData(stream) {
@@ -76,6 +78,9 @@ FramebufferData::FramebufferData(android::base::Stream* stream) :
     }
     m_dirty = stream->getByte();
     m_hasBeenBound = stream->getByte();
+    m_hasDrawBuffers = stream->getByte();
+    android::base::loadBuffer(stream, &m_drawBuffers);
+    m_readBuffer = stream->getBe32();
 }
 
 FramebufferData::~FramebufferData() {
@@ -102,6 +107,9 @@ void FramebufferData::onSave(android::base::Stream* stream) const {
     }
     stream->putByte(m_dirty);
     stream->putByte(m_hasBeenBound);
+    stream->putByte(m_hasDrawBuffers);
+    android::base::saveBuffer(stream, m_drawBuffers);
+    stream->putBe32(m_readBuffer);
 }
 
 void FramebufferData::postLoad(getObjDataPtr_t getObjDataPtr) {
@@ -169,6 +177,12 @@ void FramebufferData::restore(ObjectLocalName localName,
         }
     }
     m_dirty = true;
+    if (m_hasDrawBuffers) {
+        dispatcher.glDrawBuffers(m_drawBuffers.size(), m_drawBuffers.data());
+    }
+    if (dispatcher.glReadBuffer) {
+        dispatcher.glReadBuffer(m_readBuffer);
+    }
 }
 
 void FramebufferData::setAttachment(GLenum attachment,
@@ -363,3 +377,12 @@ void FramebufferData::validate(GLEScontext* ctx)
     }
 }
 
+void FramebufferData::setDrawBuffers(GLsizei n, const GLenum * bufs) {
+    m_drawBuffers.resize(n);
+    memcpy(m_drawBuffers.data(), bufs, n * sizeof(GLenum));
+    m_hasDrawBuffers = true;
+}
+
+void FramebufferData::setReadBuffers(GLenum src) {
+    m_readBuffer = src;
+}

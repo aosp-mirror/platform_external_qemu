@@ -11,7 +11,7 @@
 
 #include "android/skin/qt/QtLooper.h"
 
-#include "android/skin/qt/QtTimerImpl.h"
+#include "android/skin/qt/QtLooperImpl.h"
 
 #include <QTime>
 
@@ -112,6 +112,15 @@ public:
         Q_ASSERT_X(false, "QtLooper::createFdWatch",
                    "FdWatch is not yet implemented for QtLooper.");
         return nullptr;
+    }
+
+    BaseLooper::TaskPtr createTask(
+            BaseLooper::TaskCallback&& callback) override {
+        return BaseLooper::TaskPtr(new TaskImpl(this, std::move(callback)));
+    }
+
+    void scheduleCallback(BaseLooper::TaskCallback&& callback) override {
+        (new TaskImpl(this, std::move(callback)))->schedule();
     }
 
     //

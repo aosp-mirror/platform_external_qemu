@@ -121,6 +121,7 @@ typedef struct {
         Pressure pressure;
         Humidity humidity;
         MagneticField magnetic_uncalibrated;
+        Gyroscope gyroscope_uncalibrated;
     } u;
     SerializedSensor serialized;
 } Sensor;
@@ -346,6 +347,12 @@ static void serializeSensorValue(Sensor* sensor, AndroidSensor sensor_id) {
                     sensor->serialized.value, sizeof(sensor->serialized.value),
                     "magnetic-uncalibrated:%g:%g:%g", sensor->u.magnetic_uncalibrated.x,
                     sensor->u.magnetic_uncalibrated.y, sensor->u.magnetic_uncalibrated.z);
+            break;
+        case ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED:
+            sensor->serialized.length = snprintf(
+                    sensor->serialized.value, sizeof(sensor->serialized.value),
+                    "gyroscope-uncalibrated:%g:%g:%g", sensor->u.gyroscope_uncalibrated.x,
+                    sensor->u.gyroscope_uncalibrated.y, sensor->u.gyroscope_uncalibrated.z);
             break;
         case ANDROID_SENSOR_ORIENTATION:
             sensor->serialized.length = snprintf(
@@ -633,6 +640,11 @@ static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
                 stream_put_float(f, s->u.magnetic_uncalibrated.y);
                 stream_put_float(f, s->u.magnetic_uncalibrated.z);
                 break;
+            case ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED:
+                stream_put_float(f, s->u.gyroscope_uncalibrated.x);
+                stream_put_float(f, s->u.gyroscope_uncalibrated.y);
+                stream_put_float(f, s->u.gyroscope_uncalibrated.z);
+                break;
             case ANDROID_SENSOR_ORIENTATION:
                 stream_put_float(f, s->u.orientation.azimuth);
                 stream_put_float(f, s->u.orientation.pitch);
@@ -700,6 +712,11 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
                 s->u.magnetic_uncalibrated.x = stream_get_float(f);
                 s->u.magnetic_uncalibrated.y = stream_get_float(f);
                 s->u.magnetic_uncalibrated.z = stream_get_float(f);
+                break;
+            case ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED:
+                s->u.gyroscope_uncalibrated.x = stream_get_float(f);
+                s->u.gyroscope_uncalibrated.y = stream_get_float(f);
+                s->u.gyroscope_uncalibrated.z = stream_get_float(f);
                 break;
             case ANDROID_SENSOR_ORIENTATION:
                 s->u.orientation.azimuth = stream_get_float(f);
@@ -839,6 +856,10 @@ static void _hwSensors_init(HwSensors* h) {
 
     if (android_hw->hw_sensors_magnetic_field_uncalibrated) {
         h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED].enabled = true;
+    }
+
+    if (android_hw->hw_sensors_magnetic_field_uncalibrated) {
+        h->sensors[ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED].enabled = true;
     }
 
     if (android_hw->hw_sensors_orientation) {

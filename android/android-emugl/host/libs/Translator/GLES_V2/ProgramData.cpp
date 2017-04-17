@@ -26,16 +26,17 @@
 #include <string.h>
 #include <unordered_set>
 
-GLUniformDesc::GLUniformDesc(GLint location, GLsizei count, GLboolean transpose,
+GLUniformDesc::GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
             GLenum type, GLsizei size, unsigned char* val)
         : mCount(count), mTranspose(transpose), mType(type)
-        , mVal(val, val + size) { }
+        , mVal(val, val + size), mName(name) { }
 
 GLUniformDesc::GLUniformDesc(android::base::Stream* stream) {
     mCount = stream->getBe32();
     mTranspose = stream->getByte();
     mType = stream->getBe32();
     loadBuffer(stream, &mVal);
+    mName = stream->getString();
 }
 
 void GLUniformDesc::onSave(android::base::Stream* stream) const {
@@ -43,6 +44,7 @@ void GLUniformDesc::onSave(android::base::Stream* stream) const {
     stream->putByte(mTranspose);
     stream->putBe32(mType);
     saveBuffer(stream, mVal);
+    stream->putString(mName);
 }
 
 static int s_glShaderType2ShaderType(GLenum type) {
@@ -83,6 +85,18 @@ ProgramData::ProgramData(android::base::Stream* stream) :
        GLUniformDesc desc(stream);
        return std::make_pair(loc, std::move(desc));
     });
+    loadCollection(stream, &mUniformBlockBinding,
+            [](android::base::Stream* stream) {
+                GLuint block = stream->getBe32();
+                GLuint binding = stream->getBe32();
+                return std::make_pair(block, binding);
+    });
+    int transformFeedbackCount = stream->getBe32();
+    mTransformFeedbacks.resize(transformFeedbackCount);
+    for (auto& feedback : mTransformFeedbacks) {
+        feedback = stream->getString();
+    }
+    mTransformFeedbackBufferMode = stream->getBe32();
 
     for (auto& s : attachedShaders) {
         s.localName = stream->getBe32();
@@ -109,6 +123,9 @@ static void getUniformValue(GLuint pname, const GLchar *name, GLenum type,
     GLDispatch& dispatcher = GLEScontext::dispatcher();
 
     GLint location = dispatcher.glGetUniformLocation(pname, name);
+    if (location < 0) {
+        return;
+    }
     switch(type) {
     case GL_FLOAT:
     case GL_FLOAT_VEC2:
@@ -161,7 +178,7 @@ static void getUniformValue(GLuint pname, const GLchar *name, GLenum type,
                 "unsupported uniform type 0x%x\n", type);
         return;
     }
-    GLUniformDesc uniformDesc(location, 1, 0, /*transpose*/
+    GLUniformDesc uniformDesc(name, location, 1, 0, /*transpose*/
         type, glSizeof(type), val);
     uniformsOnSave[location] = std::move(uniformDesc);
 }
@@ -210,6 +227,51 @@ static std::unordered_map<GLuint, GLUniformDesc> collectUniformInfo(GLuint pname
     return uniformsOnSave;
 }
 
+static std::unordered_map<GLuint, GLuint> collectUniformBlockInfo(GLuint pname) {
+    if (gl_dispatch_get_max_version() < GL_DISPATCH_MAX_GLES_VERSION_3_0) {
+        return {};
+    }
+    GLint uniformBlockCount = 0;
+    std::unordered_map<GLuint, GLuint> uniformBlocks;
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    dispatcher.glGetProgramiv(pname, GL_ACTIVE_UNIFORM_BLOCKS,
+            &uniformBlockCount);
+    for (int i = 0; i < uniformBlockCount; i++) {
+        GLint binding = 0;
+        dispatcher.glGetActiveUniformBlockiv(pname, i, GL_UNIFORM_BLOCK_BINDING,
+                &binding);
+        uniformBlocks.emplace(i, binding);
+    }
+    return uniformBlocks;
+}
+
+static std::vector<std::string> collectTransformFeedbackInfo(GLuint pname) {
+    if (gl_dispatch_get_max_version() < GL_DISPATCH_MAX_GLES_VERSION_3_0) {
+        return {};
+    }
+    GLint transformFeedbackCount = 0;
+    GLint transformFeedbakMaxLength = 0;
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    dispatcher.glGetProgramiv(pname, GL_TRANSFORM_FEEDBACK_VARYINGS,
+            &transformFeedbackCount);
+    dispatcher.glGetProgramiv(pname, GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH,
+            &transformFeedbakMaxLength);
+
+    std::vector<std::string> transformFeedbacks(transformFeedbackCount);
+    std::unique_ptr<char[]> nameBuffer(new char [transformFeedbakMaxLength]);
+
+    for (int i = 0; i < transformFeedbackCount; i++) {
+        GLsizei size;
+        GLenum type;
+
+        dispatcher.glGetTransformFeedbackVarying(pname, i,
+                transformFeedbakMaxLength, nullptr, &size, &type,
+                nameBuffer.get());
+        transformFeedbacks[i] = nameBuffer.get();
+    }
+    return transformFeedbacks;
+}
+
 void ProgramData::onSave(android::base::Stream* stream) const {
     // The first byte is used to distinguish between program and shader object.
     // It will be loaded outside of this class
@@ -230,12 +292,40 @@ void ProgramData::onSave(android::base::Stream* stream) const {
             stream->putBe32(uniform.first);
             uniform.second.onSave(stream);
         };
+    auto saveUniformBlock = [](android::base::Stream* stream,
+                const std::pair<const GLuint, GLuint>& uniformBlock) {
+            stream->putBe32(uniformBlock.first);
+            stream->putBe32(uniformBlock.second);
+        };
+    auto saveTransformFeedbacks = [](android::base::Stream* stream,
+                const std::vector<std::string>& transformFeedbacks) {
+            stream->putBe32((int)transformFeedbacks.size());
+            for (const auto& feedback : transformFeedbacks) {
+                stream->putString(feedback);
+            }
+        };
     if (needRestore) {
         saveCollection(stream, uniforms, saveUniform);
+        saveCollection(stream, mUniformBlockBinding, saveUniformBlock);
+        saveTransformFeedbacks(stream, mTransformFeedbacks);
+        stream->putBe32(mTransformFeedbackBufferMode);
     } else {
         std::unordered_map<GLuint, GLUniformDesc> uniformsOnSave =
-            collectUniformInfo(ProgramName);
+                collectUniformInfo(ProgramName);
+        std::unordered_map<GLuint, GLuint> uniformBlocks =
+                collectUniformBlockInfo(ProgramName);
+        std::vector<std::string> transformFeedbacks =
+                collectTransformFeedbackInfo(ProgramName);
+        if (gl_dispatch_get_max_version() >= GL_DISPATCH_MAX_GLES_VERSION_3_0) {
+            GLEScontext::dispatcher().glGetProgramiv(ProgramName,
+                    GL_TRANSFORM_FEEDBACK_BUFFER_MODE,
+                    (GLint*)&mTransformFeedbackBufferMode);
+        }
+
         saveCollection(stream, uniformsOnSave, saveUniform);
+        saveCollection(stream, uniformBlocks, saveUniformBlock);
+        saveTransformFeedbacks(stream, transformFeedbacks);
+        stream->putBe32(mTransformFeedbackBufferMode);
     }
 
     for (const auto& s : attachedShaders) {
@@ -300,10 +390,33 @@ void ProgramData::restore(ObjectLocalName localName,
             dispatcher.glBindAttribLocation(globalName, attribLocs.second,
                     attribLocs.first.c_str());
         }
+        if (gl_dispatch_get_max_version() >= GL_DISPATCH_MAX_GLES_VERSION_3_0) {
+            std::unique_ptr<const char*> varyings(
+                    new const char*[mTransformFeedbacks.size()]);
+            for (size_t i = 0; i < mTransformFeedbacks.size(); i++) {
+                varyings.get()[i] = mTransformFeedbacks[i].c_str();
+            }
+            dispatcher.glTransformFeedbackVaryings(globalName,
+                    mTransformFeedbacks.size(), varyings.get(),
+                    mTransformFeedbackBufferMode);
+            mTransformFeedbacks.clear();
+        }
         dispatcher.glLinkProgram(globalName);
         dispatcher.glUseProgram(globalName);
         for (const auto& uniformEntry : uniforms) {
             const auto& uniform = uniformEntry.second;
+            GLint location = dispatcher.glGetUniformLocation(globalName,
+                    uniform.mName.c_str());
+            if (location != (GLint)uniformEntry.first) {
+                // Location changed after loading from a snapshot.
+                // likely a driver bug
+                fprintf(stderr,
+                        "%llu ERR: uniform location changed (%s: %d->%d)\n",
+                        localName, uniform.mName.c_str(),
+                        (GLint)uniformEntry.first, location);
+                continue;
+            }
+
             switch (uniform.mType) {
                 case GL_FLOAT:
                     dispatcher.glUniform1fv(uniformEntry.first, uniform.mCount,
@@ -422,6 +535,10 @@ void ProgramData::restore(ObjectLocalName localName,
                             "unsupported uniform type 0x%x\n", uniform.mType);
             }
         }
+        for (const auto& uniformBlock : mUniformBlockBinding) {
+            dispatcher.glUniformBlockBinding(globalName, uniformBlock.first,
+                    uniformBlock.second);
+        }
         for (auto s : tmpShaders) {
             if (s != 0) {
                 dispatcher.glDetachShader(globalName, s);
@@ -429,6 +546,8 @@ void ProgramData::restore(ObjectLocalName localName,
             }
         }
     }
+    uniforms.clear();
+    mUniformBlockBinding.clear();
     // We are done with the "linked" program, now we handle the one
     // that is yet to compile
     for (const auto& s : attachedShaders) {
@@ -507,10 +626,6 @@ bool ProgramData::detachShader(GLuint shader) {
         }
     }
     return false;
-}
-
-void ProgramData::addUniform(GLuint loc, GLUniformDesc&& uniform) {
-    uniforms[loc] = std::move(uniform);
 }
 
 void ProgramData::bindAttribLocation(const std::string& var, GLuint loc) {

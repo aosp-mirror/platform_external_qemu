@@ -111,9 +111,7 @@ unsigned char* ChannelStream::onLoad(android::base::Stream* stream) {
     android::base::loadBuffer(stream, &mReadBuffer);
     mReadBufferLeft = mReadBuffer.size();
     android::base::loadBuffer(stream, &mWriteBuffer);
-    return mWriteBuffer.empty()
-                   ? nullptr
-                   : reinterpret_cast<unsigned char*>(mWriteBuffer.data());
+    return reinterpret_cast<unsigned char*>(mWriteBuffer.data());
 }
 
 }  // namespace emugl

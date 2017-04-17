@@ -16,6 +16,7 @@
 #include "android/base/sockets/SocketErrors.h"
 
 #include <algorithm>
+#include <utility>
 
 namespace android {
 namespace base {
@@ -117,13 +118,30 @@ Looper::Timer* DefaultLooper::createTimer(Looper::Timer::Callback callback,
     return new DefaultLooper::Timer(this, callback, opaque, clock);
 }
 
+void DefaultLooper::addTask(DefaultLooper::Task* task) {
+    mScheduledTasks.insert(task);
+}
+
+void DefaultLooper::delTask(DefaultLooper::Task* task) {
+    mScheduledTasks.erase(task);
+}
+
+Looper::TaskPtr DefaultLooper::createTask(Looper::TaskCallback&& callback) {
+    return Looper::TaskPtr(new Task(this, std::move(callback)));
+}
+
+void DefaultLooper::scheduleCallback(Looper::TaskCallback&& callback) {
+    (new Task(this, std::move(callback), true))->schedule();
+}
+
 int DefaultLooper::runWithDeadlineMs(Looper::Duration deadlineMs) {
     mForcedExit = false;
 
     while (!mForcedExit) {
         // Return immediately with EWOULDBLOCK if there are no
         // more timers or watches registered.
-        if (mFdWatches.empty() && mActiveTimers.empty()) {
+        if (mFdWatches.empty() && mActiveTimers.empty() &&
+            mScheduledTasks.empty()) {
             return EWOULDBLOCK;
         }
 
@@ -163,6 +181,17 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
         timeOut = nextDeadline - nowMs();
         if (timeOut < 0)
             timeOut = 0;
+    }
+
+    if (!mScheduledTasks.empty()) {
+        timeOut = 0;
+    }
+
+    // Run all scheduled tasks, and make sure we remove them from the scheduled
+    // collection.
+    const TaskSet tasks = std::move(mScheduledTasks);
+    for (const auto& task : tasks) {
+        task->run();
     }
 
     if (mFdWatches.empty()) {
@@ -381,6 +410,30 @@ void DefaultLooper::Timer::save(Stream* stream) const {
 void DefaultLooper::Timer::load(Stream* stream) {
     const Duration deadline = static_cast<Duration>(stream->getBe64());
     startAbsolute(deadline);
+}
+
+DefaultLooper::Task::Task(Looper* looper,
+                          Looper::Task::Callback&& callback,
+                          bool selfDeleting)
+    : Looper::Task(looper, std::move(callback)), mSelfDeleting(selfDeleting) {}
+
+DefaultLooper::Task::~Task() {
+    cancel();
+}
+
+void DefaultLooper::Task::schedule() {
+    static_cast<DefaultLooper*>(mLooper)->addTask(this);
+}
+
+void DefaultLooper::Task::cancel() {
+    static_cast<DefaultLooper*>(mLooper)->delTask(this);
+}
+
+void DefaultLooper::Task::run() {
+    mCallback();
+    if (mSelfDeleting) {
+        delete this;
+    }
 }
 
 }  // namespace base

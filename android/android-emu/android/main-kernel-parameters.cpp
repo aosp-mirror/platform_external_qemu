@@ -33,7 +33,8 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* kernelSerialPrefix,
                                    const char* avdKernelParameters,
                                    AndroidGlesEmulationMode glesMode,
-                                   uint64_t glesFramebufferCMA,
+                                   int bootPropOpenglesVersion,
+                                   uint64_t glFramebufferSizeBytes,
                                    bool isQemu2) {
     android::ParameterList params;
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
@@ -76,12 +77,28 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.add("qemu.encrypt=1");
     }
 
-    // Additional memory for software renderers (e.g., SwiftShader)
+    // If qemu1, make sure GLDMA is disabled.
+    if (!isQemu2)
+        android::featurecontrol::setEnabledOverride(
+                android::featurecontrol::GLDMA, false);
+
+    // OpenGL ES related setup
+    // 1. Set opengles.version
+    params.addFormat("qemu.opengles.version=%d", bootPropOpenglesVersion);
+
+    // 2. Calculate additional memory for software renderers (e.g., SwiftShader)
+    const uint64_t one_MB = 1024ULL * 1024ULL;
+    int numBuffers = 2; /* double buffering */
+    uint64_t glEstimatedFramebufferMemUsageMB =
+        (numBuffers * glFramebufferSizeBytes + one_MB - 1) / one_MB;
+
+    // 3. Additional contiguous memory reservation for DMA and software framebuffers,
+    // specified in MB
     const int extraCma =
-        glesFramebufferCMA +
+        glEstimatedFramebufferMemUsageMB +
         (isQemu2 && android::featurecontrol::isEnabled(android::featurecontrol::GLDMA) ? 256 : 0);
     if (extraCma) {
-        params.addFormat("cma=%" PRIu64 "M", glesFramebufferCMA + extraCma);
+        params.addFormat("cma=%" PRIu64 "M", glEstimatedFramebufferMemUsageMB + extraCma);
     }
 
     if (opts->logcat) {

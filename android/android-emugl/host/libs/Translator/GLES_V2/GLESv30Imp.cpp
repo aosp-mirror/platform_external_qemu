@@ -9,33 +9,19 @@ extern "C" GL_APICALL GLconstubyteptr GL_APIENTRY glGetStringi(GLenum name, GLin
 }
 
 GL_APICALL void GL_APIENTRY glGenVertexArrays(GLsizei n, GLuint* arrays) {
-    GET_CTX_V2();
-    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-    ctx->dispatcher().glGenVertexArrays(n, arrays);
-
-    ctx->addVertexArrayObjects(n, arrays);
-
+    glGenVertexArraysOES(n, arrays);
 }
 
 GL_APICALL void GL_APIENTRY glBindVertexArray(GLuint array) {
-    GET_CTX_V2();
-
-    ctx->setVertexArrayObject(array);
-    ctx->dispatcher().glBindVertexArray(array);
+    glBindVertexArrayOES(array);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArrays(GLsizei n, const GLuint * arrays) {
-    GET_CTX_V2();
-    SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-
-    ctx->removeVertexArrayObjects(n, arrays);
-    ctx->dispatcher().glDeleteVertexArrays(n, arrays);
+    glDeleteVertexArraysOES(n, arrays);
 }
 
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArray(GLuint array) {
-    GET_CTX_V2_RET(0);
-    GLboolean glIsVertexArrayRET = ctx->dispatcher().glIsVertexArray(array);
-    return glIsVertexArrayRET;
+    return glIsVertexArrayOES(array);
 }
 
 GL_APICALL void * GL_APIENTRY glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
@@ -317,11 +303,10 @@ GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsi
     } else {
         GLESConversionArrays tmpArrs;
         s_glDrawSetupArraysPre(ctx, tmpArrs, first, count, 0, NULL, true);
-        ctx->dispatcher().glDrawArrays(mode,first,count);
+        ctx->dispatcher().glDrawArraysInstanced(mode,first,count, primcount);
         s_glDrawSetupArraysPost(ctx);
     }
     s_glDrawPost(ctx, mode);
-    ctx->dispatcher().glDrawArraysInstanced(mode, first, count, primcount);
 }
 
 GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount) {
@@ -341,7 +326,6 @@ GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, 
         s_glDrawEmulateClientArraysPost(ctx);
     }
     s_glDrawPost(ctx, mode);
-    ctx->dispatcher().glDrawElementsInstanced(mode, count, type, indices, primcount);
 }
 
 GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices) {
@@ -414,16 +398,16 @@ GL_APICALL void GL_APIENTRY glDrawBuffers(GLsizei n, const GLenum * bufs) {
     GET_CTX_V2();
 
     if (ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
-        std::vector<GLenum> emulatedBufs(n);
-        memcpy(&emulatedBufs[0], bufs, n * sizeof(GLenum));
-        for (int i = 0; i < n; i++) {
-            if (bufs[i] == GL_BACK && ctx->isDefaultFBOBound(GL_DRAW_FRAMEBUFFER)) {
-                emulatedBufs[i] = GL_COLOR_ATTACHMENT0;
-            }
-        }
-        ctx->dispatcher().glDrawBuffers(n, &emulatedBufs[0]);
-
+        SET_ERROR_IF(n != 1 || (bufs[0] != GL_NONE && bufs[0] != GL_BACK),
+                GL_INVALID_OPERATION);
+        GLenum emulatedBufs = bufs[0] == GL_NONE ? GL_NONE
+                                                 : GL_COLOR_ATTACHMENT0;
+        ctx->setDefaultFBODrawBuffer(emulatedBufs);
+        ctx->dispatcher().glDrawBuffers(1, &emulatedBufs);
     } else {
+        GLuint framebuffer = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+        FramebufferData* fbObj = ctx->getFBOData(framebuffer);
+        fbObj->setDrawBuffers(n, bufs);
         ctx->dispatcher().glDrawBuffers(n, bufs);
     }
 }
@@ -433,10 +417,16 @@ GL_APICALL void GL_APIENTRY glReadBuffer(GLenum src) {
     // if default fbo is bound and src is GL_BACK,
     // use GL_COLOR_ATTACHMENT0 all of a sudden.
     // bc we are using fbo emulation.
-    if (src == GL_BACK &&
-        ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER)) {
-        ctx->dispatcher().glReadBuffer(GL_COLOR_ATTACHMENT0);
+    if (ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER)) {
+        SET_ERROR_IF(src != GL_NONE && src != GL_BACK, GL_INVALID_OPERATION);
+        GLenum emulatedSrc = src == GL_NONE ? GL_NONE
+                                            : GL_COLOR_ATTACHMENT0;
+        ctx->setDefaultFBOReadBuffer(emulatedSrc);
+        ctx->dispatcher().glReadBuffer(emulatedSrc);
     } else {
+        GLuint framebuffer = ctx->getFramebufferBinding(GL_READ_FRAMEBUFFER);
+        FramebufferData* fbObj = ctx->getFBOData(framebuffer);
+        fbObj->setReadBuffers(src);
         ctx->dispatcher().glReadBuffer(src);
     }
 }
@@ -628,6 +618,8 @@ GL_APICALL void GL_APIENTRY glGenSamplers(GLsizei n, GLuint * samplers) {
         for(int i=0; i<n ;i++) {
             samplers[i] = ctx->shareGroup()->genName(NamedObjectType::SAMPLER,
                                                      0, true);
+            ctx->shareGroup()->setObjectData(NamedObjectType::SAMPLER,
+                    samplers[i], ObjectDataPtr(new SamplerData()));
         }
     }
 }
@@ -647,8 +639,8 @@ GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
-
         SET_ERROR_IF(sampler && !globalSampler, GL_INVALID_OPERATION);
+        ctx->setBindSampler(unit, sampler);
         ctx->dispatcher().glBindSampler(unit, globalSampler);
     }
 }
@@ -656,7 +648,12 @@ GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
 GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
-        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
+        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
+                NamedObjectType::SAMPLER, sampler);
+        SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
+        SamplerData* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::SAMPLER, sampler);
+        samplerData->setParamf(pname, param);
         ctx->dispatcher().glSamplerParameterf(globalSampler, pname, param);
     }
 }
@@ -664,7 +661,12 @@ GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GL
 GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GLint param) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
-        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
+        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
+        NamedObjectType::SAMPLER, sampler);
+        SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
+        SamplerData* samplerData = (SamplerData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::SAMPLER, sampler);
+        samplerData->setParami(pname, param);
         ctx->dispatcher().glSamplerParameteri(globalSampler, pname, param);
     }
 }

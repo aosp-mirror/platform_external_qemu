@@ -248,13 +248,15 @@ TEST_F(FeatureControlTest, readUserSettings) {
 }
 
 TEST_F(FeatureControlTest, stringConversion) {
-#define FEATURE_CONTROL_ITEM(item) EXPECT_TRUE(item == stringToFeature(#item));
+#define FEATURE_CONTROL_ITEM(item) \
+    EXPECT_EQ(item, stringToFeature(#item)); \
+    EXPECT_STREQ(#item, FeatureControlImpl::toString(item).c_str());
 #include "FeatureControlDefHost.h"
 #include "FeatureControlDefGuest.h"
 #undef FEATURE_CONTROL_ITEM
 
-    EXPECT_TRUE(Feature_n_items ==
-                stringToFeature("somefeaturethatshouldneverexist"));
+    EXPECT_EQ(Feature_n_items,
+              stringToFeature("somefeaturethatshouldneverexist"));
 }
 
 TEST_F(FeatureControlTest, setNonOverriden) {

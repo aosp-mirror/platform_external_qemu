@@ -63,6 +63,11 @@ uint32_t  special_addr_ip;
 /* virtual address alias for host */
 uint32_t alias_addr_ip;
 
+struct in6_addr vnameserver_addr6;
+struct in6_addr vhost_addr6;
+struct in6_addr vprefix_addr6;
+uint32_t vprefix_len = 64;
+
 static const uint8_t special_ethaddr[6] = {
     0x52, 0x54, 0x00, 0x12, 0x35, 0x00
 };
@@ -168,6 +173,15 @@ void slirp_init(int restricted, const char *special_ip)
 
     alias_addr_ip = special_addr_ip | CTL_ALIAS;
     getouraddr();
+
+    /* Simliar with what we do for vprefix6 in net/slirp.c */
+    vprefix_addr6.s6_addr[0] = 0xfe;
+    vprefix_addr6.s6_addr[1] = 0xc0;
+    vhost_addr6 = vprefix_addr6;
+    vhost_addr6.s6_addr[15] |= 2;
+    vnameserver_addr6 = vprefix_addr6;
+    vnameserver_addr6.s6_addr[15] |= 3;
+
     register_savevm(NULL, "slirp", 0, 1, slirp_state_save, slirp_state_load, NULL);
 
     slirp_net_forward_init();
@@ -543,9 +557,6 @@ void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds)
 	 global_writefds = NULL;
 	 global_xfds = NULL;
 }
-
-#define ETH_ALEN 6
-#define ETH_HLEN 14
 
 #define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
 #define ETH_P_ARP	0x0806		/* Address Resolution packet	*/
@@ -1228,13 +1239,29 @@ static void slirp_sbuf_save(QEMUFile *f, struct sbuf *sbuf)
     qemu_put_buffer(f, (unsigned char*)sbuf->sb_data, sbuf->sb_datalen);
 }
 
+static void sock_address_save(QEMUFile *f, SockAddress* addr)
+{
+    qemu_put_byte(f, addr->family);
+    switch(addr->family) {
+    case SOCKET_INET:
+        qemu_put_be16(f, addr->u.inet.port);
+        qemu_put_be32(f, addr->u.inet.address);
+        break;
+    case SOCKET_IN6:
+        qemu_put_be16(f, addr->u.in6.port);
+        qemu_put_buffer(f, addr->u.in6.address, 16);
+        break;
+    default:
+        g_assert_not_reached();
+        break;
+    }
+}
+
 static void slirp_socket_save(QEMUFile *f, struct socket *so)
 {
     qemu_put_be32(f, so->so_urgc);
-    qemu_put_be32(f, so->so_faddr_ip);
-    qemu_put_be32(f, so->so_laddr_ip);
-    qemu_put_be16(f, so->so_faddr_port);
-    qemu_put_be16(f, so->so_laddr_port);
+    sock_address_save(f, &so->faddr);
+    sock_address_save(f, &so->laddr);
     qemu_put_byte(f, so->so_iptos);
     qemu_put_byte(f, so->so_emu);
     qemu_put_byte(f, so->so_type);
@@ -1332,16 +1359,32 @@ static int slirp_sbuf_load(QEMUFile *f, struct sbuf *sbuf)
     return 0;
 }
 
+static void sock_address_load(QEMUFile *f, SockAddress* addr)
+{
+    addr->family = qemu_get_byte(f);
+    switch(addr->family) {
+    case SOCKET_INET:
+        addr->u.inet.port = qemu_get_be16(f);
+        addr->u.inet.address = qemu_get_be32(f);
+        break;
+    case SOCKET_IN6:
+        addr->u.in6.port = qemu_get_be16(f);
+        qemu_get_buffer(f, addr->u.in6.address, 16);
+        break;
+    default:
+        g_assert_not_reached();
+        break;
+    }
+}
+
 static int slirp_socket_load(QEMUFile *f, struct socket *so)
 {
     if (tcp_attach(so) < 0)
         return -ENOMEM;
 
     so->so_urgc = qemu_get_be32(f);
-    so->so_faddr_ip = qemu_get_be32(f);
-    so->so_laddr_ip = qemu_get_be32(f);
-    so->so_faddr_port = qemu_get_be16(f);
-    so->so_laddr_port = qemu_get_be16(f);
+    sock_address_load(f, &so->faddr);
+    sock_address_load(f, &so->laddr);
     so->so_iptos = qemu_get_byte(f);
     so->so_emu = qemu_get_byte(f);
     so->so_type = qemu_get_byte(f);

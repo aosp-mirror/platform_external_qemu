@@ -119,12 +119,14 @@ struct VAOState {
     VAOState(GLuint ibo, ArraysMap* arr, int numVertexAttribBindings) :
         element_array_buffer_binding(ibo),
         arraysMap(arr),
-        bindingState(numVertexAttribBindings) { }
+        bindingState(numVertexAttribBindings),
+        everBound(false) { }
     VAOState(android::base::Stream* stream);
     GLuint element_array_buffer_binding;
     ArraysMap* arraysMap;
     VertexAttribBindingVector bindingState;
     bool bufferBacked;
+    bool everBound;
     void onSave(android::base::Stream* stream) const;
 };
 
@@ -151,6 +153,12 @@ struct VAOStateRef {
     }
     VertexAttribBindingVector& bufferBindings() {
         return it->second.bindingState;
+    }
+    void setEverBound() {
+        it->second.everBound = true;
+    }
+    bool isEverBound() {
+        return it->second.everBound;
     }
     VAOStateMap::iterator it;
 };
@@ -202,7 +210,8 @@ public:
 
     void addVertexArrayObjects(GLsizei n, GLuint* arrays);
     void removeVertexArrayObjects(GLsizei n, const GLuint* arrays);
-    void setVertexArrayObject(GLuint array);
+    bool setVertexArrayObject(GLuint array);
+    void setVAOEverBound();
     GLuint getVertexArrayObject() const;
     bool vertexAttributesBufferBacked();
     const GLvoid* setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize = false, bool isInt = false);
@@ -238,11 +247,14 @@ public:
     // Default FBO emulation. Do not call this from GLEScontext context;
     // it needs dynamic dispatch (from GLEScmContext or GLESv2Context DLLs)
     // to pick up on the right functions.
-    virtual void initDefaultFBO(GLint width, GLint height,
-                                GLint colorFormat, GLint depthstencilFormat,
-                                GLint multisamples,
-                                GLuint* eglSurfaceRBColorId,
-                                GLuint* eglSurfaceRBDepthId);
+    virtual void initDefaultFBO(
+            GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+            GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+            GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+            GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId);
+    void initEmulatedEGLSurface(GLint width, GLint height,
+                             GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+                             GLuint rboColor, GLuint rboDepth);
 
     GLuint getDefaultFBOGlobalName() const { return m_defaultFBO; }
     bool isDefaultFBOBound(GLenum target) const { return !getFramebufferBinding(target); }
@@ -289,6 +301,7 @@ public:
     void setPixelStorei(GLenum pname, GLint param);
 
     void setViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+    void setPolygonOffset(GLfloat factor, GLfloat units);
     void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
     void setCullFace(GLenum mode);
     void setFrontFace(GLenum mode);
@@ -296,6 +309,8 @@ public:
     void setDepthFunc(GLenum func);
     void setDepthMask(GLboolean flag);
     void setDepthRangef(GLclampf zNear, GLclampf zFar);
+    void setLineWidth(GLfloat lineWidth);
+    void setSampleCoverage(GLclampf value, GLboolean invert);
 
     void setStencilFuncSeparate(GLenum face, GLenum func, GLint ref,
             GLuint mask);
@@ -336,11 +351,20 @@ public:
     ObjectLocalName genFBOName(ObjectLocalName p_localName = 0,
             bool genLocal = 0);
     void setFBOData(ObjectLocalName p_localName, ObjectDataPtr data);
+    void setDefaultFBODrawBuffer(GLenum buffer);
+    void setDefaultFBOReadBuffer(GLenum buffer);
     void deleteFBO(ObjectLocalName p_localName);
     FramebufferData* getFBOData(ObjectLocalName p_localName);
     ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName);
     unsigned int getFBOGlobalName(ObjectLocalName p_localName);
     ObjectLocalName getFBOLocalName(unsigned int p_globalName);
+
+    bool isVAO(ObjectLocalName p_localName);
+    ObjectLocalName genVAOName(ObjectLocalName p_localName = 0,
+            bool genLocal = 0);
+    void deleteVAO(ObjectLocalName p_localName);
+    unsigned int getVAOGlobalName(ObjectLocalName p_localName);
+    ObjectLocalName getVAOLocalName(unsigned int p_globalName);
 
     // Snapshot save
     virtual void onSave(android::base::Stream* stream) const;
@@ -403,6 +427,9 @@ protected:
     GLsizei m_viewportWidth = 0;
     GLsizei m_viewportHeight = 0;
 
+    GLfloat m_polygonOffsetFactor = 0.0f;
+    GLfloat m_polygonOffsetUnits = 0.0f;
+
     GLint m_scissorX = 0;
     GLint m_scissorY = 0;
     GLsizei m_scissorWidth = 0;
@@ -424,6 +451,11 @@ protected:
     GLboolean m_depthMask = GL_TRUE;
     GLclampf m_zNear = 0.0f;
     GLclampf m_zFar = 1.0f;
+
+    GLfloat m_lineWidth = 1.0f;
+
+    GLclampf m_sampleCoverageVal = 1.0f;
+    GLboolean m_sampleCoverageInvert = GL_FALSE;
 
     enum {
         StencilFront = 0,
@@ -462,13 +494,15 @@ protected:
 
     // Default FBO per-context state
     GLuint m_defaultFBO = 0;
+    GLuint m_defaultReadFBO = 0;
     GLuint m_defaultRBColor = 0;
     GLuint m_defaultRBDepth = 0;
     GLint m_defaultFBOWidth = 0;
     GLint m_defaultFBOHeight = 0;
     GLint m_defaultFBOColorFormat = 0;
     GLint m_defaultFBOSamples = 0;
-
+    GLenum m_defaultFBODrawBuffer = GL_COLOR_ATTACHMENT0;
+    GLenum m_defaultFBOReadBuffer = GL_COLOR_ATTACHMENT0;
 private:
 
     virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;
@@ -488,6 +522,9 @@ private:
     static std::string    s_glVersion;
 
     NameSpace* m_fboNameSpace = nullptr;
+    // m_vaoNameSpace is an empty shell that holds the names but not the data
+    // TODO(yahan): consider moving the data into it?
+    NameSpace* m_vaoNameSpace = nullptr;
 };
 
 #endif

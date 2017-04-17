@@ -76,13 +76,16 @@ public:
     void save(android::base::Stream* stream) {
         stream->putBe32(m_bufsize);
         stream->putBe32(m_free);
+        stream->putByte(m_buf != nullptr);
         onSave(stream);
     }
 
     void load(android::base::Stream* stream) {
         m_bufsize = stream->getBe32();
         m_free = stream->getBe32();
-        m_buf = onLoad(stream);
+        const bool haveBuf = stream->getByte();
+        const auto buf = onLoad(stream);
+        m_buf = haveBuf ? buf : nullptr;
     }
 
     virtual void* getDmaForReading(uint64_t guest_paddr) = 0;

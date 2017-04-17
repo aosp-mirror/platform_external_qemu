@@ -13,6 +13,8 @@
 
 #include "android/base/async/DefaultLooper.h"
 
+#include <utility>
+
 namespace android {
 namespace base {
 
@@ -80,6 +82,11 @@ Looper::FdWatch::FdWatch(Looper* looper,
                          Looper::FdWatch::Callback callback,
                          void* opaque)
     : mLooper(looper), mFd(fd), mCallback(callback), mOpaque(opaque) {}
+
+Looper::Task::Task(Looper* looper, Looper::Task::Callback&& callback)
+    : mLooper(looper), mCallback(std::move(callback)) {}
+
+Looper::Task::~Task() = default;
 
 }  // namespace base
 }  // namespace android
