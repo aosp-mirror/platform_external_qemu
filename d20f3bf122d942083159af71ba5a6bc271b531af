@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d611592d_b2d2573b",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-17T14:47:21Z",
+      "side": 1,
+      "message": "Thanks for catching these funny fprintf formatting errors I put in earlier :/\n\nI\u0027m wondering if it would be cleaner to remove the %d and the |r| from all the cases except for the default one, and to make the default case print out \"HVF unknown error 0x%x\" for more spacing and easier greppability since a lot of docs like to use hexadecimal error codes.",
+      "range": {
+        "startLine": 104,
+        "startChar": 57,
+        "endLine": 104,
+        "endChar": 59
+      },
+      "revId": "d20f3bf122d942083159af71ba5a6bc271b531af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
