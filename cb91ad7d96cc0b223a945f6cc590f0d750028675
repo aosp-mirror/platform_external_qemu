@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "27443b7c_6c49759c",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-17T14:38:20Z",
+      "side": 1,
+      "message": "Can we get into the situation where all pipes are closed, but we want to search for active pipe again, but we don\u0027t since it is not called anymore?",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 5
+      },
+      "revId": "cb91ad7d96cc0b223a945f6cc590f0d750028675",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2dbe5deb_a7c9990a",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-17T14:38:20Z",
+      "side": 1,
+      "message": "How can there be more than one active pipe like this?",
+      "range": {
+        "startLine": 132,
+        "startChar": 0,
+        "endLine": 132,
+        "endChar": 34
+      },
+      "revId": "cb91ad7d96cc0b223a945f6cc590f0d750028675",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a8f9286_50bfbe0a",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-17T14:38:20Z",
+      "side": 1,
+      "message": "Is it necessarily the case that we will find non-null mActivePipe? It seems like it will only happen if there is a pipe that is in the satte WaitingForHostAdbConnection",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 147,
+        "endChar": 34
+      },
+      "revId": "cb91ad7d96cc0b223a945f6cc590f0d750028675",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
