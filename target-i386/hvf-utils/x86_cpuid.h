@@ -35,7 +35,7 @@ struct x86_cpuid {
     uint32_t features, ext_features, ext2_features, ext3_features;
     uint32_t kvm_features, svm_features;
     uint32_t xlevel;
-    char model_id[48];
+    char model_id[52];
     int vendor_override;
     uint32_t flags;
     uint32_t xlevel2;

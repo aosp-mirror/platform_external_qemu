@@ -101,21 +101,21 @@ void assert_hvf_ok(int r) {
 
     switch (r) {
         case HV_SUCCESS:
-            fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n", r); break;
+            fprintf(stderr, "FATAL: HVF error: HV_SUCCESS%d\n", r); break;
         case HV_ERROR:
-            fprintf(stderr, "FATAL: HVF error: HV_ERROR\n", r); break;
+            fprintf(stderr, "FATAL: HVF error: HV_ERROR%d\n", r); break;
         case HV_BUSY:
-            fprintf(stderr, "FATAL: HVF error: HV_BUSY\n", r); break;
+            fprintf(stderr, "FATAL: HVF error: HV_BUSY%d\n", r); break;
         case HV_BAD_ARGUMENT:
-            fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n", r); break;
+            fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT%d\n", r); break;
         case HV_NO_RESOURCES:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n", r); break;
+            fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES%d\n", r); break;
         case HV_NO_DEVICE:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n", r); break;
+            fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE%d\n", r); break;
         case HV_UNSUPPORTED:
-            fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n", r); break;
+            fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED%d\n", r); break;
         default:
-            fprintf(stderr, "FATAL: HVF Unknown error heh\n", r); break;
+            fprintf(stderr, "FATAL: HVF Unknown error heh%d\n", r); break;
             break;
     }
     qemu_abort("HVF fatal error\n");
@@ -359,7 +359,7 @@ int hvf_init_vcpu(CPUState * cpu) {
     cpu->hvf_x86 = (struct hvf_x86_state*)malloc(sizeof(struct hvf_x86_state));
 
     DPRINTF("%s: attempt hv_vcpu_create\n", __func__);
-    r = hv_vcpu_create(&cpu->hvf_fd, HV_VCPU_DEFAULT);
+    r = hv_vcpu_create((hv_vcpuid_t*)&cpu->hvf_fd, HV_VCPU_DEFAULT);
     cpu->hvf_vcpu_dirty = 1;
     assert_hvf_ok(r);
 
@@ -440,6 +440,7 @@ int hvf_handle_io(CPUArchState * env, uint16_t port, void* buffer,
                          direction);
         ptr += size;
     }
+    return 0;
 }
 
 // TODO: synchronize vcpu state
@@ -786,7 +787,7 @@ again:
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
         if (r) {
-            qemu_abort("%s: %ld: run failed with %x\n", rip, r);
+            qemu_abort("%s: %ld: run failed with %x\n", __func__, rip, r);
         }
 
         /* handle VMEXIT */
@@ -868,7 +869,6 @@ again:
                 uint32_t size =  (exit_qual & 7) + 1;
                 uint32_t string =  (exit_qual & 16) != 0;
                 uint32_t port =  exit_qual >> 16;
-                uint32_t rep = (exit_qual & 0x20) != 0;
 
 #if 1
                 if (!string && in) {
@@ -1053,7 +1053,6 @@ again:
 
 int hvf_smp_cpu_exec(CPUState * cpu)
 {
-    CPUArchState *env = (CPUArchState *) (cpu->env_ptr);
     int why;
     int ret;
 

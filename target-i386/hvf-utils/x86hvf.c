@@ -291,8 +291,6 @@ void hvf_get_msrs(CPUState *cpu_state)
     hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_LSTAR, &env->lstar);
 #endif
 
-    int r = hv_vcpu_read_msr(cpu_state->hvf_fd, MSR_IA32_APICBASE, &tmp);
-    
     env->tsc = rdtscp() + rvmcs(cpu_state->hvf_fd, VMCS_TSC_OFFSET);
 }
 
