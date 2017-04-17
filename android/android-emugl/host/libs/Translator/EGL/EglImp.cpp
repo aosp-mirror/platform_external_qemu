@@ -63,7 +63,7 @@ void initGlobalInfo()
     emugl::Mutex::AutoLock mutex(s_eglLock);
     if (!g_eglInfo) {
         g_eglInfo = EglGlobalInfo::getInstance();
-    } 
+    }
 }
 
 static const EGLiface s_eglIface = {
@@ -770,9 +770,19 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface s
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
 
+    bool needUnbind = false;
+    if (!getThreadInfo()->eglContext) {
+        needUnbind = true;
+        dpy->nativeType()->makeCurrent(srfc->native(), srfc->native(),
+                dpy->getGlobalSharedContext());
+    }
+
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteRbo(srfc->glRboColor);
     iface->deleteRbo(srfc->glRboDepth);
+    if (needUnbind) {
+        dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
+    }
     dpy->removeSurface(surface);
     return EGL_TRUE;
 }
@@ -952,6 +962,49 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext c
     return EGL_TRUE;
 }
 
+static void sGetPbufferSurfaceGLProperties(
+        EglPbufferSurface* surface,
+        EGLint* width, EGLint* height, GLint* multisamples,
+        GLint* colorFormat, GLint* depthStencilFormat) {
+
+    assert(width);
+    assert(height);
+    assert(multisamples);
+    assert(colorFormat);
+    assert(depthStencilFormat);
+
+    EGLint r, g, b, a, d, s;
+    surface->getAttrib(EGL_WIDTH, width);
+    surface->getAttrib(EGL_HEIGHT, height);
+    surface->getAttrib(EGL_RED_SIZE, &r);
+    surface->getAttrib(EGL_GREEN_SIZE, &g);
+    surface->getAttrib(EGL_BLUE_SIZE, &b);
+    surface->getAttrib(EGL_ALPHA_SIZE, &a);
+    surface->getAttrib(EGL_DEPTH_SIZE, &d);
+    surface->getAttrib(EGL_STENCIL_SIZE, &s);
+    surface->getAttrib(EGL_SAMPLES, multisamples);
+
+    // Currently supported: RGBA8888/RGB888/RGB565/RGBA4
+    if (r == 8 && g == 8 && b == 8 && a == 8) {
+        *colorFormat = GL_RGBA8;
+    }
+    if (r == 8 && g == 8 && b == 8 && a == 0) {
+        *colorFormat = GL_RGB8;
+    }
+    if (r == 5 && g == 6 && b == 5 && a == 0) {
+        *colorFormat = GL_RGB565;
+    }
+    if (r == 4 && g == 4 && b == 4 && a == 4) {
+        *colorFormat = GL_RGBA4;
+    }
+
+    // Blanket provide 24/8 depth/stencil format for now.
+    *depthStencilFormat = GL_DEPTH24_STENCIL8;
+
+    // TODO: Support more if necessary, or even restrict
+    // EGL configs from host display to only these ones.
+}
+
 EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                                              EGLSurface draw,
                                              EGLSurface read,
@@ -1032,46 +1085,39 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
 
-        if (newDrawPtr->type() == EglSurface::PBUFFER) {
-            EGLint width,height;
+        if (newDrawPtr->type() == EglSurface::PBUFFER &&
+            newReadPtr->type() == EglSurface::PBUFFER) {
+
             EglPbufferSurface* tmpPbSurfacePtr =
                 static_cast<EglPbufferSurface*>(newDrawPtr);
-            tmpPbSurfacePtr->getAttrib(EGL_WIDTH, &width);
-            tmpPbSurfacePtr->getAttrib(EGL_HEIGHT, &height);
+            EglPbufferSurface* tmpReadPbSurfacePtr =
+                static_cast<EglPbufferSurface*>(newReadPtr);
 
-            EGLint r, g, b, a, d, s, ms;
+            EGLint width, height, readWidth, readHeight;
+            GLint colorFormat, depthStencilFormat, multisamples;
+            GLint readColorFormat, readDepthStencilFormat, readMultisamples;
 
-            tmpPbSurfacePtr->getAttrib(EGL_RED_SIZE, &r);
-            tmpPbSurfacePtr->getAttrib(EGL_GREEN_SIZE, &g);
-            tmpPbSurfacePtr->getAttrib(EGL_BLUE_SIZE, &b);
-            tmpPbSurfacePtr->getAttrib(EGL_ALPHA_SIZE, &a);
-            tmpPbSurfacePtr->getAttrib(EGL_DEPTH_SIZE, &d);
-            tmpPbSurfacePtr->getAttrib(EGL_STENCIL_SIZE, &s);
-            tmpPbSurfacePtr->getAttrib(EGL_SAMPLES, &ms);
+            sGetPbufferSurfaceGLProperties(
+                    tmpPbSurfacePtr,
+                    &width, &height,
+                    &multisamples,
+                    &colorFormat, &depthStencilFormat);
 
-            GLint glColorFormat, glDepthStencilFormat, glMultisamples;
-
-            glMultisamples = ms;
-
-            glDepthStencilFormat = GL_DEPTH24_STENCIL8;
-
-            // Synthesize gl color format depending on the EGL config,
-            // or things will not work right (alpha == 0 vs != 0, multisampling, etc)
-            if (r == 8 && g == 8 && b == 8 && a == 8) {
-                glColorFormat = GL_RGBA8;
-            }
-            if (r == 8 && g == 8 && b == 8 && a == 0) {
-                glColorFormat = GL_RGB8;
-            }
-            if (r == 5 && g == 6 && b == 5 && a == 0) {
-                glColorFormat = GL_RGB565;
-            }
+            sGetPbufferSurfaceGLProperties(
+                    tmpReadPbSurfacePtr,
+                    &readWidth, &readHeight,
+                    &readMultisamples,
+                    &readColorFormat, &readDepthStencilFormat);
 
             newCtx->getGlesContext()->initDefaultFBO(
                     width, height,
-                    glColorFormat, glDepthStencilFormat, glMultisamples,
+                    colorFormat, depthStencilFormat, multisamples,
                     &tmpPbSurfacePtr->glRboColor,
-                    &tmpPbSurfacePtr->glRboDepth);
+                    &tmpPbSurfacePtr->glRboDepth,
+                    readWidth, readHeight,
+                    readColorFormat, readDepthStencilFormat, readMultisamples,
+                    &tmpReadPbSurfacePtr->glRboColor,
+                    &tmpReadPbSurfacePtr->glRboDepth);
         }
 
         // Initialize the GLES extension function table used in

@@ -336,6 +336,8 @@ for opt do
   ;;
   --lto) OPTION_LTO=true
   ;;
+  --snapshot-profile) OPTION_SNAPSHOT_PROFILE=yes
+;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -567,6 +569,11 @@ probe_prebuilts_dir "Zlib" ZLIB_PREBUILTS_DIR qemu-android-deps
 probe_prebuilts_dir "Libpng" LIBPNG_PREBUILTS_DIR qemu-android-deps
 
 ###
+###  Libsdl2 probe
+###
+probe_prebuilts_dir "Libsdl2" LIBSDL2_PREBUILTS_DIR qemu-android-deps
+
+###
 ###  Libxml2 probe
 ###
 probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
@@ -635,6 +642,11 @@ probe_prebuilts_dir "ffmpeg" FFMPEG_PREBUILTS_DIR common/ffmpeg
 ###  x264 probe
 ###
 probe_prebuilts_dir "x264" X264_PREBUILTS_DIR common/x264
+
+###
+###  libvpx probe
+###
+probe_prebuilts_dir "libxpx" LIBVPX_PREBUILTS_DIR common/libvpx
 
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
@@ -1057,6 +1069,7 @@ fi
 
 echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
 echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
+echo "LIBSDL2_PREBUILTS_DIR := $LIBSDL2_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
 echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_TRANSLATION_PREBUILTS_DIR" >> $config_mk
@@ -1067,6 +1080,7 @@ echo "PROTOBUF_PREBUILTS_DIR := $PROTOBUF_PREBUILTS_DIR" >> $config_mk
 echo "LZ4_PREBUILTS_DIR := $LZ4_PREBUILTS_DIR" >> $config_mk
 echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
+echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
 
 if [ $OPTION_DEBUG = "yes" ] ; then
     echo "BUILD_DEBUG := true" >> $config_mk
@@ -1076,6 +1090,9 @@ if [ $OPTION_SANITIZER != "no" ] ; then
 fi
 if [ $OPTION_EMUGL_PRINTOUT = "yes" ] ; then
     echo "BUILD_EMUGL_PRINTOUT := true" >> $config_mk
+fi
+if [ $OPTION_SNAPSHOT_PROFILE = "yes" ] ; then
+    echo "BUILD_SNAPSHOT_PROFILE := true" >> $config_mk
 fi
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "BUILD_STRIP_BINARIES := true" >> $config_mk

@@ -265,6 +265,7 @@ typedef struct SaveState {
     bool skip_configuration;
     uint32_t len;
     const char *name;
+    uint32_t target_page_bits;
 } SaveState;
 
 static SaveState savevm_state = {
@@ -286,6 +287,19 @@ static void configuration_pre_save(void *opaque)
 
     state->len = strlen(current_name);
     state->name = current_name;
+    state->target_page_bits = TARGET_PAGE_BITS;
+}
+
+static int configuration_pre_load(void *opaque)
+{
+    SaveState *state = opaque;
+
+    /* If there is no target-page-bits subsection it means the source
+     * predates the variable-target-page-bits support and is using the
+     * minimum possible value for this CPU.
+     */
+    state->target_page_bits = TARGET_PAGE_BITS_MIN;
+    return 0;
 }
 
 static int configuration_post_load(void *opaque, int version_id)
@@ -298,12 +312,43 @@ static int configuration_post_load(void *opaque, int version_id)
                      (int) state->len, state->name, current_name);
         return -EINVAL;
     }
+
+    if (state->target_page_bits != TARGET_PAGE_BITS) {
+        error_report("Received TARGET_PAGE_BITS is %d but local is %d",
+                     state->target_page_bits, TARGET_PAGE_BITS);
+        return -EINVAL;
+    }
+
     return 0;
 }
+
+/* The target-page-bits subsection is present only if the
+ * target page size is not the same as the default (ie the
+ * minimum page size for a variable-page-size guest CPU).
+ * If it is present then it contains the actual target page
+ * bits for the machine, and migration will fail if the
+ * two ends don't agree about it.
+ */
+static bool vmstate_target_page_bits_needed(void *opaque)
+{
+    return TARGET_PAGE_BITS > TARGET_PAGE_BITS_MIN;
+}
+
+static const VMStateDescription vmstate_target_page_bits = {
+    .name = "configuration/target-page-bits",
+    .version_id = 1,
+    .minimum_version_id = 1,
+    .needed = vmstate_target_page_bits_needed,
+    .fields = (VMStateField[]) {
+        VMSTATE_UINT32(target_page_bits, SaveState),
+        VMSTATE_END_OF_LIST()
+    }
+};
 
 static const VMStateDescription vmstate_configuration = {
     .name = "configuration",
     .version_id = 1,
+    .pre_load = configuration_pre_load,
     .post_load = configuration_post_load,
     .pre_save = configuration_pre_save,
     .fields = (VMStateField[]) {
@@ -311,6 +356,10 @@ static const VMStateDescription vmstate_configuration = {
         VMSTATE_VBUFFER_ALLOC_UINT32(name, SaveState, 0, NULL, 0, len),
         VMSTATE_END_OF_LIST()
     },
+    .subsections = (const VMStateDescription*[]) {
+        &vmstate_target_page_bits,
+        NULL
+    }
 };
 
 static void dump_vmstate_vmsd(FILE *out_file,
@@ -1606,6 +1655,7 @@ static int loadvm_handle_cmd_packaged(MigrationIncomingState *mis)
     }
 
     bioc = qio_channel_buffer_new(length);
+    qio_channel_set_name(QIO_CHANNEL(bioc), "migration-loadvm-buffer");
     ret = qemu_get_buffer(mis->from_src_file,
                           bioc->data,
                           length);
@@ -1852,40 +1902,45 @@ qemu_loadvm_section_part_end(QEMUFile *f, MigrationIncomingState *mis)
 static int qemu_loadvm_state_main(QEMUFile *f, MigrationIncomingState *mis)
 {
     uint8_t section_type;
-    int ret;
+    int ret = 0;
 
     while ((section_type = qemu_get_byte(f)) != QEMU_VM_EOF) {
-
+        ret = 0;
         trace_qemu_loadvm_state_section(section_type);
         switch (section_type) {
         case QEMU_VM_SECTION_START:
         case QEMU_VM_SECTION_FULL:
             ret = qemu_loadvm_section_start_full(f, mis);
             if (ret < 0) {
-                return ret;
+                goto out;
             }
             break;
         case QEMU_VM_SECTION_PART:
         case QEMU_VM_SECTION_END:
             ret = qemu_loadvm_section_part_end(f, mis);
             if (ret < 0) {
-                return ret;
+                goto out;
             }
             break;
         case QEMU_VM_COMMAND:
             ret = loadvm_process_command(f);
             trace_qemu_loadvm_state_section_command(ret);
             if ((ret < 0) || (ret & LOADVM_QUIT)) {
-                return ret;
+                goto out;
             }
             break;
         default:
             error_report("Unknown savevm section type %d", section_type);
-            return -EINVAL;
+            ret = -EINVAL;
+            goto out;
         }
     }
 
-    return 0;
+out:
+    if (ret < 0) {
+        qemu_file_set_error(f, ret);
+    }
+    return ret;
 }
 
 int qemu_loadvm_state(QEMUFile *f)
@@ -1995,6 +2050,9 @@ int qemu_loadvm_state(QEMUFile *f)
 
 void hmp_savevm(Monitor *mon, const QDict *qdict)
 {
+#ifdef SNAPSHOT_PROFILE
+    int64_t beginTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+#endif
     BlockDriverState *bs, *bs1;
     QEMUSnapshotInfo sn1, *sn = &sn1, old_sn1, *old_sn = &old_sn1;
     int ret;
@@ -2083,6 +2141,10 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
 
  the_end:
     aio_context_release(aio_context);
+#ifdef SNAPSHOT_PROFILE
+    printf("savevm time %ld ms\n",
+            (qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - beginTime)/1000000);
+#endif
     if (saved_vm_running) {
         vm_start();
     }
@@ -2103,6 +2165,7 @@ void qmp_xen_save_devices_state(const char *filename, Error **errp)
     if (!ioc) {
         goto the_end;
     }
+    qio_channel_set_name(QIO_CHANNEL(ioc), "migration-xen-save-state");
     f = qemu_fopen_channel_output(QIO_CHANNEL(ioc));
     ret = qemu_save_device_state(f);
     qemu_fclose(f);
@@ -2135,6 +2198,7 @@ void qmp_xen_load_devices_state(const char *filename, Error **errp)
     if (!ioc) {
         return;
     }
+    qio_channel_set_name(QIO_CHANNEL(ioc), "migration-xen-load-state");
     f = qemu_fopen_channel_input(QIO_CHANNEL(ioc));
 
     migration_incoming_state_new(f);
@@ -2148,6 +2212,9 @@ void qmp_xen_load_devices_state(const char *filename, Error **errp)
 
 int load_vmstate(const char *name)
 {
+#ifdef SNAPSHOT_PROFILE
+    int64_t beginTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
+#endif
     BlockDriverState *bs, *bs_vm_state;
     QEMUSnapshotInfo sn;
     QEMUFile *f;
@@ -2215,6 +2282,11 @@ int load_vmstate(const char *name)
         error_report("Error %d while loading VM state", ret);
         return ret;
     }
+
+#ifdef SNAPSHOT_PROFILE
+    printf("loadvm time %ld ms\n",
+            (qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - beginTime)/1000000);
+#endif
 
     return 0;
 }

@@ -343,7 +343,6 @@ public:
     }
 
     ~MacGlLibrary() {
-        delete mLib;
     }
 
     // override

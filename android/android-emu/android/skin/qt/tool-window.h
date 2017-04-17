@@ -89,6 +89,10 @@ public:
     // window and the tool bar. This is how big that gap is.
     static const int toolGap = 10;
 
+signals:
+    void guestClipboardChanged(QString text);
+    void haveClipboardSharingKnown(bool have);
+
 private:
     void createExtendedWindow();
     void handleUICommand(QtUICommand cmd, bool down);
@@ -132,6 +136,7 @@ private:
 
 public slots:
     void raise();
+    void switchClipboardSharing(bool enabled);
 
 private slots:
     void on_back_button_pressed();
@@ -153,6 +158,9 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
+
+    void onGuestClipboardChanged(QString text);
+    void onHostClipboardChanged();
 };
 
 typedef void (ToolWindow::*ToolWindowSlot)();

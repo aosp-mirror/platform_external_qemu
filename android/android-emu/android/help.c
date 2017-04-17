@@ -34,6 +34,15 @@ help_list_avds( stralloc_t* out ) {
 }
 
 static void
+help_studio_params(stralloc_t*  out)
+{
+    PRINTF(
+    "  Indicates a temporary file containing parameters from Android Studio.\n\n"
+    "  This should be used only by Android Studio.\n\n"
+    );
+}
+
+static void
 help_virtual_device( stralloc_t*  out )
 {
     PRINTF(
@@ -421,6 +430,14 @@ help_ramdisk(stralloc_t*  out)
     "  the emulator. the default image is 'ramdisk.img' from the system directory.\n\n"
 
     "  see '-help-disk-images' for more information about disk image files\n\n"
+    );
+}
+
+static void
+help_logcat_output(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-logcat-output <file>' to specify a path to save logcat output\n\n"
     );
 }
 

@@ -32,6 +32,7 @@
 #include "GLcommon/TranslatorIfaces.h"
 #include "GLESv2Context.h"
 #include "GLESv2Validate.h"
+#include "SamplerData.h"
 #include "ShaderParser.h"
 #include "ProgramData.h"
 #include "GLcommon/TextureUtils.h"
@@ -624,19 +625,14 @@ GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, 
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
 
-
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
-                                imageSize, data, (void*)glTexImage2D);
+                                imageSize, data, glTexImage2D);
 
-    if (ctx->shareGroup().get()) {
-        TextureData *texData = getTextureTargetData(target);
-
-        if (texData) {
-            texData->hasStorage = true;
-            texData->compressed = true;
-            texData->compressedFormat = internalformat;
-        }
+    TextureData* texData = getTextureTargetData(target);
+    if (texData) {
+        texData->compressed = true;
+        texData->compressedFormat = internalformat;
     }
 }
 
@@ -652,16 +648,29 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
                         getEtcFormat(texData->compressedFormat),
                         width, height);
                 SET_ERROR_IF(imageSize != encodedDataSize, GL_INVALID_VALUE);
+                SET_ERROR_IF(width % 4 && (xoffset + width != (GLsizei)texData->width), GL_INVALID_OPERATION);
+                SET_ERROR_IF(height % 4 && (yoffset + height != (GLsizei)texData->height), GL_INVALID_OPERATION);
+                SET_ERROR_IF(xoffset % 4, GL_INVALID_OPERATION);
+                SET_ERROR_IF(yoffset % 4, GL_INVALID_OPERATION);
             }
+            SET_ERROR_IF(format != texData->compressedFormat, GL_INVALID_OPERATION);
         }
+        SET_ERROR_IF(ctx->getMajorVersion() < 3 && !data, GL_INVALID_OPERATION);
+        doCompressedTexImage2D(ctx, target, level, format,
+                width, height, 0, imageSize, data,
+                [xoffset, yoffset](GLenum target, GLint level,
+                GLint internalformat, GLsizei width, GLsizei height,
+                GLint border, GLenum format, GLenum type,
+                const GLvoid* data) {
+                    glTexSubImage2D(target, level, xoffset, yoffset,
+                        width, height, format, type, data);
+                });
     }
-    SET_ERROR_IF(!data,GL_INVALID_OPERATION);
-    ctx->dispatcher().glCompressedTexSubImage2D(target,level,xoffset,yoffset,width,height,format,imageSize,data);
 }
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
         GLsizei width, GLsizei height, GLint border, GLenum* format,
-        GLenum* type){
+        GLenum* type, GLint* internalformat_out) {
     GET_CTX();
 
     if (ctx->shareGroup().get()) {
@@ -674,7 +683,17 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
         if (texData && level == 0) {
             assert(texData->target == GL_TEXTURE_2D ||
                     texData->target == GL_TEXTURE_CUBE_MAP);
-            texData->internalFormat = internalformat;
+            if (GLESv2Validate::isCompressedFormat(internalformat)) {
+                texData->compressed = true;
+                texData->compressedFormat = internalformat;
+                texData->internalFormat = decompressedInternalFormat(
+                    internalformat);
+            } else {
+                texData->internalFormat = internalformat;
+            }
+            if (internalformat_out) {
+                *internalformat_out = texData->internalFormat;
+            }
             texData->width = width;
             texData->height = height;
             texData->border = border;
@@ -733,7 +752,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
     // TODO: set up the correct format and type
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            nullptr, nullptr);
+            nullptr, nullptr, nullptr);
     ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
 }
 
@@ -1472,6 +1491,10 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             }
             *params = i;
         }
+        break;
+    case GL_VERTEX_ARRAY_BINDING:
+        getter(pname,&i);
+        *params = ctx->getVAOLocalName(i);
         break;
     case GL_ARRAY_BUFFER_BINDING:
         *params = ctx->getBuffer(GL_ARRAY_BUFFER);
@@ -2445,6 +2468,7 @@ GL_APICALL GLboolean    GL_APIENTRY glIsShader(GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glLineWidth(GLfloat width){
     GET_CTX();
+    ctx->setLineWidth(width);
     ctx->dispatcher().glLineWidth(width);
 }
 
@@ -2519,6 +2543,7 @@ GL_APICALL void  GL_APIENTRY glPixelStorei(GLenum pname, GLint param){
 
 GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
     GET_CTX();
+    ctx->setPolygonOffset(factor, units);
     ctx->dispatcher().glPolygonOffset(factor,units);
 }
 
@@ -2653,6 +2678,7 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
     GET_CTX();
+    ctx->setSampleCoverage(value, invert);
     ctx->dispatcher().glSampleCoverage(value,invert);
 }
 
@@ -2794,7 +2820,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     VALIDATE(border != 0,GL_INVALID_VALUE);
 
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            &format, &type);
+            &format, &type, &internalformat);
 
     if (!isCompressedFormat && ctx->getMajorVersion() < 3) {
         if (type==GL_HALF_FLOAT_OES)
@@ -3057,56 +3083,75 @@ GL_APICALL void  GL_APIENTRY glValidateProgram(GLuint program){
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib1f(GLuint index, GLfloat x){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib1f(index,x);
+    ctx->setAttribValue(index, 1, &x);
     if(index == 0)
         ctx->setAttribute0value(x, 0.0, 0.0, 1.0);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib1fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib1fv(index,values);
+    ctx->setAttribValue(index, 1, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], 0.0, 0.0, 1.0);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib2f(GLuint index, GLfloat x, GLfloat y){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib2f(index,x,y);
+    GLfloat values[] = {x, y};
+    ctx->setAttribValue(index, 2, values);
     if(index == 0)
         ctx->setAttribute0value(x, y, 0.0, 1.0);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib2fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib2fv(index,values);
+    ctx->setAttribValue(index, 2, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], 0.0, 1.0);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib3f(GLuint index, GLfloat x, GLfloat y, GLfloat z){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib3f(index,x,y,z);
+    GLfloat values[3] = {x, y, z};
+    ctx->setAttribValue(index, 3, values);
     if(index == 0)
         ctx->setAttribute0value(x, y, z, 1.0);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib3fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib3fv(index,values);
+    ctx->setAttribValue(index, 3, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], values[2], 1.0);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib4f(GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib4f(index,x,y,z,w);
+    GLfloat values[4] = {x, y, z, z};
+    ctx->setAttribValue(index, 4, values);
     if(index == 0)
         ctx->setAttribute0value(x, y, z, w);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttrib4fv(GLuint index, const GLfloat* values){
     GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->dispatcher().glVertexAttrib4fv(index,values);
+    ctx->setAttribValue(index, 4, values);
     if(index == 0)
         ctx->setAttribute0value(values[0], values[1], values[2], values[3]);
 }
@@ -3246,26 +3291,39 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
 GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
-    ctx->dispatcher().glGenVertexArrays(n, arrays);
+    for (GLsizei i = 0; i < n; i++) {
+        arrays[i] = ctx->genVAOName(0, true);
+    }
     ctx->addVertexArrayObjects(n, arrays);
 }
 
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
-    ctx->setVertexArrayObject(array);
-    ctx->dispatcher().glBindVertexArray(array);
+    if (ctx->setVertexArrayObject(array)) {
+        // TODO: This could be useful for a glIsVertexArray
+        // that doesn't use the host GPU, but currently, it doesn't
+        // really work. VAOs need to be bound first if glIsVertexArray
+        // is to return true, and for now let's just ask the GPU
+        // directly.
+        ctx->setVAOEverBound();
+    }
+    ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {
     GET_CTX_V2();
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
     ctx->removeVertexArrayObjects(n, arrays);
-    ctx->dispatcher().glDeleteVertexArrays(n, arrays);
+    for (GLsizei i = 0; i < n; i++) {
+        ctx->deleteVAO(arrays[i]);
+    }
 }
 
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     GET_CTX_V2_RET(0);
-    return ctx->dispatcher().glIsVertexArray(array);
+    // TODO: Figure out how to answer this completely in software.
+    // Currently, state gets weird so we need to ask the GPU directly.
+    return ctx->dispatcher().glIsVertexArray(ctx->getVAOGlobalName(array));
 }
 
 #include "GLESv30Imp.cpp"

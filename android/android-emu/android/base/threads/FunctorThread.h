@@ -48,7 +48,6 @@ private:
 
 private:
     Functor mThreadFunc;
-    ThreadFlags mFlags;
 };
 
 }  // namespace base

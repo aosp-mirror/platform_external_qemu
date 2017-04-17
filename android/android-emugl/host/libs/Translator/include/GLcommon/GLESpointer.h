@@ -24,6 +24,9 @@
 
 class GLESpointer {
 public:
+    enum AttribType {
+        ARRAY, BUFFER, VALUE
+    };
     GLESpointer() = default;
     GLESpointer(android::base::Stream* stream);
     GLenum getType() const;
@@ -32,6 +35,8 @@ public:
     // get*Data, getBufferName all only for legacy (GLES_CM or buffer->client array converseion) setups.
     const GLvoid* getArrayData() const;
     GLvoid* getBufferData() const;
+    const GLfloat* getValues() const;
+    unsigned int getValueCount() const;
     GLuint getBufferName() const;
     GLboolean getNormalized() const { return m_normalize ? GL_TRUE : GL_FALSE; }
     const GLvoid* getData() const;
@@ -54,6 +59,8 @@ public:
                    int offset,
                    bool normalize = false,
                    bool isInt = false);
+    // setValue is used when glVertexAttrib*f(v) is called
+    void setValue(unsigned int count, const GLfloat* val);
     void setDivisor(GLuint divisor);
     void setBindingIndex(GLuint bindingindex);
     void setFormat(GLint size, GLenum type,
@@ -65,7 +72,7 @@ public:
     }
     bool isEnable() const;
     bool isNormalize() const;
-    bool isVBO() const;
+    AttribType getAttribType() const;
     bool isIntPointer() const;
     void enable(bool b);
     void onSave(android::base::Stream* stream) const;
@@ -75,7 +82,7 @@ private:
     GLsizei m_stride = 0;
     bool m_enabled = false;
     bool m_normalize = false;
-    bool m_isVBO = false;
+    AttribType m_attribType = ARRAY;
     GLsizei m_dataSize = 0;
     const GLvoid* m_data = nullptr;
     GLESbuffer* m_buffer = nullptr;
@@ -87,5 +94,7 @@ private:
     GLuint m_reloffset = 0;
     // m_ownData is only used when loading from a snapshot
     std::vector<unsigned char> m_ownData;
+    GLsizei m_valueCount = 0;
+    GLfloat m_values[4];
 };
 #endif

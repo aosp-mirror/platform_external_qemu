@@ -16,6 +16,9 @@
 #define EMUGL_COMMON_SHARED_LIBRARY_H
 
 #include <stddef.h>
+#include <memory>
+#include <string>
+#include <unordered_map>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -35,11 +38,19 @@ namespace emugl {
 //    //Probe for function symbol.
 //    FunctionPtr my_func = library->findSymbol("my_func");
 //
-//    // Closes library/
-//    delete library;
-//
+//  A shared library will be unloaded on program exit.
 class SharedLibrary {
+private:
+    struct Deleter {
+        void operator()(SharedLibrary* lib) const { delete lib; }
+    };
+
 public:
+    typedef std::unordered_map<
+            std::string,
+            std::unique_ptr<SharedLibrary, SharedLibrary::Deleter>>
+            LibraryMap;
+
     // Open a given library.  If |libraryName| has no extension, a
     // platform-appropriate extension is added and that path is opened.
     // If the |libraryName| has an extension, that form is opened.
@@ -63,9 +74,6 @@ public:
                                char* error,
                                size_t errorSize);
 
-    // Closes an existing SharedLibrary instance.
-    ~SharedLibrary();
-
     // Generic function pointer type, for values returned by the
     // findSymbol() method.
     typedef void (*FunctionPtr)(void);
@@ -76,6 +84,12 @@ public:
     FunctionPtr findSymbol(const char* symbolName) const;
 
 private:
+
+    static LibraryMap s_libraryMap;
+
+    static SharedLibrary* do_open(const char* libraryName,
+                               char* error,
+                               size_t errorSize);
 #ifdef _WIN32
     typedef HMODULE HandleType;
 #else
@@ -84,6 +98,11 @@ private:
 
     // Constructor intentionally hidden.
     SharedLibrary(HandleType);
+
+    // Closes an existing SharedLibrary hidden so nobody
+    // starts accidently cleaning up these libraries.
+    ~SharedLibrary();
+
 
     HandleType mLib;
 };

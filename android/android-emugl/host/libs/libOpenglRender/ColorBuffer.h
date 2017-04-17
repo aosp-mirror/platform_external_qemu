@@ -70,6 +70,46 @@ public:
         virtual bool setupContext() = 0;
         virtual void teardownContext() = 0;
         virtual TextureDraw* getTextureDraw() const = 0;
+        virtual bool isBound() const = 0;
+    };
+
+    // Helper class to use a ColorBuffer::Helper context.
+    // Usage is pretty simple:
+    //
+    //     {
+    //        RecursiveScopedHelperContext context(m_helper);
+    //        if (!context.isOk()) {
+    //            return false;   // something bad happened.
+    //        }
+    //        .... do something ....
+    //     }   // automatically calls m_helper->teardownContext();
+    //
+    class RecursiveScopedHelperContext {
+    public:
+        RecursiveScopedHelperContext(ColorBuffer::Helper* helper) : mHelper(helper) {
+            if (helper->isBound()) return;
+            if (!helper->setupContext()) {
+                mHelper = NULL;
+                return;
+            }
+            mNeedUnbind = true;
+        }
+
+        bool isOk() const { return mHelper != NULL; }
+
+        ~RecursiveScopedHelperContext() { release(); }
+
+        void release() {
+            if (mNeedUnbind) {
+                mHelper->teardownContext();
+                mNeedUnbind = false;
+            }
+            mHelper = NULL;
+        }
+
+    private:
+        ColorBuffer::Helper* mHelper;
+        bool mNeedUnbind = false;
     };
 
     // Create a new ColorBuffer instance.

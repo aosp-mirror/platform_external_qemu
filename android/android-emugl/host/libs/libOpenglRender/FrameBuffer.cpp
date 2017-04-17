@@ -37,34 +37,7 @@ using android::base::Stream;
 namespace {
 
 // Helper class to call the bind_locked() / unbind_locked() properly.
-class ScopedBind {
-public:
-    // Constructor will call bind_locked() on |fb|.
-    // Use isValid() to check for errors.
-    ScopedBind(FrameBuffer* fb) : mFb(fb) {
-        if (!mFb->bind_locked()) {
-            mFb = NULL;
-        }
-    }
-
-    // Returns true if contruction bound the framebuffer context properly.
-    bool isValid() const { return mFb != NULL; }
-
-    // Unbound the framebuffer explictly. This is also called by the
-    // destructor.
-    void release() {
-        if (mFb) {
-            mFb->unbind_locked();
-            mFb = NULL;
-        }
-    }
-
-    // Destructor will call release().
-    ~ScopedBind() { release(); }
-
-private:
-    FrameBuffer* mFb;
-};
+typedef ColorBuffer::RecursiveScopedHelperContext ScopedBind;
 
 // Implementation of a ColorBuffer::Helper instance that redirects calls
 // to a FrameBuffer instance.
@@ -72,16 +45,25 @@ class ColorBufferHelper : public ColorBuffer::Helper {
 public:
     ColorBufferHelper(FrameBuffer* fb) : mFb(fb) {}
 
-    virtual bool setupContext() { return mFb->bind_locked(); }
+    virtual bool setupContext() {
+        mIsBound = mFb->bind_locked();
+        return mIsBound;
+    }
 
-    virtual void teardownContext() { mFb->unbind_locked(); }
+    virtual void teardownContext() {
+        mFb->unbind_locked();
+        mIsBound = false;
+    }
 
     virtual TextureDraw* getTextureDraw() const {
         return mFb->getTextureDraw();
     }
 
+    virtual bool isBound() const { return mIsBound; }
+
 private:
     FrameBuffer* mFb;
+    bool mIsBound = false;
 };
 
 }  // namespace
@@ -314,8 +296,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
 
     GL_LOG("attempting to make context current");
     // Make the context current
-    ScopedBind bind(fb.get());
-    if (!bind.isValid()) {
+    ScopedBind bind(fb->m_colorBufferHelper);
+    if (!bind.isOk()) {
         ERR("Failed to make current\n");
         return false;
     }
@@ -622,7 +604,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           getCaps().has_eglimage_texture_2d,
                                           ret, m_colorBufferHelper));
     if (cb.get() != NULL) {
-        m_colorbuffers[ret] = { std::move(cb), 1 };
+        m_colorbuffers[ret] = { std::move(cb), 1, false };
 
         RenderThreadInfo* tInfo = RenderThreadInfo::get();
         uint64_t puid = tInfo->m_puid;
@@ -668,7 +650,7 @@ HandleType FrameBuffer::createRenderContext(int p_config,
         // support it.
         if (puid) {
             m_procOwnedRenderContext[puid].insert(ret);
-        } else {
+        } else { // legacy path to manage context lifetime by threads
             tinfo->m_contextSet.insert(ret);
         }
     } else {
@@ -695,8 +677,13 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
             getDisplay(), config->getEglConfig(), p_width, p_height, ret));
     if (win.get() != NULL) {
         m_windows[ret] = { win, 0 };
-        RenderThreadInfo* tinfo = RenderThreadInfo::get();
-        tinfo->m_windowSet.insert(ret);
+        RenderThreadInfo* tInfo = RenderThreadInfo::get();
+        uint64_t puid = tInfo->m_puid;
+        if (puid) {
+            m_procOwnedWindowSurfaces[puid].insert(ret);
+        } else { // legacy path to manage window surface lifetime by threads
+            tInfo->m_windowSet.insert(ret);
+        }
     }
 
     return ret;
@@ -723,24 +710,14 @@ void FrameBuffer::drainWindowSurface() {
     }
 
     emugl::Mutex::AutoLock mutex(m_lock);
-    // Color buffers automatically bind to a context in dtor
-    // But window surfaces do not. So we need to manually bind to a context
-    // between releasing color buffers and window surfaces.
+    ScopedBind bind(m_colorBufferHelper);
     for (const HandleType winHandle : tinfo->m_windowSet) {
         const auto winIt = m_windows.find(winHandle);
         if (winIt != m_windows.end()) {
             if (const HandleType oldColorBufferHandle = winIt->second.second) {
                 closeColorBufferLocked(oldColorBufferHandle);
-                winIt->second.second = 0;
-                winIt->second.first->setColorBuffer(nullptr);
+                m_windows.erase(winIt);
             }
-        }
-    }
-    ScopedBind bind(this);
-    for (const HandleType winHandle : tinfo->m_windowSet) {
-        const auto winIt = m_windows.find(winHandle);
-        if (winIt != m_windows.end()) {
-            m_windows.erase(winIt);
         }
     }
     tinfo->m_windowSet.clear();
@@ -767,13 +744,25 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context) {
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    DestroyWindowSurfaceLocked(p_surface);
+}
+
+void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
     const auto w = m_windows.find(p_surface);
     if (w != m_windows.end()) {
+        ScopedBind bind(m_colorBufferHelper);
         closeColorBufferLocked(w->second.second);
-        w->second.first->setColorBuffer(nullptr);
         m_windows.erase(w);
         RenderThreadInfo* tinfo = RenderThreadInfo::get();
-        tinfo->m_windowSet.erase(p_surface);
+        uint64_t puid = tinfo->m_puid;
+        if (puid) {
+            auto ite = m_procOwnedWindowSurfaces.find(puid);
+            if (ite != m_procOwnedWindowSurfaces.end()) {
+                ite->second.erase(p_surface);
+            }
+        } else {
+            tinfo->m_windowSet.erase(p_surface);
+        }
     }
 }
 
@@ -789,6 +778,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
         return -1;
     }
     (*c).second.refcount++;
+    (*c).second.opened = true;
 
     uint64_t puid = tInfo->m_puid;
     if (puid) {
@@ -802,6 +792,7 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
 
     emugl::Mutex::AutoLock mutex(m_lock);
     closeColorBufferLocked(p_colorbuffer);
+
     uint64_t puid = tInfo->m_puid;
     if (puid) {
         auto ite = m_procOwnedColorBuffers.find(puid);
@@ -811,18 +802,29 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     }
 }
 
-void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
+bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
         // closeColorBuffer command when the color buffer is already
         // garbage collected on the host. (we dont have a mechanism
         // to give guest a notice yet)
-        return;
+        return true;
     }
-    if (--(*c).second.refcount == 0) {
+    // The guest can and will gralloc_alloc/gralloc_free and then
+    // gralloc_register a buffer, due to API level (O+) or
+    // timing issues.
+    // So, we don't actually close the color buffer when refcount
+    // reached zero, unless it has been opened at least once already.
+    if (--(*c).second.refcount == 0 &&
+        (*c).second.opened) {
         m_colorbuffers.erase(c);
+        return true;
     }
+
+    DBG("%s: warning: possibly leaked color buffer 0x%x\n",
+        __FUNCTION__, p_colorbuffer);
+    return false;
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
@@ -831,37 +833,50 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
 }
 
 void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
-    // Clean up color buffers.
-    // A color buffer needs to be closed as many times as it is opened by
-    // the guest process, to give the correct reference count.
-    // (Note that a color buffer can be shared across guest processes.)
     {
-        auto procIte = m_procOwnedColorBuffers.find(puid);
-        if (procIte != m_procOwnedColorBuffers.end()) {
-            for (auto cb : procIte->second) {
-                closeColorBufferLocked(cb);
-            }
-            m_procOwnedColorBuffers.erase(procIte);
-        }
-    }
-
-    // Clean up EGLImage handles
-    {
-        auto procIte = m_procOwnedEGLImages.find(puid);
-        if (procIte != m_procOwnedEGLImages.end()) {
-            if (!procIte->second.empty()) {
-                // Bind context before potentially triggering any gl calls.
-                ScopedBind bind(this);
-                for (auto eglImg : procIte->second) {
-                    s_egl.eglDestroyImageKHR(
-                            m_eglDisplay,
-                            reinterpret_cast<EGLImageKHR>((HandleType)eglImg));
+        ScopedBind bind(m_colorBufferHelper);
+        // Clean up window surfaces
+        {
+            auto procIte = m_procOwnedWindowSurfaces.find(puid);
+            if (procIte != m_procOwnedWindowSurfaces.end()) {
+                for (auto whndl : procIte->second) {
+                    auto w = m_windows.find(whndl);
+                    closeColorBufferLocked(w->second.second);
+                    m_windows.erase(w);
                 }
+                m_procOwnedWindowSurfaces.erase(procIte);
             }
-            m_procOwnedEGLImages.erase(procIte);
+        }
+        // Clean up color buffers.
+        // A color buffer needs to be closed as many times as it is opened by
+        // the guest process, to give the correct reference count.
+        // (Note that a color buffer can be shared across guest processes.)
+        {
+            auto procIte = m_procOwnedColorBuffers.find(puid);
+            if (procIte != m_procOwnedColorBuffers.end()) {
+                for (auto cb : procIte->second) {
+                    closeColorBufferLocked(cb);
+                }
+                m_procOwnedColorBuffers.erase(procIte);
+            }
+        }
+
+        // Clean up EGLImage handles
+        {
+            auto procIte = m_procOwnedEGLImages.find(puid);
+            if (procIte != m_procOwnedEGLImages.end()) {
+                if (!procIte->second.empty()) {
+                    for (auto eglImg : procIte->second) {
+                        s_egl.eglDestroyImageKHR(
+                                m_eglDisplay,
+                                reinterpret_cast<EGLImageKHR>((HandleType)eglImg));
+                    }
+                }
+                m_procOwnedEGLImages.erase(procIte);
+            }
         }
     }
-
+    // Unbind before cleaning up contexts
     // Cleanup render contexts
     {
         auto procIte = m_procOwnedRenderContext.find(puid);
@@ -1250,6 +1265,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     m_lastPostedColorBuffer = p_colorbuffer;
 
     if (m_subWin) {
+        c->second.opened = true;
         GLuint tex = c->second.cb->scale();
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
@@ -1375,7 +1391,7 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevDrawSurf
     emugl::Mutex::AutoLock mutex(m_lock);
     // set up a context because some snapshot commands try using GL
-    ScopedBind scopedBind(this);
+    ScopedBind scopedBind(m_colorBufferHelper);
     // eglPreSaveContext labels all guest context textures to be saved
     // (textures created by the host are not saved!)
     // eglSaveAllImages labels all EGLImages (both host and guest) to be saved
@@ -1387,12 +1403,10 @@ void FrameBuffer::onSave(Stream* stream) {
         }
         s_egl.eglSaveAllImages(m_eglDisplay, stream);
     }
-    stream->putBe32(m_x);
-    stream->putBe32(m_y);
+    // Don't save subWindow's x/y/w/h here - those are related to the current
+    // emulator UI state, not guest state that we're saving.
     stream->putBe32(m_framebufferWidth);
     stream->putBe32(m_framebufferHeight);
-    stream->putBe32(m_windowWidth);
-    stream->putBe32(m_windowHeight);
     stream->putFloat(m_dpr);
 
     stream->putBe32(m_useSubWindow);
@@ -1418,6 +1432,7 @@ void FrameBuffer::onSave(Stream* stream) {
         s->putBe32(pair.second.second); // Color buffer handle.
     });
 
+    saveProcOwnedCollection(stream, m_procOwnedWindowSurfaces);
     saveProcOwnedCollection(stream, m_procOwnedColorBuffers);
     saveProcOwnedCollection(stream, m_procOwnedEGLImages);
     saveProcOwnedCollection(stream, m_procOwnedRenderContext);
@@ -1433,29 +1448,42 @@ void FrameBuffer::onSave(Stream* stream) {
 bool FrameBuffer::onLoad(Stream* stream) {
     emugl::Mutex::AutoLock mutex(m_lock);
     // cleanups
-    while (m_procOwnedColorBuffers.size()) {
-        cleanupProcGLObjects_locked(m_procOwnedColorBuffers.begin()->first);
-    }
-    while (m_procOwnedEGLImages.size()) {
-        cleanupProcGLObjects_locked(m_procOwnedEGLImages.begin()->first);
-    }
-    while (m_procOwnedRenderContext.size()) {
-        cleanupProcGLObjects_locked(m_procOwnedRenderContext.begin()->first);
-    }
+    {
+        ScopedBind scopedBind(m_colorBufferHelper);
+        if (m_procOwnedColorBuffers.empty()
+                && m_procOwnedEGLImages.empty()
+                && m_procOwnedRenderContext.empty()
+                && (!m_contexts.empty() || !m_windows.empty()
+                || !m_colorbuffers.empty())) {
+            // we are likely on a legacy system image, which does not have process
+            // owned objects. We need to force cleanup everything
+            m_contexts.clear();
+            m_windows.clear();
+            m_colorbuffers.clear();
+        }
+        while (m_procOwnedWindowSurfaces.size()) {
+            cleanupProcGLObjects_locked(m_procOwnedWindowSurfaces.begin()->first);
+        }
+        while (m_procOwnedColorBuffers.size()) {
+            cleanupProcGLObjects_locked(m_procOwnedColorBuffers.begin()->first);
+        }
+        while (m_procOwnedEGLImages.size()) {
+            cleanupProcGLObjects_locked(m_procOwnedEGLImages.begin()->first);
+        }
+        while (m_procOwnedRenderContext.size()) {
+            cleanupProcGLObjects_locked(m_procOwnedRenderContext.begin()->first);
+        }
 
-    assert(m_contexts.empty());
-    assert(m_windows.empty());
-    assert(m_colorbuffers.empty());
-    if (s_egl.eglLoadAllImages) {
-        ScopedBind scopedBind(this);
-        s_egl.eglLoadAllImages(m_eglDisplay, stream);
+        assert(m_contexts.empty());
+        assert(m_windows.empty());
+        assert(m_colorbuffers.empty());
+        if (s_egl.eglLoadAllImages) {
+            s_egl.eglLoadAllImages(m_eglDisplay, stream);
+        }
     }
-    m_x = stream->getBe32();
-    m_y = stream->getBe32();
+    // See comment about subwindow position in onSave().
     m_framebufferWidth = stream->getBe32();
     m_framebufferHeight = stream->getBe32();
-    m_windowWidth = stream->getBe32();
-    m_windowHeight = stream->getBe32();
     m_dpr = stream->getFloat();
     // TODO: resize the window
 
@@ -1492,6 +1520,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
         return { handle, { std::move(window), colorBufferHandle } };
     });
 
+    loadProcOwnedCollection(stream, &m_procOwnedWindowSurfaces);
     loadProcOwnedCollection(stream, &m_procOwnedColorBuffers);
     loadProcOwnedCollection(stream, &m_procOwnedEGLImages);
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);

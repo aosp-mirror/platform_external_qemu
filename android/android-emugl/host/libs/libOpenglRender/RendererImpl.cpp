@@ -202,13 +202,17 @@ void RendererImpl::pauseAllPreSave() {
 }
 
 void RendererImpl::resumeAll() {
-    android::base::AutoLock lock(mChannelsLock);
-    if (mStopped) {
-        return;
+    {
+        android::base::AutoLock lock(mChannelsLock);
+        if (mStopped) {
+            return;
+        }
+        for (const auto& c : mChannels) {
+            c->renderThread()->resume();
+        }
     }
-    for (const auto& c : mChannels) {
-        c->renderThread()->resume();
-    }
+
+    repaintOpenGLDisplay();
 }
 
 void RendererImpl::save(android::base::Stream* stream) {

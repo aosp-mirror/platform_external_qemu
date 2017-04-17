@@ -375,7 +375,7 @@ void slirp_init_custom_dns_servers(Slirp *slirp,
         case AF_INET6:
             if (slirp->host_dns_count < SLIRP_MAX_DNS_SERVERS) {
                 slirp->host_dns[slirp->host_dns_count++] = dns[n];
-                DEBUG_ARGS(("Custom DNS server #%d: %s\n",
+                DEBUG_ARGS((dfd, "Custom DNS server #%d: %s\n",
                             slirp->host_dns_count - 1,
                             sockaddr_to_string(&dns[n])));
             }
@@ -1214,7 +1214,9 @@ int slirp_add_exec(Slirp *slirp, int do_pty, const void *args,
 ssize_t slirp_send(struct socket *so, const void *buf, size_t len, int flags)
 {
     if (so->s == -1 && so->extra) {
-        qemu_chr_fe_write(so->extra, buf, len);
+        /* XXX this blocks entire thread. Rewrite to use
+         * qemu_chr_fe_write and background I/O callbacks */
+        qemu_chr_fe_write_all(so->extra, buf, len);
         return len;
     }
 

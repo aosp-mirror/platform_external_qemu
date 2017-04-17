@@ -72,6 +72,7 @@ CFG_PARAM( ramdisk, "<file>", "ramdisk image (default <system>/ramdisk.img" )
 CFG_PARAM( image,   "<file>", "obsolete, use -system <file> instead" )
 CFG_PARAM( initdata, "<file>", "same as '-init-data <file>'" )
 CFG_PARAM( data,     "<file>", "data image (default <datadir>/userdata-qemu.img" )
+CFG_PARAM( logcat_output, "<file>", "output file of logcat(default none)" )
 CFG_PARAM( partition_size, "<size>", "system/data partition size in MBs" )
 CFG_PARAM( cache,    "<file>", "cache partition image (default is temporary file)" )
 OPT_PARAM( cache_size, "<size>", "cache partition size in MBs" )
@@ -147,6 +148,7 @@ OPT_PARAM( tcpdump, "<file>", "capture network packets to file" )
 OPT_PARAM( bootchart, "<timeout>", "enable bootcharting")
 
 OPT_PARAM( charmap, "<file>", "use specific key character map")
+OPT_PARAM( studio_params, "<file>", "used by Android Studio to provide parameters" )
 
 OPT_LIST(  prop, "<name>=<value>", "set system property on boot")
 

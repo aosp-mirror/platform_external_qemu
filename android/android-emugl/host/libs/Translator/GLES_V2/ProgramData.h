@@ -25,7 +25,7 @@
 
 struct GLUniformDesc {
     GLUniformDesc() = default;
-    GLUniformDesc(GLint location, GLsizei count, GLboolean transpose,
+    GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
             GLenum type, GLsizei size, unsigned char* val);
     GLUniformDesc(android::base::Stream* stream);
     GLUniformDesc(GLUniformDesc&&) = default;
@@ -35,6 +35,8 @@ struct GLUniformDesc {
     GLboolean mTranspose = GL_FALSE;
     GLenum mType = (GLenum)0;
     std::vector<unsigned char> mVal;
+
+    std::string mName = {};
 
     void onSave(android::base::Stream* stream) const;
 };
@@ -89,10 +91,6 @@ public:
     bool getDeleteStatus() const { return DeleteStatus; }
     void setDeleteStatus(bool status) { DeleteStatus = status; }
 
-    // TODO: query uniforms when needed instead of storing them for performance
-    // and correctness? (glGetActiveUniform)
-    void addUniform(GLuint loc, GLUniformDesc&& uniform);
-
     // boundAttribLocs stores the attribute locations assigned by
     // glBindAttribLocation.
     // It will take effect after glLinkProgram.
@@ -113,5 +111,8 @@ private:
     bool    DeleteStatus;
     GLuint  ProgramName;
     bool needRestore = false;
+    std::unordered_map<GLuint, GLuint> mUniformBlockBinding;
+    std::vector<std::string> mTransformFeedbacks;
+    GLenum mTransformFeedbackBufferMode = 0;
 };
 #endif

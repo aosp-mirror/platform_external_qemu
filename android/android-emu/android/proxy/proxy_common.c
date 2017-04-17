@@ -268,7 +268,6 @@ proxy_manager_init(void)
     atexit( proxy_manager_atexit );
 }
 
-
 extern int
 proxy_manager_add_service( ProxyService*  service )
 {
@@ -277,6 +276,9 @@ proxy_manager_add_service( ProxyService*  service )
 
     if (!s_init)
         proxy_manager_init();
+    else
+        //try change proxy on the fly
+        proxy_manager_atexit();
 
     s_services[s_num_services++] = service;
     return 0;

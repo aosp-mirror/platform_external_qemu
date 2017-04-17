@@ -34,6 +34,7 @@
 #include "android/main-common.h"
 #include "android/main-common-ui.h"
 #include "android/main-kernel-parameters.h"
+#include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/process_setup.h"
@@ -215,7 +216,7 @@ static std::string getNthParentDir(const char* path, size_t n) {
 
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
                              AndroidHwConfig* hw, ImageType type, bool writable,
-                             int apiLevel, const char* avdContentPath) {
+                             int apiLevel, AvdInfo* avd) {
     int n   = *argsPosition;
     int idx = *driveIndex;
 
@@ -234,7 +235,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
     StringView filePath;
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            filePath = avdContentPath;
+            filePath = avdInfo_getContentPath(avd);
             driveParam += StringFormat("index=%d,id=system,file=%s"
                                        PATH_SEP "system.img.qcow2",
                                         idx++, filePath);
@@ -279,7 +280,8 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             }
             break;
         case IMAGE_TYPE_ENCRYPTION_KEY:
-            if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) &&
+            if ((android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
+                avdInfo_isEncryptionEnabledInBuild(avd)) &&
                 hw->disk_encryptionKeyPartition_path != NULL && strcmp(hw->disk_encryptionKeyPartition_path, "")) {
                 filePath = hw->disk_encryptionKeyPartition_path;
                 driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
@@ -311,8 +313,11 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     // Move the disk operations into the dedicated 'disk thread', and
     // enable modern notification mode for the hosts that support it (Linux).
-    deviceParam += ",iothread=disk-iothread";
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
+#ifdef CONFIG_LINUX
+    // eventfd is required for this, and only available on kvm.
+    deviceParam += ",iothread=disk-iothread";
+#endif
     deviceParam += ",modern-pio-notify";
 #endif
 
@@ -719,7 +724,8 @@ extern "C" int main(int argc, char **argv) {
     }
 
     // create encryptionkey.img file if needed
-    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
+            avdInfo_isEncryptionEnabledInBuild(avd)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
                 derror("Encryption is requested but failed to create encrypt partition.");
@@ -861,8 +867,7 @@ extern "C" int main(int argc, char **argv) {
         bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
                     android_op_writable_system : true;
         makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s], writable, apiLevel,
-                         avdInfo_getContentPath(avd));
+                         kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
     }
 
     // Network
@@ -938,6 +943,7 @@ extern "C" int main(int argc, char **argv) {
             gQAndroidEmulatorWindowAgent,
             gQAndroidFingerAgent,
             gQAndroidLocationAgent,
+            gQAndroidHttpProxyAgent,
             gQAndroidSensorsAgent,
             gQAndroidTelephonyAgent,
             gQAndroidUserEventAgent,
@@ -957,65 +963,56 @@ extern "C" int main(int argc, char **argv) {
             return 1;
         }
 
-        // Should enable OpenGL ES 3.x?
-        if (!android::featurecontrol::isEnabled(android::featurecontrol::GLESDynamicVersion) &&
-            skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
-            android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLESDynamicVersion, true);
-        }
-
         // Use advancedFeatures to override renderer if the user has selected
         // in UI that the preferred renderer is "autoselected".
         WinsysPreferredGlesBackend uiPreferredGlesBackend =
             skin_winsys_get_preferred_gles_backend();
 
-        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceANGLE)) {
-            uiPreferredGlesBackend =
-                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+        // Feature flags-related last-microsecond renderer changes
+        {
+            // Should enable OpenGL ES 3.x?
+            if (!android::featurecontrol::isEnabled(android::featurecontrol::GLESDynamicVersion) &&
+                    skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
+                android::featurecontrol::setEnabledOverride(
+                        android::featurecontrol::GLESDynamicVersion, true);
+            }
+
+            if (android::featurecontrol::isEnabled(android::featurecontrol::ForceANGLE)) {
+                uiPreferredGlesBackend =
+                    skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+            }
+
+            if (android::featurecontrol::isEnabled(android::featurecontrol::ForceSwiftshader)) {
+                uiPreferredGlesBackend =
+                    skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+            }
+
+            // Features to disable or enable depending on rendering backend
+            // and gpu make/model/version
+            /* Disable the GLAsyncSwap for ANGLE so far */
+            bool shouldDisableAsyncSwap = false;
+            shouldDisableAsyncSwap |= (opts->gpu && !strncmp(opts->gpu, "angle", 5));
+            shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
+
+            if (shouldDisableAsyncSwap &&
+                    android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
+                android::featurecontrol::setEnabledOverride(
+                        android::featurecontrol::GLAsyncSwap, false);
+            }
+
         }
 
-        if (android::featurecontrol::isEnabled(android::featurecontrol::ForceSwiftshader)) {
-            uiPreferredGlesBackend =
-                skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
-        }
-
-        doGpuConfig(avd, opts, hw, uiPreferredGlesBackend);
-
-        // Kernel command-line parameters.
-        AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
-        if (!strcmp(hw->hw_gpu_mode, "guest")) {
-            glesMode = kAndroidGlesEmulationGuest;
-        } else if (hw->hw_gpu_enabled) {
-            glesMode = kAndroidGlesEmulationHost;
-        }
-
-        uint64_t glesFramebufferCMA = 0ULL;
-        if ((glesMode == kAndroidGlesEmulationGuest) ||
-                (opts->gpu && !strcmp(opts->gpu, "guest")) ||
-                !hw->hw_gpu_enabled) {
-            // Set CMA (continguous memory allocation) to values that depend on
-            // the desired resolution.
-            // We will assume a double buffered 32-bit framebuffer
-            // in the calculation.
-            int framebuffer_width = hw->hw_lcd_width;
-            int framebuffer_height = hw->hw_lcd_height;
-            uint64_t bytes = framebuffer_width * framebuffer_height * 4;
-            const uint64_t one_MB = 1024ULL * 1024;
-            glesFramebufferCMA = (2 * bytes + one_MB - 1) / one_MB;
-            VERBOSE_PRINT(init, "Adjusting Contiguous Memory Allocation "
-                    "of %dx%d framebuffer for software renderer to %"
-                    PRIu64 "MB.", framebuffer_width, framebuffer_height,
-                    glesFramebufferCMA);
-        } else {
-            VERBOSE_PRINT(init, "Using default value for kernel "
-                    "Contiguous Memory Allocation.");
-        }
+        RendererConfig rendererConfig;
+        configAndStartRenderer(
+            avd, opts, hw, uiPreferredGlesBackend,
+            &rendererConfig);
 
         char* kernel_parameters = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters, glesMode, glesFramebufferCMA,
-                true  // isQemu2
-                );
+                hw->kernel_parameters,
+                rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
+                rendererConfig.glFramebufferSizeBytes,
+                true  /* isQemu2 */);
 
         if (!kernel_parameters) {
             return 1;
@@ -1035,19 +1032,6 @@ extern "C" int main(int argc, char **argv) {
         }
         args[n++] = "-append";
         args[n++] = ASTRDUP(append_arg.c_str());
-
-        // Features to disable or enable depending on rendering backend
-        // and gpu make/model/version
-        /* Disable the GLAsyncSwap for ANGLE so far */
-        bool shouldDisableAsyncSwap = false;
-        shouldDisableAsyncSwap |= (opts->gpu && !strncmp(opts->gpu, "angle", 5));
-        shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
-
-        if (shouldDisableAsyncSwap &&
-            android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
-            android::featurecontrol::setEnabledOverride(
-                    android::featurecontrol::GLAsyncSwap, false);
-        }
     }
 
     /* Generate a hardware-qemu.ini for this AVD. The real hardware

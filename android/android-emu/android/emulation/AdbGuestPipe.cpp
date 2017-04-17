@@ -111,6 +111,9 @@ void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
     // We have one connection from adb sever, stop listening for now.
     mHostAgent->stopListening();
     mActivePipe->onHostConnection(std::move(socket));
+    //remove Pipe
+    mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), mActivePipe), mPipes.end());
+    mActivePipe = nullptr;
 }
 
 void AdbGuestPipe::Service::onPipeOpen(AdbGuestPipe* pipe) {
@@ -119,18 +122,14 @@ void AdbGuestPipe::Service::onPipeOpen(AdbGuestPipe* pipe) {
 
 void AdbGuestPipe::Service::onPipeClose(AdbGuestPipe* pipe) {
     mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
-    if (mActivePipe == pipe) {
-        mActivePipe = nullptr;
+    if (mPipes.empty()) {
         mHostAgent->stopListening();
-        searchForActivePipe();
     }
     delete pipe;
 }
 
 void AdbGuestPipe::Service::searchForActivePipe() {
-    if (mActivePipe) {
-        return;
-    }
+    CHECK(mActivePipe == nullptr);
     const auto pipeIt = std::find_if(
             mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
                 return pipe->mState == State::WaitingForHostAdbConnection;
@@ -145,6 +144,7 @@ void AdbGuestPipe::Service::searchForActivePipe() {
         // instance because it's listening on a 'non-standard' ADB port.
         mHostAgent->notifyServer();
     }
+    CHECK(mActivePipe != nullptr);
 }
 
 AdbGuestPipe::~AdbGuestPipe() {
@@ -269,7 +269,9 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
             },
             this));
 
-    waitForHostConnection();
+    DD("%s: [%p] sending reply", __func__, this);
+    setReply("ok", State::SendingAcceptReplyOk);
+    signalWake(PIPE_WAKE_READ);
 }
 
 // static
@@ -509,19 +511,11 @@ void AdbGuestPipe::setExpectedGuestCommand(StringView command, State newState) {
 }
 
 void AdbGuestPipe::waitForHostConnection() {
-    if (mHostSocket.get()) {
-        // A host connection already exists! Send the 'ok' reply back to
-        // the guest.
-        DD("%s: [%p] sending reply", __func__, this);
-        setReply("ok", State::SendingAcceptReplyOk);
-        signalWake(PIPE_WAKE_READ);
-    } else {
-        // No host connection yet. The guest is still waiting for the 'ok'
-        // reply.
-        DD("%s: [%p] waiting for host connection", __func__, this);
-        mState = State::WaitingForHostAdbConnection;
-        service()->searchForActivePipe();
-    }
+    // No host connection yet. The guest is still waiting for the 'ok'
+    // reply.
+    DD("%s: [%p] waiting for host connection", __func__, this);
+    mState = State::WaitingForHostAdbConnection;
+    service()->searchForActivePipe();
 }
 
 }  // namespace emulation

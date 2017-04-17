@@ -62,41 +62,7 @@ void unbindFbo() {
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-// Helper class to use a ColorBuffer::Helper context.
-// Usage is pretty simple:
-//
-//     {
-//        ScopedHelperContext context(m_helper);
-//        if (!context.isOk()) {
-//            return false;   // something bad happened.
-//        }
-//        .... do something ....
-//     }   // automatically calls m_helper->teardownContext();
-//
-class ScopedHelperContext {
-public:
-    ScopedHelperContext(ColorBuffer::Helper* helper) : mHelper(helper) {
-        if (!helper->setupContext()) {
-            mHelper = NULL;
-        }
-    }
-
-    bool isOk() const { return mHelper != NULL; }
-
-    ~ScopedHelperContext() { release(); }
-
-    void release() {
-        if (mHelper) {
-            mHelper->teardownContext();
-            mHelper = NULL;
-        }
-    }
-
-private:
-    ColorBuffer::Helper* mHelper;
-};
-
-}  // namespace
+}
 
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
@@ -138,7 +104,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     }
     memset(initialImage.get(), 0xff, bufsize);
 
-    ScopedHelperContext context(helper);
+    RecursiveScopedHelperContext context(helper);
     if (!context.isOk()) {
         return NULL;
     }
@@ -208,7 +174,7 @@ ColorBuffer::ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper)
     : m_display(display), m_helper(helper), mHndl(hndl) {}
 
 ColorBuffer::~ColorBuffer() {
-    ScopedHelperContext context(m_helper);
+    RecursiveScopedHelperContext context(m_helper);
 
     if (m_blitEGLImage) {
         s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
@@ -240,7 +206,7 @@ void ColorBuffer::readPixels(int x,
                              GLenum p_format,
                              GLenum p_type,
                              void* pixels) {
-    ScopedHelperContext context(m_helper);
+    RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
@@ -258,7 +224,7 @@ void ColorBuffer::subUpdate(int x,
                             GLenum p_format,
                             GLenum p_type,
                             void* pixels) {
-    ScopedHelperContext context(m_helper);
+    RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
@@ -353,7 +319,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
 
-    ScopedHelperContext context(m_helper);
+    RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return false;
     }
@@ -414,7 +380,7 @@ bool ColorBuffer::bindToRenderbuffer() {
 }
 
 GLuint ColorBuffer::scale() {
-    ScopedHelperContext context(m_helper);
+    RecursiveScopedHelperContext context(m_helper);
     return m_resizer->update(m_tex);
 }
 
@@ -424,7 +390,7 @@ bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
 }
 
 void ColorBuffer::readback(unsigned char* img) {
-    ScopedHelperContext context(m_helper);
+    RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
     }
@@ -471,7 +437,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
     assert(has_eglimage_texture_2d);
     assert(eglImage && blitEGLImage);
 
-    ScopedHelperContext context(helper);
+    RecursiveScopedHelperContext context(helper);
     if (!context.isOk()) {
         return NULL;
     }

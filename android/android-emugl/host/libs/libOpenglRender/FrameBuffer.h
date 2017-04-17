@@ -38,9 +38,14 @@
 struct ColorBufferRef {
     ColorBufferPtr cb;
     uint32_t refcount;  // number of client-side references
+    bool opened; // tracks whether opened at least once. In O+,
+    // color buffers can be created/closed immediately,
+    // but then registered (opened) afterwards
 };
 
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
+typedef std::unordered_set<HandleType> WindowSurfaceSet;
+typedef std::unordered_map<uint64_t, WindowSurfaceSet> ProcOwnedWindowSurfaces;
 
 typedef std::unordered_map<HandleType, RenderContextPtr> RenderContextMap;
 typedef std::unordered_set<HandleType> RenderContextSet;
@@ -192,6 +197,7 @@ public:
     // Destroy a given WindowSurface instance. |p_surcace| is its handle
     // value as returned by createWindowSurface().
     void DestroyWindowSurface(HandleType p_surface);
+    void DestroyWindowSurfaceLocked(HandleType p_surface);
 
     // Increment the reference count associated with a given ColorBuffer
     // instance. |p_colorbuffer| is its handle value as returned by
@@ -203,7 +209,7 @@ public:
     // createColorBuffer(). Note that if the reference count reaches 0,
     // the instance is destroyed automatically.
     void closeColorBuffer(HandleType p_colorbuffer);
-    void closeColorBufferLocked(HandleType p_colorbuffer);
+    bool closeColorBufferLocked(HandleType p_colorbuffer);
 
     void cleanupProcGLObjects(uint64_t puid);
     // Equivalent for eglMakeCurrent() for the current display.
@@ -422,6 +428,7 @@ private:
 
     // The host associates color buffers with guest processes for memory
     // cleanup. Guest processes are identified with a host generated unique ID.
+    ProcOwnedWindowSurfaces m_procOwnedWindowSurfaces;
     ProcOwnedColorBuffers m_procOwnedColorBuffers;
     ProcOwnedEGLImages m_procOwnedEGLImages;
     ProcOwnedRenderContexts m_procOwnedRenderContext;

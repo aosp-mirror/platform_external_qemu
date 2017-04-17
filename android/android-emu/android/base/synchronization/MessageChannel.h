@@ -77,6 +77,11 @@ protected:
     // One still needs to call afterWrite() anyway.
     Optional<size_t> beforeTryRead();
 
+    // Same as beforeRead(), but returns an empty optional if no data arrived
+    // by the |wallTimeUs| absolute time. One still needs to call
+    // afterWrite() anyway.
+    Optional<size_t> beforeTimedRead(System::Duration wallTimeUs);
+
     // To be called after reading a fixed-size message from the channel (which
     // must happen after beforeRead() or beforeTryRead()).
     // |success| must be true to indicate that a message was read, or false
@@ -180,6 +185,17 @@ public:
         }
         afterRead(pos);
         return pos;
+    }
+
+    Optional<T> timedReceive(System::Duration wallTimeUs) {
+        const auto pos = beforeTimedRead(wallTimeUs);
+        if (pos && !isStoppedLocked()) {
+            Optional<T> res(std::move(mItems[*pos]));
+            afterRead(true);
+            return res;
+        }
+        afterRead(false);
+        return {};
     }
 
     constexpr size_t capacity() const { return CAPACITY; }

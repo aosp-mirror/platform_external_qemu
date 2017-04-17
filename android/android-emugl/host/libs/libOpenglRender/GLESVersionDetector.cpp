@@ -46,6 +46,12 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch() {
     }
 
 
+    // TODO: Modify when CTS compliant for OpenGL ES 3.1
+    if (res >= GLES_DISPATCH_MAX_VERSION_3_1 &&
+        emugl_feature_is_enabled(android::featurecontrol::PlayStoreImage)) {
+        res = GLES_DISPATCH_MAX_VERSION_3_0;
+    }
+
     int maj = 2; int min = 0;
     switch (res) {
         case GLES_DISPATCH_MAX_VERSION_2:

@@ -16,6 +16,8 @@
 
 #include "GLESv2Context.h"
 
+#include "android/base/files/StreamSerializing.h"
+#include "SamplerData.h"
 #include "ShaderParser.h"
 #include "ProgramData.h"
 
@@ -83,10 +85,17 @@ void GLESv2Context::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-void GLESv2Context::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+void GLESv2Context::initDefaultFBO(
+        GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+        GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthstencilFormat, GLint readMultisamples,
+        GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
     GLEScontext::initDefaultFBO(
             width, height, colorFormat, depthstencilFormat, multisamples,
-            eglSurfaceRBColorId, eglSurfaceRBDepthId);
+            eglSurfaceRBColorId, eglSurfaceRBDepthId,
+            readWidth, readHeight, readColorFormat, readDepthstencilFormat, readMultisamples,
+            eglReadSurfaceRBColorId, eglReadSurfaceRBDepthId
+            );
 }
 
 GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
@@ -98,18 +107,25 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
         stream->read(m_attribute0value, sizeof(m_attribute0value));
         m_attribute0valueChanged = stream->getByte();
         m_att0ArrayLength = stream->getBe32();
-        stream->read(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
+        if (m_att0ArrayLength != 0) {
+            m_att0Array.reset(new GLfloat[4 * m_att0ArrayLength]);
+            stream->read(m_att0Array.get(), sizeof(GLfloat) * 4 * m_att0ArrayLength);
+        }
         m_att0NeedsDisable = stream->getByte();
         m_useProgram = stream->getBe32();
+        android::base::loadCollection(stream, &m_bindSampler,
+                [](android::base::Stream* stream) {
+                    GLuint idx = stream->getBe32();
+                    GLuint val = stream->getBe32();
+                    return std::make_pair(idx, val);
+                });
     } else {
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
     }
 }
 
-GLESv2Context::~GLESv2Context()
-{
-    delete[] m_att0Array;
+GLESv2Context::~GLESv2Context() {
 }
 
 void GLESv2Context::onSave(android::base::Stream* stream) const {
@@ -117,9 +133,15 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
     stream->write(m_attribute0value, sizeof(m_attribute0value));
     stream->putByte(m_attribute0valueChanged);
     stream->putBe32(m_att0ArrayLength);
-    stream->write(m_att0Array, sizeof(GLfloat) * 4 * m_att0ArrayLength);
+    stream->write(m_att0Array.get(), sizeof(GLfloat) * 4 * m_att0ArrayLength);
     stream->putByte(m_att0NeedsDisable);
     stream->putBe32(m_useProgram);
+    android::base::saveCollection(stream, m_bindSampler,
+            [](android::base::Stream* stream,
+                const std::pair<const GLenum, GLuint>& item) {
+                stream->putBe32(item.first);
+                stream->putBe32(item.second);
+            });
 }
 
 void GLESv2Context::postLoadRestoreCtx() {
@@ -131,22 +153,101 @@ void GLESv2Context::postLoadRestoreCtx() {
     dispatcher.glUseProgram(globalProgramName);
 
     // vertex attribute pointers
-    // TODO: GLES3: support multiple VAO
-    // TODO: snapshot glVertexAttrib1f and its friends
-    for (const auto& vao : m_currVaoState) {
-        const GLESpointer* glesPointer = vao.second;
-        // non vertex buffer objects (vbo) are set up right before draw calls
-        // so we only set up vbo here
-        if (glesPointer->isVBO()) {
-            dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
-                    glesPointer->getBufferName());
-            dispatcher.glVertexAttribPointer(vao.first, glesPointer->getSize(),
-                    glesPointer->getType(), glesPointer->isNormalize(),
-                    glesPointer->getStride(),
-                    (GLvoid*)(size_t)glesPointer->getBufferOffset());
+    for (const auto& vaoIte : m_vaoStateMap) {
+        if (m_glesMajorVersion >= 3) {
+            if (vaoIte.first != 0) {
+                genVAOName(vaoIte.first, false);
+            }
+            dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
-        if (glesPointer->isEnable()) {
-            dispatcher.glEnableVertexAttribArray(vao.first);
+        for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
+            const GLESpointer* glesPointer = glesPointerIte.second;
+            // attribute 0 are bound right before draw, no need to bind it here
+            if (glesPointer->getAttribType() == GLESpointer::VALUE
+                    && glesPointerIte.first == 0) {
+                break;
+            }
+            switch (glesPointer->getAttribType()) {
+                case GLESpointer::BUFFER:
+                    dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
+                            glesPointer->getBufferName());
+                    dispatcher.glVertexAttribPointer(glesPointerIte.first,
+                            glesPointer->getSize(),
+                            glesPointer->getType(), glesPointer->isNormalize(),
+                            glesPointer->getStride(),
+                            (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                    break;
+                case GLESpointer::VALUE:
+                    switch (glesPointer->getValueCount()) {
+                        case 1:
+                            dispatcher.glVertexAttrib1fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                        case 2:
+                            dispatcher.glVertexAttrib2fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                        case 3:
+                            dispatcher.glVertexAttrib3fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                        case 4:
+                            dispatcher.glVertexAttrib4fv(glesPointerIte.first,
+                                    glesPointer->getValues());
+                            break;
+                    }
+                    break;
+                case GLESpointer::ARRAY:
+                    // client arrays are set up right before draw calls
+                    // so we do nothing here
+                    break;
+            }
+            if (glesPointer->isEnable()) {
+                dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+            }
+        }
+    }
+    if (m_glesMajorVersion >= 3) {
+        dispatcher.glBindVertexArray(m_currVaoState.vaoId());
+        auto bindBufferRangeFunc =
+                [this](GLenum target,
+                    const std::vector<BufferBinding>& bufferBindings) {
+                    for (unsigned int i = 0; i < bufferBindings.size(); i++) {
+                        const BufferBinding& bd = bufferBindings[i];
+                        GLuint globalName = this->shareGroup()->getGlobalName(
+                                NamedObjectType::VERTEXBUFFER,
+                                bd.buffer);
+                        this->dispatcher().glBindBufferRange(target,
+                                i, globalName, bd.offset, bd.size);
+                    }
+                };
+        bindBufferRangeFunc(GL_TRANSFORM_FEEDBACK_BUFFER,
+                m_indexedTransformFeedbackBuffers);
+        bindBufferRangeFunc(GL_UNIFORM_BUFFER,
+                m_indexedUniformBuffers);
+        bindBufferRangeFunc(GL_ATOMIC_COUNTER_BUFFER,
+                m_indexedAtomicCounterBuffers);
+        bindBufferRangeFunc(GL_SHADER_STORAGE_BUFFER,
+                m_indexedShaderStorageBuffers);
+        // buffer bindings
+        auto bindBuffer = [this](GLenum target, GLuint buffer) {
+            this->dispatcher().glBindBuffer(target,
+                    m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer));
+        };
+        bindBuffer(GL_COPY_READ_BUFFER, m_copyReadBuffer);
+        bindBuffer(GL_COPY_WRITE_BUFFER, m_copyWriteBuffer);
+        bindBuffer(GL_PIXEL_PACK_BUFFER, m_pixelPackBuffer);
+        bindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pixelUnpackBuffer);
+        bindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_transformFeedbackBuffer);
+        bindBuffer(GL_UNIFORM_BUFFER, m_uniformBuffer);
+        bindBuffer(GL_ATOMIC_COUNTER_BUFFER, m_atomicCounterBuffer);
+        bindBuffer(GL_DISPATCH_INDIRECT_BUFFER, m_dispatchIndirectBuffer);
+        bindBuffer(GL_DRAW_INDIRECT_BUFFER, m_drawIndirectBuffer);
+        bindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBuffer);
+        for (const auto& bindSampler : m_bindSampler) {
+            dispatcher.glBindSampler(bindSampler.first,
+                    shareGroup()->getGlobalName(NamedObjectType::SAMPLER,
+                        bindSampler.second));
         }
     }
 
@@ -161,6 +262,8 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
         case NamedObjectType::FRAMEBUFFER:
         case NamedObjectType::RENDERBUFFER:
             return GLEScontext::loadObject(type, localName, stream);
+        case NamedObjectType::SAMPLER:
+            return ObjectDataPtr(new SamplerData(stream));
         case NamedObjectType::SHADER_OR_PROGRAM:
             // load the first bit to see if it is a program or shader
             switch (stream->getByte()) {
@@ -176,6 +279,11 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
         default:
             return nullptr;
     }
+}
+
+void GLESv2Context::setAttribValue(int idx, unsigned int count,
+        const GLfloat* val) {
+    m_currVaoState[idx]->setValue(count, val);
 }
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)
@@ -205,20 +313,21 @@ void GLESv2Context::validateAtt0PreDraw(unsigned int count)
     }
 
     if (count > m_att0ArrayLength) {
-        delete [] m_att0Array;
         const unsigned newLen = std::max(count, 2 * m_att0ArrayLength);
-        m_att0Array = new GLfloat[4 * newLen];
+        m_att0Array.reset(new GLfloat[4 * newLen]);
         m_att0ArrayLength = newLen;
         m_attribute0valueChanged = true;
     }
     if (m_attribute0valueChanged) {
         for(unsigned int i = 0; i<m_att0ArrayLength; i++) {
-            memcpy(m_att0Array+i*4, m_attribute0value, sizeof(m_attribute0value));
+            memcpy(m_att0Array.get()+i*4, m_attribute0value,
+                    sizeof(m_attribute0value));
         }
         m_attribute0valueChanged = false;
     }
 
-    s_glDispatch.glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, m_att0Array);
+    s_glDispatch.glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0,
+            m_att0Array.get());
     s_glDispatch.glEnableVertexAttribArray(0);
 
     m_att0NeedsDisable = true;
@@ -239,9 +348,11 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
     for ( it=m_currVaoState.begin() ; it != m_currVaoState.end(); ++it) {
         GLenum array_id = (*it).first;
         GLESpointer* p = (*it).second;
-        if (!p->isEnable()) continue;
+        if (!p->isEnable() || p->getAttribType() == GLESpointer::VALUE) {
+            continue;
+        }
 
-        setupArr(p->getData(),
+        setupArr(p->getArrayData(),
                  array_id,
                  p->getType(),
                  p->getSize(),
@@ -275,10 +386,13 @@ void GLESv2Context::setVertexAttribFormat(GLuint attribindex, GLint size, GLenum
     m_currVaoState[attribindex]->setFormat(size, type, normalized == GL_TRUE ? true : false, reloffset, isInt);
 }
 
+void GLESv2Context::setBindSampler(GLuint unit, GLuint sampler) {
+    m_bindSampler[unit] = sampler;
+}
 
 bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
 
-    bool usingVBO = p->isVBO();
+    bool usingVBO = p->getAttribType() == GLESpointer::BUFFER;
     GLenum arrType = p->getType();
 
     /*
