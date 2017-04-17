@@ -18,6 +18,7 @@
 #include "android/emulator-window.h"
 #include "android/skin/qt/qt-settings.h"
 
+#include <QFile>
 #include <QSettings>
 
 void SettingsPage::initProxy() {
@@ -48,9 +49,22 @@ void SettingsPage::initProxy() {
     grayOutProxy();
 }
 
+void SettingsPage::proxyDtor() {
+    // Clean up.
+    // Try to delete the parameters file.
+    // (If we not given an agent, we didn't try
+    // to read it and we didn't delete it.)
+
+    EmulatorWindow* const ew = emulator_window_get();
+    if (ew && ew->opts && ew->opts->studio_params) {
+        QFile paramFile(ew->opts->studio_params);
+        (void)paramFile.remove();
+    }
+}
+
 void SettingsPage::setHttpProxyAgent(const QAndroidHttpProxyAgent* agent) {
     mHttpProxyAgent = agent;
-
+    getStudioProxyString();
     sendProxySettingsToAgent();
 }
 
@@ -161,8 +175,7 @@ void SettingsPage::sendProxySettingsToAgent() {
 
     if (mUi->set_useStudio->isChecked()) {
         // Use the settings from Android Studio
-        // TODO: jameskaye Read the actual settings from AS
-        mHttpProxyAgent->httpProxySet(nullptr);
+        mHttpProxyAgent->httpProxySet(mStudioProxyString.toStdString().c_str());
         return;
     }
 
@@ -173,31 +186,89 @@ void SettingsPage::sendProxySettingsToAgent() {
     }
 
     if (mUi->set_manualConfig->isChecked()) {
-        // Construct a string with our local settings:
-        // "userName:password@host:port"
-
-        QString host = mUi->set_hostName->text();
-        if (host.isEmpty()) {
-            // Without a host name, we cannot proxy.
-            mHttpProxyAgent->httpProxySet(nullptr);
-            return;
-        }
-        QString paramString = "";
+        QString user;
+        QString pass;
         if (mUi->set_proxyAuth->isChecked()) {
-            QString user = mUi->set_loginName->text();
-            if (!user.isEmpty()) {
-                paramString += user + ":";
-                QString pass = mUi->set_loginPassword->text();
-                if (!pass.isEmpty()) {
-                    paramString += pass;
-                }
-                paramString += "@";
-            }
+            user = mUi->set_loginName->text();
+            pass = mUi->set_loginPassword->text();
         }
-        int port = mUi->set_portNumber->value();
-        paramString += host + ":" + QString::number(port);
 
-        mHttpProxyAgent->httpProxySet(paramString.toStdString().c_str());
+        QString proxyString = proxyStringFromParts(mUi->set_hostName->text(),
+                                                   QString::number(mUi->set_portNumber->value()),
+                                                   user, pass);
+        mHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
         return;
     }
+}
+
+// If Android Studio gave us a file with HTTP Proxy
+// settings, read those into memory and delete the
+// file.
+void SettingsPage::getStudioProxyString() {
+    EmulatorWindow* const ew = emulator_window_get();
+    if (!ew || !ew->opts || !ew->opts->studio_params) {
+        // No file to read
+        return;
+    }
+
+    // Android Studio created a file for us
+    QFile paramFile(ew->opts->studio_params);
+    if (!paramFile.open(QFile::ReadOnly | QFile::Text)) {
+        // Open failure
+        // Try to clean up
+        (void)paramFile.remove();
+        ew->opts->studio_params = nullptr;
+        return;
+    }
+
+    QString host;
+    QString port;
+    QString username;
+    QString password;
+
+    while (!paramFile.atEnd()) {
+        QByteArray line = paramFile.readLine().trimmed();
+        int idx = line.indexOf("=");
+        if (idx > 0) {
+            QByteArray key = line.left(idx);
+            QByteArray value = line.right(line.length() - 1 - idx);
+            if (key == "http.proxyHost" ||
+                key == "https.proxyHost") {
+                host = value;
+            } else if (key == "http.proxyPort" ||
+                       key == "https.proxyPort") {
+                port =  value;
+            } else if (key == "proxy.authentication.username") {
+                username = value;
+            } else if (key == "proxy.authentication.password") {
+                password = value;
+            }
+        }
+    }
+    // Delete the file
+    (void)paramFile.remove();
+    ew->opts->studio_params = nullptr;
+
+    mStudioProxyString = proxyStringFromParts(host, port, username, password);
+}
+
+// Construct a string like "myname:password@host.com:80"
+QString SettingsPage:: proxyStringFromParts(QString hostName,
+                                            QString port,
+                                            QString userName,
+                                            QString password) {
+
+    if (hostName.isEmpty()) {
+        // Without a host name, we have nothing
+        return "";
+    }
+
+    QString proxyString = "";
+    if (!userName.isEmpty()) {
+        proxyString += userName + ":" + password + "@";
+    }
+
+    proxyString += hostName + ":" + port;
+
+    return proxyString;
 }
