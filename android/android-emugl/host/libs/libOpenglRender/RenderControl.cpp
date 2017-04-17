@@ -158,7 +158,9 @@ static constexpr android::base::StringView kAsyncSwapStr = "ANDROID_EMU_native_s
 // DMA version history:
 // "ANDROID_EMU_dma_v1": add dma device and rcUpdateColorBufferDMA and do
 // yv12 conversion on the GPU
-static constexpr android::base::StringView kDmaStr = "ANDROID_EMU_dma_v1";
+// static constexpr android::base::StringView kDmaStr = "ANDROID_EMU_dma_v1";
+// v2: read back as well
+static constexpr android::base::StringView kDmaStr = "ANDROID_EMU_dma_v2";
 
 // GLESDynamicVersion: up to 3.1 so far
 static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_gles_max_version_2";
@@ -666,6 +668,21 @@ static void rcReadColorBuffer(uint32_t colorBuffer,
     fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
 }
 
+static int rcReadColorBufferDMA(uint32_t colorBuffer,
+                                  GLint x, GLint y,
+                                  GLint width, GLint height,
+                                  GLenum format, GLenum type, void* pixels,
+                                  uint32_t pixels_size)
+{
+    FrameBuffer *fb = FrameBuffer::getFB();
+    if (!fb) {
+        return -1;
+    }
+
+    fb->readColorBuffer(colorBuffer, x, y, width, height, format, type, pixels);
+    return 0;
+}
+
 static int rcUpdateColorBuffer(uint32_t colorBuffer,
                                GLint x, GLint y,
                                GLint width, GLint height,
@@ -884,4 +901,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcSetPuid = rcSetPuid;
     dec->rcUpdateColorBufferDMA = rcUpdateColorBufferDMA;
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
+    dec->rcReadColorBufferDMA = rcReadColorBufferDMA;
 }

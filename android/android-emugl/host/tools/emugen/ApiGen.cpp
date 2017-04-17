@@ -365,6 +365,8 @@ int ApiGen::genEncoderHeader(const std::string &filename)
 
     fprintf(fp, "\t%s(IOStream *stream, ChecksumCalculator *checksumCalculator);\n", classname.c_str());
     fprintf(fp, "\tvirtual uint64_t lockAndWriteDma(void* data, uint32_t sz) { return 0; }\n");
+    fprintf(fp, "\tvirtual uint64_t readDmaPre() { return 0; }\n");
+    fprintf(fp, "\tvirtual void readDmaPost(void* data, uint32_t sz) { return; }\n");
     fprintf(fp, "};\n\n");
 
     fprintf(fp, "#endif  // GUARD_%s\n", classname.c_str());
@@ -447,7 +449,12 @@ static void writeVarEncodingExpression(Var& var, FILE* fp)
     if (var.isPointer()) {
         // encode a pointer header
         if (var.isDMA()) {
-            fprintf(fp, "\t*(uint64_t *)(ptr) = ctx->lockAndWriteDma(%s, __size_%s); ptr += 8;\n", varname, varname);
+            Var::PointerDir dir = var.pointerDir();
+            if (dir == Var::POINTER_IN) {
+                fprintf(fp, "\t*(uint64_t *)(ptr) = ctx->lockAndWriteDma(%s, __size_%s); ptr += 8;\n", varname, varname);
+            } else {
+                fprintf(fp, "\t*(uint64_t *)(ptr) = ctx->readDmaPre(); ptr += 8;\n");
+            }
         } else {
             fprintf(fp, "\t*(unsigned int *)(ptr) = __size_%s; ptr += 4;\n", varname);
 
@@ -778,8 +785,14 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                         indent = "\t\t";
                     }
 
-                    fprintf(fp, "%sstream->readback(%s, __size_%s);\n",
-                            indent, varname, varname);
+                    if (evars[j].isDMA()) {
+                        fprintf(fp, "\tstream->flush();\n");
+                        // fprintf(fp, "%sctx->readDmaPost(%s, __size_%s);\n", indent, varname, varname);
+                    } else {
+                        fprintf(fp, "%sstream->readback(%s, __size_%s);\n",
+                                indent, varname, varname);
+                    }
+
                     fprintf(fp, "%sif (useChecksum) checksumCalculator->addBuffer(%s, __size_%s);\n",
                             indent, varname, varname);
                     if (evars[j].nullAllowed()) {
@@ -1328,6 +1341,9 @@ R"(        // Do this on every iteration, as some commands may change the checks
                             fprintf(fp,
                                     "\t\t\tstream->unlockDma(var_%s_guest_paddr);\n",
                                     var_name);
+                            if (v->pointerDir() == Var::POINTER_OUT) {
+                                fprintf(fp, "\tstream->flush();\n");
+                            }
                         }
                     }
                 }
