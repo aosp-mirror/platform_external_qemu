@@ -39,10 +39,17 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
-void GLEScmContext::initDefaultFBO(GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples, GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+void GLEScmContext::initDefaultFBO(
+        GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+        GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthstencilFormat, GLint readMultisamples,
+        GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
     GLEScontext::initDefaultFBO(
             width, height, colorFormat, depthstencilFormat, multisamples,
-            eglSurfaceRBColorId, eglSurfaceRBDepthId);
+            eglSurfaceRBColorId, eglSurfaceRBDepthId,
+            readWidth, readHeight, readColorFormat, readDepthstencilFormat, readMultisamples,
+            eglReadSurfaceRBColorId, eglReadSurfaceRBDepthId
+            );
 }
 
 GLEScmContext::GLEScmContext(int maj, int min,
@@ -243,7 +250,7 @@ void GLEScmContext::drawPointsElems(GLESConversionArrays& arrs,GLsizei count,GLe
 
 bool GLEScmContext::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
 
-    bool usingVBO = p->isVBO();
+    bool usingVBO = p->getAttribType() == GLESpointer::BUFFER;
     GLenum arrType = p->getType();
     /*
      conversion is not necessary in the following cases:

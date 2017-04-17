@@ -287,7 +287,7 @@ APosixStatus path_copy_file_impl(const char*  dest, const char*  source) {
             return -1;
         }
         fs = _wopen(wideSrc, _O_RDONLY | _O_BINARY);
-        fd = _wopen(wideDest, _O_RDWR | _O_BINARY);
+        fd = _wopen(wideDest, _O_CREAT | _O_TRUNC | _O_RDWR | _O_BINARY);
     }
 #else  // !_WIN32
     const int fd = creat(dest, S_IRUSR | S_IWUSR);

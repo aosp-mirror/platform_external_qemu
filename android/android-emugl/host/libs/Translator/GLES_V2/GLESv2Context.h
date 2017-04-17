@@ -21,6 +21,8 @@
 #include <GLcommon/GLEScontext.h>
 #include <GLcommon/ShareGroup.h>
 
+#include <memory>
+
 // Extra desktop-specific OpenGL enums that we need to properly emulate OpenGL ES.
 #define GL_FRAMEBUFFER_SRGB 0x8DB9
 #define GL_TEXTURE_CUBE_MAP_SEAMLESS 0x884F
@@ -38,9 +40,11 @@ public:
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
     void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
     void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
+    void setBindSampler(GLuint unit, GLuint sampler);
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
 
+    void setAttribValue(int idx, unsigned int count, const GLfloat* val);
     // This whole att0 thing is about a incompatibility between GLES and OpenGL.
     // GLES allows a vertex shader attribute to be in location 0 and have a
     // current value, while OpenGL is not very clear about this, which results
@@ -58,12 +62,11 @@ public:
             ObjectLocalName localName, android::base::Stream* stream) const
             override;
 
-    virtual void initDefaultFBO(GLint width, GLint height,
-                                GLint colorFormat, GLint depthstencilFormat,
-                                GLint multisamples,
-                                GLuint* eglSurfaceRBColorId,
-                                GLuint* eglSurfaceRBDepthId) override;
-
+    virtual void initDefaultFBO(
+            GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+            GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+            GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+            GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
@@ -73,12 +76,13 @@ private:
 
     float m_attribute0value[4] = {};
     bool m_attribute0valueChanged = true;
-    GLfloat* m_att0Array = nullptr;
+    std::unique_ptr<GLfloat[]> m_att0Array = {};
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;
 
     GLuint m_useProgram = 0;
     ObjectDataPtr m_useProgramData = {};
+    std::unordered_map<GLuint, GLuint> m_bindSampler = {};
 };
 
 #endif

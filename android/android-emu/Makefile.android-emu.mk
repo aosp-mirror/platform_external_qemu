@@ -265,6 +265,7 @@ LOCAL_SRC_FILES := \
     android/emulation/AdbHostServer.cpp \
     android/emulation/AndroidPipe.cpp \
     android/emulation/android_pipe_host.cpp \
+    android/emulation/AudioCaptureEngine.cpp \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_unix.cpp \
@@ -272,6 +273,7 @@ LOCAL_SRC_FILES := \
     android/emulation/android_qemud.cpp \
     android/emulation/bufprint_config_dirs.cpp \
     android/emulation/ClipboardPipe.cpp \
+    android/emulation/ComponentVersion.cpp \
     android/emulation/ConfigDirs.cpp \
     android/emulation/control/AdbInterface.cpp \
     android/emulation/control/ApkInstaller.cpp \
@@ -334,6 +336,7 @@ LOCAL_SRC_FILES := \
     android/metrics/AsyncMetricsReporter.cpp \
     android/metrics/CrashMetricsReporting.cpp \
     android/metrics/FileMetricsWriter.cpp \
+    android/metrics/MemoryUsageReporter.cpp \
     android/metrics/metrics.cpp \
     android/metrics/MetricsPaths.cpp \
     android/metrics/MetricsReporter.cpp \
@@ -431,6 +434,16 @@ ANDROID_EMU_BASE_STATIC_LIBRARIES := \
 ANDROID_EMU_BASE_LDLIBS := \
     $(LIBUUID_LDLIBS) \
 
+ifeq ($(BUILD_TARGET_OS),linux)
+    ANDROID_EMU_BASE_LDLIBS += -lrt
+endif
+ifeq ($(BUILD_TARGET_OS),windows)
+    ANDROID_EMU_BASE_LDLIBS += -lpsapi
+endif
+ifeq ($(BUILD_TARGET_OS),darwin)
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit
+endif
+
 ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
     $(ANDROID_EMU_BASE_STATIC_LIBRARIES) \
@@ -464,6 +477,7 @@ ANDROID_EMU_LDLIBS += -lws2_32
 # GetNetworkParams() for android/utils/dns.c
 ANDROID_EMU_LDLIBS += -liphlpapi
 endif
+
 
 ###############################################################################
 #
@@ -543,6 +557,7 @@ LOCAL_SRC_FILES := \
   android/emulation/android_pipe_pingpong_unittest.cpp \
   android/emulation/android_pipe_zero_unittest.cpp \
   android/emulation/bufprint_config_dirs_unittest.cpp \
+  android/emulation/ComponentVersion_unittest.cpp \
   android/emulation/ConfigDirs_unittest.cpp \
   android/emulation/DeviceContextRunner_unittest.cpp \
   android/emulation/DmaMap_unittest.cpp \
@@ -700,7 +715,7 @@ EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 # The skin support sources
 include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
 
-EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES)
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) emulator-zlib
 
 $(call start-emulator-library, emulator-libui)
 
@@ -732,6 +747,7 @@ LOCAL_SRC_FILES += \
     android/emulator-window.c \
     android/main-common-ui.c \
     android/resource.c \
+    android/ffmpeg-audio-capture.cpp \
     android/ffmpeg-muxer.cpp \
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)

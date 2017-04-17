@@ -404,6 +404,24 @@ YUVConverter::YUVConverter(int width, int height, FrameworkFormat format) : mFor
     createYUVGLFullscreenQuad(&mVbuf, &mIbuf, width, ywidth);
 }
 
+void YUVConverter::saveGLState() {
+    s_gles2.glGetFloatv(GL_VIEWPORT, mCurrViewport);
+    s_gles2.glGetIntegerv(GL_ACTIVE_TEXTURE, &mCurrTexUnit);
+    s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &mCurrTexBind);
+    s_gles2.glGetIntegerv(GL_CURRENT_PROGRAM, &mCurrProgram);
+    s_gles2.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &mCurrVbo);
+    s_gles2.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &mCurrIbo);
+}
+
+void YUVConverter::restoreGLState() {
+    s_gles2.glViewport(mCurrViewport[0], mCurrViewport[1],
+                       mCurrViewport[2], mCurrViewport[3]);
+    s_gles2.glActiveTexture(mCurrTexUnit);
+    s_gles2.glUseProgram(mCurrProgram);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mCurrVbo);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mCurrIbo);
+}
+
 // drawConvert: per-frame updates.
 // Update YUV textures, then draw the fullscreen
 // quad set up above, which results in a framebuffer
@@ -411,6 +429,8 @@ YUVConverter::YUVConverter(int width, int height, FrameworkFormat format) : mFor
 void YUVConverter::drawConvert(int x, int y,
                                int width, int height,
                                char* pixels) {
+    saveGLState();
+
     s_gles2.glViewport(x, y, width, height);
 
     uint32_t yoff, uoff, voff,
@@ -446,6 +466,7 @@ void YUVConverter::drawConvert(int x, int y,
                         width / 2, cwidth,
                         mYWidthCutoff,
                         mCWidthCutoff);
+    restoreGLState();
 }
 
 void YUVConverter::updateCutoffs(float width, float ywidth,

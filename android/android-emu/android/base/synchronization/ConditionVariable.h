@@ -51,6 +51,36 @@ public:
         wait(&userLock->mLock);
     }
 
+    //
+    // Convenience functions to get rid of the loop in condition variable usage
+    // Instead of hand-writing a loop, e.g.
+    //
+    //      while (mRefCount < 3) {
+    //          mCv.wait(&mLock);
+    //      }
+    //
+    // use the following two wait() overloads:
+    //
+    //      mCv.wait(&mLock, [this]() { return mRefCount >= 3; });
+    //
+    // Parameters:
+    // |lock| - a Lock or AutoLock pointer used with the condition variable.
+    // |pred| - a functor predicate that's compatible with "bool pred()"
+    //          signature and returns a condition when one should stop waiting.
+    //
+
+    template <class Predicate>
+    void wait(Lock* lock, Predicate pred) {
+        while (!pred()) {
+            this->wait(lock);
+        }
+    }
+
+    template <class Predicate>
+    void wait(AutoLock* lock, Predicate pred) {
+        this->wait(&lock->mLock, pred);
+    }
+
 #ifdef _WIN32
 
     ConditionVariable() {
@@ -72,6 +102,14 @@ public:
     //
     void wait(Lock* userLock) {
         ::SleepConditionVariableSRW(&mCond, &userLock->mLock, INFINITE, 0);
+    }
+
+    bool timedWait(Lock *userLock, System::Duration waitUntilUs) {
+        const auto now = System::get()->getUnixTimeUs();
+        const auto timeout =
+                std::max<System::Duration>(0, waitUntilUs  - now) / 1000;
+        return ::SleepConditionVariableSRW(
+                    &mCond, &userLock->mLock, timeout, 0) != 0;
     }
 
     // Signal that a condition was reached. This will wake at least (and
@@ -102,6 +140,13 @@ private:
 
     void wait(Lock* userLock) {
         pthread_cond_wait(&mCond, &userLock->mLock);
+    }
+
+    bool timedWait(Lock* userLock, System::Duration waitUntilUs) {
+        timespec abstime;
+        abstime.tv_sec = waitUntilUs / 1000000LL;
+        abstime.tv_nsec = (waitUntilUs % 1000000LL) * 1000;
+        return pthread_cond_timedwait(&mCond, &userLock->mLock, &abstime) == 0;
     }
 
     void signal() {

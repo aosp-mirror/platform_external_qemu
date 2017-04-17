@@ -588,7 +588,6 @@ tcp_connect(struct socket *inso)
 {
 	struct socket *so;
 	SockAddress   addr;
-	uint32_t      addr_ip;
 	struct tcpcb *tp;
 	int s;
 
@@ -612,8 +611,7 @@ tcp_connect(struct socket *inso)
 			free(so); /* NOT sofree */
 			return;
 		}
-		so->so_laddr_ip   = inso->so_laddr_ip;
-		so->so_laddr_port = inso->so_laddr_port;
+		so->laddr = inso->laddr;
 	}
 
 	(void) tcp_mss(sototcpcb(so), 0);
@@ -636,14 +634,14 @@ tcp_connect(struct socket *inso)
 	socket_set_oobinline(s);
 	socket_set_nodelay(s);
 
-	so->so_faddr_port = sock_address_get_port(&addr);
-
-	addr_ip = sock_address_get_ip(&addr);
-
-	so->so_faddr_ip = addr_ip;
-	/* Translate connections from localhost to the real hostname */
-	if (addr_ip == 0 || addr_ip == loopback_addr_ip)
-	   so->so_faddr_ip = alias_addr_ip;
+	{
+		uint16_t port = sock_address_get_port(&addr);
+		uint32_t addr_ip = sock_address_get_ip(&addr);
+		/* Translate connections from localhost to the real hostname */
+		if (addr_ip == 0 || addr_ip == loopback_addr_ip)
+			addr_ip = alias_addr_ip;
+		sock_address_init_inet(&so->faddr, addr_ip, port);
+	}
 
 	/* Close the accept() socket, set right state */
 	if (inso->so_state & SS_FACCEPTONCE) {

@@ -306,7 +306,7 @@ typedef struct OpenCommandParams {
     uint32_t rw_params_max_count;
 } OpenCommandParams;
 
-typedef struct PipeDevice {
+struct PipeDevice {
     GoldfishPipeState* ps;  // backlink to instance state
     int device_version;    // host device verion
     int driver_version;    // guest's driver version
@@ -347,7 +347,7 @@ typedef struct PipeDevice {
     uint64_t channel;
     uint32_t wakes;
     uint64_t params_addr;
-} PipeDevice;
+};
 
 
 // RW params getter functions for |ptrs| and |sizes| arrays.
@@ -1242,7 +1242,14 @@ static void goldfish_pipe_save_v1(QEMUFile* file, PipeDevice* dev) {
         qemu_put_be64(file, pipe->channel);
         qemu_put_byte(file, pipe->closed);
         qemu_put_byte(file, pipe->wanted);
-        service_ops->guest_save(pipe->host_pipe, file);
+        // It's possible to get a 'save' command right after the 'load' one,
+        // when some force-closed pipes are still on the list.
+        if (pipe->host_pipe) {
+            qemu_put_byte(file, 1);
+            service_ops->guest_save(pipe->host_pipe, file);
+        } else {
+            qemu_put_byte(file, 0);
+        }
     }
 
     /* Save wanted pipes list. */
@@ -1316,6 +1323,9 @@ static void goldfish_pipe_save_v2(QEMUFile* file, PipeDevice* dev) {
 
     /* Invalidate all guest DMA buffer -> host ptr mappings. */
     service_ops->dma_invalidate_host_mappings();
+
+    /* Save DMA map. */
+    service_ops->dma_save_mappings(file);
 }
 
 static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
@@ -1347,7 +1357,12 @@ static int goldfish_pipe_load_v1(QEMUFile* file, PipeDevice* dev) {
         pipe->channel = qemu_get_be64(file);
         pipe->closed = qemu_get_byte(file);
         pipe->wanted = qemu_get_byte(file);
-        pipe->host_pipe = service_ops->guest_load(file, pipe, &force_close);
+        char has_host_pipe = qemu_get_byte(file);
+        if (has_host_pipe) {
+            pipe->host_pipe = service_ops->guest_load(file, pipe, &force_close);
+        } else {
+            force_close = 1;
+        }
         pipe->wanted_next = pipe->wanted_prev = NULL;
 
         // |pipe| might be NULL in case it couldn't be saved. However,
@@ -1549,6 +1564,9 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
 
     res = 0;
 
+    /* Load DMA mappings. */
+    service_ops->dma_load_mappings(file);
+
     /* Invalidate all guest DMA buffer -> host ptr mappings. */
     service_ops->dma_invalidate_host_mappings();
 
@@ -1583,9 +1601,12 @@ static void goldfish_pipe_post_load(void* opaque) {
     qemu_set_irq(dev->ps->irq, 1);
 }
 
+static GoldfishPipeState* s_goldfish_pipe_state = NULL;
+
 static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
     SysBusDevice* sbdev = SYS_BUS_DEVICE(dev);
     GoldfishPipeState* s = GOLDFISH_PIPE(dev);
+    s_goldfish_pipe_state = s;
 
     s->dev = (PipeDevice*)g_malloc0(sizeof(PipeDevice));
     s->dev->ps = s; /* HACK: backlink */
@@ -1622,6 +1643,8 @@ void goldfish_pipe_reset(GoldfishHwPipe *pipe, GoldfishHostPipe *host_pipe) {
 
 void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
                                GoldfishPipeWakeFlags flags) {
+    if (!pipe) return;
+
     PipeDevice *dev = pipe->dev;
 
     DD("%s: id=%d channel=0x%llx flags=%d", __func__, (int)pipe->id,
@@ -1633,6 +1656,17 @@ void goldfish_pipe_signal_wake(GoldfishHwPipe *pipe,
     /* Raise IRQ to indicate there are items on our list ! */
     qemu_set_irq(dev->ps->irq, 1);
     DD("%s: raising IRQ", __func__);
+}
+
+/* Function to look up hwpipe by pipe id and vice versa. */
+int goldfish_pipe_get_id(GoldfishHwPipe* pipe) {
+    assert(pipe->dev->device_version == PIPE_DEVICE_VERSION);
+    return pipe->id;
+}
+
+GoldfishHwPipe* goldfish_pipe_lookup_by_id(int id) {
+    assert(s_goldfish_pipe_state->dev->device_version == PIPE_DEVICE_VERSION);
+    return s_goldfish_pipe_state->dev->pipes[id];
 }
 
 void goldfish_pipe_close_from_host(GoldfishHwPipe *pipe)

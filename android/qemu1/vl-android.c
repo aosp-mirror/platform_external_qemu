@@ -1816,7 +1816,7 @@ static void android_init_metrics(int opengl_alive)
 
 static void android_teardown_metrics()
 {
-    android_metrics_stop();
+    android_metrics_stop(METRICS_STOP_GRACEFUL);
 }
 
 // Save System boot parameters from the command line

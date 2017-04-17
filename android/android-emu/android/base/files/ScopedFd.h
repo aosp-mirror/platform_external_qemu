@@ -30,6 +30,11 @@ public:
     // Constructor takes ownership of |fd|.
     explicit ScopedFd(int fd) : fd_(fd) {}
 
+    // Make it movable.
+    ScopedFd(ScopedFd&& other) : fd_(other.fd_) {
+        other.fd_ = -1;
+    }
+
     // Destructor calls close().
     ~ScopedFd() { close(); }
 

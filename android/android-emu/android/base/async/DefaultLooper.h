@@ -17,6 +17,8 @@
 #include <list>
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 namespace android {
 namespace base {
@@ -142,6 +144,30 @@ public:
                                ClockType clock) override;
 
     //
+    // Tasks
+    //
+    class Task : public Looper::Task {
+    public:
+        Task(Looper* looper, Looper::Task::Callback&& callback,
+             bool selfDeleting = false);
+
+        ~Task();
+
+        void schedule() override;
+        void cancel() override;
+        void run();
+
+    private:
+        const bool mSelfDeleting;
+    };
+
+    void addTask(Task* task);
+    void delTask(Task* task);
+
+    TaskPtr createTask(TaskCallback&& callback) override;
+    void scheduleCallback(TaskCallback&& callback) override;
+
+    //
     //  M A I N   L O O P
     //
     int runWithDeadlineMs(Duration deadlineMs) override;
@@ -162,6 +188,9 @@ protected:
     TimerSet mTimers;          // Set of all timers.
     TimerList mActiveTimers;   // Sorted list of active timers.
     TimerList mPendingTimers;  // Sorted list of pending timers.
+
+    using TaskSet = std::unordered_set<Task*>;
+    TaskSet mScheduledTasks;
 
     bool mForcedExit = false;
 };

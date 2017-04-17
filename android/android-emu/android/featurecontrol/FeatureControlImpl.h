@@ -66,12 +66,16 @@ namespace featurecontrol {
 
 class FeatureControlImpl {
 public:
-    bool isEnabled(Feature feature);
+    bool isEnabled(Feature feature) const;
+    bool isOverridden(Feature feature) const;
+
     void setEnabledOverride(Feature feature, bool isEnabled);
     void resetEnabledToDefault(Feature feature);
-    bool isOverridden(Feature feeature) const;
     void setIfNotOverriden(Feature feeature, bool isEnabled);
-    Feature fromString(const std::string& str);
+
+    static Feature fromString(base::StringView str);
+    static base::StringView toString(Feature feature);
+
     void init(android::base::StringView defaultIniHostPath,
               android::base::StringView defaultIniGuestPath,
               android::base::StringView userIniHostPath,

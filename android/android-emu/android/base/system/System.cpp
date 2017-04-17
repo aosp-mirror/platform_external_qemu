@@ -29,6 +29,7 @@
 #ifdef _WIN32
 #include <shlobj.h>
 #include <windows.h>
+#include <psapi.h>
 #include <shlobj.h>
 #endif
 
@@ -483,6 +484,39 @@ public:
 #else
         return getpid();
 #endif
+    }
+
+    size_t getPeakMemory() override {
+      // Note,there is no universal way to determine how much memory a process
+      // is really consuming in the various OSes.
+        size_t size = 0;
+#ifdef _WIN32
+        PROCESS_MEMORY_COUNTERS info;
+        GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
+        size = (size_t)info.PagefileUsage;
+#elif defined(__linux__)
+        FILE *fp = fopen("/proc/self/status", "r");
+        if (fp != NULL) {
+            char buf[16];
+            while(size == 0 && fscanf(fp, "%8s", buf) > 0)  {
+                if (strcmp(buf, "VmPeak:") == 0) {
+                  fscanf(fp, "%lu", &size);
+                  size *= 1024;
+                }
+            }
+            fclose(fp);
+        }
+#elif defined(__APPLE__)
+        struct task_basic_info info;
+        mach_msg_type_number_t info_count = sizeof(info);
+
+        if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO,
+                                      (task_info_t)&info, &info_count)) {
+            size = info.virtual_size;
+        }
+#endif
+        mMemorySize = std::max(size, mMemorySize);
+        return mMemorySize;
     }
 
     virtual std::vector<std::string> scanDirEntries(

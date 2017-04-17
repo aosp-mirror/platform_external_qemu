@@ -221,6 +221,20 @@ bool propertyFile_isGoogleApis(const FileData* data) {
             data, google_names, ARRAY_SIZE(google_names), false /*prefix*/);
 }
 
+bool propertyFile_isUserBuild(const FileData* data) {
+    bool isUser = false;
+    char* prop = propertyFile_getValue((const char*)data->data, data->size,
+                                       "ro.build.type");
+    if (!prop) {
+        return false;
+    }
+    if (!strcmp(prop, "user")) {
+       isUser = true;
+    }
+    free(prop);
+    return isUser;
+}
+
 bool propertyFile_isAndroidAuto(const FileData* data) {
     const char* car_names[] = {"car_emu"};
     return propertyFile_findProductName(data, car_names, ARRAY_SIZE(car_names),
@@ -364,7 +378,13 @@ path_getAvdSystemPath(const char* avdName,
         }
 
         char temp[PATH_MAX], *p = temp, *end= p+sizeof temp;
-        p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
+        // Prefix sdkRoot if the path is not absolute
+        if (path_is_absolute(searchPath)) {
+          p = strncpy(temp, searchPath, sizeof(temp));
+        } else {
+          p = bufprint(temp, end, "%s/%s", sdkRoot, searchPath);
+        }
+        free(searchPath);
         if (p >= end || !path_is_dir(temp)) {
             D(" Not a directory: %s\n", temp);
             continue;

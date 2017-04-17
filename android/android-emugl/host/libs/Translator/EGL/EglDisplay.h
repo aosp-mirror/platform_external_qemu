@@ -30,11 +30,15 @@
 #include "GLcommon/ObjectNameSpace.h"
 #include <memory>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 typedef std::vector<std::unique_ptr<EglConfig>> ConfigsList;
 typedef std::unordered_map<unsigned int, ContextPtr>  ContextsHndlMap;
 typedef std::unordered_map<unsigned int, SurfacePtr>  SurfacesHndlMap;
+
+
+typedef std::unordered_set<EglConfig> ConfigSet;
 
 class EglDisplay {
 public:
@@ -95,26 +99,27 @@ public:
     void onLoadAllImages(android::base::Stream* stream, SaveableTexture::loader_t loader);
     void postLoadAllImages(android::base::Stream* stream);
 private:
-   static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
+    static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 
-   int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
-   void addSimplePixelFormat(int red_size, int green_size, int blue_size, int alpha_size);
-   void addMissingConfigs(void);
-   void initConfigurations(int renderableType);
+    int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
+    void addSimplePixelFormat(int red_size, int green_size, int blue_size, int alpha_size);
+    void addMissingConfigs(void);
+    void initConfigurations(int renderableType);
 
-   EGLNativeDisplayType    m_dpy = {};
-   EglOS::Display*         m_idpy = nullptr;
-   bool                    m_initialized = false;
-   bool                    m_configInitialized = false;
-   ConfigsList             m_configs;
-   ContextsHndlMap         m_contexts;
-   SurfacesHndlMap         m_surfaces;
-   GlobalNameSpace         m_globalNameSpace;
-   ObjectNameManager*      m_manager[MAX_GLES_VERSION];
-   mutable emugl::Mutex    m_lock;
-   ImagesHndlMap           m_eglImages;
-   unsigned int            m_nextEglImageId = 0;
-   mutable EglOS::Context* m_globalSharedContext = nullptr;
+    EGLNativeDisplayType    m_dpy = {};
+    EglOS::Display*         m_idpy = nullptr;
+    bool                    m_initialized = false;
+    bool                    m_configInitialized = false;
+    ConfigsList             m_configs;
+    ContextsHndlMap         m_contexts;
+    SurfacesHndlMap         m_surfaces;
+    GlobalNameSpace         m_globalNameSpace;
+    ObjectNameManager*      m_manager[MAX_GLES_VERSION];
+    mutable emugl::Mutex    m_lock;
+    ImagesHndlMap           m_eglImages;
+    unsigned int            m_nextEglImageId = 0;
+    mutable EglOS::Context* m_globalSharedContext = nullptr;
+    ConfigSet               m_uniqueConfigs;
 };
 
 #endif

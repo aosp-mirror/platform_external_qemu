@@ -69,6 +69,7 @@ VAOState::VAOState(android::base::Stream* stream) {
 
     loadContainer(stream, bindingState);
     bufferBacked = stream->getByte();
+    everBound = stream->getByte();
 }
 
 void VAOState::onSave(android::base::Stream* stream) const {
@@ -83,6 +84,7 @@ void VAOState::onSave(android::base::Stream* stream) const {
 
     saveContainer(stream, bindingState);
     stream->putByte(bufferBacked);
+    stream->putByte(everBound);
 }
 
 GLESConversionArrays::~GLESConversionArrays() {
@@ -273,6 +275,7 @@ void GLEScontext::addVertexArrayObject(GLuint array) {
                     i,
                     new GLESpointer()));
     }
+    assert(m_vaoStateMap.count(array) == 0);  // Overwriting existing entry, leaking memory
     m_vaoStateMap[array] = VAOState(0, map, std::max(s_glSupport.maxVertexAttribs, s_glSupport.maxVertexAttribBindings));
 }
 
@@ -286,18 +289,25 @@ void GLEScontext::removeVertexArrayObject(GLuint array) {
 
     ArraysMap* map = m_vaoStateMap[array].arraysMap;
 
-    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
-        if ((*map)[i]) delete (*map)[i];
+    for (auto elem : *map) {
+        delete elem.second;
     }
     delete map;
 
     m_vaoStateMap.erase(array);
 }
 
-void GLEScontext::setVertexArrayObject(GLuint array) {
+bool GLEScontext::setVertexArrayObject(GLuint array) {
     VAOStateMap::iterator it = m_vaoStateMap.find(array);
-    if (it != m_vaoStateMap.end())
+    if (it != m_vaoStateMap.end()) {
         m_currVaoState = VAOStateRef(it);
+        return true;
+    }
+    return false;
+}
+
+void GLEScontext::setVAOEverBound() {
+    m_currVaoState.setEverBound();
 }
 
 GLuint GLEScontext::getVertexArrayObject() const {
@@ -415,6 +425,9 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_viewportWidth = static_cast<GLsizei>(stream->getBe32());
             m_viewportHeight = static_cast<GLsizei>(stream->getBe32());
 
+            m_polygonOffsetFactor = static_cast<GLfloat>(stream->getFloat());
+            m_polygonOffsetUnits = static_cast<GLfloat>(stream->getFloat());
+
             m_scissorX = static_cast<GLint>(stream->getBe32());
             m_scissorY = static_cast<GLint>(stream->getBe32());
             m_scissorWidth = static_cast<GLsizei>(stream->getBe32());
@@ -443,8 +456,13 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_frontFace = static_cast<GLenum>(stream->getBe32());
             m_depthFunc = static_cast<GLenum>(stream->getBe32());
             m_depthMask = static_cast<GLboolean>(stream->getByte());
-            m_zNear = static_cast<GLclampf>(stream->getBe32());
-            m_zFar = static_cast<GLclampf>(stream->getBe32());
+            m_zNear = static_cast<GLclampf>(stream->getFloat());
+            m_zFar = static_cast<GLclampf>(stream->getFloat());
+
+            m_lineWidth = static_cast<GLclampf>(stream->getFloat());
+
+            m_sampleCoverageVal = static_cast<GLclampf>(stream->getFloat());
+            m_sampleCoverageInvert = static_cast<GLboolean>(stream->getByte());
 
             stream->read(m_stencilStates, sizeof(m_stencilStates));
 
@@ -474,30 +492,62 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_renderbuffer = static_cast<GLuint>(stream->getBe32());
             m_drawFramebuffer = static_cast<GLuint>(stream->getBe32());
             m_readFramebuffer = static_cast<GLuint>(stream->getBe32());
+            m_defaultFBODrawBuffer = static_cast<GLenum>(stream->getBe32());
+            m_defaultFBOReadBuffer = static_cast<GLenum>(stream->getBe32());
 
             m_needRestoreFromSnapshot = true;
         }
     }
-    m_fboNameSpace = new NameSpace(NamedObjectType::FRAMEBUFFER,
-        globalNameSpace, stream, [this](NamedObjectType type,
+    auto loader = [this](NamedObjectType type,
                     long long unsigned int localName,
                     android::base::Stream* stream) {
             return loadObject(type,localName, stream);
-    });
+    };
+    m_fboNameSpace = new NameSpace(NamedObjectType::FRAMEBUFFER,
+        globalNameSpace, stream, loader);
+    // do not load m_vaoNameSpace
+    m_vaoNameSpace = new NameSpace(NamedObjectType::VERTEX_ARRAY_OBJECT,
+        globalNameSpace, nullptr, loader);
 }
 
 GLEScontext::~GLEScontext() {
-    std::vector<GLuint> vaos_to_remove;
-    for (VAOStateMap::iterator it = m_vaoStateMap.begin(); it != m_vaoStateMap.end(); ++it) {
-        vaos_to_remove.push_back(it->first);
+    if (m_defaultFBO) {
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        dispatcher().glDeleteFramebuffers(1, &m_defaultFBO);
     }
-    for (auto vao : vaos_to_remove) {
-        removeVertexArrayObject(vao);
+
+    if (m_defaultReadFBO && (m_defaultReadFBO != m_defaultFBO)) {
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        dispatcher().glDeleteFramebuffers(1, &m_defaultReadFBO);
     }
+
+    m_defaultFBO = 0;
+    m_defaultReadFBO = 0;
+
+    for (auto vao : m_vaoStateMap) {
+        ArraysMap* map = vao.second.arraysMap;
+        if (map) {
+            for (auto elem : *map) {
+                delete elem.second;
+            }
+            delete map;
+        }
+    }
+
     delete[] m_texState;
-    m_texState = NULL;
+    m_texState = nullptr;
     delete m_fboNameSpace;
-    m_fboNameSpace = NULL;
+    m_fboNameSpace = nullptr;
+    delete m_vaoNameSpace;
+    m_vaoNameSpace = nullptr;
 }
 
 void GLEScontext::postLoad() {
@@ -542,6 +592,9 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_viewportWidth);
         stream->putBe32(m_viewportHeight);
 
+        stream->putFloat(m_polygonOffsetFactor);
+        stream->putFloat(m_polygonOffsetUnits);
+
         stream->putBe32(m_scissorX);
         stream->putBe32(m_scissorY);
         stream->putBe32(m_scissorWidth);
@@ -568,8 +621,13 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_frontFace);
         stream->putBe32(m_depthFunc);
         stream->putByte(m_depthMask);
-        stream->putBe32(m_zNear);
-        stream->putBe32(m_zFar);
+        stream->putFloat(m_zNear);
+        stream->putFloat(m_zFar);
+
+        stream->putFloat(m_lineWidth);
+
+        stream->putFloat(m_sampleCoverageVal);
+        stream->putByte(m_sampleCoverageInvert);
 
         stream->write(m_stencilStates, sizeof(m_stencilStates));
 
@@ -596,8 +654,11 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putBe32(m_renderbuffer);
         stream->putBe32(m_drawFramebuffer);
         stream->putBe32(m_readFramebuffer);
+        stream->putBe32(m_defaultFBODrawBuffer);
+        stream->putBe32(m_defaultFBOReadBuffer);
     }
     m_fboNameSpace->onSave(stream);
+    // do not save m_vaoNameSpace
 }
 
 void GLEScontext::postLoadRestoreShareGroup() {
@@ -625,7 +686,6 @@ void GLEScontext::postLoadRestoreCtx() {
     };
     bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
     bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
-    // TODO: GLES3: bind other buffers and other vao
 
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
@@ -636,18 +696,42 @@ void GLEScontext::postLoadRestoreCtx() {
     bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
 
     for (unsigned int i = 0; i <= m_maxUsedTexUnit; i++) {
-        // snapshot only support GL_TEXTURE_2D for now
-        textureTargetState& texState = m_texState[i][TEXTURE_2D];
-        if (texState.texture || texState.enabled) {
-            this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
-            // TODO: refactor the following line since it is duplicated in
-            // GLESv2Imp and GLEScmImp as well
-            ObjectLocalName texName = texState.texture != 0 ?
-                    texState.texture : getDefaultTextureName(GL_TEXTURE_2D);
-            this->dispatcher().glBindTexture(
-                    GL_TEXTURE_2D,
-                    m_shareGroup->getGlobalName(
-                        NamedObjectType::TEXTURE, texName));
+        for (unsigned int j = 0; j < NUM_TEXTURE_TARGETS; j++) {
+            textureTargetState& texState = m_texState[i][j];
+            if (texState.texture || texState.enabled) {
+                this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
+                GLenum texTarget = GL_TEXTURE_2D;
+                switch (j) {
+                    case TEXTURE_2D:
+                        texTarget = GL_TEXTURE_2D;
+                        break;
+                    case TEXTURE_CUBE_MAP:
+                        texTarget = GL_TEXTURE_CUBE_MAP;
+                        break;
+                    case TEXTURE_2D_ARRAY:
+                        texTarget = GL_TEXTURE_2D_ARRAY;
+                        break;
+                    case TEXTURE_3D:
+                        texTarget = GL_TEXTURE_3D;
+                        break;
+                    case TEXTURE_2D_MULTISAMPLE:
+                        texTarget = GL_TEXTURE_2D_MULTISAMPLE;
+                        break;
+                    default:
+                        fprintf(stderr,
+                                "Warning: unsupported texture target 0x%x.\n",
+                                j);
+                        break;
+                }
+                // TODO: refactor the following line since it is duplicated in
+                // GLESv2Imp and GLEScmImp as well
+                ObjectLocalName texName = texState.texture != 0 ?
+                        texState.texture : getDefaultTextureName(texTarget);
+                this->dispatcher().glBindTexture(
+                        texTarget,
+                        m_shareGroup->getGlobalName(
+                            NamedObjectType::TEXTURE, texName));
+            }
         }
     }
     dispatcher.glActiveTexture(m_activeTexture + GL_TEXTURE0);
@@ -655,6 +739,8 @@ void GLEScontext::postLoadRestoreCtx() {
     // viewport & scissor
     dispatcher.glViewport(m_viewportX, m_viewportY,
             m_viewportWidth, m_viewportHeight);
+    dispatcher.glPolygonOffset(m_polygonOffsetFactor,
+            m_polygonOffsetUnits);
     dispatcher.glScissor(m_scissorX, m_scissorY,
             m_scissorWidth, m_scissorHeight);
 
@@ -676,6 +762,10 @@ void GLEScontext::postLoadRestoreCtx() {
     dispatcher.glDepthFunc(m_depthFunc);
     dispatcher.glDepthMask(m_depthMask);
     dispatcher.glDepthRange(m_zNear, m_zFar);
+
+    dispatcher.glLineWidth(m_lineWidth);
+
+    dispatcher.glSampleCoverage(m_sampleCoverageVal, m_sampleCoverageInvert);
 
     for (int i = 0; i < 2; i++) {
         GLenum face = i == StencilFront ? GL_FRONT
@@ -1225,6 +1315,11 @@ void GLEScontext::setScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     m_scissorHeight = height;
 }
 
+void GLEScontext::setPolygonOffset(GLfloat factor, GLfloat units) {
+    m_polygonOffsetFactor = factor;
+    m_polygonOffsetUnits = units;
+}
+
 void GLEScontext::setEnable(GLenum item, bool isEnable) {
     m_glEnableList[item] = isEnable;
 }
@@ -1262,6 +1357,14 @@ void GLEScontext::setDepthRangef(GLclampf zNear, GLclampf zFar) {
     m_zFar = zFar;
 }
 
+void GLEScontext::setLineWidth(GLfloat lineWidth) {
+    m_lineWidth = lineWidth;
+}
+
+void GLEScontext::setSampleCoverage(GLclampf value, GLboolean invert) {
+    m_sampleCoverageVal = value;
+    m_sampleCoverageInvert = invert;
+}
 void GLEScontext::setStencilFuncSeparate(GLenum face, GLenum func, GLint ref,
         GLuint mask) {
     if (face == GL_FRONT_AND_BACK) {
@@ -1562,7 +1665,7 @@ bool GLEScontext::glGetFloatv(GLenum pname, GLfloat *params)
     delete [] iParams;
 
     return result;
-}        
+}
 
 bool GLEScontext::glGetIntegerv(GLenum pname, GLint *params)
 {
@@ -1638,7 +1741,7 @@ unsigned int GLEScontext::getBindedTexture(GLenum target) {
     TextureTarget pos = GLTextureTargetToLocal(target);
     return m_texState[m_activeTexture][pos].texture;
 }
-  
+
 unsigned int GLEScontext::getBindedTexture(GLenum unit, GLenum target) {
     TextureTarget pos = GLTextureTargetToLocal(target);
     return m_texState[unit-GL_TEXTURE0][pos].texture;
@@ -1698,20 +1801,65 @@ void GLEScontext::drawValidate(void)
     fbObj->validate(this);
 }
 
+void GLEScontext::initEmulatedEGLSurface(GLint width, GLint height,
+                             GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
+                             GLuint rboColor, GLuint rboDepth) {
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, rboColor);
+    if (multisamples) {
+        dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
+        GLint err = dispatcher().glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+        }
+    } else {
+        dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
+    }
+
+    dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    if (multisamples) {
+        dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
+        GLint err = dispatcher().glGetError();
+        if (err != GL_NO_ERROR) {
+            fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
+        }
+    } else {
+        dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
+    }
+}
+
 void GLEScontext::initDefaultFBO(
         GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
-        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId) {
+        GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
+        GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
+        GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
 
     if (!m_defaultFBO) {
         dispatcher().glGenFramebuffers(1, &m_defaultFBO);
+        m_defaultReadFBO = m_defaultFBO;
     }
 
     bool needReallocateRbo = false;
+    bool separateReadRbo = false;
+    bool needReallocateReadRbo = false;
+
+    separateReadRbo =
+        eglReadSurfaceRBColorId !=
+        eglSurfaceRBColorId;
+
+    if (separateReadRbo && (m_defaultReadFBO == m_defaultFBO)) {
+        dispatcher().glGenFramebuffers(1, &m_defaultReadFBO);
+    }
 
     if (!(*eglSurfaceRBColorId)) {
         dispatcher().glGenRenderbuffers(1, eglSurfaceRBColorId);
         dispatcher().glGenRenderbuffers(1, eglSurfaceRBDepthId);
         needReallocateRbo = true;
+    }
+
+    if (!(*eglReadSurfaceRBColorId) && separateReadRbo) {
+        dispatcher().glGenRenderbuffers(1, eglReadSurfaceRBColorId);
+        dispatcher().glGenRenderbuffers(1, eglReadSurfaceRBDepthId);
+        needReallocateReadRbo = true;
     }
 
     m_defaultFBOColorFormat = colorFormat;
@@ -1722,55 +1870,54 @@ void GLEScontext::initDefaultFBO(
     GLint prevRbo;
     dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prevRbo);
 
-    GLint prevGlobalDrawFbo;
-    GLint prevGlobalReadFbo;
-    dispatcher().glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevGlobalDrawFbo);
-    dispatcher().glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &prevGlobalReadFbo);
-    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-
     // OS X in legacy opengl mode does not actually support GL_RGB565 as a renderbuffer.
     // Just replace it with GL_RGB8 for now.
     // TODO: Re-enable GL_RGB565 for OS X when we move to core profile.
 #ifdef __APPLE__
     if (colorFormat == GL_RGB565)
         colorFormat = GL_RGB8;
+    if (readColorFormat == GL_RGB565)
+        readColorFormat = GL_RGB8;
 #endif
 
     if (needReallocateRbo) {
-        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBColorId);
-        if (multisamples) {
-            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, colorFormat, width, height);
-            GLint err = dispatcher().glGetError();
-            if (err != GL_NO_ERROR) {
-                fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
-            }
-        } else {
-            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, colorFormat, width, height);
-        }
-
-        dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, *eglSurfaceRBDepthId);
-        if (multisamples) {
-            dispatcher().glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisamples, depthstencilFormat, width, height);
-            GLint err = dispatcher().glGetError();
-            if (err != GL_NO_ERROR) {
-                fprintf(stderr, "%s: error setting up multisampled RBO! 0x%x\n", __func__, err);
-            }
-        } else {
-            dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, depthstencilFormat, width, height);
-        }
+        initEmulatedEGLSurface(width, height, colorFormat, depthstencilFormat, multisamples,
+                                *eglSurfaceRBColorId, *eglSurfaceRBDepthId);
     }
+
+    if (needReallocateReadRbo) {
+        initEmulatedEGLSurface(readWidth, readHeight, readColorFormat, readDepthStencilFormat, readMultisamples,
+                                *eglReadSurfaceRBColorId, *eglReadSurfaceRBDepthId);
+    }
+
+    dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
 
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglSurfaceRBColorId);
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
     dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglSurfaceRBDepthId);
 
+    if (m_defaultFBODrawBuffer != GL_COLOR_ATTACHMENT0) {
+        dispatcher().glDrawBuffers(1, &m_defaultFBODrawBuffer);
+    }
+    if (m_defaultFBOReadBuffer != GL_COLOR_ATTACHMENT0) {
+        dispatcher().glReadBuffer(m_defaultFBOReadBuffer);
+    }
+
+    if (separateReadRbo) {
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, *eglReadSurfaceRBColorId);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, *eglReadSurfaceRBDepthId);
+        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, *eglReadSurfaceRBDepthId);
+    }
+
     dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
-    if (prevGlobalDrawFbo) {
-        dispatcher().glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevGlobalDrawFbo);
-    }
-    if (prevGlobalReadFbo) {
-        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, prevGlobalReadFbo);
-    }
+    GLuint prevDrawFBOBinding = getFramebufferBinding(GL_FRAMEBUFFER);
+    GLuint prevReadFBOBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+
+    if (prevDrawFBOBinding)
+        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getFBOGlobalName(prevDrawFBOBinding));
+    if (prevReadFBOBinding)
+        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
 }
 
 bool GLEScontext::isFBO(ObjectLocalName p_localName) {
@@ -1805,4 +1952,40 @@ unsigned int GLEScontext::getFBOGlobalName(ObjectLocalName p_localName) {
 
 ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) {
     return m_fboNameSpace->getLocalName(p_globalName);
+}
+
+bool GLEScontext::isVAO(ObjectLocalName p_localName) {
+    VAOStateMap::iterator it = m_vaoStateMap.find(p_localName);
+    if (it == m_vaoStateMap.end()) return false;
+    VAOStateRef vao(it);
+    return vao.isEverBound();
+}
+
+ObjectLocalName GLEScontext::genVAOName(ObjectLocalName p_localName,
+        bool genLocal) {
+    return m_vaoNameSpace->genName(GenNameInfo(NamedObjectType::VERTEX_ARRAY_OBJECT),
+            p_localName, genLocal);
+}
+
+void GLEScontext::deleteVAO(ObjectLocalName p_localName) {
+    if (p_localName == 0) return;
+    m_vaoNameSpace->deleteName(p_localName);
+}
+
+unsigned int GLEScontext::getVAOGlobalName(ObjectLocalName p_localName) {
+    if (p_localName == 0) return 0;
+    return m_vaoNameSpace->getGlobalName(p_localName);
+}
+
+ObjectLocalName GLEScontext::getVAOLocalName(unsigned int p_globalName) {
+    if (p_globalName == 0) return 0;
+    return m_vaoNameSpace->getLocalName(p_globalName);
+}
+
+void GLEScontext::setDefaultFBODrawBuffer(GLenum buffer) {
+    m_defaultFBODrawBuffer = buffer;
+}
+
+void GLEScontext::setDefaultFBOReadBuffer(GLenum buffer) {
+    m_defaultFBOReadBuffer = buffer;
 }

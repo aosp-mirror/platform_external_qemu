@@ -127,7 +127,7 @@ hvf_slot *hvf_find_overlap_slot(uint64_t start, uint64_t end) {
     int x;
     for (x = 0; x < hvf_state->num_slots; ++x) {
         slot = &hvf_state->slots[x];
-        if (slot->size && start < (slot->start + slot->size) && end >= slot->start)
+        if (slot->size && start < (slot->start + slot->size) && end > slot->start)
             return slot;
     }
     return NULL;
@@ -455,7 +455,7 @@ void __hvf_cpu_synchronize_state(void *data)
 void hvf_cpu_synchronize_state(CPUState *cpu_state)
 {
     if (cpu_state->hvf_vcpu_dirty == 0)
-        run_on_cpu(cpu_state, __hvf_cpu_synchronize_state, cpu_state);
+        run_on_cpu(cpu_state, __hvf_cpu_synchronize_state, RUN_ON_CPU_NULL);
 }
 
 void __hvf_cpu_synchronize_post_reset(void *data)
@@ -467,7 +467,7 @@ void __hvf_cpu_synchronize_post_reset(void *data)
 
 void hvf_cpu_synchronize_post_reset(CPUState *cpu_state)
 {
-    run_on_cpu(cpu_state, __hvf_cpu_synchronize_post_reset, cpu_state);
+    run_on_cpu(cpu_state, __hvf_cpu_synchronize_post_reset, RUN_ON_CPU_NULL);
 }
 
 void _hvf_cpu_synchronize_post_init(void *data)
@@ -479,7 +479,7 @@ void _hvf_cpu_synchronize_post_init(void *data)
 
 void hvf_cpu_synchronize_post_init(CPUState *cpu_state)
 {
-    run_on_cpu(cpu_state, _hvf_cpu_synchronize_post_init, cpu_state);
+    run_on_cpu(cpu_state, _hvf_cpu_synchronize_post_init, RUN_ON_CPU_NULL);
 }
 
 void hvf_cpu_clean_state(CPUState *cpu_state)

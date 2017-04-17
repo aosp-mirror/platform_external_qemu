@@ -519,8 +519,17 @@ static void mips_ranchu_init(MachineState *machine)
     /* Create goldfish_pic controller node in dt */
     create_device(fdt, &devmap[RANCHU_GOLDFISH_PIC], NULL, 1, 0);
 
-    /* Create 4 Goldfish TTYs */
-    create_device(fdt, &devmap[RANCHU_GOLDFISH_TTY], goldfish_pic, MAX_GF_TTYS, 0);
+    /* Make sure the first 3 serial ports are associated with a device. */
+    for(i = 0; i < 3; i++) {
+        if (!serial_hds[i]) {
+            char label[32];
+            snprintf(label, sizeof(label), "serial%d", i);
+            serial_hds[i] = qemu_chr_new(label, "null");
+        }
+    }
+
+    /* Create 3 Goldfish TTYs */
+    create_device(fdt, &devmap[RANCHU_GOLDFISH_TTY], goldfish_pic, MAX_GF_TTYS, 1);
 
     /* Other Goldfish Platform devices */
     for (i = RANCHU_GOLDFISH_AUDIO; i >= RANCHU_GOLDFISH_TIMER ; i--) {

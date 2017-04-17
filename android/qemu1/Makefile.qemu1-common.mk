@@ -176,6 +176,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/qemu-display-agent-impl.cpp \
     android-qemu1-glue/qemu-finger-agent-impl.c \
     android-qemu1-glue/qemu-location-agent-impl.c \
+    android-qemu1-glue/qemu-http-proxy-agent-impl.c \
     android-qemu1-glue/qemu-net-agent-impl.c \
     android-qemu1-glue/qemu-car-data-agent-impl.cpp \
     android-qemu1-glue/qemu-sensors-agent-impl.c \
@@ -214,12 +215,17 @@ LOCAL_SRC_FILES += \
     slirp-android/bootp.c \
     slirp-android/cksum.c \
     slirp-android/debug.c \
+    slirp-android/dhcpv6.c \
     slirp-android/if.c \
     slirp-android/ip_icmp.c \
+    slirp-android/ip6_icmp.c \
     slirp-android/ip_input.c \
+    slirp-android/ip6_input.c \
     slirp-android/ip_output.c \
+    slirp-android/ip6_output.c \
     slirp-android/mbuf.c \
     slirp-android/misc.c \
+    slirp-android/ndp_table.c \
     slirp-android/sbuf.c \
     slirp-android/slirp.c \
     slirp-android/socket.c \
@@ -229,6 +235,7 @@ LOCAL_SRC_FILES += \
     slirp-android/tcp_timer.c \
     slirp-android/tftp.c \
     slirp-android/udp.c \
+    slirp-android/udp6.c \
     ui/console.c \
     ui/d3des.c \
     ui/input.c \

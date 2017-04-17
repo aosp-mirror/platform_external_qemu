@@ -33,6 +33,7 @@
 #include <new>
 #include <string>
 
+#include <assert.h>
 #include <errno.h>
 #include <string.h>
 #include <time.h>
@@ -88,6 +89,18 @@ static size_t curlWriteCallback(char* contents,
     return total;
 }
 
+static StringView toOsArchString(int bitness) {
+    switch (bitness) {
+    case 32:
+        return "x86";
+    case 64:
+        return "x86_64";
+    default:
+        assert(false);
+        return "unknown";
+    }
+}
+
 class DataLoader final : public IDataLoader {
 public:
     DataLoader(StringView coreVersion) : mCoreVersion(coreVersion) {}
@@ -98,8 +111,9 @@ public:
         if (!mCoreVersion.empty()) {
             const auto& id = android::studio::getInstallationId();
             url += Uri::FormatEncodeArguments(
-                    "?tool=emulator&uid=%s&os=%s&", id,
-                    toString(System::get()->getOsType()));
+                    "?tool=emulator&uid=%s&os=%s&osa=%s&", id,
+                    toString(System::get()->getOsType()),
+                    toOsArchString(System::get()->getHostBitness()));
             // append the fields which may change from run to run: version and
             // core version
             url += getVersionUriFields();

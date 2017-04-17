@@ -97,7 +97,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             ;;
         darwin-*)
             # Use host compiler.
-            MY_FLAGS=
+            MY_FLAGS=--disable-iconv
             ;;
         *)
             panic "Host system '$CURRENT_HOST' is not supported by this script!"
@@ -108,6 +108,8 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 $MY_FLAGS \
                 --extra-cflags=\"-I$PREBUILTS_DIR/common/x264/$SYSTEM/include\" \
                 --extra-ldflags=\"-L$PREBUILTS_DIR/common/x264/$SYSTEM/lib\" \
+                --extra-cflags=\"-I$PREBUILTS_DIR/common/libvpx/$SYSTEM/include\" \
+                --extra-ldflags=\"-L$PREBUILTS_DIR/common/libvpx/$SYSTEM/lib\" \
                 --enable-static \
                 --disable-doc \
                 --enable-gpl \
@@ -116,10 +118,10 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 --disable-avdevice \
                 --enable-avresample \
                 --enable-libx264 \
+                --enable-libvpx \
                 --disable-protocol=tls \
                 --disable-protocol=tls_securetransport \
-                --disable-openssl \
-                --disble-iconv
+                --disable-openssl
 
         # Copy binaries necessary for the build itself as well as static
         # libraries.

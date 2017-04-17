@@ -14,6 +14,10 @@
 #include <android/base/Compiler.h>
 #include <android/base/files/Stream.h>
 
+#include <functional>
+#include <memory>
+#include <utility>
+
 #include <inttypes.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -183,6 +187,41 @@ public:
     virtual FdWatch* createFdWatch(int fd,
                                    FdWatch::Callback callback,
                                    void* opaque) = 0;
+
+    // An interface for running a task on the main looper thread with as little
+    // delay as possible.
+    class Task {
+        DISALLOW_COPY_AND_ASSIGN(Task);
+
+    public:
+        using Callback = std::function<void()>;
+
+        virtual ~Task();
+
+        // Schedule this task to run on the main looper thread. It will only run
+        // once, call schedule() again after that if you need to run it again.
+        virtual void schedule() = 0;
+
+        // Cancel the scheduled task. It's OK to call it if the task isn't
+        // scheduled.
+        virtual void cancel() = 0;
+
+    protected:
+        Task(Looper* looper, Callback&& callback);
+
+        Looper* const mLooper;
+        const Callback mCallback;
+    };
+
+    using TaskPtr = std::unique_ptr<Task>;
+    using TaskCallback = Task::Callback;
+
+    // Creates a new Task instance for this looper.
+    virtual TaskPtr createTask(TaskCallback&& callback) = 0;
+
+    // Schedules the specified one-shot |callback| to run on the main looper
+    // thread and returns (doesn't wait for task to complete).
+    virtual void scheduleCallback(TaskCallback&& callback) = 0;
 
 protected:
     // Default constructor is protected. Use create() method to create

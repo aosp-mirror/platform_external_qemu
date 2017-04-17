@@ -26,6 +26,7 @@
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/android_qemud.h"
+#include "android-qemu2-glue/audio-capturer.h"
 #include "android-qemu2-glue/net-android.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
@@ -83,6 +84,8 @@ bool qemu_android_emulation_early_setup() {
 
     qemu_snapshot_compression_setup();
 
+    android::emulation::AudioCaptureEngine::set(new android::qemu::QemuAudioCaptureEngine());
+
     return true;
 }
 
@@ -93,6 +96,7 @@ bool qemu_android_emulation_setup() {
     static const AndroidConsoleAgents consoleAgents = {
             gQAndroidBatteryAgent,   gQAndroidEmulatorWindowAgent,
             gQAndroidFingerAgent,    gQAndroidLocationAgent,
+            gQAndroidHttpProxyAgent,
             gQAndroidTelephonyAgent, gQAndroidUserEventAgent,
             gQAndroidVmOperations,   gQAndroidNetAgent,
             gQAndroidLibuiAgent,     gQCarDataAgent,

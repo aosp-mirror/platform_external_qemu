@@ -40,5 +40,9 @@ bool IsDebuggerAttached();
 // |timeoutMs| == -1 means 'no timeout'
 bool WaitForDebugger(System::Duration timeoutMs = -1);
 
+// Issues a break into debugger (if one attached). Without a debugger it could
+// do anything, but most probably will crash.
+void DebugBreak();
+
 }  // namespace base
 }  // namespace android

@@ -64,6 +64,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/rotary-input-dial.cpp \
     android/skin/qt/extended-pages/rotary-input-page.cpp \
     android/skin/qt/extended-pages/settings-page.cpp \
+    android/skin/qt/extended-pages/settings-page-proxy.cpp \
     android/skin/qt/extended-pages/telephony-page.cpp \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
@@ -108,7 +109,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-window.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/size-tweaker.h \
-    android/skin/qt/QtTimerImpl.h \
+    android/skin/qt/QtLooperImpl.h \
     android/skin/qt/tool-window.h \
     android/skin/qt/user-actions-counter.h
 

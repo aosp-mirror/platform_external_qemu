@@ -39,8 +39,27 @@ GLvoid* GLESpointer::getBufferData() const {
                    : nullptr;
 }
 
+const GLfloat* GLESpointer::getValues() const {
+    return m_values;
+}
+
+unsigned int GLESpointer::getValueCount() const {
+    return m_valueCount;
+}
+
 const GLvoid* GLESpointer::getData() const {
-    return m_isVBO ? getBufferData() : getArrayData();
+    switch (m_attribType) {
+        case ARRAY:
+            return getArrayData();
+            break;
+        case BUFFER:
+            return getBufferData();
+            break;
+        case VALUE:
+            return (GLvoid*)getValues();
+            break;
+    }
+    return nullptr;
 }
 
 void GLESpointer::redirectPointerData() {
@@ -64,8 +83,8 @@ bool GLESpointer::isNormalize() const {
     return m_normalize;
 }
 
-bool GLESpointer::isVBO() const {
-    return m_isVBO;
+GLESpointer::AttribType GLESpointer::getAttribType() const {
+    return m_attribType;
 }
 
 bool GLESpointer::isIntPointer() const {
@@ -83,7 +102,7 @@ void GLESpointer::setArray(GLint size,
                            GLsizei dataSize,
                            bool normalize,
                            bool isInt) {
-    m_ownData.resize(0);
+    m_ownData.clear();
     m_size = size;
     m_type = type;
     m_stride = stride;
@@ -93,7 +112,7 @@ void GLESpointer::setArray(GLint size,
     m_bufferName = 0;
     m_buffOffset = 0;
     m_normalize = normalize;
-    m_isVBO = false;
+    m_attribType = ARRAY;
     m_isInt = isInt;
 }
 
@@ -115,8 +134,16 @@ void GLESpointer::setBuffer(GLint size,
     m_bufferName = bufferName;
     m_buffOffset = offset;
     m_normalize = normalize;
-    m_isVBO = true;
+    m_attribType = BUFFER;
     m_isInt = isInt;
+}
+
+void GLESpointer::setValue(unsigned int count, const GLfloat* val) {
+    memcpy(m_values, val, sizeof(GLfloat) * count);
+    m_valueCount = count;
+    m_attribType = VALUE;
+    m_data = nullptr;
+    m_buffer = nullptr;
 }
 
 void GLESpointer::setDivisor(GLuint divisor) {
@@ -148,7 +175,7 @@ GLESpointer::GLESpointer(android::base::Stream* stream) {
     m_stride = stream->getBe32();
     m_enabled = stream->getByte();
     m_normalize = stream->getByte();
-    m_isVBO = stream->getByte();
+    m_attribType = (GLESpointer::AttribType)stream->getByte();
     m_bufferName = stream->getBe32();
     if (!m_bufferName) {
         m_dataSize = stream->getBe32();
@@ -161,6 +188,8 @@ GLESpointer::GLESpointer(android::base::Stream* stream) {
     m_divisor = stream->getBe32();
     m_bindingIndex = stream->getBe32();
     m_reloffset = stream->getBe32();
+    m_valueCount = stream->getBe32();
+    stream->read(m_values, sizeof(GLfloat) * m_valueCount);
 }
 
 void GLESpointer::onSave(android::base::Stream* stream) const {
@@ -169,7 +198,7 @@ void GLESpointer::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_stride);
     stream->putByte(m_enabled);
     stream->putByte(m_normalize);
-    stream->putByte(m_isVBO);
+    stream->putByte(m_attribType);
     stream->putBe32(m_bufferName);
     if (!m_bufferName) {
         stream->putBe32(m_dataSize);
@@ -180,4 +209,6 @@ void GLESpointer::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_divisor);
     stream->putBe32(m_bindingIndex);
     stream->putBe32(m_reloffset);
+    stream->putBe32(m_valueCount);
+    stream->write(m_values, sizeof(GLfloat) * m_valueCount);
 }

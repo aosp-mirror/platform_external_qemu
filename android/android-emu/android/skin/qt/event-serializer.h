@@ -14,35 +14,7 @@
 
 #pragma once
 
-#include "android/base/TypeTraits.h"
-#include "android/skin/qt/ui-event-recorder.h"
-
 #include <QEvent>
-#include <QMetaEnum>
+#include <ostream>
 
-#include <sstream>
-
-using android::base::enable_if_convertible;
-
-void serializeEventToStream(std::ostream&, const QEvent*);
-
-template <class ContainerType>
-std::string serializeEvents(
-        const ContainerType& container,
-        enable_if_convertible<
-            typename ContainerType::value_type,
-            EventRecord> = nullptr) {
-    static int event_enum_index =
-        QEvent::staticMetaObject.indexOfEnumerator("Type");
-    std::ostringstream str;
-    for (int i = 0; i < container.size(); ++i) {
-        const auto& event = container[i].event;
-        if (event) {
-            str << container[i].target_name << " "
-                << QEvent::staticMetaObject.enumerator(event_enum_index).valueToKey(event->type()) << " ";
-            serializeEventToStream(str, event.get());
-        }
-    }
-    return str.str();
-}
-
+std::ostream& operator<<(std::ostream& out, const QEvent&);

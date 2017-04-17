@@ -713,12 +713,18 @@ static int hax_vcpu_interrupt(CPUArchState * env)
     struct hax_vcpu_state *vcpu = cpu->hax_vcpu;
     struct hax_tunnel *ht = vcpu->tunnel;
 
+    /* As of now HAXM doesn't have any specific function to notify it about
+     * a pending NMI. So we have to ignore it.
+     * TODO(zyy@): add a proper handling
+     */
+    cpu->interrupt_request &= ~CPU_INTERRUPT_NMI;
+
     /*
      * Try to inject an interrupt if the guest can accept it
      * Unlike KVM, HAX kernel check for the eflags, instead of qemu
      */
-    if (ht->ready_for_interrupt_injection &&
-        (cpu->interrupt_request & CPU_INTERRUPT_HARD)) {
+    if ((cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
+      ht->ready_for_interrupt_injection) {
         int irq;
 
         irq = cpu_get_pic_interrupt(env);
@@ -867,8 +873,7 @@ static int hax_vcpu_hax_exec(CPUArchState * env, int ug_platform)
             ret = HAX_EMUL_EXITLOOP;
             break;
         case HAX_EXIT_HLT:
-            if (!(cpu->interrupt_request & CPU_INTERRUPT_HARD) &&
-                !(cpu->interrupt_request & CPU_INTERRUPT_NMI)) {
+            if (!(cpu->interrupt_request & CPU_INTERRUPT_HARD)) {
                 /* hlt instruction with interrupt disabled is shutdown */
                 env->eflags |= IF_MASK;
                 cpu->halted = 1;
@@ -897,9 +902,8 @@ static int hax_vcpu_hax_exec(CPUArchState * env, int ug_platform)
     return ret;
 }
 
-static void do_hax_cpu_synchronize_state(void *arg)
+static void do_hax_cpu_synchronize_state(CPUState* cpu, run_on_cpu_data arg)
 {
-    CPUState *cpu = arg;
     CPUArchState *env = cpu->env_ptr;
 
     hax_arch_get_registers(env);
@@ -914,12 +918,11 @@ void hax_cpu_synchronize_state(CPUState *cpu)
      * wherever a vCPU state sync between QEMU and HAX takes place. For now,
      * just perform the sync regardless of hax_vcpu_dirty.
      */
-    run_on_cpu(cpu, do_hax_cpu_synchronize_state, cpu);
+    run_on_cpu(cpu, do_hax_cpu_synchronize_state, RUN_ON_CPU_NULL);
 }
 
-static void do_hax_cpu_synchronize_post_reset(void *arg)
+static void do_hax_cpu_synchronize_post_reset(CPUState* cpu, run_on_cpu_data arg)
 {
-    CPUState *cpu = arg;
     CPUArchState *env = cpu->env_ptr;
 
     hax_vcpu_sync_state(env, 1);
@@ -928,12 +931,12 @@ static void do_hax_cpu_synchronize_post_reset(void *arg)
 
 void hax_cpu_synchronize_post_reset(CPUState * cpu)
 {
-    run_on_cpu(cpu, do_hax_cpu_synchronize_post_reset, cpu);
+    run_on_cpu(cpu, do_hax_cpu_synchronize_post_reset, RUN_ON_CPU_NULL);
 }
 
-static void do_hax_cpu_synchronize_post_init(void *arg)
+static void do_hax_cpu_synchronize_post_init(CPUState* cpu,
+                                             run_on_cpu_data arg)
 {
-    CPUState *cpu = arg;
     CPUArchState *env = cpu->env_ptr;
 
     hax_vcpu_sync_state(env, 1);
@@ -942,7 +945,7 @@ static void do_hax_cpu_synchronize_post_init(void *arg)
 
 void hax_cpu_synchronize_post_init(CPUState * cpu)
 {
-    run_on_cpu(cpu, do_hax_cpu_synchronize_post_init, cpu);
+    run_on_cpu(cpu, do_hax_cpu_synchronize_post_init, RUN_ON_CPU_NULL);
 }
 
 /*

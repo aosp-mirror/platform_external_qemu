@@ -11,14 +11,27 @@
 
 #include "android/emulation/LogcatPipe.h"
 
+#include "android/globals.h"
 #include "android/logcat-pipe.h"
+#include "android/utils/debug.h"
+
+#include <iostream>
+#include <fstream>
 
 namespace android {
 namespace emulation {
 
 
 LogcatPipe::LogcatPipe(void* hwPipe, Service* svc)
-    : AndroidPipe(hwPipe, svc) {}
+    : AndroidPipe(hwPipe, svc) {
+        if (android_hw->hw_logcatOutput_path) {
+            mOutputFile.open(android_hw->hw_logcatOutput_path, std::ios_base::app);
+            if (!mOutputFile.good()) {
+                dwarning("Cannot open logcat output file %s; print to stdout instead.\n",
+                        android_hw->hw_logcatOutput_path);
+            }
+        }
+    }
 
 void LogcatPipe::onGuestClose(PipeCloseReason reason) {
 }
@@ -36,13 +49,14 @@ int LogcatPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
 int LogcatPipe::onGuestSend(const AndroidPipeBuffer* buffers,
                                int numBuffers) {
     int result = 0;
+    std::ostream *pstream = mOutputFile.good() ? &mOutputFile : &(std::cout);
     while (numBuffers > 0) {
-        // BUG: b.android.com/261625
-        printf("%s", (char*)buffers->data);
+        pstream->write((char*)buffers->data, static_cast<int>(buffers->size));
         result += static_cast<int>(buffers->size);
         buffers++;
         numBuffers--;
     }
+    pstream->flush();
     return result;
 }
 

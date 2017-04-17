@@ -37,7 +37,7 @@ extern "C" {
 // into the service by calling android_pipe_set_hw_funcs().
 //
 // The virtual device expects a service implementation that will
-// implement the callbacks in GoldfishPIpeServiceOps. These are injected
+// implement the callbacks in GoldfishPipeServiceOps. These are injected
 // into the device through goldfish_pipe_set_service_ops().
 //
 // qemu_android_pipe_init() is used to inject all callbacks at setup time
@@ -162,6 +162,16 @@ static const GoldfishPipeServiceOps goldfish_pipe_service_ops = {
         []() { android_goldfish_dma_ops.invalidate_host_mappings(); },
         // dma_reset_host_mappings()
         []() { android_goldfish_dma_ops.reset_host_mappings(); },
+        // dma_save_mappings()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_goldfish_dma_ops.save_mappings(&stream);
+        },
+        // dma_load_mappings()
+        [](QEMUFile* file) {
+            QemuFileStream stream(file);
+            android_goldfish_dma_ops.load_mappings(&stream);
+        },
 };
 
 // These callbacks are called from the pipe service into the virtual device.
@@ -192,6 +202,14 @@ static const AndroidPipeHwFuncs android_pipe_hw_funcs = {
                     static_cast<GoldfishHwPipe*>(hwPipe),
                     static_cast<GoldfishPipeWakeFlags>(flags));
         },
+        // getPipeId()
+        [](void* hwPipe) {
+            return goldfish_pipe_get_id(static_cast<GoldfishHwPipe*>(hwPipe));
+        },
+        // lookupPipeById()
+        [](int id) {
+            return (void*)goldfish_pipe_lookup_by_id(id);
+        }
 };
 
 bool qemu_android_pipe_init(android::VmLock* vmLock) {

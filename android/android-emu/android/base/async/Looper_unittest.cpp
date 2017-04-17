@@ -338,5 +338,55 @@ TEST(GenericLooper, RunTimerAndFdWatchWithTimerRemovingPendingWatch) {
     EXPECT_FALSE(flag);  // Callback was not called.
 }
 
+TEST(GenericLooper, CreateTask) {
+    std::unique_ptr<Looper> looper(Looper::create());
+
+    bool taskRan = false;
+    auto task = looper->createTask([&taskRan]() { taskRan = true; });
+    ASSERT_TRUE(task);
+
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+    EXPECT_FALSE(taskRan);
+
+    task->schedule();
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+    EXPECT_TRUE(taskRan);
+
+    taskRan = false;
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+
+    task->schedule();
+    task->cancel();
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+    EXPECT_FALSE(taskRan);
+
+    task->schedule();
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+    EXPECT_TRUE(taskRan);
+}
+
+TEST(GenericLooper, ScheduleCallback) {
+    std::unique_ptr<Looper> looper(Looper::create());
+
+    bool taskRan = false;
+    looper->scheduleCallback([&taskRan]() { taskRan = true; });
+
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+    EXPECT_TRUE(taskRan);
+
+    taskRan = false;
+    EXPECT_EQ(EWOULDBLOCK,
+              looper->runWithDeadlineMs(Looper::kDurationInfinite));
+    EXPECT_FALSE(taskRan);
+}
+
 }  // namespace base
 }  // namespace android

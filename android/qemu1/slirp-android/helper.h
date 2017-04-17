@@ -141,4 +141,7 @@ port_seth( uint16_t  val )
     return p;
 }
 
+#define ETH_ALEN	6		/* Octets in one ethernet addr	 */
+#define ETH_HLEN	14		/* Total octets in header.	 */
+
 #endif /* _SLIRP_HELPER_H */

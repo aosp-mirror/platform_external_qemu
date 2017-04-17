@@ -25,6 +25,7 @@ extern "C" {
 
 #include <list>
 #include <unordered_map>
+#include <utility>
 
 namespace android {
 namespace qemu {
@@ -238,6 +239,61 @@ public:
     virtual BaseTimer* createTimer(BaseTimer::Callback callback,
                                    void* opaque, ClockType clock) {
         return new QemuLooper::Timer(this, callback, opaque, clock);
+    }
+
+    //
+    // Tasks
+    //
+
+    class Task : public BaseLooper::Task {
+    public:
+        Task(Looper* looper, BaseLooper::Task::Callback&& callback)
+            : BaseLooper::Task(looper, std::move(callback))
+            , mBottomHalf(qemu_bh_new(&Task::handleBottomHalf, this)) {}
+
+        ~Task() {
+            cancel();
+            qemu_bh_delete(mBottomHalf);
+        }
+
+        void schedule() override {
+            qemu_bh_schedule(mBottomHalf);
+        }
+
+        void cancel() override {
+            qemu_bh_cancel(mBottomHalf);
+        }
+
+    protected:
+        static void handleBottomHalf(void* opaque) {
+            static_cast<Task*>(opaque)->run();
+        }
+
+        virtual void run() {
+            mCallback();
+        }
+
+        QEMUBH* const mBottomHalf;
+    };
+
+    class SelfDeletingTask : public Task {
+    public:
+        SelfDeletingTask(Looper* looper, BaseLooper::Task::Callback&& callback)
+            : Task(looper, std::move(callback)) {}
+
+        void run() override {
+            Task::run();
+            delete this;
+        }
+    };
+
+    BaseLooper::TaskPtr createTask(TaskCallback&& callback) override {
+        return BaseLooper::TaskPtr(new Task(this, std::move(callback)));
+    }
+
+    void scheduleCallback(BaseLooper::TaskCallback&& callback) override {
+        // Create a task and forget it - it will take care of itself.
+        (new SelfDeletingTask(this, std::move(callback)))->schedule();
     }
 
     //

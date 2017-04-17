@@ -52,6 +52,9 @@ public:
     // Comparison operators used to sort EglConfig instances.
     bool operator<(const EglConfig& conf) const;
     bool operator>=(const EglConfig& conf) const;
+    bool operator==(const EglConfig& other) const;
+    // Return a 32-bit hash value, useful for keying on EglConfigs.
+    uint32_t u32hash() const;
 
     // Return true iff this instance is compatible with |conf|, i.e. that
     // they have the same red/green/blue/depth/stencil sizes.
@@ -208,5 +211,14 @@ private:
     // This dynamically affects config sorting order.
     std::unordered_set<EGLint> m_wantedAttribs;
 };
+
+namespace std {
+template <>
+struct hash<EglConfig> {
+    std::size_t operator()(const EglConfig& config) const {
+        return (size_t)config.u32hash();
+    }
+};
+} // namespace std
 
 #endif

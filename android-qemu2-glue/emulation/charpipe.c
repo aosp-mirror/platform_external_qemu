@@ -79,7 +79,7 @@ typedef struct CharPipeHalf {
 
 
 static void
-charpipehalf_close( CharDriverState*  cs )
+charpipehalf_free( CharDriverState*  cs )
 {
     CharPipeHalf*  ph = cs->opaque;
 
@@ -105,12 +105,12 @@ charpipehalf_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
     D("%s: writing %d bytes to %p: '%s'", __FUNCTION__,
       len, ph, quote_bytes( buf, len ));
 
-    if (bip == NULL && peer != NULL && peer->cs->chr_read != NULL) {
+    if (bip == NULL && peer != NULL && peer->cs->be->chr_read != NULL) {
         /* no buffered data, try to write directly to the peer */
         while (len > 0) {
             int  size;
 
-            if (peer->cs->chr_can_read) {
+            if (peer->cs->be->chr_can_read) {
                 size = qemu_chr_be_can_write( peer->cs );
                 if (size == 0)
                     break;
@@ -160,7 +160,7 @@ charpipehalf_poll( CharPipeHalf*  ph )
     CharPipeHalf*   peer = ph->peer;
     int             size;
 
-    if (peer == NULL || peer->cs->chr_read == NULL)
+    if (peer == NULL || peer->cs->be->chr_read == NULL)
         return;
 
     while (1) {
@@ -180,7 +180,7 @@ charpipehalf_poll( CharPipeHalf*  ph )
             continue;
         }
 
-        if (ph->cs->chr_can_read) {
+        if (ph->cs->be->chr_can_read) {
             int  size2 = qemu_chr_be_can_write(peer->cs);
 
             if (size2 == 0)
@@ -215,8 +215,7 @@ charpipehalf_init( CharPipeHalf*  ph, CharPipeHalf*  peer )
 
     cs->chr_write            = charpipehalf_write;
     cs->chr_ioctl            = NULL;
-    cs->chr_fe_event         = NULL;
-    cs->chr_close            = charpipehalf_close;
+    cs->chr_free             = charpipehalf_free;
     cs->opaque               = ph;
 
     ph->cs = cs;
@@ -309,7 +308,7 @@ charbuffer_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
 
     if (bip == NULL && peer != NULL) {
         /* no buffered data, try to write directly to the peer */
-        int  size = qemu_chr_fe_write(peer, buf, len);
+        int  size = qemu_chr_fe_write(peer->be, buf, len);
 
         if (size < 0)  /* just to be safe */
             size = 0;
@@ -374,7 +373,7 @@ charbuffer_poll( CharBuffer*  cbuf )
             continue;
         }
 
-        size = qemu_chr_fe_write( peer, base, avail );
+        size = qemu_chr_fe_write( peer->be, base, avail );
 
         if (size < 0)  /* just to be safe */
             size = 0;
@@ -390,15 +389,17 @@ charbuffer_poll( CharBuffer*  cbuf )
 
 
 static void
-charbuffer_update_handlers( CharDriverState*  cs )
+charbuffer_update_handlers( CharDriverState*  cs, GMainContext* context )
 {
-    CharBuffer*  cbuf = cs->opaque;
+    CharBackend*  be = cs->be;
 
-    qemu_chr_add_handlers( cbuf->endpoint,
-                           cs->chr_can_read,
-                           cs->chr_read,
-                           cs->chr_event,
-                           cs->handler_opaque );
+    qemu_chr_fe_set_handlers( be,
+                              be->chr_can_read,
+                              be->chr_read,
+                              be->chr_event,
+                              be->opaque,
+                              context,
+                              false);
 }
 
 
@@ -413,8 +414,7 @@ charbuffer_init( CharBuffer*  cbuf, CharDriverState*  endpoint )
 
     cs->chr_write               = charbuffer_write;
     cs->chr_ioctl               = NULL;
-    cs->chr_fe_event            = NULL;
-    cs->chr_close               = charbuffer_close;
+    cs->chr_free                = charbuffer_close;
     cs->chr_update_read_handler = charbuffer_update_handlers;
     cs->opaque                  = cbuf;
 }

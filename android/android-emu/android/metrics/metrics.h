@@ -29,9 +29,16 @@ bool android_metrics_start(const char* emulatorVersion,
                            const char* emulatorFullVersion,
                            const char* qemuVersion,
                            int controlConsolePort);
-void android_metrics_stop();
 
-bool android_metrics_start_adb_liveness_checker(void *adbInterface);
+// A set of reasons for stopping metrics.
+typedef enum {
+    METRICS_STOP_GRACEFUL,
+    METRICS_STOP_CRASH
+} MetricsStopReason;
+
+void android_metrics_stop(MetricsStopReason reason);
+
+bool android_metrics_start_adb_liveness_checker(void* adbInterface);
 
 void android_metrics_report_common_info(bool openglAlive);
 

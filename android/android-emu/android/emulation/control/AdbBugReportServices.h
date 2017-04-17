@@ -51,7 +51,16 @@ public:
     bool isBugReportInFlight() const {
         return mAdbBugReportCommand != nullptr;
     };
+
     void generateAdbLogcatInMemory(ResultOutputCallback resultCallback);
+
+    // Returns true if the adb logcat command is currently in the process of
+    // execution.
+    bool isLogcatInFlight() const { return mAdbLogcatCommand != nullptr; }
+
+    // bug report folder will be in the format of
+    // bugreport-[deviceName]-[%Y-%m-%d%H:%M:%S]-[Uuid]
+    static std::string generateUniqueBugreportName();
 
 private:
     static const android::base::System::Duration kAdbCommandTimeoutMs;

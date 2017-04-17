@@ -25,16 +25,36 @@
 
 namespace emugl {
 
+SharedLibrary::LibraryMap SharedLibrary::s_libraryMap = {};
+
 // static
 SharedLibrary* SharedLibrary::open(const char* libraryName) {
     char error[1];
     return open(libraryName, error, sizeof(error));
 }
 
+SharedLibrary* SharedLibrary::open(const char* libraryName,
+                                   char* error,
+                                   size_t errorSize) {
+    auto lib = s_libraryMap.find(libraryName);
+
+    if (lib == s_libraryMap.end()) {
+        SharedLibrary* load = do_open(libraryName, error, errorSize);
+        if (load != nullptr) {
+            s_libraryMap[libraryName] = std::move(
+                    std::unique_ptr<SharedLibrary, SharedLibrary::Deleter>(
+                            load));
+        }
+        return load;
+    }
+
+    return lib->second.get();
+}
+
 #ifdef _WIN32
 
 // static
-SharedLibrary* SharedLibrary::open(const char* libraryName,
+SharedLibrary* SharedLibrary::do_open(const char* libraryName,
                                    char* error,
                                    size_t errorSize) {
     HMODULE lib = LoadLibrary(libraryName);
@@ -98,7 +118,7 @@ SharedLibrary::FunctionPtr SharedLibrary::findSymbol(
 #else // !_WIN32
 
 // static
-SharedLibrary* SharedLibrary::open(const char* libraryName,
+SharedLibrary* SharedLibrary::do_open(const char* libraryName,
                                    char* error,
                                    size_t errorSize) {
     const char* libPath = libraryName;

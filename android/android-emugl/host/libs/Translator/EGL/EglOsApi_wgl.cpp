@@ -1010,7 +1010,6 @@ public:
 
     ~WinEngine() {
         delete mDispatch;
-        delete mLib;
     }
 
     virtual EglOS::Display* getDefaultDisplay() {

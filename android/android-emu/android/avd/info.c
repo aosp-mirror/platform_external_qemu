@@ -21,7 +21,6 @@
 #include "android/utils/dirscanner.h"
 #include "android/utils/file_data.h"
 #include "android/utils/filelock.h"
-#include "android/utils/ini.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/string.h"
@@ -103,6 +102,7 @@ typedef enum {
 struct AvdInfo {
     /* for the Android build system case */
     char      inAndroidBuild;
+    char      isEncryptionEnabled;
     char*     androidOut;
     char*     androidBuildRoot;
     char*     targetArch;
@@ -130,6 +130,7 @@ struct AvdInfo {
     bool      isMarshmallowOrHigher;
     bool      isPhoneApi;
     bool      isGoogleApis;
+    bool      isUserBuild;
     bool      isAndroidAuto;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
@@ -574,6 +575,11 @@ avdInfo_isGoogleApis(const AvdInfo* i) {
 }
 
 bool
+avdInfo_isUserBuild(const AvdInfo* i) {
+    return i->isUserBuild;
+}
+
+bool
 avdInfo_isPhoneApi(const AvdInfo* i) {
     return i->isPhoneApi;
 }
@@ -841,6 +847,7 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
     }
     i->isPhoneApi = propertyFile_isPhoneApi(i->buildProperties);
     i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
+    i->isUserBuild = propertyFile_isUserBuild(i->buildProperties);
     i->isAndroidAuto = propertyFile_isAndroidAuto(i->buildProperties);
     i->incrementalVersion = propertyFile_getInt(
         i->buildProperties,
@@ -976,6 +983,10 @@ int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath)
     return 0;
 }
 
+int avdInfo_isEncryptionEnabledInBuild(const AvdInfo* i) {
+    return (i->inAndroidBuild && i->isEncryptionEnabled);
+}
+
 AvdInfo*
 avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
                             const char*     androidOut,
@@ -1006,6 +1017,33 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
 
     _avdInfo_extractBuildProperties(i);
 
+    if (i->apiLevel >= 25) {
+         /*
+           copy encryptionkey.img
+        */
+        char encryptionimg_path[1024];
+        snprintf(encryptionimg_path, sizeof(encryptionimg_path),
+                "%s/device/generic/goldfish/data/etc/encryptionkey.img",
+                androidBuildRoot);
+        const bool encryption_enabled = path_exists(encryptionimg_path);
+        if (!encryption_enabled) {
+            dwarning("%s does not exists\n", encryptionimg_path);
+            i->isEncryptionEnabled = 0;
+        } else {
+            i->isEncryptionEnabled = 1;
+            char dest_encryptionimg_path[1024];
+            snprintf(dest_encryptionimg_path, sizeof(dest_encryptionimg_path),
+                    "%s/encryptionkey.img",
+                    androidOut);
+            if (!path_exists(dest_encryptionimg_path)) {
+                if(path_copy_file(dest_encryptionimg_path, encryptionimg_path) != 0) {
+                    derror("cannot copy from %s to %s\n", encryptionimg_path,
+                            dest_encryptionimg_path);
+                    goto FAIL;
+                }
+            }
+        }
+    }
     str_reset(&i->deviceName, "<build>");
 
     /* out/target/product/<name>/config.ini, if exists, provide configuration
@@ -1508,7 +1546,7 @@ int avdInfo_getSnapshotPresent(const AvdInfo* i)
     if (i->configIni == NULL) {
         return 0;
     } else {
-        return iniFile_getBoolean(i->configIni, "snapshot.present", "no");
+        return iniFile_getBoolean(i->configIni, SNAPSHOT_PRESENT, "no");
     }
 }
 
@@ -1520,6 +1558,27 @@ const FileData* avdInfo_getBuildProperties(const AvdInfo* i) {
     return i->buildProperties;
 }
 
+CIniFile* avdInfo_getConfigIni(const AvdInfo* i) {
+    return i->configIni;
+}
+
 int avdInfo_getSysImgIncrementalVersion(const AvdInfo* i) {
     return i->incrementalVersion;
+}
+
+const char* avdInfo_getTag(const AvdInfo* i) {
+    char temp[PATH_MAX];
+    char* tagId = "default";
+    char* tagDisplay = "Default";
+    if (i->configIni) {
+        tagId = iniFile_getString(i->configIni, TAG_ID, "default");
+        tagDisplay = iniFile_getString(i->configIni, TAG_DISPLAY, "Default");
+    }
+    snprintf(temp, PATH_MAX, "%s [%s]", tagId, tagDisplay);
+    return ASTRDUP(temp);
+}
+
+const char* avdInfo_getSdCardSize(const AvdInfo* i) {
+    return (i->configIni) ? iniFile_getString(i->configIni, SDCARD_SIZE, "")
+                          : NULL;
 }

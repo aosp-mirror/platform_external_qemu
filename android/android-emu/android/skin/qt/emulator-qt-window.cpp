@@ -40,6 +40,7 @@
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
+#include "android/utils/eintr_wrapper.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -73,6 +74,12 @@
 #include <QToolTip>
 #include <QWindow>
 #include <QtCore>
+
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 #include <array>
 #include <string>
@@ -145,9 +152,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      QMessageBox::Ok,
                      this),
       mFirstShowEvent(true),
-      mEventLogger(new UIEventRecorder<android::base::CircularBuffer>(
-              &mEventCapturer,
-              android::base::CircularBuffer<EventRecord>(1000))),
+      mEventLogger(
+          std::make_shared<UIEventRecorder<android::base::CircularBuffer>>(
+              &mEventCapturer, 1000)),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface(android::emulation::AdbInterface::create(mLooper)),
       mApkInstaller(mAdbInterface.get()),
@@ -271,41 +278,48 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     setObjectName("MainWindow");
     mEventLogger->startRecording(this);
     mEventLogger->startRecording(mToolWindow);
+    mEventLogger->startRecording(&mOverlay);
     mUserActionsCounter->startCountingForMainWindow(this);
     mUserActionsCounter->startCountingForToolWindow(mToolWindow);
     mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
 
-    auto user_actions = mUserActionsCounter;
-    CrashReporter::get()->addCrashCallback([user_actions]() {
+    // The crash reporter will dump the last X UI events.
+    // mEventLogger is a shared pointer, capturing its copy inside a lambda
+    // ensures that it lives on as long as CrashReporter needs it, even if
+    // EmulatorQtWindow is destroyed.
+    auto eventLogger = mEventLogger;
+    CrashReporter::get()->addCrashCallback([eventLogger]() {
+            eventLogger->stop();
+            auto fd = CrashReporter::get()->openDataAttachFile(
+                          "recent-ui-actions.txt");
+            if (fd.valid()) {
+                const auto& events = eventLogger->container();
+                for (int i = 0; i < events.size(); ++i) {
+                    HANDLE_EINTR(write(fd.get(), events[i].data(),
+                                       events[i].size()));
+                    HANDLE_EINTR(write(fd.get(), "\n", 1));
+                }
+            }
+    });
+
+    auto userActions = mUserActionsCounter;
+    CrashReporter::get()->addCrashCallback([userActions]() {
         char actions[16] = {};
         snprintf(actions, sizeof(actions) - 1, "%" PRIu64,
-                 user_actions->count());
+                 userActions->count());
         char filename[32 + sizeof(actions)] = {};
         snprintf(filename, sizeof(filename) - 1, "num-user-actions-%s.txt",
                  actions);
         CrashReporter::get()->attachData(filename, actions);
     });
 
-    // The crash reporter will dump the last 1000 UI events.
-    // mEventLogger is a shared pointer, capturing its copy
-    // inside a lambda ensures that it lives on as long as
-    // CrashReporter needs it, even if EmulatorQtWindow is
-    // destroyed.
-    auto event_logger = mEventLogger;
-    CrashReporter::get()->addCrashCallback([event_logger]() {
-        CrashReporter::get()->attachData(
-                "recent-ui-actions.txt",
-                serializeEvents(event_logger->container()));
-    });
-
-    std::weak_ptr<android::qt::UserActionsCounter> user_actions_weak(
+    std::weak_ptr<android::qt::UserActionsCounter> userActionsWeak(
             mUserActionsCounter);
-
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
             60 * 10 * 1000,  // reporting period
-            [user_actions_weak](android_studio::AndroidStudioEvent* event) {
-                if (auto user_actions = user_actions_weak.lock()) {
+            [userActionsWeak](android_studio::AndroidStudioEvent* event) {
+                if (auto user_actions = userActionsWeak.lock()) {
                     const auto actionsCount = user_actions->count();
                     event->mutable_emulator_ui_event()->set_context(
                             android_studio::EmulatorUiEvent::
@@ -751,13 +765,10 @@ void EmulatorQtWindow::show() {
     // situation, it will trigger screenCountChanged.
     QObject::connect(qApp->desktop(), &QDesktopWidget::screenCountChanged, this,
                      &EmulatorQtWindow::slot_screenChanged);
-    // There is still a corner case where user can miss the screen change event
-    // by changing the primary display through system setting. This can be
-    // captured by the function below, but it won't be supported until Qt 5.6.
-    //
-    // TODO(yahan): uncomment the following line when upgrade to Qt 5.6
-    // QObject::connect(qApp->desktop(), &QDesktopWidget::primaryScreenChanged,
-    //        this, &EmulatorQtWindow::slot_screenChanged);
+    QObject::connect(qApp->desktop(), &QDesktopWidget::primaryScreenChanged,
+            this, &EmulatorQtWindow::slot_screenChanged);
+    QObject::connect(qApp->desktop(), &QDesktopWidget::workAreaResized,
+            this, &EmulatorQtWindow::slot_screenChanged);
 }
 
 void EmulatorQtWindow::setOnTop(bool onTop) {

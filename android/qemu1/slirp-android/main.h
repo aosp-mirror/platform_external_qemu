@@ -40,6 +40,12 @@ extern uint32_t special_addr_ip;
 extern uint32_t alias_addr_ip;
 extern uint32_t our_addr_ip;
 extern uint32_t loopback_addr_ip;
+
+extern struct in6_addr vnameserver_addr6;
+extern struct in6_addr vhost_addr6;
+extern struct in6_addr vprefix_addr6;
+extern uint32_t vprefix_len;
+
 extern uint32_t dns_addr[DNS_ADDR_MAX];
 extern int      dns_addr_count;
 extern char *username;

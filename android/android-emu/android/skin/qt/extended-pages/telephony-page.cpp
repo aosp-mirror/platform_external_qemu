@@ -22,6 +22,7 @@
 #include <cctype>
 
 #define MAX_SMS_MSG_SIZE 1024 // Arbitrary emulator limitation
+#define MAX_SMS_MSG_SIZE_STRING "1024"
 
 class TelephonyEvent : public QEvent {
 public:
@@ -231,6 +232,13 @@ void TelephonyPage::on_sms_sendButton_clicked()
     if (nUtf8Chars < 0) {
         showErrorDialog(tr("The message contains invalid characters."), tr("SMS"));
         return;
+    }
+
+    if (nUtf8Chars > MAX_SMS_MSG_SIZE) {
+        // Note: 'sms_utf8_from_message_str' did not overwrite our buffer
+        showErrorDialog(tr("Android Emulator truncated this message to "
+                           MAX_SMS_MSG_SIZE_STRING " characters."), tr("SMS"));
+        nUtf8Chars = MAX_SMS_MSG_SIZE;
     }
 
     // Create a list of SMS PDUs, then send them

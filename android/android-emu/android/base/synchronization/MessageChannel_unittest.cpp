@@ -155,6 +155,24 @@ TEST(MessageChannel, TryVersions) {
     EXPECT_EQ(2, ret);
 }
 
+TEST(MessageChannel, TimedRead) {
+    MessageChannel<int, 2> channel;
+    EXPECT_FALSE(channel.timedReceive(0));
+    EXPECT_FALSE(channel.timedReceive(System::get()->getUnixTimeUs()));
+
+    ASSERT_TRUE(channel.trySend(1));
+
+    auto res = channel.timedReceive(System::get()->getUnixTimeUs());
+    ASSERT_TRUE(res);
+    EXPECT_EQ(1, *res);
+    EXPECT_FALSE(channel.timedReceive(System::get()->getUnixTimeUs()));
+
+    // Any other way of testing would require sleeps and inter-thread
+    // comminucation based on those sleeps. I don't consider it good testing
+    // style, as it could potentially fail out of nothing, just because of OS
+    // scheduling quirks.
+}
+
 TEST(MessageChannel, WaitForEmpty) {
     using Channel = MessageChannel<int, 100>;
     Channel channel;

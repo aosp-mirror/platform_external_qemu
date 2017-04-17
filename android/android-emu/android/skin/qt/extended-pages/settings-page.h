@@ -18,6 +18,8 @@
 #include <QWidget>
 #include <memory>
 
+struct QAndroidHttpProxyAgent;
+
 class SettingsPage : public QWidget
 {
     Q_OBJECT
@@ -26,12 +28,17 @@ public:
     explicit SettingsPage(QWidget *parent = 0);
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
+    void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
+
+public slots:
+    void setHaveClipboardSharing(bool haveSharing);
 
 signals:
     void frameAlwaysChanged(bool showFrame);
     void onForwardShortcutsToDeviceChanged(int index);
     void onTopChanged(bool isOnTop);
     void themeChanged(SettingsTheme new_theme);
+    void enableClipboardSharingChanged(bool enabled);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
@@ -47,9 +54,26 @@ private slots:
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
 
+    // HTTP Proxy
+    void on_set_hostName_editingFinished();
+    void on_set_loginName_editingFinished();
+    void on_set_loginPassword_editingFinished();
+    void on_set_manualConfig_toggled(bool checked);
+    void on_set_noProxy_toggled(bool checked);
+    void on_set_portNumber_editingFinished();
+    void on_set_proxyAuth_toggled(bool checked);
+    void on_set_useStudio_toggled(bool checked);
+
+    void on_set_clipboardSharing_toggled(bool checked);
+
 private:
-    bool eventFilter (QObject* object, QEvent* event) override;
+    bool eventFilter(QObject* object, QEvent* event) override;
+    void grayOutProxy();
+    void initProxy();
+    void sendProxySettingsToAgent();
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
+    const QAndroidHttpProxyAgent* mHttpProxyAgent;
+    bool  mProxyInitComplete;
 };

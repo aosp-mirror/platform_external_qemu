@@ -97,7 +97,7 @@ struct mbuf;
 void udp_init _P((void));
 void udp_input _P((register struct mbuf *, int));
 int udp_output_ _P((struct socket *, struct mbuf *, SockAddress *));
-int udp_attach _P((struct socket *));
+int udp_attach _P((struct socket *, SocketFamily));
 void udp_detach _P((struct socket *));
 struct socket * udp_listen _P((u_int, u_int32_t, u_int, int));
 int udp_unlisten _P((u_int));
@@ -105,4 +105,9 @@ int udp_unlisten _P((u_int));
 int udp_output2_(struct socket *so, struct mbuf *m,
                 const SockAddress *saddr, const SockAddress *daddr,
                 int iptos);
+
+void udp6_input(register struct mbuf *);
+int udp6_output(struct socket *so, struct mbuf *m, struct sockaddr_in6 *saddr,
+                struct sockaddr_in6 *daddr);
+
 #endif

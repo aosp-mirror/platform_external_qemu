@@ -18,6 +18,7 @@
 #include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
+#include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/debug.h"
 
@@ -97,7 +98,8 @@ static bool checkAdbVersion(const std::string& sdk_root_directory,
                             const std::string& adb_path) {
     static const int kMinAdbVersionMajor = 23;
     static const int kMinAdbVersionMinor = 1;
-
+    static const Version kMinAdbVersion(kMinAdbVersionMajor,
+                                        kMinAdbVersionMinor, 0);
     if (sdk_root_directory.empty()) {
         return false;
     }
@@ -106,29 +108,17 @@ static bool checkAdbVersion(const std::string& sdk_root_directory,
         return false;
     }
 
-    // The file at $(ANDROID_SDK_ROOT)/platform-tools/source.properties tells
-    // what version the ADB executable is. Find that file.
-    std::string properties_path = PathUtils::join(
-            sdk_root_directory, "platform-tools", "source.properties");
+    Version version = android::getCurrentSdkVersion(
+            sdk_root_directory, android::SdkComponentType::PlatformTools);
 
-    std::ifstream properties_file(properties_path.c_str());
-    if (properties_file) {
-        // Find the line containing "Pkg.Revision".
-        std::string line;
-        while (std::getline(properties_file, line)) {
-            int version_major, version_minor = 0;
-            if (sscanf(line.c_str(), " Pkg.Revision = %d.%d", &version_major,
-                       &version_minor) >= 1) {
-                return version_major > kMinAdbVersionMajor ||
-                       (version_major == kMinAdbVersionMajor &&
-                        version_minor >= kMinAdbVersionMinor);
-            }
-        }
+    if (version.isValid()) {
+        return !(version < kMinAdbVersion);
+
+    } else {
+        // If the version is invalid, assume the tools directory is broken in
+        // some way, and updating should fix the problem.
+        return false;
     }
-
-    // If the file is missing, assume the tools directory is broken in some
-    // way, and updating should fix the problem.
-    return false;
 }
 
 AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)

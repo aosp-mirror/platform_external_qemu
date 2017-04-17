@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/Compiler.h"
+#include "android/base/files/Stream.h"
 #include "android/base/Optional.h"
 #include "android/base/synchronization/Lock.h"
 
@@ -32,6 +33,8 @@ struct DmaBufferInfo {
     uint64_t bufferSize = 0;
     Optional<void*> currHostAddr = kNullopt;
 };
+
+using DmaBufferMap = std::unordered_map<uint64_t, DmaBufferInfo>;
 
 class DmaMap {
 public:
@@ -54,6 +57,10 @@ public:
     // a single instance. (c.f. VmLock)
     static DmaMap* get();
     static DmaMap* set(DmaMap* dmaMap);
+
+    // Snapshotting.
+    void save(android::base::Stream* stream) const;
+    void load(android::base::Stream* stream);
 protected:
 
     virtual void createMappingLocked(DmaBufferInfo* info);
@@ -64,7 +71,7 @@ protected:
     virtual void* doMap(uint64_t addr, uint64_t bufferSize) = 0;
     virtual void doUnmap(void* mapped, uint64_t bufferSize) = 0;
 
-    std::unordered_map<uint64_t, DmaBufferInfo> mDmaBuffers;
+    DmaBufferMap mDmaBuffers;
     android::base::ReadWriteLock mLock;
     DISALLOW_COPY_ASSIGN_AND_MOVE(DmaMap);
 };

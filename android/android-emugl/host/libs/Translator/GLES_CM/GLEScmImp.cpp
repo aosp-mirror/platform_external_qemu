@@ -462,7 +462,7 @@ GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLe
 
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
-                                imageSize, data, (void*)glTexImage2D);
+                                imageSize, data, glTexImage2D);
 }
 
 GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data) {
@@ -1018,10 +1018,9 @@ GL_API void GL_APIENTRY  glGetPointerv( GLenum pname, void **params) {
     GET_CTX()
     const GLESpointer* p = ctx->getPointer(pname);
     if(p) {
-        if(p->isVBO())
-        {
+        if (p->getAttribType() == GLESpointer::BUFFER) {
             *params = SafePointerFromUInt(p->getBufferOffset());
-        }else{
+        } else if (p->getAttribType() == GLESpointer::ARRAY) {
             *params = const_cast<void *>(p->getArrayData());
         }
     } else {
