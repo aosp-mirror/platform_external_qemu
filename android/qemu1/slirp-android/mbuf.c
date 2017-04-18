@@ -26,7 +26,8 @@ int mbuf_max = 0;
  * Find a nice value for msize
  * XXX if_maxlinkhdr already in mtu
  */
-#define SLIRP_MSIZE (IF_MTU + IF_MAXLINKHDR + sizeof(struct m_hdr ) + 6)
+#define SLIRP_MSIZE \
+    (IF_MTU + IF_MAXLINKHDR + sizeof(struct m_hdr) + TCPIPHDR_DELTA)
 
 void
 m_init(void)

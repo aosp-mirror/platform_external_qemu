@@ -203,8 +203,16 @@ struct ipovly {
 	u_int8_t	ih_x1;			/* (unused) */
 	u_int8_t	ih_pr;			/* protocol */
 	u_int16_t	ih_len;			/* protocol length */
-	ipaddr_t        ih_src;		/* source internet address */
-	ipaddr_t        ih_dst;		/* destination internet address */
+	union {
+		struct {
+			ipaddr_t ih_src;	/* source internet address */
+			ipaddr_t ih_dst;	/* destination internet address */
+		} addr;
+		struct {
+			struct in6_addr ih_src6;
+			struct in6_addr ih_dst6;
+		} addr6;
+	};
 } __attribute__((packed));
 
 /*

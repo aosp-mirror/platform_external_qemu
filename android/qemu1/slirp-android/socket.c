@@ -487,8 +487,18 @@ sorecvfrom(struct socket *so)
 		  int n;
 
 	  if (!(m = m_get())) return;
-	  m->m_data += IF_MAXLINKHDR;
-
+	  m->m_data += IF_MAXLINKHDR + sizeof(struct udphdr);
+	  switch (so->faddr.family) {
+	  case SOCKET_INET:
+	    m->m_data += sizeof(struct ip);
+	    break;
+	  case SOCKET_IN6:
+	    m->m_data += sizeof(struct ip6);
+	    break;
+	  default:
+	    g_assert_not_reached();
+	    break;
+	  }
 	  /*
 	   * XXX Shouldn't FIONREAD packets destined for port 53,
 	   * but I don't know the max packet size for DNS lookups
