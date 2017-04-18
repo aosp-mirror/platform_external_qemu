@@ -1270,8 +1270,19 @@ avdInfo_getDefaultDataImagePath( const AvdInfo*  i )
 }
 
 char* avdInfo_getDefaultSystemFeatureControlPath(const AvdInfo* i) {
-    char* retVal = _avdInfo_getSdkFilePath(i, "advancedFeatures.ini");
-    return retVal;
+    if (i && i->inAndroidBuild && i->androidBuildRoot) {
+        // If we're in an Android build use the advancedFeatures.ini in the
+        // build location instead.
+        char buffer[PATH_MAX];
+        char* bufEnd = buffer + sizeof(buffer);
+        char* strEnd = bufprint(buffer, bufEnd,
+                                "%s/development/sys-img/advancedFeatures.ini",
+                                i->androidBuildRoot);
+        if (strEnd < bufEnd && path_exists(buffer)) {
+            return strdup(buffer);
+        }
+    }
+    return _avdInfo_getSdkFilePath(i, "advancedFeatures.ini");
 }
 
 char* avdInfo_getDataInitImagePath(const AvdInfo* i) {
