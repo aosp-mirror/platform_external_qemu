@@ -389,6 +389,7 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
     return false;
 }
 
+extern AndroidProxyCB *gAndroidProxyCB;
 extern "C" int main(int argc, char **argv) {
     process_early_setup(argc, argv);
 
@@ -409,6 +410,10 @@ extern "C" int main(int argc, char **argv) {
     AvdInfo* avd;
     AndroidOptions opts[1];
     int exitStatus = 0;
+
+    gAndroidProxyCB->ProxySet = qemu_android_setup_http_proxy;
+    gAndroidProxyCB->ProxyUnset = qemu_android_remove_http_proxy;
+    qemu_android_init_http_proxy_ops();
 
     if (!emulator_parseCommonCommandLineOptions(&argc,
                                                 &argv,
