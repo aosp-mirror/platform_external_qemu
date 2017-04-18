@@ -26,6 +26,7 @@ class SettingsPage : public QWidget
 
 public:
     explicit SettingsPage(QWidget *parent = 0);
+    ~SettingsPage();
 
     void setAdbInterface(android::emulation::AdbInterface* adb);
     void setHttpProxyAgent(const QAndroidHttpProxyAgent* agent);
@@ -70,10 +71,17 @@ private:
     bool eventFilter(QObject* object, QEvent* event) override;
     void grayOutProxy();
     void initProxy();
+    void proxyDtor();
     void sendProxySettingsToAgent();
+    void getStudioProxyString();
+    QString proxyStringFromParts(QString hostName,
+                                 QString port,
+                                 QString userName,
+                                 QString password);
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
-    const QAndroidHttpProxyAgent* mHttpProxyAgent;
-    bool  mProxyInitComplete;
+    const   QAndroidHttpProxyAgent* mHttpProxyAgent;
+    bool    mProxyInitComplete;
+    QString mStudioProxyString;
 };

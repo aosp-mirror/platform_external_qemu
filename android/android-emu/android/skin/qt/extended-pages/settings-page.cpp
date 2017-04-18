@@ -186,6 +186,10 @@ SettingsPage::SettingsPage(QWidget* parent)
     on_set_clipboardSharing_toggled(enableClipboardSharing);
 }
 
+SettingsPage::~SettingsPage() {
+    proxyDtor();
+}
+
 void SettingsPage::setAdbInterface(android::emulation::AdbInterface* adb) {
     mAdb = adb;
 }
