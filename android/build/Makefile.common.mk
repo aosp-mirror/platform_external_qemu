@@ -57,10 +57,6 @@ ifdef EMULATOR_CRASHUPLOAD
     EMULATOR_COMMON_CFLAGS += -DCRASHUPLOAD=$(EMULATOR_CRASHUPLOAD)
 endif
 
-ifeq (true,$(BUILD_SNAPSHOT_PROFILE))
-    EMULATOR_COMMON_CFLAGS += -DSNAPSHOT_PROFILE
-endif
-
 # $(BUILD_OBJS_DIR)/build is required to access config-host.h
 # $(generated-proto-sources-dir) is needed to access generated
 # protobuff headers.
@@ -75,6 +71,11 @@ ifeq (true,$(BUILD_EMUGL_PRINTOUT))
     EMUGL_USER_CFLAGS := -DOPENGL_DEBUG_PRINTOUT
 else
     EMUGL_USER_CFLAGS :=
+endif
+
+ifeq (true,$(BUILD_SNAPSHOT_PROFILE))
+    EMULATOR_COMMON_CFLAGS += -DSNAPSHOT_PROFILE
+    EMUGL_USER_CFLAGS += -DSNAPSHOT_PROFILE
 endif
 
 ##############################################################################

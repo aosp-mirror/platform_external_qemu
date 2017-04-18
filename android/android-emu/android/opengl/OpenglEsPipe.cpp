@@ -17,6 +17,10 @@
 #include "android/opengles-pipe.h"
 #include "android/opengl/GLProcessPipe.h"
 
+#ifdef SNAPSHOT_PROFILE
+#include "android/base/system/System.h"
+#endif
+
 #include <atomic>
 
 #include <assert.h>
@@ -67,6 +71,9 @@ public:
         bool canLoad() const override { return true; }
 
         virtual void preLoad(android::base::Stream* stream) override {
+#ifdef SNAPSHOT_PROFILE
+            mLoadStartTime = android::base::System::get()->getUnixTimeUs();
+#endif
             const bool hasRenderer = stream->getByte();
             const auto& renderer = android_getOpenglesRenderer();
             if (hasRenderer != (bool)renderer) {
@@ -79,15 +86,28 @@ public:
             int version = stream->getBe32();
             (void)version;
             renderer->load(stream);
+#ifdef SNAPSHOT_PROFILE
+            printf("OpenglEs preload time: %ld ms\n",
+                    (android::base::System::get()->getUnixTimeUs()
+                    - mLoadStartTime) / 1000);
+#endif
         }
 
         void postLoad(android::base::Stream* stream) override {
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->resumeAll();
             }
+#ifdef SNAPSHOT_PROFILE
+            printf("OpenglEs total load time: %ld ms\n",
+                    (android::base::System::get()->getUnixTimeUs()
+                    - mLoadStartTime) / 1000);
+#endif
         }
 
         void preSave(android::base::Stream* stream) override {
+#ifdef SNAPSHOT_PROFILE
+            mSaveStartTime = android::base::System::get()->getUnixTimeUs();
+#endif
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->pauseAllPreSave();
                 stream->putByte(1);
@@ -102,6 +122,11 @@ public:
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->resumeAll();
             }
+#ifdef SNAPSHOT_PROFILE
+            printf("OpenglEs total save time: %ld ms\n",
+                    (android::base::System::get()->getUnixTimeUs()
+                    - mSaveStartTime) / 1000);
+#endif
         }
 
         virtual AndroidPipe* load(void* hwPipe,
@@ -130,6 +155,10 @@ public:
             }
             return pipe;
         }
+#ifdef SNAPSHOT_PROFILE
+        android::base::System::Duration mSaveStartTime = 0;
+        android::base::System::Duration mLoadStartTime = 0;
+#endif
     };
 
     /////////////////////////////////////////////////////////////////////////
