@@ -13,16 +13,17 @@
 
 #include "android/proxy/ProxyUtils.h"
 #include "android/proxy/proxy_common.h"
+#include "android/proxy/proxy_errno.h"
 #include "android/proxy/proxy_http.h"
 #include "android/utils/debug.h"
 
 #include <errno.h>
 #include <string.h>
 
-bool android_http_proxy_setup(const char* http_proxy, bool verbose) {
+int android_http_proxy_setup(const char* http_proxy, bool verbose) {
     if (!http_proxy) {
         VERBOSE_DPRINT(init, "Not using any http proxy");
-        return true;
+        return PROXY_ERR_OK;
     }
 
     // Parse the configuration string first.
@@ -30,7 +31,7 @@ bool android_http_proxy_setup(const char* http_proxy, bool verbose) {
             android::proxy::parseConfigurationString(http_proxy);
     if (result.mError) {
         dwarning("Ignoring invalid http proxy: %s", result.mError->c_str());
-        return false;
+        return PROXY_ERR_BAD_FORMAT;
     }
 
     if (verbose) {
@@ -50,7 +51,7 @@ bool android_http_proxy_setup(const char* http_proxy, bool verbose) {
         dwarning("Could not connect to proxy at %s:%d: %s !", proxy.c_str(),
                  proxyPort, strerror(errno));
         dwarning("Proxy will be ignored !");
-        return false;
+        return PROXY_ERR_UNREACHABLE;
     }
 
     ProxyOption option_tab[2] = {};
@@ -74,8 +75,8 @@ bool android_http_proxy_setup(const char* http_proxy, bool verbose) {
         dwarning("Http proxy setup failed for '%s:%d': %s", proxy.c_str(),
                  proxyPort, errno_str);
         dwarning("Proxy will be ignored !");
-        return false;
+        return PROXY_ERR_INTERNAL;
     }
 
-    return true;
+    return PROXY_ERR_OK;
 }

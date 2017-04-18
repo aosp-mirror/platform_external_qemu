@@ -257,7 +257,7 @@ static  ProxyService*  s_services[ MAX_SERVICES ];
 static  int            s_num_services;
 static  int            s_init;
 
-static void  proxy_manager_atexit( void );
+void  proxy_manager_atexit( void );
 
 static void
 proxy_manager_init(void)
@@ -290,6 +290,9 @@ proxy_manager_atexit( void )
 {
     ProxyConnection*  conn = s_connections->next;
     int               n;
+
+    if (!s_init)
+        return;
 
     /* free all proxy connections */
     while (conn != s_connections) {

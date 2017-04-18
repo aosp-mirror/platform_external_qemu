@@ -85,7 +85,7 @@ sofree(struct socket *so)
     }
   }
 
-  if (so->so_state && SS_PROXIFIED && slirp_proxy) {
+  if (so->so_state) {
 	slirp_proxy->remove(so);
   }
   if (so->so_emu==EMU_RSH && so->extra) {
@@ -935,3 +935,4 @@ const char* sockaddr_to_string(const struct sockaddr_storage* ss) {
 }
 
 const struct SlirpProxyOps *slirp_proxy;
+bool http_proxy_on = false;
