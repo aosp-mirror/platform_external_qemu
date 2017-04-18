@@ -17,5 +17,7 @@
 ANDROID_BEGIN_HEADER
 
 bool qemu_android_setup_http_proxy(const char* http_proxy);
+void qemu_android_remove_http_proxy();
+void qemu_android_init_http_proxy_ops();
 
 ANDROID_END_HEADER

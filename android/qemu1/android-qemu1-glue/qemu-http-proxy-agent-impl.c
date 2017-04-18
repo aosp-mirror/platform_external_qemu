@@ -15,6 +15,13 @@
 #include "android/http_proxy.h"
 
 static const QAndroidHttpProxyAgent sQAndroidHttpProxyAgent = {
-        .httpProxySet = android_http_proxy_set};
+        .httpProxySet = android_http_proxy_set,
+        .httpProxyCheck = android_http_proxy_check};
 const QAndroidHttpProxyAgent* const gQAndroidHttpProxyAgent =
         &sQAndroidHttpProxyAgent;
+AndroidProxyCB sAndroidProxyCB = {
+          .ProxySet = NULL,
+          .ProxyUnset = NULL
+};
+AndroidProxyCB* const gAndroidProxyCB = &sAndroidProxyCB;
+

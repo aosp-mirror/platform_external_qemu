@@ -11,7 +11,7 @@
  */
 
 #pragma once
-
+#include <stdbool.h>
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -28,6 +28,13 @@ typedef struct QAndroidHttpProxyAgent {
     //          and must be copied if it is needed after
     //          httpProxySet() returns.
     void (*httpProxySet)(const char* proxy);
+    bool (*httpProxyCheck)(const char* proxy, int port);
 } QAndroidHttpProxyAgent;
+
+// Callback functions to assign at runtime by qemu1 or qemu2
+typedef struct AndroidProxyCB {
+    bool (*ProxySet)(const char* proxy);
+    void (*ProxyUnset)();
+} AndroidProxyCB;
 
 ANDROID_END_HEADER
