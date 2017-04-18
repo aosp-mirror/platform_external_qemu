@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "75d107b3_e9f89d46",
+        "filename": "android/android-emu/android/HostHwInfo.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-18T19:04:18Z",
+      "side": 1,
+      "message": "should this be private?",
+      "revId": "089ad81f2d601b52fc9ae7cd790fbe2d98be149a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

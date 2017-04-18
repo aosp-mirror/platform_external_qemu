@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7e6b128a_7f2a07ee",
+        "filename": "android/android-emu/android/HostHwInfo.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-18T19:04:18Z",
+      "side": 1,
+      "message": "Is there a way to make all of these const?",
+      "revId": "d1bea7f2b8825e2b90cb606ecca274136cd6dcc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f029b17_886b4022",
+        "filename": "android/android-emu/android/HostHwInfo.h",
+        "patchSetId": 13
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-18T19:04:18Z",
+      "side": 1,
+      "message": "Why is this public?",
+      "revId": "d1bea7f2b8825e2b90cb606ecca274136cd6dcc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3fb8241e_5e14566e",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-18T19:04:18Z",
+      "side": 1,
+      "message": "*nit* whitespace",
+      "revId": "d1bea7f2b8825e2b90cb606ecca274136cd6dcc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "faa8242b_e4624c5c",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_darwin.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-18T19:04:18Z",
+      "side": 1,
+      "message": "Why mac os, why :-(.",
+      "revId": "d1bea7f2b8825e2b90cb606ecca274136cd6dcc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "309ed742_3406eef5",
+        "filename": "android/android-emu/android/crashreport/StructuredInfo.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 274,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-18T19:04:18Z",
+      "side": 1,
+      "message": "Looks like we are doing a lot of type conversion in this file :-). Is it worthwhile to generalize this?",
+      "revId": "d1bea7f2b8825e2b90cb606ecca274136cd6dcc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "700e79a8_a746a895",
+        "filename": "android/android-emu/android/crashreport/proto/crash_info.proto",
+        "patchSetId": 13
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-04-18T19:04:18Z",
+      "side": 1,
+      "message": "So we will be able to query what is in this file + host os information?",
+      "revId": "d1bea7f2b8825e2b90cb606ecca274136cd6dcc2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
