@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "039ff3ee_d1b2eedc",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-18T23:54:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5865f2fc_62bf607d",
+      "range": {
+        "startLine": 136,
+        "startChar": 43,
+        "endLine": 136,
+        "endChar": 47
+      },
+      "revId": "71be89396662ca818f79350e351d42cd47e20d18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e13511cd_6fc96cca",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
         "patchSetId": 4
@@ -36,6 +60,24 @@
       "writtenOn": "2017-04-18T23:49:51Z",
       "side": 1,
       "message": "maybe say \"remove it from the list and return it\"?",
+      "revId": "71be89396662ca818f79350e351d42cd47e20d18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7f4ebe9_2d278c80",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-18T23:54:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e13511cd_6fc96cca",
       "revId": "71be89396662ca818f79350e351d42cd47e20d18",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
