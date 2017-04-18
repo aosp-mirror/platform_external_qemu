@@ -46,6 +46,30 @@
       "revId": "d6633f8772891725c183682262e3e5ad0e76d709",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69d66560_8da7dc67",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1279,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-18T19:53:01Z",
+      "side": 1,
+      "message": "Checking output folder is slightly more reliable in case somebody makes mistakes when modifying the make file / backporting.\n\nBut if checking output folder is more complicated, then probably it doesn\u0027t worth the trouble.",
+      "parentUuid": "f8c03df1_7c8ed97f",
+      "range": {
+        "startLine": 1279,
+        "startChar": 33,
+        "endLine": 1279,
+        "endChar": 76
+      },
+      "revId": "d6633f8772891725c183682262e3e5ad0e76d709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
