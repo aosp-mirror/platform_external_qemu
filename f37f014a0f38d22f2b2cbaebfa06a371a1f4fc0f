@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b43aab1d_b78a6f85",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "|mPipes|",
+      "range": {
+        "startLine": 86,
+        "startChar": 44,
+        "endLine": 86,
+        "endChar": 52
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6265687_9f5eaf0d",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "Whenever",
+      "range": {
+        "startLine": 88,
+        "startChar": 3,
+        "endLine": 88,
+        "endChar": 11
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0c058ebf_ae1906f7",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "wait",
+      "range": {
+        "startLine": 89,
+        "startChar": 47,
+        "endLine": 89,
+        "endChar": 52
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3449f712_3e0743b0",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "another new connection + remove \"again\" perhaps?",
+      "range": {
+        "startLine": 90,
+        "startChar": 7,
+        "endLine": 90,
+        "endChar": 21
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e0262cb_d8f45041",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "add period at the end",
+      "range": {
+        "startLine": 92,
+        "startChar": 3,
+        "endLine": 92,
+        "endChar": 10
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5dcdb797_306d3f6a",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "Please add description of what the possible race condition could be before the solution to it",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 3
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f07f8fef_895af39d",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "I suggest rewording this to emphasize that the previous protocol required that the active pipe is disconnected before the new pipe can become active, and now, the new pipe can become active as long as the existing active pipes are fully connected (or disconnected, right?)",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 13
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38c23d6c_afa8c395",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "emulator",
+      "range": {
+        "startLine": 115,
+        "startChar": 46,
+        "endLine": 115,
+        "endChar": 54
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a7c61326_94cc263f",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "Add a case describing what would happen before the new protocol; 5037 server is disconnected by emulator I guess?",
+      "range": {
+        "startLine": 116,
+        "startChar": 37,
+        "endLine": 119,
+        "endChar": 37
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdc59a66_21613599",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "Wrap this in a function \"dequeuePipe\" or something descriptive, for readability",
+      "range": {
+        "startLine": 173,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 90
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7f1b61b_01b0824e",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-18T15:56:32Z",
+      "side": 1,
+      "message": "Please make this the top sentence in the commit message!",
+      "range": {
+        "startLine": 549,
+        "startChar": 25,
+        "endLine": 551,
+        "endChar": 68
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
