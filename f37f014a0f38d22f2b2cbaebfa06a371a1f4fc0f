@@ -163,6 +163,30 @@
     },
     {
       "key": {
+        "uuid": "4f8ccd0c_bd0828b7",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-18T23:37:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f07f8fef_895af39d",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 13
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "38c23d6c_afa8c395",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 1
@@ -174,6 +198,30 @@
       "writtenOn": "2017-04-18T15:56:32Z",
       "side": 1,
       "message": "emulator",
+      "range": {
+        "startLine": 115,
+        "startChar": 46,
+        "endLine": 115,
+        "endChar": 54
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1509887b_5ec41313",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-18T23:37:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "38c23d6c_afa8c395",
       "range": {
         "startLine": 115,
         "startChar": 46,
@@ -209,6 +257,30 @@
     },
     {
       "key": {
+        "uuid": "923b9d7f_628721a6",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-18T23:37:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a7c61326_94cc263f",
+      "range": {
+        "startLine": 116,
+        "startChar": 37,
+        "endLine": 119,
+        "endChar": 37
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdc59a66_21613599",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 1
@@ -220,6 +292,30 @@
       "writtenOn": "2017-04-18T15:56:32Z",
       "side": 1,
       "message": "Wrap this in a function \"dequeuePipe\" or something descriptive, for readability",
+      "range": {
+        "startLine": 173,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 90
+      },
+      "revId": "f37f014a0f38d22f2b2cbaebfa06a371a1f4fc0f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6c4b99d3_5305185d",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-04-18T23:37:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fdc59a66_21613599",
       "range": {
         "startLine": 173,
         "startChar": 0,
