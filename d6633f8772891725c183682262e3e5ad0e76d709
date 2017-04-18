@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df489bb7_3d81dd5f",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1279,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-18T19:38:39Z",
+      "side": 1,
+      "message": "is it better if you read the one in output folder?",
+      "range": {
+        "startLine": 1279,
+        "startChar": 33,
+        "endLine": 1279,
+        "endChar": 76
+      },
+      "revId": "d6633f8772891725c183682262e3e5ad0e76d709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
