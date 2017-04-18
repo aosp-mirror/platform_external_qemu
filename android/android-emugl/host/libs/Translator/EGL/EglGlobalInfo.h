@@ -94,6 +94,9 @@ public:
     // version.
     void initClientExtFuncTable(GLESVersion ver);
 
+    void markSurfaceForDestroy(EglDisplay* display,
+                               EGLSurface toDestroy);
+    void sweepDestroySurfaces();
 private:
     EglGlobalInfo();
     ~EglGlobalInfo();
@@ -101,6 +104,10 @@ private:
     friend emugl::LazyInstance<EglGlobalInfo>;
 
     std::vector<EglDisplay*>       m_displays;
+
+    std::vector<std::pair<EglDisplay*, EGLSurface> >
+                                   m_surfaceDestroyList;
+
     EglOS::Engine*                 m_engine = nullptr;
     EglOS::Display*                m_display = nullptr;
     const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION] = {};
