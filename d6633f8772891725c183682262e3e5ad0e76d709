@@ -70,6 +70,30 @@
       "revId": "d6633f8772891725c183682262e3e5ad0e76d709",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bc5ce37_e5fd0324",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1279,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-04-18T21:03:18Z",
+      "side": 1,
+      "message": "Since there are actually several different sources for this file depending on which build type is used it seems the output folder is the only reliable place to look. Unfortunately a simple make won\u0027t update the file from source so it\u0027s a little annoying but figuring out the correct source file in the emulator seems like too much work and doesn\u0027t feel like the right thing to do.\n\nIf I get some time I\u0027ll look into changing the build system so that the file is copied when running make.",
+      "parentUuid": "69d66560_8da7dc67",
+      "range": {
+        "startLine": 1279,
+        "startChar": 33,
+        "endLine": 1279,
+        "endChar": 76
+      },
+      "revId": "d6633f8772891725c183682262e3e5ad0e76d709",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
