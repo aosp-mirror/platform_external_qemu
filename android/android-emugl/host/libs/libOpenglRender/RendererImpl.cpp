@@ -228,8 +228,17 @@ void RendererImpl::save(android::base::Stream* stream) {
 }
 
 bool RendererImpl::load(android::base::Stream* stream) {
+#ifdef SNAPSHOT_PROFILE
+    android::base::System::Duration startTime
+            = android::base::System::get()->getUnixTimeUs();
+#endif
     cleanupRenderThreads();
     waitForProcessCleanup();
+#ifdef SNAPSHOT_PROFILE
+    printf("RenderThread cleanup time: %ld ms\n",
+            (android::base::System::get()->getUnixTimeUs()
+            - startTime) / 1000);
+#endif
 
     mStopped = stream->getByte();
     if (mStopped) {
