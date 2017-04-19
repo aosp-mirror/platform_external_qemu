@@ -663,6 +663,7 @@ void slirp_input(const uint8_t *pkt, int pkt_len)
         arp_input(pkt, pkt_len);
         break;
     case ETH_P_IP:
+    case ETH_P_IPV6:
         m = m_get();
         if (!m)
             return;
@@ -678,7 +679,11 @@ void slirp_input(const uint8_t *pkt, int pkt_len)
         m->m_data += extra + ETH_HLEN;
         m->m_len -= extra + ETH_HLEN;
 
-        ip_input(m);
+        if (proto == ETH_P_IP) {
+            ip_input(m);
+        } else if (proto == ETH_P_IPV6) {
+            ip6_input(m);
+        }
         break;
     default:
         break;
