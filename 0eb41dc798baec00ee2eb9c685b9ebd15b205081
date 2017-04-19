@@ -1,0 +1,199 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10b600ea_2694002c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "The commit message should have\n- A short one-line description\n- More description\n- A line with the keyword \"Bug:\" (if there is a bug) No need for \"b/\"--it gets made into a link automatically.\n- A line with the keyword \"Test:\" Ideally this says which unit test checks this code automatically. Lots of time it just describes how you tested it manually.\n\nFor example:\n\nAdd callback function to check proxy connection\n\nMake runtime proxy change thread safe\nFix slirp proxy bug\n\nBug: 37077782\n\nTest: Manually verified",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 19
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "85f24323_95664475",
+        "filename": "android-qemu2-glue/proxy/slirp_proxy.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "Could you also check if the string is empty?\n\nIn some cases, my code passes an empty string if there are no proxy settings.",
+      "range": {
+        "startLine": 119,
+        "startChar": 7,
+        "endLine": 119,
+        "endChar": 20
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a114e46f_2a988563",
+        "filename": "android-qemu2-glue/proxy/slirp_proxy.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "Do you need to set \u0027http_proxy_on \u003d false\u0027 here?",
+      "range": {
+        "startLine": 120,
+        "startChar": 8,
+        "endLine": 120,
+        "endChar": 19
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05366079_75ee4072",
+        "filename": "android/android-emu/android/emulation/control/http_proxy_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "is null or \"\",\n\n(That was my omission.)",
+      "range": {
+        "startLine": 25,
+        "startChar": 18,
+        "endLine": 25,
+        "endChar": 25
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d75c274b_f5ed94c7",
+        "filename": "android/android-emu/android/emulation/control/http_proxy_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "Add a description of this function.\n\nI think one parameter is a URL that we will attempt to reach.\n\nShould we also pass in new proxy settings that we are testing, or test using the current proxy settings?",
+      "range": {
+        "startLine": 31,
+        "startChar": 11,
+        "endLine": 31,
+        "endChar": 25
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "01a2efaa_b9608e63",
+        "filename": "android/android-emu/android/emulation/control/http_proxy_agent.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "This seems redundant to me. Shouldn\u0027t qemu1 or qemu2 just assign the callbacks in QAndroidHttpProxyAgent?",
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd65bfb5_17cc9635",
+        "filename": "android/android-emu/android/http_proxy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "Should alphabetize these",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 55
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d71531d5_7238e872",
+        "filename": "android/android-emu/android/http_proxy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "proxy \u003d\u003d NULL || *proxy \u003d\u003d \u0027\\0\u0027",
+      "range": {
+        "startLine": 31,
+        "startChar": 8,
+        "endLine": 31,
+        "endChar": 21
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a35f3a8c_1363a84e",
+        "filename": "android/qemu1/android-qemu1-glue/qemu-http-proxy-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T16:36:19Z",
+      "side": 1,
+      "message": "Redundant?",
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
