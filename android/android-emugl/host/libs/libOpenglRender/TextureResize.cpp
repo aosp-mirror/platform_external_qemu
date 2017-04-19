@@ -32,21 +32,37 @@
 #define V(...)  VERBOSE_PRINT(gles,__VA_ARGS__)
 #define MAX_FACTOR_POWER 4
 
-static const char kCommonShaderSource[] =
+static const char kCommonShaderSourceVertex[] =
+    "#version 300 es\n"
     "precision mediump float;\n"
-    "varying vec2 vUV00, vUV01;\n"
+    "out vec2 vUV00, vUV01;\n"
     "#if FACTOR > 2\n"
-    "varying vec2 vUV02, vUV03;\n"
+    "out vec2 vUV02, vUV03;\n"
     "#if FACTOR > 4\n"
-    "varying vec2 vUV04, vUV05, vUV06, vUV07;\n"
+    "out vec2 vUV04, vUV05, vUV06, vUV07;\n"
     "#if FACTOR > 8\n"
-    "varying vec2 vUV08, vUV09, vUV10, vUV11, vUV12, vUV13, vUV14, vUV15;\n"
+    "out vec2 vUV08, vUV09, vUV10, vUV11, vUV12, vUV13, vUV14, vUV15;\n"
     "#endif\n"
     "#endif\n"
     "#endif\n";
 
+static const char kCommonShaderSourceFrag[] =
+    "#version 300 es\n"
+    "precision mediump float;\n"
+    "in vec2 vUV00, vUV01;\n"
+    "#if FACTOR > 2\n"
+    "in vec2 vUV02, vUV03;\n"
+    "#if FACTOR > 4\n"
+    "in vec2 vUV04, vUV05, vUV06, vUV07;\n"
+    "#if FACTOR > 8\n"
+    "in vec2 vUV08, vUV09, vUV10, vUV11, vUV12, vUV13, vUV14, vUV15;\n"
+    "#endif\n"
+    "#endif\n"
+    "#endif\n";
+
+
 static const char kVertexShaderSource[] =
-    "attribute vec2 aPosition;\n"
+    "in vec2 aPosition;\n"
 
     "void main() {\n"
     "  gl_Position = vec4(aPosition, 0, 1);\n"
@@ -102,9 +118,10 @@ static const char kVertexShaderSource[] =
 
 const char kFragmentShaderSource[] =
     "uniform sampler2D uTexture;\n"
+    "out vec4 color;\n"
 
     "vec3 read(vec2 uv) {\n"
-    "  vec3 r = texture2D(uTexture, uv).rgb;\n"
+    "  vec3 r = texture(uTexture, uv).rgb;\n"
     "  #ifdef HORIZONTAL\n"
     "  r.rgb = pow(r.rgb, vec3(2.2));\n"
     "  #endif\n"
@@ -127,7 +144,7 @@ const char kFragmentShaderSource[] =
     "  #ifdef VERTICAL\n"
     "  sum.rgb = pow(sum.rgb, vec3(1.0 / 2.2));\n"
     "  #endif\n"
-    "  gl_FragColor = vec4(sum.rgb, 1.0);\n"
+    "  color = vec4(sum.rgb, 1.0);\n"
     "}\n";
 
 static const float kVertexData[] = {-1, -1, 3, -1, -1, 3};
@@ -174,10 +191,10 @@ static void attachShaders(TextureResize::Framebuffer* fb, const char* factorDefi
 
     GLuint vShader = createShader(GL_VERTEX_SHADER, {
             factorDefine, dimensionDefine,
-            kCommonShaderSource, dimensionConst.str().c_str(), kVertexShaderSource
+            kCommonShaderSourceVertex, dimensionConst.str().c_str(), kVertexShaderSource
     });
     GLuint fShader = createShader(GL_FRAGMENT_SHADER, {
-        factorDefine, dimensionDefine, kCommonShaderSource, kFragmentShaderSource
+        factorDefine, dimensionDefine, kCommonShaderSourceFrag, kFragmentShaderSource
     });
 
     if (!vShader || !fShader) {
@@ -188,7 +205,9 @@ static void attachShaders(TextureResize::Framebuffer* fb, const char* factorDefi
     s_gles2.glAttachShader(fb->program, fShader);
     s_gles2.glLinkProgram(fb->program);
 
+    fprintf(stderr, "%s: use pro\n", __func__);
     s_gles2.glUseProgram(fb->program);
+    fprintf(stderr, "%s: use pro 2\n", __func__);
     fb->aPosition = s_gles2.glGetAttribLocation(fb->program, "aPosition");
     fb->uTexture = s_gles2.glGetUniformLocation(fb->program, "uTexture");
 }
@@ -299,7 +318,7 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
     // Update the framebuffer sizes to match the new factor.
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
     s_gles2.glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight, 0, GL_RGB,
+        GL_TEXTURE_2D, 0, GL_RGB8, mWidth / factor, mHeight, 0, GL_RGB,
                 mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBWidth.framebuffer);
@@ -308,7 +327,7 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
 
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
     s_gles2.glTexImage2D(
-        GL_TEXTURE_2D, 0, GL_RGB, mWidth / factor, mHeight / factor, 0, GL_RGB,
+        GL_TEXTURE_2D, 0, GL_RGB8, mWidth / factor, mHeight / factor, 0, GL_RGB,
                 mTextureDataType, nullptr);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, mFBHeight.framebuffer);

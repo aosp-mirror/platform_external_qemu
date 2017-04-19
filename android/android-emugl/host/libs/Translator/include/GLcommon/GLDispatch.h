@@ -28,6 +28,8 @@
 #include <cstring>
 #include <type_traits>
 
+#include <pthread.h>
+
 #define GLAPIENTRY GL_APIENTRY
 typedef void (*FUNCPTR_NO_ARGS_RET_VOID)();
 typedef int (*FUNCPTR_NO_ARGS_RET_INT)();
@@ -83,7 +85,7 @@ public:
             if (err != GL_NO_ERROR) {
                 fprintf (stderr, "GLDispatch error 0x%x existed before running %s\n", err, mFuncName);
             }
-            fprintf (stderr, "GLDispatch calling %s (", funcName);
+            fprintf (stderr, "0x%x: GLDispatch calling %s (", (unsigned int)pthread_self(), funcName);
         }
     }
 

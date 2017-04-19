@@ -140,22 +140,22 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     bool gles31_supported = true;
     bool gles32_supported = false;
     // For 3.0, we don't really need glInvalidate(Sub)Framebuffer.
-#define DETECT_GLES30_SUPPORT(return_type, function_name, signature, callargs) do { \
-    if (!function_name && \
-        strcmp(#function_name, "glInvalidateFramebuffer") && \
-        strcmp(#function_name, "glInvalidateSubFramebuffer") ) { \
-        gles30_supported = false; \
-    } \
-    } while(0); \
-
-    LIST_GLES3_ONLY_FUNCTIONS(DETECT_GLES30_SUPPORT)
-
-#define DETECT_GLES31_SUPPORT(return_type, function_name, signature, callargs) do { \
-    if (!function_name) { \
-        gles31_supported = false; } \
-    } while(0); \
-
-    LIST_GLES31_ONLY_FUNCTIONS(DETECT_GLES31_SUPPORT)
+// #define DETECT_GLES30_SUPPORT(return_type, function_name, signature, callargs) do { \
+//     if (!function_name && \
+//         strcmp(#function_name, "glInvalidateFramebuffer") && \
+//         strcmp(#function_name, "glInvalidateSubFramebuffer") ) { \
+//         gles30_supported = false; \
+//     } \
+//     } while(0); \
+// 
+//     LIST_GLES3_ONLY_FUNCTIONS(DETECT_GLES30_SUPPORT)
+// 
+// #define DETECT_GLES31_SUPPORT(return_type, function_name, signature, callargs) do { \
+//     if (!function_name) { \
+//         gles31_supported = false; } \
+//     } while(0); \
+// 
+//     LIST_GLES31_ONLY_FUNCTIONS(DETECT_GLES31_SUPPORT)
 
     if (gles30_supported && gles31_supported && gles32_supported) {
         s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_3_2;

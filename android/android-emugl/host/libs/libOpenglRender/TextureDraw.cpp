@@ -16,6 +16,8 @@
 
 #include "DispatchTables.h"
 
+#include <string>
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -42,6 +44,13 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
     s_gles2.glCompileShader(shader);
     s_gles2.glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
+        GLint infoLength;
+        s_gles2.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLength);
+        std::string infoLog(infoLength + 1, '\0');
+        s_gles2.glGetShaderInfoLog(shader, infoLength, nullptr, &infoLog[0]);
+        ERR("%s shader compile failed:\n%s\n",
+                (shaderType == GL_VERTEX_SHADER) ? "Vertex" : "Fragment",
+                infoLog.c_str());
         s_gles2.glDeleteShader(shader);
         return 0;
     }
@@ -57,9 +66,11 @@ GLuint createShader(GLint shaderType, const char* shaderText) {
 //  shader; anyway the new code has hardcoded texture coordinate mapping for
 //  different rotation angles and works in both native OpenGL and SwiftShader.
 const char kVertexShaderSource[] =
-    "attribute vec4 position;\n"
-    "attribute vec2 inCoord;\n"
-    "varying vec2 outCoord;\n"
+    "#version 300 es\n"
+    "precision highp float;\n"
+    "in vec4 position;\n"
+    "in vec2 inCoord;\n"
+    "out vec2 outCoord;\n"
     "uniform vec2 translation;\n"
 
     "void main(void) {\n"
@@ -70,11 +81,14 @@ const char kVertexShaderSource[] =
 
 // Similarly, just interpolate texture coordinates.
 const char kFragmentShaderSource[] =
-    "varying lowp vec2 outCoord;\n"
+    "#version 300 es\n"
+    "precision highp float;\n"
+    "in lowp vec2 outCoord;\n"
     "uniform sampler2D tex;\n"
+    "out vec4 color;\n"
 
     "void main(void) {\n"
-    "  gl_FragColor = texture2D(tex, outCoord);\n"
+    "  color = texture(tex, outCoord);\n"
     "}\n";
 
 // Hard-coded arrays of vertex information.
@@ -141,13 +155,15 @@ TextureDraw::TextureDraw() :
         GLchar messages[256];
         s_gles2.glGetProgramInfoLog(
                 mProgram, sizeof(messages), 0, &messages[0]);
-        ERR("%s: Could not create/link program: %s\n", __FUNCTION__, messages);
+        fprintf(stderr, "%s: Could not create/link program: %s\n", __FUNCTION__, messages);
         s_gles2.glDeleteProgram(mProgram);
         mProgram = 0;
         return;
     }
 
+    fprintf(stderr, "%s: use pro\n", __func__);
     s_gles2.glUseProgram(mProgram);
+    fprintf(stderr, "%s: use pro 2\n", __func__);
 
     // Retrieve attribute/uniform locations.
     mPositionSlot = s_gles2.glGetAttribLocation(mProgram, "position");

@@ -30,9 +30,11 @@ GLuint createShader(const GLESv2Dispatch* gles2,
     if (success == GL_FALSE) {
         char msgs[256];
         gles2->glGetShaderInfoLog(shader, sizeof(msgs), nullptr, msgs);
-        qWarning("Error compiling %s shader: %s",
+        fprintf(stderr, "Error compiling %s shader: %s",
                  shader_type == GL_VERTEX_SHADER ? "vertex" : "fragment",
                  msgs);
+        *(int*)NULL = 1;
+        
     }
     return success == GL_TRUE ? shader : 0;
 }

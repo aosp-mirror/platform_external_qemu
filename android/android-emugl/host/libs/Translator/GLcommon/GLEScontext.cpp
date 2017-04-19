@@ -1832,6 +1832,7 @@ void GLEScontext::initDefaultFBO(
         GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
         GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
         GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
+    return;
 
     if (!m_defaultFBO) {
         dispatcher().glGenFramebuffers(1, &m_defaultFBO);

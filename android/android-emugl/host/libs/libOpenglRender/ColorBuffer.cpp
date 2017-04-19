@@ -26,6 +26,8 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "emugl/common/misc.h"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -37,23 +39,27 @@ namespace {
 // on creation only. I.e. all rendering operations will target it.
 // returns true in case of success, false on failure.
 bool bindFbo(GLuint* fbo, GLuint tex) {
+    // PROFILE_CALL_STDERR("bindFbo");
     if (*fbo) {
         // fbo already exist - just bind
         s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
         return true;
     }
 
-    s_gles2.glGenFramebuffers(1, fbo);
-    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
-    s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
-                                   GL_TEXTURE_2D, tex, 0);
-    GLenum status = s_gles2.glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
-        ERR("ColorBuffer::bindFbo: FBO not complete: %#x\n", status);
-        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        s_gles2.glDeleteFramebuffers(1, fbo);
-        *fbo = 0;
-        return false;
+    {
+        // PROFILE_CALL_STDERR("bindFbo-init");
+        s_gles2.glGenFramebuffers(1, fbo);
+        s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
+        s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
+                GL_TEXTURE_2D, tex, 0);
+        GLenum status = s_gles2.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
+            ERR("ColorBuffer::bindFbo: FBO not complete: %#x\n", status);
+            s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            s_gles2.glDeleteFramebuffers(1, fbo);
+            *fbo = 0;
+            return false;
+        }
     }
     return true;
 }
@@ -74,24 +80,29 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  HandleType hndl,
                                  Helper* helper) {
     GLenum texInternalFormat = 0;
+    GLenum texFormat = 0;
+    int nComp;
 
     switch (p_internalFormat) {
         case GL_RGB:
         case GL_RGB565_OES:
-            texInternalFormat = GL_RGB;
+            nComp = 3;
+            texInternalFormat = GL_RGB8;
+            texFormat = GL_RGB;
             break;
 
         case GL_RGBA:
         case GL_RGB5_A1_OES:
         case GL_RGBA4_OES:
-            texInternalFormat = GL_RGBA;
+            nComp = 4;
+            texInternalFormat = GL_RGBA8;
+            texFormat = GL_RGBA;
             break;
 
         default:
             return NULL;
     }
 
-    const int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
     const unsigned long bufsize = ((unsigned long)nComp) * p_width * p_height;
     android::base::ScopedCPtr<char> initialImage(
                 static_cast<char*>(::malloc(bufsize)));
@@ -111,11 +122,16 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
 
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
+    // s_gles2.glGenBuffers(1, &cb->m_pbo);
+    // s_gles2.glBindBuffer(GL_ARRAY_BUFFER, cb->m_pbo);
+    // s_gles2.glBufferData(GL_ARRAY_BUFFER, bufsize, 0, GL_STREAM_READ);
+    // s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     s_gles2.glGenTextures(1, &cb->m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
-                         0, texInternalFormat, GL_UNSIGNED_BYTE,
+                         0, texFormat, GL_UNSIGNED_BYTE,
                          initialImage.get());
     initialImage.reset();
 
@@ -130,7 +146,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glGenTextures(1, &cb->m_blitTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
-                         0, texInternalFormat, GL_UNSIGNED_BYTE, NULL);
+                         0, texFormat, GL_UNSIGNED_BYTE, NULL);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -166,6 +182,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
             break;
     }
 
+    bindFbo(&cb->m_fbo, cb->m_tex);
+    unbindFbo();
     s_gles2.glFinish();
     return cb;
 }
@@ -206,6 +224,7 @@ void ColorBuffer::readPixels(int x,
                              GLenum p_format,
                              GLenum p_type,
                              void* pixels) {
+    // PROFILE_CALL_STDERR("readPixels");
     RecursiveScopedHelperContext context(m_helper);
     if (!context.isOk()) {
         return;
@@ -291,8 +310,10 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
             s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
         } else {
+            fprintf(stderr, "%s: blit copy start\n", __func__);
             s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                         m_height);
+            fprintf(stderr, "%s: blit copy end\n", __func__);
         }
         s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);

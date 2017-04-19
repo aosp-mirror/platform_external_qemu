@@ -169,7 +169,7 @@ static void createYUVGLTex(GLenum texture_unit,
     s_gles2.glBindTexture(GL_TEXTURE_2D, *texName_out);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE,
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, GL_R8,
                          width, height, 0,
                          GL_LUMINANCE, GL_UNSIGNED_BYTE,
                          NULL);

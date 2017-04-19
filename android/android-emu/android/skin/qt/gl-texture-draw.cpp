@@ -17,20 +17,24 @@
 
 // Vertex shader for anti-aliasing - doesn't do anything special.
 static const char VertexShaderSource[] = R"(
-    attribute vec2 position;
+    #version 300 es
+    precision mediump float;
+    in vec2 position;
     void main(void) {
         gl_Position = vec4(position.x, position.y, 0.0, 1.0);
     })";
 
 // Fragment shader
 static const char FragmentShaderSource[] = R"(
+    #version 300 es
     precision mediump float;
     uniform sampler2D texture;
     uniform vec2 resolution;
+    out vec4 color;
     void main(void) {
         vec2 pixel_coord = gl_FragCoord.xy;
         vec2 inverse_res = 1.0 / resolution;
-        gl_FragColor = texture2D(texture, inverse_res * pixel_coord);
+        color = texture(texture, inverse_res * pixel_coord);
     }
 )";
 
@@ -62,6 +66,7 @@ TextureDraw::TextureDraw(const GLESv2Dispatch* gl_dispatch) :
         GLchar infolog[256];
         mGLES2->glGetProgramInfoLog(mProgram, sizeof(infolog), 0, infolog);
         fprintf(stderr, "Could not create/link program: %s\n", infolog);
+        *(int*)NULL = 1;
         return;
     }
 

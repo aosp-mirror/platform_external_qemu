@@ -213,6 +213,7 @@ private:
     GLuint m_width = 0;
     GLuint m_height = 0;
     GLuint m_fbo = 0;
+    GLuint m_pbo = 0;
     GLenum m_internalFormat = 0;
     EGLDisplay m_display = nullptr;
     Helper* m_helper = nullptr;

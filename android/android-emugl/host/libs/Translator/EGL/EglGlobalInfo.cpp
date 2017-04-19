@@ -124,6 +124,8 @@ void EglGlobalInfo::sweepDestroySurfaces() {
             m_gles_ifaces[GLES_2_0]->deleteRbo(surfacePtr->glRboColor);
             m_gles_ifaces[GLES_2_0]->deleteRbo(surfacePtr->glRboDepth);
         }
+        surfacePtr->glRboColor = 0;
+        surfacePtr->glRboDepth = 0;
         dpy->removeSurface(surface);
     }
     m_surfaceDestroyList.clear();

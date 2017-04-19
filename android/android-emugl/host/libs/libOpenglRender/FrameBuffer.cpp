@@ -94,7 +94,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
         return NULL;
     }
 
-    static const GLint gles2ContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
+    static const GLint gles2ContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3,
                                                 EGL_NONE};
 
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
@@ -251,7 +251,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
 
     fb->m_eglConfig = all_configs[exact_match_index];
 
-    static const GLint glContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
+    static const GLint glContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 3,
                                              EGL_NONE};
 
     GL_LOG("attempting to create egl context");
