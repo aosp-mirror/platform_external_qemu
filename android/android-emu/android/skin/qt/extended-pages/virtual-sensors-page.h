@@ -42,7 +42,10 @@ private slots:
     void on_accelModeRotate_toggled();
     void on_accelModeMove_toggled();
 
-    void onMagVectorChanged();
+    void on_magNorthWidget_valueChanged(double value);
+    void on_magEastWidget_valueChanged(double value);
+    void on_magVerticalWidget_valueChanged(double value);
+
     void updateAccelerations();
     void onPhoneRotationChanged();
     void onPhonePositionChanged();

@@ -31,28 +31,23 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mSensorsAgent(nullptr)
 {
     mUi->setupUi(this);
+    // The initial values are set here to match the initial
+    // values reported by an AVD.
     mUi->temperatureSensorValueWidget->setRange(-273.1, 100.0);
-    mUi->temperatureSensorValueWidget->setValue(25.0);
+    mUi->temperatureSensorValueWidget->setValue(0.0);
     mUi->lightSensorValueWidget->setRange(0, 40000.0);
-    mUi->lightSensorValueWidget->setValue(20000.0);
-    mUi->pressureSensorValueWidget->setRange(300, 1100);
-    mUi->pressureSensorValueWidget->setValue(1013.25);
+    mUi->lightSensorValueWidget->setValue(0.0);
+    mUi->pressureSensorValueWidget->setRange(0, 1100);
+    mUi->pressureSensorValueWidget->setValue(0.0);
     mUi->humiditySensorValueWidget->setRange(0, 100);
-    mUi->humiditySensorValueWidget->setValue(50);
+    mUi->humiditySensorValueWidget->setValue(0);
     mUi->proximitySensorValueWidget->setRange(0, 10);
-    mUi->proximitySensorValueWidget->setValue(10);
+    mUi->proximitySensorValueWidget->setValue(1);
     mUi->magNorthWidget->setLocale(QLocale::c());
     mUi->magEastWidget->setLocale(QLocale::c());
     mUi->magVerticalWidget->setLocale(QLocale::c());
 
     updateSensorValues();
-
-    connect(mUi->magNorthWidget, SIGNAL(editingFinished()),
-            this, SLOT(onMagVectorChanged()));
-    connect(mUi->magEastWidget, SIGNAL(editingFinished()),
-            this, SLOT(onMagVectorChanged()));
-    connect(mUi->magVerticalWidget, SIGNAL(editingFinished()),
-            this, SLOT(onMagVectorChanged()));
 
     connect(mUi->accelWidget, SIGNAL(rotationChanged()),
             this, SLOT(onPhoneRotationChanged()));
@@ -264,7 +259,13 @@ void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
     setSensorValue(mSensorsAgent, ANDROID_SENSOR_HUMIDITY, value);
 }
 
-void VirtualSensorsPage::onMagVectorChanged() {
+void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
+    updateSensorValues();
+}
+void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
+    updateSensorValues();
+}
+void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
     updateSensorValues();
 }
 
