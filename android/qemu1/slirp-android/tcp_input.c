@@ -230,7 +230,7 @@ present:
  * protocol specification dated September, 1981 very closely.
  */
 void
-tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
+tcp_input(struct mbuf *m, int iphlen, struct socket *inso, SocketFamily sf)
 {
   	struct ip save_ip, *ip;
 	register struct tcpiphdr *ti;
@@ -245,6 +245,7 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
 	int iss = 0;
 	u_long tiwin;
 	int ret;
+	SockAddress src, dst;
 /*	int ts_present = 0; */
     struct ex_list *ex_ptr;
 
@@ -274,39 +275,46 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
 
 	ip = mtod(m, struct ip *);
 
-	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct ip) -
-		sizeof(struct tcphdr);
-	if (iphlen > (int)sizeof(struct ip )) {
-	  ip_stripoptions(m, (struct mbuf *)0);
-	  iphlen=sizeof(struct ip );
-	}
-	/* XXX Check if too short */
+	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr);
 
+	switch (sf) {
+	case SOCKET_INET:
+	  if (iphlen > (int)sizeof(struct ip )) {
+	    ip_stripoptions(m, (struct mbuf *)0);
+	    iphlen=sizeof(struct ip );
+	  }
+	  /* XXX Check if too short */
 
-	/*
-	 * Save a copy of the IP header in case we want restore it
-	 * for sending an ICMP error message in response.
-	 */
-	save_ip = *ip;
-	save_ip.ip_len+= iphlen;
-	/*
-	 * Get IP and TCP header together in first mbuf.
-	 * Note: IP leaves IP header in first mbuf.
-	 */
-	m->m_data -= delta;
-	m->m_len += delta;
-	ti = mtod(m, struct tcpiphdr *);
+	  /*
+	   * Save a copy of the IP header in case we want restore it
+	   * for sending an ICMP error message in response.
+	   */
+	  save_ip = *ip;
+	  save_ip.ip_len+= iphlen;
+	  delta -= sizeof(struct ip);
+	  /*
+	   * Get IP and TCP header together in first mbuf.
+	   * Note: IP leaves IP header in first mbuf.
+	   */
+	  m->m_data -= delta;
+	  m->m_len += delta;
+	  ti = mtod(m, struct tcpiphdr *);
 
-	/*
-	 * Checksum extended TCP header and data.
-	 */
-	tlen = ip->ip_len;
-	tcpiphdr2qlink(ti)->next = tcpiphdr2qlink(ti)->prev = NULL;
-	memset(&ti->ti_i, 0 , sizeof(ti->ti_i));
-	ti->ti_len = htons((u_int16_t)tlen);
-	ti->ti_src = save_ip.ip_src;
-	ti->ti_dst = save_ip.ip_dst;
-	ti->ti_pr = save_ip.ip_p;
+	  /*
+	   * Checksum extended TCP header and data.
+	   */
+	  tlen = ip->ip_len;
+	  tcpiphdr2qlink(ti)->next = tcpiphdr2qlink(ti)->prev = NULL;
+	  memset(&ti->ti_i, 0 , sizeof(ti->ti_i));
+	  ti->ti_len = htons((u_int16_t)tlen);
+	  ti->ti_src = save_ip.ip_src;
+	  ti->ti_dst = save_ip.ip_dst;
+	  ti->ti_pr = save_ip.ip_p;
+	  break;
+        default:
+	  g_assert_not_reached();
+        }
+
 	len = sizeof(struct tcpiphdr) - sizeof(struct tcphdr) + tlen;
 	/* keep checksum for ICMP reply
 	 * ti->ti_sum = cksum(m, len);
@@ -380,12 +388,17 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
 	 */
 findso:
     {
-        SockAddress src, dst;
-        uint16_t  dstport = port_geth(ti->ti_dport);
-        uint16_t  srcport = port_geth(ti->ti_sport);
-        sock_address_init_inet(&src, ip_geth(ti->ti_src), srcport);
-        sock_address_init_inet(&dst, ip_geth(ti->ti_dst), dstport);
-        so = solookup(&tcp_last_so, &tcb, &src, &dst);
+	uint16_t  dstport = port_geth(ti->ti_dport);
+	uint16_t  srcport = port_geth(ti->ti_sport);
+	switch (sf) {
+	case SOCKET_INET:
+	  sock_address_init_inet(&src, ip_geth(ti->ti_src), srcport);
+	  sock_address_init_inet(&dst, ip_geth(ti->ti_dst), dstport);
+	  break;
+	default:
+	  g_assert_not_reached();
+	}
+	so = solookup(&tcp_last_so, &tcb, &src, &dst);
     }
 	/*
 	 * If the state is CLOSED (i.e., TCB does not exist) then
@@ -417,13 +430,18 @@ findso:
 	  /*		tcp_last_so = so; */  /* XXX ? */
 	  /*		tp = sototcpcb(so);    */
 
-	  sock_address_init_inet(&so->laddr, ip_geth(ti->ti_src),
-                                 port_geth(ti->ti_sport));
-	  sock_address_init_inet(&so->faddr, ip_geth(ti->ti_dst),
-                                 port_geth(ti->ti_dport));
+	  so->laddr = src;
+	  so->faddr = dst;
 
-	  if ((so->so_iptos = tcp_tos(so)) == 0)
-	    so->so_iptos = ((struct ip *)ti)->ip_tos;
+	  if ((so->so_iptos = tcp_tos(so)) == 0) {
+		switch (sf) {
+		case SOCKET_INET:
+		  so->so_iptos = save_ip.ip_tos;
+		  break;
+		default:
+		  g_assert_not_reached();
+		}
+	  }
 
 	  tp = sototcpcb(so);
 	  tp->t_state = TCPS_LISTEN;
@@ -643,7 +661,8 @@ findso:
 	   * If this is destined for the control address, then flag to
 	   * tcp_ctl once connected, otherwise connect
 	   */
-	  if ((so->so_faddr_ip & 0xffffff00) == special_addr_ip) {
+	  if (sf == SOCKET_INET &&
+	      (so->so_faddr_ip & 0xffffff00) == special_addr_ip) {
 	    int lastbyte=so->so_faddr_ip & 0xff;
 	    if (lastbyte!=CTL_ALIAS && lastbyte!=CTL_DNS) {
 #if 0
@@ -680,9 +699,18 @@ findso:
 	    if(errno == ECONNREFUSED) {
 	      /* ACK the SYN, send RST to refuse the connection */
 	      tcp_respond(tp, ti, m, ti->ti_seq+1, (tcp_seq)0,
-			  TH_RST|TH_ACK);
+			  TH_RST|TH_ACK, sf);
 	    } else {
-	      if(errno == EHOSTUNREACH) code=ICMP_UNREACH_HOST;
+	      switch (sf) {
+	      case SOCKET_INET:
+		code = ICMP_UNREACH_NET;
+		if (errno == EHOSTUNREACH) {
+		  code = ICMP_UNREACH_HOST;
+		}
+		break;
+	      default:
+		g_assert_not_reached();
+	      }
 	      HTONL(ti->ti_seq);             /* restore tcp header */
 	      HTONL(ti->ti_ack);
 	      HTONS(ti->ti_win);
@@ -691,8 +719,14 @@ findso:
 	      m->m_len  += sizeof(struct tcpiphdr)+off-sizeof(struct tcphdr);
 	      m->m_data += delta;
 	      m->m_len  -= delta;
-	      *ip=save_ip;
-	      icmp_error(m, ICMP_UNREACH,code, 0,errno_str);
+	      switch (sf) {
+	      case SOCKET_INET:
+		*ip=save_ip;
+		icmp_error(m, ICMP_UNREACH,code, 0,errno_str);
+		break;
+	      default:
+		g_assert_not_reached();
+	      }
 	    }
 	    tp = tcp_close(tp);
 	    m_free(m);
@@ -1479,11 +1513,11 @@ dropafterack:
 dropwithreset:
 	/* reuses m if m!=NULL, m_free() unnecessary */
 	if (tiflags & TH_ACK)
-		tcp_respond(tp, ti, m, (tcp_seq)0, ti->ti_ack, TH_RST);
+		tcp_respond(tp, ti, m, (tcp_seq)0, ti->ti_ack, TH_RST, sf);
 	else {
 		if (tiflags & TH_SYN) ti->ti_len++;
 		tcp_respond(tp, ti, m, ti->ti_seq+ti->ti_len, (tcp_seq)0,
-		    TH_RST|TH_ACK);
+		    TH_RST|TH_ACK, sf);
 	}
 
 	return;

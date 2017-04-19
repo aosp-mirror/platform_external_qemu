@@ -477,7 +477,8 @@ void slirp_select_poll(fd_set **readfds, fd_set **writefds, fd_set **xfds)
 			    /*
 			     * Continue tcp_input
 			     */
-			    tcp_input((struct mbuf *)NULL, sizeof(struct ip), so);
+			    tcp_input((struct mbuf *)NULL, sizeof(struct ip),
+				      so, so->faddr.family);
 			    /* continue; */
 			  } else
 			    ret = sowrite(so);
