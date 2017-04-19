@@ -1,0 +1,76 @@
+list(APPEND SOURCES
+	AdbDebugPipe.cpp
+	#AdbDebugPipe_unittest.cpp
+	AdbGuestPipe.cpp
+	#AdbGuestPipe_unittest.cpp
+	AdbHostListener.cpp
+	#AdbHostListener_unittest.cpp
+	AdbHostServer.cpp
+	#AdbHostServer_unittest.cpp
+	AndroidPipe.cpp
+	AudioCaptureEngine.cpp
+	ClipboardPipe.cpp
+	ComponentVersion.cpp
+	#ComponentVersion_unittest.cpp
+	ConfigDirs.cpp
+	#ConfigDirs_unittest.cpp
+	CpuAccelerator.cpp
+	#CpuAccelerator_unittest.cpp
+	#DeviceContextRunner_unittest.cpp
+	DmaMap.cpp
+	#DmaMap_unittest.cpp
+	GoldfishDma.cpp
+	GoldfishSyncCommandQueue.cpp
+	LogcatPipe.cpp
+	ParameterList.cpp
+	#ParameterList_unittest.cpp
+	SerialLine.cpp
+	SetupParameters.cpp
+	#SetupParameters_unittest.cpp
+	VmLock.cpp
+	#VmLock_unittest.cpp
+	android_pipe_host.cpp
+	android_pipe_pingpong.c
+	#android_pipe_pingpong_unittest.cpp
+	android_pipe_throttle.c
+	android_pipe_unix.cpp
+	android_pipe_zero.c
+	#android_pipe_zero_unittest.cpp
+	android_qemud.cpp
+	bufprint_config_dirs.cpp
+	#bufprint_config_dirs_unittest.cpp
+	control/AdbBugReportServices.cpp
+	control/AdbInterface.cpp
+	#control/AdbInterface_unittest.cpp
+	control/ApkInstaller.cpp
+	#control/ApkInstaller_unittest.cpp
+	control/FilePusher.cpp
+	#control/FilePusher_unittest.cpp
+	control/GooglePlayServices.cpp
+	#control/GooglePlayServices_unittest.cpp
+	control/LineConsumer.cpp
+	#control/LineConsumer_unittest.cpp
+	control/ScreenCapturer.cpp
+	#control/ScreenCapturer_unittest.cpp
+	goldfish_sync.cpp
+	nand_limits.c
+	#nand_limits_unittest.cpp
+	qemud/android_qemud_client.cpp
+	qemud/android_qemud_multiplexer.cpp
+	qemud/android_qemud_serial.cpp
+	qemud/android_qemud_service.cpp
+	qemud/android_qemud_sink.cpp
+	serial_line.cpp
+	#serial_line_unittest.cpp
+	testing/TestAndroidPipeDevice.cpp
+  )
+
+
+if(APPLE)
+elseif(UNIX)
+elseif(WIN32)
+endif()
+
+add_subdirectory(proto)
+add_library(emulation ${SOURCES})
+add_dependencies(emulation vehiclehal_proto)
