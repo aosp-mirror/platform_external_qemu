@@ -233,6 +233,7 @@ void
 tcp_input(struct mbuf *m, int iphlen, struct socket *inso, SocketFamily sf)
 {
   	struct ip save_ip, *ip;
+	struct ip6 save_ip6, *ip6;
 	register struct tcpiphdr *ti;
 	caddr_t optp = NULL;
 	int optlen = 0;
@@ -274,6 +275,7 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso, SocketFamily sf)
 	STAT(tcpstat.tcps_rcvtotal++);
 
 	ip = mtod(m, struct ip *);
+	ip6 = mtod(m, struct ip6 *);
 
 	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr);
 
@@ -311,9 +313,31 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso, SocketFamily sf)
 	  ti->ti_dst = save_ip.ip_dst;
 	  ti->ti_pr = save_ip.ip_p;
 	  break;
-        default:
+	case SOCKET_IN6:
+	  /*
+	   * save a copy of the ip header in case we want restore it
+	   * for sending an icmp error message in response.
+	   */
+	  save_ip6 = *ip6;
+	  delta -= sizeof(struct ip6);
+	  /*
+	   * get ip and tcp header together in first mbuf.
+	   * note: ip leaves ip header in first mbuf.
+	   */
+	  m->m_data -= delta;
+	  m->m_len += delta;
+	  ti = mtod(m, struct tcpiphdr*);
+	  tlen = ip6->ip_pl;
+	  tcpiphdr2qlink(ti)->next = tcpiphdr2qlink(ti)->prev = NULL;
+	  memset(&ti->ti_i, 0, sizeof(ti->ti_i));
+	  ti->ti_src6 = save_ip6.ip_src;
+	  ti->ti_dst6 = save_ip6.ip_dst;
+	  ti->ti_nh6 = save_ip6.ip_nh;
+	  ti->ti_len = htons((uint16_t)tlen);
+	  break;
+	default:
 	  g_assert_not_reached();
-        }
+	}
 
 	len = sizeof(struct tcpiphdr) - sizeof(struct tcphdr) + tlen;
 	/* keep checksum for ICMP reply
@@ -395,6 +419,10 @@ findso:
 	  sock_address_init_inet(&src, ip_geth(ti->ti_src), srcport);
 	  sock_address_init_inet(&dst, ip_geth(ti->ti_dst), dstport);
 	  break;
+	case SOCKET_IN6:
+	  sock_address_init_in6(&src, ti->ti_src6.s6_addr, srcport);
+	  sock_address_init_in6(&dst, ti->ti_dst6.s6_addr, dstport);
+	  break;
 	default:
 	  g_assert_not_reached();
 	}
@@ -437,6 +465,8 @@ findso:
 		switch (sf) {
 		case SOCKET_INET:
 		  so->so_iptos = save_ip.ip_tos;
+		  break;
+		case SOCKET_IN6:
 		  break;
 		default:
 		  g_assert_not_reached();
@@ -708,6 +738,12 @@ findso:
 		  code = ICMP_UNREACH_HOST;
 		}
 		break;
+	      case SOCKET_IN6:
+		code = ICMP6_UNREACH_NO_ROUTE;
+		if (errno == EHOSTUNREACH) {
+		  code = ICMP6_UNREACH_ADDRESS;
+		}
+		break;
 	      default:
 		g_assert_not_reached();
 	      }
@@ -723,6 +759,10 @@ findso:
 	      case SOCKET_INET:
 		*ip=save_ip;
 		icmp_error(m, ICMP_UNREACH,code, 0,errno_str);
+		break;
+	      case SOCKET_IN6:
+		*ip6 = save_ip6;
+		icmp6_send_error(m, ICMP6_UNREACH, code);
 		break;
 	      default:
 		g_assert_not_reached();

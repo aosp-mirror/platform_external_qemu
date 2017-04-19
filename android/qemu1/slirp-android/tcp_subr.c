@@ -79,6 +79,10 @@ tcp_template(struct tcpcb *tp)
 	  n->ti_src = ip_seth(so->so_faddr_ip);
 	  n->ti_dst = ip_seth(so->so_laddr_ip);
 	  break;
+	case SOCKET_IN6:
+	  memcpy(n->ti_src6.s6_addr, so->faddr.u.in6.address, 16);
+	  memcpy(n->ti_dst6.s6_addr, so->laddr.u.in6.address, 16);
+	  break;
 	default:
 	  g_assert_not_reached();
 	}
@@ -143,6 +147,9 @@ tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
 		case SOCKET_INET:
 		  xchg(ti->ti_dst, ti->ti_src, ipaddr_t);
 		  break;
+		case SOCKET_IN6:
+		  xchg(ti->ti_dst6, ti->ti_src6, struct in6_addr);
+		  break;
 		default:
 		  g_assert_not_reached();
 		}
@@ -187,6 +194,19 @@ tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
 
 	  (void)ip_output((struct socket*)0, m);
 	  break;
+	case SOCKET_IN6:
+	  delta -= sizeof(struct ip6);
+	  m->m_data += delta;
+	  m->m_len -= delta;
+	  struct ip6* ip6 = mtod(m, struct ip6*);
+	  ip6->ip_pl = ti->ti_len;
+	  ip6->ip_dst = tcpiph_save.ti_dst6;
+	  ip6->ip_src = tcpiph_save.ti_src6;
+	  ip6->ip_nh = tcpiph_save.ti_nh6;
+
+	  ip6_output(NULL, m, 0);
+	  break;
+
 	default:
 	  g_assert_not_reached();
 	}

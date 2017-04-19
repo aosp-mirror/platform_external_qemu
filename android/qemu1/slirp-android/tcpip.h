@@ -47,9 +47,12 @@ struct tcpiphdr {
 #define ti_mbuf         ti_i.ih_mbuf.mptr
 #define	ti_x1		ti_i.ih_x1
 #define	ti_pr		ti_i.ih_pr
+#define	ti_nh6		ti_i.ih_pr
 #define	ti_len		ti_i.ih_len
 #define	ti_src		ti_i.addr.ih_src
 #define	ti_dst		ti_i.addr.ih_dst
+#define	ti_src6		ti_i.addr6.ih_src6
+#define	ti_dst6		ti_i.addr6.ih_dst6
 #define	ti_sport	ti_t.th_sport
 #define	ti_dport	ti_t.th_dport
 #define	ti_seq		ti_t.th_seq
