@@ -1,0 +1,8 @@
+add_subdirectory(GLESv1_dec)
+add_subdirectory(GLESv2_dec)
+add_subdirectory(renderControl_dec)
+add_subdirectory(libGLES12Translator)
+add_subdirectory(libGLSnapshot)
+add_subdirectory(libOpenGLESDispatch)
+add_subdirectory(libOpenglRender)
+add_subdirectory(Translator)
