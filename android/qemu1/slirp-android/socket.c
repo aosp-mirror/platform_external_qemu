@@ -602,6 +602,20 @@ sorecvfrom(struct socket *so)
 	} /* if ping packet */
 }
 
+static void set_local_address(SockAddress* addr, uint16_t port,
+			      SocketFamily sf)
+{
+  switch (sf) {
+  case SOCKET_INET:
+    sock_address_init_inet(addr, loopback_addr_ip, port);
+    break;
+  case SOCKET_IN6:
+    sock_address_init_in6_loopback(addr, port);
+    break;
+  default:
+    g_assert_not_reached();
+  }
+}
 
 /*
  * Translate addr in host addr when it is a virtual address
@@ -613,14 +627,12 @@ int sotranslate_out(struct socket *so, SockAddress *addr)
     case SOCKET_INET:
         if ((so->faddr.u.inet.address & 0xffffff00) == special_addr_ip) {
             /* It's an alias */
-            uint32_t addr_ip;
             int  low = so->faddr.u.inet.address & 0xff;
             if ( CTL_IS_DNS(low) ) {
                *addr = dns_addr[low - CTL_DNS];
                sock_address_set_port(addr, port);
             } else {
-               addr_ip = loopback_addr_ip;
-               sock_address_init_inet(addr, addr_ip, port);
+               set_local_address(addr, port, so->so_family);
             }
             return 1;
         }
@@ -628,7 +640,7 @@ int sotranslate_out(struct socket *so, SockAddress *addr)
     case SOCKET_IN6:
         if (in6_equal_net((struct in6_addr*) &so->faddr.u.in6.address,
             &vprefix_addr6, vprefix_len)) {
-            sock_address_init_in6_loopback(addr, port);
+            set_local_address(addr, port, so->so_family);
             return 1;
         }
         break;
