@@ -68,6 +68,8 @@ static void udp_emu(struct socket *so, struct mbuf *m);
 
 struct	socket *udp_last_so = &udb;
 
+static const unsigned short kDnsPort = 53;
+
 void
 udp_init(void)
 {
@@ -201,7 +203,7 @@ udp_input(register struct mbuf *m, int iphlen)
         }
 
         // DNS logging and FW rules
-        if (ntohs(uh->uh_dport.port) == 53) {
+        if (ntohs(uh->uh_dport.port) == kDnsPort) {
             if (!slirp_dump_dns(m)) {
                 DEBUG_MISC((dfd,"Error logging DNS packet"));
             }
@@ -224,7 +226,9 @@ udp_input(register struct mbuf *m, int iphlen)
 	   * create one
 	   */
 	  if ((so = socreate()) == NULL) goto bad;
-	  if(udp_attach(so, SOCKET_INET) == -1) {
+	  if(udp_attach(so, SOCKET_INET) == -1 &&
+	     (port_geth(uh->uh_dport) != kDnsPort ||
+	      udp_attach(so, SOCKET_IN6) == -1)) {
 	    DEBUG_MISC((dfd," udp_attach errno = %d-%s\n",
 			errno,errno_str));
 	    sofree(so);
@@ -338,7 +342,7 @@ int udp_output2_(struct socket *so, struct mbuf *m,
 	STAT(udpstat.udps_opackets++);
 
 	//  DNS logging
-	if (so != NULL && so->so_faddr_port == 53) {  /*so has host byte order */
+	if (so != NULL && so->so_faddr_port == kDnsPort) {  /*so has host byte order */
 	  if (!slirp_dump_dns(m)) {
 	    DEBUG_MISC((dfd,"Error logging DNS packet"));
 	  }
