@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "7c96cf26_4c802abd",
+        "filename": "android-qemu2-glue/proxy/slirp_proxy.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-04-19T22:21:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "85f24323_95664475",
+      "range": {
+        "startLine": 119,
+        "startChar": 7,
+        "endLine": 119,
+        "endChar": 20
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a114e46f_2a988563",
         "filename": "android-qemu2-glue/proxy/slirp_proxy.cpp",
         "patchSetId": 1
@@ -59,6 +83,30 @@
       "writtenOn": "2017-04-19T16:36:19Z",
       "side": 1,
       "message": "Do you need to set \u0027http_proxy_on \u003d false\u0027 here?",
+      "range": {
+        "startLine": 120,
+        "startChar": 8,
+        "endLine": 120,
+        "endChar": 19
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41867219_2cd7f4ab",
+        "filename": "android-qemu2-glue/proxy/slirp_proxy.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-04-19T22:21:47Z",
+      "side": 1,
+      "message": "Two cases:\n1, command line parameter, no need. Initial value is false\n2, toggle proxy by UI. android_http_proxy_set() will handle this",
+      "parentUuid": "a114e46f_2a988563",
       "range": {
         "startLine": 120,
         "startChar": 8,
@@ -157,6 +205,30 @@
     },
     {
       "key": {
+        "uuid": "8f195927_0e5be1cb",
+        "filename": "android/android-emu/android/http_proxy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-04-19T22:21:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd65bfb5_17cc9635",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 55
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d71531d5_7238e872",
         "filename": "android/android-emu/android/http_proxy.c",
         "patchSetId": 1
@@ -168,6 +240,30 @@
       "writtenOn": "2017-04-19T16:36:19Z",
       "side": 1,
       "message": "proxy \u003d\u003d NULL || *proxy \u003d\u003d \u0027\\0\u0027",
+      "range": {
+        "startLine": 31,
+        "startChar": 8,
+        "endLine": 31,
+        "endChar": 21
+      },
+      "revId": "0eb41dc798baec00ee2eb9c685b9ebd15b205081",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9f117e16_4bac559b",
+        "filename": "android/android-emu/android/http_proxy.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-04-19T22:21:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d71531d5_7238e872",
       "range": {
         "startLine": 31,
         "startChar": 8,
