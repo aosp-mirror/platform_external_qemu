@@ -57,11 +57,14 @@ private slots:
 
     // HTTP Proxy
     void on_set_hostName_editingFinished();
+    void on_set_hostName_textChanged(QString /* unused */);
     void on_set_loginName_editingFinished();
-    void on_set_loginPassword_editingFinished();
+    void on_set_loginName_textChanged(QString /* unused */);
     void on_set_manualConfig_toggled(bool checked);
     void on_set_noProxy_toggled(bool checked);
     void on_set_portNumber_editingFinished();
+    void on_set_portNumber_valueChanged(int /* unused */);
+    void on_set_proxyApply_clicked();
     void on_set_proxyAuth_toggled(bool checked);
     void on_set_useStudio_toggled(bool checked);
 
@@ -69,7 +72,10 @@ private slots:
 
 private:
     bool eventFilter(QObject* object, QEvent* event) override;
+
     void grayOutProxy();
+    void disableProxyApply();
+    void enableProxyApply();
     void initProxy();
     void proxyDtor();
     void sendProxySettingsToAgent();
