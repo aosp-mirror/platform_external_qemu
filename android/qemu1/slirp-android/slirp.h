@@ -272,7 +272,7 @@ void ip6_input _P((struct mbuf *));
 int ip6_output _P((struct socket *, struct mbuf *, int));
 
 /* tcp_input.c */
-void tcp_input _P((register struct mbuf *, int, struct socket *));
+void tcp_input _P((register struct mbuf *, int, struct socket *, SocketFamily));
 int tcp_mss _P((register struct tcpcb *, u_int));
 
 /* tcp_output.c */
@@ -282,7 +282,7 @@ void tcp_setpersist _P((register struct tcpcb *));
 /* tcp_subr.c */
 void tcp_init _P((void));
 void tcp_template _P((struct tcpcb *));
-void tcp_respond _P((struct tcpcb *, register struct tcpiphdr *, register struct mbuf *, tcp_seq, tcp_seq, int));
+void tcp_respond _P((struct tcpcb *, register struct tcpiphdr *, register struct mbuf *, tcp_seq, tcp_seq, int, SocketFamily));
 struct tcpcb * tcp_newtcpcb _P((struct socket *));
 struct tcpcb * tcp_close _P((register struct tcpcb *));
 void tcp_sockclosed _P((struct tcpcb *));

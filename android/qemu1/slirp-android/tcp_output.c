@@ -540,25 +540,30 @@ send:
     {
 
 	struct tcpiphdr tcpiph_save = *mtod(m, struct tcpiphdr *);
-	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr) -
-			     sizeof(struct ip);
-	m->m_data += delta;
-	m->m_len  -= delta;
-	struct ip *ip = mtod(m, struct ip *);
-	ip->ip_len = m->m_len;
-	ip->ip_dst = tcpiph_save.ti_dst;
-	ip->ip_src = tcpiph_save.ti_src;
-	ip->ip_p = tcpiph_save.ti_pr;
-	ip->ip_ttl = IPDEFTTL;
-	ip->ip_tos = so->so_iptos;
+	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr);
+	switch (so->faddr.family) {
+	case SOCKET_INET:
+	  delta -= sizeof(struct ip);
+	  m->m_data += delta;
+	  m->m_len -= delta;
+	  struct ip* ip = mtod(m, struct ip*);
+	  ip->ip_len = m->m_len;
+	  ip->ip_dst = tcpiph_save.ti_dst;
+	  ip->ip_src = tcpiph_save.ti_src;
+	  ip->ip_p = tcpiph_save.ti_pr;
+	  ip->ip_ttl = IPDEFTTL;
+	  ip->ip_tos = so->so_iptos;
 
-/* #if BSD >= 43 */
-	/* Don't do IP options... */
-/*	error = ip_output(m, tp->t_inpcb->inp_options, &tp->t_inpcb->inp_route,
- *	    so->so_options & SO_DONTROUTE, 0);
- */
-	error = ip_output(so, m);
-
+	  /* #if BSD >= 43 */
+	  /* Don't do IP options... */
+	  /*	error = ip_output(m, tp->t_inpcb->inp_options,
+	   *&tp->t_inpcb->inp_route, so->so_options & SO_DONTROUTE, 0);
+	   */
+	  error = ip_output(so, m);
+	  break;
+	default:
+	  g_assert_not_reached();
+	}
 /* #else
  *	error = ip_output(m, (struct mbuf *)0, &tp->t_inpcb->inp_route,
  *	    so->so_options & SO_DONTROUTE);

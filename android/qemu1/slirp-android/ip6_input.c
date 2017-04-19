@@ -51,7 +51,7 @@ void ip6_input(struct mbuf *m)
     switch (ip6->ip_nh) {
     case IPPROTO_TCP:
         NTOHS(ip6->ip_pl);
-        tcp_input(m, sizeof(struct ip6), (struct socket *)NULL/*FIXME , AF_INET6*/);
+        tcp_input(m, sizeof(struct ip6), (struct socket *)NULL, SOCKET_IN6);
         break;
     case IPPROTO_UDP:
         udp6_input(m);
