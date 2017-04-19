@@ -22,6 +22,7 @@
 #include "android/emulation/ConfigDirs.h"
 #include "android/emulation/control/clipboard_agent.h"
 #include "android/emulator-window.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
@@ -132,6 +133,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Left ROTATE_LEFT\n"
             "Ctrl+Right ROTATE_RIGHT\n";
 
+    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
+        default_shortcuts += "Ctrl+Shift+G SHOW_PANE_GPLAY\n";
+    }
     QTextStream stream(&default_shortcuts);
     mShortcutKeyStore.populateFromTextStream(stream, parseQtUICommand);
     // Need to add this one separately because QKeySequence cannot parse
@@ -262,6 +266,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_FINGER:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_FINGER);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_GPLAY:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_GOOGLE_PLAY);
             }
             break;
         case QtUICommand::SHOW_PANE_SETTINGS:
