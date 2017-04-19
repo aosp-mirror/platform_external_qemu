@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "b6b0c424_e4016e86",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-19T16:32:03Z",
+      "side": 1,
+      "message": "is 5555 by default for emulator to listen for adb server connection or is it just emulator\u0027s port + 1?",
+      "range": {
+        "startLine": 90,
+        "startChar": 40,
+        "endLine": 90,
+        "endChar": 93
+      },
+      "revId": "52b147871c1505470e96309014cab26b898b9212",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b0adc2a_389c5262",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 5
