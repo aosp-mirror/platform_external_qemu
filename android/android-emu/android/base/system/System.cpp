@@ -15,13 +15,19 @@
 #include "android/base/system/System.h"
 
 #include "android/base/EintrWrapper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/memory/LazyInstance.h"
-#include "android/base/misc/StringUtils.h"
 #include "android/base/StringFormat.h"
+#include "android/base/StringParse.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/files/ScopedFd.h"
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/memory/ScopedPtr.h"
+#include "android/base/misc/FileUtils.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/threads/Thread.h"
+#include "android/utils/tempfile.h"
 
 #ifdef _WIN32
+#include "android/base/files/ScopedRegKey.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #endif
@@ -465,6 +471,111 @@ public:
         return OsType::Linux;
 #else
         #error getOsType(): unsupported OS;
+#endif
+    }
+
+    virtual string getOsName() override {
+#ifdef _WIN32
+        using android::base::ScopedRegKey;
+        HKEY hkey = 0;
+        LONG result =
+                RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+                             "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",
+                             0, KEY_READ, &hkey);
+        if (result != ERROR_SUCCESS) {
+            LOG(VERBOSE) << "RegGetValueW failed " << result
+                         << Win32Utils::getErrorString(result);
+            return "";
+        }
+        ScopedRegKey hOsVersionKey(hkey);
+
+        DWORD osNameSize = 0;
+        const WCHAR productNameKey[] = L"ProductName";
+        result = RegGetValueW(hOsVersionKey.get(), nullptr, productNameKey,
+                              RRF_RT_REG_SZ, nullptr, nullptr, &osNameSize);
+        if (result != ERROR_SUCCESS && ERROR_MORE_DATA != result) {
+            LOG(VERBOSE) << "RegGetValueW failed " << result
+                         << Win32Utils::getErrorString(result);
+            return "";
+        }
+
+        Win32UnicodeString osName;
+        osName.resize((osNameSize - 1) / sizeof(wchar_t));
+        result = RegGetValueW(hOsVersionKey.get(), nullptr, productNameKey,
+                              RRF_RT_REG_SZ, nullptr, osName.data(),
+                              &osNameSize);
+        if (result != ERROR_SUCCESS) {
+            LOG(VERBOSE) << "RegGetValueW failed " << result
+                         << Win32Utils::getErrorString(result);
+            return "";
+        }
+        return osName.toString();
+#elif defined(__APPLE__) || defined(__linux__)
+        using android::base::ScopedFd;
+        using android::base::trim;
+        const auto versionNumFile = android::base::makeCustomScopedPtr(
+                tempfile_create(), tempfile_close);
+
+        if (!versionNumFile) {
+            LOG(VERBOSE) << "Internal error: could not create a temporary file";
+            return "";
+        }
+
+        string tempPath = tempfile_path(versionNumFile.get());
+
+        int exitCode = -1;
+
+#if defined(__APPLE__)
+        vector<string> command{"sw_vers"};
+#else  // __linux__
+        vector<string> command{"lsb_release", "-d"};
+#endif
+        runCommand(command,
+                   RunOptions::WaitForCompletion |
+                           RunOptions::TerminateOnTimeout |
+                           RunOptions::DumpOutputToFile,
+                   1000,  // timeout ms
+                   &exitCode, nullptr, tempPath);
+
+        if (exitCode) {
+            LOG(VERBOSE) << "Could not get host OS product version.";
+            return "";
+        }
+
+        ScopedFd tempfileFd(open(tempPath.c_str(), O_RDONLY));
+        if (!tempfileFd.valid()) {
+            LOG(VERBOSE) << "Could not open" << tempPath << " : "
+                         << strerror(errno);
+            return "";
+        }
+
+        string contents;
+        android::readFileIntoString(tempfileFd.get(), &contents);
+        if (contents.empty()) {
+            LOG(VERBOSE) << "Internal error: could not read temporary file "
+                         << "'" << tempPath << "'";
+            return "";
+        }
+        string result;
+#if defined(__APPLE__)
+        char productName[256];
+        char productVersion[256];
+        memset(productName, 0, 256);
+        memset(productVersion, 0, 256);
+        android::base::SscanfWithCLocale(
+                contents.c_str(),
+                "ProductName: %[^\n]\nProductVersion:%[^\n]\n", productName,
+                productVersion);
+
+        result = StringFormat("%s %s", trim(string(productName)),
+                              trim(string(productVersion)));
+#else   // __linux__
+        //"lsb_release -d" output is "Description:      [os-product-version]"
+        result = trim(contents.substr(12, contents.size() - 12));
+#endif  //!__APPLE__
+        return result;
+#else
+#error getOsName(): unsupported OS;
 #endif
     }
 

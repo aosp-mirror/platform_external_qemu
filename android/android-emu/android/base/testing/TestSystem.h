@@ -128,6 +128,8 @@ public:
 
     virtual OsType getOsType() const override { return mOsType; }
 
+    virtual std::string getOsName() override { return mOsName; }
+
     virtual bool isRunningUnderWine() const override { return mUnderWine; }
 
     void setRunningUnderWine(bool underWine) { mUnderWine = underWine; }
@@ -405,6 +407,7 @@ private:
     mutable Duration mUnixTimeLastQueried = 0;
     bool mUnixTimeLive = false;
     OsType mOsType = OsType::Windows;
+    std::string mOsName = "";
     bool mUnderWine = false;
     Pid mPid = 0;
 };
