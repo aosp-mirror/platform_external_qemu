@@ -1,0 +1,8 @@
+Verified+1: Jim Kaye <jameskaye@google.com>
+Code-Review+2: Jim Kaye <jameskaye@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Jim Kaye <jameskaye@google.com>
+Submitted-at: Wed, 19 Apr 2017 21:34:45 +0000
+Reviewed-on: https://android-review.googlesource.com/376155
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.3-release
