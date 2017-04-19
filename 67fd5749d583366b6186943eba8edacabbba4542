@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1786e611_49a0396b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T22:56:06Z",
+      "side": 1,
+      "message": "Nit: Put a blank line as the second line. That way the summary page doesn\u0027t show too much info.",
+      "revId": "67fd5749d583366b6186943eba8edacabbba4542",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "403f5f78_7362c5dc",
+        "filename": "android/android-emu/android/proxy/proxy_errno.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-19T22:56:06Z",
+      "side": 1,
+      "message": "As I understand it, we\u0027re supposed to put the current year on a new file. We do not update that when the file is modified or moved or renamed, etc.\n\n(This is good enough--you don\u0027t need to change it)",
+      "revId": "67fd5749d583366b6186943eba8edacabbba4542",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
