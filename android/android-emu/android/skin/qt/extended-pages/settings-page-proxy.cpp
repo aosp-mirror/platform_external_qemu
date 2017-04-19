@@ -16,6 +16,8 @@
 
 #include "android/emulation/control/http_proxy_agent.h"
 #include "android/emulator-window.h"
+#include "android/proxy/proxy_common.h"
+#include "android/proxy/proxy_errno.h"
 #include "android/skin/qt/qt-settings.h"
 
 #include <QFile>
@@ -179,22 +181,20 @@ void SettingsPage::sendProxySettingsToAgent() {
         // There is HTTP proxy information on the command line.
         // This take precendence over the UI and the back end
         // is already using these settings.
+        mUi->set_proxyResults->setText(tr("From command line"));
         return;
     }
+
+    QString proxyString;
 
     if (mUi->set_useStudio->isChecked()) {
         // Use the settings from Android Studio
-        mHttpProxyAgent->httpProxySet(mStudioProxyString.toStdString().c_str());
-        return;
-    }
-
-    // Use our local settings
-    if (mUi->set_noProxy->isChecked()) {
-        mHttpProxyAgent->httpProxySet(nullptr);
-        return;
-    }
-
-    if (mUi->set_manualConfig->isChecked()) {
+        proxyString = mStudioProxyString;
+    } else if (mUi->set_noProxy->isChecked()) {
+        // Use our local setting, which is "None"
+        proxyString = "";
+    } else if (mUi->set_manualConfig->isChecked()) {
+        // Use our local setting, which is "Manual"
         QString user;
         QString pass;
         if (mUi->set_proxyAuth->isChecked()) {
@@ -202,12 +202,16 @@ void SettingsPage::sendProxySettingsToAgent() {
             pass = mUi->set_loginPassword->text();
         }
 
-        QString proxyString = proxyStringFromParts(mUi->set_hostName->text(),
-                                                   QString::number(mUi->set_portNumber->value()),
-                                                   user, pass);
-        mHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
-        return;
+        proxyString = proxyStringFromParts(mUi->set_hostName->text(),
+                                           QString::number(mUi->set_portNumber->value()),
+                                           user, pass);
+    } else {
+        // Should never get here. Default to "no proxy."
+        proxyString = "";
     }
+    // Send the proxy selection to the agent
+    int proxyResult = mHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
+    mUi->set_proxyResults->setText(tr(proxy_error_string(proxyResult)));
 }
 
 void SettingsPage::enableProxyApply() {
