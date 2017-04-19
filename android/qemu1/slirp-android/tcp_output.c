@@ -561,6 +561,18 @@ send:
 	   */
 	  error = ip_output(so, m);
 	  break;
+	case SOCKET_IN6:
+	  delta -= sizeof(struct ip6);
+	  m->m_data += delta;
+	  m->m_len  -= delta;
+	  struct ip6* ip6 = mtod(m, struct ip6 *);
+	  ip6->ip_pl = tcpiph_save.ti_len;
+	  ip6->ip_dst = tcpiph_save.ti_dst6;
+	  ip6->ip_src = tcpiph_save.ti_src6;
+	  ip6->ip_nh = tcpiph_save.ti_nh6;
+
+	  error = ip6_output(so, m, 0);
+	  break;
 	default:
 	  g_assert_not_reached();
 	}
