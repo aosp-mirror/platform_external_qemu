@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "09ad1043_a76ef5b9",
+        "filename": "android/qemu1/qemu-char.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2423,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-04-19T16:17:26Z",
+      "side": 1,
+      "message": "How many digits for width at most?",
+      "revId": "d31a41e4d724363f5199abf47ca44c0541d77f05",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
