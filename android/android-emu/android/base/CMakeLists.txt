@@ -1,0 +1,134 @@
+cmake_minimum_required(VERSION 2.8.11)
+project(ANDROID_BASE)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/../../../cmake/")
+
+include(AddCXXCompilerFlag)
+include(AddGlobalVariables)
+
+# Call this first to setup various dependencies
+add_global_variables()
+add_subdirectory(${BENCHMARK} google-benchmark)
+
+add_cxx_compiler_flag(-Wall)
+add_cxx_compiler_flag(-std=c++1y)
+add_cxx_compiler_flag(-fPIC)
+add_cxx_compiler_flag(-w)
+
+list(APPEND SOURCES
+  #  ArraySize_unittest.cpp
+  async/AsyncReader.cpp
+  async/AsyncSocketServer.cpp
+  # async/AsyncSocketServer_unittest.cpp
+  async/AsyncWriter.cpp
+  async/DefaultLooper.cpp
+  async/Looper.cpp
+  #async/Looper_unittest.cpp
+  #async/RecurrentTask_unittest.cpp
+  async/ScopedSocketWatch.cpp
+  #async/ScopedSocketWatch_unittest.cpp
+  #async/SubscriberList_unittest.cpp
+  async/ThreadLooper.cpp
+  #containers/CircularBuffer_unittest.cpp
+  #containers/Lookup_unittest.cpp
+  #containers/SmallVector_unittest.cpp
+  Debug.cpp
+  #EintrWrapper_unittest.cpp
+  files/Fd.cpp
+  files/IniFile.cpp
+  #files/IniFile_unittest.cpp
+  files/MemStream.cpp
+  #files/MemStream_unittest.cpp
+  files/PathUtils.cpp
+  #files/PathUtils_unittest.cpp
+  #files/ScopedFd_unittest.cpp
+  #files/ScopedFileHandle_unittest.cpp
+  #files/ScopedRegKey_unittest.cpp
+  #files/ScopedStdioFile_unittest.cpp
+  files/StdioStream.cpp
+  files/Stream.cpp
+  #files/Stream_unittest.cpp
+  files/StreamSerializing.cpp
+  #files/StreamSerializing_unittest.cpp
+  Log.cpp
+  #Log_unittest.cpp
+  memory/LazyInstance.cpp
+  #memory/LazyInstance_unittest.cpp
+  #memory/MallocUsableSize_unittest.cpp
+  #memory/ScopedPtr_unittest.cpp
+  misc/FileUtils.cpp
+  #misc/FileUtils_unittest.cpp
+  misc/HttpUtils.cpp
+  #misc/HttpUtils_unittest.cpp
+  misc/StringUtils.cpp
+  #misc/StringUtils_unittest.cpp
+  misc/Utf8Utils.cpp
+  #misc/Utf8Utils_unittest.cpp
+  network/Dns.cpp
+  #network/Dns_unittest.cpp
+  network/IpAddress.cpp
+  #network/IpAddress_unittest.cpp
+  network/NetworkUtils.cpp
+  #network/NetworkUtils_unittest.cpp
+  #Optional_unittest.cpp
+  #sockets/ScopedSocket_unittest.cpp
+  sockets/SocketDrainer.cpp
+  #sockets/SocketDrainer_unittest.cpp
+  sockets/SocketUtils.cpp
+  #sockets/SocketUtils_unittest.cpp
+  sockets/SocketWaiter.cpp
+  #sockets/SocketWaiter_unittest.cpp
+  StringFormat.cpp
+  #StringFormat_unittest.cpp
+  StringParse.cpp
+  #StringParse_unittest.cpp
+  StringView.cpp
+  #StringView_unittest.cpp
+  #synchronization/ConditionVariable_unittest.cpp
+  synchronization/Lock_benchmark.cpp
+  #synchronization/Lock_unittest.cpp
+  synchronization/MessageChannel.cpp
+  #synchronization/MessageChannel_unittest.cpp
+  #synchronization/ReadWriteLock_unittest.cpp
+  system/System.cpp
+  #system/System_unittest.cpp
+  threads/Async.cpp
+  threads/FunctorThread.cpp
+  #threads/FunctorThread_unittest.cpp
+  threads/internal/ParallelTaskBase.cpp
+  #threads/ParallelTask_unittest.cpp
+  threads/Thread_pthread.cpp
+  #threads/Thread_unittest.cpp
+  threads/ThreadStore.cpp
+  #threads/ThreadStore_unittest.cpp
+  #TypeTraits_unittest.cpp
+  Uri.cpp
+  #Uri_unittest.cpp
+  Uuid.cpp
+  #Uuid_unittest.cpp
+  Version.cpp
+  #Version_unittest.cpp
+  ../utils/eintr_wrapper.c
+  ../utils/panic.c
+  )
+
+
+if(WIN32)
+  list(APPEND SOURCES
+    system/Win32UnicodeString.cpp
+    #system/Win32UnicodeString_unittest.cpp
+    system/Win32Utils.cpp
+    #system/Win32Utils_unittest.cpp
+    threads/Thread_win32.cpp
+    )
+endif()
+
+include_directories(
+  ${E2FSPROGS_INCLUDE_DIRS}
+  ${ANDROID_EMU}
+  ${GOOGLE_BENCHMARK_INCLUDE_DIRS}
+)
+
+add_library(${PROJECT_NAME}_LIBRARIES ${SOURCES})
+target_link_libraries(${PROJECT_NAME}_LIBRARIES benchmark ${E2FSPROGS_LIBRARIES} ${EXTRA_LIBS})
+
+
