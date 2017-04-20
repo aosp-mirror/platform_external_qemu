@@ -24,7 +24,7 @@
 const char DOCS_URL[] =
     "http://developer.android.com/r/studio-ui/emulator.html";
 const char FILE_BUG_URL[] =
-    "https://code.google.com/p/android/issues/entry?template=Android%20Emulator%20Bug";
+    "https://b.corp.google.com/issues/new?component=192727&template=843117";
 const char SEND_FEEDBACK_URL[] =
     "https://code.google.com/p/android/issues/entry?template=Emulator%20Feature%20Request";
 
