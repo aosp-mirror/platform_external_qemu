@@ -118,8 +118,6 @@ icmp_input(struct mbuf *m, int hlen)
     } else {
       struct socket *so;
       SockAddress  addr;
-      uint32_t     addr_ip;
-      uint16_t     addr_port;
 
       if ((so = socreate()) == NULL) goto freeit;
       if(udp_attach(so, SOCKET_INET) == -1) {
@@ -136,21 +134,8 @@ icmp_input(struct mbuf *m, int hlen)
       so->so_type = IPPROTO_ICMP;
       so->so_state = SS_ISFCONNECTED;
 
-      /* Send the packet */
-      if ((so->so_faddr_ip & 0xffffff00) == special_addr_ip) {
-        /* It's an alias */
-        int  low = so->so_faddr_ip & 0xff;
-
-        if (low >= CTL_DNS && low < CTL_DNS + dns_addr_count)
-            addr_ip = dns_addr[low - CTL_DNS];
-        else
-            addr_ip = loopback_addr_ip;
-      } else {
-            addr_ip = so->so_faddr_ip;
-      }
-      addr_port = so->so_faddr_port;
-
-      sock_address_init_inet( &addr, addr_ip, addr_port );
+      addr = so->faddr;
+      sotranslate_out(so, &addr);
 
       if(socket_sendto(so->s, icmp_ping_msg, strlen(icmp_ping_msg), &addr) < 0) {
         DEBUG_MISC((dfd,"icmp_input udp sendto tx errno = %d-%s\n",
