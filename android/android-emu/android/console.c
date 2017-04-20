@@ -26,7 +26,6 @@
 #include "android/android.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
-#include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -2690,25 +2689,13 @@ static const CommandDefRec  qemu_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 
-static void __attribute__((noreturn)) crash() {
-    volatile int * ptr = NULL;
-    *ptr+=1;
-    abort();    // just to make the compiler happy
-}
-
 static int
 do_crash( ControlClient  client, char*  args )
 {
     control_write( client, "OK: crashing emulator, bye bye\r\n" );
-    crash();
-}
-
-static int
-do_crash_on_exit( ControlClient  client, char*  args )
-{
-    control_write( client, "OK: crashing emulator on exit, bye bye\r\n" );
-    crashhandler_exitmode("console-simulated crash on exit");
-    crash();
+    volatile int * ptr = NULL;
+    *ptr+=1;
+    return 0;
 }
 
 static int
@@ -2760,10 +2747,6 @@ static const CommandDefRec main_commands[] = {
          cdma_commands},
 
         {"crash", "crash the emulator instance", NULL, NULL, do_crash, NULL},
-
-        {"crash-on-exit", "simulate crash on exit for the emulator instance",
-         NULL, NULL,
-         do_crash_on_exit},
 
         {"kill", "kill the emulator instance", NULL, NULL, do_kill, NULL},
 
