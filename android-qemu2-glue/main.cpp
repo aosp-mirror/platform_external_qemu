@@ -93,6 +93,7 @@ namespace {
 
 enum ImageType {
     IMAGE_TYPE_SYSTEM = 0,
+    IMAGE_TYPE_VENDOR,
     IMAGE_TYPE_CACHE,
     IMAGE_TYPE_USER_DATA,
     IMAGE_TYPE_SD_CARD,
@@ -249,6 +250,17 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                     driveParam += ",read-only";
             }
             deviceParam = StringFormat("%s,drive=system",
+                                       kTarget.storageDeviceType);
+            break;
+        case IMAGE_TYPE_VENDOR:
+            filePath = avdInfo_getContentPath(avd);
+            driveParam += StringFormat("index=%d,id=system,file=%s"
+                                       PATH_SEP "vendor.img.qcow2",
+                                        idx++, filePath);
+            // You can override this explicitly
+            // by passing -writable-system to emulator.
+            if (!writable) driveParam += ",read-only";
+            deviceParam = StringFormat("%s,drive=vendor",
                                        kTarget.storageDeviceType);
             break;
         case IMAGE_TYPE_CACHE:

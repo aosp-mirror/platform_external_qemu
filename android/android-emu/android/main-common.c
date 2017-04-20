@@ -256,6 +256,12 @@ _getSdkSystemImage( const char*  path, const char*  optionName, const char*  fil
     return image;
 }
 
+static char*
+_getSdkVendorImage( const char*  path, const char*  optionName, const char*  file )
+{
+    return _getSdkSystemImage(path, optionName, file);
+}
+
 static void sanitizeOptions(AndroidOptions* opts) {
     /* legacy support: we used to use -system <dir> and -image <file>
      * instead of -sysdir <dir> and -system <file>, so handle this by checking
@@ -423,6 +429,13 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
                     &opts->system,
                     _getSdkSystemImage(opts->sysdir, "-image", "system.img"));
             D("autoconfig: -system %s", opts->system);
+        }
+
+        if (!opts->system) {
+            str_reset_nocopy(
+                    &opts->vendor,
+                    _getSdkVendorImage(opts->sysdir, "-image", "vendor.img"));
+            D("autoconfig: -vendor %s", opts->system);
         }
 
         if (!opts->kernel) {

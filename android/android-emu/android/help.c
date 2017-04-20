@@ -135,6 +135,7 @@ help_build_images( stralloc_t*  out )
     "  files there:\n\n"
 
     "    - system.img   : the *initial* system image.\n"
+    "    - vendor.img   : the *initial* vendor image.\n"
     "    - ramdisk.img  : the ramdisk image used to boot the system.\n"
     "    - userdata.img : the *initial* user data image (see below).\n"
     "    - kernel-qemu  : the emulator-specific Linux kernel image.\n\n"
@@ -142,7 +143,7 @@ help_build_images( stralloc_t*  out )
     "  If the kernel image is not found in the out directory, then it is searched\n"
     "  in <build-root>/prebuilts/qemu-kernel/.\n\n"
 
-    "  You can use the -sysdir, -system, -kernel, -ramdisk, -datadir, -data options\n"
+    "  You can use the -sysdir, -system, -vendor -kernel, -ramdisk, -datadir, -data options\n"
     "  to specify different search directories or specific image files. You can\n"
     "  also use the -cache and -sdcard options to indicate specific cache partition\n"
     "  and SD Card image files.\n\n"
@@ -450,6 +451,17 @@ help_system(stralloc_t*  out)
 
     "  NOTE: In previous releases of the Android SDK, this option was named '-image'.\n"
     "        And using '-system <path>' was equivalent to using '-sysdir <path>' now.\n\n"
+
+    "  see '-help-disk-images' for more information about disk image files\n\n"
+    );
+}
+
+static void
+help_vendor(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-vendor <file>' to specify the intial system image that will be loaded.\n"
+    "  the default image is 'vendor.img' from the system directory.\n\n"
 
     "  see '-help-disk-images' for more information about disk image files\n\n"
     );
