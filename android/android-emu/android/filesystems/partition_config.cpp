@@ -339,6 +339,7 @@ bool android_partition_configuration_setup(
     // Determine format of all partition images, if possible.
     // Note that _UNKNOWN means the file, if it exists, will be probed.
     AndroidPartitionType system_partition_type = ANDROID_PARTITION_TYPE_UNKNOWN;
+    AndroidPartitionType vendor_partition_type = ANDROID_PARTITION_TYPE_UNKNOWN;
     AndroidPartitionType userdata_partition_type =
             ANDROID_PARTITION_TYPE_UNKNOWN;
     AndroidPartitionType cache_partition_type = ANDROID_PARTITION_TYPE_UNKNOWN;
@@ -356,6 +357,9 @@ bool android_partition_configuration_setup(
 
             extractPartitionFormat(state, fstab, "system", "/system",
                                    &system_partition_type);
+
+            extractPartitionFormat(state, fstab, "vendor", "/vendor",
+                                   &vendor_partition_type);
 
             extractPartitionFormat(state, fstab, "userdata", "/data",
                                    &userdata_partition_type);
@@ -375,6 +379,17 @@ bool android_partition_configuration_setup(
                 config->system_partition.size, config->system_partition.path,
                 config->system_partition.init_path, !config->writable_system)) {
         return false;
+    }
+
+    // Initialize vendor partition image, if we have it.
+    if (config->vendor_partition.path || config->vendor_partition.init_path) {
+        if (!addNandImage(
+                state, "vendor", vendor_partition_type,
+                ANDROID_PARTITION_OPEN_MODE_MUST_EXIST,
+                config->vendor_partition.size, config->vendor_partition.path,
+                config->vendor_partition.init_path, !config->writable_system)) {
+            return false;
+        }
     }
 
     // Initialize data partition image.

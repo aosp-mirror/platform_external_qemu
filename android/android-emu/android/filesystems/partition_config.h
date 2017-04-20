@@ -66,6 +66,7 @@ typedef struct {
     const char* ramdisk_path;
     const char* fstab_name;
     AndroidPartitionInfo system_partition;
+    AndroidPartitionInfo vendor_partition;
     AndroidPartitionInfo data_partition;
     AndroidPartitionInfo cache_partition;
     bool kernel_supports_yaffs2;

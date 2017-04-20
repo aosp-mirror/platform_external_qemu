@@ -2818,6 +2818,12 @@ int main(int argc, char **argv, char **envp)
                     .path = android_hw->disk_systemPartition_path,
                     .init_path = android_hw->disk_systemPartition_initPath,
                 },
+            .vendor_partition =
+                {
+                    .size = android_hw->disk_vendorPartition_size,
+                    .path = android_hw->disk_vendorPartition_path,
+                    .init_path = android_hw->disk_vendorPartition_initPath,
+                },
             .data_partition =
                 {
                     .size = android_hw->disk_dataPartition_size,
