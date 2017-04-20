@@ -448,6 +448,79 @@ sowrite(struct socket *so)
 	return nn;
 }
 
+/* The domain name in dns packet is encoded like this:
+ * "a.bc.com" -> {0x1, 'a', 0x2, 'b', 'c', 0x3, 'c', 'o', 'm', 0x0}
+ */
+static void enc_dns(const char* src, char* dst, int size) {
+    if (strlen(src) + 2 != size) {
+        g_assert_not_reached();
+    }
+    strcpy(dst + 1, src);
+    char* p = dst;
+    char* tmp;
+    for (;;) {
+        tmp = strchr(p + 1, '.');
+        if (tmp) {
+            *tmp = 0;
+        }
+        *p = strlen(p + 1);
+        if (NULL == tmp)
+            break;
+        p = tmp;
+    }
+}
+
+static const char old_aserver[] = "android.clients.google.com";
+/* we use a fake domain name which has same length with old one
+ * so we don't need to parse the dns packet to fix offset issue.
+ * It's lucky that it's resolvable.
+ */
+static const char new_aserver[] = "androidhack.googleapis.com";
+static char old_aserver_enc[sizeof(old_aserver) + 1];
+static char new_aserver_enc[sizeof(new_aserver) + 1];
+
+void init_aserver_enc() {
+    static int done = 0;
+    if (done)
+        return;
+    enc_dns(old_aserver, old_aserver_enc, sizeof(old_aserver_enc));
+    enc_dns(new_aserver, new_aserver_enc, sizeof(new_aserver_enc));
+    done = 1;
+}
+
+static const unsigned short kDnsPort = 53;
+/* https://www.iana.org/assignments/dns-parameters/dns-parameters.xhtml */
+static const unsigned short kTypeAAAA = 28;
+
+/* This is used to replace DNS query for android.clients.google.com
+ * to androidhack.googleapis.com since the previous one is not accessible
+ * from pure IPv6 env */
+static void dns_hack(struct socket* so,
+                     struct mbuf* m,
+                     const char* src_dns,
+                     int src_len,
+                     const char* dst_dns,
+                     int dst_len) {
+    if (sock_address_get_port(&so->faddr) != kDnsPort || so->so_family == SOCKET_INET)
+        return;
+    init_aserver_enc();
+    if (src_len != dst_len) {
+        g_assert_not_reached();
+    }
+    /* The name starts from bytes 12 */
+    const int dns_name_off = 12;
+    if (m->m_len < dns_name_off + src_len + 2)
+        return;
+    char* name = m->m_data + dns_name_off;
+    if (memcmp(name, src_dns, src_len))
+        return;
+    unsigned short type = (name[src_len] << 8)  +  name[src_len + 1];
+    if (type != kTypeAAAA)
+        return;
+    memcpy(name, dst_dns, dst_len);
+    return;
+}
+
 /*
  * recvfrom() a UDP socket
  */
@@ -515,6 +588,11 @@ sorecvfrom(struct socket *so)
 	  /* } */
 
 	  m->m_len = socket_recvfrom(so->s, m->m_data, len, &addr);
+
+	  /* restore possible modified DNS replies in IPv6 mode */
+	  dns_hack(so, m, new_aserver_enc, sizeof(new_aserver_enc),
+			  old_aserver_enc, sizeof(old_aserver_enc));
+
 	  DEBUG_MISC((dfd, " did recvfrom %d, errno = %d-%s\n",
 		      m->m_len, errno,errno_str));
 	  if(m->m_len<0) {
@@ -557,7 +635,7 @@ sorecvfrom(struct socket *so)
 	   * out much quicker (10 seconds  for now...)
 	   */
 	    if (so->so_expire) {
-	      if (so->so_faddr_port == 53)
+	      if (so->so_faddr_port == kDnsPort)
 		so->so_expire = curtime + SO_EXPIREFAST;
 	      else
 		so->so_expire = curtime + SO_EXPIRE;
@@ -707,6 +785,9 @@ sosendto(struct socket *so, struct mbuf *m)
 	DEBUG_MISC((dfd, " sendto()ing, %s\n", sock_address_to_string(&addr)));
 
 	udp_reattach(so, addr.family);
+	/* replace DNS queries in IPv6 mode */
+	dns_hack(so, m, old_aserver_enc, sizeof(old_aserver_enc),
+		 new_aserver_enc, sizeof(new_aserver_enc));
 	/* Don't care what port we get */
 	ret = socket_sendto(so->s, m->m_data, m->m_len,&addr);
 	if (ret < 0)
