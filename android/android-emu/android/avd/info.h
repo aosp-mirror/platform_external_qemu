@@ -60,9 +60,11 @@ ANDROID_BEGIN_HEADER
     _AVD_IMG(KERNELRANCHU,"kernel-ranchu","kernel") \
     _AVD_IMG(RAMDISK,"ramdisk.img","ramdisk") \
     _AVD_IMG(INITSYSTEM,"system.img","init system") \
+    _AVD_IMG(INITVENDOR,"vendor.img","init vendor") \
     _AVD_IMG(INITDATA,"userdata.img","init data") \
     _AVD_IMG(INITZIP,"data","init data zip") \
     _AVD_IMG(USERSYSTEM,"system-qemu.img","user system") \
+    _AVD_IMG(USERVENDOR,"vendor-qemu.img","user vendor") \
     _AVD_IMG(USERDATA,"userdata-qemu.img", "user data") \
     _AVD_IMG(CACHE,"cache.img","cache") \
     _AVD_IMG(SDCARD,"sdcard.img","SD Card") \
@@ -198,6 +200,9 @@ char*  avdInfo_getSystemImagePath( const AvdInfo* i );
  * initialization image for this disk image.
  */
 char*  avdInfo_getSystemInitImagePath( const AvdInfo*  i );
+
+char*  avdInfo_getVendorImagePath( const AvdInfo* i );
+char*  avdInfo_getVendorInitImagePath( const AvdInfo*  i );
 
 char*  avdInfo_getDataImagePath( const AvdInfo*  i );
 char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );

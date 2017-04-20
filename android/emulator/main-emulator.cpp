@@ -162,7 +162,8 @@ static void clean_up_avd_contents_except_config_ini(const char* avd_folder) {
     // sdcard.img should not be deleted, because it is created by sdk manager
     // and we dont know how to re-create it from emulator yet
     // TODO: fixit
-    static constexpr StringView files_to_delete[] = {"system.img.qcow2", "userdata-qemu.img",
+    static constexpr StringView files_to_delete[] = {
+        "system.img.qcow2", "vendor.img.qcow2", "userdata-qemu.img",
         "userdata-qemu.img.qcow2", "userdata.img", "userdata.img.qcow2", "cache.img",
         "cache.img.qcow2", "version_num.cache", "sdcard.img.qcow2", "encryptionkey.img",
         "encryptionkey.img.qcow2", "hardware-qemu.ini", "emulator-user.ini"};
@@ -173,7 +174,8 @@ static void clean_up_android_out(const char* android_out) {
     // note: we should not delete 'userdata.img' otherwise, we will have to run
     // make again to create it; in avd/ folder, it can be copied from
     // system-images/.../<arch>/ directory.
-    static constexpr StringView files_to_delete[] = {"system.img.qcow2", "userdata-qemu.img",
+    static constexpr StringView files_to_delete[] = {
+        "system.img.qcow2", "vendor.img.qcow2", "userdata-qemu.img",
         "userdata-qemu.img.qcow2", "userdata.img.qcow2", "cache.img.qcow2", "version_num.cache",
         "hardware-qemu.ini", "emulator-user.ini"};
     delete_files(android_out, files_to_delete, ARRAY_SIZE(files_to_delete));
