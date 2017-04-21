@@ -89,7 +89,7 @@ int sowrite _P((struct socket *));
 void sorecvfrom _P((struct socket *));
 int sosendto _P((struct socket *, struct mbuf *));
 struct socket * solisten _P((u_int, u_int32_t, u_int, int));
-int  sounlisten _P((u_int port));
+int  sounlisten _P((struct socket *, u_int port));
 void soisfconnecting _P((register struct socket *));
 void soisfconnected _P((register struct socket *));
 void soisfdisconnected _P((struct socket *));
