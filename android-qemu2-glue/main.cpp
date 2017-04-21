@@ -893,21 +893,12 @@ extern "C" int main(int argc, char **argv) {
 
     args[n++] = "-show-cursor";
 
-    // TODO: the following *should* re-enable -tcpdump in QEMU2 when we have
-    // rebased to at least QEMU 2.5 - the standard -tcpdump flag
-    // See http://wiki.qemu.org/ChangeLog/2.5#Network_2 and
-    // http://wiki.qemu.org/download/qemu-doc.html#index-_002dobject
-//    std::string tcpdumpArg;
-//    if (opts->tcpdump) {
-//        args[n++] = "-object";
-//        tcpdumpArg = StringFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
-//                                  opts->tcpdump);
-//        args[n++] = tcpdumpArg.c_str();
-//    }
-
+    std::string tcpdumpArg;
     if (opts->tcpdump) {
-        dwarning("The -tcpdump flag is not supported in QEMU2 yet and will "
-                 "be ignored.");
+        args[n++] = "-object";
+        tcpdumpArg = StringFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
+                                  opts->tcpdump);
+        args[n++] = tcpdumpArg.c_str();
     }
 
     // Graphics
