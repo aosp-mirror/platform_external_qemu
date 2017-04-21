@@ -683,17 +683,17 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
 
 
 int
-sounlisten(u_int  port)
+sounlisten(struct socket *head, u_int  port)
 {
     struct socket *so;
 
-    for (so = tcb.so_next; so != &tcb; so = so->so_next) {
+    for (so = head->so_next; so != head; so = so->so_next) {
         if (so->so_haddr_port == port) {
             break;
         }
     }
 
-    if (so == &tcb) {
+    if (so == head) {
         return -1;
     }
 
