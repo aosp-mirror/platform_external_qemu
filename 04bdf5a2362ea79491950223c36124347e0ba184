@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1937f1c_d5704176",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 908,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-04-21T17:46:47Z",
+      "side": 1,
+      "message": "Remove the warning msg?",
+      "revId": "04bdf5a2362ea79491950223c36124347e0ba184",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
