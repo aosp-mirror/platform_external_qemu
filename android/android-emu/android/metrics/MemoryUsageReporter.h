@@ -16,6 +16,8 @@
 
 #include "android/base/async/Looper.h"
 #include "android/base/async/RecurrentTask.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
 #include "android/metrics/MetricsReporter.h"
 
 #include <memory>
@@ -52,7 +54,9 @@ private:
     android::base::Looper* const mLooper;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
-    size_t mPrevWss;
+
+    android::base::System::MemUsage mCurrUsage;
+    android::base::Lock mLock;
 
     DISALLOW_COPY_AND_ASSIGN(MemoryUsageReporter);
 };
