@@ -1090,13 +1090,13 @@ int slirp_redir(int is_udp, int host_port,
 int  slirp_unredir(int  is_udp, int  host_port)
 {
     if (is_udp)
-        return udp_unlisten( host_port );
+        return sounlisten(&udb, host_port );
     else {
-        if (sounlisten( host_port ))
+        if (sounlisten(&tcb, host_port ))
             return -1;
         // It's possible we are listening on both ipv4/ipv6 ports.
         // Just try unlisten again.
-        sounlisten( host_port );
+        sounlisten(&tcb, host_port );
         return 0;
     }
 }
