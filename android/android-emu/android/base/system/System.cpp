@@ -486,38 +486,122 @@ public:
 #endif
     }
 
-    size_t getPeakMemory() override {
-      // Note,there is no universal way to determine how much memory a process
-      // is really consuming in the various OSes.
-        size_t size = 0;
 #ifdef _WIN32
-        PROCESS_MEMORY_COUNTERS info;
-        GetProcessMemoryInfo(GetCurrentProcess(), &info, sizeof(info));
-        size = (size_t)info.PagefileUsage;
-#elif defined(__linux__)
+    MemUsage getMemUsage() override {
+        PROCESS_MEMORY_COUNTERS_EX memCounters = {sizeof(memCounters)};
+        char buf[1024] = {};
+        char* bufptr = buf;
+
+        MemUsage res;
+        memset(&res, 0, sizeof(MemUsage));
+
+        if (::GetProcessMemoryInfo(::GetCurrentProcess(),
+                    reinterpret_cast<PROCESS_MEMORY_COUNTERS*>(&memCounters),
+                    sizeof(memCounters))) {
+
+            uint64_t pageFileUsageCommit =
+                memCounters.PagefileUsage
+                ? memCounters.PagefileUsage
+                : memCounters.PrivateUsage;
+
+            res.resident = memCounters.WorkingSetSize;
+            res.resident_max = memCounters.PeakWorkingSetSize;
+            res.virt = pageFileUsageCommit;
+            res.virt_max = memCounters.PeakPagefileUsage;
+        }
+
+        MEMORYSTATUSEX mem = {sizeof(mem)};
+        if (::GlobalMemoryStatusEx(&mem)) {
+            bufptr += snprintf(bufptr, (int)sizeof(buf) - (bufptr - buf) - 1,
+                    "\n"
+                    "TotalPhys: %" PRIu64 " kB\n"
+                    "AvailPhys: %" PRIu64 " kB\n"
+                    "TotalPageFile: %" PRIu64 " kB\n"
+                    "AvailPageFile: %" PRIu64 " kB\n"
+                    "TotalVirtual: %" PRIu64 " kB\n"
+                    "AvailVirtual: %" PRIu64 " kB\n",
+                    toKB(mem.ullTotalPhys),
+                    toKB(mem.ullAvailPhys),
+                    toKB(mem.ullTotalPageFile),
+                    toKB(mem.ullAvailPageFile),
+                    toKB(mem.ullTotalVirtual),
+                    toKB(mem.ullAvailVirtual));
+
+            res.total_phys_memory = mem.ullTotalPhys;
+            res.total_page_file = mem.ullTotalPageFile;
+        }
+        return res;
+    }
+#elif defined (__linux__)
+    MemUsage getMemUsage() override {
+
+        MemUsage res;
+        memset(&res, 0, sizeof(MemUsage));
+
+        size_t size = 0;
         FILE *fp = fopen("/proc/self/status", "r");
+        char buf[256];
         if (fp != NULL) {
-            char buf[16];
-            while(size == 0 && fscanf(fp, "%8s", buf) > 0)  {
+            while (fscanf(fp, "%s:", buf) > 0)  {
+                if (strcmp(buf, "VmRSS:") == 0) {
+                    fscanf(fp, "%lu", &size);
+                    res.resident = size * 1024;
+                }
+                if (strcmp(buf, "VmHWM:") == 0) {
+                    fscanf(fp, "%lu", &size);
+                    res.resident_max = size * 1024;
+                }
+                if (strcmp(buf, "VmSize:") == 0) {
+                    fscanf(fp, "%lu", &size);
+                    res.virt = size * 1024;
+                }
                 if (strcmp(buf, "VmPeak:") == 0) {
-                  fscanf(fp, "%lu", &size);
-                  size *= 1024;
+                    fscanf(fp, "%lu", &size);
+                    res.virt_max = size * 1024;
                 }
             }
             fclose(fp);
         }
-#elif defined(__APPLE__)
-        struct task_basic_info info;
-        mach_msg_type_number_t info_count = sizeof(info);
 
-        if (KERN_SUCCESS == task_info(mach_task_self(), TASK_BASIC_INFO,
-                                      (task_info_t)&info, &info_count)) {
-            size = info.virtual_size;
+        fp = fopen("/proc/meminfo", "r");
+        if (fp != NULL) {
+            while (fscanf(fp, "%s:", buf) > 0)  {
+                if (strcmp(buf, "MemTotal:") == 0) {
+                    fscanf(fp, "%lu", &size);
+                    res.total_phys_memory = size * 1024;
+                }
+                if (strcmp(buf, "SwapTotal:") == 0) {
+                    fscanf(fp, "%lu", &size);
+                    res.total_page_file = size * 1024;
+                }
+            }
+            fclose(fp);
         }
-#endif
-        mMemorySize = std::max(size, mMemorySize);
-        return mMemorySize;
+        return res;
     }
+#elif defined(__APPLE__)
+    MemUsage getMemUsage() override {
+        mach_task_basic_info info = {};
+        mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
+        task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+                reinterpret_cast<task_info_t>(&info), &infoCount);
+
+        int mib[2] = { CTL_HW, HW_MEMSIZE };
+        uint64_t total_phys = 0;
+        size_t len = sizeof(uint64_t);
+        sysctl(mib, 2, &total_phys, &len, nullptr, 0);
+
+        MemUsage res = {
+            info.resident_size, // res
+            info.resident_size_max, // res max
+            info.virtual_size, // virt
+            0, // virt max (NYI)
+            total_phys, // total phys
+            0, // total page file (NYI)
+        };
+        return res;
+    }
+#endif
 
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
@@ -556,7 +640,7 @@ public:
     virtual void envSet(StringView varname, StringView varvalue) {
 #ifdef _WIN32
         std::string envStr =
-                StringFormat("%s=%s", varname, varvalue);
+            StringFormat("%s=%s", varname, varvalue);
         // Note: this leaks the result of release().
         _wputenv(Win32UnicodeString(envStr).release());
 #else
@@ -640,7 +724,7 @@ public:
     }
 
     virtual bool pathFileSize(StringView path,
-                              FileSize* outFileSize) const override {
+            FileSize* outFileSize) const override {
         return pathFileSizeInternal(path, outFileSize);
     }
 
@@ -657,7 +741,7 @@ public:
         FILETIME kernelTime = {};
         FILETIME userTime = {};
         ::GetProcessTimes(::GetCurrentProcess(), &creationTime, &exitTime,
-                          &kernelTime, &userTime);
+                &kernelTime, &userTime);
 
         // convert 100-ns intervals from a struct to int64_t milliseconds
         ULARGE_INTEGER kernelInt64;
@@ -678,7 +762,7 @@ public:
         res.userMs = (times.tms_utime * 1000ll) / ticksPerSec;
 #endif
         res.wallClockMs =
-                (kTickCount.getUs() - kTickCount.getStartTimeUs()) / 1000;
+            (kTickCount.getUs() - kTickCount.getStartTimeUs()) / 1000;
 
         return res;
     }
@@ -706,11 +790,11 @@ public:
     }
 
     bool runCommand(const std::vector<std::string>& commandLine,
-                    RunOptions options,
-                    System::Duration timeoutMs,
-                    System::ProcessExitCode* outExitCode,
-                    System::Pid* outChildPid,
-                    const std::string& outputFile) override {
+            RunOptions options,
+            System::Duration timeoutMs,
+            System::ProcessExitCode* outExitCode,
+            System::Pid* outChildPid,
+            const std::string& outputFile) override {
         // Sanity check.
         if (commandLine.empty()) {
             return false;
@@ -726,8 +810,8 @@ public:
         }
 
         if ((options & RunOptions::ShowOutput) == 0 ||
-            ((options & RunOptions::DumpOutputToFile) != 0 &&
-             !outputFile.empty())) {
+                ((options & RunOptions::DumpOutputToFile) != 0 &&
+                 !outputFile.empty())) {
             startup.dwFlags = STARTF_USESHOWWINDOW;
 
             // 'Normal' way of hiding console output is passing null std handles
@@ -780,15 +864,15 @@ public:
         Win32UnicodeString argsUnicode(args);
 
         if (!::CreateProcessW(commandUnicode.c_str(), // program path
-                argsUnicode.data(), // command line args, has to be writable
-                nullptr,            // process handle is not inheritable
-                nullptr,            // thread handle is not inheritable
-                FALSE,              // no, don't inherit any handles
-                0,                  // default creation flags
-                nullptr,            // use parent's environment block
-                nullptr,            // use parent's starting directory
-                &startup,           // startup info, i.e. std handles
-                &pinfo)) {
+                    argsUnicode.data(), // command line args, has to be writable
+                    nullptr,            // process handle is not inheritable
+                    nullptr,            // thread handle is not inheritable
+                    FALSE,              // no, don't inherit any handles
+                    0,                  // default creation flags
+                    nullptr,            // use parent's environment block
+                    nullptr,            // use parent's starting directory
+                    &startup,           // startup info, i.e. std handles
+                    &pinfo)) {
             return false;
         }
 
@@ -806,7 +890,7 @@ public:
 
         // We were requested to wait for the process to complete.
         DWORD ret = ::WaitForSingleObject(pinfo.hProcess,
-                                          timeoutMs ? timeoutMs : INFINITE);
+                timeoutMs ? timeoutMs : INFINITE);
         if (ret == WAIT_FAILED || ret == WAIT_TIMEOUT) {
             if ((options & RunOptions::TerminateOnTimeout) != 0) {
                 ::TerminateProcess(pinfo.hProcess, 1);
@@ -827,11 +911,11 @@ public:
         sigset_t oldset;
         sigset_t set;
         if (sigemptyset(&set) || sigaddset(&set, SIGCHLD) ||
-            pthread_sigmask(SIG_UNBLOCK, &set, &oldset)) {
+                pthread_sigmask(SIG_UNBLOCK, &set, &oldset)) {
             return false;
         }
         auto result = runCommandPosix(commandLine, options, timeoutMs,
-                                      outExitCode, outChildPid, outputFile);
+                outExitCode, outChildPid, outputFile);
         pthread_sigmask(SIG_SETMASK, &oldset, nullptr);
         return result;
 #endif  // !_WIN32
@@ -875,11 +959,11 @@ public:
 
 #ifndef _WIN32
     bool runCommandPosix(const std::vector<std::string>& commandLine,
-                         RunOptions options,
-                         System::Duration timeoutMs,
-                         System::ProcessExitCode* outExitCode,
-                         System::Pid* outChildPid,
-                         const std::string& outputFile) {
+            RunOptions options,
+            System::Duration timeoutMs,
+            System::ProcessExitCode* outExitCode,
+            System::Pid* outChildPid,
+            const std::string& outputFile) {
         vector<char*> params;
         for (const auto& item : commandLine) {
             params.push_back(const_cast<char*>(item.c_str()));
@@ -898,10 +982,10 @@ public:
 
 #if defined(__APPLE__)
         int pid = runViaPosixSpawn(commandLine[0].c_str(), params, options,
-                                   outputFile);
+                outputFile);
 #else
         int pid = runViaForkAndExec(commandLine[0].c_str(), params, options,
-                                    outputFile);
+                outputFile);
 #endif  // !defined(__APPLE__)
 
         if (pid < 0) {
@@ -938,8 +1022,8 @@ public:
             if (waitPid < 0) {
                 auto local_errno = errno;
                 LOG(VERBOSE) << "Error running command " << cmd
-                             << ". waitpid failed with |"
-                             << strerror(local_errno) << "|";
+                    << ". waitpid failed with |"
+                    << strerror(local_errno) << "|";
                 return false;
             }
 
@@ -965,9 +1049,9 @@ public:
     }
 
     int runViaForkAndExec(const char* command,
-                          const vector<char*>& params,
-                          RunOptions options,
-                          const string& outputFile) {
+            const vector<char*>& params,
+            RunOptions options,
+            const string& outputFile) {
         // If an output file was requested, open it before forking, since
         // creating a file in the child of a multi-threaded process is sketchy.
         //
@@ -984,7 +1068,7 @@ public:
             // output file.
             mode_t old = umask(0);
             outputFd = open(outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC,
-                            0700);
+                    0700);
             umask(old);
             if (outputFd < 0) {
                 LOG(VERBOSE) << "Failed to open file to redirect stdout/stderr";
@@ -1041,9 +1125,9 @@ public:
 
 #if defined(__APPLE__)
     int runViaPosixSpawn(const char* command,
-                         const vector<char*>& params,
-                         RunOptions options,
-                         const string& outputFile) {
+            const vector<char*>& params,
+            RunOptions options,
+            const string& outputFile) {
         posix_spawnattr_t attr;
         if (posix_spawnattr_init(&attr)) {
             LOG(VERBOSE) << "Failed to initialize spawnattr obj.";
@@ -1071,31 +1155,31 @@ public:
             posix_spawn_file_actions_destroy(t);
         };
         unique_ptr<posix_spawn_file_actions_t, decltype(fileActionsDeleter)>
-                scopedFileActions(&fileActions, fileActionsDeleter);
+            scopedFileActions(&fileActions, fileActionsDeleter);
 
         if ((options & RunOptions::DumpOutputToFile) != RunOptions::Empty) {
             if (posix_spawn_file_actions_addopen(
                         &fileActions, 1, outputFile.c_str(),
                         O_WRONLY | O_CREAT | O_TRUNC, 0700) ||
-                posix_spawn_file_actions_addopen(
+                    posix_spawn_file_actions_addopen(
                         &fileActions, 2, outputFile.c_str(),
                         O_WRONLY | O_CREAT | O_TRUNC, 0700)) {
                 LOG(VERBOSE) << "Failed to redirect child output to file "
-                             << outputFile;
+                    << outputFile;
                 return -1;
             }
         } else if ((options & RunOptions::ShowOutput) != RunOptions::Empty) {
             if (posix_spawn_file_actions_addinherit_np(&fileActions, 1) ||
-                posix_spawn_file_actions_addinherit_np(&fileActions, 2)) {
+                    posix_spawn_file_actions_addinherit_np(&fileActions, 2)) {
                 LOG(VERBOSE) << "Failed to request child stdout/stderr to be "
-                                "left intact";
+                    "left intact";
                 return -1;
             }
         } else {
             if (posix_spawn_file_actions_addopen(&fileActions, 1, "/dev/null",
-                                                 O_WRONLY, 0700) ||
-                posix_spawn_file_actions_addopen(&fileActions, 2, "/dev/null",
-                                                 O_WRONLY, 0700)) {
+                        O_WRONLY, 0700) ||
+                    posix_spawn_file_actions_addopen(&fileActions, 2, "/dev/null",
+                        O_WRONLY, 0700)) {
                 LOG(VERBOSE) << "Failed to redirect child output to /dev/null";
                 return -1;
             }
@@ -1104,7 +1188,7 @@ public:
         // We never want to forward our stdin to the child process. On the other
         // hand, closing it can confuse some programs.
         if (posix_spawn_file_actions_addopen(&fileActions, 0, "/dev/null",
-                                             O_RDONLY, 0700)) {
+                    O_RDONLY, 0700)) {
             LOG(VERBOSE) << "Failed to redirect child stdin from /dev/null";
             return -1;
         }
@@ -1114,7 +1198,7 @@ public:
 
         int pid;
         if (int error_code = posix_spawnp(&pid, command, &fileActions, &attr,
-                                          params.data(), environ)) {
+                    params.data(), environ)) {
             LOG(VERBOSE) << "posix_spawnp failed: " << strerror(error_code);
             return -1;
         }
