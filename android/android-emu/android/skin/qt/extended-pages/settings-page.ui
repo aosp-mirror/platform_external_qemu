@@ -950,6 +950,35 @@
       <number>80</number>
      </property>
     </widget>
+    <widget class="RaisedMaterialButton" name="set_proxyApply">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>280</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>APPLY</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
     <zorder>set_useStudio</zorder>
     <zorder>set_noProxy</zorder>
     <zorder>set_manualConfig</zorder>
@@ -962,9 +991,17 @@
     <zorder>set_loginName</zorder>
     <zorder>set_loginPassword</zorder>
     <zorder>set_portNumber</zorder>
+    <zorder>set_proxyApply</zorder>
    </widget>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>set_tabs</tabstop>
   <tabstop>set_themeBox</tabstop>
@@ -979,6 +1016,7 @@
   <tabstop>set_glesBackendPrefComboBox</tabstop>
   <tabstop>set_glesApiLevelPrefComboBox</tabstop>
   <tabstop>set_frameAlways</tabstop>
+  <tabstop>set_clipboardSharing</tabstop>
   <tabstop>set_useStudio</tabstop>
   <tabstop>set_noProxy</tabstop>
   <tabstop>set_manualConfig</tabstop>
@@ -987,6 +1025,7 @@
   <tabstop>set_proxyAuth</tabstop>
   <tabstop>set_loginName</tabstop>
   <tabstop>set_loginPassword</tabstop>
+  <tabstop>set_proxyApply</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>

@@ -39,4 +39,6 @@ struct SlirpProxyOps {
     void (*remove)(void *connect_opaque);
 };
 
+extern bool http_proxy_on;
+
 #endif /* SLIRP_PROXY_H */

@@ -9,14 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#include "proxy/proxy_setup.h"
-#include "android/utils/debug.h"
+#pragma once
 
-void
-android_http_proxy_set( const char*  proxy )
-{
-    if (proxy == NULL)
-        return;
+ANDROID_BEGIN_HEADER
 
-    android_http_proxy_setup(proxy, VERBOSE_CHECK(proxy));
-}
+int android_http_proxy_set( const char*  proxy );
+
+ANDROID_END_HEADER

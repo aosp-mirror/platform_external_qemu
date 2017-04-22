@@ -545,6 +545,40 @@ sorecvfrom(struct socket *so)
 	} /* if ping packet */
 }
 
+
+/*
+ * Translate addr in host addr when it is a virtual address
+ */
+int sotranslate_out(struct socket *so, SockAddress *addr)
+{
+    uint16_t port = sock_address_get_port(addr);
+    switch (addr->family) {
+    case SOCKET_INET:
+        if ((so->faddr.u.inet.address & 0xffffff00) == special_addr_ip) {
+            /* It's an alias */
+            uint32_t addr_ip;
+            int  low = so->faddr.u.inet.address & 0xff;
+            if ( CTL_IS_DNS(low) )
+               addr_ip = dns_addr[low - CTL_DNS];
+            else
+               addr_ip = loopback_addr_ip;
+            sock_address_init_inet(addr, addr_ip, port);
+            return 1;
+        }
+        break;
+    case SOCKET_IN6:
+        if (in6_equal_net((struct in6_addr*) &so->faddr.u.in6.address,
+            &vprefix_addr6, vprefix_len)) {
+            sock_address_init_in6_loopback(addr, port);
+            return 1;
+        }
+        break;
+    default:
+        break;
+    }
+    return 0;
+}
+
 /*
  * sendto() a socket
  */
@@ -552,51 +586,34 @@ int
 sosendto(struct socket *so, struct mbuf *m)
 {
 	int ret;
-    SockAddress   addr;
-    uint32_t      addr_ip;
-    uint16_t      addr_port;
+	SockAddress addr = so->faddr;
 
 	DEBUG_CALL("sosendto");
 	DEBUG_ARG("so = %lx", (long)so);
 	DEBUG_ARG("m = %lx", (long)m);
 
-	if ((so->so_faddr_ip & 0xffffff00) == special_addr_ip) {
-        /* It's an alias */
-      	int  low = so->so_faddr_ip & 0xff;
-
-        if ( CTL_IS_DNS(low) )
-            addr_ip = dns_addr[low - CTL_DNS];
-        else
-            addr_ip = loopback_addr_ip;
-	} else
-	    addr_ip = so->so_faddr_ip;
-
-	addr_port = so->so_faddr_port;
+	sotranslate_out(so, &addr);
 
 	/*
 	 * test for generic forwarding; this function replaces the arguments
 	 * only on success
 	 */
-	unsigned long faddr = addr_ip;
-        int fport = addr_port;
+	unsigned long faddr = sock_address_get_ip(&addr);
+	int fport = sock_address_get_port(&addr);
 
 	if (slirp_should_net_forward(faddr, fport, &faddr, &fport)) {
       time_t timestamp = time(NULL);
       slirp_drop_log(
-	       "Redirected UDP: src: 0x%08lx:0x%04x org dst: 0x%08lx:0x%04x "
+	       "Redirected UDP: src: 0x%08lx:0x%04x org dst: %s "
 	       "new dst: 0x%08lx:0x%04x %ld\n",
 	        so->so_laddr_ip, so->so_laddr_port,
-	        addr_ip, addr_port,
+	        sock_address_to_string(&addr),
 	        faddr, fport, timestamp
 	    );
+            sock_address_init_inet(&addr, faddr, fport);
 	}
-	addr_ip = faddr;
-	addr_port = fport;
 
-
-        sock_address_init_inet(&addr, addr_ip, addr_port);
-
-	DEBUG_MISC((dfd, " sendto()ing, addr.sin_port=%d, addr.sin_addr.s_addr=%08x\n", addr_port, addr_ip));
+	DEBUG_MISC((dfd, " sendto()ing, %s\n", sock_address_to_string(&addr)));
 
 	/* Don't care what port we get */
 	ret = socket_sendto(so->s, m->m_data, m->m_len,&addr);
@@ -666,17 +683,17 @@ solisten(u_int port, u_int32_t laddr, u_int lport, int flags)
 
 
 int
-sounlisten(u_int  port)
+sounlisten(struct socket *head, u_int  port)
 {
     struct socket *so;
 
-    for (so = tcb.so_next; so != &tcb; so = so->so_next) {
+    for (so = head->so_next; so != head; so = so->so_next) {
         if (so->so_haddr_port == port) {
             break;
         }
     }
 
-    if (so == &tcb) {
+    if (so == head) {
         return -1;
     }
 
