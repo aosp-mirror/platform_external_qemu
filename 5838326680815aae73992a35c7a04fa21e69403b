@@ -48,6 +48,29 @@
     },
     {
       "key": {
+        "uuid": "4c00f90b_b97bd780",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 506,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-22T01:00:46Z",
+      "side": 1,
+      "message": "You might want to consider also checking for CurrentMajorVersionNumber and CurrentMinorVersionNumber since apparently, Windows 10 changed this up: http://stackoverflow.com/questions/31072543/reliable-way-to-get-windows-version-from-registry",
+      "range": {
+        "startLine": 504,
+        "startChar": 0,
+        "endLine": 506,
+        "endChar": 43
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c124385_de7c31e9",
         "filename": "android/android-emu/android/base/testing/TestSystem.h",
         "patchSetId": 2
