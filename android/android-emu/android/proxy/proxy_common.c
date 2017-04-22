@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/proxy/proxy_int.h"
+#include "android/proxy/proxy_errno.h"
 
 #include "android/utils/iolooper.h"
 #include "android/utils/misc.h"
@@ -503,4 +504,15 @@ proxy_check_connection( const char* proxyname,
         ret   = -1;
     }
     return ret;
+}
+
+const char* proxy_error_string(int errorCode) {
+    switch (errorCode) {
+        case PROXY_ERR_OK:           return "Success";
+        case PROXY_ERR_BAD_FORMAT:   return "Invalid proxy format";
+        case PROXY_ERR_UNREACHABLE:  return "Proxy is unreachable";
+        case PROXY_ERR_INTERNAL:     return "Internal error";
+
+        default:                     return "Bad proxy error code";
+    }
 }
