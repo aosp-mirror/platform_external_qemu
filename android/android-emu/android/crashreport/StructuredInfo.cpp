@@ -229,6 +229,9 @@ void StructuredInfo::setHypervisor(CpuAccelerator accel) {
         case CPU_ACCELERATOR_HVF:
             protoAccel = EmulatorCrashInfoDetails::HVF;
             break;
+        case CPU_ACCELERATOR_HYPERV:
+            protoAccel = EmulatorCrashInfoDetails::HYPERV;
+            break;
         case CPU_ACCELERATOR_MAX:
             protoAccel = EmulatorCrashInfoDetails::UNKNOWN_HYPERVISOR;
             break;

@@ -964,8 +964,6 @@ message EmulatorDetails {
   optional EmulatorFeatureFlagState feature_flag_state = 19;
   // Hypervisor used in current session.
   optional EmulatorHypervisor hypervisor = 20;
-  // Emulator memory usage.
-  optional EmulatorMemoryUsage memory_usage = 21;
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -1083,6 +1081,8 @@ message EmulatorPercentileEstimator {
 message EmulatorPerformanceStats {
   // Collection of estimations of performance metrics.
   repeated EmulatorPercentileEstimator estimator = 1;
+  // Emulator memory usage over time.
+  repeated EmulatorMemoryUsage memory_usage = 2;
 }
 
 // Details about a single Gradle run.
