@@ -126,7 +126,9 @@ void GooglePlayServices::showPlayStoreSettings(ResultCallback resultCallback) {
         return;
     }
     mStoreSettingsCommand = mAdb->runAdbCommand(
-            {"shell", "am start", "-n",
+            {"shell", "am start",
+             std::string(kPlayStorePkgName) + ";",
+             "am start", "-n",
              std::string(kPlayStorePkgName) +
                      "/com.google.android.finsky.activities.SettingsActivity"},
             [this, resultCallback](const OptionalAdbCommandResult& result) {

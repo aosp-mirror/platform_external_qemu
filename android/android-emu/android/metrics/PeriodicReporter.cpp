@@ -174,7 +174,14 @@ void PeriodicReporter::removeTask(System::Duration periodMs,
                                   CallbackList::iterator iter) {
     AutoLock lock(mLock);
 
-    PerPeriodData& data = mPeriodDataByPeriod[periodMs];
+    // There is a corner case where we try to remove a
+    // task just as we are being cleaned up
+    auto it = mPeriodDataByPeriod.find(periodMs);
+    if (it == mPeriodDataByPeriod.end()) {
+      return;
+    }
+
+    PerPeriodData& data = it->second;
     data.callbacks.erase(iter);
     if (data.callbacks.empty()) {
         data.task->stopAsync();
