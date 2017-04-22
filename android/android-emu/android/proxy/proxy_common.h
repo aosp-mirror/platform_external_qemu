@@ -128,4 +128,7 @@ extern int   proxy_check_connection( const char* proxyname,
                                      int         proxyport,
                                      int         timeout_ms );
 
+// Returns a string describing the PROXY_ERR_* code
+extern const char* proxy_error_string(int errorCode);
+
 ANDROID_END_HEADER
