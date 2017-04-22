@@ -385,7 +385,7 @@ tcp_sockclosed(struct tcpcb *tp)
 static void
 tcp_on_proxy_connection(void *opaque, int fd, int af) {
         struct socket *so = opaque;
-	so->so_state &= ~SS_PROXIFIED;
+        so->so_state &= ~SS_PROXIFIED;
 	if (fd >= 0) {
 		so->s = fd;
 		so->so_state &= ~(SS_ISFCONNECTING);
@@ -420,7 +420,7 @@ int tcp_fconnect(struct socket *so, unsigned short af)
   DEBUG_CALL(" connect()ing")
   sotranslate_out(so, &addr);
 
-  if (slirp_proxy &&
+  if (http_proxy_on &&
       slirp_proxy->try_connect(&addr, tcp_on_proxy_connection, so)) {
 	soisfconnecting(so);
 	so->s = -1;

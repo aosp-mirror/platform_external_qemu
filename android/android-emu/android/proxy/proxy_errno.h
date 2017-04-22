@@ -1,4 +1,4 @@
-/* Copyright 2016 The Android Open Source Project
+/* Copyright (C) 2007-2017 The Android Open Source Project
 **
 ** This software is licensed under the terms of the GNU General Public
 ** License version 2, as published by the Free Software Foundation, and
@@ -9,15 +9,16 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#pragma once
 
-#include "android/utils/compiler.h"
-#include <stdbool.h>
+#pragma once
 
 ANDROID_BEGIN_HEADER
 
-bool qemu_android_setup_http_proxy(const char* http_proxy);
-void qemu_android_remove_http_proxy();
-void qemu_android_init_http_proxy_ops();
+enum proxy_errno {
+    PROXY_ERR_OK,
+    PROXY_ERR_BAD_FORMAT,
+    PROXY_ERR_UNREACHABLE,
+    PROXY_ERR_INTERNAL
+};
 
 ANDROID_END_HEADER

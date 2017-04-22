@@ -52,7 +52,7 @@ void SettingsPage::initProxy() {
 void SettingsPage::proxyDtor() {
     // Clean up.
     // Try to delete the parameters file.
-    // (If we not given an agent, we didn't try
+    // (If we were not given an agent, we didn't try
     // to read it and we didn't delete it.)
 
     EmulatorWindow* const ew = emulator_window_get();
@@ -68,28 +68,32 @@ void SettingsPage::setHttpProxyAgent(const QAndroidHttpProxyAgent* agent) {
     sendProxySettingsToAgent();
 }
 
+void SettingsPage::on_set_proxyApply_clicked() {
+    sendProxySettingsToAgent();
+}
+
+void SettingsPage::on_set_hostName_textChanged(QString /* unused */) {
+    enableProxyApply();
+}
 void SettingsPage::on_set_hostName_editingFinished() {
     QSettings settings;
     settings.setValue(Ui::Settings::HTTP_PROXY_HOST, mUi->set_hostName->text());
-    sendProxySettingsToAgent();
 }
 
+void SettingsPage::on_set_loginName_textChanged(QString /* unused */) {
+    enableProxyApply();
+}
 void SettingsPage::on_set_loginName_editingFinished() {
     QSettings settings;
     settings.setValue(Ui::Settings::HTTP_PROXY_USERNAME, mUi->set_loginName->text());
-    sendProxySettingsToAgent();
 }
 
-void SettingsPage::on_set_loginPassword_editingFinished() {
-    // Password is not stored
-    sendProxySettingsToAgent();
-}
 void SettingsPage::on_set_manualConfig_toggled(bool checked) {
     if (checked) {
         QSettings settings;
         settings.setValue(Ui::Settings::HTTP_PROXY_TYPE, Ui::Settings::HTTP_PROXY_TYPE_MANUAL);
         grayOutProxy();
-        sendProxySettingsToAgent();
+        enableProxyApply();
     }
 }
 void SettingsPage::on_set_noProxy_toggled(bool checked) {
@@ -97,26 +101,29 @@ void SettingsPage::on_set_noProxy_toggled(bool checked) {
         QSettings settings;
         settings.setValue(Ui::Settings::HTTP_PROXY_TYPE, Ui::Settings::HTTP_PROXY_TYPE_NONE);
         grayOutProxy();
-        sendProxySettingsToAgent();
+        enableProxyApply();
     }
+}
+void SettingsPage::on_set_portNumber_valueChanged(int /* unused */) {
+    enableProxyApply();
 }
 void SettingsPage::on_set_portNumber_editingFinished() {
     QSettings settings;
     settings.setValue(Ui::Settings::HTTP_PROXY_PORT,
                       mUi->set_portNumber->value());
-    sendProxySettingsToAgent();
 }
+
 void SettingsPage::on_set_proxyAuth_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::HTTP_PROXY_AUTHENTICATION, checked);
     grayOutProxy();
-    sendProxySettingsToAgent();
+    enableProxyApply();
 }
 void SettingsPage::on_set_useStudio_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::HTTP_PROXY_USE_STUDIO, checked);
     grayOutProxy();
-    sendProxySettingsToAgent();
+    enableProxyApply();
 }
 
 // Conditionally gray out portions of the
@@ -161,6 +168,8 @@ void SettingsPage::sendProxySettingsToAgent() {
         return;
     }
 
+    disableProxyApply();
+
     if (mHttpProxyAgent == nullptr || mHttpProxyAgent->httpProxySet == nullptr) {
         return;
     }
@@ -200,6 +209,14 @@ void SettingsPage::sendProxySettingsToAgent() {
         return;
     }
 }
+
+void SettingsPage::enableProxyApply() {
+    mUi->set_proxyApply->setEnabled(true);
+}
+void SettingsPage::disableProxyApply() {
+    mUi->set_proxyApply->setEnabled(false);
+}
+
 
 // If Android Studio gave us a file with HTTP Proxy
 // settings, read those into memory and delete the

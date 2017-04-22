@@ -105,20 +105,27 @@ static void android_proxy_remove(void* connect_opaque) {
     proxy_manager_del(connect_opaque);
 }
 
+static const struct SlirpProxyOps android_proxy_ops = {
+    .try_connect = android_proxy_try_connect,
+    .remove = android_proxy_remove,
+};
+// Inject TCP proxy implementation into SLIRP stack.
+// Initialization of the proxy will happen later.
+void qemu_android_init_http_proxy_ops() {
+    slirp_proxy = &android_proxy_ops;
+}
+
 bool qemu_android_setup_http_proxy(const char* http_proxy) {
-    if (!http_proxy) {
+    if (!http_proxy || http_proxy[0] == '\0') {
         return true;
     }
-    // Inject TCP proxy implementation into SLIRP stack.
-    // Initialization of the proxy will happen later.
-    static const SlirpProxyOps android_proxy_ops = {
-        .try_connect = android_proxy_try_connect,
-        .remove = android_proxy_remove,
-    };
-
     op_http_proxy = http_proxy;
+    http_proxy_on = true;
 
-    slirp_proxy = &android_proxy_ops;
+   return true;
+}
 
-    return true;
+void qemu_android_remove_http_proxy() {
+    op_http_proxy = NULL;
+    http_proxy_on = false;
 }

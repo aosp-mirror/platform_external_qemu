@@ -923,6 +923,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     }
 
     (*w).second.first->setColorBuffer((*c).second.cb);
+    (*c).second.opened = true;
     if (w->second.second) {
         closeColorBufferLocked(w->second.second);
     }

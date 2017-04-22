@@ -57,6 +57,7 @@ GlLibrary* getGlLibrary();
 
 EglGlobalInfo* g_eglInfo = NULL;
 emugl::Mutex  s_eglLock;
+emugl::Mutex  s_surfaceDestroyLock;
 
 void initGlobalInfo()
 {
@@ -769,21 +770,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface s
     if(!srfc.get()) {
         RETURN_ERROR(EGL_FALSE,EGL_BAD_SURFACE);
     }
-
-    bool needUnbind = false;
-    if (!getThreadInfo()->eglContext) {
-        needUnbind = true;
-        dpy->nativeType()->makeCurrent(srfc->native(), srfc->native(),
-                dpy->getGlobalSharedContext());
-    }
-
-    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    iface->deleteRbo(srfc->glRboColor);
-    iface->deleteRbo(srfc->glRboDepth);
-    if (needUnbind) {
-        dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
-    }
-    dpy->removeSurface(surface);
+    g_eglInfo->markSurfaceForDestroy(dpy, surface);
     return EGL_TRUE;
 }
 
@@ -1084,6 +1071,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
+        g_eglInfo->sweepDestroySurfaces();
 
         if (newDrawPtr->type() == EglSurface::PBUFFER &&
             newReadPtr->type() == EglSurface::PBUFFER) {

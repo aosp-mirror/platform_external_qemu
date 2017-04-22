@@ -498,9 +498,7 @@ udp_listen(u_int port, u_int32_t laddr, u_int lport, int flags)
 	addr_ip = sock_address_get_ip(&addr);
 	if (addr_ip == 0 || addr_ip == loopback_addr_ip)
 	   addr_ip = alias_addr_ip;
-	sock_address_init_inet(&so->faddr, sock_address_get_port(&addr),
-			       addr_ip);
-
+	sock_address_init_inet(&so->faddr, addr_ip, sock_address_get_port(&addr));
 	sock_address_init_inet(&so->laddr, laddr, lport);
 	if (flags != SS_FACCEPTONCE)
 	   so->so_expire = 0;

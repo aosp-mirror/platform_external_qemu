@@ -317,6 +317,7 @@ LOCAL_SRC_FILES := \
     android/gps.c \
     android/gpu_frame.cpp \
     android/help.c \
+    android/http_proxy.c \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \

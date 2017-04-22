@@ -34,6 +34,7 @@
 #include "android/metrics/StudioConfig.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
+#include "android/utils/x86_cpuid.h"
 
 #include "android/metrics/proto/studio_stats.pb.h"
 
@@ -345,5 +346,21 @@ void android_metrics_report_common_info(bool openglAlive) {
         event->mutable_emulator_host()->set_cpu_manufacturer(
                     (cpuFlags & ANDROID_CPU_INFO_INTEL) ? "INTEL" :
                     (cpuFlags & ANDROID_CPU_INFO_AMD) ? "AMD" : "OTHER");
+
+        uint32_t cpuid_mfs;
+        android_get_x86_cpuid(1, 0, &cpuid_mfs,
+                              nullptr, nullptr, nullptr);
+        uint32_t cpuid_stepping  = cpuid_mfs & 0x0000000f;
+        uint32_t cpuid_model     = (cpuid_mfs & 0x000000f0) >> 4;
+        uint32_t cpuid_family    = (cpuid_mfs & 0x00000f00) >> 8;
+        uint32_t cpuid_type      = (cpuid_mfs & 0x00003000) >> 12;
+        uint32_t cpuid_extmodel  = (cpuid_mfs & 0x000f0000) >> 16;
+        uint32_t cpuid_extfamily = (cpuid_mfs & 0x0ff00000) >> 20;
+        event->mutable_emulator_host()->set_cpuid_stepping(cpuid_stepping);
+        event->mutable_emulator_host()->set_cpuid_model(cpuid_model);
+        event->mutable_emulator_host()->set_cpuid_family(cpuid_family);
+        event->mutable_emulator_host()->set_cpuid_type(cpuid_type);
+        event->mutable_emulator_host()->set_cpuid_extmodel(cpuid_extmodel);
+        event->mutable_emulator_host()->set_cpuid_extfamily(cpuid_extfamily);
     });
 }

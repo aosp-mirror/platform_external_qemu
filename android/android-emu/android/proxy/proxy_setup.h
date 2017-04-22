@@ -30,6 +30,6 @@ ANDROID_BEGIN_HEADER
 // Return true on success, false otherwise (e.g. if the proxy address is
 // invalid, of it connecting to the proxy is impossible, or timed-out after
 // a small delay).
-bool android_http_proxy_setup(const char* http_proxy, bool verbose);
+int android_http_proxy_setup(const char* http_proxy, bool verbose);
 
 ANDROID_END_HEADER

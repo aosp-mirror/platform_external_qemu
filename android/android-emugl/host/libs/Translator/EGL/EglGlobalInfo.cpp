@@ -104,3 +104,27 @@ void EglGlobalInfo::initClientExtFuncTable(GLESVersion ver) {
         m_gles_extFuncs_inited[ver] = true;
     }
 }
+
+void EglGlobalInfo::markSurfaceForDestroy(EglDisplay* display,
+                                          EGLSurface toDestroy) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    assert(display);
+    m_surfaceDestroyList.push_back(
+        std::make_pair(display, toDestroy));
+}
+
+void EglGlobalInfo::sweepDestroySurfaces() {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    for (auto elt : m_surfaceDestroyList) {
+        EglDisplay* dpy = elt.first;
+        assert(dpy);
+        EGLSurface surface = elt.second;
+        SurfacePtr surfacePtr = dpy->getSurface(surface);
+        if (surfacePtr) {
+            m_gles_ifaces[GLES_2_0]->deleteRbo(surfacePtr->glRboColor);
+            m_gles_ifaces[GLES_2_0]->deleteRbo(surfacePtr->glRboDepth);
+        }
+        dpy->removeSurface(surface);
+    }
+    m_surfaceDestroyList.clear();
+}

@@ -257,7 +257,7 @@ static  ProxyService*  s_services[ MAX_SERVICES ];
 static  int            s_num_services;
 static  int            s_init;
 
-static void  proxy_manager_atexit( void );
+void  proxy_manager_atexit( void );
 
 static void
 proxy_manager_init(void)
@@ -290,6 +290,9 @@ proxy_manager_atexit( void )
 {
     ProxyConnection*  conn = s_connections->next;
     int               n;
+
+    if (!s_init)
+        return;
 
     /* free all proxy connections */
     while (conn != s_connections) {
@@ -372,6 +375,8 @@ proxy_manager_add( const SockAddress*  address,
 void
 proxy_manager_del( void*  ev_opaque )
 {
+    if (!s_init)
+        return;
     ProxyConnection*  conn = s_connections->next;
     for ( ; conn != s_connections; conn = conn->next ) {
         if (conn->ev_opaque == ev_opaque) {

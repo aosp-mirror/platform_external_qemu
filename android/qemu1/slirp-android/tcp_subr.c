@@ -377,29 +377,6 @@ tcp_proxy_event( struct socket*  so,
     tcp_input(NULL, sizeof(struct ip), so);
 }
 
-
-/* Tests if an IP address corresponds to a special Qemu service (eg, the DNS
- * server or the gateway - see ctl.h) and if so, rewrites it with the real
- * address of the service.
- */
-int is_qemu_special_address(unsigned long dst_addr, unsigned long *redir_addr)
-{
-  if ((dst_addr & 0xffffff00) == special_addr_ip) {
-    /* It's an alias */
-
-    int  last_byte = dst_addr & 0xff;
-
-    if (CTL_IS_DNS(last_byte))
-      *redir_addr = dns_addr[last_byte - CTL_DNS];
-    else
-      *redir_addr = loopback_addr_ip;
-
-    return 1;
-  }
-  return 0;
-}
-
-
 /*
  * Connect to a host on the Internet
  * Called by tcp_input
@@ -414,9 +391,7 @@ int tcp_fconnect(struct socket *so)
 {
   int ret=0;
     int try_proxy = 0;
-    SockAddress    sockaddr;
-    unsigned long       sock_ip;
-    int                 sock_port;
+    SockAddress    sockaddr = so->faddr;
     int redirect_happened = 0; /* for logging new src ip/port after connect */
 
     DEBUG_CALL("tcp_fconnect");
@@ -482,8 +457,8 @@ int tcp_fconnect(struct socket *so)
 
           /* This connection would normally be dropped, but since forwarding of
            * dropped connections is enabled, redirect it to the sink */
-          sock_ip = slirp_get_tcp_sink_ip();
-          sock_port= slirp_get_tcp_sink_port();
+          sock_address_init_inet(&sockaddr, slirp_get_tcp_sink_ip(),
+                                 slirp_get_tcp_sink_port());
           redirect_happened = 1;
         }
         else {   /* An allowed connection */
@@ -497,39 +472,28 @@ int tcp_fconnect(struct socket *so)
           if (slirp_should_net_forward(so->so_faddr_ip, so->so_faddr_port,
                                        &faddr, &fport)) {
             redirect_happened = 1;
-            sock_ip = faddr;              /* forced dst addr */
-            sock_port= fport;                 /* forced dst port */
+            sock_address_init_inet(&sockaddr, faddr, fport);
           }
           /* Determine if this is a connection to a special qemu service,
            * and change the destination address accordingly.
            * 'faddr' is modified only on success  */
-          else if (is_qemu_special_address(so->so_faddr_ip, &faddr)) {
-
+          else if (sotranslate_out(so, &sockaddr)) {
           /* We keep the original destination port. If a special service
            * listens on a different port than the standard, then appropriate
            * forwarding should be set up using -net-forward, e.g., as it is
            * the case with Mawler's DNS traffic, which is redirected to the
            * special DNS port:
            * -net-forward 0.0.0.0:0.0.0.0:53:127.0.0.1:21737 */
-
-            sock_ip = faddr;         /* real DNS/gateway addr */
-            sock_port= so->so_faddr_port;/* original dst port */
-
           }
           /* A normal connection - keep the original destination addr/port */
           else {
 
             try_proxy = 1;
-
-            sock_ip = so->so_faddr_ip;  /* original dst addr */
-            sock_port= so->so_faddr_port;   /* original dst port */
           }
         }
 
         DEBUG_MISC((dfd, " connect()ing, addr=%s, proxy=%d\n",
                     sock_address_to_string(&sockaddr), try_proxy));
-
-        sock_address_init_inet( &sockaddr, sock_ip, sock_port );
 
         if (try_proxy) {
             if (!proxy_manager_add(&sockaddr, SOCKET_STREAM,
@@ -552,12 +516,12 @@ int tcp_fconnect(struct socket *so)
           }
           slirp_drop_log(
               "Redirected TCP: orig 0x%08lx:0x%04x -> 0x%08lx:0x%04x "
-              "new 0x%08lx:0x%04x -> 0x%08lx:0x%04x %ld\n",
+              "new 0x%08lx:0x%04x -> %s %ld\n",
               so->so_laddr_ip, so->so_laddr_port,
               so->so_faddr_ip, so->so_laddr_port,
               sock_address_get_ip(&local_addr),
               sock_address_get_port(&local_addr),
-              sock_ip, sock_port, timestamp
+              sock_address_to_string(&sockaddr), timestamp
           );
         }
 

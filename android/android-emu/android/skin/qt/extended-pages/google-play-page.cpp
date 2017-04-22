@@ -135,13 +135,8 @@ void GooglePlayPage::playPageDone(GooglePlayServices::Result result,
     QString msg;
     switch (result) {
         case GooglePlayServices::Result::Success:
-            return;
-
         case GooglePlayServices::Result::OperationInProgress:
-            msg = tr("Still waiting for %1 to open.<br/>"
-                     "Please try again later.")
-                          .arg(getPlayPageDescription(page));
-            break;
+            return;
         default:
             msg = tr("There was an unknown error while opening %1.")
                           .arg(getPlayPageDescription(page));

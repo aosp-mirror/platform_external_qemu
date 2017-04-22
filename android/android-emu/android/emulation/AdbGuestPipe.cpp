@@ -82,6 +82,73 @@ namespace emulation {
 // State::ClosedByGuest:
 //   close host socket ->  State::ClosedByGuest
 //
+// How multiple active pipes are supported
+// First of all, the guest adbd is driving the connection.
+// in the guest, adbd is running the following loop (not exact code)
+/*
+   for (;;) {
+        open_adb_pipe();//this will tell emulator-5554 (for example) to listen
+                        //at 5555 (i.e., 5554+1) for adb server connection
+
+        wait_for_ok_replay();//emulator sends "OK" when the pipe is connected with adb server
+
+        register_the_connected_pipe();
+
+        open_another_adb_pipe();//previously, emulator will not listen again, as there is
+                                //one activepipe already; now it will just listen again
+                                //now this new pipe will trigger emulator to listen again,
+        wait_for_ok_replay();//emulator sends "OK" when the pipe is connected with adb server
+        register_the_connected_pipe();
+   }
+*/
+
+// The Service object has a vector of pipes |mPipes| waiting
+// for host connection, in FIFO mode.
+// Whenever there is a connection from host, Service
+// will remove the first pipe in the queue and wait
+// for another new connection. Each connected pipe runs
+// independently from each other once connected by
+// Service.
+//
+// Note that Service runs in the main-loop thread
+// and AdbGuestPipe runs in other cpu threads;
+// on the guest side, it always starts another pipe
+// after the current one is connected with host side
+// already: there is no race condition there.
+//
+// Previously, the new pipe has to wait for the existing
+// active pipe to disconnect before becoming active;
+// now, it only need to wait for the current active pipe to
+// become fully connected. Once that happens, the new
+// pipe is ready to connect with host.
+//
+// One example might help explain better:
+// Assume there is only one emulator-5554.
+//
+// Suppose host adb server is running at 5037, and it tries to
+// connect to 5555 port, but before there is any pipe,
+// the 5555 port is not listening yet. When guest adbd
+// starts, a new pipe is created and it sends "accept"
+// to emulator, upon receiving "accept", emulator starts
+// listening at 5555, and accept a socket from adb server
+// running at 5037. And the first pipe is connected now. Once
+// guest side adbd receives the "ok" from host ("ok" means
+// fully connected), it starts another new pipe, this new pipe
+// will cause emulator to listen again for adb server connection
+// (previously, it wont listen again because there is one
+//  active pipe running already).
+//
+// Assume there is another adb server running at 5038
+// (previously, it cannot connect to 5555 port, because there
+// is an active pipe running already, and emualtor wll stop
+// listening at 5555 because of that), it
+// will connect to this new pipe right away. Once the new pipe
+// is connected, guest adbd will start another one immediately
+// --there is no limit on how many pipes the guest adbd can start
+// (of course, it may run out of fds)
+//
+// This way, multiple active pipes can run without affecting
+// each other.
 
 using FdWatch = android::base::Looper::FdWatch;
 using android::base::ScopedSocketWatch;
@@ -104,13 +171,18 @@ AndroidPipe* AdbGuestPipe::Service::create(void* mHwPipe, const char* args) {
     return pipe;
 }
 
+void AdbGuestPipe::Service::removeAdbGuestPipe(AdbGuestPipe* pipe) {
+    mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
+}
+
 void AdbGuestPipe::Service::onHostConnection(ScopedSocket&& socket) {
     // There must be no active pipe yet, but at least one waiting
     // for activation in mPipes.
-    CHECK(mActivePipe != nullptr);
     // We have one connection from adb sever, stop listening for now.
     mHostAgent->stopListening();
-    mActivePipe->onHostConnection(std::move(socket));
+    AdbGuestPipe* activePipe = searchForActivePipe();
+    CHECK(activePipe != nullptr);
+    activePipe->onHostConnection(std::move(socket));
 }
 
 void AdbGuestPipe::Service::onPipeOpen(AdbGuestPipe* pipe) {
@@ -118,33 +190,24 @@ void AdbGuestPipe::Service::onPipeOpen(AdbGuestPipe* pipe) {
 }
 
 void AdbGuestPipe::Service::onPipeClose(AdbGuestPipe* pipe) {
-    mPipes.erase(std::remove(mPipes.begin(), mPipes.end(), pipe), mPipes.end());
-    if (mActivePipe == pipe) {
-        mActivePipe = nullptr;
+    removeAdbGuestPipe(pipe);
+    if (mPipes.empty()) {
         mHostAgent->stopListening();
-        searchForActivePipe();
     }
     delete pipe;
 }
 
-void AdbGuestPipe::Service::searchForActivePipe() {
-    if (mActivePipe) {
-        return;
-    }
+AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
     const auto pipeIt = std::find_if(
             mPipes.begin(), mPipes.end(), [](const AdbGuestPipe* pipe) {
                 return pipe->mState == State::WaitingForHostAdbConnection;
             });
     if (pipeIt != mPipes.end()) {
-        mActivePipe = *pipeIt;
-        // Tell the agent to start listening again.
-        mHostAgent->startListening();
-        // Also notify the server that an emulator instance is waiting
-        // for a connection. This is useful when the ADB Server was
-        // restarted on the host, but could not see the current emulator
-        // instance because it's listening on a 'non-standard' ADB port.
-        mHostAgent->notifyServer();
+        AdbGuestPipe* activePipe = *pipeIt;
+        removeAdbGuestPipe(activePipe);
+        return activePipe;
     }
+    return nullptr;
 }
 
 AdbGuestPipe::~AdbGuestPipe() {
@@ -269,7 +332,9 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
             },
             this));
 
-    waitForHostConnection();
+    DD("%s: [%p] sending reply", __func__, this);
+    setReply("ok", State::SendingAcceptReplyOk);
+    signalWake(PIPE_WAKE_READ);
 }
 
 // static
@@ -509,19 +574,17 @@ void AdbGuestPipe::setExpectedGuestCommand(StringView command, State newState) {
 }
 
 void AdbGuestPipe::waitForHostConnection() {
-    if (mHostSocket.get()) {
-        // A host connection already exists! Send the 'ok' reply back to
-        // the guest.
-        DD("%s: [%p] sending reply", __func__, this);
-        setReply("ok", State::SendingAcceptReplyOk);
-        signalWake(PIPE_WAKE_READ);
-    } else {
-        // No host connection yet. The guest is still waiting for the 'ok'
-        // reply.
-        DD("%s: [%p] waiting for host connection", __func__, this);
-        mState = State::WaitingForHostAdbConnection;
-        service()->searchForActivePipe();
-    }
+    // No host connection yet. The guest is still waiting for the 'ok'
+    // reply.
+    DD("%s: [%p] waiting for host connection", __func__, this);
+    mState = State::WaitingForHostAdbConnection;
+    // Tell the agent to start listening again.
+    // Also notify the server that an emulator instance is waiting
+    // for a connection. This is useful when the ADB Server was
+    // restarted on the host, but could not see the current emulator
+    // instance because it's listening on a 'non-standard' ADB port.
+    mHostAgent->startListening();
+    mHostAgent->notifyServer();
 }
 
 }  // namespace emulation

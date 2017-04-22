@@ -11,7 +11,7 @@
  */
 
 #pragma once
-
+#include <stdbool.h>
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
@@ -22,12 +22,18 @@ typedef struct QAndroidHttpProxyAgent {
     // username:password@host:port. Example:
     // "admin:passw0rd@mycorp.com:80"
     //
-    // If |proxy| is null, no HTTP proxy should be used.
+    // If |proxy| is null or "", no HTTP proxy should be used.
     //
     // CAUTION: The 'proxy' character string is volatile
     //          and must be copied if it is needed after
     //          httpProxySet() returns.
-    void (*httpProxySet)(const char* proxy);
+    int (*httpProxySet)(const char* proxy);
 } QAndroidHttpProxyAgent;
+
+// Callback functions to assign at runtime by qemu1 or qemu2
+typedef struct AndroidProxyCB {
+    bool (*ProxySet)(const char* proxy);
+    void (*ProxyUnset)();
+} AndroidProxyCB;
 
 ANDROID_END_HEADER
