@@ -121,7 +121,9 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage) &&
+        android_hw->PlayStore_enabled)
+    {
         mSidebarButtons.addButton(mExtendedUi->googlePlayButton);
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
