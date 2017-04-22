@@ -840,8 +840,23 @@ message EmulatorAvdInfo {
     AOSP = 1;
     GOOGLE = 2;
   }
+  // Other AVD properties that can combine with EmulatorAvdImageKind.
+  enum EmulatorAvdProp {
+    UNKNOWN_EMULATOR_AVD_FLAG = 0;
+    PLAY_STORE_AVD = 1;
+    PHONE_AVD = 2;
+    TV_AVD = 3;
+    WEAR_AVD = 4;
+    ANDROIDAUTO_AVD = 5;
+    THING_AVD = 6;
+    TABLET_AVD = 7;
+    LAPTOP_AVD = 8;
+    DESKTOP_AVD = 9;
+    CHROMEOS = 10;
+    // Next tag: 11
+  }
   // Name of the AVD. Deprecated as it could potentially contain PII.
-  optional string deprecated_name = 1;
+  optional string name = 1;
   // Api level (23 = M, 24 = N, ...)
   optional int64 api_level = 2;
   // CPU architecture.
@@ -858,6 +873,55 @@ message EmulatorAvdInfo {
   // A collection of files in the AVD
   // (usually 3 entries: kernel, system & ramdisk).
   repeated EmulatorAvdFile files = 8;
+  // Collection of other AVD properties, mostly relating to flavor
+  // (TV vs phone vs Auto, etc)
+  repeated EmulatorAvdProp props = 9;
+}
+
+// State of emulator feature flags, including
+// which flags attempted to enable vs resulting set
+// of enabled flags.
+message EmulatorFeatureFlagState {
+  enum EmulatorFeatureFlag {
+    EMULATOR_FEATURE_FLAG_UNSPECIFIED = 0;
+    GL_PIPE_CHECKSUM = 1;
+    GRALLOC_SYNC = 2;
+    ENCRYPT_USER_DATA = 3;
+    INTEL_PERFORMANCE_MONITORING_UNIT = 4;
+    GL_ASYNC_SWAP = 5;
+    GLDMA = 6;
+    GLES_DYNAMIC_VERSION = 7;
+    FORCE_ANGLE = 8;
+    FORCE_SWIFTSHADER = 9;
+    WIFI = 10;
+    PLAY_STORE_IMAGE = 11;
+    LOGCAT_PIPE = 12;
+    // Hypervisor "allowed" flags (different from actual using)
+    HYPERV = 13;
+    HVF = 14;
+    KVM = 15;
+    HAXM = 16;
+    // Next tag: 17
+  }
+  // Which features were enabled by default or through the server-side config.
+  repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
+  // Which features were enabled through user override.
+  repeated EmulatorFeatureFlag user_overridden_enabled_features = 2;
+  // Which features were disabled through user override.
+  repeated EmulatorFeatureFlag user_overridden_disabled_features = 3;
+  // Which features ended up being enabled overall.
+  repeated EmulatorFeatureFlag resulting_enabled_features = 4;
+  // Next tag: 5
+}
+
+// RAM usage info for the emulator.
+message EmulatorMemoryUsage {
+  optional uint64 resident_memory = 1;
+  optional uint64 resident_memory_max = 2;
+  optional uint64 virtual_memory = 3;
+  optional uint64 virtual_memory_max = 4;
+  optional uint64 total_phys_memory = 5;
+  optional uint64 total_page_file = 6;
 }
 
 // Metrics related to the Emulator.
@@ -892,10 +956,16 @@ message EmulatorDetails {
   optional string core_version = 15;
   // Renderer of the current emulator session.
   optional EmulatorRenderer renderer = 16;
-  // Flags for the used featurs.
+  // Flags for the used UI featurs.
   optional EmulatorFeatures used_features = 17;
   // Information about the currently loaded AVD.
   optional EmulatorAvdInfo avd_info = 18;
+  // State tracking emulator feature flag enable/disable.
+  optional EmulatorFeatureFlagState feature_flag_state = 19;
+  // Hypervisor used in current session.
+  optional EmulatorHypervisor hypervisor = 20;
+  // Emulator memory usage.
+  optional EmulatorMemoryUsage memory_usage = 21;
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -946,6 +1016,17 @@ message EmulatorDetails {
     SWIFTSHADER = 5;
     ANGLE = 6;
     ERROR_IN_EMULATOR_RENDERER = 255;
+  }
+
+  // Hypervisor in use for the session.
+  enum EmulatorHypervisor {
+      UNKNOWN_HYPERVISOR = 0;
+      NO_HYPERVISOR = 1;
+      KVM = 2; // KVM
+      HAXM = 3; // Intel HAXM
+      HVF = 4; // Apple Hypervisor.Framework
+      HYPERV = 5; // Microsoft Hyper-V
+      // Next tag: 6
   }
 }
 
