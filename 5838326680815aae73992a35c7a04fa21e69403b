@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfbc9034_a3722e25",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-22T00:57:43Z",
+      "side": 1,
+      "message": "Can we skip and return the last successful value if this has been called more than once?",
+      "range": {
+        "startLine": 477,
+        "startChar": 0,
+        "endLine": 477,
+        "endChar": 41
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1af86638_210c0351",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-22T00:57:43Z",
+      "side": 1,
+      "message": "Let\u0027s replace those with \"Error: \u003creason for failure\u003e\" since it will be more informative in crash reports / metrics",
+      "range": {
+        "startLine": 499,
+        "startChar": 19,
+        "endLine": 499,
+        "endChar": 21
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2c124385_de7c31e9",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-22T00:57:43Z",
+      "side": 1,
+      "message": "Can you add code to teh System unittests that exercises getOsName, and make it run the real code instead of the placeholder? We should expect the test servers to handle it.",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 64
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
