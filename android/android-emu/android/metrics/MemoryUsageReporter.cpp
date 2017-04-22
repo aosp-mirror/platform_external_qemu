@@ -14,17 +14,20 @@
 
 #include "android/metrics/MemoryUsageReporter.h"
 
-#include "android/base/system/System.h"
-// #include "android/base/threads/ParallelTask.h"
+#include "android/CommonReportedInfo.h"
+#include "android/metrics/PeriodicReporter.h"
 
-// #include "android/metrics/proto/studio_stats.pb.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/utils/debug.h"
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
+static const uint32_t kMemUsageMetricsReportIntervalMs = 60 * 1000;
+
 namespace android {
 namespace metrics {
 
+using android::base::Lock;
 using android::base::System;
 using std::shared_ptr;
 
@@ -46,8 +49,38 @@ MemoryUsageReporter::MemoryUsageReporter(
       // it's destructed.
       mRecurrentTask(looper,
                      [this]() { return checkMemoryUsage(); },
-                     mCheckIntervalMs),
-      mPrevWss(0) {
+                     mCheckIntervalMs) {
+
+    // Also start up a periodic reporter that takes whatever is in the
+    // current struct.
+    using android::metrics::PeriodicReporter;
+    PeriodicReporter::get().addTask(kMemUsageMetricsReportIntervalMs,
+        [this](android_studio::AndroidStudioEvent* event) {
+            android_studio::EmulatorMemoryUsage* memUsageProto =
+                event->mutable_emulator_performance_stats()->add_memory_usage();
+
+            android::base::AutoLock lock(mLock);
+            System::MemUsage forMetrics = mCurrUsage;
+            lock.unlock();
+
+            memUsageProto->set_resident_memory(forMetrics.resident);
+            memUsageProto->set_resident_memory_max(forMetrics.resident_max);
+            memUsageProto->set_virtual_memory(forMetrics.virt);
+            memUsageProto->set_virtual_memory_max(forMetrics.virt_max);
+            memUsageProto->set_total_phys_memory(forMetrics.total_phys_memory);
+            memUsageProto->set_total_page_file(forMetrics.total_page_file);
+
+            {
+                // TODO: Move performance stats setter to a separate location
+                // once we are tracking more performance stats
+                android_studio::EmulatorPerformanceStats forCommonInfo =
+                    event->emulator_performance_stats();
+                CommonReportedInfo::setPerformanceStats(
+                    &forCommonInfo);
+            }
+            return true;
+        });
+
     // Don't call start() here: start() launches a parallel task that calls
     // shared_from_this(), which needs at least one shared pointer owning
     // |this|. We can't guarantee that until the constructor call returns.
@@ -66,13 +99,20 @@ void MemoryUsageReporter::stop() {
 }
 
 bool MemoryUsageReporter::checkMemoryUsage() {
-  size_t wss = System::get()->getPeakMemory();
-  if (mPrevWss < wss) {
-    time_t time = System::get()->getUnixTime();
-    D("MemoryReport: Epoch: %lu, Peak: %lu", time, wss);
-    mPrevWss = wss;
-  }
-  return true;
+    System::MemUsage usage = System::get()->getMemUsage();
+
+    D("MemoryReport: Epoch: %lu, Res/ResMax/Virt/VirtMax: "
+      "%" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64,
+      time,
+      usage.resident,
+      usage.resident_max,
+      usage.virt,
+      usage.virt_max);
+
+    android::base::AutoLock lock(mLock);
+    mCurrUsage = usage;
+
+    return true;
 }
 
 }  // namespace metrics
