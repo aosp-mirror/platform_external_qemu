@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 
 #include "android/keymaster/keymaster_common.h"
+#include "android/keymaster/Keymaster.h"
 
 #include <errno.h>
 #include <string.h>
@@ -27,6 +28,8 @@
 #include <openssl/x509.h>
 
 #include <memory>
+
+#define DEBUG
 
 #ifdef DEBUG
 #  include <stdio.h>
@@ -103,6 +106,7 @@ static void logOpenSSLError(const char* location) {
 }
 
 static int wrap_key(EVP_PKEY* pkey, int type, uint8_t** keyBlob, size_t* keyBlobLength) {
+    D("%s", __FUNCTION__);
     /*
      * Find the length of each size. Public key is not needed anymore
      * but must be kept for alignment purposes.
@@ -163,7 +167,7 @@ static EVP_PKEY* unwrap_key(const uint8_t* keyBlob, const size_t keyBlobLength) 
         return NULL;
     }
 
-    int type = 0;
+    int32_t type = 0;
     if (keyBlobLength < (/*get_softkey_header_size() +*/sizeof(type) + sizeof(publicLen) + 1 +
                          sizeof(privateLen) + 1)) {
         D("key blob appears to be truncated");
@@ -211,6 +215,7 @@ static EVP_PKEY* unwrap_key(const uint8_t* keyBlob, const size_t keyBlobLength) 
 }
 
 static int generate_dsa_keypair(EVP_PKEY* pkey, const keymaster_dsa_keygen_params_t* dsa_params) {
+    D("%s", __FUNCTION__);
     if (dsa_params->key_size < 512) {
         D("Requested DSA key size is too small (<512)");
         return -1;
@@ -261,6 +266,7 @@ static int generate_dsa_keypair(EVP_PKEY* pkey, const keymaster_dsa_keygen_param
 }
 
 static int generate_ec_keypair(EVP_PKEY* pkey, const keymaster_ec_keygen_params_t* ec_params) {
+    D("%s", __FUNCTION__);
     Unique_EC_GROUP group;
     switch (ec_params->field_size) {
     case 224:
@@ -316,16 +322,19 @@ static int generate_ec_keypair(EVP_PKEY* pkey, const keymaster_ec_keygen_params_
 }
 
 static int generate_rsa_keypair(EVP_PKEY* pkey, const keymaster_rsa_keygen_params_t* rsa_params) {
+    D("%s: %d", __FUNCTION__, __LINE__);
     Unique_BIGNUM bn(BN_new());
     if (bn.get() == NULL) {
         logOpenSSLError("generate_rsa_keypair");
         return -1;
     }
+    D("%s: %d", __FUNCTION__, __LINE__);
 
     if (BN_set_word(bn.get(), rsa_params->public_exponent) == 0) {
         logOpenSSLError("generate_rsa_keypair");
         return -1;
     }
+    D("%s: %d", __FUNCTION__, __LINE__);
 
     /* initialize RSA */
     Unique_RSA rsa(RSA_new());
@@ -333,23 +342,30 @@ static int generate_rsa_keypair(EVP_PKEY* pkey, const keymaster_rsa_keygen_param
         logOpenSSLError("generate_rsa_keypair");
         return -1;
     }
+    D("%s: %d", __FUNCTION__, __LINE__);
+
+    D("%s: exponent %lu modulus %d\n", __FUNCTION__,
+        rsa_params->public_exponent, rsa_params->modulus_size);
 
     if (!RSA_generate_key_ex(rsa.get(), rsa_params->modulus_size, bn.get(), NULL) ||
         RSA_check_key(rsa.get()) < 0) {
         logOpenSSLError("generate_rsa_keypair");
         return -1;
     }
+    D("%s: %d", __FUNCTION__, __LINE__);
 
     if (EVP_PKEY_assign_RSA(pkey, rsa.get()) == 0) {
         logOpenSSLError("generate_rsa_keypair");
         return -1;
     }
+    D("%s: %d", __FUNCTION__, __LINE__);
     release_because_ownership_transferred(rsa);
+    D("%s: %d", __FUNCTION__, __LINE__);
 
     return 0;
 }
 
-__attribute__((visibility("default"))) int openssl_generate_keypair(
+static int openssl_generate_keypair(
     const keymaster_keypair_t key_type, const void* key_params,
     uint8_t** keyBlob, size_t* keyBlobLength) {
     Unique_EVP_PKEY pkey(EVP_PKEY_new());
@@ -385,7 +401,7 @@ __attribute__((visibility("default"))) int openssl_generate_keypair(
     return 0;
 }
 
-__attribute__((visibility("default"))) int openssl_import_keypair(const uint8_t* key,
+int openssl_import_keypair(const uint8_t* key,
                                                                   const size_t key_length,
                                                                   uint8_t** key_blob,
                                                                   size_t* key_blob_length) {
@@ -417,7 +433,7 @@ __attribute__((visibility("default"))) int openssl_import_keypair(const uint8_t*
     return 0;
 }
 
-__attribute__((visibility("default"))) int openssl_get_keypair_public(const uint8_t* key_blob,
+int openssl_get_keypair_public(const uint8_t* key_blob,
                                                                       const size_t key_blob_length,
                                                                       uint8_t** x509_data,
                                                                       size_t* x509_data_length) {
@@ -554,7 +570,7 @@ static int sign_rsa(EVP_PKEY* pkey, keymaster_rsa_sign_params_t* sign_params, co
     return 0;
 }
 
-__attribute__((visibility("default"))) int openssl_sign_data(
+int openssl_sign_data(
     const void* params, const uint8_t* keyBlob,
     const size_t keyBlobLength, const uint8_t* data, const size_t dataLength, uint8_t** signedData,
     size_t* signedDataLength) {
@@ -678,7 +694,7 @@ static int verify_rsa(EVP_PKEY* pkey, keymaster_rsa_sign_params_t* sign_params,
     return result == 0 ? 0 : -1;
 }
 
-__attribute__((visibility("default"))) int openssl_verify_data(
+int openssl_verify_data(
     const void* params, const uint8_t* keyBlob,
     const size_t keyBlobLength, const uint8_t* signedData, const size_t signedDataLength,
     const uint8_t* signature, const size_t signatureLength) {
@@ -712,4 +728,49 @@ __attribute__((visibility("default"))) int openssl_verify_data(
         D("Unsupported key type %d", type);
         return -1;
     }
+}
+
+int Keymaster::generateKeypair(const keymaster_keypair_t keyType,
+        const void* keyParams, uint8_t** keyBlob, uint32_t* keyBlobLength) {
+    size_t _keyBlobLength;
+    int ret = openssl_generate_keypair(keyType, keyParams, keyBlob, &_keyBlobLength);
+    *keyBlobLength = static_cast<uint32_t>(_keyBlobLength);
+    return ret;
+}
+
+int Keymaster::importKeypair(const uint8_t* key, const uint32_t keyLength,
+        uint8_t** keyBlob, uint32_t* keyBlobLength) {
+    size_t _keyBlobLength;
+    int ret = openssl_import_keypair(key, keyLength, keyBlob, &_keyBlobLength);
+    *keyBlobLength = static_cast<uint32_t>(_keyBlobLength);
+    return ret;
+}
+
+int Keymaster::getKeypairPublic(const uint8_t* keyBlob,
+        const uint32_t keyBlobLength, uint8_t** x509Data,
+        uint32_t* x509DataLength) {
+    size_t _x509DataLength = 0;
+    int ret = openssl_get_keypair_public(keyBlob, keyBlobLength,
+                                         x509Data, &_x509DataLength);
+    *x509DataLength = static_cast<uint32_t>(_x509DataLength);
+    return ret;
+}
+
+int Keymaster::signData(const void* params,
+            const uint8_t* keyBlob, const uint32_t keyBlobLength,
+            const uint8_t* data, const uint32_t dataLength, uint8_t** signedData,
+            uint32_t* signedDataLength) {
+    size_t _signedDataLength = 0;
+    int ret = openssl_sign_data(params, keyBlob, keyBlobLength, data, dataLength,
+            signedData, &_signedDataLength);
+    *signedDataLength = static_cast<uint32_t>(_signedDataLength);
+    return ret;
+}
+
+int Keymaster::verifyData(const void* params, const uint8_t* keyBlob,
+        const uint32_t keyBlobLength, const uint8_t* signedData,
+        const uint32_t signedDataLength, const uint8_t* signature,
+        const uint32_t signatureLength) {
+    return openssl_verify_data(params, keyBlob, keyBlobLength, signedData,
+            signedDataLength, signature, signatureLength);
 }
