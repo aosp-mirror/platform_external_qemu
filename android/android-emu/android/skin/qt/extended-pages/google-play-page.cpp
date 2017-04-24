@@ -21,8 +21,6 @@ using android::emulation::GooglePlayServices;
 // static
 const std::pair<GooglePlayPage::PlayPages, const char*>
         GooglePlayPage::PlayPageToDesc[] = {
-                PAGE_TO_DESC(StoreSettingsPage,
-                             "Google Play Store Settings Page"),
                 PAGE_TO_DESC(ServicesDetailsPage, "Google Play services Page"),
 };
 #undef PAGE_TO_DESC
@@ -32,7 +30,6 @@ const std::pair<GooglePlayPage::PlayPages, const char*>
 // static
 const std::pair<GooglePlayPage::PlayApps, const char*>
         GooglePlayPage::PlayAppToDesc[] = {
-                APP_TO_DESC(PlayStore, "Google Play Store"),
                 APP_TO_DESC(PlayServices, "Google Play services"),
 };
 #undef APP_TO_DESC
@@ -68,7 +65,6 @@ void GooglePlayPage::getBootCompletionProperty() {
 }
 
 void GooglePlayPage::queryPlayVersions() {
-    getPlayStoreVersion();
     getPlayServicesVersion();
 }
 
@@ -116,13 +112,6 @@ QString GooglePlayPage::getPlayAppDescription(PlayApps app) {
     return result;
 }
 
-void GooglePlayPage::showPlayStoreSettings() {
-    mGooglePlayServices->showPlayStoreSettings([this](
-            GooglePlayServices::Result result) {
-        GooglePlayPage::playPageDone(result, PlayPages::StoreSettingsPage);
-    });
-}
-
 void GooglePlayPage::showPlayServicesPage() {
     mGooglePlayServices->showPlayServicesPage([this](
             GooglePlayServices::Result result) {
@@ -144,13 +133,6 @@ void GooglePlayPage::playPageDone(GooglePlayServices::Result result,
     showErrorDialog(msg, getPlayPageDescription(page));
 }
 
-void GooglePlayPage::getPlayStoreVersion() {
-    mGooglePlayServices->getPlayStoreVersion([this](
-            GooglePlayServices::Result result, StringView outString) {
-        GooglePlayPage::playVersionDone(result, PlayApps::PlayStore, outString);
-    });
-}
-
 void GooglePlayPage::getPlayServicesVersion() {
     mGooglePlayServices->getPlayServicesVersion(
             [this](GooglePlayServices::Result result, StringView outString) {
@@ -166,9 +148,6 @@ void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
     QPlainTextEdit* textEdit = nullptr;
 
     switch (app) {
-        case PlayApps::PlayStore:
-            textEdit = mUi->goog_playStoreVersionBox;
-            break;
         case PlayApps::PlayServices:
             textEdit = mUi->goog_playServicesVersionBox;
             break;
@@ -194,8 +173,4 @@ void GooglePlayPage::playVersionDone(GooglePlayServices::Result result,
 
 void GooglePlayPage::on_goog_updateServicesButton_clicked() {
     showPlayServicesPage();
-}
-
-void GooglePlayPage::on_goog_updateStoreButton_clicked() {
-    showPlayStoreSettings();
 }
