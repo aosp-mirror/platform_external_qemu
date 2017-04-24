@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2017 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,92 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef ANDROID_HARDWARE_KEYMASTER_COMMON_H
-#define ANDROID_HARDWARE_KEYMASTER_COMMON_H
-
+#pragma once
 #include <stdint.h>
-#include <sys/cdefs.h>
-#include <sys/types.h>
-
-__BEGIN_DECLS
-
-/**
- * The id of this module
- */
-#define KEYSTORE_HARDWARE_MODULE_ID "keystore"
-
-#define KEYSTORE_KEYMASTER "keymaster"
-
-
-/**
- * Settings for "module_api_version" and "hal_api_version"
- * fields in the keymaster_module initialization.
- */
-
-/**
- * Keymaster 0.X module version provide the same APIs, but later versions add more options
- * for algorithms and flags.
- */
-//#define KEYMASTER_MODULE_API_VERSION_0_2 HARDWARE_MODULE_API_VERSION(0, 2)
-//#define KEYMASTER_DEVICE_API_VERSION_0_2 HARDWARE_DEVICE_API_VERSION(0, 2)
-
-//#define KEYMASTER_MODULE_API_VERSION_0_3 HARDWARE_MODULE_API_VERSION(0, 3)
-//#define KEYMASTER_DEVICE_API_VERSION_0_3 HARDWARE_DEVICE_API_VERSION(0, 3)
-
-/**
- * Keymaster 1.0 module version provides a completely different API, incompatible with 0.X.
- */
-//#define KEYMASTER_MODULE_API_VERSION_1_0 HARDWARE_MODULE_API_VERSION(1, 0)
-//#define KEYMASTER_DEVICE_API_VERSION_1_0 HARDWARE_DEVICE_API_VERSION(1, 0)
-
-//struct keystore_module {
-    /**
-     * Common methods of the keystore module.  This *must* be the first member of keystore_module as
-     * users of this structure will cast a hw_module_t to keystore_module pointer in contexts where
-     * it's known the hw_module_t references a keystore_module.
-     */
-//    hw_module_t common;
-
-    /* There are no keystore module methods other than the common ones. */
-//};
-
-/**
- * Flags for keymaster0_device::flags
- */
-enum {
-    /*
-     * Indicates this keymaster implementation does not have hardware that
-     * keeps private keys out of user space.
-     *
-     * This should not be implemented on anything other than the default
-     * implementation.
-     */
-    KEYMASTER_SOFTWARE_ONLY = 1 << 0,
-
-    /*
-     * This indicates that the key blobs returned via all the primitives
-     * are sufficient to operate on their own without the trusted OS
-     * querying userspace to retrieve some other data. Key blobs of
-     * this type are normally returned encrypted with a
-     * Key Encryption Key (KEK).
-     *
-     * This is currently used by "vold" to know whether the whole disk
-     * encryption secret can be unwrapped without having some external
-     * service started up beforehand since the "/data" partition will
-     * be unavailable at that point.
-     */
-    KEYMASTER_BLOBS_ARE_STANDALONE = 1 << 1,
-
-    /*
-     * Indicates that the keymaster module supports DSA keys.
-     */
-    KEYMASTER_SUPPORTS_DSA = 1 << 2,
-
-    /*
-     * Indicates that the keymaster module supports EC keys.
-     */
-    KEYMASTER_SUPPORTS_EC = 1 << 3,
-};
 
 /**
  * Asymmetric key pair types.
@@ -149,7 +65,6 @@ typedef struct {
     uint32_t field_size;
 } keymaster_ec_keygen_params_t;
 
-
 /**
  * Digest type.
  */
@@ -177,7 +92,3 @@ typedef struct {
     keymaster_digest_algorithm_t digest_type;
     keymaster_rsa_padding_t padding_type;
 } keymaster_rsa_sign_params_t;
-
-__END_DECLS
-
-#endif  // ANDROID_HARDWARE_KEYMASTER_COMMON_H
