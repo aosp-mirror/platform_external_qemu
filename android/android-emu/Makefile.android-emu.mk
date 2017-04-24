@@ -326,6 +326,7 @@ LOCAL_SRC_FILES := \
     android/hw-sensors.c \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
+    android/keymaster/hw-keystore.cpp \
     android/keymaster/Keymaster.cpp \
     android/loadpng.c \
     android/main-common.c \
