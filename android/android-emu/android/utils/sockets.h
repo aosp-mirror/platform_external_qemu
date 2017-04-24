@@ -215,6 +215,9 @@ void  sock_address_done( SockAddress*  a );
 
 int   sock_address_equal( const SockAddress*  a, const SockAddress*  b );
 
+/* return a static string describing the host */
+const char*  sock_address_host_string( const SockAddress*  a );
+
 /* return a static string describing the address */
 const char*  sock_address_to_string( const SockAddress*  a );
 
