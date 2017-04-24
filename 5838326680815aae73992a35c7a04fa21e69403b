@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "c7063eb7_c0cbb125",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 506,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-24T22:19:11Z",
+      "side": 1,
+      "message": "Last I heard it was Windows 7 I think, and Vista unofficially. Some are even using XP idk how, but I think we also agreed to go ahead and break XP.",
+      "parentUuid": "4b8a355f_81b783ea",
+      "range": {
+        "startLine": 504,
+        "startChar": 0,
+        "endLine": 506,
+        "endChar": 43
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c124385_de7c31e9",
         "filename": "android/android-emu/android/base/testing/TestSystem.h",
         "patchSetId": 2
