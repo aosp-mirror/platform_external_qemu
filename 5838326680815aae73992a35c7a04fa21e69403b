@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fafd0989_77056a2f",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-24T22:13:11Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "dfbc9034_a3722e25",
+      "range": {
+        "startLine": 477,
+        "startChar": 0,
+        "endLine": 477,
+        "endChar": 41
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1af86638_210c0351",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "41b5c936_ae1af4ca",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 499,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-24T22:13:11Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "1af86638_210c0351",
+      "range": {
+        "startLine": 499,
+        "startChar": 19,
+        "endLine": 499,
+        "endChar": 21
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4c00f90b_b97bd780",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2017-04-22T01:00:46Z",
       "side": 1,
       "message": "You might want to consider also checking for CurrentMajorVersionNumber and CurrentMinorVersionNumber since apparently, Windows 10 changed this up: http://stackoverflow.com/questions/31072543/reliable-way-to-get-windows-version-from-registry",
+      "range": {
+        "startLine": 504,
+        "startChar": 0,
+        "endLine": 506,
+        "endChar": 43
+      },
+      "revId": "5838326680815aae73992a35c7a04fa21e69403b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b8a355f_81b783ea",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 506,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-04-24T22:13:11Z",
+      "side": 1,
+      "message": "I would go with the latest one if the minimum requirement for windows platform is Windows 10. Do you know what\u0027s the min version?",
+      "parentUuid": "4c00f90b_b97bd780",
       "range": {
         "startLine": 504,
         "startChar": 0,
