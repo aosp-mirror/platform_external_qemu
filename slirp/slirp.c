@@ -657,6 +657,10 @@ void slirp_pollfds_fill(GArray *pollfds, uint32_t *timeout)
             }
         }
 
+#ifdef WIN32
+        if (slirp->icmp_handle != NULL) icmpwin_process(slirp);
+#endif
+
         /*
          * ICMP sockets
          */

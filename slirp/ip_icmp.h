@@ -162,4 +162,12 @@ void icmp_reflect(struct mbuf *);
 void icmp_receive(struct socket *so);
 void icmp_detach(struct socket *so);
 
+#ifdef WIN32
+/* Windows ICMP specific code defined in ip_icmpwin.c */
+int icmpwin_init(Slirp *slirp);
+void icmpwin_finit(Slirp *slirp);
+void icmpwin_ping(Slirp *slirp, struct mbuf *, int size);
+void icmpwin_process(Slirp *slirp);
+#endif
+
 #endif
