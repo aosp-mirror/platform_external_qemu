@@ -106,6 +106,13 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode) {
     }
 }
 
+static SelectedRenderer sCurrentRenderer =
+    SELECTED_RENDERER_UNKNOWN;
+
+SelectedRenderer emuglConfig_get_current_renderer() {
+    return sCurrentRenderer;
+}
+
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list proplist) {
     for (int i = 0; i < proplist.num_gpus; i++) {
         free(proplist.props[i].make);
@@ -116,6 +123,10 @@ void free_emugl_host_gpu_props(emugl_host_gpu_prop_list proplist) {
         free(proplist.props[i].renderer);
     }
     delete [] proplist.props;
+}
+
+static void setCurrentRenderer(const char* gpuMode) {
+    sCurrentRenderer = emuglConfig_get_renderer(gpuMode);
 }
 
 bool emuglConfig_init(EmuglConfig* config,
@@ -209,6 +220,7 @@ bool emuglConfig_init(EmuglConfig* config,
                 snprintf(config->status, sizeof(config->status),
                         "GPU emulation is disabled under %s without Swiftshader",
                         sessionType.c_str());
+                setCurrentRenderer(gpu_mode);
                 return true;
             }
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
@@ -234,6 +246,7 @@ bool emuglConfig_init(EmuglConfig* config,
                 snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
                 snprintf(config->status, sizeof(config->status),
                         "GPU emulation is disabled (-no-window without Swiftshader)");
+                setCurrentRenderer(gpu_mode);
                 return true;
             } else {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
@@ -245,6 +258,7 @@ bool emuglConfig_init(EmuglConfig* config,
                 snprintf(config->status, sizeof(config->status),
                         "GPU emulation is in the guest");
                 gpu_mode = "guest";
+                setCurrentRenderer(gpu_mode);
                 return true;
             }
         } else {
@@ -287,6 +301,7 @@ bool emuglConfig_init(EmuglConfig* config,
             snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
             snprintf(config->status, sizeof(config->status), "%s",
                      error.c_str());
+            setCurrentRenderer(gpu_mode);
             return false;
         }
     }
@@ -298,6 +313,7 @@ bool emuglConfig_init(EmuglConfig* config,
     snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
     snprintf(config->status, sizeof(config->status),
              "GPU emulation enabled using '%s' mode", gpu_mode);
+    setCurrentRenderer(gpu_mode);
     return true;
 }
 

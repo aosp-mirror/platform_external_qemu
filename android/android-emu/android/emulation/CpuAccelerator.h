@@ -40,6 +40,7 @@ enum CpuAccelerator {
     CPU_ACCELERATOR_KVM,
     CPU_ACCELERATOR_HAX,
     CPU_ACCELERATOR_HVF,
+    CPU_ACCELERATOR_HYPERV,
     CPU_ACCELERATOR_MAX,
 };
 
@@ -47,6 +48,7 @@ enum CpuAccelerator {
 // This only returns a non-CPU_ACCELERATOR_NONE if corresponding accelerator
 // can be used properly. Otherwise it will return CPU_ACCELERATOR_NONE.
 CpuAccelerator  GetCurrentCpuAccelerator();
+void ResetCurrentCpuAccelerator(CpuAccelerator accel);
 
 // Returns whether or not the accelerator |type| is suppored
 // on the current system.

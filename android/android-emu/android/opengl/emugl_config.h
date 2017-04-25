@@ -95,6 +95,9 @@ typedef enum SelectedRenderer {
 // has been taken into account already.
 SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode);
 
+// Returns the renderer that is active, after config is done.
+SelectedRenderer emuglConfig_get_current_renderer();
+
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
 
 // Initialize an EmuglConfig instance based on the AVD's hardware properties

@@ -769,15 +769,15 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     }
 #if HAVE_HVF
     if (featurecontrol::isEnabled(featurecontrol::HVF)) {
-        std::string statusHfv;
-        AndroidCpuAcceleration status_code_HVF = ProbeHVF(&statusHfv);
+        std::string statusHvf;
+        AndroidCpuAcceleration status_code_HVF = ProbeHVF(&statusHvf);
         if (status_code_HVF == ANDROID_CPU_ACCELERATION_READY) {
             g->supported_accelerators[CPU_ACCELERATOR_HVF] = true;
             // TODO: Switch to HVF as default option if/when appropriate.
             if (status_code != ANDROID_CPU_ACCELERATION_READY) {
                 g->accel = CPU_ACCELERATOR_HVF;
                 status_code = status_code_HVF;
-                status = std::move(statusHfv);
+                status = std::move(statusHvf);
             }
         }
     }
@@ -793,6 +793,11 @@ CpuAccelerator GetCurrentCpuAccelerator() {
     ::snprintf(g->status, sizeof(g->status), "%s", status.c_str());
 
     return g->accel;
+}
+
+void ResetCurrentCpuAccelerator(CpuAccelerator accel) {
+    GlobalState *g = &gGlobals;
+    g->accel = accel;
 }
 
 bool GetCurrentAcceleratorSupport(CpuAccelerator type) {

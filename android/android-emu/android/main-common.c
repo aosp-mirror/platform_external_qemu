@@ -1252,6 +1252,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
                 }
 
                 if (hvf_is_ok) {
+                    androidCpuAcceleration_resetCpuAccelerator(ANDROID_CPU_ACCELERATOR_HVF);
                     *accel_mode = ACCEL_HVF;
                 }
             }
@@ -1818,7 +1819,7 @@ bool configAndStartRenderer(
             android_startOpenglesRenderer(
                     hw->hw_lcd_width,
                     hw->hw_lcd_height,
-                    avdInfo_isPhoneApi(avd),
+                    avdInfo_getAvdFlavor(avd) == AVD_PHONE,
                     avdInfo_getApiLevel(avd),
                     &gles_major_version,
                     &gles_minor_version);

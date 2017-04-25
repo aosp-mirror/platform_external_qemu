@@ -132,8 +132,16 @@ public:
     // Get the current process ID
     virtual Pid getCurrentProcessId() const = 0;
 
-    // Gets the peak virtual memory.
-    virtual size_t getPeakMemory() = 0;
+    // Gets memory statistics.
+    struct MemUsage {
+        uint64_t resident;
+        uint64_t resident_max;
+        uint64_t virt;
+        uint64_t virt_max;
+        uint64_t total_phys_memory;
+        uint64_t total_page_file;
+    };
+    virtual MemUsage getMemUsage() = 0;
 
     // Return the program bitness as an integer, either 32 or 64.
 #ifdef __x86_64__
