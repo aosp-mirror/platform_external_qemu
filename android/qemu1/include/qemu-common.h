@@ -275,8 +275,27 @@ typedef void IOReadHandler(void *opaque, const uint8_t *buf, int size);
 typedef int IOCanReadHandler(void *opaque);
 typedef void IOHandler(void *opaque);
 
-void qemu_iohandler_fill(int *pnfds, fd_set *readfds, fd_set *writefds, fd_set *xfds);
-void qemu_iohandler_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds, int rc);
+void enlarge_fd_sets(int fd, fd_set** fds);
+
+static inline void fd_clr_ext(int fd, fd_set** fds)
+{
+    enlarge_fd_sets(fd, fds);
+    FD_CLR(fd % FD_SETSIZE, &(*fds)[fd/FD_SETSIZE]);
+}
+
+static inline int fd_isset_ext(int fd, fd_set** fds)
+{
+    return FD_ISSET(fd % FD_SETSIZE, &(*fds)[fd/FD_SETSIZE]);
+}
+
+static inline void fd_set_ext(int fd, fd_set** fds)
+{
+    enlarge_fd_sets(fd, fds);
+    FD_SET(fd % FD_SETSIZE, &(*fds)[fd/FD_SETSIZE]);
+}
+
+void qemu_iohandler_fill(int *pnfds, fd_set **readfds, fd_set **writefds, fd_set **xfds);
+void qemu_iohandler_poll(fd_set **readfds, fd_set **writefds, fd_set **xfds, int rc);
 
 struct ParallelIOArg {
     void *buffer;

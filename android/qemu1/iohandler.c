@@ -88,7 +88,7 @@ int qemu_set_fd_handler(int fd,
     return qemu_set_fd_handler2(fd, NULL, fd_read, fd_write, opaque);
 }
 
-void qemu_iohandler_fill(int *pnfds, fd_set *readfds, fd_set *writefds, fd_set *xfds)
+void qemu_iohandler_fill(int *pnfds, fd_set **readfds, fd_set **writefds, fd_set **xfds)
 {
     IOHandlerRecord *ioh;
 
@@ -98,28 +98,28 @@ void qemu_iohandler_fill(int *pnfds, fd_set *readfds, fd_set *writefds, fd_set *
         if (ioh->fd_read &&
             (!ioh->fd_read_poll ||
              ioh->fd_read_poll(ioh->opaque) != 0)) {
-            FD_SET(ioh->fd, readfds);
+            fd_set_ext(ioh->fd, readfds);
             if (ioh->fd > *pnfds)
                 *pnfds = ioh->fd;
         }
         if (ioh->fd_write) {
-            FD_SET(ioh->fd, writefds);
+            fd_set_ext(ioh->fd, writefds);
             if (ioh->fd > *pnfds)
                 *pnfds = ioh->fd;
         }
     }
 }
 
-void qemu_iohandler_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds, int ret)
+void qemu_iohandler_poll(fd_set **readfds, fd_set **writefds, fd_set **xfds, int ret)
 {
     if (ret > 0) {
         IOHandlerRecord *pioh, *ioh;
 
         QLIST_FOREACH_SAFE(ioh, &io_handlers, next, pioh) {
-            if (!ioh->deleted && ioh->fd_read && FD_ISSET(ioh->fd, readfds)) {
+            if (!ioh->deleted && ioh->fd_read && fd_isset_ext(ioh->fd, readfds)) {
                 ioh->fd_read(ioh->opaque);
             }
-            if (!ioh->deleted && ioh->fd_write && FD_ISSET(ioh->fd, writefds)) {
+            if (!ioh->deleted && ioh->fd_write && fd_isset_ext(ioh->fd, writefds)) {
                 ioh->fd_write(ioh->opaque);
             }
 
