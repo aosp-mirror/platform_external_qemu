@@ -251,6 +251,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-format-converters.c \
     android/car.cpp \
     android/cmdline-option.c \
+    android/CommonReportedInfo.cpp \
     android/console.c \
     android/console_auth.cpp \
     android/cpu_accelerator.cpp \
@@ -318,6 +319,7 @@ LOCAL_SRC_FILES := \
     android/gpu_frame.cpp \
     android/help.c \
     android/http_proxy.c \
+    android/HostHwInfo.cpp \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
@@ -487,6 +489,7 @@ endif
 #
 
 $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
@@ -550,6 +553,7 @@ LOCAL_SRC_FILES := \
   android/base/Uuid_unittest.cpp \
   android/base/Version_unittest.cpp \
   android/cmdline-option_unittest.cpp \
+  android/CommonReportedInfo_unittest.cpp \
   android/console_auth_unittest.cpp \
   android/emulation/AdbDebugPipe_unittest.cpp \
   android/emulation/AdbGuestPipe_unittest.cpp \
