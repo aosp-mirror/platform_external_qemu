@@ -138,8 +138,7 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
     mUi->bug_deviceLabel->setText(QString(deviceName));
 
     // Set OS Description
-    mReportingFields.hostOsName =
-            android::base::toString(System::get()->getOsType());
+    mReportingFields.hostOsName = System::get()->getOsName();
     mUi->bug_hostMachineLabel->setText(
             QString::fromStdString(mReportingFields.hostOsName));
 
