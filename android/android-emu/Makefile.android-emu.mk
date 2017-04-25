@@ -318,6 +318,7 @@ LOCAL_SRC_FILES := \
     android/gpu_frame.cpp \
     android/help.c \
     android/http_proxy.c \
+    android/HostHwInfo.cpp \
     android/hw-control.c \
     android/hw-events.c \
     android/hw-fingerprint.c \
@@ -487,6 +488,7 @@ endif
 #
 
 $(call start-emulator-program, android_emu$(BUILD_TARGET_SUFFIX)_unittests)
+$(call gen-hw-config-defs)
 
 LOCAL_C_INCLUDES += \
     $(ANDROID_EMU_INCLUDES) \
