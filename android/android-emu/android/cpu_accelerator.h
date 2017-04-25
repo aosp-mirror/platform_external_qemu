@@ -84,6 +84,7 @@ typedef enum {
     ANDROID_CPU_ACCELERATOR_KVM,
     ANDROID_CPU_ACCELERATOR_HAX,
     ANDROID_CPU_ACCELERATOR_HVF,
+    ANDROID_CPU_ACCELERATOR_HYPERV,
     ANDROID_CPU_ACCELERATOR_MAX,
 } AndroidCpuAccelerator;
 
@@ -92,5 +93,8 @@ AndroidCpuAccelerator androidCpuAcceleration_getAccelerator();
 
 /* Returns support status of the cpu accelerator |type| on the current machine. */
 bool androidCpuAcceleration_isAcceleratorSupported(AndroidCpuAccelerator type);
+
+/* Resets the current cpu accelerator to reflect current status. */
+void androidCpuAcceleration_resetCpuAccelerator(AndroidCpuAccelerator type);
 
 ANDROID_END_HEADER

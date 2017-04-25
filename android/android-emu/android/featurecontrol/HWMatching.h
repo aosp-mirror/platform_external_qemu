@@ -14,7 +14,7 @@
 
 #pragma once
 
-#include "android/opengl/gpuinfo.h"
+#include "android/HostHwInfo.h"
 
 #include <string>
 #include <vector>
@@ -35,24 +35,12 @@ struct FeatureAction {
     bool enable;
 };
 
-struct HostHwInfo {
-    std::string cpu_manufacturer;
-    bool virt_support;
-    bool running_in_vm;
-    int os_bit_count;
-    uint32_t cpu_model_name;
-    std::string os_platform;
-    const GpuInfoList* gpuinfolist;
-};
-
-HostHwInfo queryHostHwInfo();
-
 bool matchFeaturePattern(
-    const HostHwInfo& hostinfo,
+    const HostHwInfo::Info& hostinfo,
     const emulator_features::EmulatorFeaturePattern* pattern);
 
 std::vector<FeatureAction> matchFeaturePatterns(
-    const HostHwInfo& hostinfo,
+    const HostHwInfo::Info& hostinfo,
     const emulator_features::EmulatorFeaturePatterns* input);
 
 }  // namespace featurecontrol
