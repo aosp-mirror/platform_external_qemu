@@ -128,10 +128,9 @@ struct AvdInfo {
      * select either legacy or modern operation mode.
      */
     bool      isMarshmallowOrHigher;
-    bool      isPhoneApi;
     bool      isGoogleApis;
     bool      isUserBuild;
-    bool      isAndroidAuto;
+    AvdFlavor flavor;
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
     char*     coreHardwareIniPath;  /* core hardware.ini path */
@@ -579,13 +578,8 @@ avdInfo_isUserBuild(const AvdInfo* i) {
     return i->isUserBuild;
 }
 
-bool
-avdInfo_isPhoneApi(const AvdInfo* i) {
-    return i->isPhoneApi;
-}
-
-bool avdInfo_isAndroidAuto(const AvdInfo* i) {
-    return i->isAndroidAuto;
+AvdFlavor avdInfo_getAvdFlavor(const AvdInfo* i) {
+    return i->flavor;
 }
 
 int
@@ -845,10 +839,11 @@ _avdInfo_extractBuildProperties(AvdInfo* i) {
             i->apiLevel);
         }
     }
-    i->isPhoneApi = propertyFile_isPhoneApi(i->buildProperties);
+
+    i->flavor = propertyFile_getAvdFlavor(i->buildProperties);
+
     i->isGoogleApis = propertyFile_isGoogleApis(i->buildProperties);
     i->isUserBuild = propertyFile_isUserBuild(i->buildProperties);
-    i->isAndroidAuto = propertyFile_isAndroidAuto(i->buildProperties);
     i->incrementalVersion = propertyFile_getInt(
         i->buildProperties,
         "ro.build.version.incremental",

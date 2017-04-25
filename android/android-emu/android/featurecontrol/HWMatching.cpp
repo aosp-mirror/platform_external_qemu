@@ -22,10 +22,8 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
-#include "android/emulation/CpuAccelerator.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/utils/filelock.h"
-#include "android/utils/x86_cpuid.h"
 
 #include "android/featurecontrol/proto/emulator_feature_patterns.pb.h"
 #include "google/protobuf/io/zero_copy_stream.h"
@@ -174,64 +172,8 @@ void asyncUpdateServerFeaturePatterns() {
     sFeaturePatternQueryThread.ptr();
 }
 
-// Internal implementation//////////////////////////////////////////////////////
-
-HostHwInfo queryHostHwInfo() {
-    AndroidCpuInfoFlags cpuFlags =
-        android::GetCpuInfo().first;
-
-    StringView cpu_manufacturer_str = "Unknown";
-    if (cpuFlags | ANDROID_CPU_INFO_AMD)
-        cpu_manufacturer_str = "AMD";
-    if (cpuFlags | ANDROID_CPU_INFO_INTEL)
-        cpu_manufacturer_str = "Intel";
-
-    uint32_t model_family_stepping;
-    android_get_x86_cpuid(1, 0, &model_family_stepping,
-                          nullptr, nullptr, nullptr);
-
-    HostHwInfo res;
-    res.cpu_manufacturer = cpu_manufacturer_str;
-    res.virt_support = cpuFlags & ANDROID_CPU_INFO_VIRT_SUPPORTED;
-    res.running_in_vm = cpuFlags & ANDROID_CPU_INFO_VM;
-    res.os_bit_count = System::get()->getHostBitness();
-    res.cpu_model_name = model_family_stepping;
-    res.os_platform = android::base::toString(System::get()->getOsType());
-    res.gpuinfolist = &globalGpuInfoList();
-
-    D("cpu info:\n"
-      "    manufacturer %s\n"
-      "    virt support %d invm %d\n"
-      "    osbitcount %d\n"
-      "    cpumodel 0x%x\n"
-      "    osplatform %s",
-      res.cpu_manufacturer.c_str(),
-      res.virt_support,
-      res.running_in_vm,
-      res.os_bit_count,
-      res.cpu_model_name,
-      res.os_platform.c_str());
-
-    for (size_t i = 0; i < res.gpuinfolist->infos.size(); i++) {
-        const GpuInfo& info = res.gpuinfolist->infos[i];
-        D("gpu %zu:\n"
-          "    make %s\n"
-          "    model %s\n"
-          "    device_id %s\n"
-          "    revision_id %s\n"
-          "    version %s\n"
-          "    renderer %s\n",
-          i, info.make.c_str(), info.model.c_str(),
-          info.device_id.c_str(), info.revision_id.c_str(),
-          info.version.c_str(), info.renderer.c_str());
-        (void)info;
-    }
-
-    return res;
-}
-
 bool matchFeaturePattern(
-        const HostHwInfo& hwinfo,
+        const HostHwInfo::Info& hwinfo,
         const emulator_features::EmulatorFeaturePattern* pattern) {
 
     bool res = false;
@@ -295,7 +237,7 @@ bool matchFeaturePattern(
 }
 
 std::vector<FeatureAction> matchFeaturePatterns(
-        const HostHwInfo& hwinfo,
+        const HostHwInfo::Info& hwinfo,
         const emulator_features::EmulatorFeaturePatterns* input) {
     std::vector<FeatureAction> res;
 
@@ -388,7 +330,7 @@ void applyCachedServerFeaturePatterns() {
         return;
 
     std::vector<FeatureAction> todo =
-        matchFeaturePatterns(queryHostHwInfo(), sCachedFeaturePatterns.ptr());
+        matchFeaturePatterns(HostHwInfo::query(), sCachedFeaturePatterns.ptr());
 
     for (const auto& elt : todo) {
         doFeatureAction(elt);

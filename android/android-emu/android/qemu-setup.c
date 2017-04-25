@@ -399,7 +399,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_hw_sensors_init();
 
     /* initialize the car data emulation if the system image is a Android Auto build */
-    if (avdInfo_isAndroidAuto(android_avdInfo)) {
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         android_car_init();
     }
 
