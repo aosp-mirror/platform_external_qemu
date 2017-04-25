@@ -118,7 +118,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     }
 
     if (opts->dns_server) {
-        uint32_t ips[ANDROID_MAX_DNS_SERVERS];
+        SockAddress ips[ANDROID_MAX_DNS_SERVERS];
         int dnsCount = android_dns_get_servers(opts->dns_server, ips);
         if (dnsCount > 1) {
             params.addFormat("ndns=%d", dnsCount);
