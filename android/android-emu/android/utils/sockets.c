@@ -373,6 +373,25 @@ format_ip6( char*  buf, char*  end, const uint8_t*  ip6 )
 }
 
 const char*
+sock_address_host_string( const SockAddress*  a )
+{
+    static char buf0[MAX_PATH];
+    char *buf = buf0, *end = buf + sizeof(buf0);
+
+    switch (a->family) {
+    case SOCKET_INET:
+        buf = format_ip4( buf, end, a->u.inet.address );
+        break;
+    case SOCKET_IN6:
+        buf = format_ip6( buf, end, a->u.in6.address );
+        break;
+    default:
+        return NULL;
+    }
+    return buf0;
+}
+
+const char*
 sock_address_to_string( const SockAddress*  a )
 {
     static char buf0[MAX_PATH];

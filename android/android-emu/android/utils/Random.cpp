@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/misc/Random.h"
+#include "android/utils/Random.h"
 
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/utils/debug.h"

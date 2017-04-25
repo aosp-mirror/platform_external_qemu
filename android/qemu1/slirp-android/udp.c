@@ -387,6 +387,7 @@ udp_attach(struct socket *so, SocketFamily family)
   }
   if (so->s != -1) {
       /* success, insert in queue */
+      so->so_family = family;
       so->so_expire = curtime + SO_EXPIRE;
       insque(so,&udb);
   }

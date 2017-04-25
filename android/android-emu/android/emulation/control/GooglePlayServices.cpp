@@ -23,18 +23,11 @@ using std::string;
 
 // static
 const System::Duration GooglePlayServices::kAdbCommandTimeoutMs = 5000;
-constexpr StringView GooglePlayServices::kPlayStorePkgName;
 constexpr StringView GooglePlayServices::kPlayServicesPkgName;
 
 GooglePlayServices::~GooglePlayServices() {
-    if (mStoreSettingsCommand) {
-        mStoreSettingsCommand->cancel();
-    }
     if (mServicesPageCommand) {
         mServicesPageCommand->cancel();
-    }
-    if (mStoreVersionCommand) {
-        mStoreVersionCommand->cancel();
     }
     if (mServicesVersionCommand) {
         mServicesVersionCommand->cancel();
@@ -116,30 +109,6 @@ void GooglePlayServices::getSystemProperty(
             kAdbCommandTimeoutMs, true);
 }
 
-void GooglePlayServices::showPlayStoreSettings(ResultCallback resultCallback) {
-    if (!mAdb) {
-        return;
-    }
-
-    if (mStoreSettingsCommand) {
-        resultCallback(Result::OperationInProgress);
-        return;
-    }
-    mStoreSettingsCommand = mAdb->runAdbCommand(
-            {"shell", "am start",
-             std::string(kPlayStorePkgName) + ";",
-             "am start", "-n",
-             std::string(kPlayStorePkgName) +
-                     "/com.google.android.finsky.activities.SettingsActivity"},
-            [this, resultCallback](const OptionalAdbCommandResult& result) {
-                resultCallback((!result || result->exit_code)
-                                       ? Result::UnknownError
-                                       : Result::Success);
-                mStoreSettingsCommand.reset();
-            },
-            kAdbCommandTimeoutMs, false);
-}
-
 void GooglePlayServices::showPlayServicesPage(ResultCallback resultCallback) {
     if (!mAdb) {
         return;
@@ -159,34 +128,6 @@ void GooglePlayServices::showPlayServicesPage(ResultCallback resultCallback) {
                 mServicesPageCommand.reset();
             },
             kAdbCommandTimeoutMs, false);
-}
-
-void GooglePlayServices::getPlayStoreVersion(
-        ResultOutputCallback resultCallback) {
-    if (!mAdb) {
-        return;
-    }
-
-    if (mStoreVersionCommand) {
-        resultCallback(Result::OperationInProgress, "");
-        return;
-    }
-    mStoreVersionCommand = mAdb->runAdbCommand(
-            {"shell", "dumpsys", "package", kPlayStorePkgName},
-            [this, resultCallback](const OptionalAdbCommandResult& result) {
-                if (!result || result->exit_code) {
-                    resultCallback(Result::UnknownError, "");
-                } else {
-                    string outString;
-                    const bool parseResult = parseOutputForVersion(
-                            *(result->output), &outString);
-                    resultCallback(parseResult ? Result::Success
-                                               : Result::AppNotInstalled,
-                                   outString);
-                }
-                mStoreVersionCommand.reset();
-            },
-            kAdbCommandTimeoutMs, true);
 }
 
 void GooglePlayServices::getPlayServicesVersion(
