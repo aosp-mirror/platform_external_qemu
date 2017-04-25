@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "67518dee_bd1ac1fb",
+        "filename": "android/android-emu/android/skin/window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1884,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-04-25T20:47:20Z",
+      "side": 1,
+      "message": "nit: Is this the the correct formatting?",
+      "range": {
+        "startLine": 1884,
+        "startChar": 61,
+        "endLine": 1884,
+        "endChar": 65
+      },
+      "revId": "572c9629f0fa671456c0f4acf606ed460adaaf00",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
