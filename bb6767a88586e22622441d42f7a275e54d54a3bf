@@ -22,6 +22,30 @@
       "revId": "bb6767a88586e22622441d42f7a275e54d54a3bf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40b6260b_dbf500fe",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-25T21:53:42Z",
+      "side": 1,
+      "message": "Just google_apis and aosp so far.",
+      "parentUuid": "6c02bcc2_ea21552c",
+      "range": {
+        "startLine": 25,
+        "startChar": 4,
+        "endLine": 25,
+        "endChar": 37
+      },
+      "revId": "bb6767a88586e22622441d42f7a275e54d54a3bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
