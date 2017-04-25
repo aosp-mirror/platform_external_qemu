@@ -130,7 +130,7 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->googlePlayButton->setVisible(true);
     }
 
-    if (avdInfo_isAndroidAuto(android_avdInfo)) {
+    if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
         mSidebarButtons.addButton(mExtendedUi->carDataButton);
         mExtendedUi->carDataButton->setVisible(true);
     }
@@ -161,7 +161,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->microphonePage->setMicrophoneAgent(agentPtr->userEvents);
         mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
-        if (avdInfo_isAndroidAuto(android_avdInfo)) {
+        if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
         }
 //        mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->recordScreen);

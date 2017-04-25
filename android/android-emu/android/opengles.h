@@ -37,7 +37,7 @@ int android_initOpenglesEmulation(void);
  * guestApiLevel: API level of guest image (23 for mnc, 24 for nyc, etc)
  */
 int android_startOpenglesRenderer(int width, int height,
-                                  bool isPhoneApi, int guestApiLevel,
+                                  bool isPhone, int guestApiLevel,
                                   int* glesMajorVersion_out,
                                   int* glesMinorVersion_out);
 

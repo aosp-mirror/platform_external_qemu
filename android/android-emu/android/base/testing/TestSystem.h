@@ -136,7 +136,16 @@ public:
 
     virtual Pid getCurrentProcessId() const override { return mPid; }
 
-    virtual size_t getPeakMemory() override { return 0; }
+    virtual MemUsage getMemUsage() override {
+        MemUsage res;
+        res.resident = 4294967295ULL;
+        res.resident_max = 4294967295ULL * 2;
+        res.virt = 4294967295ULL * 4;
+        res.virt_max = 4294967295ULL * 8;
+        res.total_phys_memory = 4294967295ULL * 16;
+        res.total_page_file = 4294967295ULL * 32;
+        return res;
+    }
 
     void setCurrentProcessId(Pid pid) { mPid = pid; }
 
