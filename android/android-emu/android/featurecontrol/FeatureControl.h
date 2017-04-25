@@ -15,6 +15,7 @@
 #include "android/featurecontrol/HWMatching.h"
 
 #include <string>
+#include <vector>
 
 namespace android {
 namespace featurecontrol {
@@ -62,6 +63,17 @@ void applyCachedServerFeaturePatterns();
 // a protobuf containing the latest feature patterns, replacing
 // the current cached ones.
 void asyncUpdateServerFeaturePatterns();
+
+// Queries the current set of features in various ways:
+// - whether the default guest/host/server config has attempted
+// to enable the feature.
+// - whether the user has overriden the feature.
+// - the resulting set of enabled features, which also accounts for
+// programmatic setting of features.
+std::vector<Feature> getEnabledNonOverride();
+std::vector<Feature> getEnabledOverride();
+std::vector<Feature> getDisabledOverride();
+std::vector<Feature> getEnabled();
 
 } // namespace android
 } // namespace featurecontrol
