@@ -41,12 +41,8 @@ public:
     explicit GooglePlayServices(AdbInterface* adb) : mAdb(adb) {}
     ~GooglePlayServices();
 
-    // Opens the Google play store settings in the play store app.
-    void showPlayStoreSettings(ResultCallback resultCallback);
     // Opens the Play Services app details page in the play store.
     void showPlayServicesPage(ResultCallback resultCallback);
-    // Gets a string of the latest version number of the play store.
-    void getPlayStoreVersion(ResultOutputCallback resultCallback);
     // Get a string of the latest version number of play services.
     void getPlayServicesVersion(ResultOutputCallback resultCallback);
     // Get a system property.
@@ -63,16 +59,12 @@ public:
 
 private:
     static const android::base::System::Duration kAdbCommandTimeoutMs;
-    static constexpr android::base::StringView kPlayStorePkgName =
-            "com.android.vending";
     static constexpr android::base::StringView kPlayServicesPkgName =
             "com.google.android.gms";
 
     AdbInterface* mAdb;
     AdbCommandPtr mGetpropCommand;
-    AdbCommandPtr mStoreSettingsCommand;
     AdbCommandPtr mServicesPageCommand;
-    AdbCommandPtr mStoreVersionCommand;
     AdbCommandPtr mServicesVersionCommand;
     const ResultCallback mResultCallback;
 

@@ -16,7 +16,7 @@
 #include "android/base/system/System.h"
 #include "android/console_auth.h"
 #include "android/console_auth_internal.h"
-#include "android/misc/Random.h"
+#include "android/utils/Random.h"
 extern "C" {
 #include "android/proxy/proxy_int.h"
 }

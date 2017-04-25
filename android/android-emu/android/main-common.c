@@ -1680,7 +1680,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         //  from the -dns-server list.
         // qemu2: the opts->dns_server is NULL, just get the dns servers of the
         //  host.
-        uint32_t dnsServers[ANDROID_MAX_DNS_SERVERS] = {};
+        SockAddress dnsServers[ANDROID_MAX_DNS_SERVERS] = {};
         int dnsCount = android_dns_get_servers(opts->dns_server, dnsServers);
         if (dnsCount < 0) {
             return false;
@@ -1691,11 +1691,9 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             STRALLOC_DEFINE(newOption);
             int n;
             for (n = 0; n < dnsCount; ++n) {
-                uint32_t ip = dnsServers[n];
-                stralloc_add_format(newOption, "%s%d.%d.%d.%d",
+                stralloc_add_format(newOption, "%s%s",
                                     (n > 0) ? "," : "",
-                                    (uint8_t)(ip >> 24), (uint8_t)(ip >> 16),
-                                    (uint8_t)(ip >> 8), (uint8_t)(ip));
+                                    sock_address_host_string(&dnsServers[n]));
             }
             str_reset(&opts->dns_server, stralloc_cstr(newOption));
             stralloc_reset(newOption);

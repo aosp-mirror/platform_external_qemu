@@ -558,11 +558,13 @@ int sotranslate_out(struct socket *so, SockAddress *addr)
             /* It's an alias */
             uint32_t addr_ip;
             int  low = so->faddr.u.inet.address & 0xff;
-            if ( CTL_IS_DNS(low) )
-               addr_ip = dns_addr[low - CTL_DNS];
-            else
+            if ( CTL_IS_DNS(low) ) {
+               *addr = dns_addr[low - CTL_DNS];
+               sock_address_set_port(addr, port);
+            } else {
                addr_ip = loopback_addr_ip;
-            sock_address_init_inet(addr, addr_ip, port);
+               sock_address_init_inet(addr, addr_ip, port);
+            }
             return 1;
         }
         break;
@@ -577,6 +579,26 @@ int sotranslate_out(struct socket *so, SockAddress *addr)
         break;
     }
     return 0;
+}
+
+/* Ensure so->s's domain is |af|, if not, re-create a new socket instance.
+ * Do not change the state of |so| otherwise. In practice, this is used
+ * when the guest DNS IPv4 address is translated into a host IPv6 one:
+ * if this happens, the socket must change from AF_INET to AF_INET6 for
+ * sendto() to work correctly. See sosendto(). */
+static void
+udp_reattach(struct socket *so, SocketFamily sf)
+{
+    if (so->s != -1) {
+        if (so->so_family == sf) {
+            /* Nothing to reattach. */
+            return;
+        }
+        socket_close(so->s);
+    }
+    so->so_family = sf;
+    so->s = socket_create(sf, SOCKET_DGRAM);
+    return;
 }
 
 /*
@@ -615,6 +637,7 @@ sosendto(struct socket *so, struct mbuf *m)
 
 	DEBUG_MISC((dfd, " sendto()ing, %s\n", sock_address_to_string(&addr)));
 
+	udp_reattach(so, addr.family);
 	/* Don't care what port we get */
 	ret = socket_sendto(so->s, m->m_data, m->m_len,&addr);
 	if (ret < 0)

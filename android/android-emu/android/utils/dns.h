@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#include "android/utils/sockets.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -50,7 +51,7 @@ enum {
 // (the function will have printed a message to the console to explain why
 // before returning).
 int android_dns_get_servers(const char* dnsServersOption,
-                            uint32_t* dnsServerIps);
+                            SockAddress* dnsServerIps);
 
 // TODO: Remove the declarations below once QEMU2 uses
 //       android_dns_get_servers().
@@ -59,7 +60,7 @@ int android_dns_get_servers(const char* dnsServersOption,
  * provided |buffer|. Up to |bufferSize| DNS servers are retrieved. On success
  * the number of servers is returned, on failure a negative value is returned.
  */
-int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize);
+int android_dns_get_system_servers(SockAddress* buffer, size_t bufferSize);
 
 /* Parse a string containing a list of DNS servers separated by comma and place
  * the servers into the provided |buffer|. Up to |bufferSize| servers are
@@ -69,7 +70,7 @@ int android_dns_get_system_servers(uint32_t* buffer, size_t bufferSize);
  * -2 Number of servers in |servers| string exceeds |bufferSize|
  */
 int android_dns_parse_servers(const char* servers,
-                              uint32_t* buffer,
+                              SockAddress* buffer,
                               size_t bufferSize);
 
 ANDROID_END_HEADER

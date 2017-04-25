@@ -349,7 +349,6 @@ LOCAL_SRC_FILES := \
     android/metrics/SyncMetricsReporter.cpp \
     android/metrics/StudioConfig.cpp \
     android/metrics/TextMetricsWriter.cpp \
-    android/misc/Random.cpp \
     android/multitouch-port.c \
     android/multitouch-screen.c \
     android/network/control.cpp \
@@ -398,6 +397,7 @@ LOCAL_SRC_FILES := \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
     android/user-config.cpp \
+    android/utils/Random.cpp \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/looper.cpp \
@@ -588,7 +588,6 @@ LOCAL_SRC_FILES := \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
   android/hw-lcd_unittest.cpp \
-  android/misc/Random_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
@@ -616,6 +615,7 @@ LOCAL_SRC_FILES := \
   android/utils/host_bitness_unittest.cpp \
   android/utils/path_unittest.cpp \
   android/utils/property_file_unittest.cpp \
+  android/utils/Random_unittest.cpp \
   android/utils/string_unittest.cpp \
   android/utils/sockets_unittest.cpp \
   android/utils/timezone_unittest.cpp \

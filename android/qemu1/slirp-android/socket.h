@@ -41,6 +41,7 @@ struct socket {
   u_int8_t	so_emu;		/* Is the socket emulated? */
 
   u_char	so_type;		/* Type of socket, UDP or TCP */
+  SocketFamily  so_family;      /* Family of socket */
   int	so_state;		/* internal state flags SS_*, below */
 
   struct 	tcpcb *so_tcpcb;	/* pointer to TCP protocol control block */

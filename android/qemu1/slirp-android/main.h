@@ -46,7 +46,7 @@ extern struct in6_addr vhost_addr6;
 extern struct in6_addr vprefix_addr6;
 extern uint32_t vprefix_len;
 
-extern uint32_t dns_addr[DNS_ADDR_MAX];
+extern SockAddress dns_addr[DNS_ADDR_MAX];
 extern int      dns_addr_count;
 extern char *username;
 extern char *socket_path;

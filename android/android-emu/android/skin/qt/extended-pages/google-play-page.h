@@ -22,12 +22,10 @@ class GooglePlayPage : public QWidget {
     Q_OBJECT
 public:
     enum class PlayPages {
-        StoreSettingsPage,
         ServicesDetailsPage,
     };
 
     enum class PlayApps {
-        PlayStore,
         PlayServices,
     };
 
@@ -37,7 +35,6 @@ public:
     void initialize(android::emulation::AdbInterface* adb);
 
 private:
-    void showPlayStoreSettings();
     void showPlayServicesPage();
     void playPageDone(android::emulation::GooglePlayServices::Result result,
                       PlayPages page);
@@ -46,7 +43,6 @@ private:
     void bootCompletionPropertyDone(
             android::emulation::GooglePlayServices::Result result,
             android::base::StringView outString);
-    void getPlayStoreVersion();
     void getPlayServicesVersion();
     void playVersionDone(android::emulation::GooglePlayServices::Result result,
                          PlayApps app,
@@ -54,7 +50,6 @@ private:
 
 private slots:
     void on_goog_updateServicesButton_clicked();
-    void on_goog_updateStoreButton_clicked();
 
     void getBootCompletionProperty();
     void queryPlayVersions();
