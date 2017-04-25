@@ -1880,8 +1880,9 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                              finger->pos.x,
                              finger->pos.y,
                              button_state);
-        } else {
-            // The click is outside the touch screen.
+        } else if (!multitouch_should_skip_sync(button_state) &&
+                   !multitouch_is_second_finger(button_state)    ) {
+            // This is a single click outside the touch screen.
             // Drag or resize the device window.
             window->drag_x_pos = ev->u.mouse.x;
             window->drag_y_pos = ev->u.mouse.y;
