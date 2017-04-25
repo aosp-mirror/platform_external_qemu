@@ -27,9 +27,9 @@ struct mbuf;
 void slirp_init(int restricted, const char *special_ip);
 
 void slirp_select_fill(int *pnfds,
-                       fd_set *readfds, fd_set *writefds, fd_set *xfds);
+                       fd_set **readfds, fd_set **writefds, fd_set **xfds);
 
-void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds);
+void slirp_select_poll(fd_set **readfds, fd_set **writefds, fd_set **xfds);
 
 void slirp_input(const uint8_t *pkt, int pkt_len);
 
