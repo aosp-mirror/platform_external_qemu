@@ -190,6 +190,28 @@ BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
 BUILD_HOST_CFLAGS += $(BUILD_TARGET_CFLAGS)
 BUILD_HOST_CXXFLAGS += $(BUILD_TARGET_CXXFLAGS)
 
+_common-dump-json-list = \
+    $(foreach _list_item,$(strip $1),$(info , "$(_list_item)"))
+
+dump-json-module = \
+    $(info ,{ )\
+    $(info "MODULE" : "$(LOCAL_MODULE)", )\
+    $(info    "LOCATION" : "$(LOCAL_PATH)", )\
+    $(info    "HOST" : "$(LOCAL_HOST_BUILD)", )\
+    $(info    "TYPE" : "$(LOCAL_MODULE_CLASS)", )\
+    $(info    "IMPORTS" : "",)\
+    $(foreach _type, CXXFLAGS CFLAGS GENERATED_SOURCES LDFLAGS WHOLE_STATIC_LIBRARIES INSTALL_DIR PREBUILTS_OBJ_FILES STATIC_LIBRARIES C_INCLUDES LDLIBS,\
+        $(if $(filter C_INCLUDES ADDITIONAL_DEPENDENCIES,$(_type)),\
+            $(info   "LOCAL_$(_type)"  : [ "")\
+            $(call _common-dump-json-list,$(LOCAL_$(_type)))\
+	    $(info   ], )\
+        ,\
+            $(info   "LOCAL_$(_type)"  : "$(strip $(LOCAL_$(_type)))", )\
+        )\
+    )\
+    $(info  "LOCAL_SRC_FILES" : "$(LOCAL_SRC_FILES)")\
+    $(info  })
+
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
 # Usage:
@@ -209,6 +231,7 @@ start-emulator-library = \
 # Used with start-emulator-library
 end-emulator-library = \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 define-emulator-prebuilt-library = \
     $(call start-emulator-library,$1) \

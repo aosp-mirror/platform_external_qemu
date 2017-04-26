@@ -37,6 +37,34 @@ emugl-begin-host-executable = $(call emugl-begin-module,$1,HOST_EXECUTABLE,HOST)
 _emugl_modules :=
 _emugl_HOST_modules :=
 
+if_exist = $(if $(strip $1), $2)
+
+_emugl-dump-json-list = \
+    $(foreach _list_item,$(strip $1),$(info , "$(_list_item)"))
+
+emugl-dump-json-module = \
+    $(info ,{ )\
+    $(info "MODULE" : "$(_emugl_MODULE)", )\
+    $(info    "LOCATION" : "$(LOCAL_PATH)", )\
+    $(info    "HOST" : "$(_emugl_HOST)", )\
+    $(info    "TYPE" : "$(_emugl.$(_emugl_MODULE).type)", )\
+    $(info    "IMPORTS" : "$(_emugl.$(_emugl_MODULE).imports)",)\
+    $(foreach _type,$(EMUGL_EXPORT_TYPES),\
+        $(if $(filter C_INCLUDES ADDITIONAL_DEPENDENCIES,$(_type)),\
+            $(info  "EXPORT.$(_type)" : [ "")\
+            $(call _emugl-dump-json-list,$(_emugl.$(_emugl_MODULE).export.$(_type)))\
+	    $(info   ], )\
+            $(info   "LOCAL_$(_type)"  : [ "")\
+            $(call _emugl-dump-json-list,$(LOCAL_$(_type)))\
+	    $(info   ], )\
+        ,\
+            $(info   "EXPORT.$(_type)" : "$(strip $(_emugl.$(_emugl_MODULE).export.$(_type))) ",)\
+            $(info   "LOCAL_$(_type)"  : "$(strip $(LOCAL_$(_type)))", )\
+        )\
+    )\
+    $(info  "LOCAL_SRC_FILES" : "$(LOCAL_SRC_FILES)")\
+    $(info  })
+
 # do not use directly, see functions above instead
 emugl-begin-module = \
     $(eval include $(CLEAR_VARS)) \
@@ -55,7 +83,8 @@ emugl-end-module = \
     $(eval $(end-emulator-module-ev)) \
     $(eval LOCAL_BUILD_FILE :=) \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
-    $(if $(EMUGL_DEBUG),$(call emugl-dump-module))
+    $(if $(EMUGL_DEBUG),$(call emugl-dump-module)) \
+    # $(call emugl-dump-json-module) \
 
 # Managing module exports and imports.
 #
