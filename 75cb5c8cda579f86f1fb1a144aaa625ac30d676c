@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7808427f_10d31323",
+        "filename": "android/android-emu/android/console_internal.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-26T14:43:18Z",
+      "side": 1,
+      "message": "2017 (the year that the file was created)",
+      "range": {
+        "startLine": 1,
+        "startChar": 13,
+        "endLine": 1,
+        "endChar": 17
+      },
+      "revId": "75cb5c8cda579f86f1fb1a144aaa625ac30d676c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65f8a8e6_e2ae3e45",
+        "filename": "android/android-emu/android/console_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-26T14:43:18Z",
+      "side": 1,
+      "message": "2017",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "75cb5c8cda579f86f1fb1a144aaa625ac30d676c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00cf230c_6fb05afb",
+        "filename": "android/android-emu/android/console_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-26T14:43:18Z",
+      "side": 1,
+      "message": "Remove these?",
+      "range": {
+        "startLine": 47,
+        "startChar": 4,
+        "endLine": 48,
+        "endChar": 34
+      },
+      "revId": "75cb5c8cda579f86f1fb1a144aaa625ac30d676c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
