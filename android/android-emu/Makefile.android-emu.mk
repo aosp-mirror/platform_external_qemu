@@ -551,6 +551,7 @@ LOCAL_SRC_FILES := \
   android/base/Version_unittest.cpp \
   android/cmdline-option_unittest.cpp \
   android/console_auth_unittest.cpp \
+  android/console_unittest.cpp \
   android/emulation/AdbDebugPipe_unittest.cpp \
   android/emulation/AdbGuestPipe_unittest.cpp \
   android/emulation/AdbHostListener_unittest.cpp \

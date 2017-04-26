@@ -365,6 +365,28 @@ control_client_create( Socket         socket,
     return client;
 }
 
+void*
+test_control_client_create(Socket socket)
+{
+    ControlClient  client = calloc( sizeof(*client), 1 );
+
+    if (client) {
+        socket_set_nodelay( socket );
+        socket_set_nonblock( socket );
+        // Skip the preauth
+        client->commands = main_commands;
+        client->finished = 0;
+        client->sock    = socket;
+    }
+    return client;
+}
+
+void
+test_control_client_close(void* opaque)
+{
+    free(opaque);
+}
+
 static CommandDef
 find_command( char*  input, CommandDef  commands, char*  *pend, char*  *pargs )
 {
@@ -542,6 +564,13 @@ do_help( ControlClient  client, char*  args )
     }
 }
 
+void
+do_help_test(void* opaque, char* args)
+{
+    ControlClient c = (ControlClient)opaque;
+    strcpy(c->buff, "help");
+    control_client_do_command(c);
+}
 
 /* implement the 'help-verbose' command */
 static int
