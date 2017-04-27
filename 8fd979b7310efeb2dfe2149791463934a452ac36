@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c3d3d207_959a999b",
+        "filename": "android/android-emu/android/CommonReportedInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "it\u0027s better to have a single struct here with all static data IMHO",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 60
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f074620_9f9b6ca7",
+        "filename": "android/android-emu/android/CommonReportedInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "this is strange and scary. public nonstatic methods modify data in the very same _public_ static object.\nWhy can\u0027t we split the object with its fields from the singleton that holds a single instance of it?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 1
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1457174c_486d1518",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "this include slows down compilation A LOT for anything that has it. Can we use forward declarations instead of including it in this header?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 50
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0674cf7b_76530ac8",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "why not \u003ciosfwd\u003e ? Do you actually need fstream-specific methods, or istream/ostream is enough?",
+      "range": {
+        "startLine": 21,
+        "startChar": 10,
+        "endLine": 21,
+        "endChar": 17
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6239d31c_b46d5d18",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "System::Duration uptimeMs\n?",
+      "range": {
+        "startLine": 36,
+        "startChar": 19,
+        "endLine": 36,
+        "endChar": 27
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00957126_ed6dfb48",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "please clang-format it",
+      "range": {
+        "startLine": 41,
+        "startChar": 5,
+        "endLine": 47,
+        "endChar": 100
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b482c847_375258b5",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "what is this lock for? class doesn\u0027t have any data",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 30
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1817cfa_429136e4",
+        "filename": "android/android-emu/android/HostHwInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "if you put the initialization into LazyInstance\u003cStruct\u003e\u0027s Struct constructor you don\u0027t need to have your own flag for initialized state",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 50
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b1ee7e6_0845809d",
+        "filename": "android/android-emu/android/avd/info.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "looks like we need an enum instead",
+      "range": {
+        "startLine": 171,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 45
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b66917e1_79a68137",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T22:36:14Z",
+      "side": 1,
+      "message": "nit: this needs to be first :)",
+      "range": {
+        "startLine": 225,
+        "startChar": 11,
+        "endLine": 225,
+        "endChar": 29
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
