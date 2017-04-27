@@ -61,9 +61,11 @@ PeriodicReporter::~PeriodicReporter() {
         for (auto& pair : mPeriodDataByPeriod) {
             lock.unlock();
             PerPeriodData* const data = &pair.second;
-            data->task.clear();
             reportForPerPeriodData(data);
+            // We need the lock when clearing out the task, as it is possible
+            // that we are removing it at the same time.
             lock.lock();
+            data->task.clear();
         }
     }
 
@@ -183,7 +185,7 @@ void PeriodicReporter::removeTask(System::Duration periodMs,
 
     PerPeriodData& data = it->second;
     data.callbacks.erase(iter);
-    if (data.callbacks.empty()) {
+    if (data.task && data.callbacks.empty()) {
         data.task->stopAsync();
     }
 }
