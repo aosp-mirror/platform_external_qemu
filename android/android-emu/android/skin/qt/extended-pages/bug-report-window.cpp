@@ -221,7 +221,7 @@ void BugReportWindow::saveBugReportFolder(bool willOpenIssueTracker) {
     } else {
         // launch the bugreport folder saving task in a separate thread
         std::string savingPath = PathUtils::join(
-                mSavingStates.saveLocation,
+                dirName.toStdString(),
                 AdbBugReportServices::generateUniqueBugreportName());
         std::string adbBugreportFilePath =
                 (mUi->bug_bugReportCheckBox->isChecked() &&
