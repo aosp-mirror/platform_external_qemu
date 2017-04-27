@@ -38,11 +38,12 @@ ifeq ($(wildcard $(_BUILD_CONFIG_MAKE)),)
     $(error "The configuration file '$(_BUILD_CONFIG_MAKE)' doesn't exist, please run the 'android/configure.sh' script")
 endif
 
+
 include $(_BUILD_CONFIG_MAKE)
 include $(_BUILD_CORE_DIR)/emulator/definitions.make
 
 .PHONY: all libraries executables clean clean-config clean-objs-dir \
-        clean-executables clean-libraries
+        clean-executables clean-libraries gen-cmake
 
 CLEAR_VARS                := $(_BUILD_CORE_DIR)/emulator/clear_vars.make
 BUILD_HOST_EXECUTABLE     := $(_BUILD_CORE_DIR)/emulator/host_executable.make
@@ -59,7 +60,6 @@ _BUILD_LIBRARIES :=
 _BUILD_DEBUG_INFOS :=
 
 clean: clean-intermediates
-
 distclean: clean clean-config
 
 # let's roll
@@ -69,6 +69,15 @@ libraries: $(_BUILD_LIBRARIES)
 executables: $(_BUILD_EXECUTABLES)
 symbols: $(_BUILD_SYMBOLS)
 debuginfo: $(_BUILD_DEBUG_INFOS)
+
+
+JSON_FILE := $(BUILD_OBJS_DIR)/build/build.json
+JSON_DUMP := [ "" $(JSON_DUMP) ]
+cmake:
+	@rm -f $(JSON_FILE)
+	$(call write-to-file,$(JSON_FILE),30,$(JSON_DUMP))
+	$(hide) python android/scripts/cmake_transform.py -i $(JSON_FILE) -c $(JSON_FILE) -o .
+
 
 clean-intermediates:
 	rm -rf $(BUILD_OBJS_DIR)/intermediates $(_BUILD_EXECUTABLES) \
