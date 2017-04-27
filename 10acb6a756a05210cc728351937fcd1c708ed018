@@ -46,6 +46,30 @@
       "revId": "10acb6a756a05210cc728351937fcd1c708ed018",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a35bcef0_e13189ed",
+        "filename": "android/qemu1/main-loop.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T20:49:26Z",
+      "side": 1,
+      "message": "We still have to care about qemu1: it\u0027s still publicly available and we have about 5000 users running it at least once a week (2/3 on Windows)",
+      "parentUuid": "3c0d3996_7d799f61",
+      "range": {
+        "startLine": 327,
+        "startChar": 27,
+        "endLine": 327,
+        "endChar": 46
+      },
+      "revId": "10acb6a756a05210cc728351937fcd1c708ed018",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
