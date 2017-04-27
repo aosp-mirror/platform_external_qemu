@@ -23,6 +23,7 @@ ifneq ($(MAKE_TEST),f)
     $(error,This build system requires GNU Make 3.81 or higher to run !)
 endif
 
+$(info, [ WHAT?! "")
 # Find the source installation path, should be this file's location.
 _BUILD_ROOT := $(dir $(lastword $(MAKEFILE_LIST)))
 _BUILD_ROOT := $(_BUILD_ROOT:%/=%)
