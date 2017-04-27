@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c13e02b0_0041f6c4",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2969,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-27T17:11:22Z",
+      "side": 1,
+      "message": "nit: maybe rename to do_test_command or something with arbitrary char* arg as the command, so it\u0027s clear from looking at the unit test that exactly the \"help\" cmd is sent\n\n(and helps us do other tests as well)",
+      "range": {
+        "startLine": 2969,
+        "startChar": 0,
+        "endLine": 2969,
+        "endChar": 43
+      },
+      "revId": "3de952c8c2a618693891ea25084fbf7a226ba0cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff7bd17e_d493c0ca",
+        "filename": "android/android-emu/android/console_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-27T17:11:22Z",
+      "side": 1,
+      "message": "nit: replace with BUFF_SIZE",
+      "range": {
+        "startLine": 45,
+        "startChar": 41,
+        "endLine": 45,
+        "endChar": 45
+      },
+      "revId": "3de952c8c2a618693891ea25084fbf7a226ba0cf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
