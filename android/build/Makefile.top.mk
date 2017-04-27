@@ -189,28 +189,38 @@ BUILD_TARGET_CFLAGS += -D_GNU_SOURCE=1
 # Copy the current target cflags into the host ones.
 BUILD_HOST_CFLAGS += $(BUILD_TARGET_CFLAGS)
 BUILD_HOST_CXXFLAGS += $(BUILD_TARGET_CXXFLAGS)
+JSON_DUMP :=
 
-_common-dump-json-list = \
-    $(foreach _list_item,$(strip $1),$(info , "$(_list_item)"))
+write-to-file = \
+  $(eval _args:=) \
+  $(foreach obj,$3,$(eval _args+=$(obj))$(if $(word $2,$(_args)),@printf "%s" $(subst ",\",$(_args)) >> $1 $(EOL)$(eval _args:=))) \
+  $(if $(_args),@printf "%s" $(subst ",\", $(_args)) >> $1) \
+
+define EOL
+
+
+endef
+
+dump-json-list = \
+    $(foreach _list_item,$(strip $1),$(eval JSON_DUMP += , "$(subst ",\",$(_list_item))"))
+
 
 dump-json-module = \
-    $(info ,{ )\
-    $(info "MODULE" : "$(LOCAL_MODULE)", )\
-    $(info    "LOCATION" : "$(LOCAL_PATH)", )\
-    $(info    "HOST" : "$(LOCAL_HOST_BUILD)", )\
-    $(info    "TYPE" : "$(LOCAL_MODULE_CLASS)", )\
-    $(info    "IMPORTS" : "",)\
-    $(foreach _type, CXXFLAGS CFLAGS GENERATED_SOURCES LDFLAGS WHOLE_STATIC_LIBRARIES INSTALL_DIR PREBUILTS_OBJ_FILES STATIC_LIBRARIES C_INCLUDES LDLIBS,\
-        $(if $(filter C_INCLUDES ADDITIONAL_DEPENDENCIES,$(_type)),\
-            $(info   "LOCAL_$(_type)"  : [ "")\
-            $(call _common-dump-json-list,$(LOCAL_$(_type)))\
-	    $(info   ], )\
-        ,\
-            $(info   "LOCAL_$(_type)"  : "$(strip $(LOCAL_$(_type)))", )\
+    $(eval JSON_DUMP += ,{ )\
+    $(eval JSON_DUMP += "MODULE" : "$(LOCAL_MODULE)", )\
+    $(eval JSON_DUMP +=    "LOCATION" : "$(LOCAL_PATH)", )\
+    $(eval JSON_DUMP +=    "HOST" : "$(BUILD_TARGET_TAG)", )\
+    $(foreach _type, QT_TOP64_DIR BUILD_HOST_AR BUILD_HOST_CC BUILD_HOST_CXX BUILD_HOST_LD BUILD_HOST_OBJCOPY BUILD_HOST_DUMPSYMS, \
+            $(eval JSON_DUMP +=   "$(_type)"  : "$(subst ",\",$($(_type)))",)\
         )\
-    )\
-    $(info  "LOCAL_SRC_FILES" : "$(LOCAL_SRC_FILES)")\
-    $(info  })
+    $(foreach _type, CFLAGS CXXFLAGS C_INCLUDES GENERATED_SOURCES QEMU_SYSTEM_FRAMEWORKS QEMU_SYSTEM_LDLIBS INSTALL_DIR LDFLAGS LDLIBS PREBUILTS_OBJ_FILES PROTO_SOURCES QT_MOC_SRC_FILES QT_UI_SRC_FILES QT_RESOURCES SRC_FILES STATIC_LIBRARIES WHOLE_STATIC_LIBRARIES, \
+            $(eval JSON_DUMP +=   "LOCAL_$(_type)"  : [ "")\
+            $(call dump-json-list,$(LOCAL_$(_type)))\
+	    $(eval JSON_DUMP +=   ], )\
+        )\
+    $(eval JSON_DUMP +=    "TYPE" : "$(LOCAL_MODULE_CLASS)" )\
+    $(eval JSON_DUMP +=  })
+
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
@@ -238,6 +248,7 @@ define-emulator-prebuilt-library = \
     $(eval LOCAL_BUILD_FILE := $(PREBUILT_STATIC_LIBRARY)) \
     $(eval LOCAL_SRC_FILES := $2) \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
@@ -250,6 +261,7 @@ start-emulator-program = \
 end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 # Same thing for shared libraries
 start-emulator-shared-lib = \
@@ -261,6 +273,7 @@ start-emulator-shared-lib = \
 end-emulator-shared-lib = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 # A variant of start-emulator-program that also links the Google Benchmark
 # library to the final program. Use with end-emulator-benchmark.
@@ -276,7 +289,8 @@ end-emulator-benchmark = \
   $(eval LOCAL_STATIC_LIBRARIES += $$(GOOGLE_BENCHMARK_STATIC_LIBRARIES)) \
   $(eval LOCAL_LDLIBS += $$(GOOGLE_BENCHMARK_LDLIBS)) \
   $(call local-link-static-c++lib) \
-  $(if $(filter true,$(BUILD_BENCHMARKS)),$(call end-emulator-program))
+  $(if $(filter true,$(BUILD_BENCHMARKS)),$(call end-emulator-program))\
+  $(call dump-json-module) \
 
 define end-emulator-module-ev
 LOCAL_BITS := $$(BUILD_TARGET_BITS)
