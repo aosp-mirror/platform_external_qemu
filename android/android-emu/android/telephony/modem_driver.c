@@ -30,6 +30,7 @@
 #endif
 
 AModem        android_modem;
+int joshint =1;
 CSerialLine*  android_modem_serial_line;
 
 typedef struct {
