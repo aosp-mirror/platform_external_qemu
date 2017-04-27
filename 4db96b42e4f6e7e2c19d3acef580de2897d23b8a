@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f38be114_db37466c",
+        "filename": "android/qemu1/slirp-android/tcp.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-04-27T23:59:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e63a8f94_48020b4b",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 107,
+        "endChar": 21
+      },
+      "revId": "4db96b42e4f6e7e2c19d3acef580de2897d23b8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ec5c8bd_53c13047",
         "filename": "android/qemu1/slirp-android/tcp_input.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-27T20:46:16Z",
       "side": 1,
       "message": "nit: tabs vs spaces",
+      "range": {
+        "startLine": 1703,
+        "startChar": 0,
+        "endLine": 1712,
+        "endChar": 9
+      },
+      "revId": "4db96b42e4f6e7e2c19d3acef580de2897d23b8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69edb384_53da76fc",
+        "filename": "android/qemu1/slirp-android/tcp_input.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1712,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-04-27T23:59:24Z",
+      "side": 1,
+      "message": "I guess you mean I should use tab if the original file is using tab?\nChanged to tab now",
+      "parentUuid": "9ec5c8bd_53c13047",
       "range": {
         "startLine": 1703,
         "startChar": 0,
