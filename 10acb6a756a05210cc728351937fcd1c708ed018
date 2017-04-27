@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b4c4c8d_e28f4cb3",
+        "filename": "android/qemu1/main-loop.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:11:20Z",
+      "side": 1,
+      "message": "doesn\u0027t it only pass the first fd_set from the array? At least on Windows fd_sets don\u0027t stack if they\u0027re adjacent in memory",
+      "range": {
+        "startLine": 327,
+        "startChar": 27,
+        "endLine": 327,
+        "endChar": 46
+      },
+      "revId": "10acb6a756a05210cc728351937fcd1c708ed018",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
