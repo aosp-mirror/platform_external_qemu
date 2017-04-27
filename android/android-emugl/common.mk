@@ -37,6 +37,9 @@ emugl-begin-host-executable = $(call emugl-begin-module,$1,HOST_EXECUTABLE,HOST)
 _emugl_modules :=
 _emugl_HOST_modules :=
 
+if_exist = $(if $(strip $1), $2)
+
+
 # do not use directly, see functions above instead
 emugl-begin-module = \
     $(eval include $(CLEAR_VARS)) \
@@ -55,7 +58,8 @@ emugl-end-module = \
     $(eval $(end-emulator-module-ev)) \
     $(eval LOCAL_BUILD_FILE :=) \
     $(eval _emugl_$(_emugl_HOST)modules += $(_emugl_MODULE))\
-    $(if $(EMUGL_DEBUG),$(call emugl-dump-module))
+    $(call dump-json-module) \
+    $(if $(EMUGL_DEBUG),$(call emugl-dump-module)) \
 
 # Managing module exports and imports.
 #

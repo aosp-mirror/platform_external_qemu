@@ -256,6 +256,36 @@ BUILD_TARGET_CFLAGS += -D__packed=__attribute\(\(packed\)\)
 # Copy the current target cflags into the host ones.
 BUILD_HOST_CXXFLAGS += $(BUILD_TARGET_CXXFLAGS)
 BUILD_HOST_LDFLAGS += $(BUILD_TARGET_LDFLAGS)
+JSON_DUMP :=
+
+# Older versions of GNUmake do not support actual writing to file, so we sort of do what we can
+# and write out text in chunks, escaping "
+write-to-file = \
+  $(eval _args:=) \
+  $(foreach obj,$3,$(eval _args+=$(obj))$(if $(word $2,$(_args)),@printf "%s" $(subst ",\",$(_args)) >> $1 $(EOL)$(eval _args:=))) \
+  $(if $(_args),@printf "%s" $(subst ",\", $(_args)) >> $1) \
+
+define EOL
+
+
+endef
+
+# Functions to dump build information into a JSON tree.
+dump-json-list = \
+    $(foreach _list_item,$(strip $1),$(eval JSON_DUMP += , "$(subst ",\",$(_list_item))"))
+
+dump-json-module = \
+        $(eval JSON_DUMP += ,{ )\
+        $(foreach _type, QT_TOP64_DIR , \
+            $(eval JSON_DUMP +=   "$(_type)"  : "$(subst ",\",$($(_type)))",)\
+        )\
+        $(foreach _type, $(modules-LOCALS) GENERATED_SOURCES INSTALL_DIR PROTO_SOURCES QT_MOC_SRC_FILES QT_UI_SRC_FILES QT_RESOURCES STATIC, \
+            $(eval JSON_DUMP +=   "LOCAL_$(_type)"  : [ "")\
+            $(call dump-json-list,$(LOCAL_$(_type)))\
+            $(eval JSON_DUMP +=   ], )\
+        )\
+        $(eval JSON_DUMP += "HOST" : "$(BUILD_TARGET_TAG)"} )\
+
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
@@ -276,12 +306,14 @@ start-emulator-library = \
 # Used with start-emulator-library
 end-emulator-library = \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 define-emulator-prebuilt-library = \
     $(call start-emulator-library,$1) \
     $(eval LOCAL_BUILD_FILE := $(PREBUILT_STATIC_LIBRARY)) \
     $(eval LOCAL_SRC_FILES := $2) \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 # A variant of start-emulator-library to start the definition of a host
 # program instead. Use with end-emulator-program
@@ -294,6 +326,7 @@ start-emulator-program = \
 end-emulator-program = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 # Same thing for shared libraries
 start-emulator-shared-lib = \
@@ -305,6 +338,7 @@ start-emulator-shared-lib = \
 end-emulator-shared-lib = \
     $(eval LOCAL_LDLIBS += $(QEMU_SYSTEM_LDLIBS)) \
     $(eval $(end-emulator-module-ev)) \
+    $(call dump-json-module) \
 
 # A variant of start-emulator-program that also links the Google Benchmark
 # library to the final program. Use with end-emulator-benchmark.
@@ -320,7 +354,10 @@ end-emulator-benchmark = \
   $(eval LOCAL_STATIC_LIBRARIES += $$(GOOGLE_BENCHMARK_STATIC_LIBRARIES)) \
   $(eval LOCAL_LDLIBS += $$(GOOGLE_BENCHMARK_LDLIBS)) \
   $(call local-link-static-c++lib) \
-  $(if $(filter true,$(BUILD_BENCHMARKS)),$(call end-emulator-program))
+  $(if $(filter true,$(BUILD_BENCHMARKS)), \
+    $(call end-emulator-program) \
+    $(call dump-json-module) \
+   )\
 
 define end-emulator-module-ev
 LOCAL_BITS := $$(BUILD_TARGET_BITS)
