@@ -267,7 +267,7 @@ void EmulatorOverlay::hideForFlash() {
     }
 }
 
-void EmulatorOverlay::showForMultitouch() {
+void EmulatorOverlay::showForMultitouch(bool centerTouches) {
     if (mMode != OverlayMode::Hidden)
         return;
 
@@ -288,7 +288,8 @@ void EmulatorOverlay::showForMultitouch() {
 
     QPoint mousePosition = mapFromGlobal(QCursor::pos());
     mPrimaryTouchPoint = mousePosition;
-    mMultitouchCenter = mEmulatorWindow->deviceGeometry().center();
+    mMultitouchCenter = centerTouches ? mEmulatorWindow->deviceGeometry().center()
+                                      : mousePosition;
     mSecondaryTouchPoint = secondaryPinchPoint();
     mLastMousePos = mousePosition;
     mIsSwipeGesture = false;
