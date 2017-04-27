@@ -49,6 +49,7 @@ Options:
     --binary <path>          Full path to QEMU binary.
     --target-type <type>     QEMU emulator target type ('system' or 'user').
     --target-name <name>     QEMU emulator target name.
+    --out <name>             Output file (or stdout)
     --probe-prefix <prefix>  Prefix for dtrace probe names
                              (default: qemu-<target-type>-<target-name>).\
 """ % {
@@ -77,7 +78,7 @@ def main(args):
     _SCRIPT = args[0]
 
     long_opts = ["backends=", "format=", "help", "list-backends",
-                 "check-backends"]
+                 "check-backends", "out="]
     long_opts += ["binary=", "target-type=", "target-name=", "probe-prefix="]
 
     try:
@@ -92,6 +93,7 @@ def main(args):
     target_type = None
     target_name = None
     probe_prefix = None
+    targetFile = '--'
     for opt, arg in opts:
         if opt == "--help":
             error_opt()
@@ -100,13 +102,14 @@ def main(args):
             arg_backends = arg.split(",")
         elif opt == "--format":
             arg_format = arg
-
         elif opt == "--list-backends":
             public_backends = tracetool.backend.get_list(only_public = True)
             out(", ".join([ b for b,_ in public_backends ]))
             sys.exit(0)
         elif opt == "--check-backends":
             check_backends = True
+        elif opt == "--out":
+            targetFile = arg
 
         elif opt == "--binary":
             binary = arg
@@ -146,6 +149,14 @@ def main(args):
         events = tracetool.read_events(fh)
 
     group = make_group_name(args[0])
+
+    if targetFile != '--':
+        # Unfortunately sys out is used for source generation.
+        if not os.path.exists(os.path.dirname(targetFile)):
+            os.makedirs(os.path.dirname(targetFile))
+        fout = open(targetFile, "wb")
+        sys.stdout = fout
+        sys.stderr = fout
 
     try:
         tracetool.generate(events, group, arg_format, arg_backends,
