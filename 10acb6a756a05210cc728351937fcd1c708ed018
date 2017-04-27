@@ -22,6 +22,30 @@
       "revId": "10acb6a756a05210cc728351937fcd1c708ed018",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c0d3996_7d799f61",
+        "filename": "android/qemu1/main-loop.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 327,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-04-27T19:22:50Z",
+      "side": 1,
+      "message": "Aha, you are right. BTW, do you care qemu1 + windows that much now? If so, perhaps I can fix it in a follow up CL. But need to do it later before I find a windows machine to test my change.",
+      "parentUuid": "3b4c4c8d_e28f4cb3",
+      "range": {
+        "startLine": 327,
+        "startChar": 27,
+        "endLine": 327,
+        "endChar": 46
+      },
+      "revId": "10acb6a756a05210cc728351937fcd1c708ed018",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
