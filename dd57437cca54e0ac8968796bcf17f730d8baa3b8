@@ -1,0 +1,234 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a5d87ba_e3e075aa",
+        "filename": "android/android-emu/android/keymaster/Keymaster.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "android::keymaster ?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 21
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07153706_6097df43",
+        "filename": "android/android-emu/android/keymaster/Keymaster.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "all these parameters should be std::vector\u003cuint8_t\u003e* instead",
+      "range": {
+        "startLine": 19,
+        "startChar": 12,
+        "endLine": 19,
+        "endChar": 54
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cf14346_39dd0558",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "_T names are reserved for standard library implementation (beginning with _ + capital letter or with __ anywhere in the name)",
+      "range": {
+        "startLine": 28,
+        "startChar": 16,
+        "endLine": 28,
+        "endChar": 18
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84091e21_43b74b03",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "this isn\u0027t alignment-safe. It\u0027s better to memcpy from data into a variable of type T. Optimizer will make it fast anyway",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 15
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c2afbf04_38aa8b7d",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "please don\u0027t use \"s_\" prefix for static functions. It\u0027s nowhere in the coding guide and it makes functions look like variables",
+      "range": {
+        "startLine": 39,
+        "startChar": 13,
+        "endLine": 39,
+        "endChar": 15
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36b84f80_6aa4496a",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "please change the interface to return an std::vector\u003c\u003e",
+      "range": {
+        "startLine": 231,
+        "startChar": 15,
+        "endLine": 232,
+        "endChar": 37
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f5cb73ae_59b153c5",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "please return std::vector\u003c\u003e instead of separate dyanmically-allocatied pointer + length",
+      "range": {
+        "startLine": 265,
+        "startChar": 25,
+        "endLine": 265,
+        "endChar": 35
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc79eb5d_a0908a64",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "well, this is an external data handling, so it _can_ and _will_ happen",
+      "range": {
+        "startLine": 304,
+        "startChar": 12,
+        "endLine": 305,
+        "endChar": 22
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7545d43_6b033163",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "Qemud is a legacy service, it\u0027s better to use raw pipes instead. Unless we need it ASAP, but still we\u0027d better get rid of it completely",
+      "range": {
+        "startLine": 313,
+        "startChar": 4,
+        "endLine": 313,
+        "endChar": 15
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ed449b1_bbe7c313",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-27T19:00:13Z",
+      "side": 1,
+      "message": "nits:\nheader comment /**/ -\u003e //\nANDROID_BEGIN_HEADER/END_HEADER\n() -\u003e (void)",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 39
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
