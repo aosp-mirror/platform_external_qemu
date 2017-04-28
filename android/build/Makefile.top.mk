@@ -50,7 +50,7 @@ else
     endif
     # We use a version of Clang that doesn't support these yet.
     ifneq ($(BUILD_TARGET_OS),darwin)
-        BUILD_OPT_CFLAGS += -funroll-loops -ftracer
+        BUILD_OPT_CFLAGS += -ftracer
     endif
     BUILD_OPT_CFLAGS += -fvisibility=hidden
 endif
