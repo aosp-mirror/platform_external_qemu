@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "36b6d445_0cfc56d3",
+        "filename": "android/android-emu/android/CommonReportedInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3d3d207_959a999b",
+      "range": {
+        "startLine": 29,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 60
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5f074620_9f9b6ca7",
         "filename": "android/android-emu/android/CommonReportedInfo.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-27T22:36:14Z",
       "side": 1,
       "message": "this is strange and scary. public nonstatic methods modify data in the very same _public_ static object.\nWhy can\u0027t we split the object with its fields from the singleton that holds a single instance of it?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 1
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f339ec31_afda2821",
+        "filename": "android/android-emu/android/CommonReportedInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f074620_9f9b6ca7",
       "range": {
         "startLine": 37,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1610895e_b3fab8c9",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1457174c_486d1518",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 50
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0674cf7b_76530ac8",
         "filename": "android/android-emu/android/CommonReportedInfo.h",
         "patchSetId": 3
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "8354df42_186c2fd2",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0674cf7b_76530ac8",
+      "range": {
+        "startLine": 21,
+        "startChar": 10,
+        "endLine": 21,
+        "endChar": 17
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6239d31c_b46d5d18",
         "filename": "android/android-emu/android/CommonReportedInfo.h",
         "patchSetId": 3
@@ -105,6 +201,30 @@
       "writtenOn": "2017-04-27T22:36:14Z",
       "side": 1,
       "message": "System::Duration uptimeMs\n?",
+      "range": {
+        "startLine": 36,
+        "startChar": 19,
+        "endLine": 36,
+        "endChar": 27
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c7abd103_03fcca20",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6239d31c_b46d5d18",
       "range": {
         "startLine": 36,
         "startChar": 19,
@@ -163,6 +283,30 @@
     },
     {
       "key": {
+        "uuid": "fb29092d_6a3b5d00",
+        "filename": "android/android-emu/android/CommonReportedInfo.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "It protects the static global struct in the .cpp file. I guess I can move it there....(Done)",
+      "parentUuid": "b482c847_375258b5",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 30
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c1817cfa_429136e4",
         "filename": "android/android-emu/android/HostHwInfo.cpp",
         "patchSetId": 3
@@ -174,6 +318,30 @@
       "writtenOn": "2017-04-27T22:36:14Z",
       "side": 1,
       "message": "if you put the initialization into LazyInstance\u003cStruct\u003e\u0027s Struct constructor you don\u0027t need to have your own flag for initialized state",
+      "range": {
+        "startLine": 51,
+        "startChar": 4,
+        "endLine": 51,
+        "endChar": 50
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f613a90_913216d7",
+        "filename": "android/android-emu/android/HostHwInfo.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c1817cfa_429136e4",
       "range": {
         "startLine": 51,
         "startChar": 4,
@@ -209,6 +377,30 @@
     },
     {
       "key": {
+        "uuid": "cdf51c12_9c705d20",
+        "filename": "android/android-emu/android/avd/info.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b1ee7e6_0845809d",
+      "range": {
+        "startLine": 171,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 45
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b66917e1_79a68137",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 3
@@ -220,6 +412,30 @@
       "writtenOn": "2017-04-27T22:36:14Z",
       "side": 1,
       "message": "nit: this needs to be first :)",
+      "range": {
+        "startLine": 225,
+        "startChar": 11,
+        "endLine": 225,
+        "endChar": 29
+      },
+      "revId": "8fd979b7310efeb2dfe2149791463934a452ac36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da6616b5_32834660",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b66917e1_79a68137",
       "range": {
         "startLine": 225,
         "startChar": 11,
