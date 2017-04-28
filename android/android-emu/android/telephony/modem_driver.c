@@ -155,3 +155,7 @@ void android_modem_init( int  base_port )
         android_modem = modem_driver->modem;
     }
 }
+
+AModem android_modem_get() {
+    return android_modem;
+}
