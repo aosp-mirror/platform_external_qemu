@@ -22,6 +22,30 @@
       "revId": "fb3194b1d5a5955079fe14f4bb4c8d743762e080",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1672508_45f4dcae",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2703,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-04-28T17:43:44Z",
+      "side": 1,
+      "message": "This is after the change to shorten the \u0027help\u0027 response.\n\nThe help response is now less than 400 bytes. \u0027help-verbose\u0027 is now over 1024.",
+      "parentUuid": "29e50523_0ad6382f",
+      "range": {
+        "startLine": 2702,
+        "startChar": 0,
+        "endLine": 2703,
+        "endChar": 75
+      },
+      "revId": "fb3194b1d5a5955079fe14f4bb4c8d743762e080",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
