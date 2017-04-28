@@ -84,7 +84,9 @@ aosp_prebuilt_toolchain_subdir_for () {
             printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8"
             ;;
         darwin*)
-            printf "prebuilts/clang/darwin-x86/sdk/3.5"
+            # TODO: Wait until there is the aosp project
+            # "prebuilts/clang/darwin-x86/sdk/4.0"
+            printf "prebuilts/android-emulator-build/common/darwin-x86_64-clang-4.0"
             ;;
         windows*)
             printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"
