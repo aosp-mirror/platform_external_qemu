@@ -559,6 +559,7 @@ void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds)
 }
 
 #define ETH_P_IP	0x0800		/* Internet Protocol packet	*/
+#define ETH_P_IPV6	0x86dd
 #define ETH_P_ARP	0x0806		/* Address Resolution packet	*/
 
 #define	ARPOP_REQUEST	1		/* ARP request			*/
@@ -681,15 +682,9 @@ void slirp_input(const uint8_t *pkt, int pkt_len)
     }
 }
 
-/* output the IP packet to the ethernet device */
-void if_encap(const uint8_t *ip_data, int ip_data_len)
+static void if_encap4(const uint8_t *ip_data, int ip_data_len, struct ethhdr *eh)
 {
-    uint8_t buf[1600];
-    struct ethhdr *eh = (struct ethhdr *)buf;
-
-    if (ip_data_len + ETH_HLEN > (int)sizeof(buf))
-        return;
-
+    uint8_t* buf = (uint8_t*) eh;
     if (!memcmp(client_ethaddr, zero_ethaddr, ETH_ALEN)) {
         uint8_t arp_req[ETH_HLEN + sizeof(struct arphdr)];
         struct ethhdr *reh = (struct ethhdr *)arp_req;
@@ -732,6 +727,45 @@ void if_encap(const uint8_t *ip_data, int ip_data_len)
     }
 }
 
+static void if_encap6(const uint8_t *ip_data, int ip_data_len, struct ethhdr *eh)
+{
+    const struct ip6 *ip6h = (const struct ip6 *) ip_data;
+    uint8_t* buf = (uint8_t*) eh;
+    if (!ndp_table_search(ip6h->ip_dst, eh->h_dest)) {
+        ndp_send_ns(ip6h->ip_dst);
+        /* Just drop the packet and depends on high level retransmission now. */
+        return;
+    } else {
+        eh->h_proto = htons(ETH_P_IPV6);
+        in6_compute_ethaddr(ip6h->ip_src, eh->h_source);
+        memcpy(buf + sizeof(struct ethhdr), ip_data, ip_data_len);
+        slirp_output(buf, ip_data_len + ETH_HLEN);
+        return;
+    }
+}
+
+/* output the IP packet to the ethernet device */
+void if_encap(const uint8_t *ip_data, int ip_data_len)
+{
+    uint8_t buf[1600];
+    struct ethhdr *eh = (struct ethhdr *)buf;
+
+    if (ip_data_len + ETH_HLEN > (int)sizeof(buf))
+        return;
+
+    const struct ip *iph = (const struct ip *)ip_data;
+    switch (iph->ip_v) {
+    case IPVERSION:
+        return if_encap4(ip_data, ip_data_len, eh);
+        break;
+    case IP6VERSION:
+        return if_encap6(ip_data, ip_data_len, eh);
+        break;
+    default:
+        g_assert_not_reached();
+        break;
+    }
+}
 
 /*---------------------------------------------------*/
 /* User mode network stack restrictions */
