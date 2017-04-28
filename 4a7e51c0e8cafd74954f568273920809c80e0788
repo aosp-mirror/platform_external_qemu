@@ -1,0 +1,182 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0a89952d_7064ad5c",
+        "filename": "android/android-emu/android/keymaster/Keymaster.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "nit: all these \".data() \u003d\u003d NULL\" checks are noops for STL vector - it will crash much sooner. But feel free to keep it",
+      "range": {
+        "startLine": 438,
+        "startChar": 4,
+        "endLine": 438,
+        "endChar": 35
+      },
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e50548d_5d3184ab",
+        "filename": "android/android-emu/android/keymaster/Keymaster.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "unfortunately, our coding style requires passing output parameters by pointer, not by reference.\n:(",
+      "range": {
+        "startLine": 22,
+        "startChar": 32,
+        "endLine": 22,
+        "endChar": 33
+      },
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7ad5b10_7fa0fb0f",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "sizeof(size_t) is different on different platforms\neven more: using non-fixed sizes for protocol definitions is bad - it will fail eventually.\nPlease define the size to be either 4 or 8 and use it everywhere",
+      "range": {
+        "startLine": 210,
+        "startChar": 43,
+        "endLine": 210,
+        "endChar": 49
+      },
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2eea5b0_f275c2fa",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "why not use mCommandBuffer.size() as the command length? extra variable looks totally unnecessary",
+      "range": {
+        "startLine": 217,
+        "startChar": 19,
+        "endLine": 217,
+        "endChar": 58
+      },
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b60be612_2f402dd8",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "again, having sizeof(int) is scary for a binary protocol. Please use int32_t",
+      "range": {
+        "startLine": 283,
+        "startChar": 48,
+        "endLine": 283,
+        "endChar": 54
+      },
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8260255f_b99b8e31",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 15
+      },
+      "lineNbr": 397,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "nit: please add the closing namespace comment",
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1c12fa8_cf9acade",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "a single idea for both buffers: IMO it\u0027s better to use the buffer\u0027s .size() directly instead of maintaining a separate variable to know where it ends and where to append. This way you know:\n- data size is always buffer.size(), no garbage in the end\n- if you need to append anything, just call buffer.insert(buffer.end(), ptr, ptr + size) - this will both copy the data and update buffer size at once\n- just don\u0027t forget to call clear() when restarting buffer processing",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 59,
+        "endChar": 36
+      },
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86deff21_edf87efe",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.h",
+        "patchSetId": 15
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-04-28T16:21:05Z",
+      "side": 1,
+      "message": "1. Please move it to the .cpp\n2. rename _T -\u003e T\n3. function unpacks and advances |data| pointer, please call it unpackAndAdvance()\n2. use memcpy instead of casting:\nT ret;\nmemcpy(\u0026ret, *data, sizeof(T));\nreturn ret;\n\nP.S. I see a similar function in the .cpp\nplease remove this one and apply all comments there :)",
+      "range": {
+        "startLine": 63,
+        "startChar": 4,
+        "endLine": 68,
+        "endChar": 5
+      },
+      "revId": "4a7e51c0e8cafd74954f568273920809c80e0788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
