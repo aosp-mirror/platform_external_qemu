@@ -257,6 +257,30 @@
       "revId": "2d567143773dd2b55341de9b6ee3fc0c8cea5073",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4c3927f7_243e004f",
+        "filename": "android/android-emu/android/crashreport/proto/crash_info.proto",
+        "patchSetId": 22
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T21:20:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "13e8f206_d00b05d9",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 43
+      },
+      "revId": "2d567143773dd2b55341de9b6ee3fc0c8cea5073",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
