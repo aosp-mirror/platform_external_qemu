@@ -318,10 +318,9 @@ prepare_build_for_host () {
 	CLANG_BINDIR=
     case $CURRENT_HOST in
         darwin-*)
-            # Ensure we use the 10.8 SDK or else.
             OSX_VERSION=$(sw_vers -productVersion)
             OSX_DEPLOYMENT_TARGET=10.8
-            OSX_SDK_SUPPORTED="10.10"
+            OSX_SDK_SUPPORTED="10.10 10.11 10.12"
             OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
                     grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
                     sed -e 's/^/10./g' | tr '\n' ' ')
@@ -330,7 +329,13 @@ prepare_build_for_host () {
             fi
             log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
 
-            OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | grep $OSX_SDK_SUPPORTED | head -1)
+            for supported_sdk in $OSX_SDK_SUPPORTED
+            do
+                POSSIBLE_OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | grep $supported_sdk | head -1)
+                if [ -n "$POSSIBLE_OSX_SDK_VERSION" ]; then
+                    OSX_SDK_VERSION=$POSSIBLE_OSX_SDK_VERSION
+                fi
+            done
             log "OSX: Using SDK version $OSX_SDK_VERSION"
             if [ -z "$OSX_SDK_VERSION" ]; then
                 panic "No supported OSX SDKs found on the machine (Need any of: [$OSX_SDK_SUPPORTED], have: [$OSX_SDK_INSTALLED_LIST])"
