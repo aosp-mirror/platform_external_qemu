@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f0adf629_de8d905a",
+        "filename": "android/android-emu/android/keymaster/Keymaster.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a5d87ba_e3e075aa",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 21
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07153706_6097df43",
         "filename": "android/android-emu/android/keymaster/Keymaster.h",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-27T19:00:13Z",
       "side": 1,
       "message": "all these parameters should be std::vector\u003cuint8_t\u003e* instead",
+      "range": {
+        "startLine": 19,
+        "startChar": 12,
+        "endLine": 19,
+        "endChar": 54
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65d935fb_cc018899",
+        "filename": "android/android-emu/android/keymaster/Keymaster.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07153706_6097df43",
       "range": {
         "startLine": 19,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "435d9097_65964335",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1cf14346_39dd0558",
+      "range": {
+        "startLine": 28,
+        "startChar": 16,
+        "endLine": 28,
+        "endChar": 18
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "84091e21_43b74b03",
         "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
         "patchSetId": 10
@@ -82,6 +154,30 @@
       "writtenOn": "2017-04-27T19:00:13Z",
       "side": 1,
       "message": "this isn\u0027t alignment-safe. It\u0027s better to memcpy from data into a variable of type T. Optimizer will make it fast anyway",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 15
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bed447b5_9685ce92",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84091e21_43b74b03",
       "range": {
         "startLine": 30,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "9b585268_0f4726e0",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c2afbf04_38aa8b7d",
+      "range": {
+        "startLine": 39,
+        "startChar": 13,
+        "endLine": 39,
+        "endChar": 15
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36b84f80_6aa4496a",
         "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
         "patchSetId": 10
@@ -128,6 +248,30 @@
       "writtenOn": "2017-04-27T19:00:13Z",
       "side": 1,
       "message": "please change the interface to return an std::vector\u003c\u003e",
+      "range": {
+        "startLine": 231,
+        "startChar": 15,
+        "endLine": 232,
+        "endChar": 37
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "23837bec_d02173fb",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "36b84f80_6aa4496a",
       "range": {
         "startLine": 231,
         "startChar": 15,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "edf2337e_d491e5b0",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 265,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f5cb73ae_59b153c5",
+      "range": {
+        "startLine": 265,
+        "startChar": 25,
+        "endLine": 265,
+        "endChar": 35
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cc79eb5d_a0908a64",
         "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
         "patchSetId": 10
@@ -174,6 +342,30 @@
       "writtenOn": "2017-04-27T19:00:13Z",
       "side": 1,
       "message": "well, this is an external data handling, so it _can_ and _will_ happen",
+      "range": {
+        "startLine": 304,
+        "startChar": 12,
+        "endLine": 305,
+        "endChar": 22
+      },
+      "revId": "dd57437cca54e0ac8968796bcf17f730d8baa3b8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db8825c7_8c91fa15",
+        "filename": "android/android-emu/android/keymaster/hw-keystore.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-04-28T00:34:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cc79eb5d_a0908a64",
       "range": {
         "startLine": 304,
         "startChar": 12,
