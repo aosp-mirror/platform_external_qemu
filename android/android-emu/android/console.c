@@ -559,6 +559,15 @@ do_help_verbose( ControlClient  client, char*  args )
 }
 
 
+/* implement the 'ping' command */
+static int
+do_ping( ControlClient  client, char*  args )
+{
+    control_write( client, "I am alive!\r\n" );
+    return 0;
+}
+
+
 static void
 control_client_read_byte( ControlClient  client, unsigned char  ch )
 {
@@ -2690,6 +2699,9 @@ static const CommandDefRec  qemu_commands[] =
     {"help-verbose", "print a list of commands with descriptions", \
      NULL, NULL, do_help_verbose, NULL}
 
+#define PING_COMMAND \
+    { "ping", "check if the emulator is alive", NULL, NULL, do_ping, NULL }
+
 #define QUIT_COMMAND \
     { "quit|exit", "quit control session", NULL, NULL, do_quit, NULL }
 
@@ -2767,6 +2779,8 @@ static const CommandDefRec main_commands[] = {
         HELP_COMMAND,
 
         HELP_VERBOSE_COMMAND,
+
+        PING_COMMAND,
 
         {"event", "simulate hardware events",
          "allows you to send fake hardware events to the kernel\r\n", NULL,
@@ -2894,6 +2908,8 @@ static const CommandDefRec main_commands_preauth[] = {
     HELP_COMMAND,
 
     HELP_VERBOSE_COMMAND,
+
+    PING_COMMAND,
 
     AVD_COMMAND(vm_commands_preauth),
 
