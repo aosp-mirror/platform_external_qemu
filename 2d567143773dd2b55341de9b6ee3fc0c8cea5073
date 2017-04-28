@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "70666eab_fa4088ac",
+        "filename": "android/android-emu/Makefile.crash-service.mk",
+        "patchSetId": 22
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bed1d9e5_9c39052e",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 1
+      },
+      "revId": "2d567143773dd2b55341de9b6ee3fc0c8cea5073",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "814243ed_ebaf8326",
         "filename": "android/android-emu/Makefile.crash-service.mk",
         "patchSetId": 22
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-27T22:49:40Z",
       "side": 1,
       "message": "tab",
+      "range": {
+        "startLine": 119,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 1
+      },
+      "revId": "2d567143773dd2b55341de9b6ee3fc0c8cea5073",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1ea09810_e1bec325",
+        "filename": "android/android-emu/Makefile.crash-service.mk",
+        "patchSetId": 22
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "814243ed_ebaf8326",
       "range": {
         "startLine": 119,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1b6e1a9f_2956b6b5",
+        "filename": "android/android-emu/Makefile.crash-service.mk",
+        "patchSetId": 22
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d84c4672_b460e754",
+      "range": {
+        "startLine": 164,
+        "startChar": 0,
+        "endLine": 164,
+        "endChar": 1
+      },
+      "revId": "2d567143773dd2b55341de9b6ee3fc0c8cea5073",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d7b18787_340081b5",
         "filename": "android/android-emu/android/HostHwInfo.h",
         "patchSetId": 22
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "925bd0d5_19ebe97c",
+        "filename": "android/android-emu/android/HostHwInfo.h",
+        "patchSetId": 22
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d7b18787_340081b5",
+      "range": {
+        "startLine": 38,
+        "startChar": 11,
+        "endLine": 38,
+        "endChar": 16
+      },
+      "revId": "2d567143773dd2b55341de9b6ee3fc0c8cea5073",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "973c681f_4ad23a01",
         "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
         "patchSetId": 22
@@ -105,6 +201,30 @@
       "writtenOn": "2017-04-27T22:49:40Z",
       "side": 1,
       "message": "ofstream allocates way too much to be used in crash handler :(\nplease add \u0027attachBinaryData()\u0027, or, better, \u0027openBinaryAttachFile()\u0027 to crash reporter and use it here",
+      "range": {
+        "startLine": 237,
+        "startChar": 12,
+        "endLine": 237,
+        "endChar": 25
+      },
+      "revId": "2d567143773dd2b55341de9b6ee3fc0c8cea5073",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4484a3e2_0d9a475e",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T20:01:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "973c681f_4ad23a01",
       "range": {
         "startLine": 237,
         "startChar": 12,
