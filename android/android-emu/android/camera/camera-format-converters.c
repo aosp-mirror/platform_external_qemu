@@ -534,6 +534,25 @@ struct BayerDesc {
  * RGB/BRG load / save routines.
  *******************************************************************************/
 
+/* Loads R, G, and B colors from a ARGB32 framebuffer. */
+static const void*
+_load_ARGB32(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
+{
+    const uint8_t* rgb_ptr = (const uint8_t*)rgb;
+    *r = rgb_ptr[1]; *g = rgb_ptr[2]; *b = rgb_ptr[3];
+    return rgb_ptr + 4;
+}
+
+/* Saves R, G, and B colors to a ARGB32 framebuffer. */
+static void*
+_save_ARGB32(void* rgb, uint8_t r, uint8_t g, uint8_t b)
+{
+    uint8_t* rgb_ptr = (uint8_t*)rgb;
+    // For RGB32 we make the surface completely opaque with an alpha of 0xFF
+    rgb_ptr[0] = 0xFF; rgb_ptr[1] = r; rgb_ptr[2] = g; rgb_ptr[3] = b;
+    return rgb_ptr + 4;
+}
+
 /* Loads R, G, and B colors from a RGB32 framebuffer. */
 static const void*
 _load_RGB32(const void* rgb, uint8_t* r, uint8_t* g, uint8_t* b)
@@ -1251,6 +1270,14 @@ BAYERToYUV(const BayerDesc* bayer_fmt,
  */
 
 /* Describes RGB32 format. */
+static const RGBDesc _ARGB32 =
+{
+    .load_rgb   = _load_ARGB32,
+    .save_rgb   = _save_ARGB32,
+    .rgb_inc    = 4
+};
+
+/* Describes RGB32 format. */
 static const RGBDesc _RGB32 =
 {
     .load_rgb   = _load_RGB32,
@@ -1570,6 +1597,7 @@ typedef struct PIXFormat {
 /* Array of supported pixel format descriptors. */
 static const PIXFormat _PIXFormats[] = {
     /* RGB/BRG formats. */
+    { V4L2_PIX_FMT_ARGB32,  PIX_FMT_RGB,    .desc.rgb_desc = &_ARGB32  },
     { V4L2_PIX_FMT_RGB32,   PIX_FMT_RGB,    .desc.rgb_desc = &_RGB32  },
     { V4L2_PIX_FMT_BGR32,   PIX_FMT_RGB,    .desc.rgb_desc = &_BRG32  },
     { V4L2_PIX_FMT_RGB565,  PIX_FMT_RGB,    .desc.rgb_desc = &_RGB16  },
