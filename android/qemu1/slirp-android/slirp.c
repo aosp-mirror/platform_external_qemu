@@ -87,7 +87,7 @@ FILE *lfd;
 struct ex_list *exec_list;
 
 /* XXX: suppress those select globals */
-fd_set *global_readfds, *global_writefds, *global_xfds;
+fd_set **global_readfds, **global_writefds, **global_xfds;
 
 char slirp_hostname[33];
 
@@ -217,7 +217,7 @@ static void updtime(void)
 #endif
 
 void slirp_select_fill(int *pnfds,
-                       fd_set *readfds, fd_set *writefds, fd_set *xfds)
+                       fd_set **readfds, fd_set **writefds, fd_set **xfds)
 {
     struct socket *so, *so_next;
     struct timeval timeout;
@@ -268,7 +268,7 @@ void slirp_select_fill(int *pnfds,
 			 * Set for reading sockets which are accepting
 			 */
 			if (so->so_state & SS_FACCEPTCONN) {
-                                FD_SET(so->s, readfds);
+                                fd_set_ext(so->s, readfds);
 				UPD_NFDS(so->s);
 				continue;
 			}
@@ -277,7 +277,7 @@ void slirp_select_fill(int *pnfds,
 			 * Set for writing sockets which are connecting
 			 */
 			if (so->so_state & SS_ISFCONNECTING) {
-				FD_SET(so->s, writefds);
+				fd_set_ext(so->s, writefds);
 				UPD_NFDS(so->s);
 				continue;
 			}
@@ -287,7 +287,7 @@ void slirp_select_fill(int *pnfds,
 			 * we have something to send
 			 */
 			if (CONN_CANFSEND(so) && so->so_rcv.sb_cc) {
-				FD_SET(so->s, writefds);
+				fd_set_ext(so->s, writefds);
 				UPD_NFDS(so->s);
 			}
 
@@ -296,8 +296,8 @@ void slirp_select_fill(int *pnfds,
 			 * receive more, and we have room for it XXX /2 ?
 			 */
 			if (CONN_CANFRCV(so) && (so->so_snd.sb_cc < (so->so_snd.sb_datalen/2))) {
-				FD_SET(so->s, readfds);
-				FD_SET(so->s, xfds);
+				fd_set_ext(so->s, readfds);
+				fd_set_ext(so->s, xfds);
 				UPD_NFDS(so->s);
 			}
 		}
@@ -333,7 +333,7 @@ void slirp_select_fill(int *pnfds,
 			 * (XXX <= 4 ?)
 			 */
 			if ((so->so_state & SS_ISFCONNECTED) && so->so_queued <= 4) {
-				FD_SET(so->s, readfds);
+				fd_set_ext(so->s, readfds);
 				UPD_NFDS(so->s);
 			}
 		}
@@ -375,7 +375,7 @@ void slirp_select_fill(int *pnfds,
     *pnfds = nfds;
 }
 
-void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds)
+void slirp_select_poll(fd_set **readfds, fd_set **writefds, fd_set **xfds)
 {
     struct socket *so, *so_next;
     int ret;
@@ -431,12 +431,12 @@ void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds)
 			 * This will soread as well, so no need to
 			 * test for readfds below if this succeeds
 			 */
-			if (FD_ISSET(so->s, xfds))
+			if (fd_isset_ext(so->s, xfds))
 			   sorecvoob(so);
 			/*
 			 * Check sockets for reading
 			 */
-			else if (FD_ISSET(so->s, readfds)) {
+			else if (fd_isset_ext(so->s, readfds)) {
 				/*
 				 * Check for incoming connections
 				 */
@@ -454,7 +454,7 @@ void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds)
 			/*
 			 * Check sockets for writing
 			 */
-			if (FD_ISSET(so->s, writefds)) {
+			if (fd_isset_ext(so->s, writefds)) {
 			  /*
 			   * Check for non-blocking, still-connecting sockets
 			   */
@@ -536,7 +536,7 @@ void slirp_select_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds)
             if ((so->so_state & SS_PROXIFIED) != 0)
                 continue;
 
-			if (so->s != -1 && FD_ISSET(so->s, readfds)) {
+			if (so->s != -1 && fd_isset_ext(so->s, readfds)) {
                             sorecvfrom(so);
                         }
 		}
