@@ -459,6 +459,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
 endif
 ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,Accelerate
 endif
 
 ANDROID_EMU_STATIC_LIBRARIES := \
