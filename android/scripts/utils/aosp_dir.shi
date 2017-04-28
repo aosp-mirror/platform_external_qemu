@@ -84,7 +84,7 @@ aosp_prebuilt_toolchain_subdir_for () {
             printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8"
             ;;
         darwin*)
-            printf "prebuilts/clang/darwin-x86/sdk/3.5"
+            printf "prebuilts/clang/host/darwin-x86/clang-4053586"
             ;;
         windows*)
             printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"
