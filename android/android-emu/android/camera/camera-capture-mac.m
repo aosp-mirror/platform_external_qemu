@@ -16,8 +16,7 @@
 
 /*
  * Contains code that is used to capture video frames from a camera device
- * on Mac. This code uses QTKit API to work with camera devices, and requires
- * Mac OS at least 10.5
+ * on Mac. This code uses AVFoundation and Accelerate framework.
  */
 
 #include "android/camera/camera-capture.h"
@@ -25,63 +24,59 @@
 #include "android/utils/debug.h"
 #include "android/utils/system.h"
 
-#import <AVFoundation/AVFoundation.h>
-#import <Cocoa/Cocoa.h>
-#import <CoreAudio/CoreAudio.h>
-
-#if 0
-#import <QTKit/QTKit>
-#else
-// QTMovieModernizer.h does not compile with current toolchain.
-// TODO: revert this when toolchain is updated.
-#import <QTKit/QTCaptureConnection.h>
-#import <QTKit/QTCaptureDevice.h>
-#import <QTKit/QTCaptureDeviceInput.h>
-#import <QTKit/QTCaptureSession.h>
-#import <QTKit/QTCaptureVideoPreviewOutput.h>
-#import <QTKit/QTMedia.h>
-#import <QTKit/QTSampleBuffer.h>
-#endif
-
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
 
-/*******************************************************************************
- *                     Helper routines
- ******************************************************************************/
+#import <Accelerate/Accelerate.h>
+#import <AVFoundation/AVFoundation.h>
+#import <Cocoa/Cocoa.h>
+#import <CoreAudio/CoreAudio.h>
 
-/* Converts internal QT pixel format to a FOURCC value. */
+#include <dispatch/queue.h>
+
+/* Converts CoreVideo pixel format to our internal FOURCC value for
+ * conversion to the right guest format. */
 static uint32_t
-_QTtoFOURCC(uint32_t qt_pix_format)
+FourCCToInternal(uint32_t cm_pix_format)
 {
-  switch (qt_pix_format) {
+  switch (cm_pix_format) {
     case kCVPixelFormatType_24RGB:
+      D("%s: is kCVPixelFormatType_24RGB\n", __func__);
       return V4L2_PIX_FMT_RGB24;
 
     case kCVPixelFormatType_24BGR:
+      D("%s: is kCVPixelFormatType_24BGR\n", __func__);
       return V4L2_PIX_FMT_BGR32;
 
     case kCVPixelFormatType_32ARGB:
+      D("%s: is kCVPixelFormatType_32ARGB\n", __func__);
+      return V4L2_PIX_FMT_ARGB32;
     case kCVPixelFormatType_32RGBA:
+      D("%s: is kCVPixelFormatType_32RGBA\n", __func__);
       return V4L2_PIX_FMT_RGB32;
 
+    // TODO: Account for leading A vs trailing A in this as well
     case kCVPixelFormatType_32BGRA:
     case kCVPixelFormatType_32ABGR:
+      D("%s: is kCVPixelFormatType_32BGRA/32ABGR\n", __func__);
       return V4L2_PIX_FMT_BGR32;
 
     case kCVPixelFormatType_422YpCbCr8:
+      D("%s: is kCVPixelFormatType_422YpCbCr8\n", __func__);
       return V4L2_PIX_FMT_UYVY;
 
     case kCVPixelFormatType_420YpCbCr8Planar:
     case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
+      D("%s: is kCVPixelFormatType_422YpCbCr8Planar/BiPlanarVideoRange\n", __func__);
       return V4L2_PIX_FMT_YVU420;
 
     case 'yuvs':  // kCVPixelFormatType_422YpCbCr8_yuvs - undeclared?
+      D("%s: is yuvs?????????\n", __func__);
       return V4L2_PIX_FMT_YUYV;
 
     default:
-      E("Unrecognized pixel format '%.4s'", (const char*)&qt_pix_format);
+      E("Unrecognized pixel format '%.4s'", (const char*)&cm_pix_format);
       return 0;
   }
 }
@@ -91,24 +86,28 @@ _QTtoFOURCC(uint32_t qt_pix_format)
  ******************************************************************************/
 
 /* Encapsulates a camera device on MacOS */
-@interface MacCamera : NSObject {
+@interface MacCamera : NSObject<AVCaptureAudioDataOutputSampleBufferDelegate, AVCaptureVideoDataOutputSampleBufferDelegate> {
     /* Capture session. */
-    QTCaptureSession*             capture_session;
+    AVCaptureSession*             capture_session;
+    /* Capture connection. */
+    AVCaptureConnection*          capture_connection;
     /* Camera capture device. */
     /* NOTE: do NOT release capture_device */
     /* Releasing t causes a crash on exit. */
-    /* The official Apple QTKit examples do not release QTCaptureDevice. */
-    QTCaptureDevice*              capture_device;
+    AVCaptureDevice*              capture_device;
     /* Input device registered with the capture session. */
-    QTCaptureDeviceInput*         input_device;
+    AVCaptureDeviceInput*         input_device;
     /* Output device registered with the capture session. */
-    QTCaptureVideoPreviewOutput*  output_device;
+    AVCaptureVideoDataOutput*  output_device;
+    dispatch_queue_t output_queue;
     /* Current framebuffer. */
-    CVImageBufferRef              current_frame;
+    CVPixelBufferRef              current_frame;
     /* Desired frame width */
     int                           desired_width;
     /* Desired frame height */
     int                           desired_height;
+    /* Scratch buffer to hold imgs of desired width and height. */
+    void*                         desired_scaled_frame;
 }
 
 /* Initializes MacCamera instance.
@@ -155,7 +154,7 @@ _QTtoFOURCC(uint32_t qt_pix_format)
     /* Obtain the capture device, make sure it's not used by another
      * application, and open it. */
     capture_device =
-        [QTCaptureDevice defaultInputDeviceWithMediaType:QTMediaTypeVideo];
+        [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     if (capture_device == nil) {
         E("There are no available video devices found.");
         [self release];
@@ -167,50 +166,52 @@ _QTtoFOURCC(uint32_t qt_pix_format)
         [self release];
         return nil;
     }
-    success = [capture_device open:&error];
-    if (!success) {
-        E("Unable to open camera device: '%s'",
-          [[error localizedDescription] UTF8String]);
-        [self free];
-        [self release];
-        return nil;
-    }
+    success = false;
+    desired_scaled_frame = nil;
 
     /* Create capture session. */
-    capture_session = [[QTCaptureSession alloc] init];
+    capture_session = [[AVCaptureSession alloc] init];
     if (capture_session == nil) {
         E("Unable to create capure session.");
         [self free];
         [self release];
         return nil;
+    } else {
+        D("%s: successfully created capture session\n", __func__);
     }
 
     /* Create an input device and register it with the capture session. */
-    input_device = [[QTCaptureDeviceInput alloc] initWithDevice:capture_device];
-    success = [capture_session addInput:input_device error:&error];
-    if (!success) {
-        E("Unable to initialize input device: '%s'",
-          [[error localizedDescription] UTF8String]);
-        [input_device release];
-        input_device = nil;
-        [self free];
+    NSError *videoDeviceError = nil;
+    input_device = [[AVCaptureDeviceInput alloc] initWithDevice:capture_device error:&videoDeviceError];
+    if ([capture_session canAddInput:input_device]) {
+        [capture_session addInput:input_device];
+        D("%s: successfully added capture input device\n", __func__);
+    } else {
+        E("%s: cannot add camera capture input device\n", __func__);
         [self release];
         return nil;
     }
 
     /* Create an output device and register it with the capture session. */
-    output_device = [[QTCaptureVideoPreviewOutput alloc] init];
-    success = [capture_session addOutput:output_device error:&error];
-    if (!success) {
-        E("Unable to initialize output device: '%s'",
-          [[error localizedDescription] UTF8String]);
-        [output_device release];
-        output_device = nil;
-        [self free];
+    output_queue = dispatch_queue_create("com.google.goldfish.mac.camera.capture",
+                                         DISPATCH_QUEUE_SERIAL );
+    output_device = [[AVCaptureVideoDataOutput alloc] init];
+    output_device.videoSettings = @{
+        (id)kCVPixelBufferPixelFormatTypeKey : @(kCVPixelFormatType_32ARGB),
+    };
+    [output_device setSampleBufferDelegate:self queue:output_queue];
+    output_device.alwaysDiscardsLateVideoFrames = YES;
+
+    if ([capture_session canAddOutput:output_device] ) {
+        [capture_session addOutput:output_device];
+        D("%s: added video out\n", __func__);
+    } else {
+        D("%s: could not add video out\n", __func__);
         [self release];
         return nil;
     }
-    [output_device setDelegate:self];
+
+    capture_connection = [output_device connectionWithMediaType:AVMediaTypeVideo];
 
     return self;
 }
@@ -255,93 +256,166 @@ _QTtoFOURCC(uint32_t qt_pix_format)
             CVBufferRelease(current_frame);
             current_frame = nil;
         }
+
+        if (desired_scaled_frame != nil) {
+            free(desired_scaled_frame);
+            desired_scaled_frame = nil;
+        }
     }
 }
 
 - (int)start_capturing:(int)width:(int)height
 {
-  if (![capture_session isRunning]) {
-        /* Set desired frame dimensions. */
+    D("%s: call. start capture session\n", __func__);
+
+    @synchronized (self) {
+        current_frame = nil;
         desired_width = width;
         desired_height = height;
-        [output_device setPixelBufferAttributes:
-          [NSDictionary dictionaryWithObjectsAndKeys:
-              [NSNumber numberWithInt: width], kCVPixelBufferWidthKey,
-              [NSNumber numberWithInt: height], kCVPixelBufferHeightKey,
-              nil]];
+        desired_scaled_frame = realloc(desired_scaled_frame, 4 * desired_width * desired_height);
+    }
+
+    if (![capture_session isRunning]) {
         [capture_session startRunning];
-        return 0;
-  } else if (width == desired_width && height == desired_height) {
-      W("%s: Already capturing %dx%d frames",
-        __FUNCTION__, desired_width, desired_height);
-      return -1;
-  } else {
-      E("%s: Already capturing %dx%d frames. Requested frame dimensions are %dx%d",
-        __FUNCTION__, desired_width, desired_height, width, height);
-      return -1;
-  }
+    }
+    return 0;
+}
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
+{
+    D("%s: call\n", __func__);
+
+    if ( connection == capture_connection ) {
+        @synchronized (self) {
+
+            CVPixelBufferRef to_release;
+            CVBufferRetain(sampleBuffer);
+
+            to_release = current_frame;
+            current_frame = CMSampleBufferGetImageBuffer( sampleBuffer );
+
+            CVBufferRelease(to_release);
+
+            D("%s: is correct capture connection\n", __func__);
+        }
+    }
 }
 
 - (int)read_frame:(ClientFrameBuffer*)framebuffers:(int)fbs_num:(float)r_scale:(float)g_scale:(float)b_scale:(float)exp_comp
 {
     int res = -1;
 
-    /* Frames are pushed by QT in another thread.
+
+    const void* pixels = nil;
+    vImage_Buffer scale_output;
+    uint32_t pixel_format;
+    int frame_width, frame_height, srcBpr, srcBpp, frame_size;
+
+    /* Frames are pushed by macOS in another thread.
      * So we need a protection here. */
     @synchronized (self)
     {
         if (current_frame != nil) {
             /* Collect frame info. */
-            const uint32_t pixel_format =
-                _QTtoFOURCC(CVPixelBufferGetPixelFormatType(current_frame));
-            const int frame_width = CVPixelBufferGetWidth(current_frame);
-            const int frame_height = CVPixelBufferGetHeight(current_frame);
-            const size_t frame_size =
-                CVPixelBufferGetBytesPerRow(current_frame) * frame_height;
+            pixel_format =
+                FourCCToInternal(CVPixelBufferGetPixelFormatType(current_frame));
+            frame_width = CVPixelBufferGetWidth(current_frame);
+            frame_height = CVPixelBufferGetHeight(current_frame);
+            srcBpr = CVPixelBufferGetBytesPerRow(current_frame);
+            srcBpp = 4;
+            frame_size = srcBpr * frame_height;
+
+            D("%s: w h %d %d bytes %zu\n", __func__, frame_width, frame_height, frame_size);
 
             /* Get framebuffer pointer. */
+            D("%s: lock base addr\n", __func__);
             CVPixelBufferLockBaseAddress(current_frame, 0);
-            const void* pixels = CVPixelBufferGetBaseAddress(current_frame);
+
+            D("%s: get pixels base addr\n", __func__);
+            pixels = CVPixelBufferGetBaseAddress(current_frame);
+
             if (pixels != nil) {
-                /* Convert framebuffer. */
-                res = convert_frame(pixels, pixel_format, frame_size,
-                                    frame_width, frame_height,
-                                    framebuffers, fbs_num,
-                                    r_scale, g_scale, b_scale, exp_comp);
-            } else {
-                E("%s: Unable to obtain framebuffer", __FUNCTION__);
-                res = -1;
+                D("%s: convert frame\n", __func__);
+
+                // AVFoundation doesn't provide pre-scaled output.
+                // Scale it here, using the Accelerate framework.
+                // Also needs to be the correct aspect ratio,
+                // so do a centered crop so that aspect ratios match.
+                float currAspect = ((float)frame_width) / ((float)frame_height);
+                float desiredAspect = ((float)desired_width) / ((float)desired_height);
+                bool shrinkHoriz = false;
+                int cropX0, cropY0, cropW, cropH;
+                uintptr_t start = 0;
+
+                shrinkHoriz = desiredAspect < currAspect;
+
+                if (shrinkHoriz) {
+                    cropW = (desiredAspect / currAspect) * frame_width;
+                    cropH = frame_height;
+
+                    cropX0 = (frame_width - cropW) / 2;
+                    cropY0 = 0;
+
+                    start = srcBpp * cropX0;
+                } else {
+                    cropW = frame_width;
+                    cropH = (currAspect / desiredAspect) * frame_height;
+
+                    cropX0 = 0;
+                    cropY0 = (frame_height - cropH) / 2;
+
+                    start = srcBpr * cropY0;
+                }
+
+                vImage_Buffer scale_input;
+                scale_input.width = cropW;
+                scale_input.height = cropH;
+                scale_input.rowBytes = srcBpr;
+                scale_input.data = ((char*)pixels) + start;
+
+                const int dstBpp = 4; // ARGB8888
+                scale_output.width = desired_width;
+                scale_output.height = desired_height;
+                scale_output.rowBytes = dstBpp * desired_width;
+                scale_output.data = desired_scaled_frame;
+
+                D("%s:  image scale %d %d -> %d %d\n",
+                        __func__, frame_width, frame_height, desired_width, desired_height);
+
+                vImage_Error err = vImageScale_ARGB8888(&scale_input, &scale_output, NULL, 0);
+                if (err != kvImageNoError) {
+                    E("%s: error in scale: 0x%x\n", __func__, err);
+                }
+                CVPixelBufferUnlockBaseAddress(current_frame, 0);
+                // unlock everything early here because we have already copied to
+                // the rescaled buffer.
             }
-            CVPixelBufferUnlockBaseAddress(current_frame, 0);
+
         } else {
             /* First frame didn't come in just yet. Let the caller repeat. */
             res = 1;
         }
+
+    }
+
+    if (pixels != nil) {
+        /* Convert framebuffer. */
+        res = convert_frame(
+                scale_output.data,
+                pixel_format,
+                scale_output.rowBytes * scale_output.height,
+                desired_width, desired_height,
+                framebuffers, fbs_num,
+                r_scale, g_scale, b_scale, exp_comp);
+    } else if (current_frame != nil) {
+        E("%s: Unable to obtain framebuffer", __func__);
+        res = -1;
     }
 
     return res;
 }
 
-- (void)captureOutput:(QTCaptureOutput*) captureOutput
-                      didOutputVideoFrame:(CVImageBufferRef)videoFrame
-                      withSampleBuffer:(QTSampleBuffer*) sampleBuffer
-                      fromConnection:(QTCaptureConnection*) connection
-{
-    CVImageBufferRef to_release;
-    CVBufferRetain(videoFrame);
-
-    /* Frames are pulled by the client in another thread.
-     * So we need a protection here. */
-    @synchronized (self)
-    {
-        to_release = current_frame;
-        current_frame = videoFrame;
-    }
-    CVBufferRelease(to_release);
-}
-
 @end
-
 /*******************************************************************************
  *                     CameraDevice routines
  ******************************************************************************/
@@ -386,7 +460,6 @@ _camera_device_free(MacCameraDevice* cd)
 {
     if (cd != NULL) {
         if (cd->device != NULL) {
-            [cd->device free];
             [cd->device release];
             cd->device = nil;
         }
@@ -428,6 +501,8 @@ camera_device_open(const char* name, int inp_channel)
     if (mcd->device == nil) {
         E("%s: Unable to initialize camera device.", __FUNCTION__);
         return NULL;
+    } else {
+        D("%s: successfuly initialized camera device\n", __func__);
     }
     return &mcd->header;
 }
@@ -450,6 +525,8 @@ camera_device_start_capturing(CameraDevice* cd,
         E("%s: Camera device is not opened", __FUNCTION__);
         return -1;
     }
+
+    D("%s: w h %d %d\n", __func__, frame_width, frame_height);
 
     mcd->frame_width = frame_width;
     mcd->frame_height = frame_height;
@@ -520,12 +597,8 @@ camera_device_close(CameraDevice* cd)
 }
 
 int camera_enumerate_devices(CameraInfo* cis, int max) {
-    /* Array containing emulated webcam frame dimensions.
-     * QT API provides device independent frame dimensions, by scaling frames
-     * received from the device to whatever dimensions were requested for the
-     * output device. So, we can just use a small set of frame dimensions to
-     * emulate.
-     */
+    /* Array containing emulated webcam frame dimensions
+     * expected by framework. */
     static const CameraFrameDim _emulate_dims[] = {
             /* Emulates 640x480 frame. */
             {640, 480},
@@ -536,43 +609,26 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
             /* Emulates 176x144 frame (required by camera framework). */
             {176, 144}};
 
-    /* Obtain default video device. QT API doesn't really provide a reliable
-     * way to identify camera devices. There is a QTCaptureDevice::uniqueId
-     * method that supposedly does that, but in some cases it just doesn't
-     * work. Until we figure out a reliable device identification, we will
-     * stick to using only one (default) camera for emulation. */
-    QTCaptureDevice* video_dev =
-        [QTCaptureDevice defaultInputDeviceWithMediaType:QTMediaTypeVideo];
+    /* Obtain default video device. There is a AVCaptureDevice::uniqueId
+     * method that supposedly allows query of specific devices.
+     * For now, stick to using only one (default) camera for emulation. */
+    AVCaptureDevice* video_dev =
+        [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
     if (video_dev == nil) {
-        D("No web cameras are connected to the host.");
+        E("No web cameras are connected to the host.");
         return 0;
     }
-
-    /* Obtain pixel format for the device. */
-    NSArray* pix_formats = [video_dev formatDescriptions];
-    if (pix_formats == nil || [pix_formats count] == 0) {
-        E("Unable to obtain pixel format for the default camera device.");
-        [video_dev release];
-        video_dev = nil;
-        return 0;
-    }
-    const uint32_t qt_pix_format = [[pix_formats objectAtIndex:0] formatType];
-    [pix_formats release];
 
     /* Obtain FOURCC pixel format for the device. */
-    cis[0].pixel_format = _QTtoFOURCC(qt_pix_format);
-    if (cis[0].pixel_format == 0) {
-        AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
-        for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
-            CMFormatDescriptionRef description= vFormat.formatDescription;
-            cis[0].pixel_format = _QTtoFOURCC(CMFormatDescriptionGetMediaSubType(description));
-            if (cis[0].pixel_format) break;
-        }
+    AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+    for(AVCaptureDeviceFormat *vFormat in [videoDevice formats]) {
+        CMFormatDescriptionRef description= vFormat.formatDescription;
+        cis[0].pixel_format = FourCCToInternal(CMFormatDescriptionGetMediaSubType(description));
+        if (cis[0].pixel_format) break;
     }
     if (cis[0].pixel_format == 0) {
         /* Unsupported pixel format. */
-        E("Pixel format '%.4s' reported by the camera device is unsupported",
-          (const char*)&qt_pix_format);
+        E("Pixel format reported by the camera device is unsupported");
         [video_dev release];
         video_dev = nil;
         return 0;
