@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7bbaee10_7cdd74b9",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T21:15:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4c73c4ff_f026a546",
+      "range": {
+        "startLine": 492,
+        "startChar": 0,
+        "endLine": 493,
+        "endChar": 27
+      },
+      "revId": "85c8e51ef0a6634697ecfe328972bc5c022e8e3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fe80615e_e9f03912",
         "filename": "android/android-emu/android/base/system/System.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2017-04-27T22:42:51Z",
       "side": 1,
       "message": "1. MemUsage res \u003d {};\n2. It can be moved out of #ifdef, together with \"return\" line",
+      "range": {
+        "startLine": 495,
+        "startChar": 7,
+        "endLine": 496,
+        "endChar": 42
+      },
+      "revId": "85c8e51ef0a6634697ecfe328972bc5c022e8e3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e67f5673_22c1c736",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T21:15:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fe80615e_e9f03912",
       "range": {
         "startLine": 495,
         "startChar": 7,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "f4882c12_fcc194a7",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T21:15:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb768279_ba465ae1",
+      "range": {
+        "startLine": 144,
+        "startChar": 46,
+        "endLine": 144,
+        "endChar": 48
+      },
+      "revId": "85c8e51ef0a6634697ecfe328972bc5c022e8e3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5cf4bc2e_40d91ad6",
         "filename": "android/android-emu/android/metrics/MemoryUsageReporter.cpp",
         "patchSetId": 5
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "4d349d8b_9b5ec3a7",
+        "filename": "android/android-emu/android/metrics/MemoryUsageReporter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T21:15:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5cf4bc2e_40d91ad6",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 48
+      },
+      "revId": "85c8e51ef0a6634697ecfe328972bc5c022e8e3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ccfac51a_e081e68d",
         "filename": "android/android-emu/android/metrics/MemoryUsageReporter.cpp",
         "patchSetId": 5
@@ -105,6 +201,30 @@
       "writtenOn": "2017-04-27T22:42:51Z",
       "side": 1,
       "message": "not cancelable, but a regular task please. If you don\u0027t save what addCancelableTask() returned it\u0027s canceled immediately :)",
+      "range": {
+        "startLine": 56,
+        "startChar": 28,
+        "endLine": 56,
+        "endChar": 45
+      },
+      "revId": "85c8e51ef0a6634697ecfe328972bc5c022e8e3d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a45d7672_855b45cc",
+        "filename": "android/android-emu/android/metrics/MemoryUsageReporter.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-04-28T21:15:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ccfac51a_e081e68d",
       "range": {
         "startLine": 56,
         "startChar": 28,
