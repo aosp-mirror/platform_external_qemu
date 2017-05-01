@@ -11,7 +11,12 @@ LOCAL_SRC_FILES := \
 	jdinput.c jdmainct.c jdmarker.c jdmaster.c jdmerge.c jdphuff.c \
 	jdpostct.c jdsample.c jdtrans.c jerror.c jfdctflt.c jfdctfst.c \
 	jfdctint.c jidctflt.c jidctfst.c jidctint.c jidctred.c jquant1.c \
-	jquant2.c jutils.c jmemmgr.c armv6_idct.S
+	jquant2.c jutils.c jmemmgr.c
+
+LOCAL_SRC_FILES_arm += armv6_idct.S
+
+ifeq ($(ARCH_ARM_HAVE_NEON),true)
+   LOCAL_CFLAGS_arm += -D__ARM_HAVE_NEON
 
 # use ashmem as libjpeg decoder's backing store
 LOCAL_CFLAGS += -DUSE_ANDROID_ASHMEM
