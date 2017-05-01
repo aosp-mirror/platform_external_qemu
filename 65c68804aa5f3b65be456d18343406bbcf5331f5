@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6c06aca6_9d069136",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 843,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-01T14:35:50Z",
+      "side": 1,
+      "message": "With your \"hint\" to the Mac compiler, can we remove this?",
+      "range": {
+        "startLine": 843,
+        "startChar": 8,
+        "endLine": 843,
+        "endChar": 15
+      },
+      "revId": "65c68804aa5f3b65be456d18343406bbcf5331f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
