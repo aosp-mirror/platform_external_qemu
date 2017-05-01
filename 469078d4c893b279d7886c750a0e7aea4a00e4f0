@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e1564836_2ad1e819",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-01T18:32:59Z",
+      "side": 1,
+      "message": "please test if the guest gives this to us in half floats or full floats, and test with gles 3.0 on vs off",
+      "range": {
+        "startLine": 97,
+        "startChar": 43,
+        "endLine": 98,
+        "endChar": 33
+      },
+      "revId": "469078d4c893b279d7886c750a0e7aea4a00e4f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "37ef6d1a_b3f0115e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-01T18:32:59Z",
+      "side": 1,
+      "message": "nit: bytesPerPixel. Also please turn this into a case per format (integrate into above) so it\u0027s less surprising if we add more formats.",
+      "range": {
+        "startLine": 104,
+        "startChar": 8,
+        "endLine": 104,
+        "endChar": 19
+      },
+      "revId": "469078d4c893b279d7886c750a0e7aea4a00e4f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
