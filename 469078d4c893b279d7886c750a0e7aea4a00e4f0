@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "83a5ce11_4b7417f0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-01T19:32:02Z",
+      "side": 1,
+      "message": "I am having a hard time finding a proper test, as it seems to be pretty new. Let\u0027s set it to half float for now and we will come back to it if we see a related CTS failure. (PS: deqp all passes with GLES 3)",
+      "parentUuid": "e1564836_2ad1e819",
+      "range": {
+        "startLine": 97,
+        "startChar": 43,
+        "endLine": 98,
+        "endChar": 33
+      },
+      "revId": "469078d4c893b279d7886c750a0e7aea4a00e4f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "37ef6d1a_b3f0115e",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-05-01T18:32:59Z",
       "side": 1,
       "message": "nit: bytesPerPixel. Also please turn this into a case per format (integrate into above) so it\u0027s less surprising if we add more formats.",
+      "range": {
+        "startLine": 104,
+        "startChar": 8,
+        "endLine": 104,
+        "endChar": 19
+      },
+      "revId": "469078d4c893b279d7886c750a0e7aea4a00e4f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de44bfe7_0ac0004b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-01T19:32:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "37ef6d1a_b3f0115e",
       "range": {
         "startLine": 104,
         "startChar": 8,
