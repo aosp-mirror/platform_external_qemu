@@ -59,12 +59,6 @@
  * this might be futher improved using a system profiler.
  */
 
-#ifdef __arm__
-#include <machine/cpu-features.h>
-#endif
-
-#if __ARM_ARCH__ >= 6
-
 // void armv6_idct(short *coefs, int *quans, unsigned char *rows, int col)
     .arm
     .text
@@ -362,5 +356,3 @@ pass2_tail:
     ldmia   sp!, {r4, r5, r6, r7, r8, r9, r10, r11, r12, r14}
     bx      lr
     .endfunc
-
-#endif
