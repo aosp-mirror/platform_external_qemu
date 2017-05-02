@@ -412,7 +412,8 @@ static void slirp_init_once(void)
 static void slirp_state_save(QEMUFile *f, void *opaque);
 static int slirp_state_load(QEMUFile *f, void *opaque, int version_id);
 
-Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
+Slirp *slirp_init(int restricted, bool dns_hack_enabled,
+                  bool in_enabled, struct in_addr vnetwork,
                   struct in_addr vnetmask, struct in_addr vhost,
                   bool in6_enabled,
                   struct in6_addr vprefix_addr6, uint8_t vprefix_len,
@@ -431,6 +432,7 @@ Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
 
     slirp->in_enabled = in_enabled;
     slirp->in6_enabled = in6_enabled;
+    slirp->dns_hack_enabled = dns_hack_enabled;
 
     if_init(slirp);
     ip_init(slirp);

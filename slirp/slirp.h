@@ -178,6 +178,7 @@ struct Slirp {
     int host_dns_count;
 
     int restricted;
+    int dns_hack_enabled;
     struct ex_list *exec_list;
 
     /* mbuf states */
