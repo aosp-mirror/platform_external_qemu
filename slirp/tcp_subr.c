@@ -398,6 +398,25 @@ tcp_on_proxy_connection(void *opaque, int fd, int af) {
                   so, af);
 }
 
+/* If addr is 127.0.0.1 and we can't create IPv4 socket, create IPv6 socket and
+ * change addr to ::1 */
+static int socket_fallback(struct sockaddr_storage * addr, unsigned short type) {
+    int s = qemu_socket(addr->ss_family, type, 0);
+    if (s >= 0 || addr->ss_family == AF_INET6 || errno != EAFNOSUPPORT)
+      return s;
+    // s < 0 && addr->ss_family == AF_INET && errno == EAFNOSUPPORT;
+    struct sockaddr_in *sin = (struct sockaddr_in *)addr;
+    if (memcmp(&sin->sin_addr, &loopback_addr, sizeof(sin->sin_addr)))
+      return s;
+    s = qemu_socket(AF_INET6, type, 0);
+    if (s < 0)
+      return s;
+    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) addr;
+    sin6->sin6_family = AF_INET6;
+    sin6->sin6_addr  = in6addr_loopback;
+    return s;
+}
+
 /*
  * Connect to a host on the Internet
  * Called by tcp_input
@@ -428,7 +447,7 @@ int tcp_fconnect(struct socket *so, unsigned short af)
 	return 0;
   }
 
-  ret = so->s = qemu_socket(addr.ss_family, SOCK_STREAM, 0);
+  ret = so->s = socket_fallback(&addr, SOCK_STREAM);
   if (ret >= 0) {
     int opt, s=so->s;
 
