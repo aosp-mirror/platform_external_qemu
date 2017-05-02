@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df2b3280_5fd5d1a5",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-02T17:01:31Z",
+      "side": 1,
+      "message": "8\non the other hand, if we\u0027re really unlucky size could be split in half between two buffers, so you would need to gather it together from buffers[0] and buffers[1]. (e.g. first 4 bytes are on one guest page and second 4 bytes are on the other one).\nI think it\u0027s not worth handling explicitly but please mention the case and add at least a runtime check",
+      "revId": "62b05847ace89d1aaec660a8594aaf1447e0083a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
