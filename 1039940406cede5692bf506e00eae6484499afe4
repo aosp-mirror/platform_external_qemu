@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd9aab26_8d2e6184",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-02T16:52:14Z",
+      "side": 1,
+      "message": "isn\u0027t it supposed to be 8 here? (2 bytes for each of 4 components as per https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glTexImage2D.xhtml)?",
+      "range": {
+        "startLine": 103,
+        "startChar": 28,
+        "endLine": 103,
+        "endChar": 30
+      },
+      "revId": "1039940406cede5692bf506e00eae6484499afe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
