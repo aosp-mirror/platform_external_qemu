@@ -1,0 +1,10 @@
+Verified+1: Huihong Luo <huisinro@google.com>
+Verified+1: Bjoern Johansson <bjoernj@google.com>
+Code-Review+2: Huihong Luo <huisinro@google.com>
+Autosubmit+1: Bjoern Johansson <bjoernj@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Tue, 02 May 2017 21:49:44 +0000
+Reviewed-on: https://android-review.googlesource.com/387097
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
