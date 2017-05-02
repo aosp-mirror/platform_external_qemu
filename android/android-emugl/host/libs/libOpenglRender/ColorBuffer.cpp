@@ -100,7 +100,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
         case GL_RGBA16F:
             texInternalFormat = GL_RGBA;
             pixelType = GL_HALF_FLOAT;
-            bytesPerPixel = 16;
+            bytesPerPixel = 8;
             break;
         default:
             return NULL;
