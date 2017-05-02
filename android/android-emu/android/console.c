@@ -542,7 +542,6 @@ do_help( ControlClient  client, char*  args )
     }
 }
 
-
 /* implement the 'help-verbose' command */
 static int
 do_help_verbose( ControlClient  client, char*  args )
@@ -566,7 +565,6 @@ do_ping( ControlClient  client, char*  args )
     control_write( client, "I am alive!\r\n" );
     return 0;
 }
-
 
 static void
 control_client_read_byte( ControlClient  client, unsigned char  ch )
@@ -2954,4 +2952,39 @@ const char* android_console_help_banner_get() {
     // here
     return "Android Console: type 'help' for a list of commands"
            "\nOK";
+}
+
+/********************************************************************************************/
+/********************************************************************************************/
+/***** TESTING                                                                         ******/
+/*****  The follow functions should only be used in testing.                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+void* test_control_client_create(Socket socket)
+{
+    ControlClient  client = calloc( sizeof(*client), 1 );
+
+    if (client) {
+        socket_set_nodelay( socket );
+        socket_set_nonblock( socket );
+        // Skip the preauth
+        client->commands = main_commands;
+        client->finished = 0;
+        client->sock    = socket;
+    }
+    return client;
+}
+
+void test_control_client_close(void* opaque)
+{
+    free(opaque);
+}
+
+void send_test_string(void* opaque, const char* the_string)
+{
+    ControlClient c = (ControlClient)opaque;
+    strcpy(c->buff, the_string);
+    control_client_do_command(c);
 }
