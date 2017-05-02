@@ -22,6 +22,30 @@
       "revId": "1039940406cede5692bf506e00eae6484499afe4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b3fe2e4_a29f492a",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-02T16:55:08Z",
+      "side": 1,
+      "message": "That\u0027s right, thanks for catching this. I was in a mental mode where I thought 8 bytes was a word and \"shorts\" were 4 bytes",
+      "parentUuid": "cd9aab26_8d2e6184",
+      "range": {
+        "startLine": 103,
+        "startChar": 28,
+        "endLine": 103,
+        "endChar": 30
+      },
+      "revId": "1039940406cede5692bf506e00eae6484499afe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
