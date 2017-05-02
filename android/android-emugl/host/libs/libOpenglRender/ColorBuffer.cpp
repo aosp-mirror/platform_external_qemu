@@ -75,31 +75,45 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  Helper* helper) {
     GLenum texInternalFormat = 0;
 
+    GLenum pixelType = GL_UNSIGNED_BYTE;
+    int bytesPerPixel = 3;
     switch (p_internalFormat) {
         case GL_RGB:
         case GL_RGB565_OES:
             texInternalFormat = GL_RGB;
+            bytesPerPixel = 3;
             break;
 
         case GL_RGBA:
         case GL_RGB5_A1_OES:
         case GL_RGBA4_OES:
             texInternalFormat = GL_RGBA;
+            bytesPerPixel = 4;
             break;
 
+        case GL_UNSIGNED_INT_10_10_10_2_OES:
+            texInternalFormat = GL_RGBA;
+            pixelType = GL_UNSIGNED_SHORT;
+            bytesPerPixel = 4;
+            break;
+
+        case GL_RGBA16F:
+            texInternalFormat = GL_RGBA;
+            pixelType = GL_HALF_FLOAT;
+            bytesPerPixel = 16;
+            break;
         default:
             return NULL;
     }
-
-    const int nComp = (texInternalFormat == GL_RGB ? 3 : 4);
-    const unsigned long bufsize = ((unsigned long)nComp) * p_width * p_height;
+    const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
+            * p_height;
     android::base::ScopedCPtr<char> initialImage(
                 static_cast<char*>(::malloc(bufsize)));
     if (!initialImage) {
         fprintf(stderr,
                 "error: failed to allocate initial memory for ColorBuffer "
                 "of size %dx%dx%d (%lu KB)\n",
-                p_width, p_height, nComp * 8, bufsize / 1024);
+                p_width, p_height, bytesPerPixel * 8, bufsize / 1024);
         return nullptr;
     }
     memset(initialImage.get(), 0xff, bufsize);
@@ -115,7 +129,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
-                         0, texInternalFormat, GL_UNSIGNED_BYTE,
+                         0, texInternalFormat, pixelType,
                          initialImage.get());
     initialImage.reset();
 
@@ -130,7 +144,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     s_gles2.glGenTextures(1, &cb->m_blitTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_blitTex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
-                         0, texInternalFormat, GL_UNSIGNED_BYTE, NULL);
+                         0, texInternalFormat, pixelType, NULL);
 
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
