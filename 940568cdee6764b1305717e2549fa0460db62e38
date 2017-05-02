@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "75f7a5a0_10dc948e",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-02T20:19:45Z",
+      "side": 1,
+      "message": "nit: derror() ?",
+      "range": {
+        "startLine": 216,
+        "startChar": 20,
+        "endLine": 219,
+        "endChar": 39
+      },
+      "revId": "940568cdee6764b1305717e2549fa0460db62e38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c995393_0e43bad3",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-02T20:19:45Z",
+      "side": 1,
+      "message": "should we return some pipe error here, so guest knows it\u0027s closed, instead of closefromhost()? e.g. PIPE_ERROR_INVALID",
+      "range": {
+        "startLine": 221,
+        "startChar": 27,
+        "endLine": 221,
+        "endChar": 28
+      },
+      "revId": "940568cdee6764b1305717e2549fa0460db62e38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b277bb8_6258ea13",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-02T20:19:45Z",
+      "side": 1,
+      "message": "same",
+      "range": {
+        "startLine": 243,
+        "startChar": 23,
+        "endLine": 243,
+        "endChar": 24
+      },
+      "revId": "940568cdee6764b1305717e2549fa0460db62e38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
