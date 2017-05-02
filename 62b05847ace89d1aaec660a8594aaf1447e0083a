@@ -16,6 +16,24 @@
       "revId": "62b05847ace89d1aaec660a8594aaf1447e0083a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5abd6ba5_82e25194",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-02T18:18:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df2b3280_5fd5d1a5",
+      "revId": "62b05847ace89d1aaec660a8594aaf1447e0083a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
