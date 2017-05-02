@@ -6,7 +6,8 @@
 struct Slirp;
 typedef struct Slirp Slirp;
 
-Slirp *slirp_init(int restricted, bool in_enabled, struct in_addr vnetwork,
+Slirp *slirp_init(int restricted, bool dns_hack_enabled, bool in_enabled,
+                  struct in_addr vnetwork,
                   struct in_addr vnetmask, struct in_addr vhost,
                   bool in6_enabled,
                   struct in6_addr vprefix_addr6, uint8_t vprefix_len,

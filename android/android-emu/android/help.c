@@ -1479,6 +1479,7 @@ help_metrics_to_file(stralloc_t* out)
 #define  help_partition_size NULL
 
 #define help_skip_adb_auth NULL
+#define help_dns_hack NULL
 
 typedef struct {
     const char*  name;

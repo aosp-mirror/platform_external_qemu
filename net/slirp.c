@@ -176,7 +176,7 @@ static NetClientInfo net_slirp_info = {
 };
 
 static int net_slirp_init(NetClientState *peer, const char *model,
-                          const char *name, int restricted,
+                          const char *name, int restricted, int dnshack,
                           bool ipv4, const char *vnetwork, const char *vhost,
                           bool ipv6, const char *vprefix6, int vprefix6_len,
                           const char *vhost6,
@@ -363,7 +363,7 @@ static int net_slirp_init(NetClientState *peer, const char *model,
 
     s = DO_UPCAST(SlirpState, nc, nc);
 
-    s->slirp = slirp_init(restricted, ipv4, net, mask, host,
+    s->slirp = slirp_init(restricted, dnshack, ipv4, net, mask, host,
                           ipv6, ip6_prefix, vprefix6_len, ip6_host,
                           vhostname, tftp_export, bootfile, dhcp,
                           dns, ip6_dns, dnssearch, s);
@@ -910,7 +910,7 @@ int net_init_slirp(const Netdev *netdev, const char *name,
     net_init_slirp_configs(user->hostfwd, SLIRP_CFG_HOSTFWD);
     net_init_slirp_configs(user->guestfwd, 0);
 
-    ret = net_slirp_init(peer, "user", name, user->q_restrict,
+    ret = net_slirp_init(peer, "user", name, user->q_restrict, user->dnshack,
                          ipv4, vnet, user->host,
                          ipv6, user->ipv6_prefix, user->ipv6_prefixlen,
                          user->ipv6_host, user->hostname, user->tftp,

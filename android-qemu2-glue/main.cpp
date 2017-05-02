@@ -909,7 +909,11 @@ extern "C" int main(int argc, char **argv) {
 
     // Network
     args[n++] = "-netdev";
-    args[n++] = "user,id=mynet";
+    if (opts->dns_hack) {
+        args[n++] = "user,id=mynet,dnshack=y";
+    } else {
+        args[n++] = "user,id=mynet";
+    }
     args[n++] = "-device";
     std::string netDevice =
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);

@@ -2632,6 +2632,8 @@
 #
 # @restrict: #optional isolate the guest from the host
 #
+# @dnshack: #optional enable android.clients.googel.com IPv6 hack
+#
 # @ipv4: #optional whether to support IPv4, default true for enabled
 #        (since 2.6)
 #
@@ -2686,6 +2688,7 @@
   'data': {
     '*hostname':  'str',
     '*restrict':  'bool',
+    '*dnshack':   'bool',
     '*ipv4':      'bool',
     '*ipv6':      'bool',
     '*ip':        'str',
