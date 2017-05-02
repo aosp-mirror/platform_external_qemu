@@ -24,10 +24,9 @@ MicrophonePage::MicrophonePage(QWidget *parent) :
 {
     mUi->setupUi(this);
 
-    // The Hook and VoiceAssist buttons are
-    // not functional yet. Hide them for now.
+    // The Hook button is not functional yet.
+    // Hide it for now.
     mUi->mic_hookButton->hide();
-    mUi->mic_voiceAssistButton->hide();
 }
 
 void MicrophonePage::on_mic_enableMic_toggled(bool checked) {
