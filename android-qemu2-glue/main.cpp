@@ -858,6 +858,9 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = "-object";
     args[n++] = "iothread,id=disk-iothread";
 
+    args[n++] = "-device";
+    args[n++] = "goldfish_pstore";
+
     // Don't create the default CD drive and floppy disk devices - Android
     // won't appreciate it.
     args[n++] = "-nodefaults";
@@ -1008,6 +1011,7 @@ extern "C" int main(int argc, char **argv) {
                 hw->kernel_parameters,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes,
+                hw->hw_ramSize,
                 true  /* isQemu2 */);
 
         if (!kernel_parameters) {

@@ -162,6 +162,7 @@ int main(int argc, char **argv) {
         glesMode,
         0x2000, /* ro.opengles.version */
         0ULL, /* glFramebufferSizeBytes */
+        hw->hw_ramSize,
         false /* isQemu2 */);
 
     if (hw->hw_cpu_ncore > 1) {

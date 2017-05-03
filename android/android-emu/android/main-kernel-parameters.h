@@ -32,6 +32,7 @@ ANDROID_BEGIN_HEADER
 // |glesGuestCmaMB| is the size in megabytes of the contiguous memory
 // allocation to be used when |glesMode| is kAndroidGlesEmulationGuest.
 // A value of 0 also indicates to ignore this setting.
+// |availableMemory| The number of bytes this machine can use.
 // |isQemu2| is true to indicate that this is called from QEMU2, otherwise
 // QEMU1 is assumed.
 char* emulator_getKernelParameters(const AndroidOptions* opts,
@@ -42,6 +43,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
+                                   unsigned int memorySizeMB,
                                    bool isQemu2);
 
 ANDROID_END_HEADER

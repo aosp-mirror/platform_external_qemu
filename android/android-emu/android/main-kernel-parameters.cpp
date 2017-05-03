@@ -35,6 +35,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
+                                   unsigned int memorySizeMB,
                                    bool isQemu2) {
     android::ParameterList params;
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
@@ -134,5 +135,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.add(avdKernelParameters);
     }
 
+    // As of yet we don't have a proper kernel driver for ramoops.
+    // until that time we will be memory capped on the physical address where
+    // the persistent ram lives.
+    unsigned int kb = std::min(memorySizeMB * 1024, 0x0ff018000 / 1024);
+    params.addFormat("mem=%dK ramoops.mem_address=0x%x ramoops.mem_size=0x%x", kb, 0x0ff018000, 0x10000);
     return params.toCStringCopy();
 }
