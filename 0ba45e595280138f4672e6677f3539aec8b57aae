@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e03712b_924b0d2e",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1032276
+      },
+      "writtenOn": "2017-05-03T23:10:22Z",
+      "side": 1,
+      "message": "Why can these not be picked up by hw/misc/goldfish_pstore.h?",
+      "range": {
+        "startLine": 142,
+        "startChar": 83,
+        "endLine": 142,
+        "endChar": 103
+      },
+      "revId": "0ba45e595280138f4672e6677f3539aec8b57aae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "282c4e26_d0175c54",
+        "filename": "hw/misc/goldfish_pstore.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1032276
+      },
+      "writtenOn": "2017-05-03T23:10:22Z",
+      "side": 1,
+      "message": "Stay away from making promisses here? GOLDFISH_PSTORE_MEM_SIZE should be good enough.",
+      "range": {
+        "startLine": 26,
+        "startChar": 14,
+        "endLine": 26,
+        "endChar": 18
+      },
+      "revId": "0ba45e595280138f4672e6677f3539aec8b57aae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3f6768fa_e1431beb",
+        "filename": "hw/misc/goldfish_pstore.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1032276
+      },
+      "writtenOn": "2017-05-03T23:10:22Z",
+      "side": 1,
+      "message": "trailing space",
+      "range": {
+        "startLine": 51,
+        "startChar": 17,
+        "endLine": 51,
+        "endChar": 18
+      },
+      "revId": "0ba45e595280138f4672e6677f3539aec8b57aae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
