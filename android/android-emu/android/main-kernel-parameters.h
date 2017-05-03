@@ -19,6 +19,11 @@
 
 ANDROID_BEGIN_HEADER
 
+typedef struct mem_map {
+  uint64_t start;
+  uint64_t size;
+} mem_map;
+
 // Return a heap-allocated string containing the kernel parameter.
 // |opts| corresponds to the command-line options after they have been
 // processed by emulator_parseCommonCommandLineOptions().
@@ -32,6 +37,8 @@ ANDROID_BEGIN_HEADER
 // |glesGuestCmaMB| is the size in megabytes of the contiguous memory
 // allocation to be used when |glesMode| is kAndroidGlesEmulationGuest.
 // A value of 0 also indicates to ignore this setting.
+// |availableMemory| The number of bytes this machine can use.
+// |ramoops| The memory range that will be used by the ramoops module.
 // |isQemu2| is true to indicate that this is called from QEMU2, otherwise
 // QEMU1 is assumed.
 char* emulator_getKernelParameters(const AndroidOptions* opts,
@@ -42,6 +49,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
+                                   mem_map ramoops,
                                    bool isQemu2);
 
 ANDROID_END_HEADER
