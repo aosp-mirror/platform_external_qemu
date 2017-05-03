@@ -156,12 +156,13 @@ int main(int argc, char **argv) {
     }
 
     int apiLevel = avdInfo_getApiLevel(avd);
-
+    mem_map mem = { 0 };
     char* kernelParameters = emulator_getKernelParameters(
         opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters,
         glesMode,
         0x2000, /* ro.opengles.version */
         0ULL, /* glFramebufferSizeBytes */
+        mem,
         false /* isQemu2 */);
 
     if (hw->hw_cpu_ncore > 1) {

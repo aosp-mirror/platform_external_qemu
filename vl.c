@@ -2782,7 +2782,7 @@ static int serial_parse(const char *devname)
     // undone on crash, and Mac's default terminal is dumb enough to never
     // restore it by itself.
     if (!strcmp(devname, "stdio")) {
-        CharDriverState *stdio = serial_hds[index]; 
+        CharDriverState *stdio = serial_hds[index];
         stdio->chr_set_echo(stdio, true);
     }
 #endif
@@ -3288,6 +3288,24 @@ static int is_opengl_alive = 1;
 static void android_check_for_updates()
 {
     android_checkForUpdates(QEMU_CORE_VERSION);
+}
+
+static int android_unrealize_goldfish_device(Object *obj, void *opaque)
+{
+    DeviceState *dev =
+        (DeviceState *)object_dynamic_cast(OBJECT(obj), TYPE_DEVICE);
+
+    if (dev != NULL && dev->id && !strcmp("goldfish_pstore", dev->id)) {
+        object_property_set_bool(OBJECT(dev), false, "realized", NULL);
+    }
+
+    return 0;
+}
+
+static void android_devices_teardown()
+{
+    Object* peripheral = container_get(qdev_get_machine(), "/peripheral");
+    object_child_foreach(peripheral, android_unrealize_goldfish_device, NULL);
 }
 
 static void android_init_metrics()
@@ -5439,6 +5457,7 @@ static int main_impl(int argc, char** argv)
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
     android_reporting_teardown();
+    android_devices_teardown();
 #endif
 
     /* vhost-user must be cleaned up before chardevs.  */
