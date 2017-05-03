@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6693236_f5f61ac4",
+        "filename": "android/android-emu/android/keymaster/KeymasterPipe.cpp",
+        "patchSetId": 20
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-03T16:07:22Z",
+      "side": 1,
+      "message": "derror() prepends \"emulator: ERROR: \" to the string you pass to it, so please remove the duplicate \"ERROR: \" part from all calls",
+      "range": {
+        "startLine": 396,
+        "startChar": 12,
+        "endLine": 396,
+        "endChar": 18
+      },
+      "revId": "99e6ab15a983308a6cca26e7e8325d7dfe460488",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
