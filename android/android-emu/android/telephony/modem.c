@@ -1685,6 +1685,12 @@ handleSIM_IO( const char*  cmd, AModem  modem )
     return asimcard_io( modem->sim, cmd );
 }
 
+static const char*
+handleCSIM( const char*  cmd, AModem  modem )
+{
+    return asimcard_csim( modem->sim, cmd );
+}
+
 
 static const char*
 handleOperatorSelection( const char*  cmd, AModem  modem )
@@ -2641,6 +2647,9 @@ static const struct {
 
     /* see requestSIM_IO() */
     { "!+CRSM=", NULL, handleSIM_IO },
+
+    /* b/37719621 */
+    { "!+CSIM=", NULL, handleCSIM},
 
     /* see onRequest() */
     { "+CHLD=0", NULL, handleHangup },
