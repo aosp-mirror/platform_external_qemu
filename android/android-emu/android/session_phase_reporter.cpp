@@ -1,4 +1,4 @@
-// Copyright (C) 2016 The Android Open Source Project
+// Copyright 2017 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,19 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#include "android/session_phase_reporter.h"
 
-#include "android/base/Profiler.h"
+#include "android/CommonReportedInfo.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 
-namespace emugl {
+static AndroidSessionPhase sCurrentSessionPhase;
 
-    // Set and get API version of system image.
-    void setAvdInfo(bool isPhone, int apiLevel);
-    void getAvdInfo(bool* isPhone, int* apiLevel);
+void android_report_session_phase(
+        AndroidSessionPhase phase) {
+    sCurrentSessionPhase = phase;
+    android::CommonReportedInfo::setSessionPhase(phase);
+    // TODO: Also report session phase to metrics. But should we?
+}
 
-    // Set/get GLES major/minor version.
-    void setGlesVersion(int maj, int min);
-    void getGlesVersion(int* maj, int* min);
-
-    using Profiler = android::base::Profiler;
+AndroidSessionPhase android_get_session_phase() {
+    return sCurrentSessionPhase;
 }

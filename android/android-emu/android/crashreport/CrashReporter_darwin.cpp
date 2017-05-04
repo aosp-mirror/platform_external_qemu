@@ -94,6 +94,8 @@ bool HostCrashReporter::exceptionFilterCallback(void*) {
 
 static void attachMemoryInfo()
 {
+    CommonReportedInfo::appendMemoryUsage();
+
     rusage usage = {};
     getrusage(RUSAGE_SELF, &usage);
 

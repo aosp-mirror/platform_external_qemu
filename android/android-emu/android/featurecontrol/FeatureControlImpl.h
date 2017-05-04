@@ -14,6 +14,8 @@
 #include "android/base/StringView.h"
 #include "android/featurecontrol/Features.h"
 
+#include <vector>
+
 namespace android {
 
 namespace base { class IniFile; }
@@ -75,6 +77,11 @@ public:
 
     static Feature fromString(base::StringView str);
     static base::StringView toString(Feature feature);
+
+    std::vector<Feature> getEnabledNonOverride() const;
+    std::vector<Feature> getEnabledOverride() const;
+    std::vector<Feature> getDisabledOverride() const;
+    std::vector<Feature> getEnabled() const;
 
     void init(android::base::StringView defaultIniHostPath,
               android::base::StringView defaultIniGuestPath,

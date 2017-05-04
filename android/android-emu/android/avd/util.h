@@ -111,19 +111,22 @@ char* propertyFile_getTargetArch(const FileData* data);
  */
 int propertyFile_getApiLevel(const FileData* data);
 
-/* Determine whether a system image is for phone. */
-/* TODO: remove after we redo all the feature flags to be
- * on the guest. */
-bool propertyFile_isPhoneApi(const FileData* data);
+typedef enum {
+    AVD_PHONE = 0,
+    AVD_TV = 1,
+    AVD_WEAR = 2,
+    AVD_ANDROID_AUTO = 3,
+    AVD_OTHER = 255,
+} AvdFlavor;
+
+/* Determine the flavor of system image. */
+AvdFlavor propertyFile_getAvdFlavor(const FileData* data);
 
 /* Determine whether a Google API's system image is used. */
 bool propertyFile_isGoogleApis(const FileData* data);
 
 /* Determine whether the system image is a user build. */
 bool propertyFile_isUserBuild(const FileData* data);
-
-/* Return whether an Android Auto system image is used. */
-bool propertyFile_isAndroidAuto(const FileData* data);
 
 /* Return whether the product name in property file has a substring matching any
  * of the the given ones.

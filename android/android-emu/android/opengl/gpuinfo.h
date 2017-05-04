@@ -62,6 +62,19 @@ using WhitelistEntry = GpuInfoView;
 class GpuInfo {
 public:
     GpuInfo() : current_gpu(false) { }
+    GpuInfo(const std::string& _make,
+            const std::string& _model,
+            const std::string& _device_id,
+            const std::string& _revision_id,
+            const std::string& _version,
+            const std::string& _renderer) :
+        current_gpu(false),
+        make(_make),
+        model(_model),
+        device_id(_device_id),
+        revision_id(_revision_id),
+        version(_version),
+        renderer(_renderer) { }
 
     bool current_gpu;
 

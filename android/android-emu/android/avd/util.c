@@ -209,10 +209,29 @@ propertyFile_getApiLevel(const FileData* data) {
     return level;
 }
 
-bool propertyFile_isPhoneApi(const FileData* data) {
+#define IN_PRODUCT_NAME(data, names) \
+    propertyFile_findProductName( \
+            data, names, ARRAY_SIZE(names), false /*prefix*/) \
+
+AvdFlavor propertyFile_getAvdFlavor(const FileData* data) {
+    AvdFlavor res = AVD_OTHER;
+
     const char* phone_names[] = {"phone"};
-    return propertyFile_findProductName(
-            data, phone_names, ARRAY_SIZE(phone_names), false /*prefix*/);
+    const char* tv_names[] = {"atv"};
+    const char* wear_names[] = {"aw"};
+    const char* car_names[] = {"car_emu"};
+
+    if (IN_PRODUCT_NAME(data, phone_names)) {
+        res = AVD_PHONE;
+    } else if (IN_PRODUCT_NAME(data, tv_names)) {
+        res = AVD_TV;
+    } else if (IN_PRODUCT_NAME(data, wear_names)) {
+        res = AVD_WEAR;
+    } else if (IN_PRODUCT_NAME(data, car_names)) {
+        res = AVD_ANDROID_AUTO;
+    }
+
+    return res;
 }
 
 bool propertyFile_isGoogleApis(const FileData* data) {
@@ -233,12 +252,6 @@ bool propertyFile_isUserBuild(const FileData* data) {
     }
     free(prop);
     return isUser;
-}
-
-bool propertyFile_isAndroidAuto(const FileData* data) {
-    const char* car_names[] = {"car_emu"};
-    return propertyFile_findProductName(data, car_names, ARRAY_SIZE(car_names),
-                                         true /*prefix*/);
 }
 
 

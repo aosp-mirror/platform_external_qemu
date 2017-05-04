@@ -40,5 +40,21 @@ Feature stringToFeature(const std::string& str) {
     return FeatureControlImpl::fromString(str);
 }
 
+std::vector<Feature> getEnabledNonOverride() {
+    return FeatureControlImpl::get().getEnabledNonOverride();
+}
+
+std::vector<Feature> getEnabledOverride() {
+    return FeatureControlImpl::get().getEnabledOverride();
+}
+
+std::vector<Feature> getDisabledOverride() {
+    return FeatureControlImpl::get().getDisabledOverride();
+}
+
+std::vector<Feature> getEnabled() {
+    return FeatureControlImpl::get().getEnabled();
+}
+
 }  // namespace featurecontrol
 }  // namespace android
