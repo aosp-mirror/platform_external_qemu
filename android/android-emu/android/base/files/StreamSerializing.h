@@ -28,6 +28,9 @@ namespace base {
 void saveStream(Stream* stream, const MemStream& memStream);
 void loadStream(Stream* stream, MemStream* memStream);
 
+void saveBufferRaw(Stream* stream, char* buffer, uint32_t len);
+bool loadBufferRaw(Stream* stream, char* buffer);
+
 template <class T, class = enable_if<std::is_standard_layout<T>>>
 void saveBuffer(Stream* stream, const std::vector<T>& buffer) {
     stream->putBe32(buffer.size());
