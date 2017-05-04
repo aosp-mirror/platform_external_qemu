@@ -16,6 +16,24 @@
       "revId": "c7190e55cd794b331330340337bd4588842f5896",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af2f45b2_728e2189",
+        "filename": "android/android-emu/android/telephony/sim_card.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-05-04T21:51:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f17f2090_4eaa6281",
+      "revId": "c7190e55cd794b331330340337bd4588842f5896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
