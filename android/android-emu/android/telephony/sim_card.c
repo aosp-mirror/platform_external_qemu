@@ -10,6 +10,7 @@
 ** GNU General Public License for more details.
 */
 #include "android/telephony/sim_card.h"
+#include "android/proxy/proxy_int.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -322,6 +323,92 @@ static SimFileEFDedicatedRec  _const_files_dedicated[] =
     { 0, 0, 0, NULL, 0 }  /* end of list */
 };
 #endif /* ENABLE_DYNAMIC_RECORDS */
+
+static char s_buffer[1024];
+
+static void make_SRES_Kc(char* data, int len, char* sres, char* kc) {
+    // here we just fill in the sres and kc with original data
+    // real USIM card will create appropriate SRES and Kc here
+    // 3GPP TS 31.102 7.1.2
+    int i = 0;
+    int j = 0;
+    for (i = 0; i < 4; ++i, ++j) {
+        sres[i] = (data[j % len]);
+    }
+
+    for (i = 0; i < 8; ++i, ++j) {
+        kc[i] = (data[j % len]);
+    }
+}
+
+const char*
+asimcard_csim( ASimCard  sim, const char*  cmd )
+{
+    /* b/37719621
+       for now, we only handle the authentication in GSM context;
+       the response to authentication request is just fake data:
+       we dont fully simulate a real modem at the moment.
+
+       example input:
+       AT+CSIM=29,"0088008011abcdefghijklmnopq00"
+29: length of quoted input(exclude quotes)
+00: APDU instruction class = 00 here
+88: instruction code = 88 (authenticate)
+00: first parameter of authenticate, 00 here
+80: second parameter of authenticate (80 means GSM context)
+11: authentication challenge string length (here it is 17 bytes)
+abcdefghijklmnopq: 17 bytes authentication challenge string, base64 encoded
+00: means getting all the response; we dont care about this for now, and just
+    send back all the response to the authentication challenge, since it is
+    very short (14 bytes before base64 encoding).
+
+the response is as follows
++CSIM=<length-of-reply-without-quotes>,
+   "<base64-response><status1-in-hexstring><status2-in-hexstring>"
+
+some references:
+3GPP TS 31.102 7.1.2
+http://www.tml.tkk.fi/Studies/T-110.497/2003/lecture4.pdf
+http://wiki.openmoko.org/wiki/Hardware:AT_Commands
+http://m2msupport.net/m2msupport/atcsim-generic-sim-access/
+     */
+
+    char * first_double_quote_ptr = strchr(cmd, '"');
+
+    // sanity check: the authentication challenge should be at least 1 byte long
+    // that makes the total length of quoted string 17
+    if (!first_double_quote_ptr || strlen(first_double_quote_ptr) < 17
+            || strncmp("00880080", first_double_quote_ptr + 1, 8)) {
+        // instruction code not supported or invalid
+        snprintf(s_buffer, sizeof(s_buffer), "+CSIM=4, \"6D00\"");
+        return s_buffer;
+    }
+
+    char * length_ptr = first_double_quote_ptr + 1 /* 1 char for " */
+        + 8 /* 8 char for the 00880080 */
+        ;
+
+    int data_len = 0;
+    sscanf(length_ptr, "%02x", &data_len);
+
+    char* data_ptr = length_ptr + 2;
+    char response[14];
+    response[0] = 0x4; //SRES is 4 bytes
+    response[5] = 0x8; //Kc is 8 bytes
+    char * SRES = response + 1;
+    char * Kc = response + 6;
+    make_SRES_Kc(data_ptr, data_len, SRES, Kc);
+    char base64_response[1024];
+    int resp_len = proxy_base64_encode(response, sizeof(response), base64_response,
+            sizeof(base64_response));
+    if (resp_len >= sizeof(base64_response)) {
+        snprintf(s_buffer, sizeof(s_buffer), "+CSIM=4, \"9866\""); // no more memory
+        return s_buffer;
+    }
+    base64_response[resp_len] = '\0';
+    snprintf(s_buffer, sizeof(s_buffer), "+CSIM:%d, \"%s0900\"", resp_len + 4, base64_response);
+    return s_buffer;
+}
 
 const char*
 asimcard_io( ASimCard  sim, const char*  cmd )
