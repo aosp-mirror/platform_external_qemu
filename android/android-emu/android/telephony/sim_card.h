@@ -55,6 +55,9 @@ typedef enum {
 
 extern const char*  asimcard_io( ASimCard  sim, const char*  cmd );
 
+/* handle the authentication request only */
+extern const char*  asimcard_csim( ASimCard  sim, const char*  cmd );
+
 #ifdef __cplusplus
 }
 #endif
