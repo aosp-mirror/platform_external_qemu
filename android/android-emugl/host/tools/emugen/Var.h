@@ -31,12 +31,14 @@ public:
         const std::string & lenExpression,
         PointerDir dir,
         const std::string &packExpression,
+        const std::string &unpackExpression,
         const std::string &writeExpression) :
         m_name(name),
         m_type(const_cast<VarType *>(vartype)),
         m_lenExpression(lenExpression),
         m_pointerDir(dir),
         m_packExpression(packExpression),
+        m_unpackExpression(unpackExpression),
         m_writeExpression(writeExpression)
     {
     }
@@ -45,11 +47,13 @@ public:
               std::string lenExpression,
               PointerDir dir,
               std::string packExpression,
+              std::string unpackExpression,
               std::string writeExpression) {
         m_name = name;
         m_type = vartype;
         m_lenExpression = lenExpression;
         m_packExpression = packExpression;
+        m_unpackExpression = unpackExpression;
         m_writeExpression = writeExpression;
         m_pointerDir = dir;
         m_nullAllowed = false;
@@ -63,10 +67,12 @@ public:
     bool isVoid() const { return ((m_type->bytes() == 0) && (!m_type->isPointer())); }
     const std::string & lenExpression() const { return m_lenExpression; }
     const std::string & packExpression() const { return(m_packExpression); }
+    const std::string & unpackExpression() const { return(m_unpackExpression); }
     const std::string & writeExpression() const { return(m_writeExpression); }
     const std::string & paramCheckExpression() const { return m_paramCheckExpression; }
     void setLenExpression(const std::string & lenExpression) { m_lenExpression = lenExpression; }
     void setPackExpression(const std::string & packExpression) { m_packExpression = packExpression; }
+    void setUnpackExpression(const std::string & unpackExpression) { m_unpackExpression = unpackExpression; }
     void setWriteExpression(const std::string & writeExpression) { m_writeExpression = writeExpression; }
     void setParamCheckExpression(const std::string & paramCheckExpression) { m_paramCheckExpression = paramCheckExpression; }
     void setPointerDir(PointerDir dir) { m_pointerDir = dir; }
@@ -90,6 +96,7 @@ private:
     bool m_isLarge = false;
     bool m_isDMA = false;
     std::string m_packExpression; // an expression to pack data into the stream
+    std::string m_unpackExpression; // an expression to unpack data that has arrived from the stream
     std::string m_writeExpression; // an expression to write data into the stream
     std::string m_paramCheckExpression; //an expression to check parameter value
 };
