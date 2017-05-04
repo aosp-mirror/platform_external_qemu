@@ -53,6 +53,7 @@
         void* val = TlsGetValue(name ## _tls_key); \
         if (val) { \
             free(val); \
+            TlsSetValue(name ## _tls_key, NULL); \
         } \
     } \
 
