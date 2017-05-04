@@ -44,7 +44,7 @@ public:
     void hideForFlash();
     void showAsFlash();
 
-    void showForMultitouch();
+    void showForMultitouch(bool centerTouches);
 
     void showForZoom();
     void showForZoomUserHidden();

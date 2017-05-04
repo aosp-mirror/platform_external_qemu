@@ -275,8 +275,33 @@ typedef void IOReadHandler(void *opaque, const uint8_t *buf, int size);
 typedef int IOCanReadHandler(void *opaque);
 typedef void IOHandler(void *opaque);
 
-void qemu_iohandler_fill(int *pnfds, fd_set *readfds, fd_set *writefds, fd_set *xfds);
-void qemu_iohandler_poll(fd_set *readfds, fd_set *writefds, fd_set *xfds, int rc);
+void enlarge_fd_sets(int fd, fd_set** fds);
+
+#ifdef CONFIG_LINUX
+#define FD_FUNC(func, fd, fds) func(fd % FD_SETSIZE, &(*fds)[fd / FD_SETSIZE])
+#else
+#define FD_FUNC(func, fd, fds) func(fd, *fds)
+#endif
+
+static inline void fd_clr_ext(int fd, fd_set** fds)
+{
+    enlarge_fd_sets(fd, fds);
+    FD_FUNC(FD_CLR, fd, fds);
+}
+
+static inline int fd_isset_ext(int fd, fd_set** fds)
+{
+    return FD_FUNC(FD_ISSET, fd, fds);
+}
+
+static inline void fd_set_ext(int fd, fd_set** fds)
+{
+    enlarge_fd_sets(fd, fds);
+    FD_FUNC(FD_SET, fd, fds);
+}
+
+void qemu_iohandler_fill(int *pnfds, fd_set **readfds, fd_set **writefds, fd_set **xfds);
+void qemu_iohandler_poll(fd_set **readfds, fd_set **writefds, fd_set **xfds, int rc);
 
 struct ParallelIOArg {
     void *buffer;

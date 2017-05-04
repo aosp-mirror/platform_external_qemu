@@ -188,7 +188,7 @@ tcp_newtcpcb(struct socket *so)
 
 	memset((char *) tp, 0, sizeof(struct tcpcb));
 	tp->seg_next = tp->seg_prev = (struct tcpiphdr*)tp;
-	tp->t_maxseg = TCP_MSS;
+	tp->t_maxseg = (so->faddr.family == SOCKET_INET) ? TCP_MSS : TCP6_MSS;
 
 	tp->t_flags = TCP_DO_RFC1323 ? (TF_REQ_SCALE|TF_REQ_TSTMP) : 0;
 	tp->t_socket = so;
@@ -576,6 +576,7 @@ tcp_connect(struct socket *inso)
 			return;
 		}
 		so->laddr = inso->laddr;
+		so->faddr.family = inso->faddr.family;
 	}
 
 	(void) tcp_mss(sototcpcb(so), 0);

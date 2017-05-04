@@ -259,9 +259,60 @@ void os_host_main_loop_wait(int *timeout)
 
 static void qemu_run_alarm_timer(void);  // forward
 
+static fd_set* g_fds[3];
+static int g_fd_set_n;
+
+#ifdef CONFIG_LINUX
+static int g_max_fd = -1;
+static void update_max_fd(int fd)
+{
+    if (fd > g_max_fd) {
+        g_max_fd = fd;
+    }
+}
+#define FD_SET_COUNT ((g_max_fd + FD_SETSIZE) / FD_SETSIZE)
+#else
+static void update_max_fd(int fd)
+{
+}
+#define FD_SET_COUNT 1
+#endif
+
+static void fd_zero_ext(fd_set** fds)
+{
+    int i;
+    for (i = 0; i < g_fd_set_n; i++) {
+        FD_ZERO(&(*fds)[i]);
+    }
+}
+
+void enlarge_fd_sets(int fd, fd_set** sets) {
+    int i = 0;
+    for (i = 0; i < ARRAY_SIZE(g_fds); i++) {
+        if (sets == &g_fds[i]) {
+            break;
+        }
+    }
+    if (i == ARRAY_SIZE(g_fds)) {
+        g_assert_not_reached();
+    }
+    update_max_fd(fd);
+    int new_fd_set_n = FD_SET_COUNT;
+    if (new_fd_set_n <= g_fd_set_n)
+        return;
+    for (i = 0; i < ARRAY_SIZE(g_fds); i++) {
+        g_fds[i] = realloc(g_fds[i], sizeof(fd_set) * new_fd_set_n);
+        int j = 0;
+        for (j = g_fd_set_n; j < new_fd_set_n; j++) {
+            FD_ZERO(&g_fds[i][j]);
+        }
+    }
+    g_fd_set_n = new_fd_set_n;
+}
+
 void main_loop_wait(int timeout)
 {
-    fd_set rfds, wfds, xfds;
+    fd_set **rfds = &g_fds[0], **wfds = &g_fds[1], **xfds = &g_fds[2];
     int ret, nfds;
     struct timeval tv;
 
@@ -276,25 +327,25 @@ void main_loop_wait(int timeout)
 
     /* XXX: separate device handlers from system ones */
     nfds = -1;
-    FD_ZERO(&rfds);
-    FD_ZERO(&wfds);
-    FD_ZERO(&xfds);
-    qemu_iohandler_fill(&nfds, &rfds, &wfds, &xfds);
+    fd_zero_ext(rfds);
+    fd_zero_ext(wfds);
+    fd_zero_ext(xfds);
+    qemu_iohandler_fill(&nfds, rfds, wfds, xfds);
     if (slirp_is_inited()) {
-        slirp_select_fill(&nfds, &rfds, &wfds, &xfds);
+        slirp_select_fill(&nfds, rfds, wfds, xfds);
     }
 
     qemu_mutex_unlock_iothread();
-    ret = select(nfds + 1, &rfds, &wfds, &xfds, &tv);
+    ret = select(nfds + 1, *rfds, *wfds, *xfds, &tv);
     qemu_mutex_lock_iothread();
-    qemu_iohandler_poll(&rfds, &wfds, &xfds, ret);
+    qemu_iohandler_poll(rfds, wfds, xfds, ret);
     if (slirp_is_inited()) {
         if (ret < 0) {
-            FD_ZERO(&rfds);
-            FD_ZERO(&wfds);
-            FD_ZERO(&xfds);
+            fd_zero_ext(rfds);
+            fd_zero_ext(wfds);
+            fd_zero_ext(xfds);
         }
-        slirp_select_poll(&rfds, &wfds, &xfds);
+        slirp_select_poll(rfds, wfds, xfds);
     }
     charpipe_poll();
 

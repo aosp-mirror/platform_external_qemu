@@ -233,18 +233,18 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
 static void hvf_region_add(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    // DPRINTF("%s: call. for [0x%llx 0x%llx]\n", __func__,
-    //         (unsigned long long)section->offset_within_address_space,
-    //         (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
+    DPRINTF("%s: call. for [0x%llx 0x%llx]\n", __func__,
+             (unsigned long long)section->offset_within_address_space,
+             (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
     hvf_set_phys_mem(section, true);
 }
 
 static void hvf_region_del(MemoryListener * listener,
                            MemoryRegionSection * section)
 {
-    // DPRINTF("%s: call. for [0x%llx 0x%llx]\n", __func__,
-    //         (unsigned long long)section->offset_within_address_space,
-    //         (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
+    DPRINTF("%s: call. for [0x%llx 0x%llx]\n", __func__,
+             (unsigned long long)section->offset_within_address_space,
+             (unsigned long long)(section->offset_within_address_space + int128_get64(section->size)));
     hvf_set_phys_mem(section, false);
 }
 
@@ -355,8 +355,8 @@ int hvf_init_vcpu(CPUState * cpu) {
     init_decoder(cpu);
     init_cpuid(cpu);
 
-    cpu->hvf_caps = (struct hvf_vcpu_caps*)malloc(sizeof(struct hvf_vcpu_caps));
-    cpu->hvf_x86 = (struct hvf_x86_state*)malloc(sizeof(struct hvf_x86_state));
+    cpu->hvf_caps = (struct hvf_vcpu_caps*)g_malloc0(sizeof(struct hvf_vcpu_caps));
+    cpu->hvf_x86 = (struct hvf_x86_state*)g_malloc0(sizeof(struct hvf_x86_state));
 
     DPRINTF("%s: attempt hv_vcpu_create\n", __func__);
     r = hv_vcpu_create(&cpu->hvf_fd, HV_VCPU_DEFAULT);
@@ -391,7 +391,7 @@ int hvf_init_vcpu(CPUState * cpu) {
     vmx_reset_vcpu(cpu);
 
     x86cpu = X86_CPU(cpu);
-    posix_memalign(&x86cpu->env.kvm_xsave_buf, 4096, 4096); // TODO - BUG: bug need to calculate right val
+    x86cpu->env.kvm_xsave_buf = qemu_memalign(4096, sizeof(struct hvf_xsave_buf));
 
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_STAR, 1);
     hv_vcpu_enable_native_msr(cpu->hvf_fd, MSR_LSTAR, 1);
@@ -966,7 +966,7 @@ again:
                 cr = exit_qual & 15;
                 reg = (exit_qual >> 8) & 15;
 
-                DPRINTF("%lx: mov cr %d from %d %llx\n", rip, cr, reg, RXX(cpu, reg));
+                DPRINTF("%lx: mov cr %d from %d %llx\n", rip, cr, reg, RRX(cpu, reg));
                 switch (cr) {
                     case 0x0: {
                         macvm_set_cr0(cpu->hvf_fd, RRX(cpu, reg));
@@ -1077,7 +1077,7 @@ static int hvf_accel_init(MachineState *ms) {
     assert_hvf_ok(r);
 
     struct hvf_accel_state* s =
-        (struct hvf_accel_state*)malloc(sizeof(struct hvf_accel_state));
+        (struct hvf_accel_state*)g_malloc0(sizeof(struct hvf_accel_state));
 
     s->num_slots = 32;
     for (x = 0; x < s->num_slots; ++x) {
