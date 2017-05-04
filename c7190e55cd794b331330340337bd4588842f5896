@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f17f2090_4eaa6281",
+        "filename": "android/android-emu/android/telephony/sim_card.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-04T21:35:18Z",
+      "side": 1,
+      "message": "Is there any doc describing those magic numbers? Could you add the link in the comments?",
+      "revId": "c7190e55cd794b331330340337bd4588842f5896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
