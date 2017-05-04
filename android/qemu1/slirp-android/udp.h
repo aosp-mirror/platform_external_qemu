@@ -55,15 +55,9 @@ struct udphdr {
  * UDP kernel structures and variables.
  */
 struct udpiphdr {
-	        struct  ipovly ui_i;            /* overlaid ip structure */
+	        struct  ip ui_i;                /* ip structure */
 	        struct  udphdr ui_u;            /* udp header */
 };
-#define ui_mbuf         ui_i.ih_mbuf.mptr
-#define ui_x1           ui_i.ih_x1
-#define ui_pr           ui_i.ih_pr
-#define ui_len          ui_i.ih_len
-#define ui_src          ui_i.ih_src
-#define ui_dst          ui_i.ih_dst
 #define ui_sport        ui_u.uh_sport
 #define ui_dport        ui_u.uh_dport
 #define ui_ulen         ui_u.uh_ulen

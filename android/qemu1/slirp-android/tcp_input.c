@@ -1700,7 +1700,16 @@ tcp_mss(struct tcpcb *tp, u_int offer)
 	DEBUG_ARG("tp = %lx", (long)tp);
 	DEBUG_ARG("offer = %d", offer);
 
-	mss = min(IF_MTU, IF_MRU) - sizeof(struct tcpiphdr);
+	switch (so->faddr.family) {
+	case SOCKET_INET:
+		mss = min(IF_MTU, IF_MRU) - sizeof(struct tcphdr) - sizeof(struct ip);
+		break;
+	case SOCKET_IN6:
+		mss = min(IF_MTU, IF_MRU) - sizeof(struct tcphdr) - sizeof(struct ip6);
+		break;
+	default:
+		g_assert_not_reached();
+	}
 	if (offer)
 		mss = min(mss, (int)offer);
 	mss = max(mss, 32);

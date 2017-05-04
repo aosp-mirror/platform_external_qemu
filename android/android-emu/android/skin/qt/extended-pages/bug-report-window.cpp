@@ -138,8 +138,7 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
     mUi->bug_deviceLabel->setText(QString(deviceName));
 
     // Set OS Description
-    mReportingFields.hostOsName =
-            android::base::toString(System::get()->getOsType());
+    mReportingFields.hostOsName = System::get()->getOsName();
     mUi->bug_hostMachineLabel->setText(
             QString::fromStdString(mReportingFields.hostOsName));
 
@@ -222,7 +221,7 @@ void BugReportWindow::saveBugReportFolder(bool willOpenIssueTracker) {
     } else {
         // launch the bugreport folder saving task in a separate thread
         std::string savingPath = PathUtils::join(
-                mSavingStates.saveLocation,
+                dirName.toStdString(),
                 AdbBugReportServices::generateUniqueBugreportName());
         std::string adbBugreportFilePath =
                 (mUi->bug_bugReportCheckBox->isChecked() &&

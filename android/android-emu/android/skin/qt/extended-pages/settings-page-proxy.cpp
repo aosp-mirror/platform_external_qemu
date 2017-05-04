@@ -211,7 +211,14 @@ void SettingsPage::sendProxySettingsToAgent() {
     }
     // Send the proxy selection to the agent
     int proxyResult = mHttpProxyAgent->httpProxySet(proxyString.toStdString().c_str());
-    mUi->set_proxyResults->setText(tr(proxy_error_string(proxyResult)));
+
+    // Report the results
+    if (proxyString.isEmpty() && proxyResult == PROXY_ERR_OK) {
+        // Don't say "Success" when we're not using a proxy
+        mUi->set_proxyResults->setText(tr("No proxy"));
+    } else {
+        mUi->set_proxyResults->setText(tr(proxy_error_string(proxyResult)));
+    }
 }
 
 void SettingsPage::enableProxyApply() {

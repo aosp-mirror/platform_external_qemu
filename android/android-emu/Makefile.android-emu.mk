@@ -327,6 +327,8 @@ LOCAL_SRC_FILES := \
     android/hw-sensors.c \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
+    android/keymaster/Keymaster.cpp \
+    android/keymaster/KeymasterPipe.cpp \
     android/loadpng.c \
     android/main-common.c \
     android/main-help.cpp \
@@ -551,6 +553,7 @@ LOCAL_SRC_FILES := \
   android/base/Version_unittest.cpp \
   android/cmdline-option_unittest.cpp \
   android/console_auth_unittest.cpp \
+  android/console_unittest.cpp \
   android/emulation/AdbDebugPipe_unittest.cpp \
   android/emulation/AdbGuestPipe_unittest.cpp \
   android/emulation/AdbHostListener_unittest.cpp \

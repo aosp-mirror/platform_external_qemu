@@ -153,8 +153,12 @@ bool RenderThreadInfo::onLoad(Stream* stream) {
         // value, so we need to remap it to the new one temporarily.  If not,
         // rcTriggerWait refers to a garbage pointer and undefined behavior
         // results.
+        EGLContext eglCtx = EGL_NO_CONTEXT;
+        if (currContext) {
+            eglCtx = currContext->getEGLContext();
+        }
 
-        syncThread.reset(new SyncThread(currContext->getEGLContext()));
+        syncThread.reset(new SyncThread(eglCtx));
         sSyncThreadRegistry->remapStalePtr(syncThreadAlias, syncThread.get());
 
         // Note that the values in sSyncThreadRegistry will only be used for a
