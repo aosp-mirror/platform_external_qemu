@@ -1163,6 +1163,14 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                     var_name,
                                     varoffset.c_str(),
                                     var_name);
+                            if (v->unpackExpression().size() > 0) {
+                                fprintf(fp,
+                                    "\t\t\tvoid* inptr_%s_unpacked;\n"
+                                    "\t\t\t%s;\n",
+                                    var_name,
+                                    v->unpackExpression().c_str());
+                            }
+
                         }
                         if (pass == PASS_FunctionCall) {
                             if (v->nullAllowed()) {
@@ -1172,10 +1180,17 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                         var_type_name,
                                         var_name);
                             } else {
-                                fprintf(fp,
-                                        "(%s)(inptr_%s.get())",
-                                        var_type_name,
-                                        var_name);
+                                if (v->unpackExpression().size() > 0) {
+                                    fprintf(fp,
+                                            "(%s)(inptr_%s_unpacked)",
+                                            var_type_name,
+                                            var_name);
+                                } else {
+                                    fprintf(fp,
+                                            "(%s)(inptr_%s.get())",
+                                            var_type_name,
+                                            var_name);
+                                }
                             }
                         } else if (pass == PASS_DebugPrint) {
                             fprintf(fp,
