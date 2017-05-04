@@ -618,8 +618,8 @@ amodem_reset( AModem  modem )
         modem->emergency_numbers[i] = amodem_nvram_get_str(modem,key_name, NULL);
     }
 
-    modem->area_code = -1;
-    modem->cell_id   = -1;
+    modem->area_code = 3;  // default to some valid value
+    modem->cell_id   = 91; // default to some valid value
 
     strcpy( modem->operators[0].name[0], OPERATOR_HOME_NAME );
     strcpy( modem->operators[0].name[1], OPERATOR_HOME_NAME );

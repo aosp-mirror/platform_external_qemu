@@ -104,6 +104,7 @@ struct tcphdr {
  * We make this 1460 because we only care about Ethernet in the qemu context.
  */
 #define	TCP_MSS	1460
+#define TCP6_MSS 1440 /* sizeof(struct ip6) - sizeof(struct ip) == 20 */
 
 #define	TCP_MAXWIN	65535	/* largest value for (unscaled) window */
 

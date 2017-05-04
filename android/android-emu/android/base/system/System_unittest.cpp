@@ -144,6 +144,12 @@ TEST(System, getProgramBitness) {
     EXPECT_EQ(kExpected, System::get()->getProgramBitness());
 }
 
+TEST(System, getOsName) {
+    std::string osName = System::get()->getOsName();
+    LOG(INFO) << "Host OS: " << osName;
+    EXPECT_STRNE("Error: ", osName.substr(0, 7).c_str());
+}
+
 TEST(System, scandDirEntries) {
     static const char* const kExpected[] = {
         "fifth", "first", "fourth", "second", "sixth", "third"

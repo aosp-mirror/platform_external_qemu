@@ -23,6 +23,10 @@ MicrophonePage::MicrophonePage(QWidget *parent) :
     mUserEventAgent(nullptr)
 {
     mUi->setupUi(this);
+
+    // The Hook button is not functional yet.
+    // Hide it for now.
+    mUi->mic_hookButton->hide();
 }
 
 void MicrophonePage::on_mic_enableMic_toggled(bool checked) {

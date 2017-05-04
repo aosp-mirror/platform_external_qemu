@@ -168,9 +168,9 @@ udp_input(register struct mbuf *m, int iphlen)
 	 * Checksum extended UDP header and data.
 	 */
 	if (UDPCKSUM && uh->uh_sum) {
-      memset(&((struct ipovly *)ip)->ih_mbuf, 0, sizeof(struct mbuf_ptr));
-	  ((struct ipovly *)ip)->ih_x1 = 0;
-	  ((struct ipovly *)ip)->ih_len = uh->uh_ulen;
+          memset(ip, 0, offsetof(struct ip, ip_p));
+          ip->ip_len = uh->uh_ulen;
+          ip->ip_sum = 0;
 	  /* keep uh_sum for ICMP reply
 	   * uh->uh_sum = cksum(m, len + sizeof (struct ip));
 	   * if (uh->uh_sum) {
@@ -311,16 +311,16 @@ int udp_output2_(struct socket *so, struct mbuf *m,
 	 * and addresses and length put into network format.
 	 */
 	ui = mtod(m, struct udpiphdr *);
-    memset(&ui->ui_i.ih_mbuf, 0 , sizeof(struct mbuf_ptr));
-	ui->ui_x1 = 0;
-	ui->ui_pr = IPPROTO_UDP;
-	ui->ui_len = htons(m->m_len - sizeof(struct ip)); /* + sizeof (struct udphdr)); */
+	struct ip *ip = mtod(m, struct ip *);
+	memset(ip, 0, sizeof(*ip));
+	ip->ip_p = IPPROTO_UDP;
+	ip->ip_len = htons(m->m_len - sizeof(struct ip)); /* + sizeof (struct udphdr)); */
 	/* XXXXX Check for from-one-location sockets, or from-any-location sockets */
-    ui->ui_src   = ip_seth(saddr_ip);
-    ui->ui_dst   = ip_seth(daddr_ip);
+    ip->ip_src   = ip_seth(saddr_ip);
+    ip->ip_dst   = ip_seth(daddr_ip);
     ui->ui_sport = port_seth(saddr_port);
     ui->ui_dport = port_seth(daddr_port);
-	ui->ui_ulen = ui->ui_len;
+	ui->ui_ulen = ip->ip_len;
 
 	/*
 	 * Stuff checksum and output datagram.
@@ -330,10 +330,10 @@ int udp_output2_(struct socket *so, struct mbuf *m,
 	    if ((ui->ui_sum = cksum(m, /* sizeof (struct udpiphdr) + */ m->m_len)) == 0)
 		ui->ui_sum = 0xffff;
 	}
-	((struct ip *)ui)->ip_len = m->m_len;
+	ip->ip_len = m->m_len;
 
-	((struct ip *)ui)->ip_ttl = IPDEFTTL;
-	((struct ip *)ui)->ip_tos = iptos;
+	ip->ip_ttl = IPDEFTTL;
+	ip->ip_tos = iptos;
 
 	STAT(udpstat.udps_opackets++);
 

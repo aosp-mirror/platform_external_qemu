@@ -373,6 +373,13 @@ struct hvf_x86_state {
     uint8_t* apic_page;
 };
 
+/*
+* hvf xsave area
+*/
+struct hvf_xsave_buf {
+    uint32_t data[1024];
+};
+
 // useful register access  macros
 #define RIP(cpu)    (cpu->hvf_x86->rip)
 #define EIP(cpu)    ((uint32_t)cpu->hvf_x86->rip)

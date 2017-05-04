@@ -684,48 +684,23 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
     status->clear();
 
     AndroidCpuAcceleration res = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
-    const auto versionNumFile = android::base::makeCustomScopedPtr(
-            tempfile_create(), tempfile_close);
-
-    if (!versionNumFile) {
-        status->assign("Internal error: could not create a temporary file");
-        return res;
+    std::string osProductVersion = System::get()->getOsName();
+    // Example os version :  Max OS X 10.12.4
+    size_t pos = osProductVersion.rfind(" ");
+    if (strncmp("Error: ", osProductVersion.c_str(), 7) == 0 ||
+        pos == std::string::npos) {
+      StringAppendFormat(status,
+                         "Internal error: failed to parse OS version '%s'",
+                         osProductVersion);
+      return res;
     }
 
-    std::string tempPath = tempfile_path(versionNumFile.get());
-
-    int exitCode = -1;
-    System::get()->runCommand({"sw_vers", "-productVersion"},
-                              System::RunOptions::WaitForCompletion |
-                                      System::RunOptions::TerminateOnTimeout |
-                                      System::RunOptions::DumpOutputToFile,
-                              1000,  // timeout ms
-                              &exitCode, nullptr, tempPath);
-    if (exitCode) {
-        status->assign("Could not get host product version.");
-        return res;
-    }
-    ScopedFd tempfileFd(open(tempPath.c_str(), O_RDONLY));
-    if (!tempfileFd.valid()) {
-        StringAppendFormat(status, "Could not open '%s' : %s", tempPath,
-                           strerror(errno));
-        return res;
-    }
-    std::string contents;
-    android::readFileIntoString(tempfileFd.get(), &contents);
-    if (contents.empty()) {
-        StringAppendFormat(status,
-                           "Internal error: could not read temporary file '%s'",
-                           tempPath);
-        return res;
-    }
-
-    int maj, min;
-    int versionParseRes = sscanf(&contents[0], "%d.%d", &maj, &min);
-    if (versionParseRes != 2) {
+    auto ver = Version(
+            osProductVersion.substr(pos + 1, osProductVersion.size() - pos));
+    if (!ver.isValid()) {
         StringAppendFormat(status,
                            "Internal error: failed to parse OS version '%s'",
-                           contents);
+                           osProductVersion);
         return res;
     }
 
@@ -743,16 +718,18 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
     }
 
     // Hypervisor.framework is only supported on OS X 10.10 and above.
-    if (maj > 10 || (maj == 10 && min >= 10)) {
-        res = ANDROID_CPU_ACCELERATION_READY;
-    } else {
+    if (ver < Version(10, 10, 0)) {
         StringAppendFormat(status,
                            "Hypervisor.Framework is only supported"
                            "on OS X 10.10 and above");
         return res;
+    } else {
+        res = ANDROID_CPU_ACCELERATION_READY;
     }
 
     GlobalState* g = &gGlobals;
+    int maj = ver.component<Version::kMajor>();
+    int min = ver.component<Version::kMinor>();
     ::snprintf(g->version, sizeof(g->version), "%d.%d", maj, min);
     StringAppendFormat(status, "Hypervisor.Framework OS X Version %d.%d", maj,
                        min);

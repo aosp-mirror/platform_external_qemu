@@ -1533,10 +1533,11 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
 
     if (!mForwardShortcutsToDevice && !mInZoomMode &&
         event->key() == Qt::Key_Control &&
-        event->modifiers() == Qt::ControlModifier) {
+            (event->modifiers() == Qt::ControlModifier ||
+             event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier) )) {
         if (type == kEventKeyDown) {
             raise();
-            mOverlay.showForMultitouch();
+            mOverlay.showForMultitouch(event->modifiers() == Qt::ControlModifier);
         }
     }
 

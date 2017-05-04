@@ -371,6 +371,15 @@ asimcard_io( ASimCard  sim, const char*  cmd )
         { "+CRSM=192,28615,0,0,15", "+CRSM: 144,0,000000406fc7040011a0aa01020120" },
         { "+CRSM=178,28615,1,4,32", "+CRSM: 144,0,566f6963656d61696cffffffffffffffffff07915155125740f9ffffffffffff" },
 
+        /* b/37718561
+           192, 28539 is for querying forbidden PLMN; the response is fake data.
+           176, 28539 is also for forbidden PLMN, but in binary format
+           the 15's f is simply copied from my own phone; the value does not seem
+           to matter that much; but the length has to be a multiple of 5's
+         */
+        { "+CRSM=192,28539,0,0,15", "+CRSM: 144,0,000000406fc7040011a0aa01000000" },
+        { "+CRSM=176,28539,0,0,64", "+CRSM: 144,0,ffffffffffffffffffffffff" },
+
         { NULL, NULL }
     };
 

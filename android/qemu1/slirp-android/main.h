@@ -34,7 +34,7 @@ extern int slirp_restrict;
 extern char *slirp_tty;
 extern char *exec_shell;
 extern u_int curtime;
-extern fd_set *global_readfds, *global_writefds, *global_xfds;
+extern fd_set **global_readfds, **global_writefds, **global_xfds;
 extern uint32_t ctl_addr_ip;
 extern uint32_t special_addr_ip;
 extern uint32_t alias_addr_ip;

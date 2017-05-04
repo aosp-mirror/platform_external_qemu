@@ -418,8 +418,9 @@ dump_help( ControlClient  client,
         control_write( client, "%s", cmd->description );
     } else if (cmd->descriptor) {
         cmd->descriptor( client );
-    } else
+    } else {
         control_write( client, "%s\r\n", cmd->abstract );
+    }
 
     if (cmd->subcommands) {
         cmd = cmd->subcommands;
@@ -509,13 +510,14 @@ do_help( ControlClient  client, char*  args )
     char*       end = start;
     CommandDef  cmd = client->commands;
 
-    /* without arguments, simply dump all commands */
+    /* without arguments, simply list all commands */
     if (args == NULL) {
-        control_write( client, "Android console command help:\r\n\r\n" );
+        control_write( client, "Android console commands:\r\n" );
         for ( ; cmd->names != NULL; cmd++ ) {
-            control_write( client, "    %-15s  %s\r\n", cmd->names, cmd->abstract );
+            control_write( client, "    %s\r\n", cmd->names );
         }
-        control_write( client, "\r\ntry 'help <command>' for command-specific help\r\n" );
+        control_write( client, "\r\nTry 'help-verbose' for more description"
+                               "\r\nTry 'help <command>' for command-specific help\r\n" );
         return 0;
     }
 
@@ -526,11 +528,8 @@ do_help( ControlClient  client, char*  args )
         line    = args;
         subcmd  = find_command( line, cmd, &end, &args );
         if (subcmd == NULL) {
-            control_write( client, "try one of these instead:\r\n\r\n" );
-            for ( ; cmd->names != NULL; cmd++ ) {
-                control_write( client, "    %.*s %s\r\n",
-                              end - start, start, cmd->names );
-            }
+            /* Not found. Recurse to print the short list of commands. */
+            do_help(client, NULL);
             control_write( client, "\r\nKO: unknown command\r\n" );
             return -1;
         }
@@ -543,6 +542,29 @@ do_help( ControlClient  client, char*  args )
     }
 }
 
+/* implement the 'help-verbose' command */
+static int
+do_help_verbose( ControlClient  client, char*  args )
+{
+    CommandDef cmd;
+
+    /* Dump all commands */
+    control_write( client, "Android console command help:\r\n\r\n" );
+    for (cmd = client->commands; cmd->names != NULL; cmd++) {
+        control_write( client, "    %-15s  %s\r\n", cmd->names, cmd->abstract );
+    }
+    control_write( client, "\r\ntry 'help <command>' for command-specific help\r\n" );
+    return 0;
+}
+
+
+/* implement the 'ping' command */
+static int
+do_ping( ControlClient  client, char*  args )
+{
+    control_write( client, "I am alive!\r\n" );
+    return 0;
+}
 
 static void
 control_client_read_byte( ControlClient  client, unsigned char  ch )
@@ -2109,7 +2131,7 @@ do_event_text( ControlClient  client, char*  args )
         control_write( client, "KO: device is unable to recieve text input now\r\n" );
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -2671,6 +2693,13 @@ static const CommandDefRec  qemu_commands[] =
 #define HELP_COMMAND \
     { "help|h|?", "print a list of commands", NULL, NULL, do_help, NULL }
 
+#define HELP_VERBOSE_COMMAND \
+    {"help-verbose", "print a list of commands with descriptions", \
+     NULL, NULL, do_help_verbose, NULL}
+
+#define PING_COMMAND \
+    { "ping", "check if the emulator is alive", NULL, NULL, do_ping, NULL }
+
 #define QUIT_COMMAND \
     { "quit|exit", "quit control session", NULL, NULL, do_quit, NULL }
 
@@ -2738,8 +2767,18 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
     return (int)client->global->emu_agent->rotate90Clockwise();
 }
 
+/* NOTE: The names of all commands are listed when the 'help' command
+ *       is received.
+ *       Android Studio uses the 'help' command and requires that the
+ *       response be less than 1024 characters.
+ *       Do not expand the list to the point of breaking Android Studio.
+ */
 static const CommandDefRec main_commands[] = {
-        {"help|h|?", "print a list of commands", NULL, NULL, do_help, NULL},
+        HELP_COMMAND,
+
+        HELP_VERBOSE_COMMAND,
+
+        PING_COMMAND,
 
         {"event", "simulate hardware events",
          "allows you to send fake hardware events to the kernel\r\n", NULL,
@@ -2778,7 +2817,7 @@ static const CommandDefRec main_commands[] = {
          "allows to change battery and AC power status\r\n", NULL, NULL,
          power_commands},
 
-        {"quit|exit", "quit control session", NULL, NULL, do_quit, NULL},
+        QUIT_COMMAND,
 
         {"redir", "manage port redirections",
          "allows you to add, list and remove UDP and/or PORT redirection from "
@@ -2793,10 +2832,7 @@ static const CommandDefRec main_commands[] = {
         {"sms", "SMS related commands",
          "allows you to simulate an inbound SMS\r\n", NULL, NULL, sms_commands},
 
-        {"avd", "control virtual device execution",
-         "allows you to control (e.g. start/stop) the execution of the virtual "
-         "device\r\n",
-         NULL, NULL, vm_commands},
+        AVD_COMMAND(vm_commands),
 
         {"qemu", "QEMU-specific commands",
          "allows to connect to the QEMU virtual machine monitor\r\n", NULL,
@@ -2869,6 +2905,10 @@ static const CommandDefRec vm_commands_preauth[] = {
 static const CommandDefRec main_commands_preauth[] = {
     HELP_COMMAND,
 
+    HELP_VERBOSE_COMMAND,
+
+    PING_COMMAND,
+
     AVD_COMMAND(vm_commands_preauth),
 
     {"auth",
@@ -2912,4 +2952,39 @@ const char* android_console_help_banner_get() {
     // here
     return "Android Console: type 'help' for a list of commands"
            "\nOK";
+}
+
+/********************************************************************************************/
+/********************************************************************************************/
+/***** TESTING                                                                         ******/
+/*****  The follow functions should only be used in testing.                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+void* test_control_client_create(Socket socket)
+{
+    ControlClient  client = calloc( sizeof(*client), 1 );
+
+    if (client) {
+        socket_set_nodelay( socket );
+        socket_set_nonblock( socket );
+        // Skip the preauth
+        client->commands = main_commands;
+        client->finished = 0;
+        client->sock    = socket;
+    }
+    return client;
+}
+
+void test_control_client_close(void* opaque)
+{
+    free(opaque);
+}
+
+void send_test_string(void* opaque, const char* the_string)
+{
+    ControlClient c = (ControlClient)opaque;
+    strcpy(c->buff, the_string);
+    control_client_do_command(c);
 }

@@ -648,8 +648,12 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
                         getEtcFormat(texData->compressedFormat),
                         width, height);
                 SET_ERROR_IF(imageSize != encodedDataSize, GL_INVALID_VALUE);
-                SET_ERROR_IF(width % 4 && (xoffset + width != (GLsizei)texData->width), GL_INVALID_OPERATION);
-                SET_ERROR_IF(height % 4 && (yoffset + height != (GLsizei)texData->height), GL_INVALID_OPERATION);
+                GLsizei lvlWidth = texData->width >> level;
+                GLsizei lvlHeight = texData->height >> level;
+                if (texData->width && !lvlWidth) lvlWidth = 1;
+                if (texData->height && !lvlHeight) lvlHeight = 1;
+                SET_ERROR_IF((width % 4) && ((xoffset + width) != (GLsizei)lvlWidth), GL_INVALID_OPERATION);
+                SET_ERROR_IF((height % 4) && ((yoffset + height) != (GLsizei)lvlHeight), GL_INVALID_OPERATION);
                 SET_ERROR_IF(xoffset % 4, GL_INVALID_OPERATION);
                 SET_ERROR_IF(yoffset % 4, GL_INVALID_OPERATION);
             }

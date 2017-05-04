@@ -119,6 +119,12 @@ public:
     // Return the current OS type
     virtual OsType getOsType() const = 0;
 
+    // Return the current OS product/version name.
+    // Return error string in the format of "Error: [reason]"
+    // if we are unable to get host OS information or error
+    // occurs.
+    virtual std::string getOsName() = 0;
+
     // Check if we're running under Wine;
     // returns false for non-Windows builds
     virtual bool isRunningUnderWine() const = 0;
