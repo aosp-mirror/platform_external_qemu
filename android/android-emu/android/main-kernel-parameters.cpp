@@ -35,6 +35,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    AndroidGlesEmulationMode glesMode,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
+                                   mem_map ramoops,
                                    bool isQemu2) {
     android::ParameterList params;
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
@@ -134,5 +135,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.add(avdKernelParameters);
     }
 
+    // Configure the ramoops module, and mark the region where ramoops lives as
+    // unusable. This will prevent anyone else from using this memory region.
+    if (ramoops.size > 0 && ramoops.start > 0) {
+      params.addFormat("ramoops.mem_address=0x%" PRIx64 " ramoops.mem_size=0x%" PRIx64, ramoops.start, ramoops.size);
+      params.addFormat("memmap=0x%" PRIx64 "$0x%" PRIx64,  ramoops.start, ramoops.start + ramoops.size);
+    }
     return params.toCStringCopy();
 }

@@ -58,3 +58,4 @@ obj-$(CONFIG_ASPEED_SOC) += aspeed_scu.o aspeed_sdmc.o
 obj-$(CONFIG_GOLDFISH) += goldfish_battery.o
 obj-$(CONFIG_GOLDFISH) += goldfish_pipe.o
 obj-$(CONFIG_GOLDFISH) += goldfish_sync.o
+obj-$(CONFIG_GOLDFISH) += goldfish_pstore.o

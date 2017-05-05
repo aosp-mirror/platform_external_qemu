@@ -58,6 +58,7 @@
 
 extern "C" {
 #include "android/skin/charmap.h"
+#include "hw/misc/goldfish_pstore.h"
 }
 
 #include "android/ui-emu-agent.h"
@@ -664,13 +665,29 @@ extern "C" int main(int argc, char **argv) {
 #endif
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
+    // Initialize a persistent ram block.
+    std::string dataPath = PathUtils::join(avdInfo_getContentPath(avd), "data");
+    std::string pstorePath = PathUtils::join(dataPath, "misc", "pstore");
+    std::string pstoreFile = PathUtils::join(pstorePath, "pstore.bin");
+    path_mkdir_if_needed(pstorePath.c_str(), 0777);
+    android_chmod(pstorePath.c_str(), 0777);
+
+    mem_map pstore = {.start = GOLDFISH_PSTORE_MEM_BASE,
+                      .size = GOLDFISH_PSTORE_MEM_SIZE};
+
+    std::string goldfish_config = StringFormat("goldfish_pstore,addr=0x%" PRIx64
+                             ",size=0x%" PRIx64 ",file=%s",
+                             pstore.start, pstore.size, pstoreFile.c_str());
+
+    args[n++] = "-device";
+    args[n++] = goldfish_config.c_str();
 
     // Create userdata file from init version if needed.
     if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
+        // Clean out the pstore on wipe as well.
+        path_delete_file(pstoreFile.c_str());
         std::unique_ptr<char[]> initDir(avdInfo_getDataInitDirPath(avd));
         if (path_exists(initDir.get())) {
-            std::string dataPath = PathUtils::join(
-                    avdInfo_getContentPath(avd), "data");
             path_copy_dir(dataPath.c_str(), initDir.get());
             std::string adbKeyPath = PathUtils::join(
                     android::ConfigDirs::getUserDirectory(), "adbkey.pub");
@@ -744,7 +761,7 @@ extern "C" int main(int argc, char **argv) {
         }
     } else {
         dwarning("encryption is off");
-    }
+      }
 
     bool createEmptyCacheFile = false;
 
@@ -890,6 +907,14 @@ extern "C" int main(int argc, char **argv) {
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
     args[n++] = netDevice.c_str();
 
+    // add 2nd nic as eth1
+    args[n++] = "-netdev";
+    args[n++] = "user,id=mynet2,net=10.0.3.0/24";
+    args[n++] = "-device";
+    std::string netDevice2 =
+            StringFormat("%s,netdev=mynet2", kTarget.networkDeviceType);
+    args[n++] = netDevice2.c_str();
+
     args[n++] = "-show-cursor";
 
     std::string tcpdumpArg;
@@ -1009,6 +1034,7 @@ extern "C" int main(int argc, char **argv) {
                 hw->kernel_parameters,
                 rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes,
+                pstore,
                 true  /* isQemu2 */);
 
         if (!kernel_parameters) {

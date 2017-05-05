@@ -410,6 +410,7 @@ QEMU2_TARGET_SOURCES := \
     hw/misc/edu.c \
     hw/misc/goldfish_battery.c \
     hw/misc/goldfish_pipe.c \
+    hw/misc/goldfish_pstore.c \
     hw/misc/goldfish_sync.c \
     hw/net/vhost_net.c \
     hw/net/virtio-net.c \
