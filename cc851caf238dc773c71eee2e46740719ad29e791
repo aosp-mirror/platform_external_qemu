@@ -22,6 +22,30 @@
       "revId": "cc851caf238dc773c71eee2e46740719ad29e791",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a6d43f8_b45ca6c6",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 916,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-05T19:05:13Z",
+      "side": 1,
+      "message": "Yay! Git merge. Let me fix this.",
+      "parentUuid": "6f9d59be_1652baaa",
+      "range": {
+        "startLine": 916,
+        "startChar": 32,
+        "endLine": 916,
+        "endChar": 35
+      },
+      "revId": "cc851caf238dc773c71eee2e46740719ad29e791",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
