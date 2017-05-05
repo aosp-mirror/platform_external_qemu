@@ -79,7 +79,7 @@ TEST(InplaceStream, read) {
         }
     }
 }
- 
+
 TEST(InplaceStream, sizes) {
     int bufsize = sizeof(int64_t) + sizeof(int16_t);
     std::vector<char> testbuf(bufsize);
@@ -130,6 +130,63 @@ TEST(InplaceStream, saveLoad) {
     EXPECT_EQ(val, stream2.getBe32());
     EXPECT_EQ(fval, stream2.getFloat());
     EXPECT_STREQ(sval.c_str(), stream2.getString().c_str());
+}
+
+TEST(InplaceStream, getPosAndAdvance) {
+    std::vector<int32_t> testbuf = { 1, 2, 3, 4, 5 };
+    InplaceStream stream((char*)&testbuf[0], testbuf.size() * sizeof(int32_t));
+    EXPECT_EQ((char*)&testbuf[0], stream.currentRead());
+    stream.advanceRead(1);
+    EXPECT_EQ(((char*)&testbuf[0]) + 1, stream.currentRead());
+    stream.advanceRead(1);
+    EXPECT_EQ(((char*)&testbuf[0]) + 2, stream.currentRead());
+    stream.advanceRead(1);
+    EXPECT_EQ(((char*)&testbuf[0]) + 3, stream.currentRead());
+    stream.advanceRead(1);
+    EXPECT_EQ(((char*)&testbuf[0]) + 4, stream.currentRead());
+
+    int32_t readint = 0;
+    stream.read(&readint, sizeof(int32_t));
+    EXPECT_EQ(readint, 2);
+    EXPECT_EQ(readint, *(((char*)&testbuf[0]) + 4));
+}
+
+TEST(InplaceStream, getNullTerminatedString) {
+    std::string test("1234");
+
+    std::vector<char> buf(10);
+    InplaceStream stream(&buf[0], 10);
+
+    stream.putStringNullTerminated(&test[0]);
+    const char* fromStream =
+        stream.getStringNullTerminated();
+
+    EXPECT_EQ(0, strncmp(fromStream, test.c_str(), 5));
+}
+
+TEST(InplaceStream, getNullTerminatedStringEmpty) {
+    std::string test("");
+
+    std::vector<char> buf(10);
+    InplaceStream stream(&buf[0], 10);
+
+    stream.putStringNullTerminated(&test[0]);
+    const char* fromStream =
+        stream.getStringNullTerminated();
+
+    EXPECT_EQ(0, strncmp(fromStream, test.c_str(), 5));
+}
+
+TEST(InplaceStream, getNullTerminatedStringError) {
+    std::vector<char> buf(10, 0);
+    InplaceStream stream(&buf[0], 10);
+    // oops; we didn't actually put a string there,
+    // but we did write uint32_t zero. in this case,
+    // we can get a nullptr from getStringNullTerminated
+    // Otherwise, all bets are off
+    const char* fromStream =
+        stream.getStringNullTerminated();
+    EXPECT_EQ(nullptr, fromStream);
 }
 
 }  // namespace base

@@ -34,6 +34,20 @@ ssize_t InplaceStream::write(const void* buffer, size_t size) {
     return sizeToWrite;
 }
 
+void InplaceStream::putStringNullTerminated(const char* str) {
+    putString(str, str ? ::strlen(str) + 1 : 0U);
+}
+
+const char* InplaceStream::getStringNullTerminated() {
+    size_t len = this->getBe32();
+    const char* res = nullptr;
+    if (len > 0) {
+        res = currentRead();
+        advanceRead(len);
+    }
+    return res;
+}
+
 int InplaceStream::writtenSize() const {
     return mWritePos;
 }
@@ -44,6 +58,26 @@ int InplaceStream::readPos() const {
 
 int InplaceStream::readSize() const {
     return mDataLen - mReadPos;
+}
+
+const char* InplaceStream::currentRead() const {
+    return mData + mReadPos;
+}
+
+char* InplaceStream::currentWrite() const {
+    return mData + mWritePos;
+}
+
+ssize_t InplaceStream::advanceRead(size_t size) {
+    const auto toAdvance = std::min<int>(size, readSize());
+    mReadPos += toAdvance;
+    return toAdvance;
+}
+
+ssize_t InplaceStream::advanceWrite(size_t size) {
+    const auto toAdvance = std::min<int>(size, mDataLen - writtenSize());
+    mWritePos += toAdvance;
+    return toAdvance;
 }
 
 void InplaceStream::save(Stream* stream) const {
