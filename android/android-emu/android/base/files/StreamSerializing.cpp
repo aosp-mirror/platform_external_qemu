@@ -22,5 +22,16 @@ void loadStream(Stream* stream, MemStream* memStream) {
     memStream->load(stream);
 }
 
+void saveBufferRaw(Stream* stream, char* buffer, uint32_t len) {
+    stream->putBe32(len);
+    stream->write(buffer, len);
+}
+
+bool loadBufferRaw(Stream* stream, char* buffer) {
+    auto len = stream->getBe32();
+    int ret = (int)stream->read(buffer, len);
+    return ret == (int)len;
+}
+
 }  // namespace base
 }  // namespace android
