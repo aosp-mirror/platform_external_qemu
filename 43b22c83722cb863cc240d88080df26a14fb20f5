@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "edc29da3_5270e284",
+        "filename": "include/qemu/thread_local.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-05T19:07:14Z",
+      "side": 1,
+      "message": "Nice catch",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 59
+      },
+      "revId": "43b22c83722cb863cc240d88080df26a14fb20f5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
