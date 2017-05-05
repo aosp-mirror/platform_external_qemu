@@ -15,6 +15,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/emulation/ConfigDirs.h"
@@ -26,6 +27,8 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
+
+using android::base::ScopedCPtr;
 
 enum IniSetting { ON, OFF, DEFAULT, ERR };
 
@@ -180,7 +183,7 @@ FeatureControlImpl::FeatureControlImpl() {
     std::string defaultIniHostName =
             base::PathUtils::join(base::System::get()->getLauncherDirectory(),
                                   "lib", "advancedFeatures.ini");
-    std::unique_ptr<char[]> defaultIniGuestName;
+    ScopedCPtr<char> defaultIniGuestName;
     if (android_avdInfo) {
         defaultIniGuestName.reset(
                 avdInfo_getDefaultSystemFeatureControlPath(android_avdInfo));
