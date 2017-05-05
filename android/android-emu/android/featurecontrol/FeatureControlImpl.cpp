@@ -180,7 +180,7 @@ FeatureControlImpl::FeatureControlImpl() {
     std::string defaultIniHostName =
             base::PathUtils::join(base::System::get()->getLauncherDirectory(),
                                   "lib", "advancedFeatures.ini");
-    std::unique_ptr<char[]> defaultIniGuestName;
+    std::unique_ptr<char, decltype(&std::free)> defaultIniGuestName { nullptr, std::free };
     if (android_avdInfo) {
         defaultIniGuestName.reset(
                 avdInfo_getDefaultSystemFeatureControlPath(android_avdInfo));
