@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbf428ce_dcc91278",
+        "filename": "include/qemu/thread_local.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1166043
+      },
+      "writtenOn": "2017-05-05T20:14:32Z",
+      "side": 0,
+      "message": "Please consider mentioning in the CL description that a notifier can be added only once, since it is an intrusive list item.\nAlso, It\u0027d be nice to add a check/assert somewhere for that.",
+      "revId": "b49a947ded366068671a1f7c5745b892682e8b4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
