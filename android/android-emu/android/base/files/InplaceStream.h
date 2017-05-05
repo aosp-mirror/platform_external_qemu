@@ -29,9 +29,17 @@ public:
     int readPos() const;
     int readSize() const;
 
+    char* currentRead() const;
+    char* currentWrite() const;
+    ssize_t advanceRead(size_t size);
+    ssize_t advanceWrite(size_t size);
+
     // Stream interface implementation.
     ssize_t read(void* buffer, size_t size) override;
     ssize_t write(const void* buffer, size_t size) override;
+
+    // A way to get strings/buffers in-place as well.
+    char* getStringNullTerminated();
 
     // Snapshot support.
     void save(Stream* stream) const;
