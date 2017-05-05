@@ -45,23 +45,34 @@
  *
  */
 
+/* Define a struct to hold the thread-local variable and the corresponding
+ * exit notifier per-thread.
+ *
+ * Note: struct is used in several macros, so we can't define it with a name -
+ *       C forbids redefinitions even if struct bodies are the same.
+ */
+#define QEMU_THREAD_LOCAL_BIG_STRUCT(name) \
+    struct { __typeof__(name ## _tls_empty) item; Notifier exit_notifier; }
+
 #define QEMU_THREAD_LOCAL_DECLARE_COMMON(type, name) \
     DWORD name ## _tls_key; \
     type name ## _tls_empty; \
-    Notifier name ## _tls_exit_notifier; \
     void qemu_tls_free_ ## name(Notifier *notifier, void *data) { \
         void* val = TlsGetValue(name ## _tls_key); \
         if (val) { \
+            qemu_thread_atexit_remove(&(((QEMU_THREAD_LOCAL_BIG_STRUCT(name)*)val)->exit_notifier)); \
             free(val); \
+            TlsSetValue(name ## _tls_key, NULL); \
         } \
     } \
 
 #define QEMU_THREAD_LOCAL_ALLOC_BIG(name) \
     ({ \
-        __typeof__(name ## _tls_empty)* val = calloc(1, sizeof(*val)); \
-        TlsSetValue(name ## _tls_key, val); \
-        (name ## _tls_exit_notifier).notify = &(qemu_tls_free_ ## name); \
-        qemu_thread_atexit_add(&(name ## _tls_exit_notifier)); \
+        QEMU_THREAD_LOCAL_BIG_STRUCT(name)* ptr = calloc(1, sizeof(QEMU_THREAD_LOCAL_BIG_STRUCT(name))); \
+        TlsSetValue(name ## _tls_key, ptr); \
+        ptr->exit_notifier.notify = &(qemu_tls_free_ ## name); \
+        qemu_thread_atexit_add(&(ptr->exit_notifier)); \
+        __typeof__(name ## _tls_empty)* val = &(ptr->item); \
         val; \
     })
 
@@ -73,7 +84,6 @@
 #define QEMU_THREAD_LOCAL_EXTERN(type, name) \
     extern DWORD name ## _tls_key; \
     extern type name ## _tls_empty; \
-    extern Notifier name ## _tls_exit_notifier; \
     extern void qemu_tls_free_ ## name(Notifier *notifier, void *data); \
 
 #define QEMU_THREAD_LOCAL_DECLARE(type, name) \
@@ -82,7 +92,7 @@
         name ## _tls_key = TlsAlloc(); \
     }
 
-#define QEMU_THREAD_LOCAL_DECLARE_INIT(type, name) \
+#define QEMU_THREAD_LOCAL_DECLARE_INIT(type, name, value) \
     QEMU_THREAD_LOCAL_DECLARE_COMMON(type, name); \
     static void __attribute__((constructor)) qemu_tls_init_ ## name(void) { \
         name ## _tls_key = TlsAlloc(); \
