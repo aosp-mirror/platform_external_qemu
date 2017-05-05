@@ -85,6 +85,7 @@ bool HostCrashReporter::exceptionFilterCallback(void*) {
 }
 
 bool HostCrashReporter::onCrashPlatformSpecific() {
+    CommonReportedInfo::appendMemoryUsage();
     // collect the memory usage at the time of the crash
     crashhandler_copy_attachment(
                 CrashReporter::kProcessMemoryInfoFileName, "/proc/self/status");

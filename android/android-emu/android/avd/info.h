@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/avd/hw-config.h"
+#include "android/avd/util.h"
 #include "android/utils/compiler.h"
 #include "android/utils/file_data.h"
 #include "android/utils/ini.h"
@@ -167,11 +168,8 @@ bool   avdInfo_isGoogleApis( const AvdInfo*  i );
 /* Returns true if the AVD is a user build. */
 bool avdInfo_isUserBuild(const AvdInfo* i);
 
-/* Returns true if is a phone API. */
-bool   avdInfo_isPhoneApi( const AvdInfo*  i );
-
-/* Returns true if the AVD is running Android Auto. */
-bool avdInfo_isAndroidAuto(const AvdInfo* i);
+/* Querying AVD flavors. */
+AvdFlavor avdInfo_getAvdFlavor( const AvdInfo* i);
 
 /* Returns the path to various images corresponding to a given AVD.
  * NULL if the image cannot be found. Returned strings must be freed
