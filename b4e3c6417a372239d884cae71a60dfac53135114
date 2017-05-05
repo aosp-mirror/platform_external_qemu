@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d02fd585_9b10131f",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 668,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-05T15:36:14Z",
+      "side": 1,
+      "message": "persistent",
+      "range": {
+        "startLine": 668,
+        "startChar": 20,
+        "endLine": 668,
+        "endChar": 29
+      },
+      "revId": "b4e3c6417a372239d884cae71a60dfac53135114",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86ba0c05_95a35b85",
+        "filename": "android/android-emu/android/main-kernel-parameters.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-05T15:36:14Z",
+      "side": 1,
+      "message": "Need to update this",
+      "range": {
+        "startLine": 40,
+        "startChar": 3,
+        "endLine": 40,
+        "endChar": 62
+      },
+      "revId": "b4e3c6417a372239d884cae71a60dfac53135114",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6529c45f_d7734a0e",
+        "filename": "hw/misc/goldfish_pstore.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-05T15:36:14Z",
+      "side": 1,
+      "message": "in bytes",
+      "revId": "b4e3c6417a372239d884cae71a60dfac53135114",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "955a5d3f_b9f38948",
+        "filename": "hw/misc/goldfish_pstore.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-05T15:36:14Z",
+      "side": 1,
+      "message": "remove \u0027.\u0027",
+      "range": {
+        "startLine": 132,
+        "startChar": 69,
+        "endLine": 132,
+        "endChar": 70
+      },
+      "revId": "b4e3c6417a372239d884cae71a60dfac53135114",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
