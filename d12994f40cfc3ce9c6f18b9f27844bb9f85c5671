@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a4a7215d_2670472b",
+        "filename": "include/qemu/thread_local.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-05T15:37:03Z",
+      "side": 1,
+      "message": "well, it\u0027s not supposed to run more than once anyway, so if setting NULL here helps with anything then there\u0027s a bigger problem - thread exit notifiers run more than once for some thread",
+      "revId": "d12994f40cfc3ce9c6f18b9f27844bb9f85c5671",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
