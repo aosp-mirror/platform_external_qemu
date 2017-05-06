@@ -264,6 +264,7 @@ LOCAL_SRC_FILES := \
     android/crashreport/CrashSystem.cpp \
     android/crashreport/CrashReporter_common.cpp \
     android/crashreport/CrashReporter_$(BUILD_TARGET_OS).cpp \
+    android/crashreport/HangDetector.cpp \
     android/curl-support.c \
     android/emuctl-client.cpp \
     android/emulation/AdbDebugPipe.cpp \
