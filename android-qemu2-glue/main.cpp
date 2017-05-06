@@ -82,9 +82,6 @@ extern "C" {
 #include "android/version.h"
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
-int android_base_port;
-int android_serial_number_port;
-
 extern bool android_op_wipe_data;
 extern bool android_op_writable_system;
 
