@@ -45,7 +45,9 @@ typedef ::android::base::Looper::FdWatch BaseFdWatch;
 
 class QtLooper : public BaseLooper {
 public:
-    QtLooper() : Looper() {}
+    QtLooper() = default;
+
+    base::StringView name() const override { return "Qt event loop"; }
 
     //
     // T I M E R S
