@@ -384,7 +384,7 @@ LOCAL_SRC_FILES := \
     android/proxy/proxy_http_rewriter.c \
     android/proxy/proxy_setup.cpp \
     android/proxy/ProxyUtils.cpp \
-    android/qemu-setup.c \
+    android/qemu-setup.cpp \
     android/qemu-tcpdump.c \
     android/qt/qt_path.cpp \
     android/qt/qt_setup.cpp \

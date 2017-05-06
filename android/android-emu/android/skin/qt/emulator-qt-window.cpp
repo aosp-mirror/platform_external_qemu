@@ -174,6 +174,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<SkinRotation>("SkinRotation");
 
     android::base::ThreadLooper::setLooper(mLooper, true);
+    android::crashreport::CrashReporter::get()->hangDetector().addWatchedLooper(
+                mLooper);
 
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
