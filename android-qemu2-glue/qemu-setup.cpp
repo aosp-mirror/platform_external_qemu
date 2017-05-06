@@ -17,6 +17,8 @@
 #include "android/android.h"
 #include "android/base/Log.h"
 #include "android/console.h"
+#include "android/crashreport/CrashReporter.h"
+#include "android/globals.h"
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
@@ -24,6 +26,7 @@
 #include "android-qemu2-glue/emulation/DmaMap.h"
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
+#include "android-qemu2-glue/base/async/CpuLooper.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
@@ -106,7 +109,16 @@ bool qemu_android_emulation_setup() {
         return false;
     }
 
-    return android_emulation_setup(&consoleAgents, true);
+    if (!android_emulation_setup(&consoleAgents, true)) {
+        return false;
+    }
+
+    for (int i = 0; i < android_hw->hw_cpu_ncore; ++i) {
+        android::crashreport::CrashReporter::get()->hangDetector().
+                addWatchedLooper(new android::qemu::CpuLooper(i));
+    }
+
+    return true;
 }
 
 void qemu_android_emulation_teardown() {}
