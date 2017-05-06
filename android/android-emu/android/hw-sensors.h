@@ -12,7 +12,11 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+
 #include <stdint.h>
+
+ANDROID_BEGIN_HEADER
 
 /* initialize sensor emulation */
 extern void  android_hw_sensors_init( void );
@@ -89,3 +93,5 @@ extern const char* android_sensors_get_name_from_id( int sensor_id );
 
 /* Get sensor from sensor id */
 extern uint8_t android_sensors_get_sensor_status( int sensor_id );
+
+ANDROID_END_HEADER
