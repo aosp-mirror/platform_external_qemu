@@ -18,6 +18,7 @@
 #include "android/base/files/ScopedFd.h"
 #include "android/CommonReportedInfo.h"
 #include "android/crashreport/CrashSystem.h"
+#include "android/crashreport/HangDetector.h"
 
 #include <functional>
 
@@ -130,6 +131,8 @@ public:
 
     void SetExitMode(const char* message);
 
+    HangDetector& hangDetector() { return mHangDetector; }
+
     void addCrashCallback(CrashCallback cb) {
         assert(bool(cb));
         mCrashCallbacks.push_back(std::move(cb));
@@ -151,6 +154,7 @@ private:
     const std::string mDataExchangeDir;
     std::string mProtobufData;
     std::atomic<bool> mIsInExitMode { false };
+    HangDetector mHangDetector;
 };
 
 }  // crashreport

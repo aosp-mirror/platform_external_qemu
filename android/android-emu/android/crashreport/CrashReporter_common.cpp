@@ -79,7 +79,13 @@ CrashReporter::CrashReporter()
       // if it exists atomically. For now let's just allow UUIDs to do their
       // job to keep these unique
       mDataExchangeDir(
-              PathUtils::join(mDumpDir, Uuid::generateFast().toString())) {
+              PathUtils::join(mDumpDir, Uuid::generateFast().toString())),
+      mHangDetector([](base::StringView message) {
+          if (CrashSystem::CrashType::CRASHUPLOAD !=
+              CrashSystem::CrashType::NONE) {
+              CrashReporter::get()->GenerateDumpAndDie(message.c_str());
+          }
+      }) {
     mProtobufData.reserve(kCrashInfoProtobufStrInitialSize);
     const auto res = path_mkdir_if_needed(mDataExchangeDir.c_str(), 0744);
     if (res < 0) {
@@ -129,6 +135,8 @@ void CrashReporter::SetExitMode(const char* msg) {
         // Flush the metrics reporter to make sure we write down this message
         // before crashing on exit.
         android::metrics::MetricsReporter::get().finishPendingReports();
+
+        mHangDetector.stop();
     }
     attachData(kCrashOnExitFileName, msg);
 }

@@ -10,6 +10,9 @@
 ** GNU General Public License for more details.
 */
 
+#include "android/android.h"
+#include "android/base/async/ThreadLooper.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/console.h"
 #include "android/constants.h"
 #include "android/adb-server.h"
@@ -42,24 +45,26 @@
 
 #define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
 
-/* Contains arguments for -android-ports option. */
-char* android_op_ports = NULL;
-/* Contains the parsed numbers from android_op_ports */
-int android_op_ports_numbers[2] = {-1, -1};
-/* Contains arguments for -android-port option. */
-char* android_op_port = NULL;
-/* Contains the parsed number from android_op_port */
-int android_op_port_number = -1;
-/* Contains arguments for -android-report-console option. */
-char* android_op_report_console = NULL;
-/* Contains arguments for -http-proxy option. */
-char* op_http_proxy = NULL;
-/* Base port for the emulated system. */
-int    android_base_port;
-/* ADB port */
-int    android_adb_port = 5037; // Default
-/* The device "serial number" is "emulator-<this number>" */
-int    android_serial_number_port;
+extern "C" {
+    /* Contains arguments for -android-ports option. */
+    char* android_op_ports = NULL;
+    /* Contains the parsed numbers from android_op_ports */
+    int android_op_ports_numbers[2] = {-1, -1};
+    /* Contains arguments for -android-port option. */
+    char* android_op_port = NULL;
+    /* Contains the parsed number from android_op_port */
+    int android_op_port_number = -1;
+    /* Contains arguments for -android-report-console option. */
+    char* android_op_report_console = NULL;
+    /* Contains arguments for -http-proxy option. */
+    char* op_http_proxy = NULL;
+    /* Base port for the emulated system. */
+    int    android_base_port;
+    /* ADB port */
+    int    android_adb_port = 5037; // Default
+    /* The device "serial number" is "emulator-<this number>" */
+    int    android_serial_number_port;
+}
 
 // The following code is used to support the -report-console option,
 // which takes a parameter in one of the following formats:
@@ -405,6 +410,9 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
 
     /* initilize fingperprint here */
     android_hw_fingerprint_init();
+
+    android::crashreport::CrashReporter::get()->hangDetector().addWatchedLooper(
+                android::base::ThreadLooper::get());
 
     return true;
 }
