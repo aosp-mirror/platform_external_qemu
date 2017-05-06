@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6993f1f2_4e44a201",
+        "filename": "android-qemu2-glue/base/async/CpuLooper.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-06T02:01:15Z",
+      "side": 1,
+      "message": "Can we add comments here (and below) on why some functions are stubbed out?",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 1
+      },
+      "revId": "ba1347043e4f42bbec1a14ced8d446676dd7f0e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
