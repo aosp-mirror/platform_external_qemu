@@ -65,6 +65,8 @@ public:
         DCHECK(mPendingFdWatches.empty());
     }
 
+    base::StringView name() const override { return "QEMU2 main loop"; }
+
     static QEMUClockType toQemuClockType(ClockType clock) {
         static_assert((int) QEMU_CLOCK_HOST == (int) BaseLooper::ClockType::kHost &&
                       (int) QEMU_CLOCK_VIRTUAL == (int) BaseLooper::ClockType::kVirtual &&

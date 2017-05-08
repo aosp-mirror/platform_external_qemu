@@ -31,6 +31,8 @@ public:
 
     ~DefaultLooper() override;
 
+    StringView name() const override { return "Generic"; }
+
     Duration nowMs(ClockType clockType = ClockType::kHost) override;
 
     DurationNs nowNs(ClockType clockType = ClockType::kHost) override;

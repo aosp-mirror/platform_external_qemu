@@ -12,6 +12,10 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
+
 /* initialize */
 extern void  android_hw_fingerprint_init( void );
 
@@ -20,3 +24,5 @@ void android_hw_fingerprint_touch(int fingerid);
 
 /* take finger off the fingerprint sensor */
 void android_hw_fingerprint_remove();
+
+ANDROID_END_HEADER
