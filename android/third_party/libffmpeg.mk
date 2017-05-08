@@ -1,49 +1,19 @@
 # Build rules for the static ffmpeg prebuilt libraries.
-FFMPEG_OLD_LOCAL_PATH := $(LOCAL_PATH)
+WEBRTC_OLD_LOCAL_PATH := $(LOCAL_PATH)
 
 LOCAL_PATH := $(call my-dir)
 
-FFMPEG_TOP_DIR := $(FFMPEG_PREBUILTS_DIR)/$(BUILD_TARGET_TAG)
+WEBRTC_TOP_DIR := $(LOCAL_PATH)/webrtc/$(BUILD_TARGET_TAG)
 
 $(call define-emulator-prebuilt-library,\
-    emulator-libavcodec,\
-    $(FFMPEG_TOP_DIR)/lib/libavcodec.a)
+    emulator-webrtc,\
+    $(WEBRTC_TOP_DIR)/lib/libwebrtc.a)
 
 $(call define-emulator-prebuilt-library,\
-    emulator-libavfilter,\
-    $(FFMPEG_TOP_DIR)/lib/libavfilter.a)
+    emulator-webrtc-common,\
+    $(WEBRTC_TOP_DIR)/lib/libwebrtc_common.a)
 
-$(call define-emulator-prebuilt-library,\
-    emulator-libavformat,\
-    $(FFMPEG_TOP_DIR)/lib/libavformat.a)
+WEBRTC_INCLUDES := $(WEBRTC_TOP_DIR)/include
+WEBRTC_STATIC_LIBRARIES := \
 
-$(call define-emulator-prebuilt-library,\
-    emulator-libavresample,\
-    $(FFMPEG_TOP_DIR)/lib/libavresample.a)
-
-$(call define-emulator-prebuilt-library,\
-    emulator-libavutil,\
-    $(FFMPEG_TOP_DIR)/lib/libavutil.a)
-
-$(call define-emulator-prebuilt-library,\
-    emulator-libpostproc,\
-    $(FFMPEG_TOP_DIR)/lib/libpostproc.a)
-
-$(call define-emulator-prebuilt-library,\
-    emulator-libswscale,\
-    $(FFMPEG_TOP_DIR)/lib/libswscale.a)
-
-$(call define-emulator-prebuilt-library,\
-    emulator-libswresample,\
-    $(FFMPEG_TOP_DIR)/lib/libswresample.a)
-
-FFMPEG_INCLUDES := $(FFMPEG_TOP_DIR)/include
-FFMPEG_STATIC_LIBRARIES := \
-    emulator-libavformat \
-    emulator-libavfilter \
-    emulator-libavcodec \
-    emulator-libswresample \
-    emulator-libswscale \
-    emulator-libavutil \
-
-LOCAL_PATH := $(FFMPEG_OLD_LOCAL_PATH)
+LOCAL_PATH := $(WEBRTC_OLD_LOCAL_PATH)
