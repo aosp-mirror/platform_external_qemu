@@ -23,6 +23,7 @@ include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
 include $(LOCAL_PATH)/android/third_party/libx264.mk
 include $(LOCAL_PATH)/android/third_party/libvpx.mk
 include $(LOCAL_PATH)/android/third_party/libsdl2.mk
+include $(LOCAL_PATH)/android/third_party/libwebsockets/libwebsockets.mk
 
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
