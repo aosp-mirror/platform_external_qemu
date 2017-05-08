@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2db1a4f9_6bef0ea2",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-08T16:17:46Z",
+      "side": 1,
+      "message": "Good to know, will fix.",
+      "parentUuid": "8ea7c628_f2c3c58c",
+      "range": {
+        "startLine": 183,
+        "startChar": 4,
+        "endLine": 183,
+        "endChar": 91
+      },
+      "revId": "7e62c7230192864864196ad311460d797137ef8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d477f65_6776b666",
         "filename": "android/scripts/sanitize.py",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-05-05T21:39:32Z",
       "side": 1,
       "message": "not sure if this file should be in the same CL :)",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 17
+      },
+      "revId": "7e62c7230192864864196ad311460d797137ef8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91105e00_4de32c6a",
+        "filename": "android/scripts/sanitize.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-08T16:17:46Z",
+      "side": 1,
+      "message": "Let me move this to a different commit.",
+      "parentUuid": "2d477f65_6776b666",
       "range": {
         "startLine": 1,
         "startChar": 0,
