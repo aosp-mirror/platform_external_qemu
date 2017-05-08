@@ -2410,6 +2410,19 @@ handleAnswer( const char*  cmd, AModem  modem )
 
 int android_snapshot_update_time = 1;
 int android_snapshot_update_time_request = 0;
+static time_t android_last_signal_time = 0;
+
+static bool wakeup_from_sleep() {
+    // it has not called once yet
+    if (android_last_signal_time == 0) {
+        return false;
+    }
+    // heuristics: if guest has not asked for signal strength
+    // for 2 minutes, we assume it is caused by host sleep
+    time_t now = time(NULL);
+    const bool wakeup_from_sleep = (now > android_last_signal_time + 120);
+    return wakeup_from_sleep;
+}
 
 static const char*
 handleSignalStrength( const char*  cmd, AModem  modem )
@@ -2423,7 +2436,11 @@ handleSignalStrength( const char*  cmd, AModem  modem )
     if ( android_snapshot_update_time && android_snapshot_update_time_request ) {
       amodem_addTimeUpdate( modem );
       android_snapshot_update_time_request = 0;
+    } else if (wakeup_from_sleep()){
+        amodem_addTimeUpdate(modem);
     }
+
+    android_last_signal_time = time(NULL);
 
     if (modem->use_signal_profile) {
         signal_t current_signal = NET_PROFILES[modem->quality];
