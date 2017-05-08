@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2797031c_eb07f85d",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T23:52:55Z",
+      "side": 1,
+      "message": "we do have the emulator version baked in, it\u0027s in android/version.h\nAlso, there\u0027s android/base/Version class to help dealing with parsing and comparing versions.\nToo late :(",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 40
+      },
+      "revId": "4e736315eef0508d492592463994487e23791c60",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
