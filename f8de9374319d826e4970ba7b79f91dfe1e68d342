@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1370e548_1c1385f1",
+        "filename": "android/android-emu/android/websocket/webrtc.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T23:04:39Z",
+      "side": 1,
+      "message": "I\u0027d prefer to have \u0027dprint/derror\u0027 instead",
+      "range": {
+        "startLine": 2,
+        "startChar": 10,
+        "endLine": 2,
+        "endChar": 18
+      },
+      "revId": "f8de9374319d826e4970ba7b79f91dfe1e68d342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fd0c130_3f2ec9f2",
+        "filename": "android/android-emu/android/websocket/webrtc.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T23:04:39Z",
+      "side": 1,
+      "message": "thread and mutex are either really slow or even broken in MinGW\nplease use our wrappers from android/base instead",
+      "range": {
+        "startLine": 4,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 17
+      },
+      "revId": "f8de9374319d826e4970ba7b79f91dfe1e68d342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0c1f5c70_db8df9e8",
+        "filename": "android/android-emu/android/websocket/webrtc.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T23:04:39Z",
+      "side": 1,
+      "message": "we should define it in the makefile scripts",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 22
+      },
+      "revId": "f8de9374319d826e4970ba7b79f91dfe1e68d342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "689c5293_346fc4e5",
+        "filename": "android/android-emu/android/websocket/webrtc.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T23:04:39Z",
+      "side": 1,
+      "message": "I understand that it\u0027s a WIP CL, but for the future \u0027productisation\u0027: let\u0027s either return an object from start() function, or at least have a single class that\u0027s initialized here and put it into static LazyInstance\u003c\u003e variable.\nThis way we make sure there\u0027s no problems with global variables initialization order\n\nAnother thing is that if there\u0027s a \u0027start()\u0027, there should be a \u0027stop()\u0027 next to it (or start should return a smart pointer)",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 40
+      },
+      "revId": "f8de9374319d826e4970ba7b79f91dfe1e68d342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44c49126_14d4f4e7",
+        "filename": "android/android-emu/android/websocket/webrtc.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T23:04:39Z",
+      "side": 1,
+      "message": "this file needs a proper copyright header, #pragma once, some comments on the function\nalso, use ANDROID_BEGIN/END_HEADER if you want to make the function usable in C",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 30
+      },
+      "revId": "f8de9374319d826e4970ba7b79f91dfe1e68d342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a856661d_894187aa",
+        "filename": "android/third_party/webrtc/include/webrtc/api/audio/audio_mixer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T23:04:39Z",
+      "side": 1,
+      "message": "headers should also go into prebuilts, e.g. like with Qt",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "f8de9374319d826e4970ba7b79f91dfe1e68d342",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
