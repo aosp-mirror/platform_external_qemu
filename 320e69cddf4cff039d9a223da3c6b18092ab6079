@@ -22,6 +22,30 @@
       "revId": "320e69cddf4cff039d9a223da3c6b18092ab6079",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40ed6dd6_534bfe42",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1010,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-08T20:33:56Z",
+      "side": 1,
+      "message": "yes, it only compares first 3 characters",
+      "parentUuid": "58faf40e_431de22b",
+      "range": {
+        "startLine": 1010,
+        "startChar": 48,
+        "endLine": 1010,
+        "endChar": 51
+      },
+      "revId": "320e69cddf4cff039d9a223da3c6b18092ab6079",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
