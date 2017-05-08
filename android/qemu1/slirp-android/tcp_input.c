@@ -1352,6 +1352,18 @@ step6:
 dodata:
 
 	/*
+	 * If this is a small packet, then ACK now - with Nagel
+	 *      congestion avoidance sender won't send more until
+	 *      he gets an ACK.
+	 *
+	 * See above.
+	 */
+	if (ti->ti_len && (unsigned)ti->ti_len <= 5 &&
+	    ((struct tcpiphdr_2 *)ti)->first_char == (char)27) {
+		tp->t_flags |= TF_ACKNOW;
+	}
+
+	/*
 	 * Process the segment text, merging it into the TCP sequencing queue,
 	 * and arranging for acknowledgment of receipt if necessary.
 	 * This process logically involves adjusting tp->rcv_wnd as data
@@ -1435,25 +1447,6 @@ dodata:
 			tp->t_timer[TCPT_2MSL] = 2 * TCPTV_MSL;
 			break;
 		}
-	}
-
-	/*
-	 * If this is a small packet, then ACK now - with Nagel
-	 *      congestion avoidance sender won't send more until
-	 *      he gets an ACK.
-	 *
-	 * See above.
-	 */
-/*	if (ti->ti_len && (unsigned)ti->ti_len < tp->t_maxseg) {
- */
-/*	if ((ti->ti_len && (unsigned)ti->ti_len < tp->t_maxseg &&
- *		(so->so_iptos & IPTOS_LOWDELAY) == 0) ||
- *	       ((so->so_iptos & IPTOS_LOWDELAY) &&
- *	       ((struct tcpiphdr_2 *)ti)->first_char == (char)27)) {
- */
-	if (ti->ti_len && (unsigned)ti->ti_len <= 5 &&
-	    ((struct tcpiphdr_2 *)ti)->first_char == (char)27) {
-		tp->t_flags |= TF_ACKNOW;
 	}
 
 	/*
