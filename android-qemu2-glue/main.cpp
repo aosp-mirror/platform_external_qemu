@@ -65,6 +65,8 @@ extern "C" {
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
+#include "android/websocket/wsconsole.h"
+
 
 #ifdef TARGET_AARCH64
 #define TARGET_ARM64
@@ -1129,6 +1131,8 @@ extern "C" int main(int argc, char **argv) {
         printf("\n");
     }
 
+    WSConsole *es = new WSConsole(8080);
+    es->start();
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(opts->no_window);
 
