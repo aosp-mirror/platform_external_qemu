@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "58faf40e_431de22b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1010,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-05-08T19:52:44Z",
+      "side": 1,
+      "message": "does it cover arm64 too ?",
+      "range": {
+        "startLine": 1010,
+        "startChar": 48,
+        "endLine": 1010,
+        "endChar": 51
+      },
+      "revId": "320e69cddf4cff039d9a223da3c6b18092ab6079",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
