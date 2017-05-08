@@ -22,6 +22,54 @@
       "revId": "07025f98a553ca0462630c78a7476e1fefa6b697",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7113a1f3_07e23402",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-08T21:04:39Z",
+      "side": 1,
+      "message": "I called \u003c,\u003esort on this to make sure they are sorted.\n\nI guess the default sort in vim considers CAPITAL\u003clowercase",
+      "parentUuid": "4ac896ae_89756f12",
+      "range": {
+        "startLine": 14,
+        "startChar": 10,
+        "endLine": 14,
+        "endChar": 17
+      },
+      "revId": "07025f98a553ca0462630c78a7476e1fefa6b697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20c8df5d_abfe0065",
+        "filename": "android/android-emu/android/featurecontrol/FeatureControlImpl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-08T21:04:39Z",
+      "side": 1,
+      "message": "I called \u003c,\u003esort on this to make sure they are sorted.\n\nI guess the default sort in vim considers CAPITAL\u003clowercase",
+      "parentUuid": "4ac896ae_89756f12",
+      "range": {
+        "startLine": 14,
+        "startChar": 10,
+        "endLine": 14,
+        "endChar": 17
+      },
+      "revId": "07025f98a553ca0462630c78a7476e1fefa6b697",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
