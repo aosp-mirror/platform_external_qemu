@@ -226,6 +226,7 @@ LOCAL_C_INCLUDES := \
     $(LIBJPEG_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(LIBEXT4_UTILS_INCLUDES) \
+    $(WEBRTC_INCLUDES) \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
 
@@ -416,6 +417,7 @@ LOCAL_SRC_FILES := \
     android/wear-agent/PairUpWearPhone.cpp \
     android/websocket/websocketserver.cpp \
     android/websocket/wsconsole.cpp \
+    android/websocket/webrtc.cpp \
     
 
 # Platform-specific camera capture
@@ -427,6 +429,7 @@ endif
 ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-mac.m
+    LOCAL_CFLAGS += -DWEBRTC_MAC 
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -472,6 +475,8 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libpng \
     emulator-libwebp \
     emulator-libwebsockets \
+    emulator-libwebrtc \
+    emulator-libwebrtc-common \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \

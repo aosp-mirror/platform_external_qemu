@@ -293,6 +293,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
       CoreVideo \
       ForceFeedback \
       IOKit \
+      AudioToolbox \
       QTKit \
       VideoDecodeAcceleration \
       VideoToolbox
