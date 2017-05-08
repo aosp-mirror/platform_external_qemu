@@ -1007,6 +1007,7 @@ extern "C" int main(int argc, char **argv) {
             bool shouldDisableAsyncSwap = false;
             shouldDisableAsyncSwap |= (opts->gpu && !strncmp(opts->gpu, "angle", 5));
             shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
+            shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
 
             if (shouldDisableAsyncSwap &&
                     android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
