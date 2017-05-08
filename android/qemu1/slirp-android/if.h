@@ -28,8 +28,8 @@
 #define IF_MAXLINKHDR 40
 #endif
 #else
-        /* 2 for alignment, 14 for ethernet, 40 for TCP/IP */
-#define IF_MAXLINKHDR (2 + 14 + 40)
+        /* 2 for alignment, 14 for ethernet */
+#define IF_MAXLINKHDR (2 + ETH_HLEN)
 #endif
 
 extern int	if_queued;	/* Number of packets queued so far */

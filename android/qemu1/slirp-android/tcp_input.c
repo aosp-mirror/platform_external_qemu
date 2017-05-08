@@ -271,11 +271,11 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
 
 
 	STAT(tcpstat.tcps_rcvtotal++);
-	/*
-	 * Get IP and TCP header together in first mbuf.
-	 * Note: IP leaves IP header in first mbuf.
-	 */
-	ti = mtod(m, struct tcpiphdr *);
+
+	ip = mtod(m, struct ip *);
+
+	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct ip) -
+		sizeof(struct tcphdr);
 	if (iphlen > (int)sizeof(struct ip )) {
 	  ip_stripoptions(m, (struct mbuf *)0);
 	  iphlen=sizeof(struct ip );
@@ -287,19 +287,27 @@ tcp_input(struct mbuf *m, int iphlen, struct socket *inso)
 	 * Save a copy of the IP header in case we want restore it
 	 * for sending an ICMP error message in response.
 	 */
-	ip=mtod(m, struct ip *);
 	save_ip = *ip;
 	save_ip.ip_len+= iphlen;
+	/*
+	 * Get IP and TCP header together in first mbuf.
+	 * Note: IP leaves IP header in first mbuf.
+	 */
+	m->m_data -= delta;
+	m->m_len += delta;
+	ti = mtod(m, struct tcpiphdr *);
 
 	/*
 	 * Checksum extended TCP header and data.
 	 */
-	tlen = ((struct ip *)ti)->ip_len;
-        tcpiphdr2qlink(ti)->next = tcpiphdr2qlink(ti)->prev = NULL;
-        memset(&ti->ti_i.ih_mbuf, 0 , sizeof(struct mbuf_ptr));
-	ti->ti_x1 = 0;
+	tlen = ip->ip_len;
+	tcpiphdr2qlink(ti)->next = tcpiphdr2qlink(ti)->prev = NULL;
+	memset(&ti->ti_i, 0 , sizeof(ti->ti_i));
 	ti->ti_len = htons((u_int16_t)tlen);
-	len = sizeof(struct ip ) + tlen;
+	ti->ti_src = save_ip.ip_src;
+	ti->ti_dst = save_ip.ip_dst;
+	ti->ti_pr = save_ip.ip_p;
+	len = sizeof(struct tcpiphdr) - sizeof(struct tcphdr) + tlen;
 	/* keep checksum for ICMP reply
 	 * ti->ti_sum = cksum(m, len);
 	 * if (ti->ti_sum) { */
@@ -681,6 +689,8 @@ findso:
 	      HTONS(ti->ti_urp);
 	      m->m_data -= sizeof(struct tcpiphdr)+off-sizeof(struct tcphdr);
 	      m->m_len  += sizeof(struct tcpiphdr)+off-sizeof(struct tcphdr);
+	      m->m_data += delta;
+	      m->m_len  -= delta;
 	      *ip=save_ip;
 	      icmp_error(m, ICMP_UNREACH,code, 0,errno_str);
 	    }
