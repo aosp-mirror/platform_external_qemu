@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #pragma once
+#include "android/utils/looper.h"
 
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/car_data_agent.h"
@@ -58,5 +59,64 @@ typedef struct AndroidConsoleAgents {
 // QEMU implementations should populate |*agents| with QEMU specific
 // functions. Takes ownership of |agents|.
 extern int android_console_start(int port, const AndroidConsoleAgents* agents);
+
+typedef struct ControlGlobalRec_*  ControlGlobal;
+
+typedef struct ControlClientRec_*  ControlClient;
+
+typedef struct {
+    int           host_port;
+    int           host_udp;
+    unsigned int  guest_ip;
+    int           guest_port;
+} RedirRec, *Redir;
+
+
+typedef int Socket;
+typedef const struct CommandDefRec_* CommandDef;
+
+typedef struct ControlClientRec_
+{
+    struct ControlClientRec_*  next;       /* next client in list           */
+    Socket                     sock;       /* socket used for communication */
+    // The loopIo currently communicating over |sock|. May change over the
+    // lifetime of a ControlClient.
+    LoopIo* loopIo;
+    ControlGlobal              global;
+    char                       finished;
+    char                       buff[ 4096 ];
+    int                        buff_len;
+    CommandDef                 commands;
+
+    // Used for those who provide their own mechanism to write back data.
+    void*                      opaque;
+    void (*write)(ControlClient client, const char* line, int len);
+} ControlClientRec;
+
+ControlClient control_client_create_empty();
+
+typedef struct ControlGlobalRec_
+{
+    // Interfaces to call into QEMU specific code.
+#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) type name ## _agent [1];
+    ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_FIELD)
+
+    /* IO */
+    Looper* looper;
+    LoopIo* listen4_loopio;
+    LoopIo* listen6_loopio;
+
+    /* the list of current clients */
+    ControlClient   clients;
+
+    /* the list of redirections currently active */
+    Redir     redirs;
+    int       num_redirs;
+    int       max_redirs;
+
+} ControlGlobalRec;
+
+void control_client_do_command(ControlClient client);
+
 
 ANDROID_END_HEADER

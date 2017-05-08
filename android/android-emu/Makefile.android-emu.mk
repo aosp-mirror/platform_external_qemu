@@ -67,8 +67,7 @@ include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
-ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
-
+ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES) $(WEBSOCKETS_INCLUDES) 
 ###############################################################################
 #
 #  android-emu-base
@@ -415,6 +414,9 @@ LOCAL_SRC_FILES := \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
+    android/websocket/websocketserver.cpp \
+    android/websocket/wsconsole.cpp \
+    
 
 # Platform-specific camera capture
 ifeq ($(BUILD_TARGET_OS),linux)
@@ -469,6 +471,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libjpeg \
     emulator-libpng \
     emulator-libwebp \
+    emulator-libwebsockets \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
