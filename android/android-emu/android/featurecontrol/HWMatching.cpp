@@ -14,7 +14,6 @@
 
 #include "HWMatching.h"
 
-#include "android/android-emu-version.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
@@ -237,59 +236,6 @@ bool matchFeaturePattern(
     return res;
 }
 
-static bool featureActionAppliesToEmulatorVersion(
-    const emulator_features::FeatureFlagAction& action) {
-
-    uint32_t minMajor, minMinor, minPatch;
-    uint32_t maxMajor, maxMinor, maxPatch;
-
-    bool appliesToCurrentVersion = true;
-
-    // Allow version constraints in the protobuf
-    // to be under-specified.
-    if (action.has_min_version()) {
-        if (action.min_version().has_major()) {
-            minMajor = action.min_version().major();
-            if (ANDROID_EMU_MAJOR_VERSION < minMajor) {
-                appliesToCurrentVersion = false;
-            } else if (ANDROID_EMU_MAJOR_VERSION == minMajor &&
-                       action.min_version().has_minor()) {
-                minMinor = action.min_version().minor();
-                if (ANDROID_EMU_MINOR_VERSION < minMinor) {
-                    appliesToCurrentVersion = false;
-                } else if (ANDROID_EMU_MINOR_VERSION == minMinor &&
-                           action.min_version().has_patch()) {
-                    minPatch = action.min_version().patch();
-                    if (ANDROID_EMU_PATCH_VERSION < minPatch)
-                        appliesToCurrentVersion = false;
-                }
-            }
-        }
-    }
-
-    if (action.has_max_version()) {
-        if (action.max_version().has_major()) {
-            maxMajor = action.max_version().major();
-            if (ANDROID_EMU_MAJOR_VERSION > maxMajor) {
-                appliesToCurrentVersion = false;
-            } else if (ANDROID_EMU_MAJOR_VERSION == maxMajor &&
-                       action.max_version().has_minor()) {
-                maxMinor = action.max_version().minor();
-                if (ANDROID_EMU_MINOR_VERSION > maxMinor) {
-                    appliesToCurrentVersion = false;
-                } else if (ANDROID_EMU_MINOR_VERSION == maxMinor &&
-                           action.max_version().has_patch()) {
-                    maxPatch = action.max_version().patch();
-                    if (ANDROID_EMU_PATCH_VERSION > maxPatch)
-                        appliesToCurrentVersion = false;
-                }
-            }
-        }
-    }
-
-    return appliesToCurrentVersion;
-}
-
 std::vector<FeatureAction> matchFeaturePatterns(
         const HostHwInfo::Info& hwinfo,
         const emulator_features::EmulatorFeaturePatterns* input) {
@@ -308,8 +254,8 @@ std::vector<FeatureAction> matchFeaturePatterns(
 
         for (const auto action : pattern.featureaction()) {
 
-            if (!action.has_feature() || !action.has_enable()) continue;
-            if (!featureActionAppliesToEmulatorVersion(action)) continue;
+            if (!action.has_feature() ||
+                !action.has_enable()) continue;
 
             FeatureAction nextAction;
             nextAction.name = emulator_features::Feature_Name(action.feature());
@@ -337,7 +283,7 @@ static void doFeatureAction(const FeatureAction& action) {
 
 }
 
-static const char kFeaturePatternsUrlPrefix[] =
+static const char kFeaturePatternsUrl[] =
     "https://dl.google.com/dl/android/studio/metadata/emulator-feature-patterns.protobuf";
 
 static size_t curlDownloadFeaturePatternsCallback(
@@ -352,12 +298,12 @@ static size_t curlDownloadFeaturePatternsCallback(
 }
 
 std::string downloadFeaturePatterns() {
-    D("load: %s\n", kFeaturePatternsUrlPrefix);
+    D("load: %s\n", kFeaturePatternsUrl);
 
     char* curlError = nullptr;
     std::string res;
     if (!curl_download(
-            kFeaturePatternsUrlPrefix, nullptr,
+            kFeaturePatternsUrl, nullptr,
             &curlDownloadFeaturePatternsCallback,
             &res, &curlError)) {
         return "Error: failed to download feature patterns from server.";
