@@ -22,6 +22,30 @@
       "revId": "c00d7c661859e579810810f180381f88de7c863d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5c5a85f_708f00a8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.ui",
+        "patchSetId": 3
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-05-09T21:30:10Z",
+      "side": 0,
+      "message": "Readonly property has stylesheeet that won\u0027t give it border and background color as we want in the design. maybe there is another way to work around by overriding the stylesheet.",
+      "parentUuid": "0a4f7c32_b2d98125",
+      "range": {
+        "startLine": 496,
+        "startChar": 3,
+        "endLine": 498,
+        "endChar": 14
+      },
+      "revId": "c00d7c661859e579810810f180381f88de7c863d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
