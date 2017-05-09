@@ -14,13 +14,14 @@
 
 #include "HWMatching.h"
 
-#include "android/android-emu-version.h"
+#include "android/version.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/Version.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -52,6 +53,7 @@ using android::base::LazyInstance;
 using android::base::OsType;
 using android::base::StringView;
 using android::base::System;
+using android::base::Version;
 
 namespace android {
 namespace featurecontrol {
@@ -237,57 +239,39 @@ bool matchFeaturePattern(
     return res;
 }
 
+template <unsigned int defaultVal>
+static Version versionFromProto(const emulator_features::EmulatorVersion& ver) {
+    return Version(
+            ver.has_major() ? ver.major() : defaultVal,
+            (ver.has_major() && ver.has_minor()) ? ver.minor() : defaultVal,
+            (ver.has_major() && ver.has_minor() && ver.has_micro())
+                    ? ver.micro()
+                    : defaultVal);
+}
+
 static bool featureActionAppliesToEmulatorVersion(
-    const emulator_features::FeatureFlagAction& action) {
-
-    uint32_t minMajor, minMinor, minPatch;
-    uint32_t maxMajor, maxMinor, maxPatch;
-
-    bool appliesToCurrentVersion = true;
-
-    // Allow version constraints in the protobuf
-    // to be under-specified.
-    if (action.has_min_version()) {
-        if (action.min_version().has_major()) {
-            minMajor = action.min_version().major();
-            if (ANDROID_EMU_MAJOR_VERSION < minMajor) {
-                appliesToCurrentVersion = false;
-            } else if (ANDROID_EMU_MAJOR_VERSION == minMajor &&
-                       action.min_version().has_minor()) {
-                minMinor = action.min_version().minor();
-                if (ANDROID_EMU_MINOR_VERSION < minMinor) {
-                    appliesToCurrentVersion = false;
-                } else if (ANDROID_EMU_MINOR_VERSION == minMinor &&
-                           action.min_version().has_patch()) {
-                    minPatch = action.min_version().patch();
-                    if (ANDROID_EMU_PATCH_VERSION < minPatch)
-                        appliesToCurrentVersion = false;
-                }
-            }
-        }
+        const emulator_features::FeatureFlagAction& action) {
+    Version currentVersion(EMULATOR_VERSION_STRING_SHORT);
+    // if invalid version, then all min-version constrained features
+    // apply and all max-version constrained features don't apply.
+    if (!currentVersion.isValid()) {
+        return !action.has_max_version();
     }
 
-    if (action.has_max_version()) {
-        if (action.max_version().has_major()) {
-            maxMajor = action.max_version().major();
-            if (ANDROID_EMU_MAJOR_VERSION > maxMajor) {
-                appliesToCurrentVersion = false;
-            } else if (ANDROID_EMU_MAJOR_VERSION == maxMajor &&
-                       action.max_version().has_minor()) {
-                maxMinor = action.max_version().minor();
-                if (ANDROID_EMU_MINOR_VERSION > maxMinor) {
-                    appliesToCurrentVersion = false;
-                } else if (ANDROID_EMU_MINOR_VERSION == maxMinor &&
-                           action.max_version().has_patch()) {
-                    maxPatch = action.max_version().patch();
-                    if (ANDROID_EMU_PATCH_VERSION > maxPatch)
-                        appliesToCurrentVersion = false;
-                }
-            }
-        }
+    const Version minVersion =
+            action.has_min_version() ? versionFromProto<0>(action.min_version())
+                                     : Version(0, 0, 0);
+    if (currentVersion < minVersion) {
+        return false;
     }
-
-    return appliesToCurrentVersion;
+    const Version maxVersion =
+            action.has_max_version()
+                    ? versionFromProto<Version::kNone>(action.max_version())
+                    : Version::invalid();
+    if (currentVersion > maxVersion) {
+        return false;
+    }
+    return true;
 }
 
 std::vector<FeatureAction> matchFeaturePatterns(
