@@ -83,6 +83,9 @@
    <property name="styleSheet">
     <string notr="true"/>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Button</string>
+   </property>
    <property name="text">
     <string>SAVE REPORT</string>
    </property>
@@ -335,8 +338,8 @@
      <height>19</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">color: #1A0DAB</string>
+   <property name="ColorGroup" stdset="0">
+    <string>Link</string>
    </property>
    <property name="text">
     <string/>
