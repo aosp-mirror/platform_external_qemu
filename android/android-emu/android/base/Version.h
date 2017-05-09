@@ -44,6 +44,7 @@ public:
     constexpr bool isValid() const;
 
     constexpr bool operator<(const Version& other) const;
+    constexpr bool operator>(const Version& other) const;
     constexpr bool operator==(const Version& other) const;
     constexpr bool operator!=(const Version& other) const;
 
@@ -82,6 +83,10 @@ constexpr bool Version::isValid() const {
 
 constexpr bool Version::operator<(const Version& other) const {
     return mData < other.mData;
+}
+
+constexpr bool Version::operator>(const Version& other) const {
+    return mData > other.mData;
 }
 
 constexpr bool Version::operator==(const Version& other) const {
