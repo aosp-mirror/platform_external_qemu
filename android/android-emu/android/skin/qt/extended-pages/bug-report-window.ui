@@ -83,6 +83,9 @@
    <property name="styleSheet">
     <string notr="true"/>
    </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Button</string>
+   </property>
    <property name="text">
     <string>SAVE REPORT</string>
    </property>
@@ -335,8 +338,8 @@
      <height>19</height>
     </rect>
    </property>
-   <property name="styleSheet">
-    <string notr="true">color: #1A0DAB</string>
+   <property name="ColorGroup" stdset="0">
+    <string>Link</string>
    </property>
    <property name="text">
     <string/>
@@ -493,9 +496,6 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
   </widget>
   <widget class="QLabel" name="bug_circularSpinner">
    <property name="geometry">
@@ -580,7 +580,6 @@
   <zorder>label_3</zorder>
   <zorder>label_5</zorder>
   <zorder>bug_bugReportCheckBox</zorder>
-  <zorder>bug_bugReportTextEdit</zorder>
   <zorder>bug_circularSpinner</zorder>
   <zorder>bug_collectingLabel</zorder>
   <zorder>bug_saveButton</zorder>
@@ -588,6 +587,7 @@
   <zorder>bug_screenshotCheckBox</zorder>
   <zorder>stackedWidget</zorder>
   <zorder>label_4</zorder>
+  <zorder>bug_bugReportTextEdit</zorder>
   <zorder>bug_reproStepsTextEdit</zorder>
  </widget>
  <customwidgets>
