@@ -43,8 +43,13 @@ TEST(Version, Compare) {
     EXPECT_LT(v, Version(1, 2, 1));
     EXPECT_LT(v, Version(1, 1, 2));
     EXPECT_LT(v, Version::invalid());
+    EXPECT_GT(v, Version(0, 1, 1));
+    EXPECT_GT(v, Version(1, 0, 1));
+    EXPECT_GT(v, Version(1, 1, 0));
+    EXPECT_GT(Version::invalid(), v);
 
     EXPECT_LT(v, Version(1, 1, 1, 1));
+    EXPECT_GT(Version(1, 1, 1, 1), v);
 }
 
 TEST(Version, StringCtor) {
