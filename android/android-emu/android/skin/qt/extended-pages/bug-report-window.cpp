@@ -176,6 +176,11 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
 }
 
 void BugReportWindow::showEvent(QShowEvent* event) {
+    // Override stylesheet for QPlainTextEdit[readOnly=true]
+    SettingsTheme theme = getSelectedTheme();
+    mUi->bug_bugReportTextEdit->setStyleSheet(
+        "background: transparent; border: 1px solid " +
+        Ui::stylesheetValues(theme)["EDIT_COLOR"]);
     // Align the left side of bugreport window with the extended window.
     if (mFirstShowEvent && !event->spontaneous()) {
         ToolWindow* tW = mEmulatorWindow->toolWindow();
