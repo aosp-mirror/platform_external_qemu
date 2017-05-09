@@ -14,13 +14,14 @@
 
 #include "HWMatching.h"
 
-#include "android/android-emu-version.h"
+#include "android/version.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/Version.h"
 #include "android/curl-support.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/featurecontrol/FeatureControl.h"
@@ -52,6 +53,7 @@ using android::base::LazyInstance;
 using android::base::OsType;
 using android::base::StringView;
 using android::base::System;
+using android::base::Version;
 
 namespace android {
 namespace featurecontrol {
@@ -245,22 +247,30 @@ static bool featureActionAppliesToEmulatorVersion(
 
     bool appliesToCurrentVersion = true;
 
+    Version currentVersion(EMULATOR_VERSION_STRING_SHORT);
+
+    // if invalid version, then all min-version constrained features
+    // apply and all max-version constrained features don't apply.
+    uint32_t currMajor = currentVersion.component<Version::kMajor>();
+    uint32_t currMinor = currentVersion.component<Version::kMinor>();
+    uint32_t currMicro = currentVersion.component<Version::kMicro>();
+
     // Allow version constraints in the protobuf
     // to be under-specified.
     if (action.has_min_version()) {
         if (action.min_version().has_major()) {
             minMajor = action.min_version().major();
-            if (ANDROID_EMU_MAJOR_VERSION < minMajor) {
+            if (currMajor < minMajor) {
                 appliesToCurrentVersion = false;
-            } else if (ANDROID_EMU_MAJOR_VERSION == minMajor &&
+            } else if (currMajor == minMajor &&
                        action.min_version().has_minor()) {
                 minMinor = action.min_version().minor();
-                if (ANDROID_EMU_MINOR_VERSION < minMinor) {
+                if (currMinor < minMinor) {
                     appliesToCurrentVersion = false;
-                } else if (ANDROID_EMU_MINOR_VERSION == minMinor &&
-                           action.min_version().has_patch()) {
-                    minPatch = action.min_version().patch();
-                    if (ANDROID_EMU_PATCH_VERSION < minPatch)
+                } else if (currMinor == minMinor &&
+                           action.min_version().has_micro()) {
+                    minPatch = action.min_version().micro();
+                    if (currMicro < minPatch)
                         appliesToCurrentVersion = false;
                 }
             }
@@ -270,17 +280,17 @@ static bool featureActionAppliesToEmulatorVersion(
     if (action.has_max_version()) {
         if (action.max_version().has_major()) {
             maxMajor = action.max_version().major();
-            if (ANDROID_EMU_MAJOR_VERSION > maxMajor) {
+            if (currMajor > maxMajor) {
                 appliesToCurrentVersion = false;
-            } else if (ANDROID_EMU_MAJOR_VERSION == maxMajor &&
+            } else if (currMajor == maxMajor &&
                        action.max_version().has_minor()) {
                 maxMinor = action.max_version().minor();
-                if (ANDROID_EMU_MINOR_VERSION > maxMinor) {
+                if (currMinor > maxMinor) {
                     appliesToCurrentVersion = false;
-                } else if (ANDROID_EMU_MINOR_VERSION == maxMinor &&
-                           action.max_version().has_patch()) {
-                    maxPatch = action.max_version().patch();
-                    if (ANDROID_EMU_PATCH_VERSION > maxPatch)
+                } else if (currMinor == maxMinor &&
+                           action.max_version().has_micro()) {
+                    maxPatch = action.max_version().micro();
+                    if (currMicro > maxPatch)
                         appliesToCurrentVersion = false;
                 }
             }
