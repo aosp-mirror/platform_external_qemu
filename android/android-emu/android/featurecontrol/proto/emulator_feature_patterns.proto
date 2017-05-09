@@ -56,7 +56,7 @@ message EmulatorHostHWConfig {
 message EmulatorVersion {
     optional uint32 major = 1;
     optional uint32 minor = 2;
-    optional uint32 patch = 3;
+    optional uint32 micro = 3;
 }
 
 message FeatureFlagAction {
