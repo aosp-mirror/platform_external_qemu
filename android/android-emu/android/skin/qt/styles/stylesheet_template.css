@@ -18,6 +18,11 @@
     color: %%MAJOR_TITLE_COLOR%%;
     background-color: %%TAB_BKG_COLOR%%
 }
+
+*[ColorGroup="Link"] {
+    color: %%LINK_COLOR%%;
+}
+
 *[ColorGroup="Title"] {
     color: %%TITLE_COLOR%%;
 }
