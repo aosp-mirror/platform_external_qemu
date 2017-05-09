@@ -28,6 +28,7 @@ class BugReportWindow : public QFrame {
 
 public:
     explicit BugReportWindow(EmulatorQtWindow* eW, QWidget* parent = 0);
+    ~BugReportWindow();
     void showEvent(QShowEvent* event);
     struct ReportingFields {
         std::string androidVer;

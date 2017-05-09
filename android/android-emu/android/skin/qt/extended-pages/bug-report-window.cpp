@@ -175,6 +175,10 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
             QString::fromStdString(mReportingFields.avdDetails));
 }
 
+BugReportWindow::~BugReportWindow() {
+  delete mUi->bug_circularSpinner2->movie();
+}
+
 void BugReportWindow::showEvent(QShowEvent* event) {
     // Align the left side of bugreport window with the extended window.
     if (mFirstShowEvent && !event->spontaneous()) {
