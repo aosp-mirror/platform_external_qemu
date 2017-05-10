@@ -149,6 +149,7 @@ static void goldfish_int_write(void *opaque, hwaddr offset, uint64_t value, unsi
         case INTERRUPT_DISABLE_ALL:
             s->pending_count = 0;
             s->level = 0;
+            s->irq_enabled = 0;
             break;
 
         case INTERRUPT_DISABLE:
