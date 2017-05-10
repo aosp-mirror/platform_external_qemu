@@ -53,20 +53,9 @@ message EmulatorHostHWConfig {
     repeated EmulatorGpuInfo hostgpuinfo = 2;
 }
 
-message EmulatorVersion {
-    optional uint32 major = 1;
-    optional uint32 minor = 2;
-    optional uint32 patch = 3;
-}
-
 message FeatureFlagAction {
     optional Feature feature = 1;
     optional bool enable = 2;
-
-    // do above action only if the emulator version
-    // number is in the right range.
-    optional EmulatorVersion min_version = 3;
-    optional EmulatorVersion max_version = 4;
 }
 
 message EmulatorFeaturePattern {
