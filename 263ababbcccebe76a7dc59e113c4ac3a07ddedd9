@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b9f73d3f_a86e39e9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-10T15:50:39Z",
+      "side": 1,
+      "message": "I\u0027m not sure this is a good idea: movie\u0027s parent is |this| - BugReportWindow, so it will destroy the movie anyway (line 156)",
+      "range": {
+        "startLine": 178,
+        "startChar": 0,
+        "endLine": 180,
+        "endChar": 1
+      },
+      "revId": "263ababbcccebe76a7dc59e113c4ac3a07ddedd9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
