@@ -87,6 +87,7 @@ public:
                               std::string adbBugreportFilePath,
                               std::string screenshotFilePath,
                               std::string avdDetails,
+                              std::string reproSteps,
                               bool openIssueTracker);
 public slots:
     void run();
@@ -100,6 +101,7 @@ private:
     std::string mAdbBugreportFilePath;
     std::string mScreenshotFilePath;
     std::string mAvdDetails;
+    std::string mReproSteps;
     bool mOpenIssueTracker;
 };
 

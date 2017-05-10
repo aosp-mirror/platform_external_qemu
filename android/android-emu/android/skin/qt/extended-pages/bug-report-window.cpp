@@ -238,10 +238,14 @@ void BugReportWindow::saveBugReportFolder(bool willOpenIssueTracker) {
                  mSavingStates.screenshotSucceed)
                         ? mSavingStates.screenshotFilePath
                         : "";
+        QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
+        reproSteps.truncate(2000);
+        mReportingFields.reproSteps = reproSteps.toStdString();
         auto thread = new QThread();
         auto task = new BugReportFolderSavingTask(
                 savingPath, adbBugreportFilePath, screenshotFilePath,
-                mReportingFields.avdDetails, willOpenIssueTracker);
+                mReportingFields.avdDetails, mReportingFields.reproSteps,
+                willOpenIssueTracker);
         task->moveToThread(thread);
         connect(thread, SIGNAL(started()), task, SLOT(run()));
         connect(task, SIGNAL(started()), this,
@@ -298,12 +302,12 @@ void BugReportWindow::on_bug_saveButton_clicked() {
 }
 
 void BugReportWindow::on_bug_fileBugButton_clicked() {
-    QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
-    reproSteps.truncate(2000);
-    mReportingFields.reproSteps = reproSteps.toStdString();
     if (!mSavingStates.bugreportSavedSucceed) {
         saveBugReportFolder(true);
     } else {
+        QString reproSteps = mUi->bug_reproStepsTextEdit->toPlainText();
+        reproSteps.truncate(2000);
+        mReportingFields.reproSteps = reproSteps.toStdString();
         // launch the issue tracker in a separate thread
         launchIssueTrackerThread();
         QString dirName = QFileDialog::getOpenFileName(
@@ -486,11 +490,13 @@ BugReportFolderSavingTask::BugReportFolderSavingTask(
         std::string adbBugreportFilePath,
         std::string screenshotFilePath,
         std::string avdDetails,
+        std::string reproSteps,
         bool openIssueTracker)
     : mSavingPath(savingPath),
       mAdbBugreportFilePath(adbBugreportFilePath),
       mScreenshotFilePath(screenshotFilePath),
       mAvdDetails(avdDetails),
+      mReproSteps(reproSteps),
       mOpenIssueTracker(openIssueTracker) {}
 
 void BugReportFolderSavingTask::run() {
@@ -524,11 +530,18 @@ void BugReportFolderSavingTask::run() {
 
     if (!mAvdDetails.empty()) {
         auto avdDetailsFilePath =
-                PathUtils::join(mSavingPath, "avddetails.txt");
+                PathUtils::join(mSavingPath, "avd_details.txt");
         std::ofstream outFile(avdDetailsFilePath.c_str(),
                               std::ios_base::out | std::ios_base::trunc);
         outFile << mAvdDetails << std::endl;
-        outFile.close();
+    }
+
+    if(!mReproSteps.empty()) {
+        auto reproStepsFilePath =
+                PathUtils::join(mSavingPath, "repro_steps.txt");
+        std::ofstream outFile(reproStepsFilePath.c_str(),
+                              std::ios_base::out | std::ios_base::trunc);
+        outFile << mReproSteps << std::endl;
     }
 
     emit(finished(true, dirName, mOpenIssueTracker));
