@@ -668,16 +668,21 @@ extern "C" int main(int argc, char **argv) {
     std::string pstoreFile = PathUtils::join(pstorePath, "pstore.bin");
     path_mkdir_if_needed(pstorePath.c_str(), 0777);
     android_chmod(pstorePath.c_str(), 0777);
-
+    std::string goldfish_config;
     mem_map pstore = {.start = GOLDFISH_PSTORE_MEM_BASE,
                       .size = GOLDFISH_PSTORE_MEM_SIZE};
 
-    std::string goldfish_config = StringFormat("goldfish_pstore,addr=0x%" PRIx64
-                             ",size=0x%" PRIx64 ",file=%s",
-                             pstore.start, pstore.size, pstoreFile.c_str());
-
-    args[n++] = "-device";
-    args[n++] = goldfish_config.c_str();
+    // Do not activate pstore on mips, the memory region we are using will
+    // prevent mips from booting.
+    if (strcmp("mips", kTarget.androidArch) == 0 || strcmp("mips64", kTarget.androidArch) == 0)  {
+        pstore = { 0 };
+    } else {
+        goldfish_config = StringFormat(
+                "goldfish_pstore,addr=0x%" PRIx64 ",size=0x%" PRIx64 ",file=%s",
+                pstore.start, pstore.size, pstoreFile.c_str());
+        args[n++] = "-device";
+        args[n++] = goldfish_config.c_str();
+    }
 
     // Create userdata file from init version if needed.
     if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
