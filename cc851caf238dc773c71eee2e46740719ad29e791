@@ -46,6 +46,29 @@
       "revId": "cc851caf238dc773c71eee2e46740719ad29e791",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02efd3e6_3f84cc7b",
+        "filename": "include/hw/misc/goldfish_pstore.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1111858
+      },
+      "writtenOn": "2017-05-10T13:58:36Z",
+      "side": 1,
+      "message": "This seems very architecture and platform specific. And actually breaks the kernel for mips64 and mips32\n\nPlease take a look at:\nhttps://dmz-portal.imgtec.com/android/builders/master-MIPS32-FP/builds/665\nhttps://dmz-portal.imgtec.com/android/builders/master-MIPS64R6%20%28mips32r6%20tests%29/builds/210\n\nWhy can\u0027t this be configured through device tree like any other device? That way, each platform could reserve pstore region according to its IO memory layout.",
+      "range": {
+        "startLine": 17,
+        "startChar": 33,
+        "endLine": 17,
+        "endChar": 43
+      },
+      "revId": "cc851caf238dc773c71eee2e46740719ad29e791",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
