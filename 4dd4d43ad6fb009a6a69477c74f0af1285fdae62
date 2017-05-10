@@ -22,6 +22,30 @@
       "revId": "4dd4d43ad6fb009a6a69477c74f0af1285fdae62",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bb42762_290249b9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-05-10T19:16:44Z",
+      "side": 1,
+      "message": "Can probably do it with some kind of event filter.",
+      "parentUuid": "03706529_55bfa914",
+      "range": {
+        "startLine": 242,
+        "startChar": 0,
+        "endLine": 242,
+        "endChar": 34
+      },
+      "revId": "4dd4d43ad6fb009a6a69477c74f0af1285fdae62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
