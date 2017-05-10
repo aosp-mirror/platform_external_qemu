@@ -22,6 +22,30 @@
       "revId": "263ababbcccebe76a7dc59e113c4ac3a07ddedd9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02a86cc6_69fce53f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-05-10T16:54:31Z",
+      "side": 1,
+      "message": "I see.",
+      "parentUuid": "b9f73d3f_a86e39e9",
+      "range": {
+        "startLine": 178,
+        "startChar": 0,
+        "endLine": 180,
+        "endChar": 1
+      },
+      "revId": "263ababbcccebe76a7dc59e113c4ac3a07ddedd9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
