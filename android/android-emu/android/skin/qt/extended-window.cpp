@@ -18,6 +18,7 @@
 #include "android/main-common.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/help-page.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
@@ -285,6 +286,10 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     this->setStyleSheet(styleString);
     mToolWindow->setStyleSheet(styleString);
     mExtendedUi->rotaryInputPage->updateTheme();
+    BugReportWindow* bugreport = mExtendedUi->helpPage->getBugreportWindow();
+    if (bugreport) {
+        bugreport->updateTheme();
+    }
 
     // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);
