@@ -68,6 +68,7 @@ enum {
     RANCHU_GOLDFISH_AUDIO,
     RANCHU_GOLDFISH_SYNC,
     RANCHU_GOLDFISH_RESET,
+    RANCHU_GOLDFISH_PSTORE,
     RANCHU_MMIO,
 };
 
@@ -112,6 +113,9 @@ static DevMapEntry devmap[] = {
         "goldfish_sync", "goldfish_sync", "google,goldfish-sync\0generic,goldfish-sync", 2 },
     [RANCHU_GOLDFISH_RESET] =     { GOLDFISH_IO_SPACE + 0x0F000, 0x0100, -1,
         "goldfish_reset", "goldfish_reset", "google,goldfish-reset\0generic,goldfish-reset", 2 },
+    /* The following region of 64K is reserved for Goldfish pstore device */
+    [RANCHU_GOLDFISH_PSTORE] =     { GOLDFISH_IO_SPACE + 0x20000, 0x10000, -1,
+        "goldfish_pstore", "goldfish_pstore", "google,goldfish-pstore\0generic,goldfish-pstore", 2 },
     [RANCHU_MMIO] =         { GOLDFISH_IO_SPACE + 0x10000, 0x0200, 16,
         "virtio-mmio", "virtio_mmio", "virtio,mmio", 1 },
     /* ...repeating for a total of VIRTIO_TRANSPORTS, each of that size */
