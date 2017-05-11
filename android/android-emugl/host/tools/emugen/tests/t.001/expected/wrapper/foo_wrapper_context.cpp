@@ -15,6 +15,9 @@ int foo_wrapper_context_t::initDispatchByName(void *(*getProc)(const char *, voi
 	fooUnsupported = (fooUnsupported_wrapper_proc_t) getProc("fooUnsupported", userData);
 	fooDoEncoderFlush = (fooDoEncoderFlush_wrapper_proc_t) getProc("fooDoEncoderFlush", userData);
 	fooTakeConstVoidPtrConstPtr = (fooTakeConstVoidPtrConstPtr_wrapper_proc_t) getProc("fooTakeConstVoidPtrConstPtr", userData);
+	fooSetComplexStruct = (fooSetComplexStruct_wrapper_proc_t) getProc("fooSetComplexStruct", userData);
+	fooGetComplexStruct = (fooGetComplexStruct_wrapper_proc_t) getProc("fooGetComplexStruct", userData);
+	fooInout = (fooInout_wrapper_proc_t) getProc("fooInout", userData);
 	return 0;
 }
 

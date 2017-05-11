@@ -159,6 +159,18 @@ Var * EntryPoint::var(const std::string & name)
     return v;
 }
 
+const Var * EntryPoint::var(const std::string & name) const
+{
+    const Var *v = NULL;
+    for (size_t i = 0; i < m_vars.size(); i++) {
+        if (m_vars[i].name() == name) {
+            v = &m_vars[i];
+            break;
+        }
+    }
+    return v;
+}
+
 bool EntryPoint::hasPointers()
 {
     bool pointers = false;
@@ -174,62 +186,57 @@ bool EntryPoint::hasPointers()
     return pointers;
 }
 
+int EntryPoint::validateVarAttr(const std::string& varname, size_t lc) const {
+    if (varname.size() == 0) {
+        fprintf(stderr, "ERROR: %u: Missing variable name in attribute\n", (unsigned int)lc);
+        return -1;
+    }
+    const Var * v = var(varname);
+    if (v == NULL) {
+        fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
+                (unsigned int)lc, varname.c_str(), name().c_str());
+        return -2;
+    }
+    return 0;
+}
+
 int EntryPoint::setAttribute(const std::string &line, size_t lc)
 {
     size_t pos = 0;
     size_t last;
     std::string token = getNextToken(line, 0, &last, WHITESPACE);
+    int err = 0;
+    Var* v = nullptr;
 
     if (token == "len") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
 
-        if (varname.size() == 0) {
-            fprintf(stderr, "ERROR: %u: Missing variable name in 'len' attribute\n", (unsigned int)lc);
-            return -1;
-        }
-        Var * v = var(varname);
-        if (v == NULL) {
-            fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                    (unsigned int)lc, varname.c_str(), name().c_str());
-            return -2;
-        }
         // set the size expression into var
+        v = var(varname);
         pos = last;
         v->setLenExpression(line.substr(pos));
     } else if (token == "param_check") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
 
-        if (varname.size() == 0) {
-            fprintf(stderr, "ERROR: %u: Missing variable name in 'param_check' attribute\n", (unsigned int)lc);
-            return -1;
-        }
-        Var * v = var(varname);
-        if (v == NULL) {
-            fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                    (unsigned int)lc, varname.c_str(), name().c_str());
-            return -2;
-        }
-        // set the size expression into var
+        v = var(varname);
         pos = last;
         v->setParamCheckExpression(line.substr(pos));
 
     } else if (token == "dir") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
-        if (varname.size() == 0) {
-            fprintf(stderr, "ERROR: %u: Missing variable name in 'dir' attribute\n", (unsigned int)lc);
-            return -1;
-        }
-        Var * v = var(varname);
-        if (v == NULL) {
-            fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                    (unsigned int)lc, varname.c_str(), name().c_str());
-            return -2;
-        }
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
 
+        v = var(varname);
         pos = last;
+
         std::string pointerDirStr = getNextToken(line, pos, &last, WHITESPACE);
         if (pointerDirStr.size() == 0) {
             fprintf(stderr, "ERROR: %u: missing pointer directions\n", (unsigned int)lc);
@@ -243,21 +250,16 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
         } else if (pointerDirStr == "in") {
             v->setPointerDir(Var::POINTER_IN);
         } else {
-            fprintf(stderr, "ERROR: %u: unknow pointer direction %s\n", (unsigned int)lc, pointerDirStr.c_str());
+            fprintf(stderr, "ERROR: %u: unknown pointer direction %s\n",
+                    (unsigned int)lc, pointerDirStr.c_str());
         }
     } else if (token == "var_flag") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
-        if (varname.size() == 0) {
-            fprintf(stderr, "ERROR: %u: Missing variable name in 'var_flag' attribute\n", (unsigned int)lc);
-            return -1;
-        }
-        Var * v = var(varname);
-        if (v == NULL) {
-            fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                    (unsigned int)lc, varname.c_str(), name().c_str());
-            return -2;
-        }
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
+
+        v = var(varname);
         int count = 0;
         for (;;) {
             pos = last;
@@ -294,52 +296,75 @@ int EntryPoint::setAttribute(const std::string &line, size_t lc)
     } else if (token == "custom_pack") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
 
-        if (varname.size() == 0) {
-            fprintf(stderr, "ERROR: %u: Missing variable name in 'custom_pack' attribute\n", (unsigned int)lc);
-            return -1;
-        }
-        Var * v = var(varname);
-        if (v == NULL) {
-            fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                    (unsigned int)lc, varname.c_str(), name().c_str());
-            return -2;
-        }
-        // set the size expression into var
+        v = var(varname);
         pos = last;
         v->setPackExpression(line.substr(pos));
     } else if (token == "custom_unpack") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
 
-        if (varname.size() == 0) {
-            fprintf(stderr, "ERROR: %u: Missing variable name in 'custom_unpack' attribute\n", (unsigned int)lc);
-            return -1;
-        }
-        Var * v = var(varname);
-        if (v == NULL) {
-            fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                    (unsigned int)lc, varname.c_str(), name().c_str());
-            return -2;
-        }
-        // set the size expression into var
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
+
+        v = var(varname);
         pos = last;
         v->setUnpackExpression(line.substr(pos));
+    } else if (token == "custom_host_pack_tmp_alloc") {
+        pos = last;
+        std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
+
+        v = var(varname);
+        if (v->pointerDir() == Var::POINTER_IN) {
+            fprintf(stderr, "ERROR: %u: variable %s is not an output or inout\n",
+                    (unsigned int)lc, varname.c_str());
+            return -2;
+        }
+
+        pos = last;
+        v->setHostPackTmpAllocExpression(line.substr(pos));
+    } else if (token == "custom_host_pack") {
+        pos = last;
+        std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
+
+        v = var(varname);
+        if (v->pointerDir() == Var::POINTER_IN) {
+            fprintf(stderr, "ERROR: %u: variable %s is not an output or inout\n",
+                    (unsigned int)lc, varname.c_str());
+            return -2;
+        }
+
+        pos = last;
+        v->setHostPackExpression(line.substr(pos));
+    } else if (token == "custom_guest_unpack") {
+        pos = last;
+        std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
+
+        v = var(varname);
+        if (v->pointerDir() == Var::POINTER_IN) {
+            fprintf(stderr, "ERROR: %u: variable %s is not an output or inout\n",
+                    (unsigned int)lc, varname.c_str());
+            return -2;
+        }
+
+        pos = last;
+        v->setGuestUnpackExpression(line.substr(pos));
     } else if (token == "custom_write") {
         pos = last;
         std::string varname = getNextToken(line, pos, &last, WHITESPACE);
+        err = validateVarAttr(varname, lc);
+        if (err < 0) return err;
 
-        if (varname.size() == 0) {
-            fprintf(stderr, "ERROR: %u: Missing variable name in 'custom_write' attribute\n", (unsigned int)lc);
-            return -1;
-        }
-        Var * v = var(varname);
-        if (v == NULL) {
-            fprintf(stderr, "ERROR: %u: variable %s is not a parameter of %s\n",
-                    (unsigned int)lc, varname.c_str(), name().c_str());
-            return -2;
-        }
         // set the size expression into var
+        v = var(varname);
         pos = last;
         v->setWriteExpression(line.substr(pos));
     } else if (token == "flag") {

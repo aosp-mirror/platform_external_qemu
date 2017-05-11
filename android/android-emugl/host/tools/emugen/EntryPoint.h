@@ -40,6 +40,7 @@ public:
     VarsArray & vars() { return m_vars; }
     Var & retval() { return m_retval; }
     Var * var(const std::string & name);
+    const Var * var(const std::string & name) const;
     bool hasPointers();
     bool unsupported() const { return m_unsupported; }
     void setUnsupported(bool state) { m_unsupported = state; }
@@ -49,6 +50,7 @@ public:
     void setNotApi(bool state) { m_notApi = state; }
     bool flushOnEncode() const { return m_flushOnEncode; }
     void setFlushOnEncode(bool state) { m_flushOnEncode = state; }
+    int validateVarAttr(const std::string& varname, size_t lc) const;
     int setAttribute(const std::string &line, size_t lc);
 
 private:
