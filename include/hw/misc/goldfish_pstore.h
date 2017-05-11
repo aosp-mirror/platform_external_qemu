@@ -14,7 +14,11 @@
 
 #define TYPE_GOLDFISH_PSTORE     "goldfish_pstore"
 #define GOLDFISH_PSTORE_DEV_ID   "goldfish_pstore"
+#if defined(TARGET_MIPS)
+#define GOLDFISH_PSTORE_MEM_BASE 0x1f020000
+#else
 #define GOLDFISH_PSTORE_MEM_BASE 0xff018000
+#endif
 #define GOLDFISH_PSTORE_MEM_SIZE 0x10000
 #define GOLDFISH_PSTORE_ADDR_PROP "addr"
 #define GOLDFISH_PSTORE_SIZE_PROP "size"
