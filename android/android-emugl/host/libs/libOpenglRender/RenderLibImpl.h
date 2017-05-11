@@ -25,6 +25,7 @@ class RenderLibImpl final : public RenderLib {
 public:
     RenderLibImpl() = default;
 
+    virtual void setRenderer(SelectedRenderer renderer) override;
     virtual void setAvdInfo(bool phone, int api) override;
     virtual void getGlesVersion(int* maj, int* min) override;
     virtual void setLogger(emugl_logger_struct logger) override;
