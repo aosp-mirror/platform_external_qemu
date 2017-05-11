@@ -22,6 +22,30 @@
       "revId": "4cf8f694b8c10626bee8a58de3de0b5e2443c737",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46eba78f_31253624",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-11T05:05:48Z",
+      "side": 1,
+      "message": "I think a StringView does not own char*. In line 254 allocatedPath takes ownership of the filePath char*.\n\nchar* is malloc\u0027ed in avdInfo_getSystemInitImagePath so it needs to be released using free, hence ScopedCptr.\n\nOf course it is totally obvious that avdInfo_getSystemInitImagePath allocates memory and avdInfo_getContentPath does not. /s ;-)",
+      "parentUuid": "a6730ef8_e27ec6ef",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 40
+      },
+      "revId": "4cf8f694b8c10626bee8a58de3de0b5e2443c737",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
