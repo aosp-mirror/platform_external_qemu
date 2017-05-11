@@ -89,7 +89,6 @@ public:
 private:
     std::string m_name;
     const VarType * m_type = nullptr;
-    bool m_pointer = false; // is this variable a pointer;
     std::string m_lenExpression; // an expression to calcualte a pointer data size
     PointerDir m_pointerDir = POINTER_IN;
     bool m_nullAllowed = false;

@@ -100,23 +100,30 @@ void assert_hvf_ok(int r) {
     if (!r) return;
 
     switch (r) {
-        case HV_SUCCESS:
-            fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n", r); break;
-        case HV_ERROR:
-            fprintf(stderr, "FATAL: HVF error: HV_ERROR\n", r); break;
-        case HV_BUSY:
-            fprintf(stderr, "FATAL: HVF error: HV_BUSY\n", r); break;
-        case HV_BAD_ARGUMENT:
-            fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n", r); break;
-        case HV_NO_RESOURCES:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n", r); break;
-        case HV_NO_DEVICE:
-            fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n", r); break;
-        case HV_UNSUPPORTED:
-            fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n", r); break;
-        default:
-            fprintf(stderr, "FATAL: HVF Unknown error heh\n", r); break;
-            break;
+      case HV_SUCCESS:
+        fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n");
+        break;
+      case HV_ERROR:
+        fprintf(stderr, "FATAL: HVF error: HV_ERROR\n");
+        break;
+      case HV_BUSY:
+        fprintf(stderr, "FATAL: HVF error: HV_BUSY\n");
+        break;
+      case HV_BAD_ARGUMENT:
+        fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n");
+        break;
+      case HV_NO_RESOURCES:
+        fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n");
+        break;
+      case HV_NO_DEVICE:
+        fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n");
+        break;
+      case HV_UNSUPPORTED:
+        fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n");
+        break;
+      default:
+        fprintf(stderr, "FATAL: HVF Unknown error heh\n");
+        break;
     }
     qemu_abort("HVF fatal error\n");
 }
