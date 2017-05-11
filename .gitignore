@@ -116,3 +116,4 @@ tags
 TAGS
 docker-src.*
 *~
+*.DS_Store
