@@ -18,6 +18,9 @@
 
 #include "android/emulation/control/user_event_agent.h"
 
+#include "android/skin/qt/emulator-qt-window.h"
+
+class EmulatorQtWindow;
 
 class MicrophonePage : public QWidget
 {
@@ -27,6 +30,7 @@ public:
     explicit MicrophonePage(QWidget *parent = 0);
 
     void setMicrophoneAgent(const QAndroidUserEventAgent* agent);
+    void setEmulatorWindow(EmulatorQtWindow* eW);
 
 private slots:
     void on_mic_enableMic_toggled(bool checked);
@@ -37,8 +41,11 @@ private slots:
     void on_mic_voiceAssistButton_pressed();
     void on_mic_voiceAssistButton_released();
 
+private:
+    void forwardGenericEventToEmulator(int type, int code, int value);
 
 private:
     std::unique_ptr<Ui::MicrophonePage> mUi;
+    EmulatorQtWindow* mEmulatorWindow;
     const QAndroidUserEventAgent* mUserEventAgent;
 };

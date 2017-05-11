@@ -58,6 +58,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->helpPage->initialize(shortcuts, mEmulatorWindow);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
+    mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
