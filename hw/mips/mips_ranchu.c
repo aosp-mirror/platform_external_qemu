@@ -35,11 +35,11 @@
 
 /* Store the environment arguments table in the second page from the top
  * of the bios memory. Two pages are required since the environment
- * arguments table is 4160 bytes in size.
+ * arguments table is 7232 bytes in size.
  */
 #define ENVP_ADDR         PHYS_TO_VIRT(RESET_ADDRESS + RANCHU_BIOS_SIZE - 2*TARGET_PAGE_SIZE)
 #define ENVP_NB_ENTRIES   16
-#define ENVP_ENTRY_SIZE   256
+#define ENVP_ENTRY_SIZE   448
 
 #define VIRTIO_TRANSPORTS 16
 #define MAX_GF_TTYS       3
