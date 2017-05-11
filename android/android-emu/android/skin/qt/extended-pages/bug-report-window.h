@@ -29,6 +29,7 @@ class BugReportWindow : public QFrame {
 public:
     explicit BugReportWindow(EmulatorQtWindow* eW, QWidget* parent = 0);
     void showEvent(QShowEvent* event);
+    void updateTheme();
     struct ReportingFields {
         std::string androidVer;
         std::string avdDetails;
@@ -64,6 +65,7 @@ private:
     void loadAdbBugreport();
     void loadAdbLogcat();
     void loadAvdDetails();
+    void loadCircularSpinner(SettingsTheme theme);
     void loadScreenshotImage();
     bool eventFilter(QObject* object, QEvent* event) override;
     void saveBugReportFolder(bool willOpenIssueTracker);
