@@ -11,6 +11,8 @@ ANDROID_SKIN_QT_RESOURCES :=
 ANDROID_SKIN_SOURCES := \
     android/skin/charmap.c \
     android/skin/rect.c \
+    android/skin/generic-event.cpp \
+    android/skin/generic-event-buffer.cpp \
     android/skin/image.c \
     android/skin/trackball.c \
     android/skin/keyboard.c \

@@ -24,6 +24,7 @@ extern "C" {
 typedef enum {
     kEventKeyDown,
     kEventKeyUp,
+    kEventGeneric,
     kEventTextInput,
     kEventMouseButtonDown,
     kEventMouseButtonUp,
@@ -51,6 +52,12 @@ typedef struct {
     uint32_t keycode;
     uint32_t mod;
 } SkinEventKeyData;
+
+typedef struct {
+    uint32_t type;
+    uint32_t code;
+    uint32_t value;
+} SkinEventGenericData;
 
 typedef struct {
     uint8_t text[32];
@@ -93,6 +100,7 @@ typedef struct {
     SkinEventType type;
     union {
         SkinEventKeyData key;
+        SkinEventGenericData generic_event;
         SkinEventMouseData mouse;
         SkinEventScrollData scroll;
         SkinEventRotaryInputData rotary_input;

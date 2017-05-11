@@ -12,6 +12,7 @@
 #include "android-qemu2-glue/qemu-control-impl.h"
 
 #include "android/multitouch-screen.h"
+#include "android/skin/generic-event-buffer.h"
 #include "android/utils/debug.h"
 
 #include "qemu/osdep.h"
@@ -47,6 +48,14 @@ static void user_event_generic(int type, int code, int value) {
     goldfish_event_send(type, code, value);
 }
 
+static void user_event_generic_events(SkinGenericEventCode* events, int count) {
+    int i;
+    for (i = 0; i < count; i++) {
+        goldfish_event_send(events[i].type, events[i].code,
+                            events[i].value);
+    }
+}
+
 static void user_event_mouse(int dx, int dy, int dz, int buttonsState) {
     if (VERBOSE_CHECK(keys)) {
         printf(">> MOUSE [%d %d %d : 0x%04x]\n", dx, dy, dz, buttonsState);
@@ -72,8 +81,8 @@ static const QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendMouseEvent = user_event_mouse,
         .sendRotaryEvent = user_event_rotary,
         .sendGenericEvent = user_event_generic,
-        .onNewUserEvent = on_new_event
-};
+        .sendGenericEvents = user_event_generic_events,
+        .onNewUserEvent = on_new_event};
 
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
         &sQAndroidUserEventAgent;

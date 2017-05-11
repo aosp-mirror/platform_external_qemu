@@ -326,6 +326,7 @@ private:
 
     SkinEvent* createSkinEvent(SkinEventType type);
     void forwardKeyEventToEmulator(SkinEventType type, QKeyEvent* event);
+    void forwardGenericEventToEmulator(int type, int code, int value);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
     void maskWindowFrame();
 

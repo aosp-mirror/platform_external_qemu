@@ -59,6 +59,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->helpPage->initialize(shortcuts, mEmulatorWindow);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
+    mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
@@ -159,7 +160,6 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
-        mExtendedUi->microphonePage->setMicrophoneAgent(agentPtr->userEvents);
         mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
