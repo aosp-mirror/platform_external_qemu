@@ -139,7 +139,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     // unusable. This will prevent anyone else from using this memory region.
     if (ramoops.size > 0 && ramoops.start > 0) {
       params.addFormat("ramoops.mem_address=0x%" PRIx64 " ramoops.mem_size=0x%" PRIx64, ramoops.start, ramoops.size);
-      params.addFormat("memmap=0x%" PRIx64 "$0x%" PRIx64,  ramoops.start, ramoops.start + ramoops.size);
+      params.addFormat("memmap=0x%" PRIx64 "$0x%" PRIx64,  ramoops.size, ramoops.start);
     }
     return params.toCStringCopy();
 }
