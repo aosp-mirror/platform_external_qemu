@@ -189,39 +189,6 @@ goldfish_audio_buff_recv( struct goldfish_audio_buff*  b, int  avail, struct gol
 /* update this whenever you change the goldfish_audio_state structure */
 #define  AUDIO_STATE_SAVE_VERSION  3
 
-static const VMStateDescription goldfish_audio_buff_vmsd = {
-    .name = "goldfish_audio_buff",
-    .version_id = AUDIO_STATE_SAVE_VERSION,
-    .minimum_version_id = AUDIO_STATE_SAVE_VERSION,
-    .minimum_version_id_old = AUDIO_STATE_SAVE_VERSION,
-    .fields = (VMStateField[]) {
-        VMSTATE_UINT64(address, struct goldfish_audio_buff),
-        VMSTATE_UINT32(length, struct goldfish_audio_buff),
-        VMSTATE_UINT32(offset, struct goldfish_audio_buff),
-        VMSTATE_VARRAY_UINT32(data, struct goldfish_audio_buff, length,
-                0, vmstate_info_uint8, uint8_t),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
-static const VMStateDescription goldfish_audio_vmsd = {
-    .name = "goldfish_audio",
-    .version_id = AUDIO_STATE_SAVE_VERSION,
-    .minimum_version_id = AUDIO_STATE_SAVE_VERSION,
-    .minimum_version_id_old = AUDIO_STATE_SAVE_VERSION,
-    .fields = (VMStateField[]) {
-        VMSTATE_UINT32(int_status, struct goldfish_audio_state),
-        VMSTATE_UINT32(int_enable, struct goldfish_audio_state),
-        VMSTATE_UINT32(read_buffer_available, struct goldfish_audio_state),
-        VMSTATE_INT8(current_buffer, struct goldfish_audio_state),
-        VMSTATE_STRUCT_ARRAY(out_buffs, struct goldfish_audio_state, 2, 0,
-                goldfish_audio_buff_vmsd, struct goldfish_audio_buff),
-        VMSTATE_STRUCT(in_buff, struct goldfish_audio_state, 0,
-                goldfish_audio_buff_vmsd, struct goldfish_audio_buff),
-        VMSTATE_END_OF_LIST()
-    }
-};
-
 static void enable_audio(struct goldfish_audio_state *s, int enable)
 {
     if (s->voice != NULL) {

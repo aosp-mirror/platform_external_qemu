@@ -100,9 +100,9 @@ protected:
     void repaintGL() override;
 
     // This is called every time the mouse is moved.
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
     bool initProgram();

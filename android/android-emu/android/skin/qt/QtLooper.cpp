@@ -103,14 +103,14 @@ public:
 
     virtual BaseTimer* createTimer(BaseTimer::Callback callback,
                                    void* opaque,
-                                   ClockType clock) {
+                                   ClockType clock) override {
         clock = validateClockType(clock);
         return new QtLooper::Timer(this, callback, opaque, clock);
     }
 
     virtual BaseFdWatch* createFdWatch(int fd,
                                        BaseFdWatch::Callback callback,
-                                       void* opaque) {
+                                       void* opaque) override {
         Q_ASSERT_X(false, "QtLooper::createFdWatch",
                    "FdWatch is not yet implemented for QtLooper.");
         return nullptr;
@@ -128,7 +128,7 @@ public:
     //
     //  L O O P E R
     //
-    virtual Duration nowMs(ClockType clock) {
+    virtual Duration nowMs(ClockType clock) override {
         clock = validateClockType(clock);
         auto time = QTime::currentTime();
         return time.msec() +
@@ -136,18 +136,18 @@ public:
                          60UL * (time.minute() + 60UL * time.hour()));
     }
 
-    virtual DurationNs nowNs(ClockType clockType) {
+    virtual DurationNs nowNs(ClockType clockType) override {
         qWarning("QtLooper::nowNs is not supported. Defaulting to nowMs.");
         return nowMs(clockType);
     }
 
-    virtual int runWithDeadlineMs(Duration deadline_ms) {
+    virtual int runWithDeadlineMs(Duration deadline_ms) override {
         qWarning("User cannot call |run*| on a QtLooper event loop");
         errno = ENOSYS;
         return -1;
     }
 
-    virtual void forceQuit() {
+    virtual void forceQuit() override {
         qWarning("User cannot call |forceQuit| on a QtLooper event loop");
     }
 
