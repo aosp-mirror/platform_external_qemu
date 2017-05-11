@@ -16,6 +16,24 @@
       "revId": "dc5fba9d91de3dc6e8ea453802490c629226bc94",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1248a438_ee313f4b",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-11T22:21:28Z",
+      "side": 1,
+      "message": "only with new Swiftshader prebuilts, and only to a point (benchmarks don\u0027t work, only the UI / browser)",
+      "parentUuid": "d44979c2_8d805f71",
+      "revId": "dc5fba9d91de3dc6e8ea453802490c629226bc94",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
