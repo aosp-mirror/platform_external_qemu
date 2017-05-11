@@ -46,6 +46,30 @@
       "revId": "4cf8f694b8c10626bee8a58de3de0b5e2443c737",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e1c31e76_c90755af",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-11T05:36:13Z",
+      "side": 1,
+      "message": "you\u0027re absolutely right, Erwin\nyes, there\u0027s no general rule about what allocates and what doesn\u0027t, so one has to always look into the implementation.\nHere I wanted to make the change as simple as possible and not to add too many extra allocations.",
+      "parentUuid": "46eba78f_31253624",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 40
+      },
+      "revId": "4cf8f694b8c10626bee8a58de3de0b5e2443c737",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
