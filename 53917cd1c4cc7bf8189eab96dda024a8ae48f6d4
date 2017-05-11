@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce27f042_67e68b90",
+        "filename": "android/android-emu/android/base/files/InplaceStream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-11T17:44:07Z",
+      "side": 1,
+      "message": "const char*?",
+      "revId": "53917cd1c4cc7bf8189eab96dda024a8ae48f6d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "967a00cc_b2af164c",
+        "filename": "android/android-emu/android/base/files/InplaceStream.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-11T17:44:07Z",
+      "side": 1,
+      "message": "const char*?",
+      "revId": "53917cd1c4cc7bf8189eab96dda024a8ae48f6d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
