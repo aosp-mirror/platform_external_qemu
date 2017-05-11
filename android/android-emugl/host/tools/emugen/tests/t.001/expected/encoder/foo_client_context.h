@@ -15,6 +15,9 @@ struct foo_client_context_t {
 	fooUnsupported_client_proc_t fooUnsupported;
 	fooDoEncoderFlush_client_proc_t fooDoEncoderFlush;
 	fooTakeConstVoidPtrConstPtr_client_proc_t fooTakeConstVoidPtrConstPtr;
+	fooSetComplexStruct_client_proc_t fooSetComplexStruct;
+	fooGetComplexStruct_client_proc_t fooGetComplexStruct;
+	fooInout_client_proc_t fooInout;
 	virtual ~foo_client_context_t() {}
 
 	typedef foo_client_context_t *CONTEXT_ACCESSOR_TYPE(void);

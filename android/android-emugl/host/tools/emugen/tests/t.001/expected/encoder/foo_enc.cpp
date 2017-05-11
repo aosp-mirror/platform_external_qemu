@@ -8,6 +8,8 @@
 #include "foo_enc.h"
 
 
+#include <vector>
+
 #include <stdio.h>
 
 namespace {
@@ -138,6 +140,110 @@ void fooTakeConstVoidPtrConstPtr_enc(void *self , const void* const* param)
 
 }
 
+void fooSetComplexStruct_enc(void *self , const FooStruct* obj)
+{
+
+	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
+	IOStream *stream = ctx->m_stream;
+	ChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;
+	bool useChecksum = checksumCalculator->getVersion() > 0;
+
+	const unsigned int __size_obj =  fooStructEncodingSize(obj);
+	 unsigned char *ptr;
+	 unsigned char *buf;
+	 const size_t sizeWithoutChecksum = 8 + __size_obj + 1*4;
+	 const size_t checksumSize = checksumCalculator->checksumByteSize();
+	 const size_t totalSize = sizeWithoutChecksum + checksumSize;
+	buf = stream->alloc(totalSize);
+	ptr = buf;
+	int tmp = OP_fooSetComplexStruct;memcpy(ptr, &tmp, 4); ptr += 4;
+	memcpy(ptr, &totalSize, 4);  ptr += 4;
+
+	*(unsigned int *)(ptr) = __size_obj; ptr += 4;
+	 fooStructPack(ptr, obj);ptr += __size_obj;
+
+	if (useChecksum) checksumCalculator->addBuffer(buf, ptr-buf);
+	if (useChecksum) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;
+
+}
+
+void fooGetComplexStruct_enc(void *self , FooStruct* obj)
+{
+
+	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
+	IOStream *stream = ctx->m_stream;
+	ChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;
+	bool useChecksum = checksumCalculator->getVersion() > 0;
+
+	const unsigned int __size_obj =  fooStructEncodingSize(obj);
+	 unsigned char *ptr;
+	 unsigned char *buf;
+	 const size_t sizeWithoutChecksum = 8 + 0 + 1*4;
+	 const size_t checksumSize = checksumCalculator->checksumByteSize();
+	 const size_t totalSize = sizeWithoutChecksum + checksumSize;
+	buf = stream->alloc(totalSize);
+	ptr = buf;
+	int tmp = OP_fooGetComplexStruct;memcpy(ptr, &tmp, 4); ptr += 4;
+	memcpy(ptr, &totalSize, 4);  ptr += 4;
+
+	*(unsigned int *)(ptr) = __size_obj; ptr += 4;
+
+	if (useChecksum) checksumCalculator->addBuffer(buf, ptr-buf);
+	if (useChecksum) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;
+
+	 std::vector<unsigned char> forUnpacking_obj(__size_obj); stream->readback(&forUnpacking_obj[0], __size_obj); fooStructUnpack(&forUnpacking_obj[0], obj);
+	if (useChecksum) checksumCalculator->addBuffer(obj, __size_obj);
+	if (useChecksum) {
+		unsigned char *checksumBufPtr = NULL;
+		unsigned char checksumBuf[ChecksumCalculator::kMaxChecksumSize];
+		if (checksumSize > 0) checksumBufPtr = &checksumBuf[0];
+		stream->readback(checksumBufPtr, checksumSize);
+		if (!checksumCalculator->validate(checksumBufPtr, checksumSize)) {
+			ALOGE("fooGetComplexStruct: GL communication error, please report this issue to b.android.com.\n");
+			abort();
+		}
+	}
+}
+
+void fooInout_enc(void *self , uint32_t* count)
+{
+
+	foo_encoder_context_t *ctx = (foo_encoder_context_t *)self;
+	IOStream *stream = ctx->m_stream;
+	ChecksumCalculator *checksumCalculator = ctx->m_checksumCalculator;
+	bool useChecksum = checksumCalculator->getVersion() > 0;
+
+	const unsigned int __size_count =  sizeof(uint32_t);
+	 unsigned char *ptr;
+	 unsigned char *buf;
+	 const size_t sizeWithoutChecksum = 8 + __size_count + 1*4;
+	 const size_t checksumSize = checksumCalculator->checksumByteSize();
+	 const size_t totalSize = sizeWithoutChecksum + checksumSize;
+	buf = stream->alloc(totalSize);
+	ptr = buf;
+	int tmp = OP_fooInout;memcpy(ptr, &tmp, 4); ptr += 4;
+	memcpy(ptr, &totalSize, 4);  ptr += 4;
+
+	*(unsigned int *)(ptr) = __size_count; ptr += 4;
+	memcpy(ptr, count, __size_count);ptr += __size_count;
+
+	if (useChecksum) checksumCalculator->addBuffer(buf, ptr-buf);
+	if (useChecksum) checksumCalculator->writeChecksum(ptr, checksumSize); ptr += checksumSize;
+
+	stream->readback(count, __size_count);
+	if (useChecksum) checksumCalculator->addBuffer(count, __size_count);
+	if (useChecksum) {
+		unsigned char *checksumBufPtr = NULL;
+		unsigned char checksumBuf[ChecksumCalculator::kMaxChecksumSize];
+		if (checksumSize > 0) checksumBufPtr = &checksumBuf[0];
+		stream->readback(checksumBufPtr, checksumSize);
+		if (!checksumCalculator->validate(checksumBufPtr, checksumSize)) {
+			ALOGE("fooInout: GL communication error, please report this issue to b.android.com.\n");
+			abort();
+		}
+	}
+}
+
 }  // namespace
 
 foo_encoder_context_t::foo_encoder_context_t(IOStream *stream, ChecksumCalculator *checksumCalculator)
@@ -150,5 +256,8 @@ foo_encoder_context_t::foo_encoder_context_t(IOStream *stream, ChecksumCalculato
 	this->fooUnsupported = (fooUnsupported_client_proc_t) &enc_unsupported;
 	this->fooDoEncoderFlush = &fooDoEncoderFlush_enc;
 	this->fooTakeConstVoidPtrConstPtr = &fooTakeConstVoidPtrConstPtr_enc;
+	this->fooSetComplexStruct = &fooSetComplexStruct_enc;
+	this->fooGetComplexStruct = &fooGetComplexStruct_enc;
+	this->fooInout = &fooInout_enc;
 }
 

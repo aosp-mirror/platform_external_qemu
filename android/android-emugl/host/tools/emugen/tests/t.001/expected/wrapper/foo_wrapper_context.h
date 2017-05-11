@@ -15,6 +15,9 @@ struct foo_wrapper_context_t {
 	fooUnsupported_wrapper_proc_t fooUnsupported;
 	fooDoEncoderFlush_wrapper_proc_t fooDoEncoderFlush;
 	fooTakeConstVoidPtrConstPtr_wrapper_proc_t fooTakeConstVoidPtrConstPtr;
+	fooSetComplexStruct_wrapper_proc_t fooSetComplexStruct;
+	fooGetComplexStruct_wrapper_proc_t fooGetComplexStruct;
+	fooInout_wrapper_proc_t fooInout;
 	virtual ~foo_wrapper_context_t() {}
 
 	typedef foo_wrapper_context_t *CONTEXT_ACCESSOR_TYPE(void);

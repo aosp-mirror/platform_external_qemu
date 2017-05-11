@@ -542,6 +542,7 @@ int ApiGen::genEncoderImpl(const std::string &filename)
     fprintf(fp, "#include <string.h>\n");
     fprintf(fp, "#include \"%s_opcodes.h\"\n\n", m_basename.c_str());
     fprintf(fp, "#include \"%s_enc.h\"\n\n\n", m_basename.c_str());
+    fprintf(fp, "#include <vector>\n\n");
     fprintf(fp, "#include <stdio.h>\n\n");
     fprintf(fp, "namespace {\n\n");
 
@@ -778,8 +779,12 @@ int ApiGen::genEncoderImpl(const std::string &filename)
                         indent = "\t\t";
                     }
 
-                    fprintf(fp, "%sstream->readback(%s, __size_%s);\n",
-                            indent, varname, varname);
+                    if (evars[j].guestUnpackExpression() != "") {
+                        fprintf(fp, "%s%s;\n", indent, evars[j].guestUnpackExpression().c_str());
+                    } else {
+                        fprintf(fp, "%sstream->readback(%s, __size_%s);\n",
+                                indent, varname, varname);
+                    }
                     fprintf(fp, "%sif (useChecksum) checksumCalculator->addBuffer(%s, __size_%s);\n",
                             indent, varname, varname);
                     if (evars[j].nullAllowed()) {
@@ -1154,8 +1159,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 }
 
                 if (!v->isDMA()) {
-                    if (v->pointerDir() == Var::POINTER_IN ||
-                        v->pointerDir() == Var::POINTER_INOUT) {
+                    if (v->pointerDir() & Var::POINTER_IN) {
                         if (pass == PASS_VariableDeclarations) {
     #if USE_ALIGNED_BUFFERS
                             fprintf(fp,
@@ -1172,7 +1176,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
                             }
 
                         }
-                        if (pass == PASS_FunctionCall) {
+                        if (pass == PASS_FunctionCall &&
+                            v->pointerDir() == Var::POINTER_IN) {
                             if (v->nullAllowed()) {
                                 fprintf(fp,
                                         "size_%s == 0 ? nullptr : (%s)(inptr_%s.get())",
@@ -1192,7 +1197,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                             var_name);
                                 }
                             }
-                        } else if (pass == PASS_DebugPrint) {
+                        } else if (pass == PASS_DebugPrint &&
+                                   v->pointerDir() == Var::POINTER_IN) {
                             fprintf(fp,
                                     "(%s)(inptr_%s.get()), size_%s",
                                     var_type_name,
@@ -1205,7 +1211,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                     var_name,
                                     varoffset.c_str());
                         }
-                        if (pass == PASS_FunctionCall) {
+                        if (pass == PASS_FunctionCall &&
+                            v->pointerDir() == Var::POINTER_IN) {
                             if (v->nullAllowed()) {
                                 fprintf(fp,
                                         "size_%s == 0 ? NULL : (%s)(inptr_%s)",
@@ -1218,7 +1225,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                         var_type_name,
                                         var_name);
                             }
-                        } else if (pass == PASS_DebugPrint) {
+                        } else if (pass == PASS_DebugPrint &&
+                                   v->pointerDir() == Var::POINTER_IN) {
                             fprintf(fp,
                                     "(%s)(inptr_%s), size_%s",
                                     var_type_name,
@@ -1228,7 +1236,8 @@ R"(        // Do this on every iteration, as some commands may change the checks
     #endif  // !USE_ALIGNED_BUFFERS
                         varoffset += " + 4 + size_";
                         varoffset += var_name;
-                    } else { // out pointer;
+                    }
+                    if (v->pointerDir() & Var::POINTER_OUT)  { // out pointer;
                         if (pass == PASS_TmpBuffAlloc) {
                             if (!totalTmpBuffExist) {
                                 fprintf(fp,
@@ -1250,18 +1259,40 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                     var_name,
                                     tmpBufOffset[j].c_str(),
                                     var_name);
-                        } else if (pass == PASS_FunctionCall) {
-                            if (v->nullAllowed()) {
+                            // If both input and output variable, initialize with the input.
+                            if (v->pointerDir() == Var::POINTER_INOUT) {
                                 fprintf(fp,
-                                        "size_%s == 0 ? nullptr : (%s)(outptr_%s.get())",
+                                        "\t\t\tmemcpy(outptr_%s.get(), inptr_%s.get(), size_%s);\n",
                                         var_name,
+                                        var_name,
+                                        var_name);
+                            }
+
+                            if (v->hostPackExpression() != "") {
+                                fprintf(fp, "\t\t\tvoid* forPacking_%s = nullptr;\n", var_name);
+                            }
+                            if (v->hostPackTmpAllocExpression() != "") {
+                                fprintf(fp, "\t\t\t%s;\n", v->hostPackTmpAllocExpression().c_str());
+                            }
+                        } else if (pass == PASS_FunctionCall) {
+                            if (v->hostPackExpression() != "") {
+                                fprintf(fp,
+                                        "(%s)(forPacking_%s)",
                                         var_type_name,
                                         var_name);
                             } else {
-                                fprintf(fp,
-                                        "(%s)(outptr_%s.get())",
-                                        var_type_name,
-                                        var_name);
+                                if (v->nullAllowed()) {
+                                    fprintf(fp,
+                                            "size_%s == 0 ? nullptr : (%s)(outptr_%s.get())",
+                                            var_name,
+                                            var_type_name,
+                                            var_name);
+                                } else {
+                                    fprintf(fp,
+                                            "(%s)(outptr_%s.get())",
+                                            var_type_name,
+                                            var_name);
+                                }
                             }
                         } else if (pass == PASS_DebugPrint) {
                             fprintf(fp,
@@ -1271,6 +1302,13 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                     var_name);
                         }
                         if (pass == PASS_FlushOutput) {
+                            if (v->hostPackExpression() != "") {
+                                fprintf(fp,
+                                        "\t\t\tif (size_%s) {\n"
+                                        "\t\t\t%s; }\n",
+                                        var_name,
+                                        v->hostPackExpression().c_str());
+                            }
                             fprintf(fp,
                                     "\t\t\toutptr_%s.flush();\n",
                                     var_name);
@@ -1305,7 +1343,9 @@ R"(        // Do this on every iteration, as some commands may change the checks
                                     varoffset.c_str());
                         }
     #endif  // !USE_ALIGNED_BUFFERS
+                    if (v->pointerDir() == Var::POINTER_OUT) {
                         varoffset += " + 4";
+                    }
                     }
                 }
             }
