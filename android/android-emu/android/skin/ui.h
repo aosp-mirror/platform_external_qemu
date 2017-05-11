@@ -12,9 +12,11 @@
 
 #pragma once
 
-#include "android/skin/rect.h"
+#include "android/skin/generic-event-buffer.h"
+#include "android/skin/generic-event.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/keycode-buffer.h"
+#include "android/skin/rect.h"
 
 #include <stdbool.h>
 
@@ -44,6 +46,7 @@ typedef struct SkinUIFuncs {
     const struct SkinTrackBallParameters* trackball_params;
     SkinKeyEventFunc keyboard_event;
     SkinKeyCodeFlushFunc keyboard_flush;
+    SkinGenericEventFlushFunc generic_event_flush;
     SkinUINetworkToggleFunc network_toggle;
     SkinUIInvalidateFrameBuffer framebuffer_invalidate;
 } SkinUIFuncs;

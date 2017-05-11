@@ -12,16 +12,16 @@
 #include "android/skin/qt/extended-pages/microphone-page.h"
 
 #include "android/hw-events.h"
+#include "android/skin/event.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 #include <QSettings>
 
-
-MicrophonePage::MicrophonePage(QWidget *parent) :
-    QWidget(parent),
-    mUi(new Ui::MicrophonePage()),
-    mUserEventAgent(nullptr)
-{
+MicrophonePage::MicrophonePage(QWidget* parent)
+    : QWidget(parent),
+      mUi(new Ui::MicrophonePage()),
+      mEmulatorWindow(nullptr) {
     mUi->setupUi(this);
 
     // The Hook button is not functional yet.
@@ -34,26 +34,21 @@ void MicrophonePage::on_mic_enableMic_toggled(bool checked) {
 }
 
 void MicrophonePage::on_mic_hasMic_toggled(bool checked) {
-    if (mUserEventAgent && mUi->mic_inserted->isChecked()) {
+    if (mUi->mic_inserted->isChecked()) {
         // The headset is inserted, give our new microphone
         // status to the device.
-        mUserEventAgent->sendGenericEvent(EV_SW,
-                                          SW_MICROPHONE_INSERT,
-                                          checked ? 1 : 0);
-        mUserEventAgent->sendGenericEvent(EV_SYN, 0, 0);
+        forwardGenericEventToEmulator(EV_SW, SW_MICROPHONE_INSERT,
+                                      checked ? 1 : 0);
+        forwardGenericEventToEmulator(EV_SYN, 0, 0);
     }
 }
 
 void MicrophonePage::on_mic_hookButton_pressed() {
-    if (mUserEventAgent) {
-        mUserEventAgent->sendGenericEvent(EV_KEY, KEY_HEADSETHOOK, 1);
-    }
+    forwardGenericEventToEmulator(EV_KEY, KEY_HEADSETHOOK, 1);
 }
 
 void MicrophonePage::on_mic_hookButton_released() {
-    if (mUserEventAgent) {
-        mUserEventAgent->sendGenericEvent(EV_KEY, KEY_HEADSETHOOK, 0);
-    }
+    forwardGenericEventToEmulator(EV_KEY, KEY_HEADSETHOOK, 0);
 }
 
 void MicrophonePage::on_mic_inserted_toggled(bool checked) {
@@ -62,40 +57,48 @@ void MicrophonePage::on_mic_inserted_toggled(bool checked) {
     setButtonEnabled(mUi->mic_voiceAssistButton, getSelectedTheme(), checked);
     setButtonEnabled(mUi->mic_hookButton, getSelectedTheme(), checked);
 
-    if (mUserEventAgent) {
-        // Send the indication to the device
-        int phonesInserted;
-        int micInserted;
+    // Send the indication to the device
+    int phonesInserted;
+    int micInserted;
 
-        if (checked) {
-            // Headphones + optional microphone
-            phonesInserted = 1;
-            micInserted = mUi->mic_hasMic->isChecked() ? 1 : 0;
-        } else {
-            // No headphones, no microphone
-            phonesInserted = 0;
-            micInserted = 0;
-        }
-
-        mUserEventAgent->sendGenericEvent(EV_SW, SW_HEADPHONE_INSERT, phonesInserted);
-        mUserEventAgent->sendGenericEvent(EV_SW, SW_MICROPHONE_INSERT, micInserted);
-        mUserEventAgent->sendGenericEvent(EV_SYN, 0, 0);
+    if (checked) {
+        // Headphones + optional microphone
+        phonesInserted = 1;
+        micInserted = mUi->mic_hasMic->isChecked() ? 1 : 0;
+    } else {
+        // No headphones, no microphone
+        phonesInserted = 0;
+        micInserted = 0;
     }
+
+    forwardGenericEventToEmulator(EV_SW, SW_HEADPHONE_INSERT, phonesInserted);
+    forwardGenericEventToEmulator(EV_SW, SW_MICROPHONE_INSERT, micInserted);
+    forwardGenericEventToEmulator(EV_SYN, 0, 0);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_pressed() {
-    if (mUserEventAgent) {
-        mUserEventAgent->sendGenericEvent(EV_KEY, KEY_SEND, 1);
-    }
+    forwardGenericEventToEmulator(EV_KEY, KEY_SEND, 1);
 }
 
 void MicrophonePage::on_mic_voiceAssistButton_released() {
-    if (mUserEventAgent) {
-        mUserEventAgent->sendGenericEvent(EV_KEY, KEY_SEND, 0);
-    }
+    forwardGenericEventToEmulator(EV_KEY, KEY_SEND, 0);
 }
 
+void MicrophonePage::setEmulatorWindow(EmulatorQtWindow* eW) {
+    mEmulatorWindow = eW;
+}
 
-void MicrophonePage::setMicrophoneAgent(const QAndroidUserEventAgent* agent) {
-    mUserEventAgent = agent;
+void MicrophonePage::forwardGenericEventToEmulator(int type,
+                                                   int code,
+                                                   int value) {
+    if (mEmulatorWindow) {
+        SkinEvent* skin_event = new SkinEvent();
+        skin_event->type = kEventGeneric;
+        SkinEventGenericData& genericData = skin_event->u.generic_event;
+        genericData.type = type;
+        genericData.code = code;
+        genericData.value = value;
+
+        mEmulatorWindow->queueSkinEvent(skin_event);
+    }
 }
