@@ -225,28 +225,32 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 #else
     std::string driveParam;
 #endif
-    // Disable extra qcow2 checks as we're on its stable version.
-    // Disable cache flushes as well, as Android issues way too many flush
-    // commands for nothing.
-    driveParam += "overlap-check=none,cache=unsafe,";
 
     std::string deviceParam;
+    ScopedCPtr<const char> allocatedPath;
     StringView filePath;
+    bool qCow2Format = true;
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            filePath = avdInfo_getContentPath(avd);
-            driveParam += StringFormat("index=%d,id=system,file=%s"
-                                       PATH_SEP "system.img.qcow2",
-                                        idx++, filePath);
-            // API 15 and under images need a read+write
-            // system image.
-            if (apiLevel > 15) {
-                // API > 15 uses read-only system partition.
-                // You can override this explicitly
-                // by passing -writable-system to emulator.
-                if (!writable)
-                    driveParam += ",read-only";
+            // API 15 and under images need a read+write system image.
+            // API > 15 uses read-only system partition. You can override this
+            // explicitly by passing -writable-system to emulator.
+            if (apiLevel <= 15) {
+                writable = true;
             }
+            if (writable) {
+                const char* systemDir = avdInfo_getContentPath(avd);
+                filePath = path_join(systemDir, "system.img.qcow2");
+                driveParam += StringFormat("index=%d,id=system,file=%s",
+                                           idx++, filePath);
+            } else {
+                qCow2Format = false;
+                filePath = avdInfo_getSystemInitImagePath(avd);
+                driveParam += StringFormat("index=%d,id=system,file=%s"
+                                           ",read-only",
+                                           idx++, filePath);
+            }
+            allocatedPath.reset(filePath.c_str());
             deviceParam = StringFormat("%s,drive=system",
                                        kTarget.storageDeviceType);
             break;
@@ -297,17 +301,24 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             return;
     }
 
-    // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
-    // larger images.
-    System::FileSize diskSize;
-    if (System::get()->pathFileSize(filePath, &diskSize)) {
-        // L2 cache size should be "disk_size_GB / 131072" as per QEMU docs
-        // with a default of 1MB. Round it up just in case.
-        const int l2CacheSize =
-                std::max<int>(
-                    (diskSize + (1024 * 1024 * 1024 - 1)) / (1024 * 1024 * 1024) * 131072,
-                    1024 * 1024);
-        driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
+    if (qCow2Format) {
+        // Disable extra qcow2 checks as we're on its stable version.
+        // Disable cache flushes as well, as Android issues way too many flush
+        // commands for nothing.
+        driveParam += ",overlap-check=none,cache=unsafe";
+
+        // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
+        // larger images.
+        System::FileSize diskSize;
+        if (System::get()->pathFileSize(filePath, &diskSize)) {
+            // L2 cache size should be "disk_size_GB / 131072" as per QEMU docs
+            // with a default of 1MB. Round it up just in case.
+            const int l2CacheSize =
+                    std::max<int>((diskSize + (1024 * 1024 * 1024 - 1)) /
+                                          (1024 * 1024 * 1024) * 131072,
+                                  1024 * 1024);
+            driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
+        }
     }
 
     // Move the disk operations into the dedicated 'disk thread', and
