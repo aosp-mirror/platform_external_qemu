@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45efb4dc_256da5f8",
+        "filename": "android/android-emugl/host/tools/emugen/tests/t.001/input/foo.attrib",
+        "patchSetId": 4
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-11T22:13:57Z",
+      "side": 1,
+      "message": "void* inptr_obj_unpacked ?",
+      "revId": "8b7bd1dd69de8bc60a233889fbf6d9382ad9649e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
