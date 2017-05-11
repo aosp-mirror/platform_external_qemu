@@ -47,7 +47,9 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch() {
 
     // TODO: Remove restriction when core profile is working
 #ifdef __APPLE__
-    res = GLES_DISPATCH_MAX_VERSION_2;
+    if (emugl::getRenderer() != SELECTED_RENDERER_SWIFTSHADER) {
+        res = GLES_DISPATCH_MAX_VERSION_2;
+    }
 #endif
 
     // TODO: Modify when CTS compliant for OpenGL ES 3.1

@@ -20,6 +20,9 @@ static bool s_isPhone = false;
 static int s_glesMajorVersion = 2;
 static int s_glesMinorVersion = 0;
 
+static SelectedRenderer s_renderer =
+    SELECTED_RENDERER_HOST;
+
 void emugl::setAvdInfo(bool phone, int apiLevel) {
     s_isPhone = phone;
     s_apiLevel = apiLevel;
@@ -38,4 +41,12 @@ void emugl::setGlesVersion(int maj, int min) {
 void emugl::getGlesVersion(int* maj, int* min) {
     if (maj) *maj = s_glesMajorVersion;
     if (min) *min = s_glesMinorVersion;
+}
+
+void emugl::setRenderer(SelectedRenderer renderer) {
+    s_renderer = renderer;
+}
+
+SelectedRenderer emugl::getRenderer() {
+    return s_renderer;
 }

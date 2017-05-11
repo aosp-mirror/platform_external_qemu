@@ -15,6 +15,7 @@
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
 
+#include "android/opengl/emugl_config.h"
 #include "emugl/common/misc.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -196,40 +197,33 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
         numAttribs += 2;
     }
 
-    EGLint* newAttribs = NULL;
+    std::vector<EGLint> newAttribs(numAttribs);
+    memcpy(&newAttribs[0], attribs, numAttribs * sizeof(EGLint));
 
     int apiLevel;
     emugl::getAvdInfo(NULL, &apiLevel);
 
     if (!hasSurfaceType) {
-        // There is no EGL_SURFACE_TYPE in |attribs|.
-        newAttribs = new GLint[numAttribs + 3];
-        memcpy(newAttribs, attribs, numAttribs * sizeof(GLint));
-        newAttribs[numAttribs] = EGL_SURFACE_TYPE;
-        newAttribs[numAttribs + 1] = 0;
-        newAttribs[numAttribs + 2] = EGL_NONE;
+        newAttribs.push_back(EGL_SURFACE_TYPE);
+        newAttribs.push_back(0);
     } else if (wantSwapPreserved && apiLevel <= 19) {
-        // For api <= 19, there is a bug in some public system images
-        // that causes UI issue if the host rejects
-        // EGL_SWAP_BEHAVIOR_PRESERVED_BIT, while they are not using
-        // this feature.
-        // So we wipe it out.
-        newAttribs = new GLint[numAttribs+1];
-        memcpy(newAttribs, attribs, (numAttribs+1) * sizeof(GLint));
-        newAttribs[surfaceTypeIdx+1] &= ~(EGLint)EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
+        newAttribs[surfaceTypeIdx + 1] &= ~(EGLint)EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
+    }
+    if (emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER) {
+        newAttribs.push_back(EGL_CONFIG_CAVEAT);
+        newAttribs.push_back(EGL_DONT_CARE);
     }
 
+    newAttribs.push_back(EGL_NONE);
+
     if (s_egl.eglChooseConfig(mDisplay,
-                               newAttribs ? newAttribs : attribs,
-                               matchedConfigs,
-                               numHostConfigs,
-                               &numHostConfigs) == EGL_FALSE) {
-        if (newAttribs) delete [] newAttribs;
+                              &newAttribs[0],
+                              matchedConfigs,
+                              numHostConfigs,
+                              &numHostConfigs) == EGL_FALSE) {
         delete [] matchedConfigs;
         return -s_egl.eglGetError();
     }
-
-    delete [] newAttribs;
 
     int result = 0;
     for (int n = 0; n < numHostConfigs; ++n) {
