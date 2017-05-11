@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "521d7def_d8924c8b",
+        "filename": "android/android-emu/android/curl-support.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-11T05:33:41Z",
+      "side": 1,
+      "message": "nit: does simple (void)asprintf(...) work here?",
+      "range": {
+        "startLine": 82,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 18
+      },
+      "revId": "0908fada42f24a1cf69fc43498ebfc5c1e443d2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
