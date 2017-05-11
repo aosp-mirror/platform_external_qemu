@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/base/Profiler.h"
+#include "android/opengl/emugl_config.h"
 
 namespace emugl {
 
@@ -25,6 +26,10 @@ namespace emugl {
     // Set/get GLES major/minor version.
     void setGlesVersion(int maj, int min);
     void getGlesVersion(int* maj, int* min);
+
+    // Set/get renderer
+    void setRenderer(SelectedRenderer renderer);
+    SelectedRenderer getRenderer();
 
     using Profiler = android::base::Profiler;
 }
