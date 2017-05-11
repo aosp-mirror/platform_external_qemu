@@ -14,6 +14,9 @@ typedef FooBoolean (foo_APIENTRY *fooIsBuffer_client_proc_t) (void * ctx, void*)
 typedef void (foo_APIENTRY *fooUnsupported_client_proc_t) (void * ctx, void*);
 typedef void (foo_APIENTRY *fooDoEncoderFlush_client_proc_t) (void * ctx, FooInt);
 typedef void (foo_APIENTRY *fooTakeConstVoidPtrConstPtr_client_proc_t) (void * ctx, const void* const*);
+typedef void (foo_APIENTRY *fooSetComplexStruct_client_proc_t) (void * ctx, const FooStruct*);
+typedef void (foo_APIENTRY *fooGetComplexStruct_client_proc_t) (void * ctx, FooStruct*);
+typedef void (foo_APIENTRY *fooInout_client_proc_t) (void * ctx, uint32_t*);
 
 
 #endif

@@ -10,6 +10,9 @@ extern "C" {
 	void fooUnsupported(void* params);
 	void fooDoEncoderFlush(FooInt param);
 	void fooTakeConstVoidPtrConstPtr(const void* const* param);
+	void fooSetComplexStruct(const FooStruct* obj);
+	void fooGetComplexStruct(FooStruct* obj);
+	void fooInout(uint32_t* count);
 };
 
 #ifndef GET_CONTEXT
@@ -47,5 +50,23 @@ void fooTakeConstVoidPtrConstPtr(const void* const* param)
 {
 	GET_CONTEXT;
 	ctx->fooTakeConstVoidPtrConstPtr(ctx, param);
+}
+
+void fooSetComplexStruct(const FooStruct* obj)
+{
+	GET_CONTEXT;
+	ctx->fooSetComplexStruct(ctx, obj);
+}
+
+void fooGetComplexStruct(FooStruct* obj)
+{
+	GET_CONTEXT;
+	ctx->fooGetComplexStruct(ctx, obj);
+}
+
+void fooInout(uint32_t* count)
+{
+	GET_CONTEXT;
+	ctx->fooInout(ctx, count);
 }
 

@@ -13,6 +13,9 @@ static const struct _foo_funcs_by_name {
 	{"fooUnsupported", (void*)fooUnsupported},
 	{"fooDoEncoderFlush", (void*)fooDoEncoderFlush},
 	{"fooTakeConstVoidPtrConstPtr", (void*)fooTakeConstVoidPtrConstPtr},
+	{"fooSetComplexStruct", (void*)fooSetComplexStruct},
+	{"fooGetComplexStruct", (void*)fooGetComplexStruct},
+	{"fooInout", (void*)fooInout},
 };
 static const int foo_num_funcs = sizeof(foo_funcs_by_name) / sizeof(struct _foo_funcs_by_name);
 
