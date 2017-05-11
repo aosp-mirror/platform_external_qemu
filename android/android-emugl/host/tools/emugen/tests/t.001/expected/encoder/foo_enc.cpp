@@ -7,6 +7,7 @@
 
 #include "foo_enc.h"
 
+#include <vector>
 
 #include <stdio.h>
 
