@@ -56,7 +56,6 @@ FLAG_EXPORT int AmdPowerXpressRequestHighPerformance = 0x00000001;
 
 static const System::Duration kGPUInfoQueryTimeoutMs = 5000;
 static const System::Duration kQueryCheckIntervalMs = 66;
-static const size_t kFieldLen = 2048;
 
 static const size_t NOTFOUND = std::string::npos;
 

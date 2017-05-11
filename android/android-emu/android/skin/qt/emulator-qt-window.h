@@ -308,7 +308,7 @@ private:
 
     // When the main window appears, close the "Starting..."
     // pop-up, if it was displayed.
-    void showEvent(QShowEvent* event) {
+    void showEvent(QShowEvent* event) override {
         mStartupTimer.stop();
         mStartupDialog.close();
     }

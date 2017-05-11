@@ -52,7 +52,6 @@ public:
     int setAttribute(const std::string &line, size_t lc);
 
 private:
-    enum { PR_RETVAL = 0, PR_NAME, PR_VARS, PR_DONE } prState;
     std::string m_name;
     Var m_retval;
     VarsArray m_vars;

@@ -79,8 +79,9 @@ void* curl_easy_default_init(char** error) {
 
     curlRes = curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     if (curlRes != CURLE_OK) {
-        asprintf(error, "Could not disable signals: %s",
+        int err = asprintf(error, "Could not disable signals: %s",
                  curl_easy_strerror(curlRes));
+        (void)err;
         curl_easy_cleanup(curl);
         return NULL;
     }
@@ -88,8 +89,9 @@ void* curl_easy_default_init(char** error) {
     if (cached_ca_info != NULL) {
         curlRes = curl_easy_setopt(curl, CURLOPT_CAINFO, cached_ca_info);
         if (curlRes != CURLE_OK) {
-            asprintf(error, "Could not set CURLOPT_CAINFO: %s",
+            int err = asprintf(error, "Could not set CURLOPT_CAINFO: %s",
                      curl_easy_strerror(curlRes));
+            (void)err;
             curl_easy_cleanup(curl);
             return NULL;
         }
@@ -140,7 +142,8 @@ static bool curl_download_internal(const char* url,
 
     const CURLcode res = curl_easy_perform(curl);
     if (res != CURLE_OK) {
-        asprintf(error, "%s", curl_easy_strerror(res));
+        int err = asprintf(error, "%s", curl_easy_strerror(res));
+        (void)err;
     } else {
         // toolbar returns a 404 by design.
         long http_response = 0;
@@ -151,11 +154,13 @@ static bool curl_download_internal(const char* url,
             } else if (http_response == 404 && allow_404) {
                 result = true;
             } else {
-                asprintf(error, "%s", curl_easy_strerror(curlRes));
+                int err = asprintf(error, "%s", curl_easy_strerror(curlRes));
+                (void)err;
             }
         } else {
-            asprintf(error, "Unexpected error while checking http response: %s",
+            int err = asprintf(error, "Unexpected error while checking http response: %s",
                     curl_easy_strerror(curlRes));
+            (void)err;
         }
     }
 
