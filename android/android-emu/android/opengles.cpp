@@ -17,6 +17,7 @@
 #include "android/emulation/GoldfishDma.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/opengl/emugl_config.h"
 #include "android/opengl/logger.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -136,6 +137,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
 
     android_init_opengl_logger();
 
+    sRenderLib->setRenderer(emuglConfig_get_current_renderer());
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
     sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);

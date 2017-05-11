@@ -16,6 +16,7 @@
 #include <memory>
 
 #include "android/base/files/Stream.h"
+#include "android/opengl/emugl_config.h"
 #include "OpenglRender/Renderer.h"
 #include "OpenglRender/render_api_types.h"
 
@@ -28,6 +29,8 @@ class RenderLib {
 public:
     virtual ~RenderLib() = default;
 
+    // Get the selected renderer
+    virtual void setRenderer(SelectedRenderer renderer) = 0;
     // Tell emugl the API version of the system image
     virtual void setAvdInfo(bool phone, int api) = 0;
     // Get the GLES major/minor version determined by libOpenglRender.
