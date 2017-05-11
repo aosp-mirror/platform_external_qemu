@@ -81,6 +81,11 @@ static void emulator_window_keycodes_event(int* keycodes, int count) {
     user_event_agent->sendKeyCodes(keycodes, count);
 }
 
+static void emulator_window_generic_event(SkinGenericEventCode* events,
+                                          int count) {
+    user_event_agent->sendGenericEvents(events, count);
+}
+
 static void emulator_window_window_mouse_event(unsigned x,
                                          unsigned y,
                                          unsigned state) {
@@ -228,6 +233,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
             .trackball_params = &my_trackball_params,
             .keyboard_event = &emulator_window_keyboard_event,
             .keyboard_flush = &emulator_window_keycodes_event,
+            .generic_event_flush = &emulator_window_generic_event,
             .network_toggle = &emulator_window_network_toggle,
             .framebuffer_invalidate = &emulator_window_framebuffer_invalidate,
     };

@@ -13,6 +13,7 @@
 #include "android/skin/ui.h"
 
 #include "android/skin/file.h"
+#include "android/skin/generic-event.h"
 #include "android/skin/image.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/rect.h"
@@ -41,6 +42,7 @@ struct SkinUI {
     SkinLayout*            layout;
 
     SkinKeyboard*          keyboard;
+    SkinGenericEvent*      generic_events;
 
     SkinWindow*            window;
 
@@ -86,6 +88,8 @@ SkinUI* skin_ui_create(SkinFile* layout_file,
     ui->keyboard = skin_keyboard_create(ui->ui_params.keyboard_charmap,
                                         ui->layout->dpad_rotation,
                                         ui_funcs->keyboard_flush);
+    ui->generic_events =
+            skin_generic_event_create(ui_funcs->generic_event_flush);
     ui->window = NULL;
 
     ui->window = skin_window_create(
@@ -134,6 +138,10 @@ void skin_ui_free(SkinUI* ui) {
     if (ui->keyboard) {
         skin_keyboard_free(ui->keyboard);
         ui->keyboard = NULL;
+    }
+    if (ui->generic_events) {
+        skin_generic_event_free(ui->generic_events);
+        ui->generic_events = NULL;
     }
 
     skin_image_unref(&ui->onion);
@@ -264,6 +272,13 @@ bool skin_ui_process_events(SkinUI* ui) {
             DE("EVENT: kEventKeyUp scancode=%d mod=0x%x\n",
                ev.u.key.keycode, ev.u.key.mod);
             skin_keyboard_process_event(ui->keyboard, &ev, 0);
+            break;
+
+        case kEventGeneric:
+            DE("EVENT: kEventGeneric type=0x%02x code=0x%03x val=%x\n",
+               ev.u.generic_event.type, ev.u.generic_event.code,
+               ev.u.generic_event.value);
+            skin_generic_event_process_event(ui->generic_events, &ev);
             break;
 
         case kEventTextInput:
