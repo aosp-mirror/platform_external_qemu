@@ -22,6 +22,30 @@
       "revId": "0908fada42f24a1cf69fc43498ebfc5c1e443d2d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "548bf215_b3cbf8a8",
+        "filename": "android/android-emu/android/curl-support.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-11T05:44:01Z",
+      "side": 1,
+      "message": "Well, our older toolchain will accept this, but newer compilers are smart and will complain about: \n\nignoring return value of ‘asprintf’, declared with attribute warn_unused_result",
+      "parentUuid": "521d7def_d8924c8b",
+      "range": {
+        "startLine": 82,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 18
+      },
+      "revId": "0908fada42f24a1cf69fc43498ebfc5c1e443d2d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
