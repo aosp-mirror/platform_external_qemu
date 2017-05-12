@@ -336,10 +336,11 @@ static const MemoryRegionOps goldfish_reset_io_ops = {
 static void create_device(void* fdt, DevMapEntry* dev, qemu_irq* pic,
                           int num_devices, int is_virtio)
 {
-    int i, j, dt_compat_sz = 0;
+    int i, j;
 
     for (i = 0; i < num_devices; i++) {
         hwaddr base = dev->base + i * dev->size;
+        int dt_compat_sz = 0;
 
         char* nodename = g_strdup_printf("/%s@%" PRIx64, dev->dt_name, base);
         qemu_fdt_add_subnode(fdt, nodename);
