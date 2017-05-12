@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0c6c82d6_935b3718",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-12T17:03:59Z",
+      "side": 1,
+      "message": "Holy cow. We missed that one :-)",
+      "revId": "5d796e08393e2626a6e87509c46945ef8f62acc3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
