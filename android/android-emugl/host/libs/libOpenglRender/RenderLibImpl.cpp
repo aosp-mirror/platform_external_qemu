@@ -25,6 +25,10 @@
 
 namespace emugl {
 
+void RenderLibImpl::setRenderer(SelectedRenderer renderer) {
+    emugl::setRenderer(renderer);
+}
+
 void RenderLibImpl::setAvdInfo(bool phone, int api) {
     emugl::setAvdInfo(phone, api);
 }
