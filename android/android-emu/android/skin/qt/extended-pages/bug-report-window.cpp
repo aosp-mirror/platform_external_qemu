@@ -51,7 +51,7 @@ using android::emulation::ScreenCapturer;
 
 static const char FILE_BUG_URL[] =
         "https://issuetracker.google.com/issues/new"
-        "?component=192727&description=%s";
+        "?component=192727&description=%s&template=843117";
 
 // In reference to
 // https://developer.android.com/studio/report-bugs.html#emulator-bugs
@@ -63,13 +63,13 @@ Android Studio Version:
 
 Emulator Version (Emulator--> Extended Controls--> Emulator Version): %s
 
+HAXM / KVM Version: %s
+
 Android SDK Tools: %s
 
 Host Operating System: %s
 
-Host CPU Model: %s
-
-Device Name: %s
+CPU Manufacturer: %s
 
 Steps to Reproduce Bug:
 %s
@@ -552,18 +552,10 @@ IssueTrackerTask::IssueTrackerTask(
     : mReportingFields(reportingFields) {}
 
 void IssueTrackerTask::run() {
-    std::string emulatorAndHypervisor;
-    if (mReportingFields.hypervisorVer.empty()) {
-        emulatorAndHypervisor = mReportingFields.emulatorVer;
-    } else {
-        emulatorAndHypervisor =
-                StringFormat("%s (%s)", mReportingFields.emulatorVer,
-                             mReportingFields.hypervisorVer);
-    }
     std::string bugTemplate = StringFormat(
-            BUG_REPORT_TEMPLATE, emulatorAndHypervisor,
-            mReportingFields.sdkToolsVer, mReportingFields.hostOsName,
-            trim(mReportingFields.cpuModel), mReportingFields.deviceName,
+            BUG_REPORT_TEMPLATE, mReportingFields.emulatorVer,
+            mReportingFields.hypervisorVer, mReportingFields.sdkToolsVer,
+            mReportingFields.hostOsName, trim(mReportingFields.cpuModel),
             mReportingFields.reproSteps);
     std::string unEncodedUrl =
             Uri::FormatEncodeArguments(FILE_BUG_URL, bugTemplate);
