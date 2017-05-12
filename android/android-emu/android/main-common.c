@@ -1811,7 +1811,12 @@ bool configAndStartRenderer(
     if (strcmp(gpu_mode, "guest") == 0 ||
         strcmp(gpu_mode, "off") == 0 ||
         !hw->hw_gpu_enabled) {
-        config_out->glesMode = kAndroidGlesEmulationGuest;
+        if (avdInfo_isGoogleApis(avd) &&
+                avdInfo_getApiLevel(avd) >= 19) {
+            config_out->glesMode = kAndroidGlesEmulationGuest;
+        } else {
+            config_out->glesMode = kAndroidGlesEmulationOff;
+        }
     } else {
         int gles_init_res =
             android_initOpenglesEmulation();
