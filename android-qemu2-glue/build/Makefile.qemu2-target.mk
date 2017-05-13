@@ -174,9 +174,30 @@ LOCAL_WHOLE_STATIC_LIBRARIES += \
     libqemu2-common \
 
 LOCAL_STATIC_LIBRARIES += \
-    $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
-    $(QEMU2_GLUE_STATIC_LIBRARIES) \
-    $(ANDROID_EMU_STATIC_LIBRARIES) \
+			  $(QEMU2_GLUE_STATIC_LIBRARIES) \
+			  $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
+			  $(WEBRTC_STATIC_LIBRARIES) \
+			  android-emu \
+			  android-emu-base \
+			  emulator-libbreakpad_client \
+			  emulator-libcrypto \
+			  emulator-libext4_utils \
+			  emulator-libjpeg \
+			  emulator-libpng \
+			  emulator-libselinux \
+			  emulator-libsparse \
+			  emulator-libwebp \
+			  emulator-libwebsockets \
+			  emulator-libxml2 \
+			  emulator-protobuf \
+			  emulator-websockets \
+			  emulator-zlib \
+			  libcrashreport_proto \
+			  libfeaturecontrol_proto \
+			  libmetrics_proto \
+			  libvehicle_proto \
+
+# $(info "[ $(ANDROID_EMU_STATIC_LIBRARIES) ]")
 
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \

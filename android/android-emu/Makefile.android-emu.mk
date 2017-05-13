@@ -68,7 +68,6 @@ include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
-
 ###############################################################################
 #
 #  android-emu-base
@@ -194,7 +193,8 @@ LOCAL_C_INCLUDES := \
 LOCAL_SRC_FILES := \
     android/base/synchronization/Lock_benchmark.cpp \
 
-LOCAL_STATIC_LIBRARIES := android-emu-base
+LOCAL_STATIC_LIBRARIES := emulator-libwebrtc \
+
 
 $(call end-emulator-benchmark)
 
@@ -217,6 +217,8 @@ LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
+    -D__STDC_WANT_LIB_EXT1__
+
 
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -426,6 +428,7 @@ endif
 ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
         android/camera/camera-capture-mac.m
+    LOCAL_CFLAGS += -DWEBRTC_MAC
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -469,6 +472,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libjpeg \
     emulator-libpng \
     emulator-libwebp \
+    emulator-libwebsockets \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
