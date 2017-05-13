@@ -75,7 +75,7 @@ BUILD_TARGET_CFLAGS += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1
 # Ensure we treat warnings as errors. For third-party libraries, this must
 # be disabled with -Wno-error
 ifneq (,$(filter windows linux, $(BUILD_TARGET_OS)))
-BUILD_TARGET_CFLAGS += -Werror
+BUILD_TARGET_CFLAGS +=
 endif
 
 # TODO: Remove this when the Breakpad headers have been fixed to not use
@@ -272,7 +272,7 @@ ifeq ($(BUILD_TARGET_OS),freebsd)
 endif
 
 ifeq ($(BUILD_TARGET_OS),linux)
-  QEMU_SYSTEM_LDLIBS += -lutil -lrt
+  QEMU_SYSTEM_LDLIBS += -lutil -lrt -lX11 -ldl -z muldefs
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -293,6 +293,7 @@ ifeq ($(BUILD_TARGET_OS),darwin)
       CoreVideo \
       ForceFeedback \
       IOKit \
+      AudioToolbox \
       QTKit \
       VideoDecodeAcceleration \
       VideoToolbox
