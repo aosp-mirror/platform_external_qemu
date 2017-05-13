@@ -66,6 +66,7 @@ extern "C" {
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 
+
 #ifdef TARGET_AARCH64
 #define TARGET_ARM64
 #endif
@@ -418,6 +419,10 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
 }
 
 extern AndroidProxyCB *gAndroidProxyCB;
+
+/** Support for webrtc */
+extern "C" void initialize_webrtc(void);
+
 extern "C" int main(int argc, char **argv) {
     process_early_setup(argc, argv);
 
@@ -1164,6 +1169,9 @@ extern "C" int main(int argc, char **argv) {
         }
         printf("\n");
     }
+
+    // Hack to get webrtc up and running
+    initialize_webrtc();
 
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
     skin_winsys_enter_main_loop(opts->no_window);

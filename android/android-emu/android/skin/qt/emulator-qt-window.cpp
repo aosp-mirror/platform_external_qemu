@@ -661,6 +661,7 @@ void EmulatorQtWindow::maskWindowFrame()
 
     flags &= ~FRAME_WINDOW_FLAGS_MASK;
     flags |= (haveFrame ? FRAMED_WINDOW_FLAGS : FRAMELESS_WINDOW_FLAGS);
+    flags |= Qt::FramelessWindowHint;
 
     mContainer.setWindowFlags(flags);
 
@@ -756,9 +757,12 @@ void EmulatorQtWindow::raise() {
 }
 
 void EmulatorQtWindow::show() {
+    this->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
+    this->setGeometry(0,0, 675, 1200);
+    mContainer.setGeometry(0, 0, 675, 1200);
     mContainer.show();
     QFrame::show();
-    mToolWindow->show();
+    mToolWindow->hide();
 
     QObject::connect(window()->windowHandle(), &QWindow::screenChanged, this,
                      &EmulatorQtWindow::slot_screenChanged);
@@ -783,7 +787,7 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways)
     mFrameAlways = frameAlways;
     maskWindowFrame();
     if (mStartupDialog.wasCanceled()) {
-        mContainer.show();
+        // mContainer.show();
     }
 }
 
