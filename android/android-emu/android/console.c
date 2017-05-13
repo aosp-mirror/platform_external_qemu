@@ -41,7 +41,6 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/http_utils.h"
 #include "android/utils/ipaddr.h"
-#include "android/utils/looper.h"
 #include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/utf8_utils.h"
@@ -73,64 +72,17 @@
 #endif
 
 #define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
-
-typedef struct ControlGlobalRec_*  ControlGlobal;
-
-typedef struct ControlClientRec_*  ControlClient;
-
-typedef struct {
-    int           host_port;
-    int           host_udp;
-    unsigned int  guest_ip;
-    int           guest_port;
-} RedirRec, *Redir;
-
-
-typedef int Socket;
-typedef const struct CommandDefRec_* CommandDef;
-
-typedef struct ControlClientRec_
-{
-    struct ControlClientRec_*  next;       /* next client in list           */
-    Socket                     sock;       /* socket used for communication */
-    // The loopIo currently communicating over |sock|. May change over the
-    // lifetime of a ControlClient.
-    LoopIo* loopIo;
-    ControlGlobal              global;
-    char                       finished;
-    char                       buff[ 4096 ];
-    int                        buff_len;
-    CommandDef                 commands;
-} ControlClientRec;
-
-
-typedef struct ControlGlobalRec_
-{
-    // Interfaces to call into QEMU specific code.
-#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) type name ## _agent [1];
-    ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_FIELD)
-
-    /* IO */
-    Looper* looper;
-    LoopIo* listen4_loopio;
-    LoopIo* listen6_loopio;
-
-    /* the list of current clients */
-    ControlClient   clients;
-
-    /* the list of redirections currently active */
-    Redir     redirs;
-    int       num_redirs;
-    int       max_redirs;
-
-} ControlGlobalRec;
-
 static inline const QAndroidVmOperations* vmopers(ControlClient client) {
     return client->global->vm_agent;
 }
 
 //////////// Module level globals //////////////////////////
 static ControlGlobalRec _g_global;
+
+
+ControlGlobal control_global_get() {
+  return &_g_global;
+}
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -259,6 +211,11 @@ static void control_control_write(ControlClient client, const char* buff, int le
     if (len < 0)
         len = strlen(buff);
 
+    if (client->write) {
+      printf("%s:  buff: %s\n", __func__, buff);
+        client->write(client, buff, len);
+        return;
+    }
     // Terminal requires an explicit \r\n symbol pair for newlines, and most of
     // the clients use \n alone. Make sure we insert missing \r characters
     // before each \n while sending.
@@ -341,7 +298,20 @@ typedef struct CommandDefRec_ {
 static const CommandDefRec main_commands[];         /* forward */
 static const CommandDefRec main_commands_preauth[]; /* forward */
 
-static ControlClient
+ControlClient
+control_client_create_empty() {
+    ControlClient  client = calloc( sizeof(*client), 1 );
+
+    if (client) {
+        client->commands = main_commands_preauth;
+        client->finished = 0;
+        client->write   = 0;
+    }
+    return client;
+
+}
+
+ControlClient
 control_client_create( Socket         socket,
                        ControlGlobal  global )
 {
@@ -357,6 +327,7 @@ control_client_create( Socket         socket,
         client->loopIo =
                 loopIo_new(global->looper, socket, control_client_read, client);
         client->next    = global->clients;
+        client->write   = 0;
         global->clients = client;
 
         loopIo_wantRead(client->loopIo);
@@ -439,7 +410,7 @@ static void control_send_help_prompt(ControlClient client) {
                   "Android Console: type 'help' for a list of commands\r\n");
 }
 
-static void control_client_do_command(ControlClient client) {
+void control_client_do_command(ControlClient client) {
     char*       line     = client->buff;
     char*       args     = NULL;
     CommandDef  commands = client->commands;
@@ -466,6 +437,7 @@ static void control_client_do_command(ControlClient client) {
     }
 
     for (;;) {
+        printf("looping..");
         CommandDef  subcmd;
 
         if (cmd->handler) {

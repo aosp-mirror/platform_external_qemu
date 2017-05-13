@@ -177,6 +177,9 @@ LOCAL_STATIC_LIBRARIES += \
     $(QEMU2_SYSTEM_STATIC_LIBRARIES) \
     $(QEMU2_GLUE_STATIC_LIBRARIES) \
     $(ANDROID_EMU_STATIC_LIBRARIES) \
+    emulator-websockets \
+    emulator-libwebsockets \
+    $(WEBRTC_STATIC_LIBRARIES) \
 
 LOCAL_CFLAGS += \
     $(QEMU2_SYSTEM_CFLAGS) \

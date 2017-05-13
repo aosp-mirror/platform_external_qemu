@@ -23,6 +23,7 @@ include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
 include $(LOCAL_PATH)/android/third_party/libx264.mk
 include $(LOCAL_PATH)/android/third_party/libvpx.mk
 include $(LOCAL_PATH)/android/third_party/libsdl2.mk
+include $(LOCAL_PATH)/android/third_party/libwebsockets/libwebsockets.mk
 
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
@@ -144,8 +145,12 @@ endif  # BUILD_TARGET_OS == windows
 
 include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
 include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
+include $(LOCAL_PATH)/android/android-emu/android/websocket/Makefile.websockets.mk
+
+
 
 include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-common.mk
+
 
 # We want to build all variants of the emulator binaries. This makes
 # it easier to catch target-specific regressions during emulator development.
@@ -158,6 +163,7 @@ include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
 
 EMULATOR_TARGET_ARCH := mips
 include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+
 
 ##############################################################################
 ##############################################################################
@@ -181,9 +187,9 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
     # Need the build number as well
     LOCAL_CFLAGS += $(EMULATOR_VERSION_CFLAGS)
 
-    LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
+    LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES) \
 
-    LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)
+    LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS) \
 
     # Ensure this is always built, even if 32-bit binaries are disabled.
     LOCAL_IGNORE_BITNESS := true
@@ -215,7 +221,8 @@ ifeq ($(BUILD_TARGET_BITS),$(EMULATOR_PROGRAM_BITNESS))
 
     LOCAL_C_INCLUDES += $(ANDROID_EMU_INCLUDES)
     LOCAL_STATIC_LIBRARIES := $(ANDROID_EMU_STATIC_LIBRARIES)
-    LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS)
+    LOCAL_LDLIBS := $(ANDROID_EMU_LDLIBS) \
+
 
     LOCAL_IGNORE_BITNESS := true
 
