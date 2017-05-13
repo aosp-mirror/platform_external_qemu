@@ -41,10 +41,10 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/http_utils.h"
 #include "android/utils/ipaddr.h"
-#include "android/utils/looper.h"
 #include "android/utils/sockets.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/utf8_utils.h"
+
 
 #include "config-host.h"
 
@@ -73,64 +73,17 @@
 #endif
 
 #define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
-
-typedef struct ControlGlobalRec_*  ControlGlobal;
-
-typedef struct ControlClientRec_*  ControlClient;
-
-typedef struct {
-    int           host_port;
-    int           host_udp;
-    unsigned int  guest_ip;
-    int           guest_port;
-} RedirRec, *Redir;
-
-
-typedef int Socket;
-typedef const struct CommandDefRec_* CommandDef;
-
-typedef struct ControlClientRec_
-{
-    struct ControlClientRec_*  next;       /* next client in list           */
-    Socket                     sock;       /* socket used for communication */
-    // The loopIo currently communicating over |sock|. May change over the
-    // lifetime of a ControlClient.
-    LoopIo* loopIo;
-    ControlGlobal              global;
-    char                       finished;
-    char                       buff[ 4096 ];
-    int                        buff_len;
-    CommandDef                 commands;
-} ControlClientRec;
-
-
-typedef struct ControlGlobalRec_
-{
-    // Interfaces to call into QEMU specific code.
-#define ANDROID_CONSOLE_DEFINE_FIELD(type, name) type name ## _agent [1];
-    ANDROID_CONSOLE_AGENTS_LIST(ANDROID_CONSOLE_DEFINE_FIELD)
-
-    /* IO */
-    Looper* looper;
-    LoopIo* listen4_loopio;
-    LoopIo* listen6_loopio;
-
-    /* the list of current clients */
-    ControlClient   clients;
-
-    /* the list of redirections currently active */
-    Redir     redirs;
-    int       num_redirs;
-    int       max_redirs;
-
-} ControlGlobalRec;
-
 static inline const QAndroidVmOperations* vmopers(ControlClient client) {
     return client->global->vm_agent;
 }
 
 //////////// Module level globals //////////////////////////
 static ControlGlobalRec _g_global;
+
+
+ControlGlobal control_global_get() {
+  return &_g_global;
+}
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -259,6 +212,11 @@ static void control_control_write(ControlClient client, const char* buff, int le
     if (len < 0)
         len = strlen(buff);
 
+    if (client->write) {
+      printf("%s:  buff: %s\n", __func__, buff);
+        client->write(client, buff, len);
+        return;
+    }
     // Terminal requires an explicit \r\n symbol pair for newlines, and most of
     // the clients use \n alone. Make sure we insert missing \r characters
     // before each \n while sending.
@@ -341,7 +299,22 @@ typedef struct CommandDefRec_ {
 static const CommandDefRec main_commands[];         /* forward */
 static const CommandDefRec main_commands_preauth[]; /* forward */
 
-static ControlClient
+ControlClient
+control_client_create_empty() {
+    ControlClient  client = calloc( sizeof(*client), 1 );
+
+    if (client) {
+        client->commands = main_commands_preauth;
+        client->finished = 0;
+        client->write   = 0;
+        client->global  = &_g_global;
+
+    }
+    return client;
+
+}
+
+ControlClient
 control_client_create( Socket         socket,
                        ControlGlobal  global )
 {
@@ -357,6 +330,7 @@ control_client_create( Socket         socket,
         client->loopIo =
                 loopIo_new(global->looper, socket, control_client_read, client);
         client->next    = global->clients;
+        client->write   = 0;
         global->clients = client;
 
         loopIo_wantRead(client->loopIo);
@@ -439,7 +413,7 @@ static void control_send_help_prompt(ControlClient client) {
                   "Android Console: type 'help' for a list of commands\r\n");
 }
 
-static void control_client_do_command(ControlClient client) {
+void control_client_do_command(ControlClient client) {
     char*       line     = client->buff;
     char*       args     = NULL;
     CommandDef  commands = client->commands;
@@ -466,6 +440,7 @@ static void control_client_do_command(ControlClient client) {
     }
 
     for (;;) {
+        printf("looping..");
         CommandDef  subcmd;
 
         if (cmd->handler) {
@@ -500,6 +475,7 @@ static void control_client_do_command(ControlClient client) {
         cmd = subcmd;
     }
 }
+
 
 /* implement the 'help' command */
 static int
@@ -565,6 +541,7 @@ do_ping( ControlClient  client, char*  args )
     control_write( client, "I am alive!\r\n" );
     return 0;
 }
+
 
 static void
 control_client_read_byte( ControlClient  client, unsigned char  ch )
@@ -777,7 +754,6 @@ int android_console_start(int control_port,
 
     return 0;
 }
-
 
 
 static int
@@ -2103,6 +2079,21 @@ do_event_codes( ControlClient  client, char*  args )
 }
 
 static int
+do_event_mouse( ControlClient  client, char*  args ) {
+  if (!args) {
+    control_write( client, "KO: argument missing, try 'event mouse <x> <y> <z> <buttonstate>'\r\n" );
+    return -1;
+  }
+
+  int dx, dy, dz, buttonState;
+  sscanf(args, "%d %d %d %d", &dx, &dy, &dz, &buttonState);
+
+  client->global->user_event_agent->sendMouseEvent(dx, dy, dz, buttonState);
+  return 0;
+}
+
+
+static int
 do_event_text( ControlClient  client, char*  args )
 {
     if (!args) {
@@ -2155,6 +2146,18 @@ static const CommandDefRec  event_commands[] =
     "message. <message> must be an utf-8 string. Unicode points will be reverse-mapped\r\n"
     "according to the current device keyboard. Unsupported characters will be discarded\r\n"
     "silently\r\n", NULL, do_event_text, NULL },
+
+    { "mouse", "simulate a touch event",
+      "'event mouse <x> <y> <z> <buttonstate>' allows you to genenarate a mouse event.\r\n"
+      "at x, y, z with the given buttonstate. All values are integeers.\r\n"
+      "Usually z = 0. And buttonstate is a mask where:\r\n"
+      "0 = No buttons\r\n"
+      "1 = Left button\r\n"
+      "2 = Right button\r\n"
+      "4 = Middle button\r\n"
+      "8 = Wheel up\r\n"
+      "16 = Wheel down\r\n",
+      NULL, do_event_mouse, NULL},
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
@@ -2673,6 +2676,7 @@ static const CommandDefRec fingerprint_commands[] =
 /*****                                                                                 ******/
 /********************************************************************************************/
 /********************************************************************************************/
+
 
 static int
 do_qemu_monitor( ControlClient client, char* args )

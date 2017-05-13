@@ -783,7 +783,7 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways)
     mFrameAlways = frameAlways;
     maskWindowFrame();
     if (mStartupDialog.wasCanceled()) {
-        mContainer.show();
+        // mContainer.show();
     }
 }
 
