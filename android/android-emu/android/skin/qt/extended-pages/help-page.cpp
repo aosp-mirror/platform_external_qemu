@@ -147,6 +147,10 @@ void HelpPage::updateAdbPortNumber() {
             "emulator-" + QString::number(android_serial_number_port) );
 }
 
+BugReportWindow* HelpPage::getBugreportWindow() {
+    return mBugReportWindow;
+}
+
 void HelpPage::on_help_docs_clicked() {
     QDesktopServices::openUrl(QUrl::fromEncoded(DOCS_URL));
 }
