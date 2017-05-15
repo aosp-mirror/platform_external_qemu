@@ -22,6 +22,30 @@
       "revId": "81a63a0c5c790258b7cbbf39b5afa8e296789b50",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d6b180e_3b8aca53",
+        "filename": "android/qemu1/slirp-android/socket.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 592,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-05-15T21:41:39Z",
+      "side": 1,
+      "message": "OK, will send a follow up CL to do this.",
+      "parentUuid": "b27f2fef_a232c4ff",
+      "range": {
+        "startLine": 592,
+        "startChar": 57,
+        "endLine": 592,
+        "endChar": 59
+      },
+      "revId": "81a63a0c5c790258b7cbbf39b5afa8e296789b50",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
