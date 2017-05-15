@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "f23473cb_35adb62f",
+        "filename": "android-qemu2-glue/qemu-user-event-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "This isn\u0027t needed",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 20
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "250b2ac0_46b25dc7",
         "filename": "android/android-emu/android/emulation/control/user_event_agent.h",
         "patchSetId": 1
@@ -18,6 +41,167 @@
         "startChar": 11,
         "endLine": 43,
         "endChar": 27
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28303844_7e55514d",
+        "filename": "android/android-emu/android/skin/generic-event-buffer.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "2017",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 26
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1991ccd9_dcf6fbbf",
+        "filename": "android/android-emu/android/skin/generic-event-buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "2017",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "340b15c3_90757c1d",
+        "filename": "android/android-emu/android/skin/generic-event-buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "need",
+      "range": {
+        "startLine": 21,
+        "startChar": 72,
+        "endLine": 21,
+        "endChar": 77
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98db3234_50ca9d36",
+        "filename": "android/android-emu/android/skin/generic-event-buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "These aren\u0027t keycode sequences, are they?",
+      "range": {
+        "startLine": 21,
+        "startChar": 50,
+        "endLine": 21,
+        "endChar": 66
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69fe7c95_403522ca",
+        "filename": "android/android-emu/android/skin/generic-event-buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "(256 * 2)",
+      "range": {
+        "startLine": 26,
+        "startChar": 27,
+        "endLine": 26,
+        "endChar": 34
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af18a7de_36441f67",
+        "filename": "android/android-emu/android/skin/generic-event-buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "generic",
+      "range": {
+        "startLine": 49,
+        "startChar": 10,
+        "endLine": 49,
+        "endChar": 13
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c15c1f37_b1e676fa",
+        "filename": "android/android-emu/android/skin/generic-event-buffer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "events",
+      "range": {
+        "startLine": 49,
+        "startChar": 36,
+        "endLine": 49,
+        "endChar": 44
       },
       "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
@@ -71,6 +255,29 @@
     },
     {
       "key": {
+        "uuid": "a07f6ac6_d0ebec03",
+        "filename": "android/android-emu/android/skin/generic-event.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "2017",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 26
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a1a3990d_abdfdf4a",
         "filename": "android/android-emu/android/skin/generic-event.h",
         "patchSetId": 1
@@ -104,6 +311,52 @@
         "startChar": 0,
         "endLine": 21,
         "endChar": 47
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "155d151b_e013debb",
+        "filename": "android/android-emu/android/skin/ui.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "alignment",
+      "range": {
+        "startLine": 45,
+        "startChar": 22,
+        "endLine": 45,
+        "endChar": 37
+      },
+      "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3de5ac51_16faae28",
+        "filename": "android/qemu1/android-qemu1-glue/qemu-user-event-agent-impl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-05-15T23:02:29Z",
+      "side": 1,
+      "message": "redundant",
+      "range": {
+        "startLine": 51,
+        "startChar": 25,
+        "endLine": 51,
+        "endChar": 38
       },
       "revId": "151a2e9e52c4e93a61dc0a4d8cdc4ca38b1d2fff",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
