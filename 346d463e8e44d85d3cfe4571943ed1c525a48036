@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cda0b9b9_3296f948",
+        "filename": "android/android-emu/android/utils/sockets.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-05-15T22:12:13Z",
+      "side": 1,
+      "message": "This function is not thread safe, and not even check NULL.",
+      "range": {
+        "startLine": 377,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 1
+      },
+      "revId": "346d463e8e44d85d3cfe4571943ed1c525a48036",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
