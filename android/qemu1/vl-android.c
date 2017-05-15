@@ -1540,7 +1540,7 @@ char *qemu_find_file(int type, const char *name)
         subdir = "";
         break;
     case QEMU_FILE_TYPE_KEYMAP:
-        subdir = "keymaps/";
+        subdir = "lib/pc-bios/keymaps/";
         break;
     default:
         abort();

@@ -327,6 +327,15 @@ QEMU2_COMMON_SOURCES := \
     ui/input.c \
     ui/keymaps.c \
     ui/qemu-pixman.c \
+    ui/vnc-auth-vencrypt.c \
+    ui/vnc-enc-hextile.c \
+    ui/vnc-enc-tight.c \
+    ui/vnc-enc-zlib.c \
+    ui/vnc-enc-zrle.c \
+    ui/vnc-jobs.c \
+    ui/vnc-palette.c \
+    ui/vnc-ws.c \
+    ui/vnc.c \
     ui/x_keymap.c \
 
 QEMU2_COMMON_SOURCES_darwin-x86_64 := \

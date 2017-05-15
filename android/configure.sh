@@ -525,6 +525,11 @@ if [ "$PCBIOS_PROBE" = "yes" ]; then
             cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE ||
                 panic "Could not copy BIOS file: $PCBIOS_DIR/$BIOS_FILE"
         done
+        # copy key files needed by vnc
+        VNC_KEYMAPS=$(dirname "$0")/../pc-bios/keymaps
+        cp -f -r $VNC_KEYMAPS $OUT_DIR/lib/pc-bios ||
+            panic "Missing vnc keymap file: $VNC_KEYMAPS"
+        log "VNC        : Copying $VNC_KEYMAPS"
     fi
 fi
 
