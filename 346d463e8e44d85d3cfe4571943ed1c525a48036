@@ -46,6 +46,30 @@
       "revId": "346d463e8e44d85d3cfe4571943ed1c525a48036",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6617f1e3_390bf2e8",
+        "filename": "android/android-emu/android/utils/sockets.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-05-15T22:34:39Z",
+      "side": 1,
+      "message": "What is the context the original function is used? just in logging, or there are other usages?\n\nnevertheless, this is a dangerous pattern. let\u0027s fix both then.",
+      "parentUuid": "543fc930_2fa88bdd",
+      "range": {
+        "startLine": 377,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 1
+      },
+      "revId": "346d463e8e44d85d3cfe4571943ed1c525a48036",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
