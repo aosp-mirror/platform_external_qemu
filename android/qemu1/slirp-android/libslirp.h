@@ -24,7 +24,7 @@ extern "C" {
 
 struct mbuf;
 
-void slirp_init(int restricted, const char *special_ip);
+void slirp_init(int restricted, const char *special_ip, int dns_hack);
 
 void slirp_select_fill(int *pnfds,
                        fd_set **readfds, fd_set **writefds, fd_set **xfds);

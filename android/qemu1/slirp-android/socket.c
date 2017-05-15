@@ -501,6 +501,8 @@ static void dns_hack(struct socket* so,
                      int src_len,
                      const char* dst_dns,
                      int dst_len) {
+    if (!slirp_hack_dns)
+        return;
     if (sock_address_get_port(&so->faddr) != kDnsPort || so->so_family == SOCKET_INET)
         return;
     init_aserver_enc();
