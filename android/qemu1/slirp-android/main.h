@@ -20,6 +20,7 @@ extern u_int32_t slirp_socket_addr;
 extern char *slirp_socket_passwd;
 extern int ctty_closed;
 extern int slirp_restrict;
+extern int slirp_hack_dns;
 
 /*
  * Get the difference in 2 times from updtim()

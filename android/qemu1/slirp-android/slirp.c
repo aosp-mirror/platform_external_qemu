@@ -80,6 +80,7 @@ static const uint8_t zero_ethaddr[6] = { 0, 0, 0, 0, 0, 0 };
 
 const char *slirp_special_ip = CTL_SPECIAL;
 int slirp_restrict;
+int slirp_hack_dns;
 static int do_slowtimo;
 int link_up;
 struct timeval tt;
@@ -124,7 +125,7 @@ int slirp_get_max_dns_servers(void) {
 static void slirp_state_save(QEMUFile *f, void *opaque);
 static int slirp_state_load(QEMUFile *f, void *opaque, int version_id);
 
-void slirp_init(int restricted, const char *special_ip)
+void slirp_init(int restricted, const char *special_ip, int dns_hack)
 {
 #if DEBUG
     int   slirp_logmask = 0;
@@ -155,6 +156,7 @@ void slirp_init(int restricted, const char *special_ip)
 
     link_up = 1;
     slirp_restrict = restricted;
+    slirp_hack_dns = dns_hack;
 
     if_init();
     ip_init();
