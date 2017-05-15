@@ -94,6 +94,30 @@
       "revId": "346d463e8e44d85d3cfe4571943ed1c525a48036",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4cc3e6e0_89a06b11",
+        "filename": "android/android-emu/android/utils/sockets.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 377,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-05-15T22:44:43Z",
+      "side": 1,
+      "message": "OK. will send out another CL to make sure functions inside this file is thread safe. But I won\u0027t add NULL check here. since actually we have to crash if use pass NULL there. Most functions here don\u0027t do NULL check. It\u0027s better to crash then just add checking.",
+      "parentUuid": "6617f1e3_390bf2e8",
+      "range": {
+        "startLine": 377,
+        "startChar": 0,
+        "endLine": 377,
+        "endChar": 1
+      },
+      "revId": "346d463e8e44d85d3cfe4571943ed1c525a48036",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
