@@ -32,6 +32,7 @@ public:
     void initialize(const ShortcutKeyStore<QtUICommand>* key_store,
                     EmulatorQtWindow* eW);
     void setAdbPort();
+    BugReportWindow* getBugreportWindow();
 
 signals:
     void adbPortUpdateRequired();

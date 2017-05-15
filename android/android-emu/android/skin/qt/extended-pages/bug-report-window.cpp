@@ -159,10 +159,7 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
     if (movie->isValid()) {
         movie->start();
         mUi->bug_circularSpinner->setMovie(movie);
-        mUi->bug_circularSpinner->hide();
-        mUi->bug_collectingLabel->hide();
         mUi->bug_circularSpinner2->setMovie(movie);
-        mUi->bug_circularSpinner2->show();
     }
 
     loadAvdDetails();
@@ -175,12 +172,28 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
             QString::fromStdString(mReportingFields.avdDetails));
 }
 
+void BugReportWindow::updateTheme() {
+    SettingsTheme theme = getSelectedTheme();
+    QMovie* movie = new QMovie(this);
+    movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                       "/circular_spinner");
+    if (movie->isValid()) {
+        movie->start();
+        mUi->bug_circularSpinner->setMovie(movie);
+        mUi->bug_circularSpinner2->setMovie(movie);
+    }
+
+    mUi->bug_bugReportTextEdit->setStyleSheet(
+            "background: transparent; border: 1px solid " +
+            Ui::stylesheetValues(theme)["EDIT_COLOR"]);
+}
+
 void BugReportWindow::showEvent(QShowEvent* event) {
     // Override stylesheet for QPlainTextEdit[readOnly=true]
     SettingsTheme theme = getSelectedTheme();
     mUi->bug_bugReportTextEdit->setStyleSheet(
-        "background: transparent; border: 1px solid " +
-        Ui::stylesheetValues(theme)["EDIT_COLOR"]);
+            "background: transparent; border: 1px solid " +
+            Ui::stylesheetValues(theme)["EDIT_COLOR"]);
     // Align the left side of bugreport window with the extended window.
     if (mFirstShowEvent && !event->spontaneous()) {
         ToolWindow* tW = mEmulatorWindow->toolWindow();
