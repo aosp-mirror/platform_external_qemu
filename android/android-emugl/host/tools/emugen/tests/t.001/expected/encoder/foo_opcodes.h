@@ -8,7 +8,10 @@
 #define OP_fooUnsupported 					202
 #define OP_fooDoEncoderFlush 					203
 #define OP_fooTakeConstVoidPtrConstPtr 					204
-#define OP_last 					205
+#define OP_fooSetComplexStruct 					205
+#define OP_fooGetComplexStruct 					206
+#define OP_fooInout 					207
+#define OP_last 					208
 
 
 #endif

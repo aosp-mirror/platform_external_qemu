@@ -13,3 +13,20 @@ fooUnsupported
 
 fooDoEncoderFlush
     flag flushOnEncode
+
+fooSetComplexStruct
+    dir obj in
+    len obj fooStructEncodingSize(obj)
+    custom_pack obj fooStructPack(ptr, obj)
+    custom_unpack obj FooStruct unpacked; inptr_obj_unpacked = (void*)(&unpacked); fooStructUnpack((unsigned char*)(inptr_obj.get()), size_obj, inptr_obj_unpacked)
+
+fooGetComplexStruct
+    dir obj out
+    len obj fooStructEncodingSize(obj)
+    custom_host_pack_tmp_alloc obj FooStruct tmp; forPacking_obj = (void*)tmp
+    custom_host_pack obj fooStructPack((unsigned char*)outptr_obj.get(), (FooStruct*)forPacking_obj)
+    custom_guest_unpack obj std::vector<unsigned char> forUnpacking_obj(__size_obj); stream->readback(&forUnpacking_obj[0], __size_obj); fooStructUnpack(&forUnpacking_obj[0], obj)
+
+fooInout
+    dir count inout
+    len count sizeof(uint32_t)
