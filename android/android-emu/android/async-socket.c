@@ -862,12 +862,16 @@ _on_async_socket_recv(AsyncSocket* as)
             D("ASocket %s: Read is aborted on failure.", _async_socket_string(as));
             /* Move on to the next reader. */
             _async_socket_advance_reader(as);
-            /* Lets see if there are still active readers, and enable, or disable
-             * read I/O callback accordingly. */
-            if (as->readers_head != NULL) {
-                loopIo_wantRead(as->io);
-            } else {
-                loopIo_dontWantRead(as->io);
+            /* It's possible that failure handler closed the socket so check for
+             * that first. */
+            if (as->io) {
+                /* Lets see if there are still active readers, and enable, or
+                 * disable read I/O callback accordingly. */
+                if (as->readers_head != NULL) {
+                    loopIo_wantRead(as->io);
+                } else {
+                    loopIo_dontWantRead(as->io);
+                }
             }
         }
         async_socket_io_release(asr);
@@ -969,12 +973,16 @@ _on_async_socket_send(AsyncSocket* as)
             D("ASocket %s: Write is aborted on failure.", _async_socket_string(as));
             /* Move on to the next writer. */
             _async_socket_advance_writer(as);
-            /* Lets see if there are still active writers, and enable, or disable
-             * write I/O callback accordingly. */
-            if (as->writers_head != NULL) {
-                loopIo_wantWrite(as->io);
-            } else {
-                loopIo_dontWantWrite(as->io);
+            /* It's possible that failure handler closed the socket so check for
+             * that first. */
+            if (as->io) {
+                /* Lets see if there are still active writers, and enable, or
+                 * disable write I/O callback accordingly. */
+                if (as->writers_head != NULL) {
+                    loopIo_wantWrite(as->io);
+                } else {
+                    loopIo_dontWantWrite(as->io);
+                }
             }
         }
         async_socket_io_release(asw);
