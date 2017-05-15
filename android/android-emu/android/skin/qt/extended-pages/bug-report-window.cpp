@@ -76,9 +76,7 @@ Steps to Reproduce Bug:
 
 Expected Behavior:
 
-Observed Behavior:
-
-)";
+Observed Behavior:)";
 
 BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
     : QFrame(parent),
