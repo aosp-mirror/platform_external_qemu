@@ -296,12 +296,6 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
 
 void deleteRenderbufferGlobal(GLuint rbo) {
     if (rbo) {
-        GLint prevRbo;
-        GLEScontext::dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prevRbo);
-        GLEScontext::dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-        GLEScontext::dispatcher().glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA4, 0, 0);
-        GLEScontext::dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, 0);
         GLEScontext::dispatcher().glDeleteRenderbuffers(1, &rbo);
-        GLEScontext::dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prevRbo);
     }
 }
