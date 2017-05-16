@@ -16,10 +16,11 @@
 
 TEST(SockAddress, ResolveAndToString) {
     SockAddress s[1];
+    char tmp[256];
 
     EXPECT_EQ(0 ,sock_address_init_resolve(s, "216.58.194.164", 53, 0));
-    EXPECT_STREQ("216.58.194.164:53", sock_address_to_string(s));
+    EXPECT_STREQ("216.58.194.164:53", sock_address_to_string(s, tmp, sizeof(tmp)));
 
     EXPECT_EQ(0 ,sock_address_init_resolve(s, "2001:4860:f802::9b", 53, 0));
-    EXPECT_STREQ("[2001:4860:f802::9b]:53", sock_address_to_string(s));
+    EXPECT_STREQ("[2001:4860:f802::9b]:53", sock_address_to_string(s, tmp, sizeof(tmp)));
 }

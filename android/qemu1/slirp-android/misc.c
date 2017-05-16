@@ -20,7 +20,8 @@ struct emu_t *tcpemu;
 void
 getouraddr()
 {
-    char*        hostname = host_name();
+    char tmp[256];
+    char* hostname = host_name(tmp, sizeof(tmp));
     SockAddress  hostaddr;
 
     our_addr_ip = loopback_addr_ip;
