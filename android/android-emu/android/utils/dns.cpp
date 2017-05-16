@@ -113,7 +113,8 @@ int android_dns_get_servers(const char* dnsServerOption,
     if (VERBOSE_CHECK(init)) {
         dprintn("emulator: Found %d DNS servers:", dnsCount);
         for (int n = 0; n < dnsCount; ++n) {
-            dprintn(" %s", sock_address_host_string(&dnsServerIps[n]));
+            char tmp[256];
+            dprintn(" %s", sock_address_host_string(&dnsServerIps[n], tmp, sizeof(tmp)));
         }
         dprintn("\n");
     }

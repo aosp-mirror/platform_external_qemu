@@ -1693,8 +1693,9 @@ static int net_socket_mcast_create(SockAddress *mcastaddr)
     int fd;
     int ret;
     if (!IN_MULTICAST(sock_address_get_ip(mcastaddr))) {
+        char tmp[256];
 	fprintf(stderr, "qemu: error: specified mcastaddr \"%s\" (0x%08x) does not contain a multicast address\n",
-		sock_address_to_string(mcastaddr),
+		sock_address_to_string(mcastaddr, tmp, sizeof(tmp)),
                 sock_address_get_ip(mcastaddr));
 	return -1;
 
@@ -1797,10 +1798,11 @@ static NetSocketState *net_socket_fd_init_dgram(VLANState *vlan,
     /* mcast: save bound address as dst */
     if (is_connected) s->dgram_dst=saddr;
 
+    char tmp[256];
     snprintf(s->vc->info_str, sizeof(s->vc->info_str),
 	    "socket: fd=%d (%s mcast=%s)",
 	    fd, is_connected? "cloned" : "",
-	    sock_address_to_string(&saddr));
+	    sock_address_to_string(&saddr, tmp, sizeof(tmp)));
     return s;
 }
 
@@ -1868,8 +1870,9 @@ static void net_socket_accept(void *opaque)
     if (!s1) {
         socket_close(fd);
     } else {
+        char tmp[256];
         snprintf(s1->vc->info_str, sizeof(s1->vc->info_str),
-                 "socket: connection from %s", sock_address_to_string(&saddr));
+                 "socket: connection from %s", sock_address_to_string(&saddr, tmp, sizeof(tmp)));
     }
 }
 
@@ -1955,9 +1958,10 @@ static int net_socket_connect_init(VLANState *vlan,
     s = net_socket_fd_init(vlan, model, name, fd, connected);
     if (!s)
         return -1;
+    char tmp[256];
     snprintf(s->vc->info_str, sizeof(s->vc->info_str),
              "socket: connect to %s",
-             sock_address_to_string(&saddr));
+             sock_address_to_string(&saddr, tmp, sizeof(tmp)));
     return 0;
 }
 
@@ -1984,9 +1988,10 @@ static int net_socket_mcast_init(VLANState *vlan,
 
     s->dgram_dst = saddr;
 
+    char tmp[256];
     snprintf(s->vc->info_str, sizeof(s->vc->info_str),
              "socket: mcast=%s",
-             sock_address_to_string(&saddr));
+             sock_address_to_string(&saddr, tmp, sizeof(tmp)));
     return 0;
 
 }
