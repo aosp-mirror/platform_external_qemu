@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "72c506d4_c6a1c5df",
+        "filename": "android/android-emu/android/skin/generic-event.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-16T20:55:05Z",
+      "side": 1,
+      "message": "for C++ you could just do \"auto gb \u003d new SkinGenericEvent();\"\neven better, use unique_ptr\u003c\u003e:\n\nauto gb \u003d std::unique_ptr\u003cSkinGenericEvent\u003e(new SkinGenericEvent());\n...\nreturn gb.release();\n\nDon\u0027t forget to change AFREE() to delete in _free() function",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 14
+      },
+      "revId": "f5d1d5da1889276e1f5b26103a5c88a528659560",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ef35caa7_6ad47af5",
+        "filename": "android/android-emu/android/skin/generic-event.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-16T20:55:05Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 74
+      },
+      "revId": "f5d1d5da1889276e1f5b26103a5c88a528659560",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
