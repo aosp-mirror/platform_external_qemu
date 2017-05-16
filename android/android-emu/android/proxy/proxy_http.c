@@ -42,8 +42,9 @@ http_service_connect( HttpService*  service,
     if (sock_address_equal( address, &service->server_addr ))
         return NULL;
 
+    char tmp[256];
     PROXY_LOG("%s: trying to connect to %s",
-              __FUNCTION__, sock_address_to_string(address));
+              __FUNCTION__, sock_address_to_string(address, tmp, sizeof(tmp)));
 
     HttpServiceType service_type = service->service_type;
     if (service_type == HTTP_SERVICE_TYPE_AUTO) {

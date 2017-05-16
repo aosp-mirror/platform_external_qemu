@@ -772,11 +772,12 @@ sosendto(struct socket *so, struct mbuf *m)
 
 	if (slirp_should_net_forward(faddr, fport, &faddr, &fport)) {
       time_t timestamp = time(NULL);
+      char tmp[256];
       slirp_drop_log(
 	       "Redirected UDP: src: 0x%08lx:0x%04x org dst: %s "
 	       "new dst: 0x%08lx:0x%04x %ld\n",
 	        so->so_laddr_ip, so->so_laddr_port,
-	        sock_address_to_string(&addr),
+	        sock_address_to_string(&addr, tmp, sizeof(tmp)),
 	        faddr, fport, timestamp
 	    );
             sock_address_init_inet(&addr, faddr, fport);
