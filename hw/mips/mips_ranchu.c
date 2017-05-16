@@ -16,6 +16,7 @@
 #include "qapi/error.h"
 #include "qemu/bitops.h"
 #include "qemu/config-file.h"
+#include "qemu/cutils.h"
 #include "qemu/error-report.h"
 #include "sysemu/char.h"
 #include "sysemu/device_tree.h"
@@ -106,8 +107,9 @@ typedef struct DevMapEntry {
 
 static DevMapEntry devmap[] = {
     [RANCHU_GOLDFISH_PIC] = {
-        GOLDFISH_IO_SPACE, 0x1000, 0,
-          NULL, "goldfish_pic", "generic,goldfish-pic", 1
+        GOLDFISH_IO_SPACE, 0x1000, -1,
+          "goldfish_pic", "goldfish_pic",
+          "google,goldfish-pic\0generic,goldfish-pic", 2
         },
     /* ttyGF0 base address remains hardcoded in the kernel.
      * Early printing (prom_putchar()) relies on finding device
@@ -163,7 +165,7 @@ static DevMapEntry devmap[] = {
     [RANCHU_GOLDFISH_RESET] = {
         GOLDFISH_IO_SPACE + 0x0F000, 0x0100, -1,
           "goldfish_reset", "goldfish_reset",
-          "google,goldfish-reset\0generic,goldfish-reset", 2
+          "google,goldfish-reset\0generic,goldfish-reset\0syscon\0simple-mfd", 4
         },
     /* The following region of 64K is reserved for Goldfish pstore device */
     [RANCHU_GOLDFISH_PSTORE] = {
@@ -178,6 +180,43 @@ static DevMapEntry devmap[] = {
         },
 };
 
+#ifdef _WIN32
+/*
+ * Returns a pointer to the first occurrence of |needle| in |haystack|, or a
+ * NULL pointer if |needle| is not part of |haystack|.
+ * Intentionally in global namespace. This is already provided by the system
+ * C library on Linux and OS X.
+ */
+static void *memmem(const void *haystack, size_t haystacklen,
+             const void *needle, size_t needlelen)
+{
+    register char *cur, *last;
+    const char *cl = (const char *)haystack;
+    const char *cs = (const char *)needle;
+
+    /* we need something to compare */
+    if (haystacklen == 0 || needlelen == 0)
+        return NULL;
+
+    /* "needle" must be smaller or equal to "haystack" */
+    if (haystacklen < needlelen)
+        return NULL;
+
+    /* special case where needlelen == 1 */
+    if (needlelen == 1)
+        return memchr(haystack, (int)*cs, haystacklen);
+
+    /* the last position where its possible to find "needle" in "haystack" */
+    last = (char *)cl + haystacklen - needlelen;
+
+    for (cur = (char *)cl; cur <= last; cur++)
+        if (cur[0] == cs[0] && memcmp(cur, cs, needlelen) == 0)
+            return cur;
+
+    return NULL;
+}
+#endif
+
 static QemuDeviceTreeSetupFunc device_tree_setup_func;
 void qemu_device_tree_setup_callback(QemuDeviceTreeSetupFunc setup_func)
 {
@@ -190,6 +229,7 @@ struct mips_boot_info {
     const char *initrd_filename;
     uint64_t ram_size;
     uint64_t highmem_size;
+    bool use_uhi;
 };
 
 typedef struct machine_params {
@@ -199,6 +239,148 @@ typedef struct machine_params {
     void *fdt;
     hwaddr fdt_addr;
 } ranchu_params;
+
+typedef enum {
+    KERNEL_VERSION_4_4_0 = 0x040400,
+} KernelVersion;
+
+const char kLinuxVersionStringPrefix[] = "Linux version ";
+const size_t kLinuxVersionStringPrefixLen =
+        sizeof(kLinuxVersionStringPrefix) - 1U;
+
+static void parse_vmlinux_version_string(const char *versionString,
+                                         KernelVersion *kernelVersion) {
+    uint32_t parsedVersion;
+    int i, err = 0;
+
+    if (strncmp(versionString, kLinuxVersionStringPrefix,
+            kLinuxVersionStringPrefixLen)) {
+        FATAL("Unsupported kernel version string: %s\n", versionString);
+    }
+    /* skip the linux prefix string to start parsing the version number */
+    versionString += kLinuxVersionStringPrefixLen;
+
+    parsedVersion = 0;
+    for (i = 0; i < 3; i++) {
+        const char *end;
+        unsigned long number;
+
+        /* skip '.' delimeters */
+        while (i > 0 && *versionString == '.') {
+            versionString++;
+        }
+
+        err = qemu_strtoul(versionString, &end, 10, &number);
+        if (end == versionString || number > 0xff || err) {
+            FATAL("Unsupported kernel version string: %s\n", versionString);
+        }
+        parsedVersion <<= 8;
+        parsedVersion |= number;
+        versionString = end;
+    }
+    *kernelVersion = (KernelVersion)parsedVersion;
+}
+
+static void probe_vmlinux_version_string(const char *kernelFilePath, char *dst,
+                                         size_t dstLen) {
+    const uint8_t *uncompressedKernel = NULL;
+    size_t uncompressedKernelLen = 0;
+    int ret = 0;
+    long kernelFileSize;
+    uint8_t *kernelFileData;
+
+    FILE *f = fopen(kernelFilePath, "rb");
+    if (!f) {
+        FATAL("Failed to fopen() kernel file %s\n", kernelFilePath);
+    }
+
+    do {
+        if (fseek(f, 0, SEEK_END) < 0) {
+            ret = -errno;
+            break;
+        }
+
+        kernelFileSize = ftell(f);
+        if (kernelFileSize < 0) {
+            ret = -errno;
+            break;
+        }
+
+        if (fseek(f, 0, SEEK_SET) < 0) {
+            ret = -errno;
+            break;
+        }
+
+        kernelFileData = malloc((size_t)kernelFileSize);
+        if (!kernelFileData) {
+            ret = -errno;
+            break;
+        }
+
+        size_t readLen = fread(kernelFileData, 1, (size_t)kernelFileSize, f);
+        if (readLen != (size_t)kernelFileSize) {
+            if (feof(f)) {
+                ret = -EIO;
+            } else {
+                ret = -ferror(f);
+            }
+            free(kernelFileData);
+            break;
+        }
+
+    } while (0);
+
+    fclose(f);
+    if (ret) {
+        FATAL("Failed to load kernel file %s errno %d\n", kernelFilePath, ret);
+    }
+
+    const char kElfHeader[] = { 0x7f, 'E', 'L', 'F' };
+
+    if (kernelFileSize < sizeof(kElfHeader)) {
+        FATAL("Kernel image too short\n");
+    }
+
+    const char *versionStringStart = NULL;
+
+    if (0 == memcmp(kElfHeader, kernelFileData, sizeof(kElfHeader))) {
+        /* Ranchu uses uncompressed kernel ELF file */
+        uncompressedKernel = kernelFileData;
+        uncompressedKernelLen = kernelFileSize;
+    }
+
+    if (!versionStringStart) {
+        versionStringStart = (const char *)memmem(
+                uncompressedKernel,
+                uncompressedKernelLen,
+                kLinuxVersionStringPrefix,
+                kLinuxVersionStringPrefixLen);
+
+        if (!versionStringStart) {
+            FATAL("Could not find 'Linux version' in kernel!\n");
+        }
+    }
+
+    snprintf(dst, dstLen, "%s", versionStringStart);
+}
+
+static void boot_protocol_detect(ranchu_params *rp, const char *kernelFilePath)
+{
+    char version_string[256];
+    KernelVersion kernelVersion = 0;
+
+    probe_vmlinux_version_string(kernelFilePath, version_string,
+                                 sizeof(version_string));
+    parse_vmlinux_version_string(version_string, &kernelVersion);
+
+    if (kernelVersion >= KERNEL_VERSION_4_4_0) {
+        LOGI("Using UHI boot protocol!\n");
+        rp->bootinfo.use_uhi = true;
+    } else {
+        LOGI("Using legacy boot protocol!\n");
+        rp->bootinfo.use_uhi = false;
+    }
+}
 
 static void main_cpu_reset(void *opaque1)
 {
@@ -224,6 +406,10 @@ static void main_cpu_reset(void *opaque1)
  * a2 = RAM size in bytes (highmen_size)
  * a3 = 0
  *
+ * UHI boot loader - DTB passover mode
+ *
+ * a0 = -2
+ * a1 = DTB address
  */
 static void write_bootloader(uint8_t *base, int64_t run_addr,
                              int64_t kernel_entry, ranchu_params *rp)
@@ -241,16 +427,25 @@ static void write_bootloader(uint8_t *base, int64_t run_addr,
     /* Second part of the bootloader */
     p = (uint32_t *) (base + 0x040);
 
-    addr = ENVP_ADDR + 64;
-    stl_p(p++, 0x3c040000 | HIGH(addr));        /* lui a0, HI(envp_addr)     */
-    stl_p(p++, 0x34840000 | LOW(addr));         /* ori a0, a0, LO(envp_addr) */
-    addr = rp->bootinfo.ram_size;
-    stl_p(p++, 0x3c050000 | HIGH(addr));        /* lui a1, HI(ram_size)      */
-    stl_p(p++, 0x34a50000 | LOW(addr));         /* ori a1, a1, LO(ram_size)  */
-    addr = rp->bootinfo.highmem_size;
-    stl_p(p++, 0x3c060000 | HIGH(addr));        /* lui a2, HI(highmem)       */
-    stl_p(p++, 0x34c60000 | LOW(addr));         /* ori a2, a2, LO(highmem)   */
-    stl_p(p++, 0x24070000);                     /* addiu a3, zero, 0         */
+    if (rp->bootinfo.use_uhi) {
+        /* UHI boot protocol, device tree handover mode */
+        addr = cpu_mips_phys_to_kseg0(NULL, rp->fdt_addr);
+        stl_p(p++, 0x2404fffe);                 /* addiu a0, zero, -2        */
+        stl_p(p++, 0x3c050000 | HIGH(addr));    /* lui a1, HI(fdt_addr)      */
+        stl_p(p++, 0x34a50000 | LOW(addr));     /* ori a1, a1, LO(fdt_addr)  */
+    } else {
+        /* legacy boot protocol */
+        addr = ENVP_ADDR + 64;
+        stl_p(p++, 0x3c040000 | HIGH(addr));    /* lui a0, HI(envp_addr)     */
+        stl_p(p++, 0x34840000 | LOW(addr));     /* ori a0, a0, LO(envp_addr) */
+        addr = rp->bootinfo.ram_size;
+        stl_p(p++, 0x3c050000 | HIGH(addr));    /* lui a1, HI(ram_size)      */
+        stl_p(p++, 0x34a50000 | LOW(addr));     /* ori a1, a1, LO(ram_size)  */
+        addr = rp->bootinfo.highmem_size;
+        stl_p(p++, 0x3c060000 | HIGH(addr));    /* lui a2, HI(highmem)       */
+        stl_p(p++, 0x34c60000 | LOW(addr));     /* ori a2, a2, LO(highmem)   */
+        stl_p(p++, 0x24070000);                 /* addiu a3, zero, 0         */
+    }
 
     /* Jump to kernel code */
     addr = kernel_entry;
@@ -283,6 +478,8 @@ static void GCC_FMT_ATTR(3, 4) prom_set(uint32_t *prom_buf, int index,
     va_end(ap);
 }
 
+#define KERNEL_CMD_MAX_LEN 1024
+
 static int64_t android_load_kernel(ranchu_params *rp)
 {
     int initrd_size;
@@ -291,6 +488,7 @@ static int64_t android_load_kernel(ranchu_params *rp)
     uint32_t *prom_buf;
     long prom_size;
     int prom_index = 0;
+    GString *kernel_cmd;
 
     /* Load the kernel.  */
     if (!rp->bootinfo.kernel_filename) {
@@ -331,39 +529,71 @@ static int64_t android_load_kernel(ranchu_params *rp)
         }
     }
 
-    char kernel_cmd[1024];
-    sprintf(kernel_cmd, "%s mipsr2emu", rp->bootinfo.kernel_cmdline);
+    kernel_cmd = g_string_new(rp->bootinfo.kernel_cmdline);
+    g_string_append(kernel_cmd, " ieee754=relaxed");
 
-    if (initrd_size > 0) {
-        sprintf(kernel_cmd, "%s rd_start=0x%" HWADDR_PRIx " rd_size=%d",
-                rp->bootinfo.kernel_cmdline,
-                (hwaddr)cpu_mips_phys_to_kseg0(NULL, initrd_offset),
-                initrd_size);
+    if (rp->bootinfo.use_uhi) {
+        char stdout_path[64];
+        int rc;
+
+        sprintf(stdout_path, "/%s@%" HWADDR_PRIx,
+                devmap[RANCHU_GOLDFISH_TTY].qemu_name,
+                devmap[RANCHU_GOLDFISH_TTY].base +
+                devmap[RANCHU_GOLDFISH_TTY].size *
+                (MAX_GF_TTYS - 1));
+
+        g_string_append(kernel_cmd, " mipsr2emu");
+
+        qemu_fdt_add_subnode(rp->fdt, "/chosen");
+        rc = qemu_fdt_setprop_string(rp->fdt, "/chosen", "bootargs",
+                                     kernel_cmd->str);
+        if (rc < 0) {
+            FATAL("couldn't set /chosen/bootargs\n");
+        }
+        rc = qemu_fdt_setprop_cell(rp->fdt, "/chosen", "linux,initrd-start",
+                                   initrd_offset);
+        if (rc < 0) {
+            FATAL("couldn't set /chosen/linux,initrd-start\n");
+        }
+        rc = qemu_fdt_setprop_cell(rp->fdt, "/chosen", "linux,initrd-end",
+                                   initrd_offset + (long int)initrd_size);
+        if (rc < 0) {
+            FATAL("couldn't set /chosen/linux,initrd-end\n");
+        }
+        rc = qemu_fdt_setprop_string(rp->fdt, "/chosen", "stdout-path",
+                                     stdout_path);
+        if (rc < 0) {
+            FATAL("couldn't set /chosen/stdout-path\n");
+        }
     } else {
-        strcpy(kernel_cmd, rp->bootinfo.kernel_cmdline);
+        g_string_append(kernel_cmd, " earlycon");
+
+        if (initrd_size > 0) {
+            g_string_append_printf(kernel_cmd,
+                     " rd_start=0x%" HWADDR_PRIx " rd_size=%li",
+                     (hwaddr)cpu_mips_phys_to_kseg0(NULL, initrd_offset),
+                     (long int)initrd_size);
+        }
+
+        /* Setup Highmem */
+        if (rp->bootinfo.highmem_size) {
+            g_string_append_printf(kernel_cmd,
+                     " mem=%um@0x0 mem=%" PRIu64 "m@0x%x",
+                     GOLDFISH_IO_SPACE / (1024 * 1024),
+                     rp->bootinfo.highmem_size / (1024 * 1024),
+                     HIGHMEM_OFFSET);
+        }
+
+        /* Prepare the environment arguments table */
+        prom_size = ENVP_NB_ENTRIES * (sizeof(int32_t) + ENVP_ENTRY_SIZE);
+        prom_buf = g_malloc(prom_size);
+
+        prom_set(prom_buf, prom_index++, "%s", kernel_cmd->str);
+        prom_set(prom_buf, prom_index++, NULL);
+
+        rom_add_blob_fixed("prom", prom_buf, prom_size,
+                           cpu_mips_kseg0_to_phys(NULL, ENVP_ADDR));
     }
-
-    /* Setup Highmem */
-    char kernel_cmd2[1024];
-    if (rp->bootinfo.highmem_size) {
-        sprintf(kernel_cmd2, "%s mem=%um@0x0 mem=%" PRIu64 "m@0x%x",
-                kernel_cmd,
-                GOLDFISH_IO_SPACE / (1024 * 1024),
-                rp->bootinfo.highmem_size / (1024 * 1024),
-                HIGHMEM_OFFSET);
-    } else {
-        strcpy(kernel_cmd2, kernel_cmd);
-    }
-
-    /* Prepare the environment arguments table */
-    prom_size = ENVP_NB_ENTRIES * (sizeof(int32_t) + ENVP_ENTRY_SIZE);
-    prom_buf = g_malloc(prom_size);
-
-    prom_set(prom_buf, prom_index++, "%s", kernel_cmd2);
-    prom_set(prom_buf, prom_index++, NULL);
-
-    rom_add_blob_fixed("prom", prom_buf, prom_size,
-                       cpu_mips_kseg0_to_phys(NULL, ENVP_ADDR));
 
     /* Put the DTB into the memory map as a ROM image: this will ensure
      * the DTB is copied again upon reset, even if addr points into RAM.
@@ -371,6 +601,8 @@ static int64_t android_load_kernel(ranchu_params *rp)
     rom_add_blob_fixed("dtb", rp->fdt, rp->fdt_size, rp->fdt_addr);
 
     qemu_fdt_dumpdtb(rp->fdt, rp->fdt_size);
+
+    g_string_free(kernel_cmd, true);
 
     return kernel_entry;
 }
@@ -485,6 +717,23 @@ static void create_pm_device(void *fdt, DevMapEntry *dev)
     qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, base, 2, dev->size);
 
     g_free(nodename);
+    nodename = g_strdup_printf("/%s/reboot", dev->dt_name);
+    qemu_fdt_add_subnode(fdt, nodename);
+    qemu_fdt_setprop_string(fdt, nodename, "compatible", "syscon-reboot");
+    qemu_fdt_setprop_cell(fdt, nodename, "regmap", pm_regs);
+    qemu_fdt_setprop_sized_cells(fdt, nodename, "offset", 1, 0x00);
+    qemu_fdt_setprop_sized_cells(fdt, nodename, "mask", 1,
+                                 GOLDFISH_PM_CMD_GORESET);
+
+    g_free(nodename);
+    nodename = g_strdup_printf("/%s/poweroff", dev->dt_name);
+    qemu_fdt_add_subnode(fdt, nodename);
+    qemu_fdt_setprop_string(fdt, nodename, "compatible", "syscon-poweroff");
+    qemu_fdt_setprop_cell(fdt, nodename, "regmap", pm_regs);
+    qemu_fdt_setprop_sized_cells(fdt, nodename, "offset", 1, 0x00);
+    qemu_fdt_setprop_sized_cells(fdt, nodename, "mask", 1,
+                                 GOLDFISH_PM_CMD_GOSHUTDOWN);
+    g_free(nodename);
 }
 
 static void mips_ranchu_init(MachineState *machine)
@@ -574,6 +823,9 @@ static void mips_ranchu_init(MachineState *machine)
     cpu_mips_irq_init_cpu(cpu);
     cpu_mips_clock_init(cpu);
 
+    /* Are we using UHI or legacy boot protocol? */
+    boot_protocol_detect(rp, rp->bootinfo.kernel_filename);
+
     /* Initialize Goldfish PIC */
     s->gfpic = goldfish_interrupt_init(devmap[RANCHU_GOLDFISH_PIC].base,
                                        env->irq[2], env->irq[3]);
@@ -581,7 +833,11 @@ static void mips_ranchu_init(MachineState *machine)
     devmap[RANCHU_GOLDFISH_PIC].irq = qemu_fdt_alloc_phandle(fdt);
 
     qemu_fdt_setprop_string(fdt, "/", "model", "ranchu");
-    qemu_fdt_setprop_string(fdt, "/", "compatible", "mti,goldfish");
+    if (!rp->bootinfo.use_uhi) {
+        qemu_fdt_setprop_string(fdt, "/", "compatible", "mti,goldfish");
+    } else {
+        qemu_fdt_setprop_string(fdt, "/", "compatible", "mti,ranchu");
+    }
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x1);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
     qemu_fdt_setprop_cell(fdt, "/", "interrupt-parent",
