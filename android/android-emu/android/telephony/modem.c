@@ -2227,7 +2227,7 @@ handleQueryPDPContext( const char* cmd, AModem modem )
     /* WiFi uses a different gateway because there is NAT involved to get
      * both WiFi and radio networks to coexist on the single ethernet connection
      * connecting the guest to the outside world */
-    const char* gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.1"
+    const char* gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.2"
                                                             : "10.0.2.15";
     int  nn;
 
