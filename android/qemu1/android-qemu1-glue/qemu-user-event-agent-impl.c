@@ -11,6 +11,7 @@
 */
 #include "android-qemu1-glue/qemu-control-impl.h"
 
+#include "android/skin/generic-event-buffer.h"
 #include "android/utils/debug.h"
 #include "hw/android/goldfish/device.h"
 #include "ui/console.h"
@@ -45,6 +46,16 @@ static void user_event_generic(int type, int code, int value) {
     }
 }
 
+static void user_event_generic_events(SkinGenericEventCode* events, int count) {
+    int i;
+    if (eventDeviceHandle) {
+        for (i = 0; i < count; i++) {
+            events_put_generic(eventDeviceHandle, events[i].type,
+                               events[i].code, events[i].value);
+        }
+    }
+}
+
 static void user_event_rotary(int delta) {
     // Not implemented in qemu1.
 }
@@ -55,6 +66,7 @@ const static QAndroidUserEventAgent sQAndroidUserEventAgent = {
         .sendKeyCodes = user_event_keycodes,
         .sendMouseEvent = kbd_mouse_event,
         .sendRotaryEvent = user_event_rotary,
-        .sendGenericEvent = user_event_generic};
+        .sendGenericEvent = user_event_generic,
+        .sendGenericEvents = user_event_generic_events};
 const QAndroidUserEventAgent* const gQAndroidUserEventAgent =
         &sQAndroidUserEventAgent;

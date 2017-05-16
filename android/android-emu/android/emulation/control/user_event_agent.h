@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/skin/generic-event-buffer.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -40,6 +41,7 @@ typedef struct QAndroidUserEventAgent {
 
     // Send generic input events.
     void (*sendGenericEvent)(int type, int code, int value);
+    void (*sendGenericEvents)(SkinGenericEventCode* events, int count);
 
     // notify the emulator that new user event is available
     void (*onNewUserEvent)(void);
