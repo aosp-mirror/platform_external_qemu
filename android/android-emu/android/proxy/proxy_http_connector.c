@@ -53,10 +53,11 @@ connection_init( Connection*  conn )
     HttpService*      service = (HttpService*) conn->root->service;
     ProxyConnection*  root    = conn->root;
     stralloc_t*       str     = root->str;
+    char tmp[256];
 
     proxy_connection_rewind(root);
     stralloc_add_format(str, "CONNECT %s HTTP/" HTTP_VERSION "\r\n",
-                        sock_address_to_string(&root->address));
+                        sock_address_to_string(&root->address, tmp, sizeof(tmp)));
 
     stralloc_add_bytes(str, service->footer, service->footer_len);
 

@@ -21,10 +21,11 @@ TEST(android_dns_parse_servers, IgnoreIpv6) {
     const int kMaxAddresses = 3;
     SockAddress addresses[kMaxAddresses] = {};
     const char kList[] = "127.0.0.1,::1,127.0.1.1";
+    char tmp[256];
     EXPECT_EQ(3, android_dns_parse_servers(kList, addresses, kMaxAddresses));
-    EXPECT_STREQ("127.0.0.1", sock_address_host_string(&addresses[0]));
-    EXPECT_STREQ("::1", sock_address_host_string(&addresses[1]));
-    EXPECT_STREQ("127.0.1.1", sock_address_host_string(&addresses[2]));
+    EXPECT_STREQ("127.0.0.1", sock_address_host_string(&addresses[0], tmp, sizeof(tmp)));
+    EXPECT_STREQ("::1", sock_address_host_string(&addresses[1], tmp, sizeof(tmp)));
+    EXPECT_STREQ("127.0.1.1", sock_address_host_string(&addresses[2], tmp, sizeof(tmp)));
 }
 
 TEST(android_dns_get_system_servers, DumpList) {
@@ -33,7 +34,8 @@ TEST(android_dns_get_system_servers, DumpList) {
     int count = android_dns_get_system_servers(ips, kMaxServers);
     EXPECT_GT(count, 0);
     EXPECT_LT(count, (int)kMaxServers);
+    char tmp[256];
     for (int n = 0; n < count; ++n) {
-        LOG(INFO) << "DNS nameserver " << sock_address_host_string(&ips[n]);
+        LOG(INFO) << "DNS nameserver " << sock_address_host_string(&ips[n], tmp, sizeof(tmp));
     }
 }
