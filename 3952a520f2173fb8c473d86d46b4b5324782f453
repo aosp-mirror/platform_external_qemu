@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f4436ba_8edc14d9",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-16T21:01:57Z",
+      "side": 1,
+      "message": "just making sure that the reset device doesn\u0027t need an IRQ",
+      "range": {
+        "startLine": 113,
+        "startChar": 73,
+        "endLine": 113,
+        "endChar": 75
+      },
+      "revId": "3952a520f2173fb8c473d86d46b4b5324782f453",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
