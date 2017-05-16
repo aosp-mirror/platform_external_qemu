@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af976a6f_2185f16a",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-16T20:58:24Z",
+      "side": 1,
+      "message": "don\u0027t you overwrite the previous entry with NULL now?",
+      "range": {
+        "startLine": 288,
+        "startChar": 22,
+        "endLine": 288,
+        "endChar": 40
+      },
+      "revId": "4e639000571217d2d5342fdab7a5a7396e68b397",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
