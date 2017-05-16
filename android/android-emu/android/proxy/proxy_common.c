@@ -80,11 +80,12 @@ proxy_connection_init( ProxyConnection*           conn,
 
     {
         SocketType  type = socket_get_type(socket);
+        char tmp[256];
 
         snprintf( conn->name, sizeof(conn->name),
                   "%s:%s(%d)",
                   (type == SOCKET_STREAM) ? "tcp" : "udp",
-                  sock_address_to_string(address), socket );
+                  sock_address_to_string(address, tmp, sizeof(tmp)), socket );
 
         /* just in case */
         conn->name[sizeof(conn->name)-1] = 0;
@@ -448,7 +449,8 @@ proxy_resolve_server( SockAddress*   addr,
         goto Exit;
     }
 
-    PROXY_LOG("server name '%s' resolved to %s", name, sock_address_to_string(addr));
+    char tmp[256];
+    PROXY_LOG("server name '%s' resolved to %s", name, sock_address_to_string(addr, tmp, sizeof(tmp)));
     result = 0;
 
 Exit:
