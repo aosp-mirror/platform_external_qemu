@@ -551,14 +551,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
                        "Please ensure the file \"%s\" is in the same location "
                        "as your system image.",
                        is_qemu2 ? "kernel-ranchu" : "kernel-qemu");
-                const char* sdkRootDir = getenv("ANDROID_SDK_ROOT");
-                if (sdkRootDir) {
-                    derror( "ANDROID_SDK_ROOT is defined (%s) but cannot find kernel file in "
-                            "%s" PATH_SEP "system-images" PATH_SEP
-                            " sub directories", sdkRootDir, sdkRootDir);
-                } else {
-                    derror( "ANDROID_SDK_ROOT is undefined");
-                }
+                const char* sdkRootDir = path_getSdkRoot();
+
+                derror("Unable to find system image in %s" PATH_SEP
+                       "system-images" PATH_SEP
+                       " sub directories. Please make sure ANDROID_SDK_ROOT "
+                       "environment variable is set properly, or passed in "
+                       "using the -sdkroot parameter",
+                       sdkRootDir);
                 return false;
             }
             D("autoconfig: -kernel %s", kernelFile);

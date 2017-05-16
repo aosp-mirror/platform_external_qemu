@@ -442,6 +442,26 @@ help_logcat_output(stralloc_t*  out)
 }
 
 static void
+help_sdkroot(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-sdlkroot <dir>' to set the root path containing the android sdk\n"
+    "  overriding the ANDROID_SDK_ROOT environment variable that might have been set\n\n"
+    );
+}
+
+
+static void
+help_avdroot(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-avdroot <dir>' to set the root path containing all AVD sub-directories\n"
+    "  overriding the ANDROID_AVD_HOME environment variable that might have been set\n\n"
+    );
+}
+
+
+static void
 help_system(stralloc_t*  out)
 {
     PRINTF(

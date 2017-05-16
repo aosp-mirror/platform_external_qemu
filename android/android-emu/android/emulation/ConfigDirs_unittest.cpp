@@ -16,6 +16,7 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/testing/TestSystem.h"
+#include "android/cmdline-option.h"
 #include "android/utils/path.h"
 
 #include <gtest/gtest.h>
@@ -77,6 +78,15 @@ TEST(ConfigDirs, getSdkRootDirectory) {
     sys.envSet("ANDROID_HOME", PATH_SEP "bogus");
     sys.envSet("ANDROID_SDK_ROOT", PATH_SEP "Sdk");
     EXPECT_STREQ(PATH_SEP "Sdk", ConfigDirs::getSdkRootDirectory().c_str());
+
+    // Cmdline parameters always win, regardless of what you set them to
+    AndroidOptions opts = { 0 };
+    const AndroidOptions* old = android_cmdLineOptions;
+    opts.sdkroot = (char*) "winner!";
+    android_cmdLineOptions = &opts;
+
+    EXPECT_STREQ("winner!", ConfigDirs::getSdkRootDirectory().c_str());
+    android_cmdLineOptions = old;
 }
 
 
@@ -100,15 +110,25 @@ TEST(ConfigDirs, getAvdRootDirectory) {
     ASSERT_TRUE(sys.pathIsDir(PATH_SEP "Area_4" PATH_SEP ".android" PATH_SEP "avd"));
 
     // Order of precedence is
+    //   Cmdline parameters
     //   ANDROID_AVD_HOME
     //   ANDROID_SDK_HOME
     //   USER_HOME or HOME
     //   ANDROID_EMULATOR_HOME
 
+    AndroidOptions opts = { 0 };
+    opts.avdroot = (char*) PATH_SEP "Area_1" PATH_SEP ".android" PATH_SEP "cmdline";
+    const AndroidOptions* old = android_cmdLineOptions;
+    android_cmdLineOptions = &opts;
+
     sys.envSet("ANDROID_AVD_HOME", PATH_SEP "Area_1" PATH_SEP ".android" PATH_SEP "avd");
     sys.envSet("ANDROID_SDK_HOME", PATH_SEP "Area_2");
     sys.envSet("USER_HOME", PATH_SEP "Area_3");
     sys.envSet("ANDROID_EMULATOR_HOME", PATH_SEP "Area_4" PATH_SEP ".android");
+    EXPECT_STREQ(PATH_SEP "Area_1" PATH_SEP ".android" PATH_SEP "cmdline", ConfigDirs::getAvdRootDirectory().c_str());
+
+    android_cmdLineOptions = old;
+
     EXPECT_STREQ(PATH_SEP "Area_1" PATH_SEP ".android" PATH_SEP "avd", ConfigDirs::getAvdRootDirectory().c_str());
 
     sys.envSet("ANDROID_AVD_HOME", "bogus");

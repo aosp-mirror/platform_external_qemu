@@ -75,6 +75,8 @@ CFG_PARAM( data,     "<file>", "data image (default <datadir>/userdata-qemu.img"
 CFG_PARAM( logcat_output, "<file>", "output file of logcat(default none)" )
 CFG_PARAM( partition_size, "<size>", "system/data partition size in MBs" )
 CFG_PARAM( cache,    "<file>", "cache partition image (default is temporary file)" )
+CFG_PARAM( sdkroot, "<dir>", "Use <dir> as the ANDROID_SDK_ROOT instead of the environment variable")
+CFG_PARAM( avdroot, "<dir>", "Use <dir> as the ANDROID_AVD_HOME instead of the environment variable")
 OPT_PARAM( cache_size, "<size>", "cache partition size in MBs" )
 CFG_FLAG ( no_cache, "disable the cache partition" )
 CFG_FLAG ( nocache,  "same as -no-cache" )

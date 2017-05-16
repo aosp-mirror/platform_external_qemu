@@ -38,6 +38,7 @@ struct ConfigDirs {
     // Return the root path containing all AVD sub-directories.
     // More specifically:
     //
+    // - If avdroot is set it will be returned else
     // - If $ANDROID_AVD_HOME points to a directory, it is returned.
     //
     // - Else if $ANDROID_SDK_HOME/.android/avd is a valid root, it is returned.
@@ -60,6 +61,8 @@ struct ConfigDirs {
     static std::string getSdkRootDirectoryByPath();
 
     // Returns the path to the root of the android sdk.
+    // - Will return sdkroot if it is not null otherwise
+    //
     // - If ANDROID_SDK_ROOT is defined in the environment and the path exists,
     //   its value is returned.
     //

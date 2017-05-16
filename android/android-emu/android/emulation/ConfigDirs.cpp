@@ -17,6 +17,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
+#include "android/cmdline-option.h"
 
 #include <assert.h>
 
@@ -61,6 +62,9 @@ std::string ConfigDirs::getUserDirectory() {
 std::string ConfigDirs::getAvdRootDirectory() {
     System* system = System::get();
 
+    if (android_cmdLineOptions && android_cmdLineOptions->avdroot) {
+        return std::string(android_cmdLineOptions->avdroot);
+    }
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
     if ( !avdRoot.empty() && system->pathIsDir(avdRoot) ) {
         return avdRoot;
@@ -145,6 +149,10 @@ std::string ConfigDirs::getSdkRootDirectoryByPath() {
 
 // static
 std::string ConfigDirs::getSdkRootDirectory() {
+    if (android_cmdLineOptions && android_cmdLineOptions->sdkroot) {
+        return std::string(android_cmdLineOptions->sdkroot);
+    }
+
     std::string sdkRoot = getSdkRootDirectoryByEnv();
     if (!sdkRoot.empty()) {
         return sdkRoot;
