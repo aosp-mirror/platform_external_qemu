@@ -48,7 +48,7 @@
  *******************************************************************************/
 
 /* Gets socket's address string. */
-static const char* _async_socket_string(AsyncSocket* as);
+static const char* _async_socket_string(AsyncSocket* as, char* buf, size_t len);
 
 /* Gets socket's looper. */
 static Looper* _async_socket_get_looper(AsyncSocket* as);
@@ -166,7 +166,7 @@ _async_socket_rw_new(AsyncSocket* as,
     async_socket_reference(as);
 
     T("ASocket %s: %s I/O descriptor %p is created for %d bytes of data",
-      _async_socket_string(as), is_io_read ? "READ" : "WRITE", asio, len);
+      _async_socket_string(as, tmp, sizeof(tmp)), is_io_read ? "READ" : "WRITE", asio, len);
 
     return asio;
 }
@@ -278,9 +278,10 @@ _on_async_socket_io_timed_out(void* opaque, LoopTimer* timer)
 {
     AsyncSocketIO* const asio = (AsyncSocketIO*)opaque;
     AsyncSocket* const as = asio->as;
+    char tmp[256];
 
     D("ASocket %s: %s I/O with deadline %lld has timed out at %lld",
-      _async_socket_string(as), asio->is_io_read ? "READ" : "WRITE",
+      _async_socket_string(as, tmp, sizeof(tmp)), asio->is_io_read ? "READ" : "WRITE",
       asio->deadline, async_socket_deadline(as, 0));
 
     /* Reference while in callback. */
@@ -392,9 +393,9 @@ struct AsyncSocket {
 };
 
 static const char*
-_async_socket_string(AsyncSocket* as)
+_async_socket_string(AsyncSocket* as, char* buf, size_t len)
 {
-    return sock_address_to_string(&as->address);
+    return sock_address_to_string(&as->address, buf, len);
 }
 
 static Looper*
@@ -478,8 +479,9 @@ _async_socket_remove_io(AsyncSocket* as,
         list_head = &((*list_head)->next);
     }
     if (*list_head == NULL) {
+        char tmp[256];
         D("%s: I/O %p is not found in the list for socket '%s'",
-          __FUNCTION__, io, _async_socket_string(as));
+          __FUNCTION__, io, _async_socket_string(as, tmp, sizeof(tmp)));
         return 0;
     }
 
@@ -755,8 +757,9 @@ _on_async_socket_disconnected(AsyncSocket* as)
     /* Save error to restore it for the client's callback. */
     const int save_errno = errno;
     AsyncIOAction action = ASIO_ACTION_ABORT;
+    char tmp[256];
 
-    D("ASocket %s: Disconnected.", _async_socket_string(as));
+    D("ASocket %s: Disconnected.", _async_socket_string(as, tmp, sizeof(tmp)));
 
     /* Cancel all the I/O on this socket. */
     _async_socket_cancel_all_io(as);
@@ -782,8 +785,9 @@ _on_async_socket_disconnected(AsyncSocket* as)
 static AsyncIOAction
 _on_async_socket_failure(AsyncSocket* as, AsyncSocketIO* asio)
 {
+    char tmp[256];
     D("ASocket %s: %s I/O failure: %d -> %s",
-      _async_socket_string(as), asio->is_io_read ? "READ" : "WRITE",
+      _async_socket_string(as, tmp, sizeof(tmp)), asio->is_io_read ? "READ" : "WRITE",
       errno, strerror(errno));
 
     /* Report the failure. */
@@ -801,11 +805,12 @@ static int
 _on_async_socket_recv(AsyncSocket* as)
 {
     AsyncIOAction action;
+    char tmp[256];
 
     /* Get current reader. */
     AsyncSocketIO* const asr = as->readers_head;
     if (asr == NULL) {
-        D("ASocket %s: No reader is available.", _async_socket_string(as));
+        D("ASocket %s: No reader is available.", _async_socket_string(as, tmp, sizeof(tmp)));
         loopIo_dontWantRead(as->io);
         return 0;
     }
@@ -821,7 +826,7 @@ _on_async_socket_recv(AsyncSocket* as)
     }
     action = asr->on_io(asr->io_opaque, asr, asr->state);
     if (action == ASIO_ACTION_ABORT) {
-        D("ASocket %s: Read is aborted by the client.", _async_socket_string(as));
+        D("ASocket %s: Read is aborted by the client.", _async_socket_string(as, tmp, sizeof(tmp)));
         /* Move on to the next reader. */
         _async_socket_advance_reader(as);
         /* Lets see if there are still active readers, and enable, or disable
@@ -859,7 +864,7 @@ _on_async_socket_recv(AsyncSocket* as)
         /* An I/O error. */
         action = _on_async_socket_failure(as, asr);
         if (action != ASIO_ACTION_RETRY) {
-            D("ASocket %s: Read is aborted on failure.", _async_socket_string(as));
+            D("ASocket %s: Read is aborted on failure.", _async_socket_string(as, tmp, sizeof(tmp)));
             /* Move on to the next reader. */
             _async_socket_advance_reader(as);
             /* It's possible that failure handler closed the socket so check for
@@ -912,11 +917,12 @@ static int
 _on_async_socket_send(AsyncSocket* as)
 {
     AsyncIOAction action;
+    char tmp[256];
 
     /* Get current writer. */
     AsyncSocketIO* const asw = as->writers_head;
     if (asw == NULL) {
-        D("ASocket %s: No writer is available.", _async_socket_string(as));
+        D("ASocket %s: No writer is available.", _async_socket_string(as, tmp, sizeof(tmp)));
         loopIo_dontWantWrite(as->io);
         return 0;
     }
@@ -932,7 +938,7 @@ _on_async_socket_send(AsyncSocket* as)
     }
     action = asw->on_io(asw->io_opaque, asw, asw->state);
     if (action == ASIO_ACTION_ABORT) {
-        D("ASocket %s: Write is aborted by the client.", _async_socket_string(as));
+        D("ASocket %s: Write is aborted by the client.", _async_socket_string(as, tmp, sizeof(tmp)));
         /* Move on to the next writer. */
         _async_socket_advance_writer(as);
         /* Lets see if there are still active writers, and enable, or disable
@@ -970,7 +976,7 @@ _on_async_socket_send(AsyncSocket* as)
         /* An I/O error. */
         action = _on_async_socket_failure(as, asw);
         if (action != ASIO_ACTION_RETRY) {
-            D("ASocket %s: Write is aborted on failure.", _async_socket_string(as));
+            D("ASocket %s: Write is aborted on failure.", _async_socket_string(as, tmp, sizeof(tmp)));
             /* Move on to the next writer. */
             _async_socket_advance_writer(as);
             /* It's possible that failure handler closed the socket so check for
@@ -1072,10 +1078,11 @@ _on_connector_events(void* opaque,
     /* Invoke client's callback. */
     action = as->on_connection(as->client_opaque, as, event);
     if (event == ASIO_STATE_SUCCEEDED && action != ASIO_ACTION_DONE) {
+        char tmp[256];
         /* For whatever reason the client didn't want to keep this connection.
          * Close it. */
         D("ASocket %s: Connection is discarded by the client.",
-          _async_socket_string(as));
+          _async_socket_string(as, tmp, sizeof(tmp)));
         _async_socket_close_socket(as);
     }
 
@@ -1116,6 +1123,7 @@ async_socket_new(int port,
                  Looper* looper)
 {
     AsyncSocket* as;
+    char tmp[256];
 
     if (client_cb == NULL) {
         E("Invalid client_cb parameter");
@@ -1135,7 +1143,7 @@ async_socket_new(int port,
         as->looper = looper_newGeneric();
         if (as->looper == NULL) {
             E("Unable to create I/O looper for async socket '%s'",
-              _async_socket_string(as));
+              _async_socket_string(as, tmp, sizeof(tmp)));
             client_cb(client_opaque, as, ASIO_STATE_FAILED);
             _async_socket_free(as);
             return NULL;
@@ -1221,8 +1229,9 @@ async_socket_read_abs(AsyncSocket* as,
                       void* reader_opaque,
                       Duration deadline)
 {
+    char tmp[256];
     T("ASocket %s: Handling read for %d bytes with deadline %lld...",
-      _async_socket_string(as), len, deadline);
+      _async_socket_string(as, tmp, sizeof(tmp)), len, deadline);
 
     AsyncSocketIO* const asr =
         _async_socket_reader_new(as, buffer, len, reader_cb, reader_opaque,
@@ -1238,7 +1247,7 @@ async_socket_read_abs(AsyncSocket* as,
         }
         loopIo_wantRead(as->io);
     } else {
-        D("ASocket %s: Read on a disconnected socket.", _async_socket_string(as));
+        D("ASocket %s: Read on a disconnected socket.", _async_socket_string(as, tmp, sizeof(tmp)));
         errno = ECONNRESET;
         reader_cb(reader_opaque, asr, ASIO_STATE_FAILED);
         async_socket_io_release(asr);
@@ -1264,8 +1273,9 @@ async_socket_write_abs(AsyncSocket* as,
                        void* writer_opaque,
                        Duration deadline)
 {
+    char tmp[256];
     T("ASocket %s: Handling write for %d bytes with deadline %lld...",
-      _async_socket_string(as), len, deadline);
+      _async_socket_string(as, tmp, sizeof(tmp)), len, deadline);
 
     AsyncSocketIO* const asw =
         _async_socket_writer_new(as, buffer, len, writer_cb, writer_opaque,
@@ -1281,7 +1291,7 @@ async_socket_write_abs(AsyncSocket* as,
         }
         loopIo_wantWrite(as->io);
     } else {
-        D("ASocket %s: Write on a disconnected socket.", _async_socket_string(as));
+        D("ASocket %s: Write on a disconnected socket.", _async_socket_string(as, tmp, sizeof(tmp)));
         errno = ECONNRESET;
         writer_cb(writer_opaque, asw, ASIO_STATE_FAILED);
         async_socket_io_release(asw);

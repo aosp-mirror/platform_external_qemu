@@ -1692,9 +1692,10 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             STRALLOC_DEFINE(newOption);
             int n;
             for (n = 0; n < dnsCount; ++n) {
+                char tmp[256];
                 stralloc_add_format(newOption, "%s%s",
                                     (n > 0) ? "," : "",
-                                    sock_address_host_string(&dnsServers[n]));
+                                    sock_address_host_string(&dnsServers[n], tmp, sizeof(tmp)));
             }
             str_reset(&opts->dns_server, stralloc_cstr(newOption));
             stralloc_reset(newOption);

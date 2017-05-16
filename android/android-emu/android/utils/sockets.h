@@ -149,7 +149,7 @@ ANDROID_BEGIN_HEADER
 int  android_socket_init( void );
 
 /* return the name of the current host */
-char*  host_name( void );
+char*  host_name( char* buf, size_t len );
 
 /* supported socket types */
 typedef enum {
@@ -216,10 +216,10 @@ void  sock_address_done( SockAddress*  a );
 int   sock_address_equal( const SockAddress*  a, const SockAddress*  b );
 
 /* return a static string describing the host */
-const char*  sock_address_host_string( const SockAddress*  a );
+const char*  sock_address_host_string( const SockAddress*  a, char* buf, size_t len );
 
 /* return a static string describing the address */
-const char*  sock_address_to_string( const SockAddress*  a );
+const char*  sock_address_to_string( const SockAddress*  a, char* buf, size_t len );
 
 static __inline__
 SocketFamily  sock_address_get_family( const SockAddress*  a )

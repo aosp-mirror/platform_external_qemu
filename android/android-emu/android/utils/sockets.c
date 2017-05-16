@@ -373,10 +373,9 @@ format_ip6( char*  buf, char*  end, const uint8_t*  ip6 )
 }
 
 const char*
-sock_address_host_string( const SockAddress*  a )
+sock_address_host_string( const SockAddress*  a, char* buf0, size_t len)
 {
-    static char buf0[MAX_PATH];
-    char *buf = buf0, *end = buf + sizeof(buf0);
+    char *buf = buf0, *end = buf + len;
 
     switch (a->family) {
     case SOCKET_INET:
@@ -392,10 +391,9 @@ sock_address_host_string( const SockAddress*  a )
 }
 
 const char*
-sock_address_to_string( const SockAddress*  a )
+sock_address_to_string( const SockAddress*  a, char* buf0, size_t len)
 {
-    static char buf0[MAX_PATH];
-    char *buf = buf0, *end = buf + sizeof(buf0);
+    char *buf = buf0, *end = buf + len;
 
     switch (a->family) {
     case SOCKET_INET:
@@ -1315,17 +1313,18 @@ static int
 socket_bind_server( int  s, const SockAddress*  to, SocketType  type )
 {
     socket_set_xreuseaddr(s);
+    char tmp[256];
 
     if (socket_bind(s, to) < 0) {
         D("could not bind server socket address %s: %s",
-          sock_address_to_string(to), errno_str);
+          sock_address_to_string(to, tmp, sizeof(tmp)), errno_str);
         goto FAIL;
     }
 
     if (type == SOCKET_STREAM) {
         if (socket_listen(s, 4) < 0) {
             D("could not listen server socket %s: %s",
-              sock_address_to_string(to), errno_str);
+              sock_address_to_string(to, tmp, sizeof(tmp)), errno_str);
             goto FAIL;
         }
     }
@@ -1341,8 +1340,9 @@ static int
 socket_connect_client( int  s, const SockAddress*  to )
 {
     if (socket_connect(s, to) < 0) {
+        char tmp[256];
         D( "could not connect client socket to %s: %s\n",
-           sock_address_to_string(to), errno_str );
+           sock_address_to_string(to, tmp, sizeof(tmp)), errno_str );
         socket_close(s);
         return -1;
     }
@@ -1627,12 +1627,11 @@ socket_mcast_inet_set_ttl( int  s, int  ttl )
 
 
 char*
-host_name( void )
+host_name(char * buf, size_t len)
 {
-    static char buf[256];  /* 255 is the max host name length supported by DNS */
     int         ret;
 
-    QSOCKET_CALL(ret, gethostname(buf, sizeof(buf)));
+    QSOCKET_CALL(ret, gethostname(buf, len));
 
     if (ret < 0)
         return "localhost";
