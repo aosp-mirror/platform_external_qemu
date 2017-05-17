@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e1ef5c15_7ae4344b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-17T20:06:15Z",
+      "side": 1,
+      "message": "Nope, it\u0027s fixed now. Removed",
+      "parentUuid": "1ad9ceb7_5274e38f",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eae6847b_bdd517bb",
         "filename": "android/android-emu/android/camera/camera-capture-mac.m",
         "patchSetId": 12
@@ -30,6 +48,24 @@
       "writtenOn": "2017-05-17T19:27:38Z",
       "side": 1,
       "message": "Is it possible that someone is in the locked part of free and now calling CVBufferRelease(nil)? Is that ok?",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0ed9e234_adafdbd3",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 12
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-17T20:06:15Z",
+      "side": 1,
+      "message": "Good catch! Done",
+      "parentUuid": "eae6847b_bdd517bb",
       "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "236d16b8_7671496d",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 12
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-17T20:06:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "57890cd3_f002d879",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "603c1a8f_eca91fc0",
         "filename": "android/android-emu/android/camera/camera-capture-mac.m",
         "patchSetId": 12
@@ -70,6 +124,24 @@
     },
     {
       "key": {
+        "uuid": "f40b875b_246192ea",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 12
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-17T20:06:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "603c1a8f_eca91fc0",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dda11701_b1dd2f10",
         "filename": "android/scripts/utils/aosp_dir.shi",
         "patchSetId": 12
@@ -81,6 +153,24 @@
       "writtenOn": "2017-05-17T19:27:38Z",
       "side": 1,
       "message": "This comes in from somewhere else?",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d93f705_c4837e65",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 12
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-17T20:06:15Z",
+      "side": 1,
+      "message": "Yeah, we\u0027ll need to wait until AOSP project maintainers put up the new version (hopefully next week), then add it to our repo manifest.",
+      "parentUuid": "dda11701_b1dd2f10",
       "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
