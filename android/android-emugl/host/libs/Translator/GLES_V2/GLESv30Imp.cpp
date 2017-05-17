@@ -472,7 +472,11 @@ GL_APICALL void GL_APIENTRY glInvalidateFramebuffer(GLenum target, GLsizei numAt
     }
 
     std::vector<GLenum> emulatedAttachments = sGetEmulatedAttachmentList(ctx, target, numAttachments, attachments);
-    ctx->dispatcher().glInvalidateFramebuffer(target, numAttachments, &emulatedAttachments[0]);
+    if (ctx->dispatcher().glInvalidateFramebuffer) {
+        ctx->dispatcher().glInvalidateFramebuffer(target, numAttachments, &emulatedAttachments[0]);
+    } else {
+        // If we are missing glInvalidateFramebuffer, just don't do anything and hope things work out.
+    }
 }
 
 GL_APICALL void GL_APIENTRY glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum * attachments, GLint x, GLint y, GLsizei width, GLsizei height) {
