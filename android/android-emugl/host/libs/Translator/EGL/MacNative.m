@@ -72,7 +72,13 @@ int getNumPixelFormats(){
 void* getPixelFormat(int i){
     int size;
     NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    return [[NSOpenGLPixelFormat alloc] initWithAttributes:attrib_lists[i]];
+    void* res = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrib_lists[i]];
+    if (res) {
+        fprintf(stderr, "%s: got res!\n", __func__);
+    } else {
+        fprintf(stderr, "%s: no res!\n", __func__);
+    }
+    return res;
 }
 
 int getPixelFormatDefinitionAlpha(int i) {
@@ -83,6 +89,8 @@ int getPixelFormatDefinitionAlpha(int i) {
         switch (*attribs) {
         // These are the ones that take a value, according to the current
         // NSOpenGLPixelFormat docs
+        case NSOpenGLPFAOpenGLProfile:
+            fprintf(stderr, "%s: found profile\n", __func__);
         case NSOpenGLPFAAuxBuffers:
         case NSOpenGLPFAColorSize:
         case NSOpenGLPFADepthSize:
@@ -90,9 +98,11 @@ int getPixelFormatDefinitionAlpha(int i) {
         case NSOpenGLPFAAccumSize:
         case NSOpenGLPFARendererID:
         case NSOpenGLPFAScreenMask:
+            fprintf(stderr, "%s: found something else\n", __func__);
             attribs += 2;
             break;
         case NSOpenGLPFAAlphaSize:
+            fprintf(stderr, "%s: found alpha\n", __func__);
             return attribs[1];
             break;
         // All other attributes are boolean attributes that don't take a value

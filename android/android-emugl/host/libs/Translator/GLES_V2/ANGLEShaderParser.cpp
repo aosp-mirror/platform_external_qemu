@@ -44,9 +44,8 @@ static ShShaderSpec sInputSpecForVersion(int esslVersion) {
 static ShShaderOutput sOutputSpecForVersion(int esslVersion) {
     switch (esslVersion) {
         case 100:
-            return SH_GLSL_COMPATIBILITY_OUTPUT;
         case 300:
-            return SH_GLSL_150_CORE_OUTPUT;
+            return SH_GLSL_330_CORE_OUTPUT;
         case 310:
             return SH_GLSL_430_CORE_OUTPUT;
     }

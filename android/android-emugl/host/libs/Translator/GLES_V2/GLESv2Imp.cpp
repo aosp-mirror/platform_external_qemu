@@ -494,8 +494,8 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
-#define GL_DEPTH_TEXTURE_MODE 0x884B
-    ctx->dispatcher().glTexParameteri(target,GL_DEPTH_TEXTURE_MODE,GL_RED);
+// #define GL_DEPTH_TEXTURE_MODE 0x884B
+    // ctx->dispatcher().glTexParameteri(target,GL_DEPTH_TEXTURE_MODE,GL_RED);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
