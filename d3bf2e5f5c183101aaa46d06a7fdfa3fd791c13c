@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0f165ef1_d567413b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-05-17T23:58:20Z",
+      "side": 1,
+      "message": "how about other architecture, do they need to have vendor img as well ?",
+      "range": {
+        "startLine": 183,
+        "startChar": 91,
+        "endLine": 183,
+        "endChar": 108
+      },
+      "revId": "d3bf2e5f5c183101aaa46d06a7fdfa3fd791c13c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
