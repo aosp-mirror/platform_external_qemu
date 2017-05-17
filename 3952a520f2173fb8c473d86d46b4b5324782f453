@@ -22,6 +22,30 @@
       "revId": "3952a520f2173fb8c473d86d46b4b5324782f453",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80e90005_974d7bdb",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2017-05-17T08:13:20Z",
+      "side": 1,
+      "message": "It does not need any interrupts. Here is the kernel support :https://android-review.googlesource.com/#/c/396212/",
+      "parentUuid": "4f4436ba_8edc14d9",
+      "range": {
+        "startLine": 113,
+        "startChar": 73,
+        "endLine": 113,
+        "endChar": 75
+      },
+      "revId": "3952a520f2173fb8c473d86d46b4b5324782f453",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
