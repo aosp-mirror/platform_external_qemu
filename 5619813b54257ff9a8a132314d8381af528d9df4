@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9d77bcf_1c3b56c3",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-05-17T17:32:52Z",
+      "side": 1,
+      "message": "This value will be 7, instead of 6. Would it be OK?",
+      "revId": "5619813b54257ff9a8a132314d8381af528d9df4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
