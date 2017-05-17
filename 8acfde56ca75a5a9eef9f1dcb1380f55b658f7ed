@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "caf767f3_da3a5270",
+        "filename": "android/android-emu/android/cmdline-options.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-17T20:28:40Z",
+      "side": 1,
+      "message": "nit: typo",
+      "range": {
+        "startLine": 183,
+        "startChar": 56,
+        "endLine": 183,
+        "endChar": 62
+      },
+      "revId": "8acfde56ca75a5a9eef9f1dcb1380f55b658f7ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
