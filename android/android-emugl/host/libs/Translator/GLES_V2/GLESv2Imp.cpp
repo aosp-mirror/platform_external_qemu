@@ -49,7 +49,7 @@ extern "C" {
 
 //decleration
 static void initGLESx();
-static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
+static void initContext(bool isCoreProfile, GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
@@ -92,11 +92,12 @@ static GLESiface s_glesIface = {
 extern "C" {
 
 
-static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
+static void initContext(bool isCoreProfile, GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
     }
     if (!ctx->isInitialized()) {
+        ctx->setCoreProfile(isCoreProfile);
         ctx->init(s_eglIface->eglGetGlLibrary());
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
@@ -495,8 +496,10 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
+    if (!ctx->isCoreProfile()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
-    ctx->dispatcher().glTexParameteri(target,GL_DEPTH_TEXTURE_MODE,GL_RED);
+        ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
@@ -617,6 +620,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
 
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
             sp->setCompileStatus(compileStatus == GL_FALSE ? false : true);
+
         } else {
             ctx->dispatcher().glCompileShader(globalShaderName);
             sp->setCompileStatus(false);
@@ -854,7 +858,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
         }
         const GLuint localShaderName = ctx->shareGroup()->genName(
                                                 shaderProgramType, 0, true);
-        ShaderParser* sp = new ShaderParser(type);
+        ShaderParser* sp = new ShaderParser(type, ctx->isCoreProfile());
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localShaderName, ObjectDataPtr(sp));
         return localShaderName;
@@ -1173,15 +1177,35 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
     s_glDrawPre(ctx, mode);
 
-    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
+    bool canDirectlyDraw =
+        ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+        (!ctx->isCoreProfile() || ctx->vertexAttributesBufferBacked());
+
+    if (canDirectlyDraw) {
         ctx->dispatcher().glDrawElements(mode,count,type,indices);
-    } else {
-        s_glDrawEmulateClientArraysPre(ctx);
+        s_glDrawPost(ctx, mode);
+        return;
+    }
+
+    bool needClientVBOSetup =
+        (ctx->isCoreProfile() && !ctx->vertexAttributesBufferBacked());
+
+    bool needClientIBOSetup =
+        !ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+    if (needClientVBOSetup) {
         GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
+        s_glDrawSetupArraysPre(ctx, tmpArrs, 0, count, type, indices, false);
+    }
+
+    if (needClientIBOSetup) {
+        ctx->emulatedClientIBODraw(mode, count, type, indices);
+    } else {
         ctx->dispatcher().glDrawElements(mode,count,type,indices);
+    }
+
+    if (needClientVBOSetup) {
         s_glDrawSetupArraysPost(ctx);
-        s_glDrawEmulateClientArraysPost(ctx);
     }
 
     s_glDrawPost(ctx, mode);
@@ -2295,7 +2319,41 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
-        return ctx->dispatcher().glGetUniformLocation(globalProgramName,name);
+
+        // TODO:
+        // core profile flag and then
+        if (!ctx->isCoreProfile()) {
+            return ctx->dispatcher().glGetUniformLocation(globalProgramName,name);
+        } else {
+            // On core profile, it's possible to have renamed
+            // a bunch of variables to avoid ES -> core name collisions.
+            // Sort it out here.
+            std::string localVarName(name);
+
+            GLint fragmentShader = pData->getAttachedFragmentShader();
+            GLint vertexShader =  pData->getAttachedVertexShader();
+
+            if (vertexShader != 0 && fragmentShader != 0) {
+                auto fragObjData = ctx->shareGroup()->getObjectData(
+                        NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
+                auto vertObjData = ctx->shareGroup()->getObjectData(
+                        NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
+                ShaderParser* fragSp = (ShaderParser*)fragObjData;
+                ShaderParser* vertSp = (ShaderParser*)vertObjData;
+                std::string fragPart = pData->getTranslatedName(fragSp, name);
+                std::string vertPart = pData->getTranslatedName(vertSp, name);
+                if (fragPart != std::string(name)) {
+                    localVarName = fragPart;
+                }
+                if (vertPart != std::string(name)) {
+                    localVarName = vertPart;
+                }
+            }
+
+            return ctx->dispatcher().glGetUniformLocation(
+                    globalProgramName,
+                    localVarName.c_str());
+        }
     }
     return -1;
 }
@@ -2850,6 +2908,38 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     *err_out = GL_NO_ERROR;
 }
 
+static void sPrepareTextureForCoreProfile(
+    GLenum target,
+    GLint internalformat, GLenum format,
+    GLint* internalformat_out,
+    GLenum* format_out) {
+    GET_CTX_V2();
+
+    // GL_ALPHA is deprecated
+    if ((!format_out || format == GL_ALPHA) &&
+        (!internalformat_out || internalformat == GL_ALPHA)) {
+
+        if (format_out) *format_out = GL_RED;
+        if (internalformat_out) *internalformat_out = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    // GL_LUMINANCE is deprecated
+    } else if ((!format_out || format == GL_LUMINANCE) &&
+               (!internalformat_out || internalformat == GL_LUMINANCE)) {
+
+        if (format_out) *format_out = GL_RED;
+        if (internalformat_out) *internalformat_out = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+    }
+}
+
 GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels){
     GET_CTX_V2();
     // clear previous error
@@ -2857,6 +2947,13 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+
+    if (ctx->isCoreProfile()) {
+        sPrepareTextureForCoreProfile(
+            target, internalformat, format,
+            &internalformat, &format);
+    }
+
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
@@ -2909,6 +3006,13 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
+
+    if (ctx->isCoreProfile()) {
+        sPrepareTextureForCoreProfile(
+            target, 0, format,
+            nullptr, &format);
+    }
+
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
@@ -3202,7 +3306,6 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
-    (void)dataSize;
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
@@ -3313,15 +3416,21 @@ GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
 
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
-    if (ctx->setVertexArrayObject(array)) {
-        // TODO: This could be useful for a glIsVertexArray
-        // that doesn't use the host GPU, but currently, it doesn't
-        // really work. VAOs need to be bound first if glIsVertexArray
-        // is to return true, and for now let's just ask the GPU
-        // directly.
-        ctx->setVAOEverBound();
+    if (!array) {
+        array = ctx->getDefaultVAO();
+        ctx->dispatcher().glBindVertexArray(array);
+    } else {
+        if (ctx->setVertexArrayObject(array)) {
+            // TODO: This could be useful for a glIsVertexArray
+            // that doesn't use the host GPU, but currently, it doesn't
+            // really work. VAOs need to be bound first if glIsVertexArray
+            // is to return true, and for now let's just ask the GPU
+            // directly.
+            ctx->setVAOEverBound();
+        }
+        ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
     }
-    ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
+    ctx->setVertexArrayObject(array);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {

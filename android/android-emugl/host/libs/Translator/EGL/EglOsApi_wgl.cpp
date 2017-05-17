@@ -47,6 +47,15 @@
 #define D(...)  ((void)0)
 #endif
 
+namespace EglOS {
+
+bool shouldEnableCoreProfile() {
+    // TODO: Enable core profile for Linux
+    return false;
+}
+
+} // namespace EglOS
+
 namespace {
 
 using emugl::SharedLibrary;

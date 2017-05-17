@@ -41,7 +41,7 @@ extern "C" {
 
 //decleration
 static void initGLESx();
-static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
+static void initContext(bool isCoreProfile, GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
@@ -79,13 +79,14 @@ static void initGLESx() {
     return;
 }
 
-static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
+static void initContext(bool isCoreProfile, GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->isInitialized()) {
+        ctx->setCoreProfile(isCoreProfile);
         ctx->setShareGroup(grp);
         ctx->init(s_eglIface->eglGetGlLibrary());
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
-     }
+    }
 }
 
 static GLEScontext* createGLESContext(int maj, int min,

@@ -64,7 +64,7 @@ class SaveableTexture;
 typedef struct {
     void                                            (*initGLESx)();
     GLEScontext*                                    (*createGLESContext)(int majorVersion, int minorVersion, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
-    void                                            (*initContext)(GLEScontext*,ShareGroupPtr);
+    void                                            (*initContext)(bool isCoreProfile, GLEScontext*,ShareGroupPtr);
     void                                            (*deleteGLESContext)(GLEScontext*);
     void                                            (*flush)();
     void                                            (*finish)();

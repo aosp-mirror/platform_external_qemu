@@ -260,12 +260,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
         func  = loadIfaces(LIB_GLES_CM_NAME, error, sizeof(error));
         if (func) {
             g_eglInfo->setIface(func(&s_eglIface),GLES_1_1);
+            initGLESx(GLES_1_1);
         } else {
            fprintf(stderr, "%s: Could not find ifaces for GLES CM 1.1 [%s]\n",
                    __FUNCTION__, error);
-           return EGL_FALSE;
         }
-        initGLESx(GLES_1_1);
     }
     if(!g_eglInfo->getIface(GLES_2_0)) {
         func  = loadIfaces(LIB_GLES_V2_NAME, error, sizeof(error));
@@ -1074,7 +1073,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
         thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
-        g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
+        g_eglInfo->getIface(newCtx->version())->initContext(newCtx->isCoreProfile(), newCtx->getGlesContext(),newCtx->getShareGroup());
         g_eglInfo->sweepDestroySurfaces();
 
         if (newDrawPtr->type() == EglSurface::PBUFFER &&

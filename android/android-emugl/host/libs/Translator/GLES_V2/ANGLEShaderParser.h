@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -29,6 +30,7 @@ struct ShaderLinkInfo {
     std::vector<sh::Attribute> attributes;
     std::vector<sh::OutputVariable> outputVars;
     std::vector<sh::InterfaceBlock> interfaceBlocks;
+    std::map<std::string, std::string> nameMap;
 };
 
 bool globalInitialize(
@@ -47,7 +49,8 @@ bool globalInitialize(
         int maxProgramTexelOffset,
         int maxDualSourceDrawBuffers);
 
-bool translate(int esslVersion, const char* src, GLenum shaderType,
+bool translate(bool hostUsesCoreProfile,
+               int esslVersion, const char* src, GLenum shaderType,
                std::string* outInfolog, std::string* outObjCode,
                ShaderLinkInfo* outShaderLinkInfo);
 }

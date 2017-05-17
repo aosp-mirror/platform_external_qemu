@@ -36,6 +36,7 @@ public:
     GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream, GlLibrary* glLib);
     virtual ~GLESv2Context();
+    void emulatedClientIBODraw(GLenum mode, GLsizei count, GLenum type, const GLvoid* ptr);
     void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct);
     void setVertexAttribDivisor(GLuint bindingindex, GLuint divisor);
     void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
@@ -67,11 +68,12 @@ public:
             GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
             GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
             GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
+    int getDefaultVAO() const { return m_defaultVAO; }
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
-    void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1, bool isInt = false);
+    void setupArr(GLsizei datasize, const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int pointsIndex = -1, bool isInt = false);
     void initExtensionString();
 
     float m_attribute0value[4] = {};
@@ -83,6 +85,11 @@ private:
     GLuint m_useProgram = 0;
     ObjectDataPtr m_useProgramData = {};
     std::unordered_map<GLuint, GLuint> m_bindSampler = {};
+
+    // Core profile-related emulations
+    GLuint m_defaultVAO;
+    std::vector<GLuint> m_emulatedClientVBOs = {};
+    GLuint m_emulatedClientIBO;
 };
 
 #endif

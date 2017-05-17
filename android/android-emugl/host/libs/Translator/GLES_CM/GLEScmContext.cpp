@@ -88,7 +88,9 @@ GLEScmContext::~GLEScmContext(){
 
 
 //setting client side arr
-void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
+void GLEScmContext::setupArr(GLsizei datasize, const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
+    (void)datasize;
+
     if( arr == NULL) return;
     switch(arrayType) {
         case GL_VERTEX_ARRAY:
@@ -117,10 +119,10 @@ void GLEScmContext::setupArrayPointerHelper(GLESConversionArrays& cArrs,GLint fi
         if(needConvert(cArrs,first,count,type,indices,direct,p,array_id)){
             //conversion has occured
             ArrayData currentArr = cArrs.getCurrentArray();
-            setupArr(currentArr.data,array_id,currentArr.type,size,currentArr.stride,GL_FALSE, cArrs.getCurrentIndex());
+            setupArr(0, currentArr.data,array_id,currentArr.type,size,currentArr.stride,GL_FALSE, cArrs.getCurrentIndex());
             ++cArrs;
         } else {
-            setupArr(p->getData(),array_id,dataType,size,p->getStride(), GL_FALSE);
+            setupArr(0, p->getData(),array_id,dataType,size,p->getStride(), GL_FALSE);
         }
 }
 

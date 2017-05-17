@@ -163,5 +163,9 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
 }
 
 extern "C" GL_APICALL GLDispatchMaxGLESVersion GL_APIENTRY gl_dispatch_get_max_version() {
+    if (!s_got_gles_support_level) {
+        fprintf(stderr, "%s: dont got sport level yet (for core profile only)\n", __func__);
+        return GL_DISPATCH_MAX_GLES_VERSION_3_0;
+    }
     return s_max_supported_gles_version;
 }

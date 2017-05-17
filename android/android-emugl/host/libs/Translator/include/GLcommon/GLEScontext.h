@@ -244,6 +244,9 @@ public:
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
     virtual void drawValidate(void);
 
+    // Core profile accessors
+    bool isCoreProfile() const { return m_coreProfile; }
+    void setCoreProfile(bool core) { m_coreProfile = core; }
     // Default FBO emulation. Do not call this from GLEScontext context;
     // it needs dynamic dispatch (from GLEScmContext or GLESv2Context DLLs)
     // to pick up on the right functions.
@@ -503,9 +506,11 @@ protected:
     GLint m_defaultFBOSamples = 0;
     GLenum m_defaultFBODrawBuffer = GL_COLOR_ATTACHMENT0;
     GLenum m_defaultFBOReadBuffer = GL_COLOR_ATTACHMENT0;
+
+    bool                  m_coreProfile = false;
 private:
 
-    virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;
+    virtual void setupArr(GLsizei datasize, const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;
 
     GLenum                m_glError = GL_NO_ERROR;
     int                   m_maxTexUnits;

@@ -65,6 +65,8 @@ public:
         }
     }
 
+    unsigned int mEmulatedClientIndexBuffer = 0;
+    std::vector<unsigned int> mEmulatedClientArrayBuffers = {};
 private:
     static const int kMaxVertexAttributes = 64;
 

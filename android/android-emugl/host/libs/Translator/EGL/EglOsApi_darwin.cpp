@@ -17,14 +17,50 @@
 
 #include "MacNative.h"
 
+#include "emugl/common/feature_control.h"
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/misc.h"
 #include "emugl/common/shared_library.h"
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 
 #include <list>
 
+#include <dlfcn.h>
+
 #define MAX_PBUFFER_MIPMAP_LEVEL 1
+
+namespace EglOS {
+
+static void* s_renderApiLib = nullptr;
+static feature_enabled_t s_renderApiFeatureIsEnabled = nullptr;
+static get_gles_version_t s_renderApiGlesVersion = nullptr;
+
+bool shouldEnableCoreProfile() {
+    if (!s_renderApiLib) {
+        s_renderApiLib = dlopen("lib64OpenglRender.dylib", RTLD_GLOBAL | RTLD_NOW);
+        if (!s_renderApiLib) return false;
+    }
+
+    if (!s_renderApiFeatureIsEnabled) {
+        s_renderApiFeatureIsEnabled =
+            (feature_enabled_t)dlsym(s_renderApiLib, "renderApiFeatureIsEnabled");
+        if (!s_renderApiFeatureIsEnabled) return false;
+    }
+
+    if (!s_renderApiGlesVersion) {
+        s_renderApiGlesVersion =
+            (get_gles_version_t)dlsym(s_renderApiLib, "renderApiGlesVersion");
+        if (!s_renderApiGlesVersion) return false;
+    }
+
+    int majorVersion = 2;
+    int minorVersion = 0;
+    s_renderApiGlesVersion(&majorVersion, &minorVersion);
+    return majorVersion > 2;
+}
+
+} // namespace EglOS
 
 namespace {
 
@@ -50,6 +86,8 @@ private:
 class MacContext : public EglOS::Context {
 public:
     explicit MacContext(void* context) : mContext(context) {}
+    explicit MacContext(bool isCoreProfile, void* context) :
+        EglOS::Context(isCoreProfile), mContext(context) {  }
 
     virtual ~MacContext() {
         nsDestroyContext(mContext);
@@ -70,6 +108,9 @@ typedef std::list<void*> NativeFormatList;
 NativeFormatList s_nativeFormats;
 
 void initNativeConfigs(){
+    if (EglOS::shouldEnableCoreProfile()) {
+        setupCoreProfileNativeFormats();
+    }
     int nConfigs = getNumPixelFormats();
     if (s_nativeFormats.empty()) {
         for(int i = 0; i < nConfigs; i++) {
@@ -83,14 +124,15 @@ void initNativeConfigs(){
 
 class MacPixelFormat : public EglOS::PixelFormat {
 public:
-    MacPixelFormat(void* handle, int redSize, int greenSize, int blueSize) :
+    MacPixelFormat(bool isCoreProfile, void* handle, int redSize, int greenSize, int blueSize) :
+            EglOS::PixelFormat(isCoreProfile),
             mHandle(handle),
             mRedSize(redSize),
             mGreenSize(greenSize),
             mBlueSize(blueSize) {}
 
     EglOS::PixelFormat* clone() {
-        return new MacPixelFormat(mHandle, mRedSize, mGreenSize, mBlueSize);
+        return new MacPixelFormat(mCoreProfile, mHandle, mRedSize, mGreenSize, mBlueSize);
     }
 
     void* handle() const { return mHandle; }
@@ -125,26 +167,44 @@ void pixelFormatToConfig(int index,
         return; //pixel double buffer
     }
 
+    EGLint openGLProfileLevel;
+    getPixelFormatAttrib(frmt, MAC_OPENGL_PROFILE, &openGLProfileLevel);
+
+    bool isCoreProfile =
+        openGLProfileLevel != MAC_OPENGL_PROFILE_LEGACY;
+
     EGLint window = 0, pbuffer = 0;
     getPixelFormatAttrib(frmt, MAC_DRAW_TO_WINDOW, &window);
     getPixelFormatAttrib(frmt, MAC_DRAW_TO_PBUFFER, &pbuffer);
 
     info.surface_type = 0;
-    if (window) {
+
+    if (window || isCoreProfile) {
         info.surface_type |= EGL_WINDOW_BIT;
     }
-    if (pbuffer) {
+    if (pbuffer || isCoreProfile) {
         info.surface_type |= EGL_PBUFFER_BIT;
     }
-    if (!info.surface_type) {
-        return;
-    }
+    
+    EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
 
     //default values
     info.native_visual_id = 0;
     info.native_visual_type = EGL_NONE;
     info.caveat = EGL_NONE;
     info.native_renderable = EGL_FALSE;
+
+    if (isCoreProfile) {
+        if (!EglOS::shouldEnableCoreProfile()) return;
+        info.renderable_type = EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+    } else {
+        if (EglOS::shouldEnableCoreProfile()) {
+            info.renderable_type = EGL_OPENGL_ES_BIT;
+        } else {
+            info.renderable_type = EGL_OPENGL_ES_BIT | EGL_OPENGL_ES2_BIT;
+        }
+    }
+
     info.renderable_type = renderableType;
     info.max_pbuffer_width = PBUFFER_MAX_WIDTH;
     info.max_pbuffer_height = PBUFFER_MAX_HEIGHT;
@@ -178,6 +238,7 @@ void pixelFormatToConfig(int index,
 
     info.config_id = (EGLint) index;
     info.frmt = new MacPixelFormat(
+            isCoreProfile,
             frmt, info.red_size, info.green_size, info.blue_size);
 
     (*addConfigFunc)(addConfigOpaque, &info);
@@ -240,6 +301,7 @@ public:
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
         return new MacContext(
+                pixelFormat->isCoreProfile(),
                 nsCreateContext(MacPixelFormat::from(pixelFormat)->handle(),
                                 macSharedContext));
     }
