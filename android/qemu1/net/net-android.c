@@ -805,7 +805,7 @@ static void net_slirp_cleanup(VLANClientState *vc)
 }
 
 static int net_slirp_init(VLANState *vlan, const char *model, const char *name,
-                          int restricted, const char *ip)
+                          int restricted, const char *ip, int dnshack)
 {
     if (slirp_in_use) {
         /* slirp only supports a single instance so far */
@@ -813,7 +813,7 @@ static int net_slirp_init(VLANState *vlan, const char *model, const char *name,
     }
     if (!slirp_inited) {
         slirp_inited = 1;
-        slirp_init(restricted, ip);
+        slirp_init(restricted, ip, dnshack);
 
         while (slirp_redirs) {
             struct slirp_config_str *config = slirp_redirs;
@@ -2237,9 +2237,10 @@ int net_client_init(Monitor *mon, const char *device, const char *p)
 #ifdef CONFIG_SLIRP
     if (!strcmp(device, "user")) {
         static const char * const slirp_params[] = {
-            "vlan", "name", "hostname", "restrict", "ip", NULL
+            "vlan", "name", "hostname", "restrict", "ip", "dnshack", NULL
         };
         int restricted = 0;
+        int dnshack = 0;
         char *ip = NULL;
 
         if (check_params(buf, sizeof(buf), slirp_params, p) < 0) {
@@ -2256,8 +2257,11 @@ int net_client_init(Monitor *mon, const char *device, const char *p)
         if (get_param_value(buf, sizeof(buf), "ip", p)) {
             ip = g_strdup(buf);
         }
+        if (get_param_value(buf, sizeof(buf), "dnshack", p)) {
+            dnshack = (buf[0] == 'y') ? 1: 0;
+        }
         vlan->nb_host_devs++;
-        ret = net_slirp_init(vlan, device, name, restricted, ip);
+        ret = net_slirp_init(vlan, device, name, restricted, ip, dnshack);
         g_free(ip);
     } else if (!strcmp(device, "channel")) {
         long port;
