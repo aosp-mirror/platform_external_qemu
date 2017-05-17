@@ -125,20 +125,8 @@ void pixelFormatToConfig(int index,
         return; //pixel double buffer
     }
 
-    EGLint window = 0, pbuffer = 0;
-    getPixelFormatAttrib(frmt, MAC_DRAW_TO_WINDOW, &window);
-    getPixelFormatAttrib(frmt, MAC_DRAW_TO_PBUFFER, &pbuffer);
-
-    info.surface_type = 0;
-    if (window) {
-        info.surface_type |= EGL_WINDOW_BIT;
-    }
-    if (pbuffer) {
-        info.surface_type |= EGL_PBUFFER_BIT;
-    }
-    if (!info.surface_type) {
-        return;
-    }
+    EGLint window = 1, pbuffer = 1;
+    info.surface_type = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
 
     //default values
     info.native_visual_id = 0;
