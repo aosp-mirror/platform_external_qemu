@@ -425,6 +425,13 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
             D("autoconfig: -system %s", opts->system);
         }
 
+        if (!opts->vendor) {
+            str_reset_nocopy(
+                    &opts->vendor,
+                    _getSdkSystemImage(opts->sysdir, "-vendor", "vendor.img"));
+            D("autoconfig: -vendor %s", opts->vendor);
+        }
+
         if (!opts->kernel) {
             str_reset_nocopy(
                     &opts->kernel,
@@ -812,6 +819,81 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         hw->disk_systemPartition_size =
             _adjustPartitionSize("system", systemBytes, defaultPartitionSize,
                                  avdInfo_inAndroidBuild(avd));
+    }
+
+    /** VENDOR PARTITION **/
+    {
+        char*  rwImage   = NULL;
+        char*  initImage = NULL;
+
+        do {
+            if (opts->vendor == NULL) {
+                /* If -vendor is not used, try to find a runtime system image
+                * (i.e. vendor-qemu.img) in the content directory.
+                */
+                rwImage = avdInfo_getVendorImagePath(avd);
+                if (rwImage != NULL) {
+                    break;
+                }
+                /* Otherwise, try to find the initial system image */
+                initImage = avdInfo_getVendorInitImagePath(avd);
+                /* Vendor image is for O+ only */
+                break;
+            }
+
+            /* If -vendor <name> is used, use it to find the initial image */
+            if (opts->sysdir != NULL && !path_exists(opts->vendor)) {
+                initImage = _getFullFilePath(opts->sysdir, opts->vendor);
+            } else {
+                initImage = ASTRDUP(opts->vendor);
+            }
+            /* Vendor image is for O+ only */
+            if (!path_exists(initImage)) {
+                initImage = NULL;
+            }
+
+        } while (0);
+
+        if (rwImage != NULL) {
+            /* Use the read/write image file directly */
+            str_reset_nocopy(&hw->disk_vendorPartition_path, rwImage);
+            str_reset_null(&hw->disk_vendorPartition_initPath);
+            D("Using direct vendor image: %s", rwImage);
+        } else if (initImage != NULL) {
+            str_reset_null(&hw->disk_vendorPartition_path);
+            str_reset_nocopy(&hw->disk_vendorPartition_initPath, initImage);
+            D("Using initial vendor image: %s", initImage);
+        } else {
+            str_reset_null(&hw->disk_vendorPartition_path);
+            str_reset_null(&hw->disk_vendorPartition_initPath);
+            D("No vendor image");
+        }
+
+        /* Check the size of the vendor partition image.
+        * If we have an AVD, it must be smaller than
+        * the disk.systemPartition.size hardware property.
+        *
+        * Otherwise, we need to adjust the systemPartitionSize
+        * automatically, and print a warning.
+        *
+        */
+        const char* vendorImage = hw->disk_vendorPartition_path;
+        uint64_t    vendorBytes = 0;
+
+        if (vendorImage == NULL) {
+            vendorImage = hw->disk_vendorPartition_initPath;
+        }
+
+        if (vendorImage) {
+            if (path_get_size(vendorImage, &vendorBytes) < 0) {
+                derror("Missing vendor image: %s", vendorImage);
+                return false;
+            }
+
+            hw->disk_vendorPartition_size =
+                _adjustPartitionSize("vendor", vendorBytes, defaultPartitionSize,
+                                     avdInfo_inAndroidBuild(avd));
+        }
     }
 
     /** DATA PARTITION **/
