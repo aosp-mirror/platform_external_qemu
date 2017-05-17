@@ -38,7 +38,7 @@ namespace android {
 // Usage is the following:
 //
 // - Define a custom type |OP| corresponding to
-//   the state of each operation. It must be copy-able.
+//   the state of each operation. It must be copyable.
 //
 // - Define a derived class of
 //   |DeviceContextRunner<OP>| that must implement the
@@ -105,6 +105,9 @@ public:
     }
 
 protected:
+    // Disable delete-through-interface.
+    ~DeviceContextRunner() = default;
+
     // To be implemented by the class that derives DeviceContextRunner:
     // the method that actually touches the virtual device.
     virtual void performDeviceOperation(const T& op) = 0;
