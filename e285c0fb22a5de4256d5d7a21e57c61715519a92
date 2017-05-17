@@ -1,0 +1,89 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ad9ceb7_5274e38f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-17T19:27:38Z",
+      "side": 1,
+      "message": "Is this still the case?",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eae6847b_bdd517bb",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 12
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-17T19:27:38Z",
+      "side": 1,
+      "message": "Is it possible that someone is in the locked part of free and now calling CVBufferRelease(nil)? Is that ok?",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57890cd3_f002d879",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 12
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-17T19:27:38Z",
+      "side": 1,
+      "message": "The outer scope also declares bpp.",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "603c1a8f_eca91fc0",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 12
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-17T19:27:38Z",
+      "side": 1,
+      "message": "__func__?",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dda11701_b1dd2f10",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 12
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-05-17T19:27:38Z",
+      "side": 1,
+      "message": "This comes in from somewhere else?",
+      "revId": "e285c0fb22a5de4256d5d7a21e57c61715519a92",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
