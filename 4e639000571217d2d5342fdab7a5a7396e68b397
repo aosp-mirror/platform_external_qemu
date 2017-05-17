@@ -22,6 +22,30 @@
       "revId": "4e639000571217d2d5342fdab7a5a7396e68b397",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d6946f5_8feb5ebb",
+        "filename": "hw/mips/mips_ranchu.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2017-05-17T08:53:56Z",
+      "side": 1,
+      "message": "Good catch, thank you.\n\nThe good thing is that everything worked fine because we had only one data entry occupied in the arguments table and that our boot loader did not relay on the first level pointer prom[0] for getting the address of the first data entry. But we would have an issue if we tried to fill additional entries.\n\nFixed in PS 3.",
+      "parentUuid": "af976a6f_2185f16a",
+      "range": {
+        "startLine": 288,
+        "startChar": 22,
+        "endLine": 288,
+        "endChar": 40
+      },
+      "revId": "4e639000571217d2d5342fdab7a5a7396e68b397",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
