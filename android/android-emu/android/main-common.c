@@ -1930,6 +1930,10 @@ bool configAndStartRenderer(
         hw->hw_lcd_height *
         pixelSizeBytes;
 
+    // Also write the selected renderer.
+    config_out->selectedRenderer =
+        emuglConfig_get_current_renderer();
+
     lastRendererConfig = *config_out;
     return true;
 }

@@ -1010,6 +1010,7 @@ extern "C" int main(int argc, char **argv) {
             skin_winsys_get_preferred_gles_backend();
 
         // Feature flags-related last-microsecond renderer changes
+        bool shouldDisableAsyncSwap = false;
         {
             // Should enable OpenGL ES 3.x?
             if (!android::featurecontrol::isEnabled(android::featurecontrol::GLESDynamicVersion) &&
@@ -1031,16 +1032,8 @@ extern "C" int main(int argc, char **argv) {
             // Features to disable or enable depending on rendering backend
             // and gpu make/model/version
             /* Disable the GLAsyncSwap for ANGLE so far */
-            bool shouldDisableAsyncSwap = false;
-            shouldDisableAsyncSwap |= (opts->gpu && !strncmp(opts->gpu, "angle", 5));
             shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
             shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
-
-            if (shouldDisableAsyncSwap &&
-                    android::featurecontrol::isEnabled(android::featurecontrol::GLAsyncSwap)) {
-                android::featurecontrol::setEnabledOverride(
-                        android::featurecontrol::GLAsyncSwap, false);
-            }
 
         }
 
@@ -1048,6 +1041,15 @@ extern "C" int main(int argc, char **argv) {
         configAndStartRenderer(
             avd, opts, hw, uiPreferredGlesBackend,
             &rendererConfig);
+
+        shouldDisableAsyncSwap |=
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
+            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+
+        if (shouldDisableAsyncSwap) {
+            android::featurecontrol::setEnabledOverride(
+                    android::featurecontrol::GLAsyncSwap, false);
+        }
 
         char* kernel_parameters = emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
