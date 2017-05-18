@@ -336,8 +336,10 @@ for opt do
   ;;
   --lto) OPTION_LTO=true
   ;;
-  --snapshot-profile) OPTION_SNAPSHOT_PROFILE=yes
-;;
+  --snapshot-profile) OPTION_SNAPSHOT_PROFILE=1
+  ;;
+  --snapshot-profile-level=*) OPTION_SNAPSHOT_PROFILE=$optarg
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -373,6 +375,7 @@ EOF
     echo "  --no-tests                  Don't run unit test suite"
     echo "  --benchmarks                Build benchmark programs."
     echo "  --lto                       Force link-time optimization."
+    echo "  --snapshot-profile[-level=X] Enable snapshot profiling via debug prints."
     echo ""
     exit 1
 fi
@@ -1091,8 +1094,8 @@ fi
 if [ $OPTION_EMUGL_PRINTOUT = "yes" ] ; then
     echo "BUILD_EMUGL_PRINTOUT := true" >> $config_mk
 fi
-if [ $OPTION_SNAPSHOT_PROFILE = "yes" ] ; then
-    echo "BUILD_SNAPSHOT_PROFILE := true" >> $config_mk
+if [ $OPTION_SNAPSHOT_PROFILE -gt 0 ] ; then
+    echo "BUILD_SNAPSHOT_PROFILE := $OPTION_SNAPSHOT_PROFILE" >> $config_mk
 fi
 if [ "$OPTION_STRIP" = "yes" ]; then
     echo "BUILD_STRIP_BINARIES := true" >> $config_mk
