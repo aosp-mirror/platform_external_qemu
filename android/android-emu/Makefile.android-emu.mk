@@ -434,6 +434,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
 endif
 
 $(call gen-hw-config-defs)
+$(call gen-emulator-version-header)
 $(call end-emulator-library)
 
 # List of static libraries that anything that depends on the base libraries
