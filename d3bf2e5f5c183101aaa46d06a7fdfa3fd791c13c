@@ -22,6 +22,30 @@
       "revId": "d3bf2e5f5c183101aaa46d06a7fdfa3fd791c13c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69ee61c0_c34427aa",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-18T00:08:00Z",
+      "side": 1,
+      "message": "Other arch\u0027s ordering is correct",
+      "parentUuid": "0f165ef1_d567413b",
+      "range": {
+        "startLine": 183,
+        "startChar": 91,
+        "endLine": 183,
+        "endChar": 108
+      },
+      "revId": "d3bf2e5f5c183101aaa46d06a7fdfa3fd791c13c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
