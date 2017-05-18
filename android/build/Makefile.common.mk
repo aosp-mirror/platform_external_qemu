@@ -116,6 +116,38 @@ gen-hw-config-defs = \
   $(eval LOCAL_GENERATED_SOURCES += $(QEMU_HW_CONFIG_DEFS_H))\
   $(eval LOCAL_C_INCLUDES += $(QEMU_HW_CONFIG_DEFS_INCLUDES))
 
+##############################################################################
+##############################################################################
+###
+###  gen-emulator-version-header: Bake emulator version into AndroidEmu.
+###
+###  The 'gen-emulator-version-header.py' script is used to generate.
+###  This defines a function that can be used inside a module definition
+###
+###  $(call gen-emulator-version-header)
+
+QEMU_SOURCE_PROPERTIES := \
+    $(_BUILD_ROOT)/source.properties
+
+# First, define a rule to generate a dummy "emulator_version_header" module
+# which purpose is simply to host the generated header in its output directory.
+intermediates := $(call intermediates-dir-for,$(BUILD_TARGET_BITS),emulator_version_header)
+
+QEMU_ANDROIDEMU_VERSION_H := $(intermediates)/android/android-emu-version.h
+$(QEMU_ANDROIDEMU_VERSION_H): PRIVATE_PATH := $(_BUILD_ROOT)/android/scripts
+$(QEMU_ANDROIDEMU_VERSION_H): PRIVATE_CUSTOM_TOOL = $(PRIVATE_PATH)/gen-emulator-version-header.py $< $@
+$(QEMU_ANDROIDEMU_VERSION_H): $(QEMU_SOURCE_PROPERTIES) $(PRIVATE_CUSTOM_TOOL)
+	$(hide) rm -f $@
+	$(transform-generated-source)
+
+QEMU_ANDROIDEMU_VERSION_INCLUDES := $(intermediates)
+
+# Second, define a function that needs to be called inside each module that contains
+# a source file that includes the generated header file.
+gen-emulator-version-header = \
+  $(eval LOCAL_GENERATED_SOURCES += $(QEMU_ANDROIDEMU_VERSION_H))\
+  $(eval LOCAL_C_INCLUDES += $(QEMU_ANDROIDEMU_VERSION_INCLUDES))
+
 ifeq ($(BUILD_TARGET_OS),windows)
   # on Windows, link the icon file as well into the executable
   # unfortunately, our build system doesn't help us much, so we need
