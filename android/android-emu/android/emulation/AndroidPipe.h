@@ -221,7 +221,7 @@ protected:
     AndroidPipe(void* hwPipe, Service* service)
         : mHwPipe(hwPipe), mService(service) {}
 
-    void* mHwPipe = nullptr;
+    void* const mHwPipe = nullptr;
     Service* mService = nullptr;
     std::string mArgs;
 };
