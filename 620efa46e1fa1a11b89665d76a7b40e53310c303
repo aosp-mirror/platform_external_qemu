@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc05a027_ae2c563b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1036,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-18T23:35:00Z",
+      "side": 1,
+      "message": "which one prevails here? I mean, is it possible that one of (opts|hw) had \"angle\" but we picked something different because of forced user option? In that case what we actually need to check is the final state, not the incoming arguments",
+      "range": {
+        "startLine": 1035,
+        "startChar": 0,
+        "endLine": 1036,
+        "endChar": 97
+      },
+      "revId": "620efa46e1fa1a11b89665d76a7b40e53310c303",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
