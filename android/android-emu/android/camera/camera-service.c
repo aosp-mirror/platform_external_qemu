@@ -1353,6 +1353,8 @@ void android_camera_service_init(void) {
             return;
         }
 
+        boot_property_add("qemu.sf.front_camera_hal", "3");
+        boot_property_add("qemu.sf.back_camera_hal", "3");
         if (strcmp(android_hw->hw_camera_back, "emulated") &&
                 strcmp(android_hw->hw_camera_front, "emulated")) {
             /* Fake camera is not used for camera emulation. */
