@@ -73,4 +73,4 @@ private:
     NamedObjectPtr m_globalTexObj = nullptr;
 };
 
-typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
+typedef std::unique_ptr<SaveableTexture> SaveableTexturePtr;
