@@ -539,10 +539,18 @@ send:
 
     {
 
-	((struct ip *)ti)->ip_len = m->m_len;
-
-	((struct ip *)ti)->ip_ttl = IPDEFTTL;
-	((struct ip *)ti)->ip_tos = so->so_iptos;
+	struct tcpiphdr tcpiph_save = *mtod(m, struct tcpiphdr *);
+	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr) -
+			     sizeof(struct ip);
+	m->m_data += delta;
+	m->m_len  -= delta;
+	struct ip *ip = mtod(m, struct ip *);
+	ip->ip_len = m->m_len;
+	ip->ip_dst = tcpiph_save.ti_dst;
+	ip->ip_src = tcpiph_save.ti_src;
+	ip->ip_p = tcpiph_save.ti_pr;
+	ip->ip_ttl = IPDEFTTL;
+	ip->ip_tos = so->so_iptos;
 
 /* #if BSD >= 43 */
 	/* Don't do IP options... */

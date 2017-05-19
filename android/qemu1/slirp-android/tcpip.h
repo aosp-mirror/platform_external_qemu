@@ -48,8 +48,8 @@ struct tcpiphdr {
 #define	ti_x1		ti_i.ih_x1
 #define	ti_pr		ti_i.ih_pr
 #define	ti_len		ti_i.ih_len
-#define	ti_src		ti_i.ih_src
-#define	ti_dst		ti_i.ih_dst
+#define	ti_src		ti_i.addr.ih_src
+#define	ti_dst		ti_i.addr.ih_dst
 #define	ti_sport	ti_t.th_sport
 #define	ti_dport	ti_t.th_dport
 #define	ti_seq		ti_t.th_seq
@@ -68,6 +68,13 @@ struct tcpiphdr {
 #define tcpfrag_list_first(T) qlink2tcpiphdr((T)->seg_next)
 #define tcpfrag_list_end(F, T) (tcpiphdr2qlink(F) == (struct qlink*)(T))
 #define tcpfrag_list_empty(T) ((T)->seg_next == (struct tcpiphdr*)(T))
+
+/* This is the difference between the size of a tcpiphdr structure, and the
+ * size of actual ip+tcp headers, rounded up since we need to align data.  */
+#define TCPIPHDR_DELTA\
+    (max(0,\
+         (sizeof(struct tcpiphdr)\
+          - sizeof(struct ip) - sizeof(struct tcphdr) + 3) & ~3))
 
 /*
  * Just a clean way to get to the first byte

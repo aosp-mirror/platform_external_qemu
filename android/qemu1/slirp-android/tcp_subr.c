@@ -69,23 +69,15 @@ tcp_template(struct tcpcb *tp)
 	struct socket *so = tp->t_socket;
 	register struct tcpiphdr *n = &tp->t_template;
 
-	n->ti_mbuf = NULL;
-	n->ti_x1 = 0;
+	memset(n, 0, sizeof(*n));
 	n->ti_pr = IPPROTO_TCP;
-	n->ti_len = htons(sizeof (struct tcpiphdr) - sizeof (struct ip));
+	n->ti_len = htons(sizeof (struct tcphdr));
 	n->ti_src = ip_seth(so->so_faddr_ip);
 	n->ti_dst = ip_seth(so->so_laddr_ip);
 	n->ti_sport = port_seth(so->so_faddr_port);
 	n->ti_dport = port_seth(so->so_laddr_port);
 
-	n->ti_seq = 0;
-	n->ti_ack = 0;
-	n->ti_x2 = 0;
 	n->ti_off = 5;
-	n->ti_flags = 0;
-	n->ti_win = 0;
-	n->ti_sum = 0;
-	n->ti_urp = 0;
 }
 
 /*
@@ -162,12 +154,22 @@ tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
 	ti->ti_urp = 0;
 	ti->ti_sum = 0;
 	ti->ti_sum = cksum(m, tlen);
-	((struct ip *)ti)->ip_len = tlen;
 
-	if(flags & TH_RST)
-	  ((struct ip *)ti)->ip_ttl = MAXTTL;
-	else
-	  ((struct ip *)ti)->ip_ttl = IPDEFTTL;
+	struct tcpiphdr tcpiph_save = *(mtod(m, struct tcpiphdr *));
+	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr) 
+		- sizeof(struct ip);
+	m->m_data += delta;
+	m->m_len  -= delta;
+	struct ip *ip = mtod(m, struct ip *);
+	ip->ip_len = m->m_len;
+	ip->ip_dst = tcpiph_save.ti_dst;
+	ip->ip_src = tcpiph_save.ti_src;
+	ip->ip_p = tcpiph_save.ti_pr;
+	if (flags & TH_RST) {
+		ip->ip_ttl = MAXTTL;
+	} else {
+		ip->ip_ttl = IPDEFTTL;
+	}
 
 	(void) ip_output((struct socket *)0, m);
 }
