@@ -1013,6 +1013,8 @@ extern "C" int main(int argc, char **argv) {
         // and gpu make/model/version
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap = false;
+        shouldDisableAsyncSwap |= (!opts->gpu && hw->hw_gpu_mode &&
+                                   !strncmp(hw->hw_gpu_mode, "angle", 5));
         shouldDisableAsyncSwap |= (opts->gpu && !strncmp(opts->gpu, "angle", 5));
         shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
         if (shouldDisableAsyncSwap &&
