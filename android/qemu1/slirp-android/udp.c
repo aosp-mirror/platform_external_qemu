@@ -489,6 +489,11 @@ udp_listen(u_int port, u_int32_t laddr, u_int lport, int flags)
 		return NULL;
 	}
 	so->s = socket_anyaddr_server( port, SOCKET_DGRAM );
+	so->so_family = SOCKET_INET;
+	if (so->s < 0 && errno == EAFNOSUPPORT) {
+		so->s = socket_loopback6_server(port, SOCKET_DGRAM);
+		so->so_family = SOCKET_IN6;
+	}
 	so->so_expire = curtime + SO_EXPIRE;
     so->so_haddr_port = port;
 	insque(so,&udb);
@@ -501,7 +506,7 @@ udp_listen(u_int port, u_int32_t laddr, u_int lport, int flags)
         socket_get_address(so->s, &addr);
 
 	addr_ip = sock_address_get_ip(&addr);
-	if (addr_ip == 0 || addr_ip == loopback_addr_ip)
+	if (addr.family == SOCKET_IN6 || addr_ip == 0 || addr_ip == loopback_addr_ip)
 	   addr_ip = alias_addr_ip;
 	sock_address_init_inet(&so->faddr, addr_ip, sock_address_get_port(&addr));
 	sock_address_init_inet(&so->laddr, laddr, lport);
