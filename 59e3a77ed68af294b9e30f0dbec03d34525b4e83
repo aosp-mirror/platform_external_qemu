@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "13e152c4_4cb47541",
+        "filename": "android/android-emu/android/external-display/ExternalDisplayPipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:17:41Z",
+      "side": 1,
+      "message": "Still not comfortable with processing messages in the vcpu thread. Can you use a MessageChannel along with a new external display thread that receives and processes the messages?",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 89,
+        "endChar": 65
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d64dc8e5_c8e13cc4",
         "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
         "patchSetId": 7
