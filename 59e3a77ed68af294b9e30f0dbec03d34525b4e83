@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "46b3ebde_be51e435",
+        "filename": "android/android-emu/android/external-display/DisplayWindow.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "Please make this a debug logging macro, it\u0027s easier to do it earlier than later",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 29
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d64dc8e5_c8e13cc4",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "Is _USE_SDL_ a thing? If so, we could probably make this implementatino more flexible by either having a SDL backend, or one that just uses OpenGL and integrates wiht the existing Qt.",
+      "range": {
+        "startLine": 243,
+        "startChar": 0,
+        "endLine": 246,
+        "endChar": 6
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90b613ef_e42ce172",
+        "filename": "android/android-emu/android/external-display/FFmpegDecoder.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "Use a debug logging macro for this",
+      "range": {
+        "startLine": 252,
+        "startChar": 0,
+        "endLine": 255,
+        "endChar": 55
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d9bfafc7_eddcad23",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "Same comments about naming and labeling as in Mirroring.h",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 17,
+        "endChar": 2
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bee0bf5b_21b86e5c",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "Should message processing be protected by a lock, since it might touch other lock-protected things?",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 67
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "881dc49f_48f95551",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "Make this a static const int kPacketBufSize and document why 4 MB is enough",
+      "range": {
+        "startLine": 148,
+        "startChar": 31,
+        "endLine": 148,
+        "endChar": 72
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08d5c017_e4caaaa7",
+        "filename": "android/android-emu/android/external-display/Mirroring.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "What if we make it aligned to the worst thing from the start, so behavior is similar across all platforms without depending on the malloc alignment?",
+      "range": {
+        "startLine": 154,
+        "startChar": 0,
+        "endLine": 154,
+        "endChar": 42
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d6817008_5d55cb79",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "nit: there\u0027s probably no need to label Mirroring.h with mirroring.h in the file itself.",
+      "range": {
+        "startLine": 12,
+        "startChar": 3,
+        "endLine": 12,
+        "endChar": 14
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3836632d_c2732921",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "nit: add \"The \u003cname-of-class\u003e class\"",
+      "range": {
+        "startLine": 14,
+        "startChar": 3,
+        "endLine": 14,
+        "endChar": 11
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78027814_0073229b",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "default",
+      "range": {
+        "startLine": 15,
+        "startChar": 12,
+        "endLine": 15,
+        "endChar": 19
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9899fab4_ba1fed3d",
+        "filename": "android/android-emu/android/external-display/Mirroring.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "Hmm, reading this, it seems we can use the Mirroring class to act as a second screen not just mirror?\n\nIn that case, we should probably rename this file and class to something like ExternalDisplay.h and ExternalDisplay, and make it more prominent that the default action is to mirror.",
+      "range": {
+        "startLine": 15,
+        "startChar": 21,
+        "endLine": 16,
+        "endChar": 47
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a07eb576_981e8051",
+        "filename": "android/android-emu/android/external-display/SDLRenderer.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T19:12:57Z",
+      "side": 1,
+      "message": "What\u0027s the status of the version using Qt? It looks we need a window and a section of memory in which yuv-\u003ergb converted frames are sent, which can be done with Qt + OpenGL.",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 2
+      },
+      "revId": "59e3a77ed68af294b9e30f0dbec03d34525b4e83",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
