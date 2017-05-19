@@ -26,12 +26,12 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
     // And we can't change the mutex to a static variable because it would be
     // passed around different shared libraries.
     m_globalNameSpace = globalNameSpace;
-    emugl::Mutex::AutoLock _lock(m_globalNameSpace->m_lock);
     m_type = genNameInfo.m_type;
     if (genNameInfo.m_existingGlobal) {
         fprintf(stderr, "%s: global name %u exists already\n", __func__, genNameInfo.m_existingGlobal);
         m_globalName = genNameInfo.m_existingGlobal;
     } else {
+        emugl::Mutex::AutoLock _lock(m_globalNameSpace->m_lock);
         switch (genNameInfo.m_type) {
             case NamedObjectType::VERTEXBUFFER:
                 GLEScontext::dispatcher().glGenBuffers(1,&m_globalName);
