@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "57cdc12c_4bda3710",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 268,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T08:09:04Z",
+      "side": 1,
+      "message": "very nit: pixelStore",
+      "range": {
+        "startLine": 268,
+        "startChar": 32,
+        "endLine": 268,
+        "endChar": 41
+      },
+      "revId": "194060ad286471c8edc2a09c16ea18c15a6c6a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b0ac6d3_f3450304",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-19T08:09:04Z",
+      "side": 1,
+      "message": "cool",
+      "range": {
+        "startLine": 317,
+        "startChar": 0,
+        "endLine": 317,
+        "endChar": 43
+      },
+      "revId": "194060ad286471c8edc2a09c16ea18c15a6c6a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
