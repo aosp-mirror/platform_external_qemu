@@ -19,7 +19,7 @@
 #include <GLES/gl.h>
 #include <memory>
 
-enum class NamedObjectType {
+enum class NamedObjectType : short {
     NULLTYPE,
     VERTEXBUFFER,
     TEXTURE,
@@ -32,7 +32,7 @@ enum class NamedObjectType {
     NUM_OBJECT_TYPES  // Must be last
 };
 
-enum class ShaderProgramType {
+enum class ShaderProgramType : short {
     PROGRAM,
     VERTEX_SHADER,
     FRAGMENT_SHADER,
