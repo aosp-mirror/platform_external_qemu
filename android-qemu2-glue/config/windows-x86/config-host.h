@@ -43,3 +43,4 @@
 #define CONFIG_IASL iasl
 #define HOST_DSOSUF ".dll"
 #define CONFIG_WIN32_VISTA_SYNCHRONIZATION 1
+#define CONFIG_VNC 1
