@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4c36b43c_3d3bc05e",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1050,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-19T05:15:56Z",
+      "side": 1,
+      "message": "nit: I don\u0027t think it matters if it\u0027s enabled or not, just override it :)",
+      "range": {
+        "startLine": 1050,
+        "startChar": 12,
+        "endLine": 1050,
+        "endChar": 84
+      },
+      "revId": "0cc49680fd6ab2ba073b3ef3fd8db05283a8c85d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
