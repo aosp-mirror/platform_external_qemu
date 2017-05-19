@@ -233,19 +233,20 @@ int inet_connect_opts(QemuOpts *opts)
         }
         socket_set_xreuseaddr(sock);
 
+        char tmp[256];
         /* connect to peer */
         if (socket_connect(sock,e) < 0) {
             if (sockets_debug)
                 fprintf(stderr, "%s: connect(%s,%s,%s,%s): %s\n", __FUNCTION__,
                         sock_address_strfamily(e),
-                        sock_address_to_string(e), addr, port, strerror(errno));
+                        sock_address_to_string(e, tmp, sizeof(tmp)), addr, port, strerror(errno));
             socket_close(sock);
             continue;
         }
         if (sockets_debug)
             fprintf(stderr, "%s: connect(%s,%s,%s,%s): OK\n", __FUNCTION__,
                         sock_address_strfamily(e),
-                        sock_address_to_string(e), addr, port);
+                        sock_address_to_string(e, tmp, sizeof(tmp)), addr, port);
 
         goto EXIT;
     }
@@ -339,19 +340,20 @@ int inet_dgram_opts(QemuOpts *opts)
             continue;
         }
 
+        char tmp[256];
         /* connect to peer */
         if (socket_connect(sock,e) < 0) {
             if (sockets_debug)
                 fprintf(stderr, "%s: connect(%s,%s,%s,%s): %s\n", __FUNCTION__,
                         sock_address_strfamily(e),
-                        sock_address_to_string(e), addr, port, strerror(errno));
+                        sock_address_to_string(e, tmp, sizeof(tmp)), addr, port, strerror(errno));
             socket_close(sock);
             continue;
         }
         if (sockets_debug)
             fprintf(stderr, "%s: connect(%s,%s,%s,%s): OK\n", __FUNCTION__,
                         sock_address_strfamily(e),
-                        sock_address_to_string(e), addr, port);
+                        sock_address_to_string(e, tmp, sizeof(tmp)), addr, port);
 
         goto EXIT;
     }

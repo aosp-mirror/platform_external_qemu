@@ -564,6 +564,7 @@ int tcp_fconnect(struct socket *so)
             fprintf (stderr,
                      "Warning: tcp_fconnect: could not get socket name\n");
           }
+          char tmp[256];
           slirp_drop_log(
               "Redirected TCP: orig 0x%08lx:0x%04x -> 0x%08lx:0x%04x "
               "new 0x%08lx:0x%04x -> %s %ld\n",
@@ -571,7 +572,7 @@ int tcp_fconnect(struct socket *so)
               so->so_faddr_ip, so->so_laddr_port,
               sock_address_get_ip(&local_addr),
               sock_address_get_port(&local_addr),
-              sock_address_to_string(&sockaddr), timestamp
+              sock_address_to_string(&sockaddr, tmp, sizeof(tmp)), timestamp
           );
         }
 
