@@ -397,6 +397,16 @@ tcp_proxy_event( struct socket*  so,
     tcp_input(NULL, sizeof(struct ip), so, so->faddr.family);
 }
 
+static int stream_create_fallback(struct socket* so, SocketFamily sf) {
+    so->so_family = sf;
+    int s = socket_create(sf, SOCKET_STREAM);
+    if (s >= 0 || sf == SOCKET_IN6 || errno != EAFNOSUPPORT)
+      return s;
+    sf = SOCKET_IN6;
+    so->so_family = sf;
+    return socket_create(sf, SOCKET_STREAM);
+}
+
 /*
  * Connect to a host on the Internet
  * Called by tcp_input
@@ -464,7 +474,7 @@ int tcp_fconnect(struct socket *so)
     }
     /*-------------------------------------------------------------*/
 
-    if ((ret=so->s=socket_create(so->faddr.family, SOCKET_STREAM)) >= 0)
+    if ((ret=so->s=stream_create_fallback(so, so->faddr.family)) >= 0)
     {
         int  s = so->s;
 
