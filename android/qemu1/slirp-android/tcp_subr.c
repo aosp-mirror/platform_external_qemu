@@ -72,10 +72,16 @@ tcp_template(struct tcpcb *tp)
 	memset(n, 0, sizeof(*n));
 	n->ti_pr = IPPROTO_TCP;
 	n->ti_len = htons(sizeof (struct tcphdr));
-	n->ti_src = ip_seth(so->so_faddr_ip);
-	n->ti_dst = ip_seth(so->so_laddr_ip);
-	n->ti_sport = port_seth(so->so_faddr_port);
-	n->ti_dport = port_seth(so->so_laddr_port);
+	n->ti_sport = port_seth(sock_address_get_port(&so->faddr));
+	n->ti_dport = port_seth(sock_address_get_port(&so->laddr));
+	switch (so->faddr.family) {
+	case SOCKET_INET:
+	  n->ti_src = ip_seth(so->so_faddr_ip);
+	  n->ti_dst = ip_seth(so->so_laddr_ip);
+	  break;
+	default:
+	  g_assert_not_reached();
+	}
 
 	n->ti_off = 5;
 }
@@ -95,7 +101,7 @@ tcp_template(struct tcpcb *tp)
  */
 void
 tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
-            tcp_seq ack, tcp_seq seq, int flags)
+            tcp_seq ack, tcp_seq seq, int flags, SocketFamily sf)
 {
 	register int tlen;
 	int win = 0;
@@ -132,8 +138,14 @@ tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
 		m->m_len = sizeof (struct tcpiphdr);
 		tlen = 0;
 #define xchg(a,b,type) { type t; t=a; a=b; b=t; }
-		xchg(ti->ti_dst, ti->ti_src, ipaddr_t);
 		xchg(ti->ti_dport, ti->ti_sport, port_t);
+		switch (sf) {
+		case SOCKET_INET:
+		  xchg(ti->ti_dst, ti->ti_src, ipaddr_t);
+		  break;
+		default:
+		  g_assert_not_reached();
+		}
 #undef xchg
 	}
 	ti->ti_len = htons((u_short)(sizeof (struct tcphdr) + tlen));
@@ -156,22 +168,28 @@ tcp_respond(struct tcpcb *tp, struct tcpiphdr *ti, struct mbuf *m,
 	ti->ti_sum = cksum(m, tlen);
 
 	struct tcpiphdr tcpiph_save = *(mtod(m, struct tcpiphdr *));
-	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr) 
-		- sizeof(struct ip);
-	m->m_data += delta;
-	m->m_len  -= delta;
-	struct ip *ip = mtod(m, struct ip *);
-	ip->ip_len = m->m_len;
-	ip->ip_dst = tcpiph_save.ti_dst;
-	ip->ip_src = tcpiph_save.ti_src;
-	ip->ip_p = tcpiph_save.ti_pr;
-	if (flags & TH_RST) {
-		ip->ip_ttl = MAXTTL;
-	} else {
-		ip->ip_ttl = IPDEFTTL;
-	}
+	unsigned int delta = sizeof(struct tcpiphdr) - sizeof(struct tcphdr);
+	switch (sf) {
+	case SOCKET_INET:
+	  delta -= sizeof(struct ip);
+	  m->m_data += delta;
+	  m->m_len -= delta;
+	  struct ip* ip = mtod(m, struct ip*);
+	  ip->ip_len = m->m_len;
+	  ip->ip_dst = tcpiph_save.ti_dst;
+	  ip->ip_src = tcpiph_save.ti_src;
+	  ip->ip_p = tcpiph_save.ti_pr;
+	  if (flags & TH_RST) {
+	      ip->ip_ttl = MAXTTL;
+	  } else {
+	      ip->ip_ttl = IPDEFTTL;
+	  }
 
-	(void) ip_output((struct socket *)0, m);
+	  (void)ip_output((struct socket*)0, m);
+	  break;
+	default:
+	  g_assert_not_reached();
+	}
 }
 
 /*
@@ -376,7 +394,7 @@ tcp_proxy_event( struct socket*  so,
     }
 
     /* continue the connect */
-    tcp_input(NULL, sizeof(struct ip), so);
+    tcp_input(NULL, sizeof(struct ip), so, so->faddr.family);
 }
 
 /*
@@ -446,7 +464,7 @@ int tcp_fconnect(struct socket *so)
     }
     /*-------------------------------------------------------------*/
 
-    if ((ret=so->s=socket_create_inet(SOCKET_STREAM)) >= 0)
+    if ((ret=so->s=socket_create(so->faddr.family, SOCKET_STREAM)) >= 0)
     {
         int  s = so->s;
 
