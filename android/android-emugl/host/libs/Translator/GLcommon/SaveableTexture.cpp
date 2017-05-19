@@ -16,6 +16,8 @@
 
 #include "GLcommon/SaveableTexture.h"
 
+#include "android/base/ArraySize.h"
+#include "android/base/containers/SmallVector.h"
 #include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLES2/gl2ext.h"
@@ -261,23 +263,26 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP
             || m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         // restore the texture
-        // TODO: move this to higher level for performance
-        std::unordered_map<GLenum, GLint> desiredPixelStori = {
-            {GL_UNPACK_ROW_LENGTH, 0},
-            {GL_UNPACK_IMAGE_HEIGHT, 0},
-            {GL_UNPACK_SKIP_PIXELS, 0},
-            {GL_UNPACK_SKIP_ROWS, 0},
-            {GL_UNPACK_SKIP_IMAGES, 0},
-            {GL_UNPACK_ALIGNMENT, 1},
-        };
-        std::unordered_map<GLenum, GLint> prevPixelStori = desiredPixelStori;
         GLDispatch& dispatcher = GLEScontext::dispatcher();
-        for (auto& ps : prevPixelStori) {
-            dispatcher.glGetIntegerv(ps.first, &ps.second);
+
+        static constexpr GLenum pixelStoreIndexes[] = {
+                GL_UNPACK_ROW_LENGTH,  GL_UNPACK_IMAGE_HEIGHT,
+                GL_UNPACK_SKIP_PIXELS, GL_UNPACK_SKIP_ROWS,
+                GL_UNPACK_SKIP_IMAGES, GL_UNPACK_ALIGNMENT,
+        };
+
+        static constexpr GLint pixelStoreDesired[] = {0, 0, 0, 0, 0, 1};
+
+        GLint pixelStorePrev[android::base::arraySize(pixelStoreIndexes)];
+
+        for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            dispatcher.glGetIntegerv(pixelStoreIndexes[i], &pixelStorePrev[i]);
+            if (pixelStorePrev[i] != pixelStoreDesired[i]) {
+                dispatcher.glPixelStorei(pixelStoreIndexes[i],
+                                         pixelStoreDesired[i]);
+            }
         }
-        for (auto& ps : desiredPixelStori) {
-            dispatcher.glPixelStorei(ps.first, ps.second);
-        }
+
         m_globalName = m_globalTexObj->getGlobalName();
         GLint prevTex = 0;
         switch (m_target) {
@@ -300,35 +305,37 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
         // Restore texture data
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
-        unsigned int numLevels = 1 + floor(log2(
-                (float)std::max(m_width, m_height)));
+        unsigned int numLevels = 1 + floor(log2((float)std::max(m_width, m_height)));
+        android::base::SmallFixedVector<unsigned char, 128> loadedData;
         auto restoreTex2D = [stream, internalFormat=m_internalFormat,
                 border=m_border, format=m_format, type=m_type, numLevels,
-                &dispatcher] (GLenum target) {
+                &dispatcher, &loadedData] (GLenum target) {
                 for (unsigned int level = 0; level < numLevels; level++) {
                     GLint width = stream->getBe32();
                     GLint height = stream->getBe32();
-                    std::vector<unsigned char> loadedData;
                     loadBuffer(stream, &loadedData);
                     const void* pixels = loadedData.empty() ? nullptr :
                                                               loadedData.data();
-                    dispatcher.glTexImage2D(target, level, internalFormat,
-                            width, height, border, format, type, pixels);
+                    if (!level || pixels) {
+                        dispatcher.glTexImage2D(target, level, internalFormat,
+                                width, height, border, format, type, pixels);
+                    }
                 }
         };
         auto restoreTex3D = [stream, internalFormat=m_internalFormat,
                 border=m_border, format=m_format, type=m_type, numLevels,
-                &dispatcher] (GLenum target) {
+                &dispatcher, &loadedData] (GLenum target) {
                 for (unsigned int level = 0; level < numLevels; level++) {
                     GLint width = stream->getBe32();
                     GLint height = stream->getBe32();
                     GLint depth = stream->getBe32();
-                    std::vector<unsigned char> loadedData;
                     loadBuffer(stream, &loadedData);
                     const void* pixels = loadedData.empty() ? nullptr :
                                                               loadedData.data();
-                    dispatcher.glTexImage3D(target, level, internalFormat,
-                            width, height, depth, border, format, type, pixels);
+                    if (!level || pixels) {
+                        dispatcher.glTexImage3D(target, level, internalFormat,
+                                width, height, depth, border, format, type, pixels);
+                    }
                 }
         };
         switch (m_target) {
@@ -349,7 +356,6 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
                 break;
             default:
                 break;
-
         }
         // Restore tex param
         auto loadParam = [stream, target=m_target, &dispatcher](GLenum pname) {
@@ -361,8 +367,12 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
         loadParam(GL_TEXTURE_WRAP_S);
         loadParam(GL_TEXTURE_WRAP_T);
         // Restore environment
-        for (auto& ps : prevPixelStori) {
-            dispatcher.glPixelStorei(ps.first, ps.second);
+
+        for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            if (pixelStorePrev[i] != pixelStoreDesired[i]) {
+                dispatcher.glPixelStorei(pixelStoreIndexes[i],
+                                         pixelStorePrev[i]);
+            }
         }
         dispatcher.glBindTexture(m_target, prevTex);
     } else {
@@ -382,22 +392,23 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP
             || m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
-        // TODO: move this to higher level for performance
-        std::unordered_map<GLenum, GLint> desiredPixelStori = {
-            {GL_PACK_ROW_LENGTH, 0},
-            {GL_PACK_SKIP_PIXELS, 0},
-            {GL_PACK_SKIP_ROWS, 0},
-            {GL_PACK_ALIGNMENT, 1},
+
+        static constexpr GLenum pixelStoreIndexes[] = {
+                GL_PACK_ROW_LENGTH, GL_PACK_SKIP_PIXELS, GL_PACK_SKIP_ROWS,
+                GL_PACK_ALIGNMENT,
         };
-        std::unordered_map<GLenum, GLint> prevPixelStori = desiredPixelStori;
+        static constexpr GLint pixelStoreDesired[] = {0, 0, 0, 1};
+        GLint pixelStorePrev[android::base::arraySize(pixelStoreIndexes)];
+
         GLint prevTex = 0;
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         assert(dispatcher.glGetIntegerv);
-        for (auto& ps : prevPixelStori) {
-            dispatcher.glGetIntegerv(ps.first, &ps.second);
-        }
-        for (auto& ps : desiredPixelStori) {
-            dispatcher.glPixelStorei(ps.first, ps.second);
+        for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            dispatcher.glGetIntegerv(pixelStoreIndexes[i], &pixelStorePrev[i]);
+            if (pixelStorePrev[i] != pixelStoreDesired[i]) {
+                dispatcher.glPixelStorei(pixelStoreIndexes[i],
+                                         pixelStoreDesired[i]);
+            }
         }
         switch (m_target) {
             case GL_TEXTURE_2D:
@@ -417,10 +428,10 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         }
         dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
-        unsigned int numLevels = 1 + floor(log2(
-                (float)std::max(m_width, m_height)));
+        android::base::SmallFixedVector<unsigned char, 128> buffer;
+        unsigned int numLevels = 1 + floor(log2((float)std::max(m_width, m_height)));
         auto saveTex2D = [stream, format=m_format, type=m_type, numLevels,
-                &dispatcher] (GLenum target) {
+                &dispatcher, &buffer] (GLenum target) {
             for (unsigned int level = 0; level < numLevels; level++) {
                 GLint width = 1;
                 GLint height = 1;
@@ -430,16 +441,17 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
                         GL_TEXTURE_HEIGHT, &height);
                 stream->putBe32(width);
                 stream->putBe32(height);
-                // Snapshot texture data
-                std::vector<unsigned char> tmpData(s_texImageSize(format,
+                buffer.resize_noinit(s_texImageSize(format,
                         type, 1, width, height));
-                dispatcher.glGetTexImage(target, level, format, type,
-                        tmpData.data());
-                saveBuffer(stream, tmpData);
+                if (!buffer.empty()) {
+                    dispatcher.glGetTexImage(target, level, format, type,
+                            buffer.data());
+                }
+                saveBuffer(stream, buffer);
             }
         };
         auto saveTex3D = [stream, format=m_format, type=m_type, numLevels,
-                &dispatcher] (GLenum target) {
+                &dispatcher, &buffer] (GLenum target) {
             for (unsigned int level = 0; level < numLevels; level++) {
                 GLint width = 1;
                 GLint height = 1;
@@ -454,11 +466,13 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
                 stream->putBe32(height);
                 stream->putBe32(depth);
                 // Snapshot texture data
-                std::vector<unsigned char> tmpData(s_texImageSize(format,
+                buffer.resize_noinit(s_texImageSize(format,
                         type, 1, width, height) * depth);
-                dispatcher.glGetTexImage(target, level, format, type,
-                        tmpData.data());
-                saveBuffer(stream, tmpData);
+                if (!buffer.empty()) {
+                    dispatcher.glGetTexImage(target, level, format, type,
+                            buffer.data());
+                }
+                saveBuffer(stream, buffer);
             }
         };
         switch (m_target) {
@@ -491,8 +505,11 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         saveParam(GL_TEXTURE_WRAP_S);
         saveParam(GL_TEXTURE_WRAP_T);
         // Restore environment
-        for (auto& ps : prevPixelStori) {
-            dispatcher.glPixelStorei(ps.first, ps.second);
+        for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            if (pixelStorePrev[i] != pixelStoreDesired[i]) {
+                dispatcher.glPixelStorei(pixelStoreIndexes[i],
+                                         pixelStorePrev[i]);
+            }
         }
         dispatcher.glBindTexture(m_target, prevTex);
     } else {
