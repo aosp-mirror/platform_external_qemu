@@ -937,13 +937,6 @@ extern "C" int main(int argc, char **argv) {
             return 1;
         }
 
-        // Should enable OpenGL ES 3.x?
-        if (!android::featurecontrol::isEnabled(android::featurecontrol::GLESDynamicVersion) &&
-            skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
-            android::featurecontrol::setEnabledOverride(
-                android::featurecontrol::GLESDynamicVersion, true);
-        }
-
         // Use advancedFeatures to override renderer if the user has selected
         // in UI that the preferred renderer is "autoselected".
         WinsysPreferredGlesBackend uiPreferredGlesBackend =
