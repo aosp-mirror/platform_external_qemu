@@ -518,13 +518,36 @@ sorecvfrom(struct socket *so)
 	  DEBUG_MISC((dfd, " did recvfrom %d, errno = %d-%s\n",
 		      m->m_len, errno,errno_str));
 	  if(m->m_len<0) {
-	    u_char code=ICMP_UNREACH_PORT;
+	    switch (so->laddr.family) {
+	    u_char code;
+	    case SOCKET_INET:
+		code = ICMP_UNREACH_PORT;
 
-	    if(errno == EHOSTUNREACH) code=ICMP_UNREACH_HOST;
-	    else if(errno == ENETUNREACH) code=ICMP_UNREACH_NET;
+		if (errno == EHOSTUNREACH)
+		    code = ICMP_UNREACH_HOST;
+		else if (errno == ENETUNREACH)
+		    code = ICMP_UNREACH_NET;
 
-	    DEBUG_MISC((dfd," rx error, tx icmp ICMP_UNREACH:%i\n", code));
-	    icmp_error(so->so_m, ICMP_UNREACH,code, 0,errno_str);
+		DEBUG_MISC((dfd, " rx error, tx icmp ICMP_UNREACH:%i\n",
+		            code));
+		icmp_error(so->so_m, ICMP_UNREACH, code, 0, errno_str);
+		break;
+	    case SOCKET_IN6:
+		code = ICMP6_UNREACH_PORT;
+
+		if (errno == EHOSTUNREACH)
+		    code = ICMP6_UNREACH_ADDRESS;
+		else if (errno == ENETUNREACH)
+		    code = ICMP6_UNREACH_NO_ROUTE;
+
+		DEBUG_MISC((dfd, " rx error, tx icmp6 ICMP_UNREACH:%i\n",
+		            code));
+		icmp6_send_error(so->so_m, ICMP6_UNREACH, code);
+		break;
+	    default:
+		g_assert_not_reached();
+		break;
+	    }
 	    m_free(m);
 	  } else {
 	  /*
@@ -546,11 +569,35 @@ sorecvfrom(struct socket *so)
 	     *		}
 	     */
 
-	    /*
-	     * If this packet was destined for CTL_ADDR,
-	     * make it look like that's where it came from, done by udp_output
-	     */
-	    udp_output_(so, m, &addr);
+	    switch (so->faddr.family) {
+	    struct sockaddr_in6 saddr, daddr;
+	    case SOCKET_INET:
+		/*
+		 * If this packet was destined for CTL_ADDR,
+		 * make it look like that's where it came from, done by
+		 * udp_output
+		 */
+		udp_output_(so, m, &addr);
+		break;
+	    case SOCKET_IN6:
+		saddr.sin6_port = htons(sock_address_get_port(&addr));
+		memcpy(saddr.sin6_addr.s6_addr, addr.u.in6.address, 16);
+		/*
+		 * If this packet was destined for CTL_ADDR,
+		 * make it look like that's where it came from */
+		if (in6_equal_net((struct in6_addr*)&so->faddr.u.in6.address,
+				  &vprefix_addr6, vprefix_len)) {
+		    memcpy(saddr.sin6_addr.s6_addr, so->faddr.u.in6.address,
+		           16);
+		}
+		daddr.sin6_port = htons(sock_address_get_port(&so->laddr));
+		memcpy(daddr.sin6_addr.s6_addr, so->laddr.u.in6.address,
+		       16);
+		udp6_output(so, m, &saddr, &daddr);
+		break;
+	    default:
+		g_assert_not_reached();
+	    }
 	  } /* rx error */
 	} /* if ping packet */
 }
