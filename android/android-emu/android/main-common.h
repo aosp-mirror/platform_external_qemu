@@ -68,6 +68,7 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 // |bootPropOpenglesVersion|; Constructed ro.opengles.version boot property
 // appropriate to the detected OpenGL ES API level support.
 // |glFramebufferSizeBytes|: Returns size of LCD-bound framebuffer in bytes.
+// |selectedRenderer|: Returns OpenGL ES backend (host/angle/swiftshader etc)
 // Useful for reserving extra memory for in-guest framebuffers.
 
 // First, there is a struct to hold outputs.
@@ -76,6 +77,7 @@ typedef struct {
     int openglAlive;
     int bootPropOpenglesVersion;
     int glFramebufferSizeBytes;
+    SelectedRenderer selectedRenderer;
 } RendererConfig;
 // Function itself:
 bool configAndStartRenderer(
