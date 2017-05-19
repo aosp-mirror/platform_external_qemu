@@ -353,7 +353,7 @@ static const mips_def_t mips_defs[] =
     },
     {
         .name = "74Kf",
-        .CP0_PRid = 0x00019700,
+        .CP0_PRid = 0x00010000,
         .CP0_Config0 = MIPS_CONFIG0 | (0x1 << CP0C0_AR) |
                     (MMU_TYPE_R4000 << CP0C0_MT),
         .CP0_Config1 = MIPS_CONFIG1 | (1 << CP0C1_FP) | (15 << CP0C1_MMU) |
