@@ -283,5 +283,35 @@ TEST_F(FeatureControlTest, setNonOverriden) {
     EXPECT_FALSE(isEnabled(nonOverriden));
 }
 
+TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOn) {
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOnIniGuestOnly);
+    loadAllIni();
+    for (int i = 0; i < Feature_n_items; i++) {
+        Feature feature = static_cast<Feature>(i);
+        EXPECT_FALSE(isEnabled(feature));
+        EXPECT_FALSE(isOverridden(feature));
+        setIfNotOverridenOrGuestDisabled(feature, true);
+        EXPECT_TRUE(isEnabled(feature));
+    }
+}
+
+TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOff) {
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    loadAllIni();
+    for (int i = 0; i < Feature_n_items; i++) {
+        Feature feature = static_cast<Feature>(i);
+        EXPECT_FALSE(isEnabled(feature));
+        EXPECT_FALSE(isOverridden(feature));
+        setIfNotOverridenOrGuestDisabled(feature, true);
+        if (isGuestFeature(feature)) {
+            EXPECT_FALSE(isEnabled(feature));
+        } else {
+            EXPECT_TRUE(isEnabled(feature));
+        }
+    }
+}
+
 } // namespace featurecontrol
 } // namespace android
