@@ -76,7 +76,7 @@ private:
 static LazyInstance<FeaturePatternQueryThread> sFeaturePatternQueryThread =
     LAZY_INSTANCE_INIT;
 
-static const char kCachedPatternsFilename[] = "emu-last-feature-flags.protobuf";
+static const char kCachedPatternsFilename[] = "emu-last-feature-patterns.protobuf";
 
 static bool tryParseFeaturePatternsProtobuf(
         const std::string& filename,
@@ -322,7 +322,7 @@ static void doFeatureAction(const FeatureAction& action) {
 }
 
 static const char kFeaturePatternsUrlPrefix[] =
-    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-flags.protobuf";
+    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-patterns.protobuf";
 
 static size_t curlDownloadFeaturePatternsCallback(
         char* contents, size_t size, size_t nmemb, void* userp) {
