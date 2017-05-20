@@ -1495,7 +1495,7 @@ static void reset_ram_globals(void)
     ram_bulk_stage = true;
 }
 
-#define MAX_WAIT 50 /* ms, half buffered_file limit */
+#define MAX_WAIT 5000 /* ms, half buffered_file limit */
 
 void migration_bitmap_extend(ram_addr_t old, ram_addr_t new)
 {

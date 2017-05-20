@@ -87,7 +87,7 @@ public:
             (void)version;
             renderer->load(stream);
 #ifdef SNAPSHOT_PROFILE
-            printf("OpenglEs preload time: %ld ms\n",
+            printf("OpenglEs preload time: %lld ms\n",
                     (android::base::System::get()->getUnixTimeUs()
                     - mLoadStartTime) / 1000);
 #endif
@@ -98,7 +98,7 @@ public:
                 renderer->resumeAll();
             }
 #ifdef SNAPSHOT_PROFILE
-            printf("OpenglEs total load time: %ld ms\n",
+            printf("OpenglEs total load time: %lld ms\n",
                     (android::base::System::get()->getUnixTimeUs()
                     - mLoadStartTime) / 1000);
 #endif
@@ -123,7 +123,7 @@ public:
                 renderer->resumeAll();
             }
 #ifdef SNAPSHOT_PROFILE
-            printf("OpenglEs total save time: %ld ms\n",
+            printf("OpenglEs total save time: %lld ms\n",
                     (android::base::System::get()->getUnixTimeUs()
                     - mSaveStartTime) / 1000);
 #endif

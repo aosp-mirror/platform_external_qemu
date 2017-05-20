@@ -129,7 +129,7 @@ public:
     void onSave(android::base::Stream* stream, SaveableTexture::saver_t saver);
     void onLoad(android::base::Stream* stream, SaveableTexture::loader_t loader);
     void postLoad(android::base::Stream* stream);
-    NamedObjectPtr getGlobalObjectFromLoad(unsigned int oldGlobalName);
+    const NamedObjectPtr& getGlobalObjectFromLoad(unsigned int oldGlobalName);
     EglImage* makeEglImageFromLoad(unsigned int oldGlobalName);
 private:
     emugl::Mutex m_lock;

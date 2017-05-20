@@ -117,6 +117,7 @@ private:
     virtual void mousePressEvent(QMouseEvent* event) override;
     virtual void paintEvent(QPaintEvent*) override;
     virtual void hideEvent(QHideEvent* event) override;
+    virtual void showEvent(QShowEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
     // ExtendedWindow has slots with subscribers, so use deleteLater() instead

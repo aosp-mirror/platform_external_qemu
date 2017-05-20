@@ -1483,7 +1483,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
             s_egl.eglLoadAllImages(m_eglDisplay, stream);
         }
 #ifdef SNAPSHOT_PROFILE
-        printf("Texture load time: %ld ms\n",
+        printf("Texture load time: %lld ms\n",
                     (android::base::System::get()->getUnixTimeUs()
                     - imgStartTime) / 1000);
 #endif

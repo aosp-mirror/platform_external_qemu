@@ -248,7 +248,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
     , m_globalName(texture.globalName) { }
 
 SaveableTexture::SaveableTexture(android::base::Stream* stream,
-        GlobalNameSpace* globalNameSpace)
+        GlobalNameSpace* globalNameSpace, android::base::SmallVector<unsigned char>* buffer)
     : m_globalTexObj(new NamedObject(GenNameInfo(NamedObjectType::TEXTURE),
         globalNameSpace)) {
     m_target = stream->getBe32();
@@ -306,16 +306,15 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
         unsigned int numLevels = 1 + floor(log2((float)std::max(m_width, m_height)));
-        android::base::SmallFixedVector<unsigned char, 128> loadedData;
         auto restoreTex2D = [stream, internalFormat=m_internalFormat,
                 border=m_border, format=m_format, type=m_type, numLevels,
-                &dispatcher, &loadedData] (GLenum target) {
+                &dispatcher, buffer] (GLenum target) {
                 for (unsigned int level = 0; level < numLevels; level++) {
                     GLint width = stream->getBe32();
                     GLint height = stream->getBe32();
-                    loadBuffer(stream, &loadedData);
-                    const void* pixels = loadedData.empty() ? nullptr :
-                                                              loadedData.data();
+                    loadBuffer(stream, buffer);
+                    const void* pixels = buffer->empty()
+                                         ? nullptr : buffer->data();
                     if (!level || pixels) {
                         dispatcher.glTexImage2D(target, level, internalFormat,
                                 width, height, border, format, type, pixels);
@@ -324,14 +323,14 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
         };
         auto restoreTex3D = [stream, internalFormat=m_internalFormat,
                 border=m_border, format=m_format, type=m_type, numLevels,
-                &dispatcher, &loadedData] (GLenum target) {
+                &dispatcher, buffer] (GLenum target) {
                 for (unsigned int level = 0; level < numLevels; level++) {
                     GLint width = stream->getBe32();
                     GLint height = stream->getBe32();
                     GLint depth = stream->getBe32();
-                    loadBuffer(stream, &loadedData);
-                    const void* pixels = loadedData.empty() ? nullptr :
-                                                              loadedData.data();
+                    loadBuffer(stream, buffer);
+                    const void* pixels = buffer->empty() ? nullptr :
+                                                              buffer->data();
                     if (!level || pixels) {
                         dispatcher.glTexImage3D(target, level, internalFormat,
                                 width, height, depth, border, format, type, pixels);
@@ -380,7 +379,7 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
     }
 }
 
-void SaveableTexture::onSave(android::base::Stream* stream) const {
+void SaveableTexture::onSave(android::base::Stream* stream, android::base::SmallVector<unsigned char>* buffer) const {
     stream->putBe32(m_target);
     stream->putBe32(m_width);
     stream->putBe32(m_height);
@@ -428,10 +427,9 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         }
         dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
-        android::base::SmallFixedVector<unsigned char, 128> buffer;
         unsigned int numLevels = 1 + floor(log2((float)std::max(m_width, m_height)));
         auto saveTex2D = [stream, format=m_format, type=m_type, numLevels,
-                &dispatcher, &buffer] (GLenum target) {
+                &dispatcher, buffer] (GLenum target) {
             for (unsigned int level = 0; level < numLevels; level++) {
                 GLint width = 1;
                 GLint height = 1;
@@ -441,17 +439,18 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
                         GL_TEXTURE_HEIGHT, &height);
                 stream->putBe32(width);
                 stream->putBe32(height);
-                buffer.resize_noinit(s_texImageSize(format,
+                buffer->clear();
+                buffer->resize_noinit(s_texImageSize(format,
                         type, 1, width, height));
-                if (!buffer.empty()) {
+                if (!buffer->empty()) {
                     dispatcher.glGetTexImage(target, level, format, type,
-                            buffer.data());
+                            buffer->data());
                 }
-                saveBuffer(stream, buffer);
+                saveBuffer(stream, *buffer);
             }
         };
         auto saveTex3D = [stream, format=m_format, type=m_type, numLevels,
-                &dispatcher, &buffer] (GLenum target) {
+                &dispatcher, buffer] (GLenum target) {
             for (unsigned int level = 0; level < numLevels; level++) {
                 GLint width = 1;
                 GLint height = 1;
@@ -466,13 +465,14 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
                 stream->putBe32(height);
                 stream->putBe32(depth);
                 // Snapshot texture data
-                buffer.resize_noinit(s_texImageSize(format,
+                buffer->clear();
+                buffer->resize_noinit(s_texImageSize(format,
                         type, 1, width, height) * depth);
-                if (!buffer.empty()) {
+                if (!buffer->empty()) {
                     dispatcher.glGetTexImage(target, level, format, type,
-                            buffer.data());
+                            buffer->data());
                 }
-                saveBuffer(stream, buffer);
+                saveBuffer(stream, *buffer);
             }
         };
         switch (m_target) {
@@ -515,10 +515,6 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
     } else {
         fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
     }
-}
-
-NamedObjectPtr SaveableTexture::getGlobalObject() const {
-    return m_globalTexObj;
 }
 
 EglImage* SaveableTexture::makeEglImage() const {

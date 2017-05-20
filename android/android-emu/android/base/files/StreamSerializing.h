@@ -54,6 +54,7 @@ void saveBuffer(Stream* stream, const SmallVector<T>& buffer) {
 template <class T, class = enable_if<std::is_standard_layout<T>>>
 bool loadBuffer(Stream* stream, SmallVector<T>* buffer) {
     auto len = stream->getBe32();
+    buffer->clear();
     buffer->resize_noinit(len);
     int ret = (int)stream->read(buffer->data(), len * sizeof(T));
     return ret == len * sizeof(T);
