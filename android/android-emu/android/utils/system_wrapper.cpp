@@ -35,6 +35,10 @@ int64_t get_system_time_ms() {
     return static_cast<int64_t>(System::get()->getProcessTimes().systemMs);
 }
 
+int64_t get_uptime_ms() {
+    return static_cast<int64_t>(System::get()->getProcessTimes().wallClockMs);
+}
+
 char* get_launcher_directory() {
     return strdup(System::get()->getLauncherDirectory().c_str());
 }

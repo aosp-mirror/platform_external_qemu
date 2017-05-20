@@ -172,8 +172,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
-    createExtendedWindow(); // But don't show it yet
-
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
     int tmp_x = mToolsUi->close_button->x();
@@ -221,6 +219,13 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 void ToolWindow::hideEvent(QHideEvent*) {
     mIsExtendedWindowVisibleOnShow =
             mExtendedWindow && mExtendedWindow->isVisible();
+}
+
+void ToolWindow::showEvent(QShowEvent* event) {
+    if (!mExtendedWindow) {
+        createExtendedWindow(); // But don't show it yet
+    }
+    QFrame::showEvent(event);
 }
 
 void ToolWindow::show() {

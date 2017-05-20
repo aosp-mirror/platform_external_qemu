@@ -165,6 +165,7 @@ int main(int argc, char **argv)
 #include "android/utils/lineinput.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
+#include "android/utils/system.h"
 #include "android/utils/socket_drainer.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/timezone.h"
@@ -3403,6 +3404,10 @@ static int main_impl(int argc, char** argv)
     Error *err = NULL;
     bool list_data_dirs = false;
 
+#if defined(CONFIG_ANDROID) && (SNAPSHOT_PROFILE > 1)
+    printf("Entering QEMU main with uptime %lld ms\n",
+           (long long)get_uptime_ms());
+#endif
 
 #ifdef CONFIG_ANDROID
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
@@ -5421,6 +5426,10 @@ static int main_impl(int argc, char** argv)
     qemu_system_reset(VMRESET_SILENT);
     register_global_state();
     if (loadvm) {
+#if defined(CONFIG_ANDROID) && (SNAPSHOT_PROFILE > 1)
+        printf("Starting snapshot load with uptime %lld ms\n",
+               (long long)get_uptime_ms());
+#endif
         if (load_vmstate(loadvm) < 0) {
             autostart = 0;
         }

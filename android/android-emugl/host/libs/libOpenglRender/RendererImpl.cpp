@@ -235,8 +235,8 @@ bool RendererImpl::load(android::base::Stream* stream) {
     cleanupRenderThreads();
     waitForProcessCleanup();
 #ifdef SNAPSHOT_PROFILE
-    printf("RenderThread cleanup time: %ld ms\n",
-            (android::base::System::get()->getUnixTimeUs()
+    printf("RenderThread cleanup time: %lld ms\n",
+            (long long)(android::base::System::get()->getUnixTimeUs()
             - startTime) / 1000);
 #endif
 
