@@ -80,6 +80,10 @@ void FeatureControlImpl::initGuestFeatureAndParseDefault(
     IniSetting valHost = ParseIniStr(strHost);
     IniSetting valGuest = ParseIniStr(
             defaultIniGuest.getString(featureNameStr, "null"));
+    if (valGuest == ON) {
+        setGuestTriedEnable(featureName);
+    }
+
     initEnabledDefault(featureName, false);
     switch (valHost) {
         case ON:
@@ -125,6 +129,7 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
                               android::base::StringView defaultIniGuestPath,
                               android::base::StringView userIniHostPath,
                               android::base::StringView userIniGuestPath) {
+    memset(mGuestTriedEnabledFeatures, 0, sizeof(FeatureOption) * Feature_n_items);
     base::IniFile defaultIniHost(defaultIniHostPath);
     if (defaultIniHost.read()) {
         // Initialize host only features
@@ -239,9 +244,29 @@ bool FeatureControlImpl::isOverridden(Feature feature) const {
     return currFeature.isOverridden;
 }
 
+bool FeatureControlImpl::isGuestFeature(Feature feature) const {
+#define FEATURE_CONTROL_ITEM(item) if (feature == Feature::item) return true;
+#include "FeatureControlDefGuest.h"
+#undef FEATURE_CONTROL_ITEM
+    return false;
+}
+
+bool FeatureControlImpl::isEnabledByGuest(Feature feature) const {
+    return mGuestTriedEnabledFeatures[feature].currentVal;
+}
+
 void FeatureControlImpl::setIfNotOverriden(Feature feature, bool isEnabled) {
     FeatureOption& currFeature = mFeatures[feature];
     if (currFeature.isOverridden) return;
+    currFeature.currentVal = isEnabled;
+}
+
+void FeatureControlImpl::setIfNotOverridenOrGuestDisabled(Feature feature, bool isEnabled) {
+    FeatureOption& currFeature = mFeatures[feature];
+    if (currFeature.isOverridden) return;
+    if (isGuestFeature(feature) &&
+        !isEnabledByGuest(feature)) return;
+
     currFeature.currentVal = isEnabled;
 }
 
@@ -271,6 +296,14 @@ void FeatureControlImpl::initEnabledDefault(Feature feature, bool isEnabled) {
     currFeature.defaultVal = isEnabled;
     currFeature.currentVal = isEnabled;
     currFeature.isOverridden = false;
+}
+
+void FeatureControlImpl::setGuestTriedEnable(Feature feature) {
+    FeatureOption& opt = mGuestTriedEnabledFeatures[feature];
+    opt.name = feature;
+    opt.defaultVal = true;
+    opt.currentVal = true;
+    opt.isOverridden = false;
 }
 
 std::vector<Feature> FeatureControlImpl::getEnabledNonOverride() const {
