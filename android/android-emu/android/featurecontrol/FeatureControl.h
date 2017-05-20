@@ -37,6 +37,9 @@ bool isEnabled(Feature feature);
 void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);
 
+// Queries whether this feature is tied to the guest.
+bool isGuestFeature(Feature feature);
+
 // returns true if the user has specified it in
 // home directory's user-based advancedFeatures.ini.
 bool isOverridden(Feature feature);
@@ -44,6 +47,9 @@ bool isOverridden(Feature feature);
 // like setEnabledOverride, except it is a no-op
 // if isOverridden(feature) == true.
 void setIfNotOverriden(Feature feature, bool isEnabled);
+// like setIfNotOverriden, except it is a no-op
+// if the guest did not enable it too.
+void setIfNotOverridenOrGuestDisabled(Feature feature, bool isEnabled);
 
 Feature stringToFeature(const std::string& str);
 

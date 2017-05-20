@@ -32,8 +32,16 @@ bool isOverridden(Feature feature) {
     return FeatureControlImpl::get().isOverridden(feature);
 }
 
+bool isGuestFeature(Feature feature) {
+    return FeatureControlImpl::get().isGuestFeature(feature);
+}
+
 void setIfNotOverriden(Feature feature, bool isEnabled) {
     FeatureControlImpl::get().setIfNotOverriden(feature, isEnabled);
+}
+
+void setIfNotOverridenOrGuestDisabled(Feature feature, bool isEnabled) {
+    FeatureControlImpl::get().setIfNotOverridenOrGuestDisabled(feature, isEnabled);
 }
 
 Feature stringToFeature(const std::string& str) {
