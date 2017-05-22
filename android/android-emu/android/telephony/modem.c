@@ -2226,9 +2226,11 @@ handleQueryPDPContext( const char* cmd, AModem modem )
 {
     /* WiFi uses a different gateway because there is NAT involved to get
      * both WiFi and radio networks to coexist on the single ethernet connection
-     * connecting the guest to the outside world */
+     * connecting the guest to the outside world.
+     * The IPv6 address is bind to the default mac address of emulator.*/
     const char* gateway = feature_is_enabled(kFeature_Wifi) ? "192.168.200.2"
-                                                            : "10.0.2.15";
+                                                            : "10.0.2.15 fe80::5054:ff:fe12:3456/64";
+    const char* ipmode = feature_is_enabled(kFeature_Wifi) ? "IP" : "IPV4V6";
     int  nn;
 
     amodem_begin_line(modem);
@@ -2238,7 +2240,7 @@ handleQueryPDPContext( const char* cmd, AModem modem )
             continue;
         amodem_add_line( modem, "+CGDCONT: %d,\"%s\",\"%s\",\"%s\",0,0\r\n",
                          data->id,
-                         data->type == A_DATA_IP ? "IP" : "PPP",
+                         data->type == A_DATA_IP ? ipmode : "PPP",
                          data->apn,
                          /* Note: For now, hard-code the IP address of our
                           *       network interface
