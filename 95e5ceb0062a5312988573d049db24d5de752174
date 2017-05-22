@@ -46,6 +46,30 @@
       "revId": "95e5ceb0062a5312988573d049db24d5de752174",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "345444fb_8dd291c8",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-22T20:49:56Z",
+      "side": 1,
+      "message": "I am still working on it. I will keep you updated.\n\nThe texture save in this CL would be still helpful.",
+      "parentUuid": "17f4d417_05166d84",
+      "range": {
+        "startLine": 251,
+        "startChar": 85,
+        "endLine": 251,
+        "endChar": 91
+      },
+      "revId": "95e5ceb0062a5312988573d049db24d5de752174",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
