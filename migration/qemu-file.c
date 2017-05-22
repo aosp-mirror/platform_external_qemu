@@ -32,7 +32,7 @@
 #include "migration/qemu-file.h"
 #include "trace.h"
 
-#define IO_BUF_SIZE 32768
+#define IO_BUF_SIZE (1024 * 1024)
 #define MAX_IOV_SIZE MIN(IOV_MAX, 64)
 
 struct QEMUFile {
