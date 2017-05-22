@@ -211,6 +211,7 @@ extern android_thread_id_t android_get_thread_id();
 /* Type duplicated from android/base/system/System.h */
 extern int64_t get_user_time_ms();
 extern int64_t get_system_time_ms();
+extern int64_t get_uptime_ms();
 
 // Caller must free the returned string.
 extern char* get_launcher_directory();
