@@ -311,16 +311,14 @@ static void doFeatureAction(const FeatureAction& action) {
 
     if (stringToFeature(action.name) == Feature::Feature_n_items) return;
 
-    // Conservatively:
-    // If the server wants to enable: enable if guest didn't disable
-    // If the server wants to disable: disable if user did not override
+    setIfNotOverriden(feature, action.enable);
+
     if (action.enable) {
-        setIfNotOverridenOrGuestDisabled(feature, action.enable);
-        D("server has tried to enable %s", action.name.c_str());
+        D("server has enabled %s", action.name.c_str());
     } else {
-        setIfNotOverriden(feature, action.enable);
-        D("server has tried to disable %s", action.name.c_str());
+        D("server has disabled %s", action.name.c_str());
     }
+
 }
 
 static const char kFeaturePatternsUrlPrefix[] =

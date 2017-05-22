@@ -71,13 +71,9 @@ public:
     bool isEnabled(Feature feature) const;
     bool isOverridden(Feature feature) const;
 
-    bool isGuestFeature(Feature feature) const;
-    bool isEnabledByGuest(Feature feature) const;
-
     void setEnabledOverride(Feature feature, bool isEnabled);
     void resetEnabledToDefault(Feature feature);
-    void setIfNotOverriden(Feature feature, bool isEnabled);
-    void setIfNotOverridenOrGuestDisabled(Feature feature, bool isEnabled);
+    void setIfNotOverriden(Feature feeature, bool isEnabled);
 
     static Feature fromString(base::StringView str);
     static base::StringView toString(Feature feature);
@@ -101,9 +97,7 @@ private:
         bool isOverridden = false;
     };
     FeatureOption mFeatures[Feature_n_items] = {};
-    FeatureOption mGuestTriedEnabledFeatures[Feature_n_items] = {};
     void initEnabledDefault(Feature feature, bool isEnabled);
-    void setGuestTriedEnable(Feature feature);
 
     void initHostFeatureAndParseDefault(
         android::base::IniFile& defaultIniHost,
