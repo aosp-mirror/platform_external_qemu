@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c782b471_fe3b1144",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-22T19:15:53Z",
+      "side": 1,
+      "message": "Let\u0027s not do this for now. I am planning to keep the texture data in CPU memory, and only load them onto GPU when something tries to have access to the texture. So I would need to split up a restore function and keep the buffer data until restore.",
+      "range": {
+        "startLine": 251,
+        "startChar": 85,
+        "endLine": 251,
+        "endChar": 91
+      },
+      "revId": "95e5ceb0062a5312988573d049db24d5de752174",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
