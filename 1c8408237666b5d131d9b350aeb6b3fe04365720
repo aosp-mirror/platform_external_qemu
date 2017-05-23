@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9c7f8bed_7c9ddec7",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-23T18:41:02Z",
+      "side": 1,
+      "message": "Tested on z840 workstation and Macbook pro. On z840 this patch can reduce GL load time by 15%~20%, but on Macbook pro it does not. Also, Macbookpro spends more time loading \"other\" GL stuffs, while on z840 the texture loading time is dominating.",
+      "parentUuid": "f61726a0_d178424c",
+      "range": {
+        "startLine": 285,
+        "startChar": 19,
+        "endLine": 285,
+        "endChar": 65
+      },
+      "revId": "1c8408237666b5d131d9b350aeb6b3fe04365720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a7bd92a_106c983a",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
         "patchSetId": 5
