@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c1220fdd_d4949ee9",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T16:12:57Z",
+      "side": 1,
+      "message": "I believe that most of the time is spent in this call, and delaying the glTex() doesn\u0027t save much time for us\nUnfortunately",
+      "range": {
+        "startLine": 285,
+        "startChar": 19,
+        "endLine": 285,
+        "endChar": 65
+      },
+      "revId": "1c8408237666b5d131d9b350aeb6b3fe04365720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a7bd92a_106c983a",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T16:12:57Z",
+      "side": 1,
+      "message": "this code is quite scary: if one doesn\u0027t assign the result to anything the function doesn\u0027t actually release the |m_saveableTexture|, so the function call becomes a noop.\nWhat about doing it like this:\n\nSaveableTexturePtr release() {\n    SaveableTexturePtr res \u003d std::move(m_saveableTexture);\n    return res;\n}\n\n(if it compiles)\nthis way it is released no matter how the caller uses the return value (like in std::unique_ptr\u003c\u003e)",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 1
+      },
+      "revId": "1c8408237666b5d131d9b350aeb6b3fe04365720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2245152c_392fa61d",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/LazySnapshotObj.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T16:12:57Z",
+      "side": 1,
+      "message": "please make it protected, or virtual if that doesn\u0027t work",
+      "range": {
+        "startLine": 28,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 33
+      },
+      "revId": "1c8408237666b5d131d9b350aeb6b3fe04365720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c571bfc9_5726f7b7",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/LazySnapshotObj.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T16:12:57Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 35,
+        "startChar": 22,
+        "endLine": 35,
+        "endChar": 23
+      },
+      "revId": "1c8408237666b5d131d9b350aeb6b3fe04365720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0cace9d4_1c1c82ef",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/LazySnapshotObj.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T16:12:57Z",
+      "side": 1,
+      "message": "this has to first get the mutex, otherwise it\u0027s technically an undefined behavior",
+      "range": {
+        "startLine": 36,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 10
+      },
+      "revId": "1c8408237666b5d131d9b350aeb6b3fe04365720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "339744d3_bb738158",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T16:12:57Z",
+      "side": 1,
+      "message": "override\nnit: virtual isn\u0027t required if you added \u0027override\u0027",
+      "range": {
+        "startLine": 65,
+        "startChar": 26,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "1c8408237666b5d131d9b350aeb6b3fe04365720",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
