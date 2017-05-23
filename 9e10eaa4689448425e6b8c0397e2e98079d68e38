@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ee0210b_ae1690dc",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 654,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T22:27:57Z",
+      "side": 1,
+      "message": "this definitely works, but pretty inefficient.\nwhat about using std::ifstream to open the file and std::getline() to read it line-by-line into std::string?\n\nparsing it can be done either with sscanf() or in any other way",
+      "range": {
+        "startLine": 650,
+        "startChar": 0,
+        "endLine": 654,
+        "endChar": 43
+      },
+      "revId": "9e10eaa4689448425e6b8c0397e2e98079d68e38",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

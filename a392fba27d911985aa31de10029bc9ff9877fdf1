@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e79ca53_2d28455b",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 648,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T22:27:57Z",
+      "side": 0,
+      "message": "you could use \"%255s[:\\n]\" format here to make sure we\u0027re reading the file line by line and not overflowing the buffer",
+      "range": {
+        "startLine": 648,
+        "startChar": 31,
+        "endLine": 648,
+        "endChar": 33
+      },
+      "revId": "a392fba27d911985aa31de10029bc9ff9877fdf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
