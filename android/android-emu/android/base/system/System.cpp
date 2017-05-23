@@ -643,9 +643,16 @@ public:
 #elif defined (__linux__)
         size_t size = 0;
         FILE *fp = fopen("/proc/self/status", "r");
-        char buf[256];
+        char *buf = NULL;
         if (fp != NULL) {
-            while (fscanf(fp, "%s:", buf) > 0)  {
+            int file_size = 0;
+            // note ftell(), stat() won't work for virtual proc file system
+            while (fgetc(fp) != EOF) {
+                file_size ++;
+            }
+            fseek(fp, 0, SEEK_SET);
+            buf = (char*)malloc(file_size);
+            while (buf != NULL && fscanf(fp, "%s:", buf) > 0)  {
                 if (strcmp(buf, "VmRSS:") == 0) {
                     fscanf(fp, "%lu", &size);
                     res.resident = size * 1024;
@@ -663,12 +670,21 @@ public:
                     res.virt_max = size * 1024;
                 }
             }
+            if (buf != NULL)
+                free(buf);
             fclose(fp);
         }
 
         fp = fopen("/proc/meminfo", "r");
         if (fp != NULL) {
-            while (fscanf(fp, "%s:", buf) > 0)  {
+            int file_size = 0;
+            // note ftell(), stat() won't work for virtual proc file system
+            while (fgetc(fp) != EOF) {
+                file_size ++;
+            }
+            fseek(fp, 0, SEEK_SET);
+            buf = (char*)malloc(file_size);
+            while (buf != NULL && fscanf(fp, "%s:", buf) > 0)  {
                 if (strcmp(buf, "MemTotal:") == 0) {
                     fscanf(fp, "%lu", &size);
                     res.total_phys_memory = size * 1024;
@@ -678,6 +694,8 @@ public:
                     res.total_page_file = size * 1024;
                 }
             }
+            if (buf != NULL)
+                free(buf);
             fclose(fp);
         }
 #elif defined(__APPLE__)
