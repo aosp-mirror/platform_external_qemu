@@ -22,6 +22,30 @@
       "revId": "a392fba27d911985aa31de10029bc9ff9877fdf1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ffc1e8b_0705d7ef",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 648,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-23T22:32:21Z",
+      "side": 0,
+      "message": "Oops, typo in the format string: \"%255s%[:\\n]\"\nAnd I believe you can use a simple \"%255s:\" here as it would stop on \\n by default",
+      "parentUuid": "8e79ca53_2d28455b",
+      "range": {
+        "startLine": 648,
+        "startChar": 31,
+        "endLine": 648,
+        "endChar": 33
+      },
+      "revId": "a392fba27d911985aa31de10029bc9ff9877fdf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
