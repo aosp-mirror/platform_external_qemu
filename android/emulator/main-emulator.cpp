@@ -439,8 +439,9 @@ int main(int argc, char** argv)
 
     // print a version string and build id for easier debugging
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-    D("Android emulator version %s\n", EMULATOR_VERSION_STRING
-      " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")");
+    D("Android emulator version %s (CL:%s)\n", EMULATOR_VERSION_STRING
+      " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
+      EMULATOR_CL_SHA1);
 #endif
     /* If there is an AVD name, we're going to extract its target architecture
      * by looking at its config.ini
