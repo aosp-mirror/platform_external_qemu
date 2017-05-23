@@ -117,6 +117,7 @@ SettingsPage::SettingsPage(QWidget* parent)
         mUi->set_glesBackendPrefComboBox->setCurrentIndex(
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO);
         break;
+#ifdef _WIN32
     case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
         mUi->set_glesBackendPrefComboBox->setCurrentIndex(
                 WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
@@ -125,6 +126,7 @@ SettingsPage::SettingsPage(QWidget* parent)
         mUi->set_glesBackendPrefComboBox->setCurrentIndex(
                 WINSYS_GLESBACKEND_PREFERENCE_ANGLE9);
         break;
+#endif
     case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
         mUi->set_glesBackendPrefComboBox->setCurrentIndex(
                 WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
@@ -354,8 +356,10 @@ static void set_glesApiLevel_to(WinsysPreferredGlesApiLevel v) {
 void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index) {
     switch (index) {
     case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
+#ifdef _WIN32
     case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
     case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
+#endif
     case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
     case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
         set_glesBackend_to((WinsysPreferredGlesBackend)index);
