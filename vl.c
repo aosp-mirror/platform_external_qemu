@@ -945,7 +945,8 @@ static int create_qcow2_images(void) {
             /* If the path is NULL or empty, just ignore it.*/
             continue;
         }
-        if (!strcmp(backing_image_path,
+        if (android_hw->disk_systemPartition_initPath &&
+            !strcmp(backing_image_path,
                     android_hw->disk_systemPartition_initPath)) {
             /* System image is a special case, the backing image is
              * in the SDK folder, but the QCoW2 image that the emulator
