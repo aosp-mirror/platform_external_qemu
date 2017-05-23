@@ -1125,6 +1125,12 @@ if [ "$ANDROID_SDK_TOOLS_BUILD_NUMBER" ] ; then
   echo "ANDROID_SDK_TOOLS_BUILD_NUMBER := $ANDROID_SDK_TOOLS_BUILD_NUMBER" >> $config_mk
 fi
 
+# Dump the ToT CL SHA1 number (located in .git/FETCH_HEAD)
+ANDROID_SDK_TOOLS_CL_SHA1=$( git log -n 1 --pretty=format:"%H" )
+if [ "$ANDROID_SDK_TOOLS_CL_SHA1" ] ; then
+  echo "ANDROID_SDK_TOOLS_CL_SHA1 := $ANDROID_SDK_TOOLS_CL_SHA1" >> $config_mk
+fi
+
 if [ "$config_mk" = "yes" ] ; then
     echo "" >> $config_mk
     echo "USE_MINGW := 1" >> $config_mk

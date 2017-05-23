@@ -1430,16 +1430,18 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     if (opts->version) {
-      printf("Android emulator version %s\n"
-             "Copyright (C) 2006-2015 The Android Open Source Project and many "
+      printf("Android emulator version %s (CL:%s)\n"
+             "Copyright (C) 2006-2017 The Android Open Source Project and many "
              "others.\n"
              "This program is a derivative of the QEMU CPU emulator "
              "(www.qemu.org).\n\n",
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-             EMULATOR_VERSION_STRING " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")");
+             EMULATOR_VERSION_STRING " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
 #else
-             EMULATOR_VERSION_STRING);
+             EMULATOR_VERSION_STRING,
 #endif
+             EMULATOR_CL_SHA1);
+
         printf("  This software is licensed under the terms of the GNU General Public\n"
                "  License version 2, as published by the Free Software Foundation, and\n"
                "  may be copied, distributed, and modified under those terms.\n\n"
