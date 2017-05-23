@@ -29,6 +29,13 @@
 #  define EMULATOR_BUILD_STRING "0"
 #endif
 
+// Latest CL in the emulator build
+#ifdef ANDROID_SDK_TOOLS_CL_SHA1
+#  define EMULATOR_CL_SHA1 STRINGIFY(ANDROID_SDK_TOOLS_CL_SHA1)
+#else
+#  define EMULATOR_CL_SHA1 "N/A"
+#endif
+
 // Full version, with build suffix
 #define EMULATOR_FULL_VERSION_STRING \
     EMULATOR_VERSION_STRING_SHORT "-" EMULATOR_BUILD_STRING
