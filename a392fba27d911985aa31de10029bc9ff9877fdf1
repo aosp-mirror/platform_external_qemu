@@ -46,6 +46,30 @@
       "revId": "a392fba27d911985aa31de10029bc9ff9877fdf1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "051b8d5e_241edc6c",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 648,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-05-23T22:39:31Z",
+      "side": 0,
+      "message": "If we don\u0027t this, won\u0027t crash, but then the code may not work due to partial line.",
+      "parentUuid": "8e79ca53_2d28455b",
+      "range": {
+        "startLine": 648,
+        "startChar": 31,
+        "endLine": 648,
+        "endChar": 33
+      },
+      "revId": "a392fba27d911985aa31de10029bc9ff9877fdf1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
