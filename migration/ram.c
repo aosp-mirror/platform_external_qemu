@@ -1495,7 +1495,11 @@ static void reset_ram_globals(void)
     ram_bulk_stage = true;
 }
 
+#ifdef CONFIG_MIGRATION_RAM_SINGLE_ITERATION
+#define MAX_WAIT 0  /* don't split migration to iterations to make it faster */
+#else
 #define MAX_WAIT 50 /* ms, half buffered_file limit */
+#endif
 
 void migration_bitmap_extend(ram_addr_t old, ram_addr_t new)
 {
@@ -2063,7 +2067,7 @@ static int ram_save_iterate(QEMUFile *f, void *opaque)
            qemu_get_clock_ns() is a bit expensive, so we only check each some
            iterations
         */
-        if ((i & 63) == 0) {
+        if (MAX_WAIT && (i & 63) == 0) {
             uint64_t t1 = (qemu_clock_get_ns(QEMU_CLOCK_REALTIME) - t0) / 1000000;
             if (t1 > MAX_WAIT) {
                 DPRINTF("big wait: %" PRIu64 " milliseconds, %d iterations\n",

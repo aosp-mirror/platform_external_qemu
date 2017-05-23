@@ -133,6 +133,10 @@ QEMU2_CFLAGS += \
         -Wno-maybe-uninitialized \
         ) \
 
+# Enable faster migration code when saving RAM to a snapshot
+QEMU2_CFLAGS += \
+    -DCONFIG_MIGRATION_RAM_SINGLE_ITERATION
+
 #include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-glue.mk
 
 #include $(LOCAL_PATH)/android-qemu2-glue/build/Makefile.qemu2-qt.mk
