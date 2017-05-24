@@ -22,6 +22,30 @@
       "revId": "2c166cab8270415a0e56fe62546ce7bfec97b02b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc085225_9d5af367",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-24T18:55:18Z",
+      "side": 1,
+      "message": "yes the gralloc code says GL_LUMINANCE with GL_UNSIGNED_SHORT. I still need to run CTS-dEQP to test for regression.",
+      "parentUuid": "6f6e0d62_f0a2f12f",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 30
+      },
+      "revId": "2c166cab8270415a0e56fe62546ce7bfec97b02b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
