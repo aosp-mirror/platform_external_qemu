@@ -55,4 +55,5 @@ private:
 
     android::emulation::AdbInterface* mAdb;
     std::unique_ptr<Ui::SettingsPage> mUi;
+    bool    mDisableANGLE = false;
 };
