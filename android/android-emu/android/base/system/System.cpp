@@ -71,6 +71,11 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
+#if defined (__linux__)
+#include <fstream>
+#include <string>
+#endif
+
 // This variable is a pointer to a zero-terminated array of all environment
 // variables in the current process.
 // Posix requires this to be declared as extern at the point of use
@@ -642,44 +647,45 @@ public:
         }
 #elif defined (__linux__)
         size_t size = 0;
-        FILE *fp = fopen("/proc/self/status", "r");
-        char buf[256];
-        if (fp != NULL) {
-            while (fscanf(fp, "%s:", buf) > 0)  {
-                if (strcmp(buf, "VmRSS:") == 0) {
-                    fscanf(fp, "%lu", &size);
-                    res.resident = size * 1024;
-                }
-                if (strcmp(buf, "VmHWM:") == 0) {
-                    fscanf(fp, "%lu", &size);
-                    res.resident_max = size * 1024;
-                }
-                if (strcmp(buf, "VmSize:") == 0) {
-                    fscanf(fp, "%lu", &size);
-                    res.virt = size * 1024;
-                }
-                if (strcmp(buf, "VmPeak:") == 0) {
-                    fscanf(fp, "%lu", &size);
-                    res.virt_max = size * 1024;
-                }
-            }
-            fclose(fp);
+        std::ifstream fin;
+
+        fin.open("/proc/self/status");
+        if (!fin.good()) {
+            return res;
         }
 
-        fp = fopen("/proc/meminfo", "r");
-        if (fp != NULL) {
-            while (fscanf(fp, "%s:", buf) > 0)  {
-                if (strcmp(buf, "MemTotal:") == 0) {
-                    fscanf(fp, "%lu", &size);
-                    res.total_phys_memory = size * 1024;
-                }
-                if (strcmp(buf, "SwapTotal:") == 0) {
-                    fscanf(fp, "%lu", &size);
-                    res.total_page_file = size * 1024;
-                }
+        std::string line;
+        while (std::getline(fin, line)) {
+            if (sscanf(line.c_str(), "VmRSS:%lu", &size) == 1) {
+                res.resident = size * 1024;
             }
-            fclose(fp);
+            else if (sscanf(line.c_str(), "VmHWM:%lu", &size) == 1) {
+                res.resident_max = size * 1024;
+            }
+            else if (sscanf(line.c_str(), "VmSize:%lu", &size) == 1) {
+                res.virt = size * 1024;
+            }
+            else if (sscanf(line.c_str(), "VmPeak:%lu", &size) == 1) {
+                res.virt_max = size * 1024;
+            }
         }
+        fin.close();
+
+        fin.open("/proc/meminfo");
+        if (!fin.good()) {
+            return res;
+        }
+
+        while (std::getline(fin, line)) {
+            if (sscanf(line.c_str(), "MemTotal:%lu", &size) == 1) {
+                res.total_phys_memory = size * 1024;
+            }
+            else if (sscanf(line.c_str(), "SwapTotal:%lu", &size) == 1) {
+                res.total_page_file = size * 1024;
+            }
+        }
+        fin.close();
+
 #elif defined(__APPLE__)
         mach_task_basic_info info = {};
         mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
