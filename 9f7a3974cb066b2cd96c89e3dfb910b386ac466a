@@ -1,0 +1,210 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c90354ea_51afe272",
+        "filename": "android/android-emu/android/base/LazySnapshotObj.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "I don\u0027t think it is generic enough to be a part of base. What about moving it to the emugl common? or creating android/snapshot directory and putting it there",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 16
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1418667_1bd151e6",
+        "filename": "android/android-emu/android/base/LazySnapshotObj.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "some one-two sentence comment would be great here",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69dde4e2_8768bca3",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "very nit: a helper function - it\u0027s the same as in postLoadRestore()",
+      "range": {
+        "startLine": 110,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 63
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6244ad0e_f01b7488",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "nit:?",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "86ce2918_f77c634a",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "nit:?",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94eb91b6_2b44323f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "nit: const ref?",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 18
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd0d9b90_99606725",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "nit: this wasn\u0027t needed, default ctor is called anyway",
+      "range": {
+        "startLine": 231,
+        "startChar": 6,
+        "endLine": 231,
+        "endChar": 23
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05e49c91_ad62f259",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "nit: I feel like these functions are pretty much the same now, with the only difference being about reading |m_depth|.\nRuntime argument \"bool readDepth \u003d false\" would be enough to make it a single function",
+      "range": {
+        "startLine": 278,
+        "startChar": 0,
+        "endLine": 285,
+        "endChar": 65
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a292ade_c0b48188",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "nit: std::move(), or it would copy the argument",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b29951c_ba6b61a8",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T18:08:59Z",
+      "side": 1,
+      "message": "nit: you don\u0027t have to make it protected as in base class, private is good too.\nActually, if you don\u0027t expect anyone to inherit from SaveableTexture then protected doesn\u0027t make sense here",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 10
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
