@@ -70,6 +70,30 @@
       "revId": "2c166cab8270415a0e56fe62546ce7bfec97b02b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98fe0fe3_f8c9fcd2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-05-24T19:23:45Z",
+      "side": 1,
+      "message": "No, not yet. Desktop GL is more tolerable.",
+      "parentUuid": "58cd5593_25f1229f",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 30
+      },
+      "revId": "2c166cab8270415a0e56fe62546ce7bfec97b02b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
