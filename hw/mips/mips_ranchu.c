@@ -35,11 +35,11 @@
 
 /* Store the environment arguments table in the second page from the top
  * of the bios memory. Two pages are required since the environment
- * arguments table is 4160 bytes in size.
+ * arguments table is 7232 bytes in size.
  */
 #define ENVP_ADDR         PHYS_TO_VIRT(RESET_ADDRESS + RANCHU_BIOS_SIZE - 2*TARGET_PAGE_SIZE)
 #define ENVP_NB_ENTRIES   16
-#define ENVP_ENTRY_SIZE   256
+#define ENVP_ENTRY_SIZE   448
 
 #define VIRTIO_TRANSPORTS 16
 #define MAX_GF_TTYS       3
@@ -108,9 +108,9 @@ static DevMapEntry devmap[] = {
         "goldfish_pipe", "android_pipe", "google,android-pipe\0generic,android-pipe", 2 },
     [RANCHU_GOLDFISH_AUDIO] =     { GOLDFISH_IO_SPACE + 0x0C000, 0x0100, 11,
         "goldfish_audio", "goldfish_audio", "google,goldfish-audio\0generic,goldfish-audio", 2 },
-    [RANCHU_GOLDFISH_SYNC] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 11,
+    [RANCHU_GOLDFISH_SYNC] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x2000, 12,
         "goldfish_sync", "goldfish_sync", "google,goldfish-sync\0generic,goldfish-sync", 2 },
-    [RANCHU_GOLDFISH_RESET] =     { GOLDFISH_IO_SPACE + 0x0D000, 0x0100, 12,
+    [RANCHU_GOLDFISH_RESET] =     { GOLDFISH_IO_SPACE + 0x0F000, 0x0100, -1,
         "goldfish_reset", "goldfish_reset", "google,goldfish-reset\0generic,goldfish-reset", 2 },
     [RANCHU_MMIO] =         { GOLDFISH_IO_SPACE + 0x10000, 0x0200, 16,
         "virtio-mmio", "virtio_mmio", "virtio,mmio", 1 },
@@ -336,10 +336,11 @@ static const MemoryRegionOps goldfish_reset_io_ops = {
 static void create_device(void* fdt, DevMapEntry* dev, qemu_irq* pic,
                           int num_devices, int is_virtio)
 {
-    int i, j, dt_compat_sz = 0;
+    int i, j;
 
     for (i = 0; i < num_devices; i++) {
         hwaddr base = dev->base + i * dev->size;
+        int dt_compat_sz = 0;
 
         char* nodename = g_strdup_printf("/%s@%" PRIx64, dev->dt_name, base);
         qemu_fdt_add_subnode(fdt, nodename);
@@ -451,8 +452,11 @@ static void mips_ranchu_init(MachineState *machine)
     vmstate_register_ram_global(ram_lo);
     memory_region_add_subregion(get_system_memory(), 0, ram_lo);
 
-    memory_region_init_io(iomem, NULL, &goldfish_reset_io_ops, NULL, "goldfish-reset", 0x0100);
-    memory_region_add_subregion(get_system_memory(), devmap[RANCHU_GOLDFISH_RESET].base, iomem);
+    memory_region_init_io(iomem, NULL, &goldfish_reset_io_ops, NULL,
+        devmap[RANCHU_GOLDFISH_RESET].qemu_name,
+        devmap[RANCHU_GOLDFISH_RESET].size);
+    memory_region_add_subregion(get_system_memory(),
+        devmap[RANCHU_GOLDFISH_RESET].base, iomem);
 
     memory_region_init_ram(bios, NULL, "ranchu.bios", RANCHU_BIOS_SIZE,
                            &error_abort);
@@ -532,7 +536,7 @@ static void mips_ranchu_init(MachineState *machine)
     create_device(fdt, &devmap[RANCHU_GOLDFISH_TTY], goldfish_pic, MAX_GF_TTYS, 1);
 
     /* Other Goldfish Platform devices */
-    for (i = RANCHU_GOLDFISH_AUDIO; i >= RANCHU_GOLDFISH_TIMER ; i--) {
+    for (i = RANCHU_GOLDFISH_SYNC; i >= RANCHU_GOLDFISH_TIMER ; i--) {
         create_device(fdt, &devmap[i], goldfish_pic, 1, 0);
     }
 
