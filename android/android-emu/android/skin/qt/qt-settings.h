@@ -14,6 +14,10 @@
 // restoring user settings associated with the Qt-based UI.
 #pragma once
 
+#include "android/version.h"
+
+#include <QString>
+
 namespace Ui {
 namespace Settings {
 
@@ -53,8 +57,8 @@ constexpr int CRASHREPORT_COMBOBOX_ALWAYS = 0;
 constexpr int CRASHREPORT_COMBOBOX_NEVER = 1;
 constexpr int CRASHREPORT_COMBOBOX_ASK = 2;
 
-constexpr char GLESBACKEND_PREFERENCE[] = "set/glesBackendPreference";
-constexpr char GLESAPILEVEL_PREFERENCE[] ="set/glesApiLevelPreference";
+constexpr char GLESBACKEND_PREFERENCE[] = "set/glesBackendPreference" EMULATOR_CL_SHA1;
+constexpr char GLESAPILEVEL_PREFERENCE[] ="set/glesApiLevelPreference" EMULATOR_CL_SHA1;
 
 constexpr char CLIPBOARD_SHARING[] = "set/clipboardSharing";
 
