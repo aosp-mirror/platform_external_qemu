@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d5275f5_59731455",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 649,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-05-24T19:48:45Z",
+      "side": 1,
+      "message": "this needs to be \u0027unsigned long\u0027 as size_t is a typedef while %lu is fixed.\nBut overall, the new code is so much safer already\nThank you!",
+      "range": {
+        "startLine": 649,
+        "startChar": 8,
+        "endLine": 649,
+        "endChar": 14
+      },
+      "revId": "9dc1d9cc193f4e2db24fe04e92c4dc7b76ce5afd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
