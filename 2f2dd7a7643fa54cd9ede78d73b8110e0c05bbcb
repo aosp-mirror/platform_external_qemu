@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e299af18_dd6e10de",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-24T21:21:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "df3538d2_5deebd92",
+      "range": {
+        "startLine": 126,
+        "startChar": 8,
+        "endLine": 126,
+        "endChar": 15
+      },
+      "revId": "2f2dd7a7643fa54cd9ede78d73b8110e0c05bbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "27f122a0_84dcc9fe",
         "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-05-24T21:06:27Z",
       "side": 1,
       "message": "why so complicated?\nfor (int i \u003d 0; i \u003c mUi-\u003eset_glesBackendPrefComboBox-\u003ecount();) {\n    if (\u003cshould remove\u003e) {\n        combobox-\u003eremoveItem(i);\n    } else {\n        ++i;\n    }\n}",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 153,
+        "endChar": 9
+      },
+      "revId": "2f2dd7a7643fa54cd9ede78d73b8110e0c05bbcb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bb77268_fe8969e8",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-24T21:21:50Z",
+      "side": 1,
+      "message": "Cool tip, thanks! Done",
+      "parentUuid": "27f122a0_84dcc9fe",
       "range": {
         "startLine": 139,
         "startChar": 0,
