@@ -46,6 +46,30 @@
       "revId": "2c166cab8270415a0e56fe62546ce7bfec97b02b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "58cd5593_25f1229f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-24T18:56:33Z",
+      "side": 1,
+      "message": "That\u0027s awesome. Are you getting any GL errors?",
+      "parentUuid": "dc085225_9d5af367",
+      "range": {
+        "startLine": 108,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 30
+      },
+      "revId": "2c166cab8270415a0e56fe62546ce7bfec97b02b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
