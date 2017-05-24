@@ -122,41 +122,66 @@ SettingsPage::SettingsPage(QWidget* parent)
             break;
     }
 
-    WinsysPreferredGlesBackend glesbackend_pref =
+    for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
+        fprintf(stderr, "%s: %d: item %s\n", __func__, i,
+                mUi->set_glesBackendPrefComboBox->itemText(i).toStdString().c_str());
+        mUi->set_glesBackendPrefComboBox->setItemData(i, QVariant(i));
+        fprintf(stderr, "%s: %d: item %s get item data: %d\n", __func__, i,
+                mUi->set_glesBackendPrefComboBox->itemText(i).toStdString().c_str(),
+                mUi->set_glesBackendPrefComboBox->itemData(i).toInt());
+    }
+
+#ifndef _WIN32
+    mDisableANGLE = true;
+#endif
+
+    if (mDisableANGLE) {
+        std::vector<int> removedANGLEOptions;
+        for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
+            switch ((WinsysPreferredGlesBackend)i) {
+                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
+                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
+                    removedANGLEOptions.push_back(i);
+                    break;
+                default:
+                    break;
+            }
+        }
+        for (auto it = removedANGLEOptions.rbegin();
+             it != removedANGLEOptions.rend(); ++it) {
+            mUi->set_glesBackendPrefComboBox->removeItem(*it);
+        }
+    }
+
+    WinsysPreferredGlesBackend settings_glesbackend_pref =
         static_cast<WinsysPreferredGlesBackend>(
             settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt());
 
-    switch (glesbackend_pref) {
-    case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
-        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO);
-        break;
-#ifdef _WIN32
-    case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
-        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
-                WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
-        break;
-    case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
-        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
-                WINSYS_GLESBACKEND_PREFERENCE_ANGLE9);
-        break;
-#endif
-    case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
-        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
-                WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
-        break;
-    case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
-        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
-                WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL);
-        break;
-    default:
-        fprintf(stderr,
-                "%s: warning: unknown GLES backend preference value 0x%x. "
-                "Setting to auto.\n",
-                __func__, (unsigned int)glesbackend_pref);
-        mUi->set_glesBackendPrefComboBox->setCurrentIndex(
-                WINSYS_GLESBACKEND_PREFERENCE_AUTO);
-        break;
+    for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
+        WinsysPreferredGlesBackend backendPreference =
+            (WinsysPreferredGlesBackend)
+            (mUi->set_glesBackendPrefComboBox->itemData(i).toInt());
+
+        if ((int)settings_glesbackend_pref == backendPreference) {
+            switch (settings_glesbackend_pref) {
+                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
+                case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
+                    if (mDisableANGLE) break;
+                case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
+                case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
+                case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
+                    mUi->set_glesBackendPrefComboBox->setCurrentIndex(i);
+                    break;
+                default:
+                    fprintf(stderr,
+                            "%s: warning: unknown GLES backend preference value 0x%x. "
+                            "Setting to auto.\n",
+                            __func__, (unsigned int)settings_glesbackend_pref);
+                    mUi->set_glesBackendPrefComboBox->setCurrentIndex(
+                            WINSYS_GLESBACKEND_PREFERENCE_AUTO);
+                    break;
+            }
+        }
     }
 
     WinsysPreferredGlesApiLevel glesapilevel_pref =
@@ -399,15 +424,17 @@ static void set_glesApiLevel_to(WinsysPreferredGlesApiLevel v) {
 }
 
 void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index) {
-    switch (index) {
-    case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
-#ifdef _WIN32
+    WinsysPreferredGlesBackend backendPreference =
+        (WinsysPreferredGlesBackend)
+        (mUi->set_glesBackendPrefComboBox->itemData(index).toInt());
+    switch (backendPreference) {
     case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
     case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
-#endif
+        if (mDisableANGLE) break;
+    case WINSYS_GLESBACKEND_PREFERENCE_AUTO:
     case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
     case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
-        set_glesBackend_to((WinsysPreferredGlesBackend)index);
+        set_glesBackend_to((WinsysPreferredGlesBackend)backendPreference);
         break;
     default:
         break;
