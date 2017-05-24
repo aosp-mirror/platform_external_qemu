@@ -611,6 +611,9 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
         if (puid) {
             m_procOwnedColorBuffers[puid].insert(ret);
         }
+    } else {
+        ret = 0;
+        DBG("Create color buffer failed.\n");
     }
     return ret;
 }

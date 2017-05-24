@@ -102,7 +102,15 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
             pixelType = GL_HALF_FLOAT;
             bytesPerPixel = 8;
             break;
+
+        case GL_LUMINANCE:
+            texInternalFormat = GL_LUMINANCE;
+            pixelType = GL_UNSIGNED_SHORT;
+            bytesPerPixel = 2;
+            break;
         default:
+            fprintf(stderr, "ColorBuffer::create invalid format 0x%x\n",
+                    p_internalFormat);
             return NULL;
     }
     const unsigned long bufsize = ((unsigned long)bytesPerPixel) * p_width
