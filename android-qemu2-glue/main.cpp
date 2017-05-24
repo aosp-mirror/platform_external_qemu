@@ -1008,6 +1008,12 @@ extern "C" int main(int argc, char **argv) {
         // in UI that the preferred renderer is "autoselected".
         WinsysPreferredGlesBackend uiPreferredGlesBackend =
             skin_winsys_get_preferred_gles_backend();
+#ifndef _WIN32
+        if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE ||
+            uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
+            uiPreferredGlesBackend = WINSYS_GLESBACKEND_PREFERENCE_AUTO;
+        }
+#endif
 
         // Feature flags-related last-microsecond renderer changes
         bool shouldDisableAsyncSwap = false;
