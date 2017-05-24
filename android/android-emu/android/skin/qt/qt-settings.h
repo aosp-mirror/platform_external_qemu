@@ -15,6 +15,7 @@
 #pragma once
 
 #include "android/skin/winsys.h"
+#include "android/version.h"
 
 #include <QString>
 
@@ -56,8 +57,8 @@ const int CRASHREPORT_COMBOBOX_ALWAYS = 0;
 const int CRASHREPORT_COMBOBOX_NEVER = 1;
 const int CRASHREPORT_COMBOBOX_ASK = 2;
 
-const QString GLESBACKEND_PREFERENCE("set/glesBackendPreference");
-const QString GLESAPILEVEL_PREFERENCE("set/glesApiLevelPreference");
+const QString GLESBACKEND_PREFERENCE("set/glesBackendPreference" EMULATOR_CL_SHA1);
+const QString GLESAPILEVEL_PREFERENCE("set/glesApiLevelPreference" EMULATOR_CL_SHA1);
 
 constexpr char CLIPBOARD_SHARING[] = "set/clipboardSharing";
 
