@@ -22,6 +22,30 @@
       "revId": "6eb4a7ed5e7d62f4ad4153a05633a93d2def0d96",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c7bcad8_66d3a31a",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-25T16:32:16Z",
+      "side": 1,
+      "message": "I was wondering about that and am not sure what to do.\n\n1. If we make it the version automatically, that means manual work to have another version file even if the change in the emulator didn\u0027t involve a change in the set of flags.\n\n2. On the other hand, if we only update this when there is a new feature flag, we can use an existing version of the server-side proto until there is another breaking change, and the version here just refers to the minimum emulator version necessary to parse a particular set of server flags.",
+      "parentUuid": "241ff47c_4c9a3038",
+      "range": {
+        "startLine": 52,
+        "startChar": 31,
+        "endLine": 52,
+        "endChar": 39
+      },
+      "revId": "6eb4a7ed5e7d62f4ad4153a05633a93d2def0d96",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
