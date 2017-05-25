@@ -22,7 +22,16 @@ enum Feature {
     HAXM = 9;
     AMDOpenGLDriver = 10;
     MesaDRI = 11;
-    HypervisorFramework = 12;
+    HVF = 12;
 
-    ProtoNumFeatures = 13;
+    Wifi = 13;
+
+    PlayStoreImage = 14;
+
+    LogcatPipe = 15;
+
+    HYPERV = 16;
+    KVM = 17;
+
+    ProtoNumFeatures = 18;
 }
