@@ -3233,6 +3233,7 @@ static bool android_reporting_setup(void)
         derror("Could not initialize OpenglES emulation, "
                "use '-gpu off' to disable it.");
         android_teardown_metrics();
+        crashhandler_die("OpenGLES emulation failed to initialize.");
         return false;
     }
 
