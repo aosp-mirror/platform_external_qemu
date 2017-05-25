@@ -45,6 +45,30 @@
       "revId": "817874355f5bfabaf37d87cb3db542d5882b5507",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5867db5a_58e504a4",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-25T00:04:13Z",
+      "side": 1,
+      "message": "hmm yeah that\u0027s a good point. Perhaps a less invasive way to fix the ANGLE on non-windows cases is to detect it in newer emulator versions and actively set it to that",
+      "parentUuid": "c43ab950_a7e45fe6",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 88
+      },
+      "revId": "817874355f5bfabaf37d87cb3db542d5882b5507",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
