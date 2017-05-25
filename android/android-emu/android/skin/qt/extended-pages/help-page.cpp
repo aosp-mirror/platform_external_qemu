@@ -24,9 +24,9 @@
 const char DOCS_URL[] =
     "http://developer.android.com/r/studio-ui/emulator.html";
 const char FILE_BUG_URL[] =
-    "https://b.corp.google.com/issues/new?component=192727&template=843117";
+    "https://issuetracker.google.com/issues/new?component=192727&template=843117";
 const char SEND_FEEDBACK_URL[] =
-    "https://code.google.com/p/android/issues/entry?template=Emulator%20Feature%20Request";
+    "https://issuetracker.google.com/issues/new?component=192727&template=872501";
 
 HelpPage::HelpPage(QWidget *parent) :
     QWidget(parent),
