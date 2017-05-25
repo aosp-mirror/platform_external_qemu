@@ -76,16 +76,15 @@ private:
 static LazyInstance<FeaturePatternQueryThread> sFeaturePatternQueryThread =
     LAZY_INSTANCE_INIT;
 
-static const char kCachedPatternsFilename[] = "emu-last-feature-flags.protobuf";
+static const char kCachedPatternsFilename[] =
+    "emu-last-feature-flags.protobuf";
 
 static bool tryParseFeaturePatternsProtobuf(
         const std::string& filename,
         emulator_features::EmulatorFeaturePatterns* out_patterns) {
-    std::ifstream in(filename);
-    google::protobuf::io::IstreamInputStream istream(&in);
+    std::ifstream in(filename, std::ios::binary);
 
-    if (!google::protobuf::TextFormat::Parse(
-                &istream, out_patterns)) {
+    if (!out_patterns->ParseFromIstream(&in)) {
         D("failed to parse protobuf file");
         return false;
     }
@@ -124,7 +123,7 @@ public:
         {
             std::ofstream outFile(
                     mFilename,
-                    std::ios_base::out | std::ios_base::trunc);
+                    std::ios_base::binary | std::ios_base::trunc);
 
             if (!outFile) {
                 D("not valid file: %s\n", mFilename.c_str());
@@ -132,8 +131,7 @@ public:
             }
 
             patterns.set_last_download_time(System::get()->getUnixTime());
-            google::protobuf::io::OstreamOutputStream ostream(&outFile);
-            google::protobuf::TextFormat::Print(patterns, &ostream);
+            patterns.SerializeToOstream(&outFile);
         }
 
         // Check if we wrote a parseable protobuf, if not, delete immediately.
@@ -292,8 +290,15 @@ std::vector<FeatureAction> matchFeaturePatterns(
 
         for (const auto action : pattern.featureaction()) {
 
-            if (!action.has_feature() || !action.has_enable()) continue;
-            if (!featureActionAppliesToEmulatorVersion(action)) continue;
+            if (!action.has_feature() || !action.has_enable()) {
+                D("Not enough info about this feature. Skip");
+                continue;
+            }
+            if (!featureActionAppliesToEmulatorVersion(action)) {
+                D("Feature %s doesn't apply to this emulator version.",
+                  emulator_features::Feature_Name(action.feature()).c_str());
+                continue;
+            }
 
             FeatureAction nextAction;
             nextAction.name = emulator_features::Feature_Name(action.feature());
@@ -309,7 +314,10 @@ static void doFeatureAction(const FeatureAction& action) {
 
     Feature feature = stringToFeature(action.name);
 
-    if (stringToFeature(action.name) == Feature::Feature_n_items) return;
+    if (stringToFeature(action.name) == Feature::Feature_n_items) {
+        D("Unknown feature action.");
+        return;
+    }
 
     // Conservatively:
     // If the server wants to enable: enable if guest didn't disable
@@ -323,7 +331,9 @@ static void doFeatureAction(const FeatureAction& action) {
     }
 }
 
-static const char kFeaturePatternsUrlPrefix[] =
+static const char kFeaturePatternsUrl[] =
+    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-flags.protobuf.bin";
+static const char kFeaturePatternsUrlText[] =
     "https://dl.google.com/dl/android/studio/metadata/emulator-feature-flags.protobuf";
 
 static size_t curlDownloadFeaturePatternsCallback(
@@ -337,20 +347,48 @@ static size_t curlDownloadFeaturePatternsCallback(
     return total;
 }
 
-std::string downloadFeaturePatterns() {
-    D("load: %s\n", kFeaturePatternsUrlPrefix);
+bool downloadFeaturePatternsText(emulator_features::EmulatorFeaturePatterns* patternsOut) {
+    D("load: %s\n", kFeaturePatternsUrlText);
 
     char* curlError = nullptr;
     std::string res;
     if (!curl_download(
-            kFeaturePatternsUrlPrefix, nullptr,
+            kFeaturePatternsUrlText, nullptr,
             &curlDownloadFeaturePatternsCallback,
             &res, &curlError)) {
-        return "Error: failed to download feature patterns from server.";
+        D("failed to download feature flags from server.\n");
+        return false;
     }
 
     D("got: %s", res.c_str());
-    return res;
+
+    if (!google::protobuf::TextFormat::ParseFromString(res, patternsOut)) {
+        D("failed to parse text feature flags\n");
+        return false;
+    }
+    return true;
+}
+
+bool downloadFeaturePatternsBinary(emulator_features::EmulatorFeaturePatterns* patternsOut) {
+    D("load: %s\n", kFeaturePatternsUrl);
+
+    char* curlError = nullptr;
+    std::string res;
+    if (!curl_download(
+            kFeaturePatternsUrl, nullptr,
+            &curlDownloadFeaturePatternsCallback,
+            &res, &curlError)) {
+        D("failed to download feature flags from server.\n");
+        return false;
+    }
+
+    D("got: %s", res.c_str());
+
+    if (!patternsOut->ParseFromString(res)) {
+        D("failed to parse binary feature flags\n");
+    }
+
+    return true;
 }
 
 static void outputCachedFeaturePatterns(
@@ -393,14 +431,15 @@ static void queryFeaturePatternFn() {
         D("Downloading new feature patterns.");
     }
 
-    std::string featurePattern =
-        downloadFeaturePatterns();
     emulator_features::EmulatorFeaturePatterns patterns;
-    if (!google::protobuf::TextFormat::ParseFromString(
-                featurePattern, &patterns)) {
-        D("Downloaded protobuf file corrupt.");
-        return;
+    if (!downloadFeaturePatternsBinary(&patterns)) {
+        D("Could not find binary protobuf, trying text.");
+        if (!downloadFeaturePatternsText(&patterns)) {
+            D("Downloaded protobuf file corrupt.");
+            return;
+        }
     }
+
     outputCachedFeaturePatterns(patterns);
 }
 
