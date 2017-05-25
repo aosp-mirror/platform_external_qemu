@@ -76,7 +76,8 @@ private:
 static LazyInstance<FeaturePatternQueryThread> sFeaturePatternQueryThread =
     LAZY_INSTANCE_INIT;
 
-static const char kCachedPatternsFilename[] = "emu-last-feature-flags.protobuf";
+static const char kCachedPatternsFilename[] =
+    "emu-last-feature-flags." EMULATOR_VERSION_STRING_SHORT ".protobuf.";
 
 static bool tryParseFeaturePatternsProtobuf(
         const std::string& filename,
@@ -323,8 +324,8 @@ static void doFeatureAction(const FeatureAction& action) {
     }
 }
 
-static const char kFeaturePatternsUrlPrefix[] =
-    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-flags.protobuf";
+static const char kFeaturePatternsUrl[] =
+    "https://dl.google.com/dl/android/studio/metadata/emulator-feature-flags." EMULATOR_VERSION_STRING_SHORT ".protobuf.";
 
 static size_t curlDownloadFeaturePatternsCallback(
         char* contents, size_t size, size_t nmemb, void* userp) {
@@ -338,12 +339,12 @@ static size_t curlDownloadFeaturePatternsCallback(
 }
 
 std::string downloadFeaturePatterns() {
-    D("load: %s\n", kFeaturePatternsUrlPrefix);
+    D("load: %s\n", kFeaturePatternsUrl);
 
     char* curlError = nullptr;
     std::string res;
     if (!curl_download(
-            kFeaturePatternsUrlPrefix, nullptr,
+            kFeaturePatternsUrl, nullptr,
             &curlDownloadFeaturePatternsCallback,
             &res, &curlError)) {
         return "Error: failed to download feature patterns from server.";
