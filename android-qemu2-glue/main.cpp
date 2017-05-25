@@ -1012,6 +1012,7 @@ extern "C" int main(int argc, char **argv) {
         if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE ||
             uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
             uiPreferredGlesBackend = WINSYS_GLESBACKEND_PREFERENCE_AUTO;
+            skin_winsys_set_preferred_gles_backend(uiPreferredGlesBackend);
         }
 #endif
 
