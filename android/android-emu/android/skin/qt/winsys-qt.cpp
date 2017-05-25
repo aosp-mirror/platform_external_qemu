@@ -265,6 +265,13 @@ extern WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend()
     return (WinsysPreferredGlesBackend)settings.value(Ui::Settings::GLESBACKEND_PREFERENCE, 0).toInt();
 }
 
+void skin_winsys_set_preferred_gles_backend(WinsysPreferredGlesBackend backend)
+{
+    D("skin_winsys_set_preferred_gles_backend");
+    QSettings settings;
+    settings.setValue(Ui::Settings::GLESBACKEND_PREFERENCE, backend);
+}
+
 extern WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel()
 {
     D("skin_winsys_get_preferred_gles_apilevel");
