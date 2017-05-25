@@ -71,6 +71,8 @@ enum WinsysPreferredGlesApiLevel {
 enum WinsysPreferredGlesBackend skin_winsys_override_glesbackend_if_auto(enum WinsysPreferredGlesBackend);
 // Returns current preferred gles backend specified through the emulator UI.
 enum WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend();
+// Sets current preferred gles backend.
+void skin_winsys_set_preferred_gles_backend(enum WinsysPreferredGlesBackend);
 // Returns current preferred gles api level specified through the emulator UI.
 enum WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel();
 

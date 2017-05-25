@@ -89,5 +89,6 @@ private:
     std::unique_ptr<Ui::SettingsPage> mUi;
     const   QAndroidHttpProxyAgent* mHttpProxyAgent;
     bool    mProxyInitComplete;
+    bool    mDisableANGLE = false;
     QString mStudioProxyString;
 };
