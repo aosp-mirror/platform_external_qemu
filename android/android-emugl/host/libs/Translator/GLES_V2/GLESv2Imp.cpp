@@ -583,6 +583,8 @@ GL_APICALL void  GL_APIENTRY glColorMask(GLboolean red, GLboolean green, GLboole
 
 GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
     GET_CTX();
+    fprintf(stderr, "%s: call\n", __func__);
+    ctx->getGlobalLock();
     if(ctx->shareGroup().get()) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -617,6 +619,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             }
         }
     }
+    ctx->releaseGlobalLock();
 }
 
 GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
@@ -785,6 +788,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
 
 GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
     GET_CTX_V2_RET(0);
+    ctx->getGlobalLock();
     // Lazy init so we can catch the caps.
     if (!shaderParserInitialized) {
         shaderParserInitialized = true;
@@ -848,8 +852,10 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
         ShaderParser* sp = new ShaderParser(type);
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localShaderName, ObjectDataPtr(sp));
+        ctx->releaseGlobalLock();
         return localShaderName;
     }
+    ctx->releaseGlobalLock();
     return 0;
 }
 
@@ -996,6 +1002,7 @@ GL_APICALL void  GL_APIENTRY glDeleteProgram(GLuint program){
 
 GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
     GET_CTX();
+    ctx->getGlobalLock();
     if(shader && ctx->shareGroup().get()) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -1012,6 +1019,7 @@ GL_APICALL void  GL_APIENTRY glDeleteShader(GLuint shader){
             ctx->shareGroup()->deleteName(NamedObjectType::SHADER_OR_PROGRAM, shader);
         }
     }
+    ctx->releaseGlobalLock();
 }
 
 GL_APICALL void  GL_APIENTRY glDepthFunc(GLenum func){
@@ -2065,6 +2073,7 @@ GL_APICALL void  GL_APIENTRY glGetProgramInfoLog(GLuint program, GLsizei bufsize
 
 GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* params){
     GET_CTX();
+    ctx->getGlobalLock();
     if(ctx->shareGroup().get()) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -2097,11 +2106,13 @@ GL_APICALL void  GL_APIENTRY glGetShaderiv(GLuint shader, GLenum pname, GLint* p
             ctx->dispatcher().glGetShaderiv(globalShaderName,pname,params);
         }
     }
+    ctx->releaseGlobalLock();
 }
 
 
 GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* infolog){
     GET_CTX();
+    ctx->getGlobalLock();
     if(ctx->shareGroup().get()) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -2116,6 +2127,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, 
             if (length) {
                 *length = 0;
             }
+    ctx->releaseGlobalLock();
             return;
         }
 
@@ -2132,10 +2144,12 @@ GL_APICALL void  GL_APIENTRY glGetShaderInfoLog(GLuint shader, GLsizei bufsize, 
             *length = returnLength;
         }
     }
+    ctx->releaseGlobalLock();
 }
 
 GL_APICALL void  GL_APIENTRY glGetShaderPrecisionFormat(GLenum shadertype, GLenum precisiontype, GLint* range, GLint* precision){
     GET_CTX_V2();
+    ctx->getGlobalLock();
     SET_ERROR_IF(!(GLESv2Validate::shaderType(ctx, shadertype) &&
                    GLESv2Validate::precisionType(precisiontype)),GL_INVALID_ENUM);
 
@@ -2162,10 +2176,13 @@ GL_APICALL void  GL_APIENTRY glGetShaderPrecisionFormat(GLenum shadertype, GLenu
         }
         break;
     }
+    ctx->releaseGlobalLock();
 }
 
 GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, GLsizei* length, GLchar* source){
     GET_CTX();
+    fprintf(stderr, "%s: call\n", __func__);
+    ctx->getGlobalLock();
     if(ctx->shareGroup().get()) {
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -2188,6 +2205,7 @@ GL_APICALL void  GL_APIENTRY glGetShaderSource(GLuint shader, GLsizei bufsize, G
        if (length)
           *length = returnLength;
     }
+    ctx->releaseGlobalLock();
 }
 
 
@@ -2726,6 +2744,8 @@ static int sDetectShaderESSLVersion(GLESv2Context* ctx, const GLchar* const* str
 GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length){
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE);
+    fprintf(stderr, "%s: call\n", __func__);
+    ctx->getGlobalLock();
     if(ctx->shareGroup().get()){
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -2741,6 +2761,7 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
     }
+    ctx->releaseGlobalLock();
 }
 
 GL_APICALL void  GL_APIENTRY glStencilFunc(GLenum func, GLint ref, GLuint mask){
