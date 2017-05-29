@@ -7,6 +7,9 @@ commonSources := \
         glUtils.cpp \
         ChecksumCalculator.cpp \
         ChecksumCalculatorThreadInfo.cpp \
+        InplaceStream.cpp \
+        vkUtils.cpp \
+        vkUtils_custom.cpp \
 
 host_commonSources := $(commonSources)
 

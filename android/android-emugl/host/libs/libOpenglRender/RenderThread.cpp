@@ -28,6 +28,7 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "../../../shared/OpenglCodecCommon/ChecksumCalculatorThreadInfo.h"
+#include "Vk/VkImp.h"
 
 #include "android/base/system/System.h"
 #include "android/base/files/StreamSerializing.h"
@@ -204,6 +205,7 @@ intptr_t RenderThread::main() {
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
     initRenderControlContext(&tInfo.m_rcDec);
+    initVulkanHostFuncs(&tInfo.m_vkDec);
 
     if (!mChannel) {
         DBG("Exited a loader RenderThread @%p\n", this);
@@ -371,6 +373,17 @@ intptr_t RenderThread::main() {
             // renderControl decoder
             //
             last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
+                                        &stream, &checksumCalc);
+            if (last > 0) {
+                readBuf.consume(last);
+                progress = true;
+            }
+
+            //
+            // try to process some of the command buffer using the
+            // renderControl decoder
+            //
+            last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
                                         &stream, &checksumCalc);
             if (last > 0) {
                 readBuf.consume(last);
