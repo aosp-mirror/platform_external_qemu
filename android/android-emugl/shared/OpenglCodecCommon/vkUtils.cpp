@@ -438,12 +438,12 @@ uint32_t vkUtilsEncodingSize_VkDeviceCreateInfo(const VkDeviceCreateInfo* data) 
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkDeviceCreateFlags flags
     res += 1 * 4; // u32 queueCreateInfoCount
-    if (data->pQueueCreateInfos) res += data->queueCreateInfoCount * vkUtilsEncodingSize_VkDeviceQueueCreateInfo(data->pQueueCreateInfos); // VkDeviceQueueCreateInfo pQueueCreateInfos
+    if (data->pQueueCreateInfos) { res += data->queueCreateInfoCount * vkUtilsEncodingSize_VkDeviceQueueCreateInfo(data->pQueueCreateInfos); } // VkDeviceQueueCreateInfo pQueueCreateInfos
     res += 1 * 4; // u32 enabledLayerCount
     res += data->enabledLayerCount * 1; // char ppEnabledLayerNames
     res += 1 * 4; // u32 enabledExtensionCount
     res += data->enabledExtensionCount * 1; // char ppEnabledExtensionNames
-    if (data->pEnabledFeatures) res += 1 * vkUtilsEncodingSize_VkPhysicalDeviceFeatures(data->pEnabledFeatures); // VkPhysicalDeviceFeatures pEnabledFeatures
+    if (data->pEnabledFeatures) { res += 1 * vkUtilsEncodingSize_VkPhysicalDeviceFeatures(data->pEnabledFeatures); } // VkPhysicalDeviceFeatures pEnabledFeatures
     return res;
 }
 
@@ -496,7 +496,7 @@ uint32_t vkUtilsEncodingSize_VkInstanceCreateInfo(const VkInstanceCreateInfo* da
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkInstanceCreateFlags flags
-    if (data->pApplicationInfo) res += 1 * vkUtilsEncodingSize_VkApplicationInfo(data->pApplicationInfo); // VkApplicationInfo pApplicationInfo
+    if (data->pApplicationInfo) { res += 1 * vkUtilsEncodingSize_VkApplicationInfo(data->pApplicationInfo); } // VkApplicationInfo pApplicationInfo
     res += 1 * 4; // u32 enabledLayerCount
     res += strings2d_len(data->enabledLayerCount, data->ppEnabledLayerNames) * 1; // char ppEnabledLayerNames
     res += 1 * 4; // u32 enabledExtensionCount
@@ -567,9 +567,9 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceMemoryProperties(const VkPhysicalDe
     uint32_t res = 0;
     if (!data) return res;
     res += 1 * 4; // u32 memoryTypeCount
-    if (data->memoryTypes) res += VK_MAX_MEMORY_TYPES * vkUtilsEncodingSize_VkMemoryType(data->memoryTypes); // VkMemoryType memoryTypes
+    res += VK_MAX_MEMORY_TYPES * vkUtilsEncodingSize_VkMemoryType(data->memoryTypes); // VkMemoryType memoryTypes
     res += 1 * 4; // u32 memoryHeapCount
-    if (data->memoryHeaps) res += VK_MAX_MEMORY_HEAPS * vkUtilsEncodingSize_VkMemoryHeap(data->memoryHeaps); // VkMemoryHeap memoryHeaps
+    res += VK_MAX_MEMORY_HEAPS * vkUtilsEncodingSize_VkMemoryHeap(data->memoryHeaps); // VkMemoryHeap memoryHeaps
     return res;
 }
 
@@ -577,24 +577,22 @@ void vkUtilsPack_VkPhysicalDeviceMemoryProperties(android::base::InplaceStream* 
     if (!data) return;
     stream->write(&data->memoryTypeCount, 1 * 4); // u32 memoryTypeCount
     {
-    if (data->memoryTypes) { for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; i++) { vkUtilsPack_VkMemoryType(stream, data->memoryTypes + i); } } } // VkMemoryType memoryTypes
+    { for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; i++) { vkUtilsPack_VkMemoryType(stream, data->memoryTypes + i); } } } // VkMemoryType memoryTypes
     stream->write(&data->memoryHeapCount, 1 * 4); // u32 memoryHeapCount
     {
-    if (data->memoryHeaps) { for (uint32_t i = 0; i < VK_MAX_MEMORY_HEAPS; i++) { vkUtilsPack_VkMemoryHeap(stream, data->memoryHeaps + i); } } } // VkMemoryHeap memoryHeaps
+    { for (uint32_t i = 0; i < VK_MAX_MEMORY_HEAPS; i++) { vkUtilsPack_VkMemoryHeap(stream, data->memoryHeaps + i); } } } // VkMemoryHeap memoryHeaps
 }
 
 VkPhysicalDeviceMemoryProperties* vkUtilsUnpack_VkPhysicalDeviceMemoryProperties(android::base::InplaceStream* stream) {
     VkPhysicalDeviceMemoryProperties* data = new VkPhysicalDeviceMemoryProperties;
     stream->read(&data->memoryTypeCount, 1 * 4); // u32 memoryTypeCount
     { // VkMemoryType memoryTypes
-        uint64_t ptrval = 1;
-        if (ptrval) { for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; i++) {
+        { for (uint32_t i = 0; i < VK_MAX_MEMORY_TYPES; i++) {
         VkMemoryType* tmpUnpacked = vkUtilsUnpack_VkMemoryType(stream); data->memoryTypes[i] = *tmpUnpacked; } }
     }
     stream->read(&data->memoryHeapCount, 1 * 4); // u32 memoryHeapCount
     { // VkMemoryHeap memoryHeaps
-        uint64_t ptrval = 1;
-        if (ptrval) { for (uint32_t i = 0; i < VK_MAX_MEMORY_HEAPS; i++) {
+        { for (uint32_t i = 0; i < VK_MAX_MEMORY_HEAPS; i++) {
         VkMemoryHeap* tmpUnpacked = vkUtilsUnpack_VkMemoryHeap(stream); data->memoryHeaps[i] = *tmpUnpacked; } }
     }
     return data;
@@ -889,8 +887,8 @@ uint32_t vkUtilsEncodingSize_VkWriteDescriptorSet(const VkWriteDescriptorSet* da
     res += 1 * 4; // u32 dstArrayElement
     res += 1 * 4; // u32 descriptorCount
     res += 1 * 4; // VkDescriptorType descriptorType
-    if (data->pImageInfo) res += customCount_VkWriteDescriptorSet_pImageInfo(data) * vkUtilsEncodingSize_VkDescriptorImageInfo(data->pImageInfo); // VkDescriptorImageInfo pImageInfo
-    if (data->pBufferInfo) res += customCount_VkWriteDescriptorSet_pBufferInfo(data) * vkUtilsEncodingSize_VkDescriptorBufferInfo(data->pBufferInfo); // VkDescriptorBufferInfo pBufferInfo
+    if (data->pImageInfo) { res += customCount_VkWriteDescriptorSet_pImageInfo(data) * vkUtilsEncodingSize_VkDescriptorImageInfo(data->pImageInfo); } // VkDescriptorImageInfo pImageInfo
+    if (data->pBufferInfo) { res += customCount_VkWriteDescriptorSet_pBufferInfo(data) * vkUtilsEncodingSize_VkDescriptorBufferInfo(data->pBufferInfo); } // VkDescriptorBufferInfo pBufferInfo
     res += customCount_VkWriteDescriptorSet_pTexelBufferView(data) * 8; // VkBufferView pTexelBufferView
     return res;
 }
@@ -1444,7 +1442,7 @@ uint32_t vkUtilsEncodingSize_VkSparseBufferMemoryBindInfo(const VkSparseBufferMe
     if (!data) return res;
     res += 1 * 8; // VkBuffer buffer
     res += 1 * 4; // u32 bindCount
-    if (data->pBinds) res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); // VkSparseMemoryBind pBinds
+    if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); } // VkSparseMemoryBind pBinds
     return res;
 }
 
@@ -1475,7 +1473,7 @@ uint32_t vkUtilsEncodingSize_VkSparseImageOpaqueMemoryBindInfo(const VkSparseIma
     if (!data) return res;
     res += 1 * 8; // VkImage image
     res += 1 * 4; // u32 bindCount
-    if (data->pBinds) res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); // VkSparseMemoryBind pBinds
+    if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); } // VkSparseMemoryBind pBinds
     return res;
 }
 
@@ -1506,7 +1504,7 @@ uint32_t vkUtilsEncodingSize_VkSparseImageMemoryBindInfo(const VkSparseImageMemo
     if (!data) return res;
     res += 1 * 8; // VkImage image
     res += 1 * 4; // u32 bindCount
-    if (data->pBinds) res += data->bindCount * vkUtilsEncodingSize_VkSparseImageMemoryBind(data->pBinds); // VkSparseImageMemoryBind pBinds
+    if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseImageMemoryBind(data->pBinds); } // VkSparseImageMemoryBind pBinds
     return res;
 }
 
@@ -1540,11 +1538,11 @@ uint32_t vkUtilsEncodingSize_VkBindSparseInfo(const VkBindSparseInfo* data) {
     res += 1 * 4; // u32 waitSemaphoreCount
     res += data->waitSemaphoreCount * 8; // VkSemaphore pWaitSemaphores
     res += 1 * 4; // u32 bufferBindCount
-    if (data->pBufferBinds) res += data->bufferBindCount * vkUtilsEncodingSize_VkSparseBufferMemoryBindInfo(data->pBufferBinds); // VkSparseBufferMemoryBindInfo pBufferBinds
+    if (data->pBufferBinds) { res += data->bufferBindCount * vkUtilsEncodingSize_VkSparseBufferMemoryBindInfo(data->pBufferBinds); } // VkSparseBufferMemoryBindInfo pBufferBinds
     res += 1 * 4; // u32 imageOpaqueBindCount
-    if (data->pImageOpaqueBinds) res += data->imageOpaqueBindCount * vkUtilsEncodingSize_VkSparseImageOpaqueMemoryBindInfo(data->pImageOpaqueBinds); // VkSparseImageOpaqueMemoryBindInfo pImageOpaqueBinds
+    if (data->pImageOpaqueBinds) { res += data->imageOpaqueBindCount * vkUtilsEncodingSize_VkSparseImageOpaqueMemoryBindInfo(data->pImageOpaqueBinds); } // VkSparseImageOpaqueMemoryBindInfo pImageOpaqueBinds
     res += 1 * 4; // u32 imageBindCount
-    if (data->pImageBinds) res += data->imageBindCount * vkUtilsEncodingSize_VkSparseImageMemoryBindInfo(data->pImageBinds); // VkSparseImageMemoryBindInfo pImageBinds
+    if (data->pImageBinds) { res += data->imageBindCount * vkUtilsEncodingSize_VkSparseImageMemoryBindInfo(data->pImageBinds); } // VkSparseImageMemoryBindInfo pImageBinds
     res += 1 * 4; // u32 signalSemaphoreCount
     res += data->signalSemaphoreCount * 8; // VkSemaphore pSignalSemaphores
     return res;
@@ -1665,9 +1663,9 @@ uint32_t vkUtilsEncodingSize_VkImageBlit(const VkImageBlit* data) {
     uint32_t res = 0;
     if (!data) return res;
     res += 1 * vkUtilsEncodingSize_VkImageSubresourceLayers(&data->srcSubresource); // VkImageSubresourceLayers srcSubresource
-    if (data->srcOffsets) res += 2 * vkUtilsEncodingSize_VkOffset3D(data->srcOffsets); // VkOffset3D srcOffsets
+    res += 2 * vkUtilsEncodingSize_VkOffset3D(data->srcOffsets); // VkOffset3D srcOffsets
     res += 1 * vkUtilsEncodingSize_VkImageSubresourceLayers(&data->dstSubresource); // VkImageSubresourceLayers dstSubresource
-    if (data->dstOffsets) res += 2 * vkUtilsEncodingSize_VkOffset3D(data->dstOffsets); // VkOffset3D dstOffsets
+    res += 2 * vkUtilsEncodingSize_VkOffset3D(data->dstOffsets); // VkOffset3D dstOffsets
     return res;
 }
 
@@ -1675,24 +1673,22 @@ void vkUtilsPack_VkImageBlit(android::base::InplaceStream* stream, const VkImage
     if (!data) return;
     vkUtilsPack_VkImageSubresourceLayers(stream, &data->srcSubresource); // VkImageSubresourceLayers srcSubresource
     {
-    if (data->srcOffsets) { for (uint32_t i = 0; i < 2; i++) { vkUtilsPack_VkOffset3D(stream, data->srcOffsets + i); } } } // VkOffset3D srcOffsets
+    { for (uint32_t i = 0; i < 2; i++) { vkUtilsPack_VkOffset3D(stream, data->srcOffsets + i); } } } // VkOffset3D srcOffsets
     vkUtilsPack_VkImageSubresourceLayers(stream, &data->dstSubresource); // VkImageSubresourceLayers dstSubresource
     {
-    if (data->dstOffsets) { for (uint32_t i = 0; i < 2; i++) { vkUtilsPack_VkOffset3D(stream, data->dstOffsets + i); } } } // VkOffset3D dstOffsets
+    { for (uint32_t i = 0; i < 2; i++) { vkUtilsPack_VkOffset3D(stream, data->dstOffsets + i); } } } // VkOffset3D dstOffsets
 }
 
 VkImageBlit* vkUtilsUnpack_VkImageBlit(android::base::InplaceStream* stream) {
     VkImageBlit* data = new VkImageBlit;
     { VkImageSubresourceLayers* tmpUnpacked = vkUtilsUnpack_VkImageSubresourceLayers(stream); memcpy(&data->srcSubresource, tmpUnpacked, sizeof(VkImageSubresourceLayers)); delete tmpUnpacked; } // VkImageSubresourceLayers srcSubresource
     { // VkOffset3D srcOffsets
-        uint64_t ptrval = 1;
-        if (ptrval) { for (uint32_t i = 0; i < 2; i++) {
+        { for (uint32_t i = 0; i < 2; i++) {
         VkOffset3D* tmpUnpacked = vkUtilsUnpack_VkOffset3D(stream); data->srcOffsets[i] = *tmpUnpacked; } }
     }
     { VkImageSubresourceLayers* tmpUnpacked = vkUtilsUnpack_VkImageSubresourceLayers(stream); memcpy(&data->dstSubresource, tmpUnpacked, sizeof(VkImageSubresourceLayers)); delete tmpUnpacked; } // VkImageSubresourceLayers dstSubresource
     { // VkOffset3D dstOffsets
-        uint64_t ptrval = 1;
-        if (ptrval) { for (uint32_t i = 0; i < 2; i++) {
+        { for (uint32_t i = 0; i < 2; i++) {
         VkOffset3D* tmpUnpacked = vkUtilsUnpack_VkOffset3D(stream); data->dstOffsets[i] = *tmpUnpacked; } }
     }
     return data;
@@ -1828,7 +1824,7 @@ uint32_t vkUtilsEncodingSize_VkDescriptorSetLayoutCreateInfo(const VkDescriptorS
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkDescriptorSetLayoutCreateFlags flags
     res += 1 * 4; // u32 bindingCount
-    if (data->pBindings) res += data->bindingCount * vkUtilsEncodingSize_VkDescriptorSetLayoutBinding(data->pBindings); // VkDescriptorSetLayoutBinding pBindings
+    if (data->pBindings) { res += data->bindingCount * vkUtilsEncodingSize_VkDescriptorSetLayoutBinding(data->pBindings); } // VkDescriptorSetLayoutBinding pBindings
     return res;
 }
 
@@ -1887,7 +1883,7 @@ uint32_t vkUtilsEncodingSize_VkDescriptorPoolCreateInfo(const VkDescriptorPoolCr
     res += 1 * 4; // VkDescriptorPoolCreateFlags flags
     res += 1 * 4; // u32 maxSets
     res += 1 * 4; // u32 poolSizeCount
-    if (data->pPoolSizes) res += data->poolSizeCount * vkUtilsEncodingSize_VkDescriptorPoolSize(data->pPoolSizes); // VkDescriptorPoolSize pPoolSizes
+    if (data->pPoolSizes) { res += data->poolSizeCount * vkUtilsEncodingSize_VkDescriptorPoolSize(data->pPoolSizes); } // VkDescriptorPoolSize pPoolSizes
     return res;
 }
 
@@ -1977,7 +1973,7 @@ uint32_t vkUtilsEncodingSize_VkSpecializationInfo(const VkSpecializationInfo* da
     uint32_t res = 0;
     if (!data) return res;
     res += 1 * 4; // u32 mapEntryCount
-    if (data->pMapEntries) res += data->mapEntryCount * vkUtilsEncodingSize_VkSpecializationMapEntry(data->pMapEntries); // VkSpecializationMapEntry pMapEntries
+    if (data->pMapEntries) { res += data->mapEntryCount * vkUtilsEncodingSize_VkSpecializationMapEntry(data->pMapEntries); } // VkSpecializationMapEntry pMapEntries
     res += 1 * 8; // size_t dataSize
     res += data->dataSize * 8; // void pData
     return res;
@@ -2016,7 +2012,7 @@ uint32_t vkUtilsEncodingSize_VkPipelineShaderStageCreateInfo(const VkPipelineSha
     res += 1 * 4; // VkShaderStageFlagBits stage
     res += 1 * 8; // VkShaderModule module
     res += string1d_len(data->pName) * 1; // char pName
-    if (data->pSpecializationInfo) res += 1 * vkUtilsEncodingSize_VkSpecializationInfo(data->pSpecializationInfo); // VkSpecializationInfo pSpecializationInfo
+    if (data->pSpecializationInfo) { res += 1 * vkUtilsEncodingSize_VkSpecializationInfo(data->pSpecializationInfo); } // VkSpecializationInfo pSpecializationInfo
     return res;
 }
 
@@ -2144,9 +2140,9 @@ uint32_t vkUtilsEncodingSize_VkPipelineVertexInputStateCreateInfo(const VkPipeli
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkPipelineVertexInputStateCreateFlags flags
     res += 1 * 4; // u32 vertexBindingDescriptionCount
-    if (data->pVertexBindingDescriptions) res += data->vertexBindingDescriptionCount * vkUtilsEncodingSize_VkVertexInputBindingDescription(data->pVertexBindingDescriptions); // VkVertexInputBindingDescription pVertexBindingDescriptions
+    if (data->pVertexBindingDescriptions) { res += data->vertexBindingDescriptionCount * vkUtilsEncodingSize_VkVertexInputBindingDescription(data->pVertexBindingDescriptions); } // VkVertexInputBindingDescription pVertexBindingDescriptions
     res += 1 * 4; // u32 vertexAttributeDescriptionCount
-    if (data->pVertexAttributeDescriptions) res += data->vertexAttributeDescriptionCount * vkUtilsEncodingSize_VkVertexInputAttributeDescription(data->pVertexAttributeDescriptions); // VkVertexInputAttributeDescription pVertexAttributeDescriptions
+    if (data->pVertexAttributeDescriptions) { res += data->vertexAttributeDescriptionCount * vkUtilsEncodingSize_VkVertexInputAttributeDescription(data->pVertexAttributeDescriptions); } // VkVertexInputAttributeDescription pVertexAttributeDescriptions
     return res;
 }
 
@@ -2251,9 +2247,9 @@ uint32_t vkUtilsEncodingSize_VkPipelineViewportStateCreateInfo(const VkPipelineV
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkPipelineViewportStateCreateFlags flags
     res += 1 * 4; // u32 viewportCount
-    if (data->pViewports) res += data->viewportCount * vkUtilsEncodingSize_VkViewport(data->pViewports); // VkViewport pViewports
+    if (data->pViewports) { res += data->viewportCount * vkUtilsEncodingSize_VkViewport(data->pViewports); } // VkViewport pViewports
     res += 1 * 4; // u32 scissorCount
-    if (data->pScissors) res += data->scissorCount * vkUtilsEncodingSize_VkRect2D(data->pScissors); // VkRect2D pScissors
+    if (data->pScissors) { res += data->scissorCount * vkUtilsEncodingSize_VkRect2D(data->pScissors); } // VkRect2D pScissors
     return res;
 }
 
@@ -2438,7 +2434,7 @@ uint32_t vkUtilsEncodingSize_VkPipelineColorBlendStateCreateInfo(const VkPipelin
     res += 1 * 4; // VkBool32 logicOpEnable
     res += 1 * 4; // VkLogicOp logicOp
     res += 1 * 4; // u32 attachmentCount
-    if (data->pAttachments) res += data->attachmentCount * vkUtilsEncodingSize_VkPipelineColorBlendAttachmentState(data->pAttachments); // VkPipelineColorBlendAttachmentState pAttachments
+    if (data->pAttachments) { res += data->attachmentCount * vkUtilsEncodingSize_VkPipelineColorBlendAttachmentState(data->pAttachments); } // VkPipelineColorBlendAttachmentState pAttachments
     res += 4 * 4; // f32 blendConstants
     return res;
 }
@@ -2599,16 +2595,16 @@ uint32_t vkUtilsEncodingSize_VkGraphicsPipelineCreateInfo(const VkGraphicsPipeli
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkPipelineCreateFlags flags
     res += 1 * 4; // u32 stageCount
-    if (data->pStages) res += data->stageCount * vkUtilsEncodingSize_VkPipelineShaderStageCreateInfo(data->pStages); // VkPipelineShaderStageCreateInfo pStages
-    if (data->pVertexInputState) res += 1 * vkUtilsEncodingSize_VkPipelineVertexInputStateCreateInfo(data->pVertexInputState); // VkPipelineVertexInputStateCreateInfo pVertexInputState
-    if (data->pInputAssemblyState) res += 1 * vkUtilsEncodingSize_VkPipelineInputAssemblyStateCreateInfo(data->pInputAssemblyState); // VkPipelineInputAssemblyStateCreateInfo pInputAssemblyState
-    if (data->pTessellationState) res += 1 * vkUtilsEncodingSize_VkPipelineTessellationStateCreateInfo(data->pTessellationState); // VkPipelineTessellationStateCreateInfo pTessellationState
-    if (data->pViewportState) res += 1 * vkUtilsEncodingSize_VkPipelineViewportStateCreateInfo(data->pViewportState); // VkPipelineViewportStateCreateInfo pViewportState
-    if (data->pRasterizationState) res += 1 * vkUtilsEncodingSize_VkPipelineRasterizationStateCreateInfo(data->pRasterizationState); // VkPipelineRasterizationStateCreateInfo pRasterizationState
-    if (data->pMultisampleState) res += 1 * vkUtilsEncodingSize_VkPipelineMultisampleStateCreateInfo(data->pMultisampleState); // VkPipelineMultisampleStateCreateInfo pMultisampleState
-    if (data->pDepthStencilState) res += 1 * vkUtilsEncodingSize_VkPipelineDepthStencilStateCreateInfo(data->pDepthStencilState); // VkPipelineDepthStencilStateCreateInfo pDepthStencilState
-    if (data->pColorBlendState) res += 1 * vkUtilsEncodingSize_VkPipelineColorBlendStateCreateInfo(data->pColorBlendState); // VkPipelineColorBlendStateCreateInfo pColorBlendState
-    if (data->pDynamicState) res += 1 * vkUtilsEncodingSize_VkPipelineDynamicStateCreateInfo(data->pDynamicState); // VkPipelineDynamicStateCreateInfo pDynamicState
+    if (data->pStages) { res += data->stageCount * vkUtilsEncodingSize_VkPipelineShaderStageCreateInfo(data->pStages); } // VkPipelineShaderStageCreateInfo pStages
+    if (data->pVertexInputState) { res += 1 * vkUtilsEncodingSize_VkPipelineVertexInputStateCreateInfo(data->pVertexInputState); } // VkPipelineVertexInputStateCreateInfo pVertexInputState
+    if (data->pInputAssemblyState) { res += 1 * vkUtilsEncodingSize_VkPipelineInputAssemblyStateCreateInfo(data->pInputAssemblyState); } // VkPipelineInputAssemblyStateCreateInfo pInputAssemblyState
+    if (data->pTessellationState) { res += 1 * vkUtilsEncodingSize_VkPipelineTessellationStateCreateInfo(data->pTessellationState); } // VkPipelineTessellationStateCreateInfo pTessellationState
+    if (data->pViewportState) { res += 1 * vkUtilsEncodingSize_VkPipelineViewportStateCreateInfo(data->pViewportState); } // VkPipelineViewportStateCreateInfo pViewportState
+    if (data->pRasterizationState) { res += 1 * vkUtilsEncodingSize_VkPipelineRasterizationStateCreateInfo(data->pRasterizationState); } // VkPipelineRasterizationStateCreateInfo pRasterizationState
+    if (data->pMultisampleState) { res += 1 * vkUtilsEncodingSize_VkPipelineMultisampleStateCreateInfo(data->pMultisampleState); } // VkPipelineMultisampleStateCreateInfo pMultisampleState
+    if (data->pDepthStencilState) { res += 1 * vkUtilsEncodingSize_VkPipelineDepthStencilStateCreateInfo(data->pDepthStencilState); } // VkPipelineDepthStencilStateCreateInfo pDepthStencilState
+    if (data->pColorBlendState) { res += 1 * vkUtilsEncodingSize_VkPipelineColorBlendStateCreateInfo(data->pColorBlendState); } // VkPipelineColorBlendStateCreateInfo pColorBlendState
+    if (data->pDynamicState) { res += 1 * vkUtilsEncodingSize_VkPipelineDynamicStateCreateInfo(data->pDynamicState); } // VkPipelineDynamicStateCreateInfo pDynamicState
     res += 1 * 8; // VkPipelineLayout layout
     res += 1 * 8; // VkRenderPass renderPass
     res += 1 * 4; // u32 subpass
@@ -2797,7 +2793,7 @@ uint32_t vkUtilsEncodingSize_VkPipelineLayoutCreateInfo(const VkPipelineLayoutCr
     res += 1 * 4; // u32 setLayoutCount
     res += data->setLayoutCount * 8; // VkDescriptorSetLayout pSetLayouts
     res += 1 * 4; // u32 pushConstantRangeCount
-    if (data->pPushConstantRanges) res += data->pushConstantRangeCount * vkUtilsEncodingSize_VkPushConstantRange(data->pPushConstantRanges); // VkPushConstantRange pPushConstantRanges
+    if (data->pPushConstantRanges) { res += data->pushConstantRangeCount * vkUtilsEncodingSize_VkPushConstantRange(data->pPushConstantRanges); } // VkPushConstantRange pPushConstantRanges
     return res;
 }
 
@@ -3002,7 +2998,7 @@ uint32_t vkUtilsEncodingSize_VkCommandBufferBeginInfo(const VkCommandBufferBegin
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkCommandBufferUsageFlags flags
-    if (data->pInheritanceInfo) res += 1 * vkUtilsEncodingSize_VkCommandBufferInheritanceInfo(data->pInheritanceInfo); // VkCommandBufferInheritanceInfo pInheritanceInfo
+    if (data->pInheritanceInfo) { res += 1 * vkUtilsEncodingSize_VkCommandBufferInheritanceInfo(data->pInheritanceInfo); } // VkCommandBufferInheritanceInfo pInheritanceInfo
     return res;
 }
 
@@ -3039,7 +3035,7 @@ uint32_t vkUtilsEncodingSize_VkRenderPassBeginInfo(const VkRenderPassBeginInfo* 
     res += 1 * 8; // VkFramebuffer framebuffer
     res += 1 * vkUtilsEncodingSize_VkRect2D(&data->renderArea); // VkRect2D renderArea
     res += 1 * 4; // u32 clearValueCount
-    if (data->pClearValues) res += data->clearValueCount * vkUtilsEncodingSize_VkClearValue(data->pClearValues); // VkClearValue pClearValues
+    if (data->pClearValues) { res += data->clearValueCount * vkUtilsEncodingSize_VkClearValue(data->pClearValues); } // VkClearValue pClearValues
     return res;
 }
 
@@ -3232,11 +3228,11 @@ uint32_t vkUtilsEncodingSize_VkSubpassDescription(const VkSubpassDescription* da
     res += 1 * 4; // VkSubpassDescriptionFlags flags
     res += 1 * 4; // VkPipelineBindPoint pipelineBindPoint
     res += 1 * 4; // u32 inputAttachmentCount
-    if (data->pInputAttachments) res += data->inputAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pInputAttachments); // VkAttachmentReference pInputAttachments
+    if (data->pInputAttachments) { res += data->inputAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pInputAttachments); } // VkAttachmentReference pInputAttachments
     res += 1 * 4; // u32 colorAttachmentCount
-    if (data->pColorAttachments) res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pColorAttachments); // VkAttachmentReference pColorAttachments
-    if (data->pResolveAttachments) res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pResolveAttachments); // VkAttachmentReference pResolveAttachments
-    if (data->pDepthStencilAttachment) res += 1 * vkUtilsEncodingSize_VkAttachmentReference(data->pDepthStencilAttachment); // VkAttachmentReference pDepthStencilAttachment
+    if (data->pColorAttachments) { res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pColorAttachments); } // VkAttachmentReference pColorAttachments
+    if (data->pResolveAttachments) { res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pResolveAttachments); } // VkAttachmentReference pResolveAttachments
+    if (data->pDepthStencilAttachment) { res += 1 * vkUtilsEncodingSize_VkAttachmentReference(data->pDepthStencilAttachment); } // VkAttachmentReference pDepthStencilAttachment
     res += 1 * 4; // u32 preserveAttachmentCount
     res += data->preserveAttachmentCount * 4; // u32 pPreserveAttachments
     return res;
@@ -3342,11 +3338,11 @@ uint32_t vkUtilsEncodingSize_VkRenderPassCreateInfo(const VkRenderPassCreateInfo
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkRenderPassCreateFlags flags
     res += 1 * 4; // u32 attachmentCount
-    if (data->pAttachments) res += data->attachmentCount * vkUtilsEncodingSize_VkAttachmentDescription(data->pAttachments); // VkAttachmentDescription pAttachments
+    if (data->pAttachments) { res += data->attachmentCount * vkUtilsEncodingSize_VkAttachmentDescription(data->pAttachments); } // VkAttachmentDescription pAttachments
     res += 1 * 4; // u32 subpassCount
-    if (data->pSubpasses) res += data->subpassCount * vkUtilsEncodingSize_VkSubpassDescription(data->pSubpasses); // VkSubpassDescription pSubpasses
+    if (data->pSubpasses) { res += data->subpassCount * vkUtilsEncodingSize_VkSubpassDescription(data->pSubpasses); } // VkSubpassDescription pSubpasses
     res += 1 * 4; // u32 dependencyCount
-    if (data->pDependencies) res += data->dependencyCount * vkUtilsEncodingSize_VkSubpassDependency(data->pDependencies); // VkSubpassDependency pDependencies
+    if (data->pDependencies) { res += data->dependencyCount * vkUtilsEncodingSize_VkSubpassDependency(data->pDependencies); } // VkSubpassDependency pDependencies
     return res;
 }
 
@@ -5293,7 +5289,7 @@ uint32_t vkUtilsEncodingSize_VkBindImageMemoryInfoKHX(const VkBindImageMemoryInf
     res += 1 * 4; // u32 deviceIndexCount
     res += data->deviceIndexCount * 4; // u32 pDeviceIndices
     res += 1 * 4; // u32 SFRRectCount
-    if (data->pSFRRects) res += data->SFRRectCount * vkUtilsEncodingSize_VkRect2D(data->pSFRRects); // VkRect2D pSFRRects
+    if (data->pSFRRects) { res += data->SFRRectCount * vkUtilsEncodingSize_VkRect2D(data->pSFRRects); } // VkRect2D pSFRRects
     return res;
 }
 
@@ -5338,7 +5334,7 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupRenderPassBeginInfoKHX(const VkDeviceG
     res += 1 * 8; // void pNext
     res += 1 * 4; // u32 deviceMask
     res += 1 * 4; // u32 deviceRenderAreaCount
-    if (data->pDeviceRenderAreas) res += data->deviceRenderAreaCount * vkUtilsEncodingSize_VkRect2D(data->pDeviceRenderAreas); // VkRect2D pDeviceRenderAreas
+    if (data->pDeviceRenderAreas) { res += data->deviceRenderAreaCount * vkUtilsEncodingSize_VkRect2D(data->pDeviceRenderAreas); } // VkRect2D pDeviceRenderAreas
     return res;
 }
 
@@ -6152,7 +6148,7 @@ uint32_t vkUtilsEncodingSize_VkPresentRegionKHR(const VkPresentRegionKHR* data) 
     uint32_t res = 0;
     if (!data) return res;
     res += 1 * 4; // u32 rectangleCount
-    if (data->pRectangles) res += data->rectangleCount * vkUtilsEncodingSize_VkRectLayerKHR(data->pRectangles); // VkRectLayerKHR pRectangles
+    if (data->pRectangles) { res += data->rectangleCount * vkUtilsEncodingSize_VkRectLayerKHR(data->pRectangles); } // VkRectLayerKHR pRectangles
     return res;
 }
 
@@ -6182,7 +6178,7 @@ uint32_t vkUtilsEncodingSize_VkPresentRegionsKHR(const VkPresentRegionsKHR* data
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // u32 swapchainCount
-    if (data->pRegions) res += data->swapchainCount * vkUtilsEncodingSize_VkPresentRegionKHR(data->pRegions); // VkPresentRegionKHR pRegions
+    if (data->pRegions) { res += data->swapchainCount * vkUtilsEncodingSize_VkPresentRegionKHR(data->pRegions); } // VkPresentRegionKHR pRegions
     return res;
 }
 
@@ -6250,7 +6246,7 @@ uint32_t vkUtilsEncodingSize_VkDescriptorUpdateTemplateCreateInfoKHR(const VkDes
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkDescriptorUpdateTemplateCreateFlagsKHR flags
     res += 1 * 4; // u32 descriptorUpdateEntryCount
-    if (data->pDescriptorUpdateEntries) res += data->descriptorUpdateEntryCount * vkUtilsEncodingSize_VkDescriptorUpdateTemplateEntryKHR(data->pDescriptorUpdateEntries); // VkDescriptorUpdateTemplateEntryKHR pDescriptorUpdateEntries
+    if (data->pDescriptorUpdateEntries) { res += data->descriptorUpdateEntryCount * vkUtilsEncodingSize_VkDescriptorUpdateTemplateEntryKHR(data->pDescriptorUpdateEntries); } // VkDescriptorUpdateTemplateEntryKHR pDescriptorUpdateEntries
     res += 1 * 4; // VkDescriptorUpdateTemplateTypeKHR templateType
     res += 1 * 8; // VkDescriptorSetLayout descriptorSetLayout
     res += 1 * 4; // VkPipelineBindPoint pipelineBindPoint
@@ -6520,7 +6516,7 @@ uint32_t vkUtilsEncodingSize_VkPresentTimesInfoGOOGLE(const VkPresentTimesInfoGO
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // u32 swapchainCount
-    if (data->pTimes) res += data->swapchainCount * vkUtilsEncodingSize_VkPresentTimeGOOGLE(data->pTimes); // VkPresentTimeGOOGLE pTimes
+    if (data->pTimes) { res += data->swapchainCount * vkUtilsEncodingSize_VkPresentTimeGOOGLE(data->pTimes); } // VkPresentTimeGOOGLE pTimes
     return res;
 }
 
@@ -6604,7 +6600,7 @@ uint32_t vkUtilsEncodingSize_VkPipelineDiscardRectangleStateCreateInfoEXT(const 
     res += 1 * 4; // VkPipelineDiscardRectangleStateCreateFlagsEXT flags
     res += 1 * 4; // VkDiscardRectangleModeEXT discardRectangleMode
     res += 1 * 4; // u32 discardRectangleCount
-    if (data->pDiscardRectangles) res += data->discardRectangleCount * vkUtilsEncodingSize_VkRect2D(data->pDiscardRectangles); // VkRect2D pDiscardRectangles
+    if (data->pDiscardRectangles) { res += data->discardRectangleCount * vkUtilsEncodingSize_VkRect2D(data->pDiscardRectangles); } // VkRect2D pDiscardRectangles
     return res;
 }
 

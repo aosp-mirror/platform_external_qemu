@@ -5,6 +5,7 @@
 using android::base::InplaceStream;
 
 uint32_t string1d_len(const char* string) {
+    if (!string) return 4 + 1;
     return 4 + strlen(string) + 1;
 }
 
@@ -23,8 +24,7 @@ const char* string1d_unpack(InplaceStream* stream) {
 uint32_t strings2d_len(uint32_t count, const char* const* strings) {
     uint32_t res = 0;
     for (uint32_t i = 0; i < count; i++) {
-        res += 4;
-        res += strlen(strings[i]) + 1;
+        res += string1d_len(strings[i]);
     }
     return res;
 }
