@@ -83,10 +83,12 @@ endif
 include $(EMUGL_PATH)/host/libs/GLESv1_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/GLESv2_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/renderControl_dec/Android.mk
+include $(EMUGL_PATH)/host/libs/vk_dec/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLcommon/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLES_CM/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/GLES_V2/Android.mk
 include $(EMUGL_PATH)/host/libs/Translator/EGL/Android.mk
+# include $(EMUGL_PATH)/host/libs/Translator/vulkan/Android.mk
 include $(EMUGL_PATH)/host/libs/libOpenGLESDispatch/Android.mk
 
 # Host shared libraries

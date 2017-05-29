@@ -130,6 +130,8 @@ cp -f $DECODER_TOP_DIR/GLESv2_dec/gles2.types $DECODER_TOP_DIR/GLESv2_dec/gl2.ty
 $EMUGEN -i $DECODER_TOP_DIR/GLESv1_dec -E $ENCODER_TOP_DIR/GLESv1_enc gl
 $EMUGEN -i $DECODER_TOP_DIR/GLESv2_dec -E $ENCODER_TOP_DIR/GLESv2_enc gl2
 $EMUGEN -i $DECODER_TOP_DIR/renderControl_dec -E $ENCODER_TOP_DIR/renderControl_enc renderControl
+$EMUGEN -i $DECODER_TOP_DIR/renderControl_dec -E $ENCODER_TOP_DIR/renderControl_enc renderControl
+$EMUGEN -i $DECODER_TOP_DIR/vk_dec -E $ENCODER_TOP_DIR/vulkan vk
 
 rm $DECODER_TOP_DIR/GLESv1_dec/gl.attrib
 rm $DECODER_TOP_DIR/GLESv1_dec/gl.in

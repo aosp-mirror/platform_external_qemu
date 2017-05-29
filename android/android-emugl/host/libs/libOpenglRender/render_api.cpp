@@ -47,5 +47,7 @@ RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary() {
         return nullptr;
     }
 
+    initVkDispatch();
+
     return emugl::RenderLibPtr(new emugl::RenderLibImpl());
 }
