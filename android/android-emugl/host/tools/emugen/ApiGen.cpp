@@ -1179,11 +1179,19 @@ R"(        // Do this on every iteration, as some commands may change the checks
                         if (pass == PASS_FunctionCall &&
                             v->pointerDir() == Var::POINTER_IN) {
                             if (v->nullAllowed()) {
-                                fprintf(fp,
-                                        "size_%s == 0 ? nullptr : (%s)(inptr_%s.get())",
-                                        var_name,
-                                        var_type_name,
-                                        var_name);
+                                if (v->unpackExpression().size() > 0) {
+                                    fprintf(fp,
+                                            "size_%s == 0 ? nullptr : (%s)(inptr_%s_unpacked)",
+                                            var_name,
+                                            var_type_name,
+                                            var_name);
+                                } else {
+                                    fprintf(fp,
+                                            "size_%s == 0 ? nullptr : (%s)(inptr_%s.get())",
+                                            var_name,
+                                            var_type_name,
+                                            var_name);
+                                }
                             } else {
                                 if (v->unpackExpression().size() > 0) {
                                     fprintf(fp,

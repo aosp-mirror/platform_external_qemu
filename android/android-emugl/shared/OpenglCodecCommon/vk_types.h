@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2011-2015 The Android Open Source Project
+* Copyright 2017 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -15,9 +15,31 @@
 */
 #pragma once
 
-#include "OpenGLESDispatch/GLESv1Dispatch.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
-#include "OpenGLESDispatch/VkDispatch.h"
+#include <stdint.h>
+#include <vulkan/vulkan.h>
 
-extern GLESv2Dispatch s_gles2;
-extern GLESv1Dispatch s_gles1;
+#include "vkUtils.h"
+
+#include <memory>
+
+typedef uint32_t u32;
+typedef uint64_t u64;
+typedef uint16_t u16;
+typedef uint8_t u8;
+
+typedef int32_t s32;
+typedef int64_t s64;
+typedef int16_t s16;
+typedef int8_t  s8;
+
+typedef float f32;
+struct float4x {
+    float r;
+    float g;
+    float b;
+    float a;
+};
+typedef float4x f32_4;
+typedef float4x uint128_t;
+
+using android::base::InplaceStream;
