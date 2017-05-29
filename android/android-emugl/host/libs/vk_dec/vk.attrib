@@ -1,0 +1,1139 @@
+GLOBAL
+    base_opcode 20000
+    encoder_headers "vkUtils.h"
+vkMapMemoryAEMU
+    flag custom_decoder
+    flag not_api
+    dir data out
+    var_flag data nullAllowed
+    len data datalen * sizeof(char)
+
+vkUnmapMemoryAEMU
+    flag custom_decoder
+    flag not_api
+    dir data in
+    var_flag data nullAllowed
+    len data datalen * sizeof(char)
+
+vkFlushMappedMemoryRangeAEMU
+    flag custom_decoder
+    flag not_api
+    dir memoryRange in
+    var_flag memoryRange nullAllowed
+    len memoryRange vkUtilsEncodingSize_VkMappedMemoryRange(memoryRange)
+    custom_pack memoryRange { InplaceStream stream_memoryRange((char*)ptr, __size_memoryRange); vkUtilsPack_VkMappedMemoryRange(&stream_memoryRange, memoryRange); }
+    custom_unpack memoryRange InplaceStream stream_memoryRange((char*)(inptr_memoryRange.get()), size_memoryRange); inptr_memoryRange_unpacked = vkUtilsUnpack_VkMappedMemoryRange(&stream_memoryRange);
+    dir data in
+    var_flag data nullAllowed
+    len data datalen * sizeof(char)
+
+vkInvalidateMappedMemoryRangeAEMU
+    flag custom_decoder
+    flag not_api
+    dir memoryRange in
+    var_flag memoryRange nullAllowed
+    len memoryRange vkUtilsEncodingSize_VkMappedMemoryRange(memoryRange)
+    custom_pack memoryRange { InplaceStream stream_memoryRange((char*)ptr, __size_memoryRange); vkUtilsPack_VkMappedMemoryRange(&stream_memoryRange, memoryRange); }
+    custom_unpack memoryRange InplaceStream stream_memoryRange((char*)(inptr_memoryRange.get()), size_memoryRange); inptr_memoryRange_unpacked = vkUtilsUnpack_VkMappedMemoryRange(&stream_memoryRange);
+    dir data out
+    var_flag data nullAllowed
+    len data datalen * sizeof(char)
+
+vkCmdSetBlendConstantsAEMU
+    flag custom_decoder
+    flag not_api
+
+vkCreateInstance
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkInstanceCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkInstanceCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkInstanceCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pInstance out
+    var_flag pInstance nullAllowed
+    len pInstance sizeof(VkInstance)
+
+vkDestroyInstance
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkEnumeratePhysicalDevices
+    dir pPhysicalDeviceCount out
+    var_flag pPhysicalDeviceCount nullAllowed
+    len pPhysicalDeviceCount sizeof(u32)
+    dir pPhysicalDevices out
+    var_flag pPhysicalDevices nullAllowed
+    len pPhysicalDevices (*pPhysicalDeviceCount) * sizeof(VkPhysicalDevice)
+
+
+
+vkGetPhysicalDeviceProperties
+    dir pProperties out
+    var_flag pProperties nullAllowed
+    len pProperties vkUtilsEncodingSize_VkPhysicalDeviceProperties(pProperties)
+    custom_host_pack_tmp_alloc pProperties std::vector<VkPhysicalDeviceProperties> tmp_pProperties(16); forPacking_pProperties = (void*)(&tmp_pProperties[0])
+    custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkPhysicalDeviceProperties((VkPhysicalDeviceProperties*)forPacking_pProperties)); vkUtilsPack_VkPhysicalDeviceProperties(&stream_forPacking_pProperties, (VkPhysicalDeviceProperties*)forPacking_pProperties);
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkPhysicalDeviceProperties* tmp_pProperties = vkUtilsUnpack_VkPhysicalDeviceProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkPhysicalDeviceProperties));
+
+vkGetPhysicalDeviceQueueFamilyProperties
+    dir pQueueFamilyPropertyCount out
+    var_flag pQueueFamilyPropertyCount nullAllowed
+    len pQueueFamilyPropertyCount sizeof(u32)
+    dir pQueueFamilyProperties out
+    var_flag pQueueFamilyProperties nullAllowed
+    len pQueueFamilyProperties (*pQueueFamilyPropertyCount) * vkUtilsEncodingSize_VkQueueFamilyProperties(pQueueFamilyProperties)
+    custom_host_pack_tmp_alloc pQueueFamilyProperties std::vector<VkQueueFamilyProperties> tmp_pQueueFamilyProperties(16); forPacking_pQueueFamilyProperties = (void*)(&tmp_pQueueFamilyProperties[0])
+    custom_host_pack pQueueFamilyProperties InplaceStream stream_forPacking_pQueueFamilyProperties((char*)outptr_pQueueFamilyProperties.get(), vkUtilsEncodingSize_VkQueueFamilyProperties((VkQueueFamilyProperties*)forPacking_pQueueFamilyProperties)); vkUtilsPack_VkQueueFamilyProperties(&stream_forPacking_pQueueFamilyProperties, (VkQueueFamilyProperties*)forPacking_pQueueFamilyProperties);
+    custom_guest_unpack pQueueFamilyProperties std::vector<char> forUnpacking_pQueueFamilyProperties(__size_pQueueFamilyProperties); stream->readback(&forUnpacking_pQueueFamilyProperties[0], __size_pQueueFamilyProperties); InplaceStream stream_forUnpacking_pQueueFamilyProperties((char*)&forUnpacking_pQueueFamilyProperties[0], __size_pQueueFamilyProperties); VkQueueFamilyProperties* tmp_pQueueFamilyProperties = vkUtilsUnpack_VkQueueFamilyProperties(&stream_forUnpacking_pQueueFamilyProperties); memcpy(pQueueFamilyProperties, tmp_pQueueFamilyProperties, sizeof(VkQueueFamilyProperties));
+
+vkGetPhysicalDeviceMemoryProperties
+    dir pMemoryProperties out
+    var_flag pMemoryProperties nullAllowed
+    len pMemoryProperties vkUtilsEncodingSize_VkPhysicalDeviceMemoryProperties(pMemoryProperties)
+    custom_host_pack_tmp_alloc pMemoryProperties std::vector<VkPhysicalDeviceMemoryProperties> tmp_pMemoryProperties(16); forPacking_pMemoryProperties = (void*)(&tmp_pMemoryProperties[0])
+    custom_host_pack pMemoryProperties InplaceStream stream_forPacking_pMemoryProperties((char*)outptr_pMemoryProperties.get(), vkUtilsEncodingSize_VkPhysicalDeviceMemoryProperties((VkPhysicalDeviceMemoryProperties*)forPacking_pMemoryProperties)); vkUtilsPack_VkPhysicalDeviceMemoryProperties(&stream_forPacking_pMemoryProperties, (VkPhysicalDeviceMemoryProperties*)forPacking_pMemoryProperties);
+    custom_guest_unpack pMemoryProperties std::vector<char> forUnpacking_pMemoryProperties(__size_pMemoryProperties); stream->readback(&forUnpacking_pMemoryProperties[0], __size_pMemoryProperties); InplaceStream stream_forUnpacking_pMemoryProperties((char*)&forUnpacking_pMemoryProperties[0], __size_pMemoryProperties); VkPhysicalDeviceMemoryProperties* tmp_pMemoryProperties = vkUtilsUnpack_VkPhysicalDeviceMemoryProperties(&stream_forUnpacking_pMemoryProperties); memcpy(pMemoryProperties, tmp_pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties));
+
+vkGetPhysicalDeviceFeatures
+    dir pFeatures out
+    var_flag pFeatures nullAllowed
+    len pFeatures vkUtilsEncodingSize_VkPhysicalDeviceFeatures(pFeatures)
+    custom_host_pack_tmp_alloc pFeatures std::vector<VkPhysicalDeviceFeatures> tmp_pFeatures(16); forPacking_pFeatures = (void*)(&tmp_pFeatures[0])
+    custom_host_pack pFeatures InplaceStream stream_forPacking_pFeatures((char*)outptr_pFeatures.get(), vkUtilsEncodingSize_VkPhysicalDeviceFeatures((VkPhysicalDeviceFeatures*)forPacking_pFeatures)); vkUtilsPack_VkPhysicalDeviceFeatures(&stream_forPacking_pFeatures, (VkPhysicalDeviceFeatures*)forPacking_pFeatures);
+    custom_guest_unpack pFeatures std::vector<char> forUnpacking_pFeatures(__size_pFeatures); stream->readback(&forUnpacking_pFeatures[0], __size_pFeatures); InplaceStream stream_forUnpacking_pFeatures((char*)&forUnpacking_pFeatures[0], __size_pFeatures); VkPhysicalDeviceFeatures* tmp_pFeatures = vkUtilsUnpack_VkPhysicalDeviceFeatures(&stream_forUnpacking_pFeatures); memcpy(pFeatures, tmp_pFeatures, sizeof(VkPhysicalDeviceFeatures));
+
+vkGetPhysicalDeviceFormatProperties
+    dir pFormatProperties out
+    var_flag pFormatProperties nullAllowed
+    len pFormatProperties vkUtilsEncodingSize_VkFormatProperties(pFormatProperties)
+    custom_host_pack_tmp_alloc pFormatProperties std::vector<VkFormatProperties> tmp_pFormatProperties(16); forPacking_pFormatProperties = (void*)(&tmp_pFormatProperties[0])
+    custom_host_pack pFormatProperties InplaceStream stream_forPacking_pFormatProperties((char*)outptr_pFormatProperties.get(), vkUtilsEncodingSize_VkFormatProperties((VkFormatProperties*)forPacking_pFormatProperties)); vkUtilsPack_VkFormatProperties(&stream_forPacking_pFormatProperties, (VkFormatProperties*)forPacking_pFormatProperties);
+    custom_guest_unpack pFormatProperties std::vector<char> forUnpacking_pFormatProperties(__size_pFormatProperties); stream->readback(&forUnpacking_pFormatProperties[0], __size_pFormatProperties); InplaceStream stream_forUnpacking_pFormatProperties((char*)&forUnpacking_pFormatProperties[0], __size_pFormatProperties); VkFormatProperties* tmp_pFormatProperties = vkUtilsUnpack_VkFormatProperties(&stream_forUnpacking_pFormatProperties); memcpy(pFormatProperties, tmp_pFormatProperties, sizeof(VkFormatProperties));
+
+vkGetPhysicalDeviceImageFormatProperties
+    dir pImageFormatProperties out
+    var_flag pImageFormatProperties nullAllowed
+    len pImageFormatProperties vkUtilsEncodingSize_VkImageFormatProperties(pImageFormatProperties)
+    custom_host_pack_tmp_alloc pImageFormatProperties std::vector<VkImageFormatProperties> tmp_pImageFormatProperties(16); forPacking_pImageFormatProperties = (void*)(&tmp_pImageFormatProperties[0])
+    custom_host_pack pImageFormatProperties InplaceStream stream_forPacking_pImageFormatProperties((char*)outptr_pImageFormatProperties.get(), vkUtilsEncodingSize_VkImageFormatProperties((VkImageFormatProperties*)forPacking_pImageFormatProperties)); vkUtilsPack_VkImageFormatProperties(&stream_forPacking_pImageFormatProperties, (VkImageFormatProperties*)forPacking_pImageFormatProperties);
+    custom_guest_unpack pImageFormatProperties std::vector<char> forUnpacking_pImageFormatProperties(__size_pImageFormatProperties); stream->readback(&forUnpacking_pImageFormatProperties[0], __size_pImageFormatProperties); InplaceStream stream_forUnpacking_pImageFormatProperties((char*)&forUnpacking_pImageFormatProperties[0], __size_pImageFormatProperties); VkImageFormatProperties* tmp_pImageFormatProperties = vkUtilsUnpack_VkImageFormatProperties(&stream_forUnpacking_pImageFormatProperties); memcpy(pImageFormatProperties, tmp_pImageFormatProperties, sizeof(VkImageFormatProperties));
+
+vkCreateDevice
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkDeviceCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkDeviceCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkDeviceCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pDevice out
+    var_flag pDevice nullAllowed
+    len pDevice sizeof(VkDevice)
+
+vkDestroyDevice
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkEnumerateInstanceLayerProperties
+    dir pPropertyCount out
+    var_flag pPropertyCount nullAllowed
+    len pPropertyCount sizeof(u32)
+    dir pProperties out
+    var_flag pProperties nullAllowed
+    len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkLayerProperties(pProperties)
+    custom_host_pack_tmp_alloc pProperties std::vector<VkLayerProperties> tmp_pProperties(16); forPacking_pProperties = (void*)(&tmp_pProperties[0])
+    custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkLayerProperties((VkLayerProperties*)forPacking_pProperties)); vkUtilsPack_VkLayerProperties(&stream_forPacking_pProperties, (VkLayerProperties*)forPacking_pProperties);
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkLayerProperties* tmp_pProperties = vkUtilsUnpack_VkLayerProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkLayerProperties));
+
+vkEnumerateInstanceExtensionProperties
+    dir pLayerName in
+    var_flag pLayerName nullAllowed
+    len pLayerName (strlen(pLayerName) + 1) * sizeof(char)
+    dir pPropertyCount out
+    var_flag pPropertyCount nullAllowed
+    len pPropertyCount sizeof(u32)
+    dir pProperties out
+    var_flag pProperties nullAllowed
+    len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkExtensionProperties(pProperties)
+    custom_host_pack_tmp_alloc pProperties std::vector<VkExtensionProperties> tmp_pProperties(16); forPacking_pProperties = (void*)(&tmp_pProperties[0])
+    custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkExtensionProperties((VkExtensionProperties*)forPacking_pProperties)); vkUtilsPack_VkExtensionProperties(&stream_forPacking_pProperties, (VkExtensionProperties*)forPacking_pProperties);
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkExtensionProperties* tmp_pProperties = vkUtilsUnpack_VkExtensionProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkExtensionProperties));
+
+vkEnumerateDeviceLayerProperties
+    dir pPropertyCount out
+    var_flag pPropertyCount nullAllowed
+    len pPropertyCount sizeof(u32)
+    dir pProperties out
+    var_flag pProperties nullAllowed
+    len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkLayerProperties(pProperties)
+    custom_host_pack_tmp_alloc pProperties std::vector<VkLayerProperties> tmp_pProperties(16); forPacking_pProperties = (void*)(&tmp_pProperties[0])
+    custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkLayerProperties((VkLayerProperties*)forPacking_pProperties)); vkUtilsPack_VkLayerProperties(&stream_forPacking_pProperties, (VkLayerProperties*)forPacking_pProperties);
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkLayerProperties* tmp_pProperties = vkUtilsUnpack_VkLayerProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkLayerProperties));
+
+vkEnumerateDeviceExtensionProperties
+    dir pLayerName in
+    var_flag pLayerName nullAllowed
+    len pLayerName (strlen(pLayerName) + 1) * sizeof(char)
+    dir pPropertyCount out
+    var_flag pPropertyCount nullAllowed
+    len pPropertyCount sizeof(u32)
+    dir pProperties out
+    var_flag pProperties nullAllowed
+    len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkExtensionProperties(pProperties)
+    custom_host_pack_tmp_alloc pProperties std::vector<VkExtensionProperties> tmp_pProperties(16); forPacking_pProperties = (void*)(&tmp_pProperties[0])
+    custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkExtensionProperties((VkExtensionProperties*)forPacking_pProperties)); vkUtilsPack_VkExtensionProperties(&stream_forPacking_pProperties, (VkExtensionProperties*)forPacking_pProperties);
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkExtensionProperties* tmp_pProperties = vkUtilsUnpack_VkExtensionProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkExtensionProperties));
+
+vkGetDeviceQueue
+    dir pQueue out
+    var_flag pQueue nullAllowed
+    len pQueue sizeof(VkQueue)
+
+vkQueueSubmit
+    dir pSubmits in
+    var_flag pSubmits nullAllowed
+    len pSubmits submitCount * vkUtilsEncodingSize_VkSubmitInfo(pSubmits)
+    custom_pack pSubmits { InplaceStream stream_pSubmits((char*)ptr, __size_pSubmits); vkUtilsPack_VkSubmitInfo(&stream_pSubmits, pSubmits); }
+    custom_unpack pSubmits InplaceStream stream_pSubmits((char*)(inptr_pSubmits.get()), size_pSubmits); inptr_pSubmits_unpacked = vkUtilsUnpack_VkSubmitInfo(&stream_pSubmits);
+
+vkQueueWaitIdle
+
+vkDeviceWaitIdle
+
+vkAllocateMemory
+    dir pAllocateInfo in
+    var_flag pAllocateInfo nullAllowed
+    len pAllocateInfo vkUtilsEncodingSize_VkMemoryAllocateInfo(pAllocateInfo)
+    custom_pack pAllocateInfo { InplaceStream stream_pAllocateInfo((char*)ptr, __size_pAllocateInfo); vkUtilsPack_VkMemoryAllocateInfo(&stream_pAllocateInfo, pAllocateInfo); }
+    custom_unpack pAllocateInfo InplaceStream stream_pAllocateInfo((char*)(inptr_pAllocateInfo.get()), size_pAllocateInfo); inptr_pAllocateInfo_unpacked = vkUtilsUnpack_VkMemoryAllocateInfo(&stream_pAllocateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pMemory out
+    var_flag pMemory nullAllowed
+    len pMemory sizeof(VkDeviceMemory)
+
+vkFreeMemory
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+
+
+
+
+vkGetDeviceMemoryCommitment
+    dir pCommittedMemoryInBytes out
+    var_flag pCommittedMemoryInBytes nullAllowed
+    len pCommittedMemoryInBytes sizeof(VkDeviceSize)
+
+vkGetBufferMemoryRequirements
+    dir pMemoryRequirements out
+    var_flag pMemoryRequirements nullAllowed
+    len pMemoryRequirements vkUtilsEncodingSize_VkMemoryRequirements(pMemoryRequirements)
+    custom_host_pack_tmp_alloc pMemoryRequirements std::vector<VkMemoryRequirements> tmp_pMemoryRequirements(16); forPacking_pMemoryRequirements = (void*)(&tmp_pMemoryRequirements[0])
+    custom_host_pack pMemoryRequirements InplaceStream stream_forPacking_pMemoryRequirements((char*)outptr_pMemoryRequirements.get(), vkUtilsEncodingSize_VkMemoryRequirements((VkMemoryRequirements*)forPacking_pMemoryRequirements)); vkUtilsPack_VkMemoryRequirements(&stream_forPacking_pMemoryRequirements, (VkMemoryRequirements*)forPacking_pMemoryRequirements);
+    custom_guest_unpack pMemoryRequirements std::vector<char> forUnpacking_pMemoryRequirements(__size_pMemoryRequirements); stream->readback(&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); InplaceStream stream_forUnpacking_pMemoryRequirements((char*)&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); VkMemoryRequirements* tmp_pMemoryRequirements = vkUtilsUnpack_VkMemoryRequirements(&stream_forUnpacking_pMemoryRequirements); memcpy(pMemoryRequirements, tmp_pMemoryRequirements, sizeof(VkMemoryRequirements));
+
+vkBindBufferMemory
+
+vkGetImageMemoryRequirements
+    dir pMemoryRequirements out
+    var_flag pMemoryRequirements nullAllowed
+    len pMemoryRequirements vkUtilsEncodingSize_VkMemoryRequirements(pMemoryRequirements)
+    custom_host_pack_tmp_alloc pMemoryRequirements std::vector<VkMemoryRequirements> tmp_pMemoryRequirements(16); forPacking_pMemoryRequirements = (void*)(&tmp_pMemoryRequirements[0])
+    custom_host_pack pMemoryRequirements InplaceStream stream_forPacking_pMemoryRequirements((char*)outptr_pMemoryRequirements.get(), vkUtilsEncodingSize_VkMemoryRequirements((VkMemoryRequirements*)forPacking_pMemoryRequirements)); vkUtilsPack_VkMemoryRequirements(&stream_forPacking_pMemoryRequirements, (VkMemoryRequirements*)forPacking_pMemoryRequirements);
+    custom_guest_unpack pMemoryRequirements std::vector<char> forUnpacking_pMemoryRequirements(__size_pMemoryRequirements); stream->readback(&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); InplaceStream stream_forUnpacking_pMemoryRequirements((char*)&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); VkMemoryRequirements* tmp_pMemoryRequirements = vkUtilsUnpack_VkMemoryRequirements(&stream_forUnpacking_pMemoryRequirements); memcpy(pMemoryRequirements, tmp_pMemoryRequirements, sizeof(VkMemoryRequirements));
+
+vkBindImageMemory
+
+vkGetImageSparseMemoryRequirements
+    dir pSparseMemoryRequirementCount out
+    var_flag pSparseMemoryRequirementCount nullAllowed
+    len pSparseMemoryRequirementCount sizeof(u32)
+    dir pSparseMemoryRequirements out
+    var_flag pSparseMemoryRequirements nullAllowed
+    len pSparseMemoryRequirements (*pSparseMemoryRequirementCount) * vkUtilsEncodingSize_VkSparseImageMemoryRequirements(pSparseMemoryRequirements)
+    custom_host_pack_tmp_alloc pSparseMemoryRequirements std::vector<VkSparseImageMemoryRequirements> tmp_pSparseMemoryRequirements(16); forPacking_pSparseMemoryRequirements = (void*)(&tmp_pSparseMemoryRequirements[0])
+    custom_host_pack pSparseMemoryRequirements InplaceStream stream_forPacking_pSparseMemoryRequirements((char*)outptr_pSparseMemoryRequirements.get(), vkUtilsEncodingSize_VkSparseImageMemoryRequirements((VkSparseImageMemoryRequirements*)forPacking_pSparseMemoryRequirements)); vkUtilsPack_VkSparseImageMemoryRequirements(&stream_forPacking_pSparseMemoryRequirements, (VkSparseImageMemoryRequirements*)forPacking_pSparseMemoryRequirements);
+    custom_guest_unpack pSparseMemoryRequirements std::vector<char> forUnpacking_pSparseMemoryRequirements(__size_pSparseMemoryRequirements); stream->readback(&forUnpacking_pSparseMemoryRequirements[0], __size_pSparseMemoryRequirements); InplaceStream stream_forUnpacking_pSparseMemoryRequirements((char*)&forUnpacking_pSparseMemoryRequirements[0], __size_pSparseMemoryRequirements); VkSparseImageMemoryRequirements* tmp_pSparseMemoryRequirements = vkUtilsUnpack_VkSparseImageMemoryRequirements(&stream_forUnpacking_pSparseMemoryRequirements); memcpy(pSparseMemoryRequirements, tmp_pSparseMemoryRequirements, sizeof(VkSparseImageMemoryRequirements));
+
+vkGetPhysicalDeviceSparseImageFormatProperties
+    dir pPropertyCount out
+    var_flag pPropertyCount nullAllowed
+    len pPropertyCount sizeof(u32)
+    dir pProperties out
+    var_flag pProperties nullAllowed
+    len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkSparseImageFormatProperties(pProperties)
+    custom_host_pack_tmp_alloc pProperties std::vector<VkSparseImageFormatProperties> tmp_pProperties(16); forPacking_pProperties = (void*)(&tmp_pProperties[0])
+    custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkSparseImageFormatProperties((VkSparseImageFormatProperties*)forPacking_pProperties)); vkUtilsPack_VkSparseImageFormatProperties(&stream_forPacking_pProperties, (VkSparseImageFormatProperties*)forPacking_pProperties);
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkSparseImageFormatProperties* tmp_pProperties = vkUtilsUnpack_VkSparseImageFormatProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkSparseImageFormatProperties));
+
+vkQueueBindSparse
+    dir pBindInfo in
+    var_flag pBindInfo nullAllowed
+    len pBindInfo bindInfoCount * vkUtilsEncodingSize_VkBindSparseInfo(pBindInfo)
+    custom_pack pBindInfo { InplaceStream stream_pBindInfo((char*)ptr, __size_pBindInfo); vkUtilsPack_VkBindSparseInfo(&stream_pBindInfo, pBindInfo); }
+    custom_unpack pBindInfo InplaceStream stream_pBindInfo((char*)(inptr_pBindInfo.get()), size_pBindInfo); inptr_pBindInfo_unpacked = vkUtilsUnpack_VkBindSparseInfo(&stream_pBindInfo);
+
+vkCreateFence
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkFenceCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkFenceCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkFenceCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pFence out
+    var_flag pFence nullAllowed
+    len pFence sizeof(VkFence)
+
+vkDestroyFence
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkResetFences
+    dir pFences in
+    var_flag pFences nullAllowed
+    len pFences fenceCount * sizeof(VkFence)
+
+vkGetFenceStatus
+
+vkWaitForFences
+    dir pFences in
+    var_flag pFences nullAllowed
+    len pFences fenceCount * sizeof(VkFence)
+
+vkCreateSemaphore
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkSemaphoreCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkSemaphoreCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkSemaphoreCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pSemaphore out
+    var_flag pSemaphore nullAllowed
+    len pSemaphore sizeof(VkSemaphore)
+
+vkDestroySemaphore
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateEvent
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkEventCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkEventCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkEventCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pEvent out
+    var_flag pEvent nullAllowed
+    len pEvent sizeof(VkEvent)
+
+vkDestroyEvent
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkGetEventStatus
+
+vkSetEvent
+
+vkResetEvent
+
+vkCreateQueryPool
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkQueryPoolCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkQueryPoolCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkQueryPoolCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pQueryPool out
+    var_flag pQueryPool nullAllowed
+    len pQueryPool sizeof(VkQueryPool)
+
+vkDestroyQueryPool
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkGetQueryPoolResults
+    dir pData out
+    var_flag pData nullAllowed
+    len pData dataSize * sizeof(char)
+
+vkCreateBuffer
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkBufferCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkBufferCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkBufferCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pBuffer out
+    var_flag pBuffer nullAllowed
+    len pBuffer sizeof(VkBuffer)
+
+vkDestroyBuffer
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateBufferView
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkBufferViewCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkBufferViewCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkBufferViewCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pView out
+    var_flag pView nullAllowed
+    len pView sizeof(VkBufferView)
+
+vkDestroyBufferView
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateImage
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkImageCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkImageCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkImageCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pImage out
+    var_flag pImage nullAllowed
+    len pImage sizeof(VkImage)
+
+vkDestroyImage
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkGetImageSubresourceLayout
+    dir pSubresource in
+    var_flag pSubresource nullAllowed
+    len pSubresource vkUtilsEncodingSize_VkImageSubresource(pSubresource)
+    custom_pack pSubresource { InplaceStream stream_pSubresource((char*)ptr, __size_pSubresource); vkUtilsPack_VkImageSubresource(&stream_pSubresource, pSubresource); }
+    custom_unpack pSubresource InplaceStream stream_pSubresource((char*)(inptr_pSubresource.get()), size_pSubresource); inptr_pSubresource_unpacked = vkUtilsUnpack_VkImageSubresource(&stream_pSubresource);
+    dir pLayout out
+    var_flag pLayout nullAllowed
+    len pLayout vkUtilsEncodingSize_VkSubresourceLayout(pLayout)
+    custom_host_pack_tmp_alloc pLayout std::vector<VkSubresourceLayout> tmp_pLayout(16); forPacking_pLayout = (void*)(&tmp_pLayout[0])
+    custom_host_pack pLayout InplaceStream stream_forPacking_pLayout((char*)outptr_pLayout.get(), vkUtilsEncodingSize_VkSubresourceLayout((VkSubresourceLayout*)forPacking_pLayout)); vkUtilsPack_VkSubresourceLayout(&stream_forPacking_pLayout, (VkSubresourceLayout*)forPacking_pLayout);
+    custom_guest_unpack pLayout std::vector<char> forUnpacking_pLayout(__size_pLayout); stream->readback(&forUnpacking_pLayout[0], __size_pLayout); InplaceStream stream_forUnpacking_pLayout((char*)&forUnpacking_pLayout[0], __size_pLayout); VkSubresourceLayout* tmp_pLayout = vkUtilsUnpack_VkSubresourceLayout(&stream_forUnpacking_pLayout); memcpy(pLayout, tmp_pLayout, sizeof(VkSubresourceLayout));
+
+vkCreateImageView
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkImageViewCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkImageViewCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkImageViewCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pView out
+    var_flag pView nullAllowed
+    len pView sizeof(VkImageView)
+
+vkDestroyImageView
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateShaderModule
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkShaderModuleCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkShaderModuleCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkShaderModuleCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pShaderModule out
+    var_flag pShaderModule nullAllowed
+    len pShaderModule sizeof(VkShaderModule)
+
+vkDestroyShaderModule
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreatePipelineCache
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkPipelineCacheCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkPipelineCacheCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkPipelineCacheCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pPipelineCache out
+    var_flag pPipelineCache nullAllowed
+    len pPipelineCache sizeof(VkPipelineCache)
+
+vkDestroyPipelineCache
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkGetPipelineCacheData
+    dir pDataSize out
+    var_flag pDataSize nullAllowed
+    len pDataSize sizeof(size_t)
+    dir pData out
+    var_flag pData nullAllowed
+    len pData (*pDataSize) * sizeof(char)
+
+vkMergePipelineCaches
+    dir pSrcCaches in
+    var_flag pSrcCaches nullAllowed
+    len pSrcCaches srcCacheCount * sizeof(VkPipelineCache)
+
+vkCreateGraphicsPipelines
+    dir pCreateInfos in
+    var_flag pCreateInfos nullAllowed
+    len pCreateInfos createInfoCount * vkUtilsEncodingSize_VkGraphicsPipelineCreateInfo(pCreateInfos)
+    custom_pack pCreateInfos { InplaceStream stream_pCreateInfos((char*)ptr, __size_pCreateInfos); vkUtilsPack_VkGraphicsPipelineCreateInfo(&stream_pCreateInfos, pCreateInfos); }
+    custom_unpack pCreateInfos InplaceStream stream_pCreateInfos((char*)(inptr_pCreateInfos.get()), size_pCreateInfos); inptr_pCreateInfos_unpacked = vkUtilsUnpack_VkGraphicsPipelineCreateInfo(&stream_pCreateInfos);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pPipelines out
+    var_flag pPipelines nullAllowed
+    len pPipelines createInfoCount * sizeof(VkPipeline)
+
+vkCreateComputePipelines
+    dir pCreateInfos in
+    var_flag pCreateInfos nullAllowed
+    len pCreateInfos createInfoCount * vkUtilsEncodingSize_VkComputePipelineCreateInfo(pCreateInfos)
+    custom_pack pCreateInfos { InplaceStream stream_pCreateInfos((char*)ptr, __size_pCreateInfos); vkUtilsPack_VkComputePipelineCreateInfo(&stream_pCreateInfos, pCreateInfos); }
+    custom_unpack pCreateInfos InplaceStream stream_pCreateInfos((char*)(inptr_pCreateInfos.get()), size_pCreateInfos); inptr_pCreateInfos_unpacked = vkUtilsUnpack_VkComputePipelineCreateInfo(&stream_pCreateInfos);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pPipelines out
+    var_flag pPipelines nullAllowed
+    len pPipelines createInfoCount * sizeof(VkPipeline)
+
+vkDestroyPipeline
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreatePipelineLayout
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkPipelineLayoutCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkPipelineLayoutCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkPipelineLayoutCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pPipelineLayout out
+    var_flag pPipelineLayout nullAllowed
+    len pPipelineLayout sizeof(VkPipelineLayout)
+
+vkDestroyPipelineLayout
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateSampler
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkSamplerCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkSamplerCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkSamplerCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pSampler out
+    var_flag pSampler nullAllowed
+    len pSampler sizeof(VkSampler)
+
+vkDestroySampler
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateDescriptorSetLayout
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkDescriptorSetLayoutCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkDescriptorSetLayoutCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkDescriptorSetLayoutCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pSetLayout out
+    var_flag pSetLayout nullAllowed
+    len pSetLayout sizeof(VkDescriptorSetLayout)
+
+vkDestroyDescriptorSetLayout
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateDescriptorPool
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkDescriptorPoolCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkDescriptorPoolCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkDescriptorPoolCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pDescriptorPool out
+    var_flag pDescriptorPool nullAllowed
+    len pDescriptorPool sizeof(VkDescriptorPool)
+
+vkDestroyDescriptorPool
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkResetDescriptorPool
+
+vkAllocateDescriptorSets
+    dir pAllocateInfo in
+    var_flag pAllocateInfo nullAllowed
+    len pAllocateInfo vkUtilsEncodingSize_VkDescriptorSetAllocateInfo(pAllocateInfo)
+    custom_pack pAllocateInfo { InplaceStream stream_pAllocateInfo((char*)ptr, __size_pAllocateInfo); vkUtilsPack_VkDescriptorSetAllocateInfo(&stream_pAllocateInfo, pAllocateInfo); }
+    custom_unpack pAllocateInfo InplaceStream stream_pAllocateInfo((char*)(inptr_pAllocateInfo.get()), size_pAllocateInfo); inptr_pAllocateInfo_unpacked = vkUtilsUnpack_VkDescriptorSetAllocateInfo(&stream_pAllocateInfo);
+    dir pDescriptorSets out
+    var_flag pDescriptorSets nullAllowed
+    len pDescriptorSets (pAllocateInfo->descriptorSetCount) * sizeof(VkDescriptorSet)
+
+vkFreeDescriptorSets
+    dir pDescriptorSets in
+    var_flag pDescriptorSets nullAllowed
+    len pDescriptorSets descriptorSetCount * sizeof(VkDescriptorSet)
+
+vkUpdateDescriptorSets
+    dir pDescriptorWrites in
+    var_flag pDescriptorWrites nullAllowed
+    len pDescriptorWrites descriptorWriteCount * vkUtilsEncodingSize_VkWriteDescriptorSet(pDescriptorWrites)
+    custom_pack pDescriptorWrites { InplaceStream stream_pDescriptorWrites((char*)ptr, __size_pDescriptorWrites); vkUtilsPack_VkWriteDescriptorSet(&stream_pDescriptorWrites, pDescriptorWrites); }
+    custom_unpack pDescriptorWrites InplaceStream stream_pDescriptorWrites((char*)(inptr_pDescriptorWrites.get()), size_pDescriptorWrites); inptr_pDescriptorWrites_unpacked = vkUtilsUnpack_VkWriteDescriptorSet(&stream_pDescriptorWrites);
+    dir pDescriptorCopies in
+    var_flag pDescriptorCopies nullAllowed
+    len pDescriptorCopies descriptorCopyCount * vkUtilsEncodingSize_VkCopyDescriptorSet(pDescriptorCopies)
+    custom_pack pDescriptorCopies { InplaceStream stream_pDescriptorCopies((char*)ptr, __size_pDescriptorCopies); vkUtilsPack_VkCopyDescriptorSet(&stream_pDescriptorCopies, pDescriptorCopies); }
+    custom_unpack pDescriptorCopies InplaceStream stream_pDescriptorCopies((char*)(inptr_pDescriptorCopies.get()), size_pDescriptorCopies); inptr_pDescriptorCopies_unpacked = vkUtilsUnpack_VkCopyDescriptorSet(&stream_pDescriptorCopies);
+
+vkCreateFramebuffer
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkFramebufferCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkFramebufferCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkFramebufferCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pFramebuffer out
+    var_flag pFramebuffer nullAllowed
+    len pFramebuffer sizeof(VkFramebuffer)
+
+vkDestroyFramebuffer
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkCreateRenderPass
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkRenderPassCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkRenderPassCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkRenderPassCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pRenderPass out
+    var_flag pRenderPass nullAllowed
+    len pRenderPass sizeof(VkRenderPass)
+
+vkDestroyRenderPass
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkGetRenderAreaGranularity
+    dir pGranularity out
+    var_flag pGranularity nullAllowed
+    len pGranularity vkUtilsEncodingSize_VkExtent2D(pGranularity)
+    custom_host_pack_tmp_alloc pGranularity std::vector<VkExtent2D> tmp_pGranularity(16); forPacking_pGranularity = (void*)(&tmp_pGranularity[0])
+    custom_host_pack pGranularity InplaceStream stream_forPacking_pGranularity((char*)outptr_pGranularity.get(), vkUtilsEncodingSize_VkExtent2D((VkExtent2D*)forPacking_pGranularity)); vkUtilsPack_VkExtent2D(&stream_forPacking_pGranularity, (VkExtent2D*)forPacking_pGranularity);
+    custom_guest_unpack pGranularity std::vector<char> forUnpacking_pGranularity(__size_pGranularity); stream->readback(&forUnpacking_pGranularity[0], __size_pGranularity); InplaceStream stream_forUnpacking_pGranularity((char*)&forUnpacking_pGranularity[0], __size_pGranularity); VkExtent2D* tmp_pGranularity = vkUtilsUnpack_VkExtent2D(&stream_forUnpacking_pGranularity); memcpy(pGranularity, tmp_pGranularity, sizeof(VkExtent2D));
+
+vkCreateCommandPool
+    dir pCreateInfo in
+    var_flag pCreateInfo nullAllowed
+    len pCreateInfo vkUtilsEncodingSize_VkCommandPoolCreateInfo(pCreateInfo)
+    custom_pack pCreateInfo { InplaceStream stream_pCreateInfo((char*)ptr, __size_pCreateInfo); vkUtilsPack_VkCommandPoolCreateInfo(&stream_pCreateInfo, pCreateInfo); }
+    custom_unpack pCreateInfo InplaceStream stream_pCreateInfo((char*)(inptr_pCreateInfo.get()), size_pCreateInfo); inptr_pCreateInfo_unpacked = vkUtilsUnpack_VkCommandPoolCreateInfo(&stream_pCreateInfo);
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+    dir pCommandPool out
+    var_flag pCommandPool nullAllowed
+    len pCommandPool sizeof(VkCommandPool)
+
+vkDestroyCommandPool
+    dir pAllocator in
+    var_flag pAllocator nullAllowed
+    len pAllocator vkUtilsEncodingSize_VkAllocationCallbacks(pAllocator)
+    custom_pack pAllocator { InplaceStream stream_pAllocator((char*)ptr, __size_pAllocator); vkUtilsPack_VkAllocationCallbacks(&stream_pAllocator, pAllocator); }
+    custom_unpack pAllocator InplaceStream stream_pAllocator((char*)(inptr_pAllocator.get()), size_pAllocator); inptr_pAllocator_unpacked = vkUtilsUnpack_VkAllocationCallbacks(&stream_pAllocator);
+
+vkResetCommandPool
+
+vkAllocateCommandBuffers
+    dir pAllocateInfo in
+    var_flag pAllocateInfo nullAllowed
+    len pAllocateInfo vkUtilsEncodingSize_VkCommandBufferAllocateInfo(pAllocateInfo)
+    custom_pack pAllocateInfo { InplaceStream stream_pAllocateInfo((char*)ptr, __size_pAllocateInfo); vkUtilsPack_VkCommandBufferAllocateInfo(&stream_pAllocateInfo, pAllocateInfo); }
+    custom_unpack pAllocateInfo InplaceStream stream_pAllocateInfo((char*)(inptr_pAllocateInfo.get()), size_pAllocateInfo); inptr_pAllocateInfo_unpacked = vkUtilsUnpack_VkCommandBufferAllocateInfo(&stream_pAllocateInfo);
+    dir pCommandBuffers out
+    var_flag pCommandBuffers nullAllowed
+    len pCommandBuffers (pAllocateInfo->commandBufferCount) * sizeof(VkCommandBuffer)
+
+vkFreeCommandBuffers
+    dir pCommandBuffers in
+    var_flag pCommandBuffers nullAllowed
+    len pCommandBuffers commandBufferCount * sizeof(VkCommandBuffer)
+
+vkBeginCommandBuffer
+    dir pBeginInfo in
+    var_flag pBeginInfo nullAllowed
+    len pBeginInfo vkUtilsEncodingSize_VkCommandBufferBeginInfo(pBeginInfo)
+    custom_pack pBeginInfo { InplaceStream stream_pBeginInfo((char*)ptr, __size_pBeginInfo); vkUtilsPack_VkCommandBufferBeginInfo(&stream_pBeginInfo, pBeginInfo); }
+    custom_unpack pBeginInfo InplaceStream stream_pBeginInfo((char*)(inptr_pBeginInfo.get()), size_pBeginInfo); inptr_pBeginInfo_unpacked = vkUtilsUnpack_VkCommandBufferBeginInfo(&stream_pBeginInfo);
+
+vkEndCommandBuffer
+
+vkResetCommandBuffer
+
+vkCmdBindPipeline
+
+vkCmdSetViewport
+    dir pViewports in
+    var_flag pViewports nullAllowed
+    len pViewports viewportCount * vkUtilsEncodingSize_VkViewport(pViewports)
+    custom_pack pViewports { InplaceStream stream_pViewports((char*)ptr, __size_pViewports); vkUtilsPack_VkViewport(&stream_pViewports, pViewports); }
+    custom_unpack pViewports InplaceStream stream_pViewports((char*)(inptr_pViewports.get()), size_pViewports); inptr_pViewports_unpacked = vkUtilsUnpack_VkViewport(&stream_pViewports);
+
+vkCmdSetScissor
+    dir pScissors in
+    var_flag pScissors nullAllowed
+    len pScissors scissorCount * vkUtilsEncodingSize_VkRect2D(pScissors)
+    custom_pack pScissors { InplaceStream stream_pScissors((char*)ptr, __size_pScissors); vkUtilsPack_VkRect2D(&stream_pScissors, pScissors); }
+    custom_unpack pScissors InplaceStream stream_pScissors((char*)(inptr_pScissors.get()), size_pScissors); inptr_pScissors_unpacked = vkUtilsUnpack_VkRect2D(&stream_pScissors);
+
+vkCmdSetLineWidth
+
+vkCmdSetDepthBias
+
+
+vkCmdSetDepthBounds
+
+vkCmdSetStencilCompareMask
+
+vkCmdSetStencilWriteMask
+
+vkCmdSetStencilReference
+
+vkCmdBindDescriptorSets
+    dir pDescriptorSets in
+    var_flag pDescriptorSets nullAllowed
+    len pDescriptorSets descriptorSetCount * sizeof(VkDescriptorSet)
+    dir pDynamicOffsets in
+    var_flag pDynamicOffsets nullAllowed
+    len pDynamicOffsets dynamicOffsetCount * sizeof(u32)
+
+vkCmdBindIndexBuffer
+
+vkCmdBindVertexBuffers
+    dir pBuffers in
+    var_flag pBuffers nullAllowed
+    len pBuffers bindingCount * sizeof(VkBuffer)
+    dir pOffsets in
+    var_flag pOffsets nullAllowed
+    len pOffsets bindingCount * sizeof(VkDeviceSize)
+
+vkCmdDraw
+
+vkCmdDrawIndexed
+
+vkCmdDrawIndirect
+
+vkCmdDrawIndexedIndirect
+
+vkCmdDispatch
+
+vkCmdDispatchIndirect
+
+vkCmdCopyBuffer
+    dir pRegions in
+    var_flag pRegions nullAllowed
+    len pRegions regionCount * vkUtilsEncodingSize_VkBufferCopy(pRegions)
+    custom_pack pRegions { InplaceStream stream_pRegions((char*)ptr, __size_pRegions); vkUtilsPack_VkBufferCopy(&stream_pRegions, pRegions); }
+    custom_unpack pRegions InplaceStream stream_pRegions((char*)(inptr_pRegions.get()), size_pRegions); inptr_pRegions_unpacked = vkUtilsUnpack_VkBufferCopy(&stream_pRegions);
+
+vkCmdCopyImage
+    dir pRegions in
+    var_flag pRegions nullAllowed
+    len pRegions regionCount * vkUtilsEncodingSize_VkImageCopy(pRegions)
+    custom_pack pRegions { InplaceStream stream_pRegions((char*)ptr, __size_pRegions); vkUtilsPack_VkImageCopy(&stream_pRegions, pRegions); }
+    custom_unpack pRegions InplaceStream stream_pRegions((char*)(inptr_pRegions.get()), size_pRegions); inptr_pRegions_unpacked = vkUtilsUnpack_VkImageCopy(&stream_pRegions);
+
+vkCmdBlitImage
+    dir pRegions in
+    var_flag pRegions nullAllowed
+    len pRegions regionCount * vkUtilsEncodingSize_VkImageBlit(pRegions)
+    custom_pack pRegions { InplaceStream stream_pRegions((char*)ptr, __size_pRegions); vkUtilsPack_VkImageBlit(&stream_pRegions, pRegions); }
+    custom_unpack pRegions InplaceStream stream_pRegions((char*)(inptr_pRegions.get()), size_pRegions); inptr_pRegions_unpacked = vkUtilsUnpack_VkImageBlit(&stream_pRegions);
+
+vkCmdCopyBufferToImage
+    dir pRegions in
+    var_flag pRegions nullAllowed
+    len pRegions regionCount * vkUtilsEncodingSize_VkBufferImageCopy(pRegions)
+    custom_pack pRegions { InplaceStream stream_pRegions((char*)ptr, __size_pRegions); vkUtilsPack_VkBufferImageCopy(&stream_pRegions, pRegions); }
+    custom_unpack pRegions InplaceStream stream_pRegions((char*)(inptr_pRegions.get()), size_pRegions); inptr_pRegions_unpacked = vkUtilsUnpack_VkBufferImageCopy(&stream_pRegions);
+
+vkCmdCopyImageToBuffer
+    dir pRegions in
+    var_flag pRegions nullAllowed
+    len pRegions regionCount * vkUtilsEncodingSize_VkBufferImageCopy(pRegions)
+    custom_pack pRegions { InplaceStream stream_pRegions((char*)ptr, __size_pRegions); vkUtilsPack_VkBufferImageCopy(&stream_pRegions, pRegions); }
+    custom_unpack pRegions InplaceStream stream_pRegions((char*)(inptr_pRegions.get()), size_pRegions); inptr_pRegions_unpacked = vkUtilsUnpack_VkBufferImageCopy(&stream_pRegions);
+
+vkCmdUpdateBuffer
+    dir pData in
+    var_flag pData nullAllowed
+    len pData dataSize * sizeof(char)
+
+vkCmdFillBuffer
+
+vkCmdClearColorImage
+    dir pColor in
+    var_flag pColor nullAllowed
+    len pColor vkUtilsEncodingSize_VkClearColorValue(pColor)
+    custom_pack pColor { InplaceStream stream_pColor((char*)ptr, __size_pColor); vkUtilsPack_VkClearColorValue(&stream_pColor, pColor); }
+    custom_unpack pColor InplaceStream stream_pColor((char*)(inptr_pColor.get()), size_pColor); inptr_pColor_unpacked = vkUtilsUnpack_VkClearColorValue(&stream_pColor);
+    dir pRanges in
+    var_flag pRanges nullAllowed
+    len pRanges rangeCount * vkUtilsEncodingSize_VkImageSubresourceRange(pRanges)
+    custom_pack pRanges { InplaceStream stream_pRanges((char*)ptr, __size_pRanges); vkUtilsPack_VkImageSubresourceRange(&stream_pRanges, pRanges); }
+    custom_unpack pRanges InplaceStream stream_pRanges((char*)(inptr_pRanges.get()), size_pRanges); inptr_pRanges_unpacked = vkUtilsUnpack_VkImageSubresourceRange(&stream_pRanges);
+
+vkCmdClearDepthStencilImage
+    dir pDepthStencil in
+    var_flag pDepthStencil nullAllowed
+    len pDepthStencil vkUtilsEncodingSize_VkClearDepthStencilValue(pDepthStencil)
+    custom_pack pDepthStencil { InplaceStream stream_pDepthStencil((char*)ptr, __size_pDepthStencil); vkUtilsPack_VkClearDepthStencilValue(&stream_pDepthStencil, pDepthStencil); }
+    custom_unpack pDepthStencil InplaceStream stream_pDepthStencil((char*)(inptr_pDepthStencil.get()), size_pDepthStencil); inptr_pDepthStencil_unpacked = vkUtilsUnpack_VkClearDepthStencilValue(&stream_pDepthStencil);
+    dir pRanges in
+    var_flag pRanges nullAllowed
+    len pRanges rangeCount * vkUtilsEncodingSize_VkImageSubresourceRange(pRanges)
+    custom_pack pRanges { InplaceStream stream_pRanges((char*)ptr, __size_pRanges); vkUtilsPack_VkImageSubresourceRange(&stream_pRanges, pRanges); }
+    custom_unpack pRanges InplaceStream stream_pRanges((char*)(inptr_pRanges.get()), size_pRanges); inptr_pRanges_unpacked = vkUtilsUnpack_VkImageSubresourceRange(&stream_pRanges);
+
+vkCmdClearAttachments
+    dir pAttachments in
+    var_flag pAttachments nullAllowed
+    len pAttachments attachmentCount * vkUtilsEncodingSize_VkClearAttachment(pAttachments)
+    custom_pack pAttachments { InplaceStream stream_pAttachments((char*)ptr, __size_pAttachments); vkUtilsPack_VkClearAttachment(&stream_pAttachments, pAttachments); }
+    custom_unpack pAttachments InplaceStream stream_pAttachments((char*)(inptr_pAttachments.get()), size_pAttachments); inptr_pAttachments_unpacked = vkUtilsUnpack_VkClearAttachment(&stream_pAttachments);
+    dir pRects in
+    var_flag pRects nullAllowed
+    len pRects rectCount * vkUtilsEncodingSize_VkClearRect(pRects)
+    custom_pack pRects { InplaceStream stream_pRects((char*)ptr, __size_pRects); vkUtilsPack_VkClearRect(&stream_pRects, pRects); }
+    custom_unpack pRects InplaceStream stream_pRects((char*)(inptr_pRects.get()), size_pRects); inptr_pRects_unpacked = vkUtilsUnpack_VkClearRect(&stream_pRects);
+
+vkCmdResolveImage
+    dir pRegions in
+    var_flag pRegions nullAllowed
+    len pRegions regionCount * vkUtilsEncodingSize_VkImageResolve(pRegions)
+    custom_pack pRegions { InplaceStream stream_pRegions((char*)ptr, __size_pRegions); vkUtilsPack_VkImageResolve(&stream_pRegions, pRegions); }
+    custom_unpack pRegions InplaceStream stream_pRegions((char*)(inptr_pRegions.get()), size_pRegions); inptr_pRegions_unpacked = vkUtilsUnpack_VkImageResolve(&stream_pRegions);
+
+vkCmdSetEvent
+
+vkCmdResetEvent
+
+vkCmdWaitEvents
+    dir pEvents in
+    var_flag pEvents nullAllowed
+    len pEvents eventCount * sizeof(VkEvent)
+    dir pMemoryBarriers in
+    var_flag pMemoryBarriers nullAllowed
+    len pMemoryBarriers memoryBarrierCount * vkUtilsEncodingSize_VkMemoryBarrier(pMemoryBarriers)
+    custom_pack pMemoryBarriers { InplaceStream stream_pMemoryBarriers((char*)ptr, __size_pMemoryBarriers); vkUtilsPack_VkMemoryBarrier(&stream_pMemoryBarriers, pMemoryBarriers); }
+    custom_unpack pMemoryBarriers InplaceStream stream_pMemoryBarriers((char*)(inptr_pMemoryBarriers.get()), size_pMemoryBarriers); inptr_pMemoryBarriers_unpacked = vkUtilsUnpack_VkMemoryBarrier(&stream_pMemoryBarriers);
+    dir pBufferMemoryBarriers in
+    var_flag pBufferMemoryBarriers nullAllowed
+    len pBufferMemoryBarriers bufferMemoryBarrierCount * vkUtilsEncodingSize_VkBufferMemoryBarrier(pBufferMemoryBarriers)
+    custom_pack pBufferMemoryBarriers { InplaceStream stream_pBufferMemoryBarriers((char*)ptr, __size_pBufferMemoryBarriers); vkUtilsPack_VkBufferMemoryBarrier(&stream_pBufferMemoryBarriers, pBufferMemoryBarriers); }
+    custom_unpack pBufferMemoryBarriers InplaceStream stream_pBufferMemoryBarriers((char*)(inptr_pBufferMemoryBarriers.get()), size_pBufferMemoryBarriers); inptr_pBufferMemoryBarriers_unpacked = vkUtilsUnpack_VkBufferMemoryBarrier(&stream_pBufferMemoryBarriers);
+    dir pImageMemoryBarriers in
+    var_flag pImageMemoryBarriers nullAllowed
+    len pImageMemoryBarriers imageMemoryBarrierCount * vkUtilsEncodingSize_VkImageMemoryBarrier(pImageMemoryBarriers)
+    custom_pack pImageMemoryBarriers { InplaceStream stream_pImageMemoryBarriers((char*)ptr, __size_pImageMemoryBarriers); vkUtilsPack_VkImageMemoryBarrier(&stream_pImageMemoryBarriers, pImageMemoryBarriers); }
+    custom_unpack pImageMemoryBarriers InplaceStream stream_pImageMemoryBarriers((char*)(inptr_pImageMemoryBarriers.get()), size_pImageMemoryBarriers); inptr_pImageMemoryBarriers_unpacked = vkUtilsUnpack_VkImageMemoryBarrier(&stream_pImageMemoryBarriers);
+
+vkCmdPipelineBarrier
+    dir pMemoryBarriers in
+    var_flag pMemoryBarriers nullAllowed
+    len pMemoryBarriers memoryBarrierCount * vkUtilsEncodingSize_VkMemoryBarrier(pMemoryBarriers)
+    custom_pack pMemoryBarriers { InplaceStream stream_pMemoryBarriers((char*)ptr, __size_pMemoryBarriers); vkUtilsPack_VkMemoryBarrier(&stream_pMemoryBarriers, pMemoryBarriers); }
+    custom_unpack pMemoryBarriers InplaceStream stream_pMemoryBarriers((char*)(inptr_pMemoryBarriers.get()), size_pMemoryBarriers); inptr_pMemoryBarriers_unpacked = vkUtilsUnpack_VkMemoryBarrier(&stream_pMemoryBarriers);
+    dir pBufferMemoryBarriers in
+    var_flag pBufferMemoryBarriers nullAllowed
+    len pBufferMemoryBarriers bufferMemoryBarrierCount * vkUtilsEncodingSize_VkBufferMemoryBarrier(pBufferMemoryBarriers)
+    custom_pack pBufferMemoryBarriers { InplaceStream stream_pBufferMemoryBarriers((char*)ptr, __size_pBufferMemoryBarriers); vkUtilsPack_VkBufferMemoryBarrier(&stream_pBufferMemoryBarriers, pBufferMemoryBarriers); }
+    custom_unpack pBufferMemoryBarriers InplaceStream stream_pBufferMemoryBarriers((char*)(inptr_pBufferMemoryBarriers.get()), size_pBufferMemoryBarriers); inptr_pBufferMemoryBarriers_unpacked = vkUtilsUnpack_VkBufferMemoryBarrier(&stream_pBufferMemoryBarriers);
+    dir pImageMemoryBarriers in
+    var_flag pImageMemoryBarriers nullAllowed
+    len pImageMemoryBarriers imageMemoryBarrierCount * vkUtilsEncodingSize_VkImageMemoryBarrier(pImageMemoryBarriers)
+    custom_pack pImageMemoryBarriers { InplaceStream stream_pImageMemoryBarriers((char*)ptr, __size_pImageMemoryBarriers); vkUtilsPack_VkImageMemoryBarrier(&stream_pImageMemoryBarriers, pImageMemoryBarriers); }
+    custom_unpack pImageMemoryBarriers InplaceStream stream_pImageMemoryBarriers((char*)(inptr_pImageMemoryBarriers.get()), size_pImageMemoryBarriers); inptr_pImageMemoryBarriers_unpacked = vkUtilsUnpack_VkImageMemoryBarrier(&stream_pImageMemoryBarriers);
+
+vkCmdBeginQuery
+
+vkCmdEndQuery
+
+vkCmdResetQueryPool
+
+vkCmdWriteTimestamp
+
+vkCmdCopyQueryPoolResults
+
+vkCmdPushConstants
+    dir pValues in
+    var_flag pValues nullAllowed
+    len pValues size * sizeof(char)
+
+vkCmdBeginRenderPass
+    dir pRenderPassBegin in
+    var_flag pRenderPassBegin nullAllowed
+    len pRenderPassBegin vkUtilsEncodingSize_VkRenderPassBeginInfo(pRenderPassBegin)
+    custom_pack pRenderPassBegin { InplaceStream stream_pRenderPassBegin((char*)ptr, __size_pRenderPassBegin); vkUtilsPack_VkRenderPassBeginInfo(&stream_pRenderPassBegin, pRenderPassBegin); }
+    custom_unpack pRenderPassBegin InplaceStream stream_pRenderPassBegin((char*)(inptr_pRenderPassBegin.get()), size_pRenderPassBegin); inptr_pRenderPassBegin_unpacked = vkUtilsUnpack_VkRenderPassBeginInfo(&stream_pRenderPassBegin);
+
+vkCmdNextSubpass
+
+vkCmdEndRenderPass
+
+vkCmdExecuteCommands
+    dir pCommandBuffers in
+    var_flag pCommandBuffers nullAllowed
+    len pCommandBuffers commandBufferCount * sizeof(VkCommandBuffer)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
