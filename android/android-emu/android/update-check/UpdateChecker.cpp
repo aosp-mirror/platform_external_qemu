@@ -59,7 +59,7 @@ static const char kNewerVersionMessage[] =
  - Start Android Studio
  - Select menu "Tools > Android > SDK Manager"
  - Click "SDK Tools" tab
- - Check "Android SDK Tools" checkbox
+ - Check "Android Emulator" checkbox
  - Click "OK"
 )";
 
