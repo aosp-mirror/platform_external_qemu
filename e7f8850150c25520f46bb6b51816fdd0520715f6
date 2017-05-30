@@ -68,6 +68,30 @@
       "revId": "e7f8850150c25520f46bb6b51816fdd0520715f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "20366851_79cb321a",
+        "filename": "android/android-emu/android/featurecontrol/HWMatching.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-05-30T19:48:25Z",
+      "side": 1,
+      "message": "Yeah, the \"String\" part of ParseFromString is to still parse binary protobufs, but use a std::string as the source.",
+      "parentUuid": "2ac818ef_423df44d",
+      "range": {
+        "startLine": 387,
+        "startChar": 22,
+        "endLine": 387,
+        "endChar": 37
+      },
+      "revId": "e7f8850150c25520f46bb6b51816fdd0520715f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
