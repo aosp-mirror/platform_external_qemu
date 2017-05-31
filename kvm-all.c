@@ -1926,7 +1926,6 @@ int kvm_cpu_exec(CPUState *cpu)
         }
 
         run_ret = kvm_vcpu_ioctl(cpu, KVM_RUN, 0);
-
         attrs = kvm_arch_post_run(cpu, run);
 
         if (run_ret < 0) {
@@ -1934,6 +1933,8 @@ int kvm_cpu_exec(CPUState *cpu)
                 DPRINTF("io window exit\n");
                 ret = EXCP_INTERRUPT;
                 break;
+            } else if (run_ret == -EFAULT) {
+                printf("oops\n");
             }
             fprintf(stderr, "error: kvm run failed %s\n",
                     strerror(-run_ret));
