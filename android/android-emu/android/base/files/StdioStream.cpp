@@ -17,7 +17,7 @@ namespace android {
 namespace base {
 
 StdioStream::StdioStream(FILE* file, Ownership ownership) :
-    mFile(file), mOwnership() {}
+    mFile(file), mOwnership(ownership) {}
 
 StdioStream::StdioStream(StdioStream&& other)
     : mFile(other.mFile), mOwnership(other.mOwnership) {
