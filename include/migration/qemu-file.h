@@ -88,6 +88,14 @@ typedef size_t (QEMURamSaveFunc)(QEMUFile *f, void *opaque,
                                ram_addr_t offset,
                                size_t size,
                                uint64_t *bytes_sent);
+typedef size_t (QEMURamSaveExFunc)(QEMUFile *f, void *opaque,
+                               ram_addr_t block_offset, const char* block_id,
+                               const void* block_host_ptr,
+                               ram_addr_t offset,
+                               size_t size,
+                               uint64_t *bytes_sent);
+
+typedef void (QEMUCloseFunc)(QEMUFile *f, void *opaque);
 
 /*
  * Return a QEMUFile for comms in the opposite direction
@@ -116,6 +124,8 @@ typedef struct QEMUFileHooks {
     QEMURamHookFunc *after_ram_iterate;
     QEMURamHookFunc *hook_ram_load;
     QEMURamSaveFunc *save_page;
+    QEMURamSaveExFunc *save_page_ex;
+    QEMUCloseFunc *close;
 } QEMUFileHooks;
 
 QEMUFile *qemu_fopen_ops(void *opaque, const QEMUFileOps *ops);

@@ -2028,6 +2028,11 @@ ram_addr_t qemu_ram_addr_from_host(void *ptr)
     return block->offset + offset;
 }
 
+void* qemu_host_from_ram_block(RAMBlock* block)
+{
+    return block->host;
+}
+
 /* Called within RCU critical section.  */
 static void notdirty_mem_write(void *opaque, hwaddr ram_addr,
                                uint64_t val, unsigned size)
