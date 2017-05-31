@@ -211,12 +211,21 @@ void ram_control_load_hook(QEMUFile *f, uint64_t flags, void *data)
 }
 
 size_t ram_control_save_page(QEMUFile *f, ram_addr_t block_offset,
+                             const char* block_id, const void* block_host_ptr,
                              ram_addr_t offset, size_t size,
                              uint64_t *bytes_sent)
 {
-    if (f->hooks && f->hooks->save_page) {
-        int ret = f->hooks->save_page(f, f->opaque, block_offset,
+    if (f->hooks) {
+        int ret;
+        if (f->hooks->save_page_ex) {
+            ret = f->hooks->save_page_ex(f, f->opaque, block_offset, block_id,
+                                         block_host_ptr, offset, size, bytes_sent);
+        } else if (f->hooks->save_page) {
+            ret = f->hooks->save_page(f, f->opaque, block_offset,
                                       offset, size, bytes_sent);
+        } else {
+            return RAM_SAVE_CONTROL_NOT_SUPP;
+        }
 
         if (ret != RAM_SAVE_CONTROL_DELAYED) {
             if (bytes_sent && *bytes_sent > 0) {
@@ -286,6 +295,10 @@ int qemu_fclose(QEMUFile *f)
     int ret;
     qemu_fflush(f);
     ret = qemu_file_get_error(f);
+
+    if (f->hooks && f->hooks->close) {
+        f->hooks->close(f, f->opaque);
+    }
 
     if (f->ops->close) {
         int ret2 = f->ops->close(f->opaque);
