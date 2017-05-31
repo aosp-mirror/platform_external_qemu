@@ -1409,6 +1409,7 @@ void memory_region_init_ram_ptr(MemoryRegion *mr,
                                 uint64_t size,
                                 void *ptr)
 {
+    fprintf(stderr, "%s: omfg, init ram from hostptr!!!!!!!!!!!!!!!11111\n", __func__);
     memory_region_init(mr, owner, name, size);
     mr->ram = true;
     mr->terminates = true;

@@ -243,6 +243,7 @@ static int kvm_set_user_memory_region(KVMMemoryListener *kml, KVMSlot *slot)
     mem.flags = slot->flags;
 
     if (slot->memory_size && mem.flags & KVM_MEM_READONLY) {
+        fprintf(stderr, "%s: set slot size 0 if readonly\n", __func__);
         /* Set the slot size to 0 before setting the slot to the desired
          * value. This is needed based on KVM commit 75d61fbc. */
         mem.memory_size = 0;
@@ -352,9 +353,11 @@ static int kvm_mem_flags(MemoryRegion *mr)
     int flags = 0;
 
     if (memory_region_get_dirty_log_mask(mr) != 0) {
+        fprintf(stderr, "%s: set log dirty pages\n", __func__);
         flags |= KVM_MEM_LOG_DIRTY_PAGES;
     }
     if (readonly && kvm_readonly_mem_allowed) {
+        fprintf(stderr, "%s: set readonly\n", __func__);
         flags |= KVM_MEM_READONLY;
     }
     return flags;
@@ -371,6 +374,8 @@ static int kvm_slot_update_flags(KVMMemoryListener *kml, KVMSlot *mem,
     /* If nothing changed effectively, no need to issue ioctl */
     if (mem->flags == old_flags) {
         return 0;
+    } else {
+        fprintf(stderr, "%s: ened reset flags\n", __func__);
     }
 
     return kvm_set_user_memory_region(kml, mem);

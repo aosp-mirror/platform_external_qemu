@@ -39,7 +39,10 @@
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
 
+#include "exec/address-spaces.h"
+
 #include <assert.h>
+#include <dlfcn.h>
 #include <glib.h>
 
 /* Set to > 0 for debug output */
@@ -249,6 +252,7 @@ static const PipeOperations pipe_ops_v1;
 typedef struct {
     SysBusDevice parent;
     MemoryRegion iomem;
+    MemoryRegion hostmem;
     qemu_irq irq;
 
     /* TODO: roll into shared state */
@@ -1603,7 +1607,21 @@ static void goldfish_pipe_post_load(void* opaque) {
 
 static GoldfishPipeState* s_goldfish_pipe_state = NULL;
 
+typedef void* (*vk_test_func_t)();
+
+vk_test_func_t test_func;
 static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
+
+    void* lib = dlopen("./test_vulkan.so", RTLD_NOW);
+    if (!lib) { fprintf(stderr, "%s: dlopen failed: %s\n", __func__, dlerror()); }
+
+    fprintf(stderr, "%s: vulkan lib %p\n", __func__, lib);
+    test_func = (vk_test_func_t)dlsym(lib, "test_vulkan_mapped_mem");
+    fprintf(stderr, "%s: vulkan test func %p\n", __func__, test_func);
+    // test_func lib creates a vulkan instance and host coherent mapped memory,
+    // returning the ptr.
+    void* testptr = test_func();
+
     SysBusDevice* sbdev = SYS_BUS_DEVICE(dev);
     GoldfishPipeState* s = GOLDFISH_PIPE(dev);
     s_goldfish_pipe_state = s;
@@ -1629,6 +1647,18 @@ static void goldfish_pipe_realize(DeviceState* dev, Error** errp) {
 
     memory_region_init_io(&s->iomem, OBJECT(s), &goldfish_pipe_iomem_ops, s,
                           "goldfish_pipe", 0x2000 /*TODO: ?how big?*/);
+
+
+    fprintf(stderr, "%s: adding hostmem\n", __func__);
+    // void* hostptr = (void*)qemu_memalign(0x1000, 0x1000);
+    // fprintf(stderr, "%s: hostptr: %p", __func__, hostptr);
+
+    void* hostptr = testptr;
+    memset(hostptr, 0xaa, 0x1000);
+    memory_region_init_ram_ptr(&s->hostmem, OBJECT(s), "goldfish_pipe_hostmem", 0x1000, hostptr);
+    memory_region_add_subregion_overlap(get_system_memory(), 0xff030000, &s->hostmem, 666);
+    fprintf(stderr, "%s: added hostmem\n", __func__);
+
     sysbus_init_mmio(sbdev, &s->iomem);
     sysbus_init_irq(sbdev, &s->irq);
 
