@@ -787,8 +787,8 @@ static int ram_save_page(QEMUFile *f, PageSearchStatus *pss,
 
     /* In doubt sent page as normal */
     bytes_xmit = 0;
-    ret = ram_control_save_page(f, block->offset,
-                           offset, TARGET_PAGE_SIZE, &bytes_xmit);
+    ret = ram_control_save_page(f, block->offset, block->idstr, block->host,
+                                offset, TARGET_PAGE_SIZE, &bytes_xmit);
     if (bytes_xmit) {
         *bytes_transferred += bytes_xmit;
         pages = 1;
@@ -965,7 +965,7 @@ static int ram_save_compressed_page(QEMUFile *f, PageSearchStatus *pss,
 
     p = block->host + offset;
 
-    ret = ram_control_save_page(f, block->offset,
+    ret = ram_control_save_page(f, block->offset, block->idstr, block->host,
                                 offset, TARGET_PAGE_SIZE, &bytes_xmit);
     if (bytes_xmit) {
         *bytes_transferred += bytes_xmit;
