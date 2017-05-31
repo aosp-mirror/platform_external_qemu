@@ -42,7 +42,7 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
             // They are loaded by GlobalNameSpace before loading
             // share groups
             TextureData* texData = (TextureData*)data.get();
-            NamedObjectPtr texObj = globalNameSpace->
+            const NamedObjectPtr& texObj = globalNameSpace->
                     getGlobalObjectFromLoad(texData->globalName);
             texData->globalName = texObj->getGlobalName();
             setGlobalObject(localName, texObj);
@@ -230,33 +230,34 @@ void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
 }
 
 void GlobalNameSpace::onSave(android::base::Stream* stream,
-        std::function<void(SaveableTexture*, android::base::Stream*)> saver) {
+        SaveableTexture::saver_t saver) {
+    android::base::SmallFixedVector<unsigned char, 128> buffer;
     saveCollection(stream, m_textureMap,
-            [saver](android::base::Stream* stream,
+            [saver, &buffer](android::base::Stream* stream,
                 const std::pair<const unsigned int, SaveableTexturePtr>& tex) {
                 stream->putBe32(tex.first);
-                saver(tex.second.get(), stream);
+                saver(tex.second.get(), stream, &buffer);
             });
     m_textureMap.clear();
 }
 
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
-        std::function<SaveableTexture*(android::base::Stream*,
-            GlobalNameSpace*)> loader) {
+                             SaveableTexture::loader_t loader) {
     assert(m_textureMap.size() == 0);
-    loadCollection(stream, &m_textureMap, [loader, this](
+    android::base::SmallFixedVector<unsigned char, 128> buffer;
+    loadCollection(stream, &m_textureMap, [loader, &buffer, this](
             android::base::Stream* stream) {
         unsigned int globalName = stream->getBe32();
-        SaveableTexture* saveableTexture = loader(stream, this);
+        SaveableTexture* saveableTexture = loader(stream, this, &buffer);
         return std::make_pair(globalName, SaveableTexturePtr(saveableTexture));
     });
 }
 
 void GlobalNameSpace::postLoad(android::base::Stream* stream) {
-    m_textureMap.clear();
+    decltype(m_textureMap)().swap(m_textureMap);
 }
 
-NamedObjectPtr GlobalNameSpace::getGlobalObjectFromLoad(
+const NamedObjectPtr& GlobalNameSpace::getGlobalObjectFromLoad(
         unsigned int oldGlobalName) {
     assert(m_textureMap.count(oldGlobalName));
     return m_textureMap[oldGlobalName]->getGlobalObject();

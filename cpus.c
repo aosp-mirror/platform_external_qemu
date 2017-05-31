@@ -910,6 +910,7 @@ static void qemu_kvm_init_cpu_signals(CPUState *cpu)
     pthread_sigmask(SIG_BLOCK, NULL, &set);
     sigdelset(&set, SIG_IPI);
     sigdelset(&set, SIGBUS);
+    sigdelset(&set, SIGSEGV);
     r = kvm_set_signal_mask(cpu, &set);
     if (r) {
         fprintf(stderr, "kvm_set_signal_mask: %s\n", strerror(-r));

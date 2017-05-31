@@ -55,8 +55,8 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
 static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-static void saveTexture(SaveableTexture* texture, android::base::Stream* stream);
-static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace);
+static void saveTexture(SaveableTexture* texture, android::base::Stream* stream, SaveableTexture::Buffer* buffer);
+static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace, SaveableTexture::Buffer* buffer);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -150,13 +150,15 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
     return ret;
 }
 
-static void saveTexture(SaveableTexture* texture, android::base::Stream* stream) {
-    texture->onSave(stream);
+static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
+                        SaveableTexture::Buffer* buffer) {
+    texture->onSave(stream, buffer);
 }
 
 static SaveableTexture* loadTexture(android::base::Stream* stream,
-        GlobalNameSpace* globalNameSpace) {
-    return new SaveableTexture(stream, globalNameSpace);
+                                    GlobalNameSpace* globalNameSpace,
+                                    SaveableTexture::Buffer* buffer) {
+    return new SaveableTexture(stream, globalNameSpace, buffer);
 }
 
 GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
