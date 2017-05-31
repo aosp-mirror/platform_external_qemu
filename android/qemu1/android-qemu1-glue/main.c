@@ -147,20 +147,18 @@ int main(int argc, char **argv) {
     }
 
     const char* serialPrefix = androidHwConfig_getKernelSerialPrefix(hw);
-    AndroidGlesEmulationMode glesMode = kAndroidGlesEmulationOff;
 
-    if (!strcmp(android_hw->hw_gpu_mode, "guest")) {
-        glesMode = kAndroidGlesEmulationGuest;
-    } else if (android_hw->hw_gpu_enabled) {
-        glesMode = kAndroidGlesEmulationHost;
-    }
+    RendererConfig rendererConfig;
+    configAndStartRenderer(
+        avd, opts, hw, WINSYS_GLESBACKEND_PREFERENCE_AUTO,
+        &rendererConfig);
 
     int apiLevel = avdInfo_getApiLevel(avd);
     mem_map mem = { 0 };
     char* kernelParameters = emulator_getKernelParameters(
         opts, kTargetArch, apiLevel, serialPrefix, hw->kernel_parameters,
-        glesMode,
-        0x2000, /* ro.opengles.version */
+        rendererConfig.glesMode,
+        rendererConfig.bootPropOpenglesVersion, /* ro.opengles.version */
         0ULL, /* glFramebufferSizeBytes */
         mem,
         false /* isQemu2 */);
