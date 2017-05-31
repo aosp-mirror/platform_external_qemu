@@ -192,7 +192,10 @@ void hvf_set_phys_mem(MemoryRegionSection* section, bool add) {
     hvf_slot *mem;
     MemoryRegion *area = section->mr;
 
-    if (!memory_region_is_ram(area)) return;
+    if (!memory_region_is_ram(area) 
+        && section->offset_within_address_space!= 0xff011000) {
+            return;
+        }
 
     mem = hvf_find_overlap_slot(
             section->offset_within_address_space,
