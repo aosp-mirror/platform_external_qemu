@@ -46,6 +46,7 @@ LOCAL_SRC_FILES := \
     qemu-vm-operations-impl.c \
     qemu-window-agent-impl.c \
     snapshot_compression.cpp \
+    snapshot_hooks.cpp \
     telephony/modem_init.c \
     utils/stream.cpp \
 
