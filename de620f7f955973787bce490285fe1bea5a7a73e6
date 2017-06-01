@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3645321_b9e3a71d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/VkImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-01T20:29:59Z",
+      "side": 1,
+      "message": "please wrap these into a struct in a LazyInstance\u003c\u003e",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 86
+      },
+      "revId": "de620f7f955973787bce490285fe1bea5a7a73e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d3aa334_4a0b3551",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/VkImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-01T20:29:59Z",
+      "side": 1,
+      "message": "I don\u0027t see any deletes - are these caches going to live forever?",
+      "range": {
+        "startLine": 18,
+        "startChar": 40,
+        "endLine": 18,
+        "endChar": 43
+      },
+      "revId": "de620f7f955973787bce490285fe1bea5a7a73e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
