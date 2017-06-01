@@ -25,6 +25,7 @@
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #include "iphlpapi.h"
+#include "windns.h"
 #else
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -129,6 +130,42 @@ public:
 
     virtual int getSystemServerList(AddressList* out) override {
 #ifdef _WIN32
+        std::unordered_set<IpAddress> present;
+
+        //Get preferred DNS server IP from GetNetworkParams
+        FIXED_INFO *pFixedInfo;
+        ULONG outBufLen = sizeof (FIXED_INFO);;
+        pFixedInfo = (FIXED_INFO *) malloc(sizeof (FIXED_INFO));
+        if (pFixedInfo == NULL) {
+            DLOG(ERROR) << "Error allocating memory needed to call GetNetworkParams";
+            return -ENOENT;
+        }
+        if (GetNetworkParams(pFixedInfo, &outBufLen) ==
+            ERROR_BUFFER_OVERFLOW)
+        {
+            free(pFixedInfo);
+            pFixedInfo = (FIXED_INFO *) malloc(outBufLen);
+            if (pFixedInfo == NULL) {
+                DLOG(ERROR) << "Error allocating memory needed to call GetNetworkParams";
+                return -ENOENT;
+            }
+        }
+        DWORD retVal = GetNetworkParams(pFixedInfo, &outBufLen);
+        if (retVal == ERROR_SUCCESS)
+        {
+            IP_ADDR_STRING *pIPAddr;
+            pIPAddr = &pFixedInfo->DnsServerList;
+            do {
+                IpAddress ip(pIPAddr->IpAddress.String);
+                if (ip.valid()) {
+                    present.insert(ip);
+                    out->emplace_back(std::move(ip));
+                }
+                pIPAddr = pIPAddr->Next;
+            } while (pIPAddr);
+        }
+        free(pFixedInfo);
+
         std::string buffer;
         ULONG bufferLen = 0;
         DWORD ret = GetAdaptersAddresses(AF_UNSPEC, 0, nullptr, nullptr,
@@ -175,7 +212,6 @@ public:
 
         // The set of DNS server addresses already in the output list,
         // used to remove duplicates.
-        std::unordered_set<IpAddress> present;
 
         for (auto adapter = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(&buffer[0]);
              adapter != nullptr; adapter = adapter->Next) {
