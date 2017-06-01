@@ -187,6 +187,11 @@ void RenderThread::setFinished() {
     }
 }
 
+static VkResult vkCreateInstanceStub(const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* res) {
+    fprintf(stderr, "%s: call\n", __func__);
+    *res = (VkInstance)666;
+    return VK_SUCCESS;
+}
 intptr_t RenderThread::main() {
     if (mFinished) {
         DBG("Error: fail loading a RenderThread @%p\n", this);
@@ -204,6 +209,7 @@ intptr_t RenderThread::main() {
     tInfo.m_glDec.initGL(gles1_dispatch_get_proc_func, nullptr);
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
     initRenderControlContext(&tInfo.m_rcDec);
+    tInfo.m_vkDec.vkCreateInstance = vkCreateInstanceStub;
 
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
@@ -361,6 +367,17 @@ intptr_t RenderThread::main() {
             // renderControl decoder
             //
             last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
+                                        &stream, &checksumCalc);
+            if (last > 0) {
+                readBuf.consume(last);
+                progress = true;
+            }
+
+            //
+            // try to process some of the command buffer using the
+            // renderControl decoder
+            //
+            last = tInfo.m_vkDec.decode(readBuf.buf(), readBuf.validData(),
                                         &stream, &checksumCalc);
             if (last > 0) {
                 readBuf.consume(last);
