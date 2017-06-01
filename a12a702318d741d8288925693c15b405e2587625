@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "ce03beda_701d57de",
+        "filename": "slirp/ip_icmp_win32.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-06-01T17:20:26Z",
+      "side": 1,
+      "message": "You are right, we can\u0027t, I will remove, or change the copyright notice to GPL.",
+      "parentUuid": "440307c6_6639e6cf",
+      "range": {
+        "startLine": 26,
+        "startChar": 66,
+        "endLine": 27,
+        "endChar": 31
+      },
+      "revId": "a12a702318d741d8288925693c15b405e2587625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "843d28eb_e4330f71",
         "filename": "slirp/ip_icmp_win32.c",
         "patchSetId": 1
@@ -151,6 +175,30 @@
       "writtenOn": "2017-06-01T02:34:58Z",
       "side": 1,
       "message": "|off| can be negative here, is it ok? the previous while() could potentially subtract |m-\u003em_len| from |off| even if |off| is smaller",
+      "range": {
+        "startLine": 231,
+        "startChar": 34,
+        "endLine": 231,
+        "endChar": 37
+      },
+      "revId": "a12a702318d741d8288925693c15b405e2587625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4fc77f02_61803f5c",
+        "filename": "slirp/mbuf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-06-01T17:20:26Z",
+      "side": 1,
+      "message": "off is checked if line 220 :)",
+      "parentUuid": "4020a673_10a175e2",
       "range": {
         "startLine": 231,
         "startChar": 34,
