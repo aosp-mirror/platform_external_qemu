@@ -75,7 +75,6 @@ BUILD_TARGET_CFLAGS += -D__STDC_LIMIT_MACROS=1 -D__STDC_FORMAT_MACROS=1
 # Ensure we treat warnings as errors. For third-party libraries, this must
 # be disabled with -Wno-error
 ifneq (,$(filter windows linux, $(BUILD_TARGET_OS)))
-BUILD_TARGET_CFLAGS += -Werror
 endif
 
 # TODO: Remove this when the Breakpad headers have been fixed to not use

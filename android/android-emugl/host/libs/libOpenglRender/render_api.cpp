@@ -19,6 +19,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "OpenGLESDispatch/VkDispatch.h"
 #include "RenderLibImpl.h"
 
 #include <memory>
@@ -51,6 +52,8 @@ RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary()
         ERR("Failed to gles2_dispatch_init\n");
         return nullptr;
     }
+
+    initVkDispatch();
 
     return emugl::RenderLibPtr(new emugl::RenderLibImpl());
 }
