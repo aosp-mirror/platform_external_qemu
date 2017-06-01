@@ -362,6 +362,7 @@ VkApplicationInfo* vkUtilsUnpack_VkApplicationInfo(android::base::InplaceStream*
     data->pEngineName = string1d_unpack(stream); // char pEngineName
     stream->read(&data->engineVersion, 1 * 4); // u32 engineVersion
     stream->read(&data->apiVersion, 1 * 4); // u32 apiVersion
+    fprintf(stderr, "%s: engine api ver 0x%x 0x%x\n", __func__, data->engineVersion, data->apiVersion);
     return data;
 }
 
@@ -521,6 +522,9 @@ void vkUtilsPack_VkInstanceCreateInfo(android::base::InplaceStream* stream, cons
 VkInstanceCreateInfo* vkUtilsUnpack_VkInstanceCreateInfo(android::base::InplaceStream* stream) {
     VkInstanceCreateInfo* data = new VkInstanceCreateInfo;
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
+    if (data->sType == VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO) {
+        fprintf(stderr, "%s: is valid instance create info\n", __func__);
+    }
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->flags, 1 * 4); // VkInstanceCreateFlags flags
     { // VkApplicationInfo pApplicationInfo
@@ -530,6 +534,7 @@ VkInstanceCreateInfo* vkUtilsUnpack_VkInstanceCreateInfo(android::base::InplaceS
         data->pApplicationInfo = tmpArr;
     }
     stream->read(&data->enabledLayerCount, 1 * 4); // u32 enabledLayerCount
+    fprintf(stderr, "%s: layercount %u\n", __func__, data->enabledLayerCount);
     data->ppEnabledLayerNames = strings2d_unpack(stream, data->enabledLayerCount); // char ppEnabledLayerNames
     stream->read(&data->enabledExtensionCount, 1 * 4); // u32 enabledExtensionCount
     data->ppEnabledExtensionNames = strings2d_unpack(stream, data->enabledExtensionCount); // char ppEnabledExtensionNames

@@ -19,6 +19,7 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "OpenGLESDispatch/VkDispatch.h"
 #include "RenderLibImpl.h"
 
 #include <memory>

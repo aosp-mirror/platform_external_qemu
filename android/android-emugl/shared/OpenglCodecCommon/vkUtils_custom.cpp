@@ -15,7 +15,11 @@ void string1d_pack(InplaceStream* stream, const char* string) {
 
 const char* string1d_unpack(InplaceStream* stream) {
     const char* str = stream->getStringNullTerminated();
+    if (!str) return nullptr;
+    fprintf(stderr, "%s: str ptr %p\n", __func__, str);
+    fprintf(stderr, "%s: str %s\n", __func__, str);
     uint32_t len = strlen(str) + 1;
+    fprintf(stderr, "%s: len %u\n", __func__, len);
     char* res = new char[len];
     memcpy(res, str, len);
     return res;
@@ -36,6 +40,12 @@ void strings2d_pack(InplaceStream* stream, uint32_t count, const char* const* st
 }
 
 const char* const* strings2d_unpack(InplaceStream* stream, uint32_t count) {
+    if (count == 0) {
+        fprintf(stderr, "%s: 0 count, null char matrix\n", __func__);
+        return nullptr;
+    } else {
+        fprintf(stderr, "%s: count: %u\n", __func__, count);
+    }
     char** res = new char*[count];
     for (uint32_t i = 0; i < count; i++) {
         res[i] = (char*)string1d_unpack(stream);
