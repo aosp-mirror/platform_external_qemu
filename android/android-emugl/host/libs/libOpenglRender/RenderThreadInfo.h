@@ -22,6 +22,7 @@
 #include "GLESv1Decoder.h"
 #include "GLESv2Decoder.h"
 #include "renderControl_dec.h"
+#include "vk_dec.h"
 #include "StalePtrRegistry.h"
 #include "SyncThread.h"
 
@@ -57,6 +58,7 @@ struct RenderThreadInfo {
     GLESv1Decoder                   m_glDec;
     GLESv2Decoder                   m_gl2Dec;
     renderControl_decoder_context_t m_rcDec;
+    vk_decoder_context_t m_vkDec;
 
     // All the contexts that are created by this render thread.
     // New emulator manages contexts in guest process level,

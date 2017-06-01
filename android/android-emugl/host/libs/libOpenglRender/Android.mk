@@ -40,13 +40,17 @@ host_common_SRC_FILES := \
     SyncThread.cpp \
     TextureDraw.cpp \
     TextureResize.cpp \
+    VkImp.cpp \
+    VkHandleDispatch.cpp \
+    VkHostMarshaling.cpp \
+    VkVirtualHandle.cpp \
     WindowSurface.cpp \
     YUVConverter.cpp \
 
 ### host libOpenglRender #################################################
 $(call emugl-begin-shared-library,lib$(BUILD_TARGET_SUFFIX)OpenglRender)
 
-$(call emugl-import,libGLESv1_dec libGLESv2_dec lib_renderControl_dec libOpenglCodecCommon)
+$(call emugl-import,libGLESv1_dec libGLESv2_dec lib_renderControl_dec lib_vk_dec libOpenglCodecCommon)
 
 LOCAL_LDLIBS += $(host_common_LDLIBS)
 LOCAL_LDLIBS += $(ANDROID_EMU_LDLIBS)

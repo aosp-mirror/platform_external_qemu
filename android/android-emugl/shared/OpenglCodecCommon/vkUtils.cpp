@@ -1,5 +1,6 @@
 #include "vkUtils.h"
 #include "vkUtils_custom.h"
+#include "vk_types.h"
 #include <string.h>
 
 uint32_t vkUtilsEncodingSize_VkOffset2D(const VkOffset2D* data) {
@@ -305,14 +306,15 @@ uint32_t vkUtilsEncodingSize_VkSubmitInfo(const VkSubmitInfo* data) {
 void vkUtilsPack_VkSubmitInfo(android::base::InplaceStream* stream, const VkSubmitInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->write(&data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
-    stream->write(&data->pWaitDstStageMask, 1 * 4); // VkPipelineStageFlags pWaitDstStageMask
+    stream->write(data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
+    stream->write(data->pWaitDstStageMask, 1 * 4); // VkPipelineStageFlags pWaitDstStageMask
     stream->write(&data->commandBufferCount, 1 * 4); // u32 commandBufferCount
-    stream->write(&data->pCommandBuffers, data->commandBufferCount * 8); // VkCommandBuffer pCommandBuffers
+    stream->write(data->pCommandBuffers, data->commandBufferCount * 8); // VkCommandBuffer pCommandBuffers
     stream->write(&data->signalSemaphoreCount, 1 * 4); // u32 signalSemaphoreCount
-    stream->write(&data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
+    stream->write(data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
 }
 
 VkSubmitInfo* vkUtilsUnpack_VkSubmitInfo(android::base::InplaceStream* stream) {
@@ -320,12 +322,16 @@ VkSubmitInfo* vkUtilsUnpack_VkSubmitInfo(android::base::InplaceStream* stream) {
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->read(&data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
-    stream->read(&data->pWaitDstStageMask, 1 * 4); // VkPipelineStageFlags pWaitDstStageMask
+    data->pWaitSemaphores = new VkSemaphore[data->waitSemaphoreCount]; // VkSemaphore pWaitSemaphores
+    stream->read((char*)data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
+    data->pWaitDstStageMask = new VkPipelineStageFlags[1]; // VkPipelineStageFlags pWaitDstStageMask
+    stream->read((char*)data->pWaitDstStageMask, 1 * 4); // VkPipelineStageFlags pWaitDstStageMask
     stream->read(&data->commandBufferCount, 1 * 4); // u32 commandBufferCount
-    stream->read(&data->pCommandBuffers, data->commandBufferCount * 8); // VkCommandBuffer pCommandBuffers
+    data->pCommandBuffers = new VkCommandBuffer[data->commandBufferCount]; // VkCommandBuffer pCommandBuffers
+    stream->read((char*)data->pCommandBuffers, data->commandBufferCount * 8); // VkCommandBuffer pCommandBuffers
     stream->read(&data->signalSemaphoreCount, 1 * 4); // u32 signalSemaphoreCount
-    stream->read(&data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
+    data->pSignalSemaphores = new VkSemaphore[data->signalSemaphoreCount]; // VkSemaphore pSignalSemaphores
+    stream->read((char*)data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
     return data;
 }
 
@@ -345,7 +351,8 @@ uint32_t vkUtilsEncodingSize_VkApplicationInfo(const VkApplicationInfo* data) {
 void vkUtilsPack_VkApplicationInfo(android::base::InplaceStream* stream, const VkApplicationInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     string1d_pack(stream, data->pApplicationName); // char pApplicationName
     stream->write(&data->applicationVersion, 1 * 4); // u32 applicationVersion
     string1d_pack(stream, data->pEngineName); // char pEngineName
@@ -413,11 +420,12 @@ uint32_t vkUtilsEncodingSize_VkDeviceQueueCreateInfo(const VkDeviceQueueCreateIn
 void vkUtilsPack_VkDeviceQueueCreateInfo(android::base::InplaceStream* stream, const VkDeviceQueueCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDeviceQueueCreateFlags flags
     stream->write(&data->queueFamilyIndex, 1 * 4); // u32 queueFamilyIndex
     stream->write(&data->queueCount, 1 * 4); // u32 queueCount
-    stream->write(&data->pQueuePriorities, data->queueCount * 4); // f32 pQueuePriorities
+    stream->write(data->pQueuePriorities, data->queueCount * 4); // f32 pQueuePriorities
 }
 
 VkDeviceQueueCreateInfo* vkUtilsUnpack_VkDeviceQueueCreateInfo(android::base::InplaceStream* stream) {
@@ -427,7 +435,8 @@ VkDeviceQueueCreateInfo* vkUtilsUnpack_VkDeviceQueueCreateInfo(android::base::In
     stream->read(&data->flags, 1 * 4); // VkDeviceQueueCreateFlags flags
     stream->read(&data->queueFamilyIndex, 1 * 4); // u32 queueFamilyIndex
     stream->read(&data->queueCount, 1 * 4); // u32 queueCount
-    stream->read(&data->pQueuePriorities, data->queueCount * 4); // f32 pQueuePriorities
+    data->pQueuePriorities = new f32[data->queueCount]; // f32 pQueuePriorities
+    stream->read((char*)data->pQueuePriorities, data->queueCount * 4); // f32 pQueuePriorities
     return data;
 }
 
@@ -438,28 +447,29 @@ uint32_t vkUtilsEncodingSize_VkDeviceCreateInfo(const VkDeviceCreateInfo* data) 
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkDeviceCreateFlags flags
     res += 1 * 4; // u32 queueCreateInfoCount
-    if (data->pQueueCreateInfos) { res += data->queueCreateInfoCount * vkUtilsEncodingSize_VkDeviceQueueCreateInfo(data->pQueueCreateInfos); } // VkDeviceQueueCreateInfo pQueueCreateInfos
+    res += 8; if (data->pQueueCreateInfos) { res += data->queueCreateInfoCount * vkUtilsEncodingSize_VkDeviceQueueCreateInfo(data->pQueueCreateInfos); } // VkDeviceQueueCreateInfo pQueueCreateInfos
     res += 1 * 4; // u32 enabledLayerCount
-    res += data->enabledLayerCount * 1; // char ppEnabledLayerNames
+    res += strings2d_len(data->enabledLayerCount, data->ppEnabledLayerNames) * 1; // char ppEnabledLayerNames
     res += 1 * 4; // u32 enabledExtensionCount
-    res += data->enabledExtensionCount * 1; // char ppEnabledExtensionNames
-    if (data->pEnabledFeatures) { res += 1 * vkUtilsEncodingSize_VkPhysicalDeviceFeatures(data->pEnabledFeatures); } // VkPhysicalDeviceFeatures pEnabledFeatures
+    res += strings2d_len(data->enabledExtensionCount, data->ppEnabledExtensionNames) * 1; // char ppEnabledExtensionNames
+    res += 8; if (data->pEnabledFeatures) { res += 1 * vkUtilsEncodingSize_VkPhysicalDeviceFeatures(data->pEnabledFeatures); } // VkPhysicalDeviceFeatures pEnabledFeatures
     return res;
 }
 
 void vkUtilsPack_VkDeviceCreateInfo(android::base::InplaceStream* stream, const VkDeviceCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDeviceCreateFlags flags
     stream->write(&data->queueCreateInfoCount, 1 * 4); // u32 queueCreateInfoCount
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pQueueCreateInfos); stream->write(&ptrval, 8);
     if (data->pQueueCreateInfos) { for (uint32_t i = 0; i < data->queueCreateInfoCount; i++) { vkUtilsPack_VkDeviceQueueCreateInfo(stream, data->pQueueCreateInfos + i); } } } // VkDeviceQueueCreateInfo pQueueCreateInfos
     stream->write(&data->enabledLayerCount, 1 * 4); // u32 enabledLayerCount
-    stream->write(&data->ppEnabledLayerNames, data->enabledLayerCount * 1); // char ppEnabledLayerNames
+    strings2d_pack(stream, data->enabledLayerCount, data->ppEnabledLayerNames); // char ppEnabledLayerNames
     stream->write(&data->enabledExtensionCount, 1 * 4); // u32 enabledExtensionCount
-    stream->write(&data->ppEnabledExtensionNames, data->enabledExtensionCount * 1); // char ppEnabledExtensionNames
+    strings2d_pack(stream, data->enabledExtensionCount, data->ppEnabledExtensionNames); // char ppEnabledExtensionNames
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pEnabledFeatures); stream->write(&ptrval, 8);
     if (data->pEnabledFeatures) { for (uint32_t i = 0; i < 1; i++) { vkUtilsPack_VkPhysicalDeviceFeatures(stream, data->pEnabledFeatures + i); } } } // VkPhysicalDeviceFeatures pEnabledFeatures
@@ -478,9 +488,9 @@ VkDeviceCreateInfo* vkUtilsUnpack_VkDeviceCreateInfo(android::base::InplaceStrea
         data->pQueueCreateInfos = tmpArr;
     }
     stream->read(&data->enabledLayerCount, 1 * 4); // u32 enabledLayerCount
-    stream->read(&data->ppEnabledLayerNames, data->enabledLayerCount * 1); // char ppEnabledLayerNames
+    data->ppEnabledLayerNames = strings2d_unpack(stream, data->enabledLayerCount); // char ppEnabledLayerNames
     stream->read(&data->enabledExtensionCount, 1 * 4); // u32 enabledExtensionCount
-    stream->read(&data->ppEnabledExtensionNames, data->enabledExtensionCount * 1); // char ppEnabledExtensionNames
+    data->ppEnabledExtensionNames = strings2d_unpack(stream, data->enabledExtensionCount); // char ppEnabledExtensionNames
     { // VkPhysicalDeviceFeatures pEnabledFeatures
         uint64_t ptrval = 0; stream->read(&ptrval, 8); VkPhysicalDeviceFeatures* tmpArr = new VkPhysicalDeviceFeatures[1];
         if (ptrval) { for (uint32_t i = 0; i < 1; i++) {
@@ -496,7 +506,7 @@ uint32_t vkUtilsEncodingSize_VkInstanceCreateInfo(const VkInstanceCreateInfo* da
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkInstanceCreateFlags flags
-    if (data->pApplicationInfo) { res += 1 * vkUtilsEncodingSize_VkApplicationInfo(data->pApplicationInfo); } // VkApplicationInfo pApplicationInfo
+    res += 8; if (data->pApplicationInfo) { res += 1 * vkUtilsEncodingSize_VkApplicationInfo(data->pApplicationInfo); } // VkApplicationInfo pApplicationInfo
     res += 1 * 4; // u32 enabledLayerCount
     res += strings2d_len(data->enabledLayerCount, data->ppEnabledLayerNames) * 1; // char ppEnabledLayerNames
     res += 1 * 4; // u32 enabledExtensionCount
@@ -507,7 +517,8 @@ uint32_t vkUtilsEncodingSize_VkInstanceCreateInfo(const VkInstanceCreateInfo* da
 void vkUtilsPack_VkInstanceCreateInfo(android::base::InplaceStream* stream, const VkInstanceCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkInstanceCreateFlags flags
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pApplicationInfo); stream->write(&ptrval, 8);
@@ -611,7 +622,8 @@ uint32_t vkUtilsEncodingSize_VkMemoryAllocateInfo(const VkMemoryAllocateInfo* da
 void vkUtilsPack_VkMemoryAllocateInfo(android::base::InplaceStream* stream, const VkMemoryAllocateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->allocationSize, 1 * 8); // VkDeviceSize allocationSize
     stream->write(&data->memoryTypeIndex, 1 * 4); // u32 memoryTypeIndex
 }
@@ -759,7 +771,8 @@ uint32_t vkUtilsEncodingSize_VkMappedMemoryRange(const VkMappedMemoryRange* data
 void vkUtilsPack_VkMappedMemoryRange(android::base::InplaceStream* stream, const VkMappedMemoryRange* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->memory, 1 * 8); // VkDeviceMemory memory
     stream->write(&data->offset, 1 * 8); // VkDeviceSize offset
     stream->write(&data->size, 1 * 8); // VkDeviceSize size
@@ -887,8 +900,8 @@ uint32_t vkUtilsEncodingSize_VkWriteDescriptorSet(const VkWriteDescriptorSet* da
     res += 1 * 4; // u32 dstArrayElement
     res += 1 * 4; // u32 descriptorCount
     res += 1 * 4; // VkDescriptorType descriptorType
-    if (data->pImageInfo) { res += customCount_VkWriteDescriptorSet_pImageInfo(data) * vkUtilsEncodingSize_VkDescriptorImageInfo(data->pImageInfo); } // VkDescriptorImageInfo pImageInfo
-    if (data->pBufferInfo) { res += customCount_VkWriteDescriptorSet_pBufferInfo(data) * vkUtilsEncodingSize_VkDescriptorBufferInfo(data->pBufferInfo); } // VkDescriptorBufferInfo pBufferInfo
+    res += 8; if (data->pImageInfo) { res += customCount_VkWriteDescriptorSet_pImageInfo(data) * vkUtilsEncodingSize_VkDescriptorImageInfo(data->pImageInfo); } // VkDescriptorImageInfo pImageInfo
+    res += 8; if (data->pBufferInfo) { res += customCount_VkWriteDescriptorSet_pBufferInfo(data) * vkUtilsEncodingSize_VkDescriptorBufferInfo(data->pBufferInfo); } // VkDescriptorBufferInfo pBufferInfo
     res += customCount_VkWriteDescriptorSet_pTexelBufferView(data) * 8; // VkBufferView pTexelBufferView
     return res;
 }
@@ -896,7 +909,8 @@ uint32_t vkUtilsEncodingSize_VkWriteDescriptorSet(const VkWriteDescriptorSet* da
 void vkUtilsPack_VkWriteDescriptorSet(android::base::InplaceStream* stream, const VkWriteDescriptorSet* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->dstSet, 1 * 8); // VkDescriptorSet dstSet
     stream->write(&data->dstBinding, 1 * 4); // u32 dstBinding
     stream->write(&data->dstArrayElement, 1 * 4); // u32 dstArrayElement
@@ -908,7 +922,7 @@ void vkUtilsPack_VkWriteDescriptorSet(android::base::InplaceStream* stream, cons
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pBufferInfo); stream->write(&ptrval, 8);
     if (data->pBufferInfo) { for (uint32_t i = 0; i < customCount_VkWriteDescriptorSet_pBufferInfo(data); i++) { vkUtilsPack_VkDescriptorBufferInfo(stream, data->pBufferInfo + i); } } } // VkDescriptorBufferInfo pBufferInfo
-    stream->write(&data->pTexelBufferView, customCount_VkWriteDescriptorSet_pTexelBufferView(data) * 8); // VkBufferView pTexelBufferView
+    stream->write(data->pTexelBufferView, customCount_VkWriteDescriptorSet_pTexelBufferView(data) * 8); // VkBufferView pTexelBufferView
 }
 
 VkWriteDescriptorSet* vkUtilsUnpack_VkWriteDescriptorSet(android::base::InplaceStream* stream) {
@@ -932,7 +946,8 @@ VkWriteDescriptorSet* vkUtilsUnpack_VkWriteDescriptorSet(android::base::InplaceS
         VkDescriptorBufferInfo* tmpUnpacked = vkUtilsUnpack_VkDescriptorBufferInfo(stream); memcpy(&tmpArr[i], tmpUnpacked, sizeof(VkDescriptorBufferInfo)); delete tmpUnpacked; } }
         data->pBufferInfo = tmpArr;
     }
-    stream->read(&data->pTexelBufferView, customCount_VkWriteDescriptorSet_pTexelBufferView(data) * 8); // VkBufferView pTexelBufferView
+    data->pTexelBufferView = new VkBufferView[customCount_VkWriteDescriptorSet_pTexelBufferView(data)]; // VkBufferView pTexelBufferView
+    stream->read((char*)data->pTexelBufferView, customCount_VkWriteDescriptorSet_pTexelBufferView(data) * 8); // VkBufferView pTexelBufferView
     return data;
 }
 
@@ -954,7 +969,8 @@ uint32_t vkUtilsEncodingSize_VkCopyDescriptorSet(const VkCopyDescriptorSet* data
 void vkUtilsPack_VkCopyDescriptorSet(android::base::InplaceStream* stream, const VkCopyDescriptorSet* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->srcSet, 1 * 8); // VkDescriptorSet srcSet
     stream->write(&data->srcBinding, 1 * 4); // u32 srcBinding
     stream->write(&data->srcArrayElement, 1 * 4); // u32 srcArrayElement
@@ -995,13 +1011,14 @@ uint32_t vkUtilsEncodingSize_VkBufferCreateInfo(const VkBufferCreateInfo* data) 
 void vkUtilsPack_VkBufferCreateInfo(android::base::InplaceStream* stream, const VkBufferCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkBufferCreateFlags flags
     stream->write(&data->size, 1 * 8); // VkDeviceSize size
     stream->write(&data->usage, 1 * 4); // VkBufferUsageFlags usage
     stream->write(&data->sharingMode, 1 * 4); // VkSharingMode sharingMode
     stream->write(&data->queueFamilyIndexCount, 1 * 4); // u32 queueFamilyIndexCount
-    stream->write(&data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
+    stream->write(data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
 }
 
 VkBufferCreateInfo* vkUtilsUnpack_VkBufferCreateInfo(android::base::InplaceStream* stream) {
@@ -1013,7 +1030,8 @@ VkBufferCreateInfo* vkUtilsUnpack_VkBufferCreateInfo(android::base::InplaceStrea
     stream->read(&data->usage, 1 * 4); // VkBufferUsageFlags usage
     stream->read(&data->sharingMode, 1 * 4); // VkSharingMode sharingMode
     stream->read(&data->queueFamilyIndexCount, 1 * 4); // u32 queueFamilyIndexCount
-    stream->read(&data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
+    data->pQueueFamilyIndices = new u32[data->queueFamilyIndexCount]; // u32 pQueueFamilyIndices
+    stream->read((char*)data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
     return data;
 }
 
@@ -1033,7 +1051,8 @@ uint32_t vkUtilsEncodingSize_VkBufferViewCreateInfo(const VkBufferViewCreateInfo
 void vkUtilsPack_VkBufferViewCreateInfo(android::base::InplaceStream* stream, const VkBufferViewCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkBufferViewCreateFlags flags
     stream->write(&data->buffer, 1 * 8); // VkBuffer buffer
     stream->write(&data->format, 1 * 4); // VkFormat format
@@ -1120,7 +1139,8 @@ uint32_t vkUtilsEncodingSize_VkMemoryBarrier(const VkMemoryBarrier* data) {
 void vkUtilsPack_VkMemoryBarrier(android::base::InplaceStream* stream, const VkMemoryBarrier* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->srcAccessMask, 1 * 4); // VkAccessFlags srcAccessMask
     stream->write(&data->dstAccessMask, 1 * 4); // VkAccessFlags dstAccessMask
 }
@@ -1152,7 +1172,8 @@ uint32_t vkUtilsEncodingSize_VkBufferMemoryBarrier(const VkBufferMemoryBarrier* 
 void vkUtilsPack_VkBufferMemoryBarrier(android::base::InplaceStream* stream, const VkBufferMemoryBarrier* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->srcAccessMask, 1 * 4); // VkAccessFlags srcAccessMask
     stream->write(&data->dstAccessMask, 1 * 4); // VkAccessFlags dstAccessMask
     stream->write(&data->srcQueueFamilyIndex, 1 * 4); // u32 srcQueueFamilyIndex
@@ -1195,7 +1216,8 @@ uint32_t vkUtilsEncodingSize_VkImageMemoryBarrier(const VkImageMemoryBarrier* da
 void vkUtilsPack_VkImageMemoryBarrier(android::base::InplaceStream* stream, const VkImageMemoryBarrier* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->srcAccessMask, 1 * 4); // VkAccessFlags srcAccessMask
     stream->write(&data->dstAccessMask, 1 * 4); // VkAccessFlags dstAccessMask
     stream->write(&data->oldLayout, 1 * 4); // VkImageLayout oldLayout
@@ -1245,7 +1267,8 @@ uint32_t vkUtilsEncodingSize_VkImageCreateInfo(const VkImageCreateInfo* data) {
 void vkUtilsPack_VkImageCreateInfo(android::base::InplaceStream* stream, const VkImageCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkImageCreateFlags flags
     stream->write(&data->imageType, 1 * 4); // VkImageType imageType
     stream->write(&data->format, 1 * 4); // VkFormat format
@@ -1257,7 +1280,7 @@ void vkUtilsPack_VkImageCreateInfo(android::base::InplaceStream* stream, const V
     stream->write(&data->usage, 1 * 4); // VkImageUsageFlags usage
     stream->write(&data->sharingMode, 1 * 4); // VkSharingMode sharingMode
     stream->write(&data->queueFamilyIndexCount, 1 * 4); // u32 queueFamilyIndexCount
-    stream->write(&data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
+    stream->write(data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
     stream->write(&data->initialLayout, 1 * 4); // VkImageLayout initialLayout
 }
 
@@ -1276,7 +1299,8 @@ VkImageCreateInfo* vkUtilsUnpack_VkImageCreateInfo(android::base::InplaceStream*
     stream->read(&data->usage, 1 * 4); // VkImageUsageFlags usage
     stream->read(&data->sharingMode, 1 * 4); // VkSharingMode sharingMode
     stream->read(&data->queueFamilyIndexCount, 1 * 4); // u32 queueFamilyIndexCount
-    stream->read(&data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
+    data->pQueueFamilyIndices = new u32[data->queueFamilyIndexCount]; // u32 pQueueFamilyIndices
+    stream->read((char*)data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
     stream->read(&data->initialLayout, 1 * 4); // VkImageLayout initialLayout
     return data;
 }
@@ -1328,7 +1352,8 @@ uint32_t vkUtilsEncodingSize_VkImageViewCreateInfo(const VkImageViewCreateInfo* 
 void vkUtilsPack_VkImageViewCreateInfo(android::base::InplaceStream* stream, const VkImageViewCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkImageViewCreateFlags flags
     stream->write(&data->image, 1 * 8); // VkImage image
     stream->write(&data->viewType, 1 * 4); // VkImageViewType viewType
@@ -1442,7 +1467,7 @@ uint32_t vkUtilsEncodingSize_VkSparseBufferMemoryBindInfo(const VkSparseBufferMe
     if (!data) return res;
     res += 1 * 8; // VkBuffer buffer
     res += 1 * 4; // u32 bindCount
-    if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); } // VkSparseMemoryBind pBinds
+    res += 8; if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); } // VkSparseMemoryBind pBinds
     return res;
 }
 
@@ -1473,7 +1498,7 @@ uint32_t vkUtilsEncodingSize_VkSparseImageOpaqueMemoryBindInfo(const VkSparseIma
     if (!data) return res;
     res += 1 * 8; // VkImage image
     res += 1 * 4; // u32 bindCount
-    if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); } // VkSparseMemoryBind pBinds
+    res += 8; if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseMemoryBind(data->pBinds); } // VkSparseMemoryBind pBinds
     return res;
 }
 
@@ -1504,7 +1529,7 @@ uint32_t vkUtilsEncodingSize_VkSparseImageMemoryBindInfo(const VkSparseImageMemo
     if (!data) return res;
     res += 1 * 8; // VkImage image
     res += 1 * 4; // u32 bindCount
-    if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseImageMemoryBind(data->pBinds); } // VkSparseImageMemoryBind pBinds
+    res += 8; if (data->pBinds) { res += data->bindCount * vkUtilsEncodingSize_VkSparseImageMemoryBind(data->pBinds); } // VkSparseImageMemoryBind pBinds
     return res;
 }
 
@@ -1538,11 +1563,11 @@ uint32_t vkUtilsEncodingSize_VkBindSparseInfo(const VkBindSparseInfo* data) {
     res += 1 * 4; // u32 waitSemaphoreCount
     res += data->waitSemaphoreCount * 8; // VkSemaphore pWaitSemaphores
     res += 1 * 4; // u32 bufferBindCount
-    if (data->pBufferBinds) { res += data->bufferBindCount * vkUtilsEncodingSize_VkSparseBufferMemoryBindInfo(data->pBufferBinds); } // VkSparseBufferMemoryBindInfo pBufferBinds
+    res += 8; if (data->pBufferBinds) { res += data->bufferBindCount * vkUtilsEncodingSize_VkSparseBufferMemoryBindInfo(data->pBufferBinds); } // VkSparseBufferMemoryBindInfo pBufferBinds
     res += 1 * 4; // u32 imageOpaqueBindCount
-    if (data->pImageOpaqueBinds) { res += data->imageOpaqueBindCount * vkUtilsEncodingSize_VkSparseImageOpaqueMemoryBindInfo(data->pImageOpaqueBinds); } // VkSparseImageOpaqueMemoryBindInfo pImageOpaqueBinds
+    res += 8; if (data->pImageOpaqueBinds) { res += data->imageOpaqueBindCount * vkUtilsEncodingSize_VkSparseImageOpaqueMemoryBindInfo(data->pImageOpaqueBinds); } // VkSparseImageOpaqueMemoryBindInfo pImageOpaqueBinds
     res += 1 * 4; // u32 imageBindCount
-    if (data->pImageBinds) { res += data->imageBindCount * vkUtilsEncodingSize_VkSparseImageMemoryBindInfo(data->pImageBinds); } // VkSparseImageMemoryBindInfo pImageBinds
+    res += 8; if (data->pImageBinds) { res += data->imageBindCount * vkUtilsEncodingSize_VkSparseImageMemoryBindInfo(data->pImageBinds); } // VkSparseImageMemoryBindInfo pImageBinds
     res += 1 * 4; // u32 signalSemaphoreCount
     res += data->signalSemaphoreCount * 8; // VkSemaphore pSignalSemaphores
     return res;
@@ -1551,9 +1576,10 @@ uint32_t vkUtilsEncodingSize_VkBindSparseInfo(const VkBindSparseInfo* data) {
 void vkUtilsPack_VkBindSparseInfo(android::base::InplaceStream* stream, const VkBindSparseInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->write(&data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
+    stream->write(data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
     stream->write(&data->bufferBindCount, 1 * 4); // u32 bufferBindCount
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pBufferBinds); stream->write(&ptrval, 8);
@@ -1567,7 +1593,7 @@ void vkUtilsPack_VkBindSparseInfo(android::base::InplaceStream* stream, const Vk
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pImageBinds); stream->write(&ptrval, 8);
     if (data->pImageBinds) { for (uint32_t i = 0; i < data->imageBindCount; i++) { vkUtilsPack_VkSparseImageMemoryBindInfo(stream, data->pImageBinds + i); } } } // VkSparseImageMemoryBindInfo pImageBinds
     stream->write(&data->signalSemaphoreCount, 1 * 4); // u32 signalSemaphoreCount
-    stream->write(&data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
+    stream->write(data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
 }
 
 VkBindSparseInfo* vkUtilsUnpack_VkBindSparseInfo(android::base::InplaceStream* stream) {
@@ -1575,7 +1601,8 @@ VkBindSparseInfo* vkUtilsUnpack_VkBindSparseInfo(android::base::InplaceStream* s
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->read(&data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
+    data->pWaitSemaphores = new VkSemaphore[data->waitSemaphoreCount]; // VkSemaphore pWaitSemaphores
+    stream->read((char*)data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
     stream->read(&data->bufferBindCount, 1 * 4); // u32 bufferBindCount
     { // VkSparseBufferMemoryBindInfo pBufferBinds
         uint64_t ptrval = 0; stream->read(&ptrval, 8); VkSparseBufferMemoryBindInfo* tmpArr = new VkSparseBufferMemoryBindInfo[data->bufferBindCount];
@@ -1598,7 +1625,8 @@ VkBindSparseInfo* vkUtilsUnpack_VkBindSparseInfo(android::base::InplaceStream* s
         data->pImageBinds = tmpArr;
     }
     stream->read(&data->signalSemaphoreCount, 1 * 4); // u32 signalSemaphoreCount
-    stream->read(&data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
+    data->pSignalSemaphores = new VkSemaphore[data->signalSemaphoreCount]; // VkSemaphore pSignalSemaphores
+    stream->read((char*)data->pSignalSemaphores, data->signalSemaphoreCount * 8); // VkSemaphore pSignalSemaphores
     return data;
 }
 
@@ -1771,10 +1799,11 @@ uint32_t vkUtilsEncodingSize_VkShaderModuleCreateInfo(const VkShaderModuleCreate
 void vkUtilsPack_VkShaderModuleCreateInfo(android::base::InplaceStream* stream, const VkShaderModuleCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkShaderModuleCreateFlags flags
     stream->write(&data->codeSize, 1 * 8); // size_t codeSize
-    stream->write(&data->pCode, 1 * 4); // u32 pCode
+    stream->write(data->pCode, 1 * 4); // u32 pCode
 }
 
 VkShaderModuleCreateInfo* vkUtilsUnpack_VkShaderModuleCreateInfo(android::base::InplaceStream* stream) {
@@ -1783,7 +1812,8 @@ VkShaderModuleCreateInfo* vkUtilsUnpack_VkShaderModuleCreateInfo(android::base::
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->flags, 1 * 4); // VkShaderModuleCreateFlags flags
     stream->read(&data->codeSize, 1 * 8); // size_t codeSize
-    stream->read(&data->pCode, 1 * 4); // u32 pCode
+    data->pCode = new u32[1]; // u32 pCode
+    stream->read((char*)data->pCode, 1 * 4); // u32 pCode
     return data;
 }
 
@@ -1804,7 +1834,7 @@ void vkUtilsPack_VkDescriptorSetLayoutBinding(android::base::InplaceStream* stre
     stream->write(&data->descriptorType, 1 * 4); // VkDescriptorType descriptorType
     stream->write(&data->descriptorCount, 1 * 4); // u32 descriptorCount
     stream->write(&data->stageFlags, 1 * 4); // VkShaderStageFlags stageFlags
-    stream->write(&data->pImmutableSamplers, data->descriptorCount * 8); // VkSampler pImmutableSamplers
+    stream->write(data->pImmutableSamplers, data->descriptorCount * 8); // VkSampler pImmutableSamplers
 }
 
 VkDescriptorSetLayoutBinding* vkUtilsUnpack_VkDescriptorSetLayoutBinding(android::base::InplaceStream* stream) {
@@ -1813,7 +1843,8 @@ VkDescriptorSetLayoutBinding* vkUtilsUnpack_VkDescriptorSetLayoutBinding(android
     stream->read(&data->descriptorType, 1 * 4); // VkDescriptorType descriptorType
     stream->read(&data->descriptorCount, 1 * 4); // u32 descriptorCount
     stream->read(&data->stageFlags, 1 * 4); // VkShaderStageFlags stageFlags
-    stream->read(&data->pImmutableSamplers, data->descriptorCount * 8); // VkSampler pImmutableSamplers
+    data->pImmutableSamplers = new VkSampler[data->descriptorCount]; // VkSampler pImmutableSamplers
+    stream->read((char*)data->pImmutableSamplers, data->descriptorCount * 8); // VkSampler pImmutableSamplers
     return data;
 }
 
@@ -1824,14 +1855,15 @@ uint32_t vkUtilsEncodingSize_VkDescriptorSetLayoutCreateInfo(const VkDescriptorS
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkDescriptorSetLayoutCreateFlags flags
     res += 1 * 4; // u32 bindingCount
-    if (data->pBindings) { res += data->bindingCount * vkUtilsEncodingSize_VkDescriptorSetLayoutBinding(data->pBindings); } // VkDescriptorSetLayoutBinding pBindings
+    res += 8; if (data->pBindings) { res += data->bindingCount * vkUtilsEncodingSize_VkDescriptorSetLayoutBinding(data->pBindings); } // VkDescriptorSetLayoutBinding pBindings
     return res;
 }
 
 void vkUtilsPack_VkDescriptorSetLayoutCreateInfo(android::base::InplaceStream* stream, const VkDescriptorSetLayoutCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDescriptorSetLayoutCreateFlags flags
     stream->write(&data->bindingCount, 1 * 4); // u32 bindingCount
     {
@@ -1883,14 +1915,15 @@ uint32_t vkUtilsEncodingSize_VkDescriptorPoolCreateInfo(const VkDescriptorPoolCr
     res += 1 * 4; // VkDescriptorPoolCreateFlags flags
     res += 1 * 4; // u32 maxSets
     res += 1 * 4; // u32 poolSizeCount
-    if (data->pPoolSizes) { res += data->poolSizeCount * vkUtilsEncodingSize_VkDescriptorPoolSize(data->pPoolSizes); } // VkDescriptorPoolSize pPoolSizes
+    res += 8; if (data->pPoolSizes) { res += data->poolSizeCount * vkUtilsEncodingSize_VkDescriptorPoolSize(data->pPoolSizes); } // VkDescriptorPoolSize pPoolSizes
     return res;
 }
 
 void vkUtilsPack_VkDescriptorPoolCreateInfo(android::base::InplaceStream* stream, const VkDescriptorPoolCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDescriptorPoolCreateFlags flags
     stream->write(&data->maxSets, 1 * 4); // u32 maxSets
     stream->write(&data->poolSizeCount, 1 * 4); // u32 poolSizeCount
@@ -1929,10 +1962,11 @@ uint32_t vkUtilsEncodingSize_VkDescriptorSetAllocateInfo(const VkDescriptorSetAl
 void vkUtilsPack_VkDescriptorSetAllocateInfo(android::base::InplaceStream* stream, const VkDescriptorSetAllocateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->descriptorPool, 1 * 8); // VkDescriptorPool descriptorPool
     stream->write(&data->descriptorSetCount, 1 * 4); // u32 descriptorSetCount
-    stream->write(&data->pSetLayouts, data->descriptorSetCount * 8); // VkDescriptorSetLayout pSetLayouts
+    stream->write(data->pSetLayouts, data->descriptorSetCount * 8); // VkDescriptorSetLayout pSetLayouts
 }
 
 VkDescriptorSetAllocateInfo* vkUtilsUnpack_VkDescriptorSetAllocateInfo(android::base::InplaceStream* stream) {
@@ -1941,7 +1975,8 @@ VkDescriptorSetAllocateInfo* vkUtilsUnpack_VkDescriptorSetAllocateInfo(android::
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->descriptorPool, 1 * 8); // VkDescriptorPool descriptorPool
     stream->read(&data->descriptorSetCount, 1 * 4); // u32 descriptorSetCount
-    stream->read(&data->pSetLayouts, data->descriptorSetCount * 8); // VkDescriptorSetLayout pSetLayouts
+    data->pSetLayouts = new VkDescriptorSetLayout[data->descriptorSetCount]; // VkDescriptorSetLayout pSetLayouts
+    stream->read((char*)data->pSetLayouts, data->descriptorSetCount * 8); // VkDescriptorSetLayout pSetLayouts
     return data;
 }
 
@@ -1973,7 +2008,7 @@ uint32_t vkUtilsEncodingSize_VkSpecializationInfo(const VkSpecializationInfo* da
     uint32_t res = 0;
     if (!data) return res;
     res += 1 * 4; // u32 mapEntryCount
-    if (data->pMapEntries) { res += data->mapEntryCount * vkUtilsEncodingSize_VkSpecializationMapEntry(data->pMapEntries); } // VkSpecializationMapEntry pMapEntries
+    res += 8; if (data->pMapEntries) { res += data->mapEntryCount * vkUtilsEncodingSize_VkSpecializationMapEntry(data->pMapEntries); } // VkSpecializationMapEntry pMapEntries
     res += 1 * 8; // size_t dataSize
     res += data->dataSize * 8; // void pData
     return res;
@@ -2012,14 +2047,15 @@ uint32_t vkUtilsEncodingSize_VkPipelineShaderStageCreateInfo(const VkPipelineSha
     res += 1 * 4; // VkShaderStageFlagBits stage
     res += 1 * 8; // VkShaderModule module
     res += string1d_len(data->pName) * 1; // char pName
-    if (data->pSpecializationInfo) { res += 1 * vkUtilsEncodingSize_VkSpecializationInfo(data->pSpecializationInfo); } // VkSpecializationInfo pSpecializationInfo
+    res += 8; if (data->pSpecializationInfo) { res += 1 * vkUtilsEncodingSize_VkSpecializationInfo(data->pSpecializationInfo); } // VkSpecializationInfo pSpecializationInfo
     return res;
 }
 
 void vkUtilsPack_VkPipelineShaderStageCreateInfo(android::base::InplaceStream* stream, const VkPipelineShaderStageCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineShaderStageCreateFlags flags
     stream->write(&data->stage, 1 * 4); // VkShaderStageFlagBits stage
     stream->write(&data->module, 1 * 8); // VkShaderModule module
@@ -2062,7 +2098,8 @@ uint32_t vkUtilsEncodingSize_VkComputePipelineCreateInfo(const VkComputePipeline
 void vkUtilsPack_VkComputePipelineCreateInfo(android::base::InplaceStream* stream, const VkComputePipelineCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineCreateFlags flags
     vkUtilsPack_VkPipelineShaderStageCreateInfo(stream, &data->stage); // VkPipelineShaderStageCreateInfo stage
     stream->write(&data->layout, 1 * 8); // VkPipelineLayout layout
@@ -2140,16 +2177,17 @@ uint32_t vkUtilsEncodingSize_VkPipelineVertexInputStateCreateInfo(const VkPipeli
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkPipelineVertexInputStateCreateFlags flags
     res += 1 * 4; // u32 vertexBindingDescriptionCount
-    if (data->pVertexBindingDescriptions) { res += data->vertexBindingDescriptionCount * vkUtilsEncodingSize_VkVertexInputBindingDescription(data->pVertexBindingDescriptions); } // VkVertexInputBindingDescription pVertexBindingDescriptions
+    res += 8; if (data->pVertexBindingDescriptions) { res += data->vertexBindingDescriptionCount * vkUtilsEncodingSize_VkVertexInputBindingDescription(data->pVertexBindingDescriptions); } // VkVertexInputBindingDescription pVertexBindingDescriptions
     res += 1 * 4; // u32 vertexAttributeDescriptionCount
-    if (data->pVertexAttributeDescriptions) { res += data->vertexAttributeDescriptionCount * vkUtilsEncodingSize_VkVertexInputAttributeDescription(data->pVertexAttributeDescriptions); } // VkVertexInputAttributeDescription pVertexAttributeDescriptions
+    res += 8; if (data->pVertexAttributeDescriptions) { res += data->vertexAttributeDescriptionCount * vkUtilsEncodingSize_VkVertexInputAttributeDescription(data->pVertexAttributeDescriptions); } // VkVertexInputAttributeDescription pVertexAttributeDescriptions
     return res;
 }
 
 void vkUtilsPack_VkPipelineVertexInputStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineVertexInputStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineVertexInputStateCreateFlags flags
     stream->write(&data->vertexBindingDescriptionCount, 1 * 4); // u32 vertexBindingDescriptionCount
     {
@@ -2197,7 +2235,8 @@ uint32_t vkUtilsEncodingSize_VkPipelineInputAssemblyStateCreateInfo(const VkPipe
 void vkUtilsPack_VkPipelineInputAssemblyStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineInputAssemblyStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineInputAssemblyStateCreateFlags flags
     stream->write(&data->topology, 1 * 4); // VkPrimitiveTopology topology
     stream->write(&data->primitiveRestartEnable, 1 * 4); // VkBool32 primitiveRestartEnable
@@ -2226,7 +2265,8 @@ uint32_t vkUtilsEncodingSize_VkPipelineTessellationStateCreateInfo(const VkPipel
 void vkUtilsPack_VkPipelineTessellationStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineTessellationStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineTessellationStateCreateFlags flags
     stream->write(&data->patchControlPoints, 1 * 4); // u32 patchControlPoints
 }
@@ -2247,16 +2287,17 @@ uint32_t vkUtilsEncodingSize_VkPipelineViewportStateCreateInfo(const VkPipelineV
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkPipelineViewportStateCreateFlags flags
     res += 1 * 4; // u32 viewportCount
-    if (data->pViewports) { res += data->viewportCount * vkUtilsEncodingSize_VkViewport(data->pViewports); } // VkViewport pViewports
+    res += 8; if (data->pViewports) { res += data->viewportCount * vkUtilsEncodingSize_VkViewport(data->pViewports); } // VkViewport pViewports
     res += 1 * 4; // u32 scissorCount
-    if (data->pScissors) { res += data->scissorCount * vkUtilsEncodingSize_VkRect2D(data->pScissors); } // VkRect2D pScissors
+    res += 8; if (data->pScissors) { res += data->scissorCount * vkUtilsEncodingSize_VkRect2D(data->pScissors); } // VkRect2D pScissors
     return res;
 }
 
 void vkUtilsPack_VkPipelineViewportStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineViewportStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineViewportStateCreateFlags flags
     stream->write(&data->viewportCount, 1 * 4); // u32 viewportCount
     {
@@ -2312,7 +2353,8 @@ uint32_t vkUtilsEncodingSize_VkPipelineRasterizationStateCreateInfo(const VkPipe
 void vkUtilsPack_VkPipelineRasterizationStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineRasterizationStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineRasterizationStateCreateFlags flags
     stream->write(&data->depthClampEnable, 1 * 4); // VkBool32 depthClampEnable
     stream->write(&data->rasterizerDiscardEnable, 1 * 4); // VkBool32 rasterizerDiscardEnable
@@ -2362,12 +2404,13 @@ uint32_t vkUtilsEncodingSize_VkPipelineMultisampleStateCreateInfo(const VkPipeli
 void vkUtilsPack_VkPipelineMultisampleStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineMultisampleStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineMultisampleStateCreateFlags flags
     stream->write(&data->rasterizationSamples, 1 * 4); // VkSampleCountFlagBits rasterizationSamples
     stream->write(&data->sampleShadingEnable, 1 * 4); // VkBool32 sampleShadingEnable
     stream->write(&data->minSampleShading, 1 * 4); // f32 minSampleShading
-    stream->write(&data->pSampleMask, 1 * 4); // VkSampleMask pSampleMask
+    stream->write(data->pSampleMask, 1 * 4); // VkSampleMask pSampleMask
     stream->write(&data->alphaToCoverageEnable, 1 * 4); // VkBool32 alphaToCoverageEnable
     stream->write(&data->alphaToOneEnable, 1 * 4); // VkBool32 alphaToOneEnable
 }
@@ -2380,7 +2423,8 @@ VkPipelineMultisampleStateCreateInfo* vkUtilsUnpack_VkPipelineMultisampleStateCr
     stream->read(&data->rasterizationSamples, 1 * 4); // VkSampleCountFlagBits rasterizationSamples
     stream->read(&data->sampleShadingEnable, 1 * 4); // VkBool32 sampleShadingEnable
     stream->read(&data->minSampleShading, 1 * 4); // f32 minSampleShading
-    stream->read(&data->pSampleMask, 1 * 4); // VkSampleMask pSampleMask
+    data->pSampleMask = new VkSampleMask[1]; // VkSampleMask pSampleMask
+    stream->read((char*)data->pSampleMask, 1 * 4); // VkSampleMask pSampleMask
     stream->read(&data->alphaToCoverageEnable, 1 * 4); // VkBool32 alphaToCoverageEnable
     stream->read(&data->alphaToOneEnable, 1 * 4); // VkBool32 alphaToOneEnable
     return data;
@@ -2434,7 +2478,7 @@ uint32_t vkUtilsEncodingSize_VkPipelineColorBlendStateCreateInfo(const VkPipelin
     res += 1 * 4; // VkBool32 logicOpEnable
     res += 1 * 4; // VkLogicOp logicOp
     res += 1 * 4; // u32 attachmentCount
-    if (data->pAttachments) { res += data->attachmentCount * vkUtilsEncodingSize_VkPipelineColorBlendAttachmentState(data->pAttachments); } // VkPipelineColorBlendAttachmentState pAttachments
+    res += 8; if (data->pAttachments) { res += data->attachmentCount * vkUtilsEncodingSize_VkPipelineColorBlendAttachmentState(data->pAttachments); } // VkPipelineColorBlendAttachmentState pAttachments
     res += 4 * 4; // f32 blendConstants
     return res;
 }
@@ -2442,7 +2486,8 @@ uint32_t vkUtilsEncodingSize_VkPipelineColorBlendStateCreateInfo(const VkPipelin
 void vkUtilsPack_VkPipelineColorBlendStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineColorBlendStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineColorBlendStateCreateFlags flags
     stream->write(&data->logicOpEnable, 1 * 4); // VkBool32 logicOpEnable
     stream->write(&data->logicOp, 1 * 4); // VkLogicOp logicOp
@@ -2528,7 +2573,8 @@ uint32_t vkUtilsEncodingSize_VkPipelineDepthStencilStateCreateInfo(const VkPipel
 void vkUtilsPack_VkPipelineDepthStencilStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineDepthStencilStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineDepthStencilStateCreateFlags flags
     stream->write(&data->depthTestEnable, 1 * 4); // VkBool32 depthTestEnable
     stream->write(&data->depthWriteEnable, 1 * 4); // VkBool32 depthWriteEnable
@@ -2572,10 +2618,11 @@ uint32_t vkUtilsEncodingSize_VkPipelineDynamicStateCreateInfo(const VkPipelineDy
 void vkUtilsPack_VkPipelineDynamicStateCreateInfo(android::base::InplaceStream* stream, const VkPipelineDynamicStateCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineDynamicStateCreateFlags flags
     stream->write(&data->dynamicStateCount, 1 * 4); // u32 dynamicStateCount
-    stream->write(&data->pDynamicStates, data->dynamicStateCount * 4); // VkDynamicState pDynamicStates
+    stream->write(data->pDynamicStates, data->dynamicStateCount * 4); // VkDynamicState pDynamicStates
 }
 
 VkPipelineDynamicStateCreateInfo* vkUtilsUnpack_VkPipelineDynamicStateCreateInfo(android::base::InplaceStream* stream) {
@@ -2584,7 +2631,8 @@ VkPipelineDynamicStateCreateInfo* vkUtilsUnpack_VkPipelineDynamicStateCreateInfo
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->flags, 1 * 4); // VkPipelineDynamicStateCreateFlags flags
     stream->read(&data->dynamicStateCount, 1 * 4); // u32 dynamicStateCount
-    stream->read(&data->pDynamicStates, data->dynamicStateCount * 4); // VkDynamicState pDynamicStates
+    data->pDynamicStates = new VkDynamicState[data->dynamicStateCount]; // VkDynamicState pDynamicStates
+    stream->read((char*)data->pDynamicStates, data->dynamicStateCount * 4); // VkDynamicState pDynamicStates
     return data;
 }
 
@@ -2595,16 +2643,16 @@ uint32_t vkUtilsEncodingSize_VkGraphicsPipelineCreateInfo(const VkGraphicsPipeli
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkPipelineCreateFlags flags
     res += 1 * 4; // u32 stageCount
-    if (data->pStages) { res += data->stageCount * vkUtilsEncodingSize_VkPipelineShaderStageCreateInfo(data->pStages); } // VkPipelineShaderStageCreateInfo pStages
-    if (data->pVertexInputState) { res += 1 * vkUtilsEncodingSize_VkPipelineVertexInputStateCreateInfo(data->pVertexInputState); } // VkPipelineVertexInputStateCreateInfo pVertexInputState
-    if (data->pInputAssemblyState) { res += 1 * vkUtilsEncodingSize_VkPipelineInputAssemblyStateCreateInfo(data->pInputAssemblyState); } // VkPipelineInputAssemblyStateCreateInfo pInputAssemblyState
-    if (data->pTessellationState) { res += 1 * vkUtilsEncodingSize_VkPipelineTessellationStateCreateInfo(data->pTessellationState); } // VkPipelineTessellationStateCreateInfo pTessellationState
-    if (data->pViewportState) { res += 1 * vkUtilsEncodingSize_VkPipelineViewportStateCreateInfo(data->pViewportState); } // VkPipelineViewportStateCreateInfo pViewportState
-    if (data->pRasterizationState) { res += 1 * vkUtilsEncodingSize_VkPipelineRasterizationStateCreateInfo(data->pRasterizationState); } // VkPipelineRasterizationStateCreateInfo pRasterizationState
-    if (data->pMultisampleState) { res += 1 * vkUtilsEncodingSize_VkPipelineMultisampleStateCreateInfo(data->pMultisampleState); } // VkPipelineMultisampleStateCreateInfo pMultisampleState
-    if (data->pDepthStencilState) { res += 1 * vkUtilsEncodingSize_VkPipelineDepthStencilStateCreateInfo(data->pDepthStencilState); } // VkPipelineDepthStencilStateCreateInfo pDepthStencilState
-    if (data->pColorBlendState) { res += 1 * vkUtilsEncodingSize_VkPipelineColorBlendStateCreateInfo(data->pColorBlendState); } // VkPipelineColorBlendStateCreateInfo pColorBlendState
-    if (data->pDynamicState) { res += 1 * vkUtilsEncodingSize_VkPipelineDynamicStateCreateInfo(data->pDynamicState); } // VkPipelineDynamicStateCreateInfo pDynamicState
+    res += 8; if (data->pStages) { res += data->stageCount * vkUtilsEncodingSize_VkPipelineShaderStageCreateInfo(data->pStages); } // VkPipelineShaderStageCreateInfo pStages
+    res += 8; if (data->pVertexInputState) { res += 1 * vkUtilsEncodingSize_VkPipelineVertexInputStateCreateInfo(data->pVertexInputState); } // VkPipelineVertexInputStateCreateInfo pVertexInputState
+    res += 8; if (data->pInputAssemblyState) { res += 1 * vkUtilsEncodingSize_VkPipelineInputAssemblyStateCreateInfo(data->pInputAssemblyState); } // VkPipelineInputAssemblyStateCreateInfo pInputAssemblyState
+    res += 8; if (data->pTessellationState) { res += 1 * vkUtilsEncodingSize_VkPipelineTessellationStateCreateInfo(data->pTessellationState); } // VkPipelineTessellationStateCreateInfo pTessellationState
+    res += 8; if (data->pViewportState) { res += 1 * vkUtilsEncodingSize_VkPipelineViewportStateCreateInfo(data->pViewportState); } // VkPipelineViewportStateCreateInfo pViewportState
+    res += 8; if (data->pRasterizationState) { res += 1 * vkUtilsEncodingSize_VkPipelineRasterizationStateCreateInfo(data->pRasterizationState); } // VkPipelineRasterizationStateCreateInfo pRasterizationState
+    res += 8; if (data->pMultisampleState) { res += 1 * vkUtilsEncodingSize_VkPipelineMultisampleStateCreateInfo(data->pMultisampleState); } // VkPipelineMultisampleStateCreateInfo pMultisampleState
+    res += 8; if (data->pDepthStencilState) { res += 1 * vkUtilsEncodingSize_VkPipelineDepthStencilStateCreateInfo(data->pDepthStencilState); } // VkPipelineDepthStencilStateCreateInfo pDepthStencilState
+    res += 8; if (data->pColorBlendState) { res += 1 * vkUtilsEncodingSize_VkPipelineColorBlendStateCreateInfo(data->pColorBlendState); } // VkPipelineColorBlendStateCreateInfo pColorBlendState
+    res += 8; if (data->pDynamicState) { res += 1 * vkUtilsEncodingSize_VkPipelineDynamicStateCreateInfo(data->pDynamicState); } // VkPipelineDynamicStateCreateInfo pDynamicState
     res += 1 * 8; // VkPipelineLayout layout
     res += 1 * 8; // VkRenderPass renderPass
     res += 1 * 4; // u32 subpass
@@ -2616,7 +2664,8 @@ uint32_t vkUtilsEncodingSize_VkGraphicsPipelineCreateInfo(const VkGraphicsPipeli
 void vkUtilsPack_VkGraphicsPipelineCreateInfo(android::base::InplaceStream* stream, const VkGraphicsPipelineCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineCreateFlags flags
     stream->write(&data->stageCount, 1 * 4); // u32 stageCount
     {
@@ -2744,7 +2793,8 @@ uint32_t vkUtilsEncodingSize_VkPipelineCacheCreateInfo(const VkPipelineCacheCrea
 void vkUtilsPack_VkPipelineCacheCreateInfo(android::base::InplaceStream* stream, const VkPipelineCacheCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineCacheCreateFlags flags
     stream->write(&data->initialDataSize, 1 * 8); // size_t initialDataSize
     stream->write(&data->pInitialData, 8); // void pInitialData
@@ -2793,17 +2843,18 @@ uint32_t vkUtilsEncodingSize_VkPipelineLayoutCreateInfo(const VkPipelineLayoutCr
     res += 1 * 4; // u32 setLayoutCount
     res += data->setLayoutCount * 8; // VkDescriptorSetLayout pSetLayouts
     res += 1 * 4; // u32 pushConstantRangeCount
-    if (data->pPushConstantRanges) { res += data->pushConstantRangeCount * vkUtilsEncodingSize_VkPushConstantRange(data->pPushConstantRanges); } // VkPushConstantRange pPushConstantRanges
+    res += 8; if (data->pPushConstantRanges) { res += data->pushConstantRangeCount * vkUtilsEncodingSize_VkPushConstantRange(data->pPushConstantRanges); } // VkPushConstantRange pPushConstantRanges
     return res;
 }
 
 void vkUtilsPack_VkPipelineLayoutCreateInfo(android::base::InplaceStream* stream, const VkPipelineLayoutCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineLayoutCreateFlags flags
     stream->write(&data->setLayoutCount, 1 * 4); // u32 setLayoutCount
-    stream->write(&data->pSetLayouts, data->setLayoutCount * 8); // VkDescriptorSetLayout pSetLayouts
+    stream->write(data->pSetLayouts, data->setLayoutCount * 8); // VkDescriptorSetLayout pSetLayouts
     stream->write(&data->pushConstantRangeCount, 1 * 4); // u32 pushConstantRangeCount
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pPushConstantRanges); stream->write(&ptrval, 8);
@@ -2816,7 +2867,8 @@ VkPipelineLayoutCreateInfo* vkUtilsUnpack_VkPipelineLayoutCreateInfo(android::ba
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->flags, 1 * 4); // VkPipelineLayoutCreateFlags flags
     stream->read(&data->setLayoutCount, 1 * 4); // u32 setLayoutCount
-    stream->read(&data->pSetLayouts, data->setLayoutCount * 8); // VkDescriptorSetLayout pSetLayouts
+    data->pSetLayouts = new VkDescriptorSetLayout[data->setLayoutCount]; // VkDescriptorSetLayout pSetLayouts
+    stream->read((char*)data->pSetLayouts, data->setLayoutCount * 8); // VkDescriptorSetLayout pSetLayouts
     stream->read(&data->pushConstantRangeCount, 1 * 4); // u32 pushConstantRangeCount
     { // VkPushConstantRange pPushConstantRanges
         uint64_t ptrval = 0; stream->read(&ptrval, 8); VkPushConstantRange* tmpArr = new VkPushConstantRange[data->pushConstantRangeCount];
@@ -2854,7 +2906,8 @@ uint32_t vkUtilsEncodingSize_VkSamplerCreateInfo(const VkSamplerCreateInfo* data
 void vkUtilsPack_VkSamplerCreateInfo(android::base::InplaceStream* stream, const VkSamplerCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkSamplerCreateFlags flags
     stream->write(&data->magFilter, 1 * 4); // VkFilter magFilter
     stream->write(&data->minFilter, 1 * 4); // VkFilter minFilter
@@ -2909,7 +2962,8 @@ uint32_t vkUtilsEncodingSize_VkCommandPoolCreateInfo(const VkCommandPoolCreateIn
 void vkUtilsPack_VkCommandPoolCreateInfo(android::base::InplaceStream* stream, const VkCommandPoolCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkCommandPoolCreateFlags flags
     stream->write(&data->queueFamilyIndex, 1 * 4); // u32 queueFamilyIndex
 }
@@ -2937,7 +2991,8 @@ uint32_t vkUtilsEncodingSize_VkCommandBufferAllocateInfo(const VkCommandBufferAl
 void vkUtilsPack_VkCommandBufferAllocateInfo(android::base::InplaceStream* stream, const VkCommandBufferAllocateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->commandPool, 1 * 8); // VkCommandPool commandPool
     stream->write(&data->level, 1 * 4); // VkCommandBufferLevel level
     stream->write(&data->commandBufferCount, 1 * 4); // u32 commandBufferCount
@@ -2970,7 +3025,8 @@ uint32_t vkUtilsEncodingSize_VkCommandBufferInheritanceInfo(const VkCommandBuffe
 void vkUtilsPack_VkCommandBufferInheritanceInfo(android::base::InplaceStream* stream, const VkCommandBufferInheritanceInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->renderPass, 1 * 8); // VkRenderPass renderPass
     stream->write(&data->subpass, 1 * 4); // u32 subpass
     stream->write(&data->framebuffer, 1 * 8); // VkFramebuffer framebuffer
@@ -2998,14 +3054,15 @@ uint32_t vkUtilsEncodingSize_VkCommandBufferBeginInfo(const VkCommandBufferBegin
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkCommandBufferUsageFlags flags
-    if (data->pInheritanceInfo) { res += 1 * vkUtilsEncodingSize_VkCommandBufferInheritanceInfo(data->pInheritanceInfo); } // VkCommandBufferInheritanceInfo pInheritanceInfo
+    res += 8; if (data->pInheritanceInfo) { res += 1 * vkUtilsEncodingSize_VkCommandBufferInheritanceInfo(data->pInheritanceInfo); } // VkCommandBufferInheritanceInfo pInheritanceInfo
     return res;
 }
 
 void vkUtilsPack_VkCommandBufferBeginInfo(android::base::InplaceStream* stream, const VkCommandBufferBeginInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkCommandBufferUsageFlags flags
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pInheritanceInfo); stream->write(&ptrval, 8);
@@ -3035,14 +3092,15 @@ uint32_t vkUtilsEncodingSize_VkRenderPassBeginInfo(const VkRenderPassBeginInfo* 
     res += 1 * 8; // VkFramebuffer framebuffer
     res += 1 * vkUtilsEncodingSize_VkRect2D(&data->renderArea); // VkRect2D renderArea
     res += 1 * 4; // u32 clearValueCount
-    if (data->pClearValues) { res += data->clearValueCount * vkUtilsEncodingSize_VkClearValue(data->pClearValues); } // VkClearValue pClearValues
+    res += 8; if (data->pClearValues) { res += data->clearValueCount * vkUtilsEncodingSize_VkClearValue(data->pClearValues); } // VkClearValue pClearValues
     return res;
 }
 
 void vkUtilsPack_VkRenderPassBeginInfo(android::base::InplaceStream* stream, const VkRenderPassBeginInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->renderPass, 1 * 8); // VkRenderPass renderPass
     stream->write(&data->framebuffer, 1 * 8); // VkFramebuffer framebuffer
     vkUtilsPack_VkRect2D(stream, &data->renderArea); // VkRect2D renderArea
@@ -3228,11 +3286,11 @@ uint32_t vkUtilsEncodingSize_VkSubpassDescription(const VkSubpassDescription* da
     res += 1 * 4; // VkSubpassDescriptionFlags flags
     res += 1 * 4; // VkPipelineBindPoint pipelineBindPoint
     res += 1 * 4; // u32 inputAttachmentCount
-    if (data->pInputAttachments) { res += data->inputAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pInputAttachments); } // VkAttachmentReference pInputAttachments
+    res += 8; if (data->pInputAttachments) { res += data->inputAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pInputAttachments); } // VkAttachmentReference pInputAttachments
     res += 1 * 4; // u32 colorAttachmentCount
-    if (data->pColorAttachments) { res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pColorAttachments); } // VkAttachmentReference pColorAttachments
-    if (data->pResolveAttachments) { res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pResolveAttachments); } // VkAttachmentReference pResolveAttachments
-    if (data->pDepthStencilAttachment) { res += 1 * vkUtilsEncodingSize_VkAttachmentReference(data->pDepthStencilAttachment); } // VkAttachmentReference pDepthStencilAttachment
+    res += 8; if (data->pColorAttachments) { res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pColorAttachments); } // VkAttachmentReference pColorAttachments
+    res += 8; if (data->pResolveAttachments) { res += data->colorAttachmentCount * vkUtilsEncodingSize_VkAttachmentReference(data->pResolveAttachments); } // VkAttachmentReference pResolveAttachments
+    res += 8; if (data->pDepthStencilAttachment) { res += 1 * vkUtilsEncodingSize_VkAttachmentReference(data->pDepthStencilAttachment); } // VkAttachmentReference pDepthStencilAttachment
     res += 1 * 4; // u32 preserveAttachmentCount
     res += data->preserveAttachmentCount * 4; // u32 pPreserveAttachments
     return res;
@@ -3257,7 +3315,7 @@ void vkUtilsPack_VkSubpassDescription(android::base::InplaceStream* stream, cons
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pDepthStencilAttachment); stream->write(&ptrval, 8);
     if (data->pDepthStencilAttachment) { for (uint32_t i = 0; i < 1; i++) { vkUtilsPack_VkAttachmentReference(stream, data->pDepthStencilAttachment + i); } } } // VkAttachmentReference pDepthStencilAttachment
     stream->write(&data->preserveAttachmentCount, 1 * 4); // u32 preserveAttachmentCount
-    stream->write(&data->pPreserveAttachments, data->preserveAttachmentCount * 4); // u32 pPreserveAttachments
+    stream->write(data->pPreserveAttachments, data->preserveAttachmentCount * 4); // u32 pPreserveAttachments
 }
 
 VkSubpassDescription* vkUtilsUnpack_VkSubpassDescription(android::base::InplaceStream* stream) {
@@ -3291,7 +3349,8 @@ VkSubpassDescription* vkUtilsUnpack_VkSubpassDescription(android::base::InplaceS
         data->pDepthStencilAttachment = tmpArr;
     }
     stream->read(&data->preserveAttachmentCount, 1 * 4); // u32 preserveAttachmentCount
-    stream->read(&data->pPreserveAttachments, data->preserveAttachmentCount * 4); // u32 pPreserveAttachments
+    data->pPreserveAttachments = new u32[data->preserveAttachmentCount]; // u32 pPreserveAttachments
+    stream->read((char*)data->pPreserveAttachments, data->preserveAttachmentCount * 4); // u32 pPreserveAttachments
     return data;
 }
 
@@ -3338,18 +3397,19 @@ uint32_t vkUtilsEncodingSize_VkRenderPassCreateInfo(const VkRenderPassCreateInfo
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkRenderPassCreateFlags flags
     res += 1 * 4; // u32 attachmentCount
-    if (data->pAttachments) { res += data->attachmentCount * vkUtilsEncodingSize_VkAttachmentDescription(data->pAttachments); } // VkAttachmentDescription pAttachments
+    res += 8; if (data->pAttachments) { res += data->attachmentCount * vkUtilsEncodingSize_VkAttachmentDescription(data->pAttachments); } // VkAttachmentDescription pAttachments
     res += 1 * 4; // u32 subpassCount
-    if (data->pSubpasses) { res += data->subpassCount * vkUtilsEncodingSize_VkSubpassDescription(data->pSubpasses); } // VkSubpassDescription pSubpasses
+    res += 8; if (data->pSubpasses) { res += data->subpassCount * vkUtilsEncodingSize_VkSubpassDescription(data->pSubpasses); } // VkSubpassDescription pSubpasses
     res += 1 * 4; // u32 dependencyCount
-    if (data->pDependencies) { res += data->dependencyCount * vkUtilsEncodingSize_VkSubpassDependency(data->pDependencies); } // VkSubpassDependency pDependencies
+    res += 8; if (data->pDependencies) { res += data->dependencyCount * vkUtilsEncodingSize_VkSubpassDependency(data->pDependencies); } // VkSubpassDependency pDependencies
     return res;
 }
 
 void vkUtilsPack_VkRenderPassCreateInfo(android::base::InplaceStream* stream, const VkRenderPassCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkRenderPassCreateFlags flags
     stream->write(&data->attachmentCount, 1 * 4); // u32 attachmentCount
     {
@@ -3406,7 +3466,8 @@ uint32_t vkUtilsEncodingSize_VkEventCreateInfo(const VkEventCreateInfo* data) {
 void vkUtilsPack_VkEventCreateInfo(android::base::InplaceStream* stream, const VkEventCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkEventCreateFlags flags
 }
 
@@ -3430,7 +3491,8 @@ uint32_t vkUtilsEncodingSize_VkFenceCreateInfo(const VkFenceCreateInfo* data) {
 void vkUtilsPack_VkFenceCreateInfo(android::base::InplaceStream* stream, const VkFenceCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkFenceCreateFlags flags
 }
 
@@ -3997,7 +4059,8 @@ uint32_t vkUtilsEncodingSize_VkSemaphoreCreateInfo(const VkSemaphoreCreateInfo* 
 void vkUtilsPack_VkSemaphoreCreateInfo(android::base::InplaceStream* stream, const VkSemaphoreCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkSemaphoreCreateFlags flags
 }
 
@@ -4024,7 +4087,8 @@ uint32_t vkUtilsEncodingSize_VkQueryPoolCreateInfo(const VkQueryPoolCreateInfo* 
 void vkUtilsPack_VkQueryPoolCreateInfo(android::base::InplaceStream* stream, const VkQueryPoolCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkQueryPoolCreateFlags flags
     stream->write(&data->queryType, 1 * 4); // VkQueryType queryType
     stream->write(&data->queryCount, 1 * 4); // u32 queryCount
@@ -4060,11 +4124,12 @@ uint32_t vkUtilsEncodingSize_VkFramebufferCreateInfo(const VkFramebufferCreateIn
 void vkUtilsPack_VkFramebufferCreateInfo(android::base::InplaceStream* stream, const VkFramebufferCreateInfo* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkFramebufferCreateFlags flags
     stream->write(&data->renderPass, 1 * 8); // VkRenderPass renderPass
     stream->write(&data->attachmentCount, 1 * 4); // u32 attachmentCount
-    stream->write(&data->pAttachments, data->attachmentCount * 8); // VkImageView pAttachments
+    stream->write(data->pAttachments, data->attachmentCount * 8); // VkImageView pAttachments
     stream->write(&data->width, 1 * 4); // u32 width
     stream->write(&data->height, 1 * 4); // u32 height
     stream->write(&data->layers, 1 * 4); // u32 layers
@@ -4077,7 +4142,8 @@ VkFramebufferCreateInfo* vkUtilsUnpack_VkFramebufferCreateInfo(android::base::In
     stream->read(&data->flags, 1 * 4); // VkFramebufferCreateFlags flags
     stream->read(&data->renderPass, 1 * 8); // VkRenderPass renderPass
     stream->read(&data->attachmentCount, 1 * 4); // u32 attachmentCount
-    stream->read(&data->pAttachments, data->attachmentCount * 8); // VkImageView pAttachments
+    data->pAttachments = new VkImageView[data->attachmentCount]; // VkImageView pAttachments
+    stream->read((char*)data->pAttachments, data->attachmentCount * 8); // VkImageView pAttachments
     stream->read(&data->width, 1 * 4); // u32 width
     stream->read(&data->height, 1 * 4); // u32 height
     stream->read(&data->layers, 1 * 4); // u32 layers
@@ -4258,7 +4324,8 @@ uint32_t vkUtilsEncodingSize_VkSwapchainCreateInfoKHR(const VkSwapchainCreateInf
 void vkUtilsPack_VkSwapchainCreateInfoKHR(android::base::InplaceStream* stream, const VkSwapchainCreateInfoKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkSwapchainCreateFlagsKHR flags
     stream->write(&data->surface, 1 * 8); // VkSurfaceKHR surface
     stream->write(&data->minImageCount, 1 * 4); // u32 minImageCount
@@ -4269,7 +4336,7 @@ void vkUtilsPack_VkSwapchainCreateInfoKHR(android::base::InplaceStream* stream, 
     stream->write(&data->imageUsage, 1 * 4); // VkImageUsageFlags imageUsage
     stream->write(&data->imageSharingMode, 1 * 4); // VkSharingMode imageSharingMode
     stream->write(&data->queueFamilyIndexCount, 1 * 4); // u32 queueFamilyIndexCount
-    stream->write(&data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
+    stream->write(data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
     stream->write(&data->preTransform, 1 * 4); // VkSurfaceTransformFlagBitsKHR preTransform
     stream->write(&data->compositeAlpha, 1 * 4); // VkCompositeAlphaFlagBitsKHR compositeAlpha
     stream->write(&data->presentMode, 1 * 4); // VkPresentModeKHR presentMode
@@ -4291,7 +4358,8 @@ VkSwapchainCreateInfoKHR* vkUtilsUnpack_VkSwapchainCreateInfoKHR(android::base::
     stream->read(&data->imageUsage, 1 * 4); // VkImageUsageFlags imageUsage
     stream->read(&data->imageSharingMode, 1 * 4); // VkSharingMode imageSharingMode
     stream->read(&data->queueFamilyIndexCount, 1 * 4); // u32 queueFamilyIndexCount
-    stream->read(&data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
+    data->pQueueFamilyIndices = new u32[data->queueFamilyIndexCount]; // u32 pQueueFamilyIndices
+    stream->read((char*)data->pQueueFamilyIndices, data->queueFamilyIndexCount * 4); // u32 pQueueFamilyIndices
     stream->read(&data->preTransform, 1 * 4); // VkSurfaceTransformFlagBitsKHR preTransform
     stream->read(&data->compositeAlpha, 1 * 4); // VkCompositeAlphaFlagBitsKHR compositeAlpha
     stream->read(&data->presentMode, 1 * 4); // VkPresentModeKHR presentMode
@@ -4317,13 +4385,14 @@ uint32_t vkUtilsEncodingSize_VkPresentInfoKHR(const VkPresentInfoKHR* data) {
 void vkUtilsPack_VkPresentInfoKHR(android::base::InplaceStream* stream, const VkPresentInfoKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->write(&data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
+    stream->write(data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
     stream->write(&data->swapchainCount, 1 * 4); // u32 swapchainCount
-    stream->write(&data->pSwapchains, data->swapchainCount * 8); // VkSwapchainKHR pSwapchains
-    stream->write(&data->pImageIndices, 1 * 4); // u32 pImageIndices
-    stream->write(&data->pResults, 1 * 4); // VkResult pResults
+    stream->write(data->pSwapchains, data->swapchainCount * 8); // VkSwapchainKHR pSwapchains
+    stream->write(data->pImageIndices, 1 * 4); // u32 pImageIndices
+    stream->write(data->pResults, 1 * 4); // VkResult pResults
 }
 
 VkPresentInfoKHR* vkUtilsUnpack_VkPresentInfoKHR(android::base::InplaceStream* stream) {
@@ -4331,11 +4400,15 @@ VkPresentInfoKHR* vkUtilsUnpack_VkPresentInfoKHR(android::base::InplaceStream* s
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->read(&data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
+    data->pWaitSemaphores = new VkSemaphore[data->waitSemaphoreCount]; // VkSemaphore pWaitSemaphores
+    stream->read((char*)data->pWaitSemaphores, data->waitSemaphoreCount * 8); // VkSemaphore pWaitSemaphores
     stream->read(&data->swapchainCount, 1 * 4); // u32 swapchainCount
-    stream->read(&data->pSwapchains, data->swapchainCount * 8); // VkSwapchainKHR pSwapchains
-    stream->read(&data->pImageIndices, 1 * 4); // u32 pImageIndices
-    stream->read(&data->pResults, 1 * 4); // VkResult pResults
+    data->pSwapchains = new VkSwapchainKHR[data->swapchainCount]; // VkSwapchainKHR pSwapchains
+    stream->read((char*)data->pSwapchains, data->swapchainCount * 8); // VkSwapchainKHR pSwapchains
+    data->pImageIndices = new u32[1]; // u32 pImageIndices
+    stream->read((char*)data->pImageIndices, 1 * 4); // u32 pImageIndices
+    data->pResults = new VkResult[1]; // VkResult pResults
+    stream->read((char*)data->pResults, 1 * 4); // VkResult pResults
     return data;
 }
 
@@ -4355,7 +4428,7 @@ uint32_t vkUtilsEncodingSize_VkDisplayPropertiesKHR(const VkDisplayPropertiesKHR
 void vkUtilsPack_VkDisplayPropertiesKHR(android::base::InplaceStream* stream, const VkDisplayPropertiesKHR* data) {
     if (!data) return;
     stream->write(&data->display, 1 * 8); // VkDisplayKHR display
-    stream->write(&data->displayName, 1 * 1); // char displayName
+    stream->write(data->displayName, 1 * 1); // char displayName
     vkUtilsPack_VkExtent2D(stream, &data->physicalDimensions); // VkExtent2D physicalDimensions
     vkUtilsPack_VkExtent2D(stream, &data->physicalResolution); // VkExtent2D physicalResolution
     stream->write(&data->supportedTransforms, 1 * 4); // VkSurfaceTransformFlagsKHR supportedTransforms
@@ -4366,7 +4439,8 @@ void vkUtilsPack_VkDisplayPropertiesKHR(android::base::InplaceStream* stream, co
 VkDisplayPropertiesKHR* vkUtilsUnpack_VkDisplayPropertiesKHR(android::base::InplaceStream* stream) {
     VkDisplayPropertiesKHR* data = new VkDisplayPropertiesKHR;
     stream->read(&data->display, 1 * 8); // VkDisplayKHR display
-    stream->read(&data->displayName, 1 * 1); // char displayName
+    data->displayName = new char[1]; // char displayName
+    stream->read((char*)data->displayName, 1 * 1); // char displayName
     { VkExtent2D* tmpUnpacked = vkUtilsUnpack_VkExtent2D(stream); memcpy(&data->physicalDimensions, tmpUnpacked, sizeof(VkExtent2D)); delete tmpUnpacked; } // VkExtent2D physicalDimensions
     { VkExtent2D* tmpUnpacked = vkUtilsUnpack_VkExtent2D(stream); memcpy(&data->physicalResolution, tmpUnpacked, sizeof(VkExtent2D)); delete tmpUnpacked; } // VkExtent2D physicalResolution
     stream->read(&data->supportedTransforms, 1 * 4); // VkSurfaceTransformFlagsKHR supportedTransforms
@@ -4430,7 +4504,8 @@ uint32_t vkUtilsEncodingSize_VkDisplayModeCreateInfoKHR(const VkDisplayModeCreat
 void vkUtilsPack_VkDisplayModeCreateInfoKHR(android::base::InplaceStream* stream, const VkDisplayModeCreateInfoKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDisplayModeCreateFlagsKHR flags
     vkUtilsPack_VkDisplayModeParametersKHR(stream, &data->parameters); // VkDisplayModeParametersKHR parameters
 }
@@ -4526,7 +4601,8 @@ uint32_t vkUtilsEncodingSize_VkDisplaySurfaceCreateInfoKHR(const VkDisplaySurfac
 void vkUtilsPack_VkDisplaySurfaceCreateInfoKHR(android::base::InplaceStream* stream, const VkDisplaySurfaceCreateInfoKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDisplaySurfaceCreateFlagsKHR flags
     stream->write(&data->displayMode, 1 * 8); // VkDisplayModeKHR displayMode
     stream->write(&data->planeIndex, 1 * 4); // u32 planeIndex
@@ -4566,7 +4642,8 @@ uint32_t vkUtilsEncodingSize_VkDisplayPresentInfoKHR(const VkDisplayPresentInfoK
 void vkUtilsPack_VkDisplayPresentInfoKHR(android::base::InplaceStream* stream, const VkDisplayPresentInfoKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkRect2D(stream, &data->srcRect); // VkRect2D srcRect
     vkUtilsPack_VkRect2D(stream, &data->dstRect); // VkRect2D dstRect
     stream->write(&data->persistent, 1 * 4); // VkBool32 persistent
@@ -4596,7 +4673,8 @@ uint32_t vkUtilsEncodingSize_VkDebugReportCallbackCreateInfoEXT(const VkDebugRep
 void vkUtilsPack_VkDebugReportCallbackCreateInfoEXT(android::base::InplaceStream* stream, const VkDebugReportCallbackCreateInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDebugReportFlagsEXT flags
     stream->write(&data->pfnCallback, 1 * 8); // PFN_vkDebugReportCallbackEXT pfnCallback
     stream->write(&data->pUserData, 8); // void pUserData
@@ -4624,7 +4702,8 @@ uint32_t vkUtilsEncodingSize_VkPipelineRasterizationStateRasterizationOrderAMD(c
 void vkUtilsPack_VkPipelineRasterizationStateRasterizationOrderAMD(android::base::InplaceStream* stream, const VkPipelineRasterizationStateRasterizationOrderAMD* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->rasterizationOrder, 1 * 4); // VkRasterizationOrderAMD rasterizationOrder
 }
 
@@ -4650,10 +4729,11 @@ uint32_t vkUtilsEncodingSize_VkDebugMarkerObjectNameInfoEXT(const VkDebugMarkerO
 void vkUtilsPack_VkDebugMarkerObjectNameInfoEXT(android::base::InplaceStream* stream, const VkDebugMarkerObjectNameInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->objectType, 1 * 4); // VkDebugReportObjectTypeEXT objectType
     stream->write(&data->object, 1 * 8); // u64 object
-    stream->write(&data->pObjectName, 1 * 1); // char pObjectName
+    stream->write(data->pObjectName, 1 * 1); // char pObjectName
 }
 
 VkDebugMarkerObjectNameInfoEXT* vkUtilsUnpack_VkDebugMarkerObjectNameInfoEXT(android::base::InplaceStream* stream) {
@@ -4662,7 +4742,8 @@ VkDebugMarkerObjectNameInfoEXT* vkUtilsUnpack_VkDebugMarkerObjectNameInfoEXT(and
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->objectType, 1 * 4); // VkDebugReportObjectTypeEXT objectType
     stream->read(&data->object, 1 * 8); // u64 object
-    stream->read(&data->pObjectName, 1 * 1); // char pObjectName
+    data->pObjectName = new char[1]; // char pObjectName
+    stream->read((char*)data->pObjectName, 1 * 1); // char pObjectName
     return data;
 }
 
@@ -4682,7 +4763,8 @@ uint32_t vkUtilsEncodingSize_VkDebugMarkerObjectTagInfoEXT(const VkDebugMarkerOb
 void vkUtilsPack_VkDebugMarkerObjectTagInfoEXT(android::base::InplaceStream* stream, const VkDebugMarkerObjectTagInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->objectType, 1 * 4); // VkDebugReportObjectTypeEXT objectType
     stream->write(&data->object, 1 * 8); // u64 object
     stream->write(&data->tagName, 1 * 8); // u64 tagName
@@ -4715,8 +4797,9 @@ uint32_t vkUtilsEncodingSize_VkDebugMarkerMarkerInfoEXT(const VkDebugMarkerMarke
 void vkUtilsPack_VkDebugMarkerMarkerInfoEXT(android::base::InplaceStream* stream, const VkDebugMarkerMarkerInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
-    stream->write(&data->pMarkerName, 1 * 1); // char pMarkerName
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
+    stream->write(data->pMarkerName, 1 * 1); // char pMarkerName
     stream->write(&data->color, 4 * 4); // f32 color
 }
 
@@ -4724,7 +4807,8 @@ VkDebugMarkerMarkerInfoEXT* vkUtilsUnpack_VkDebugMarkerMarkerInfoEXT(android::ba
     VkDebugMarkerMarkerInfoEXT* data = new VkDebugMarkerMarkerInfoEXT;
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
-    stream->read(&data->pMarkerName, 1 * 1); // char pMarkerName
+    data->pMarkerName = new char[1]; // char pMarkerName
+    stream->read((char*)data->pMarkerName, 1 * 1); // char pMarkerName
     stream->read(&data->color, 4 * 4); // f32 color
     return data;
 }
@@ -4741,7 +4825,8 @@ uint32_t vkUtilsEncodingSize_VkDedicatedAllocationImageCreateInfoNV(const VkDedi
 void vkUtilsPack_VkDedicatedAllocationImageCreateInfoNV(android::base::InplaceStream* stream, const VkDedicatedAllocationImageCreateInfoNV* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->dedicatedAllocation, 1 * 4); // VkBool32 dedicatedAllocation
 }
 
@@ -4765,7 +4850,8 @@ uint32_t vkUtilsEncodingSize_VkDedicatedAllocationBufferCreateInfoNV(const VkDed
 void vkUtilsPack_VkDedicatedAllocationBufferCreateInfoNV(android::base::InplaceStream* stream, const VkDedicatedAllocationBufferCreateInfoNV* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->dedicatedAllocation, 1 * 4); // VkBool32 dedicatedAllocation
 }
 
@@ -4790,7 +4876,8 @@ uint32_t vkUtilsEncodingSize_VkDedicatedAllocationMemoryAllocateInfoNV(const VkD
 void vkUtilsPack_VkDedicatedAllocationMemoryAllocateInfoNV(android::base::InplaceStream* stream, const VkDedicatedAllocationMemoryAllocateInfoNV* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->image, 1 * 8); // VkImage image
     stream->write(&data->buffer, 1 * 8); // VkBuffer buffer
 }
@@ -4821,13 +4908,14 @@ uint32_t vkUtilsEncodingSize_VkRenderPassMultiviewCreateInfoKHX(const VkRenderPa
 void vkUtilsPack_VkRenderPassMultiviewCreateInfoKHX(android::base::InplaceStream* stream, const VkRenderPassMultiviewCreateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->subpassCount, 1 * 4); // u32 subpassCount
-    stream->write(&data->pViewMasks, data->subpassCount * 4); // u32 pViewMasks
+    stream->write(data->pViewMasks, data->subpassCount * 4); // u32 pViewMasks
     stream->write(&data->dependencyCount, 1 * 4); // u32 dependencyCount
-    stream->write(&data->pViewOffsets, data->dependencyCount * 4); // s32 pViewOffsets
+    stream->write(data->pViewOffsets, data->dependencyCount * 4); // s32 pViewOffsets
     stream->write(&data->correlationMaskCount, 1 * 4); // u32 correlationMaskCount
-    stream->write(&data->pCorrelationMasks, data->correlationMaskCount * 4); // u32 pCorrelationMasks
+    stream->write(data->pCorrelationMasks, data->correlationMaskCount * 4); // u32 pCorrelationMasks
 }
 
 VkRenderPassMultiviewCreateInfoKHX* vkUtilsUnpack_VkRenderPassMultiviewCreateInfoKHX(android::base::InplaceStream* stream) {
@@ -4835,11 +4923,14 @@ VkRenderPassMultiviewCreateInfoKHX* vkUtilsUnpack_VkRenderPassMultiviewCreateInf
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->subpassCount, 1 * 4); // u32 subpassCount
-    stream->read(&data->pViewMasks, data->subpassCount * 4); // u32 pViewMasks
+    data->pViewMasks = new u32[data->subpassCount]; // u32 pViewMasks
+    stream->read((char*)data->pViewMasks, data->subpassCount * 4); // u32 pViewMasks
     stream->read(&data->dependencyCount, 1 * 4); // u32 dependencyCount
-    stream->read(&data->pViewOffsets, data->dependencyCount * 4); // s32 pViewOffsets
+    data->pViewOffsets = new s32[data->dependencyCount]; // s32 pViewOffsets
+    stream->read((char*)data->pViewOffsets, data->dependencyCount * 4); // s32 pViewOffsets
     stream->read(&data->correlationMaskCount, 1 * 4); // u32 correlationMaskCount
-    stream->read(&data->pCorrelationMasks, data->correlationMaskCount * 4); // u32 pCorrelationMasks
+    data->pCorrelationMasks = new u32[data->correlationMaskCount]; // u32 pCorrelationMasks
+    stream->read((char*)data->pCorrelationMasks, data->correlationMaskCount * 4); // u32 pCorrelationMasks
     return data;
 }
 
@@ -4857,7 +4948,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceMultiviewFeaturesKHX(const VkPhysic
 void vkUtilsPack_VkPhysicalDeviceMultiviewFeaturesKHX(android::base::InplaceStream* stream, const VkPhysicalDeviceMultiviewFeaturesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->multiview, 1 * 4); // VkBool32 multiview
     stream->write(&data->multiviewGeometryShader, 1 * 4); // VkBool32 multiviewGeometryShader
     stream->write(&data->multiviewTessellationShader, 1 * 4); // VkBool32 multiviewTessellationShader
@@ -4886,7 +4978,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceMultiviewPropertiesKHX(const VkPhys
 void vkUtilsPack_VkPhysicalDeviceMultiviewPropertiesKHX(android::base::InplaceStream* stream, const VkPhysicalDeviceMultiviewPropertiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->maxMultiviewViewCount, 1 * 4); // u32 maxMultiviewViewCount
     stream->write(&data->maxMultiviewInstanceIndex, 1 * 4); // u32 maxMultiviewInstanceIndex
 }
@@ -4939,7 +5032,8 @@ uint32_t vkUtilsEncodingSize_VkExternalMemoryImageCreateInfoNV(const VkExternalM
 void vkUtilsPack_VkExternalMemoryImageCreateInfoNV(android::base::InplaceStream* stream, const VkExternalMemoryImageCreateInfoNV* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleTypes, 1 * 4); // VkExternalMemoryHandleTypeFlagsNV handleTypes
 }
 
@@ -4963,7 +5057,8 @@ uint32_t vkUtilsEncodingSize_VkExportMemoryAllocateInfoNV(const VkExportMemoryAl
 void vkUtilsPack_VkExportMemoryAllocateInfoNV(android::base::InplaceStream* stream, const VkExportMemoryAllocateInfoNV* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleTypes, 1 * 4); // VkExternalMemoryHandleTypeFlagsNV handleTypes
 }
 
@@ -4987,7 +5082,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceFeatures2KHR(const VkPhysicalDevice
 void vkUtilsPack_VkPhysicalDeviceFeatures2KHR(android::base::InplaceStream* stream, const VkPhysicalDeviceFeatures2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkPhysicalDeviceFeatures(stream, &data->features); // VkPhysicalDeviceFeatures features
 }
 
@@ -5011,7 +5107,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceProperties2KHR(const VkPhysicalDevi
 void vkUtilsPack_VkPhysicalDeviceProperties2KHR(android::base::InplaceStream* stream, const VkPhysicalDeviceProperties2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkPhysicalDeviceProperties(stream, &data->properties); // VkPhysicalDeviceProperties properties
 }
 
@@ -5035,7 +5132,8 @@ uint32_t vkUtilsEncodingSize_VkFormatProperties2KHR(const VkFormatProperties2KHR
 void vkUtilsPack_VkFormatProperties2KHR(android::base::InplaceStream* stream, const VkFormatProperties2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkFormatProperties(stream, &data->formatProperties); // VkFormatProperties formatProperties
 }
 
@@ -5059,7 +5157,8 @@ uint32_t vkUtilsEncodingSize_VkImageFormatProperties2KHR(const VkImageFormatProp
 void vkUtilsPack_VkImageFormatProperties2KHR(android::base::InplaceStream* stream, const VkImageFormatProperties2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkImageFormatProperties(stream, &data->imageFormatProperties); // VkImageFormatProperties imageFormatProperties
 }
 
@@ -5087,7 +5186,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceImageFormatInfo2KHR(const VkPhysica
 void vkUtilsPack_VkPhysicalDeviceImageFormatInfo2KHR(android::base::InplaceStream* stream, const VkPhysicalDeviceImageFormatInfo2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->format, 1 * 4); // VkFormat format
     stream->write(&data->type, 1 * 4); // VkImageType type
     stream->write(&data->tiling, 1 * 4); // VkImageTiling tiling
@@ -5119,7 +5219,8 @@ uint32_t vkUtilsEncodingSize_VkQueueFamilyProperties2KHR(const VkQueueFamilyProp
 void vkUtilsPack_VkQueueFamilyProperties2KHR(android::base::InplaceStream* stream, const VkQueueFamilyProperties2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkQueueFamilyProperties(stream, &data->queueFamilyProperties); // VkQueueFamilyProperties queueFamilyProperties
 }
 
@@ -5143,7 +5244,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceMemoryProperties2KHR(const VkPhysic
 void vkUtilsPack_VkPhysicalDeviceMemoryProperties2KHR(android::base::InplaceStream* stream, const VkPhysicalDeviceMemoryProperties2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkPhysicalDeviceMemoryProperties(stream, &data->memoryProperties); // VkPhysicalDeviceMemoryProperties memoryProperties
 }
 
@@ -5167,7 +5269,8 @@ uint32_t vkUtilsEncodingSize_VkSparseImageFormatProperties2KHR(const VkSparseIma
 void vkUtilsPack_VkSparseImageFormatProperties2KHR(android::base::InplaceStream* stream, const VkSparseImageFormatProperties2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkSparseImageFormatProperties(stream, &data->properties); // VkSparseImageFormatProperties properties
 }
 
@@ -5195,7 +5298,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceSparseImageFormatInfo2KHR(const VkP
 void vkUtilsPack_VkPhysicalDeviceSparseImageFormatInfo2KHR(android::base::InplaceStream* stream, const VkPhysicalDeviceSparseImageFormatInfo2KHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->format, 1 * 4); // VkFormat format
     stream->write(&data->type, 1 * 4); // VkImageType type
     stream->write(&data->samples, 1 * 4); // VkSampleCountFlagBits samples
@@ -5228,7 +5332,8 @@ uint32_t vkUtilsEncodingSize_VkMemoryAllocateFlagsInfoKHX(const VkMemoryAllocate
 void vkUtilsPack_VkMemoryAllocateFlagsInfoKHX(android::base::InplaceStream* stream, const VkMemoryAllocateFlagsInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkMemoryAllocateFlagsKHX flags
     stream->write(&data->deviceMask, 1 * 4); // u32 deviceMask
 }
@@ -5258,12 +5363,13 @@ uint32_t vkUtilsEncodingSize_VkBindBufferMemoryInfoKHX(const VkBindBufferMemoryI
 void vkUtilsPack_VkBindBufferMemoryInfoKHX(android::base::InplaceStream* stream, const VkBindBufferMemoryInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->buffer, 1 * 8); // VkBuffer buffer
     stream->write(&data->memory, 1 * 8); // VkDeviceMemory memory
     stream->write(&data->memoryOffset, 1 * 8); // VkDeviceSize memoryOffset
     stream->write(&data->deviceIndexCount, 1 * 4); // u32 deviceIndexCount
-    stream->write(&data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
+    stream->write(data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
 }
 
 VkBindBufferMemoryInfoKHX* vkUtilsUnpack_VkBindBufferMemoryInfoKHX(android::base::InplaceStream* stream) {
@@ -5274,7 +5380,8 @@ VkBindBufferMemoryInfoKHX* vkUtilsUnpack_VkBindBufferMemoryInfoKHX(android::base
     stream->read(&data->memory, 1 * 8); // VkDeviceMemory memory
     stream->read(&data->memoryOffset, 1 * 8); // VkDeviceSize memoryOffset
     stream->read(&data->deviceIndexCount, 1 * 4); // u32 deviceIndexCount
-    stream->read(&data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
+    data->pDeviceIndices = new u32[data->deviceIndexCount]; // u32 pDeviceIndices
+    stream->read((char*)data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
     return data;
 }
 
@@ -5289,19 +5396,20 @@ uint32_t vkUtilsEncodingSize_VkBindImageMemoryInfoKHX(const VkBindImageMemoryInf
     res += 1 * 4; // u32 deviceIndexCount
     res += data->deviceIndexCount * 4; // u32 pDeviceIndices
     res += 1 * 4; // u32 SFRRectCount
-    if (data->pSFRRects) { res += data->SFRRectCount * vkUtilsEncodingSize_VkRect2D(data->pSFRRects); } // VkRect2D pSFRRects
+    res += 8; if (data->pSFRRects) { res += data->SFRRectCount * vkUtilsEncodingSize_VkRect2D(data->pSFRRects); } // VkRect2D pSFRRects
     return res;
 }
 
 void vkUtilsPack_VkBindImageMemoryInfoKHX(android::base::InplaceStream* stream, const VkBindImageMemoryInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->image, 1 * 8); // VkImage image
     stream->write(&data->memory, 1 * 8); // VkDeviceMemory memory
     stream->write(&data->memoryOffset, 1 * 8); // VkDeviceSize memoryOffset
     stream->write(&data->deviceIndexCount, 1 * 4); // u32 deviceIndexCount
-    stream->write(&data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
+    stream->write(data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
     stream->write(&data->SFRRectCount, 1 * 4); // u32 SFRRectCount
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pSFRRects); stream->write(&ptrval, 8);
@@ -5316,7 +5424,8 @@ VkBindImageMemoryInfoKHX* vkUtilsUnpack_VkBindImageMemoryInfoKHX(android::base::
     stream->read(&data->memory, 1 * 8); // VkDeviceMemory memory
     stream->read(&data->memoryOffset, 1 * 8); // VkDeviceSize memoryOffset
     stream->read(&data->deviceIndexCount, 1 * 4); // u32 deviceIndexCount
-    stream->read(&data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
+    data->pDeviceIndices = new u32[data->deviceIndexCount]; // u32 pDeviceIndices
+    stream->read((char*)data->pDeviceIndices, data->deviceIndexCount * 4); // u32 pDeviceIndices
     stream->read(&data->SFRRectCount, 1 * 4); // u32 SFRRectCount
     { // VkRect2D pSFRRects
         uint64_t ptrval = 0; stream->read(&ptrval, 8); VkRect2D* tmpArr = new VkRect2D[data->SFRRectCount];
@@ -5334,14 +5443,15 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupRenderPassBeginInfoKHX(const VkDeviceG
     res += 1 * 8; // void pNext
     res += 1 * 4; // u32 deviceMask
     res += 1 * 4; // u32 deviceRenderAreaCount
-    if (data->pDeviceRenderAreas) { res += data->deviceRenderAreaCount * vkUtilsEncodingSize_VkRect2D(data->pDeviceRenderAreas); } // VkRect2D pDeviceRenderAreas
+    res += 8; if (data->pDeviceRenderAreas) { res += data->deviceRenderAreaCount * vkUtilsEncodingSize_VkRect2D(data->pDeviceRenderAreas); } // VkRect2D pDeviceRenderAreas
     return res;
 }
 
 void vkUtilsPack_VkDeviceGroupRenderPassBeginInfoKHX(android::base::InplaceStream* stream, const VkDeviceGroupRenderPassBeginInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->deviceMask, 1 * 4); // u32 deviceMask
     stream->write(&data->deviceRenderAreaCount, 1 * 4); // u32 deviceRenderAreaCount
     {
@@ -5376,7 +5486,8 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupCommandBufferBeginInfoKHX(const VkDevi
 void vkUtilsPack_VkDeviceGroupCommandBufferBeginInfoKHX(android::base::InplaceStream* stream, const VkDeviceGroupCommandBufferBeginInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->deviceMask, 1 * 4); // u32 deviceMask
 }
 
@@ -5405,13 +5516,14 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupSubmitInfoKHX(const VkDeviceGroupSubmi
 void vkUtilsPack_VkDeviceGroupSubmitInfoKHX(android::base::InplaceStream* stream, const VkDeviceGroupSubmitInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->write(&data->pWaitSemaphoreDeviceIndices, data->waitSemaphoreCount * 4); // u32 pWaitSemaphoreDeviceIndices
+    stream->write(data->pWaitSemaphoreDeviceIndices, data->waitSemaphoreCount * 4); // u32 pWaitSemaphoreDeviceIndices
     stream->write(&data->commandBufferCount, 1 * 4); // u32 commandBufferCount
-    stream->write(&data->pCommandBufferDeviceMasks, data->commandBufferCount * 4); // u32 pCommandBufferDeviceMasks
+    stream->write(data->pCommandBufferDeviceMasks, data->commandBufferCount * 4); // u32 pCommandBufferDeviceMasks
     stream->write(&data->signalSemaphoreCount, 1 * 4); // u32 signalSemaphoreCount
-    stream->write(&data->pSignalSemaphoreDeviceIndices, data->signalSemaphoreCount * 4); // u32 pSignalSemaphoreDeviceIndices
+    stream->write(data->pSignalSemaphoreDeviceIndices, data->signalSemaphoreCount * 4); // u32 pSignalSemaphoreDeviceIndices
 }
 
 VkDeviceGroupSubmitInfoKHX* vkUtilsUnpack_VkDeviceGroupSubmitInfoKHX(android::base::InplaceStream* stream) {
@@ -5419,11 +5531,14 @@ VkDeviceGroupSubmitInfoKHX* vkUtilsUnpack_VkDeviceGroupSubmitInfoKHX(android::ba
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->waitSemaphoreCount, 1 * 4); // u32 waitSemaphoreCount
-    stream->read(&data->pWaitSemaphoreDeviceIndices, data->waitSemaphoreCount * 4); // u32 pWaitSemaphoreDeviceIndices
+    data->pWaitSemaphoreDeviceIndices = new u32[data->waitSemaphoreCount]; // u32 pWaitSemaphoreDeviceIndices
+    stream->read((char*)data->pWaitSemaphoreDeviceIndices, data->waitSemaphoreCount * 4); // u32 pWaitSemaphoreDeviceIndices
     stream->read(&data->commandBufferCount, 1 * 4); // u32 commandBufferCount
-    stream->read(&data->pCommandBufferDeviceMasks, data->commandBufferCount * 4); // u32 pCommandBufferDeviceMasks
+    data->pCommandBufferDeviceMasks = new u32[data->commandBufferCount]; // u32 pCommandBufferDeviceMasks
+    stream->read((char*)data->pCommandBufferDeviceMasks, data->commandBufferCount * 4); // u32 pCommandBufferDeviceMasks
     stream->read(&data->signalSemaphoreCount, 1 * 4); // u32 signalSemaphoreCount
-    stream->read(&data->pSignalSemaphoreDeviceIndices, data->signalSemaphoreCount * 4); // u32 pSignalSemaphoreDeviceIndices
+    data->pSignalSemaphoreDeviceIndices = new u32[data->signalSemaphoreCount]; // u32 pSignalSemaphoreDeviceIndices
+    stream->read((char*)data->pSignalSemaphoreDeviceIndices, data->signalSemaphoreCount * 4); // u32 pSignalSemaphoreDeviceIndices
     return data;
 }
 
@@ -5440,7 +5555,8 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupBindSparseInfoKHX(const VkDeviceGroupB
 void vkUtilsPack_VkDeviceGroupBindSparseInfoKHX(android::base::InplaceStream* stream, const VkDeviceGroupBindSparseInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->resourceDeviceIndex, 1 * 4); // u32 resourceDeviceIndex
     stream->write(&data->memoryDeviceIndex, 1 * 4); // u32 memoryDeviceIndex
 }
@@ -5467,7 +5583,8 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupPresentCapabilitiesKHX(const VkDeviceG
 void vkUtilsPack_VkDeviceGroupPresentCapabilitiesKHX(android::base::InplaceStream* stream, const VkDeviceGroupPresentCapabilitiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->presentMask, VK_MAX_DEVICE_GROUP_SIZE_KHX * 4); // u32 presentMask
     stream->write(&data->modes, 1 * 4); // VkDeviceGroupPresentModeFlagsKHX modes
 }
@@ -5493,7 +5610,8 @@ uint32_t vkUtilsEncodingSize_VkImageSwapchainCreateInfoKHX(const VkImageSwapchai
 void vkUtilsPack_VkImageSwapchainCreateInfoKHX(android::base::InplaceStream* stream, const VkImageSwapchainCreateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->swapchain, 1 * 8); // VkSwapchainKHR swapchain
 }
 
@@ -5518,7 +5636,8 @@ uint32_t vkUtilsEncodingSize_VkBindImageMemorySwapchainInfoKHX(const VkBindImage
 void vkUtilsPack_VkBindImageMemorySwapchainInfoKHX(android::base::InplaceStream* stream, const VkBindImageMemorySwapchainInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->swapchain, 1 * 8); // VkSwapchainKHR swapchain
     stream->write(&data->imageIndex, 1 * 4); // u32 imageIndex
 }
@@ -5548,7 +5667,8 @@ uint32_t vkUtilsEncodingSize_VkAcquireNextImageInfoKHX(const VkAcquireNextImageI
 void vkUtilsPack_VkAcquireNextImageInfoKHX(android::base::InplaceStream* stream, const VkAcquireNextImageInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->swapchain, 1 * 8); // VkSwapchainKHR swapchain
     stream->write(&data->timeout, 1 * 8); // u64 timeout
     stream->write(&data->semaphore, 1 * 8); // VkSemaphore semaphore
@@ -5582,9 +5702,10 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupPresentInfoKHX(const VkDeviceGroupPres
 void vkUtilsPack_VkDeviceGroupPresentInfoKHX(android::base::InplaceStream* stream, const VkDeviceGroupPresentInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->swapchainCount, 1 * 4); // u32 swapchainCount
-    stream->write(&data->pDeviceMasks, data->swapchainCount * 4); // u32 pDeviceMasks
+    stream->write(data->pDeviceMasks, data->swapchainCount * 4); // u32 pDeviceMasks
     stream->write(&data->mode, 1 * 4); // VkDeviceGroupPresentModeFlagBitsKHX mode
 }
 
@@ -5593,7 +5714,8 @@ VkDeviceGroupPresentInfoKHX* vkUtilsUnpack_VkDeviceGroupPresentInfoKHX(android::
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->swapchainCount, 1 * 4); // u32 swapchainCount
-    stream->read(&data->pDeviceMasks, data->swapchainCount * 4); // u32 pDeviceMasks
+    data->pDeviceMasks = new u32[data->swapchainCount]; // u32 pDeviceMasks
+    stream->read((char*)data->pDeviceMasks, data->swapchainCount * 4); // u32 pDeviceMasks
     stream->read(&data->mode, 1 * 4); // VkDeviceGroupPresentModeFlagBitsKHX mode
     return data;
 }
@@ -5610,7 +5732,8 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupSwapchainCreateInfoKHX(const VkDeviceG
 void vkUtilsPack_VkDeviceGroupSwapchainCreateInfoKHX(android::base::InplaceStream* stream, const VkDeviceGroupSwapchainCreateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->modes, 1 * 4); // VkDeviceGroupPresentModeFlagsKHX modes
 }
 
@@ -5635,9 +5758,10 @@ uint32_t vkUtilsEncodingSize_VkValidationFlagsEXT(const VkValidationFlagsEXT* da
 void vkUtilsPack_VkValidationFlagsEXT(android::base::InplaceStream* stream, const VkValidationFlagsEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->disabledValidationCheckCount, 1 * 4); // u32 disabledValidationCheckCount
-    stream->write(&data->pDisabledValidationChecks, data->disabledValidationCheckCount * 4); // VkValidationCheckEXT pDisabledValidationChecks
+    stream->write(data->pDisabledValidationChecks, data->disabledValidationCheckCount * 4); // VkValidationCheckEXT pDisabledValidationChecks
 }
 
 VkValidationFlagsEXT* vkUtilsUnpack_VkValidationFlagsEXT(android::base::InplaceStream* stream) {
@@ -5645,7 +5769,8 @@ VkValidationFlagsEXT* vkUtilsUnpack_VkValidationFlagsEXT(android::base::InplaceS
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->disabledValidationCheckCount, 1 * 4); // u32 disabledValidationCheckCount
-    stream->read(&data->pDisabledValidationChecks, data->disabledValidationCheckCount * 4); // VkValidationCheckEXT pDisabledValidationChecks
+    data->pDisabledValidationChecks = new VkValidationCheckEXT[data->disabledValidationCheckCount]; // VkValidationCheckEXT pDisabledValidationChecks
+    stream->read((char*)data->pDisabledValidationChecks, data->disabledValidationCheckCount * 4); // VkValidationCheckEXT pDisabledValidationChecks
     return data;
 }
 
@@ -5663,7 +5788,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceGroupPropertiesKHX(const VkPhysical
 void vkUtilsPack_VkPhysicalDeviceGroupPropertiesKHX(android::base::InplaceStream* stream, const VkPhysicalDeviceGroupPropertiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->physicalDeviceCount, 1 * 4); // u32 physicalDeviceCount
     stream->write(&data->physicalDevices, VK_MAX_DEVICE_GROUP_SIZE_KHX * 8); // VkPhysicalDevice physicalDevices
     stream->write(&data->subsetAllocation, 1 * 4); // VkBool32 subsetAllocation
@@ -5692,9 +5818,10 @@ uint32_t vkUtilsEncodingSize_VkDeviceGroupDeviceCreateInfoKHX(const VkDeviceGrou
 void vkUtilsPack_VkDeviceGroupDeviceCreateInfoKHX(android::base::InplaceStream* stream, const VkDeviceGroupDeviceCreateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->physicalDeviceCount, 1 * 4); // u32 physicalDeviceCount
-    stream->write(&data->pPhysicalDevices, data->physicalDeviceCount * 8); // VkPhysicalDevice pPhysicalDevices
+    stream->write(data->pPhysicalDevices, data->physicalDeviceCount * 8); // VkPhysicalDevice pPhysicalDevices
 }
 
 VkDeviceGroupDeviceCreateInfoKHX* vkUtilsUnpack_VkDeviceGroupDeviceCreateInfoKHX(android::base::InplaceStream* stream) {
@@ -5702,7 +5829,8 @@ VkDeviceGroupDeviceCreateInfoKHX* vkUtilsUnpack_VkDeviceGroupDeviceCreateInfoKHX
     stream->read(&data->sType, 1 * 4); // VkStructureType sType
     stream->read(&data->pNext, 8); // void pNext
     stream->read(&data->physicalDeviceCount, 1 * 4); // u32 physicalDeviceCount
-    stream->read(&data->pPhysicalDevices, data->physicalDeviceCount * 8); // VkPhysicalDevice pPhysicalDevices
+    data->pPhysicalDevices = new VkPhysicalDevice[data->physicalDeviceCount]; // VkPhysicalDevice pPhysicalDevices
+    stream->read((char*)data->pPhysicalDevices, data->physicalDeviceCount * 8); // VkPhysicalDevice pPhysicalDevices
     return data;
 }
 
@@ -5742,7 +5870,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceExternalImageFormatInfoKHX(const Vk
 void vkUtilsPack_VkPhysicalDeviceExternalImageFormatInfoKHX(android::base::InplaceStream* stream, const VkPhysicalDeviceExternalImageFormatInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleType, 1 * 4); // VkExternalMemoryHandleTypeFlagBitsKHX handleType
 }
 
@@ -5766,7 +5895,8 @@ uint32_t vkUtilsEncodingSize_VkExternalImageFormatPropertiesKHX(const VkExternal
 void vkUtilsPack_VkExternalImageFormatPropertiesKHX(android::base::InplaceStream* stream, const VkExternalImageFormatPropertiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkExternalMemoryPropertiesKHX(stream, &data->externalMemoryProperties); // VkExternalMemoryPropertiesKHX externalMemoryProperties
 }
 
@@ -5792,7 +5922,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceExternalBufferInfoKHX(const VkPhysi
 void vkUtilsPack_VkPhysicalDeviceExternalBufferInfoKHX(android::base::InplaceStream* stream, const VkPhysicalDeviceExternalBufferInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkBufferCreateFlags flags
     stream->write(&data->usage, 1 * 4); // VkBufferUsageFlags usage
     stream->write(&data->handleType, 1 * 4); // VkExternalMemoryHandleTypeFlagBitsKHX handleType
@@ -5820,7 +5951,8 @@ uint32_t vkUtilsEncodingSize_VkExternalBufferPropertiesKHX(const VkExternalBuffe
 void vkUtilsPack_VkExternalBufferPropertiesKHX(android::base::InplaceStream* stream, const VkExternalBufferPropertiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkExternalMemoryPropertiesKHX(stream, &data->externalMemoryProperties); // VkExternalMemoryPropertiesKHX externalMemoryProperties
 }
 
@@ -5847,7 +5979,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceIDPropertiesKHX(const VkPhysicalDev
 void vkUtilsPack_VkPhysicalDeviceIDPropertiesKHX(android::base::InplaceStream* stream, const VkPhysicalDeviceIDPropertiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->deviceUUID, VK_UUID_SIZE * 1); // u8 deviceUUID
     stream->write(&data->driverUUID, VK_UUID_SIZE * 1); // u8 driverUUID
     stream->write(&data->deviceLUID, VK_LUID_SIZE_KHX * 1); // u8 deviceLUID
@@ -5877,7 +6010,8 @@ uint32_t vkUtilsEncodingSize_VkExternalMemoryImageCreateInfoKHX(const VkExternal
 void vkUtilsPack_VkExternalMemoryImageCreateInfoKHX(android::base::InplaceStream* stream, const VkExternalMemoryImageCreateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleTypes, 1 * 4); // VkExternalMemoryHandleTypeFlagsKHX handleTypes
 }
 
@@ -5901,7 +6035,8 @@ uint32_t vkUtilsEncodingSize_VkExternalMemoryBufferCreateInfoKHX(const VkExterna
 void vkUtilsPack_VkExternalMemoryBufferCreateInfoKHX(android::base::InplaceStream* stream, const VkExternalMemoryBufferCreateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleTypes, 1 * 4); // VkExternalMemoryHandleTypeFlagsKHX handleTypes
 }
 
@@ -5925,7 +6060,8 @@ uint32_t vkUtilsEncodingSize_VkExportMemoryAllocateInfoKHX(const VkExportMemoryA
 void vkUtilsPack_VkExportMemoryAllocateInfoKHX(android::base::InplaceStream* stream, const VkExportMemoryAllocateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleTypes, 1 * 4); // VkExternalMemoryHandleTypeFlagsKHX handleTypes
 }
 
@@ -5950,7 +6086,8 @@ uint32_t vkUtilsEncodingSize_VkImportMemoryFdInfoKHX(const VkImportMemoryFdInfoK
 void vkUtilsPack_VkImportMemoryFdInfoKHX(android::base::InplaceStream* stream, const VkImportMemoryFdInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleType, 1 * 4); // VkExternalMemoryHandleTypeFlagBitsKHX handleType
     stream->write(&data->fd, 1 * 4); // int fd
 }
@@ -5976,7 +6113,8 @@ uint32_t vkUtilsEncodingSize_VkMemoryFdPropertiesKHX(const VkMemoryFdPropertiesK
 void vkUtilsPack_VkMemoryFdPropertiesKHX(android::base::InplaceStream* stream, const VkMemoryFdPropertiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->memoryTypeBits, 1 * 4); // u32 memoryTypeBits
 }
 
@@ -6000,7 +6138,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceExternalSemaphoreInfoKHX(const VkPh
 void vkUtilsPack_VkPhysicalDeviceExternalSemaphoreInfoKHX(android::base::InplaceStream* stream, const VkPhysicalDeviceExternalSemaphoreInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleType, 1 * 4); // VkExternalSemaphoreHandleTypeFlagBitsKHX handleType
 }
 
@@ -6026,7 +6165,8 @@ uint32_t vkUtilsEncodingSize_VkExternalSemaphorePropertiesKHX(const VkExternalSe
 void vkUtilsPack_VkExternalSemaphorePropertiesKHX(android::base::InplaceStream* stream, const VkExternalSemaphorePropertiesKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->exportFromImportedHandleTypes, 1 * 4); // VkExternalSemaphoreHandleTypeFlagsKHX exportFromImportedHandleTypes
     stream->write(&data->compatibleHandleTypes, 1 * 4); // VkExternalSemaphoreHandleTypeFlagsKHX compatibleHandleTypes
     stream->write(&data->externalSemaphoreFeatures, 1 * 4); // VkExternalSemaphoreFeatureFlagsKHX externalSemaphoreFeatures
@@ -6054,7 +6194,8 @@ uint32_t vkUtilsEncodingSize_VkExportSemaphoreCreateInfoKHX(const VkExportSemaph
 void vkUtilsPack_VkExportSemaphoreCreateInfoKHX(android::base::InplaceStream* stream, const VkExportSemaphoreCreateInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->handleTypes, 1 * 4); // VkExternalSemaphoreHandleTypeFlagsKHX handleTypes
 }
 
@@ -6080,7 +6221,8 @@ uint32_t vkUtilsEncodingSize_VkImportSemaphoreFdInfoKHX(const VkImportSemaphoreF
 void vkUtilsPack_VkImportSemaphoreFdInfoKHX(android::base::InplaceStream* stream, const VkImportSemaphoreFdInfoKHX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->semaphore, 1 * 8); // VkSemaphore semaphore
     stream->write(&data->handleType, 1 * 4); // VkExternalSemaphoreHandleTypeFlagBitsKHX handleType
     stream->write(&data->fd, 1 * 4); // s32 fd
@@ -6108,7 +6250,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDevicePushDescriptorPropertiesKHR(const V
 void vkUtilsPack_VkPhysicalDevicePushDescriptorPropertiesKHR(android::base::InplaceStream* stream, const VkPhysicalDevicePushDescriptorPropertiesKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->maxPushDescriptors, 1 * 4); // u32 maxPushDescriptors
 }
 
@@ -6148,7 +6291,7 @@ uint32_t vkUtilsEncodingSize_VkPresentRegionKHR(const VkPresentRegionKHR* data) 
     uint32_t res = 0;
     if (!data) return res;
     res += 1 * 4; // u32 rectangleCount
-    if (data->pRectangles) { res += data->rectangleCount * vkUtilsEncodingSize_VkRectLayerKHR(data->pRectangles); } // VkRectLayerKHR pRectangles
+    res += 8; if (data->pRectangles) { res += data->rectangleCount * vkUtilsEncodingSize_VkRectLayerKHR(data->pRectangles); } // VkRectLayerKHR pRectangles
     return res;
 }
 
@@ -6178,14 +6321,15 @@ uint32_t vkUtilsEncodingSize_VkPresentRegionsKHR(const VkPresentRegionsKHR* data
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // u32 swapchainCount
-    if (data->pRegions) { res += data->swapchainCount * vkUtilsEncodingSize_VkPresentRegionKHR(data->pRegions); } // VkPresentRegionKHR pRegions
+    res += 8; if (data->pRegions) { res += data->swapchainCount * vkUtilsEncodingSize_VkPresentRegionKHR(data->pRegions); } // VkPresentRegionKHR pRegions
     return res;
 }
 
 void vkUtilsPack_VkPresentRegionsKHR(android::base::InplaceStream* stream, const VkPresentRegionsKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->swapchainCount, 1 * 4); // u32 swapchainCount
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pRegions); stream->write(&ptrval, 8);
@@ -6246,7 +6390,7 @@ uint32_t vkUtilsEncodingSize_VkDescriptorUpdateTemplateCreateInfoKHR(const VkDes
     res += 1 * 8; // void pNext
     res += 1 * 4; // VkDescriptorUpdateTemplateCreateFlagsKHR flags
     res += 1 * 4; // u32 descriptorUpdateEntryCount
-    if (data->pDescriptorUpdateEntries) { res += data->descriptorUpdateEntryCount * vkUtilsEncodingSize_VkDescriptorUpdateTemplateEntryKHR(data->pDescriptorUpdateEntries); } // VkDescriptorUpdateTemplateEntryKHR pDescriptorUpdateEntries
+    res += 8; if (data->pDescriptorUpdateEntries) { res += data->descriptorUpdateEntryCount * vkUtilsEncodingSize_VkDescriptorUpdateTemplateEntryKHR(data->pDescriptorUpdateEntries); } // VkDescriptorUpdateTemplateEntryKHR pDescriptorUpdateEntries
     res += 1 * 4; // VkDescriptorUpdateTemplateTypeKHR templateType
     res += 1 * 8; // VkDescriptorSetLayout descriptorSetLayout
     res += 1 * 4; // VkPipelineBindPoint pipelineBindPoint
@@ -6258,7 +6402,8 @@ uint32_t vkUtilsEncodingSize_VkDescriptorUpdateTemplateCreateInfoKHR(const VkDes
 void vkUtilsPack_VkDescriptorUpdateTemplateCreateInfoKHR(android::base::InplaceStream* stream, const VkDescriptorUpdateTemplateCreateInfoKHR* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkDescriptorUpdateTemplateCreateFlagsKHR flags
     stream->write(&data->descriptorUpdateEntryCount, 1 * 4); // u32 descriptorUpdateEntryCount
     {
@@ -6313,7 +6458,8 @@ uint32_t vkUtilsEncodingSize_VkSurfaceCapabilities2EXT(const VkSurfaceCapabiliti
 void vkUtilsPack_VkSurfaceCapabilities2EXT(android::base::InplaceStream* stream, const VkSurfaceCapabilities2EXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->minImageCount, 1 * 4); // u32 minImageCount
     stream->write(&data->maxImageCount, 1 * 4); // u32 maxImageCount
     vkUtilsPack_VkExtent2D(stream, &data->currentExtent); // VkExtent2D currentExtent
@@ -6357,7 +6503,8 @@ uint32_t vkUtilsEncodingSize_VkDisplayPowerInfoEXT(const VkDisplayPowerInfoEXT* 
 void vkUtilsPack_VkDisplayPowerInfoEXT(android::base::InplaceStream* stream, const VkDisplayPowerInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->powerState, 1 * 4); // VkDisplayPowerStateEXT powerState
 }
 
@@ -6381,7 +6528,8 @@ uint32_t vkUtilsEncodingSize_VkDeviceEventInfoEXT(const VkDeviceEventInfoEXT* da
 void vkUtilsPack_VkDeviceEventInfoEXT(android::base::InplaceStream* stream, const VkDeviceEventInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->deviceEvent, 1 * 4); // VkDeviceEventTypeEXT deviceEvent
 }
 
@@ -6405,7 +6553,8 @@ uint32_t vkUtilsEncodingSize_VkDisplayEventInfoEXT(const VkDisplayEventInfoEXT* 
 void vkUtilsPack_VkDisplayEventInfoEXT(android::base::InplaceStream* stream, const VkDisplayEventInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->displayEvent, 1 * 4); // VkDisplayEventTypeEXT displayEvent
 }
 
@@ -6429,7 +6578,8 @@ uint32_t vkUtilsEncodingSize_VkSwapchainCounterCreateInfoEXT(const VkSwapchainCo
 void vkUtilsPack_VkSwapchainCounterCreateInfoEXT(android::base::InplaceStream* stream, const VkSwapchainCounterCreateInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->surfaceCounters, 1 * 4); // VkSurfaceCounterFlagsEXT surfaceCounters
 }
 
@@ -6516,14 +6666,15 @@ uint32_t vkUtilsEncodingSize_VkPresentTimesInfoGOOGLE(const VkPresentTimesInfoGO
     res += 1 * 4; // VkStructureType sType
     res += 1 * 8; // void pNext
     res += 1 * 4; // u32 swapchainCount
-    if (data->pTimes) { res += data->swapchainCount * vkUtilsEncodingSize_VkPresentTimeGOOGLE(data->pTimes); } // VkPresentTimeGOOGLE pTimes
+    res += 8; if (data->pTimes) { res += data->swapchainCount * vkUtilsEncodingSize_VkPresentTimeGOOGLE(data->pTimes); } // VkPresentTimeGOOGLE pTimes
     return res;
 }
 
 void vkUtilsPack_VkPresentTimesInfoGOOGLE(android::base::InplaceStream* stream, const VkPresentTimesInfoGOOGLE* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->swapchainCount, 1 * 4); // u32 swapchainCount
     {
     uint64_t ptrval = (uint64_t)(uintptr_t)(data->pTimes); stream->write(&ptrval, 8);
@@ -6556,7 +6707,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceMultiviewPerViewAttributesPropertie
 void vkUtilsPack_VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX(android::base::InplaceStream* stream, const VkPhysicalDeviceMultiviewPerViewAttributesPropertiesNVX* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->perViewPositionAllComponents, 1 * 4); // VkBool32 perViewPositionAllComponents
 }
 
@@ -6580,7 +6732,8 @@ uint32_t vkUtilsEncodingSize_VkPhysicalDeviceDiscardRectanglePropertiesEXT(const
 void vkUtilsPack_VkPhysicalDeviceDiscardRectanglePropertiesEXT(android::base::InplaceStream* stream, const VkPhysicalDeviceDiscardRectanglePropertiesEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->maxDiscardRectangles, 1 * 4); // u32 maxDiscardRectangles
 }
 
@@ -6600,14 +6753,15 @@ uint32_t vkUtilsEncodingSize_VkPipelineDiscardRectangleStateCreateInfoEXT(const 
     res += 1 * 4; // VkPipelineDiscardRectangleStateCreateFlagsEXT flags
     res += 1 * 4; // VkDiscardRectangleModeEXT discardRectangleMode
     res += 1 * 4; // u32 discardRectangleCount
-    if (data->pDiscardRectangles) { res += data->discardRectangleCount * vkUtilsEncodingSize_VkRect2D(data->pDiscardRectangles); } // VkRect2D pDiscardRectangles
+    res += 8; if (data->pDiscardRectangles) { res += data->discardRectangleCount * vkUtilsEncodingSize_VkRect2D(data->pDiscardRectangles); } // VkRect2D pDiscardRectangles
     return res;
 }
 
 void vkUtilsPack_VkPipelineDiscardRectangleStateCreateInfoEXT(android::base::InplaceStream* stream, const VkPipelineDiscardRectangleStateCreateInfoEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     stream->write(&data->flags, 1 * 4); // VkPipelineDiscardRectangleStateCreateFlagsEXT flags
     stream->write(&data->discardRectangleMode, 1 * 4); // VkDiscardRectangleModeEXT discardRectangleMode
     stream->write(&data->discardRectangleCount, 1 * 4); // u32 discardRectangleCount
@@ -6672,7 +6826,8 @@ uint32_t vkUtilsEncodingSize_VkHdrMetadataEXT(const VkHdrMetadataEXT* data) {
 void vkUtilsPack_VkHdrMetadataEXT(android::base::InplaceStream* stream, const VkHdrMetadataEXT* data) {
     if (!data) return;
     stream->write(&data->sType, 1 * 4); // VkStructureType sType
-    stream->write(&data->pNext, 8); // void pNext
+    uint64_t forHost_pNext = 0; // TODO: take into acct pNext's
+    stream->write(&forHost_pNext, 8); // void pNext
     vkUtilsPack_VkXYColorEXT(stream, &data->displayPrimaryRed); // VkXYColorEXT displayPrimaryRed
     vkUtilsPack_VkXYColorEXT(stream, &data->displayPrimaryGreen); // VkXYColorEXT displayPrimaryGreen
     vkUtilsPack_VkXYColorEXT(stream, &data->displayPrimaryBlue); // VkXYColorEXT displayPrimaryBlue
