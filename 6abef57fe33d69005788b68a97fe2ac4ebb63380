@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "ed76c19a_4aceaafc",
+        "filename": "android-qemu2-glue/snapshot_hooks.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-01T13:35:59Z",
+      "side": 1,
+      "message": "How are the statistics on time spent waiting in a stalled thread versus total time loading? If it\u0027s significant, we could potentially influence the order in which pages are saved/loaded to minimize that time, maybe get another order of magnitude improvement :)",
+      "range": {
+        "startLine": 292,
+        "startChar": 0,
+        "endLine": 295,
+        "endChar": 55
+      },
+      "revId": "6abef57fe33d69005788b68a97fe2ac4ebb63380",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "18996673_262bdf15",
         "filename": "kvm-all.c",
         "patchSetId": 2
