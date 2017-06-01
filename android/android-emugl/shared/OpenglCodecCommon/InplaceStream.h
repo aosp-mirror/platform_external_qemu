@@ -105,6 +105,7 @@ public:
     // which will be empty on error. Note that this can only be used
     // to read strings that were written with putString().
     std::string getString();
+
 private:
 
     char* mBuffer;

@@ -81,7 +81,7 @@ vkGetPhysicalDeviceProperties
     len pProperties vkUtilsEncodingSize_VkPhysicalDeviceProperties(pProperties)
     custom_host_pack_tmp_alloc pProperties std::unique_ptr<VkPhysicalDeviceProperties> tmp_pProperties(new VkPhysicalDeviceProperties); forPacking_pProperties = (void*)(tmp_pProperties.get())
     custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkPhysicalDeviceProperties((VkPhysicalDeviceProperties*)forPacking_pProperties)); vkUtilsPack_VkPhysicalDeviceProperties(&stream_forPacking_pProperties, (VkPhysicalDeviceProperties*)forPacking_pProperties);
-    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); pProperties = vkUtilsUnpack_VkPhysicalDeviceProperties(&stream_forUnpacking_pProperties)
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkPhysicalDeviceProperties* tmp_pProperties = vkUtilsUnpack_VkPhysicalDeviceProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkPhysicalDeviceProperties));
 
 vkGetPhysicalDeviceQueueFamilyProperties
     dir pQueueFamilyPropertyCount out
@@ -92,7 +92,7 @@ vkGetPhysicalDeviceQueueFamilyProperties
     len pQueueFamilyProperties (*pQueueFamilyPropertyCount) * vkUtilsEncodingSize_VkQueueFamilyProperties(pQueueFamilyProperties)
     custom_host_pack_tmp_alloc pQueueFamilyProperties std::unique_ptr<VkQueueFamilyProperties> tmp_pQueueFamilyProperties(new VkQueueFamilyProperties); forPacking_pQueueFamilyProperties = (void*)(tmp_pQueueFamilyProperties.get())
     custom_host_pack pQueueFamilyProperties InplaceStream stream_forPacking_pQueueFamilyProperties((char*)outptr_pQueueFamilyProperties.get(), vkUtilsEncodingSize_VkQueueFamilyProperties((VkQueueFamilyProperties*)forPacking_pQueueFamilyProperties)); vkUtilsPack_VkQueueFamilyProperties(&stream_forPacking_pQueueFamilyProperties, (VkQueueFamilyProperties*)forPacking_pQueueFamilyProperties);
-    custom_guest_unpack pQueueFamilyProperties std::vector<char> forUnpacking_pQueueFamilyProperties(__size_pQueueFamilyProperties); stream->readback(&forUnpacking_pQueueFamilyProperties[0], __size_pQueueFamilyProperties); InplaceStream stream_forUnpacking_pQueueFamilyProperties((char*)&forUnpacking_pQueueFamilyProperties[0], __size_pQueueFamilyProperties); pQueueFamilyProperties = vkUtilsUnpack_VkQueueFamilyProperties(&stream_forUnpacking_pQueueFamilyProperties)
+    custom_guest_unpack pQueueFamilyProperties std::vector<char> forUnpacking_pQueueFamilyProperties(__size_pQueueFamilyProperties); stream->readback(&forUnpacking_pQueueFamilyProperties[0], __size_pQueueFamilyProperties); InplaceStream stream_forUnpacking_pQueueFamilyProperties((char*)&forUnpacking_pQueueFamilyProperties[0], __size_pQueueFamilyProperties); VkQueueFamilyProperties* tmp_pQueueFamilyProperties = vkUtilsUnpack_VkQueueFamilyProperties(&stream_forUnpacking_pQueueFamilyProperties); memcpy(pQueueFamilyProperties, tmp_pQueueFamilyProperties, sizeof(VkQueueFamilyProperties));
 
 vkGetPhysicalDeviceMemoryProperties
     dir pMemoryProperties out
@@ -100,7 +100,7 @@ vkGetPhysicalDeviceMemoryProperties
     len pMemoryProperties vkUtilsEncodingSize_VkPhysicalDeviceMemoryProperties(pMemoryProperties)
     custom_host_pack_tmp_alloc pMemoryProperties std::unique_ptr<VkPhysicalDeviceMemoryProperties> tmp_pMemoryProperties(new VkPhysicalDeviceMemoryProperties); forPacking_pMemoryProperties = (void*)(tmp_pMemoryProperties.get())
     custom_host_pack pMemoryProperties InplaceStream stream_forPacking_pMemoryProperties((char*)outptr_pMemoryProperties.get(), vkUtilsEncodingSize_VkPhysicalDeviceMemoryProperties((VkPhysicalDeviceMemoryProperties*)forPacking_pMemoryProperties)); vkUtilsPack_VkPhysicalDeviceMemoryProperties(&stream_forPacking_pMemoryProperties, (VkPhysicalDeviceMemoryProperties*)forPacking_pMemoryProperties);
-    custom_guest_unpack pMemoryProperties std::vector<char> forUnpacking_pMemoryProperties(__size_pMemoryProperties); stream->readback(&forUnpacking_pMemoryProperties[0], __size_pMemoryProperties); InplaceStream stream_forUnpacking_pMemoryProperties((char*)&forUnpacking_pMemoryProperties[0], __size_pMemoryProperties); pMemoryProperties = vkUtilsUnpack_VkPhysicalDeviceMemoryProperties(&stream_forUnpacking_pMemoryProperties)
+    custom_guest_unpack pMemoryProperties std::vector<char> forUnpacking_pMemoryProperties(__size_pMemoryProperties); stream->readback(&forUnpacking_pMemoryProperties[0], __size_pMemoryProperties); InplaceStream stream_forUnpacking_pMemoryProperties((char*)&forUnpacking_pMemoryProperties[0], __size_pMemoryProperties); VkPhysicalDeviceMemoryProperties* tmp_pMemoryProperties = vkUtilsUnpack_VkPhysicalDeviceMemoryProperties(&stream_forUnpacking_pMemoryProperties); memcpy(pMemoryProperties, tmp_pMemoryProperties, sizeof(VkPhysicalDeviceMemoryProperties));
 
 vkGetPhysicalDeviceFeatures
     dir pFeatures out
@@ -108,7 +108,7 @@ vkGetPhysicalDeviceFeatures
     len pFeatures vkUtilsEncodingSize_VkPhysicalDeviceFeatures(pFeatures)
     custom_host_pack_tmp_alloc pFeatures std::unique_ptr<VkPhysicalDeviceFeatures> tmp_pFeatures(new VkPhysicalDeviceFeatures); forPacking_pFeatures = (void*)(tmp_pFeatures.get())
     custom_host_pack pFeatures InplaceStream stream_forPacking_pFeatures((char*)outptr_pFeatures.get(), vkUtilsEncodingSize_VkPhysicalDeviceFeatures((VkPhysicalDeviceFeatures*)forPacking_pFeatures)); vkUtilsPack_VkPhysicalDeviceFeatures(&stream_forPacking_pFeatures, (VkPhysicalDeviceFeatures*)forPacking_pFeatures);
-    custom_guest_unpack pFeatures std::vector<char> forUnpacking_pFeatures(__size_pFeatures); stream->readback(&forUnpacking_pFeatures[0], __size_pFeatures); InplaceStream stream_forUnpacking_pFeatures((char*)&forUnpacking_pFeatures[0], __size_pFeatures); pFeatures = vkUtilsUnpack_VkPhysicalDeviceFeatures(&stream_forUnpacking_pFeatures)
+    custom_guest_unpack pFeatures std::vector<char> forUnpacking_pFeatures(__size_pFeatures); stream->readback(&forUnpacking_pFeatures[0], __size_pFeatures); InplaceStream stream_forUnpacking_pFeatures((char*)&forUnpacking_pFeatures[0], __size_pFeatures); VkPhysicalDeviceFeatures* tmp_pFeatures = vkUtilsUnpack_VkPhysicalDeviceFeatures(&stream_forUnpacking_pFeatures); memcpy(pFeatures, tmp_pFeatures, sizeof(VkPhysicalDeviceFeatures));
 
 vkGetPhysicalDeviceFormatProperties
     dir pFormatProperties out
@@ -116,7 +116,7 @@ vkGetPhysicalDeviceFormatProperties
     len pFormatProperties vkUtilsEncodingSize_VkFormatProperties(pFormatProperties)
     custom_host_pack_tmp_alloc pFormatProperties std::unique_ptr<VkFormatProperties> tmp_pFormatProperties(new VkFormatProperties); forPacking_pFormatProperties = (void*)(tmp_pFormatProperties.get())
     custom_host_pack pFormatProperties InplaceStream stream_forPacking_pFormatProperties((char*)outptr_pFormatProperties.get(), vkUtilsEncodingSize_VkFormatProperties((VkFormatProperties*)forPacking_pFormatProperties)); vkUtilsPack_VkFormatProperties(&stream_forPacking_pFormatProperties, (VkFormatProperties*)forPacking_pFormatProperties);
-    custom_guest_unpack pFormatProperties std::vector<char> forUnpacking_pFormatProperties(__size_pFormatProperties); stream->readback(&forUnpacking_pFormatProperties[0], __size_pFormatProperties); InplaceStream stream_forUnpacking_pFormatProperties((char*)&forUnpacking_pFormatProperties[0], __size_pFormatProperties); pFormatProperties = vkUtilsUnpack_VkFormatProperties(&stream_forUnpacking_pFormatProperties)
+    custom_guest_unpack pFormatProperties std::vector<char> forUnpacking_pFormatProperties(__size_pFormatProperties); stream->readback(&forUnpacking_pFormatProperties[0], __size_pFormatProperties); InplaceStream stream_forUnpacking_pFormatProperties((char*)&forUnpacking_pFormatProperties[0], __size_pFormatProperties); VkFormatProperties* tmp_pFormatProperties = vkUtilsUnpack_VkFormatProperties(&stream_forUnpacking_pFormatProperties); memcpy(pFormatProperties, tmp_pFormatProperties, sizeof(VkFormatProperties));
 
 vkGetPhysicalDeviceImageFormatProperties
     dir pImageFormatProperties out
@@ -124,7 +124,7 @@ vkGetPhysicalDeviceImageFormatProperties
     len pImageFormatProperties vkUtilsEncodingSize_VkImageFormatProperties(pImageFormatProperties)
     custom_host_pack_tmp_alloc pImageFormatProperties std::unique_ptr<VkImageFormatProperties> tmp_pImageFormatProperties(new VkImageFormatProperties); forPacking_pImageFormatProperties = (void*)(tmp_pImageFormatProperties.get())
     custom_host_pack pImageFormatProperties InplaceStream stream_forPacking_pImageFormatProperties((char*)outptr_pImageFormatProperties.get(), vkUtilsEncodingSize_VkImageFormatProperties((VkImageFormatProperties*)forPacking_pImageFormatProperties)); vkUtilsPack_VkImageFormatProperties(&stream_forPacking_pImageFormatProperties, (VkImageFormatProperties*)forPacking_pImageFormatProperties);
-    custom_guest_unpack pImageFormatProperties std::vector<char> forUnpacking_pImageFormatProperties(__size_pImageFormatProperties); stream->readback(&forUnpacking_pImageFormatProperties[0], __size_pImageFormatProperties); InplaceStream stream_forUnpacking_pImageFormatProperties((char*)&forUnpacking_pImageFormatProperties[0], __size_pImageFormatProperties); pImageFormatProperties = vkUtilsUnpack_VkImageFormatProperties(&stream_forUnpacking_pImageFormatProperties)
+    custom_guest_unpack pImageFormatProperties std::vector<char> forUnpacking_pImageFormatProperties(__size_pImageFormatProperties); stream->readback(&forUnpacking_pImageFormatProperties[0], __size_pImageFormatProperties); InplaceStream stream_forUnpacking_pImageFormatProperties((char*)&forUnpacking_pImageFormatProperties[0], __size_pImageFormatProperties); VkImageFormatProperties* tmp_pImageFormatProperties = vkUtilsUnpack_VkImageFormatProperties(&stream_forUnpacking_pImageFormatProperties); memcpy(pImageFormatProperties, tmp_pImageFormatProperties, sizeof(VkImageFormatProperties));
 
 vkCreateDevice
     dir pCreateInfo in
@@ -157,7 +157,7 @@ vkEnumerateInstanceLayerProperties
     len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkLayerProperties(pProperties)
     custom_host_pack_tmp_alloc pProperties std::unique_ptr<VkLayerProperties> tmp_pProperties(new VkLayerProperties); forPacking_pProperties = (void*)(tmp_pProperties.get())
     custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkLayerProperties((VkLayerProperties*)forPacking_pProperties)); vkUtilsPack_VkLayerProperties(&stream_forPacking_pProperties, (VkLayerProperties*)forPacking_pProperties);
-    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); pProperties = vkUtilsUnpack_VkLayerProperties(&stream_forUnpacking_pProperties)
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkLayerProperties* tmp_pProperties = vkUtilsUnpack_VkLayerProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkLayerProperties));
 
 vkEnumerateInstanceExtensionProperties
     dir pLayerName in
@@ -171,7 +171,7 @@ vkEnumerateInstanceExtensionProperties
     len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkExtensionProperties(pProperties)
     custom_host_pack_tmp_alloc pProperties std::unique_ptr<VkExtensionProperties> tmp_pProperties(new VkExtensionProperties); forPacking_pProperties = (void*)(tmp_pProperties.get())
     custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkExtensionProperties((VkExtensionProperties*)forPacking_pProperties)); vkUtilsPack_VkExtensionProperties(&stream_forPacking_pProperties, (VkExtensionProperties*)forPacking_pProperties);
-    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); pProperties = vkUtilsUnpack_VkExtensionProperties(&stream_forUnpacking_pProperties)
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkExtensionProperties* tmp_pProperties = vkUtilsUnpack_VkExtensionProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkExtensionProperties));
 
 vkEnumerateDeviceLayerProperties
     dir pPropertyCount out
@@ -182,7 +182,7 @@ vkEnumerateDeviceLayerProperties
     len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkLayerProperties(pProperties)
     custom_host_pack_tmp_alloc pProperties std::unique_ptr<VkLayerProperties> tmp_pProperties(new VkLayerProperties); forPacking_pProperties = (void*)(tmp_pProperties.get())
     custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkLayerProperties((VkLayerProperties*)forPacking_pProperties)); vkUtilsPack_VkLayerProperties(&stream_forPacking_pProperties, (VkLayerProperties*)forPacking_pProperties);
-    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); pProperties = vkUtilsUnpack_VkLayerProperties(&stream_forUnpacking_pProperties)
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkLayerProperties* tmp_pProperties = vkUtilsUnpack_VkLayerProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkLayerProperties));
 
 vkEnumerateDeviceExtensionProperties
     dir pLayerName in
@@ -196,7 +196,7 @@ vkEnumerateDeviceExtensionProperties
     len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkExtensionProperties(pProperties)
     custom_host_pack_tmp_alloc pProperties std::unique_ptr<VkExtensionProperties> tmp_pProperties(new VkExtensionProperties); forPacking_pProperties = (void*)(tmp_pProperties.get())
     custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkExtensionProperties((VkExtensionProperties*)forPacking_pProperties)); vkUtilsPack_VkExtensionProperties(&stream_forPacking_pProperties, (VkExtensionProperties*)forPacking_pProperties);
-    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); pProperties = vkUtilsUnpack_VkExtensionProperties(&stream_forUnpacking_pProperties)
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkExtensionProperties* tmp_pProperties = vkUtilsUnpack_VkExtensionProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkExtensionProperties));
 
 vkGetDeviceQueue
     dir pQueue out
@@ -251,7 +251,7 @@ vkGetBufferMemoryRequirements
     len pMemoryRequirements vkUtilsEncodingSize_VkMemoryRequirements(pMemoryRequirements)
     custom_host_pack_tmp_alloc pMemoryRequirements std::unique_ptr<VkMemoryRequirements> tmp_pMemoryRequirements(new VkMemoryRequirements); forPacking_pMemoryRequirements = (void*)(tmp_pMemoryRequirements.get())
     custom_host_pack pMemoryRequirements InplaceStream stream_forPacking_pMemoryRequirements((char*)outptr_pMemoryRequirements.get(), vkUtilsEncodingSize_VkMemoryRequirements((VkMemoryRequirements*)forPacking_pMemoryRequirements)); vkUtilsPack_VkMemoryRequirements(&stream_forPacking_pMemoryRequirements, (VkMemoryRequirements*)forPacking_pMemoryRequirements);
-    custom_guest_unpack pMemoryRequirements std::vector<char> forUnpacking_pMemoryRequirements(__size_pMemoryRequirements); stream->readback(&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); InplaceStream stream_forUnpacking_pMemoryRequirements((char*)&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); pMemoryRequirements = vkUtilsUnpack_VkMemoryRequirements(&stream_forUnpacking_pMemoryRequirements)
+    custom_guest_unpack pMemoryRequirements std::vector<char> forUnpacking_pMemoryRequirements(__size_pMemoryRequirements); stream->readback(&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); InplaceStream stream_forUnpacking_pMemoryRequirements((char*)&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); VkMemoryRequirements* tmp_pMemoryRequirements = vkUtilsUnpack_VkMemoryRequirements(&stream_forUnpacking_pMemoryRequirements); memcpy(pMemoryRequirements, tmp_pMemoryRequirements, sizeof(VkMemoryRequirements));
 
 vkBindBufferMemory
 
@@ -261,7 +261,7 @@ vkGetImageMemoryRequirements
     len pMemoryRequirements vkUtilsEncodingSize_VkMemoryRequirements(pMemoryRequirements)
     custom_host_pack_tmp_alloc pMemoryRequirements std::unique_ptr<VkMemoryRequirements> tmp_pMemoryRequirements(new VkMemoryRequirements); forPacking_pMemoryRequirements = (void*)(tmp_pMemoryRequirements.get())
     custom_host_pack pMemoryRequirements InplaceStream stream_forPacking_pMemoryRequirements((char*)outptr_pMemoryRequirements.get(), vkUtilsEncodingSize_VkMemoryRequirements((VkMemoryRequirements*)forPacking_pMemoryRequirements)); vkUtilsPack_VkMemoryRequirements(&stream_forPacking_pMemoryRequirements, (VkMemoryRequirements*)forPacking_pMemoryRequirements);
-    custom_guest_unpack pMemoryRequirements std::vector<char> forUnpacking_pMemoryRequirements(__size_pMemoryRequirements); stream->readback(&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); InplaceStream stream_forUnpacking_pMemoryRequirements((char*)&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); pMemoryRequirements = vkUtilsUnpack_VkMemoryRequirements(&stream_forUnpacking_pMemoryRequirements)
+    custom_guest_unpack pMemoryRequirements std::vector<char> forUnpacking_pMemoryRequirements(__size_pMemoryRequirements); stream->readback(&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); InplaceStream stream_forUnpacking_pMemoryRequirements((char*)&forUnpacking_pMemoryRequirements[0], __size_pMemoryRequirements); VkMemoryRequirements* tmp_pMemoryRequirements = vkUtilsUnpack_VkMemoryRequirements(&stream_forUnpacking_pMemoryRequirements); memcpy(pMemoryRequirements, tmp_pMemoryRequirements, sizeof(VkMemoryRequirements));
 
 vkBindImageMemory
 
@@ -274,7 +274,7 @@ vkGetImageSparseMemoryRequirements
     len pSparseMemoryRequirements (*pSparseMemoryRequirementCount) * vkUtilsEncodingSize_VkSparseImageMemoryRequirements(pSparseMemoryRequirements)
     custom_host_pack_tmp_alloc pSparseMemoryRequirements std::unique_ptr<VkSparseImageMemoryRequirements> tmp_pSparseMemoryRequirements(new VkSparseImageMemoryRequirements); forPacking_pSparseMemoryRequirements = (void*)(tmp_pSparseMemoryRequirements.get())
     custom_host_pack pSparseMemoryRequirements InplaceStream stream_forPacking_pSparseMemoryRequirements((char*)outptr_pSparseMemoryRequirements.get(), vkUtilsEncodingSize_VkSparseImageMemoryRequirements((VkSparseImageMemoryRequirements*)forPacking_pSparseMemoryRequirements)); vkUtilsPack_VkSparseImageMemoryRequirements(&stream_forPacking_pSparseMemoryRequirements, (VkSparseImageMemoryRequirements*)forPacking_pSparseMemoryRequirements);
-    custom_guest_unpack pSparseMemoryRequirements std::vector<char> forUnpacking_pSparseMemoryRequirements(__size_pSparseMemoryRequirements); stream->readback(&forUnpacking_pSparseMemoryRequirements[0], __size_pSparseMemoryRequirements); InplaceStream stream_forUnpacking_pSparseMemoryRequirements((char*)&forUnpacking_pSparseMemoryRequirements[0], __size_pSparseMemoryRequirements); pSparseMemoryRequirements = vkUtilsUnpack_VkSparseImageMemoryRequirements(&stream_forUnpacking_pSparseMemoryRequirements)
+    custom_guest_unpack pSparseMemoryRequirements std::vector<char> forUnpacking_pSparseMemoryRequirements(__size_pSparseMemoryRequirements); stream->readback(&forUnpacking_pSparseMemoryRequirements[0], __size_pSparseMemoryRequirements); InplaceStream stream_forUnpacking_pSparseMemoryRequirements((char*)&forUnpacking_pSparseMemoryRequirements[0], __size_pSparseMemoryRequirements); VkSparseImageMemoryRequirements* tmp_pSparseMemoryRequirements = vkUtilsUnpack_VkSparseImageMemoryRequirements(&stream_forUnpacking_pSparseMemoryRequirements); memcpy(pSparseMemoryRequirements, tmp_pSparseMemoryRequirements, sizeof(VkSparseImageMemoryRequirements));
 
 vkGetPhysicalDeviceSparseImageFormatProperties
     dir pPropertyCount out
@@ -285,7 +285,7 @@ vkGetPhysicalDeviceSparseImageFormatProperties
     len pProperties (*pPropertyCount) * vkUtilsEncodingSize_VkSparseImageFormatProperties(pProperties)
     custom_host_pack_tmp_alloc pProperties std::unique_ptr<VkSparseImageFormatProperties> tmp_pProperties(new VkSparseImageFormatProperties); forPacking_pProperties = (void*)(tmp_pProperties.get())
     custom_host_pack pProperties InplaceStream stream_forPacking_pProperties((char*)outptr_pProperties.get(), vkUtilsEncodingSize_VkSparseImageFormatProperties((VkSparseImageFormatProperties*)forPacking_pProperties)); vkUtilsPack_VkSparseImageFormatProperties(&stream_forPacking_pProperties, (VkSparseImageFormatProperties*)forPacking_pProperties);
-    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); pProperties = vkUtilsUnpack_VkSparseImageFormatProperties(&stream_forUnpacking_pProperties)
+    custom_guest_unpack pProperties std::vector<char> forUnpacking_pProperties(__size_pProperties); stream->readback(&forUnpacking_pProperties[0], __size_pProperties); InplaceStream stream_forUnpacking_pProperties((char*)&forUnpacking_pProperties[0], __size_pProperties); VkSparseImageFormatProperties* tmp_pProperties = vkUtilsUnpack_VkSparseImageFormatProperties(&stream_forUnpacking_pProperties); memcpy(pProperties, tmp_pProperties, sizeof(VkSparseImageFormatProperties));
 
 vkQueueBindSparse
     dir pBindInfo in
@@ -482,7 +482,7 @@ vkGetImageSubresourceLayout
     len pLayout vkUtilsEncodingSize_VkSubresourceLayout(pLayout)
     custom_host_pack_tmp_alloc pLayout std::unique_ptr<VkSubresourceLayout> tmp_pLayout(new VkSubresourceLayout); forPacking_pLayout = (void*)(tmp_pLayout.get())
     custom_host_pack pLayout InplaceStream stream_forPacking_pLayout((char*)outptr_pLayout.get(), vkUtilsEncodingSize_VkSubresourceLayout((VkSubresourceLayout*)forPacking_pLayout)); vkUtilsPack_VkSubresourceLayout(&stream_forPacking_pLayout, (VkSubresourceLayout*)forPacking_pLayout);
-    custom_guest_unpack pLayout std::vector<char> forUnpacking_pLayout(__size_pLayout); stream->readback(&forUnpacking_pLayout[0], __size_pLayout); InplaceStream stream_forUnpacking_pLayout((char*)&forUnpacking_pLayout[0], __size_pLayout); pLayout = vkUtilsUnpack_VkSubresourceLayout(&stream_forUnpacking_pLayout)
+    custom_guest_unpack pLayout std::vector<char> forUnpacking_pLayout(__size_pLayout); stream->readback(&forUnpacking_pLayout[0], __size_pLayout); InplaceStream stream_forUnpacking_pLayout((char*)&forUnpacking_pLayout[0], __size_pLayout); VkSubresourceLayout* tmp_pLayout = vkUtilsUnpack_VkSubresourceLayout(&stream_forUnpacking_pLayout); memcpy(pLayout, tmp_pLayout, sizeof(VkSubresourceLayout));
 
 vkCreateImageView
     dir pCreateInfo in
@@ -767,7 +767,7 @@ vkGetRenderAreaGranularity
     len pGranularity vkUtilsEncodingSize_VkExtent2D(pGranularity)
     custom_host_pack_tmp_alloc pGranularity std::unique_ptr<VkExtent2D> tmp_pGranularity(new VkExtent2D); forPacking_pGranularity = (void*)(tmp_pGranularity.get())
     custom_host_pack pGranularity InplaceStream stream_forPacking_pGranularity((char*)outptr_pGranularity.get(), vkUtilsEncodingSize_VkExtent2D((VkExtent2D*)forPacking_pGranularity)); vkUtilsPack_VkExtent2D(&stream_forPacking_pGranularity, (VkExtent2D*)forPacking_pGranularity);
-    custom_guest_unpack pGranularity std::vector<char> forUnpacking_pGranularity(__size_pGranularity); stream->readback(&forUnpacking_pGranularity[0], __size_pGranularity); InplaceStream stream_forUnpacking_pGranularity((char*)&forUnpacking_pGranularity[0], __size_pGranularity); pGranularity = vkUtilsUnpack_VkExtent2D(&stream_forUnpacking_pGranularity)
+    custom_guest_unpack pGranularity std::vector<char> forUnpacking_pGranularity(__size_pGranularity); stream->readback(&forUnpacking_pGranularity[0], __size_pGranularity); InplaceStream stream_forUnpacking_pGranularity((char*)&forUnpacking_pGranularity[0], __size_pGranularity); VkExtent2D* tmp_pGranularity = vkUtilsUnpack_VkExtent2D(&stream_forUnpacking_pGranularity); memcpy(pGranularity, tmp_pGranularity, sizeof(VkExtent2D));
 
 vkCreateCommandPool
     dir pCreateInfo in
