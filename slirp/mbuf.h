@@ -106,6 +106,7 @@ void m_cat(register struct mbuf *, register struct mbuf *);
 void m_inc(struct mbuf *, int);
 void m_adj(struct mbuf *, int);
 int m_copy(struct mbuf *, struct mbuf *, int, int);
+void m_copydata(const struct mbuf *m, int off, int len, caddr_t cp);
 struct mbuf * dtom(Slirp *, void *);
 
 static inline void ifs_init(struct mbuf *ifm)

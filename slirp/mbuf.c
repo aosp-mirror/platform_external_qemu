@@ -210,6 +210,31 @@ m_copy(struct mbuf *n, struct mbuf *m, int off, int len)
 	return 0;
 }
 
+/*
+ * Copy data from an mbuf chain starting "off" bytes from the beginning,
+ * continuing for "len" bytes, into the indicated buffer.
+ */
+void m_copydata(const struct mbuf *m, int off, int len, caddr_t cp) {
+	u_int count;
+
+	if (off < 0 || len < 0 || m == NULL) return;
+
+	while (off > 0) {
+		if (m == NULL || off < m->m_len) break;
+		off -= m->m_len;
+		m = m->m_next;
+	}
+	while (len > 0) {
+		if (m == NULL) break;
+
+		count = min(m->m_len - off, len);
+		memcpy(cp, mtod(m, caddr_t) + off, count);
+		len -= count;
+		cp += count;
+		off = 0;
+		m = m->m_next;
+	}
+}
 
 /*
  * Given a pointer into an mbuf, return the mbuf

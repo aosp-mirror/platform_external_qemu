@@ -152,6 +152,12 @@ bool ndp_table_search(Slirp *slirp, struct in6_addr ip_addr,
 
 #define SLIRP_MAX_DNS_SERVERS 4
 
+#ifdef WIN32
+#include "queue.h"
+struct pong;
+TAILQ_HEAD(pong_tailq, pong);
+#endif
+
 struct Slirp {
     QTAILQ_ENTRY(Slirp) entry;
     u_int time_fasttimo;
@@ -214,6 +220,14 @@ struct Slirp {
     /* icmp states */
     struct socket icmp;
     struct socket *icmp_last_so;
+
+#ifdef WIN32
+    HANDLE icmp_handle;
+    HANDLE icmp_event;
+    struct pong_tailq pongs_expected;
+    struct pong_tailq pongs_received;
+    size_t cbIcmpPending;
+#endif
 
     /* tftp states */
     char *tftp_prefix;
