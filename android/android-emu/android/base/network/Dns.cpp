@@ -129,6 +129,39 @@ public:
 
     virtual int getSystemServerList(AddressList* out) override {
 #ifdef _WIN32
+        // The set of DNS server addresses already in the output list,
+        // used to remove duplicates.
+        std::unordered_set<IpAddress> present;
+
+        //Get preferred DNS server IP from GetNetworkParams
+        std::string dnsBuffer;
+        ULONG outBufLen = sizeof (FIXED_INFO);
+        dnsBuffer.resize(static_cast<size_t>(outBufLen));
+        DWORD retVal = GetNetworkParams(
+            reinterpret_cast<FIXED_INFO*>(&dnsBuffer[0]), &outBufLen);
+        if (retVal == ERROR_BUFFER_OVERFLOW) {
+            dnsBuffer.resize(static_cast<size_t>(outBufLen));
+            retVal = GetNetworkParams(
+                       reinterpret_cast<FIXED_INFO*>(&dnsBuffer[0]),
+                       &outBufLen);
+        }
+        if (retVal == ERROR_SUCCESS)
+        {
+            IP_ADDR_STRING *ipAddr;
+            ipAddr =
+                &(reinterpret_cast<FIXED_INFO*>(&dnsBuffer[0])->DnsServerList);
+            while (ipAddr) {
+                IpAddress ip(ipAddr->IpAddress.String);
+                if (ip.valid()) {
+                    auto ret = present.insert(ip);
+                    if (ret.second) {
+                        out->emplace_back(std::move(ip));
+                    }
+                }
+                ipAddr = ipAddr->Next;
+            };
+        }
+
         std::string buffer;
         ULONG bufferLen = 0;
         DWORD ret = GetAdaptersAddresses(AF_UNSPEC, 0, nullptr, nullptr,
@@ -172,10 +205,6 @@ public:
         //   multiple network adapters), and it's useless to return duplicate
         //   entries in the result.
         //
-
-        // The set of DNS server addresses already in the output list,
-        // used to remove duplicates.
-        std::unordered_set<IpAddress> present;
 
         for (auto adapter = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(&buffer[0]);
              adapter != nullptr; adapter = adapter->Next) {
