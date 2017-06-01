@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "204a711f_6c0cddfa",
+        "filename": "slirp/ip_icmp.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-01T02:34:58Z",
+      "side": 1,
+      "message": "nit: you can define these functions for all platforms, but make them empty everywhere but on Windows. This way the rest of the code will not need to have #ifdefs",
+      "range": {
+        "startLine": 165,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 6
+      },
+      "revId": "a12a702318d741d8288925693c15b405e2587625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "440307c6_6639e6cf",
+        "filename": "slirp/ip_icmp_win32.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-01T02:34:58Z",
+      "side": 1,
+      "message": "is it OK to relicense GPL to Apache?",
+      "range": {
+        "startLine": 26,
+        "startChar": 66,
+        "endLine": 27,
+        "endChar": 31
+      },
+      "revId": "a12a702318d741d8288925693c15b405e2587625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1637cc7_11986712",
+        "filename": "slirp/mbuf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-01T02:34:58Z",
+      "side": 1,
+      "message": "nit: this file uses tabs for formatting",
+      "range": {
+        "startLine": 218,
+        "startChar": 0,
+        "endLine": 218,
+        "endChar": 2
+      },
+      "revId": "a12a702318d741d8288925693c15b405e2587625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4020a673_10a175e2",
+        "filename": "slirp/mbuf.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-01T02:34:58Z",
+      "side": 1,
+      "message": "|off| can be negative here, is it ok? the previous while() could potentially subtract |m-\u003em_len| from |off| even if |off| is smaller",
+      "range": {
+        "startLine": 231,
+        "startChar": 34,
+        "endLine": 231,
+        "endChar": 37
+      },
+      "revId": "a12a702318d741d8288925693c15b405e2587625",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
