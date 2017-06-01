@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18996673_262bdf15",
+        "filename": "kvm-all.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1928,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-01T13:30:05Z",
+      "side": 1,
+      "message": "This is awesome stuff :)\n\nTo check my understanding: judging by no changes to kvm vcpu, it looks like with userfaultfd, any EFAULT issued by any driver is handled using userfaultfd, by suspending the thread causing the fault, handling, and then resuming execution?\n\n(Versus mprotect which doesn\u0027t seem to have this feature vs. EFAULT)",
+      "range": {
+        "startLine": 1928,
+        "startChar": 0,
+        "endLine": 1928,
+        "endChar": 50
+      },
+      "revId": "6abef57fe33d69005788b68a97fe2ac4ebb63380",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
