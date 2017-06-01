@@ -25,6 +25,7 @@
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #include "iphlpapi.h"
+#include "windns.h"
 #else
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -129,6 +130,38 @@ public:
 
     virtual int getSystemServerList(AddressList* out) override {
 #ifdef _WIN32
+        std::unordered_set<IpAddress> present;
+        // Parse the output of nslookup for the valid DNS server IP
+        char buff[512];
+        std::string cmd = "nslookup non-exist 2>&1";
+        FILE *fpipe = _popen(cmd.c_str(), "r");
+        if (fpipe != NULL) {
+            while (fgets(buff, sizeof(buff), fpipe) != NULL) {
+                std::string line(buff);
+                size_t pos = line.find("Address:");
+                if (pos == std::string::npos) {
+                    continue;
+                }
+                size_t ip_pos_begin = line.find_first_not_of(" ",
+                                                  pos + sizeof("Address:"));
+                size_t ip_pos_end = line.find_last_not_of('\n');
+                if (ip_pos_begin == std::string::npos ||
+                    ip_pos_end == std::string::npos) {
+                    continue;
+                }
+                std::string dns_ip(line, ip_pos_begin,
+                                   ip_pos_end - ip_pos_begin + 1);
+                IpAddress ip(dns_ip);
+                if(ip.valid()) {
+                    present.insert(ip);
+                    out->emplace_back(std::move(ip));
+                    DLOG(INFO)<<"parse nslookup for DNS "<< dns_ip;
+                    break;
+                }
+            }
+            pclose(fpipe);
+        }
+
         std::string buffer;
         ULONG bufferLen = 0;
         DWORD ret = GetAdaptersAddresses(AF_UNSPEC, 0, nullptr, nullptr,
@@ -175,7 +208,6 @@ public:
 
         // The set of DNS server addresses already in the output list,
         // used to remove duplicates.
-        std::unordered_set<IpAddress> present;
 
         for (auto adapter = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(&buffer[0]);
              adapter != nullptr; adapter = adapter->Next) {
