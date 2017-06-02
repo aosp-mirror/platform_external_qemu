@@ -11,6 +11,7 @@
 
 #include "android/base/files/Stream.h"
 
+#include <assert.h>
 #include <string.h>
 
 namespace android {
@@ -100,20 +101,16 @@ float Stream::getFloat() {
 }
 
 void Stream::putString(StringView str) {
-    putString(str.c_str(), str.size());
+    this->putBe32(str.size());
+    this->write(str.data(), str.size());
 }
 
 void Stream::putString(const char* str) {
-    putString(str, str ? ::strlen(str) : 0U);
+    putString(StringView(str));
 }
 
 void Stream::putString(const char* str, size_t len) {
-    if (!str) {
-        str = "";
-        len = 0;
-    }
-    this->putBe32(len);
-    this->write(str, len);
+    putString(StringView(str, len));
 }
 
 std::string Stream::getString() {
@@ -143,6 +140,28 @@ std::string Stream::getString() {
     }
 #endif
     return result;
+}
+
+void Stream::putPackedNum(uint64_t num) {
+    do {
+        auto byte = uint8_t(num & 0x7f);
+        num >>= 7;
+        if (num) {
+            byte |= 0x80;
+        }
+        putByte(byte);
+    } while (num != 0);
+}
+
+uint64_t Stream::getPackedNum() {
+    uint64_t res = 0;
+    uint8_t byte;
+    int i = 0;
+    do {
+        byte = getByte();
+        res |= uint64_t(byte & 0x7f) << (i++ * 7);
+    } while (byte & 0x80 && i < 10);
+    return res;
 }
 
 }  // namespace base
