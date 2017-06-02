@@ -168,6 +168,10 @@ int icmpwin_init(Slirp *slirp);
 void icmpwin_finit(Slirp *slirp);
 void icmpwin_ping(Slirp *slirp, struct mbuf *, int size);
 void icmpwin_process(Slirp *slirp);
+#else
+int ping_binary_send(struct socket *so, struct mbuf *m, int hlen);
+int ping_binary_recv(struct socket *so, struct ip *ip, struct icmp *icp);
+void ping_binary_close(struct socket *so);
 #endif
 
 #endif
