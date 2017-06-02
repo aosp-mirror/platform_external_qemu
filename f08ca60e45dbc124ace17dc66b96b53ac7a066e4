@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1287e0cd_3e67a9a5",
+        "filename": "android/android-emu/android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-02T16:08:25Z",
+      "side": 1,
+      "message": "Windows got a GetNetworkParams() API to list DNS servers\nIn windows it\u0027s much faster to call an API than running a process.\nhttps://msdn.microsoft.com/en-us/library/aa365968(VS.85).aspx",
+      "range": {
+        "startLine": 133,
+        "startChar": 7,
+        "endLine": 133,
+        "endChar": 46
+      },
+      "revId": "f08ca60e45dbc124ace17dc66b96b53ac7a066e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
