@@ -191,6 +191,12 @@ void if_start(Slirp *slirp)
         if ((struct quehead *) ifm_next == &slirp->if_batchq) {
             /* end of batchq */
             ifm_next = NULL;
+            if (slirp->if_batchq.qh_link != (struct quehead*)ifm) {
+                /* We reached the end but there is still more to send,
+                   this happens if a session contains more packets and they
+                   were re-queued in the previous loop iteration. */
+                slirp->next_m = (struct mbuf*)slirp->if_batchq.qh_link;
+            }
         }
 
         /* Try to send packet unless it already expired */
