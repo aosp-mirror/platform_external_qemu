@@ -20,6 +20,10 @@ struct socket {
 
   int s;                           /* The actual socket */
 
+#ifndef WIN32
+  FILE *ping_pipe;                 /* the popen() stream for ping binary */
+#endif
+
   int pollfds_idx;                 /* GPollFD GArray index */
 
   Slirp *slirp;			   /* managing slirp instance */

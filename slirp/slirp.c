@@ -906,6 +906,11 @@ void slirp_pollfds_poll(GArray *pollfds, int select_error)
                                                 so->pollfds_idx).revents;
                     }
 
+#ifndef WIN32
+                    if (so->ping_pipe != NULL)
+                        icmp_receive(so);
+#endif
+
                     if (so->s != -1 &&
                         (revents & (G_IO_IN | G_IO_HUP | G_IO_ERR))) {
                     icmp_receive(so);
