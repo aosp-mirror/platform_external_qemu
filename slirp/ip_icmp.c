@@ -89,7 +89,13 @@ static int icmp_send(struct socket *so, struct mbuf *m, int hlen)
 
     so->s = qemu_socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
     if (so->s == -1) {
+#ifndef WIN32
+        int res = ping_binary_send(so, m, hlen);
+        if (res != 0)
+           return -1;
+#else
         return -1;
+#endif
     }
 
     so->so_m = m;
@@ -105,7 +111,7 @@ static int icmp_send(struct socket *so, struct mbuf *m, int hlen)
 
     insque(so, &so->slirp->icmp);
 
-    if (sendto(so->s, m->m_data + hlen, m->m_len - hlen, 0,
+    if (so->s != -1 && sendto(so->s, m->m_data + hlen, m->m_len - hlen, 0,
                (struct sockaddr *)&addr, sizeof(addr)) == -1) {
         DEBUG_MISC((dfd, "icmp_input icmp sendto tx errno = %d-%s\n",
                     errno, strerror(errno)));
@@ -118,7 +124,13 @@ static int icmp_send(struct socket *so, struct mbuf *m, int hlen)
 
 void icmp_detach(struct socket *so)
 {
-    closesocket(so->s);
+#ifndef WIN32
+    if (so->ping_pipe != NULL)
+        ping_binary_close(so);
+#endif
+
+    if (so->s != -1)
+        closesocket(so->s);
     sofree(so);
 }
 
@@ -425,14 +437,21 @@ void icmp_receive(struct socket *so)
     int hlen = ip->ip_hl << 2;
     u_char error_code;
     struct icmp *icp;
-    int id, len;
+    int id, len = -1;
 
     m->m_data += hlen;
     m->m_len -= hlen;
     icp = mtod(m, struct icmp *);
 
     id = icp->icmp_id;
-    len = qemu_recv(so->s, icp, m->m_len, 0);
+
+#ifndef WIN32
+    if (so->ping_pipe != NULL)
+        len = ping_binary_recv(so, ip, icp);
+#endif
+    if (so->s != -1)
+        len = qemu_recv(so->s, icp, m->m_len, 0);
+
     icp->icmp_id = id;
 
     m->m_data -= hlen;

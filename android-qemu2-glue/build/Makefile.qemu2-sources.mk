@@ -348,6 +348,7 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     net/tap.c \
     net/vhost-user.c \
     os-posix.c \
+    slirp/ip_icmp_ping.c \
 
 QEMU2_COMMON_SOURCES_linux-x86_64 := \
     aio-posix.c \
@@ -367,6 +368,7 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     net/vhost-user.c \
     os-posix.c \
     ui/input-linux.c \
+    slirp/ip_icmp_ping.c \
 
 QEMU2_COMMON_SOURCES_windows-x86 := \
     aio-win32.c \
