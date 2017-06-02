@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c97a4eab_3c9e5f0e",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-06-02T21:37:59Z",
+      "side": 1,
+      "message": "I can add files there, but here is the logical place for those files. I wonder if I can modify the script so the new source files are included.",
+      "parentUuid": "eaece737_60332665",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 60
+      },
+      "revId": "b087b0c68973debcb8bbbf9a11d30827798996d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee846de8_b941034b",
         "filename": "slirp/ip_icmp.c",
         "patchSetId": 1
