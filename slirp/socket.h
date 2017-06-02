@@ -18,7 +18,11 @@
 struct socket {
   struct socket *so_next,*so_prev;      /* For a linked list of sockets */
 
-  int s;                           /* The actual socket */
+  int s;                           /* The actual socket or file descriptor of ping_pipe below */
+
+#ifndef WIN32
+  FILE *ping_pipe;                 /* the popen() stream for ping binary */
+#endif
 
   int pollfds_idx;                 /* GPollFD GArray index */
 

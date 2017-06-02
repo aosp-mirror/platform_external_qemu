@@ -236,6 +236,7 @@ LOCAL_SRC_FILES += \
     util/uri.c \
     util/uuid.c \
     $(call qemu2-if-windows, \
+        slirp/ip_icmp_win32.c \
         util/coroutine-win32.c \
         util/event_notifier-win32.c \
         util/oslib-win32.c \
@@ -249,6 +250,7 @@ LOCAL_SRC_FILES += \
         util/coroutine-sigaltstack.c \
         ) \
     $(call qemu2-if-posix, \
+        slirp/ip_icmp_ping.c \
         util/event_notifier-posix.c \
         util/mmap-alloc.c \
         util/oslib-posix.c \

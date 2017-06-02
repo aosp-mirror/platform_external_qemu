@@ -377,7 +377,6 @@ QEMU2_COMMON_SOURCES_windows-x86 := \
     block/win32-aio.c \
     net/tap-win32.c \
     os-win32.c \
-    slirp/ip_icmp_win32.c \
 
 QEMU2_COMMON_SOURCES_windows-x86_64 := \
     aio-win32.c \
@@ -388,7 +387,6 @@ QEMU2_COMMON_SOURCES_windows-x86_64 := \
     block/win32-aio.c \
     net/tap-win32.c \
     os-win32.c \
-    slirp/ip_icmp_win32.c \
 
 QEMU2_TARGET_SOURCES := \
     arch_init.c \
