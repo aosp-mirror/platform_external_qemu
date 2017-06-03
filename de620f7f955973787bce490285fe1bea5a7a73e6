@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e3facbe9_f9622862",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/VkImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-03T01:49:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b3645321_b9e3a71d",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 86
+      },
+      "revId": "de620f7f955973787bce490285fe1bea5a7a73e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5d3aa334_4a0b3551",
         "filename": "android/android-emugl/host/libs/libOpenglRender/VkImp.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-06-01T20:29:59Z",
       "side": 1,
       "message": "I don\u0027t see any deletes - are these caches going to live forever?",
+      "range": {
+        "startLine": 18,
+        "startChar": 40,
+        "endLine": 18,
+        "endChar": 43
+      },
+      "revId": "de620f7f955973787bce490285fe1bea5a7a73e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d80d611_42aa6c1c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/VkImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-03T01:49:47Z",
+      "side": 1,
+      "message": "There are much worse leaks going on right now; I will clean them up once we can draw a single triangle.",
+      "parentUuid": "5d3aa334_4a0b3551",
       "range": {
         "startLine": 18,
         "startChar": 40,
