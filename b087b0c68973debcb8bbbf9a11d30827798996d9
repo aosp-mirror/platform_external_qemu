@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "c6beb59b_6b1d87b1",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-06-05T19:16:49Z",
+      "side": 1,
+      "message": "Ok,I\u0027ve made the changes in the .mk files.",
+      "parentUuid": "ff2ada65_afa77f11",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 60
+      },
+      "revId": "b087b0c68973debcb8bbbf9a11d30827798996d9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee846de8_b941034b",
         "filename": "slirp/ip_icmp.c",
         "patchSetId": 1
