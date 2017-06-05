@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a77a5ac9_6084b2eb",
+        "filename": "android/android-emu/android/base/LazySnapshotObj.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done, moved to android/snapshot",
+      "parentUuid": "c90354ea_51afe272",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 16
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c1418667_1bd151e6",
         "filename": "android/android-emu/android/base/LazySnapshotObj.h",
         "patchSetId": 10
@@ -36,6 +60,24 @@
       "writtenOn": "2017-05-24T18:08:59Z",
       "side": 1,
       "message": "some one-two sentence comment would be great here",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b2e3446_8780f3f6",
+        "filename": "android/android-emu/android/base/LazySnapshotObj.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c1418667_1bd151e6",
       "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "5624428a_7ae8881d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69dde4e2_8768bca3",
+      "range": {
+        "startLine": 110,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 63
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6244ad0e_f01b7488",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
         "patchSetId": 10
@@ -76,6 +142,24 @@
       "writtenOn": "2017-05-24T18:08:59Z",
       "side": 1,
       "message": "nit:?",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28cbb854_9f3c5f21",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6244ad0e_f01b7488",
       "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -99,6 +183,24 @@
     },
     {
       "key": {
+        "uuid": "4dc427ce_03f27537",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86ce2918_f77c634a",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "94eb91b6_2b44323f",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
         "patchSetId": 10
@@ -110,6 +212,30 @@
       "writtenOn": "2017-05-24T18:08:59Z",
       "side": 1,
       "message": "nit: const ref?",
+      "range": {
+        "startLine": 283,
+        "startChar": 0,
+        "endLine": 283,
+        "endChar": 18
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22762691_c8d3addd",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "94eb91b6_2b44323f",
       "range": {
         "startLine": 283,
         "startChar": 0,
@@ -145,6 +271,30 @@
     },
     {
       "key": {
+        "uuid": "ebbbba72_cc8f88e3",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bd0d9b90_99606725",
+      "range": {
+        "startLine": 231,
+        "startChar": 6,
+        "endLine": 231,
+        "endChar": 23
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "05e49c91_ad62f259",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 10
@@ -156,6 +306,30 @@
       "writtenOn": "2017-05-24T18:08:59Z",
       "side": 1,
       "message": "nit: I feel like these functions are pretty much the same now, with the only difference being about reading |m_depth|.\nRuntime argument \"bool readDepth \u003d false\" would be enough to make it a single function",
+      "range": {
+        "startLine": 278,
+        "startChar": 0,
+        "endLine": 285,
+        "endChar": 65
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbc22c78_b0159932",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 285,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "05e49c91_ad62f259",
       "range": {
         "startLine": 278,
         "startChar": 0,
@@ -185,6 +359,24 @@
     },
     {
       "key": {
+        "uuid": "1f87963c_03018d2a",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureData.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a292ade_c0b48188",
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b29951c_ba6b61a8",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
         "patchSetId": 10
@@ -196,6 +388,30 @@
       "writtenOn": "2017-05-24T18:08:59Z",
       "side": 1,
       "message": "nit: you don\u0027t have to make it protected as in base class, private is good too.\nActually, if you don\u0027t expect anyone to inherit from SaveableTexture then protected doesn\u0027t make sense here",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 10
+      },
+      "revId": "9f7a3974cb066b2cd96c89e3dfb910b386ac466a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd019d27_0e9c657c",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-05T19:49:06Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b29951c_ba6b61a8",
       "range": {
         "startLine": 64,
         "startChar": 0,
