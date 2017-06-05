@@ -347,7 +347,7 @@ EOF
             --disable-vde \
             --disable-vhdx \
             --disable-vhost-net \
-            --disable-vnc \
+            --enable-vnc \
             --disable-vnc-sasl \
             --disable-werror \
             --enable-winvista \
