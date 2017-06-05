@@ -139,7 +139,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                         "%1\n"
                         "Some users have experienced emulator stability issues "
                         "with this driver version.  As a result, we're "
-                        "selecting an alternate renderer.  Please check with "
+                        "selecting a compatibility renderer.  Please check with "
                         "your manufacturer to see if there is an updated "
                         "driver available.")
                              .arg(QString::fromStdString(
