@@ -11,11 +11,10 @@
 
 #include "android/base/files/Stream.h"
 
+#include "android/base/ArraySize.h"
 #include <gtest/gtest.h>
 
 #include <string.h>
-
-#define ARRAYLEN(x)  (sizeof(x)/sizeof(x[0]))
 
 namespace android {
 namespace base {
@@ -109,7 +108,7 @@ TEST(Stream,getBe16) {
     };
     MemoryStream stream(kData, sizeof(kData));
 
-    for (size_t n = 0; n < ARRAYLEN(kExpected); ++n) {
+    for (size_t n = 0; n < ARRAY_SIZE(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], stream.getBe16()) << "#" << n;
     }
 }
@@ -141,7 +140,7 @@ TEST(Stream,getBe32) {
     };
     MemoryStream stream(kData, sizeof(kData));
 
-    for (size_t n = 0; n < ARRAYLEN(kExpected); ++n) {
+    for (size_t n = 0; n < ARRAY_SIZE(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], stream.getBe32()) << "#" << n;
     }
 }
@@ -173,7 +172,7 @@ TEST(Stream,getBe64) {
     };
     MemoryStream stream(kData, sizeof(kData));
 
-    for (size_t n = 0; n < ARRAYLEN(kExpected); ++n) {
+    for (size_t n = 0; n < ARRAY_SIZE(kExpected); ++n) {
         EXPECT_EQ(kExpected[n], stream.getBe64()) << "#" << n;
     }
 }
@@ -253,6 +252,58 @@ TEST(Stream, getString) {
     std::string str = stream.getString();
     EXPECT_EQ(sizeof(kExpected) - 1U, str.size());
     EXPECT_STREQ(kExpected, str.c_str());
+}
+
+TEST(Stream, putPackedNum) {
+    static const uint64_t kData[] = {
+        0,
+        1,
+        0x80,
+        0x7fff,
+        uint32_t(-1),
+        uint64_t(-1)
+    };
+    static const uint8_t kExpected[] = {
+        0x00,
+        0x01,
+        0x80, 0x01,
+        0xff, 0xff, 0x01,
+        0xff, 0xff, 0xff, 0xff, 0x0f,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01
+    };
+    uint8_t buffer[sizeof(kExpected)] = {};
+    MemoryStream stream(buffer, sizeof(buffer));
+
+    for (size_t n = 0; n < ARRAY_SIZE(kData); ++n) {
+        stream.putPackedNum(kData[n]);
+    }
+    for (size_t n = 0; n < sizeof(kExpected); ++n) {
+        EXPECT_EQ(kExpected[n], buffer[n]) << "#" << n;
+    }
+}
+
+TEST(Stream, getPackedNum) {
+    static const uint8_t kData[] = {
+        0x00,
+        0x01,
+        0x80, 0x01,
+        0xff, 0xff, 0x01,
+        0xff, 0xff, 0xff, 0xff, 0x0f,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01
+    };
+    static const uint64_t kExpected[] = {
+        0,
+        1,
+        0x80,
+        0x7fff,
+        uint32_t(-1),
+        uint64_t(-1)
+    };
+    MemoryStream stream(kData, sizeof(kData));
+
+    for (size_t n = 0; n < ARRAY_SIZE(kExpected); ++n) {
+        EXPECT_EQ(stream.getPackedNum(), kExpected[n]) << "#" << n;
+    }
 }
 
 }  // namespace base

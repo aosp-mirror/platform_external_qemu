@@ -26,10 +26,10 @@ namespace base {
 class Stream {
 public:
     // Default constructor.
-    Stream() {}
+    Stream() = default;
 
     // Destructor.
-    virtual ~Stream() {}
+    virtual ~Stream() = default;
 
     // Read up to |size| bytes and copy them to |buffer|. Return the number
     // of bytes that were actually transferred, or -errno value on error.
@@ -81,12 +81,23 @@ public:
 
     // Write a string |str| of |strlen| bytes into the stream.
     // Ignore errors.
-    virtual void putString(const char* str, size_t strlen);
+    void putString(const char* str, size_t strlen);
 
     // Read a string from the stream. Return a new string instance,
     // which will be empty on error. Note that this can only be used
     // to read strings that were written with putString().
-    virtual std::string getString();
+    std::string getString();
+
+    // Put/gen an integer number into the stream, making it use as little space
+    // there as possible.
+    // It uses a simple byte-by-byte encoding scheme, putting 7 bits of the
+    // number with the 8th bit set when there's more data to read, until the
+    // whole number is read.
+    // The compression is efficient if the number range is small, but it starts
+    // wasting space when values approach 14 bits for int16 (16K), 28 bits for
+    // int32 (268M) or 56 bits for int64 (still a lot).
+    void putPackedNum(uint64_t num);
+    uint64_t getPackedNum();
 };
 
 }  // namespace base
