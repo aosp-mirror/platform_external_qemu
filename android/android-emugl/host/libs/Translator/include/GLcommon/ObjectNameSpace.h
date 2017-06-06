@@ -110,6 +110,9 @@ private:
     GlobalToLocalNamesMap m_globalToLocalMap;
     const NamedObjectType m_type;
     GlobalNameSpace *m_globalNameSpace = nullptr;
+    // touchTextures loads all textures onto GPU
+    // Please only call it if the NameSpace is for textures
+    void touchTextures();
 };
 
 struct EglImage;
@@ -129,7 +132,7 @@ public:
     void onSave(android::base::Stream* stream, SaveableTexture::saver_t saver);
     void onLoad(android::base::Stream* stream, SaveableTexture::loader_t loader);
     void postLoad(android::base::Stream* stream);
-    NamedObjectPtr getGlobalObjectFromLoad(unsigned int oldGlobalName);
+    const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);
     EglImage* makeEglImageFromLoad(unsigned int oldGlobalName);
 private:
     emugl::Mutex m_lock;
