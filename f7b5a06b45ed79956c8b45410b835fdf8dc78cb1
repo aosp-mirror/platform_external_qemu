@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "786b301e_8f6d4ea3",
+        "filename": "android/android-emu/android/snapshot/LazySnapshotObj.h",
+        "patchSetId": 12
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-06T20:52:53Z",
+      "side": 1,
+      "message": "nit: add namespace names as per coding guide",
+      "range": {
+        "startLine": 59,
+        "startChar": 1,
+        "endLine": 60,
+        "endChar": 1
+      },
+      "revId": "f7b5a06b45ed79956c8b45410b835fdf8dc78cb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "10fc0b1a_5f563398",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-06T20:52:53Z",
+      "side": 1,
+      "message": "should getGlobalObject() call touch inside instead of forcing the user?",
+      "range": {
+        "startLine": 504,
+        "startChar": 10,
+        "endLine": 505,
+        "endChar": 80
+      },
+      "revId": "f7b5a06b45ed79956c8b45410b835fdf8dc78cb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "767ad387_f8dcda60",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-06T20:52:53Z",
+      "side": 1,
+      "message": "should these two lines be in opposite order?",
+      "range": {
+        "startLine": 368,
+        "startChar": 19,
+        "endLine": 370,
+        "endChar": 50
+      },
+      "revId": "f7b5a06b45ed79956c8b45410b835fdf8dc78cb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
