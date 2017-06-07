@@ -16,7 +16,7 @@
   <widget class="QGroupBox" name="mic_insertedLabel">
    <property name="geometry">
     <rect>
-     <x>324</x>
+     <x>20</x>
      <y>20</y>
      <width>251</width>
      <height>24</height>
@@ -35,7 +35,7 @@
   <widget class="QCheckBox" name="mic_inserted">
    <property name="geometry">
     <rect>
-     <x>324</x>
+     <x>20</x>
      <y>38</y>
      <width>211</width>
      <height>24</height>
@@ -63,7 +63,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>324</x>
+     <x>20</x>
      <y>112</y>
      <width>211</width>
      <height>24</height>
@@ -88,7 +88,7 @@
   <widget class="QGroupBox" name="mic_hasMicLabel">
    <property name="geometry">
     <rect>
-     <x>324</x>
+     <x>20</x>
      <y>94</y>
      <width>251</width>
      <height>24</height>
@@ -110,7 +110,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>324</x>
+     <x>20</x>
      <y>168</y>
      <width>132</width>
      <height>36</height>
@@ -142,7 +142,7 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>472</x>
+     <x>168</x>
      <y>168</y>
      <width>132</width>
      <height>36</height>
@@ -168,59 +168,10 @@
     <bool>false</bool>
    </property>
   </widget>
-  <widget class="QGroupBox" name="mic_enableMicLabel">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>20</y>
-     <width>251</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">border: 0px;</string>
-   </property>
-   <property name="title">
-    <string>Enable microphone</string>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string notr="true">Title</string>
-   </property>
-  </widget>
-  <widget class="QCheckBox" name="mic_enableMic">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>38</y>
-     <width>212</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="iconSize">
-    <size>
-     <width>24</width>
-     <height>24</height>
-    </size>
-   </property>
-   <property name="checked">
-    <bool>true</bool>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Toggle</string>
-   </property>
-   <property name="report_metrics" stdset="0">
-    <bool>false</bool>
-   </property>
-  </widget>
   <zorder>mic_insertedLabel</zorder>
   <zorder>mic_hasMicLabel</zorder>
   <zorder>mic_voiceAssistButton</zorder>
   <zorder>mic_hookButton</zorder>
-  <zorder>mic_enableMicLabel</zorder>
-  <zorder>mic_enableMic</zorder>
   <zorder>mic_inserted</zorder>
   <zorder>mic_hasMic</zorder>
  </widget>
@@ -232,7 +183,6 @@
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>mic_enableMic</tabstop>
   <tabstop>mic_inserted</tabstop>
   <tabstop>mic_hasMic</tabstop>
   <tabstop>mic_voiceAssistButton</tabstop>
