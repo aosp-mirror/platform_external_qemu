@@ -25,8 +25,10 @@ class StdioStream : public Stream {
 public:
     enum Ownership { kNotOwner, kOwner };
 
+    StdioStream() = delete;
     StdioStream(FILE* file, Ownership ownership = kNotOwner);
     StdioStream(StdioStream&& other);
+    StdioStream& operator=(StdioStream&& other);
 
     virtual ~StdioStream();
     virtual ssize_t read(void* buffer, size_t size) override;
@@ -35,7 +37,8 @@ public:
     FILE* get() const { return mFile; }
 
 private:
-    StdioStream();  // no default constructor
+    void close();
+
     DISALLOW_COPY_AND_ASSIGN(StdioStream);
 
     FILE* mFile;

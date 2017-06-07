@@ -11,6 +11,7 @@
 
 #include "android/base/files/StdioStream.h"
 
+#include <assert.h>
 #include <errno.h>
 
 namespace android {
@@ -24,10 +25,17 @@ StdioStream::StdioStream(StdioStream&& other)
     other.mFile = nullptr;
 }
 
+StdioStream& StdioStream::operator=(StdioStream&& other) {
+    assert(this != &other);
+    close();
+    mFile = other.mFile;
+    mOwnership = other.mOwnership;
+    other.mFile = nullptr;
+    return *this;
+}
+
 StdioStream::~StdioStream() {
-    if (mOwnership == kOwner) {
-        ::fclose(mFile);
-    }
+    close();
 }
 
 ssize_t StdioStream::read(void* buffer, size_t size) {
@@ -48,6 +56,13 @@ ssize_t StdioStream::write(const void* buffer, size_t size) {
         }
     }
     return static_cast<ssize_t>(res);
+}
+
+void StdioStream::close() {
+    if (mOwnership == kOwner && mFile) {
+        ::fclose(mFile);
+        mFile = nullptr;
+    }
 }
 
 }  // namespace base
