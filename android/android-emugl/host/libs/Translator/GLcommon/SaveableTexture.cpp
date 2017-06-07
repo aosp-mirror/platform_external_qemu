@@ -1,18 +1,18 @@
 /*
-* Copyright (C) 2017 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include "GLcommon/SaveableTexture.h"
 
@@ -25,201 +25,268 @@
 #include <algorithm>
 
 static uint32_t s_texAlign(uint32_t v, uint32_t align) {
-
     uint32_t rem = v % align;
     return rem ? (v + (align - rem)) : v;
-
 }
 
 // s_computePixelSize is both in the host and the guest. Consider moving it to
 // android-emugl/shared
 
 static int s_computePixelSize(GLenum format, GLenum type) {
-
-#define FORMAT_ERROR(format, type) \
+#define FORMAT_ERROR(format, type)                                         \
     fprintf(stderr, "%s:%d unknown format/type 0x%x 0x%x\n", __FUNCTION__, \
             __LINE__, format, type);
 
-    switch(type) {
-    case GL_BYTE:
-        switch(format) {
-        case GL_R8:
-        case GL_R8I:
-        case GL_R8_SNORM:
-        case GL_RED:             return 1;
-        case GL_RED_INTEGER:     return 1;
-        case GL_RG8:
-        case GL_RG8I:
-        case GL_RG8_SNORM:
-        case GL_RG:              return 1 * 2;
-        case GL_RG_INTEGER:      return 1 * 2;
-        case GL_RGB8:
-        case GL_RGB8I:
-        case GL_RGB8_SNORM:
-        case GL_RGB:             return 1 * 3;
-        case GL_RGB_INTEGER:     return 1 * 3;
-        case GL_RGBA8:
-        case GL_RGBA8I:
-        case GL_RGBA8_SNORM:
-        case GL_RGBA:            return 1 * 4;
-        case GL_RGBA_INTEGER:    return 1 * 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    case GL_UNSIGNED_BYTE:
-        switch(format) {
-        case GL_R8:
-        case GL_R8UI:
-        case GL_RED:             return 1;
-        case GL_RED_INTEGER:     return 1;
-        case GL_ALPHA8_EXT:
-        case GL_ALPHA:           return 1;
-        case GL_LUMINANCE8_EXT:
-        case GL_LUMINANCE:       return 1;
-        case GL_LUMINANCE8_ALPHA8_EXT:
-        case GL_LUMINANCE_ALPHA: return 1 * 2;
-        case GL_RG8:
-        case GL_RG8UI:
-        case GL_RG:              return 1 * 2;
-        case GL_RG_INTEGER:      return 1 * 2;
-        case GL_RGB8:
-        case GL_RGB8UI:
-        case GL_SRGB8:
-        case GL_RGB:             return 1 * 3;
-        case GL_RGB_INTEGER:     return 1 * 3;
-        case GL_RGBA8:
-        case GL_RGBA8UI:
-        case GL_SRGB8_ALPHA8:
-        case GL_RGBA:            return 1 * 4;
-        case GL_RGBA_INTEGER:    return 1 * 4;
-        case GL_BGRA_EXT:
-        case GL_BGRA8_EXT:       return 1* 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    case GL_SHORT:
-        switch(format) {
-        case GL_R16I:
-        case GL_RED_INTEGER:     return 2;
-        case GL_RG16I:
-        case GL_RG_INTEGER:      return 2 * 2;
-        case GL_RGB16I:
-        case GL_RGB_INTEGER:     return 2 * 3;
-        case GL_RGBA16I:
-        case GL_RGBA_INTEGER:    return 2 * 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    case GL_UNSIGNED_SHORT:
-        switch(format) {
-        case GL_DEPTH_COMPONENT16:
-        case GL_DEPTH_COMPONENT: return 2;
-        case GL_R16UI:
-        case GL_RED_INTEGER:     return 2;
-        case GL_RG16UI:
-        case GL_RG_INTEGER:      return 2 * 2;
-        case GL_RGB16UI:
-        case GL_RGB_INTEGER:     return 2 * 3;
-        case GL_RGBA16UI:
-        case GL_RGBA_INTEGER:    return 2 * 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    case GL_INT:
-        switch(format) {
-        case GL_R32I:
-        case GL_RED_INTEGER:     return 4;
-        case GL_RG32I:
-        case GL_RG_INTEGER:      return 4 * 2;
-        case GL_RGB32I:
-        case GL_RGB_INTEGER:     return 4 * 3;
-        case GL_RGBA32I:
-        case GL_RGBA_INTEGER:    return 4 * 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    case GL_UNSIGNED_INT:
-        switch(format) {
-        case GL_DEPTH_COMPONENT16:
-        case GL_DEPTH_COMPONENT24:
-        case GL_DEPTH_COMPONENT32_OES:
-        case GL_DEPTH_COMPONENT: return 4;
-        case GL_R32UI:
-        case GL_RED_INTEGER:     return 4;
-        case GL_RG32UI:
-        case GL_RG_INTEGER:      return 4 * 2;
-        case GL_RGB32UI:
-        case GL_RGB_INTEGER:     return 4 * 3;
-        case GL_RGBA32UI:
-        case GL_RGBA_INTEGER:    return 4 * 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    case GL_UNSIGNED_SHORT_4_4_4_4:
-    case GL_UNSIGNED_SHORT_5_5_5_1:
-    case GL_UNSIGNED_SHORT_5_6_5:
-    case GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT:
-    case GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT:
-        return 2;
-    case GL_UNSIGNED_INT_10F_11F_11F_REV:
-    case GL_UNSIGNED_INT_5_9_9_9_REV:
-    case GL_UNSIGNED_INT_2_10_10_10_REV:
-    case GL_UNSIGNED_INT_24_8_OES:
-        return 4;
-    case GL_FLOAT_32_UNSIGNED_INT_24_8_REV:
-        return 4 + 4;
-    case GL_FLOAT:
-        switch(format) {
-        case GL_DEPTH_COMPONENT32F:
-        case GL_DEPTH_COMPONENT: return 4;
-        case GL_ALPHA32F_EXT:
-        case GL_ALPHA:           return 4;
-        case GL_LUMINANCE32F_EXT:
-        case GL_LUMINANCE:       return 4;
-        case GL_LUMINANCE_ALPHA32F_EXT:
-        case GL_LUMINANCE_ALPHA: return 4 * 2;
-        case GL_RED:             return 4;
-        case GL_R32F:            return 4;
-        case GL_RG:              return 4 * 2;
-        case GL_RG32F:           return 4 * 2;
-        case GL_RGB:             return 4 * 3;
-        case GL_RGB32F:          return 4 * 3;
-        case GL_RGBA:            return 4 * 4;
-        case GL_RGBA32F:         return 4 * 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    case GL_HALF_FLOAT:
-    case GL_HALF_FLOAT_OES:
-        switch(format) {
-        case GL_ALPHA16F_EXT:
-        case GL_ALPHA:           return 2;
-        case GL_LUMINANCE16F_EXT:
-        case GL_LUMINANCE:       return 2;
-        case GL_LUMINANCE_ALPHA16F_EXT:
-        case GL_LUMINANCE_ALPHA: return 2 * 2;
-        case GL_RED:             return 2;
-        case GL_R16F:            return 2;
-        case GL_RG:              return 2 * 2;
-        case GL_RG16F:           return 2 * 2;
-        case GL_RGB:             return 2 * 3;
-        case GL_RGB16F:          return 2 * 3;
-        case GL_RGBA:            return 2 * 4;
-        case GL_RGBA16F:         return 2 * 4;
-        default: FORMAT_ERROR(format, type);
-        }
-        break;
-    default: FORMAT_ERROR(format, type);
+    switch (type) {
+        case GL_BYTE:
+            switch (format) {
+                case GL_R8:
+                case GL_R8I:
+                case GL_R8_SNORM:
+                case GL_RED:
+                    return 1;
+                case GL_RED_INTEGER:
+                    return 1;
+                case GL_RG8:
+                case GL_RG8I:
+                case GL_RG8_SNORM:
+                case GL_RG:
+                    return 1 * 2;
+                case GL_RG_INTEGER:
+                    return 1 * 2;
+                case GL_RGB8:
+                case GL_RGB8I:
+                case GL_RGB8_SNORM:
+                case GL_RGB:
+                    return 1 * 3;
+                case GL_RGB_INTEGER:
+                    return 1 * 3;
+                case GL_RGBA8:
+                case GL_RGBA8I:
+                case GL_RGBA8_SNORM:
+                case GL_RGBA:
+                    return 1 * 4;
+                case GL_RGBA_INTEGER:
+                    return 1 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        case GL_UNSIGNED_BYTE:
+            switch (format) {
+                case GL_R8:
+                case GL_R8UI:
+                case GL_RED:
+                    return 1;
+                case GL_RED_INTEGER:
+                    return 1;
+                case GL_ALPHA8_EXT:
+                case GL_ALPHA:
+                    return 1;
+                case GL_LUMINANCE8_EXT:
+                case GL_LUMINANCE:
+                    return 1;
+                case GL_LUMINANCE8_ALPHA8_EXT:
+                case GL_LUMINANCE_ALPHA:
+                    return 1 * 2;
+                case GL_RG8:
+                case GL_RG8UI:
+                case GL_RG:
+                    return 1 * 2;
+                case GL_RG_INTEGER:
+                    return 1 * 2;
+                case GL_RGB8:
+                case GL_RGB8UI:
+                case GL_SRGB8:
+                case GL_RGB:
+                    return 1 * 3;
+                case GL_RGB_INTEGER:
+                    return 1 * 3;
+                case GL_RGBA8:
+                case GL_RGBA8UI:
+                case GL_SRGB8_ALPHA8:
+                case GL_RGBA:
+                    return 1 * 4;
+                case GL_RGBA_INTEGER:
+                    return 1 * 4;
+                case GL_BGRA_EXT:
+                case GL_BGRA8_EXT:
+                    return 1 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        case GL_SHORT:
+            switch (format) {
+                case GL_R16I:
+                case GL_RED_INTEGER:
+                    return 2;
+                case GL_RG16I:
+                case GL_RG_INTEGER:
+                    return 2 * 2;
+                case GL_RGB16I:
+                case GL_RGB_INTEGER:
+                    return 2 * 3;
+                case GL_RGBA16I:
+                case GL_RGBA_INTEGER:
+                    return 2 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        case GL_UNSIGNED_SHORT:
+            switch (format) {
+                case GL_DEPTH_COMPONENT16:
+                case GL_DEPTH_COMPONENT:
+                    return 2;
+                case GL_R16UI:
+                case GL_RED_INTEGER:
+                    return 2;
+                case GL_RG16UI:
+                case GL_RG_INTEGER:
+                    return 2 * 2;
+                case GL_RGB16UI:
+                case GL_RGB_INTEGER:
+                    return 2 * 3;
+                case GL_RGBA16UI:
+                case GL_RGBA_INTEGER:
+                    return 2 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        case GL_INT:
+            switch (format) {
+                case GL_R32I:
+                case GL_RED_INTEGER:
+                    return 4;
+                case GL_RG32I:
+                case GL_RG_INTEGER:
+                    return 4 * 2;
+                case GL_RGB32I:
+                case GL_RGB_INTEGER:
+                    return 4 * 3;
+                case GL_RGBA32I:
+                case GL_RGBA_INTEGER:
+                    return 4 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        case GL_UNSIGNED_INT:
+            switch (format) {
+                case GL_DEPTH_COMPONENT16:
+                case GL_DEPTH_COMPONENT24:
+                case GL_DEPTH_COMPONENT32_OES:
+                case GL_DEPTH_COMPONENT:
+                    return 4;
+                case GL_R32UI:
+                case GL_RED_INTEGER:
+                    return 4;
+                case GL_RG32UI:
+                case GL_RG_INTEGER:
+                    return 4 * 2;
+                case GL_RGB32UI:
+                case GL_RGB_INTEGER:
+                    return 4 * 3;
+                case GL_RGBA32UI:
+                case GL_RGBA_INTEGER:
+                    return 4 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        case GL_UNSIGNED_SHORT_4_4_4_4:
+        case GL_UNSIGNED_SHORT_5_5_5_1:
+        case GL_UNSIGNED_SHORT_5_6_5:
+        case GL_UNSIGNED_SHORT_4_4_4_4_REV_EXT:
+        case GL_UNSIGNED_SHORT_1_5_5_5_REV_EXT:
+            return 2;
+        case GL_UNSIGNED_INT_10F_11F_11F_REV:
+        case GL_UNSIGNED_INT_5_9_9_9_REV:
+        case GL_UNSIGNED_INT_2_10_10_10_REV:
+        case GL_UNSIGNED_INT_24_8_OES:
+            return 4;
+        case GL_FLOAT_32_UNSIGNED_INT_24_8_REV:
+            return 4 + 4;
+        case GL_FLOAT:
+            switch (format) {
+                case GL_DEPTH_COMPONENT32F:
+                case GL_DEPTH_COMPONENT:
+                    return 4;
+                case GL_ALPHA32F_EXT:
+                case GL_ALPHA:
+                    return 4;
+                case GL_LUMINANCE32F_EXT:
+                case GL_LUMINANCE:
+                    return 4;
+                case GL_LUMINANCE_ALPHA32F_EXT:
+                case GL_LUMINANCE_ALPHA:
+                    return 4 * 2;
+                case GL_RED:
+                    return 4;
+                case GL_R32F:
+                    return 4;
+                case GL_RG:
+                    return 4 * 2;
+                case GL_RG32F:
+                    return 4 * 2;
+                case GL_RGB:
+                    return 4 * 3;
+                case GL_RGB32F:
+                    return 4 * 3;
+                case GL_RGBA:
+                    return 4 * 4;
+                case GL_RGBA32F:
+                    return 4 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        case GL_HALF_FLOAT:
+        case GL_HALF_FLOAT_OES:
+            switch (format) {
+                case GL_ALPHA16F_EXT:
+                case GL_ALPHA:
+                    return 2;
+                case GL_LUMINANCE16F_EXT:
+                case GL_LUMINANCE:
+                    return 2;
+                case GL_LUMINANCE_ALPHA16F_EXT:
+                case GL_LUMINANCE_ALPHA:
+                    return 2 * 2;
+                case GL_RED:
+                    return 2;
+                case GL_R16F:
+                    return 2;
+                case GL_RG:
+                    return 2 * 2;
+                case GL_RG16F:
+                    return 2 * 2;
+                case GL_RGB:
+                    return 2 * 3;
+                case GL_RGB16F:
+                    return 2 * 3;
+                case GL_RGBA:
+                    return 2 * 4;
+                case GL_RGBA16F:
+                    return 2 * 4;
+                default:
+                    FORMAT_ERROR(format, type);
+            }
+            break;
+        default:
+            FORMAT_ERROR(format, type);
     }
 
     return 0;
 }
 
 static uint32_t s_texImageSize(GLenum internalformat,
-                              GLenum type,
-                              int unpackAlignment,
-                              GLsizei width, GLsizei height) {
-
+                               GLenum type,
+                               int unpackAlignment,
+                               GLsizei width,
+                               GLsizei height) {
     uint32_t alignedWidth = s_texAlign(width, unpackAlignment);
     uint32_t pixelSize = s_computePixelSize(internalformat, type);
     uint32_t totalSize = pixelSize * alignedWidth * height;
@@ -228,27 +295,27 @@ static uint32_t s_texImageSize(GLenum internalformat,
 }
 
 SaveableTexture::SaveableTexture(const EglImage& eglImage)
-    : m_width(eglImage.width)
-    , m_height(eglImage.height)
-    , m_format(eglImage.format)
-    , m_internalFormat(eglImage.internalFormat)
-    , m_type(eglImage.type)
-    , m_border(eglImage.border)
-    , m_globalName(eglImage.globalTexObj->getGlobalName()) { }
+    : m_width(eglImage.width),
+      m_height(eglImage.height),
+      m_format(eglImage.format),
+      m_internalFormat(eglImage.internalFormat),
+      m_type(eglImage.type),
+      m_border(eglImage.border),
+      m_globalName(eglImage.globalTexObj->getGlobalName()) {}
 
 SaveableTexture::SaveableTexture(const TextureData& texture)
-    : m_target(texture.target)
-    , m_width(texture.width)
-    , m_height(texture.height)
-    , m_depth(texture.depth)
-    , m_format(texture.format)
-    , m_internalFormat(texture.internalFormat)
-    , m_type(texture.type)
-    , m_border(texture.border)
-    , m_globalName(texture.globalName) { }
+    : m_target(texture.target),
+      m_width(texture.width),
+      m_height(texture.height),
+      m_depth(texture.depth),
+      m_format(texture.format),
+      m_internalFormat(texture.internalFormat),
+      m_type(texture.type),
+      m_border(texture.border),
+      m_globalName(texture.globalName) {}
 
 SaveableTexture::SaveableTexture(android::base::Stream* stream,
-        GlobalNameSpace* globalNameSpace)
+                                 GlobalNameSpace* globalNameSpace)
     : LazySnapshotObj(stream)
     , m_globalNamespace(globalNameSpace) {
     m_target = stream->getBe32();
@@ -260,34 +327,35 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
     m_type = stream->getBe32();
     m_border = stream->getBe32();
     // TODO: handle other texture targets
-    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP
-            || m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
-        unsigned int numLevels = 1 + floor(log2(
-                (float)std::max(m_width, m_height)));
-        auto loadTex = [stream, numLevels] (
-                std::unique_ptr<LevelImageData[]>& levelData, bool isDepth) {
-                levelData.reset(new LevelImageData[numLevels]);
-                for (unsigned int level = 0; level < numLevels; level++) {
-                    levelData[level].m_width = stream->getBe32();
-                    levelData[level].m_height = stream->getBe32();
-                    if (isDepth) {
-                        levelData[level].m_depth = stream->getBe32();
-                    }
-                    loadBuffer(stream, &levelData[level].m_data);
+    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
+        m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
+        unsigned int numLevels =
+                1 + floor(log2((float)std::max(m_width, m_height)));
+        auto loadTex = [stream, numLevels](
+                               std::unique_ptr<LevelImageData[]>& levelData,
+                               bool isDepth) {
+            levelData.reset(new LevelImageData[numLevels]);
+            for (unsigned int level = 0; level < numLevels; level++) {
+                levelData[level].m_width = stream->getBe32();
+                levelData[level].m_height = stream->getBe32();
+                if (isDepth) {
+                    levelData[level].m_depth = stream->getBe32();
                 }
+                loadBuffer(stream, &levelData[level].m_data);
+            }
         };
         switch (m_target) {
             case GL_TEXTURE_2D:
-                loadTex(m_levelData, false);
+                loadTex(m_levelData[0], false);
                 break;
             case GL_TEXTURE_CUBE_MAP:
                 for (int i = 0; i < 6; i++) {
-                    loadTex(m_cubeLevelData[i], false);
+                    loadTex(m_levelData[i], false);
                 }
                 break;
             case GL_TEXTURE_3D:
             case GL_TEXTURE_2D_ARRAY:
-                loadTex(m_levelData, true);
+                loadTex(m_levelData[0], true);
                 break;
             default:
                 break;
@@ -302,7 +370,8 @@ SaveableTexture::SaveableTexture(android::base::Stream* stream,
     }
 }
 
-void SaveableTexture::onSave(android::base::Stream* stream) const {
+void SaveableTexture::onSave(
+        android::base::Stream* stream, Buffer* buffer) const {
     stream->putBe32(m_target);
     stream->putBe32(m_width);
     stream->putBe32(m_height);
@@ -312,9 +381,8 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
     stream->putBe32(m_type);
     stream->putBe32(m_border);
     // TODO: handle other texture targets
-    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP
-            || m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
-
+    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
+        m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         static constexpr GLenum pixelStoreIndexes[] = {
                 GL_PACK_ROW_LENGTH, GL_PACK_SKIP_PIXELS, GL_PACK_SKIP_ROWS,
                 GL_PACK_ALIGNMENT,
@@ -350,33 +418,35 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         }
         dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
-        android::base::SmallFixedVector<unsigned char, 128> buffer;
-        unsigned int numLevels = 1 + floor(log2((float)std::max(m_width, m_height)));
-        auto saveTex = [stream, format=m_format, type=m_type, numLevels,
-                &dispatcher, &buffer] (GLenum target, bool isDepth) {
+        unsigned int numLevels =
+                1 + floor(log2((float)std::max(m_width, m_height)));
+        auto saveTex = [this, stream, numLevels, &dispatcher, buffer](
+                               GLenum target, bool isDepth) {
             for (unsigned int level = 0; level < numLevels; level++) {
                 GLint width = 1;
                 GLint height = 1;
                 GLint depth = 1;
                 dispatcher.glGetTexLevelParameteriv(target, level,
-                        GL_TEXTURE_WIDTH, &width);
+                                                    GL_TEXTURE_WIDTH, &width);
                 dispatcher.glGetTexLevelParameteriv(target, level,
-                        GL_TEXTURE_HEIGHT, &height);
+                                                    GL_TEXTURE_HEIGHT, &height);
                 stream->putBe32(width);
                 stream->putBe32(height);
                 if (isDepth) {
-                    dispatcher.glGetTexLevelParameteriv(target, level,
-                        GL_TEXTURE_DEPTH, &depth);
+                    dispatcher.glGetTexLevelParameteriv(
+                            target, level, GL_TEXTURE_DEPTH, &depth);
                     stream->putBe32(depth);
                 }
                 // Snapshot texture data
-                buffer.resize_noinit(s_texImageSize(format,
-                        type, 1, width, height) * depth);
-                if (!buffer.empty()) {
-                    dispatcher.glGetTexImage(target, level, format, type,
-                            buffer.data());
+                buffer->clear();
+                buffer->resize_noinit(
+                        s_texImageSize(m_format, m_type, 1, width, height) *
+                        depth);
+                if (!buffer->empty()) {
+                    dispatcher.glGetTexImage(target, level, m_format, m_type,
+                                             buffer->data());
                 }
-                saveBuffer(stream, buffer);
+                saveBuffer(stream, *buffer);
             }
         };
         switch (m_target) {
@@ -401,9 +471,9 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
                 break;
         }
         // Snapshot texture param
-        auto saveParam = [stream, target=m_target, &dispatcher](GLenum pname) {
+        auto saveParam = [this, stream, &dispatcher](GLenum pname) {
             GLint param;
-            dispatcher.glGetTexParameteriv(target, pname, &param);
+            dispatcher.glGetTexParameteriv(m_target, pname, &param);
             stream->putBe32(param);
         };
         saveParam(GL_TEXTURE_MAG_FILTER);
@@ -419,13 +489,14 @@ void SaveableTexture::onSave(android::base::Stream* stream) const {
         }
         dispatcher.glBindTexture(m_target, prevTex);
     } else {
-        fprintf(stderr, "Warning: texture target 0x%x not supported\n", m_target);
+        fprintf(stderr, "Warning: texture target 0x%x not supported\n",
+                m_target);
     }
 }
 
 void SaveableTexture::restore() {
-    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP
-            || m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
+    if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
+        m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         // restore the texture
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         // Make sure we are using the right dispatcher
@@ -449,8 +520,8 @@ void SaveableTexture::restore() {
             }
         }
 
-        m_globalTexObj.reset(new NamedObject(GenNameInfo(NamedObjectType::TEXTURE),
-                m_globalNamespace));
+        m_globalTexObj.reset(new NamedObject(
+                GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
         m_globalName = m_globalTexObj->getGlobalName();
         GLint prevTex = 0;
         switch (m_target) {
@@ -473,61 +544,71 @@ void SaveableTexture::restore() {
         // Restore texture data
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
-        unsigned int numLevels = 1 + floor(log2((float)std::max(m_width, m_height)));
-        auto restoreTex2D = [internalFormat=m_internalFormat, border=m_border,
-                format=m_format, type=m_type, numLevels, &dispatcher] (
-                    GLenum target, std::unique_ptr<LevelImageData[]>& levelData) {
-                for (unsigned int level = 0; level < numLevels; level++) {
-                    const void* pixels = levelData[level].m_data.empty() ?
-                            nullptr : levelData[level].m_data.data();
-                    if (!level || pixels) {
-                        dispatcher.glTexImage2D(target, level, internalFormat,
-                                levelData[level].m_width, levelData[level].m_height,
-                                border, format, type, pixels);
+        unsigned int numLevels =
+                1 + floor(log2((float)std::max(m_width, m_height)));
+        auto restoreTex2D =
+                [this, numLevels, &dispatcher](
+                        GLenum target,
+                        std::unique_ptr<LevelImageData[]>& levelData) {
+                    for (unsigned int level = 0; level < numLevels; level++) {
+                        const void* pixels =
+                                levelData[level].m_data.empty()
+                                        ? nullptr
+                                        : levelData[level].m_data.data();
+                        if (!level || pixels) {
+                            dispatcher.glTexImage2D(
+                                    target, level, m_internalFormat,
+                                    levelData[level].m_width,
+                                    levelData[level].m_height, m_border,
+                                    m_format, m_type, pixels);
+                        }
                     }
-                }
-                levelData.reset();
-        };
-        auto restoreTex3D = [internalFormat=m_internalFormat, border=m_border,
-                format=m_format, type=m_type, numLevels, &dispatcher] (
-                    GLenum target, std::unique_ptr<LevelImageData[]>& levelData) {
-                for (unsigned int level = 0; level < numLevels; level++) {
-                    const void* pixels = levelData[level].m_data.empty() ?
-                            nullptr : levelData[level].m_data.data();
-                    if (!level || pixels) {
-                        dispatcher.glTexImage3D(target, level, internalFormat,
-                                levelData[level].m_width, levelData[level].m_height,
-                                levelData[level].m_depth, border, format, type,
-                                pixels);
+                    levelData.reset();
+                };
+        auto restoreTex3D =
+                [this, numLevels, &dispatcher](
+                        GLenum target,
+                        std::unique_ptr<LevelImageData[]>& levelData) {
+                    for (unsigned int level = 0; level < numLevels; level++) {
+                        const void* pixels =
+                                levelData[level].m_data.empty()
+                                        ? nullptr
+                                        : levelData[level].m_data.data();
+                        if (!level || pixels) {
+                            dispatcher.glTexImage3D(
+                                    target, level, m_internalFormat,
+                                    levelData[level].m_width,
+                                    levelData[level].m_height,
+                                    levelData[level].m_depth, m_border,
+                                    m_format, m_type, pixels);
+                        }
                     }
-                }
-                levelData.reset();
-        };
+                    levelData.reset();
+                };
         switch (m_target) {
             case GL_TEXTURE_2D:
-                restoreTex2D(GL_TEXTURE_2D, m_levelData);
+                restoreTex2D(GL_TEXTURE_2D, m_levelData[0]);
                 break;
             case GL_TEXTURE_CUBE_MAP:
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_cubeLevelData[0]);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, m_cubeLevelData[1]);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, m_cubeLevelData[2]);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, m_cubeLevelData[3]);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, m_cubeLevelData[4]);
-                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, m_cubeLevelData[5]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_levelData[0]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, m_levelData[1]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, m_levelData[2]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, m_levelData[3]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, m_levelData[4]);
+                restoreTex2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, m_levelData[5]);
                 break;
             case GL_TEXTURE_3D:
-                restoreTex3D(GL_TEXTURE_3D, m_levelData);
-                break;
             case GL_TEXTURE_2D_ARRAY:
-                restoreTex3D(GL_TEXTURE_2D_ARRAY, m_levelData);
+                restoreTex3D(m_target, m_levelData[0]);
                 break;
             default:
                 break;
-
         }
         // Restore tex param
-        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER, mTexMagFilter);
-        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER, mTexMinFilter);
+        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER,
+                                   mTexMagFilter);
+        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER,
+                                   mTexMinFilter);
         dispatcher.glTexParameteri(m_target, GL_TEXTURE_WRAP_S, mTexWrapS);
         dispatcher.glTexParameteri(m_target, GL_TEXTURE_WRAP_T, mTexWrapT);
         // Restore environment
@@ -541,7 +622,7 @@ void SaveableTexture::restore() {
     }
 }
 
-NamedObjectPtr SaveableTexture::getGlobalObject() {
+const NamedObjectPtr& SaveableTexture::getGlobalObject() {
     touch();
     return m_globalTexObj;
 }

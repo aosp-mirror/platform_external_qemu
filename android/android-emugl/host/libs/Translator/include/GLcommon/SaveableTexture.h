@@ -1,21 +1,22 @@
 /*
-* Copyright (C) 2017 The Android Open Source Project
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ * Copyright (C) 2017 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #pragma once
 
+#include "android/base/containers/SmallVector.h"
 #include "android/base/files/Stream.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "GLcommon/NamedObject.h"
@@ -43,31 +44,37 @@ class TextureData;
 
 class SaveableTexture : public android::snapshot::LazySnapshotObj {
 public:
-    typedef std::function<void(SaveableTexture*, android::base::Stream*)> saver_t;
-    typedef std::function<SaveableTexture*(android::base::Stream*,
-            GlobalNameSpace*)> loader_t;
-    typedef std::function<void(SaveableTexture*)> restorer_t;
+    using Buffer = android::base::SmallVector<unsigned char>;
+    using saver_t = void (*)(SaveableTexture*,
+                             android::base::Stream*,
+                             Buffer* buffer);
+    using loader_t = SaveableTexture* (*)(android::base::Stream*,
+                                          GlobalNameSpace*);
+    using restorer_t = void (*)(SaveableTexture*);
 
-    SaveableTexture() = default;
-    SaveableTexture(SaveableTexture&&) = default;
-    SaveableTexture& operator=(SaveableTexture&&) = default;
+    SaveableTexture() = delete;
+    SaveableTexture(SaveableTexture&&) = delete;
+    SaveableTexture& operator=(SaveableTexture&&) = delete;
+
     SaveableTexture(const EglImage& eglImage);
     SaveableTexture(const TextureData& texture);
     // precondition: a context must be properly bound
     SaveableTexture(android::base::Stream* stream,
-        GlobalNameSpace* globalNameSpace);
+                    GlobalNameSpace* globalNameSpace);
     // precondition: a context must be properly bound
-    void onSave(android::base::Stream* stream) const;
+    void onSave(android::base::Stream* stream, Buffer* buffer) const;
     // getGlobalObject() will touch and load data onto GPU if it is not yet
     // restored
-    NamedObjectPtr getGlobalObject();
+    const NamedObjectPtr& getGlobalObject();
     EglImage* makeEglImage() const;
+
 private:
     void restore() override;
+
     unsigned int m_target = GL_TEXTURE_2D;
     unsigned int m_width = 0;
     unsigned int m_height = 0;
-    unsigned int m_depth = 0; // For texture 3D
+    unsigned int m_depth = 0;  // For texture 3D
     unsigned int m_format = GL_RGBA;
     unsigned int m_internalFormat = GL_RGBA;
     unsigned int m_type = GL_UNSIGNED_BYTE;
@@ -80,10 +87,9 @@ private:
         unsigned int m_width = 0;
         unsigned int m_height = 0;
         unsigned int m_depth = 0;
-        std::vector<unsigned char> m_data = {};
+        android::base::SmallFixedVector<unsigned char, 16> m_data;
     };
-    std::unique_ptr<LevelImageData[]> m_levelData = {};
-    std::unique_ptr<LevelImageData[]> m_cubeLevelData[6] = {};
+    std::unique_ptr<LevelImageData[]> m_levelData[6] = {};
     GLint mTexMagFilter;
     GLint mTexMinFilter;
     GLint mTexWrapS;

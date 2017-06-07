@@ -16,6 +16,7 @@
 #ifndef TRANSLATOR_IFACES_H
 #define TRANSLATOR_IFACES_H
 
+#include "android/base/containers/SmallVector.h"
 #include "GLcommon/ShareGroup.h"
 
 #include <GLES/gl.h>
@@ -73,7 +74,7 @@ typedef struct {
     GLsync                                          (*fenceSync)(GLenum, GLbitfield);
     GLenum                                          (*clientWaitSync)(GLsync, GLbitfield, GLuint64);
     void                                            (*deleteSync)(GLsync);
-    void                                            (*saveTexture)(SaveableTexture*, android::base::Stream*);
+    void                                            (*saveTexture)(SaveableTexture*, android::base::Stream*, android::base::SmallVector<unsigned char>* buffer);
     SaveableTexture*                                (*loadTexture)(android::base::Stream*, GlobalNameSpace*);
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
