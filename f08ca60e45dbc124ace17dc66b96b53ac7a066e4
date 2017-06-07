@@ -22,6 +22,30 @@
       "revId": "f08ca60e45dbc124ace17dc66b96b53ac7a066e4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de2f2692_58a2e63d",
+        "filename": "android/android-emu/android/base/network/Dns.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-06-07T16:20:31Z",
+      "side": 1,
+      "message": "Just tried. This API returns the preferred IPV4 DNS.\nIt is what I am looking for. \nThanks!",
+      "parentUuid": "1287e0cd_3e67a9a5",
+      "range": {
+        "startLine": 133,
+        "startChar": 7,
+        "endLine": 133,
+        "endChar": 46
+      },
+      "revId": "f08ca60e45dbc124ace17dc66b96b53ac7a066e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
