@@ -253,14 +253,15 @@ void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
 }
 
 void GlobalNameSpace::onSave(android::base::Stream* stream,
-        std::function<void(SaveableTexture*, android::base::Stream*)> saver) {
+        SaveableTexture::saver_t saver) {
+    android::base::SmallFixedVector<unsigned char, 128> buffer;
     saveCollection(stream, m_textureMap,
-            [saver](android::base::Stream* stream,
+            [saver, &buffer](android::base::Stream* stream,
                 const std::pair<const unsigned int, SaveableTexturePtr>& tex) {
                 stream->putBe32(tex.first);
-                saver(tex.second.get(), stream);
+                saver(tex.second.get(), stream, &buffer);
             });
-    m_textureMap.clear();
+    decltype(m_textureMap)().swap(m_textureMap);
 }
 
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
@@ -275,7 +276,7 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
 }
 
 void GlobalNameSpace::postLoad(android::base::Stream* stream) {
-    m_textureMap.clear();
+    decltype(m_textureMap)().swap(m_textureMap);
 }
 
 const SaveableTexturePtr& GlobalNameSpace::getSaveableTextureFromLoad(
