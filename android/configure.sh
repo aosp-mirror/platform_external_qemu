@@ -257,6 +257,7 @@ HOST_CXX=${CXX:-g++}
 OPTION_CXX=
 
 VERBOSITY=0
+OPTION_SNAPSHOT_PROFILE=0
 
 AOSP_PREBUILTS_DIR=$(dirname "$0")/../../../prebuilts
 if [ -d "$AOSP_PREBUILTS_DIR" ]; then
