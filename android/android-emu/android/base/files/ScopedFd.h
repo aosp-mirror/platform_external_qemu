@@ -35,6 +35,11 @@ public:
         other.fd_ = -1;
     }
 
+    ScopedFd& operator=(ScopedFd&& other) {
+        swap(&other);
+        return *this;
+    }
+
     // Destructor calls close().
     ~ScopedFd() { close(); }
 
