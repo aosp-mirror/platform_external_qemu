@@ -19,6 +19,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
@@ -35,6 +36,7 @@
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/snapshot_compression.h"
+#include "android-qemu2-glue/snapshot_hooks.h"
 
 extern "C" {
 
@@ -86,6 +88,9 @@ bool qemu_android_emulation_early_setup() {
         return false;
     }
 
+    if (isEnabled(android::featurecontrol::Feature::FastSnapshotV1)) {
+        qemu_snapshot_hooks_setup();
+    }
     qemu_snapshot_compression_setup();
 
     android::emulation::AudioCaptureEngine::set(new android::qemu::QemuAudioCaptureEngine());
