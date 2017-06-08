@@ -905,7 +905,9 @@ message EmulatorFeatureFlagState {
     HVF = 14;
     KVM = 15;
     HAXM = 16;
-    // Next tag: 17
+    //
+    FAST_SNAPSHOT_V1 = 17;
+    // Next tag: 18
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
