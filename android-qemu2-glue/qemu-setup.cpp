@@ -35,6 +35,7 @@
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/snapshot_compression.h"
+#include "android-qemu2-glue/snapshot_hooks.h"
 
 extern "C" {
 
@@ -86,6 +87,7 @@ bool qemu_android_emulation_early_setup() {
         return false;
     }
 
+    qemu_snapshot_hooks_setup();
     qemu_snapshot_compression_setup();
 
     android::emulation::AudioCaptureEngine::set(new android::qemu::QemuAudioCaptureEngine());
