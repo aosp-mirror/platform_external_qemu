@@ -169,6 +169,7 @@ LOCAL_SRC_FILES := \
 
 ifeq ($(BUILD_TARGET_OS),windows)
 LOCAL_SRC_FILES += \
+    android/base/files/pread.cpp \
     android/base/threads/Thread_win32.cpp \
     android/base/system/Win32Utils.cpp \
     android/base/system/Win32UnicodeString.cpp \
