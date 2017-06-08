@@ -396,6 +396,7 @@ LOCAL_SRC_FILES := \
     android/shaper.c \
     android/snaphost-android.c \
     android/snapshot.c \
+    android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
     android/telephony/debug.c \
     android/telephony/gsm.c \
     android/telephony/modem.c \
