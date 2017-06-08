@@ -33,5 +33,7 @@ enum Feature {
     HYPERV = 16;
     KVM = 17;
 
-    ProtoNumFeatures = 18;
+    FastSnapshotV1 = 18;
+
+    ProtoNumFeatures = 19;
 }

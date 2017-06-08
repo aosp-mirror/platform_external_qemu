@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "metrics.h"
+#include "android/metrics/metrics.h"
 
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/IniFile.h"
@@ -356,6 +356,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::KVM;
         case android::featurecontrol::HAXM:
             return android_studio::EmulatorFeatureFlagState::HAXM;
+        case android::featurecontrol::FastSnapshotV1:
+            return android_studio::EmulatorFeatureFlagState::FAST_SNAPSHOT_V1;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }

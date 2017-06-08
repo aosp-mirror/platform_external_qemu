@@ -32,7 +32,9 @@
 
 using android::base::ScopedCPtr;
 
-enum IniSetting { ON, OFF, DEFAULT, ERR };
+enum IniSetting { ON, OFF, DEFAULT, NULLVAL, ERR };
+static constexpr char kIniSettingNull[] = "null";
+static constexpr char kIniSettingDefault[] = "default";
 
 static android::base::LazyInstance<android::featurecontrol::FeatureControlImpl>
         s_featureControl = LAZY_INSTANCE_INIT;
@@ -42,8 +44,10 @@ static IniSetting ParseIniStr(const std::string& str) {
         return ON;
     } else if (strcasecmp(str.c_str(), "off") == 0) {
         return OFF;
-    } else if (strcasecmp(str.c_str(), "default") == 0) {
+    } else if (strcasecmp(str.c_str(), kIniSettingDefault) == 0) {
         return DEFAULT;
+    } else if (strcasecmp(str.c_str(), kIniSettingNull) == 0) {
+        return NULLVAL;
     } else {
         return ERR;
     }
@@ -56,7 +60,7 @@ void FeatureControlImpl::initHostFeatureAndParseDefault(
         android::base::IniFile& defaultIniHost,
         android::featurecontrol::Feature featureName,
         const char* featureNameStr) {
-    std::string strHost = defaultIniHost.getString(featureNameStr, "null");
+    std::string strHost = defaultIniHost.getString(featureNameStr, kIniSettingNull);
 
     initEnabledDefault(featureName, false);
     switch (ParseIniStr(strHost)) {
@@ -64,6 +68,7 @@ void FeatureControlImpl::initHostFeatureAndParseDefault(
             initEnabledDefault(featureName, true);
             break;
         case OFF:
+        case NULLVAL:
             break;
         default:
             LOG(WARNING) << "Loading advanced feature host default setting: "
@@ -78,10 +83,10 @@ void FeatureControlImpl::initGuestFeatureAndParseDefault(
         android::base::IniFile& defaultIniGuest,
         android::featurecontrol::Feature featureName,
         const char* featureNameStr) {
-    std::string strHost = defaultIniHost.getString(featureNameStr, "null");
+    std::string strHost = defaultIniHost.getString(featureNameStr, kIniSettingNull);
     IniSetting valHost = ParseIniStr(strHost);
     IniSetting valGuest = ParseIniStr(
-            defaultIniGuest.getString(featureNameStr, "null"));
+            defaultIniGuest.getString(featureNameStr, kIniSettingNull));
     if (valGuest == ON) {
         setGuestTriedEnable(featureName);
     }
@@ -94,6 +99,7 @@ void FeatureControlImpl::initGuestFeatureAndParseDefault(
             }
             break;
         case OFF:
+        case NULLVAL:
             break;
         default:
             LOG(WARNING) << "Loading advanced feature host default setting: "
@@ -107,7 +113,7 @@ void FeatureControlImpl::loadUserOverrideFeature(
         android::base::IniFile& userIni,
         android::featurecontrol::Feature featureName,
         const char* featureNameStr) {
-    std::string val = userIni.getString(featureNameStr, "default");
+    std::string val = userIni.getString(featureNameStr, kIniSettingDefault);
     switch (ParseIniStr(val)) {
         case ON:
             setEnabledOverride(featureName, true);
@@ -117,6 +123,8 @@ void FeatureControlImpl::loadUserOverrideFeature(
             break;
         case DEFAULT:
             resetEnabledToDefault(featureName);
+            break;
+        case NULLVAL:
             break;
         default:
             LOG(WARNING) << "Loading advanced feature user setting:"
@@ -192,7 +200,7 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
         parseAndApplyOverrides(envVar);
     }
     if (android_cmdLineOptions) {
-        if (ParamList* feature = android_cmdLineOptions->feature) {
+        if (const ParamList* feature = android_cmdLineOptions->feature) {
             do {
                 parseAndApplyOverrides(feature->param);
                 feature = feature->next;
