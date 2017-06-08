@@ -488,7 +488,6 @@ void icmpwin_pong(struct pong* pong) {
         ip->ip_src.s_addr = reply->Address;
     }
 
-    assert(ip->ip_len == m_length(m, NULL));
     ip_output((struct socket*)NULL, m);
 }
 
