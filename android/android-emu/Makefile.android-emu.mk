@@ -397,6 +397,8 @@ LOCAL_SRC_FILES := \
     android/snaphost-android.c \
     android/snapshot.c \
     android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
+    android/snapshot/RamLoader.cpp \
+    android/snapshot/RamSaver.cpp \
     android/telephony/debug.c \
     android/telephony/gsm.c \
     android/telephony/modem.c \
