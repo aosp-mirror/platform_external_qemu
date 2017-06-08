@@ -155,6 +155,7 @@ LOCAL_C_INCLUDES += \
     $(LOCAL_PATH)/slirp \
     $(LOCAL_PATH)/tcg \
     $(ZLIB_INCLUDES) \
+    $(LIBBLUEZ_INCLUDES) \
 
 LOCAL_SRC_FILES += \
     $(QEMU2_COMMON_SOURCES) \
