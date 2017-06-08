@@ -648,6 +648,11 @@ probe_prebuilts_dir "e2fsprogs" E2FSPROGS_PREBUILTS_DIR common/e2fsprogs
 probe_prebuilts_dir "ffmpeg" FFMPEG_PREBUILTS_DIR common/ffmpeg
 
 ###
+###  bluez probe
+###
+probe_prebuilts_dir "bluez" LIBBLUEZ_PREBUILTS_DIR common/bluez
+
+###
 ###  x264 probe
 ###
 probe_prebuilts_dir "x264" X264_PREBUILTS_DIR common/x264
@@ -1088,6 +1093,7 @@ echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
 echo "PROTOBUF_PREBUILTS_DIR := $PROTOBUF_PREBUILTS_DIR" >> $config_mk
 echo "LZ4_PREBUILTS_DIR := $LZ4_PREBUILTS_DIR" >> $config_mk
 echo "FFMPEG_PREBUILTS_DIR := $FFMPEG_PREBUILTS_DIR" >> $config_mk
+echo "LIBBLUEZ_PREBUILTS_DIR := $LIBBLUEZ_PREBUILTS_DIR" >> $config_mk
 echo "X264_PREBUILTS_DIR := $X264_PREBUILTS_DIR" >> $config_mk
 echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
 

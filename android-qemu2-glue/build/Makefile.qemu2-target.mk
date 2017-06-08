@@ -64,7 +64,10 @@ QEMU2_SYSTEM_LDLIBS := \
     $(call qemu2-if-darwin, -framework Hypervisor) \
 
 QEMU2_SYSTEM_STATIC_LIBRARIES := \
-    emulator-zlib
+    emulator-zlib \
+    $(call qemu2-if-linux, emulator-libbluez) \
+
+
 
 $(call start-emulator-library,libqemu2-system-$(QEMU2_TARGET_SYSTEM))
 
