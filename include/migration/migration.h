@@ -331,6 +331,9 @@ int migrate_compress_threads(void);
 int migrate_decompress_threads(void);
 bool migrate_use_events(void);
 
+void migrate_set_file_hooks(const QEMUFileHooks* save_hooks,
+                            const QEMUFileHooks* load_hooks);
+
 /* Sending on the return path - generic and then for each message type */
 void migrate_send_rp_message(MigrationIncomingState *mis,
                              enum mig_rp_message_type message_type,

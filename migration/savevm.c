@@ -1251,6 +1251,16 @@ void qemu_savevm_state_cleanup(void)
     }
 }
 
+static const QEMUFileHooks* sSaveFileHooks = NULL;
+static const QEMUFileHooks* sLoadFileHooks = NULL;
+
+void migrate_set_file_hooks(const QEMUFileHooks* save_hooks,
+                            const QEMUFileHooks* load_hooks)
+{
+    sSaveFileHooks = save_hooks;
+    sLoadFileHooks = load_hooks;
+}
+
 static int qemu_savevm_state(QEMUFile *f, Error **errp)
 {
     int ret;
@@ -2185,6 +2195,7 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
         monitor_printf(mon, "Could not open VM state file\n");
         goto the_end;
     }
+    qemu_file_set_hooks(f, sSaveFileHooks);
 
 #if SNAPSHOT_PROFILE > 1
     int64_t beginSaveStateTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
@@ -2356,6 +2367,7 @@ int load_vmstate(const char *name)
         error_report("Could not open VM state file");
         return -EINVAL;
     }
+    qemu_file_set_hooks(f, sLoadFileHooks);
 
     qemu_system_reset(VMRESET_SILENT);
     migration_incoming_state_new(f);
