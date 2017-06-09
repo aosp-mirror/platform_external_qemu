@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d711646_fa1337c0",
+        "filename": "android/android-emu/android/base/files/pread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-09T19:07:18Z",
+      "side": 1,
+      "message": "do you want to reset the file seek pointer after reading so that it has consistent behavior across platforms?",
+      "revId": "c02b98df33330cae745472714979e9eabdff94ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
