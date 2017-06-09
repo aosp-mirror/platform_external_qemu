@@ -16,6 +16,24 @@
       "revId": "c02b98df33330cae745472714979e9eabdff94ca",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b07b9fd_aa148f9e",
+        "filename": "android/android-emu/android/base/files/pread.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-09T19:18:09Z",
+      "side": 1,
+      "message": "Unfortunately, it won\u0027t help that much: pread()\u0027s main purpose is to be able to call it from multiple threads, otherwise it\u0027s as good as seek() + read(). Resetting file pointer is of no help for multithreaded usage, and it\u0027s better to just never call regular read() for the same descriptor. I\u0027ll add a comment",
+      "parentUuid": "5d711646_fa1337c0",
+      "revId": "c02b98df33330cae745472714979e9eabdff94ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
