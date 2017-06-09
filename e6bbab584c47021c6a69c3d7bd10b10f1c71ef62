@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce96f7ae_2214c31e",
+        "filename": "android-qemu2-glue/snapshot_hooks.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-09T19:00:13Z",
+      "side": 1,
+      "message": "remove this?",
+      "range": {
+        "startLine": 180,
+        "startChar": 0,
+        "endLine": 189,
+        "endChar": 23
+      },
+      "revId": "e6bbab584c47021c6a69c3d7bd10b10f1c71ef62",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
