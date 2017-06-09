@@ -96,6 +96,11 @@ enable_if_scoped_enum<E, bool> operator==(int val, E e) {
     return e == val;
 }
 
+template <class E>
+enable_if_scoped_enum<E, bool> nonzero(E e) {
+    return static_cast<underlying_enum_type<E>>(e) != 0;
+}
+
 }  // namespace EnumFlags
 
 // For the ADL to kick in let's make sure we bring all the operators into our
