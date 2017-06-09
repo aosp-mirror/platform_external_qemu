@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be0d5851_12b2c5a7",
+        "filename": "android/android-emu/android/camera/camera-capture-linux.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 863,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-09T01:38:16Z",
+      "side": 1,
+      "message": "is this the right way to sleep?",
+      "revId": "1553e4c3fe9a815963bbebc6e56dd2629e2e692f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
