@@ -24,6 +24,7 @@
 #include "android/camera/camera-format-converters.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/file_io.h"
+#include "android/utils/system.h"
 
 #include <fcntl.h>
 #include <stdio.h>
@@ -854,7 +855,15 @@ camera_device_start_capturing(CameraDevice* ccd,
     fmt.fmt.pix.width       = frame_width;
     fmt.fmt.pix.height      = frame_height;
     fmt.fmt.pix.pixelformat = pixel_format;
-    if (_xioctl(cd->handle, VIDIOC_S_FMT, &fmt) < 0) {
+    int failed = 0;
+    do {
+        failed = _xioctl(cd->handle, VIDIOC_S_FMT, &fmt);
+        if (failed == 0 || errno != EBUSY) {
+            break;
+        }
+        sleep_ms(60);
+    } while (1);
+    if (failed < 0) {
         memcpy(fmt_str, &pixel_format, 4);
         fmt_str[4] = '\0';
         E("%s: Camera '%s' does not support pixel format '%s' with dimensions %dx%d",
