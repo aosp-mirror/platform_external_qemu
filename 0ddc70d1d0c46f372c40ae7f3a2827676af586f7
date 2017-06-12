@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e883012e_edbc3e1c",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "Do we expect different pagesizes? \nIf not we can remove it from the struct, if we do why restrict to pagesizes \u003c\u003d4k here?",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b451014_8cdc9c40",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "Can we make these named functions? That would be slightly more readable for the newcomers :-). It took me a while to understand that the lambda is an allocator.",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea625323_b2018cfa",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "This never gets called right?",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88b4a350_be73fa67",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "nameLenghth \u003c 256? More of these types of over/under flows below. I guess the real question is if we trust the input :-)",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "474d9e58_5c201a15",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "can we rename this to bufGetter?",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fdd3752e_c8302037",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "So the caller is responsible for deleting buf in this case? Why not pass in a deleter in this function? It might make the readerWorker function easier to understand.\n\nLine 246-250 could become something like this:\n\nreadDataFromDisk(page, [](int size) { return new uint8_t[size]); }, [](uint_8t *ptr) { delete[] ptr; });",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c8982d9_63b63ad1",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "do { ... } while(..)",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b72014f9_a366716e",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "uint?",
+      "revId": "e33e3c916cd7278fbe6331fc9a14226c46ceb811",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a954881_87e86101",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-12T18:11:38Z",
+      "side": 1,
+      "message": "nameLength \u003c 256?",
+      "revId": "e33e3c916cd7278fbe6331fc9a14226c46ceb811",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
