@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "30520228_0aaea914",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:33:58Z",
+      "side": 1,
+      "message": "I don\u0027t, it\u0027s just an old code that I had.\nWill clean up, thanks",
+      "parentUuid": "e883012e_edbc3e1c",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b451014_8cdc9c40",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 4
@@ -30,6 +48,24 @@
       "writtenOn": "2017-06-12T18:11:38Z",
       "side": 1,
       "message": "Can we make these named functions? That would be slightly more readable for the newcomers :-). It took me a while to understand that the lambda is an allocator.",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f604126_124ebae7",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:33:58Z",
+      "side": 1,
+      "message": "Named function for the whole read/fill or just instead of \"return buf\" part?\nI\u0027m totally ok with moving the whole function out, but the allocation and deallocation are specifically designed to be lambdas - they capture a local buffer to return it, and making it into a class would look horrible",
+      "parentUuid": "9b451014_8cdc9c40",
       "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "b0516faa_53cdbfd3",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:33:58Z",
+      "side": 1,
+      "message": "it does - there\u0027s a potential case when a separate reader thread has already started reading the page data from the disk\nin that case it would read it into its own allocated memory, and readDataFromDisk() call here won\u0027t do anything but wait for it to finish reading.\nIn that case we need to free that allocated memory here\nIt\u0027s rare, but I saw it happening",
+      "parentUuid": "ea625323_b2018cfa",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88b4a350_be73fa67",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 4
@@ -64,6 +118,24 @@
       "writtenOn": "2017-06-12T18:11:38Z",
       "side": 1,
       "message": "nameLenghth \u003c 256? More of these types of over/under flows below. I guess the real question is if we trust the input :-)",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1234dce7_1d416713",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:33:58Z",
+      "side": 1,
+      "message": "getByte() reads a single byte, so we don\u0027t need to _trust_ input here.\nOn the other hand, later we read the actual memory pages from the disk - if we don\u0027t trust the input then we\u0027re totally screwed here",
+      "parentUuid": "88b4a350_be73fa67",
       "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "262c2fc5_a8cccf18",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:33:58Z",
+      "side": 1,
+      "message": "It\u0027s a deleter. It\u0027s needed to make sure we delete[] the buffer memory in case when readDataFromDisk() returned false",
+      "parentUuid": "474d9e58_5c201a15",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fdd3752e_c8302037",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 4
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "490884f3_e5363c12",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:33:58Z",
+      "side": 1,
+      "message": "That\u0027s actually a good idea, thanks",
+      "parentUuid": "fdd3752e_c8302037",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c8982d9_63b63ad1",
         "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
         "patchSetId": 4
@@ -115,6 +223,24 @@
       "writtenOn": "2017-06-12T18:11:38Z",
       "side": 1,
       "message": "do { ... } while(..)",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8812084c_37bc023d",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:33:58Z",
+      "side": 1,
+      "message": "well, it\u0027s a matter of preference. I strongly prefer for(;;) for infinite loops (mostly because of different compilers giving warnings about constant loop condition in while(1)",
+      "parentUuid": "3c8982d9_63b63ad1",
       "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
