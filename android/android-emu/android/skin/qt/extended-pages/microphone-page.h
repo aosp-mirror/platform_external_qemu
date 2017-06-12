@@ -28,7 +28,6 @@ public:
     void setEmulatorWindow(EmulatorQtWindow* eW);
 
 private slots:
-    void on_mic_enableMic_toggled(bool checked);
     void on_mic_hasMic_toggled(bool checked);
     void on_mic_hookButton_pressed();
     void on_mic_hookButton_released();
