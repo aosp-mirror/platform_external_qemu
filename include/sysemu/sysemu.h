@@ -12,6 +12,16 @@
 #include "qemu/uuid.h"
 #include "qom/object.h"
 
+typedef void (*add_hva_gpa_t)(void* hva, uint64_t len, uint64_t gpa);
+typedef void (*remove_hva_gpa_t)(uint64_t len, uint64_t gpa);
+typedef void (*fault_gpa_t)(uint64_t len, uint64_t gpa);
+
+extern add_hva_gpa_t add_hva_gpa_call;
+extern remove_hva_gpa_t remove_hva_gpa_call;
+extern fault_gpa_t fault_gpa_call;
+
+void set_vm_mapping_callbacks(add_hva_gpa_t add, remove_hva_gpa_t rem, fault_gpa_t fault);
+
 /* vl.c */
 
 extern const char *bios_name;

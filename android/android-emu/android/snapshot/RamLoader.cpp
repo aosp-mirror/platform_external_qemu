@@ -21,8 +21,23 @@
 #include <cassert>
 #include <memory>
 
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/errno.h>
+#include <sys/mman.h>
+
+#include <set>
+
+Lock gRamLoaderLock;
+
 namespace android {
 namespace snapshot {
+
+hva2gpa_t hva2gpa_call = 0;
+
+void set_hva2gpa_func(hva2gpa_t f) {
+    hva2gpa_call = f;
+}
 
 struct RamLoader::Page {
     std::atomic<uint8_t> state;
@@ -40,13 +55,27 @@ struct RamLoader::Page {
           data(other.data) {}
 };
 
+std::set<uint64_t> gpasDone;
+std::set<void*> hvasDone;
+
 RamLoader::RamLoader(ZeroChecker zeroChecker)
     : mStream(nullptr),
       mZeroChecker(zeroChecker),
-      mReaderThread([this]() { readerWorker(); }) {
+      mReaderThread([this]() { ; }) {
+    fprintf(stderr, "%s: start\n", __func__);
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace(
                 [this](void* ptr) {
+                AutoLock lock(gRamLoaderLock);
+                    // if (hvasDone.find(ptr) != hvasDone.end()) return;
+                    // hvasDone.insert(ptr);
+
+                    if (0x21522000 == this->getGuestPhysicalAddress(ptr)) {
+                    // fprintf(stderr, "%s; bail\n", __func__);
+                    // abort();
+
+                    }
+                    // fprintf(stderr, "%s: accesscallback %p\n", __func__, ptr);
                     Page& page = this->page(ptr);
                     uint8_t buf[4096];
                     assert(ARRAY_SIZE(buf) >= pageSize(page));
@@ -56,6 +85,10 @@ RamLoader::RamLoader(ZeroChecker zeroChecker)
                             delete[] ptr;
                         }
                     });
+
+                    // readDataFromDisk(&page, [&page, this](int) { return pagePtr(page); });
+                    // fillPageData(&page, [](uint8_t* ptr) { ; });
+                    // }
                 },
                 [this]() { return backgroundPageLoad(); });
     }
@@ -178,26 +211,59 @@ bool RamLoader::readIndex() {
 
 bool RamLoader::registerPageWatches() {
     uint8_t* startPtr = nullptr;
+    Page* lastPage = nullptr;
     uint32_t curSize = 0;
-    for (const Page& page : mIndex.pages) {
+    uint64_t startgpa = 0;
+    bool lastFound = false;
+
+    for (Page& page : mIndex.pages) {
         auto ptr = pagePtr(page);
         auto size = pageSize(page);
-        if (ptr == startPtr + curSize) {
+        if (false) {
             curSize += size;
         } else {
             if (startPtr) {
-                if (!mAccessWatch->registerMemoryRange(startPtr, curSize)) {
-                    return false;
+                // bool found; uint64_t gpa = hva2gpa_call(startPtr, &found);
+                // if (!found || gpa >= 0x60000000) {
+                // if (!found || gpa >= 0x10000000) {
+                // if (!found || (gpa >= 0x21400000 && gpa <= 0x21800000)) {
+                // if (true) {
+                // if (!lastFound || !startgpa || startgpa < 0x21400000 || startgpa >= 0x21523000) {
+                if (!lastFound || !startgpa || startgpa < 0x10000000 || startgpa >= 0x30000000) {
+                //if (true) {
+                    readDataFromDisk(lastPage, [lastPage, this](int) { return pagePtr(*lastPage); });
+                    // mAccessWatch->fillPage(pagePtr(page), curSize, page.data);
+                } else {
+                    if (!mAccessWatch->registerMemoryRange(startPtr, curSize, startgpa, lastFound)) {
+                        return false;
+                    }
                 }
             }
             startPtr = ptr;
             curSize = size;
+            lastPage = &page;
+            startgpa = hva2gpa_call(startPtr, &lastFound);
+            uint64_t othergpa = getGuestPhysicalAddress(startPtr);
+            // if (othergpa == startgpa) {
+            //     fprintf(stderr, "%s: yay, hva %p gpa matches for 0x%llx\n", __func__, startPtr, startgpa);
+            // } else {
+            //     fprintf(stderr, "%s: oops, hva %p gpas dont match: 0x%llx 0x%llx\n", __func__, startPtr, startgpa, othergpa);
+            // }
+            startgpa = othergpa;
+            lastFound = true;
         }
     }
     if (startPtr) {
-        if (!mAccessWatch->registerMemoryRange(startPtr, curSize)) {
-            return false;
-        }
+        // bool found; uint64_t gpa = hva2gpa_call(startPtr, &found);
+        // if (!found || gpa >= 0x600000000) {
+        // if (true) {
+            readDataFromDisk(lastPage, [lastPage, this](int) { return pagePtr(*lastPage); });
+            // mAccessWatch->fillPage(pagePtr(*lastPage), curSize, lastPage->data);
+        // } else {
+            // if (!mAccessWatch->registerMemoryRange(startPtr, curSize, startgpa, lastFound)) {
+            //     return false;
+            // }
+        // }
     }
     return true;
 }
@@ -209,6 +275,49 @@ uint8_t* RamLoader::pagePtr(const RamLoader::Page& page) const {
 
 uint32_t RamLoader::pageSize(const RamLoader::Page& page) const {
     return mIndex.blocks[page.blockIndex].ramBlock.pageSize;
+}
+
+uint64_t RamLoader::getGuestPhysicalAddress(void* ptr) {
+    const auto blockIt = std::find_if(
+            mIndex.blocks.begin(), mIndex.blocks.end(),
+            [ptr](const FileIndex::Block& b) {
+                return ptr >= b.ramBlock.hostPtr &&
+                       ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
+            });
+    assert(blockIt != mIndex.blocks.end());
+    assert(ptr >= blockIt->ramBlock.hostPtr);
+    assert(ptr < blockIt->ramBlock.hostPtr + blockIt->ramBlock.totalSize);
+    assert(blockIt->pagesBegin != blockIt->pagesEnd);
+
+    uintptr_t hostBlockOff =
+        ((uintptr_t)ptr - (uintptr_t)(blockIt->ramBlock.hostPtr));
+    uint64_t res = blockIt->ramBlock.guestPhysicalAddress + hostBlockOff;
+    uint64_t off = blockIt->ramBlock.startOffset;
+    // fprintf(stderr, "%s: hva %p gpa 0x%llx off 0x%llx\n", __func__, ptr, res, off);
+    return res;
+}
+
+void* RamLoader::getHostRamAddrFromGuestPhysical(uint64_t ptr) {
+    const auto blockIt = std::find_if(
+            mIndex.blocks.begin(), mIndex.blocks.end(),
+            [ptr](const FileIndex::Block& b) {
+                return ptr >= b.ramBlock.guestPhysicalAddress &&
+                       ptr < b.ramBlock.guestPhysicalAddress + b.ramBlock.totalSize;
+            });
+    assert(blockIt != mIndex.blocks.end());
+    assert(ptr >= blockIt->ramBlock.guestPhysicalAddress);
+    assert(ptr < blockIt->ramBlock.guestPhysicalAddress + blockIt->ramBlock.totalSize);
+    assert(blockIt->pagesBegin != blockIt->pagesEnd);
+
+    if (blockIt == mIndex.blocks.end()) {
+        fprintf(stderr, "%s: fail\n", __func__);
+    }
+
+    uintptr_t hostBlockOff =
+        ((uintptr_t)ptr - (uintptr_t)(blockIt->ramBlock.guestPhysicalAddress));
+    void* res = (void*)(blockIt->ramBlock.hostPtr + hostBlockOff);
+    // fprintf(stderr, "%s: gpa 0x%llx hva %p\n", __func__, ptr, res);
+    return res;
 }
 
 RamLoader::Page& RamLoader::page(void* ptr) {
@@ -232,6 +341,10 @@ RamLoader::Page& RamLoader::page(void* ptr) {
     assert(ptr >= pagePtr(*it));
     assert(ptr < pagePtr(*it) + pageSize(*it));
     return *it;
+}
+
+RamLoader::Page& RamLoader::pageFromGpa(uint64_t ptr) {
+    return this->page(this->getHostRamAddrFromGuestPhysical(ptr));
 }
 
 void RamLoader::readerWorker() {
@@ -302,8 +415,33 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::backgroundPageLoad() {
     return MemoryAccessWatch::IdleCallbackResult::RunAgain;
 }
 
+void RamLoader::readPageAtPtr(void* ptr) {
+    Page& p = this->page(ptr);
+    if (readDataFromDisk(&p, [&p, this](int) { return pagePtr(p); })) {
+        bool found;
+        uint64_t gpa = hva2gpa_call(ptr, &found);
+        if (found) {
+            mAccessWatch->fillPage(pagePtr(p), pageSize(p), p.data, gpa);
+        }
+    }
+}
+
+
+void RamLoader::readAtGpa(uint64_t len, uint64_t gpa) {
+    if (gpasDone.find(gpa) != gpasDone.end()) { return; }
+    gpasDone.insert(gpa);
+    Page& p = this->pageFromGpa(gpa);
+    mprotect(pagePtr(p), 4096, PROT_READ | PROT_WRITE | PROT_EXEC);
+
+                    uint8_t buf[4096];
+                    readDataFromDisk(&p, [&buf](int) { return buf; });
+                    fillPageData(&p, [&buf](uint8_t* ptr) {
+                    });
+}
+
 template <class BufferGetter>
 bool RamLoader::readDataFromDisk(Page* pagePtr, BufferGetter&& bufGetter) {
+    // fprintf(stderr, "%s: call\n", __func__);
     Page& page = *pagePtr;
     auto state = uint8_t(State::Empty);
     if (!page.state.compare_exchange_strong(state, (uint8_t)State::Reading)) {
@@ -321,6 +459,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, BufferGetter&& bufGetter) {
         derror("Reading page %p from disk returned less data: %d of %d\n",
                this->pagePtr(page), (int)read, (int)size);
         page.state.store(uint8_t(State::Error));
+        abort();
         return false;
     }
 
@@ -342,9 +481,11 @@ void RamLoader::fillPageData(Page* pagePtr, DataDeleter&& deleter) {
 #if SNAPSHOT_PROFILE > 2
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
+    void* hostptr = this->pagePtr(page);
+    uint64_t gpa = this->getGuestPhysicalAddress(hostptr);
     if (mAccessWatch) {
         bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data);
+                                          page.data, gpa);
         deleter(page.data);
         page.data = nullptr;
         page.state.store(uint8_t(res ? State::Filled : State::Error));
@@ -352,6 +493,7 @@ void RamLoader::fillPageData(Page* pagePtr, DataDeleter&& deleter) {
 }
 
 bool RamLoader::readAllPages() {
+    fprintf(stderr, "%s: start\n", __func__);
     for (Page& page : mIndex.pages) {
         if (!readDataFromDisk(&page,
                               [&page, this](int) { return pagePtr(page); })) {

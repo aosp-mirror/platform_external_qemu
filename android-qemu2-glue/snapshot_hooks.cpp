@@ -20,10 +20,12 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/globals.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/common.h"
+#include "android-qemu2-glue/vm_mem_mappings.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -42,6 +44,8 @@ extern "C" {
 #include <utility>
 #include <vector>
 
+using android::base::AutoLock;
+using android::base::Lock;
 using android::base::LazyInstance;
 using android::base::PathUtils;
 using android::base::StdioStream;
@@ -124,6 +128,22 @@ static const QEMUFileHooks sSaveHooks = {
         },
 };
 
+void load_page_right_now(uint64_t len, uint64_t gpa) {
+    AutoLock lock(gRamLoaderLock);
+    fprintf(stderr, "%s: call. gpa 0x%llx\n", __func__);
+    // bool found;
+    // void* hva = gpa2hva(gpa, &found);
+    // if (!found) return;
+    // if (!found) { fprintf(stderr, "%s: wtf? not found 0x%llx\n", __func__, gpa); }
+    // else { fprintf(stderr, "%s: fault in gpa 0x%llx -> hva %p\n", __func__, gpa, hva); }
+    // sRamLoader->get()->readPageAtPtr(hva);
+    // fprintf(stderr, "%s: fault in gpa 0x%llx -> hva %p\n", __func__, gpa,
+    //         sRamLoader->get()->getHostRamAddrFromGuestPhysical(gpa));
+
+    sRamLoader->get()->readAtGpa(len, gpa);
+    fprintf(stderr, "%s: call. gpa 0x%llx (exit)\n", __func__);
+}
+
 static const QEMUFileHooks sLoadHooks = {
         // before_ram_iterate
         nullptr,
@@ -134,14 +154,17 @@ static const QEMUFileHooks sLoadHooks = {
             switch (flags) {
                 case RAM_CONTROL_BLOCK_REG: {
                     if (!sRamLoader->get() || sRamLoader->get()->wasStarted()) {
+                        fprintf(stderr, "%s: first ram load hook.\n", __func__);
+                        // register callback
+                        android::snapshot::set_hva2gpa_func(hva2gpa);
                         // First call to the load hook - create a new loader.
                         sRamLoader->reset(new RamLoader(isPageZeroed));
                     }
                     RamBlock block;
                     block.id = static_cast<const char*>(data);
-                    qemu_ram_foreach_block(
+                    qemu_ram_foreach_block2(
                             [](const char* block_name, void* host_addr,
-                               ram_addr_t offset, ram_addr_t length,
+                               ram_addr_t offset, ram_addr_t length, uint64_t gpa,
                                void* opaque) {
                                 auto block = static_cast<RamBlock*>(opaque);
                                 if (block->id != block_name) {
@@ -150,6 +173,12 @@ static const QEMUFileHooks sLoadHooks = {
                                 block->startOffset = offset;
                                 block->hostPtr = (uint8_t*)host_addr;
                                 block->totalSize = length;
+                                block->guestPhysicalAddress = gpa;
+                                if (offset != gpa) {
+                                    fprintf(stderr, "offset doesn't match gpa: id %s hva %p offset: 0x%llx gpa: 0x%llx size 0x%llx\n", block->id.c_str(), block->hostPtr, offset, gpa, (uint64_t)length);
+                                } else {
+                                    fprintf(stderr, "offset matches gpa: id %s hva %p offset: 0x%llx gpa: 0x%llx size 0x%llx\n", block->id.c_str(), block->hostPtr, offset, gpa, (uint64_t)length);
+                                }
                                 return 1;
                             },
                             &block);
@@ -157,6 +186,7 @@ static const QEMUFileHooks sLoadHooks = {
                     RAMBlock* const qemuBlock =
                             qemu_ram_block_by_name(block.id.c_str());
                     block.pageSize = (int32_t)qemu_ram_pagesize(qemuBlock);
+                    fprintf(stderr, "%s: register block %s\n", __func__, block.id.c_str());
                     sRamLoader->get()->registerBlock(block);
                     break;
                 }

@@ -37,12 +37,15 @@
 #include "android-qemu2-glue/snapshot_compression.h"
 #include "android-qemu2-glue/snapshot_hooks.h"
 
+#include "android-qemu2-glue/vm_mem_mappings.h"
+
 extern "C" {
 
 #include "qemu/osdep.h"
 #include "qemu-common.h"
 #include "qemu/main-loop.h"
 #include "qemu/thread.h"
+#include "sysemu/sysemu.h"
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -89,6 +92,8 @@ bool qemu_android_emulation_early_setup() {
 
     qemu_snapshot_hooks_setup();
     qemu_snapshot_compression_setup();
+    set_vm_mapping_callbacks(add_hva_gpa, remove_hva_gpa, load_page_right_now);
+
 
     android::emulation::AudioCaptureEngine::set(new android::qemu::QemuAudioCaptureEngine());
 

@@ -267,6 +267,7 @@ using android::crashreport::CrashSystem;
 extern "C" {
 
 bool crashhandler_init() {
+    return false;
     if (CrashSystem::CrashType::CRASHUPLOAD == CrashSystem::CrashType::NONE) {
         return false;
     }

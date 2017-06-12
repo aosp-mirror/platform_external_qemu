@@ -16,12 +16,13 @@
 
 #include "android/base/StringView.h"
 
-#include "google_breakpad/processor/process_state.h"
-#include "google_breakpad/processor/basic_source_line_resolver.h"
+// #include "google_breakpad/processor/process_state.h"
+// #include "google_breakpad/processor/basic_source_line_resolver.h"
 
 #include <memory>
 #include <set>
 #include <string>
+#include <map>
 
 namespace android {
 namespace crashreport {
@@ -42,7 +43,7 @@ class UserSuggestions {
 public:
     std::set<Suggestion> suggestions;
 
-    UserSuggestions(google_breakpad::ProcessState* process_state);
+    UserSuggestions(int* process_state);
 };
 
 // Class CrashService wraps Breakpad platform specific crash generation server
@@ -219,9 +220,9 @@ private:
     std::string mCrashOnExitMessage;
     std::map<std::string, std::string> mReportValues;
     std::map<std::string, std::string> mReportFiles;
-    google_breakpad::ProcessState mProcessState;
-    google_breakpad::BasicSourceLineResolver mLineResolver;
-    std::unique_ptr<google_breakpad::Minidump> mMinidump;
+    int mProcessState;
+    int mLineResolver;
+    std::unique_ptr<int> mMinidump;
 
     bool mDidCrashOnExit;
     bool mDeleteCrashDataOnExit = true;
