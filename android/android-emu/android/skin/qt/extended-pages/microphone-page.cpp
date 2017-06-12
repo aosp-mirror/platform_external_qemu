@@ -29,10 +29,6 @@ MicrophonePage::MicrophonePage(QWidget* parent)
     mUi->mic_hookButton->hide();
 }
 
-void MicrophonePage::on_mic_enableMic_toggled(bool checked) {
-    // TODO
-}
-
 void MicrophonePage::on_mic_hasMic_toggled(bool checked) {
     if (mUi->mic_inserted->isChecked()) {
         // The headset is inserted, give our new microphone
