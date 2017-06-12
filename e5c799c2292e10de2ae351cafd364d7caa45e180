@@ -22,6 +22,30 @@
       "revId": "e5c799c2292e10de2ae351cafd364d7caa45e180",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bbc9387_09095059",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_linux.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:16:53Z",
+      "side": 1,
+      "message": "Thanks :)\nYes, that\u0027s for host and we don\u0027t build 32-bit emulator for linux anymore",
+      "parentUuid": "4e949226_e55d75ea",
+      "range": {
+        "startLine": 36,
+        "startChar": 9,
+        "endLine": 36,
+        "endChar": 13
+      },
+      "revId": "e5c799c2292e10de2ae351cafd364d7caa45e180",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
