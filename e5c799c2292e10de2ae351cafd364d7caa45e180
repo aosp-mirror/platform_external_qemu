@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e949226_e55d75ea",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_linux.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2017-06-12T15:15:41Z",
+      "side": 1,
+      "message": "Should be i386 :) Although this refers to the host architecture and probably doesn\u0027t matter.",
+      "range": {
+        "startLine": 36,
+        "startChar": 9,
+        "endLine": 36,
+        "endChar": 13
+      },
+      "revId": "e5c799c2292e10de2ae351cafd364d7caa45e180",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
