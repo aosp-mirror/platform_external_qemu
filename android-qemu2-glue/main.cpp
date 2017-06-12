@@ -949,6 +949,12 @@ extern "C" int main(int argc, char **argv) {
         /* HACK: force display emulation by overriding '-vga none' */
         args[n++] = "-vga";
         args[n++] = "virtio";
+
+        /* HACK: add USB input devices */
+        args[n++] = "-usbdevice";
+        args[n++] = "tablet";
+        args[n++] = "-usbdevice";
+        args[n++] = "keyboard";
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
