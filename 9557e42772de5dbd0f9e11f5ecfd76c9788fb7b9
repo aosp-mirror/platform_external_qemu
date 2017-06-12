@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "de932b29_7546fc65",
+        "filename": "android-qemu2-glue/snapshot_hooks.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:07:38Z",
+      "side": 1,
+      "message": "will fix\nI miss exceptions so much here",
+      "parentUuid": "902cfdd2_52478602",
+      "revId": "9557e42772de5dbd0f9e11f5ecfd76c9788fb7b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b1074e02_d9390a7b",
         "filename": "android-qemu2-glue/snapshot_hooks.cpp",
         "patchSetId": 3
@@ -30,6 +48,24 @@
       "writtenOn": "2017-06-12T16:15:10Z",
       "side": 1,
       "message": "Does RamSaver handle nulls from fopen?",
+      "revId": "9557e42772de5dbd0f9e11f5ecfd76c9788fb7b9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69a72cae_68857d6b",
+        "filename": "android-qemu2-glue/snapshot_hooks.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-12T18:07:38Z",
+      "side": 1,
+      "message": "no, it crashes :)\nthanks, will add a check",
+      "parentUuid": "b1074e02_d9390a7b",
       "revId": "9557e42772de5dbd0f9e11f5ecfd76c9788fb7b9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
