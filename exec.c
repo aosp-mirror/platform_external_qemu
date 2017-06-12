@@ -3771,4 +3771,23 @@ int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque)
     rcu_read_unlock();
     return ret;
 }
+
+int qemu_ram_foreach_block2(RAMBlockIterFunc2 func, void *opaque)
+{
+    RAMBlock *block;
+    int ret = 0;
+    uint64_t gpa = 0;
+
+    rcu_read_lock();
+    QLIST_FOREACH_RCU(block, &ram_list.blocks, next) {
+        gpa = block->mr ? (uint64_t)block->mr->addr : 0;
+        ret = func(block->idstr, block->host, block->offset,
+                   block->used_length, gpa, opaque);
+        if (ret) {
+            break;
+        }
+    }
+    rcu_read_unlock();
+    return ret;
+}
 #endif

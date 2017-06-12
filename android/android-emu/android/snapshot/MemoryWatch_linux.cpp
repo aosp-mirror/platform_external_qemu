@@ -176,7 +176,7 @@ bool MemoryAccessWatch::valid() const {
     return mImpl->mUserfaultFd.valid();
 }
 
-bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
+bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length, uint64_t gpa, bool found) {
     madvise(start, length, MADV_DONTNEED);
     uffdio_register regStruct = {{(uintptr_t)start, length},
                                  UFFDIO_REGISTER_MODE_MISSING};
@@ -193,7 +193,7 @@ void MemoryAccessWatch::doneRegistering() {
     }
 }
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
+bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data, uint64_t gpa) {
     uffdio_copy copyStruct = {(uintptr_t)ptr, (uintptr_t)data, length};
     if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_COPY, &copyStruct)) {
         derror("%s: %s copy host: %p from: %p\n", __func__, strerror(errno),

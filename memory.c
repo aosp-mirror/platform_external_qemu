@@ -33,6 +33,16 @@
 
 //#define DEBUG_UNASSIGNED
 
+add_hva_gpa_t add_hva_gpa_call = 0;
+remove_hva_gpa_t remove_hva_gpa_call = 0;
+fault_gpa_t fault_gpa_call = 0;
+
+void set_vm_mapping_callbacks(add_hva_gpa_t add, remove_hva_gpa_t rem, fault_gpa_t fault) {
+    add_hva_gpa_call = add;
+    remove_hva_gpa_call = rem;
+    fault_gpa_call = fault;
+}
+
 static unsigned memory_region_transaction_depth;
 static bool memory_region_update_pending;
 static bool ioeventfd_update_pending;

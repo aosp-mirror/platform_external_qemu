@@ -49,6 +49,7 @@ LOCAL_SRC_FILES := \
     snapshot_hooks.cpp \
     telephony/modem_init.c \
     utils/stream.cpp \
+    vm_mem_mappings.cpp \
 
 LOCAL_SRC_FILES := $(LOCAL_SRC_FILES:%=android-qemu2-glue/%)
 

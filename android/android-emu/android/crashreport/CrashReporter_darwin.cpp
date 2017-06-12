@@ -17,7 +17,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
-#include "client/mac/handler/exception_handler.h"
+// #include "client/mac/handler/exception_handler.h"
 
 #include <mach/mach.h>
 
@@ -43,53 +43,58 @@ public:
     virtual ~HostCrashReporter() {}
 
     bool attachCrashHandler(const CrashSystem::CrashPipe& crashpipe) override {
-        if (mHandler) {
-            return false;
-        }
+        return false;
+        // if (mHandler) {
+        //     return false;
+        // }
 
-        mHandler.reset(new google_breakpad::ExceptionHandler(
-                getDumpDir(), &HostCrashReporter::exceptionFilterCallback,
-                nullptr,  // no minidump callback
-                nullptr,  // no callback context
-                true,     // install signal handlers
-                crashpipe.mClient.c_str()));
+        // mHandler.reset(new google_breakpad::ExceptionHandler(
+        //         getDumpDir(), &HostCrashReporter::exceptionFilterCallback,
+        //         nullptr,  // no minidump callback
+        //         nullptr,  // no callback context
+        //         true,     // install signal handlers
+        //         crashpipe.mClient.c_str()));
 
-        return mHandler != nullptr;
+        // return mHandler != nullptr;
     }
 
     bool waitServicePipeReady(const std::string& pipename,
                               int timeout_ms) override {
-        static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
-        mach_port_t task_bootstrap_port = 0;
-        mach_port_t port;
-        task_get_bootstrap_port(mach_task_self(), &task_bootstrap_port);
-        for (; timeout_ms > 0; timeout_ms -= kWaitIntervalMS) {
-            if (bootstrap_look_up(task_bootstrap_port, pipename.c_str(),
-                                  &port) == KERN_SUCCESS) {
-                return true;
-            }
-            ::android::base::System::get()->sleepMs(kWaitIntervalMS);
-        }
         return false;
+
+        // static_assert(kWaitIntervalMS > 0, "kWaitIntervalMS must be greater than 0");
+        // mach_port_t task_bootstrap_port = 0;
+        // mach_port_t port;
+        // task_get_bootstrap_port(mach_task_self(), &task_bootstrap_port);
+        // for (; timeout_ms > 0; timeout_ms -= kWaitIntervalMS) {
+        //     if (bootstrap_look_up(task_bootstrap_port, pipename.c_str(),
+        //                           &port) == KERN_SUCCESS) {
+        //         return true;
+        //     }
+        //     ::android::base::System::get()->sleepMs(kWaitIntervalMS);
+        // }
+        // return false;
     }
 
     void setupChildCrashProcess(int pid) override {}
 
-    void writeDump() override { mHandler->WriteMinidump(); }
+    void writeDump() override { }
 
    static bool exceptionFilterCallback(void* context);
 
 private:
     bool onCrashPlatformSpecific() override;
 
-    std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
+    std::unique_ptr<int> mHandler;
+    // std::unique_ptr<google_breakpad::ExceptionHandler> mHandler;
 };
 
 ::android::base::LazyInstance<HostCrashReporter> sCrashReporter =
         LAZY_INSTANCE_INIT;
 
 bool HostCrashReporter::exceptionFilterCallback(void*) {
-    return CrashReporter::get()->onCrash();
+    return false;
+    // return CrashReporter::get()->onCrash();
 }
 
 static void attachMemoryInfo()

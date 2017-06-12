@@ -60,6 +60,7 @@
 
 #define  DEBUG  1
 
+AModem android_modem;
 #if 1
 #  define  D_ACTIVE   VERBOSE_CHECK(console)
 #else
