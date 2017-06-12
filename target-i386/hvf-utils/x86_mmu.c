@@ -85,6 +85,9 @@ static bool get_pt_entry(struct CPUState *cpu, struct gpt_translation *pt, int l
         gpa = pt->pte[level];
 
     index = gpt_entry(pt->gva, level, pae);
+
+    addr_t wantedAddr = gpa + index * pte_size(pae);
+    if (wantedAddr >= 0x21400000 && wantedAddr <= 0x21800000) { fprintf(stderr, "%s: Yer ded 0x%llx\n", __func__, wantedAddr); }
     address_space_rw(&address_space_memory, gpa + index * pte_size(pae), MEMTXATTRS_UNSPECIFIED, (uint8_t *)&pte, pte_size(pae), 0);
 
     pt->pte[level - 1] = pte;
@@ -225,6 +228,8 @@ void vmx_write_mem(struct CPUState* cpu, addr_t gva, void *data, int bytes)
         if (!mmu_gva_to_gpa(cpu, gva, &gpa)) {
             VM_PANIC_ON_EX(1, "%s: mmu_gva_to_gpa %llx failed\n", __FUNCTION__, gva);
         } else {
+    addr_t wantedAddr = gpa;
+    if (wantedAddr >= 0x21400000 && wantedAddr <= 0x21800000) { fprintf(stderr, "%s: Yer ded 0x%llx\n", __func__, wantedAddr); }
             address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, data, copy, 1);
         }
 
@@ -245,6 +250,8 @@ void vmx_read_mem(struct CPUState* cpu, void *data, addr_t gva, int bytes)
         if (!mmu_gva_to_gpa(cpu, gva, &gpa)) {
             VM_PANIC_ON_EX(1, "%s: mmu_gva_to_gpa %llx failed\n", __FUNCTION__, gva);
         }
+    addr_t wantedAddr = gpa;
+    if (wantedAddr >= 0x21400000 && wantedAddr <= 0x21800000) { fprintf(stderr, "%s: Yer ded 0x%llx\n", __func__, wantedAddr); }
         address_space_rw(&address_space_memory, gpa, MEMTXATTRS_UNSPECIFIED, data, copy, 0);
 
         bytes -= copy;

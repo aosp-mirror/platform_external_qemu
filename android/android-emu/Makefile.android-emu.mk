@@ -396,7 +396,6 @@ LOCAL_SRC_FILES := \
     android/shaper.c \
     android/snaphost-android.c \
     android/snapshot.c \
-    android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
     android/telephony/debug.c \
@@ -429,7 +428,12 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
-        android/camera/camera-capture-mac.m
+        android/camera/camera-capture-mac.m \
+        android/snapshot/MacSegvHandler.m \
+        android/snapshot/mac_segv_handler.c \
+        android/snapshot/MemoryWatch_darwin.cpp \
+endif
+
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -460,6 +464,7 @@ endif
 ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,Accelerate
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,Foundation
 endif
 
 ANDROID_EMU_STATIC_LIBRARIES := \

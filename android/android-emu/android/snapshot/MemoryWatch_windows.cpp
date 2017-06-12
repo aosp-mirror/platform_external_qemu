@@ -30,13 +30,13 @@ bool MemoryAccessWatch::valid() const {
     return false;
 }
 
-bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
+bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length, uint64_t gpa, bool found) {
     return false;
 }
 
 void MemoryAccessWatch::doneRegistering() {}
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
+bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data, uint64_t gpa) {
     return false;
 }
 

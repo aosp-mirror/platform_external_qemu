@@ -16,8 +16,6 @@
 
 #include "android/crashreport/CrashService.h"
 
-#include "client/mac/crash_generation/crash_generation_server.h"
-
 namespace android {
 namespace crashreport {
 
@@ -30,11 +28,11 @@ public:
 
     static void OnClientDumpRequest(
             void* context,
-            const google_breakpad::ClientInfo& client_info,
+            const int& client_info,
             const std::string& file_path);
 
     static void OnClientExit(void* context,
-                             const google_breakpad::ClientInfo& client_info);
+                             const int& client_info);
 
     virtual bool startCrashServer(const std::string& pipe) override;
 
@@ -47,7 +45,7 @@ protected:
     bool getMemInfo() override;
 
 private:
-    std::unique_ptr<::google_breakpad::CrashGenerationServer> mCrashServer;
+    std::unique_ptr<int> mCrashServer;
 };
 
 }  // namespace crashreport

@@ -2778,6 +2778,9 @@ MemTxResult address_space_read_full(AddressSpace *as, hwaddr addr,
 MemTxResult address_space_rw(AddressSpace *as, hwaddr addr, MemTxAttrs attrs,
                              uint8_t *buf, int len, bool is_write)
 {
+    if (addr >= 0x21400000 && addr <= 0x21800000) {
+        fprintf(stderr, "%s: yer ded! 0x%llx\n", __func__, addr);
+    }
     if (is_write) {
         return address_space_write(as, addr, attrs, (uint8_t *)buf, len);
     } else {
@@ -3764,6 +3767,25 @@ int qemu_ram_foreach_block(RAMBlockIterFunc func, void *opaque)
     QLIST_FOREACH_RCU(block, &ram_list.blocks, next) {
         ret = func(block->idstr, block->host, block->offset,
                    block->used_length, opaque);
+        if (ret) {
+            break;
+        }
+    }
+    rcu_read_unlock();
+    return ret;
+}
+
+int qemu_ram_foreach_block2(RAMBlockIterFunc2 func, void *opaque)
+{
+    RAMBlock *block;
+    int ret = 0;
+    uint64_t gpa = 0;
+
+    rcu_read_lock();
+    QLIST_FOREACH_RCU(block, &ram_list.blocks, next) {
+        gpa = block->mr ? (uint64_t)block->mr->addr : 0;
+        ret = func(block->idstr, block->host, block->offset,
+                   block->used_length, gpa, opaque);
         if (ret) {
             break;
         }

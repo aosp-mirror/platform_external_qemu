@@ -18,7 +18,10 @@
 
 ANDROID_BEGIN_HEADER
 
+#include <inttypes.h>
+
 // Sets up the snapshot hooks in QEMU.
 void qemu_snapshot_hooks_setup();
+void load_page_right_now(uint64_t len, uint64_t gpa);
 
 ANDROID_END_HEADER

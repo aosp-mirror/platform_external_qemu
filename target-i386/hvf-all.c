@@ -160,10 +160,11 @@ int __hvf_set_memory(hvf_slot *slot) {
     if (macslot->present) {
         if (macslot->size != slot->size) {
             macslot->present = 0;
-            DPRINTF("%s: hv_vm_unmap for gpa [0x%llx 0x%llx]\n", __func__,
+            fprintf(stderr, "%s: hv_vm_unmap for gpa [0x%llx 0x%llx]\n", __func__,
                     (unsigned long long)macslot->gpa_start,
                     (unsigned long long)(macslot->gpa_start + macslot->size));
             int unmapres = hv_vm_unmap(macslot->gpa_start, macslot->size);
+            remove_hva_gpa_call(macslot->size, macslot->gpa_start);
             assert_hvf_ok(unmapres);
         }
     }
@@ -178,11 +179,12 @@ int __hvf_set_memory(hvf_slot *slot) {
     macslot->present = 1;
     macslot->gpa_start = slot->start;
     macslot->size = slot->size;
-    DPRINTF("%s: hv_vm_map for hva 0x%llx gpa [0x%llx 0x%llx]\n", __func__,
+    fprintf(stderr, "%s: hv_vm_map for hva 0x%llx gpa [0x%llx 0x%llx]\n", __func__,
             (unsigned long long)(slot->mem),
             (unsigned long long)macslot->gpa_start,
             (unsigned long long)(macslot->gpa_start + macslot->size));
     int mapres = (hv_vm_map((hv_uvaddr_t)slot->mem, slot->start, slot->size, flags));
+    add_hva_gpa_call(slot->mem, slot->size, slot->start);
     assert_hvf_ok(mapres);
     pthread_rwlock_unlock(&mem_lock);
     return 0;
@@ -790,6 +792,7 @@ again:
             return EXCP_HLT;
         }
 
+        // fprintf(stderr, "%s: do\n", __func__);
         int r  = hv_vcpu_run(cpu->hvf_fd);
 
         if (r) {
@@ -830,11 +833,13 @@ again:
             {
                 hvf_slot *slot;
                 addr_t gpa = rvmcs(cpu->hvf_fd, VMCS_GUEST_PHYSICAL_ADDRESS);
+                // fprintf(stderr, "EPT FAULT: gpa 0x%llx\n", gpa);
 
                 if ((idtvec_info & VMCS_IDT_VEC_VALID) == 0 && (exit_qual & EXIT_QUAL_NMIUDTI) != 0)
                     vmx_set_nmi_blocking(cpu);
 
                 slot = hvf_find_overlap_slot(gpa, gpa);
+                // in case snapshot load heh.
                 // mmio
                 if (ept_emulation_fault(exit_qual) && !slot) {
                     struct x86_decode decode;
@@ -849,24 +854,25 @@ again:
 #endif
                     exec_instruction(cpu, &decode);
                     store_regs(cpu);
-                    break;
-                }
-#ifdef DIRTY_VGA_TRACKING
-                if (slot) {
-                    bool read = exit_qual & EPT_VIOLATION_DATA_READ ? 1 : 0;
-                    bool write = exit_qual & EPT_VIOLATION_DATA_WRITE ? 1 : 0;
-                    if (!read && !write)
-                        break;
-                    int flags = HV_MEMORY_READ | HV_MEMORY_EXEC;
-                    if (write) flags |= HV_MEMORY_WRITE;
+                } 
+                //else {
+                    if (slot) {
+                        bool read = exit_qual & EPT_VIOLATION_DATA_READ ? 1 : 0;
+                        bool write = exit_qual & EPT_VIOLATION_DATA_WRITE ? 1 : 0;
+                        fprintf(stderr, "%s: gpa 0x%llx read fault? %d write fault? %d\n", __func__, gpa, read, write);
+                        fault_gpa_call(4096, gpa & ~0xfff);
 
-                    pthread_rwlock_wrlock(&mem_lock);
-                    if (write)
-                        mark_slot_page_dirty(slot, gpa);
-                    hv_vm_protect(gpa & ~0xfff, 4096, flags);
-                    pthread_rwlock_unlock(&mem_lock);
-                }
-#endif
+                        // if (!read && !write)
+                        //     break;
+                        // int flags = HV_MEMORY_READ | HV_MEMORY_EXEC;
+                        // if (write) flags |= HV_MEMORY_WRITE;
+
+                        // pthread_rwlock_wrlock(&mem_lock);
+                        // if (write)
+                        //     mark_slot_page_dirty(slot, gpa);
+                        // pthread_rwlock_unlock(&mem_lock);
+                    }
+                // }
                 break;
             }
             case EXIT_REASON_INOUT:
@@ -1028,6 +1034,7 @@ again:
             case EXIT_REASON_TRIPLE_FAULT: {
                 addr_t gpa = rvmcs(cpu->hvf_fd, VMCS_GUEST_PHYSICAL_ADDRESS);
 
+                fprintf(stderr, "TRIPLE FAILT: gpa 0x%llx\n", gpa);
                 DPRINTF("triple fault at %llx (%llx, %llx), cr0 %llx, qual %llx, gpa %llx, ins len %d, cpu %p\n",
                         linear_rip(cpu, rip), RIP(cpu), linear_addr(cpu, rip, REG_SEG_CS),
                         rvmcs(cpu->hvf_fd, VMCS_GUEST_CR0), exit_qual, gpa, ins_len, cpu);

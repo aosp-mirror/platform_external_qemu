@@ -34,9 +34,9 @@ public:
     ~MemoryAccessWatch();
 
     bool valid() const;
-    bool registerMemoryRange(void* start, size_t length);
+    bool registerMemoryRange(void* start, size_t length, uint64_t gpa = 0, bool found = false);
     void doneRegistering();
-    bool fillPage(void* ptr, size_t length, const void* data);
+    bool fillPage(void* ptr, size_t length, const void* data, uint64_t gpa = 0);
 
 private:
     class Impl;
