@@ -510,6 +510,9 @@ static void virtio_unref_resource(pixman_image_t *image, void *data)
     pixman_image_unref(data);
 }
 
+/* Android QFramebuffer pixels */
+static pixman_image_t  *fb_image;
+
 static void virtio_gpu_set_scanout(VirtIOGPU *g,
                                    struct virtio_gpu_ctrl_command *cmd)
 {
@@ -587,6 +590,7 @@ static void virtio_gpu_set_scanout(VirtIOGPU *g,
         scanout->width != ss.r.width ||
         scanout->height != ss.r.height) {
         pixman_image_t *rect;
+        DisplaySurface *prev = scanout->ds;
         void *ptr = (uint8_t *)pixman_image_get_data(res->image) + offset;
         rect = pixman_image_create_bits(format, ss.r.width, ss.r.height, ptr,
                                         pixman_image_get_stride(res->image));
@@ -599,7 +603,14 @@ static void virtio_gpu_set_scanout(VirtIOGPU *g,
             cmd->error = VIRTIO_GPU_RESP_ERR_UNSPEC;
             return;
         }
+#if 0 /* HACK: copy to Android QFramebuffer */
         dpy_gfx_replace_surface(g->scanout[ss.scanout_id].con, scanout->ds);
+#else
+        pixman_image_composite(PIXMAN_OP_OVER, res->image, NULL, fb_image,
+                               ss.r.x, ss.r.y, 0, 0, 0, 0,
+                               ss.r.width, ss.r.height);
+        qemu_free_displaysurface(prev);
+#endif
     }
 
     res->scanout_bitmask |= (1 << ss.scanout_id);
@@ -1096,6 +1107,32 @@ static int virtio_gpu_load(QEMUFile *f, void *opaque, size_t size)
     return 0;
 }
 
+static void display_switch(DisplayChangeListener *dcl,
+                           struct DisplaySurface *surface)
+{
+    /*
+     * HACK:
+     * the first surface not allocated by QEMU is the Android QFramebuffer
+     */
+    if (!fb_image && is_buffer_shared(surface)) {
+        /* prevent destroying the underlaying pixman image */
+        pixman_image_ref(surface->image);
+        fb_image = surface->image;
+        /* Update the screen size */
+        QemuUIInfo info = {
+            0, 0,
+            surface_width(surface),
+            surface_height(surface)
+        };
+        dpy_set_ui_info(dcl->con, &info);
+    }
+}
+
+static DisplayChangeListenerOps display_listener_ops = {
+    .dpy_name        = "virtio",
+    .dpy_gfx_switch  = display_switch,
+};
+
 static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
 {
     VirtIODevice *vdev = VIRTIO_DEVICE(qdev);
@@ -1157,6 +1194,10 @@ static void virtio_gpu_device_realize(DeviceState *qdev, Error **errp)
         error_setg(&g->migration_blocker, "virgl is not yet migratable");
         migrate_add_blocker(g->migration_blocker);
     }
+
+    g->dcl.ops = &display_listener_ops;
+    g->dcl.con = g->scanout[0].con;
+    register_displaychangelistener(&g->dcl);
 }
 
 static void virtio_gpu_device_unrealize(DeviceState *qdev, Error **errp)

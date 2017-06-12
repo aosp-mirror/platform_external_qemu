@@ -241,8 +241,11 @@ static void pc_init1(MachineState *machine,
                          pcms->gsi[GOLDFISH_EVENTS_IRQ]);
     sysbus_create_simple("goldfish_pipe", GOLDFISH_PIPE_IOMEM_BASE,
                          pcms->gsi[GOLDFISH_PIPE_IRQ]);
-    sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
-                         pcms->gsi[GOLDFISH_FB_IRQ]);
+    /* Do not enable goldfish FB if we need another emulation for graphics */
+    if (vga_interface_type == VGA_NONE) {
+        sysbus_create_simple("goldfish_fb", GOLDFISH_FB_IOMEM_BASE,
+                             pcms->gsi[GOLDFISH_FB_IRQ]);
+    }
     sysbus_create_simple("goldfish_audio", GOLDFISH_AUDIO_IOMEM_BASE,
                          pcms->gsi[GOLDFISH_AUDIO_IRQ]);
     sysbus_create_simple("goldfish_rtc", GOLDFISH_RTC_IOMEM_BASE,

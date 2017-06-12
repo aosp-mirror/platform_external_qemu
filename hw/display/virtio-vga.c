@@ -192,7 +192,11 @@ static void virtio_vga_class_init(ObjectClass *klass, void *data)
     dc->hotpluggable = false;
 
     k->realize = virtio_vga_realize;
+#if 0 //GROSS HACK: take whatever VGABIOS is available in this build
     pcidev_k->romfile = "vgabios-virtio.bin";
+#else
+    pcidev_k->romfile = "vgabios-cirrus.bin";
+#endif
     pcidev_k->class_id = PCI_CLASS_DISPLAY_VGA;
 }
 
