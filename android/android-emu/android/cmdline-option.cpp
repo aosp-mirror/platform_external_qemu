@@ -57,8 +57,8 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
     memset( opt, 0, sizeof *opt );
 
     while (nargs > 0) {
-        char*  arg;
-        char   arg2_tab[64], *arg2 = arg2_tab;
+        const char* arg;
+        char arg2_tab[64], *arg2 = arg2_tab;
 
         /* process @<name> as a special exception meaning
          * '-avd <name>'
