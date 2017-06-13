@@ -72,6 +72,24 @@
     },
     {
       "key": {
+        "uuid": "e54670e9_5d565d1e",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-13T19:51:01Z",
+      "side": 1,
+      "message": "I don\u0027t think the approach is wrong, it is more that the cognitive load on a newbie to this code is higher when there is just this lambda.\n\nIt took me a while to figure out what the intent was of the lambda, especially since the lambdas that are passed into the function are different depending on the context.",
+      "parentUuid": "4f604126_124ebae7",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea625323_b2018cfa",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 4
@@ -107,6 +125,24 @@
     },
     {
       "key": {
+        "uuid": "f3a0a809_f0c2bd75",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-13T19:51:01Z",
+      "side": 1,
+      "message": "Ok. So can the opposite happen as well? Where we read the page and another thread tries to fill it and tries to delete our stack pointer?",
+      "parentUuid": "b0516faa_53cdbfd3",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88b4a350_be73fa67",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 4
@@ -136,6 +172,24 @@
       "side": 1,
       "message": "getByte() reads a single byte, so we don\u0027t need to _trust_ input here.\nOn the other hand, later we read the actual memory pages from the disk - if we don\u0027t trust the input then we\u0027re totally screwed here",
       "parentUuid": "88b4a350_be73fa67",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e5932e2a_7c8e572e",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-13T19:51:01Z",
+      "side": 1,
+      "message": "Oh yeah. (hangs down head)",
+      "parentUuid": "1234dce7_1d416713",
       "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -241,6 +295,24 @@
       "side": 1,
       "message": "well, it\u0027s a matter of preference. I strongly prefer for(;;) for infinite loops (mostly because of different compilers giving warnings about constant loop condition in while(1)",
       "parentUuid": "3c8982d9_63b63ad1",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b79a449b_0a5041e9",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-13T19:51:01Z",
+      "side": 1,
+      "message": "Ok.",
+      "parentUuid": "8812084c_37bc023d",
       "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
