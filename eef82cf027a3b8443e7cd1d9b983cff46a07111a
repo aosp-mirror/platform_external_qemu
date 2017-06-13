@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ef91758a_e93b7294",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-13T18:19:04Z",
+      "side": 1,
+      "message": "nit: could you please add a comment explaining that Chrome OS needs some key codes remapping? Otherwise it\u0027s quite hard to understand the purpose of the function",
+      "range": {
+        "startLine": 121,
+        "startChar": 11,
+        "endLine": 121,
+        "endChar": 23
+      },
+      "revId": "eef82cf027a3b8443e7cd1d9b983cff46a07111a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
