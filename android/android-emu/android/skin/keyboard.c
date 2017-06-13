@@ -11,6 +11,7 @@
 */
 #include "android/skin/keyboard.h"
 
+#include "android/globals.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode.h"
 #include "android/skin/keycode-buffer.h"
@@ -117,6 +118,25 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     return -1;
 }
 
+static int map_cros_key(int code) {
+    if (!android_hw->hw_arc) return -1;
+    if ((code >= LINUX_KEY_F1 && code <= LINUX_KEY_F10) ||
+        code == LINUX_KEY_ENTER) return code;
+    switch (code) {
+    case LINUX_KEY_VOLUMEUP:
+        return LINUX_KEY_F10;
+    case LINUX_KEY_VOLUMEDOWN:
+        return LINUX_KEY_F9;
+    case LINUX_KEY_BACK:
+        return LINUX_KEY_F1;
+    case LINUX_KEY_HOME:
+        return LINUX_KEY_LEFTMETA;
+    case KEY_APPSWITCH:
+        return LINUX_KEY_F5;
+    }
+    return -1;
+}
+
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
@@ -158,7 +178,8 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
+        if ((code = map_cros_key(code)) > 0 ||
+            code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
             code == LINUX_KEY_BACK || code == LINUX_KEY_POWER ||
             code == LINUX_KEY_BACKSPACE || code == LINUX_KEY_SOFT1 ||
             code == LINUX_KEY_CENTER || code == LINUX_KEY_REWIND ||
