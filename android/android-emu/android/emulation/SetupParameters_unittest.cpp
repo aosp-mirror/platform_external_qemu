@@ -38,10 +38,16 @@ const AvdSettings kAvdGingerbreadX86 = {9, "x86", "ttyS", false};
 const AvdSettings kAvdIcsArm = {14, "arm", "ttyS", false};
 const AvdSettings kAvdIcsX86 = {14, "x86", "ttyS", false};
 const AvdSettings kAvdMarshmallowArm = {23, "arm", "ttyAMA", true};
-const AvdSettings kAvdMarshmallowArm64 = {23, "arm64", "ttyAMA", true};
 const AvdSettings kAvdMarshmallowX86 = {23, "x86", "ttyGF", true};
-const AvdSettings kAvdMarshmallowX86_64 = {23, "x86_64", "ttyGF", true};
 const AvdSettings kAvdMarshmallowMips = {23, "mips", "ttyS", true};
+const AvdSettings kAvdNougatArm = {25, "arm", "ttyAMA", true};
+const AvdSettings kAvdNougatArm64 = {25, "arm64", "ttyAMA", true};
+const AvdSettings kAvdNougatX86 = {25, "x86", "ttyGF", true};
+const AvdSettings kAvdNougatX86_64 = {25, "x86_64", "ttyGF", true};
+const AvdSettings kAvdOcArm = {26, "arm", "ttyAMA", true};
+const AvdSettings kAvdOcArm64 = {26, "arm64", "ttyAMA", true};
+const AvdSettings kAvdOcX86 = {26, "x86", "ttyGF", true};
+const AvdSettings kAvdOcX86_64 = {26, "x86_64", "ttyGF", true};
 
 }  // namespace
 
@@ -162,28 +168,6 @@ TEST(SetupParameters, setupVirtualSerialPorts) {
                     "-serial foo-serial", &kAvdMarshmallowArm, true, true,
             },
 
-            // Marshmallow ARM64
-            {
-                    "keep_bootcon earlyprintk=ttyAMA0 android.qemud=1 "
-                    "console=0",
-                    "-serial null", &kAvdMarshmallowArm64, false, false,
-            },
-            {
-                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
-                    "android.qemud=1",
-                    "-serial foo-serial", &kAvdMarshmallowArm64, true, false,
-            },
-            {
-                    "keep_bootcon earlyprintk=ttyAMA0 "
-                    "androidboot.console=ttyAMA0 android.qemud=1 console=0",
-                    "-serial foo-serial", &kAvdMarshmallowArm64, false, true,
-            },
-            {
-                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
-                    "androidboot.console=ttyAMA0 android.qemud=1",
-                    "-serial foo-serial", &kAvdMarshmallowArm64, true, true,
-            },
-
             // Marshmallow X86
             {
                     "android.qemud=1 console=0", "-serial null",
@@ -201,25 +185,6 @@ TEST(SetupParameters, setupVirtualSerialPorts) {
                     "console=ttyGF0,38400 androidboot.console=ttyGF0 "
                     "android.qemud=1",
                     "-serial foo-serial", &kAvdMarshmallowX86, true, true,
-            },
-
-            // Marshmallow X86_64
-            {
-                    "android.qemud=1 console=0", "-serial null",
-                    &kAvdMarshmallowX86_64, false, false,
-            },
-            {
-                    "console=ttyGF0,38400 android.qemud=1",
-                    "-serial foo-serial", &kAvdMarshmallowX86_64, true, false,
-            },
-            {
-                    "androidboot.console=ttyGF0 android.qemud=1 console=0",
-                    "-serial foo-serial", &kAvdMarshmallowX86_64, false, true,
-            },
-            {
-                    "console=ttyGF0,38400 androidboot.console=ttyGF0 "
-                    "android.qemud=1",
-                    "-serial foo-serial", &kAvdMarshmallowX86_64, true, true,
             },
 
             // Marshmallow MIPS
@@ -240,6 +205,170 @@ TEST(SetupParameters, setupVirtualSerialPorts) {
                     "android.qemud=1",
                     "-serial foo-serial", &kAvdMarshmallowMips, true, true,
             },
+            // Nougat ARM
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 android.qemud=1 "
+                    "console=0",
+                    "-serial null", &kAvdNougatArm, false, false,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatArm, true, false,
+            },
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdNougatArm, false, true,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatArm, true, true,
+            },
+
+            // Nougat ARM64
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 android.qemud=1 "
+                    "console=0",
+                    "-serial null", &kAvdNougatArm64, false, false,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatArm64, true, false,
+            },
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdNougatArm64, false, true,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatArm64, true, true,
+            },
+
+            // Nougat X86
+            {
+                    "android.qemud=1 console=0", "-serial null",
+                    &kAvdNougatX86, false, false,
+            },
+            {
+                    "console=ttyGF0,38400 android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatX86, true, false,
+            },
+            {
+                    "androidboot.console=ttyGF0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdNougatX86, false, true,
+            },
+            {
+                    "console=ttyGF0,38400 androidboot.console=ttyGF0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatX86, true, true,
+            },
+
+            // Nougat X86_64
+            {
+                    "android.qemud=1 console=0", "-serial null",
+                    &kAvdNougatX86_64, false, false,
+            },
+            {
+                    "console=ttyGF0,38400 android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatX86_64, true, false,
+            },
+            {
+                    "androidboot.console=ttyGF0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdNougatX86_64, false, true,
+            },
+            {
+                    "console=ttyGF0,38400 androidboot.console=ttyGF0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdNougatX86_64, true, true,
+            },
+
+            // Oc ARM
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 android.qemud=1 "
+                    "console=0",
+                    "-serial null", &kAvdOcArm, false, false,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdOcArm, true, false,
+            },
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdOcArm, false, true,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1",
+                    "-serial foo-serial", &kAvdOcArm, true, true,
+            },
+
+            // Oc ARM64
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 android.qemud=1 "
+                    "console=0",
+                    "-serial null", &kAvdOcArm64, false, false,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdOcArm64, true, false,
+            },
+            {
+                    "keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdOcArm64, false, true,
+            },
+            {
+                    "console=ttyAMA0,38400 keep_bootcon earlyprintk=ttyAMA0 "
+                    "androidboot.console=ttyAMA0 android.qemud=1",
+                    "-serial foo-serial", &kAvdOcArm64, true, true,
+            },
+
+            // Oc X86
+            {
+                    "android.qemud=1 console=0", "-serial null",
+                    &kAvdOcX86, false, false,
+            },
+            {
+                    "console=ttyGF0,38400 android.qemud=1",
+                    "-serial foo-serial", &kAvdOcX86, true, false,
+            },
+            {
+                    "androidboot.console=ttyGF0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdOcX86, false, true,
+            },
+            {
+                    "console=ttyGF0,38400 androidboot.console=ttyGF0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdOcX86, true, true,
+            },
+
+            // Oc X86_64
+            {
+                    "android.qemud=1 console=0", "-serial null",
+                    &kAvdOcX86_64, false, false,
+            },
+            {
+                    "console=ttyGF0,38400 android.qemud=1",
+                    "-serial foo-serial", &kAvdOcX86_64, true, false,
+            },
+            {
+                    "androidboot.console=ttyGF0 android.qemud=1 console=0",
+                    "-serial foo-serial", &kAvdOcX86_64, false, true,
+            },
+            {
+                    "console=ttyGF0,38400 androidboot.console=ttyGF0 "
+                    "android.qemud=1",
+                    "-serial foo-serial", &kAvdOcX86_64, true, true,
+            },
+
     };
     for (const auto& data : kData) {
         ParameterList kernelParams;
