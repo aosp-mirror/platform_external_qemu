@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "225cdeb4_639cd0b2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 22
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-13T21:39:03Z",
+      "side": 1,
+      "message": "That\u0027s weird...",
+      "revId": "3f00ce05248d8b0c650e24dfda8d1c1a6994b812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ad632f7_6b1c387a",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 22
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-13T21:39:03Z",
+      "side": 1,
+      "message": "Are we still able to run on Mountain Lion? Testers only run on El Capitain :-(",
+      "revId": "3f00ce05248d8b0c650e24dfda8d1c1a6994b812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
