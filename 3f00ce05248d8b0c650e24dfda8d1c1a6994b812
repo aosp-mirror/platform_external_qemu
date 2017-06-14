@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "97f9b260_67d29cb3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 22
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-14T15:48:27Z",
+      "side": 1,
+      "message": "Yeah. console.c is not the only file affected by this, the console unittests are too and joshuaduong@ has had problems with it too. I guess with new clang, the problem got worse.",
+      "parentUuid": "225cdeb4_639cd0b2",
+      "revId": "3f00ce05248d8b0c650e24dfda8d1c1a6994b812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5ad632f7_6b1c387a",
         "filename": "android/scripts/gen-android-sdk-toolchain.sh",
         "patchSetId": 22
@@ -30,6 +48,24 @@
       "writtenOn": "2017-06-13T21:39:03Z",
       "side": 1,
       "message": "Are we still able to run on Mountain Lion? Testers only run on El Capitain :-(",
+      "revId": "3f00ce05248d8b0c650e24dfda8d1c1a6994b812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a434de0c_095189b4",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 22
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-14T15:48:27Z",
+      "side": 1,
+      "message": "I doubt that works anymore with this new SDK business, it\u0027s also hard for me to access a machine with it to check :/",
+      "parentUuid": "5ad632f7_6b1c387a",
       "revId": "3f00ce05248d8b0c650e24dfda8d1c1a6994b812",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
