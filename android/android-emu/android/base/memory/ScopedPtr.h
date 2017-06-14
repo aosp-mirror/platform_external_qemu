@@ -78,12 +78,10 @@ using ScopedCustomPtr = std::unique_ptr<T, FuncDelete<Func>>;
 
 // A factory function that creates a scoped pointer with |deleter|
 // function used as a deleter - it is called at the scope exit.
-// Note: enable_if<> limits the scope of allowed arguments to pointers and
-//  std::nullptr_t (to allow makeCustomScopedPtr(nullptr, ...) calls).
+// Note: enable_if<> limits the scope of allowed arguments to pointers.
 template <class T,
           class Func,
-          class = enable_if_c<std::is_same<T, std::nullptr_t>::value ||
-                              std::is_pointer<T>::value>>
+          class = enable_if_c<std::is_pointer<T>::value>>
 ScopedCustomPtr<
         typename std::decay<typename std::remove_pointer<T>::type>::type,
         typename std::decay<Func>::type>
