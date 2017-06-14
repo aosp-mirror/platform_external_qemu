@@ -16,7 +16,10 @@
 #include "android/featurecontrol/FeatureControlImpl.h"
 
 #include "android/base/StringView.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestTempDir.h"
+#include "android/base/testing/TestSystem.h"
+#include "android/cmdline-option.h"
 
 #include <gtest/gtest.h>
 
@@ -313,5 +316,59 @@ TEST_F(FeatureControlTest, setNonOverridenGuestFeatureGuestOff) {
     }
 }
 
-} // namespace featurecontrol
-} // namespace android
+TEST_F(FeatureControlTest, parseCommandLine) {
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    ParamList feature1 = {
+            (char*)FeatureControlImpl::toString(Feature::Wifi).c_str()};
+    ParamList feature2 = {
+            (char*)FeatureControlImpl::toString(Feature::EncryptUserData)
+                    .c_str()};
+    ParamList feature3 = {
+            (char*)FeatureControlImpl::toString(Feature::GLPipeChecksum)
+                    .c_str()};
+    std::string feature4str =
+            "-" + (std::string)FeatureControlImpl::toString(Feature::HYPERV);
+    ParamList feature4 = {(char*)feature4str.c_str()};
+    feature1.next = &feature2;
+    feature2.next = &feature3;
+    feature3.next = &feature4;
+    AndroidOptions options = {};
+    options.feature = &feature1;
+    android_cmdLineOptions = &options;
+    auto undoCommandLine = android::base::makeCustomScopedPtr(
+            &android_cmdLineOptions,
+            [](const AndroidOptions** opts) { *opts = nullptr; });
+    loadAllIni();
+
+    EXPECT_TRUE(isEnabled(Feature::Wifi));
+    EXPECT_TRUE(isOverridden(Feature::Wifi));
+    EXPECT_TRUE(isEnabled(Feature::EncryptUserData));
+    EXPECT_TRUE(isOverridden(Feature::EncryptUserData));
+    EXPECT_TRUE(isEnabled(Feature::GLPipeChecksum));
+    EXPECT_TRUE(isOverridden(Feature::GLPipeChecksum));
+    EXPECT_FALSE(isEnabled(Feature::HYPERV));
+    EXPECT_TRUE(isOverridden(Feature::HYPERV));
+}
+
+TEST_F(FeatureControlTest, parseEnvironment) {
+    android::base::TestSystem system("/usr", 64, "/");
+    system.envSet(
+            "ANDROID_EMULATOR_FEATURES",
+            android::base::StringFormat(
+                    "%s,%s,-%s", FeatureControlImpl::toString(Feature::Wifi),
+                    FeatureControlImpl::toString(Feature::EncryptUserData),
+                    FeatureControlImpl::toString(Feature::GLPipeChecksum)));
+    writeDefaultIniHost(mAllOffIni);
+    writeDefaultIniGuest(mAllOffIniGuestOnly);
+    loadAllIni();
+    EXPECT_TRUE(isEnabled(Feature::Wifi));
+    EXPECT_TRUE(isOverridden(Feature::Wifi));
+    EXPECT_TRUE(isEnabled(Feature::EncryptUserData));
+    EXPECT_TRUE(isOverridden(Feature::EncryptUserData));
+    EXPECT_FALSE(isEnabled(Feature::GLPipeChecksum));
+    EXPECT_TRUE(isOverridden(Feature::GLPipeChecksum));
+}
+
+}  // namespace featurecontrol
+}  // namespace android

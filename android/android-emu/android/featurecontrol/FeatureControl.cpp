@@ -64,5 +64,9 @@ std::vector<Feature> getEnabled() {
     return FeatureControlImpl::get().getEnabled();
 }
 
+void initialize() {
+    FeatureControlImpl::create();
+}
+
 }  // namespace featurecontrol
 }  // namespace android

@@ -17,9 +17,11 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+#include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/globals.h"
+#include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/system.h"
 
@@ -182,6 +184,28 @@ void FeatureControlImpl::init(android::base::StringView defaultIniHostPath,
 #undef FEATURE_CONTROL_ITEM
         }
     }
+
+    // Enumerate the command line and environment variables to add overrides.
+    const auto envVar =
+            android::base::System::get()->envGet("ANDROID_EMULATOR_FEATURES");
+    if (!envVar.empty()) {
+        parseAndApplyOverrides(envVar);
+    }
+    if (android_cmdLineOptions) {
+        if (ParamList* feature = android_cmdLineOptions->feature) {
+            do {
+                parseAndApplyOverrides(feature->param);
+                feature = feature->next;
+            } while (feature);
+        }
+    }
+}
+
+void FeatureControlImpl::create() {
+    if (s_featureControl.hasInstance()) {
+        LOG(ERROR) << "Feature control already exists in create() call";
+    }
+    (void)s_featureControl.get();
 }
 
 FeatureControlImpl::FeatureControlImpl() {
@@ -304,6 +328,32 @@ void FeatureControlImpl::setGuestTriedEnable(Feature feature) {
     opt.defaultVal = true;
     opt.currentVal = true;
     opt.isOverridden = false;
+}
+
+void FeatureControlImpl::parseAndApplyOverrides(base::StringView csv) {
+    for (auto it = csv.begin(); it < csv.end();) {
+        bool enable = true;
+        if (*it == '-') {
+            enable = false;
+            ++it;
+        }
+        auto itEnd = std::find(it, csv.end(), ',');
+        if (it != itEnd) {
+            auto feature = fromString({it, itEnd});
+            if (feature == Feature::Feature_n_items) {
+                dwarning("[FeatureControl] Bad feature name: '%s'",
+                         std::string(it, itEnd).c_str());
+            } else {
+                setEnabledOverride(feature, enable);
+                VERBOSE_PRINT(
+                        init,
+                        "[FeatureControl] Feature '%s' (%d) state set to %s",
+                        std::string(it, itEnd).c_str(), (int)feature,
+                        (enable ? "enabled" : "disabled"));
+            }
+        }
+        it = itEnd + 1;
+    }
 }
 
 std::vector<Feature> FeatureControlImpl::getEnabledNonOverride() const {
