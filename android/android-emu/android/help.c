@@ -1482,6 +1482,7 @@ help_feature(stralloc_t* out)
     PRINTF(
     "  Force-enable or disable an emulator feature by name. Also use the\n"
     "  ANDROID_EMULATOR_FEATURES environment variable for the same purpose.\n\n"
+    "  E.g. \"-feature HAXM,-HVF -feature Wifi\""
     );
 }
 
