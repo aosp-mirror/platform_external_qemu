@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf3aca62_c519ef0a",
+        "filename": "android/android-emu/android/help.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1483,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-14T15:39:12Z",
+      "side": 1,
+      "message": "Provide an example usage in help message?",
+      "range": {
+        "startLine": 1483,
+        "startChar": 0,
+        "endLine": 1483,
+        "endChar": 75
+      },
+      "revId": "8b1d370a896a860d1a774e1fb78e4ccfbc515386",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
