@@ -181,6 +181,8 @@ OPT_FLAG(skip_adb_auth, "Skip adb authentication dialogue")
 OPT_FLAG(metrics_to_console, "Enable usage metrics and print the messages to stdout")
 OPT_PARAM(metrics_to_file, "<file>", "Enable usage metrics and write the messages into specified file")
 
+OPT_LIST(feature, "<name|-name>", "Force-enable or disable (-name) the features")
+
 #undef CFG_FLAG
 #undef CFG_PARAM
 #undef OPT_FLAG

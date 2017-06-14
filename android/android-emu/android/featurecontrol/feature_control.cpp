@@ -12,6 +12,10 @@
 #include "feature_control.h"
 #include "FeatureControl.h"
 
+void feature_initialize() {
+    android::featurecontrol::initialize();
+}
+
 bool feature_is_enabled(Feature feature) {
     auto value = static_cast<android::featurecontrol::Feature>(feature);
     return android::featurecontrol::isEnabled(value);

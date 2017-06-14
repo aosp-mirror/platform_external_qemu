@@ -145,9 +145,9 @@ TEST(CmdLineOptions, parseDebug) {
 
     // Make sure the android_verbose debug flags are restored even if any test
     // case fails.
-    const auto oldFlags = android_verbose;
-    auto restoreFlags = android::base::makeCustomScopedPtr(nullptr,
-        [oldFlags](std::nullptr_t*) { android_verbose = oldFlags; });
+    auto oldFlags = android_verbose;
+    auto restoreFlags = android::base::makeCustomScopedPtr(&oldFlags,
+        [](const uint64_t* oldFlags) { android_verbose = *oldFlags; });
 
     for (const auto& data : kData) {
         android_verbose = data.initialFlags;

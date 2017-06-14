@@ -33,6 +33,9 @@ namespace featurecontrol {
 // To add new features, please (1) add it to android/data/advancedFeatures.ini
 // (2) add a new line to FeatureControlDef.h, in the following format:
 // FEATURE_CONTROL_ITEM(YOUR_FEATURE_NAME)
+
+void initialize();
+
 bool isEnabled(Feature feature);
 void setEnabledOverride(Feature feature, bool isEnabled);
 void resetEnabledToDefault(Feature feature);

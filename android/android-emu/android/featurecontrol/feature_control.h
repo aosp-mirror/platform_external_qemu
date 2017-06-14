@@ -19,6 +19,9 @@ ANDROID_BEGIN_HEADER
 
 #include "features_c.h"
 
+// Call this function first to initialize the feature control.
+void feature_initialize();
+
 // Get the access rules given by |name| if they exist, otherwise returns NULL
 bool feature_is_enabled(Feature feature);
 void feature_set_enabled_override(Feature feature, bool isEnabled);

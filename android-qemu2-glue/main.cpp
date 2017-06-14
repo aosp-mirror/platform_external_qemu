@@ -475,6 +475,7 @@ extern "C" int main(int argc, char **argv) {
     // Must be done after emulator_parseCommonCommandLineOptions,
     // since that calls createAVD which sets up critical info needed
     // by featurecontrol component itself.
+    feature_initialize();
     feature_update_from_server();
 
     // just because we know that we're in the new emulator as we got here

@@ -257,7 +257,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-service.c \
     android/camera/camera-format-converters.c \
     android/car.cpp \
-    android/cmdline-option.c \
+    android/cmdline-option.cpp \
     android/CommonReportedInfo.cpp \
     android/console.c \
     android/console_auth.cpp \
