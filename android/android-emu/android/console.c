@@ -2102,6 +2102,39 @@ do_event_codes( ControlClient  client, char*  args )
     return 0;
 }
 
+static int do_event_mouse(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client,
+                      "KO: argument missing, try 'event mouse <x> <y> <device> "
+                      "<buttonstate>'\r\n");
+        return -1;
+    }
+
+    int mouseEvent[4] = {0}, idx = 0;
+    const char delim[] = " ";
+    char *save_ptr, *token;
+
+    token = strtok_r(args, delim, &save_ptr);
+    while (token && idx < 4) {
+        if (1 != sscanf(token, "%d", &mouseEvent[idx])) {
+            break;
+        }
+        idx++;
+        token = strtok_r(NULL, delim, &save_ptr);
+    }
+
+    if (idx != 4 || token) {
+        do_control_write(
+                client,
+                "KO: Invalid arguments. Make sure you provide 4 integers.\r\n");
+        return -1;
+    }
+
+    client->global->user_event_agent->sendMouseEvent(
+            mouseEvent[0], mouseEvent[1], mouseEvent[2], mouseEvent[3]);
+    return 0;
+}
+
 static int
 do_event_text( ControlClient  client, char*  args )
 {
@@ -2155,6 +2188,21 @@ static const CommandDefRec  event_commands[] =
     "message. <message> must be an utf-8 string. Unicode points will be reverse-mapped\r\n"
     "according to the current device keyboard. Unsupported characters will be discarded\r\n"
     "silently\r\n", NULL, do_event_text, NULL },
+
+    { "mouse", "simulate a mouse event",
+      "'event mouse <x> <y> <device> <buttonstate>' allows you to genenarate a mouse event\r\n"
+      "at x, y with the given buttonstate using the given device. All values are integers.\r\n"
+      "Where device:
+      "  0  = touch screen\r\n"
+      "  1  = trackball\r\n"
+      "And buttonstate is a mask where:\r\n"
+      "  0  = No buttons\r\n"
+      "  1  = Left button\r\n"
+      "  2  = Right button\r\n"
+      "  4  = Middle button\r\n"
+      "  8  = Wheel up\r\n"
+      "  16 = Wheel down\r\n",
+      NULL, do_event_mouse, NULL},
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
