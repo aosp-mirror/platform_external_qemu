@@ -143,6 +143,24 @@
     },
     {
       "key": {
+        "uuid": "869fb124_0eba7e10",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-14T18:14:19Z",
+      "side": 1,
+      "message": "No - fillPageData() is only called on a single thread - otherwise there are other things that could go wrong, e.g. syscall for filling data in kernel could also be non thread-safe\n\nThere\u0027s a separate reader thread that reads RAM pages from disk and sends them for filling to the same dedicated thread - that\u0027s why we need to take care of allocation and reading safety, but not filling",
+      "parentUuid": "f3a0a809_f0c2bd75",
+      "revId": "0ddc70d1d0c46f372c40ae7f3a2827676af586f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88b4a350_be73fa67",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 4
