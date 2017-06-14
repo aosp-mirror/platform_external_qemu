@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2b445c2_d27fded3",
+        "filename": "android/configure.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 1096,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-14T20:20:52Z",
+      "side": 1,
+      "message": "please also update package-release.sh",
+      "range": {
+        "startLine": 1096,
+        "startChar": 33,
+        "endLine": 1096,
+        "endChar": 55
+      },
+      "revId": "599b9e3b7337d44d093ae3e5081acc0eb6c96a6b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
