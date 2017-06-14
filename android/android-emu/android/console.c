@@ -2102,6 +2102,31 @@ do_event_codes( ControlClient  client, char*  args )
     return 0;
 }
 
+static int do_event_mouse(ControlClient client, char* args) {
+    if (!args) {
+        control_write(client,
+                      "KO: argument missing, try 'event mouse <x> <y> <device> "
+                      "<buttonstate>'\r\n");
+        return -1;
+    }
+
+    int x, y, dev, btn, len;
+    // Note that the returned arg count from sscanf when %n is
+    // used is not well defined, so we will use strlen to determine
+    // if we were able to consume all parameters.
+    sscanf(args, "%d %d %d %d%n", &x, &y, &dev, &btn, &len);
+
+    if (len != strlen(args)) {
+        do_control_write(
+                client,
+                "KO: Invalid arguments. Make sure you provide 4 integers.\r\n");
+        return -1;
+    }
+
+    client->global->user_event_agent->sendMouseEvent(x, y, dev, btn);
+    return 0;
+}
+
 static int
 do_event_text( ControlClient  client, char*  args )
 {
@@ -2155,6 +2180,21 @@ static const CommandDefRec  event_commands[] =
     "message. <message> must be an utf-8 string. Unicode points will be reverse-mapped\r\n"
     "according to the current device keyboard. Unsupported characters will be discarded\r\n"
     "silently\r\n", NULL, do_event_text, NULL },
+
+    { "mouse", "simulate a mouse event",
+      "'event mouse <x> <y> <device> <buttonstate>' allows you to genenarate a mouse event\r\n"
+      "at x, y with the given buttonstate using the given device. All values are integers.\r\n"
+      "Where device:\r\n"
+      "  0  = touch screen\r\n"
+      "  1  = trackball\r\n"
+      "And buttonstate is a mask where:\r\n"
+      "  0  = No buttons\r\n"
+      "  1  = Left button\r\n"
+      "  2  = Right button\r\n"
+      "  4  = Middle button\r\n"
+      "  8  = Wheel up\r\n"
+      "  16 = Wheel down\r\n",
+      NULL, do_event_mouse, NULL},
 
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
