@@ -48,14 +48,14 @@ bool generateRandomBytes(char* buf, size_t buf_len) {
     }
     return true;
 #else
-    ScopedStdioFile fp(fopen("/dev/urandom", "rb"));
+    ScopedStdioFile fp(fopen("/dev/random", "rb"));
     if (fp.get() == nullptr) {
         E("Can't open /dev/urandom");
         return false;
     }
     size_t err = fread(buf, 1, buf_len, fp.get());
     if (err != buf_len) {
-        E("Can't read from /dev/urandom");
+        E("Can't read from /dev/random");
         return false;
     }
     return true;
