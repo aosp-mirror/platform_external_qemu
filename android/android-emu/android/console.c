@@ -2861,6 +2861,15 @@ static const CommandDefRec main_commands[] = {
 /*****                                                                                 ******/
 /********************************************************************************************/
 /********************************************************************************************/
+static int const_time_strcmp(char* fst, char* snd, size_t size) {
+    unsigned char result = 0;
+    size_t i;
+    for(i = 0; i < size; i++) {
+      result |= fst[i] ^ snd[i];
+    }
+
+    return result; // 0 => fst == snd.
+}
 
 static int do_auth(ControlClient client, char* args) {
     if (!args) {
@@ -2875,14 +2884,24 @@ static int do_auth(ControlClient client, char* args) {
         return -1;
     }
 
-    if (0 != strcmp(auth_token, args)) {
+    /** Create a buffer that is is of the same length as the auth_token,
+        fill it with 0s and copy over the password we want to match */
+    size_t token = strlen(auth_token) + 1;
+    size_t args_len = strlen(args) + 1;
+    char* auth = (char*) malloc(token * sizeof(char));
+    memset(auth, 0, token);
+    memcpy(auth, args, token <= args_len ? token : args_len);
+
+    if (0 != const_time_strcmp(auth_token, auth, token)) {
         free(auth_token);
+        free(auth);
         control_write(client,
                       "KO: authentication token does not match "
                       "~/.emulator_console_auth_token\r\n");
         return -1;
     }
     free(auth_token);
+    free(auth);
 
     control_send_help_prompt(client);
     client->commands = main_commands;
