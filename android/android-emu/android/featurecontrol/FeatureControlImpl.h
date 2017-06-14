@@ -91,6 +91,8 @@ public:
               android::base::StringView defaultIniGuestPath,
               android::base::StringView userIniHostPath,
               android::base::StringView userIniGuestPath);
+
+    static void create();
     static FeatureControlImpl& get();
     FeatureControlImpl();
 private:
@@ -104,6 +106,11 @@ private:
     FeatureOption mGuestTriedEnabledFeatures[Feature_n_items] = {};
     void initEnabledDefault(Feature feature, bool isEnabled);
     void setGuestTriedEnable(Feature feature);
+
+    // Parse the list of overrides and apply those to the control.
+    // |overrides| - list of overrides in following format:
+    //      "[-]feature1[,[-]feature2,[...]]"
+    void parseAndApplyOverrides(base::StringView overrides);
 
     void initHostFeatureAndParseDefault(
         android::base::IniFile& defaultIniHost,

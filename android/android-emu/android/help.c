@@ -1476,6 +1476,15 @@ help_metrics_to_file(stralloc_t* out)
     );
 }
 
+static void
+help_feature(stralloc_t* out)
+{
+    PRINTF(
+    "  Force-enable or disable an emulator feature by name. Also use the\n"
+    "  ANDROID_EMULATOR_FEATURES environment variable for the same purpose.\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
