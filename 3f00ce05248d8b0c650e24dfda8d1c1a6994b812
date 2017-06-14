@@ -69,6 +69,24 @@
       "revId": "3f00ce05248d8b0c650e24dfda8d1c1a6994b812",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b31b020_7db5e3d1",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 22
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-14T16:13:44Z",
+      "side": 1,
+      "message": "I think we are all in the same boat. i filled  62617949 to track this, maybe the test team can pick this up.",
+      "parentUuid": "a434de0c_095189b4",
+      "revId": "3f00ce05248d8b0c650e24dfda8d1c1a6994b812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
