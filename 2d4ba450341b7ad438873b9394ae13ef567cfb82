@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b7421a8e_04ec12b5",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2864,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-15T17:49:21Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "1f1920fc_a9743c05",
+      "range": {
+        "startLine": 2864,
+        "startChar": 29,
+        "endLine": 2864,
+        "endChar": 46
+      },
+      "revId": "2d4ba450341b7ad438873b9394ae13ef567cfb82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "24b0e2ae_e59f5a35",
         "filename": "android/android-emu/android/console.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-06-15T17:47:15Z",
       "side": 1,
       "message": "why unsigned? I\u0027d prefer to have the whole int here just to make it simpler",
+      "range": {
+        "startLine": 2865,
+        "startChar": 4,
+        "endLine": 2865,
+        "endChar": 12
+      },
+      "revId": "2d4ba450341b7ad438873b9394ae13ef567cfb82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0d705dc_1f08b35c",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2865,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-15T17:49:21Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "24b0e2ae_e59f5a35",
       "range": {
         "startLine": 2865,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "5f99bd1a_b22e2ab3",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2869,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-15T17:49:21Z",
+      "side": 1,
+      "message": "That\u0027s madness. Will validate.",
+      "parentUuid": "a70b9f27_9e421004",
+      "range": {
+        "startLine": 2867,
+        "startChar": 0,
+        "endLine": 2869,
+        "endChar": 5
+      },
+      "revId": "2d4ba450341b7ad438873b9394ae13ef567cfb82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "059e087e_686be0bf",
         "filename": "android/android-emu/android/console.c",
         "patchSetId": 2
@@ -82,6 +154,30 @@
       "writtenOn": "2017-06-15T17:47:15Z",
       "side": 1,
       "message": "nit: please add a reason (protection from timing attack) into the comment, otherwise it looks like overly complicated piece of nonsense",
+      "range": {
+        "startLine": 2887,
+        "startChar": 0,
+        "endLine": 2888,
+        "endChar": 70
+      },
+      "revId": "2d4ba450341b7ad438873b9394ae13ef567cfb82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df1e4957_02159f86",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2888,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-15T17:49:21Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "059e087e_686be0bf",
       "range": {
         "startLine": 2887,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "248b9734_058c44a2",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2891,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-15T17:49:21Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "94ab58e3_26d5d7d4",
+      "range": {
+        "startLine": 2891,
+        "startChar": 40,
+        "endLine": 2891,
+        "endChar": 52
+      },
+      "revId": "2d4ba450341b7ad438873b9394ae13ef567cfb82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "89acc7dd_b5cd0ffc",
         "filename": "android/android-emu/android/console.c",
         "patchSetId": 2
@@ -128,6 +248,30 @@
       "writtenOn": "2017-06-15T17:47:15Z",
       "side": 1,
       "message": "nit: calloc() zeroes the memory out in a single call",
+      "range": {
+        "startLine": 2892,
+        "startChar": 4,
+        "endLine": 2892,
+        "endChar": 27
+      },
+      "revId": "2d4ba450341b7ad438873b9394ae13ef567cfb82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbb12e82_6ce32211",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2892,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-15T17:49:21Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "89acc7dd_b5cd0ffc",
       "range": {
         "startLine": 2892,
         "startChar": 4,
