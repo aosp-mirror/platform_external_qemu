@@ -236,7 +236,7 @@ OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STRIP=yes
-OPTION_CRASHUPLOAD=
+OPTION_CRASHUPLOAD=NONE
 OPTION_MINGW=no
 OPTION_GLES=
 OPTION_SDK_REV=
@@ -304,9 +304,9 @@ for opt do
   ;;
   --no-strip) OPTION_STRIP=no
   ;;
-  --crash-staging) OPTION_CRASHUPLOAD=staging
+  --crash-staging) OPTION_CRASHUPLOAD=STAGING
   ;;
-  --crash-prod) OPTION_CRASHUPLOAD=prod
+  --crash-prod) OPTION_CRASHUPLOAD=PROD
   ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
@@ -567,25 +567,32 @@ probe_prebuilts_dir () {
     eval $2=\$PREBUILTS_DIR
 }
 
-###
-###  Zlib probe
-###
-probe_prebuilts_dir "Zlib" ZLIB_PREBUILTS_DIR qemu-android-deps
+function probe_and_set() {
+  local ADD=$1
+  local PREFIX=$2
+  local LIST=$3
 
-###
-###  Libpng probe
-###
-probe_prebuilts_dir "Libpng" LIBPNG_PREBUILTS_DIR qemu-android-deps
+  for PROBE in $LIST; do
+    # We have 2 standards when it comes to prebuilts.. So we need 
+    # to differentiate between them
+    if [ "$ADD" == "add" ]; then
+      probe_prebuilts_dir "$PROBE" CONFIG_VALUE "$PREFIX/$PROBE"
+    else
+      probe_prebuilts_dir "$PROBE" CONFIG_VALUE "$PREFIX"
+    fi
 
-###
-###  Libsdl2 probe
-###
-probe_prebuilts_dir "Libsdl2" LIBSDL2_PREBUILTS_DIR qemu-android-deps
+    # Create the variable {$PROBE}_PREBUILTS_DIR with the proper config.
+    CONFIG_OPTION=$(echo $PROBE |  tr '[:lower:]' '[:upper:]')_PREBUILTS_DIR
+    printf -v $CONFIG_OPTION "$CONFIG_VALUE"
+  done
 
-###
-###  Libxml2 probe
-###
-probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
+}
+
+# Probe common prebuilt libraries.
+probe_and_set add common "e2fsprogs ffmpeg x264 libvpx libxml2 lz4 ANGLE"
+
+# Probe and set the qemu-android-deps libraries
+probe_and_set ignore qemu-android-deps "zlib libpng libsdl2"
 
 ###
 ###  Libcurl probe
@@ -593,19 +600,9 @@ probe_prebuilts_dir "Libxml2" LIBXML2_PREBUILTS_DIR common/libxml2
 probe_prebuilts_dir "LibCURL" LIBCURL_PREBUILTS_DIR curl
 
 ###
-###  LibANGLEtranslation probe
-###
-probe_prebuilts_dir "LibANGLEtranslation" ANGLE_TRANSLATION_PREBUILTS_DIR common/ANGLE
-
-###
 ###  Protobuf library probe
 ###
 probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
-
-###
-###  lz4 probe
-###
-probe_prebuilts_dir "lz4" LZ4_PREBUILTS_DIR common/lz4
 
 CACERTS_FILE="$PROGDIR/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
@@ -636,26 +633,6 @@ fi
 ###  Qt probe
 ###
 probe_prebuilts_dir "Qt" QT_PREBUILTS_DIR qt
-
-###
-###  e2fsprogs probe
-###
-probe_prebuilts_dir "e2fsprogs" E2FSPROGS_PREBUILTS_DIR common/e2fsprogs
-
-###
-###  ffmpeg probe
-###
-probe_prebuilts_dir "ffmpeg" FFMPEG_PREBUILTS_DIR common/ffmpeg
-
-###
-###  x264 probe
-###
-probe_prebuilts_dir "x264" X264_PREBUILTS_DIR common/x264
-
-###
-###  libvpx probe
-###
-probe_prebuilts_dir "libxpx" LIBVPX_PREBUILTS_DIR common/libvpx
 
 # create the objs directory that is going to contain all generated files
 # including the configuration ones
@@ -1081,7 +1058,7 @@ echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBSDL2_PREBUILTS_DIR := $LIBSDL2_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
-echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_TRANSLATION_PREBUILTS_DIR" >> $config_mk
+echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
@@ -1110,13 +1087,9 @@ if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "BUILD_GENERATE_SYMBOLS := true" >> $config_mk
     echo "" >> $config_mk
 fi
-if [ "$OPTION_CRASHUPLOAD" = "prod" ]; then
-    echo "EMULATOR_CRASHUPLOAD := PROD" >> $config_mk
-elif [ "$OPTION_CRASHUPLOAD" = "staging" ]; then
-    echo "EMULATOR_CRASHUPLOAD := STAGING" >> $config_mk
-else
-    echo "EMULATOR_CRASHUPLOAD := NONE" >> $config_mk
-fi
+
+echo "EMULATOR_CRASHUPLOAD := $OPTION_CRASHUPLOAD" >> $config_mk
+
 
 if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
   echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
@@ -1130,13 +1103,6 @@ fi
 ANDROID_SDK_TOOLS_CL_SHA1=$( git log -n 1 --pretty=format:"%H" )
 if [ "$ANDROID_SDK_TOOLS_CL_SHA1" ] ; then
   echo "ANDROID_SDK_TOOLS_CL_SHA1 := $ANDROID_SDK_TOOLS_CL_SHA1" >> $config_mk
-fi
-
-if [ "$config_mk" = "yes" ] ; then
-    echo "" >> $config_mk
-    echo "USE_MINGW := 1" >> $config_mk
-    echo "HOST_OS   := windows" >> $config_mk
-    echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
 fi
 
 if [ -z "$OPTION_QEMU2_SRCDIR" ]; then
