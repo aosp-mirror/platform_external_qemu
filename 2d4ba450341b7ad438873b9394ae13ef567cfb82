@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "4e3d6582_0c628307",
+        "filename": "android/android-emu/android/console.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2869,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-06-15T21:35:46Z",
+      "side": 1,
+      "message": "just random thoughts: can we add a random delay in this function so that timing attach is not going to work anymore ?",
+      "parentUuid": "5f99bd1a_b22e2ab3",
+      "range": {
+        "startLine": 2867,
+        "startChar": 0,
+        "endLine": 2869,
+        "endChar": 5
+      },
+      "revId": "2d4ba450341b7ad438873b9394ae13ef567cfb82",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "059e087e_686be0bf",
         "filename": "android/android-emu/android/console.c",
         "patchSetId": 2
