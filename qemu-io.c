@@ -1,3 +1,4 @@
+fail to compile2
 /*
  * Command line utility to exercise the QEMU I/O path.
  *
