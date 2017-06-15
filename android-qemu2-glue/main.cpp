@@ -301,8 +301,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             }
             break;
         case IMAGE_TYPE_ENCRYPTION_KEY:
-            if ((android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
-                avdInfo_isEncryptionEnabledInBuild(avd)) &&
+            if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) &&
                 hw->disk_encryptionKeyPartition_path != NULL && strcmp(hw->disk_encryptionKeyPartition_path, "")) {
                 filePath = hw->disk_encryptionKeyPartition_path;
                 driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
@@ -778,8 +777,7 @@ extern "C" int main(int argc, char **argv) {
     }
 
     // create encryptionkey.img file if needed
-    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
-            avdInfo_isEncryptionEnabledInBuild(avd)) {
+    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
                 derror("Encryption is requested but failed to create encrypt partition.");
