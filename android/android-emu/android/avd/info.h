@@ -370,9 +370,4 @@ const char* avdInfo_getTag(const AvdInfo* i);
  */
 const char* avdInfo_getSdCardSize(const AvdInfo* i);
 
-/* return 1 if it is build environment and encryption is enabled */
-/* 0 otherwise */
-
-int avdInfo_isEncryptionEnabledInBuild(const AvdInfo* i);
-
 ANDROID_END_HEADER
