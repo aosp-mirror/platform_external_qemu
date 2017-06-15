@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f2d8c69_d915431d",
+        "filename": "android/android-emu/android/utils/Random.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-06-15T05:58:49Z",
+      "side": 1,
+      "message": "nit: s/urandom/random\nis it guaranteed to succeed when reading buf_len bytes from /dev/random ?",
+      "range": {
+        "startLine": 53,
+        "startChar": 27,
+        "endLine": 53,
+        "endChar": 34
+      },
+      "revId": "3db13d49aeb1201c3208e373e059b5c503d1989e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
