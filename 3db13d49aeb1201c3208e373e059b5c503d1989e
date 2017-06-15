@@ -22,6 +22,30 @@
       "revId": "3db13d49aeb1201c3208e373e059b5c503d1989e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07205592_3923fccf",
+        "filename": "android/android-emu/android/utils/Random.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-15T16:45:45Z",
+      "side": 1,
+      "message": "Yes. However this call might be blocking if there is insufficient entropy.\n\nHere\u0027s why we should use /dev/random: https://www.usenix.org/system/files/conference/usenixsecurity12/sec12-final228.pdf\n\nAnd here\u0027s an overview of why not: https://crypto.stackexchange.com/questions/41595/when-to-use-dev-random-over-dev-urandom-in-linux\n\nI think I\u0027m going to revert this. Thanks!",
+      "parentUuid": "8f2d8c69_d915431d",
+      "range": {
+        "startLine": 53,
+        "startChar": 27,
+        "endLine": 53,
+        "endChar": 34
+      },
+      "revId": "3db13d49aeb1201c3208e373e059b5c503d1989e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
