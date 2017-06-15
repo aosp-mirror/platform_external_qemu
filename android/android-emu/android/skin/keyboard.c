@@ -121,27 +121,46 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
 /* If it's running chrome os images, remapping key code here so
  * the emulator toolbar also does the "expected" thing for chrome os.
  */
-static int map_cros_key(int* code) {
+static int map_cros_key(SkinKeyboard*  kb, int code, int down) {
     if (!android_hw->hw_arc) return -1;
-    if (*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) return 0;
-    switch (*code) {
+    int mod = 0;
+    int count = 0;
+    int keys[2];
+    if (code >= LINUX_KEY_F1 && code <= LINUX_KEY_F10) goto send;
+    switch (code) {
+    case LINUX_KEY_SYSRQ:
+        mod =  LINUX_KEY_LEFTCTRL;
+        code = LINUX_KEY_F5;
+        fprintf(stderr, "got print\n");
+        goto send;
     case LINUX_KEY_VOLUMEUP:
-        *code = LINUX_KEY_F10;
-        return 0;
+        code = LINUX_KEY_F10;
+        goto send;
     case LINUX_KEY_VOLUMEDOWN:
-        *code = LINUX_KEY_F9;
-        return 0;
+        code = LINUX_KEY_F9;
+        goto send;
     case LINUX_KEY_BACK:
-        *code = LINUX_KEY_F1;
-        return 0;
+        code = LINUX_KEY_F1;
+        goto send;
     case LINUX_KEY_HOME:
-        *code = LINUX_KEY_LEFTMETA;
-        return 0;
+        code = LINUX_KEY_LEFTMETA;
+        goto send;
     case KEY_APPSWITCH:
-        *code = LINUX_KEY_F5;
-        return 0;
+        code = LINUX_KEY_F5;
+        goto send;
     }
     return -1;
+send:
+    // If there is a key modifier (such as ctrl ) and it's a press event, we
+    // need to send out modifier key first.
+    keys[count++] = (down && mod) ? mod : code;
+    if (mod) keys[count++] = down ? code : mod;
+    int i;
+    for(i = 0; i < count; i++) {
+        skin_keyboard_add_key_event(kb, keys[i], down);
+    }
+    skin_keyboard_flush(kb);
+    return 0;
 }
 
 void
@@ -151,6 +170,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         // TODO(digit): For each Unicode value in the input text.
         const uint8_t* text = ev->u.text.text;
         const uint8_t* end = text + sizeof(ev->u.text.text);
+        fprintf(stderr, "text\n");
         while (text < end && *text) {
             uint32_t codepoint = 0;
             int len = android_utf8_decode(text, end - text, &codepoint);
@@ -165,15 +185,18 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
+        fprintf(stderr, "key:%d %d\n", keycode, mod);
 
         /* first, try the keyboard-mode-independent keys */
         int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
         if (code == 0) {
+            fprintf(stderr, "hehe\n");
             return;
         }
         if ((int)code > 0) {
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
+            fprintf(stderr, "xuixu\n");
             return;
         }
 
@@ -185,8 +208,9 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (map_cros_key(&code) == 0 ||
-            code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
+        if (map_cros_key(kb, code, down) == 0) return;
+  
+        if (code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
             code == LINUX_KEY_BACK || code == LINUX_KEY_POWER ||
             code == LINUX_KEY_BACKSPACE || code == LINUX_KEY_SOFT1 ||
             code == LINUX_KEY_CENTER || code == LINUX_KEY_REWIND ||
@@ -195,10 +219,12 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             code == LINUX_KEY_HOME || code == LINUX_KEY_SLEEP ||
             code == KEY_STEM_1 || code == KEY_STEM_2 ||
             code == KEY_STEM_3 || code == KEY_STEM_PRIMARY) {
+            fprintf(stderr, "send key %d\n", code);
             skin_keyboard_add_key_event(kb, code, down);
             skin_keyboard_flush(kb);
             return;
         }
+        fprintf(stderr, "ignore key %d\n", keycode);
         D("ignoring keycode %d", keycode);
     }
 }
