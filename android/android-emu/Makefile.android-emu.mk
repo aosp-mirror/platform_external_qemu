@@ -433,7 +433,9 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
-        android/camera/camera-capture-mac.m
+        android/camera/camera-capture-mac.m \
+        android/snapshot/mac_segv_handler.c
+
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)

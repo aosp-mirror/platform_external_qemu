@@ -275,6 +275,8 @@ void qemu_iovec_init(QEMUIOVector *qiov, int alloc_hint)
     qiov->size = 0;
 }
 
+uint32_t plzdontdeletethisexpr = 0;
+
 void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
 {
     int i;
@@ -283,13 +285,27 @@ void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
     qiov->niov = niov;
     qiov->nalloc = -1;
     qiov->size = 0;
-    for (i = 0; i < niov; i++)
+    for (i = 0; i < niov; i++) {
+        plzdontdeletethisexpr +=
+            *(uint32_t*)(qiov->iov[i].iov_base);
         qiov->size += iov[i].iov_len;
+    }
+
+    if (plzdontdeletethisexpr == -1) {
+        fprintf(stderr, "%s rolled over!\n", __func__);
+    }
 }
 
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len)
 {
     assert(qiov->nalloc != -1);
+
+    for (size_t i = 0; i < len / 4096; i++) {
+        plzdontdeletethisexpr += *(uint32_t*)((char*)base + i * 4096);
+        if (plzdontdeletethisexpr == -1) {
+            fprintf(stderr, "%s: rolled over!\n", __func__);
+        }
+    }
 
     if (qiov->niov == qiov->nalloc) {
         qiov->nalloc = 2 * qiov->nalloc + 1;
@@ -430,6 +446,8 @@ ssize_t qemu_iovec_compare(QEMUIOVector *a, QEMUIOVector *b)
         size_t len = 0;
         uint8_t *p = (uint8_t *)a->iov[i].iov_base;
         uint8_t *q = (uint8_t *)b->iov[i].iov_base;
+        plzdontdeletethisexpr += (uint32_t)(*p);
+        plzdontdeletethisexpr += (uint32_t)(*q);
 
         assert(a->iov[i].iov_len == b->iov[i].iov_len);
         while (len < a->iov[i].iov_len && *p++ == *q++) {

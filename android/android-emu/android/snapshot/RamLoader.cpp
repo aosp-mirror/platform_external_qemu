@@ -25,6 +25,24 @@
 namespace android {
 namespace snapshot {
 
+static hva2gpa_t hva2gpa_call = 0;
+static gpa2hva_t gpa2hva_call = 0;
+
+static bql_locked_t bql_locked_call = 0;
+static bql_lock_unlock_t bql_lock_call = 0;
+static bql_lock_unlock_t bql_unlock_call = 0;
+
+void setAddressLookups(hva2gpa_t hva2gpa, gpa2hva_t gpa2hva) {
+    hva2gpa_call = hva2gpa;
+    gpa2hva_call = gpa2hva;
+}
+
+void setBQLInterface(bql_locked_t isLocked, bql_lock_unlock_t lock, bql_lock_unlock_t unlock) {
+    bql_locked_call = isLocked;
+    bql_lock_call = lock;
+    bql_unlock_call = unlock;
+}
+
 struct RamLoader::Page {
     std::atomic<uint8_t> state{uint8_t(State::Empty)};
     uint16_t blockIndex;
@@ -58,16 +76,8 @@ RamLoader::RamLoader(base::StdioStream&& stream, ZeroChecker zeroChecker)
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace(
                 [this](void* ptr) {
-                    Page& page = this->page(ptr);
-                    uint8_t buf[4096];
-                    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
-                                                    ? buf
-                                                    : nullptr);
-                    fillPageData(&page);
-                    if (page.data != buf) {
-                        delete[] page.data;
-                    }
-                    page.data = nullptr;
+                    // fprintf(stderr, "%s: accesswatch load %p\n", __func__, ptr);
+                    this->loadPtr(ptr, 4096);
                 },
                 [this]() { return backgroundPageLoad(); });
         if (!mAccessWatch->valid()) {
@@ -107,6 +117,17 @@ bool RamLoader::startLoading() {
     mAccessWatch->doneRegistering();
     mReaderThread.start();
     return true;
+}
+
+void RamLoader::loadPtr(void* ptr, uint64_t len) {
+    // TODO: care about len?
+    Page& page = this->page(ptr);
+    if (ptr != this->pagePtr(page)) {
+        fprintf(stderr, "%s: WTF hva %p page ptr %p\n", __func__, ptr, this->pagePtr(page));
+        abort();
+    }
+    readDataFromDisk(&page);
+    fillPageData(&page);
 }
 
 void RamLoader::interruptReading() {
@@ -200,29 +221,50 @@ bool RamLoader::readIndex() {
     return true;
 }
 
+static bool sIsGuestMapped(void* ptr) {
+    GuestPageInfo gpi = { 0, false };
+    gpi.addr =
+        hva2gpa_call(ptr, &gpi.exists);
+    return gpi.exists;
+}
+
 bool RamLoader::registerPageWatches() {
     uint8_t* startPtr = nullptr;
     uint32_t curSize = 0;
+    GuestPageInfo curGuestPageInfo = { 0, false };
+
     for (const Page& page : mIndex.pages) {
         if (!page.sizeOnDisk) {
             continue;
         }
         auto ptr = pagePtr(page);
         auto size = pageSize(page);
-        if (ptr == startPtr + curSize) {
+        if (ptr == startPtr + curSize &&
+            sIsGuestMapped(startPtr + curSize)) {
             curSize += size;
         } else {
             if (startPtr) {
-                if (!mAccessWatch->registerMemoryRange(startPtr, curSize)) {
+                if (!curGuestPageInfo.exists) { 
+                    for (uint32_t i = 0; i < curSize / 4096; i++) {
+                        loadPtr(((char*)startPtr) + 4096 * i, 4096);
+                    }
+                } else if (!mAccessWatch->registerMemoryRange(startPtr, curSize, curGuestPageInfo)) {
                     return false;
                 }
             }
             startPtr = ptr;
             curSize = size;
+            curGuestPageInfo.addr =
+                hva2gpa_call(ptr, &curGuestPageInfo.exists);
         }
     }
+
     if (startPtr) {
-        if (!mAccessWatch->registerMemoryRange(startPtr, curSize)) {
+            if (!curGuestPageInfo.exists) { 
+                for (uint32_t i = 0; i < curSize / 4096; i++) {
+                    loadPtr(((char*)startPtr) + 4096 * i, 4096);
+                }
+        } else if (!mAccessWatch->registerMemoryRange(startPtr, curSize, curGuestPageInfo)) {
             return false;
         }
     }
@@ -418,9 +460,13 @@ void RamLoader::fillPageData(Page* pagePtr) {
 #if SNAPSHOT_PROFILE > 2
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
+
+    GuestPageInfo guestPageInfo;
+    guestPageInfo.addr = hva2gpa_call(this->pagePtr(page), &guestPageInfo.exists);
+
     if (mAccessWatch) {
         bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data);
+                                          page.data, guestPageInfo);
         page.state.store(uint8_t(res ? State::Filled : State::Error),
                          std::memory_order_release);
     }
