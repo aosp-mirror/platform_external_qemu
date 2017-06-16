@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7d773bc5_7ddb00ca",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-16T21:48:07Z",
+      "side": 1,
+      "message": "Ack. for now, I don\u0027t think it is too big a problem since it is only allocated on a few function call stacks and passed by const reference.",
+      "parentUuid": "b5a66f45_479c450c",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 2
+      },
+      "revId": "8ccf89f04390b56701487c32b3a5a2fc70bec4c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "59623996_c111565a",
         "filename": "target-i386/hvf-all.c",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2017-06-16T19:20:41Z",
       "side": 1,
       "message": "call the callback only if this succeeded",
+      "range": {
+        "startLine": 166,
+        "startChar": 16,
+        "endLine": 166,
+        "endChar": 24
+      },
+      "revId": "8ccf89f04390b56701487c32b3a5a2fc70bec4c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7721ee0_557eaff8",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-16T21:48:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59623996_c111565a",
       "range": {
         "startLine": 166,
         "startChar": 16,
