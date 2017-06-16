@@ -27,6 +27,20 @@
 namespace android {
 namespace snapshot {
 
+typedef uint64_t (*hva2gpa_t)(void*, bool*);
+typedef void* (*gpa2hva_t)(uint64_t, bool*);
+
+typedef bool (*bql_locked_t)();
+typedef void (*bql_lock_unlock_t)();
+
+void setAddressLookups(
+        hva2gpa_t hva2gpa,
+        gpa2hva_t gpa2hva);
+
+void setBQLInterface(bql_locked_t isLocked,
+                     bql_lock_unlock_t lock,
+                     bql_lock_unlock_t unlock);
+
 class RamLoader {
     DISALLOW_COPY_AND_ASSIGN(RamLoader);
 
@@ -37,6 +51,7 @@ public:
     void registerBlock(const RamBlock& block);
     bool startLoading();
     bool wasStarted() const { return mWasStarted; }
+    void loadPtr(void* ptr, uint64_t len);
 
 private:
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };

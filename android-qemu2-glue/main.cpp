@@ -323,6 +323,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
         // Disable cache flushes as well, as Android issues way too many flush
         // commands for nothing.
         driveParam += ",overlap-check=none,cache=unsafe";
+        // driveParam += ",overlap-check=none,cache=unsafe";
 
         // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
         // larger images.
