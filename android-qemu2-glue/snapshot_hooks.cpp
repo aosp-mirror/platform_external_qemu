@@ -20,10 +20,12 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/system/System.h"
 #include "android/globals.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/common.h"
+#include "android/utils/path.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -54,11 +56,19 @@ using android::snapshot::RamSaver;
 static LazyInstance<std::unique_ptr<RamSaver>> sRamSaver = {};
 static LazyInstance<std::unique_ptr<RamLoader>> sRamLoader = {};
 
-static std::string makeRamSaveFilename(const std::string& uuid) {
+static std::string getSnapshotDir(const char* snapshotName, bool create) {
     auto dir = avdInfo_getContentPath(android_avdInfo);
-    auto path = PathUtils::join(
-            dir, android::base::StringFormat("snapshot_ram_%s.bin", uuid));
+    auto path = PathUtils::join(dir, "snapshots", snapshotName);
+    if (create) {
+        if (path_mkdir_if_needed(path.c_str(), 0777) != 0) {
+            return {};
+        }
+    }
     return path;
+}
+
+static std::string getRamFileName(const std::string& snapshotDir) {
+    return PathUtils::join(snapshotDir, "ram.bin");
 }
 
 static bool isPageZeroed(const uint8_t* ptr, int size) {
@@ -72,27 +82,78 @@ static std::string readRamFileUuid(QEMUFile* f) {
     return uuid;
 }
 
+static int onSaveVmStart(const char* name) {
+    auto dir = getSnapshotDir(name, true);
+    if (dir.empty()) {
+        return -EINVAL;
+    }
+
+    auto ramFile = fopen(getRamFileName(dir).c_str(), "wb");
+    if (!ramFile) {
+        return errno ? -errno : -EINVAL;
+    }
+    sRamSaver->reset(new RamSaver(
+            StdioStream(ramFile, StdioStream::kOwner), isPageZeroed));
+    return 0;
+}
+
+static void onSaveVmEnd(const char* name, int res) {
+    if (res != 0) {
+        sRamSaver->reset();
+        // The original snapshot is already screwed, so let's at least clean up
+        // the current one.
+        path_delete_file(getRamFileName(getSnapshotDir(name, false)).c_str());
+    }
+}
+
+static int onLoadVmStart(const char* name) {
+    auto& loader = sRamLoader.get();
+    if (loader) {
+        loader.reset();
+    }
+
+    // First call to the load hook - create a new loader.
+    auto dir = getSnapshotDir(name, false);
+    if (!path_is_dir(dir.c_str())) {
+        // No such directory - a raw QEMU snapshot?
+        return 0;
+    }
+
+    auto ramFileName = getRamFileName(dir);
+    auto ramFile = fopen(ramFileName.c_str(), "rb");
+    if (!ramFile) {
+        const auto err = errno ? -errno : -EINVAL;
+        sRamLoader->reset();
+        return err;
+    }
+    loader.reset(new RamLoader(StdioStream(ramFile, StdioStream::kOwner), isPageZeroed));
+    return 0;
+}
+
+static void onLoadVmEnd(const char* name, int res) {
+    if (res != 0) {
+        sRamLoader->reset();
+    }
+}
+
+static int onDelVmStart(const char* name) {
+    auto snapshotDir = getSnapshotDir(name, false);
+    if (!path_is_dir(snapshotDir.c_str())) {
+        return 0;
+    }
+    return path_delete_dir(snapshotDir.c_str());
+}
+
+static void onDelVmEnd(const char* name, int res) {
+    ;
+}
+
 static const QEMUFileHooks sSaveHooks = {
         // before_ram_iterate
         [](QEMUFile* f, void* opaque, uint64_t flags, void* data) {
             qemu_put_be64(f, RAM_SAVE_FLAG_HOOK);
             if (flags == RAM_CONTROL_SETUP) {
-                auto uuid = Uuid::generateFast().toString();
-                auto name = makeRamSaveFilename(uuid);
-                auto file = fopen(name.c_str(), "wb");
-                if (!file) {
-                    qemu_file_set_error(f, errno ? -errno : -EINVAL);
-                    return -1;
-                }
-                qemu_put_byte(f, uuid.size());
-                qemu_put_buffer(f, (const uint8_t*)uuid.data(), uuid.size());
-                if (qemu_file_get_error(f)) {
-                    return -1;
-                }
-                sRamSaver->reset(new RamSaver(
-                        StdioStream(file, StdioStream::kOwner), isPageZeroed));
-
-                // Now register all blocks for saving.
+                // Register all blocks for saving.
                 qemu_ram_foreach_block(
                         [](const char* block_name, void* host_addr,
                            ram_addr_t offset, ram_addr_t length, void* opaque) {
@@ -146,8 +207,8 @@ static const QEMUFileHooks sLoadHooks = {
                 case RAM_CONTROL_BLOCK_REG: {
                     auto& loader = sRamLoader.get();
                     if (!loader || loader->wasStarted()) {
-                        // First call to the load hook - create a new loader.
-                        loader.reset(new RamLoader(isPageZeroed));
+                        qemu_file_set_error(f, -EINVAL);
+                        return -1;
                     }
                     RamBlock block;
                     block.id = static_cast<const char*>(data);
@@ -179,16 +240,7 @@ static const QEMUFileHooks sLoadHooks = {
                         return -1;
                     }
                     if (!loader->wasStarted()) {
-                        auto uuid = readRamFileUuid(f);
-                        auto name = makeRamSaveFilename(uuid);
-                        auto file = fopen(name.c_str(), "rb");
-                        if (!file) {
-                            qemu_file_set_error(f, errno ? -errno : -EINVAL);
-                            sRamLoader->reset();
-                            return -1;
-                        }
-                        loader->startLoading(
-                                StdioStream(file, StdioStream::kOwner));
+                        loader->startLoading();
                     }
                     break;
                 }
@@ -198,4 +250,10 @@ static const QEMUFileHooks sLoadHooks = {
 
 void qemu_snapshot_hooks_setup() {
     migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
+    QEMUSnapshotCallbacks snapshotCallbacks = {
+        .savevm = { onSaveVmStart, onSaveVmEnd },
+        .loadvm = { onLoadVmStart, onLoadVmEnd },
+        .delvm = { onDelVmStart, onDelVmEnd }
+    };
+    qemu_set_snapshot_callbacks(&snapshotCallbacks);
 }
