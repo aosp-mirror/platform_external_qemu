@@ -11,33 +11,102 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
+#include "android/base/synchronization/Lock.h"
+#include "android/emulation/CpuAccelerator.h"
+
+#include "mac_segv_handler.h"
+
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/errno.h>
+#include <sys/mman.h>
+
+#include <Hypervisor/hv.h>
+
 namespace android {
 namespace snapshot {
 
-class MemoryAccessWatch::Impl {};
+static MemoryAccessWatch* sWatch = nullptr;
 
+class MemoryAccessWatch::Impl {
+public:
+    static void MacDoAccessCallback(void* ptr) {
+        sWatch->mImpl->mAccessCallback(ptr);
+    }
+
+    static IdleCallbackResult MacIdlePageCallback() {
+        return sWatch->mImpl->mIdleCallback();
+    }
+
+    Impl(CpuAccelerator accel) : mAccel(accel) {
+        setup_mac_segv_handler(MacDoAccessCallback);
+    }
+
+    bool registerMemoryRange(void* start, size_t length, const GuestPageInfo& guestPageInfo) {
+        if (mAccel == CPU_ACCELERATOR_HVF) {
+            if (guestPageInfo.exists) {
+                hv_vm_protect(guestPageInfo.addr, length, 0);
+            }
+        }
+        mprotect(start, length, PROT_NONE);
+        return true;
+    }
+
+    void doneRegistering() { }
+
+    bool fillPage(void* start, size_t length, const void* data, const GuestPageInfo& guestPageInfo) {
+        android::base::AutoLock lock(mLock);
+        memcpy(start, data, length);
+        if (mAccel == CPU_ACCELERATOR_HVF) {
+            if (guestPageInfo.exists) {
+                hv_vm_protect(guestPageInfo.addr, length,
+                              HV_MEMORY_READ |
+                              HV_MEMORY_WRITE |
+                              HV_MEMORY_EXEC);
+            }
+        }
+        return true;
+    }
+
+    android::base::Lock mLock;
+    CpuAccelerator mAccel;
+    MemoryAccessWatch::AccessCallback mAccessCallback;
+    MemoryAccessWatch::IdleCallback mIdleCallback;
+};
+
+// static
 bool MemoryAccessWatch::isSupported() {
-    return false;
+    return true;
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
-                                     IdleCallback&& idleCallback)
-    : mImpl(new Impl()) {}
+                                     IdleCallback&& idleCallback) :
+    mImpl(new Impl(GetCurrentCpuAccelerator())) {
+    mImpl->mAccessCallback = std::move(accessCallback);
+    mImpl->mIdleCallback = std::move(idleCallback);
+    sWatch = this;
+}
 
 MemoryAccessWatch::~MemoryAccessWatch() {}
 
 bool MemoryAccessWatch::valid() const {
+    if (mImpl) return true;
     return false;
 }
 
-bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
+bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length, const GuestPageInfo& guestPageInfo) {
+    if (mImpl) return mImpl->registerMemoryRange(start, length, guestPageInfo);
     return false;
 }
 
-void MemoryAccessWatch::doneRegistering() {}
+void MemoryAccessWatch::doneRegistering() {
+    if (mImpl) mImpl->doneRegistering();
+}
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
-    return false;
+bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data, const GuestPageInfo& guestPageInfo) {
+    if (!mImpl) return false;
+
+    return mImpl->fillPage(ptr, length, data, guestPageInfo);
 }
 
 }  // namespace snapshot
