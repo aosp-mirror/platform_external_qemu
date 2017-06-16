@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ad2909f8_da8a2581",
+        "filename": "android-qemu2-glue/snapshot_hooks.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-16T19:14:20Z",
+      "side": 1,
+      "message": "actually, would you move this function to a better place (maybe android/avd/util.c)? I would need to use it for texture snapshot as well.",
+      "revId": "14cc1c8405d46fd93957481d15056de80bea0b30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
