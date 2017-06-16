@@ -25,7 +25,7 @@ namespace android {
 namespace snapshot {
 
 struct RamLoader::Page {
-    std::atomic<uint8_t> state;
+    std::atomic<uint8_t> state{uint8_t(State::Empty)};
     uint16_t blockIndex;
     uint32_t pageIndex;
     uint64_t filePos;
@@ -158,7 +158,6 @@ bool RamLoader::readIndex() {
             mIndex.pages.emplace_back();
             Page& page = mIndex.pages.back();
             page.blockIndex = blockIndex;
-            page.state = uint8_t(State::Empty);
             uint32_t index = page.pageIndex = mStream.getBe32();
             uint64_t pos = page.filePos = mStream.getBe64();
             for (uint32_t i = 1; i != blockPagesCount; ++i) {
@@ -170,7 +169,6 @@ bool RamLoader::readIndex() {
                 mIndex.pages.emplace_back();
                 Page& page = mIndex.pages.back();
                 page.blockIndex = blockIndex;
-                page.state = uint8_t(State::Empty);
                 page.pageIndex = index;
                 page.filePos = pos;
             }
@@ -311,7 +309,8 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::backgroundPageLoad() {
 bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     Page& page = *pagePtr;
     auto state = uint8_t(State::Empty);
-    if (!page.state.compare_exchange_strong(state, (uint8_t)State::Reading)) {
+    if (!page.state.compare_exchange_strong(state, (uint8_t)State::Reading,
+                                            std::memory_order_release)) {
         // Spin until the reading thread finishes.
         while (state < uint8_t(State::Read)) {
             state = uint8_t(page.state.load(std::memory_order_relaxed));
@@ -340,7 +339,8 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
 void RamLoader::fillPageData(Page* pagePtr) {
     Page& page = *pagePtr;
     auto state = uint8_t(State::Read);
-    if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling))) {
+    if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling),
+                                            std::memory_order_release)) {
         assert(state == uint8_t(State::Filled));
         return;
     }
@@ -351,7 +351,8 @@ void RamLoader::fillPageData(Page* pagePtr) {
     if (mAccessWatch) {
         bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
                                           page.data);
-        page.state.store(uint8_t(res ? State::Filled : State::Error));
+        page.state.store(uint8_t(res ? State::Filled : State::Error),
+                         std::memory_order_release);
     }
 }
 
