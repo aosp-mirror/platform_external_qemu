@@ -75,6 +75,19 @@ void qemu_exit_notifiers_notify(void);
 void qemu_add_machine_init_done_notifier(Notifier *notify);
 void qemu_remove_machine_init_done_notifier(Notifier *notify);
 
+typedef struct {
+    int (*on_start)(const char* name);
+    void (*on_end)(const char* name, int res);
+} QEMUCallbackPair;
+
+typedef struct {
+    QEMUCallbackPair savevm;
+    QEMUCallbackPair loadvm;
+    QEMUCallbackPair delvm;
+} QEMUSnapshotCallbacks;
+
+void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);
+
 void hmp_savevm(Monitor *mon, const QDict *qdict);
 int load_vmstate(const char *name);
 void hmp_delvm(Monitor *mon, const QDict *qdict);
