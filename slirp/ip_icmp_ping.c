@@ -40,12 +40,23 @@
 #include "qemu/error-report.h"
 #include "slirp.h"
 #include "ip_icmp.h"
+#include "ip6_icmp.h"
 
 int ping_binary_send(struct socket* so, struct mbuf* m, int hlen) {
-    struct ip* ip = mtod(m, struct ip*);
-    const char* dest_ip_addr = inet_ntoa(ip->ip_dst);
     char ping_cmd[1024];
-    sprintf(ping_cmd, "ping -c 1 -t %d %s 2>&1", ip->ip_ttl, dest_ip_addr);
+    if (so->so_type == IPPROTO_ICMPV6) {
+        struct ip6* ip = mtod(m, struct ip6*);
+        char dest_ip_addr[INET6_ADDRSTRLEN];
+        if (inet_ntop(AF_INET6, &ip->ip_dst, dest_ip_addr, sizeof(dest_ip_addr)) == NULL)
+            return -1;
+        snprintf(ping_cmd, sizeof(ping_cmd), "ping6 -c 1 %s 2>&1", dest_ip_addr);
+    } else {
+        struct ip* ip = mtod(m, struct ip*);
+        const char* dest_ip_addr = inet_ntoa(ip->ip_dst);
+        if (dest_ip_addr == NULL)
+            return -1;
+        snprintf(ping_cmd, sizeof(ping_cmd), "ping -c 1 -t %d %s 2>&1", ip->ip_ttl, dest_ip_addr);
+    }
     FILE* p = popen(ping_cmd, "r");
     if (!p) {
         error_report("popen failed for ping binary");
@@ -76,11 +87,8 @@ int ping_binary_recv(struct socket* so, struct ip* ip, struct icmp* icp) {
     if (so == NULL || so->ping_pipe == NULL) {
         return -1;
     }
-
     int seq = -1, ttl = -1;
     char line[4096] = "";
-    char skip[4096] = "";
-    char skip2[4096] = "";
     while (fgets(line, sizeof(line), so->ping_pipe)) {
         char* p = strstr(line, "icmp_seq=");
         if (p != NULL) {
@@ -104,7 +112,51 @@ int ping_binary_recv(struct socket* so, struct ip* ip, struct icmp* icp) {
         icp->icmp_type = ICMP_ECHOREPLY;
         icp->icmp_code = 0;
         icp->icmp_cksum = 0;
-        // icp->icmp_seq = seq;
+        return sizeof(*icp);
+    }
+
+    return -1;
+}
+
+/*
+ping6 -c 1 2607:f8b0:4005:807::200e
+PING 2607:f8b0:4005:807::200e(2607:f8b0:4005:807::200e) 56 data bytes
+64 bytes from 2607:f8b0:4005:807::200e: icmp_seq=1 ttl=57 time=1.31 ms
+
+--- 2607:f8b0:4005:807::200e ping statistics ---
+1 packets transmitted, 1 received, 0% packet loss, time 0ms
+rtt min/avg/max/mdev = 1.314/1.314/1.314/0.000 ms
+*/
+int ping6_binary_recv(struct socket* so, struct ip6* ip, struct icmp6* icp) {
+    if (so == NULL || so->ping_pipe == NULL) {
+        return -1;
+    }
+
+    int seq = -1, ttl = -1;
+    char line[4096] = "";
+    while (fgets(line, sizeof(line), so->ping_pipe)) {
+        char* p = strstr(line, "icmp_seq=");
+        if (p != NULL) {
+            p += strlen("icmp_seq=");
+            seq = atoi(p);
+        }
+        p = strstr(line, "ttl=");
+        if (p != NULL) {
+            p += strlen("ttl=");
+            ttl = atoi(p);
+        }
+
+        if (seq != -1 && ttl != -1) {
+            break;
+        }
+    }
+
+    if (seq != -1 && ttl != -1) {
+        ip->ip_nh = IPPROTO_ICMPV6;
+        ip->ip_hl = ttl;
+        icp->icmp6_type = ICMP6_ECHO_REPLY;
+        icp->icmp6_code = 0;
+        icp->icmp6_cksum = 0;
         return sizeof(*icp);
     }
 
