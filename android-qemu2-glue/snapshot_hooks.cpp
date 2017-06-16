@@ -35,6 +35,7 @@ extern "C" {
 #include "migration/migration.h"
 #include "migration/qemu-file.h"
 #include "qemu/cutils.h"
+#include "qemu/main-loop.h"
 #include "sysemu/sysemu.h"
 }
 
@@ -43,6 +44,11 @@ extern "C" {
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/errno.h>
+#include <sys/mman.h>
 
 using android::base::LazyInstance;
 using android::base::PathUtils;
@@ -260,11 +266,94 @@ static const QEMUFileHooks sLoadHooks = {
             return 0;
         }};
 
+using android::base::LazyInstance;
+
+struct Range { void* begin; uint64_t len; uint64_t gpa; };
+
+typedef std::vector<Range> MemRanges;
+static LazyInstance<MemRanges> sRanges;
+
+// Memory mapping functions
+void qemu_snapshot_ram_map(void* hva, uint64_t len, uint64_t gpa) {
+    sRanges.get().push_back({ hva, len, gpa });
+}
+
+void qemu_snapshot_ram_unmap(uint64_t gpa, uint64_t len) {
+    sRanges.get().erase(
+        std::remove_if(sRanges.get().begin(), sRanges.get().end(),
+            [gpa](const Range& r) {
+                // Should have length as well?
+                return gpa == r.gpa;
+            }),
+            sRanges.get().end());
+}
+
+uint64_t qemu_snapshot_ram_hva2gpa(void* hva, bool* found) {
+    *found = false;
+
+    uintptr_t me = (uintptr_t)hva;
+    for (const auto& elt: sRanges.get()) {
+        uintptr_t other1 = (uintptr_t)elt.begin;
+        uintptr_t other2 = (uintptr_t)(((char*)elt.begin) + elt.len);
+        if (me >= other1 && me < other2) {
+            uintptr_t res = me - other1;
+            uint64_t gpa = elt.gpa + res;
+
+            // if (gpa >= 0x10000000 && gpa < 0x18000000) {
+                *found = true;
+                return gpa;
+            // }
+        }
+    }
+
+    return 0;
+}
+
+void* qemu_snapshot_ram_gpa2hva(uint64_t gpa, bool* found) {
+    *found = false;
+
+    uintptr_t me = gpa;
+    for (const auto& elt : sRanges.get()) {
+        uintptr_t other1 = (uintptr_t)elt.gpa;
+        uintptr_t other2 = (uintptr_t)(elt.gpa + elt.len);
+
+        if (me >= other1 && me < other2) {
+            uintptr_t res = me - other1;
+            *found = true;
+            return (void*)(((char*)elt.begin) + res);
+        }
+    }
+
+    return nullptr;
+}
+
+void qemu_snapshot_guest_fault(uint64_t gpa, uint64_t len) {
+    auto& loader = sRamLoader.get();
+    if (!loader || !loader->wasStarted()) return;
+    
+    bool found = false;
+    void* hva = qemu_snapshot_ram_gpa2hva(gpa, &found);
+
+    if (found) {
+        mprotect(hva, len, PROT_READ | PROT_WRITE | PROT_EXEC);
+        sRamLoader->get()->loadPtr(hva, len);
+    }
+}
+
 void qemu_snapshot_hooks_setup() {
     migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
+
     QEMUSnapshotCallbacks snapshotCallbacks = {
             .savevm = {onSaveVmStart, onSaveVmEnd},
             .loadvm = {onLoadVmStart, onLoadVmEnd},
             .delvm = {onDelVmStart, onDelVmEnd}};
     qemu_set_snapshot_callbacks(&snapshotCallbacks);
+
+    qemu_set_ram_map_hooks(qemu_snapshot_ram_map, qemu_snapshot_ram_unmap);
+    qemu_set_guest_fault_hook(qemu_snapshot_guest_fault);
+    android::snapshot::setAddressLookups(qemu_snapshot_ram_hva2gpa, qemu_snapshot_ram_gpa2hva);
+    android::snapshot::setBQLInterface(qemu_mutex_iothread_locked,
+                                       qemu_mutex_lock_iothread,
+                                       qemu_mutex_unlock_iothread);
 }
+

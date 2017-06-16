@@ -323,19 +323,20 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
         // Disable cache flushes as well, as Android issues way too many flush
         // commands for nothing.
         driveParam += ",overlap-check=none,cache=unsafe";
+        // driveParam += ",overlap-check=none,cache=unsafe";
 
-        // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
-        // larger images.
-        System::FileSize diskSize;
-        if (System::get()->pathFileSize(filePath, &diskSize)) {
-            // L2 cache size should be "disk_size_GB / 131072" as per QEMU docs
-            // with a default of 1MB. Round it up just in case.
-            const int l2CacheSize =
-                    std::max<int>((diskSize + (1024 * 1024 * 1024 - 1)) /
-                                          (1024 * 1024 * 1024) * 131072,
-                                  1024 * 1024);
-            driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
-        }
+        // // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
+        // // larger images.
+        // System::FileSize diskSize;
+        // if (System::get()->pathFileSize(filePath, &diskSize)) {
+        //     // L2 cache size should be "disk_size_GB / 131072" as per QEMU docs
+        //     // with a default of 1MB. Round it up just in case.
+        //     const int l2CacheSize =
+        //             std::max<int>((diskSize + (1024 * 1024 * 1024 - 1)) /
+        //                                   (1024 * 1024 * 1024) * 131072,
+        //                           1024 * 1024);
+        //     driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
+        // }
     }
 
     // Move the disk operations into the dedicated 'disk thread', and
