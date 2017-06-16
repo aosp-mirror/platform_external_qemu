@@ -1338,16 +1338,16 @@ static void *qemu_hvf_cpu_thread_fn(void *arg)
     current_cpu = cpu;
 
     // init cpu signals
-    sigset_t set;
-    struct sigaction sigact;
+    // sigset_t set;
+    // struct sigaction sigact;
 
-    memset(&sigact, 0, sizeof(sigact));
-    sigact.sa_handler = dummy_signal;
-    sigaction(SIG_IPI, &sigact, NULL);
+    // memset(&sigact, 0, sizeof(sigact));
+    // sigact.sa_handler = dummy_signal;
+    // sigaction(SIG_IPI, &sigact, NULL);
 
-    pthread_sigmask(SIG_BLOCK, NULL, &set);
-    sigdelset(&set, SIG_IPI);
-    sigdelset(&set, SIGBUS);
+    // pthread_sigmask(SIG_BLOCK, NULL, &set);
+    // sigdelset(&set, SIG_IPI);
+    // sigdelset(&set, SIGBUS);
 
     hvf_init_vcpu(cpu);
 

@@ -17,6 +17,11 @@
 namespace android {
 namespace snapshot {
 
+struct GuestPageInfo {
+    uint64_t addr;
+    bool exists;
+};
+
 class MemoryAccessWatch {
 public:
     static bool isSupported();
@@ -24,6 +29,7 @@ public:
     enum class IdleCallbackResult {
         RunAgain, Wait, AllDone
     };
+
 
     using AccessCallback = std::function<void(void*)>;
     using IdleCallback = std::function<IdleCallbackResult()>;
@@ -34,10 +40,9 @@ public:
     ~MemoryAccessWatch();
 
     bool valid() const;
-    bool registerMemoryRange(void* start, size_t length);
+    bool registerMemoryRange(void* start, size_t length, const GuestPageInfo& guestPageInfo);
     void doneRegistering();
-    bool fillPage(void* ptr, size_t length, const void* data);
-
+    bool fillPage(void* ptr, size_t length, const void* data, const GuestPageInfo& guestPageInfo);
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

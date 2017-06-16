@@ -164,6 +164,7 @@ int __hvf_set_memory(hvf_slot *slot) {
                     (unsigned long long)macslot->gpa_start,
                     (unsigned long long)(macslot->gpa_start + macslot->size));
             int unmapres = hv_vm_unmap(macslot->gpa_start, macslot->size);
+            if (g_ram_unmap_call) g_ram_unmap_call(macslot->size, macslot->gpa_start);
             assert_hvf_ok(unmapres);
         }
     }
@@ -183,6 +184,8 @@ int __hvf_set_memory(hvf_slot *slot) {
             (unsigned long long)macslot->gpa_start,
             (unsigned long long)(macslot->gpa_start + macslot->size));
     int mapres = (hv_vm_map((hv_uvaddr_t)slot->mem, slot->start, slot->size, flags));
+    if (g_ram_map_call) g_ram_map_call(slot->mem, slot->size, slot->start);
+
     assert_hvf_ok(mapres);
     pthread_rwlock_unlock(&mem_lock);
     return 0;
@@ -851,22 +854,12 @@ again:
                     store_regs(cpu);
                     break;
                 }
-#ifdef DIRTY_VGA_TRACKING
-                if (slot) {
-                    bool read = exit_qual & EPT_VIOLATION_DATA_READ ? 1 : 0;
-                    bool write = exit_qual & EPT_VIOLATION_DATA_WRITE ? 1 : 0;
-                    if (!read && !write)
-                        break;
-                    int flags = HV_MEMORY_READ | HV_MEMORY_EXEC;
-                    if (write) flags |= HV_MEMORY_WRITE;
 
-                    pthread_rwlock_wrlock(&mem_lock);
-                    if (write)
-                        mark_slot_page_dirty(slot, gpa);
-                    hv_vm_protect(gpa & ~0xfff, 4096, flags);
-                    pthread_rwlock_unlock(&mem_lock);
+                if (slot) {
+                    if (g_guest_fault_call) {
+                        g_guest_fault_call(gpa & ~0xFFF, 4096);
+                    }
                 }
-#endif
                 break;
             }
             case EXIT_REASON_INOUT:
