@@ -29,11 +29,11 @@ namespace snapshot {
 class RamLoader {
     DISALLOW_COPY_AND_ASSIGN(RamLoader);
 public:
-    RamLoader(ZeroChecker zeroChecker);
+    RamLoader(base::StdioStream&& stream, ZeroChecker zeroChecker);
     ~RamLoader();
 
     void registerBlock(const RamBlock& block);
-    bool startLoading(base::StdioStream&& stream);
+    bool startLoading();
     bool wasStarted() const { return mWasStarted; }
 
 private:
