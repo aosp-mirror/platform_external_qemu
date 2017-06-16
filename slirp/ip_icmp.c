@@ -87,6 +87,7 @@ static int icmp_send(struct socket *so, struct mbuf *m, int hlen)
     struct ip *ip = mtod(m, struct ip *);
     struct sockaddr_in addr;
 
+    so->so_type = IPPROTO_ICMP;
     so->s = qemu_socket(AF_INET, SOCK_DGRAM, IPPROTO_ICMP);
     if (so->s == -1) {
 #ifndef WIN32
@@ -102,7 +103,6 @@ static int icmp_send(struct socket *so, struct mbuf *m, int hlen)
     so->so_faddr = ip->ip_dst;
     so->so_laddr = ip->ip_src;
     so->so_iptos = ip->ip_tos;
-    so->so_type = IPPROTO_ICMP;
     so->so_state = SS_ISFCONNECTED;
     so->so_expire = curtime + SO_EXPIRE;
 
