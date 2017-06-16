@@ -34,6 +34,24 @@
       "revId": "14cc1c8405d46fd93957481d15056de80bea0b30",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14f61ae0_af0546c9",
+        "filename": "android-qemu2-glue/snapshot_hooks.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-16T19:27:07Z",
+      "side": 1,
+      "message": "That might work as well. You can leave it here and later I will figure out what would be the better way to pass it to TextureSaver/Loader.",
+      "parentUuid": "e3a96c27_f7a3e134",
+      "revId": "14cc1c8405d46fd93957481d15056de80bea0b30",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
