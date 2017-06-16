@@ -570,3 +570,25 @@ APosixStatus path_copy_dir(const char* dst, const char* src) {
     }
     return 0;
 }
+
+APosixStatus path_delete_dir(const char* path) {
+    auto dirScanner = android::base::makeCustomScopedPtr(dirScanner_new(path),
+                                                         dirScanner_free);
+    if (!dirScanner)
+        return -EINVAL;
+
+    const char* name = dirScanner_nextFull(dirScanner.get());
+    while (name) {
+        if (path_is_dir(name)) {
+            if (auto res = path_delete_dir(name)) {
+                return res;
+            }
+        } else {
+            if (auto res = path_delete_file(name)) {
+                return res;
+            }
+        }
+        name = dirScanner_nextFull(dirScanner.get());
+    }
+    return 0;
+}
