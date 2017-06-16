@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b5a66f45_479c450c",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T19:20:41Z",
+      "side": 1,
+      "message": "fyi: because of an extra bool this struct is now 16 bytes instead of 8",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 2
+      },
+      "revId": "8ccf89f04390b56701487c32b3a5a2fc70bec4c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59623996_c111565a",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T19:20:41Z",
+      "side": 1,
+      "message": "call the callback only if this succeeded",
+      "range": {
+        "startLine": 166,
+        "startChar": 16,
+        "endLine": 166,
+        "endChar": 24
+      },
+      "revId": "8ccf89f04390b56701487c32b3a5a2fc70bec4c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
