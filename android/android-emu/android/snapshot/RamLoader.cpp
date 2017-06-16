@@ -40,8 +40,8 @@ struct RamLoader::Page {
           data(other.data) {}
 };
 
-RamLoader::RamLoader(ZeroChecker zeroChecker)
-    : mStream(nullptr),
+RamLoader::RamLoader(base::StdioStream&& stream, ZeroChecker zeroChecker)
+    : mStream(std::move(stream)),
       mZeroChecker(zeroChecker),
       mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
@@ -72,8 +72,7 @@ void RamLoader::registerBlock(const RamBlock& block) {
     mIndex.blocks.push_back({block});
 }
 
-bool RamLoader::startLoading(base::StdioStream&& stream) {
-    mStream = std::move(stream);
+bool RamLoader::startLoading() {
     if (!readIndex()) {
         return false;
     }
