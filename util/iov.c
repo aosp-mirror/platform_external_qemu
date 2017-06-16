@@ -275,6 +275,8 @@ void qemu_iovec_init(QEMUIOVector *qiov, int alloc_hint)
     qiov->size = 0;
 }
 
+uint32_t plzdontdeletethisexpr = 0;
+
 void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
 {
     int i;
@@ -283,8 +285,15 @@ void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
     qiov->niov = niov;
     qiov->nalloc = -1;
     qiov->size = 0;
-    for (i = 0; i < niov; i++)
+    for (i = 0; i < niov; i++) {
+        plzdontdeletethisexpr +=
+            *(uint32_t*)(qiov->iov[i].iov_base);
         qiov->size += iov[i].iov_len;
+    }
+
+    if (plzdontdeletethisexpr == -1) {
+        fprintf(stderr, "%s rolled over!\n", __func__);
+    }
 }
 
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len)

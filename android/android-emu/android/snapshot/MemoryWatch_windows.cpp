@@ -68,14 +68,14 @@ bool MemoryAccessWatch::valid() const {
     return mImpl->mExceptionHandler != nullptr;
 }
 
-bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
+bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length, const GuestPageInfo& guestPageInfo) {
     DWORD oldProtect;
     return ::VirtualProtect(start, length, PAGE_NOACCESS, &oldProtect) != 0;
 }
 
 void MemoryAccessWatch::doneRegistering() {}
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
+bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data, const GuestPageInfo& guestPageInfo) {
     DWORD oldProtect;
     if (!::VirtualProtect(ptr, length, PAGE_EXECUTE_READWRITE, &oldProtect)) {
         return false;

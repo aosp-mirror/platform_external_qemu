@@ -12,6 +12,19 @@
 #include "qemu/uuid.h"
 #include "qom/object.h"
 
+// RAM mapping hooks
+
+typedef void (*ram_map_hook_t)(void*, uint64_t, uint64_t);
+typedef void (*ram_unmap_hook_t)(uint64_t, uint64_t);
+typedef void (*guest_fault_t)(uint64_t, uint64_t);
+
+extern ram_map_hook_t g_ram_map_call;
+extern ram_unmap_hook_t g_ram_unmap_call;
+extern guest_fault_t g_guest_fault_call;
+
+void qemu_set_ram_map_hooks(ram_map_hook_t, ram_unmap_hook_t);
+void qemu_set_guest_fault_hook(guest_fault_t);
+
 /* vl.c */
 
 extern const char *bios_name;
