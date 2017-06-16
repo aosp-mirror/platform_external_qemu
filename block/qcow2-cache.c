@@ -57,7 +57,8 @@ static inline int qcow2_cache_get_table_idx(BlockDriverState *bs,
 {
     BDRVQcow2State *s = bs->opaque;
     ptrdiff_t table_offset = (uint8_t *) table - (uint8_t *) c->table_array;
-    int idx = table_offset / s->cluster_size;
+    int idx = table_offset >> s->cluster_bits;
+    assert(idx == table_offset / s->cluster_size);
     assert(idx >= 0 && idx < c->size && table_offset % s->cluster_size == 0);
     return idx;
 }
