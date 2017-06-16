@@ -2118,6 +2118,17 @@ int qemu_loadvm_state(QEMUFile *f)
     return ret;
 }
 
+static QEMUSnapshotCallbacks s_snapshot_callbacks = {};
+
+void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks)
+{
+    if (callbacks) {
+        memcpy(&s_snapshot_callbacks, callbacks, sizeof(s_snapshot_callbacks));
+    } else {
+        memset(&s_snapshot_callbacks, 0, sizeof(s_snapshot_callbacks));
+    }
+}
+
 void hmp_savevm(Monitor *mon, const QDict *qdict)
 {
 #if SNAPSHOT_PROFILE
@@ -2189,9 +2200,18 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
         strftime(sn->name, sizeof(sn->name), "vm-%Y%m%d%H%M%S", &tm);
     }
 
+    if (s_snapshot_callbacks.savevm.on_start) {
+        ret = s_snapshot_callbacks.savevm.on_start(name);
+        if (ret) {
+            monitor_printf(mon, "Error %d from the snapshot callback\n", ret);
+            return;
+        }
+    }
+
     /* save the VM state */
     f = qemu_fopen_bdrv(bs, 1);
     if (!f) {
+        ret = -1;
         monitor_printf(mon, "Could not open VM state file\n");
         goto the_end;
     }
@@ -2225,6 +2245,11 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
 
  the_end:
     aio_context_release(aio_context);
+
+    if (s_snapshot_callbacks.savevm.on_end) {
+        s_snapshot_callbacks.savevm.on_end(name, ret);
+    }
+
 #if SNAPSHOT_PROFILE
     int64_t endTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
 #if SNAPSHOT_PROFILE > 1
@@ -2361,6 +2386,14 @@ int load_vmstate(const char *name)
     printf("goto snapshot time %.03f ms\n", (gotoEndTime - gotoTime)/1000000.0);
 #endif
 
+    if (s_snapshot_callbacks.loadvm.on_start) {
+        ret = s_snapshot_callbacks.loadvm.on_start(name);
+        if (ret) {
+            error_report("Error %d from the snapshot callback", ret);
+            return -EINVAL;
+        }
+    }
+
     /* restore the VM state */
     f = qemu_fopen_bdrv(bs_vm_state, 0);
     if (!f) {
@@ -2384,6 +2417,11 @@ int load_vmstate(const char *name)
     aio_context_release(aio_context);
 
     migration_incoming_state_destroy();
+
+    if (s_snapshot_callbacks.loadvm.on_end) {
+        s_snapshot_callbacks.loadvm.on_end(name, ret);
+    }
+
     if (ret < 0) {
         error_report("Error %d while loading VM state", ret);
         return ret;
@@ -2404,9 +2442,24 @@ void hmp_delvm(Monitor *mon, const QDict *qdict)
 {
     BlockDriverState *bs;
     Error *err;
+    int ret;
     const char *name = qdict_get_str(qdict, "name");
 
-    if (bdrv_all_delete_snapshot(name, &bs, &err) < 0) {
+    if (s_snapshot_callbacks.delvm.on_start) {
+        ret = s_snapshot_callbacks.delvm.on_start(name);
+        if (ret) {
+            error_reportf_err(err, "Error %d from the snapshot callback", ret);
+            return;
+        }
+    }
+
+    ret = bdrv_all_delete_snapshot(name, &bs, &err);
+
+    if (s_snapshot_callbacks.delvm.on_end) {
+        s_snapshot_callbacks.delvm.on_end(name, ret);
+    }
+
+    if (ret < 0) {
         error_reportf_err(err,
                           "Error while deleting snapshot on device '%s': ",
                           bdrv_get_device_name(bs));
