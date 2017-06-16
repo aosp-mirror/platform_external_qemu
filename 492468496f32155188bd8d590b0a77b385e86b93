@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43f4edf1_bc0a94af",
+        "filename": "slirp/ip6_icmp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "where is |so| deleted?",
+      "range": {
+        "startLine": 485,
+        "startChar": 12,
+        "endLine": 485,
+        "endChar": 46
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24756e8f_c08100dd",
+        "filename": "slirp/ip6_icmp.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "it looks like |so| leaks here",
+      "range": {
+        "startLine": 489,
+        "startChar": 16,
+        "endLine": 489,
+        "endChar": 28
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cd5d1f3_bcd0bacb",
+        "filename": "slirp/ip6_icmp.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "nit: change to #ifndef",
+      "range": {
+        "startLine": 223,
+        "startChar": 0,
+        "endLine": 224,
+        "endChar": 5
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8779a0e5_0ceb3357",
+        "filename": "slirp/ip_icmp_ping.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "please check the return value, just in case",
+      "range": {
+        "startLine": 50,
+        "startChar": 8,
+        "endLine": 50,
+        "endChar": 17
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d04295d9_297a5dd3",
+        "filename": "slirp/ip_icmp_ping.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "snprintf, please",
+      "range": {
+        "startLine": 51,
+        "startChar": 8,
+        "endLine": 51,
+        "endChar": 15
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11744837_47076e23",
+        "filename": "slirp/ip_icmp_ping.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "here as well - |skip| and |skip2| aren\u0027t used",
+      "range": {
+        "startLine": 90,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 26
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40e3ed95_c243efe9",
+        "filename": "slirp/ip_icmp_ping.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "what these two are for?",
+      "range": {
+        "startLine": 138,
+        "startChar": 0,
+        "endLine": 139,
+        "endChar": 26
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6cca9e2c_12031432",
+        "filename": "slirp/ip_icmp_ping.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T20:32:35Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 163,
+        "endChar": 31
+      },
+      "revId": "492468496f32155188bd8d590b0a77b385e86b93",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
