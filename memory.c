@@ -31,6 +31,19 @@
 #include "sysemu/kvm.h"
 #include "sysemu/sysemu.h"
 
+ram_map_hook_t g_ram_map_call = 0;
+ram_unmap_hook_t g_ram_unmap_call = 0;
+guest_fault_t g_guest_fault_call = 0;
+
+void qemu_set_ram_map_hooks(ram_map_hook_t m, ram_unmap_hook_t um) {
+    g_ram_map_call = m;
+    g_ram_unmap_call = um;
+}
+
+void qemu_set_guest_fault_hook(guest_fault_t f) {
+    g_guest_fault_call = f;
+}
+
 //#define DEBUG_UNASSIGNED
 
 static unsigned memory_region_transaction_depth;
