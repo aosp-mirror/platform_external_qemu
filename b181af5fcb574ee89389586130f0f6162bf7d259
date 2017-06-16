@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b4527bf5_6dae69ed",
+        "filename": "android/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 574,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T00:24:41Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 574,
+        "startChar": 0,
+        "endLine": 574,
+        "endChar": 37
+      },
+      "revId": "b181af5fcb574ee89389586130f0f6162bf7d259",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c005b154_77920cb5",
+        "filename": "android/configure.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-16T00:24:41Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 592,
+        "startChar": 0,
+        "endLine": 595,
+        "endChar": 6
+      },
+      "revId": "b181af5fcb574ee89389586130f0f6162bf7d259",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
