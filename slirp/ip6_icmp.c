@@ -383,6 +383,65 @@ static void ndp_input(struct mbuf *m, Slirp *slirp, struct ip6 *ip,
     }
 }
 
+void icmp6_detach(struct socket *so)
+{
+#ifndef WIN32
+    if (so->ping_pipe != NULL)
+        ping_binary_close(so);
+    else
+        closesocket(so->s);
+#else
+    closesocket(so->s);
+#endif
+
+    sofree(so);
+}
+
+static int icmp6_send(struct socket *so, struct mbuf *m, int hlen)
+{
+    struct ip6 *ip = mtod(m, struct ip6 *);
+    struct sockaddr_in6 addr;
+
+    so->so_type = IPPROTO_ICMPV6;
+    so->s = qemu_socket(AF_INET6, SOCK_DGRAM, IPPROTO_ICMPV6);
+    if (so->s == -1) {
+#ifndef WIN32
+        int res = ping_binary_send(so, m, hlen);
+        if (res != 0)
+           return -1;
+#else
+        return -1;
+#endif
+    }
+
+    so->so_m = m;
+    so->so_faddr6 = ip->ip_dst;
+    so->so_laddr6 = ip->ip_src;
+    //so->so_iptos = ip->ip_tos;
+    so->so_state = SS_ISFCONNECTED;
+    so->so_expire = curtime + SO_EXPIRE;
+
+    addr.sin6_family = AF_INET6;
+    addr.sin6_addr = so->so_faddr6;
+
+    insque(so, &so->slirp->icmp);
+
+#ifndef WIN32
+    if (so->ping_pipe != NULL)
+        return 0;
+#endif
+
+    if (sendto(so->s, m->m_data + hlen, m->m_len - hlen, 0,
+               (struct sockaddr *)&addr, sizeof(addr)) == -1) {
+        DEBUG_MISC((dfd, "icmp6_input icmp sendto tx errno = %d-%s\n",
+                    errno, strerror(errno)));
+        icmp6_send_error(m, ICMP6_UNREACH, ICMP6_UNREACH_NO_ROUTE);
+        icmp6_detach(so);
+    }
+
+    return 0;
+}
+
 /*
  * Process a received ICMPv6 message.
  */
@@ -417,8 +476,20 @@ void icmp6_input(struct mbuf *m)
         if (in6_equal_host(&ip->ip_dst)) {
             icmp6_send_echoreply(m, slirp, ip, icmp);
         } else {
-            /* TODO */
-            error_report("external icmpv6 not supported yet");
+#ifdef WIN32
+            icmpwin_ping(slirp, m, hlen);
+            break;
+#else
+            struct socket *so;
+            struct sockaddr_storage addr;
+            if ((so = socreate(slirp)) == NULL) goto end;
+            if (icmp6_send(so, m, hlen) == 0) {
+                return;
+            } else {
+                sofree(so);
+                error_report("icmpv6 ICMP6_ECHO_REQUEST failed");
+            }
+#endif /* !WIN32 */
         }
         break;
 
@@ -441,4 +512,83 @@ void icmp6_input(struct mbuf *m)
 
 end:
     m_free(m);
+}
+
+/*
+ * Reflect the ip packet back to the source
+ */
+void icmp6_reflect(struct mbuf *m)
+{
+    register struct ip6 *ip = mtod(m, struct ip6 *);
+    int hlen = sizeof(struct ip6);
+    register struct icmp6 *icp;
+
+    /*
+     * Send an icmp6 packet back to the ip level,
+     * after supplying a checksum.
+     */
+    m->m_data += hlen;
+    m->m_len -= hlen;
+    icp = mtod(m, struct icmp6 *);
+
+    icp->icmp6_type = ICMP6_ECHO_REPLY;
+    icp->icmp6_cksum = 0;
+
+    if (ip->ip_hl == 0)
+        ip->ip_hl = MAXTTL;
+
+    { /* swap src and dst addr */
+        struct in6_addr icmp_dst;
+        icmp_dst = ip->ip_dst;
+        ip->ip_dst = ip->ip_src;
+        ip->ip_src = icmp_dst;
+    }
+
+    m->m_data -= hlen;
+    m->m_len += hlen;
+
+    icp->icmp6_cksum = ip6_cksum(m);
+
+    (void ) ip6_output((struct socket *)NULL, m, 0);
+}
+
+void icmp6_receive(struct socket *so)
+{
+    struct mbuf *m = so->so_m;
+    struct ip6 *ip = mtod(m, struct ip6 *);
+    int hlen = sizeof(struct ip6);
+    u_char error_code;
+    struct icmp6 *icp;
+    int id, len = -1;
+
+    m->m_data += hlen;
+    m->m_len -= hlen;
+    icp = mtod(m, struct icmp6 *);
+
+#ifndef WIN32
+    if (so->ping_pipe != NULL)
+        len = ping6_binary_recv(so, ip, icp);
+    else
+        len = qemu_recv(so->s, icp, m->m_len, 0);
+#else
+    len = qemu_recv(so->s, icp, m->m_len, 0);
+#endif
+
+    m->m_data -= hlen;
+    m->m_len += hlen;
+
+    if (len == -1 || len == 0) {
+        if (errno == ENETUNREACH) {
+            error_code = ICMP6_UNREACH_NO_ROUTE;
+        } else {
+            error_code = ICMP6_UNREACH_ADDRESS;
+        }
+        DEBUG_MISC((dfd, " udp icmp rx errno = %d-%s\n", errno,
+                    strerror(errno)));
+        icmp6_send_error(so->so_m, ICMP6_UNREACH, error_code);
+    } else {
+        icmp6_reflect(so->so_m);
+        so->so_m = NULL; /* Don't m_free() it again! */
+    }
+    icmp6_detach(so);
 }
