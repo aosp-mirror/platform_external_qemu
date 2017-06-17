@@ -146,6 +146,8 @@ bool emuglConfig_init(EmuglConfig* config,
     // zero all fields first.
     memset(config, 0, sizeof(*config));
 
+    bool host_set_in_hwconfig = false;
+
     bool hasUiPreference = uiPreferredBackend != WINSYS_GLESBACKEND_PREFERENCE_AUTO;
 
     // The value of '-gpu <mode>' overrides both the hardware properties
@@ -170,9 +172,13 @@ bool emuglConfig_init(EmuglConfig* config,
         }
     } else {
         // Support "hw.gpu.mode=on" in config.ini
-        if (gpu_mode && (!strcmp(gpu_mode, "on") || !strcmp(gpu_mode, "enable"))) {
+        if (gpu_enabled && gpu_mode && (
+            !strcmp(gpu_mode, "on") ||
+            !strcmp(gpu_mode, "enable") ||
+            !strcmp(gpu_mode, "host"))) {
             gpu_enabled = true;
             gpu_mode = "host";
+            host_set_in_hwconfig = true;
         }
     }
 
@@ -206,7 +212,7 @@ bool emuglConfig_init(EmuglConfig* config,
     // the best mode depending on the environment. Its purpose is to
     // enable 'swiftshader' mode automatically when NX or Chrome Remote Desktop
     // is detected.
-    if (!strcmp(gpu_mode, "auto")) {
+    if (!strcmp(gpu_mode, "auto") || host_set_in_hwconfig) {
         // The default will be 'host' unless:
         // 1. NX or Chrome Remote Desktop is detected, or |no_window| is true.
         // 2. The user's host GPU is on the blacklist.
@@ -226,7 +232,7 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader";
         }
-        else if (!no_window && !hasUiPreference &&
+        else if (!host_set_in_hwconfig && !no_window && !hasUiPreference &&
                    async_query_host_gpu_AngleWhitelisted()) {
                 gpu_mode = "angle";
                 D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
