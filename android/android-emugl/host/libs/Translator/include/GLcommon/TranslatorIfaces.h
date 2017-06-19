@@ -75,7 +75,7 @@ typedef struct {
     GLenum                                          (*clientWaitSync)(GLsync, GLbitfield, GLuint64);
     void                                            (*deleteSync)(GLsync);
     void                                            (*saveTexture)(SaveableTexture*, android::base::Stream*, android::base::SmallVector<unsigned char>* buffer);
-    SaveableTexture*                                (*loadTexture)(android::base::Stream*, GlobalNameSpace*);
+    SaveableTexture*                                (*createTexture)(GlobalNameSpace*);
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
 } GLESiface;

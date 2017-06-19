@@ -20,6 +20,8 @@
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "GLcommon/GLEScontext.h"
+#include "GLcommon/TextureLoader.h"
+#include "GLcommon/TextureSaver.h"
 #include "GLcommon/TranslatorIfaces.h"
 
 #include <assert.h>
@@ -252,25 +254,54 @@ void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
             SaveableTexturePtr(new SaveableTexture(*texture)));
 }
 
+static std::unique_ptr<TextureLoader> s_textureLoader;
+
 void GlobalNameSpace::onSave(android::base::Stream* stream,
         SaveableTexture::saver_t saver) {
+    s_textureLoader.reset();
     android::base::SmallFixedVector<unsigned char, 128> buffer;
-    saveCollection(stream, m_textureMap,
-            [saver, &buffer](android::base::Stream* stream,
+    // TODO: fix the texture file path
+    auto texFile = fopen("textures.bin", "wb");
+    if (!texFile) {
+        fprintf(stderr, "Error: failed to write texture file.\n");
+    } else {
+        TextureSaver texSaver(android::base::StdioStream(
+                texFile, android::base::StdioStream::kOwner));
+        saveCollection(stream, m_textureMap,
+            [saver, &texSaver](android::base::Stream* stream,
                 const std::pair<const unsigned int, SaveableTexturePtr>& tex) {
                 stream->putBe32(tex.first);
-                saver(tex.second.get(), stream, &buffer);
+                texSaver.saveTexture(tex.first, [saver, &tex](
+                    android::base::Stream* stream,
+                    TextureSaver::Buffer* buffer) {
+                        saver(tex.second.get(), stream, buffer);
+                });
             });
+    }
     decltype(m_textureMap)().swap(m_textureMap);
 }
 
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
-        SaveableTexture::loader_t loader) {
+        SaveableTexture::creator_t creator) {
     assert(m_textureMap.size() == 0);
-    loadCollection(stream, &m_textureMap, [loader, this](
+    // TODO: fix the texture file path
+    auto texFile = fopen("textures.bin", "rb");
+    s_textureLoader.reset(new TextureLoader(texFile));
+    loadCollection(stream, &m_textureMap, [this, creator](
             android::base::Stream* stream) {
         unsigned int globalName = stream->getBe32();
-        SaveableTexture* saveableTexture = loader(stream, this);
+        SaveableTexture* saveableTexture = creator(this);
+        // A lot of function wrapping happens here.
+        // When touched, saveableTexture triggers s_textureLoader->loadTexture,
+        // which sets up the file position and the mutex, and triggers
+        // saveableTexture->loadTexture for the real loading.
+        saveableTexture->setLoader(
+            [globalName](SaveableTexture* saveableTexture) {
+                s_textureLoader->loadTexture(globalName,
+                        [saveableTexture](android::base::Stream* stream) {
+                            saveableTexture->loadFromStream(stream);
+                        });
+        });
         return std::make_pair(globalName, SaveableTexturePtr(saveableTexture));
     });
 }
@@ -283,14 +314,5 @@ const SaveableTexturePtr& GlobalNameSpace::getSaveableTextureFromLoad(
         unsigned int oldGlobalName) {
     assert(m_textureMap.count(oldGlobalName));
     return m_textureMap[oldGlobalName];
-}
-
-EglImage* GlobalNameSpace::makeEglImageFromLoad(
-        unsigned int oldGlobalName) {
-    assert(m_textureMap.count(oldGlobalName));
-    SaveableTexturePtr& saveableTexture = m_textureMap[oldGlobalName];
-    EglImage* ret = saveableTexture->makeEglImage();
-    ret->saveableTexture = saveableTexture;
-    return ret;
 }
 

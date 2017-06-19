@@ -1403,11 +1403,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display, EGLStream str
 
 EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display, EGLStream stream) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
-    assert(iface->loadTexture);
-    if (!iface || !iface->loadTexture) return true;
+    assert(iface->createTexture);
+    if (!iface || !iface->createTexture) return true;
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
-    dpy->onLoadAllImages(stm, iface->loadTexture);
+    dpy->onLoadAllImages(stm, iface->createTexture);
     return EGL_TRUE;
 }
 

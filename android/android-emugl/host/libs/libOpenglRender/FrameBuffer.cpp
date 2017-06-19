@@ -1479,7 +1479,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
         assert(m_windows.empty());
         assert(m_colorbuffers.empty());
 #ifdef SNAPSHOT_PROFILE
-        android::base::System::Duration imgStartTime =
+        android::base::System::Duration texTime =
                 android::base::System::get()->getUnixTimeUs();
 #endif
         if (s_egl.eglLoadAllImages) {
@@ -1488,7 +1488,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
 #ifdef SNAPSHOT_PROFILE
         printf("Texture load time: %lld ms\n",
                     (long long)(android::base::System::get()->getUnixTimeUs()
-                    - imgStartTime) / 1000);
+                    - texTime) / 1000);
 #endif
     }
     // See comment about subwindow position in onSave().
