@@ -18,6 +18,7 @@
 #include "android/base/system/System.h"
 #include "android/emulation/control/AdbInterface.h"
 
+#include <iosfwd>
 #include <functional>
 #include <string>
 
