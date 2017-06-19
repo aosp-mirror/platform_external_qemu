@@ -22,6 +22,7 @@
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 #include "emugl/common/sync_device.h"
+#include "SnapshotDirGetter.h"
 
 namespace emugl {
 
@@ -40,6 +41,10 @@ void RenderLibImpl::getGlesVersion(int* maj, int* min) {
 void RenderLibImpl::setLogger(emugl_logger_struct logger) {
     set_emugl_logger(logger.coarse);
     set_emugl_cxt_logger(logger.fine);
+}
+
+void RenderLibImpl::setSnapshotDirGetter(emugl_get_snapshot_dir_t snapshotGetter) {
+    set_emugl_get_snapshot_dir(snapshotGetter);
 }
 
 void RenderLibImpl::setCrashReporter(emugl_crash_reporter_t reporter) {
