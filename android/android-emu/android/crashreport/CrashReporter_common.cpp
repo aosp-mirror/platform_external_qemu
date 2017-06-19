@@ -95,7 +95,11 @@ CrashReporter::CrashReporter()
     }
 }
 
-CrashReporter::~CrashReporter() = default;
+CrashReporter::~CrashReporter() {
+    if (CrashSystem::CrashType::CRASHUPLOAD == CrashSystem::CrashType::NONE) {
+        path_delete_dir(mDataExchangeDir.c_str());
+    }
+}
 
 const std::string& CrashReporter::getDumpDir() const {
     return mDumpDir;
@@ -305,6 +309,10 @@ bool crashhandler_init() {
     }
 
     return CrashReporter::get()->attachCrashHandler(crashpipe);
+}
+
+void crashhandler_cleanup() {
+    CrashReporter::destroy();
 }
 
 void crashhandler_die(const char* message) {

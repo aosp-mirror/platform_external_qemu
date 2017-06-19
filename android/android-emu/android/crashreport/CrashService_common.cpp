@@ -38,6 +38,7 @@
 #include "android/crashreport/CrashSystem.h"
 #include "android/curl-support.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 #include "google_breakpad/processor/fast_source_line_resolver.h"
 #include "google_breakpad/processor/call_stack.h"
 #include "google_breakpad/processor/code_module.h"
@@ -111,7 +112,7 @@ CrashService::CrashService(const std::string& version,
     mVersionId = version;
     mVersionId += "-";
     mVersionId += build;
-};
+}
 
 CrashService::~CrashService() {
     if (!mDeleteCrashDataOnExit) {
@@ -119,18 +120,10 @@ CrashService::~CrashService() {
     }
 
     if (validDumpFile()) {
-        remove(mDumpFile.c_str());
+        path_delete_file(mDumpFile.c_str());
     }
     if (!mDataDirectory.empty()) {
-        const auto files = System::get()->scanDirEntries(mDataDirectory, true);
-        for (const std::string& file : files) {
-            remove(file.c_str());
-        }
-        if (remove(mDataDirectory.c_str()) < 0) {
-            // on Windows waiting a bit usually helps
-            System::get()->sleepMs(1);
-            remove(mDataDirectory.c_str());
-        }
+        path_delete_dir(mDataDirectory.c_str());
     }
 }
 

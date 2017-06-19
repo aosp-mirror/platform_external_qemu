@@ -37,6 +37,7 @@ ANDROID_BEGIN_HEADER
 //    Unable to connect to crash service process
 //    Success on previous call
 bool crashhandler_init(void);
+void crashhandler_cleanup(void);
 
 // Abort the program execution immidiately; when showing a crash dialog, use
 // show |message| to the user instead of standard 'emulator have crashed'
