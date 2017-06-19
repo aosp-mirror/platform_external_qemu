@@ -96,8 +96,12 @@ public:
     EglOS::Context* getGlobalSharedContext() const;
     GlobalNameSpace* getGlobalNameSpace() { return &m_globalNameSpace; }
 
-    void onSaveAllImages(android::base::Stream* stream, SaveableTexture::saver_t saver);
-    void onLoadAllImages(android::base::Stream* stream, SaveableTexture::loader_t loader);
+    void onSaveAllImages(android::base::Stream* stream,
+                         const char* snapshotDir,
+                         SaveableTexture::saver_t saver);
+    void onLoadAllImages(android::base::Stream* stream,
+                         const char* snapshotDir,
+                         SaveableTexture::creator_t creator);
     void postLoadAllImages(android::base::Stream* stream);
 private:
     static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);

@@ -14,17 +14,16 @@
 
 #include "android-qemu2-glue/snapshot_hooks.h"
 
-#include "android/avd/info.h"
 #include "android/base/StringFormat.h"
 #include "android/base/Uuid.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/globals.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/utils/path.h"
 
 extern "C" {
@@ -49,23 +48,13 @@ using android::base::PathUtils;
 using android::base::StdioStream;
 using android::base::Uuid;
 
+using android::snapshot::getSnapshotDir;
 using android::snapshot::RamBlock;
 using android::snapshot::RamLoader;
 using android::snapshot::RamSaver;
 
 static LazyInstance<std::unique_ptr<RamSaver>> sRamSaver = {};
 static LazyInstance<std::unique_ptr<RamLoader>> sRamLoader = {};
-
-static std::string getSnapshotDir(const char* snapshotName, bool create) {
-    auto dir = avdInfo_getContentPath(android_avdInfo);
-    auto path = PathUtils::join(dir, "snapshots", snapshotName);
-    if (create) {
-        if (path_mkdir_if_needed(path.c_str(), 0777) != 0) {
-            return {};
-        }
-    }
-    return path;
-}
 
 static std::string getRamFileName(const std::string& snapshotDir) {
     return PathUtils::join(snapshotDir, "ram.bin");
@@ -83,6 +72,7 @@ static std::string readRamFileUuid(QEMUFile* f) {
 }
 
 static int onSaveVmStart(const char* name) {
+    android::snapshot::setSnapshotName(name);
     auto dir = getSnapshotDir(name, true);
     if (dir.empty()) {
         return -EINVAL;
@@ -107,6 +97,7 @@ static void onSaveVmEnd(const char* name, int res) {
 }
 
 static int onLoadVmStart(const char* name) {
+    android::snapshot::setSnapshotName(name);
     auto& loader = sRamLoader.get();
     if (loader) {
         loader.reset();

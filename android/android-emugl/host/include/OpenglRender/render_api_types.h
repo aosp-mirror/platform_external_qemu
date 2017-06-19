@@ -19,6 +19,11 @@
 #include "android/emulation/goldfish_sync.h"
 #include "android/featurecontrol/FeatureControl.h"
 
+#include <string>
+
+// Snapshot dir
+typedef std::string (*emugl_get_snapshot_dir_t)(bool create);
+
 // Crash reporter
 typedef void (*emugl_crash_reporter_t)(const char* format, ...);
 

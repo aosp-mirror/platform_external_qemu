@@ -19,6 +19,7 @@
 #include "DispatchTables.h"
 #include "NativeSubWindow.h"
 #include "RenderThreadInfo.h"
+#include "SnapshotDirGetter.h"
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -1411,7 +1412,8 @@ void FrameBuffer::onSave(Stream* stream) {
             s_egl.eglPreSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
                     stream);
         }
-        s_egl.eglSaveAllImages(m_eglDisplay, stream);
+        std::string snapshotPath(emugl_get_snapshot_dir(true));
+        s_egl.eglSaveAllImages(m_eglDisplay, stream, snapshotPath.c_str());
     }
     // Don't save subWindow's x/y/w/h here - those are related to the current
     // emulator UI state, not guest state that we're saving.
@@ -1487,16 +1489,18 @@ bool FrameBuffer::onLoad(Stream* stream) {
         assert(m_windows.empty());
         assert(m_colorbuffers.empty());
 #ifdef SNAPSHOT_PROFILE
-        android::base::System::Duration imgStartTime =
+        android::base::System::Duration texTime =
                 android::base::System::get()->getUnixTimeUs();
 #endif
         if (s_egl.eglLoadAllImages) {
-            s_egl.eglLoadAllImages(m_eglDisplay, stream);
+            std::string snapshotPath = emugl_get_snapshot_dir(false);
+            s_egl.eglLoadAllImages(m_eglDisplay, stream, snapshotPath.c_str());
         }
 #ifdef SNAPSHOT_PROFILE
         printf("Texture load time: %lld ms\n",
-                    (long long)(android::base::System::get()->getUnixTimeUs()
-                    - imgStartTime) / 1000);
+               (long long)(android::base::System::get()->getUnixTimeUs() -
+                           texTime) /
+                       1000);
 #endif
     }
     // See comment about subwindow position in onSave().
