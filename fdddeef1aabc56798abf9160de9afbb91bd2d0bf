@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "96ec708e_3dd17179",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 675,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-19T17:40:37Z",
+      "side": 0,
+      "message": "Intel VTune used to hang in this call for 10-30 seconds - because of uninitialized variable",
+      "range": {
+        "startLine": 675,
+        "startChar": 31,
+        "endLine": 675,
+        "endChar": 35
+      },
+      "revId": "fdddeef1aabc56798abf9160de9afbb91bd2d0bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
