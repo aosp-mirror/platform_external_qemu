@@ -92,6 +92,7 @@ public:
 
     // Gets a handle to single instance of crash reporter
     static CrashReporter* get();
+    static void destroy();
 
     // Pass some data to the crash reporter, so in case of a crash it's uploaded
     // with the dump

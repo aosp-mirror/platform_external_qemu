@@ -190,5 +190,11 @@ CrashReporter* CrashReporter::get() {
     return sCrashReporter.ptr();
 }
 
+void CrashReporter::destroy() {
+    if (sCrashReporter.hasInstance()) {
+        sCrashReporter.ptr()->~HostCrashReporter();
+    }
+}
+
 }  // namespace crashreport
 }  // namespace android

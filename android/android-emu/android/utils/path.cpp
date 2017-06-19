@@ -577,18 +577,22 @@ APosixStatus path_delete_dir(const char* path) {
     if (!dirScanner)
         return -EINVAL;
 
+    int fullRes = 0;
     const char* name = dirScanner_nextFull(dirScanner.get());
     while (name) {
         if (path_is_dir(name)) {
             if (auto res = path_delete_dir(name)) {
-                return res;
+                fullRes = fullRes ? fullRes : res;
             }
         } else {
             if (auto res = path_delete_file(name)) {
-                return res;
+                fullRes = fullRes ? fullRes : res;
             }
         }
         name = dirScanner_nextFull(dirScanner.get());
     }
-    return 0;
+
+    auto res = rmdir(path);
+    fullRes = fullRes ? fullRes : res;
+    return fullRes;
 }

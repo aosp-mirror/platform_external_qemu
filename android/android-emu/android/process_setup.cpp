@@ -89,4 +89,5 @@ void process_early_setup(int argc, char** argv) {
 
 void process_late_teardown() {
     curl_cleanup();
+    crashhandler_cleanup();
 }
