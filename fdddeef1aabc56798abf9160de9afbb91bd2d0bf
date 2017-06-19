@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "bd864037_1a895871",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 250,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-19T18:23:27Z",
+      "side": 1,
+      "message": "should we write a ctor for AdbCommandResult and open the file handle there?",
+      "revId": "fdddeef1aabc56798abf9160de9afbb91bd2d0bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "98debfbd_08a9ed62",
         "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
         "patchSetId": 1
