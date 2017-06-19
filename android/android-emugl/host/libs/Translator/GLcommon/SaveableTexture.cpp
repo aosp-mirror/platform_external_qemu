@@ -314,10 +314,13 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_border(texture.border),
       m_globalName(texture.globalName) {}
 
-SaveableTexture::SaveableTexture(android::base::Stream* stream,
-                                 GlobalNameSpace* globalNameSpace)
-    : LazySnapshotObj(stream)
-    , m_globalNamespace(globalNameSpace) {
+SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
+                                 loader_t loader)
+    : m_loader(loader), m_globalNamespace(globalNameSpace) {
+    mNeedRestore = true;
+}
+
+void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     m_target = stream->getBe32();
     m_width = stream->getBe32();
     m_height = stream->getBe32();
@@ -495,6 +498,8 @@ void SaveableTexture::onSave(
 }
 
 void SaveableTexture::restore() {
+    assert(m_loader);
+    m_loader(this);
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         // restore the texture
@@ -627,14 +632,13 @@ const NamedObjectPtr& SaveableTexture::getGlobalObject() {
     return m_globalTexObj;
 }
 
-EglImage* SaveableTexture::makeEglImage() const {
-    EglImage* ret = new EglImage();
-    ret->border = m_border;
-    ret->format = m_format;
-    ret->height = m_height;
-    ret->globalTexObj = m_globalTexObj;
-    ret->internalFormat = m_internalFormat;
-    ret->type = m_type;
-    ret->width = m_width;
-    return ret;
+void SaveableTexture::fillEglImage(EglImage* eglImage) {
+    touch();
+    eglImage->border = m_border;
+    eglImage->format = m_format;
+    eglImage->height = m_height;
+    eglImage->globalTexObj = m_globalTexObj;
+    eglImage->internalFormat = m_internalFormat;
+    eglImage->type = m_type;
+    eglImage->width = m_width;
 }

@@ -15,6 +15,7 @@
 
 #include "RendererImpl.h"
 
+#include "SnapshotDirGetter.h"
 #include "android/base/files/Stream.h"
 #include "emugl/common/crash_reporter.h"
 #include "emugl/common/dma_device.h"
@@ -40,6 +41,11 @@ void RenderLibImpl::getGlesVersion(int* maj, int* min) {
 void RenderLibImpl::setLogger(emugl_logger_struct logger) {
     set_emugl_logger(logger.coarse);
     set_emugl_cxt_logger(logger.fine);
+}
+
+void RenderLibImpl::setSnapshotDirGetter(
+        emugl_get_snapshot_dir_t snapshotGetter) {
+    set_emugl_get_snapshot_dir(snapshotGetter);
 }
 
 void RenderLibImpl::setCrashReporter(emugl_crash_reporter_t reporter) {

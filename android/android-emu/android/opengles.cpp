@@ -19,10 +19,11 @@
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/logger.h"
-#include "android/utils/debug.h"
-#include "android/utils/path.h"
+#include "android/snapshot/PathUtils.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
 #include "android/utils/dll.h"
+#include "android/utils/path.h"
 #include "config-host.h"
 
 #include "OpenglRender/render_api_functions.h"
@@ -139,6 +140,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
 
     sRenderLib->setRenderer(emuglConfig_get_current_renderer());
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
+    sRenderLib->setSnapshotDirGetter(&android::snapshot::getSnapshotDir);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
     sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
     sRenderLib->setSyncDevice(goldfish_sync_create_timeline,

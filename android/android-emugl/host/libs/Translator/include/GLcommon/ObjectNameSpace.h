@@ -129,11 +129,14 @@ public:
     // The following are used for snapshot
     void preSaveAddEglImage(const EglImage* eglImage);
     void preSaveAddTex(const TextureData* texture);
-    void onSave(android::base::Stream* stream, SaveableTexture::saver_t saver);
-    void onLoad(android::base::Stream* stream, SaveableTexture::loader_t loader);
+    void onSave(android::base::Stream* stream,
+                const char* snapshotDir,
+                SaveableTexture::saver_t saver);
+    void onLoad(android::base::Stream* stream,
+                const char* snapshotDir,
+                SaveableTexture::creator_t creator);
     void postLoad(android::base::Stream* stream);
     const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);
-    EglImage* makeEglImageFromLoad(unsigned int oldGlobalName);
 private:
     emugl::Mutex m_lock;
     // m_textureMap is only used when saving / loading a snapshot

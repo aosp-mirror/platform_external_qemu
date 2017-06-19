@@ -491,6 +491,13 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
     return reinterpret_cast<EGLImageKHR>(m_nextEglImageId);
 }
 
+static void touchEglImage(EglImage* eglImage) {
+    if (eglImage->saveableTexture) {
+        eglImage->saveableTexture->fillEglImage(eglImage);
+        eglImage->saveableTexture.reset();
+    }
+}
+
 ImagePtr EglDisplay::getImage(EGLImageKHR img,
         SaveableTexture::restorer_t restorer) const {
     emugl::Mutex::AutoLock mutex(m_lock);
@@ -500,10 +507,7 @@ ImagePtr EglDisplay::getImage(EGLImageKHR img,
     if (i == m_eglImages.end()) {
         return ImagePtr();
     }
-    if (i->second->saveableTexture) {
-        i->second->globalTexObj = i->second->saveableTexture->getGlobalObject();
-        i->second->saveableTexture.reset();
-    }
+    touchEglImage(i->second.get());
     return i->second;
 }
 
@@ -602,24 +606,21 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
 }
 
 void EglDisplay::onSaveAllImages(android::base::Stream* stream,
-        SaveableTexture::saver_t saver) {
+                                 const char* snapshotDir,
+                                 SaveableTexture::saver_t saver) {
     // we could consider calling presave for all ShareGroups from here
     // but it would introduce overheads because not all share groups need to be
     // saved
     emugl::Mutex::AutoLock mutex(m_lock);
     for (auto& image : m_eglImages) {
-        if (image.second->saveableTexture) {
-            // In case we loaded textures from a previous snapshot and have not
-            // yet restore them to GPU, we do the restoration here.
-            // TODO: skip restoration and write saveableTexture directly to the
-            // new snapshot for better performance
-            image.second->globalTexObj =
-                    image.second->saveableTexture->getGlobalObject();
-            image.second->saveableTexture.reset();
-        }
+        // In case we loaded textures from a previous snapshot and have not
+        // yet restore them to GPU, we do the restoration here.
+        // TODO: skip restoration and write saveableTexture directly to the
+        // new snapshot for better performance
+        touchEglImage(image.second.get());
         getGlobalNameSpace()->preSaveAddEglImage(image.second.get());
     }
-    m_globalNameSpace.onSave(stream, saver);
+    m_globalNameSpace.onSave(stream, snapshotDir, saver);
     saveCollection(stream, m_eglImages, [](
             android::base::Stream* stream,
             const ImagesHndlMap::value_type& img) {
@@ -631,7 +632,8 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
 }
 
 void EglDisplay::onLoadAllImages(android::base::Stream* stream,
-        SaveableTexture::loader_t loader) {
+                                 const char* snapshotDir,
+                                 SaveableTexture::creator_t creator) {
     if (!m_eglImages.empty()) {
         // Could be triggered by this bug:
         // b/36654917
@@ -639,13 +641,15 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
     }
     m_eglImages.clear();
     emugl::Mutex::AutoLock mutex(m_lock);
-    m_globalNameSpace.onLoad(stream, loader);
+    m_globalNameSpace.onLoad(stream, snapshotDir, creator);
     loadCollection(stream, &m_eglImages, [this](
         android::base::Stream* stream) {
         unsigned int hndl = stream->getBe32();
         unsigned int globalName = stream->getBe32();
-        ImagePtr eglImg(m_globalNameSpace.makeEglImageFromLoad(globalName));
+        ImagePtr eglImg(new EglImage);
         eglImg->imageId = hndl;
+        eglImg->saveableTexture =
+                m_globalNameSpace.getSaveableTextureFromLoad(globalName);
         return std::make_pair(hndl, std::move(eglImg));
     });
 }
