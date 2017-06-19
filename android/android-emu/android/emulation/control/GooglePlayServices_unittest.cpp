@@ -21,6 +21,7 @@
 
 #include <gtest/gtest.h>
 
+#include <fstream>
 #include <string>
 
 using android::base::System;

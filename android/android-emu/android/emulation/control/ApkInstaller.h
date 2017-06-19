@@ -57,7 +57,7 @@ public:
     // running "adb install" to see if the install succeeded. Returns true
     // if the install succeeded, false otherwise. If the install failed,
     // |outErrorString| is populated with the error from "adb install".
-    static bool parseOutputForFailure(std::ifstream& output,
+    static bool parseOutputForFailure(std::istream& output,
                                       std::string* outErrorString);
 
     static const char kDefaultErrorString[];

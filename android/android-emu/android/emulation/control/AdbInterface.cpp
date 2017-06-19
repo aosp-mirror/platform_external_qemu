@@ -21,6 +21,7 @@
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 
 #include <cstdio>
 #include <fstream>
@@ -246,11 +247,20 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
     if (command_ran) {
         *result = android::base::makeOptional<AdbCommandResult>(
                 {exit_code,
-                 mWantOutput ? std::unique_ptr<std::ifstream>(new std::ifstream(
-                                       mOutputFilePath.c_str()))
-                             : std::unique_ptr<std::ifstream>()});
+                 std::unique_ptr<std::ifstream>(
+                         mWantOutput
+                                 ? new std::ifstream(mOutputFilePath.c_str())
+                                 : nullptr),
+                 mWantOutput ? mOutputFilePath : std::string()});
     }
 }
 
+AdbCommandResult::~AdbCommandResult() {
+    output.reset();
+    if (!output_name.empty()) {
+        path_delete_file(output_name.c_str());
+    }
 }
-}
+
+}  // namespace emulation
+}  // namespace android
