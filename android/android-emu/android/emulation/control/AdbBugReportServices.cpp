@@ -95,8 +95,8 @@ void AdbBugReportServices::generateBugReport(StringView outputDirectoryPath,
                         if (!outFile.is_open() || !outFile.good()) {
                             resultCallback(Result::GenerationFailed, nullptr);
                         } else {
-                            std::filebuf* pbuf = result->output->rdbuf();
-                            outFile << pbuf;
+                            auto buf = result->output->rdbuf();
+                            outFile << buf;
                             outFile.close();
                             resultCallback(Result::Success, filePath);
                         }
