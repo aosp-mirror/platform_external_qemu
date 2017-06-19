@@ -97,6 +97,13 @@ public:
         return mInFlight;
     }
 
+    void waitUntilRunning() {
+        AutoLock lock(mLock);
+        while (mInFlight && !mInTimerCallback) {
+            mInTimerCondition.wait(&lock);
+        }
+    }
+
 protected:
     static void taskCallback(void* opaqueThis, Looper::Timer* timer) {
         const auto self = static_cast<RecurrentTask*>(opaqueThis);

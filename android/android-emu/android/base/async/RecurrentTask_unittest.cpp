@@ -152,6 +152,8 @@ TEST(RecurrentTaskTest, stopAndWait) {
         return nullptr;
     }, &looper);
 
+    task.waitUntilRunning();
+
     // If there's any but with the task's stop method, the test would hang in
     // the next call forever as looper won't be able to break out of its run()
     // call.

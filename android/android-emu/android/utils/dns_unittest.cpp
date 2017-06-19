@@ -33,7 +33,7 @@ TEST(android_dns_get_system_servers, DumpList) {
     SockAddress ips[kMaxServers];
     int count = android_dns_get_system_servers(ips, kMaxServers);
     EXPECT_GT(count, 0);
-    EXPECT_LT(count, (int)kMaxServers);
+    EXPECT_LE(count, (int)kMaxServers);
     char tmp[256];
     for (int n = 0; n < count; ++n) {
         LOG(INFO) << "DNS nameserver " << sock_address_host_string(&ips[n], tmp, sizeof(tmp));
