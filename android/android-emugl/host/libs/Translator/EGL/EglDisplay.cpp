@@ -631,7 +631,7 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
 }
 
 void EglDisplay::onLoadAllImages(android::base::Stream* stream,
-        SaveableTexture::loader_t loader) {
+        SaveableTexture::creator_t creator) {
     if (!m_eglImages.empty()) {
         // Could be triggered by this bug:
         // b/36654917
@@ -639,7 +639,7 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
     }
     m_eglImages.clear();
     emugl::Mutex::AutoLock mutex(m_lock);
-    m_globalNameSpace.onLoad(stream, loader);
+    m_globalNameSpace.onLoad(stream, creator);
     loadCollection(stream, &m_eglImages, [this](
         android::base::Stream* stream) {
         unsigned int hndl = stream->getBe32();

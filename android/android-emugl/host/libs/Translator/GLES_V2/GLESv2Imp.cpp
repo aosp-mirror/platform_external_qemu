@@ -57,7 +57,7 @@ static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* global
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
                         android::base::SmallVector<unsigned char>* buffer);
-static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace);
+static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace);
 static void restoreTexture(SaveableTexture* texture);
 }
 
@@ -81,7 +81,7 @@ static GLESiface  s_glesIface = {
     .clientWaitSync             = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
     .deleteSync                 = (FUNCPTR_DELETE_SYNC)glDeleteSync,
     .saveTexture                = saveTexture,
-    .loadTexture                = loadTexture,
+    .createTexture                = createTexture,
     .restoreTexture             = restoreTexture,
     .deleteRbo                  = deleteRenderbufferGlobal,
 };
@@ -158,9 +158,8 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
     texture->onSave(stream, buffer);
 }
 
-static SaveableTexture* loadTexture(android::base::Stream* stream,
-        GlobalNameSpace* globalNameSpace) {
-    return new SaveableTexture(stream, globalNameSpace);
+static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace) {
+    return new SaveableTexture(globalNameSpace);
 }
 
 static void restoreTexture(SaveableTexture* texture) {

@@ -314,10 +314,16 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_border(texture.border),
       m_globalName(texture.globalName) {}
 
-SaveableTexture::SaveableTexture(android::base::Stream* stream,
-                                 GlobalNameSpace* globalNameSpace)
-    : LazySnapshotObj(stream)
-    , m_globalNamespace(globalNameSpace) {
+SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace)
+    : m_globalNamespace(globalNameSpace) {
+    mNeedRestore = true;
+}
+
+void SaveableTexture::setLoader(loader_t loader) {
+    m_loader = loader;
+}
+
+void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     m_target = stream->getBe32();
     m_width = stream->getBe32();
     m_height = stream->getBe32();
@@ -495,6 +501,8 @@ void SaveableTexture::onSave(
 }
 
 void SaveableTexture::restore() {
+    assert(m_loader);
+    m_loader(this);
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         // restore the texture
