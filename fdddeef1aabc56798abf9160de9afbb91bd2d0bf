@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98debfbd_08a9ed62",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-06-19T18:20:49Z",
+      "side": 1,
+      "message": "Not sure why we switched form ifstream to istream.",
+      "range": {
+        "startLine": 43,
+        "startChar": 25,
+        "endLine": 43,
+        "endChar": 32
+      },
+      "revId": "fdddeef1aabc56798abf9160de9afbb91bd2d0bf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
