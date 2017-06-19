@@ -21,10 +21,12 @@
 #include "android/emulation/ComponentVersion.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/utils/debug.h"
+#include "android/utils/path.h"
 
 #include <cstdio>
 #include <fstream>
 #include <string>
+#include <utility>
 
 using namespace android::base;
 
@@ -245,12 +247,38 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
 
     if (command_ran) {
         *result = android::base::makeOptional<AdbCommandResult>(
-                {exit_code,
-                 mWantOutput ? std::unique_ptr<std::ifstream>(new std::ifstream(
-                                       mOutputFilePath.c_str()))
-                             : std::unique_ptr<std::ifstream>()});
+                {exit_code, mWantOutput ? mOutputFilePath : std::string()});
     }
 }
 
+AdbCommandResult::AdbCommandResult(System::ProcessExitCode exitCode,
+                                   const std::string& outputName)
+    : exit_code(exitCode),
+      output(outputName.empty() ? nullptr
+                                : new std::ifstream(outputName.c_str())),
+      output_name(outputName) {}
+
+AdbCommandResult::~AdbCommandResult() {
+    output.reset();
+    if (!output_name.empty()) {
+        path_delete_file(output_name.c_str());
+    }
 }
+
+AdbCommandResult::AdbCommandResult(AdbCommandResult&& other)
+    : exit_code(other.exit_code),
+      output(std::move(other.output)),
+      output_name(std::move(other.output_name)) {
+    other.output_name.clear();  // make sure |other| won't delete it
 }
+
+AdbCommandResult& AdbCommandResult::operator=(AdbCommandResult&& other) {
+    exit_code = other.exit_code;
+    output = std::move(other.output);
+    output_name = std::move(other.output_name);
+    other.output_name.clear();
+    return *this;
+}
+
+}  // namespace emulation
+}  // namespace android

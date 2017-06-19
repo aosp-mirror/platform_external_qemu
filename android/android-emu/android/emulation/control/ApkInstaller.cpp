@@ -20,7 +20,7 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
 
-#include <fstream>
+#include <istream>
 #include <iostream>
 #include <sstream>
 
@@ -53,7 +53,7 @@ ApkInstaller::~ApkInstaller() {
 }
 
 // static
-bool ApkInstaller::parseOutputForFailure(std::ifstream& stream,
+bool ApkInstaller::parseOutputForFailure(std::istream& stream,
                                          string* outErrorString) {
     // "adb install" does not return a helpful exit status, so instead we parse
     // the output of the process looking for:

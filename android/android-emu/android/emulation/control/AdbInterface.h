@@ -20,7 +20,7 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
 
-#include <fstream>
+#include <iosfwd>
 #include <functional>
 #include <memory>
 #include <string>
@@ -40,7 +40,17 @@ struct AdbCommandResult {
     // The command's output.
     // NOTE: we're using unique_ptr here because there's a bug in g++ 4 due to
     // which file streams are unmovable.
-    mutable std::unique_ptr<std::ifstream> output;
+    std::unique_ptr<std::istream> output;
+
+    AdbCommandResult(android::base::System::ProcessExitCode exitCode,
+                     const std::string& outputName);
+
+    ~AdbCommandResult();
+    AdbCommandResult(AdbCommandResult&&);
+    AdbCommandResult& operator=(AdbCommandResult&&);
+
+private:
+    std::string output_name;
 };
 using OptionalAdbCommandResult = android::base::Optional<AdbCommandResult>;
 
