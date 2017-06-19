@@ -52,7 +52,8 @@ static void write_window_name(char* buff,
                               size_t buff_len,
                               int base_port,
                               const char* avd_name) {
-    snprintf(buff, buff_len, "Android Emulator - %s:%d", avd_name, base_port);
+    const char* const os = android_hw->hw_arc ? "Chrome OS" : "Android";
+    snprintf(buff, buff_len, "%s Emulator - %s:%d", os, avd_name, base_port);
 }
 
 
