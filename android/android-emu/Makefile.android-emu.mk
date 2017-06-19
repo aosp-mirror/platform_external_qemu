@@ -103,7 +103,6 @@ LOCAL_SRC_FILES := \
     android/base/misc/HttpUtils.cpp \
     android/base/misc/StringUtils.cpp \
     android/base/misc/Utf8Utils.cpp \
-    android/base/network/Dns.cpp \
     android/base/network/IpAddress.cpp \
     android/base/network/NetworkUtils.cpp \
     android/base/StringFormat.cpp \
@@ -129,7 +128,6 @@ LOCAL_SRC_FILES := \
     android/utils/cbuffer.c \
     android/utils/debug.c \
     android/utils/debug_wrapper.cpp \
-    android/utils/dns.cpp \
     android/utils/dll.c \
     android/utils/dirscanner.cpp \
     android/utils/eintr_wrapper.c \
@@ -249,6 +247,7 @@ LOCAL_SRC_FILES := \
     android/base/async/Looper.cpp \
     android/base/async/ScopedSocketWatch.cpp \
     android/base/async/ThreadLooper.cpp \
+    android/base/network/Dns.cpp \
     android/base/sockets/SocketDrainer.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
@@ -413,6 +412,7 @@ LOCAL_SRC_FILES := \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
     android/user-config.cpp \
+    android/utils/dns.cpp \
     android/utils/Random.cpp \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \

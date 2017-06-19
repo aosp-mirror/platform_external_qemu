@@ -37,8 +37,9 @@ namespace base {
 //                                [this]() { return askAgain(); },
 //                                1 * 60 * 1000) {}
 //
-//         void askAgain() {
+//         bool askAgain() {
 //             std::cout << "Are we there yet?" << std::endl;
+//             return rand() % 2;
 //         }
 //
 //         void startHike() {
@@ -97,13 +98,21 @@ public:
         return mInFlight;
     }
 
+    void waitUntilRunning() {
+        AutoLock lock(mLock);
+        while (mInFlight && !mInTimerCallback) {
+            mInTimerCondition.wait(&lock);
+        }
+    }
+
 protected:
     static void taskCallback(void* opaqueThis, Looper::Timer* timer) {
         const auto self = static_cast<RecurrentTask*>(opaqueThis);
         AutoLock lock(self->mLock);
         self->mInTimerCallback = true;
         const bool inFlight = self->mInFlight;
-        lock.unlock();
+        self->mInTimerCondition.broadcastAndUnlock(&lock);
+
         const auto undoInTimerCallback =
                 makeCustomScopedPtr(self, [&lock](RecurrentTask* self) {
                     if (!lock.isLocked()) {
