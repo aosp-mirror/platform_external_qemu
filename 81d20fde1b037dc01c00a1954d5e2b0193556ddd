@@ -48,6 +48,23 @@
     },
     {
       "key": {
+        "uuid": "f353d329_91fcb568",
+        "filename": "android/console.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2684,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "uint8_t is required to be an unsigned integer type that\u0027s exactly 8 bits wide. So sizeof should return 1.",
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ff922014_04e63e8c",
         "filename": "android/console.c",
         "patchSetId": 7
@@ -65,6 +82,23 @@
         "endLine": 2691,
         "endChar": 5
       },
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbd7569f_b6088f1b",
+        "filename": "android/console.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 2692,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "It looks like  \"1  a     a\"  gets turned into 1aaaa is that ok?",
       "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -117,6 +151,40 @@
     },
     {
       "key": {
+        "uuid": "3430d2a0_25ccfe01",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "nit: Same as _nfcState, who initializes _nfcState[0]?",
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3953f7b7_85e99869",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "Is there a case where this is not NULL?",
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c2b103f2_3b319ec9",
         "filename": "android/hw-nfc.c",
         "patchSetId": 7
@@ -140,6 +208,40 @@
     },
     {
       "key": {
+        "uuid": "b742a766_292b72ab",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "nit: No need to set to NULL. This snippet looks very similar to hwNfc_reset_request, consider replacing this so the code is easier to read.",
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "482b5ed2_538c41e6",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "nit: No need to calloc if you are memcpying over it immediately.",
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b5c7ffa6_47992190",
         "filename": "android/hw-nfc.c",
         "patchSetId": 7
@@ -157,6 +259,40 @@
         "endLine": 145,
         "endChar": 2
       },
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5e5f83b_313fc848",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "nit: No need to check for length.",
+      "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29fc9c16_99238387",
+        "filename": "android/hw-nfc.c",
+        "patchSetId": 7
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-20T17:53:16Z",
+      "side": 1,
+      "message": "Does this always succeed? Do we need to handle failures?",
       "revId": "81d20fde1b037dc01c00a1954d5e2b0193556ddd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
