@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7aa46109_8421ed28",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-20T16:16:30Z",
+      "side": 1,
+      "message": "Having three memory allocations for a simple check is really inefficient\nwhat about strstr() and then compare the character after the match to be \u0027 \u0027 or \u0027\\0\u0027?\nAlso, what if the extension you\u0027re looking for is the last one?",
+      "range": {
+        "startLine": 134,
+        "startChar": 4,
+        "endLine": 139,
+        "endChar": 17
+      },
+      "revId": "5c641caf5bbb9b61a41fa847931ae9485f7b2e8b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
