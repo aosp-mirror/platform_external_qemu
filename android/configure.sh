@@ -12,7 +12,7 @@
 # first, let's see which system we're running this on
 PROGNAME=`basename $0`
 PROGDIR=`dirname $0`
-
+CURR_SHELL=$(ps -o comm= -p $$)
 ## Logging support
 ##
 VERBOSE=yes
@@ -49,6 +49,7 @@ case "$BUILD_ARCH" in
 esac
 
 log2 "BUILD_ARCH=$BUILD_ARCH"
+log2 "CURR_SHELL=$CURR_SHELL"
 
 # at this point, the supported values for CPU are:
 #   x86
@@ -236,7 +237,7 @@ OPTION_AOSP_PREBUILTS_DIR=
 OPTION_OUT_DIR=
 OPTION_HELP=no
 OPTION_STRIP=yes
-OPTION_CRASHUPLOAD=
+OPTION_CRASHUPLOAD=NONE
 OPTION_MINGW=no
 OPTION_GLES=
 OPTION_SDK_REV=
@@ -305,9 +306,9 @@ for opt do
   ;;
   --no-strip) OPTION_STRIP=no
   ;;
-  --crash-staging) OPTION_CRASHUPLOAD=staging
+  --crash-staging) OPTION_CRASHUPLOAD=STAGING
   ;;
-  --crash-prod) OPTION_CRASHUPLOAD=prod
+  --crash-prod) OPTION_CRASHUPLOAD=PROD
   ;;
   --out-dir=*) OPTION_OUT_DIR=$optarg
   ;;
@@ -568,6 +569,7 @@ probe_prebuilts_dir () {
     eval $2=\$PREBUILTS_DIR
 }
 
+
 ###
 ###  Zlib probe
 ###
@@ -607,6 +609,11 @@ probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 ###  lz4 probe
 ###
 probe_prebuilts_dir "lz4" LZ4_PREBUILTS_DIR common/lz4
+
+###
+###  Protobuf library probe
+###
+probe_prebuilts_dir "Protobuf" PROTOBUF_PREBUILTS_DIR protobuf
 
 CACERTS_FILE="$PROGDIR/data/ca-bundle.pem"
 if [ ! -f "$CACERTS_FILE" ]; then
@@ -1082,7 +1089,7 @@ echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBSDL2_PREBUILTS_DIR := $LIBSDL2_PREBUILTS_DIR" >> $config_mk
 echo "LIBXML2_PREBUILTS_DIR := $LIBXML2_PREBUILTS_DIR" >> $config_mk
 echo "LIBCURL_PREBUILTS_DIR := $LIBCURL_PREBUILTS_DIR" >> $config_mk
-echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_TRANSLATION_PREBUILTS_DIR" >> $config_mk
+echo "ANGLE_TRANSLATION_PREBUILTS_DIR := $ANGLE_PREBUILTS_DIR" >> $config_mk
 echo "BREAKPAD_PREBUILTS_DIR := $BREAKPAD_PREBUILTS_DIR" >> $config_mk
 # libuuid is a part of e2fsprogs package
 echo "LIBUUID_PREBUILTS_DIR := $E2FSPROGS_PREBUILTS_DIR" >> $config_mk
@@ -1111,13 +1118,9 @@ if [ "$OPTION_SYMBOLS" = "yes" ]; then
     echo "BUILD_GENERATE_SYMBOLS := true" >> $config_mk
     echo "" >> $config_mk
 fi
-if [ "$OPTION_CRASHUPLOAD" = "prod" ]; then
-    echo "EMULATOR_CRASHUPLOAD := PROD" >> $config_mk
-elif [ "$OPTION_CRASHUPLOAD" = "staging" ]; then
-    echo "EMULATOR_CRASHUPLOAD := STAGING" >> $config_mk
-else
-    echo "EMULATOR_CRASHUPLOAD := NONE" >> $config_mk
-fi
+
+echo "EMULATOR_CRASHUPLOAD := $OPTION_CRASHUPLOAD" >> $config_mk
+
 
 if [ "$ANDROID_SDK_TOOLS_REVISION" ] ; then
   echo "ANDROID_SDK_TOOLS_REVISION := $ANDROID_SDK_TOOLS_REVISION" >> $config_mk
@@ -1131,13 +1134,6 @@ fi
 ANDROID_SDK_TOOLS_CL_SHA1=$( git log -n 1 --pretty=format:"%H" )
 if [ "$ANDROID_SDK_TOOLS_CL_SHA1" ] ; then
   echo "ANDROID_SDK_TOOLS_CL_SHA1 := $ANDROID_SDK_TOOLS_CL_SHA1" >> $config_mk
-fi
-
-if [ "$config_mk" = "yes" ] ; then
-    echo "" >> $config_mk
-    echo "USE_MINGW := 1" >> $config_mk
-    echo "HOST_OS   := windows" >> $config_mk
-    echo "HOST_MINGW_VERSION := $MINGW_GCC_VERSION" >> $config_mk
 fi
 
 if [ -z "$OPTION_QEMU2_SRCDIR" ]; then
