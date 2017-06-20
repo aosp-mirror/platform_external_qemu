@@ -130,6 +130,17 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     return extString;
 }
 
+static bool s_hasExtension(const char* extensionsStr, const char* wantedExtension) {
+    const char* match = strstr(extensionsStr, wantedExtension);
+    size_t wantedTerminatorOffset = strlen(wantedExtension);
+    if (match &&
+        (match[wantedTerminatorOffset] == ' ' ||
+         match[wantedTerminatorOffset] == '\0')) {
+        return true;
+    }
+    return false;
+}
+
 void FrameBuffer::finalize() {
     m_colorbuffers.clear();
     if (m_useSubWindow) {
@@ -307,7 +318,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
     // Initilize framebuffer capabilities
     //
     const bool has_gl_oes_image =
-            strstr(gles2Extensions.get(), "GL_OES_EGL_image") != NULL;
+            s_hasExtension(gles2Extensions.get(), "GL_OES_EGL_image");
     gles2Extensions.reset();
 
     fb->m_caps.has_eglimage_texture_2d = false;
@@ -317,11 +328,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
                 s_egl.eglQueryString(fb->m_eglDisplay, EGL_EXTENSIONS);
         if (eglExtensions != nullptr) {
             fb->m_caps.has_eglimage_texture_2d =
-                    strstr(eglExtensions, "EGL_KHR_gl_texture_2D_image") !=
-                    NULL;
+                    s_hasExtension(eglExtensions, "EGL_KHR_gl_texture_2D_image");
             fb->m_caps.has_eglimage_renderbuffer =
-                    strstr(eglExtensions, "EGL_KHR_gl_renderbuffer_image") !=
-                    NULL;
+                    s_hasExtension(eglExtensions, "EGL_KHR_gl_renderbuffer_image");
         }
     }
 
@@ -601,7 +610,6 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
     ret = genHandle();
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
-                                          getCaps().has_eglimage_texture_2d,
                                           ret, m_colorBufferHelper));
     if (cb.get() != NULL) {
         m_colorbuffers[ret] = { std::move(cb), 1, false };
@@ -1514,7 +1522,6 @@ bool FrameBuffer::onLoad(Stream* stream) {
     loadCollection(stream, &m_colorbuffers,
                    [this](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
-                                              getCaps().has_eglimage_texture_2d,
                                               m_colorBufferHelper));
         const HandleType handle = cb->getHndl();
         const unsigned refCount = stream->getBe32();

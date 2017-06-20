@@ -124,15 +124,13 @@ public:
     // color buffer so that we know how to convert to |p_internalFormat|,
     // if necessary (otherwise, p_frameworkFormat ==
     // FRAMEWORK_FORMAT_GL_COMPATIBLE).
-    // |has_eglimage_texture_2d| should be true iff the display supports
-    // the EGL_KHR_gl_texture_2D_image extension.
+    // It is assumed underlying EGL has EGL_KHR_gl_texture_2D_image.
     // Returns NULL on failure.
     static ColorBuffer* create(EGLDisplay p_display,
                                int p_width,
                                int p_height,
                                GLenum p_internalFormat,
                                FrameworkFormat p_frameworkFormat,
-                               bool has_eglimage_texture_2d,
                                HandleType hndl,
                                Helper* helper);
 
@@ -199,7 +197,6 @@ public:
     void onSave(android::base::Stream* stream);
     static ColorBuffer* onLoad(android::base::Stream* stream,
                                EGLDisplay p_display,
-                               bool has_eglimage_texture_2d,
                                Helper* helper);
 
     HandleType getHndl() const;
