@@ -65,10 +65,6 @@ void icmp_init(Slirp *slirp)
 {
     slirp->icmp.so_next = slirp->icmp.so_prev = &slirp->icmp;
     slirp->icmp_last_so = &slirp->icmp;
-
-#ifdef WIN32
-    icmpwin_init(slirp);
-#endif
 }
 
 void icmp_cleanup(Slirp *slirp)
@@ -76,10 +72,6 @@ void icmp_cleanup(Slirp *slirp)
     while (slirp->icmp.so_next != &slirp->icmp) {
         icmp_detach(slirp->icmp.so_next);
     }
-
-#ifdef WIN32
-    icmpwin_finit(slirp);
-#endif
 }
 
 static int icmp_send(struct socket *so, struct mbuf *m, int hlen)
@@ -184,10 +176,6 @@ icmp_input(struct mbuf *m, int hlen)
     } else if (slirp->restricted) {
         goto freeit;
     } else {
-#ifdef WIN32
-      icmpwin_ping(slirp, m, hlen);
-      m_free(m);
-#else
       struct socket *so;
       struct sockaddr_storage addr;
       if ((so = socreate(slirp)) == NULL) goto freeit;
@@ -223,7 +211,6 @@ icmp_input(struct mbuf *m, int hlen)
 	icmp_send_error(m, ICMP_UNREACH, ICMP_UNREACH_NET, 0, strerror(errno));
 	udp_detach(so);
       }
-#endif /* !WIN32 */
     } /* if ip->ip_dst.s_addr == alias_addr.s_addr */
     break;
   case ICMP_UNREACH:

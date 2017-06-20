@@ -476,10 +476,6 @@ void icmp6_input(struct mbuf *m)
         if (in6_equal_host(&ip->ip_dst)) {
             icmp6_send_echoreply(m, slirp, ip, icmp);
         } else {
-#ifdef WIN32
-            icmpwin_ping(slirp, m, hlen);
-            break;
-#else
             struct socket *so;
             struct sockaddr_storage addr;
             if ((so = socreate(slirp)) == NULL) goto end;
@@ -489,7 +485,6 @@ void icmp6_input(struct mbuf *m)
                 sofree(so);
                 error_report("icmpv6 ICMP6_ECHO_REQUEST failed");
             }
-#endif /* !WIN32 */
         }
         break;
 
