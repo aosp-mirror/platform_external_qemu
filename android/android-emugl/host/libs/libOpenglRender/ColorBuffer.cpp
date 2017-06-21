@@ -70,7 +70,6 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_height,
                                  GLenum p_internalFormat,
                                  FrameworkFormat p_frameworkFormat,
-                                 bool has_eglimage_texture_2d,
                                  HandleType hndl,
                                  Helper* helper) {
     GLenum texInternalFormat = 0;
@@ -163,15 +162,13 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_height = p_height;
     cb->m_internalFormat = texInternalFormat;
 
-    if (has_eglimage_texture_2d) {
-        cb->m_eglImage = s_egl.eglCreateImageKHR(
-                p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-                (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
+    cb->m_eglImage = s_egl.eglCreateImageKHR(
+            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(cb->m_tex), NULL);
 
-        cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
-                p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
-                (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
-    }
+    cb->m_blitEGLImage = s_egl.eglCreateImageKHR(
+            p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(cb->m_blitTex), NULL);
 
     cb->m_resizer = new TextureResize(p_width, p_height);
 
@@ -448,7 +445,6 @@ void ColorBuffer::onSave(android::base::Stream* stream) {
 
 ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
                                  EGLDisplay p_display,
-                                 bool has_eglimage_texture_2d,
                                  Helper* helper) {
     HandleType hndl = static_cast<HandleType>(stream->getBe32());
     GLuint width = static_cast<GLuint>(stream->getBe32());
@@ -461,13 +457,12 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
 
     if (!eglImage) {
         return create(p_display, width, height, internalFormat, frameworkFormat,
-                has_eglimage_texture_2d, hndl, helper);
+                      hndl, helper);
     }
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
     cb->mNeedRestore = true;
     cb->m_eglImage = eglImage;
     cb->m_blitEGLImage = blitEGLImage;
-    assert(has_eglimage_texture_2d);
     assert(eglImage && blitEGLImage);
     cb->m_width = width;
     cb->m_height = height;
