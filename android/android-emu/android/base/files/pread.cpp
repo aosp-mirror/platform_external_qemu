@@ -39,18 +39,44 @@ int64_t pread(int fd, void* buf, size_t count, int64_t offset) {
     DWORD countRead = 0;
     if (!::ReadFile(handle, buf, count, &countRead, &params)) {
         switch (::GetLastError()) {
-        case ERROR_IO_PENDING:
-            errno = EAGAIN;
-            return -1;
-        default:
-            errno = EINVAL;
-            return -1;
+            case ERROR_IO_PENDING:
+                errno = EAGAIN;
+                return -1;
+            default:
+                errno = EINVAL;
+                return -1;
         }
     }
     return static_cast<int64_t>(countRead);
 }
 
+int64_t pwrite(int fd, const void* buf, size_t count, int64_t offset) {
+    if (fd < 0) {
+        errno = EINVAL;
+        return -1;
+    }
+    auto handle = (HANDLE)_get_osfhandle(fd);
+    if (handle == INVALID_HANDLE_VALUE) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    OVERLAPPED params = {};
+    params.Offset = static_cast<DWORD>(offset);
+    params.OffsetHigh = static_cast<DWORD>(offset >> 32);
+    DWORD countWritten = 0;
+    if (!::WriteFile(handle, buf, count, &countWritten, &params)) {
+        switch (::GetLastError()) {
+            case ERROR_IO_PENDING:
+                errno = EAGAIN;
+                return -1;
+            default:
+                errno = EINVAL;
+                return -1;
+        }
+    }
+    return static_cast<int64_t>(countWritten);
+}
+
 }  // namespace base
 }  // namespace android
-
-
