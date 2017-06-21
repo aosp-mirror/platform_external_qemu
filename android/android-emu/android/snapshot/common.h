@@ -30,5 +30,10 @@ struct RamBlock {
     int32_t pageSize;
 };
 
+enum class IndexFlags : int32_t {
+    None = 0,
+    CompressedPages = 0x01,
+};
+
 }  // namespace snapshot
 }  // namespace android
