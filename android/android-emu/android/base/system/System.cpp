@@ -63,6 +63,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
+#include <unistd.h>
 #endif
 #include <assert.h>
 #include <stdlib.h>
@@ -617,6 +618,17 @@ public:
         return ::GetCurrentProcessId();
 #else
         return getpid();
+#endif
+    }
+
+    int getCpuCoreCount() const override {
+#ifdef _WIN32
+        SYSTEM_INFO si = {};
+        ::GetSystemInfo(&si);
+        return si.dwNumberOfProcessors < 1 ? 1 : si.dwNumberOfProcessors;
+#else
+        auto res = (int)::sysconf(_SC_NPROCESSORS_ONLN);
+        return res < 1 ? 1 : res;
 #endif
     }
 
