@@ -17,6 +17,7 @@
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/snapshot/Compressor.h"
 #include "android/snapshot/common.h"
 
 #include <cstdint>
@@ -35,13 +36,14 @@ public:
         None = 0,
         Async = 0x1,
         // TODO: add "CopyOnWrite = 0x3  // implies |Async|"
+        Compress = 0x4,
     };
 
     using ZeroChecker = bool (*)(const uint8_t* ptr, int size);
 
     RamSaver(base::StdioStream&& stream,
              ZeroChecker zeroChecker,
-             Flags flags = Flags::Async);
+             Flags flags);
     ~RamSaver();
 
     void registerBlock(const RamBlock& block);
@@ -54,37 +56,50 @@ private:
         int32_t pageIndex;  // == pageOffset / block.pageSize
     };
 
+    // The file structure is as follows:
+    //
+    // 0: 8 bytes, index offset in the file (indexOffset)
+    // 8: first nonzero page as struct FileIndex::Page
+    // 8 + first page size: second nonzero page
+    // ....
+    // indexOffset: struct FileIndex
+    // EOF
+
     struct FileIndex {
         struct Block {
             RamBlock ramBlock;
-            std::vector<int32_t> zeroPageIndexes;
             struct Page {
-                int32_t index;
+                int32_t sizeOnDisk; // 0 -> page is all zeroes
                 int64_t filePos;
             };
-            std::vector<Page> nonZeroPages;
+            std::vector<Page> pages;
         };
+
+        using Flags = IndexFlags;
 
         int64_t startPosInFile;
         int32_t version = 1;
-        int32_t totalNonzeroPages = 0;
+        int32_t flags = (int32_t)Flags::None;
+        int32_t totalPages = 0;
         std::vector<Block> blocks;
     };
 
-    void done();
-    void savingThreadWorker();
-    void passToSaveHandler(const QueuedPageInfo& pi);
-    bool handlePageSave(const QueuedPageInfo& pi);
+    void passToSaveHandler(QueuedPageInfo&& pi);
+    base::WorkerProcessingResult savePageInWorker(QueuedPageInfo&& pi);
+    bool handlePageSave(QueuedPageInfo&& pi);
     void writeIndex();
+    void writePage(const QueuedPageInfo& pi,
+                   const void* dataPtr,
+                   int32_t dataSize);
 
     base::StdioStream mStream;
     ZeroChecker mZeroChecker;
     Flags mFlags;
-
     int mLastBlockIndex = 0;
 
-    base::MessageChannel<QueuedPageInfo, 512 * 1024> mPagesQueue;
-    base::FunctorThread mSavingThread;
+    base::Optional<Compressor<QueuedPageInfo>> mCompressor;
+    base::Optional<base::WorkerThread<QueuedPageInfo>> mSavingWorker;
+
     FileIndex mIndex;
 
 #if SNAPSHOT_PROFILE > 1
