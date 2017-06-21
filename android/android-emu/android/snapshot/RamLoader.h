@@ -12,13 +12,14 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/files/StdioStream.h"
 #include "android/base/Optional.h"
+#include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
-#include "android/snapshot/common.h"
+#include "android/base/threads/ThreadPool.h"
 #include "android/snapshot/MemoryWatch.h"
+#include "android/snapshot/common.h"
 
 #include <cstdint>
 #include <vector>
@@ -28,6 +29,7 @@ namespace snapshot {
 
 class RamLoader {
     DISALLOW_COPY_AND_ASSIGN(RamLoader);
+
 public:
     RamLoader(base::StdioStream&& stream, ZeroChecker zeroChecker);
     ~RamLoader();
@@ -49,6 +51,7 @@ private:
             Pages::iterator pagesEnd;
         };
 
+        IndexFlags flags;
         std::vector<Block> blocks;
         Pages pages;
     };
@@ -81,6 +84,8 @@ private:
     bool mSentEndOfPagesMarker = false;
     base::MessageChannel<Page*, 32> mReadingQueue;
     base::MessageChannel<Page*, 32> mReadDataQueue;
+
+    base::Optional<base::ThreadPool<Page*>> mDecompressor;
 
     FileIndex mIndex;
 
