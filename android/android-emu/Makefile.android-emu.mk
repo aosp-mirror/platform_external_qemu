@@ -228,6 +228,7 @@ LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
+    $(LZ4_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -395,6 +396,7 @@ LOCAL_SRC_FILES := \
     android/shaper.c \
     android/snaphost-android.c \
     android/snapshot.c \
+    android/snapshot/Compressor.cpp \
     android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
@@ -475,6 +477,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libpng \
     emulator-libwebp \
     emulator-zlib \
+    emulator-lz4 \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
