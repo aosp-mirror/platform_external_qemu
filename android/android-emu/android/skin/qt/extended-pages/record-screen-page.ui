@@ -195,7 +195,12 @@
    </property>
    <item>
     <property name="text">
-     <string>MP4</string>
+     <string>webm</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>gif</string>
     </property>
    </item>
   </widget>
