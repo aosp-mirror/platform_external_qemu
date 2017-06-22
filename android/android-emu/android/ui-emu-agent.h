@@ -22,6 +22,7 @@ typedef struct UiEmuAgent {
     const struct QAndroidFingerAgent* finger;
     const struct QAndroidLocationAgent* location;
     const struct QAndroidHttpProxyAgent* proxy;
+    const struct QAndroidRecordScreenAgent* record;
     const struct QAndroidSensorsAgent* sensors;
     const struct QAndroidTelephonyAgent* telephony;
     const struct QAndroidUserEventAgent* userEvents;
