@@ -98,6 +98,34 @@ QString getScreenshotSaveDirectory()
     return savePath;
 }
 
+QString getRecordingSaveDirectory()
+{
+    QSettings settings;
+    QString savePath = settings.value(Ui::Settings::SCREENREC_SAVE_PATH, "").toString();
+
+    if ( !directoryIsWritable(savePath) ) {
+        // This path is not writable.
+        // Clear it, so we'll try the default instead.
+        savePath = "";
+    }
+
+    if (savePath.isEmpty()) {
+
+        // We have no path. Try to determine the path to the desktop.
+        QStringList paths =
+                QStandardPaths::standardLocations(
+                    QStandardPaths::DesktopLocation);
+        if (paths.size() > 0) {
+            savePath = QDir::toNativeSeparators(paths[0]);
+
+            // Save this for future reference
+            settings.setValue(Ui::Settings::SCREENREC_SAVE_PATH, savePath);
+        }
+    }
+
+    return savePath;
+}
+
 SettingsTheme getSelectedTheme() {
     QSettings settings;
     return (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
