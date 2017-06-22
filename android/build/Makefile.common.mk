@@ -24,6 +24,12 @@ include $(LOCAL_PATH)/android/third_party/libx264.mk
 include $(LOCAL_PATH)/android/third_party/libvpx.mk
 include $(LOCAL_PATH)/android/third_party/libsdl2.mk
 
+# Bluez only works on linux
+ifeq ($(BUILD_TARGET_OS),linux)
+  include $(LOCAL_PATH)/android/third_party/libbluez.mk
+endif
+
+
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
 include $(LOCAL_PATH)/android/third_party/google-benchmark/sources.mk
