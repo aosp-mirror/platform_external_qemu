@@ -12,15 +12,16 @@
 #include "android/utils/timezone.h"
 
 #include "android/android.h"
+#include "android/base/StringFormat.h"
+#include "android/base/StringView.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/system/System.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/eintr_wrapper.h"
-#include "android/base/files/PathUtils.h"
-#include "android/base/system/System.h"
-#include "android/base/StringFormat.h"
-#include "android/base/StringView.h"
-#include "android/base/memory/LazyInstance.h"
+#include "android/utils/tempfile.h"
 
 #include <stdbool.h>
 #include <stdlib.h>
@@ -1251,16 +1252,18 @@ int TimeZone::setAndroidTimeZoneUsingZdump()
     //  info in place.
     System::Duration timeout = 5000;
     System::ProcessExitCode exitCode;
-    const std::string outputFile = PathUtils::join(
-            System::get()->getTempDir(),
-                    StringFormat("android_tzoffset%d",
-                         (int)System::get()->getCurrentProcessId()));
+
+    TempFile* tempFile = tempfile_create();
+    if (!tempFile) {
+        return -1;
+    }
+    std::string outputFilepath(tempfile_path(tempFile));
 
     bool commandRan = System::get()->runCommand(
-            shellCmd, runFlags, timeout, &exitCode, nullptr, outputFile);
+            shellCmd, runFlags, timeout, &exitCode, nullptr, outputFilepath);
 
     if (commandRan && !exitCode) {
-        std::ifstream file(outputFile.c_str());
+        std::ifstream file(outputFilepath.c_str());
         std::string line;
         std::vector<std::string> rules;
         while (std::getline(file, line)) {
@@ -1310,16 +1313,17 @@ int TimeZone::setAndroidTimeZoneUsingDate()
                            System::RunOptions::DumpOutputToFile;
     System::Duration timeout = 1000;
     System::ProcessExitCode exitCode;
-    const std::string outputFile = PathUtils::join(
-            System::get()->getTempDir(),
-                    StringFormat("android_tzoffset%d",
-                         (int)System::get()->getCurrentProcessId()));
+    TempFile* tempFile = tempfile_create();
+    if (!tempFile) {
+        return -1;
+    }
+    std::string outputFilepath(tempfile_path(tempFile));
 
     bool commandRan = System::get()->runCommand(
-            shellCmd, runFlags, timeout, &exitCode, nullptr, outputFile);
+            shellCmd, runFlags, timeout, &exitCode, nullptr, outputFilepath);
 
     if (commandRan && !exitCode) {
-        std::ifstream file(outputFile.c_str());
+        std::ifstream file(outputFilepath.c_str());
         std::string tzdiff;
         std::getline(file, tzdiff);
         file.close();
