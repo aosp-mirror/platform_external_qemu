@@ -25,8 +25,8 @@
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
-#include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
 #include "android/utils/looper.h"
 
 #include "android/telephony/modem_driver.h"
@@ -153,6 +153,15 @@ static void emulator_window_opengles_redraw_window(void) {
     if (s_use_emugl_subwindow) {
         android_redrawOpenglesWindow();
     }
+}
+
+bool emulator_window_start_recording(const char* filename) {
+    fprintf(stderr, "%s: NOT IMPLEMENTED\n", __FUNCTION__);
+    return true;
+}
+
+void emulator_window_stop_recording(void) {
+    fprintf(stderr, "%s: NOT IMPLEMENTED\n", __FUNCTION__);
 }
 
 // Used as an emugl callback to get each frame of GPU display.

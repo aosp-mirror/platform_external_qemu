@@ -63,4 +63,10 @@ emulator_window_get_layout(EmulatorWindow* emulator);
  * otherwise */
 bool emulator_window_rotate_90_clockwise(void);
 
+/* Start recording the screen. Returns false if recording is already
+ * running. */
+bool emulator_window_start_recording(const char* filename);
+/* Stop recording the screen. */
+void emulator_window_stop_recording(void);
+
 ANDROID_END_HEADER
