@@ -80,5 +80,6 @@ constexpr char LOCATION_RECENT_ALTITUDE[] = "loc/recent_altitude";
 constexpr char LOCATION_RECENT_LATITUDE[] = "loc/recent_latitude";
 constexpr char LOCATION_RECENT_LONGITUDE[] = "loc/recent_longitude";
 
+constexpr char SCREENREC_SAVE_PATH[] = "rec/savePath";
 }  // namespace Settings
 }  // namespace Ui
