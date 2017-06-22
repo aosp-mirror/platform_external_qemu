@@ -120,11 +120,36 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
 
 /* If it's running chrome os images, remapping key code here so
  * the emulator toolbar also does the "expected" thing for chrome os.
+ * Also fix some incorrected key codes.
  */
 static int map_cros_key(int* code) {
     if (!android_hw->hw_arc) return -1;
-    if (*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) return 0;
+    // Android emulator use Qt, and it maps qt key to linux key and
+    // send it here.
+    // Actually underlying qemu is expecting something else and it
+    // called it as "number", for most keys, "number" is same as
+    // linux key, but it's different for some keys. Since Android emulator
+    // don't really use those special keys, so it doesn't care about this bug.
+    // As a quick fix, we also remmap them here. Also remap some special cros
+    // keys here.
+    // This mapping can be generated from 2 stage mapping:
+    // linux_to_qcode in ui/input-linux.c  can map linux key -> qcode
+    // qcode_to_number in ui/input-keymap.c can map qcode -> number
+    if ((*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) ||
+	*code ==  LINUX_KEY_ESC) return 0;
     switch (*code) {
+    case LINUX_KEY_UP:
+        *code = 0xc8;
+        return 0;
+    case LINUX_KEY_DOWN:
+	*code = 0xd0;
+	return 0;
+    case LINUX_KEY_LEFT:
+	*code = 0xcb;
+	return 0;
+    case LINUX_KEY_RIGHT:
+	*code = 0xcd;
+	return 0;
     case LINUX_KEY_VOLUMEUP:
         *code = LINUX_KEY_F10;
         return 0;
@@ -166,6 +191,12 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
 
+        if (map_cros_key(&keycode) == 0) {
+            skin_keyboard_add_key_event(kb, keycode, down);
+            skin_keyboard_flush(kb);
+            return;
+        }
+
         /* first, try the keyboard-mode-independent keys */
         int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
         if (code == 0) {
@@ -185,8 +216,7 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             return;
         }
 
-        if (map_cros_key(&code) == 0 ||
-            code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
+        if (code == KEY_APPSWITCH || code == LINUX_KEY_PLAYPAUSE ||
             code == LINUX_KEY_BACK || code == LINUX_KEY_POWER ||
             code == LINUX_KEY_BACKSPACE || code == LINUX_KEY_SOFT1 ||
             code == LINUX_KEY_CENTER || code == LINUX_KEY_REWIND ||
