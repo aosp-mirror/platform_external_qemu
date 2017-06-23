@@ -192,6 +192,7 @@ BUILD_TARGET_CFLAGS += -D__packed=__attribute\(\(packed\)\)
 # Copy the current target cflags into the host ones.
 BUILD_HOST_CFLAGS += $(BUILD_TARGET_CFLAGS)
 BUILD_HOST_CXXFLAGS += $(BUILD_TARGET_CXXFLAGS)
+BUILD_HOST_LDFLAGS += $(BUILD_TARGET_LDFLAGS)
 
 # A useful function that can be used to start the declaration of a host
 # module. Avoids repeating the same stuff again and again.
