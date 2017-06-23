@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ed14fce9_c1f2ada6",
+        "filename": "android/android-emu/android/snapshot/Compressor.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-23T16:20:26Z",
+      "side": 1,
+      "message": "nit: CompressorBase could be a policy class, allowing us to easily swap out compressors if desired. (it might also make things more confusing)",
+      "revId": "44d01efe99568e9cecfd768ff5688db50e6eb250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
