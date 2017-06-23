@@ -65,7 +65,9 @@ public:
             mFdWatch(NULL),
             mFrames(),
             mCallback(callback),
-            mCallbackOpaque(callbackOpaque) {
+            mCallbackOpaque(callbackOpaque),
+            mCallback2(NULL),
+            mCallbackOpaque2(NULL) {
         if (::android::base::socketCreatePair(&mInSocket, &mOutSocket) < 0) {
             PLOG(ERROR) << "Could not create socket pair";
             return;
@@ -104,6 +106,11 @@ public:
         android::base::socketSend(mInSocket, &c, 1);
     }
 
+    virtual void addCallback(Callback* callback, void* cbOpaque) {
+        mCallback2 = callback;
+        mCallbackOpaque2 = cbOpaque;
+    }
+
 private:
     enum {
         kMaxFrames = 16
@@ -132,6 +139,12 @@ private:
                                   frame->width,
                                   frame->height,
                                   frame->pixels);
+                if (bridge->mCallback2) {
+                    bridge->mCallback2(bridge->mCallbackOpaque2,
+                                       frame->width,
+                                       frame->height,
+                                       frame->pixels);
+                }
                 delete frame;
             }
         }
@@ -143,7 +156,9 @@ private:
     Looper::FdWatch* mFdWatch;
     MessageChannel<Frame*, kMaxFrames> mFrames;
     Callback* mCallback;
+    Callback* mCallback2;
     void* mCallbackOpaque;
+    void* mCallbackOpaque2;
 };
 
 }  // namespace
