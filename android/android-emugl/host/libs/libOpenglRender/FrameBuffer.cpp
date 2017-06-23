@@ -31,6 +31,7 @@
 #include "android/base/system/System.h"
 #include "emugl/common/logging.h"
 
+#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -474,6 +475,7 @@ FrameBuffer::~FrameBuffer() {
     delete m_configs;
     delete m_colorBufferHelper;
     free(m_fbImage);
+    free(m_fbRecImage);
 }
 
 void FrameBuffer::setPostCallback(emugl::Renderer::OnPostCallback onPost,
@@ -1331,6 +1333,77 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     *surfOut = createWindowSurface(0, 1, 1);
 }
 
+bool FrameBuffer::startRecording() {
+    // We need to call this under a lock because the post() call uses
+    // m_fbImage and m_recording.
+    {
+    emugl::Mutex::AutoLock mutex(m_lock);
+
+    if (m_recording) {
+        ERR("%s: Already recording\n", __func__);
+        return false;
+    }
+
+    if (!m_fbRecImage) {
+        m_fbRecImage = (unsigned char*)malloc(4 * m_framebufferWidth *
+                                           m_framebufferHeight);
+        if (!m_fbRecImage) {
+            ERR("out of memory, cancelling recording");
+            return false;
+        }
+    }
+    if (!m_fbImage) {
+        m_fbImage = (unsigned char*)malloc(4 * m_framebufferWidth *
+                                           m_framebufferHeight);
+        if (!m_fbImage) {
+            ERR("out of memory, cancelling recording");
+            return false;
+        }
+    }
+    // Set this so first getFrame() call will copy m_fbImage
+    m_frameUpdated = true;
+    m_recording = true;
+    }
+
+    // Need to fill m_fbImage by reposting
+    repost();
+    return true;
+}
+
+void FrameBuffer::stopRecording() {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    m_recording = false;
+}
+
+unsigned char* FrameBuffer::getFrame() {
+    // Assumption: startRecording() has been called prior to using this
+    // function.
+    assert(m_fbImage);
+    assert(m_fbRecImage);
+
+    // It should be ok to check this without a lock. The worst that can happen
+    // is we grab a few extra frames.
+    if (!m_recording) {
+        return nullptr;
+    }
+
+    // Even though m_frameUpdated is modified by the emuGL thread (post()), we
+    // should be able to check it without a lock because we don't do copying
+    // when there is no frame update. We do need a lock though when we need to
+    // update the frame. We probably will get a lot of missed frames when the
+    // FPS is high.
+    if (m_frameUpdated) {
+        // Need to acquire the lock so m_fbImage is not changing while we copy.
+        emugl::Mutex::AutoLock mutex(m_lock);
+
+        memcpy(m_fbRecImage, m_fbImage,
+               4 * m_framebufferWidth * m_framebufferHeight);
+        m_frameUpdated = false;
+    }
+
+    return m_fbRecImage;
+}
+
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
@@ -1407,10 +1480,13 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     //
     // Send framebuffer (without FPS overlay) to callback
     //
-    if (m_onPost) {
+    if (m_onPost || m_recording) {
         (*c).second.cb->readback(m_fbImage);
-        m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1,
-                 GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
+        m_frameUpdated = true;
+        if (m_onPost) {
+            m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1,
+                     GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
+        }
     }
 
 EXIT:

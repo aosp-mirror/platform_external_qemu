@@ -84,6 +84,15 @@ public:
                                     unsigned char* pixels);
     virtual void setPostCallback(OnPostCallback onPost, void* context) = 0;
 
+    // startRecording - Prepares the FrameBuffer for recording. Returns true on
+    // success, false otherwise.
+    virtual bool startRecording() = 0;
+    // stopRecording - Stops the FrameBuffer recording.
+    virtual void stopRecording() = 0;
+    // Retrieves the frame for recording. Returns NULL on failure or if
+    // recording was stopped.
+    virtual unsigned char* getFrame() = 0;
+
     // showOpenGLSubwindow -
     //     Create or modify a native subwindow which is a child of 'window'
     //     to be used for framebuffer display. If a subwindow already exists,

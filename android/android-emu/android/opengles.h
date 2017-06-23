@@ -46,6 +46,16 @@ typedef void (*OnPostFunc)(void* context, int width, int height, int ydir,
                            int format, int type, unsigned char* pixels);
 void android_setPostCallback(OnPostFunc onPost, void* onPostContext);
 
+/* Starts the FrameBuffer recording. Returns 0 on success, -1 if failed */
+int android_startRecording();
+
+/* Stops the FrameBuffer recording. */
+void android_stopRecording();
+
+/* Fetchs the pixel data from the FrameBuffer. Returns NULL if error or
+ * recording has stopped. */
+unsigned char* android_getFrame();
+
 /* Retrieve the Vendor/Renderer/Version strings describing the underlying GL
  * implementation. The call only works while the renderer is started.
  *

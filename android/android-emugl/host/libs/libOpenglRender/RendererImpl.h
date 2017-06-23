@@ -65,6 +65,10 @@ public:
     void save(android::base::Stream* stream) final;
     bool load(android::base::Stream* stream) final;
 
+    bool startRecording() final;
+    void stopRecording() final;
+    unsigned char* getFrame() final;
+
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 

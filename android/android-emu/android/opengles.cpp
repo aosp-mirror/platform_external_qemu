@@ -191,6 +191,32 @@ android_setPostCallback(OnPostFunc onPost, void* onPostContext)
     }
 }
 
+int
+android_startRecording()
+{
+   if (sRenderer) {
+        return sRenderer->startRecording() ? 0 : -1;
+   }
+   return -1;
+}
+
+void
+android_stopRecording()
+{
+    if (sRenderer) {
+        sRenderer->stopRecording();
+    }
+}
+
+unsigned char*
+android_getFrame()
+{
+    if (sRenderer) {
+        return sRenderer->getFrame();
+    }
+    return NULL;
+}
+
 static char* strdupBaseString(const char* src) {
     const char* begin = strchr(src, '(');
     if (!begin) {

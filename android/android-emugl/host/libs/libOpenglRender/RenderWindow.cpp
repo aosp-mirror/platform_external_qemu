@@ -60,6 +60,8 @@ enum Command {
     CMD_SET_ROTATION,
     CMD_SET_TRANSLATION,
     CMD_REPAINT,
+    CMD_START_RECORDING,
+    CMD_STOP_RECORDING,
     CMD_FINALIZE,
 };
 
@@ -199,6 +201,23 @@ struct RenderWindowMessage {
                 fb = FrameBuffer::getFB();
                 if (fb) {
                     fb->repost();
+                    result = true;
+                }
+                break;
+
+            case CMD_START_RECORDING:
+                D("CMD_START_RECORDING\n");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    result = fb->startRecording();
+                }
+                break;
+
+            case CMD_STOP_RECORDING:
+                D("CMD_STOP_RECORDING\n");
+                fb = FrameBuffer::getFB();
+                if (fb) {
+                    fb->stopRecording();
                     result = true;
                 }
                 break;
@@ -467,6 +486,36 @@ void RenderWindow::repaint() {
     msg.cmd = CMD_REPAINT;
     (void) processMessage(msg);
     D("Exiting\n");
+}
+
+bool RenderWindow::startRecording() {
+    D("Entering\n");
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_START_RECORDING;
+    bool result = processMessage(msg);
+    D("Exiting result=%s\n", result ? "success" : "failure");
+    return result;
+}
+
+void RenderWindow::stopRecording() {
+    D("Entering\n");
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_STOP_RECORDING;
+    (void) processMessage(msg);
+    D("Exiting\n");
+}
+
+unsigned char* RenderWindow::getFrame() {
+    D("Entering\n");
+    FrameBuffer* fb = FrameBuffer::getFB();
+    if (!fb) {
+        D("No framebuffer!\n");
+        return NULL;
+    }
+    unsigned char* result = fb->getFrame();
+    D("Exiting result=%p\n", result);
+
+    return result;
 }
 
 bool RenderWindow::processMessage(const RenderWindowMessage& msg) {

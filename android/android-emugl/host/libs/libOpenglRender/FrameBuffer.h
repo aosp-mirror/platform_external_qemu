@@ -149,6 +149,17 @@ public:
     // so only do this when you need to.
     void setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext);
 
+    // Starts the recording. Need to call this before using getFrame(). Returns
+    // true is recording has started, false otherwise.
+    bool startRecording();
+    // Stops the recording.
+    void stopRecording();
+    // Gets the current frame that is displayed. This call will be off a
+    // different thread, and will only be under a lock when a frame update is
+    // detected. Make sure startRecording() is called prior to using this.
+    // Returns the fb data on success, NULL on error or if recording is stopped.
+    unsigned char* getFrame();
+
     // Retrieve the GL strings of the underlying EGL/GLES implementation.
     // On return, |*vendor|, |*renderer| and |*version| will point to strings
     // that are owned by the instance (and must not be freed by the caller).
@@ -428,6 +439,18 @@ private:
     emugl::Renderer::OnPostCallback m_onPost = nullptr;
     void* m_onPostContext = nullptr;
     unsigned char* m_fbImage = nullptr;
+
+    // Used to store a copy of m_fbImage. This should only be used in
+    // recording. Since m_fbImage will be under a lock when updating, we'll just
+    // store a copy so we can feed it to the recorder without a lock. We'll only
+    // use a lock when m_frameUpdated is set and we need to update our copy.
+    unsigned char* m_fbRecImage = nullptr;
+    // Used for screen recording. This flag is set in post() when we
+    // receive a new frame. We'll check this flag without a lock so
+    // we are not slowing down the rendering.
+    bool m_frameUpdated = false;
+    // Flag indicating if recording or not.
+    bool m_recording = false;
 
     const char* m_glVendor = nullptr;
     const char* m_glRenderer = nullptr;
