@@ -18,6 +18,7 @@
 #include "android/skin/keyboard.h"
 #include "android/skin/window.h"
 #include "android/utils/aconfig-file.h"
+#include "android/utils/stralloc.h"
 
 #include "android/skin/ui.h"
 #include "android/ui-emu-agent.h"

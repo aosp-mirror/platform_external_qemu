@@ -84,13 +84,14 @@ int ffmpeg_add_audio_track(ffmpeg_recorder *recorder, int bit_rate,
 //              for example, 512 * 1024 * 1024. It should be higher than audio
 //              bit rate
 //   fps - frame rate per second, 30 and 60 are good numbers
+//   intra_spacing - the intra-frame spacing (key frames)
 // return:
 //   0    if successful
 //   < 0  if failed
 //
 // this method is thread safe
 int ffmpeg_add_video_track(ffmpeg_recorder *recorder, int width, int height,
-                           int bit_rate, int fps);
+                           int bit_rate, int fps, int intra_spacing = 12);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:

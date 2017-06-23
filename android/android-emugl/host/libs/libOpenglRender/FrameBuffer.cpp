@@ -31,6 +31,7 @@
 #include "android/base/system/System.h"
 #include "emugl/common/logging.h"
 
+#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 

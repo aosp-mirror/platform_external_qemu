@@ -62,6 +62,9 @@ public:
     // Post a new frame from the EmuGL thread.
     virtual void postFrame(int width, int height, const void* pixels) = 0;
 
+    // Add another callback. For now, we only support one additional callback.
+    virtual void addCallback(Callback* callback, void* cbOpaque) = 0;
+
 protected:
     GpuFrameBridge() {}
     GpuFrameBridge(const GpuFrameBridge& other);

@@ -27,6 +27,9 @@
 using android::opengl::GpuFrameBridge;
 
 static GpuFrameBridge* sBridge = NULL;
+// We need some way to disable the post() if only the recording is using that
+// path and it is not in use because glReadPixels will slow down everything.
+static bool sInGuestMode = true;
 
 // Called from an EmuGL thread to transfer a new frame of the GPU display
 // to the main loop.
@@ -45,6 +48,17 @@ static void onNewGpuFrame(void* opaque,
     bridge->postFrame(width, height, pixels);
 }
 
+
+static void gpu_frame_disable_post() {
+    android_setPostCallback(nullptr, nullptr);
+}
+
+static void gpu_frame_enable_post() {
+    CHECK(sBridge);
+
+    android_setPostCallback(onNewGpuFrame, sBridge);
+}
+
 void gpu_frame_set_post_callback(
         Looper* looper,
         void* context,
@@ -58,4 +72,25 @@ void gpu_frame_set_post_callback(
     CHECK(sBridge);
 
     android_setPostCallback(onNewGpuFrame, sBridge);
+}
+
+void gpu_frame_add_callback(
+        Looper* looper,
+        void* context,
+        void (*callback)(void*, int, int, const void*)) {
+    if (!sBridge) {
+        // The post() callback is not used in host mode, so need to initialize
+        // it.
+        gpu_frame_set_post_callback(looper, context, callback);
+        sInGuestMode = false;
+    } else {
+        if (sInGuestMode) {
+            sBridge->addCallback(callback, context);
+        } else {
+            // Only the first call to this function will set the callback.
+            // Subsequent calls will only enable/disable the post calls,
+            // depending on if callback is null or not.
+            callback ? gpu_frame_enable_post() : gpu_frame_disable_post();
+        }
+    }
 }

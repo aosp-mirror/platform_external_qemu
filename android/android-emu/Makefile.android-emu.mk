@@ -791,6 +791,7 @@ LOCAL_SRC_FILES += \
     android/resource.c \
     android/ffmpeg-audio-capture.cpp \
     android/ffmpeg-muxer.cpp \
+    android/screen-recorder.cpp
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)
