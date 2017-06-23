@@ -22,6 +22,30 @@
       "revId": "267e60c5cf33e6dade600d7d388cc32b39079a2a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7934c75_7957a005",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-23T22:06:52Z",
+      "side": 1,
+      "message": "sure it could, but only if we compressed pages in batches as well. but in that case we need to always start from the beginning of the batch to decompress a single page and then memcpy it out\nLots of complicated code, v2 it is",
+      "parentUuid": "b3e4519a_471c5a57",
+      "range": {
+        "startLine": 435,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 78
+      },
+      "revId": "267e60c5cf33e6dade600d7d388cc32b39079a2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
