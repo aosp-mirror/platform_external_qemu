@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b789f622_6f8b9bbf",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-06-23T22:37:37Z",
+      "side": 1,
+      "message": "Can you use brackets to be consistent with neighbouring code?\nif (!down) {\n    // Only send out request when user releases key.\n    qemu_system_powerdown_request();\n}",
+      "range": {
+        "startLine": 353,
+        "startChar": 19,
+        "endLine": 353,
+        "endChar": 26
+      },
+      "revId": "546afac9f5449a3c911e1dc18a2a4ecfa50c670c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
