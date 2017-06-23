@@ -136,6 +136,10 @@ public:
 
     virtual Pid getCurrentProcessId() const override { return mPid; }
 
+    int getCpuCoreCount() const override { return mCoreCount; }
+
+    void setCpuCoreCount(int count) { mCoreCount = count; }
+
     virtual MemUsage getMemUsage() override {
         MemUsage res;
         res.resident = 4294967295ULL;
@@ -419,6 +423,7 @@ private:
     std::string mOsName = "";
     bool mUnderWine = false;
     Pid mPid = 0;
+    int mCoreCount = 4;
 };
 
 }  // namespace base

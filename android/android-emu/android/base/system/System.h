@@ -132,6 +132,10 @@ public:
     // Get the current process ID
     virtual Pid getCurrentProcessId() const = 0;
 
+    // Get the number of hardware CPU cores available. Hyperthreading cores are
+    // counted as separate here.
+    virtual int getCpuCoreCount() const = 0;
+
     // Gets memory statistics.
     struct MemUsage {
         uint64_t resident;
