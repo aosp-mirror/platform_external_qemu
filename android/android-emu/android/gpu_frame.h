@@ -31,4 +31,15 @@ void gpu_frame_set_post_callback(
                          int height,
                          const void* pixels));
 
+// A wrapper around gpu_frame_set_post_callback for multiple callbacks. If no
+// post callback is set, then this will create a new one using |callback|. If
+// a post callback is already set, then |callback| will be called along with
+// the post callback on every frame update.
+void gpu_frame_add_callback(Looper* looper,
+                            void* context,
+                            void (*callback)(void* context,
+                                             int width,
+                                             int height,
+                                             const void* pixels));
+
 ANDROID_END_HEADER

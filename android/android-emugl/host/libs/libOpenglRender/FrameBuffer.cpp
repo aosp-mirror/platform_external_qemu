@@ -33,6 +33,7 @@
 #include "emugl/common/logging.h"
 #include "emugl/common/misc.h"
 
+#include <memory.h>
 #include <stdio.h>
 #include <string.h>
 
