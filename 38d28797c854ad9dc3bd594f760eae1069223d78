@@ -22,6 +22,30 @@
       "revId": "38d28797c854ad9dc3bd594f760eae1069223d78",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2fa947e_bd24afca",
+        "filename": "android/android-emu/android/snapshot/Decompressor.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-23T17:22:34Z",
+      "side": 1,
+      "message": "User needs to store the size elsewhere (from the docs)\n\n\u003e\u003eDecompressing an lz4-compressed block also requires metadata (such as compressed size).\n\u003e\u003eEach application is free to encode such metadata in whichever way it wants.",
+      "parentUuid": "0898c41f_ba516799",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 44
+      },
+      "revId": "38d28797c854ad9dc3bd594f760eae1069223d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
