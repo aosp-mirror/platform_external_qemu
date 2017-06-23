@@ -288,6 +288,22 @@ void RendererImpl::setPostCallback(RendererImpl::OnPostCallback onPost,
     mRenderWindow->setPostCallback(onPost, context);
 }
 
+
+bool RendererImpl::startRecording() {
+    assert(mRenderWindow);
+    return mRenderWindow->startRecording();
+}
+
+void RendererImpl::stopRecording() {
+    assert(mRenderWindow);
+    mRenderWindow->stopRecording();
+}
+
+unsigned char* RendererImpl::getFrame() {
+    assert(mRenderWindow);
+    return mRenderWindow->getFrame();
+}
+
 bool RendererImpl::showOpenGLSubwindow(FBNativeWindowType window,
                                        int wx,
                                        int wy,
