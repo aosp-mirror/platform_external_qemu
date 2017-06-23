@@ -1,58 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BugReportWindow</class>
- <widget class="QFrame" name="BugReportWindow">
+ <class>BugreportPage</class>
+ <widget class="QWidget" name="BugreportPage">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>792</width>
-    <height>720</height>
+    <width>622</width>
+    <height>580</height>
    </rect>
   </property>
-  <property name="sizePolicy">
-   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-    <horstretch>0</horstretch>
-    <verstretch>0</verstretch>
-   </sizepolicy>
-  </property>
-  <property name="minimumSize">
-   <size>
-    <width>792</width>
-    <height>720</height>
-   </size>
-  </property>
-  <property name="maximumSize">
-   <size>
-    <width>792</width>
-    <height>720</height>
-   </size>
-  </property>
-  <property name="font">
-   <font>
-    <family>Roboto</family>
-    <pointsize>12</pointsize>
-   </font>
-  </property>
   <property name="windowTitle">
-   <string>File a Bug Report</string>
-  </property>
-  <property name="whatsThis">
-   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;File a Bug Report&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-  </property>
-  <property name="frameShape">
-   <enum>QFrame::StyledPanel</enum>
-  </property>
-  <property name="frameShadow">
-   <enum>QFrame::Raised</enum>
+   <string>Form</string>
   </property>
   <widget class="RaisedMaterialButton" name="bug_saveButton">
    <property name="geometry">
     <rect>
-     <x>428</x>
-     <y>653</y>
+     <x>484</x>
+     <y>540</y>
      <width>120</width>
-     <height>36</height>
+     <height>30</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -64,57 +31,13 @@
    <property name="minimumSize">
     <size>
      <width>120</width>
-     <height>36</height>
+     <height>30</height>
     </size>
    </property>
    <property name="maximumSize">
     <size>
      <width>16777215</width>
-     <height>36</height>
-    </size>
-   </property>
-   <property name="font">
-    <font>
-     <family>Roboto</family>
-     <weight>75</weight>
-     <bold>true</bold>
-    </font>
-   </property>
-   <property name="styleSheet">
-    <string notr="true"/>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Button</string>
-   </property>
-   <property name="text">
-    <string>SAVE REPORT</string>
-   </property>
-  </widget>
-  <widget class="RaisedMaterialButton" name="bug_fileBugButton">
-   <property name="geometry">
-    <rect>
-     <x>568</x>
-     <y>653</y>
-     <width>200</width>
-     <height>36</height>
-    </rect>
-   </property>
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
-   <property name="minimumSize">
-    <size>
-     <width>0</width>
-     <height>36</height>
-    </size>
-   </property>
-   <property name="maximumSize">
-    <size>
-     <width>16777215</width>
-     <height>36</height>
+     <height>30</height>
     </size>
    </property>
    <property name="font">
@@ -128,14 +51,17 @@
     <string notr="true">background-color: #00bea4; color: #ffffff</string>
    </property>
    <property name="text">
-    <string>FILE A BUG FOR GOOGLE</string>
+    <string>SAVE REPORT</string>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Button</string>
    </property>
   </widget>
   <widget class="QCheckBox" name="bug_screenshotCheckBox">
    <property name="geometry">
     <rect>
-     <x>24</x>
-     <y>29</y>
+     <x>19</x>
+     <y>14</y>
      <width>177</width>
      <height>25</height>
     </rect>
@@ -147,7 +73,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Include screenshot</string>
+    <string>Screenshot</string>
    </property>
    <property name="checked">
     <bool>true</bool>
@@ -156,11 +82,14 @@
   <widget class="QStackedWidget" name="stackedWidget">
    <property name="geometry">
     <rect>
-     <x>24</x>
-     <y>58</y>
-     <width>320</width>
-     <height>568</height>
+     <x>19</x>
+     <y>43</y>
+     <width>270</width>
+     <height>480</height>
     </rect>
+   </property>
+   <property name="currentIndex">
+    <number>1</number>
    </property>
    <widget class="QWidget" name="Page1">
     <widget class="QLabel" name="bug_screenshotImage">
@@ -168,8 +97,8 @@
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>320</width>
-       <height>568</height>
+       <width>270</width>
+       <height>480</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -205,8 +134,8 @@
     <widget class="QLabel" name="bug_CapturingLabel">
      <property name="geometry">
       <rect>
-       <x>145</x>
-       <y>290</y>
+       <x>75</x>
+       <y>230</y>
        <width>55</width>
        <height>20</height>
       </rect>
@@ -239,8 +168,8 @@
     <widget class="QLabel" name="bug_circularSpinner2">
      <property name="geometry">
       <rect>
-       <x>120</x>
-       <y>292</y>
+       <x>140</x>
+       <y>234</y>
        <width>16</width>
        <height>16</height>
       </rect>
@@ -275,8 +204,8 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>32</y>
+     <x>312</x>
+     <y>16</y>
      <width>96</width>
      <height>19</height>
     </rect>
@@ -303,10 +232,10 @@
   <widget class="QPlainTextEdit" name="bug_reproStepsTextEdit">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>58</y>
-     <width>400</width>
-     <height>200</height>
+     <x>312</x>
+     <y>43</y>
+     <width>290</width>
+     <height>150</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -319,10 +248,10 @@
   <widget class="QLabel" name="bug_emulatorVersionLabel">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>300</y>
-     <width>200</width>
-     <height>19</height>
+     <x>312</x>
+     <y>250</y>
+     <width>130</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -332,26 +261,26 @@
   <widget class="QLabel" name="bug_deviceLabel">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>361</y>
-     <width>200</width>
-     <height>19</height>
+     <x>312</x>
+     <y>300</y>
+     <width>130</width>
+     <height>20</height>
     </rect>
-   </property>
-   <property name="ColorGroup" stdset="0">
-    <string>Link</string>
    </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Link</string>
    </property>
   </widget>
   <widget class="QLabel" name="bug_hostMachineLabel">
    <property name="geometry">
     <rect>
-     <x>568</x>
-     <y>361</y>
-     <width>200</width>
-     <height>19</height>
+     <x>470</x>
+     <y>300</y>
+     <width>130</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -361,10 +290,10 @@
   <widget class="QLabel" name="bug_androidVersionLabel">
    <property name="geometry">
     <rect>
-     <x>568</x>
-     <y>300</y>
-     <width>200</width>
-     <height>19</height>
+     <x>470</x>
+     <y>250</y>
+     <width>130</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="text">
@@ -374,8 +303,8 @@
   <widget class="QLabel" name="label_2">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>275</y>
+     <x>312</x>
+     <y>230</y>
      <width>137</width>
      <height>19</height>
     </rect>
@@ -396,8 +325,8 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>569</x>
-     <y>275</y>
+     <x>470</x>
+     <y>230</y>
      <width>126</width>
      <height>19</height>
     </rect>
@@ -418,8 +347,8 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>569</x>
-     <y>336</y>
+     <x>470</x>
+     <y>280</y>
      <width>111</width>
      <height>19</height>
     </rect>
@@ -440,8 +369,8 @@
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>336</y>
+     <x>312</x>
+     <y>280</y>
      <width>146</width>
      <height>19</height>
     </rect>
@@ -462,8 +391,8 @@
   <widget class="QCheckBox" name="bug_bugReportCheckBox">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>408</y>
+     <x>312</x>
+     <y>345</y>
      <width>152</width>
      <height>25</height>
     </rect>
@@ -484,10 +413,10 @@
   <widget class="QPlainTextEdit" name="bug_bugReportTextEdit">
    <property name="geometry">
     <rect>
-     <x>368</x>
-     <y>435</y>
-     <width>400</width>
-     <height>191</height>
+     <x>312</x>
+     <y>375</y>
+     <width>290</width>
+     <height>150</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -503,8 +432,8 @@
   <widget class="QLabel" name="bug_circularSpinner">
    <property name="geometry">
     <rect>
-     <x>688</x>
-     <y>412</y>
+     <x>585</x>
+     <y>347</y>
      <width>16</width>
      <height>16</height>
     </rect>
@@ -540,9 +469,9 @@
   <widget class="QLabel" name="bug_collectingLabel">
    <property name="geometry">
     <rect>
-     <x>713</x>
-     <y>410</y>
-     <width>55</width>
+     <x>500</x>
+     <y>345</y>
+     <width>71</width>
      <height>20</height>
     </rect>
    </property>
@@ -574,6 +503,38 @@
     <string>Title</string>
    </property>
   </widget>
+  <widget class="QPushButton" name="bug_sendToGoogle">
+   <property name="geometry">
+    <rect>
+     <x>16</x>
+     <y>540</y>
+     <width>101</width>
+     <height>30</height>
+    </rect>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::RightToLeft</enum>
+   </property>
+   <property name="text">
+    <string>Send to Google</string>
+   </property>
+   <property name="icon">
+    <iconset resource="../resources.qrc">
+     <normaloff>:/dark/open_in_browser</normaloff>:/dark/open_in_browser</iconset>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string>Link</string>
+   </property>
+  </widget>
   <zorder>bug_emulatorVersionLabel</zorder>
   <zorder>bug_deviceLabel</zorder>
   <zorder>bug_hostMachineLabel</zorder>
@@ -587,11 +548,11 @@
   <zorder>bug_circularSpinner</zorder>
   <zorder>bug_collectingLabel</zorder>
   <zorder>bug_saveButton</zorder>
-  <zorder>bug_fileBugButton</zorder>
   <zorder>bug_screenshotCheckBox</zorder>
   <zorder>stackedWidget</zorder>
   <zorder>label_4</zorder>
   <zorder>bug_reproStepsTextEdit</zorder>
+  <zorder>bug_sendToGoogle</zorder>
  </widget>
  <customwidgets>
   <customwidget>
