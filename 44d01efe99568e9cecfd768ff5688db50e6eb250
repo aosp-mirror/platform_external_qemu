@@ -16,6 +16,24 @@
       "revId": "44d01efe99568e9cecfd768ff5688db50e6eb250",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2768faa7_93986d3d",
+        "filename": "android/android-emu/android/snapshot/Compressor.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-23T16:48:31Z",
+      "side": 1,
+      "message": "Sure, I\u0027m just not sure if we need to switch compressors in compile time that often",
+      "parentUuid": "ed14fce9_c1f2ada6",
+      "revId": "44d01efe99568e9cecfd768ff5688db50e6eb250",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
