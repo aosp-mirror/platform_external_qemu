@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3e4519a_471c5a57",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-23T05:02:43Z",
+      "side": 1,
+      "message": "Can this work faster if we didn\u0027t necessarily compress page by page? Perhaps we have a sequence of nonzero pages that are highly repetitive, maybe a RGB buffer that is a single color, for example. If the compression algorithm supports adding data in a stream-like manner, you can keep adding data until the _compressed_ version takes up a page, or something.",
+      "range": {
+        "startLine": 435,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 78
+      },
+      "revId": "267e60c5cf33e6dade600d7d388cc32b39079a2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
