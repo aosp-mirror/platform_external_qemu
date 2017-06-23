@@ -14,20 +14,22 @@
 #include "android/emulation/control/AdbBugReportServices.h"
 #include "android/skin/qt/emulator-qt-window.h"
 
-#include "ui_bug-report-window.h"
+#include "ui_bug-report-page.h"
 
-#include <QFrame>
 #include <QMessageBox>
 #include <QThread>
+#include <QWidget>
 
 #include <memory>
 #include <string>
 
-class BugReportWindow : public QFrame {
+class BugreportPage : public QWidget {
     Q_OBJECT
 
 public:
-    explicit BugReportWindow(EmulatorQtWindow* eW, QWidget* parent = 0);
+    explicit BugreportPage(QWidget* parent = 0);
+    ~BugreportPage();
+    void initialize(EmulatorQtWindow* eW);
     void showEvent(QShowEvent* event);
     void updateTheme();
     struct ReportingFields {
@@ -54,7 +56,7 @@ public:
 
 private slots:
     void on_bug_saveButton_clicked();
-    void on_bug_fileBugButton_clicked();
+    void on_bug_sendToGoogle_clicked();
     void saveBugreportFolderFinished(bool success,
                                      QString folderPath,
                                      bool willOpenIssueTracker);
@@ -72,12 +74,11 @@ private:
     void launchIssueTrackerThread();
 
     EmulatorQtWindow* mEmulatorWindow;
-    android::emulation::AdbInterface* mAdb;
-    android::emulation::AdbBugReportServices mBugReportServices;
+    std::unique_ptr<android::emulation::AdbBugReportServices> mBugReportServices;
     android::emulation::ScreenCapturer* mScreenCapturer;
     QMessageBox* mDeviceDetailsDialog;
     bool mFirstShowEvent = true;
-    std::unique_ptr<Ui::BugReportWindow> mUi;
+    std::unique_ptr<Ui::BugreportPage> mUi;
     ReportingFields mReportingFields;
     SavingStates mSavingStates;
 };
@@ -110,7 +111,7 @@ private:
 class IssueTrackerTask : public QObject {
     Q_OBJECT
 public:
-    IssueTrackerTask(BugReportWindow::ReportingFields reportingField);
+    IssueTrackerTask(BugreportPage::ReportingFields reportingField);
 
 public slots:
     void run();
@@ -118,5 +119,5 @@ signals:
     void finished(bool success, QString error);
 
 private:
-    BugReportWindow::ReportingFields mReportingFields;
+    BugreportPage::ReportingFields mReportingFields;
 };

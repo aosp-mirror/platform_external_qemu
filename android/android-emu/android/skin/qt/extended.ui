@@ -67,11 +67,12 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="CellularPage" name="cellular_page"/>
    <widget class="BatteryPage" name="batteryPage"/>
    <widget class="TelephonyPage" name="telephonyPage"/>
-   <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
    <widget class="DPadPage" name="dpadPage"/>
    <widget class="RotaryInputPage" name="rotaryInputPage"/>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
+   <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
+   <widget class="BugreportPage" name="bugreportPage"/>
    <widget class="RecordScreenPage" name="recordScreenPage"/>
    <widget class="GooglePlayPage" name="googlePlayPage"/>
    <widget class="SettingsPage" name="settingsPage"/>
@@ -333,7 +334,7 @@ font-family: &quot;Roboto&quot;</string>
      <number>0</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -760,6 +761,54 @@ padding: 10px 0px 10px 16px;</string>
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="bugreportButton">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Bug report</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/bugreport</normaloff>:/light/bugreport</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>bugreport</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="carDataButton">
         <property name="font">
           <font>
@@ -767,7 +816,7 @@ padding: 10px 0px 10px 16px;</string>
          </font>
         </property>
         <!-- Default invisible, will change to visible programmatically when running Android Auto
-             system image -->
+              system image -->
         <property name="visible">
          <bool>false</bool>
         </property>
@@ -1066,6 +1115,12 @@ padding: 10px 0px 10px 16px;</string>
    <container>1</container>
   </customwidget>
   <customwidget>
+   <class>BugreportPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/bug-report-page.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>TelephonyPage</class>
    <extends>QWidget</extends>
    <header>android/skin/qt/extended-pages/telephony-page.h</header>
@@ -1150,6 +1205,7 @@ padding: 10px 0px 10px 16px;</string>
   <tabstop>virtSensorsButton</tabstop>
   <!-- TODO(joshuaduong): Enable once gplay is ready. -->
   <!-- <tabstop>googlePlayButton</tabstop> -->
+  <tabstop>bugreportButton</tabstop>
   <tabstop>carDataButton</tabstop>
   <tabstop>settingsButton</tabstop>
   <!-- <tabstop>recordScreenButton</tabstop> -->

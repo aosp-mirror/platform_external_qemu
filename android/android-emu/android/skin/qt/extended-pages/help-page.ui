@@ -128,43 +128,11 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="RaisedMaterialButton" name="help_fileBug">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>60</y>
-       <width>132</width>
-       <height>36</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-     <property name="text">
-      <string>FILE A BUG</string>
-     </property>
-     <property name="flat">
-      <bool>true</bool>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Button</string>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-    </widget>
     <widget class="RaisedMaterialButton" name="help_sendFeedback">
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>110</y>
+       <y>60</y>
        <width>132</width>
        <height>36</height>
       </rect>
@@ -499,7 +467,6 @@
  <tabstops>
   <tabstop>help_tabs</tabstop>
   <tabstop>help_docs</tabstop>
-  <tabstop>help_fileBug</tabstop>
   <tabstop>help_sendFeedback</tabstop>
   <tabstop>help_licenseText</tabstop>
   <tabstop>help_adbSerialNumberBox</tabstop>

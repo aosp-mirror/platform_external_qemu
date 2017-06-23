@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/skin/qt/extended-pages/bug-report-window.h"
+#include "android/skin/qt/extended-pages/bug-report-page.h"
 
 #include "android/avd/keys.h"
 #include "android/base/StringFormat.h"
@@ -27,17 +27,15 @@
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
-#include "ui_bug-report-window.h"
+#include "ui_bug-report-page.h"
 
 #include <QDesktopServices>
 #include <QFileDialog>
 #include <QMovie>
-#include <QSettings>
 
 #include <algorithm>
 #include <fstream>
 #include <vector>
-
 using android::base::PathUtils;
 using android::base::StringFormat;
 using android::base::StringView;
@@ -78,32 +76,9 @@ Expected Behavior:
 
 Observed Behavior:)";
 
-BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
-    : QFrame(parent),
-      mEmulatorWindow(eW),
-      mAdb(eW->getAdbInterface()),
-      mBugReportServices(mAdb),
-      mScreenCapturer(eW->getScreenCapturer()),
-      mUi(new Ui::BugReportWindow) {
-// "Tool" type windows live in another layer on top of everything in OSX, which
-// is undesirable because it means the extended window must be on top of the
-// emulator window. However, on Windows and Linux, "Tool" type windows are the
-// only way to make a window that does not have its own taskbar item.
-#ifdef __APPLE__
-    Qt::WindowFlags flag = Qt::Dialog;
-#else
-    Qt::WindowFlags flag = Qt::Tool;
-#endif
-
-    setWindowFlags(flag | Qt::WindowMinimizeButtonHint |
-                   Qt::WindowCloseButtonHint);
-
-    QSettings settings;
-    bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
-    setFrameOnTop(this, onTop);
-
+BugreportPage::BugreportPage(QWidget* parent)
+    : QWidget(parent), mUi(new Ui::BugreportPage) {
     mUi->setupUi(this);
-
     mUi->bug_deviceLabel->installEventFilter(this);
 
     // Set emulator version and affix it with CPU accelerator version if
@@ -170,7 +145,22 @@ BugReportWindow::BugReportWindow(EmulatorQtWindow* eW, QWidget* parent)
             QString::fromStdString(mReportingFields.avdDetails));
 }
 
-void BugReportWindow::updateTheme() {
+BugreportPage::~BugreportPage() {
+    if (System::get()->pathIsFile(mSavingStates.adbBugreportFilePath)) {
+        System::get()->deleteFile(mSavingStates.adbBugreportFilePath);
+    }
+    if (System::get()->pathIsFile(mSavingStates.screenshotFilePath)) {
+        System::get()->deleteFile(mSavingStates.screenshotFilePath);
+    }
+}
+
+void BugreportPage::initialize(EmulatorQtWindow* eW) {
+    mEmulatorWindow = eW;
+    mBugReportServices.reset(new AdbBugReportServices(eW->getAdbInterface()));
+    mScreenCapturer = eW->getScreenCapturer();
+}
+
+void BugreportPage::updateTheme() {
     SettingsTheme theme = getSelectedTheme();
     QMovie* movie = new QMovie(this);
     movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
@@ -186,19 +176,12 @@ void BugReportWindow::updateTheme() {
             Ui::stylesheetValues(theme)["EDIT_COLOR"]);
 }
 
-void BugReportWindow::showEvent(QShowEvent* event) {
+void BugreportPage::showEvent(QShowEvent* event) {
     // Override stylesheet for QPlainTextEdit[readOnly=true]
     SettingsTheme theme = getSelectedTheme();
     mUi->bug_bugReportTextEdit->setStyleSheet(
             "background: transparent; border: 1px solid " +
             Ui::stylesheetValues(theme)["EDIT_COLOR"]);
-    // Align the left side of bugreport window with the extended window.
-    if (mFirstShowEvent && !event->spontaneous()) {
-        ToolWindow* tW = mEmulatorWindow->toolWindow();
-        move(tW->geometry().right() + ToolWindow::toolGap,
-             tW->geometry().top());
-        mFirstShowEvent = false;
-    }
 
     QWidget::showEvent(event);
     // clean up the content loaded from last time.
@@ -227,7 +210,7 @@ void BugReportWindow::showEvent(QShowEvent* event) {
     }
 }
 
-void BugReportWindow::saveBugReportFolder(bool willOpenIssueTracker) {
+void BugreportPage::saveBugReportFolder(bool willOpenIssueTracker) {
     QString dirName = QString::fromStdString(mSavingStates.saveLocation);
     dirName = QFileDialog::getExistingDirectory(
             Q_NULLPTR, tr("Report Saving Location"), dirName);
@@ -271,11 +254,11 @@ void BugReportWindow::saveBugReportFolder(bool willOpenIssueTracker) {
     }
 }
 
-void BugReportWindow::saveBugreportFolderFinished(bool success,
-                                                  QString folderPath,
-                                                  bool willOpenIssueTracker) {
+void BugreportPage::saveBugreportFolderFinished(bool success,
+                                                QString folderPath,
+                                                bool willOpenIssueTracker) {
     SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->bug_fileBugButton, theme, true);
+    setButtonEnabled(mUi->bug_sendToGoogle, theme, true);
     setButtonEnabled(mUi->bug_saveButton, theme, true);
     mSavingStates.bugreportSavedSucceed = success;
     if (success) {
@@ -292,13 +275,13 @@ void BugReportWindow::saveBugreportFolderFinished(bool success,
     }
 }
 
-void BugReportWindow::saveBugreportFolderStarted() {
+void BugreportPage::saveBugreportFolderStarted() {
     SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->bug_fileBugButton, theme, false);
+    setButtonEnabled(mUi->bug_sendToGoogle, theme, false);
     setButtonEnabled(mUi->bug_saveButton, theme, false);
 }
 
-void BugReportWindow::issueTrackerTaskFinished(bool success, QString error) {
+void BugreportPage::issueTrackerTaskFinished(bool success, QString error) {
     if (!success) {
         QString errMsg =
                 tr("There was an error while opening the Google issue "
@@ -308,11 +291,11 @@ void BugReportWindow::issueTrackerTaskFinished(bool success, QString error) {
     }
 }
 
-void BugReportWindow::on_bug_saveButton_clicked() {
+void BugreportPage::on_bug_saveButton_clicked() {
     saveBugReportFolder(false);
 }
 
-void BugReportWindow::on_bug_fileBugButton_clicked() {
+void BugreportPage::on_bug_sendToGoogle_clicked() {
     if (!mSavingStates.bugreportSavedSucceed) {
         saveBugReportFolder(true);
     } else {
@@ -327,7 +310,7 @@ void BugReportWindow::on_bug_fileBugButton_clicked() {
     }
 }
 
-void BugReportWindow::launchIssueTrackerThread() {
+void BugreportPage::launchIssueTrackerThread() {
     auto thread = new QThread();
     auto task = new IssueTrackerTask(mReportingFields);
     task->moveToThread(thread);
@@ -340,24 +323,30 @@ void BugReportWindow::launchIssueTrackerThread() {
     thread->start();
 }
 
-void BugReportWindow::loadAdbBugreport() {
+void BugreportPage::loadAdbBugreport() {
     // Avoid generating adb bugreport multiple times while in execution.
-    if (mBugReportServices.isBugReportInFlight())
+    if (mBugReportServices->isBugReportInFlight())
         return;
     mSavingStates.adbBugreportSucceed = false;
     SettingsTheme theme = getSelectedTheme();
-    setButtonEnabled(mUi->bug_fileBugButton, theme, false);
+    setButtonEnabled(mUi->bug_sendToGoogle, theme, false);
     setButtonEnabled(mUi->bug_saveButton, theme, false);
     mUi->bug_circularSpinner->show();
     mUi->bug_collectingLabel->show();
-    mBugReportServices.generateBugReport(
+    mBugReportServices->generateBugReport(
             System::get()->getTempDir(),
             [this, theme](AdbBugReportServices::Result result,
                           StringView filePath) {
-                setButtonEnabled(mUi->bug_fileBugButton, theme, true);
+
+                setButtonEnabled(mUi->bug_sendToGoogle, theme, true);
                 setButtonEnabled(mUi->bug_saveButton, theme, true);
                 mUi->bug_circularSpinner->hide();
                 mUi->bug_collectingLabel->hide();
+                if (System::get()->pathIsFile(
+                            mSavingStates.adbBugreportFilePath)) {
+                    System::get()->deleteFile(mSavingStates.adbBugreportFilePath);
+                    mSavingStates.adbBugreportFilePath.clear();
+                }
                 if (result == AdbBugReportServices::Result::Success &&
                     System::get()->pathIsFile(filePath) &&
                     System::get()->pathCanRead(filePath)) {
@@ -373,12 +362,12 @@ void BugReportWindow::loadAdbBugreport() {
             });
 }
 
-void BugReportWindow::loadAdbLogcat() {
+void BugreportPage::loadAdbLogcat() {
     // Avoid generating adb logcat multiple times while in execution.
-    if (mBugReportServices.isLogcatInFlight()) {
+    if (mBugReportServices->isLogcatInFlight()) {
         return;
     }
-    mBugReportServices.generateAdbLogcatInMemory(
+    mBugReportServices->generateAdbLogcatInMemory(
             [this](AdbBugReportServices::Result result, StringView output) {
                 if (result == AdbBugReportServices::Result::Success) {
                     mUi->bug_bugReportTextEdit->setPlainText(
@@ -392,7 +381,7 @@ void BugReportWindow::loadAdbLogcat() {
             });
 }
 
-void BugReportWindow::loadAvdDetails() {
+void BugreportPage::loadAvdDetails() {
     static std::vector<const char*> avdDetailsNoDisplayKeys{
             ABI_TYPE,    CPU_ARCH,    SKIN_NAME, SKIN_PATH,
             SDCARD_SIZE, SDCARD_PATH, IMAGES_2};
@@ -451,7 +440,7 @@ void BugReportWindow::loadAvdDetails() {
     }
 }
 
-void BugReportWindow::loadScreenshotImage() {
+void BugreportPage::loadScreenshotImage() {
     static const int MIN_SCREENSHOT_API = 14;
     static const int DEFAULT_API_LEVEL = 1000;
     mSavingStates.screenshotSucceed = false;
@@ -466,6 +455,11 @@ void BugReportWindow::loadScreenshotImage() {
             System::get()->getTempDir(),
             [this](ScreenCapturer::Result result, StringView filePath) {
                 mUi->stackedWidget->setCurrentIndex(0);
+                if (System::get()->pathIsFile(
+                            mSavingStates.screenshotFilePath)) {
+                    System::get()->deleteFile(mSavingStates.screenshotFilePath);
+                    mSavingStates.screenshotFilePath.clear();
+                }
                 if (result == ScreenCapturer::Result::kSuccess &&
                     System::get()->pathIsFile(filePath) &&
                     System::get()->pathCanRead(filePath)) {
@@ -488,7 +482,7 @@ void BugReportWindow::loadScreenshotImage() {
             });
 }
 
-bool BugReportWindow::eventFilter(QObject* object, QEvent* event) {
+bool BugreportPage::eventFilter(QObject* object, QEvent* event) {
     if (event->type() != QEvent::MouseButtonPress) {
         return false;
     }
@@ -547,7 +541,7 @@ void BugReportFolderSavingTask::run() {
         outFile << mAvdDetails << std::endl;
     }
 
-    if(!mReproSteps.empty()) {
+    if (!mReproSteps.empty()) {
         auto reproStepsFilePath =
                 PathUtils::join(mSavingPath, "repro_steps.txt");
         std::ofstream outFile(reproStepsFilePath.c_str(),
@@ -559,7 +553,7 @@ void BugReportFolderSavingTask::run() {
 }
 
 IssueTrackerTask::IssueTrackerTask(
-        BugReportWindow::ReportingFields reportingFields)
+        BugreportPage::ReportingFields reportingFields)
     : mReportingFields(reportingFields) {}
 
 void IssueTrackerTask::run() {

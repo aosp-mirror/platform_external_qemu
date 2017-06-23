@@ -13,15 +13,11 @@
 
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/qt-ui-commands.h"
-#include "android/skin/qt/emulator-qt-window.h"
-#include "android/skin/qt/extended-pages/bug-report-window.h"
 
 #include "ui_help-page.h"
 #include <QWidget>
 #include <memory>
 
-class BugReportWindow;
-class EmulatorQtWindow;
 
 class HelpPage : public QWidget
 {
@@ -29,28 +25,22 @@ class HelpPage : public QWidget
 
 public:
     explicit HelpPage(QWidget *parent = 0);
-    void initialize(const ShortcutKeyStore<QtUICommand>* key_store,
-                    EmulatorQtWindow* eW);
+    void initialize(const ShortcutKeyStore<QtUICommand>* key_store);
     void setAdbPort();
-    BugReportWindow* getBugreportWindow();
 
 signals:
     void adbPortUpdateRequired();
 
 private slots:
     void on_help_docs_clicked();
-    void on_help_fileBug_clicked();
     void on_help_sendFeedback_clicked();
     void updateAdbPortNumber();
 
 private:
     void initializeLicenseText();
     void initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand>* key_store);
-    void createBugReportWindow();
 
     std::unique_ptr<Ui::HelpPage> mUi;
-    EmulatorQtWindow* mEmulatorWindow;
-    BugReportWindow* mBugReportWindow = nullptr;
 };
 
 class LatestVersionLoadTask : public QObject {
