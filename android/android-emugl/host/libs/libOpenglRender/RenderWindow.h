@@ -121,6 +121,15 @@ public:
     // Force a repaint of the whole content into the sub-window.
     void repaint();
 
+    // Starts the recording.
+    bool startRecording();
+
+    // Stops the recording.
+    void stopRecording();
+
+    // Gets the Framebuffer data for recording.
+    unsigned char* getFrame();
+
 private:
     bool processMessage(const RenderWindowMessage& msg);
 
