@@ -60,6 +60,9 @@ extern "C" {
 
 #define SCALE_FLAGS SWS_BICUBIC
 
+//#define DEBUG_VIDEO 0
+//#define DEBUG_AUDIO 0
+
 using namespace android::emulation;
 
 // a wrapper around a single output AVStream
@@ -75,6 +78,10 @@ struct VideoOutputStream {
     int bit_rate;
     int fps;
 
+#ifdef DEBUG_VIDEO
+    int64_t frame_count;
+    int64_t write_frame_count;
+#endif
     // pts of the next frame that will be generated
     int64_t next_pts;
 
@@ -91,6 +98,11 @@ typedef struct AudioOutputStream {
 
     int bit_rate;
     int sample_rate;
+
+#ifdef DEBUG_AUDIO
+    int64_t frame_count;
+    int64_t write_frame_count;
+#endif
 
     // pts of the next frame that will be generated
     int64_t next_pts;
@@ -142,6 +154,22 @@ static void log_packet(const AVFormatContext* fmt_ctx, const AVPacket* pkt) {
     AVRational* time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
 
     VERBOSE_PRINT(capture,
+                  "pts:%s pts_time:%s dts:%s dts_time:%s duration:%s "
+                  "duration_time:%s "
+                  "stream_index:%d\n",
+                  avTs2Str(pkt->pts).c_str(),
+                  avTs2TimeStr(pkt->pts, time_base).c_str(),
+                  avTs2Str(pkt->dts).c_str(),
+                  avTs2TimeStr(pkt->dts, time_base).c_str(),
+                  avTs2Str(pkt->duration).c_str(),
+                  avTs2TimeStr(pkt->duration, time_base).c_str(),
+                  pkt->stream_index);
+}
+
+static void log_packet2(const AVFormatContext* fmt_ctx, const AVPacket* pkt) {
+    AVRational* time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
+
+    printf(
                   "pts:%s pts_time:%s dts:%s dts_time:%s duration:%s "
                   "duration_time:%s "
                   "stream_index:%d\n",
@@ -306,7 +334,9 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
         frame = ost->frame;
         ost->samples_count += dst_nb_samples;
     }
-
+#ifdef DEBUG_AUDIO
+    printf("Encoding audio frame %d\n", ost->frame_count++);
+#endif
     ret = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
     if (ret < 0) {
         derror("Error encoding audio frame: %s\n", avErr2Str(ret).c_str());
@@ -314,6 +344,12 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
     }
 
     if (got_packet) {
+#ifdef DEBUG_AUDIO
+        printf("%sWriting audio frame %d\n",
+               pkt.flags & AV_PKT_FLAG_KEY ? "(KEY) " : "",
+               ost->write_frame_count++);
+        log_packet2(oc, &pkt);
+#endif
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
@@ -425,6 +461,9 @@ static int write_video_frame(ffmpeg_recorder* recorder,
         av_init_packet(&pkt);
 
         // encode the frame
+#ifdef DEBUG_VIDEO
+        printf("Encoding video frame %d\n", ost->frame_count++);
+#endif
         ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
         if (ret < 0) {
             derror("Error encoding video frame: %s\n", avErr2Str(ret).c_str());
@@ -432,6 +471,12 @@ static int write_video_frame(ffmpeg_recorder* recorder,
         }
 
         if (got_packet) {
+#ifdef DEBUG_VIDEO
+            printf("%sWriting frame %d\n",
+                   (pkt.flags & AV_PKT_FLAG_KEY) ? "(KEY) " : "",
+                   ost->write_frame_count++);
+            log_packet2(oc, &pkt);
+#endif
             ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         } else {
             ret = 0;
@@ -519,48 +564,60 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         delete recorder->audio_capturer;
     }
 
-    // flush the remaining audio packet
-    if (recorder->audio_st.audio_leftover_len > 0) {
-        AVFrame* frame = recorder->audio_st.tmp_frame;
-        int frame_size = frame->nb_samples *
-                         recorder->audio_st.st->codec->channels *
-                         sizeof(int16_t);  // 16-bit
-        if (recorder->audio_st.audio_leftover_len <
-            frame_size) {  // this should always true
-            int size = frame_size - recorder->audio_st.audio_leftover_len;
-            uint8_t* zeros = new uint8_t[size];
-            if (zeros != nullptr) {
-                ffmpeg_encode_audio_frame(recorder, zeros, size);
-                delete[] zeros;
-            }
-        }
-    }
-
     // flush video encoding with a NULL frame
-    for (int i = 0; i < 5; i++) {
+    while (1) {
         AVPacket pkt = {0};
         int got_packet = 0;
         av_init_packet(&pkt);
-        avcodec_encode_video2(recorder->video_st.st->codec, &pkt, NULL,
+        int ret = avcodec_encode_video2(recorder->video_st.st->codec, &pkt, NULL,
                               &got_packet);
-        if (got_packet) {
+        if (!ret && got_packet) {
+#ifdef DEBUG_VIDEO
+            printf("%s: Writing frame %d\n", __func__, recorder->video_st.write_frame_count++);
+#endif
             write_frame(recorder, recorder->oc,
                         &recorder->video_st.st->codec->time_base,
                         recorder->video_st.st, &pkt);
+        } else {
+            break;
         }
     }
 
-    // flush audio encoding with a NULL frame
-    for (int i = 0; i < 5; i++) {
-        AVPacket pkt = {0};
-        int got_packet;
-        av_init_packet(&pkt);
-        avcodec_encode_audio2(recorder->audio_st.st->codec, &pkt, NULL,
-                              &got_packet);
-        if (got_packet) {
-            write_frame(recorder, recorder->oc,
-                        &recorder->audio_st.st->codec->time_base,
-                        recorder->audio_st.st, &pkt);
+    if (recorder->have_audio) {
+        // flush the remaining audio packet
+        if (recorder->audio_st.audio_leftover_len > 0) {
+            AVFrame* frame = recorder->audio_st.tmp_frame;
+            int frame_size = frame->nb_samples *
+                             recorder->audio_st.st->codec->channels *
+                             sizeof(int16_t);  // 16-bit
+            if (recorder->audio_st.audio_leftover_len <
+                frame_size) {  // this should always true
+                int size = frame_size - recorder->audio_st.audio_leftover_len;
+                uint8_t* zeros = new uint8_t[size];
+                if (zeros != nullptr) {
+                    ffmpeg_encode_audio_frame(recorder, zeros, size);
+                    delete[] zeros;
+                }
+            }
+        }
+
+        // flush audio encoding with a NULL frame
+        while (1) {
+            AVPacket pkt = {0};
+            int got_packet;
+            av_init_packet(&pkt);
+            int ret = avcodec_encode_audio2(recorder->audio_st.st->codec, &pkt, NULL,
+                                  &got_packet);
+            if (!ret && got_packet) {
+#ifdef DEBUG_AUDIO
+                printf("%s: Writing audio frame %d\n", __func__, recorder->audio_st.write_frame_count++);
+#endif
+                write_frame(recorder, recorder->oc,
+                            &recorder->audio_st.st->codec->time_base,
+                            recorder->audio_st.st, &pkt);
+            } else {
+                break;
+            }
         }
     }
 
@@ -659,6 +716,10 @@ int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
 
     ost->bit_rate = bit_rate;
     ost->sample_rate = sample_rate;
+#ifdef DEBUG_AUDIO
+    ost->frame_count = 0;
+    ost->write_frame_count = 0;
+#endif
 
     // find the encoder
     AVCodec* codec = avcodec_find_encoder(codec_id);
@@ -738,7 +799,8 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
                            int width,
                            int height,
                            int bit_rate,
-                           int fps) {
+                           int fps,
+                           int intra_spacing) {
     if (recorder == NULL)
         return -1;
 
@@ -753,6 +815,10 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
     ost->height = height;
     ost->bit_rate = bit_rate;
     ost->fps = fps;
+#ifdef DEBUG_VIDEO
+    ost->frame_count = 0;
+    ost->write_frame_count = 0;
+#endif
 
     // find the encoder
     AVCodec* codec = avcodec_find_encoder(codec_id);
@@ -794,7 +860,7 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 
     ost->st->avg_frame_rate = (AVRational){1, fps};
 
-    c->gop_size = 12;  // emit one intra frame every twelve frames at most
+    c->gop_size = intra_spacing;  // emit one intra frame every twelve frames at most
     c->pix_fmt = STREAM_PIX_FMT;
     if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO) {
         // just for testing, we also add B frames
