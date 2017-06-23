@@ -845,6 +845,7 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
     // Resolution must be a multiple of two.
     c->width = ost->width;
     c->height = ost->height;
+    c->thread_count = 8;
 
     // timebase: This is the fundamental unit of time (in seconds) in terms
     // of which frame timestamps are represented. For fixed-fps content,

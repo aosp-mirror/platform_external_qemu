@@ -21,6 +21,7 @@
 #include "android/hw-sensors.h"
 #include "android/network/globals.h"
 #include "android/opengles.h"
+#include "android/screen-recorder.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/winsys.h"
@@ -156,12 +157,11 @@ static void emulator_window_opengles_redraw_window(void) {
 }
 
 bool emulator_window_start_recording(const char* filename) {
-    fprintf(stderr, "%s: NOT IMPLEMENTED\n", __FUNCTION__);
-    return true;
+    return screen_recorder_start(filename);
 }
 
 void emulator_window_stop_recording(void) {
-    fprintf(stderr, "%s: NOT IMPLEMENTED\n", __FUNCTION__);
+    screen_recorder_stop();
 }
 
 // Used as an emugl callback to get each frame of GPU display.
@@ -277,6 +277,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
                                     emulator,
                                     _emulator_window_on_gpu_frame);
     }
+
+    screen_recorder_init(!s_use_emugl_subwindow,
+                         android_hw->hw_lcd_width,
+                         android_hw->hw_lcd_height);
 
     skin_ui_reset_title(emulator->ui);
 }

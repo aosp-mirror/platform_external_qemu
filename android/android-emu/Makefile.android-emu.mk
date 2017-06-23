@@ -790,6 +790,11 @@ LOCAL_CFLAGS += \
 # string literals which are being glued together
 LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
 
+# ffmpeg mac dependency
+ifeq ($(BUILD_TARGET_OS),darwin)
+    EMULATOR_LIBUI_LDLIBS += -lbz2
+endif
+
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
@@ -804,6 +809,7 @@ LOCAL_SRC_FILES += \
     android/resource.c \
     android/ffmpeg-audio-capture.cpp \
     android/ffmpeg-muxer.cpp \
+    android/screen-recorder.cpp
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)

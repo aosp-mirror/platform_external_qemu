@@ -20,6 +20,8 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/synchronization/MessageChannel.h"
 
+#include <atomic>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,6 +32,8 @@
 namespace android {
 namespace opengl {
 
+using android::base::AutoLock;
+using android::base::Lock;
 using android::base::Looper;
 using android::base::MessageChannel;
 
@@ -65,7 +69,14 @@ public:
             mFdWatch(NULL),
             mFrames(),
             mCallback(callback),
-            mCallbackOpaque(callbackOpaque) {
+            mCallbackOpaque(callbackOpaque),
+            mRecFrame(NULL),
+            mRecTmpFrame(NULL),
+            mRecFrameUpdated(false) {
+        if (!mLooper) {
+            return;
+        }
+
         if (::android::base::socketCreatePair(&mInSocket, &mOutSocket) < 0) {
             PLOG(ERROR) << "Could not create socket pair";
             return;
@@ -86,9 +97,18 @@ public:
 
     // Destructor
     virtual ~Bridge() {
-        delete mFdWatch;
-        android::base::socketClose(mOutSocket);
-        android::base::socketClose(mInSocket);
+        // Non-recording mode
+        if (mLooper) {
+            delete mFdWatch;
+            android::base::socketClose(mOutSocket);
+            android::base::socketClose(mInSocket);
+        }
+        if (mRecFrame) {
+            delete mRecFrame;
+        }
+        if (mRecTmpFrame) {
+            delete mRecTmpFrame;
+        }
     }
 
     // Implementation of the GpuFrameBridge::postFrame() method, must be
@@ -102,6 +122,34 @@ public:
         mFrames.send(frame);
         char c = 1;
         android::base::socketSend(mInSocket, &c, 1);
+    }
+
+    // Implementation of the GpuFrameBridge::postRecordFrame() method, must be
+    // called from the EmuGL thread.
+    virtual void postRecordFrame(int width, int height, const void* pixels) {
+        {
+            AutoLock lock(mRecLock);
+
+            if (!mRecFrame) {
+                mRecFrame = new Frame(width, height, pixels);
+            }
+            if (!mRecTmpFrame) {
+                mRecTmpFrame = new Frame(width, height, pixels);
+            } else {
+                memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
+            }
+        }
+
+        mRecFrameUpdated = true;
+    }
+
+    virtual void* getRecordFrame() {
+        if (mRecFrameUpdated.exchange(false)) {
+            AutoLock lock(mRecLock);
+            memcpy(mRecFrame->pixels, mRecTmpFrame->pixels,
+                   mRecFrame->width * mRecFrame->height * 4);
+        }
+        return mRecFrame ? mRecFrame->pixels : nullptr;
     }
 
 private:
@@ -144,6 +192,10 @@ private:
     MessageChannel<Frame*, kMaxFrames> mFrames;
     Callback* mCallback;
     void* mCallbackOpaque;
+    Lock mRecLock;
+    Frame* mRecFrame;
+    Frame* mRecTmpFrame;
+    std::atomic_bool mRecFrameUpdated;
 };
 
 }  // namespace

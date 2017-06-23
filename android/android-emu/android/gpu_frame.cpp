@@ -27,6 +27,9 @@
 using android::opengl::GpuFrameBridge;
 
 static GpuFrameBridge* sBridge = NULL;
+// We need some way to disable the post() if only the recording is using that
+// path and it is not in use because glReadPixels will slow down everything.
+static bool sIsGuestMode = false;
 
 // Called from an EmuGL thread to transfer a new frame of the GPU display
 // to the main loop.
@@ -42,7 +45,21 @@ static void onNewGpuFrame(void* opaque,
     DCHECK(type == GL_UNSIGNED_BYTE);
 
     GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
-    bridge->postFrame(width, height, pixels);
+    if (sIsGuestMode) {
+        bridge->postFrame(width, height, pixels);
+    } else {
+        bridge->postRecordFrame(width, height, pixels);
+    }
+}
+
+static void gpu_frame_set_post(bool on) {
+    CHECK(sBridge);
+
+    if (on) {
+        android_setPostCallback(onNewGpuFrame, sBridge);
+    } else {
+        android_setPostCallback(nullptr, nullptr);
+    }
 }
 
 void gpu_frame_set_post_callback(
@@ -58,4 +75,26 @@ void gpu_frame_set_post_callback(
     CHECK(sBridge);
 
     android_setPostCallback(onNewGpuFrame, sBridge);
+    sIsGuestMode = true;
+}
+
+bool gpu_frame_set_record_mode(bool on) {
+    // Assumption: gpu_frame_set_post_callback() is called before this one, so
+    // we can determine if we are in host mode based on if sBridge is set.
+    if (sIsGuestMode) {
+        return false;
+    }
+
+    if (!sBridge) {
+        sBridge = android::opengl::GpuFrameBridge::create(nullptr, nullptr, nullptr);
+    }
+    CHECK(sBridge);
+
+    gpu_frame_set_post(on);
+    return true;
+}
+
+void* gpu_frame_get_record_frame() {
+    CHECK(sBridge);
+    return sBridge->getRecordFrame();
 }
