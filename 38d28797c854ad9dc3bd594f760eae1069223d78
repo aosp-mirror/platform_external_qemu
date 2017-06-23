@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0898c41f_ba516799",
+        "filename": "android/android-emu/android/snapshot/Decompressor.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-06-23T04:55:54Z",
+      "side": 1,
+      "message": "How does the user know to set |outSize|? To be more generally useful, I feel like some kind of interface for finding that out would be cool (maybe call with |outData| null and |outSize| a output pointer if you don\u0027t know the right size, then call again with non-null |outData|, like in OpenGL)",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 32,
+        "endChar": 44
+      },
+      "revId": "38d28797c854ad9dc3bd594f760eae1069223d78",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
