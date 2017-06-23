@@ -13,11 +13,13 @@
 #pragma once
 
 #include "android/cmdline-option.h"
+#include "android/ffmpeg-muxer.h"
 #include "android/framebuffer.h"
 #include "android/skin/file.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/window.h"
 #include "android/utils/aconfig-file.h"
+#include "android/utils/stralloc.h"
 
 #include "android/skin/ui.h"
 #include "android/ui-emu-agent.h"
@@ -37,6 +39,13 @@ typedef struct {
     AndroidOptions opts[1];  /* copy of options */
     UiEmuAgent     uiEmuAgent[1];
 } EmulatorWindow;
+
+typedef struct {
+    ffmpeg_recorder* recorder;
+    bool running;
+    bool request_stop;
+    stralloc_t filename;
+} RecordingInfo;
 
 /* Gets a pointer to a EmulatorWindow structure instance. */
 EmulatorWindow*
