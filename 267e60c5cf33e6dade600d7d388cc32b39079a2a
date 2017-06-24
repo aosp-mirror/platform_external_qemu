@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "beeada96_f9ed1557",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-06-24T06:43:09Z",
+      "side": 1,
+      "message": "what is the initial memory size ? 2G ?\n2x seems quite impressive already\n\nwhat if you split the 2G into two chunks and run\ncompression in parallel with 2 threads ?",
+      "range": {
+        "startLine": 10,
+        "startChar": 11,
+        "endLine": 10,
+        "endChar": 53
+      },
+      "revId": "267e60c5cf33e6dade600d7d388cc32b39079a2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3e4519a_471c5a57",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 1
