@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3d5fd7e3_3dd57e71",
+        "filename": "android-qemu2-glue/snapshot_hooks.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "I am thinking to keep them within the translator library so that the changes to the interfaces would be minimum. Putting them here seems to introduce a lot of coupling. What do you think?",
+      "parentUuid": "7c611037_77f65adf",
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2bc83c8e_6569d9d7",
         "filename": "android/android-emu/android/snapshot/PathUtils.cpp",
         "patchSetId": 4
@@ -30,6 +48,30 @@
       "writtenOn": "2017-06-23T22:30:41Z",
       "side": 1,
       "message": "nit: LazyInstance\u003c\u003e",
+      "range": {
+        "startLine": 19,
+        "startChar": 7,
+        "endLine": 19,
+        "endChar": 18
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "958306db_8318e4b8",
+        "filename": "android/android-emu/android/snapshot/PathUtils.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2bc83c8e_6569d9d7",
       "range": {
         "startLine": 19,
         "startChar": 7,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "6282a55c_80c810a1",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "19c2d158_c59a2766",
+      "range": {
+        "startLine": 262,
+        "startChar": 7,
+        "endLine": 262,
+        "endChar": 37
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0d0a9aa0_7a26e87b",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
         "patchSetId": 4
@@ -76,6 +142,30 @@
       "writtenOn": "2017-06-23T22:30:41Z",
       "side": 1,
       "message": "you could change creator() to pass both |this| and the loader callback\nif that\u0027s the only place where it is used then it\u0027s cleaner with all parameters passed at creation time. setLoader() would not be needed anymore",
+      "range": {
+        "startLine": 302,
+        "startChar": 42,
+        "endLine": 302,
+        "endChar": 57
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a45c90cf_9cd8ed73",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 302,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d0a9aa0_7a26e87b",
       "range": {
         "startLine": 302,
         "startChar": 42,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "bcc59585_def59d28",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c92dc24_d2419698",
+      "range": {
+        "startLine": 18,
+        "startChar": 4,
+        "endLine": 18,
+        "endChar": 15
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d34d184e_92b2fd0a",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureLoader.cpp",
         "patchSetId": 4
@@ -122,6 +236,30 @@
       "writtenOn": "2017-06-23T22:30:41Z",
       "side": 1,
       "message": "you could call mIndex.reserve() here to preallocate memory",
+      "range": {
+        "startLine": 39,
+        "startChar": 13,
+        "endLine": 39,
+        "endChar": 21
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd5d38c8_a99ba8ab",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d34d184e_92b2fd0a",
       "range": {
         "startLine": 39,
         "startChar": 13,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "30cd2460_51bd744f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Yes. And I have a worry that people might start using crazy large textures in the next few years. As I remember we are already hitting 4k*4k*pixel_size textures in antutu. If they make 10x width and height, filePos diff would be over 2G.",
+      "parentUuid": "4320f2e1_74eff9a9",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 42,
+        "endChar": 44
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a65c2e8_6749b1eb",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureSaver.cpp",
         "patchSetId": 4
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "37233b30_720d8ca8",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureSaver.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a65c2e8_6749b1eb",
+      "range": {
+        "startLine": 34,
+        "startChar": 3,
+        "endLine": 34,
+        "endChar": 70
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6e3fbbcb_d33c21ae",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureLoader.h",
         "patchSetId": 4
@@ -191,6 +377,24 @@
       "writtenOn": "2017-06-23T22:30:41Z",
       "side": 1,
       "message": "nit: I\u0027d prefer a \"using\" syntax here",
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3443f96b_bd7a421e",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureLoader.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done. What is the difference between using and typedef?",
+      "parentUuid": "6e3fbbcb_d33c21ae",
       "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -243,6 +447,30 @@
     },
     {
       "key": {
+        "uuid": "814b9712_e5d752b2",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureSaver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "This is the buffer for fetching texture data from GPU memory to RAM. I will leave a comment here.\n\nActually can we make it a lot larger even if it is named SmallFixedVector? Since it will be at least as big as the color buffer which is 3*skin resolution.",
+      "parentUuid": "ec9654a6_c4cab0e2",
+      "range": {
+        "startLine": 46,
+        "startChar": 56,
+        "endLine": 46,
+        "endChar": 63
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "118ab985_817bb28d",
         "filename": "android/android-emugl/host/libs/libOpenglRender/SnapshotDirGetter.cpp",
         "patchSetId": 4
@@ -254,6 +482,30 @@
       "writtenOn": "2017-06-23T22:30:41Z",
       "side": 1,
       "message": "rofl\nplease add some stderr logging about internal error as this function isn\u0027t supposed to be ever called",
+      "range": {
+        "startLine": 20,
+        "startChar": 11,
+        "endLine": 20,
+        "endChar": 14
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fd9feb2_f360c321",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/SnapshotDirGetter.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-06-24T00:13:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "118ab985_817bb28d",
       "range": {
         "startLine": 20,
         "startChar": 11,
