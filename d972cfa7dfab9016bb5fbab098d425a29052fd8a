@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e8605d4e_5d7c0b11",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:15:58Z",
+      "side": 1,
+      "message": "do we want to print everything out unconditionally? It looks a little bit too noisy, and most of our users run the emulator from Android Studio with no console attached",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 10
+      },
+      "revId": "d972cfa7dfab9016bb5fbab098d425a29052fd8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebb56754_b1879ad3",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:15:58Z",
+      "side": 1,
+      "message": "please clean up this code",
+      "range": {
+        "startLine": 193,
+        "startChar": 0,
+        "endLine": 196,
+        "endChar": 15
+      },
+      "revId": "d972cfa7dfab9016bb5fbab098d425a29052fd8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe0aac54_4693b118",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:15:58Z",
+      "side": 1,
+      "message": "do we expect this variable to be used in multiple threads (e.g. start/stop recording calls in parallel with gpu callback)? What\u0027s the expected threading model for the API?",
+      "range": {
+        "startLine": 197,
+        "startChar": 8,
+        "endLine": 197,
+        "endChar": 22
+      },
+      "revId": "d972cfa7dfab9016bb5fbab098d425a29052fd8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24480b63_38eaa8af",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:15:58Z",
+      "side": 1,
+      "message": "this will definitely bee too noisy :)",
+      "range": {
+        "startLine": 208,
+        "startChar": 12,
+        "endLine": 208,
+        "endChar": 18
+      },
+      "revId": "d972cfa7dfab9016bb5fbab098d425a29052fd8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "556bc567_69d51e4e",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:15:58Z",
+      "side": 1,
+      "message": "what about the recorder in case when it was enabled during exit?",
+      "range": {
+        "startLine": 477,
+        "startChar": 4,
+        "endLine": 477,
+        "endChar": 18
+      },
+      "revId": "d972cfa7dfab9016bb5fbab098d425a29052fd8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
