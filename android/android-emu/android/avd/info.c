@@ -1413,8 +1413,20 @@ avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )
             return;
         }
 
-        /* otherwise, use the default name */
-        skinName = ASTRDUP(SKIN_DEFAULT);
+        /* We need to create a name.
+         * Make a "magical" name using the screen size from config.ini
+         * (parse_skin_files() in main-common-ui.c parses this name
+         *  to determine the screen size.)
+         */
+        int width = iniFile_getInteger(i->configIni, "hw.lcd.width", 0);
+        int height = iniFile_getInteger(i->configIni, "hw.lcd.height", 0);
+        if (width > 0 && height > 0) {
+            char skinNameBuf[64];
+            snprintf(skinNameBuf, sizeof skinNameBuf, "%dx%d", width, height);
+            skinName = ASTRDUP(skinNameBuf);
+        } else {
+            skinName = ASTRDUP(SKIN_DEFAULT);
+        }
     }
 
     /* now try to find the skin directory for that name -
