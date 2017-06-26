@@ -49,6 +49,52 @@
     },
     {
       "key": {
+        "uuid": "87d9e24f_e6c79f5f",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T19:54:27Z",
+      "side": 1,
+      "message": "you could use a [] { QFontDatabase db; } lambda here",
+      "range": {
+        "startLine": 423,
+        "startChar": 55,
+        "endLine": 423,
+        "endChar": 71
+      },
+      "revId": "488e6c4f92b4653d46c358993a770f0b6b225673",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bbf332cc_86d4f676",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T19:54:27Z",
+      "side": 1,
+      "message": "lazy instance, btw :)",
+      "range": {
+        "startLine": 423,
+        "startChar": 22,
+        "endLine": 423,
+        "endChar": 35
+      },
+      "revId": "488e6c4f92b4653d46c358993a770f0b6b225673",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0c781be8_44154b3d",
         "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
         "patchSetId": 3
