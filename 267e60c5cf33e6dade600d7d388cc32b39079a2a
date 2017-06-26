@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "a0bb6253_8e06261d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-06-26T05:05:21Z",
+      "side": 1,
+      "message": "page by page compression might explain the 2x overall compression rate; I wonder what is the compression rate of you compress the whole ram, I expect it to be higher but not sure.",
+      "parentUuid": "b3b1773f_a25b999a",
+      "range": {
+        "startLine": 10,
+        "startChar": 11,
+        "endLine": 10,
+        "endChar": 53
+      },
+      "revId": "267e60c5cf33e6dade600d7d388cc32b39079a2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3e4519a_471c5a57",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 1
