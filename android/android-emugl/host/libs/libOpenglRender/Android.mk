@@ -36,6 +36,7 @@ host_common_SRC_FILES := \
     RenderThreadInfo.cpp \
     render_api.cpp \
     RenderWindow.cpp \
+    SnapshotDirGetter.cpp \
     SyncThread.cpp \
     TextureDraw.cpp \
     TextureResize.cpp \

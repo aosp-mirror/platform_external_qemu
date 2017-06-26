@@ -57,7 +57,8 @@ static GLEScontext* createGLESxContext(int maj, int min, GlobalNameSpace* global
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
                         android::base::SmallVector<unsigned char>* buffer);
-static SaveableTexture* loadTexture(android::base::Stream* stream, GlobalNameSpace* globalNameSpace);
+static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
+                                      SaveableTexture::loader_t loader);
 static void restoreTexture(SaveableTexture* texture);
 }
 
@@ -67,23 +68,23 @@ ProcTableMap *s_glesExtensions = NULL;
 /****************************************************************************************************************/
 
 static EGLiface*  s_eglIface = NULL;
-static GLESiface  s_glesIface = {
-    .initGLESx                  = initGLESx,
-    .createGLESContext          = createGLESxContext,
-    .initContext                = initContext,
-    .deleteGLESContext          = deleteGLESContext,
-    .flush                      = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish                     = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError                   = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
-    .setShareGroup              = setShareGroup,
-    .getProcAddress             = getProcAddress,
-    .fenceSync                  = (FUNCPTR_FENCE_SYNC)glFenceSync,
-    .clientWaitSync             = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
-    .deleteSync                 = (FUNCPTR_DELETE_SYNC)glDeleteSync,
-    .saveTexture                = saveTexture,
-    .loadTexture                = loadTexture,
-    .restoreTexture             = restoreTexture,
-    .deleteRbo                  = deleteRenderbufferGlobal,
+static GLESiface s_glesIface = {
+        .initGLESx = initGLESx,
+        .createGLESContext = createGLESxContext,
+        .initContext = initContext,
+        .deleteGLESContext = deleteGLESContext,
+        .flush = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
+        .finish = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+        .getError = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
+        .setShareGroup = setShareGroup,
+        .getProcAddress = getProcAddress,
+        .fenceSync = (FUNCPTR_FENCE_SYNC)glFenceSync,
+        .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
+        .deleteSync = (FUNCPTR_DELETE_SYNC)glDeleteSync,
+        .saveTexture = saveTexture,
+        .createTexture = createTexture,
+        .restoreTexture = restoreTexture,
+        .deleteRbo = deleteRenderbufferGlobal,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -158,9 +159,9 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
     texture->onSave(stream, buffer);
 }
 
-static SaveableTexture* loadTexture(android::base::Stream* stream,
-        GlobalNameSpace* globalNameSpace) {
-    return new SaveableTexture(stream, globalNameSpace);
+static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
+                                      SaveableTexture::loader_t loader) {
+    return new SaveableTexture(globalNameSpace, loader);
 }
 
 static void restoreTexture(SaveableTexture* texture) {

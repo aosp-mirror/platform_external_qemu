@@ -23,6 +23,7 @@
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
 
+#include <functional>
 #include <memory>
 
 class GLDispatch;
@@ -48,27 +49,30 @@ public:
     using saver_t = void (*)(SaveableTexture*,
                              android::base::Stream*,
                              Buffer* buffer);
-    using loader_t = SaveableTexture* (*)(android::base::Stream*,
-                                          GlobalNameSpace*);
+    // loader_t is supposed to setup a stream and trigger loadFromStream.
+    typedef std::function<void(SaveableTexture*)> loader_t;
+    using creator_t = SaveableTexture* (*)(GlobalNameSpace*, loader_t);
     using restorer_t = void (*)(SaveableTexture*);
 
     SaveableTexture() = delete;
     SaveableTexture(SaveableTexture&&) = delete;
+    SaveableTexture(GlobalNameSpace* globalNameSpace, loader_t loader);
     SaveableTexture& operator=(SaveableTexture&&) = delete;
 
     SaveableTexture(const EglImage& eglImage);
     SaveableTexture(const TextureData& texture);
     // precondition: a context must be properly bound
-    SaveableTexture(android::base::Stream* stream,
-                    GlobalNameSpace* globalNameSpace);
-    // precondition: a context must be properly bound
     void onSave(android::base::Stream* stream, Buffer* buffer) const;
     // getGlobalObject() will touch and load data onto GPU if it is not yet
     // restored
     const NamedObjectPtr& getGlobalObject();
-    EglImage* makeEglImage() const;
+    // precondition: a context must be properly bound
+    void fillEglImage(EglImage* eglImage);
+    void loadFromStream(android::base::Stream* stream);
 
 private:
+    // precondition: (1) a context must be properly bound
+    //               (2) m_fileReader is set up
     void restore() override;
 
     unsigned int m_target = GL_TEXTURE_2D;
@@ -94,6 +98,7 @@ private:
     GLint mTexMinFilter;
     GLint mTexWrapS;
     GLint mTexWrapT;
+    loader_t m_loader = nullptr;
     GlobalNameSpace* m_globalNamespace = nullptr;
 };
 
