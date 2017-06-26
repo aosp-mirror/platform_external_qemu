@@ -100,6 +100,10 @@ endif
 # Ensure config-host.h can be found properly.
 QEMU2_INCLUDES := $(LOCAL_PATH)/android-qemu2-glue/config/$(BUILD_TARGET_TAG)
 
+ifeq ($(BUILD_TARGET_OS),linux)
+  QEMU2_INCLUDES += $(QEMU2_TOP_DIR)/linux-headers
+endif
+
 # Ensure QEMU2 headers are found.
 QEMU2_INCLUDES += \
     $(LOCAL_PATH) \
