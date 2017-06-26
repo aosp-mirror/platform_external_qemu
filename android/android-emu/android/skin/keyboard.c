@@ -118,6 +118,30 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     return -1;
 }
 
+/* Handle modifier key for cros keyboard shortcuts.
+ * Note: Ctrl doesn't work now since Android emulator intercepts it.
+ */
+static void handle_cros_shortcuts(SkinKeyboard* kb, int key, int mod, int down) {
+    int doShift = (mod & kKeyModLShift) || (mod & kKeyModRShift);
+    int doAlt = (mod & kKeyModLAlt) || (mod & kKeyModRAlt);
+    int doCtrl = (mod & kKeyModLCtrl) || (mod & kKeyModRCtrl);
+
+    /* Send modifier key first when it's a press event */
+    if (down) {
+        if (doCtrl) skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 1);
+        if (doAlt) skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT,  1);
+        if (doShift) skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
+    }
+    skin_keyboard_add_key_event(kb, key, down);
+    /* Send modifier key last when it's a release event */
+    if (!down) {
+        if (doCtrl) skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTCTRL, 0);
+        if (doAlt) skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTALT,  0);
+        if (doShift) skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 0);
+    }
+    skin_keyboard_flush(kb);
+}
+
 /* If it's running chrome os images, remapping key code here so
  * the emulator toolbar also does the "expected" thing for chrome os.
  * Also fix some incorrected key codes.
@@ -191,7 +215,10 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
-
+        if (mod && mod != kKeyModNumLock && android_hw->hw_arc) {
+            handle_cros_shortcuts(kb, keycode, mod, down);
+            return;
+        }
         if (map_cros_key(&keycode) == 0) {
             skin_keyboard_add_key_event(kb, keycode, down);
             skin_keyboard_flush(kb);
