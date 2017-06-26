@@ -419,6 +419,7 @@ static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
 
 extern AndroidProxyCB *gAndroidProxyCB;
 extern "C" int main(int argc, char **argv) {
+
     process_early_setup(argc, argv);
 
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
@@ -470,6 +471,7 @@ extern "C" int main(int argc, char **argv) {
         // Normal exit.
         return exitStatus;
     }
+
 
     // Update server-based hw config / feature flags.
     // Must be done after emulator_parseCommonCommandLineOptions,
@@ -999,7 +1001,6 @@ extern "C" int main(int argc, char **argv) {
         /* Setup SDL UI just before calling the code */
         android::base::Thread::maskAllSignals();
 
-        skin_winsys_init_args(argc, argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }

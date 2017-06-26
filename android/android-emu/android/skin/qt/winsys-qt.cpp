@@ -18,6 +18,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
@@ -27,6 +28,7 @@
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/setenv.h"
+#include "android/utils/system.h"
 #include "android/main-common-ui.h"
 
 #include <QtCore>
@@ -392,13 +394,9 @@ void skin_winsys_setup_library_paths() {
     D("Qt plugin path: %s\n", qtPluginsPath.c_str());
 }
 
-extern void skin_winsys_init_args(int argc, char** argv) {
-    GlobalState* g = globalState();
-    g->argc = argc;
-    g->argv = argv;
-}
+extern void skin_winsys_init_args(int argc, char** argv, bool no_window) {
 
-extern void skin_winsys_start(bool no_window) {
+    fprintf(stderr, "%s:%d %llu ms\n", __func__, __LINE__, get_uptime_ms());
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
@@ -406,17 +404,51 @@ extern void skin_winsys_start(bool no_window) {
     // work (confirmed by grepping through Qt code).
     XInitThreads();
 #endif
-    skin_winsys_setup_library_paths();
 
+    g->argc = argc;
+    g->argv = argv;
+    fprintf(stderr, "%s:%d %llu ms\n", __func__, __LINE__, get_uptime_ms());
+    skin_winsys_setup_library_paths();
+    fprintf(stderr, "%s:%d %llu ms\n", __func__, __LINE__, get_uptime_ms());
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
-        EmulatorQtNoWindow::create();
+        
     } else {
         g->app = new QApplication(g->argc, g->argv);
-        g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
         androidQtDefaultInit();
+    }
+    fprintf(stderr, "%s:%d %llu ms\n", __func__, __LINE__, get_uptime_ms());
+    skin_winsys_touch_uilib();
+}
 
+static int sMakeADialog() {
+    fprintf(stderr, "%s:%d %llu ms before noreason (in thread)\n", __func__, __LINE__, get_uptime_ms());
+    QFontDatabase db;
+    fprintf(stderr, "%s:%d %llu ms before noreason (done thread)\n", __func__, __LINE__, get_uptime_ms());
+    return 0;
+}
+
+static android::base::FunctorThread sAsyncToucher(sMakeADialog);
+
+extern void skin_winsys_touch_uilib() {
+    fprintf(stderr, "%s:%d %llu ms before noreason\n", __func__, __LINE__, get_uptime_ms());
+    sAsyncToucher.start();
+    fprintf(stderr, "%s:%d %llu ms after noreason\n", __func__, __LINE__, get_uptime_ms());
+}
+
+extern void skin_winsys_start(bool no_window) {
+        fprintf(stderr, "%s:%d %llu ms before defeaultinit\n", __func__, __LINE__, get_uptime_ms());
+    GlobalState* g = globalState();
+    if (no_window) {
+        EmulatorQtNoWindow::create();
+    } else {
+        fprintf(stderr, "%s:%d %llu ms before defeaultinit\n", __func__, __LINE__, get_uptime_ms());
+        g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
+        fprintf(stderr, "%s:%d %llu ms before defeaultinit\n", __func__, __LINE__, get_uptime_ms());
+
+        fprintf(stderr, "%s:%d %llu ms before create\n", __func__, __LINE__, get_uptime_ms());
         EmulatorQtWindow::create();
+        fprintf(stderr, "%s:%d %llu ms after create\n", __func__, __LINE__, get_uptime_ms());
 #ifdef __APPLE__
         // On OS X, Qt automatically generates an application menu with a "Quit"
         // item. For whatever reason, the auto-generated "quit" does not work,

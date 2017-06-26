@@ -20,6 +20,7 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/protobuf/ProtobufLogging.h"
+#include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/sockets.h"
@@ -33,6 +34,7 @@ using android::base::System;
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
 void process_early_setup(int argc, char** argv) {
+    skin_winsys_init_args(argc, argv, false /* no window */);
     // This function is the first thing emulator calls - so it's the best place
     // to wait for a debugger to attach, before even the options parsing code.
     static constexpr StringView waitForDebuggerArg = "-wait-for-debugger";

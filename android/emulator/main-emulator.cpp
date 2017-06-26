@@ -48,6 +48,7 @@
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/utils/system.h"
 #include "android/version.h"
 
 #include "android/skin/winsys.h"
@@ -211,6 +212,7 @@ static bool checkOsVersion() {
 /* Main routine */
 int main(int argc, char** argv)
 {
+    fprintf(stderr, "%s:%d %llu ms in launcher\n", __func__, __LINE__, get_uptime_ms());
     const char* avdName = NULL;
     const char* avdArch = NULL;
     const char* engine = NULL;
@@ -662,6 +664,7 @@ int main(int argc, char** argv)
         printf("\n");
     }
 
+    fprintf(stderr, "%s:%d %llu ms in launcher\n", __func__, __LINE__, get_uptime_ms());
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.
