@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 // Init args.
-void skin_winsys_init_args(int argc, char** argv);
+void skin_winsys_init_args(int argc, char** argv, bool no_window);
 
 // Return window handle of main UI. MUST BE CALLED FROM THE MAIN UI THREAD.
 void* skin_winsys_get_window_handle();
@@ -75,6 +75,9 @@ enum WinsysPreferredGlesBackend skin_winsys_get_preferred_gles_backend();
 void skin_winsys_set_preferred_gles_backend(enum WinsysPreferredGlesBackend);
 // Returns current preferred gles api level specified through the emulator UI.
 enum WinsysPreferredGlesApiLevel skin_winsys_get_preferred_gles_apilevel();
+
+// Page in UI library data for faster start.
+void skin_winsys_touch_uilib();
 
 // Start main window support. |no_window| must be true to indicate that
 // no window needs to be shown, but that the GUI backend still needs to be

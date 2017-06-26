@@ -18,6 +18,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
@@ -392,13 +393,7 @@ void skin_winsys_setup_library_paths() {
     D("Qt plugin path: %s\n", qtPluginsPath.c_str());
 }
 
-extern void skin_winsys_init_args(int argc, char** argv) {
-    GlobalState* g = globalState();
-    g->argc = argc;
-    g->argv = argv;
-}
-
-extern void skin_winsys_start(bool no_window) {
+extern void skin_winsys_init_args(int argc, char** argv, bool no_window) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
@@ -406,15 +401,37 @@ extern void skin_winsys_start(bool no_window) {
     // work (confirmed by grepping through Qt code).
     XInitThreads();
 #endif
-    skin_winsys_setup_library_paths();
 
+    g->argc = argc;
+    g->argv = argv;
+    skin_winsys_setup_library_paths();
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
-        EmulatorQtNoWindow::create();
+        
     } else {
         g->app = new QApplication(g->argc, g->argv);
-        g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
         androidQtDefaultInit();
+        skin_winsys_touch_uilib();
+    }
+}
+
+static int sTouchFontDbFunc() {
+    QFontDatabase db;
+    return 0;
+}
+
+static android::base::FunctorThread sTouchFontDbThread(sTouchFontDbFunc);
+
+extern void skin_winsys_touch_uilib() {
+    sTouchFontDbThread.start();
+}
+
+extern void skin_winsys_start(bool no_window) {
+    GlobalState* g = globalState();
+    if (no_window) {
+        EmulatorQtNoWindow::create();
+    } else {
+        g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
 
         EmulatorQtWindow::create();
 #ifdef __APPLE__
