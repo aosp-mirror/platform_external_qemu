@@ -612,10 +612,14 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
             if (infoLogLength == 0) {
                 infoLog[0] = 0;
             }
+            fprintf(stderr, "%s: fail compile at host driver lvl. info log: %s\n", __func__, infoLog);
             sp->setInfoLog(infoLog);
 
             ctx->dispatcher().glGetShaderiv(globalShaderName,GL_COMPILE_STATUS,&compileStatus);
             sp->setCompileStatus(compileStatus == GL_FALSE ? false : true);
+
+            // if (compileStatus == GL_FALSE) {
+            // }
         } else {
             ctx->dispatcher().glCompileShader(globalShaderName);
             sp->setCompileStatus(false);
@@ -2294,7 +2298,33 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
-        return ctx->dispatcher().glGetUniformLocation(globalProgramName,name);
+
+        std::string localVarName(name);
+
+        GLint fragmentShader = pData->getAttachedFragmentShader();
+        GLint vertexShader =  pData->getAttachedVertexShader();
+
+        if (vertexShader != 0 && fragmentShader != 0) {
+            auto fragObjData = ctx->shareGroup()->getObjectData(
+                    NamedObjectType::SHADER_OR_PROGRAM, fragmentShader);
+            auto vertObjData = ctx->shareGroup()->getObjectData(
+                    NamedObjectType::SHADER_OR_PROGRAM, vertexShader);
+            ShaderParser* fragSp = (ShaderParser*)fragObjData;
+            ShaderParser* vertSp = (ShaderParser*)vertObjData;
+            std::string fragPart = pData->getTranslatedName(fragSp, name);
+            std::string vertPart = pData->getTranslatedName(vertSp, name);
+            if (fragPart != std::string(name)) {
+                localVarName = fragPart;
+            }
+            if (vertPart != std::string(name)) {
+                localVarName = vertPart;
+            }
+            fprintf(stderr, "%s: translated %s -> %s\n", __func__, name, localVarName.c_str());
+        }
+        
+        return ctx->dispatcher().glGetUniformLocation(
+                   globalProgramName,
+                   localVarName.c_str());
     }
     return -1;
 }

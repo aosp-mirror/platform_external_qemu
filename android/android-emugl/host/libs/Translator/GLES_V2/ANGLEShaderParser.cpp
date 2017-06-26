@@ -45,7 +45,7 @@ static ShShaderOutput sOutputSpecForVersion(int esslVersion) {
     switch (esslVersion) {
         case 100:
         case 300:
-            return SH_GLSL_330_CORE_OUTPUT;
+            return SH_GLSL_410_CORE_OUTPUT;
         case 310:
             return SH_GLSL_430_CORE_OUTPUT;
     }
@@ -162,7 +162,17 @@ bool globalInitialize(
 }
 
 static void getShaderLinkInfo(ShHandle compilerHandle,
-                              ShaderLinkInfo* linkInfo) {
+        ShaderLinkInfo* linkInfo) {
+
+    std::map<std::string, std::string> thismap = *ShGetNameHashingMap(compilerHandle);
+
+    fprintf(stderr, "%s: name map: %zu items\n", __func__, thismap.size());
+    for (const auto& elt : thismap) {
+        fprintf(stderr, "%s: %s -> %s\n", __func__, elt.first.c_str(), elt.second.c_str());
+    }
+
+    linkInfo->nameMap = thismap;
+
     auto uniforms = ShGetUniforms(compilerHandle);
     auto varyings = ShGetVaryings(compilerHandle);
     auto attributes = ShGetAttributes(compilerHandle);
@@ -222,6 +232,7 @@ bool translate(int esslVersion,
         return false;
     }
 
+    fprintf(stderr, "%s: source is %s\n", __func__, src);
     // Pass in the entire src as 1 string, ask for compiled GLSL object code
     // and information about all compiled variables.
     int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
@@ -230,6 +241,9 @@ bool translate(int esslVersion,
     // and we manually clear them immediately anyway.
     *outInfolog = std::string(ShGetInfoLog(compilerHandle));
     *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+
+    fprintf(stderr, "%s: output is %s\n", __func__, outObjCode->c_str());
+    fprintf(stderr, "%s: output infolog %s\n", __func__, outInfolog->c_str());
 
     if (outShaderLinkInfo) getShaderLinkInfo(compilerHandle, outShaderLinkInfo);
 

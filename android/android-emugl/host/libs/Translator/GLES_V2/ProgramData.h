@@ -70,6 +70,8 @@ public:
     GLuint getAttachedComputeShader() const;
     GLuint getAttachedShader(GLenum type) const;
 
+    std::string getTranslatedName(ShaderParser* sp, const std::string& userVarName) const;
+
     bool attachShader(GLuint shader, ShaderParser* shaderData, GLenum type);
     bool isAttached(GLuint shader) const;
     bool detachShader(GLuint shader);

@@ -18,7 +18,7 @@
 
 static NSOpenGLPixelFormatAttribute attrs32_1[] =
 {
-    NSOpenGLPFAOpenGLProfile, (NSOpenGLPixelFormatAttribute)NSOpenGLProfileVersion3_2Core,
+    NSOpenGLPFAOpenGLProfile, (NSOpenGLPixelFormatAttribute)NSOpenGLProfileVersion4_1Core,
     NSOpenGLPFADoubleBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFADepthSize   ,24,
@@ -28,7 +28,7 @@ static NSOpenGLPixelFormatAttribute attrs32_1[] =
 
 static NSOpenGLPixelFormatAttribute attrs32_2[] =
 {
-    NSOpenGLPFAOpenGLProfile, (NSOpenGLPixelFormatAttribute)NSOpenGLProfileVersion3_2Core,
+    NSOpenGLPFAOpenGLProfile, (NSOpenGLPixelFormatAttribute)NSOpenGLProfileVersion4_1Core,
     NSOpenGLPFADoubleBuffer,
     NSOpenGLPFAColorSize   ,32,
     NSOpenGLPFAAlphaSize   ,8,
