@@ -15,9 +15,11 @@
 #endif
 
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/qt/qt_path.h"
 #include "android/skin/rect.h"
 #include "android/skin/resource.h"
@@ -59,6 +61,8 @@
 #include <signal.h>
 #endif
 
+using android::base::FunctorThread;
+using android::base::LazyInstance;
 using android::base::System;
 #ifdef _WIN32
 using android::base::Win32UnicodeString;
@@ -392,13 +396,22 @@ void skin_winsys_setup_library_paths() {
     D("Qt plugin path: %s\n", qtPluginsPath.c_str());
 }
 
-extern void skin_winsys_init_args(int argc, char** argv) {
-    GlobalState* g = globalState();
-    g->argc = argc;
-    g->argv = argv;
-}
+class FontDbToucher {
+public:
+    FontDbToucher() : mThread([]() { QFontDatabase db; }) {
+        mThread.start();
+    }
 
-extern void skin_winsys_start(bool no_window) {
+    void wait() {
+        mThread.wait();
+    }
+private:
+    FunctorThread mThread;
+};
+
+static LazyInstance<FontDbToucher> sFontDbToucher = LAZY_INSTANCE_INIT;
+
+extern void skin_winsys_init_args(int argc, char** argv, bool no_window) {
     GlobalState* g = globalState();
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
@@ -406,16 +419,29 @@ extern void skin_winsys_start(bool no_window) {
     // work (confirmed by grepping through Qt code).
     XInitThreads();
 #endif
-    skin_winsys_setup_library_paths();
 
+    g->argc = argc;
+    g->argv = argv;
+    skin_winsys_setup_library_paths();
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
-        EmulatorQtNoWindow::create();
+        
     } else {
         g->app = new QApplication(g->argc, g->argv);
-        g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
         androidQtDefaultInit();
+        // Start paging in font database on a separate thread for faster startup.
+        sFontDbToucher.get();
+    }
+}
 
+extern void skin_winsys_start(bool no_window) {
+    GlobalState* g = globalState();
+    if (no_window) {
+        EmulatorQtNoWindow::create();
+    } else {
+        g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+        sFontDbToucher.get().wait();
         EmulatorQtWindow::create();
 #ifdef __APPLE__
         // On OS X, Qt automatically generates an application menu with a "Quit"

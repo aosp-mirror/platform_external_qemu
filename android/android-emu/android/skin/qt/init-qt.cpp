@@ -22,7 +22,7 @@
 using android::base::System;
 using android::base::PathUtils;
 
-void androidQtDefaultInit() {
+void androidQtDefaultInit() { 
     Q_INIT_RESOURCE(static_resources);
 
     const auto resourceFile = PathUtils::join(
@@ -31,7 +31,7 @@ void androidQtDefaultInit() {
     if (!QResource::registerResource(
             QString::fromUtf8(resourceFile.c_str(), resourceFile.size()))) {
         VERBOSE_PRINT(init,
-                      "Count not register resources file: '%s'",
+                      "Could not register resources file: '%s'\n",
                       resourceFile.c_str());
     }
 

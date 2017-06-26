@@ -474,8 +474,16 @@ extern "C" int main(int argc, char **argv) {
     // Must be done after emulator_parseCommonCommandLineOptions,
     // since that calls createAVD which sets up critical info needed
     // by featurecontrol component itself.
+#if (SNAPSHOT_PROFILE > 1)
+     printf("Starting feature flag application and host hw query with uptime %llu ms\n",
+            get_uptime_ms());
+#endif
     feature_initialize();
     feature_update_from_server();
+#if (SNAPSHOT_PROFILE > 1)
+     printf("Finished feature flag application and host hw query with uptime %llu ms\n",
+            get_uptime_ms());
+#endif
 
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
@@ -998,10 +1006,17 @@ extern "C" int main(int argc, char **argv) {
         /* Setup SDL UI just before calling the code */
         android::base::Thread::maskAllSignals();
 
-        skin_winsys_init_args(argc, argv);
+#if (SNAPSHOT_PROFILE > 1)
+        printf("EmulatorQtWindow initialization starting at uptime %llu ms\n",
+               get_uptime_ms());
+#endif
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
+#if (SNAPSHOT_PROFILE > 1)
+        printf("EmulatorQtWindow initialization finished at uptime %llu ms\n",
+               get_uptime_ms());
+#endif
 
         // Use advancedFeatures to override renderer if the user has selected
         // in UI that the preferred renderer is "autoselected".
