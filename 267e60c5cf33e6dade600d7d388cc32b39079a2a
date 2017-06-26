@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "7c7884e1_5f167621",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-06-26T17:35:29Z",
+      "side": 1,
+      "message": "some random thoughts: what if we compress 2 pages, 4 pages, 8 pages ?\nthere might be an optimal point where we can get a better compression ratio but still retain on demand loading of pages (2, 4, 8)",
+      "parentUuid": "a0bb6253_8e06261d",
+      "range": {
+        "startLine": 10,
+        "startChar": 11,
+        "endLine": 10,
+        "endChar": 53
+      },
+      "revId": "267e60c5cf33e6dade600d7d388cc32b39079a2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3e4519a_471c5a57",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 1
