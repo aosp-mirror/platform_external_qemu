@@ -319,6 +319,30 @@
     },
     {
       "key": {
+        "uuid": "1799f1c2_6d5beba8",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:30:43Z",
+      "side": 1,
+      "message": "4x4k textures will give us lots of other problems to deal with, so I wouldn\u0027t really optimize for them yet\nand packedNum() writing would encode 2G number in 5 bytes (and anything up to 34G), which is less than 8 bytes used for int64_t as of now",
+      "parentUuid": "30cd2460_51bd744f",
+      "range": {
+        "startLine": 41,
+        "startChar": 8,
+        "endLine": 42,
+        "endChar": 44
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a65c2e8_6749b1eb",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/TextureSaver.cpp",
         "patchSetId": 4
@@ -401,6 +425,24 @@
     },
     {
       "key": {
+        "uuid": "b9fdd66a_a374e04d",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureLoader.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:30:43Z",
+      "side": 1,
+      "message": "Other than convenience - none :)\nwell, \"using\" supports templated aliases, but in general it\u0027s just a more readable typedef, especially for more complicated cases like arrays and function pointers\ne.g. compare these:\n\nusing array \u003d int[3];\ntypedef int array[3];\n\nusing func \u003d void(int);\ntypedef void(func)(int);",
+      "parentUuid": "3443f96b_bd7a421e",
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "54012b06_b63df5ea",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureSaver.h",
         "patchSetId": 4
@@ -459,6 +501,30 @@
       "side": 1,
       "message": "This is the buffer for fetching texture data from GPU memory to RAM. I will leave a comment here.\n\nActually can we make it a lot larger even if it is named SmallFixedVector? Since it will be at least as big as the color buffer which is 3*skin resolution.",
       "parentUuid": "ec9654a6_c4cab0e2",
+      "range": {
+        "startLine": 46,
+        "startChar": 56,
+        "endLine": 46,
+        "endChar": 63
+      },
+      "revId": "59e9897da88505a383b5a52a44db35d09974ab5f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0aec3d06_a4c1afd7",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureSaver.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:30:43Z",
+      "side": 1,
+      "message": "You\u0027re free to make the internal buffer size as big as you want, just don\u0027t forget that it would be all inside the object, so it increases the object size -\u003e increases the TextureSaver size. If created on stack that could lead to interesting and unexpected consequences, like stack overflow from nowhere",
+      "parentUuid": "814b9712_e5d752b2",
       "range": {
         "startLine": 46,
         "startChar": 56,
