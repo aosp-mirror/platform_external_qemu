@@ -270,7 +270,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     setOnTop(onTop);
 
     bool shortcutBool =
-            settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false)
+            settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, android_hw->hw_arc)
                     .toBool();
     setForwardShortcutsToDevice(shortcutBool ? 1 : 0);
 
@@ -1436,6 +1436,23 @@ static int convertKeyCode(int sym) {
     for (nn = 0; nn < kConvertSize; ++nn) {
         if (sym == kConvert[nn].qt_sym) {
             return kConvert[nn].keycode;
+        }
+    }
+    if (!android_hw->hw_arc) return -1;
+    static const struct {
+        int qt_sym;
+        int keycode;
+    } kCrosConvert[] = {
+            // Qt treats "SHIFT + TAB" as "Backtab", just convert it back to TAB.
+            KK(Backtab, TAB),
+            KK(Control, LEFTCTRL),
+            KK(Alt, LEFTALT),
+            KK(Shift, LEFTSHIFT),
+    };
+    const size_t kCrosConvertSize = sizeof(kCrosConvert) / sizeof(kCrosConvert[0]);
+    for (nn = 0; nn < kCrosConvertSize; ++nn) {
+        if (sym == kCrosConvert[nn].qt_sym) {
+            return kCrosConvert[nn].keycode;
         }
     }
     return -1;
