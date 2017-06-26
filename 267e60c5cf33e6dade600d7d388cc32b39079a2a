@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b3b1773f_a25b999a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T04:06:00Z",
+      "side": 1,
+      "message": "I tested it on the default size of 1.5G and a smaller 1G AVD\nIt works by compressing each memory page (4KB) separately in a thread pool, so it uses as many threads as possible to speed it up\nPage-by-page compression is needed to be able to later read and unpack a single page for on demand memory loading.",
+      "parentUuid": "beeada96_f9ed1557",
+      "range": {
+        "startLine": 10,
+        "startChar": 11,
+        "endLine": 10,
+        "endChar": 53
+      },
+      "revId": "267e60c5cf33e6dade600d7d388cc32b39079a2a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3e4519a_471c5a57",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 1
