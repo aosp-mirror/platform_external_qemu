@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c7bde375_bedb4bb0",
+        "filename": "android-qemu2-glue/qemu-record-screen-agent-impl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:36:05Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 1,
+        "startChar": 13,
+        "endLine": 1,
+        "endChar": 17
+      },
+      "revId": "c281f461f636a8d5cb4599ff7a8b067f9b927adc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da153b69_87dc3671",
+        "filename": "android/android-emu/android/emulation/control/record_screen_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:36:05Z",
+      "side": 1,
+      "message": "nit:2017",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "c281f461f636a8d5cb4599ff7a8b067f9b927adc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db575234_b2340e3b",
+        "filename": "android/qemu1/android-qemu1-glue/qemu-record-screen-agent-impl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-26T15:36:05Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 1,
+        "startChar": 13,
+        "endLine": 1,
+        "endChar": 17
+      },
+      "revId": "c281f461f636a8d5cb4599ff7a8b067f9b927adc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
