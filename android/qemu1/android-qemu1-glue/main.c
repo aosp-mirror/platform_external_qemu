@@ -259,7 +259,7 @@ int main(int argc, char **argv) {
     sigfillset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
-    skin_winsys_init_args(argc, argv);
+    skin_winsys_init_args(argc, argv, opts->no_window);
 
     if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
         return 1;
@@ -274,9 +274,11 @@ int main(int argc, char **argv) {
 #ifdef __APPLE__
     skin_acquire_window_inst();
 #endif
+    fprintf(stderr, "%s:%d %llu ms\n", __func__, __LINE__, get_uptime_ms());
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop,
                              qemu_parameters_size(qemuParams),
                              qemu_parameters_array(qemuParams));
+    fprintf(stderr, "%s:%d %llu ms\n", __func__, __LINE__, get_uptime_ms());
 
     skin_winsys_enter_main_loop(opts->no_window);
 
