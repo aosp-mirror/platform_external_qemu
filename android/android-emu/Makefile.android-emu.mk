@@ -229,6 +229,10 @@ LOCAL_C_INCLUDES := \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
 
+ifeq ($(BUILD_TARGET_OS),linux)
+    LOCAL_C_INCLUDES += $(QEMU2_TOP_DIR)/linux-headers
+endif
+
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
     android/avd/hw-config.c \

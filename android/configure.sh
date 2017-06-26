@@ -994,6 +994,11 @@ if [ -n "${TOOLCHAIN_SYSROOT}" ]; then
                 copy_toolchain_lib "${OUT_DIR}/lib/libstdc++" "${TOOLCHAIN_SYSROOT}/lib32" "${BUNDLED_LIB}"
                 copy_toolchain_lib "${OUT_DIR}/lib64/libstdc++" "${TOOLCHAIN_SYSROOT}/lib64" "${BUNDLED_LIB}"
             done
+            log "Copying toolchain headers to override qemu ones"
+            mkdir -p "${OUT_DIR}/build/linux"
+            for header in kvm.h kvm_para.h vhost.h; do
+                cp "${TOOLCHAIN_SYSROOT}/../sysroot/usr/include/linux/$header" "${OUT_DIR}/build/linux/"
+            done
         ;;
         *) log "Not copying toolchain libraries for ${HOST_OS}";;
     esac
