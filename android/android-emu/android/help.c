@@ -470,6 +470,17 @@ help_vendor(stralloc_t*  out)
 }
 
 static void
+help_encryption_key(stralloc_t*  out)
+{
+    PRINTF(
+    "  use '-encryption-key <file>' to specify the intial encryption key image that will be loaded.\n"
+    "  the default image is 'encryptionkey.img' from the system directory.\n\n"
+
+    "  see '-help-disk-images' for more information about disk image files\n\n"
+    );
+}
+
+static void
 help_image(stralloc_t*  out)
 {
     PRINTF(
