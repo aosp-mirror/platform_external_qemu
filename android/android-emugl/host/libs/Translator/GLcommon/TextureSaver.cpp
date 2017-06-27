@@ -31,10 +31,10 @@ TextureSaver::~TextureSaver() {
 }
 
 void TextureSaver::saveTexture(uint32_t texId, saver_t saver) {
-    assert(mIndex.texturs.end() ==
+    assert(mIndex.textures.end() ==
            std::find_if(
-                   mIndex.texture.begin(),
-                   mIndex.texture.end(), [texId](FileIndex::Texture & tex) {
+                   mIndex.textures.begin(),
+                   mIndex.textures.end(), [texId](FileIndex::Texture & tex) {
                        return tex.texId == texId;
                    }));
     mIndex.textures.push_back({texId, (int64_t)ftell(mStream.get())});
