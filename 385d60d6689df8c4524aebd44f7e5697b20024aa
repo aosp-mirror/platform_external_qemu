@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d10e4015_f40508c4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-06-27T22:07:41Z",
+      "side": 1,
+      "message": "BUG: 62349956",
+      "revId": "385d60d6689df8c4524aebd44f7e5697b20024aa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
