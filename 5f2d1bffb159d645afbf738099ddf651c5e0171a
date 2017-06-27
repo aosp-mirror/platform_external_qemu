@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "97b2eba0_17031dda",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 407,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-06-27T16:02:46Z",
+      "side": 1,
+      "message": "I got rid of \"Include\" for screenshot according to  \"Emulator VsD\"",
+      "parentUuid": "a1491cfb_7352d85b",
+      "range": {
+        "startLine": 407,
+        "startChar": 12,
+        "endLine": 407,
+        "endChar": 27
+      },
+      "revId": "5f2d1bffb159d645afbf738099ddf651c5e0171a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12dc0ae6_bb0a1bd3",
         "filename": "android/android-emu/android/skin/qt/extended.ui",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2017-06-26T16:31:39Z",
       "side": 1,
       "message": "Two words: \"  Bug report\"",
+      "range": {
+        "startLine": 782,
+        "startChar": 19,
+        "endLine": 782,
+        "endChar": 28
+      },
+      "revId": "5f2d1bffb159d645afbf738099ddf651c5e0171a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69590486_bca767a2",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 4
+      },
+      "lineNbr": 782,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-06-27T16:02:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12dc0ae6_bb0a1bd3",
       "range": {
         "startLine": 782,
         "startChar": 19,
