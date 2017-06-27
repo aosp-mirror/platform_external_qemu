@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0769c744_34504234",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglWindowSurface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-27T20:57:32Z",
+      "side": 1,
+      "message": "should we make it std::unique_ptr\u003c\u003e instead?",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 20
+      },
+      "revId": "83483d7e44c443c87f9795d548b8afb5416a3695",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
