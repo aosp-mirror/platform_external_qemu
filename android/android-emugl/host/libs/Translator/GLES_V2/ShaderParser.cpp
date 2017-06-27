@@ -81,7 +81,9 @@ void ShaderParser::restore(ObjectLocalName localName,
     if (m_parsedSrc.empty()) return;
     int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
             localName);
-    GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(), NULL);
+    //GLEScontext::dispatcher().glShaderSource(globalName, 1, parsedLines(), NULL);
+    const char* src = getOriginalSrc().c_str();
+    GLEScontext::dispatcher().glShaderSource(globalName, 1, &src, NULL);
     if (m_compileStatus)
         GLEScontext::dispatcher().glCompileShader(globalName);
 }
