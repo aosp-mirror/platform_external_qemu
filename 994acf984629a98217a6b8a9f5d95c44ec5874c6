@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f5ddd7f2_32d2c436",
+        "filename": "android/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1001,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-06-27T22:42:28Z",
+      "side": 1,
+      "message": "what happened with the glib update? it used to work with the existing set of headers",
+      "range": {
+        "startLine": 997,
+        "startChar": 12,
+        "endLine": 1001,
+        "endChar": 16
+      },
+      "revId": "994acf984629a98217a6b8a9f5d95c44ec5874c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
