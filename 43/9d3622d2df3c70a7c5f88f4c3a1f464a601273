@@ -1,0 +1,9 @@
+Autosubmit+1: Nicolas Norvez <norvez@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Tao Wu <lepton@google.com>
+Code-Review+2: Tao Wu <lepton@google.com>
+Submitted-by: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-at: Tue, 27 Jun 2017 17:12:01 +0000
+Reviewed-on: https://android-review.googlesource.com/423401
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.4-arc
