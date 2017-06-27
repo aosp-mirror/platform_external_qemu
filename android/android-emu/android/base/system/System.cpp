@@ -1349,7 +1349,7 @@ Win32UnicodeString win32Path(StringView path) {
     return wpath;
 }
 
-using PathStat = struct _stat;
+using PathStat = struct _stat64;
 
 #else  // _WIN32
 
@@ -1359,7 +1359,7 @@ using PathStat = struct stat;
 
 int pathStat(StringView path, PathStat* st) {
 #ifdef _WIN32
-    return _wstat(win32Path(path).c_str(), st);
+    return _wstat64(win32Path(path).c_str(), st);
 #else   // !_WIN32
     return HANDLE_EINTR(stat(path.c_str(), st));
 #endif  // !_WIN32
