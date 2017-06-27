@@ -27,7 +27,6 @@
 #include "ui_extended.h"
 
 #include <QDesktopWidget>
-
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
     ToolWindow *tW,
@@ -56,13 +55,14 @@ ExtendedWindow::ExtendedWindow(
     setFrameOnTop(this, onTop);
 
     mExtendedUi->setupUi(this);
-    mExtendedUi->helpPage->initialize(shortcuts, mEmulatorWindow);
+    mExtendedUi->helpPage->initialize(shortcuts);
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
+    mExtendedUi->bugreportPage->initialize(mEmulatorWindow);
 
      connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
@@ -98,6 +98,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
+        {PANE_IDX_BUGREPORT,     mExtendedUi->bugreportButton},
         {PANE_IDX_SETTINGS,      mExtendedUi->settingsButton},
         {PANE_IDX_HELP,          mExtendedUi->helpButton},
         {PANE_IDX_RECORD_SCREEN, mExtendedUi->recordScreenButton},
@@ -119,6 +120,7 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
+    mSidebarButtons.addButton(mExtendedUi->bugreportButton);
     mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
@@ -230,6 +232,7 @@ void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
 
 // Tab buttons. Each raises its stacked pane to the top.
 void ExtendedWindow::on_batteryButton_clicked()      { adjustTabs(PANE_IDX_BATTERY); }
+void ExtendedWindow::on_bugreportButton_clicked()    { adjustTabs(PANE_IDX_BUGREPORT); }
 void ExtendedWindow::on_cellularButton_clicked()     { adjustTabs(PANE_IDX_CELLULAR); }
 void ExtendedWindow::on_dpadButton_clicked()         { adjustTabs(PANE_IDX_DPAD); }
 void ExtendedWindow::on_rotaryInputButton_clicked()  { adjustTabs(PANE_IDX_ROTARY); }
@@ -286,10 +289,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     this->setStyleSheet(styleString);
     mToolWindow->setStyleSheet(styleString);
     mExtendedUi->rotaryInputPage->updateTheme();
-    BugReportWindow* bugreport = mExtendedUi->helpPage->getBugreportWindow();
-    if (bugreport) {
-        bugreport->updateTheme();
-    }
+    mExtendedUi->bugreportPage->updateTheme();
 
     // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);
