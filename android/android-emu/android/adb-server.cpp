@@ -14,6 +14,7 @@
 #include "android/base/files/StdioStream.h"
 #include "android/base/files/Stream.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/threads/Async.h"
 #include "android/base/system/System.h"
 #include "android/emulation/AdbDebugPipe.h"
 #include "android/emulation/AdbGuestPipe.h"
@@ -64,7 +65,13 @@ android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 void android_adb_server_notify(int port) {
     auto globals = sGlobals.ptr();
     globals->hostListener.reset(port);
-    globals->hostListener.notifyServer();
+
+    // Nothing depends on the result of this operation, but it could potentially
+    // take seconds if ipv6 loopback is down (e.g. on Windows).
+    // Let's run it asynchronously to not delay the startup.
+    android::base::async([globals] {
+        globals->hostListener.notifyServer();
+    });
 }
 
 int android_adb_server_init(int port) {
