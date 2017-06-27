@@ -1049,9 +1049,13 @@ private:
     WglBaseDispatch mBaseDispatch = {};
     WglLibrary mGlLib;
     WinGlobals mGlobals;
+
+    SharedLibrary* mAngleGLLib = nullptr;
+    WglBaseDispatch mAngleGLBaseDispatch = {};
 };
 
 WinEngine::WinEngine() :
+        //mGlLib(&mBaseDispatch),
         mGlLib(&mBaseDispatch),
         mGlobals(&mBaseDispatch) {
     const char* kLibName = "opengl32.dll";
@@ -1062,7 +1066,7 @@ WinEngine::WinEngine() :
         isSystemLib = false;
     }
     char error[256];
-    D("%s: Trying to load %s\n", __FUNCTION__, kLibName);
+    printf("%s: Trying to load %s\n", __FUNCTION__, kLibName);
     mLib = SharedLibrary::open(kLibName, error, sizeof(error));
     if (!mLib) {
         ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
@@ -1074,6 +1078,17 @@ WinEngine::WinEngine() :
     mBaseDispatch.init(mLib, isSystemLib);
     mDispatch = initExtensionsDispatch(&mBaseDispatch);
     D("%s: Dispatch initialized\n", __FUNCTION__);
+
+    const char* kGLLibName = "ANGLE_libGLESv2.dll";
+    printf("%s: Trying to load %s\n", __FUNCTION__, kGLLibName);
+    mAngleGLLib = SharedLibrary::open(kGLLibName, error, sizeof(error));
+    if (!mAngleGLLib) {
+        ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
+            kGLLibName, error);
+        exit(1);
+    }
+    D("%s: Library loaded at %p\n", __FUNCTION__, mAngleGLLib);
+    mAngleGLBaseDispatch.init(mAngleGLLib, false);
 }
 
 emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;
