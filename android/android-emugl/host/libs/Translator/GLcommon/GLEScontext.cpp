@@ -689,7 +689,7 @@ void GLEScontext::postLoadRestoreCtx() {
 
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
-        this->dispatcher().glBindFramebufferEXT(target,
+        this->dispatcher().glBindFramebuffer(target,
                 getFBOGlobalName(buffer));
     };
     bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
@@ -1791,14 +1791,16 @@ ObjectLocalName GLEScontext::getTextureLocalName(GLenum target,
 
 void GLEScontext::drawValidate(void)
 {
-    if(m_drawFramebuffer == 0)
+    if(m_drawFramebuffer == 0) {
         return;
+    }
 
     auto fbObj = getFBOData(m_drawFramebuffer);
-    if (!fbObj)
+    if (!fbObj) {
         return;
+    }
 
-    fbObj->validate(this);
+    //fbObj->validate(this);
 }
 
 void GLEScontext::initEmulatedEGLSurface(GLint width, GLint height,

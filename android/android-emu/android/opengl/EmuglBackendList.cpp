@@ -52,6 +52,14 @@ bool EmuglBackendList::contains(const char* name) const {
 }
 
 std::string EmuglBackendList::getLibDirPath(const char* name) {
+    size_t nameSize = strlen(name);
+    const char postfix[] = "_indirect";
+    std::string realName = {};
+    // remove the "_indirect" postfix
+    if (0 == memcmp(postfix, name + nameSize - sizeof(postfix) + 1, sizeof(postfix))) {
+        realName = std::string(name).substr(0, nameSize - sizeof(postfix) + 1);
+        name = realName.c_str();
+    }
     return android::base::StringFormat(
             "%s/%s/gles_%s",
             mExecDir,
