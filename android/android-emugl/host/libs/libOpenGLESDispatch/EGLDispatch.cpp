@@ -25,7 +25,8 @@ EGLDispatch s_egl;
 #define DEFAULT_EGL_LIB EMUGL_LIBNAME("EGL_translator")
 
 #define RENDER_EGL_LOAD_FIELD(return_type, function_name, signature) \
-    s_egl. function_name = (function_name ## _t) lib->findSymbol(#function_name);
+    s_egl. function_name = (function_name ## _t) lib->findSymbol(#function_name); \
+    if (!s_egl. function_name) printf("warning: get " #function_name " failed %d\n", __LINE__);
 
 #define RENDER_EGL_LOAD_OPTIONAL_FIELD(return_type, function_name, signature) \
     if (s_egl.eglGetProcAddress) s_egl. function_name = \
