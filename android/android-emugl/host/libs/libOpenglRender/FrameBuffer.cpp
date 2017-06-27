@@ -167,7 +167,8 @@ void FrameBuffer::finalize() {
     }
 }
 
-bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
+bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
+        bool egl2egl) {
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
@@ -183,6 +184,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
         return false;
     }
 
+    if (s_egl.eglUseOsEglApi) s_egl.eglUseOsEglApi(egl2egl);
     //
     // Initialize backend EGL display
     //
