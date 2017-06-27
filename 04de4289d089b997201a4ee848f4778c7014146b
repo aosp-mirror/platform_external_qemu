@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26905ece_11e90245",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1197,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-06-27T01:11:12Z",
+      "side": 1,
+      "message": "Actually the todo is saying hvf is broken on x86_64. perhaps we shoudl change the strncmp for abi to cpu arch? then it\u0027s more general.",
+      "revId": "04de4289d089b997201a4ee848f4778c7014146b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
