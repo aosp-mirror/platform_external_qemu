@@ -52,6 +52,24 @@
       "revId": "04de4289d089b997201a4ee848f4778c7014146b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b644f09_9d8f5d63",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1197,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-06-27T01:34:35Z",
+      "side": 1,
+      "message": "Actually, in this case, I think it\u0027s an upstream bug. it shouldn\u0027t compare with \"abi\", it should compare with \"cpu.arch\". Any way, approved.",
+      "parentUuid": "0ba7c802_dd267e43",
+      "revId": "04de4289d089b997201a4ee848f4778c7014146b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
