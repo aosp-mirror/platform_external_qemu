@@ -27,6 +27,7 @@
   X(EGLSurface, eglGetCurrentSurface, (EGLint readdraw)) \
   X(EGLBoolean, eglSwapBuffers, (EGLDisplay display, EGLSurface surface)) \
   X(void*, eglGetProcAddress, (const char* function_name)) \
+  X(void, eglUseOsEglApi, (EGLBoolean enable)) \
 
 
 #endif  // RENDER_EGL_FUNCTIONS_H

@@ -183,6 +183,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
         return false;
     }
 
+    s_egl.eglUseOsEglApi(true);
     //
     // Initialize backend EGL display
     //
@@ -457,6 +458,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int fbh,
                                  float dpr,
                                  float zRot) {
+    printf("%s\n", __FUNCTION__);
     bool success = false;
 
     if (!m_useSubWindow) {
@@ -487,6 +489,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             if (m_eglSurface == EGL_NO_SURFACE) {
                 // NOTE: This can typically happen with software-only renderers
                 // like OSMesa.
+                printf("%s: subwindow surface failed\n", __FUNCTION__);
                 destroySubWindow(m_subWin);
                 m_subWin = (EGLNativeWindowType)0;
             } else {
@@ -494,7 +497,10 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 m_py = 0;
 
                 success = true;
+                printf("%s: subwindow created successful\n", __FUNCTION__);
             }
+        } else {
+            printf("%s: %d subwindow surface failed\n", __FUNCTION__, __LINE__);
         }
     }
 
@@ -562,6 +568,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 }
 
 bool FrameBuffer::removeSubWindow() {
+    printf("%s\n", __FUNCTION__);
     if (!m_useSubWindow) {
         ERR("%s: Cannot remove native sub-window in this configuration\n",
             __FUNCTION__);
@@ -1046,7 +1053,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
                               draw ? draw->getEGLSurface() : EGL_NO_SURFACE,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
                               ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT)) {
-        ERR("eglMakeCurrent failed\n");
+        ERR("%s eglMakeCurrent failed\n", __FUNCTION__);
         return false;
     }
 
@@ -1189,7 +1196,7 @@ bool FrameBuffer::bind_locked() {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface, m_pbufSurface,
                                   m_pbufContext)) {
             if (!m_shuttingDown)
-                ERR("eglMakeCurrent failed\n");
+                ERR("%s eglMakeCurrent failed\n", __FUNCTION__);
             return false;
         }
     } else {
@@ -1211,7 +1218,7 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed\n");
+            ERR("%s eglMakeCurrent failed\n", __FUNCTION__);
             return false;
         }
     } else {

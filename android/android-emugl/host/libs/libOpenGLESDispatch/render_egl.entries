@@ -25,3 +25,4 @@ EGLContext eglGetCurrentContext(void);
 EGLSurface eglGetCurrentSurface(EGLint readdraw);
 EGLBoolean eglSwapBuffers(EGLDisplay display, EGLSurface surface);
 void* eglGetProcAddress(const char* function_name);
+void eglUseOsEglApi(EGLBoolean enable);

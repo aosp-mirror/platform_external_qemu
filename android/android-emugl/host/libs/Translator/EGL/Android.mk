@@ -4,7 +4,7 @@ host_OS_SRCS :=
 host_common_LDLIBS :=
 
 ifeq ($(BUILD_TARGET_OS),linux)
-    host_OS_SRCS = EglOsApi_glx.cpp
+    host_OS_SRCS = EglOsApi_glx.cpp EglOsApi_egl.cpp
     host_common_LDLIBS += -lGL -lX11 -ldl -lpthread
 endif
 
@@ -17,7 +17,8 @@ ifeq ($(BUILD_TARGET_OS),darwin)
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
-    host_OS_SRCS = EglOsApi_wgl.cpp
+    host_OS_SRCS = EglOsApi_wgl.cpp \
+                   EglOsApi_egl.cpp
     host_common_LDLIBS += -lgdi32
 endif
 

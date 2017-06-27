@@ -27,8 +27,13 @@ namespace {
 
 // Use a LazyInstance to ensure thread-safe initialization.
 emugl::LazyInstance<EglGlobalInfo> sSingleton = LAZY_INSTANCE_INIT;
+bool sEgl2Egl = false;
 
 }  // namespace
+
+void EglGlobalInfo::useOsEglApi(EGLBoolean enable) {
+    sEgl2Egl = enable;
+}
 
 // static
 EglGlobalInfo* EglGlobalInfo::getInstance() {
@@ -36,8 +41,12 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
 }
 
 EglGlobalInfo::EglGlobalInfo() {
-    // TODO(digit): Choose alternate engine based on env. variable?
-    m_engine = EglOS::Engine::getHostInstance();
+    printf("init engine %d\n", sEgl2Egl);
+    if (sEgl2Egl) {
+        m_engine = EglOS::getEgl2EglHostInstance();
+    } else {
+        m_engine = EglOS::Engine::getHostInstance();
+    }
     m_display = m_engine->getDefaultDisplay();
 }
 

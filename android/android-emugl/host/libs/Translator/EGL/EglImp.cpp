@@ -1250,6 +1250,10 @@ EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
     return retVal;
 }
 
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
+    EglGlobalInfo::useOsEglApi(enable);
+}
+
 /************************** KHR IMAGE *************************************************************/
 ImagePtr getEGLImage(unsigned int imageId)
 {
