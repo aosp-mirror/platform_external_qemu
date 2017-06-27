@@ -53,7 +53,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
-            } \
+            } else {fprintf(stderr, "load function failed %s\n", #func_name);}\
         } \
     } while (0);
 
@@ -123,6 +123,7 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
      * leave it up to EGL to determine support level. */
     LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
     LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
+    printf("gl dispatch loading done\n");
 
     if (s_got_gles_support_level) return;
 

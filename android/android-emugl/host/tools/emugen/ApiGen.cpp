@@ -1080,7 +1080,7 @@ R"(        // Do this on every iteration, as some commands may change the checks
                 if (strstr(m_basename.c_str(), "gl")) {
                     fprintf(fp, "\t\t#ifdef CHECK_GL_ERRORS\n");
                     fprintf(fp, "\t\tGLint err = this->glGetError();\n");
-                    fprintf(fp, "\t\tif (err) fprintf(stderr, \"%s Error (pre-call): 0x%%X before %s\\n\", err);\n",
+                    fprintf(fp, "\t\tif (err) fprintf(stderr, \"%s Error (pre-call): 0x%%X before %s (last call %%s)\\n\", err, lastCall);\n",
                             m_basename.c_str(), e->name().c_str());
                     fprintf(fp, "\t\t#endif\n");
                 }

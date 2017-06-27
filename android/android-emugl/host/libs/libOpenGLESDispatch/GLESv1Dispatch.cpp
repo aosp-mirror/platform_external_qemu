@@ -24,7 +24,7 @@
 
 #include "emugl/common/shared_library.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #define DPRINT(...) do { \

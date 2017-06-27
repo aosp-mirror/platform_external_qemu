@@ -449,7 +449,7 @@ public:
         return &mGlLib;
     }
 
-    virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
+    virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* pf, EGLNativeWindowType wnd) {
         return new GlxSurface(wnd, GlxSurface::WINDOW);
     }
 private:

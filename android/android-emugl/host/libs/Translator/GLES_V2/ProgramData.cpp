@@ -672,7 +672,8 @@ void ProgramData::setLinkStatus(GLint status) {
         for (auto& s : attachedShaders) {
             if (s.localName) {
                 assert(s.shader);
-                s.linkedSource = s.shader->getCompiledSrc();
+                //s.linkedSource = s.shader->getCompiledSrc();
+                s.linkedSource = s.shader->getOriginalSrc();
             }
         }
         for (const auto &attribLoc : boundAttribLocs) {
