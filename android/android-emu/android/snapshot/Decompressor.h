@@ -11,28 +11,25 @@
 
 #pragma once
 
-#include "android/base/StringView.h"
-#include <cstdint>
+#include "android/base/threads/ThreadPool.h"
+#include "android/base/threads/WorkerThread.h"
+
+//
+// Decompressor - a simple class for decompressing data.
+//
 
 namespace android {
 namespace snapshot {
 
-// A function to check if a range of memory is all zeroes.
-// It's better to be as well optimized as possible - both saving and loading
-// classes call it a lot.
-using ZeroChecker = bool (*)(const uint8_t* ptr, int size);
+class Decompressor {
+public:
+    Decompressor() = delete;
 
-struct RamBlock {
-    base::StringView id;
-    int64_t startOffset;
-    uint8_t* hostPtr;
-    int64_t totalSize;
-    int32_t pageSize;
-};
-
-enum class IndexFlags : int32_t {
-    None = 0,
-    CompressedPages = 0x01,
+    // Decompress |data| into |outData| buffer.
+    static bool decompress(const uint8_t* data,
+                           int32_t size,
+                           uint8_t* outData,
+                           int32_t outSize);
 };
 
 }  // namespace snapshot

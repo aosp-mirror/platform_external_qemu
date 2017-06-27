@@ -9,31 +9,26 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#pragma once
+#include "android/snapshot/Decompressor.h"
 
-#include "android/base/StringView.h"
-#include <cstdint>
+#include "lz4.h"
+
+#include <cassert>
 
 namespace android {
 namespace snapshot {
 
-// A function to check if a range of memory is all zeroes.
-// It's better to be as well optimized as possible - both saving and loading
-// classes call it a lot.
-using ZeroChecker = bool (*)(const uint8_t* ptr, int size);
-
-struct RamBlock {
-    base::StringView id;
-    int64_t startOffset;
-    uint8_t* hostPtr;
-    int64_t totalSize;
-    int32_t pageSize;
-};
-
-enum class IndexFlags : int32_t {
-    None = 0,
-    CompressedPages = 0x01,
-};
+bool Decompressor::decompress(const uint8_t* data,
+                              int32_t size,
+                              uint8_t* outData,
+                              int32_t outSize) {
+    const int res = LZ4_decompress_safe((const char*)data, (char*)outData, size,
+                                        outSize);
+    if (res != outSize) {
+        printf("Decompression failed: %d\n", res);
+    }
+    return res == outSize;
+}
 
 }  // namespace snapshot
 }  // namespace android

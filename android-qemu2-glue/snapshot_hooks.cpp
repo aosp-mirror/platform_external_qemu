@@ -82,8 +82,19 @@ static int onSaveVmStart(const char* name) {
     if (!ramFile) {
         return errno ? -errno : -EINVAL;
     }
-    sRamSaver->reset(new RamSaver(
-            StdioStream(ramFile, StdioStream::kOwner), isPageZeroed));
+    auto flags = RamSaver::Flags::None;
+    if (!android::base::System::get()
+                 ->envGet("ANDROID_EMULATOR_SNAPSHOT_ASYNC")
+                 .empty()) {
+        flags |= RamSaver::Flags::Async;
+    }
+    if (!android::base::System::get()
+                 ->envGet("ANDROID_EMULATOR_SNAPSHOT_COMPRESS")
+                 .empty()) {
+        flags |= RamSaver::Flags::Compress;
+    }
+    sRamSaver->reset(new RamSaver(StdioStream(ramFile, StdioStream::kOwner),
+                                  isPageZeroed, flags));
     return 0;
 }
 
@@ -117,7 +128,8 @@ static int onLoadVmStart(const char* name) {
         sRamLoader->reset();
         return err;
     }
-    loader.reset(new RamLoader(StdioStream(ramFile, StdioStream::kOwner), isPageZeroed));
+    loader.reset(new RamLoader(StdioStream(ramFile, StdioStream::kOwner),
+                               isPageZeroed));
     return 0;
 }
 
@@ -242,9 +254,8 @@ static const QEMUFileHooks sLoadHooks = {
 void qemu_snapshot_hooks_setup() {
     migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
     QEMUSnapshotCallbacks snapshotCallbacks = {
-        .savevm = { onSaveVmStart, onSaveVmEnd },
-        .loadvm = { onLoadVmStart, onLoadVmEnd },
-        .delvm = { onDelVmStart, onDelVmEnd }
-    };
+            .savevm = {onSaveVmStart, onSaveVmEnd},
+            .loadvm = {onLoadVmStart, onLoadVmEnd},
+            .delvm = {onDelVmStart, onDelVmEnd}};
     qemu_set_snapshot_callbacks(&snapshotCallbacks);
 }
