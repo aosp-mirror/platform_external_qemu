@@ -80,6 +80,7 @@
   X(void, glRenderbufferStorage, (GLenum target, GLenum internalformat, GLsizei width, GLsizei height), (target, internalformat, width, height)) \
   X(void, glGetRenderbufferParameteriv, (GLenum target, GLenum pname, GLint * params), (target, pname, params)) \
   X(void, glFramebufferRenderbuffer, (GLenum target, GLenum attachment, GLenum renderbuffertarget, GLuint renderbuffer), (target, attachment, renderbuffertarget, renderbuffer)) \
+  X(void, glGetFramebufferAttachmentParameteriv, (GLenum target, GLenum attachment, GLenum pname, GLint * params), (target, attachment, pname, params)) \
   X(void, glGenerateMipmap, (GLenum target), (target)) \
 
 

@@ -101,6 +101,9 @@ public:
     // actual deleting will happen at the host driver level.
     void sweepDestroySurfaces();
 
+    // UseOsEglApi(true) to enable egl on top of another egl.
+    // Must be called before instantiation.
+    static void useOsEglApi(EGLBoolean enable);
 private:
     EglGlobalInfo();
     ~EglGlobalInfo();
