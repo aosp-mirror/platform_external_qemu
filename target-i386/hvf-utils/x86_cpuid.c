@@ -105,6 +105,25 @@ void get_cpuid_func(struct CPUState* cpu, int func, int cnt, uint32_t *eax, uint
    host_cpuid(func, cnt, &h_rax, &h_rbx, &h_rcx, &h_rdx);
    uint32_t apic_id = X86_CPU(cpu)->apic_id;
 
+   // TODO: Newer CPUs are going to have features that can break
+   // emulation if the guest kernel detects them and tries to run with it.
+   // Either we need support in the HVF while running in vcpu level,
+   // or in the x86 emulation level.
+   // For now, let's just have a whitelist of features based on a working host
+   // (Macbook pro 2015 Intel(R) Core(TM) i7-4770HQ CPU @ 2.20GHz)
+   uint32_t f1_ecx_whitelist = 0x7ffafbbf;
+   uint32_t f1_edx_whitelist = 0xbfebfbff;
+   uint32_t f7_ebx_whitelist = 0x27ab;
+   // which should give a subset of the following features in /proc/cpuinfo:
+   // fpu           : yes
+   // fpu_exception : yes
+   // cpuid level   : 13
+   // wp            : yes
+   // flags         : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca
+   // cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall
+   // nx lm constant_tsc pebs bts eagerfpu pni pclmulqdq dtes64 ds_cpl ssse3
+   // fma cx16 xtpr pdcm movbe popcnt aes xsave avx f16c rdrand hypervisor
+   // lahf_lm xsaveopt fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms
 
     *eax = *ebx = *ecx = *edx = 0;
     switch(func) {
@@ -119,6 +138,7 @@ void get_cpuid_func(struct CPUState* cpu, int func, int cnt, uint32_t *eax, uint
             *ebx = (apic_id << 24) | (h_rbx & 0x00ffffff);
             *ecx = h_rcx;
             *edx = h_rdx;
+            *edx = *edx & f1_edx_whitelist;
 
             if (cpu->nr_cores * cpu->nr_threads > 1) {
                 *ebx |= (cpu->nr_cores * cpu->nr_threads) << 16;
@@ -128,6 +148,8 @@ void get_cpuid_func(struct CPUState* cpu, int func, int cnt, uint32_t *eax, uint
             *ecx = *ecx & ~(CPUID_EXT_OSXSAVE | CPUID_EXT_MONITOR | CPUID_EXT_X2APIC |
                         CPUID_EXT_VMX | CPUID_EXT_TSC_DEADLINE_TIMER | CPUID_EXT_TM2 | CPUID_EXT_PCID |
                         CPUID_EXT_EST | CPUID_EXT_SSE42 | CPUID_EXT_SSE41);
+            *ecx = *ecx & f1_ecx_whitelist;
+
             *ecx |= CPUID_EXT_HYPERVISOR;
             break;
         case 2:
@@ -162,6 +184,8 @@ void get_cpuid_func(struct CPUState* cpu, int func, int cnt, uint32_t *eax, uint
             *eax = h_rax;
             *ebx = h_rbx & ~(CPUID_7_0_EBX_AVX512F | CPUID_7_0_EBX_AVX512PF | CPUID_7_0_EBX_AVX512ER | CPUID_7_0_EBX_AVX512CD |
                              CPUID_7_0_EBX_AVX512BW | CPUID_7_0_EBX_AVX512VL | CPUID_7_0_EBX_MPX | CPUID_7_0_EBX_INVPCID);
+            *ebx = *ebx & f7_ebx_whitelist;
+
             *ecx = h_rcx & ~(CPUID_7_0_ECX_AVX512BMI);
             *edx = h_rdx;
             break;
