@@ -960,7 +960,6 @@ static int create_qcow2_images(void) {
             bufprint(image_qcow2_basename, image_qcow2_basename + path_size, "%s%s", image_basename, qcow2_suffix);
             qcow2_image_path =
                 path_join(avd_data_dir, image_qcow2_basename);
-            printf("path %s\n", qcow2_image_path);
             free(image_basename);
             free(image_qcow2_basename);
         } else {
