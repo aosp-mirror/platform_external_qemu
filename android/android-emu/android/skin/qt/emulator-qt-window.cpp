@@ -496,6 +496,7 @@ void EmulatorQtWindow::slot_startupTick() {
 
     mStartupDialog.setRange(0, 0);      // Don't show % complete
     mStartupDialog.setCancelButton(0);  // No "cancel" button
+    mStartupDialog.setMinimumSize(mStartupDialog.sizeHint());
     mStartupDialog.show();
 }
 
