@@ -1079,16 +1079,6 @@ WinEngine::WinEngine() :
     mDispatch = initExtensionsDispatch(&mBaseDispatch);
     D("%s: Dispatch initialized\n", __FUNCTION__);
 
-    const char* kGLLibName = "ANGLE_libGLESv2.dll";
-    printf("%s: Trying to load %s\n", __FUNCTION__, kGLLibName);
-    mAngleGLLib = SharedLibrary::open(kGLLibName, error, sizeof(error));
-    if (!mAngleGLLib) {
-        ERR("ERROR: %s: Could not open %s: %s\n", __FUNCTION__,
-            kGLLibName, error);
-        exit(1);
-    }
-    D("%s: Library loaded at %p\n", __FUNCTION__, mAngleGLLib);
-    mAngleGLBaseDispatch.init(mAngleGLLib, false);
 }
 
 emugl::LazyInstance<WinEngine> sHostEngine = LAZY_INSTANCE_INIT;
