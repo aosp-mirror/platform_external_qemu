@@ -119,6 +119,9 @@ EglContext::~EglContext()
     // restore the current context
     //
     if (currentCtx) {
+        if (!currentRead->native() || !currentDraw->native()) {
+            printf("%s: %d !!!make current with bad ptr\n", __FILE__, __LINE__);
+        }
         m_dpy->nativeType()->makeCurrent(currentRead->native(),
                                          currentDraw->native(),
                                          currentCtx->nativeType());

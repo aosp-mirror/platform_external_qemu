@@ -351,6 +351,12 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     if (!strcmp(config->backend, "host")) {
         // Nothing more to do for the 'host' backend.
+        fprintf(stderr, "OpenGL backend '%s' without OpenGL ES 1.x library detected. "
+                        "Using GLESv2 only.\n",
+                        config->backend);
+        // A GLESv1 lib is optional---we can deal with a GLESv2 only
+        // backend by using a GLESv1->GLESv2 emulation library.
+        system->envSet("ANDROID_GLESv1_LIB", sBackendList->getGLES12TranslatorLibName().c_str());
         return;
     }
 
