@@ -123,11 +123,7 @@ QEMU2_CFLAGS := \
 
 QEMU2_CFLAGS += \
     -Wno-unused-function \
-    $(call qemu2-if-darwin, \
-        -Wno-unused-value \
-        -Wno-parentheses-equality \
-        -Wno-self-assign \
-        , \
+    $(call if-target-clang,, \
         -Wno-unused-variable \
         -Wno-unused-but-set-variable \
         -Wno-maybe-uninitialized \
