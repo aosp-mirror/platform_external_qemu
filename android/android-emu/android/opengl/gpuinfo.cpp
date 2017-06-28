@@ -624,8 +624,6 @@ void query_blacklist_fn(bool* res) {
         gpuinfo_query_blacklist(gpulist, sSyncBlacklist, sSyncBlacklistSize);
 }
 
-void query_blacklist_done_fn(const bool& res) { }
-
 // Separate thread for GPU info querying:
 //
 // Our goal is to account for circumstances where obtaining GPU info either
@@ -644,14 +642,12 @@ void query_blacklist_done_fn(const bool& res) { }
 // aborts the program.
 class GPUInfoQueryThread : public android::base::Thread {
 public:
-    GPUInfoQueryThread() {
-        this->start();
-    }
+    GPUInfoQueryThread() { this->start(); }
     virtual intptr_t main() override {
         Looper* looper = android::base::ThreadLooper::get();
-        android::base::runParallelTask<bool>
-            (looper, &query_blacklist_fn, &query_blacklist_done_fn,
-             kQueryCheckIntervalMs);
+        android::base::runParallelTask<bool>(looper, &query_blacklist_fn,
+                                             [](bool) {},
+                                             kQueryCheckIntervalMs);
         looper->runWithTimeoutMs(kGPUInfoQueryTimeoutMs);
         looper->forceQuit();
         return 0;
@@ -660,6 +656,10 @@ public:
 
 static android::base::LazyInstance<GPUInfoQueryThread> sGPUInfoQueryThread =
         LAZY_INSTANCE_INIT;
+
+void async_query_host_gpu_start() {
+    sGPUInfoQueryThread.get();
+}
 
 bool async_query_host_gpu_blacklisted() {
     return globalGpuInfoList().blacklist_status;

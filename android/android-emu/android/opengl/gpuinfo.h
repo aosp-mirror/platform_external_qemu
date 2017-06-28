@@ -35,6 +35,7 @@ std::string load_gpu_info();
 // host_gpu_blacklisted_async() does the two steps above,
 // but on a different thread, with a timeout in case
 // the started processes hang or what not.
+void async_query_host_gpu_start();
 bool async_query_host_gpu_blacklisted();
 bool async_query_host_gpu_AngleWhitelisted();
 bool async_query_host_gpu_SyncBlacklisted();
