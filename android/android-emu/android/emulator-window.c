@@ -242,7 +242,8 @@ emulator_window_setup( EmulatorWindow*  emulator )
     const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER");
     s_use_emugl_subwindow = !env || !env[0] || env[0] == '0';
     // for gpu off or gpu guest, we don't use the subwindow
-    if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
+    //if (!android_hw->hw_gpu_enabled || !strcmp(android_hw->hw_gpu_mode, "guest")) {
+    if (1) {
         s_use_emugl_subwindow = 0;
     }
 

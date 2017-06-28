@@ -626,11 +626,11 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
        return false;
    }
 
-   if(dummy.m_renderable_type != EGL_DONT_CARE &&
+   /*if(dummy.m_renderable_type != EGL_DONT_CARE &&
       ((dummy.m_renderable_type & m_renderable_type) != dummy.m_renderable_type)) {
        CHOOSE_CONFIG_DLOG("m_renderable_type does not match.");
        return false;
-   }
+   }*/
 
    if ((EGLint)(dummy.m_framebuffer_target_android) != EGL_DONT_CARE &&
        dummy.m_framebuffer_target_android !=

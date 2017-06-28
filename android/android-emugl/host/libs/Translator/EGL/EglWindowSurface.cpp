@@ -44,7 +44,6 @@ EglWindowSurface::EglWindowSurface(EglDisplay* dpy,
 
 EglWindowSurface::~EglWindowSurface() {
     s_associatedWins.get().erase(m_win);
-    delete m_native;
 }
 
 bool  EglWindowSurface::getAttrib(EGLint attrib,EGLint* val) {
