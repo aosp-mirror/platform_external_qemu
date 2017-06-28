@@ -478,13 +478,13 @@ extern "C" int main(int argc, char **argv) {
     // since that calls createAVD which sets up critical info needed
     // by featurecontrol component itself.
 #if (SNAPSHOT_PROFILE > 1)
-     printf("Starting feature flag application and host hw query with uptime %llu ms\n",
+     printf("Starting feature flag application and host hw query with uptime %" PRIu64 " ms\n",
             get_uptime_ms());
 #endif
     feature_initialize();
     feature_update_from_server();
 #if (SNAPSHOT_PROFILE > 1)
-     printf("Finished feature flag application and host hw query with uptime %llu ms\n",
+     printf("Finished feature flag application and host hw query with uptime %" PRIu64 " ms\n",
             get_uptime_ms());
 #endif
 
@@ -1010,14 +1010,14 @@ extern "C" int main(int argc, char **argv) {
         android::base::Thread::maskAllSignals();
 
 #if (SNAPSHOT_PROFILE > 1)
-        printf("EmulatorQtWindow initialization starting at uptime %llu ms\n",
+        printf("EmulatorQtWindow initialization starting at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
 #endif
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
 #if (SNAPSHOT_PROFILE > 1)
-        printf("EmulatorQtWindow initialization finished at uptime %llu ms\n",
+        printf("EmulatorQtWindow initialization finished at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
 #endif
 
