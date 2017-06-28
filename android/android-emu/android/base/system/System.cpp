@@ -303,24 +303,14 @@ public:
         if (mLauncherDir.empty()) {
             std::string launcherDirEnv = envGet("ANDROID_EMULATOR_LAUNCHER_DIR");
             if (!launcherDirEnv.empty()) {
-                mLauncherDir = launcherDirEnv;
-                return mLauncherDir;
-            }
-            std::string programDir = getProgramDirectory();
-
-            std::string launcherName("emulator");
-#ifdef _WIN32
-            launcherName += ".exe";
-#endif
-            std::vector<StringView> pathList = {programDir, launcherName};
-            std::string launcherPath = PathUtils::recompose(pathList);
-
-            if (pathIsFile(launcherPath)) {
-                mLauncherDir = programDir;
+                mLauncherDir = std::move(launcherDirEnv);
                 return mLauncherDir;
             }
 
-            // we are probably executing a qemu2 binary, which live in
+            const std::string& programDir = getProgramDirectory();
+            std::string launcherName = PathUtils::toExecutableName("emulator");
+
+            // Let's first check if this is qemu2 binary, which lives in
             // <launcher-dir>/qemu/<os>-<arch>/
             // look for the launcher in grandparent directory
             auto programDirVector = PathUtils::decompose(programDir);
@@ -330,9 +320,16 @@ public:
                 programDirVector.push_back(launcherName);
                 std::string launcherPath = PathUtils::recompose(programDirVector);
                 if (pathIsFile(launcherPath)) {
-                    mLauncherDir = grandparentDir;
+                    mLauncherDir = std::move(grandparentDir);
                     return mLauncherDir;
                 }
+            }
+
+            std::vector<StringView> pathList = {programDir, launcherName};
+            std::string launcherPath = PathUtils::recompose(pathList);
+            if (pathIsFile(launcherPath)) {
+                mLauncherDir = programDir;
+                return mLauncherDir;
             }
 
             mLauncherDir.assign("<unknown-launcher-dir>");
