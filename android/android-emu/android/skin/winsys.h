@@ -114,7 +114,7 @@ void skin_winsys_enter_main_loop(bool no_window);
 // E.g. for Qt UI, it makes sure the function runs on the main Qt UI thread,
 //   as Qt requires any UI interaction to come from there.
 typedef void (*SkinGenericFunction)(void* data);
-void skin_winsys_run_ui_update(SkinGenericFunction f, void* data);
+void skin_winsys_run_ui_update(SkinGenericFunction f, void* data, bool wait);
 
 // Show a blocking error dialog running on the UI thread.
 void skin_winsys_error_dialog(const char* message, const char* title);

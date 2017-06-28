@@ -1248,11 +1248,16 @@ skin_window_show_trackball( SkinWindow*  window, int  enable )
     }
 }
 
+// Track the state of opengles subwindow: we need to create it synchronously,
+// but the following show operations can be async.
+static bool s_opengles_window_created = false;
+
 /* Hide the OpenGL ES framebuffer */
 static void
 skin_window_hide_opengles( SkinWindow* window )
 {
     window->win_funcs->opengles_hide();
+    s_opengles_window_created = false;
 }
 
 typedef struct {
@@ -1268,7 +1273,7 @@ typedef struct {
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
-    const gles_show_data* data = (const gles_show_data*)p;
+    gles_show_data* data = p;
     data->window->win_funcs->opengles_show(skin_winsys_get_window_handle(),
                                            data->wx,
                                            data->wy,
@@ -1278,6 +1283,8 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->fbh,
                                            data->dpr,
                                            data->rot);
+    AFREE(data);
+    s_opengles_window_created = true;
 }
 
 static void
@@ -1320,11 +1327,15 @@ skin_window_show_opengles( SkinWindow* window )
 {
     ADisplay* disp = window->layout.displays;
 
-    gles_show_data data;
-    skin_window_setup_opengles_subwindow(window, &data);
-    data.rot = disp->rotation * 90.;
+    gles_show_data* data = NULL;
+    ANEW0(data);
+    skin_window_setup_opengles_subwindow(window, data);
+    data->rot = disp->rotation * 90.;
 
-    skin_winsys_run_ui_update(&skin_window_run_opengles_show, &data);
+    // We need to wait for the subwindow creation if it doesn't exist; otherwise
+    // it's Ok to run just the show command asynchronously.
+    bool wait = !s_opengles_window_created;
+    skin_winsys_run_ui_update(&skin_window_run_opengles_show, data, wait);
 }
 
 static void skin_window_redraw_opengles(SkinWindow* window) {
@@ -1824,7 +1835,8 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
             ball_state_redraw( &window->ball, rect, window->surface );
 
         skin_surface_update(window->surface, rect);
-        skin_window_redraw_opengles( window );
+        skin_winsys_run_ui_update((SkinGenericFunction)skin_window_redraw_opengles,
+                                  window, false);
     }
 }
 

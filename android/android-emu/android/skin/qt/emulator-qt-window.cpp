@@ -172,6 +172,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mHaveBeenFrameless(false) {
     qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
     qRegisterMetaType<SkinRotation>("SkinRotation");
+    qRegisterMetaType<SkinGenericFunction>();
 
     android::base::ThreadLooper::setLooper(mLooper, true);
     android::crashreport::CrashReporter::get()->hangDetector().addWatchedLooper(
@@ -1662,7 +1663,7 @@ void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
     mForwardShortcutsToDevice = (index != 0);
 }
 
-void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction* f,
+void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction f,
                                           void* data,
                                           QSemaphore* semaphore) {
     (*f)(data);
