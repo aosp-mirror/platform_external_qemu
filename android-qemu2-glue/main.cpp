@@ -427,6 +427,9 @@ extern "C" int main(int argc, char **argv) {
         return 1;
     }
 
+    // Start GPU information query to use it later for the renderer seleciton.
+    async_query_host_gpu_start();
+
     /* The emulator always uses the first serial port for kernel messages
      * and the second one for qemud. So start at the third if we need one
      * for logcat or 'shell'
