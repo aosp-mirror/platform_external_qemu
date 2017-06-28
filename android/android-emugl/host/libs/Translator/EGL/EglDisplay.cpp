@@ -438,6 +438,7 @@ int EglDisplay::doChooseConfigs(const EglConfig& dummy,
             added++;
        }
     }
+    printf("total num of configs %d\n", added);
 
     CHOOSE_CONFIG_DLOG("sorting valid configs...");
 

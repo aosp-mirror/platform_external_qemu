@@ -555,6 +555,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
             case EGL_RENDERABLE_TYPE:
                 renderable_type = attrib_list[i+1];
                 wanted_attribs.push_back(EGL_RENDERABLE_TYPE);
+                printf("want renderable type %d\n", renderable_type);
                 break;
             case EGL_NATIVE_VISUAL_TYPE:
                 native_visual_type = attrib_list[i+1];
@@ -1062,6 +1063,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
         if(prevCtx.get()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
+        }
+        if (!newReadPtr->native() || !newReadPtr->native()) {
+            printf("%s: %d !!!make current with bad ptr\n", __FILE__, __LINE__);
         }
         if (!dpy->nativeType()->makeCurrent(
                 newReadPtr->native(),

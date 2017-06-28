@@ -407,7 +407,7 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     bool isDefaultFBO = !framebuffer;
     if (isDefaultFBO) {
        globalFrameBufferName = ctx->getDefaultFBOGlobalName();
-       ctx->dispatcher().glBindFramebufferEXT(target, globalFrameBufferName);
+       ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
        ctx->setFramebufferBinding(target, 0);
     } else {
         globalFrameBufferName = framebuffer;
@@ -424,7 +424,7 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             auto fbObj = ctx->getFBOData(framebuffer);
             fbObj->setBoundAtLeastOnce();
         }
-        ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
+        ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
         ctx->setFramebufferBinding(target, framebuffer);
     }
 
@@ -450,7 +450,7 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
                     NamedObjectType::RENDERBUFFER, renderbuffer);
         }
     }
-    ctx->dispatcher().glBindRenderbufferEXT(target,globalRenderBufferName);
+    ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
@@ -555,7 +555,7 @@ GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
     RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target), GL_INVALID_ENUM, GL_FRAMEBUFFER_COMPLETE);
     // We used to issue ctx->drawValidate() here, but it can corrupt the status of
     // separately bound draw/read framebuffer objects. So we just don't call it now.
-    return ctx->dispatcher().glCheckFramebufferStatusEXT(target);
+    return ctx->dispatcher().glCheckFramebufferStatus(target);
 }
 
 GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
@@ -854,6 +854,20 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
         }
         const GLuint localShaderName = ctx->shareGroup()->genName(
                                                 shaderProgramType, 0, true);
+        // for debug
+        /*{
+            int globalName = 
+                ctx->shareGroup()->getGlobalName(
+                    NamedObjectType::SHADER_OR_PROGRAM, localShaderName);
+            int tmpshader = ctx->dispatcher().glCreateShader(GL_VERTEX_SHADER);
+            printf("creat shader %d (global name %d), tmp shader %d\n",
+                    (int)localShaderName, globalName, tmpshader);
+            
+            int err = ctx->dispatcher().glGetError();
+            if (err) {
+                printf("get error %d\n", err);
+            }
+        }*/
         ShaderParser* sp = new ShaderParser(type);
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localShaderName, ObjectDataPtr(sp));
@@ -1254,7 +1268,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.
             //
-            ctx->dispatcher().glFramebufferTexture2DEXT(target,
+            ctx->dispatcher().glFramebufferTexture2D(target,
                                     attachment,
                                     GL_TEXTURE_2D,
                                     rbData->eglImageGlobalTexObject->getGlobalName(),
@@ -1263,7 +1277,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
         }
     }
 
-    ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalRenderbufferName);
+    ctx->dispatcher().glFramebufferRenderbuffer(target,attachment,renderbuffertarget,globalRenderbufferName);
 
     sUpdateFboEmulation(ctx);
 }
@@ -1288,7 +1302,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
                 NamedObjectType::TEXTURE, texname);
     }
 
-    ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTextureName,level);
+    ctx->dispatcher().glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(target);
@@ -1327,7 +1341,7 @@ GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
     // Assuming we advertised GL_OES_texture_npot
-    ctx->dispatcher().glGenerateMipmapEXT(target);
+    ctx->dispatcher().glGenerateMipmap(target);
 }
 
 GL_APICALL void  GL_APIENTRY glGenFramebuffers(GLsizei n, GLuint* framebuffers){
@@ -1900,7 +1914,7 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
             attachment = GL_STENCIL_ATTACHMENT;
     }
 
-    ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(target,attachment,pname,params);
+    ctx->dispatcher().glGetFramebufferAttachmentParameteriv(target,attachment,pname,params);
 
     if (ctx->isDefaultFBOBound(target) && *params == GL_RENDERBUFFER) {
         *params = GL_FRAMEBUFFER_DEFAULT;
@@ -1967,7 +1981,7 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
         }
     }
 
-    ctx->dispatcher().glGetRenderbufferParameterivEXT(target,pname,params);
+    ctx->dispatcher().glGetRenderbufferParameteriv(target,pname,params);
     if (pname == GL_RENDERBUFFER_INTERNAL_FORMAT && *params == GL_RGBA) {
         *params = GL_RGBA4;
     }
@@ -2642,7 +2656,10 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
         GLsizei height, GLint* err) {
     GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
-    if (ctx->getMajorVersion() < 3) {
+    if (internalformat == GL_DEPTH_COMPONENT24_OES) {
+        internal = GL_DEPTH_COMPONENT16;
+    }
+    /*if (ctx->getMajorVersion() < 3) {
         switch (internalformat) {
             case GL_RGB565:
                 internal = GL_RGB;
@@ -2653,7 +2670,7 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
             default:
                 break;
         }
-    }
+    }*/
 
 
     // Get current bounded renderbuffer
@@ -2686,7 +2703,7 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     internalformat = sPrepareRenderbufferStorage(internalformat, width, height,
             &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
-    ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
+    ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
 }
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
@@ -2747,8 +2764,10 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         ShaderParser* sp = (ShaderParser*)objData;
         int esslVersion = sDetectShaderESSLVersion(ctx, string);
         sp->setSrc(esslVersion, count, string, length);
-        ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
-                                         NULL);
+        /*ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
+                                         NULL);*/
+        ctx->dispatcher().glShaderSource(globalShaderName, count, string,
+                                         length);
     }
 }
 
@@ -2818,14 +2837,14 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
 
         VALIDATE(!GLESv2Validate::pixelItnlFrmt(ctx,internalformat), GL_INVALID_VALUE);
         VALIDATE((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
-        VALIDATE(ctx->getMajorVersion() < 3 &&
+        /*VALIDATE(ctx->getMajorVersion() < 3 &&
                 (format == GL_DEPTH_COMPONENT || internalformat == GL_DEPTH_COMPONENT) &&
                 (type != GL_UNSIGNED_SHORT && type != GL_UNSIGNED_INT), GL_INVALID_OPERATION);
 
         VALIDATE(ctx->getMajorVersion() < 3 &&
                 (type == GL_UNSIGNED_SHORT || type == GL_UNSIGNED_INT) &&
                 !((format == GL_DEPTH_COMPONENT && internalformat == GL_DEPTH_COMPONENT)
-                || (format == GL_LUMINANCE && internalformat == GL_LUMINANCE)), GL_INVALID_OPERATION);
+                || (format == GL_LUMINANCE && internalformat == GL_LUMINANCE)), GL_INVALID_OPERATION);*/
 
         VALIDATE(!GLESv2Validate::pixelOp(format,type) && internalformat == ((GLint)format),GL_INVALID_OPERATION);
         VALIDATE(!GLESv2Validate::pixelSizedFrmt(ctx, internalformat, format, type), GL_INVALID_OPERATION);
@@ -2840,9 +2859,9 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
         if (type==GL_HALF_FLOAT_OES)
             type = GL_HALF_FLOAT_NV;
         if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
-            type = GL_UNSIGNED_SHORT;
-        if (type == GL_FLOAT)
-            internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
+            type = GL_UNSIGNED_BYTE;
+        //if (type == GL_FLOAT)
+        //    internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
     }
 
     *type_out = type;
@@ -2857,12 +2876,15 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+    int internalBefore = internalformat;
+    int typeBefore = type;
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
     err = ctx->dispatcher().glGetError();
     if (err != GL_NO_ERROR) {
-        fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
+        fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x"
+                " before internal 0x%x type 0x%x\n", __func__, err, internalformat, format, type, internalBefore, typeBefore);
     }
 }
 
@@ -3286,16 +3308,16 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
         // underlying texture of the img
         GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
+            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
                                                    rbData->attachedFB);
         }
-        ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+        ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,
                                                     rbData->attachedPoint,
                                                     GL_TEXTURE_2D,
                                                     img->globalTexObj->getGlobalName(),
                                                     0);
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
+            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
                                                    prevFB);
         }
     }
