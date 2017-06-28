@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "36e9511d_3c1d7f71",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-06-28T17:06:53Z",
+      "side": 1,
+      "message": "It\u0027s used to \"simulate\" multi touch. If we don\u0027t care about multi touch. then we can change it.I can put it in another follow up CL",
+      "parentUuid": "71598762_51c957fc",
+      "range": {
+        "startLine": 122,
+        "startChar": 3,
+        "endLine": 122,
+        "endChar": 67
+      },
+      "revId": "fa99a900ac01e3d8228a34aabb7e9e9f22982330",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "429a6f3c_11191bc5",
         "filename": "android/android-emu/android/skin/keyboard.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-06-27T21:40:17Z",
       "side": 1,
       "message": "These 2 functions handle android_hw-\u003ehw_arc slightly inconsistently.\nCould we do instead\nif (android_hw-\u003ehw_arc) {\n  if (mod \u0026\u0026 ...) {\n    handle_cros_shortcuts();\n    return;\n  }\n  if (map_cros_key(... ) {\n    ...\n  }\n}",
+      "range": {
+        "startLine": 218,
+        "startChar": 8,
+        "endLine": 226,
+        "endChar": 9
+      },
+      "revId": "fa99a900ac01e3d8228a34aabb7e9e9f22982330",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbbb34f5_e178d38e",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-06-28T17:06:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "429a6f3c_11191bc5",
       "range": {
         "startLine": 218,
         "startChar": 8,
@@ -82,6 +130,54 @@
       "writtenOn": "2017-06-28T17:03:53Z",
       "side": 1,
       "message": "Still unsure about that one. Could those keys be folded into kConvert[]?",
+      "parentUuid": "c3995670_5faa0ace",
+      "range": {
+        "startLine": 1441,
+        "startChar": 4,
+        "endLine": 1454,
+        "endChar": 5
+      },
+      "revId": "fa99a900ac01e3d8228a34aabb7e9e9f22982330",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f25c7f57_4df37008",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1454,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-06-28T17:06:53Z",
+      "side": 1,
+      "message": "Then android emulator will get these \"additional\" keys, this changed the behavior of android emulator. This could make upstream merge difficult. Now android emulator just \"ignore\" all of these keys.",
+      "parentUuid": "a08db160_771dfd92",
+      "range": {
+        "startLine": 1441,
+        "startChar": 4,
+        "endLine": 1454,
+        "endChar": 5
+      },
+      "revId": "fa99a900ac01e3d8228a34aabb7e9e9f22982330",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e65fba89_9e2d5763",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1454,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-06-28T17:06:53Z",
+      "side": 1,
+      "message": "Just don\u0027t want to introduce any possible regression /behavior changing for android.",
       "parentUuid": "c3995670_5faa0ace",
       "range": {
         "startLine": 1441,
