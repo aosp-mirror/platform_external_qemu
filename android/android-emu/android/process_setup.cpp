@@ -45,8 +45,6 @@ bool is_headless(int argc, char** argv) {
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
 void process_early_setup(int argc, char** argv) {
-    skin_winsys_init_args(argc, argv, is_headless(argc, argv));
-
     // This function is the first thing emulator calls - so it's the best place
     // to wait for a debugger to attach, before even the options parsing code.
     static constexpr StringView waitForDebuggerArg = "-wait-for-debugger";
@@ -99,6 +97,10 @@ void process_early_setup(int argc, char** argv) {
     }
 
     android::protobuf::initProtobufLogger();
+
+    // This thing will create some Qt preload threads, so it needs to be the
+    // last one in the function.
+    skin_winsys_init_args(argc, argv, is_headless(argc, argv));
 }
 
 void process_late_teardown() {
