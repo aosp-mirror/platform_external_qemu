@@ -84,28 +84,28 @@ void virtio_blk_data_plane_create(VirtIODevice *vdev, VirtIOBlkConf *conf,
     BusState *qbus = BUS(qdev_get_parent_bus(DEVICE(vdev)));
     VirtioBusClass *k = VIRTIO_BUS_GET_CLASS(qbus);
 
+    bool use_iothread = true;
     *dataplane = NULL;
 
     if (conf->iothread) {
-        if (!k->set_guest_notifiers || !k->ioeventfd_assign) {
-            error_setg(errp,
-                       "device is incompatible with iothread "
-                       "(transport does not support notifiers)");
-            return;
-        }
-        if (!virtio_device_ioeventfd_enabled(vdev)) {
-            error_setg(errp, "ioeventfd is required for iothread");
-            return;
-        }
+        use_iothread = k->set_guest_notifiers && k->ioeventfd_assign &&
+                       virtio_device_ioeventfd_enabled(vdev);
 
         /* If dataplane is (re-)enabled while the guest is running there could
          * be block jobs that can conflict.
          */
-        if (blk_op_is_blocked(conf->conf.blk, BLOCK_OP_TYPE_DATAPLANE, errp)) {
+        if (use_iothread &&
+            blk_op_is_blocked(conf->conf.blk, BLOCK_OP_TYPE_DATAPLANE, errp)) {
             error_prepend(errp, "cannot start virtio-blk dataplane: ");
             return;
         }
     }
+
+    if (!use_iothread) {
+        conf->iothread = NULL;
+        return;
+    }
+
     /* Don't try if transport does not support notifiers. */
     if (!virtio_device_ioeventfd_enabled(vdev)) {
         return;
