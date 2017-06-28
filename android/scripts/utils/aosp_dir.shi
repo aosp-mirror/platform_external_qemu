@@ -27,6 +27,7 @@
 
 shell_import utils/option_parser.shi
 
+
 aosp_dir_register_option () {
 
     OPT_AOSP_DIR=
@@ -75,16 +76,48 @@ aosp_dir_parse_option () {
     fi
 }
 
+# Returns the linux glibc version
+aosp_linux_glibc_version () {
+   printf "glibc2.15-4.8"
+}
+
+# Returns the version of Clang to use.
+aosp_clang_version () {
+  printf "clang-4053586"
+
+}
+
+# Returns the directory where we can find the clang compiler.
+aosp_prebuilt_clang_dir_for () {
+    case $1 in
+        linux*)
+            local CLANG_VERSION="$(aosp_clang_version)"
+            printf "prebuilts/clang/host/linux-x86/$CLANG_VERSION/bin"
+            ;;
+        darwin*)
+            local CLANG_VERSION="$(aosp_clang_version)"
+            printf "prebuilts/clang/host/darwin-x86/$CLANG_VERSION/bin"
+            ;;
+        windows*)
+            echo "No clang support for windows yet"
+            exit 1;
+            ;;
+    esac
+
+}
+
 # Return the AOSP subdirectory that contains the prebuilt toolchain to be
 # used for a given host system.
 # $1: System name (e.g. 'linux' or 'linux-x86_64')
 aosp_prebuilt_toolchain_subdir_for () {
     case $1 in
         linux*)
-            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.15-4.8"
+            local GLIBC="$(aosp_linux_glibc_version)"
+            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-$GLIBC"
             ;;
         darwin*)
-            printf "prebuilts/clang/host/darwin-x86/clang-4053586"
+            local CLANG_VERSION="$(aosp_clang_version)"
+            printf "prebuilts/clang/host/darwin-x86/$CLANG_VERSION"
             ;;
         windows*)
             printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8"
@@ -102,18 +135,17 @@ aosp_prebuilt_breakpad_subdir_for () {
 # Return the AOSP subdirectory corresponding to the toolchain's sysroot.
 # $1: System name (e.g. 'linux-x86' or 'linux-x86_64')
 aosp_prebuilt_toolchain_sysroot_subdir_for () {
-    local PREBUILT_DIR
-    PREBUILT_DIR="$(aosp_prebuilt_toolchain_subdir_for "$1")"
     case $1 in
         linux*)
-            printf "${PREBUILT_DIR}/x86_64-linux"
+            local GLIBC="$(aosp_linux_glibc_version)"
+            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-$GLIBC/x86_64-linux"
             ;;
         darwin*)
             # We use the developer machine's system SDK.
             printf ""
             ;;
         windows*)
-            printf "${PREBUILT_DIR}/x86_64-w64-mingw32"
+            printf "prebuilts/gcc/linux-x86/host/x86_64-w64-mingw32-4.8/x86_64-w64-mingw32"
             ;;
     esac
 }
