@@ -475,21 +475,26 @@ extern void skin_winsys_start(bool no_window) {
     }
 }
 
-extern void skin_winsys_run_ui_update(SkinGenericFunction f, void* data) {
+void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
+                               bool wait) {
     D(__FUNCTION__);
-    QSemaphore semaphore;
     EmulatorQtWindow* const window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return;
     }
-    window->runOnUiThread(&f, data, &semaphore);
-    semaphore.acquire();
+    if (wait) {
+        QSemaphore semaphore;
+        window->runOnUiThread(f, data, &semaphore);
+        semaphore.acquire();
+    } else {
+        window->runOnUiThread(f, data, nullptr);
+    }
 }
-
 extern void skin_winsys_error_dialog(const char* message, const char* title) {
-    // Lambdas can only be converted to function pointers if they don't capture
-    // So instead we use the void parameter to pass our parameters in a struct
+    // Lambdas can only be converted to function pointers if they don't have a
+    // capture. So instead we use the void* parameter to pass our data in a
+    // struct.
     struct Params {
         const char* Message;
         const char* Title;
@@ -505,7 +510,7 @@ extern void skin_winsys_error_dialog(const char* message, const char* title) {
     // Make sure we show the dialog on the UI thread or it will crash. This is
     // a blocking call so referencing params and its contents from another
     // thread is safe.
-    skin_winsys_run_ui_update(showDialog, &params);
+    skin_winsys_run_ui_update(showDialog, &params, true);
 }
 
 #ifdef _WIN32

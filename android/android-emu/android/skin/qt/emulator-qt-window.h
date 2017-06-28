@@ -55,6 +55,8 @@ class EmulatorWindow;
 
 typedef struct SkinSurface SkinSurface;
 
+Q_DECLARE_METATYPE(SkinGenericFunction);
+
 class MainLoopThread : public QThread {
     Q_OBJECT
 
@@ -172,9 +174,7 @@ signals:
                     QRect rect,
                     QSemaphore* semaphore = NULL);
 
-    // Qt doesn't support function pointers in signals/slots natively, but
-    // pointer to function pointer works fine
-    void runOnUiThread(SkinGenericFunction* f,
+    void runOnUiThread(SkinGenericFunction f,
                        void* data,
                        QSemaphore* semaphore = NULL);
     void updateRotation(SkinRotation rotation);
@@ -269,7 +269,7 @@ private slots:
     void slot_showWindow(SkinSurface* surface,
                          QRect rect,
                          QSemaphore* semaphore = NULL);
-    void slot_runOnUiThread(SkinGenericFunction* f,
+    void slot_runOnUiThread(SkinGenericFunction f,
                             void* data,
                             QSemaphore* semaphore = NULL);
     void slot_updateRotation(SkinRotation rotation);
