@@ -38,13 +38,12 @@ EglWindowSurface::EglWindowSurface(EglDisplay* dpy,
         EglSurface(dpy, WINDOW, config, width, height),
         m_win(win) {
     s_associatedWins.get().insert(win);
-    EglOS::Engine* engine = EglGlobalInfo::getInstance()->getOsEngine();
-    m_native = engine->createWindowSurface(win);
+    //EglOS::Engine* engine = EglGlobalInfo::getInstance()->getOsEngine();
+    //m_native = engine->createWindowSurface(win);
 }
 
 EglWindowSurface::~EglWindowSurface() {
     s_associatedWins.get().erase(m_win);
-    delete m_native;
 }
 
 bool  EglWindowSurface::getAttrib(EGLint attrib,EGLint* val) {
