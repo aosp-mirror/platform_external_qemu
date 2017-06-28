@@ -176,8 +176,7 @@ static void trace_dev_write(void *opaque, hwaddr offset, uint32_t value)
         break;
     case TRACE_DEV_REG_MMAP_EXEPATH:    // mmap, path of EXE, the others are same as execve
         get_guest_kernel_string(exec_path, value, CLIENT_PAGE_SIZE);
-        if (exec_path != NULL)
-          record_mmap(vstart, vend, eoff, exec_path, tid);
+        record_mmap(vstart, vend, eoff, exec_path, tid);
         DPID("QEMU.trace: mmap exe=%s\n", exec_path);
         if (trace_filename != NULL) {
             D("QEMU.trace: kernel, mmap [%lx,%lx]@%lx [%s]\n", vstart, vend, eoff, exec_path);

@@ -58,9 +58,18 @@ using ::android::base::System;
 
 namespace {
 
-const char kCrashURL_prod[] = "https://clients2.google.com/cr/report";
-const char kCrashURL_staging[] =
-        "https://clients2.google.com/cr/staging_report";
+struct PROD {
+  static constexpr const char* CrashURL = "https://clients2.google.com/cr/report";
+};
+
+struct STAGING {
+   static constexpr const char* CrashURL = "https://clients2.google.com/cr/staging_report";
+};
+
+struct NONE {
+   static constexpr const char* CrashURL = "";
+
+};
 
 #if defined(_WIN32)
 const char kPipeName[] = "\\\\.\\pipe\\AndroidEmulatorCrashService";
@@ -70,9 +79,10 @@ const char kPipeName[] = "com.google.AndroidEmulator.CrashService";
 
 const char kCrashSubDir[] = "breakpad";
 
+template<typename URL>
 class HostCrashSystem : public CrashSystem {
 public:
-    HostCrashSystem() = default;
+    HostCrashSystem() : mCrashURL(URL::CrashURL) { };
 
     virtual ~HostCrashSystem() = default;
 
@@ -87,13 +97,6 @@ public:
     }
 
     virtual const std::string& getCrashURL() override {
-        if (mCrashURL.empty()) {
-            if (CrashType::CRASHUPLOAD == CrashType::PROD) {
-                mCrashURL.assign(kCrashURL_prod);
-            } else if (CrashType::CRASHUPLOAD == CrashType::STAGING) {
-                mCrashURL.assign(kCrashURL_staging);
-            }
-        }
         return mCrashURL;
     }
 
@@ -117,7 +120,10 @@ private:
     std::string mCrashURL;
 };
 
-LazyInstance<HostCrashSystem> sCrashSystem = LAZY_INSTANCE_INIT;
+
+// Note CRASHUPLOAD is a #define that is passed in by the make system, clearly
+// if this is not defined, or points to a wrong type we will fail to compile
+LazyInstance<HostCrashSystem<CRASHUPLOAD>> sCrashSystem = LAZY_INSTANCE_INIT;
 CrashSystem* sCrashSystemForTesting = nullptr;
 
 }  // namespace
