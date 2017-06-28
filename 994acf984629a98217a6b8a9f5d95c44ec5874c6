@@ -22,6 +22,30 @@
       "revId": "994acf984629a98217a6b8a9f5d95c44ec5874c6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12498096_58285aec",
+        "filename": "android/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 1001,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-28T21:20:41Z",
+      "side": 1,
+      "message": "Let me simplify this. The root cause is:\n\nThe glibc-2.15 no longer comes with a userfaultfd.h, which ships with our sources.",
+      "parentUuid": "f5ddd7f2_32d2c436",
+      "range": {
+        "startLine": 997,
+        "startChar": 12,
+        "endLine": 1001,
+        "endChar": 16
+      },
+      "revId": "994acf984629a98217a6b8a9f5d95c44ec5874c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
