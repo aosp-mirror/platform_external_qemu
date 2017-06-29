@@ -1010,14 +1010,15 @@ extern "C" int main(int argc, char **argv) {
         android::base::Thread::maskAllSignals();
 
 #if (SNAPSHOT_PROFILE > 1)
-        printf("EmulatorQtWindow initialization starting at uptime %" PRIu64 " ms\n",
+        printf("skin_winsys_init and UI starting at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
 #endif
+        skin_winsys_init_args(argc, argv);
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
 #if (SNAPSHOT_PROFILE > 1)
-        printf("EmulatorQtWindow initialization finished at uptime %" PRIu64 " ms\n",
+        printf("skin_winsys_init and UI finishing at uptime %" PRIu64 " ms\n",
                get_uptime_ms());
 #endif
 

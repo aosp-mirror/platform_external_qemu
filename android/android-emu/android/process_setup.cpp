@@ -20,7 +20,6 @@
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/protobuf/ProtobufLogging.h"
-#include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/utils/filelock.h"
 #include "android/utils/sockets.h"
@@ -30,17 +29,6 @@
 using android::base::PathUtils;
 using android::base::StringView;
 using android::base::System;
-
-static const char kEarlyNoWindowArg[] = "-no-window";
-
-bool is_headless(int argc, char** argv) {
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], kEarlyNoWindowArg)) {
-            return true;
-        }
-    }
-    return false;
-}
 
 // The order of initialization here can be very finicky. Handle with care, and
 // leave hints about any ordering constraints via comments.
@@ -97,10 +85,6 @@ void process_early_setup(int argc, char** argv) {
     }
 
     android::protobuf::initProtobufLogger();
-
-    // This thing will create some Qt preload threads, so it needs to be the
-    // last one in the function.
-    skin_winsys_init_args(argc, argv, is_headless(argc, argv));
 }
 
 void process_late_teardown() {
