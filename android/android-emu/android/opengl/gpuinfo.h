@@ -27,11 +27,6 @@
 
 // The main entry points:
 
-// load_gpu_info() queries the host system
-// and returns a platform-specific string
-// describing all GPU's on the system.
-std::string load_gpu_info();
-
 // host_gpu_blacklisted_async() does the two steps above,
 // but on a different thread, with a timeout in case
 // the started processes hang or what not.
@@ -124,11 +119,7 @@ bool gpuinfo_query_blacklist(GpuInfoList* gpulist,
                              const BlacklistEntry* list,
                              int size);
 
-// Main function to parse GPU information.
-void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist);
-
 // Platform-specific information parsing functions.
-void parse_gpu_info_list_osx(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_linux(const std::string& contents, GpuInfoList* gpulist);
 void parse_gpu_info_list_windows(const std::string& contents, GpuInfoList* gpulist);
 
