@@ -401,21 +401,12 @@ int main(int argc, char** argv)
     int wantedBitness = hostBitness;
 
 #if defined(__linux__)
-    if (!force32bit && hostBitness == 32) {
-        fprintf(stderr,
-"ERROR: 32-bit Linux Android emulator binaries are DEPRECATED, to use them\n"
-"       you will have to do at least one of the following:\n"
-"\n"
-"       - Use the '-force-32bit' option when invoking 'emulator'.\n"
-"       - Set ANDROID_EMULATOR_FORCE_32BIT to 'true' in your environment.\n"
-"\n"
-"       Either one will allow you to use the 32-bit binaries, but please be\n"
-"       aware that these will disappear in a future Android SDK release.\n"
-"       Consider moving to a 64-bit Linux system before that happens.\n"
-"\n"
-        );
-        return 1;
-    }
+    // Linux binaries are compiled for 64 bit, so none of the 32 bit settings
+    // will make any sense.
+    static_assert(sizeof(void*) == 8, "We only support 64 bit in linux (see: c5a2d4198cb)");
+    force32bit = false;
+    hostBitness = 64;
+    wantedBitness = 64;
 #endif  // __linux__
 
     if (force32bit) {
