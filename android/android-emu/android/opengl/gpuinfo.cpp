@@ -338,6 +338,7 @@ std::string load_gpu_info() {
                         nullptr, nullptr, temp_file_path)) {
         return {};
     }
+    // We used to run glxinfo here, but use GLX library itself instead for speed.
 #else
     if (!sys.runCommand({"wmic", "/OUTPUT:" + std::string(temp_file_path),
                         "path", "Win32_VideoController", "get", "/value"},
@@ -442,7 +443,7 @@ void parse_gpu_info_list_linux(const std::string& contents,
     // forever is lspci.
     // We just look for "VGA" in lspci, then
     // attempt to grab vendor and device information.
-    // Second, we issue glxinfo and look for the version string,
+    // Second, we use glx to look for the version string,
     // in case there is a renderer such as Mesa
     // to look out for.
     while (line_loc != NOTFOUND) {

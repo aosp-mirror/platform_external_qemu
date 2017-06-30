@@ -458,6 +458,8 @@ ANDROID_EMU_BASE_LDLIBS := \
 
 ifeq ($(BUILD_TARGET_OS),linux)
     ANDROID_EMU_BASE_LDLIBS += -lrt
+    ANDROID_EMU_BASE_LDLIBS += -lX11
+    ANDROID_EMU_BASE_LDLIBS += -lGL
 endif
 ifeq ($(BUILD_TARGET_OS),windows)
     ANDROID_EMU_BASE_LDLIBS += -lpsapi
