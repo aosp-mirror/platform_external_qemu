@@ -66,5 +66,10 @@ std::string trim(const std::string& in) {
     return std::string(in.c_str() + start, end - start);
 }
 
+bool startsWith(StringView string, StringView prefix) {
+    return string.size() >= prefix.size() &&
+            memcmp(string.data(), prefix.data(), prefix.size()) == 0;
+}
+
 }  // namespace base
 }  // namespace android

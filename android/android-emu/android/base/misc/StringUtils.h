@@ -70,5 +70,7 @@ std::string join(const Range& range) {
 // Returns a version of |in| with whitespace trimmed from the front/end
 std::string trim(const std::string& in);
 
+bool startsWith(StringView string, StringView prefix);
+
 }  // namespace base
 }  // namespace android
