@@ -17,6 +17,7 @@
 #include "android/base/threads/ParallelTask.h"
 #include "android/base/threads/Thread.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/opengl/NativeGpuInfo.h"
 #include "android/utils/file_io.h"
 
 #include <algorithm>
@@ -337,15 +338,6 @@ std::string load_gpu_info() {
                         nullptr, nullptr, temp_file_path)) {
         return {};
     }
-    secondTempFile = std::string(temp_file_path) + ".glxinfo";
-    if (!sys.runCommand({"glxinfo"},
-                        System::RunOptions::WaitForCompletion |
-                        System::RunOptions::TerminateOnTimeout |
-                        System::RunOptions::DumpOutputToFile,
-                        kGPUInfoQueryTimeoutMs / 2,
-                        nullptr, nullptr, secondTempFile)) {
-        return {};
-    }
 #else
     if (!sys.runCommand({"wmic", "/OUTPUT:" + std::string(temp_file_path),
                         "path", "Win32_VideoController", "get", "/value"},
@@ -609,9 +601,15 @@ void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist) {
 }
 
 void query_blacklist_fn(bool* res) {
-    std::string gpu_info = load_gpu_info();
     GpuInfoList* gpulist = sGpuInfoList.ptr();
+
+#ifndef __APPLE__
+    std::string gpu_info = load_gpu_info();
     parse_gpu_info_list(gpu_info, gpulist);
+#endif
+
+    getGpuInfoListNative(gpulist);
+
     *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
     sGpuInfoList->blacklist_status = *res;
 #ifdef _WIN32
