@@ -17,6 +17,7 @@
 #include "android/base/threads/ParallelTask.h"
 #include "android/base/threads/Thread.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/opengl/NativeGpuInfo.h"
 #include "android/utils/file_io.h"
 
 #include <algorithm>
@@ -609,9 +610,13 @@ void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist) {
 }
 
 void query_blacklist_fn(bool* res) {
-    std::string gpu_info = load_gpu_info();
     GpuInfoList* gpulist = sGpuInfoList.ptr();
+#ifdef __APPLE__
+    getGpuInfoListNative(gpulist);
+#else
+    load_gpu_info();
     parse_gpu_info_list(gpu_info, gpulist);
+#endif
     *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
     sGpuInfoList->blacklist_status = *res;
 #ifdef _WIN32
