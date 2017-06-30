@@ -841,6 +841,10 @@ public:
         return pathFileSizeInternal(path, outFileSize);
     }
 
+    bool fileSize(int fd, FileSize* outFileSize) const override {
+        return fileSizeInternal(fd, outFileSize);
+    }
+
     virtual Optional<Duration> pathCreationTime(StringView path) const override {
         return pathCreationTimeInternal(path);
     }
@@ -1362,6 +1366,14 @@ int pathStat(StringView path, PathStat* st) {
 #endif  // !_WIN32
 }
 
+int fdStat(int fd, PathStat* st) {
+#ifdef _WIN32
+    return fstat64(fd, st);
+#else   // !_WIN32
+    return HANDLE_EINTR(fstat(fd, st));
+#endif  // !_WIN32
+}
+
 int pathAccess(StringView path, int mode) {
 #ifdef _WIN32
     // Convert |mode| to win32 permission bits.
@@ -1564,6 +1576,22 @@ bool System::pathFileSizeInternal(StringView path, FileSize* outFileSize) {
     }
     PathStat st;
     int ret = pathStat(path, &st);
+    if (ret < 0 || !S_ISREG(st.st_mode)) {
+        return false;
+    }
+    // This is off_t on POSIX and a 32/64 bit integral type on windows based on
+    // the host / compiler combination. We cast everything to 64 bit unsigned to
+    // play safe.
+    *outFileSize = static_cast<FileSize>(st.st_size);
+    return true;
+}
+
+bool System::fileSizeInternal(int fd, System::FileSize* outFileSize) {
+    if (fd < 0) {
+        return false;
+    }
+    PathStat st;
+    int ret = fdStat(fd, &st);
     if (ret < 0 || !S_ISREG(st.st_mode)) {
         return false;
     }
