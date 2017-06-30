@@ -1,6 +1,7 @@
 #!/bin/bash -e
 
 LINUX_VERSION="Linux version 3.10.0+ (vharron@tifa.mtv.corp.google.com) (gcc version 4.7 (GCC) ) #1 PREEMPT Sat Jan 5 2:45:24 PDT 2008\xA\x0"
+LINUX_VERSION_ALT="0123456789ABCDEF3.10.0+ (vharron@tifa.mtv.corp.google.com) (gcc version 4.7 (GCC) ) #1 PREEMPT Sat Jan 5 2:45:24 PDT 2008\xA\x0"
 TMP_FILE=/tmp/print_mock_kernel_tmp
 
 printf "// a mock uncompressed kernel\n"
@@ -35,6 +36,13 @@ printf "WHATEVER" | gzip >> $TMP_FILE
 cat $TMP_FILE | xxd -i
 printf "};\n\n"
 
+printf "// a mock semi-compressed kernel\n"
+printf "// an unspecified number of bytes, followed by a version string\n"
+printf "// with alternative prefix followed by a gzip header\n"
+printf "static const unsigned char kMockKernelSemiCompressedAlt[] = {\n"
+printf "01234567899abcdef${LINUX_VERSION_ALT}0123455789" > $TMP_FILE
+printf "WHATEVER" | gzip >> $TMP_FILE
+cat $TMP_FILE | xxd -i
+printf "};\n\n"
+
 rm $TMP_FILE
-
-
