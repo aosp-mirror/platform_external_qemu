@@ -249,6 +249,7 @@ public:
     // Get the size of file at |path|.
     // Fails if path is not a file or not readable, and in case of other errors.
     virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
+    virtual bool fileSize(int fd, FileSize* outFileSize) const = 0;
 
     // Gets the file creation timestamp as a Unix epoch time with microsecond
     // resolution. Returns an empty optional for systems that don't support
@@ -371,6 +372,7 @@ protected:
     static bool pathCanExecInternal(StringView path);
     static bool deleteFileInternal(StringView path);
     static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
+    static bool fileSizeInternal(int fd, FileSize* outFileSize);
     static Optional<Duration> pathCreationTimeInternal(StringView path);
 
 private:

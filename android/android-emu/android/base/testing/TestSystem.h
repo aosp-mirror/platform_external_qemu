@@ -245,6 +245,10 @@ public:
         return pathFileSizeInternal(toTempRoot(path), outFileSize);
     }
 
+    virtual bool fileSize(int fd, FileSize* outFileSize) const override {
+        return fileSizeInternal(fd, outFileSize);
+    }
+
     virtual Optional<Duration> pathCreationTime(
             StringView path) const override {
         return pathCreationTimeInternal(toTempRoot(path));
