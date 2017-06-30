@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8cc63519_4a9ee505",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-30T18:05:49Z",
+      "side": 1,
+      "message": "My fear as well. Will start with the suggestions of the compiler team. If it is too much will start by excluding qemu.",
+      "parentUuid": "a4509e49_8e82b4c0",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 28
+      },
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf6a38c5_168121ad",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2017-06-30T17:37:43Z",
       "side": 1,
       "message": "This usually indicates misuse of packed. Assuming the member they are taking the address of is the first one, you can usually put the proper alignment specifier on the type declaration.",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d92f8d17_346bbd33",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-30T18:05:49Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "cf6a38c5_168121ad",
       "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "6cae7312_b4702f5a",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-30T18:05:49Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "18d969c6_af5e0166",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b75508a_0e7e51a8",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 1
@@ -70,6 +130,24 @@
       "writtenOn": "2017-06-30T17:37:43Z",
       "side": 1,
       "message": "This one is frequently a bug as well.",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc7c5750_b0df5612",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-30T18:05:49Z",
+      "side": 1,
+      "message": "will fix",
+      "parentUuid": "5b75508a_0e7e51a8",
       "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -93,6 +171,24 @@
     },
     {
       "key": {
+        "uuid": "a9541caa_d6873748",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-30T18:05:49Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "f47b00bf_28ace323",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9507f81d_953e0178",
         "filename": "android/scripts/utils/aosp_dir.shi",
         "patchSetId": 1
@@ -104,6 +200,30 @@
       "writtenOn": "2017-06-30T17:39:36Z",
       "side": 1,
       "message": "You may want to extract the hardcoded build numbers out.  We\u0027ve often been forgetful about updating all instances.",
+      "range": {
+        "startLine": 87,
+        "startChar": 57,
+        "endLine": 87,
+        "endChar": 64
+      },
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "992299fb_88128809",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-06-30T18:05:49Z",
+      "side": 1,
+      "message": "will fix. Should we use clang-stable?",
+      "parentUuid": "9507f81d_953e0178",
       "range": {
         "startLine": 87,
         "startChar": 57,
