@@ -233,6 +233,30 @@
       "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0c44407_f3e203e6",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2017-06-30T18:10:32Z",
+      "side": 1,
+      "message": "No, clang-stable is a symbolic link that we created for users of git-clang-format.\n\nclang-stable should not be used in the build rules because the build system does not trigger on changes to symlinks.\n\nHaving a specific prebuilts here means the emulator team can control when the emulator moves to a new/updated clang and not when we periodically and randomly update clang-stable.",
+      "parentUuid": "992299fb_88128809",
+      "range": {
+        "startLine": 87,
+        "startChar": 57,
+        "endLine": 87,
+        "endChar": 64
+      },
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
