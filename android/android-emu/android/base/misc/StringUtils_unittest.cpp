@@ -138,5 +138,28 @@ TEST(StringUtils, trim) {
     }
 }
 
+TEST(StringUtils, startsWith) {
+    struct {
+        const char* string;
+        const char* prefix;
+        bool res;
+    } test_data[] = {
+            {"", "", true},
+            {"123", "", true},
+            {"blah", "bl", true},
+            {" asD1f asdfsda", " asD1f ", true},
+            {"blah", "lah", false},
+            {"123", "gasd", false},
+            {"123", "1234", false},
+            {"", "1", false},
+    };
+    size_t TEST_DATA_COUNT = sizeof(test_data) / sizeof(test_data[0]);
+
+    for (size_t i = 0; i < TEST_DATA_COUNT; i++) {
+        EXPECT_EQ(test_data[i].res, startsWith(test_data[i].string,
+                                               test_data[i].prefix));
+    }
+}
+
 }  // namespace base
 }  // namespace android
