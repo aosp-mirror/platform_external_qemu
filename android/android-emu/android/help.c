@@ -1387,6 +1387,7 @@ help_selinux(stralloc_t* out)
     );
 }
 
+#ifndef __linux__
 static void
 help_force_32bit(stralloc_t* out)
 {
@@ -1395,6 +1396,7 @@ help_force_32bit(stralloc_t* out)
 
     );
 }
+#endif  // __linux__
 
 #ifdef __linux__
 static void

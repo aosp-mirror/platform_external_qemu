@@ -416,6 +416,7 @@ public:
 
     virtual int getHostBitness() const {
 #ifdef __x86_64__
+
         return 64;
 #elif defined(_WIN32)
         // Retrieves the path of the WOW64 system directory, which doesn't

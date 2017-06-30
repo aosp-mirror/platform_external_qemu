@@ -168,7 +168,9 @@ OPT_FLAG( webcam_list, "lists web cameras available for emulation" )
 
 OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 
-OPT_FLAG( force_32bit, "always use 32-bit emulator" )
+#ifndef __linux__
+  OPT_FLAG( force_32bit, "always use 32-bit emulator" )
+#endif  // __linux__
 
 OPT_PARAM(selinux, "<disabled|permissive>", "Set SELinux to either disabled or permissive mode")
 OPT_LIST(unix_pipe, "<path>", "Add <path> to the list of allowed Unix pipes")
