@@ -67,6 +67,29 @@
       "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9507f81d_953e0178",
+        "filename": "android/scripts/utils/aosp_dir.shi",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2017-06-30T17:39:36Z",
+      "side": 1,
+      "message": "You may want to extract the hardcoded build numbers out.  We\u0027ve often been forgetful about updating all instances.",
+      "range": {
+        "startLine": 87,
+        "startChar": 57,
+        "endLine": 87,
+        "endChar": 64
+      },
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
