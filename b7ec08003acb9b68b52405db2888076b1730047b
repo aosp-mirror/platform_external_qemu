@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf6a38c5_168121ad",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2017-06-30T17:37:43Z",
+      "side": 1,
+      "message": "This usually indicates misuse of packed. Assuming the member they are taking the address of is the first one, you can usually put the proper alignment specifier on the type declaration.",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18d969c6_af5e0166",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2017-06-30T17:37:43Z",
+      "side": 1,
+      "message": "This one should really be fixed.",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b75508a_0e7e51a8",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2017-06-30T17:37:43Z",
+      "side": 1,
+      "message": "This one is frequently a bug as well.",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f47b00bf_28ace323",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1010056
+      },
+      "writtenOn": "2017-06-30T17:37:43Z",
+      "side": 1,
+      "message": "This is a great source of bugs. Optimizers will definitely remove code in such cases, and \"this !\u003d nullptr\" is a classic case that ends up breaking code. Please verify that these checks need to be there, and if not, please remove them.",
+      "revId": "b7ec08003acb9b68b52405db2888076b1730047b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
