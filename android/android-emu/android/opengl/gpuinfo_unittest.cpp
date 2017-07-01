@@ -500,6 +500,8 @@ TEST(parse_gpu_info_list_osx, DualGpu) {
     EXPECT_TRUE(nvidia_info.dlls.empty());
 }
 
+#ifdef _WIN32
+
 TEST(parse_gpu_info_list_windows, WinNoInstalledDriversContinueCase) {
     std::string contents(win_noinstalleddrivers);
 
@@ -595,6 +597,8 @@ TEST(parse_gpu_info_list_windows, DualGpu) {
     EXPECT_STREQ("igd10iumd32", intel_info.dlls[6].c_str());
     EXPECT_STREQ("igd12umd32", intel_info.dlls[7].c_str());
 }
+
+#endif
 
 TEST(parse_gpu_info_list_linux, EmptyStr) {
     std::string contents;
