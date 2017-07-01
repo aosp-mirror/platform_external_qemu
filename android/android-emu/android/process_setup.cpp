@@ -16,6 +16,7 @@
 #include "android/base/Log.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Async.h"
 #include "android/curl-support.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/crashreport/CrashReporter.h"
@@ -85,6 +86,9 @@ void process_early_setup(int argc, char** argv) {
     }
 
     android::protobuf::initProtobufLogger();
+
+    // now we can start other threads
+    android::base::async([] { System::get()->getOsName(); });
 }
 
 void process_late_teardown() {

@@ -23,6 +23,7 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/misc/StringUtils.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
 #include "android/utils/tempfile.h"
 
@@ -480,6 +481,7 @@ public:
     }
 
     virtual string getOsName() override {
+      android::base::AutoLock lock(mLock);
       static string lastSuccessfulValue;
       if (!lastSuccessfulValue.empty()) {
         return lastSuccessfulValue;
@@ -1329,6 +1331,7 @@ private:
     mutable std::string mLauncherDir;
     mutable std::string mHomeDir;
     mutable std::string mAppDataDir;
+    android::base::Lock mLock;
 };
 
 LazyInstance<HostSystem> sHostSystem = LAZY_INSTANCE_INIT;
