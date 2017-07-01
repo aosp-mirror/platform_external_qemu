@@ -14,6 +14,8 @@
 
 #include "RenderWindow.h"
 
+#include "android/base/threads/Async.h"
+#include "android/utils/system.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/message_channel.h"
 #include "emugl/common/mutex.h"
@@ -235,6 +237,22 @@ public:
 
     // Send a message from the main thread.
     // Note that the content of |msg| is copied into the channel.
+    // Returns result async in |f|.
+    void sendMessageAndThen(const RenderWindowMessage& msg,
+                            RenderWindowResultHandler f) {
+        D("msg.cmd=%d\n", msg.cmd);
+        mIn.send(msg);
+        D("waiting for result\n");
+        android::base::async([this, f] {
+            bool result = false;
+            mOut.receive(&result);
+            D("async receive result=%s\n", result ? "success" : "failure");
+            f(result);
+        });
+    }
+
+    // Send a message from the main thread.
+    // Note that the content of |msg| is copied into the channel.
     // Returns with the command's result (true or false).
     bool sendMessageAndGetResult(const RenderWindowMessage& msg) {
         D("msg.cmd=%d\n", msg.cmd);
@@ -327,7 +345,9 @@ RenderWindow::RenderWindow(int width,
     msg.init.width = width;
     msg.init.height = height;
     msg.init.useSubWindow = use_sub_window;
-    mValid = processMessage(msg);
+    processMessageAndThen(msg, [this](bool res) {
+        setValid(res);
+    });
 }
 
 RenderWindow::~RenderWindow() {
@@ -446,5 +466,14 @@ bool RenderWindow::processMessage(const RenderWindowMessage& msg) {
         return mChannel->sendMessageAndGetResult(msg);
     } else {
         return msg.process();
+    }
+}
+
+void RenderWindow::processMessageAndThen(const RenderWindowMessage& msg, RenderWindowResultHandler f) {
+    if (mChannel) {
+        mChannel->sendMessageAndThen(msg, f);
+    } else {
+        bool res = msg.process();
+        f(res);
     }
 }

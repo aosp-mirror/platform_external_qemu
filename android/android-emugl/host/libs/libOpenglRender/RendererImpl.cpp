@@ -47,7 +47,7 @@ namespace emugl {
 //   dragging the window between monitors, triggering a Qt-specific callback
 //   in the context of RenderWindow thread, which will become blocked on the UI
 //   thread, which may in turn be blocked on something else.
-static const bool kUseSubwindowThread = false;
+static const bool kUseSubwindowThread = true;
 
 // This object manages the cleanup of guest process resources when the process
 // exits. It runs the cleanup in a separate thread to never block the main
@@ -104,10 +104,8 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
         GL_LOG("Could not create rendering window class");
         return false;
     }
-    if (!renderWindow->isValid()) {
-        ERR("Could not initialize emulated framebuffer\n");
-        return false;
-    }
+
+    // Let's check isValid() later
 
     mRenderWindow = std::move(renderWindow);
     GL_LOG("OpenGL renderer initialized successfully");
