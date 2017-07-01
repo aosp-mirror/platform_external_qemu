@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20dd02a9_70a01d04",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderWindow.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 477,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-01T16:03:45Z",
+      "side": 1,
+      "message": "we always go this way, BTW - there\u0027s no separate thread now.",
+      "range": {
+        "startLine": 477,
+        "startChar": 5,
+        "endLine": 477,
+        "endChar": 15
+      },
+      "revId": "3ab5b6302d6745deead68f9fa5cccdab46f2c98a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5424387c_e082e03f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderWindow.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-01T16:03:45Z",
+      "side": 1,
+      "message": "this predicate returns a condition when to stop waiting",
+      "range": {
+        "startLine": 82,
+        "startChar": 48,
+        "endLine": 82,
+        "endChar": 49
+      },
+      "revId": "3ab5b6302d6745deead68f9fa5cccdab46f2c98a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7ad39400_114ccc27",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RendererImpl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-01T16:03:45Z",
+      "side": 1,
+      "message": "this is dangerous\nit caused hangs on Windows and some strange bugs on Linux, AFAIK",
+      "range": {
+        "startLine": 50,
+        "startChar": 40,
+        "endLine": 50,
+        "endChar": 44
+      },
+      "revId": "3ab5b6302d6745deead68f9fa5cccdab46f2c98a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
