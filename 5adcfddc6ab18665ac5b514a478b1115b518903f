@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ac547a80_9b17ab62",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-01T00:49:21Z",
+      "side": 1,
+      "message": "Intel ones? (Refer to crashreporter windows (IIRC)) for the others",
+      "range": {
+        "startLine": 91,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 5
+      },
+      "revId": "5adcfddc6ab18665ac5b514a478b1115b518903f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
