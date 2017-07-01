@@ -197,6 +197,10 @@ bool DefaultLooper::runOneIterationWithDeadlineMs(Looper::Duration deadlineMs) {
     if (mFdWatches.empty()) {
         // We don't have any FDs to watch, so just sleep till the next
         // timer expires.
+        if (timeOut == INT64_MAX) {
+            // no way we should sleep that long
+            return false;
+        }
         System::get()->sleepMs(timeOut);
     } else {
         int ret = mWaiter->wait(timeOut);
