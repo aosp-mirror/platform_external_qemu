@@ -22,6 +22,30 @@
       "revId": "fe8e87d6a0b64e2fd7edb6b6a89a494ee9782d55",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67ac4dc9_e900446b",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_darwin.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-01T03:51:08Z",
+      "side": 1,
+      "message": "From what I\u0027ve seen from ioreg (which lists all I/O devices and their info) the opengl driver version doesn\u0027t seem to be available, so we\u0027d be looking at another opengl context creation",
+      "parentUuid": "f34ad3ec_1582cf12",
+      "range": {
+        "startLine": 100,
+        "startChar": 40,
+        "endLine": 100,
+        "endChar": 47
+      },
+      "revId": "fe8e87d6a0b64e2fd7edb6b6a89a494ee9782d55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
