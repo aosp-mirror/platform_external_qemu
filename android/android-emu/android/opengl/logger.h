@@ -9,6 +9,8 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#pragma once
+
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER

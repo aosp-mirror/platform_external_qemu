@@ -47,6 +47,8 @@ class OpenGLLogger {
 public:
     OpenGLLogger();
     OpenGLLogger(const char* filename);
+    void stop();
+
     // Coarse log: Call this infrequently.
     void writeCoarse(const char* str);
 
@@ -94,9 +96,13 @@ OpenGLLogger::OpenGLLogger(const char* filename) :
 
 void OpenGLLogger::writeCoarse(const char* str) {
     if (mFileHandle) {
-        mFileHandle << str;
-        mFileHandle << std::endl;
+        mFileHandle << str << std::endl;
     }
+}
+
+void OpenGLLogger::stop() {
+    stopFineLog();
+    mFileHandle.close();
 }
 
 void OpenGLLogger::writeFine(uint64_t time, const char* str) {
@@ -195,6 +201,5 @@ void android_opengl_cxt_logger_write(const char* fmt, ...) {
 
 void android_stop_opengl_logger() {
     OpenGLLogger* gl_log = OpenGLLogger::get();
-    gl_log->stopFineLog();
+    gl_log->stop();
 }
-
