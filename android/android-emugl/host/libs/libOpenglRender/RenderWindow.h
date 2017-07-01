@@ -17,7 +17,12 @@
 
 #include "OpenglRender/render_api.h"
 
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
+
 #include "emugl/common/thread.h"
+
+#include <functional>
 
 class RenderWindowChannel;
 struct RenderWindowMessage;
@@ -62,9 +67,20 @@ public:
     // Destructor. This will automatically call removeSubWindow() is needed.
     ~RenderWindow();
 
+    void setValid(bool result) {
+        android::base::AutoLock lock(mLock);
+        mValid = result;
+        mValidInitialized = true;
+        mValidCv.signal();
+    }
+
     // Returns true if the RenderWindow instance is valid, which really
     // means that the constructor succeeded.
-    bool isValid() const { return mValid; }
+    bool isValid() const {
+        android::base::AutoLock lock(mLock);
+        mValidCv.wait(&mLock, [this]() { return !mValidInitialized; });
+        return mValid;
+    }
 
     // Return misc. GL strings to the caller. On success, return true and sets
     // |*vendor| to the GL vendor string, |*renderer| to the GL renderer one,
@@ -122,9 +138,16 @@ public:
     void repaint();
 
 private:
+    using BoolResultHandler = std::function<void (bool)>;
     bool processMessage(const RenderWindowMessage& msg);
+    void processMessageAndThen(const RenderWindowMessage& msg, BoolResultHandler f);
 
     bool mValid = false;
+
+    mutable android::base::ConditionVariable mValidCv;
+    mutable android::base::Lock mLock;
+    bool mValidInitialized = false;
+
     bool mHasSubWindow = false;
     emugl::Thread* mThread = nullptr;
     RenderWindowChannel* mChannel = nullptr;

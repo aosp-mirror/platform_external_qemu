@@ -104,10 +104,8 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
         GL_LOG("Could not create rendering window class");
         return false;
     }
-    if (!renderWindow->isValid()) {
-        ERR("Could not initialize emulated framebuffer\n");
-        return false;
-    }
+
+    // Let's check isValid() later
 
     mRenderWindow = std::move(renderWindow);
     GL_LOG("OpenGL renderer initialized successfully");

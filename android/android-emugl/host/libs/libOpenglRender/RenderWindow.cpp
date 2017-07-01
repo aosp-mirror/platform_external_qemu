@@ -14,6 +14,8 @@
 
 #include "RenderWindow.h"
 
+#include "android/base/threads/Async.h"
+#include "android/utils/system.h"
 #include "emugl/common/logging.h"
 #include "emugl/common/message_channel.h"
 #include "emugl/common/mutex.h"
@@ -327,7 +329,9 @@ RenderWindow::RenderWindow(int width,
     msg.init.width = width;
     msg.init.height = height;
     msg.init.useSubWindow = use_sub_window;
-    mValid = processMessage(msg);
+    processMessageAndThen(msg, [this](bool res) {
+        setValid(res);
+    });
 }
 
 RenderWindow::~RenderWindow() {
@@ -447,4 +451,9 @@ bool RenderWindow::processMessage(const RenderWindowMessage& msg) {
     } else {
         return msg.process();
     }
+}
+
+void RenderWindow::processMessageAndThen(const RenderWindowMessage& msg, BoolResultHandler f) {
+    android::base::async([this,f,msg] {
+            f(processMessage(msg)); });
 }
