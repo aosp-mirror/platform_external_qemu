@@ -46,6 +46,13 @@ TEST(FileUtils, stringToFile) {
 
     fd.close();
 
+    auto readFailedRes = readFileIntoString("!@#%R#$%W$*@#$*");
+    EXPECT_FALSE(readFailedRes);
+
+    auto readSucceededRes = readFileIntoString(tempfile_path(tf));
+    EXPECT_TRUE(readSucceededRes);
+    EXPECT_STREQ(test_pattern, readSucceededRes->c_str());
+
     tempfile_close(tf);
 }
 

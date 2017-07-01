@@ -14,10 +14,14 @@
 
 #include <assert.h>
 #include <fcntl.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
-#include <vector>
+
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <utility>
 
 namespace android {
 
@@ -31,12 +35,12 @@ bool readFileIntoString(int fd, std::string* file_contents) {
         return false;
     }
 
-    std::vector<char> buf(size);
+    std::string buf((size_t)size, '\0');
     ssize_t result = HANDLE_EINTR(read(fd, &buf[0], size));
     if (result != size) {
         return false;
     }
-    file_contents->assign(&buf[0], result);
+    *file_contents = std::move(buf);
     return true;
 }
 
@@ -47,6 +51,19 @@ bool writeStringToFile(int fd, const std::string& file_contents) {
         return false;
     }
     return true;
+}
+
+base::Optional<std::string> readFileIntoString(base::StringView name) {
+    std::ifstream is(name.isNullTerminated()
+                             ? name.c_str()
+                             : std::string(name.data(), name.size()).c_str());
+    if (!is) {
+        return {};
+    }
+
+    std::ostringstream ss;
+    ss << is.rdbuf();
+    return ss.str();
 }
 
 }  // namespace android

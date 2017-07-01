@@ -11,6 +11,9 @@
 
 #pragma once
 
+#include "android/base/Optional.h"
+#include "android/base/StringView.h"
+
 #include <string>
 
 namespace android {
@@ -18,6 +21,9 @@ namespace android {
 // Reads from |fd| into |file_contents|
 // Returns false if something went wrong
 bool readFileIntoString(int fd, std::string* file_contents);
+
+// Reads |name| file
+base::Optional<std::string> readFileIntoString(base::StringView name);
 
 // Writes |file_contents| to |fd|
 // Returns false if something went wrong
