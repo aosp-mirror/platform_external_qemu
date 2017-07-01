@@ -9,33 +9,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
+#include "android/opengl/gpuinfo.h"
+
 #include "android/base/async/Looper.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/base/system/Win32UnicodeString.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/base/threads/Thread.h"
 #include "android/opengl/gpuinfo.h"
-#include "android/utils/file_io.h"
+#include "android/opengl/NativeGpuInfo.h"
 
-#include <algorithm>
 #include <assert.h>
 #include <inttypes.h>
-#include <fstream>
 #include <sstream>
+#include <utility>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 using android::base::Looper;
-using android::base::ParallelTask;
-using android::base::RunOptions;
-using android::base::StringView;
+using android::base::runParallelTask;
 using android::base::System;
-#ifdef _WIN32
-using android::base::Win32UnicodeString;
-#endif
 
 // Try to switch to NVIDIA on Optimus systems,
 // and AMD GPU on AmdPowerXpress.
@@ -56,15 +51,12 @@ FLAG_EXPORT int AmdPowerXpressRequestHighPerformance = 0x00000001;
 
 static const System::Duration kGPUInfoQueryTimeoutMs = 5000;
 static const System::Duration kQueryCheckIntervalMs = 66;
-static const size_t kFieldLen = 2048;
-
-static const size_t NOTFOUND = std::string::npos;
 
 static ::android::base::LazyInstance<GpuInfoList> sGpuInfoList =
         LAZY_INSTANCE_INIT;
 
 void GpuInfo::addDll(std::string dll_str) {
-    dlls.push_back(dll_str);
+    dlls.push_back(std::move(dll_str));
 }
 
 void GpuInfoList::addGpu() {
@@ -134,7 +126,7 @@ static bool gpuinfo_query_list(GpuInfoList* gpulist,
             if (bl_version && (gpuinfo.revision_id != bl_version))
                 continue;
             if (bl_renderer && (gpuinfo.renderer.find(bl_renderer) ==
-                                NOTFOUND))
+                                std::string::npos))
                 continue;
             if (bl_os && (gpuinfo.os != bl_os))
                 continue;
@@ -257,363 +249,14 @@ static const BlacklistEntry sSyncBlacklist[] = {
 static const int sSyncBlacklistSize =
     sizeof(sSyncBlacklist) / sizeof(BlacklistEntry);
 
-static std::string readAndDeleteTempFile(StringView name) {
-    std::ifstream fh(name.c_str(), std::ios::binary);
-    if (!fh) {
-#ifdef _WIN32
-        Sleep(100);
-#endif
-        fh.open(name.c_str(), std::ios::binary);
-        if (!fh) {
-            return {};
-        }
-    }
-
-    std::stringstream ss;
-    ss << fh.rdbuf();
-    std::string contents = ss.str();
-    fh.close();
-
-#ifndef _WIN32
-    remove(name.c_str());
-#else
-    DWORD del_ret = DeleteFile(name.c_str());
-    if (!del_ret) {
-        Sleep(100);
-        DeleteFile(name.c_str());
-    }
-#endif
-    return contents;
-}
-
-std::string load_gpu_info() {
-    auto& sys = *System::get();
-    std::string tmp_dir = sys.getTempDir();
-
-// Get temporary file path
-#ifndef _WIN32
-    if (tmp_dir.back() != '/') {
-        tmp_dir += '/';
-    }
-    std::string temp_filename_pattern = "gpuinfo_XXXXXX";
-    std::string temp_file_path_template = (tmp_dir + temp_filename_pattern);
-
-    int tmpfd = mkstemp((char*)temp_file_path_template.data());
-
-    if (tmpfd == -1) {
-        return std::string();
-    }
-
-    StringView temp_file_path = temp_file_path_template.c_str();
-#else
-    char tmp_filename_buffer[kFieldLen] = {};
-    DWORD temp_file_ret =
-            GetTempFileName(tmp_dir.c_str(), "gpu", 0, tmp_filename_buffer);
-
-    if (!temp_file_ret) {
-        return {};
-    }
-
-    StringView temp_file_path = tmp_filename_buffer;
-#endif
-    std::string secondTempFile;
-
-    // Execute the command to get GPU info.
-#ifdef __APPLE__
-    if (!sys.runCommand({"system_profiler", "SPDisplaysDataType"},
-                        RunOptions::WaitForCompletion |
-                        RunOptions::TerminateOnTimeout |
-                        RunOptions::DumpOutputToFile,
-                        kGPUInfoQueryTimeoutMs,
-                        nullptr, nullptr, temp_file_path)) {
-        return {};
-    }
-#elif !defined(_WIN32)
-    if (!sys.runCommand({"lspci", "-mvnn"},
-                        RunOptions::WaitForCompletion |
-                        RunOptions::TerminateOnTimeout |
-                        RunOptions::DumpOutputToFile,
-                        kGPUInfoQueryTimeoutMs / 2,
-                        nullptr, nullptr, temp_file_path)) {
-        return {};
-    }
-    secondTempFile = std::string(temp_file_path) + ".glxinfo";
-    if (!sys.runCommand({"glxinfo"},
-                        System::RunOptions::WaitForCompletion |
-                        System::RunOptions::TerminateOnTimeout |
-                        System::RunOptions::DumpOutputToFile,
-                        kGPUInfoQueryTimeoutMs / 2,
-                        nullptr, nullptr, secondTempFile)) {
-        return {};
-    }
-#else
-    if (!sys.runCommand({"wmic", "/OUTPUT:" + std::string(temp_file_path),
-                        "path", "Win32_VideoController", "get", "/value"},
-                        RunOptions::WaitForCompletion |
-                        RunOptions::TerminateOnTimeout,
-                        kGPUInfoQueryTimeoutMs)) {
-        return {};
-    }
-#endif
-
-    std::string contents = readAndDeleteTempFile(temp_file_path);
-    if (!secondTempFile.empty()) {
-        contents += readAndDeleteTempFile(secondTempFile);
-    }
-
-#ifdef _WIN32
-    // Windows outputs the data in UTF-16 encoding, let's convert it to the
-    // common UTF-8.
-    int num_chars = contents.size() / sizeof(wchar_t);
-    contents = Win32UnicodeString::convertToUtf8(
-            reinterpret_cast<const wchar_t*>(contents.c_str()), num_chars);
-#endif
-
-    return contents;
-}
-
-std::string parse_last_hexbrackets(const std::string& str) {
-    size_t closebrace_p = str.rfind("]");
-    size_t openbrace_p = str.rfind("[", closebrace_p - 1);
-    return str.substr(openbrace_p + 1, closebrace_p - openbrace_p - 1);
-}
-
-std::string parse_renderer_part(const std::string& str) {
-    size_t lastspace_p = str.rfind(" ");
-    size_t prevspace_p = str.rfind(" ", lastspace_p - 1);
-    return str.substr(prevspace_p + 1, lastspace_p - prevspace_p - 1);
-}
-
-void parse_gpu_info_list_osx(const std::string& contents,
-                             GpuInfoList* gpulist) {
-    size_t line_loc = contents.find("\n");
-    if (line_loc == NOTFOUND) {
-        line_loc = contents.size();
-    }
-    size_t p = 0;
-    size_t kvsep_loc;
-    std::string key;
-    std::string val;
-
-    // OS X: We expect a sequence of lines from system_profiler
-    // that describe all GPU's connected to the system.
-    // When a line containing
-    //     Chipset Model: <gpu model name>
-    // that's the earliest reliable indication of information
-    // about an additional GPU. After that,
-    // it's a simple matter to find the vendor/device ID lines.
-    while (line_loc != NOTFOUND) {
-        kvsep_loc = contents.find(": ", p);
-        if ((kvsep_loc != NOTFOUND) && (kvsep_loc < line_loc)) {
-            key = contents.substr(p, kvsep_loc - p);
-            size_t valbegin = (kvsep_loc + 2);
-            val = contents.substr(valbegin, line_loc - valbegin);
-            if (key.find("Chipset Model") != NOTFOUND) {
-                gpulist->addGpu();
-                gpulist->currGpu().model = val;
-                gpulist->currGpu().os = "M";
-            } else if (key.find("Vendor") != NOTFOUND) {
-                gpulist->currGpu().make = val;
-            } else if (key.find("Device ID") != NOTFOUND) {
-                gpulist->currGpu().device_id = val;
-            } else if (key.find("Revision ID") != NOTFOUND) {
-                gpulist->currGpu().revision_id = val;
-            } else if (key.find("Display Type") != NOTFOUND) {
-                gpulist->currGpu().current_gpu = true;
-            } else {
-            }
-        }
-        if (line_loc == contents.size()) {
-            break;
-        }
-        p = line_loc + 1;
-        line_loc = contents.find("\n", p);
-        if (line_loc == NOTFOUND) {
-            line_loc = contents.size();
-        }
-    }
-}
-
-void parse_gpu_info_list_linux(const std::string& contents,
-                               GpuInfoList* gpulist) {
-    size_t line_loc = contents.find("\n");
-    if (line_loc == NOTFOUND) {
-        line_loc = contents.size();
-    }
-    size_t p = 0;
-    std::string key;
-    std::string val;
-    bool lookfor = false;
-
-    // Linux - Only support one GPU for now.
-    // On Linux, the only command that seems not to take
-    // forever is lspci.
-    // We just look for "VGA" in lspci, then
-    // attempt to grab vendor and device information.
-    // Second, we issue glxinfo and look for the version string,
-    // in case there is a renderer such as Mesa
-    // to look out for.
-    while (line_loc != NOTFOUND) {
-        key = contents.substr(p, line_loc - p);
-        if (!lookfor && (key.find("VGA") != NOTFOUND)) {
-            lookfor = true;
-            gpulist->addGpu();
-            gpulist->currGpu().os = "L";
-        } else if (lookfor && (key.find("Vendor") != NOTFOUND)) {
-            gpulist->currGpu().make = parse_last_hexbrackets(key);
-        } else if (lookfor && (key.find("Device") != NOTFOUND)) {
-            gpulist->currGpu().device_id = parse_last_hexbrackets(key);
-            lookfor = false;
-        } else if (key.find("OpenGL version string") != NOTFOUND) {
-            gpulist->currGpu().renderer = key;
-        } else {
-        }
-        if (line_loc == contents.size()) {
-            break;
-        }
-        p = line_loc + 1;
-        line_loc = contents.find("\n", p);
-        if (line_loc == NOTFOUND) {
-            line_loc = contents.size();
-        }
-    }
-}
-
-static void parse_windows_gpu_dlls(int line_loc, int val_pos,
-                            const std::string& contents,
-                            GpuInfoList* gpulist) {
-    if (line_loc - val_pos == 0) {
-        return;
-    }
-
-    const std::string& dll_str =
-        contents.substr(val_pos, line_loc - val_pos);
-
-    size_t vp = 0;
-    size_t dll_sep_loc = dll_str.find(",", vp);
-    size_t dll_end =
-        (dll_sep_loc != NOTFOUND) ?  dll_sep_loc : dll_str.size() - vp;
-    gpulist->currGpu().addDll(dll_str.substr(vp, dll_end - vp));
-
-    while (dll_sep_loc != NOTFOUND) {
-        vp = dll_sep_loc + 1;
-        dll_sep_loc = dll_str.find(",", vp);
-        dll_end =
-            (dll_sep_loc != NOTFOUND) ?  dll_sep_loc : dll_str.size() - vp;
-        gpulist->currGpu().addDll(
-                dll_str.substr(vp, dll_end - vp));
-    }
-
-    const std::string& curr_make = gpulist->currGpu().make;
-    if (curr_make == "NVIDIA") {
-        gpulist->currGpu().addDll("nvoglv32.dll");
-        gpulist->currGpu().addDll("nvoglv64.dll");
-    }
-    else if (curr_make == "Advanced Micro Devices, Inc.") {
-        gpulist->currGpu().addDll("atioglxx.dll");
-        gpulist->currGpu().addDll("atig6txx.dll");
-    }
-}
-
-void parse_windows_gpu_ids(const std::string& val, GpuInfoList *gpulist) {
-    std::string result;
-    size_t key_start = 0;
-    size_t key_end = 0;
-
-    key_start = val.find("VEN_", key_start);
-    if (key_start == NOTFOUND) {
-        return;
-    }
-    key_end = val.find("&", key_start);
-    if (key_end == NOTFOUND) {
-        return;
-    }
-    result = val.substr(key_start + 4, key_end - key_start - 4);
-    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-    gpulist->currGpu().make = result;
-
-    key_start = val.find("DEV_", key_start);
-    if (key_start == NOTFOUND) {
-        return;
-    }
-    key_end = val.find("&", key_start);
-    if (key_end == NOTFOUND) {
-        return;
-    }
-    result = val.substr(key_start + 4, key_end - key_start - 4);
-    std::transform(result.begin(), result.end(), result.begin(), ::tolower);
-    gpulist->currGpu().device_id = result;
-}
-
-void parse_gpu_info_list_windows(const std::string& contents,
-                                 GpuInfoList* gpulist) {
-    size_t line_loc = contents.find("\r\n");
-    if (line_loc == NOTFOUND) {
-        line_loc = contents.size();
-    }
-    size_t p = 0;
-    size_t equals_pos = 0;
-    size_t val_pos = 0;
-    std::string key;
-    std::string val;
-
-    // Windows: We use `wmic path Win32_VideoController get /value`
-    // to get a reasonably detailed list of '<key>=<val>'
-    // pairs. From these, we can get the make/model
-    // of the GPU, the driver version, and all DLLs involved.
-   while (line_loc != NOTFOUND) {
-        equals_pos = contents.find("=", p);
-        if ((equals_pos != NOTFOUND) && (equals_pos < line_loc)) {
-            key = contents.substr(p, equals_pos - p);
-            val_pos = equals_pos + 1;
-            val = contents.substr(val_pos, line_loc - val_pos);
-
-            if (key.find("AdapterCompatibility") != NOTFOUND) {
-                gpulist->addGpu();
-                gpulist->currGpu().os = "W";
-                // 'make' will be overwritten in parsing 'PNPDeviceID'
-                // later. Set it here because we need it in paring
-                // 'InstalledDisplayDrivers' which comes before
-                // 'PNPDeviceID'.
-                gpulist->currGpu().make = val;
-            } else if (key.find("Caption") != NOTFOUND) {
-                gpulist->currGpu().model = val;
-            } else if (key.find("PNPDeviceID") != NOTFOUND) {
-                parse_windows_gpu_ids(val, gpulist);
-            }
-            else if (key.find("DriverVersion") != NOTFOUND) {
-                gpulist->currGpu().version = val;
-            } else if (key.find("InstalledDisplayDrivers") != NOTFOUND) {
-                parse_windows_gpu_dlls(line_loc, val_pos, contents, gpulist);
-            }
-        }
-        if (line_loc == contents.size()) {
-            break;
-        }
-        p = line_loc + 2;
-        line_loc = contents.find("\r\n", p);
-        if (line_loc == NOTFOUND) {
-            line_loc = contents.size();
-        }
-    }
-}
-
-void parse_gpu_info_list(const std::string& contents, GpuInfoList* gpulist) {
-#ifdef __APPLE__
-    parse_gpu_info_list_osx(contents, gpulist);
-#elif !defined(_WIN32)
-    parse_gpu_info_list_linux(contents, gpulist);
-#else
-    parse_gpu_info_list_windows(contents, gpulist);
-#endif
-}
-
 void query_blacklist_fn(bool* res) {
-    std::string gpu_info = load_gpu_info();
     GpuInfoList* gpulist = sGpuInfoList.ptr();
-    parse_gpu_info_list(gpu_info, gpulist);
+
+    getGpuInfoListNative(gpulist);
+
     *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
     sGpuInfoList->blacklist_status = *res;
+
 #ifdef _WIN32
     sGpuInfoList->Anglelist_status =
         gpuinfo_query_whitelist(gpulist, sAngleWhitelist, sAngleWhitelistSize);
@@ -645,9 +288,8 @@ public:
     GPUInfoQueryThread() { this->start(); }
     virtual intptr_t main() override {
         Looper* looper = android::base::ThreadLooper::get();
-        android::base::runParallelTask<bool>(looper, &query_blacklist_fn,
-                                             [](bool) {},
-                                             kQueryCheckIntervalMs);
+        runParallelTask<bool>(looper, &query_blacklist_fn,
+                              [](bool) {}, kQueryCheckIntervalMs);
         looper->runWithTimeoutMs(kGPUInfoQueryTimeoutMs);
         looper->forceQuit();
         return 0;
