@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "92fc4274_4fdb4519",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-07-05T17:44:48Z",
+      "side": 1,
+      "message": "why not crash it if it is used other than unit test ?",
+      "range": {
+        "startLine": 9,
+        "startChar": 3,
+        "endLine": 9,
+        "endChar": 32
+      },
+      "revId": "743385877f05520ab13f86be3190d4a45e97ecff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
