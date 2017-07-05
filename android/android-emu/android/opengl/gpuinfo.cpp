@@ -11,12 +11,10 @@
 
 #include "android/opengl/gpuinfo.h"
 
-#include "android/base/async/Looper.h"
-#include "android/base/async/ThreadLooper.h"
+#include "android/base/ArraySize.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/ParallelTask.h"
-#include "android/base/threads/Thread.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/opengl/NativeGpuInfo.h"
 
@@ -28,8 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-using android::base::Looper;
-using android::base::runParallelTask;
+using android::base::arraySize;
+using android::base::FunctorThread;
+using android::base::LazyInstance;
 using android::base::System;
 
 // Try to switch to NVIDIA on Optimus systems,
@@ -44,16 +43,17 @@ using android::base::System;
 #define FLAG_EXPORT __attribute__ ((visibility ("default")))
 #endif
 
+extern "C" {
+
 FLAG_EXPORT int NvOptimusEnablement = 0x00000001;
 FLAG_EXPORT int AmdPowerXpressRequestHighPerformance = 0x00000001;
+
+}  // extern "C"
 
 #undef FLAG_EXPORT
 
 static const System::Duration kGPUInfoQueryTimeoutMs = 5000;
 static const System::Duration kQueryCheckIntervalMs = 66;
-
-static ::android::base::LazyInstance<GpuInfoList> sGpuInfoList =
-        LAZY_INSTANCE_INIT;
 
 void GpuInfo::addDll(std::string dll_str) {
     dlls.push_back(std::move(dll_str));
@@ -182,9 +182,6 @@ static const BlacklistEntry sGpuBlacklist[] = {
          nullptr, "M"},  // NVIDIA GeForce 7300 GT (Mac)
 };
 
-static const int sBlacklistSize =
-    sizeof(sGpuBlacklist) / sizeof(BlacklistEntry);
-
 // If any blacklist entry matches any gpu, return true.
 bool gpuinfo_query_blacklist(GpuInfoList* gpulist,
                              const BlacklistEntry* list,
@@ -204,10 +201,6 @@ static const WhitelistEntry sAngleWhitelist[] = {
         {"8086", nullptr, "0102", nullptr, nullptr,
          nullptr, "W"},
 };
-
-static const int sAngleWhitelistSize =
-    sizeof(sAngleWhitelist) / sizeof(WhitelistEntry);
-
 
 static bool gpuinfo_query_whitelist(GpuInfoList *gpulist,
                              const WhitelistEntry *list,
@@ -246,61 +239,62 @@ static const BlacklistEntry sSyncBlacklist[] = {
     {"10de", nullptr, "0a2c", nullptr, nullptr, nullptr, "W"}, // Quadro NVS 5100M
 };
 
-static const int sSyncBlacklistSize =
-    sizeof(sSyncBlacklist) / sizeof(BlacklistEntry);
+namespace {
 
-void query_blacklist_fn(bool* res) {
-    GpuInfoList* gpulist = sGpuInfoList.ptr();
+// A set of global variables for GPU information - a single instance of
+// GpuInfoList and its loading thread.
+class Globals {
+    DISALLOW_COPY_AND_ASSIGN(Globals);
 
-    getGpuInfoListNative(gpulist);
-
-    *res = gpuinfo_query_blacklist(gpulist, sGpuBlacklist, sBlacklistSize);
-    sGpuInfoList->blacklist_status = *res;
-
-#ifdef _WIN32
-    sGpuInfoList->Anglelist_status =
-        gpuinfo_query_whitelist(gpulist, sAngleWhitelist, sAngleWhitelistSize);
-#else
-    sGpuInfoList->Anglelist_status = false;
-#endif
-    sGpuInfoList->SyncBlacklist_status =
-        gpuinfo_query_blacklist(gpulist, sSyncBlacklist, sSyncBlacklistSize);
-}
-
-// Separate thread for GPU info querying:
-//
-// Our goal is to account for circumstances where obtaining GPU info either
-// takes too long or ties up the host system in a special way where the system
-// ends up hanging. This is bad, since no progress will happen for emulator
-// startup, which is more critical.
-//
-// We therefore use a ParallelTask and a looper with timeout to take care of
-// this case.
-//
-// Note that we use a separate thread (rather than the main thread) because
-// later on when skin_winsys_enter_main_loop is called, it will set the looper
-// of the main thread to a custom Looper that works with Qt
-// (android::qt::createLooper()).  Otherwise, creating a looper on the main
-// thread at this point will prevent the custom looper from being used, which
-// aborts the program.
-class GPUInfoQueryThread : public android::base::Thread {
 public:
-    GPUInfoQueryThread() { this->start(); }
-    virtual intptr_t main() override {
-        Looper* looper = android::base::ThreadLooper::get();
-        runParallelTask<bool>(looper, &query_blacklist_fn,
-                              [](bool) {}, kQueryCheckIntervalMs);
-        looper->runWithTimeoutMs(kGPUInfoQueryTimeoutMs);
-        looper->forceQuit();
-        return 0;
+    Globals()
+        : mAsyncLoadThread([this]() {
+              getGpuInfoListNative(&mGpuInfoList);
+
+              mGpuInfoList.blacklist_status = gpuinfo_query_blacklist(
+                      &mGpuInfoList, sGpuBlacklist, arraySize(sGpuBlacklist));
+#ifdef _WIN32
+              mGpuInfoList.Anglelist_status =
+                      gpuinfo_query_whitelist(&mGpuInfoList, sAngleWhitelist,
+                                              arraySize(sAngleWhitelist));
+#else
+              mGpuInfoList.Anglelist_status = false;
+#endif
+              mGpuInfoList.SyncBlacklist_status = gpuinfo_query_blacklist(
+                      &mGpuInfoList, sSyncBlacklist, arraySize(sSyncBlacklist));
+
+          }) {
+        mAsyncLoadThread.start();
     }
+
+    const GpuInfoList& gpuInfoList() {
+        mAsyncLoadThread.wait();
+        return mGpuInfoList;
+    }
+
+private:
+    GpuInfoList mGpuInfoList;
+
+    // Separate thread for GPU info querying:
+    //
+    // GPU information querying may take a while, but the implementation is
+    // expected to abort if it's over reasonable limits. That's why we use a
+    // separate thread that's started as soon as possible at startup and then
+    // wait for it synchronoulsy before using the information.
+    //
+    FunctorThread mAsyncLoadThread;
 };
 
-static android::base::LazyInstance<GPUInfoQueryThread> sGPUInfoQueryThread =
-        LAZY_INSTANCE_INIT;
+}  // namespace
+
+static LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 
 void async_query_host_gpu_start() {
-    sGPUInfoQueryThread.get();
+    sGlobals.get();
+}
+
+const GpuInfoList& globalGpuInfoList() {
+    return sGlobals->gpuInfoList();
 }
 
 bool async_query_host_gpu_blacklisted() {
@@ -316,10 +310,8 @@ bool async_query_host_gpu_SyncBlacklisted() {
 }
 
 void setGpuBlacklistStatus(bool switchedToSoftware) {
-    sGpuInfoList->blacklist_status = switchedToSoftware;
-}
-
-const GpuInfoList& globalGpuInfoList() {
-    sGPUInfoQueryThread->wait();
-    return *sGpuInfoList;
+    // We know what we're doing here: GPU list doesn't change after it's fully
+    // loaded.
+    const_cast<GpuInfoList&>(globalGpuInfoList()).blacklist_status =
+            switchedToSoftware;
 }
