@@ -19,29 +19,57 @@ namespace android {
 namespace base {
 namespace internal {
 
-bool LazyInstanceState::inInitState() const {
-    return mState.load(std::memory_order_acquire) == State::Init;
+bool LazyInstanceState::inNoObjectState() const {
+    const auto state = mState.load(std::memory_order_acquire);
+    return state == State::Init || state == State::Destroying;
+}
+
+template <LazyInstanceState::State start,
+          LazyInstanceState::State intermediate,
+          LazyInstanceState::State end>
+static bool checkAndTranformState(
+        std::atomic<LazyInstanceState::State>* state) {
+    for (;;) {
+        auto current = start;
+        if (state->compare_exchange_strong(current, intermediate,
+                                           std::memory_order_acquire,
+                                           std::memory_order_acquire)) {
+            // The object was in the expected |start| state, so we're done here
+            // and return that the action needs to be done.
+            return true;
+        }
+
+        while (current != end && current != start) {
+            Thread::yield();
+            current = state->load(std::memory_order_acquire);
+        }
+
+        // |end| -> object is in final state, nothing to do.
+        if (current == end) {
+            return false;
+        }
+
+        // |start| -> some other thread has undone all progress; we need to
+        // retry the whole thing again.
+    }
 }
 
 bool LazyInstanceState::needConstruction() {
-    auto state = State::Init;
-    if (mState.compare_exchange_strong(state,
-                                       State::Constructing,
-                                       std::memory_order_acq_rel,
-                                       std::memory_order_relaxed)) {
-        return true;
-    }
-
-    while (state != State::Done) {
-        Thread::yield();
-        state = mState.load(std::memory_order_acquire);
-    }
-
-    return false;
+    return checkAndTranformState<State::Init, State::Constructing, State::Done>(
+            &mState);
 }
 
 void LazyInstanceState::doneConstructing() {
     mState.store(State::Done, std::memory_order_release);
+}
+
+bool LazyInstanceState::needDestruction() {
+    return checkAndTranformState<State::Done, State::Destroying, State::Init>(
+            &mState);
+}
+
+void LazyInstanceState::doneDestroying() {
+    mState.store(State::Init, std::memory_order_release);
 }
 
 }  // namespace internal
