@@ -81,6 +81,7 @@ int guest_data_partition_mounted = 0;
 bool emulator_has_network_option = false;
 
 #define ONE_MB (1024 * 1024)
+#define TWO_GB (uint64_t)(2LL * 1024LL * 1024LL * 1024LL)
 
 unsigned convertBytesToMB( uint64_t  size )
 {
@@ -956,6 +957,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             // If the -partition-size option is given that should override
             // whatever setting was in the config file.
             defaultBytes = defaultPartitionSize;
+        }
+
+        // studio avd manager does not allow user to change
+        // partition size, set a lower limit to 2GB
+        if (feature_is_enabled(kFeature_PlayStoreImage)) {
+            if (defaultBytes < TWO_GB) {
+                defaultBytes = TWO_GB;
+            }
         }
 
         uint64_t     dataBytes;
