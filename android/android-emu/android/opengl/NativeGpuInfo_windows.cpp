@@ -28,6 +28,7 @@
 #include "android/utils/path.h"
 
 #include <windows.h>
+#include <d3d9.h>
 
 #include <ctype.h>
 
@@ -267,8 +268,47 @@ void parse_gpu_info_list_windows(const std::string& contents,
     }
 }
 
+static bool queryGpuInfoD3D(GpuInfoList* gpus) {
+    LPDIRECT3D9 pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+    UINT numAdapters = pD3D->GetAdapterCount();
+
+    char vendoridBuf[16] = {};
+    char deviceidBuf[16] = {};
+
+    // MAX_DEVICE_IDENTIFIER_STRING can be pretty big,
+    // don't allocate on stack.
+    std::vector<char> descriptionBuf(MAX_DEVICE_IDENTIFIER_STRING + 1, '\0');
+
+    if (numAdapters == 0) return false;
+
+    // The adapter that is equal to D3DADAPTER_DEFAULT is the primary display adapter.
+    // D3DADAPTER_DEFAULT is currently defined to be 0, btw---but this is more future proof
+    for (UINT i = 0; i < numAdapters; i++) {
+        if (i == D3DADAPTER_DEFAULT) {
+            gpus->addGpu();
+            GpuInfo& gpu = gpus->currGpu();
+            gpu.os = "W";
+
+            D3DADAPTER_IDENTIFIER9 id;
+            pD3D->GetAdapterIdentifier(0, 0, &id);
+            snprintf(vendoridBuf, sizeof(vendoridBuf), "%04x", (unsigned int)id.VendorId);
+            snprintf(deviceidBuf, sizeof(deviceidBuf), "%04x", (unsigned int)id.DeviceId);
+            snprintf(&descriptionBuf[0], MAX_DEVICE_IDENTIFIER_STRING, "%s", id.Description);
+            gpu.make = vendoridBuf;
+            gpu.device_id = deviceidBuf;
+            gpu.model = &descriptionBuf[0];
+            return true;
+        }
+    }
+
+    return false;
+}
+
 void getGpuInfoListNative(GpuInfoList* gpus) {
-    DISPLAY_DEVICEW device = {sizeof(device)};
+    if (queryGpuInfoD3D(gpus)) return;
+
+    DISPLAY_DEVICEW device = { sizeof(device) };
+
     for (int i = 0; EnumDisplayDevicesW(nullptr, i, &device, 0); ++i) {
         gpus->addGpu();
         GpuInfo& gpu = gpus->currGpu();
