@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "30bd4e03_50969685",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-05T21:39:20Z",
+      "side": 0,
+      "message": "why are you removing this part? it\u0027s much easier to copy them over instead of not forgetting about two versions in each place",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 193,
+        "endChar": 43
+      },
+      "revId": "65cd36be7646bcdc1aaf1ef1420f1949d2ebbdaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
