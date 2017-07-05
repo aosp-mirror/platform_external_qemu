@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "4a2d1085_d54fce02",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-05T22:56:24Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "a5d56a6e_801023b9",
+      "range": {
+        "startLine": 42,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 42
+      },
+      "revId": "3144a275a90ad3246a380433cc3825ef73b7cb01",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5bb6fd03_09ac3553",
         "filename": "android/build/Makefile.top.mk",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6c3c6eb8_52d5b3ab",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-05T22:56:24Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "5bb6fd03_09ac3553",
+      "range": {
+        "startLine": 70,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 8
+      },
+      "revId": "3144a275a90ad3246a380433cc3825ef73b7cb01",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12576e6f_be288bd7",
         "filename": "android/configure.sh",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2017-07-05T21:39:20Z",
       "side": 1,
       "message": "instead of making it default, could you please a configure option for clang instead? \"--clang\" is a good one\nLater we could make it default with --no-clang to keep for gcc. But for now it would be better to be able to quickly build both versions.",
+      "range": {
+        "startLine": 295,
+        "startChar": 0,
+        "endLine": 295,
+        "endChar": 27
+      },
+      "revId": "3144a275a90ad3246a380433cc3825ef73b7cb01",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28680c5a_3f5fd879",
+        "filename": "android/configure.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-05T22:56:24Z",
+      "side": 1,
+      "message": "will add",
+      "parentUuid": "12576e6f_be288bd7",
       "range": {
         "startLine": 295,
         "startChar": 0,

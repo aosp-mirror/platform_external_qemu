@@ -22,6 +22,30 @@
       "revId": "65cd36be7646bcdc1aaf1ef1420f1949d2ebbdaf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e6a83aee_f603b161",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-05T22:56:24Z",
+      "side": 0,
+      "message": "Cross compilation will fail as mingw doesn\u0027t use clang. Certain flags are clang/gcc only.",
+      "parentUuid": "30bd4e03_50969685",
+      "range": {
+        "startLine": 192,
+        "startChar": 0,
+        "endLine": 193,
+        "endChar": 43
+      },
+      "revId": "65cd36be7646bcdc1aaf1ef1420f1949d2ebbdaf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
