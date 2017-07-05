@@ -369,6 +369,13 @@ static void enter_qemu_main_loop(int argc, char **argv) {
     sigemptyset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
+    // stick a version here for qemu-system binary
+#if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
+    D("Android qemu version %s (CL:%s)\n", EMULATOR_VERSION_STRING
+      " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
+      EMULATOR_CL_SHA1);
+#endif
+
 
     D("Starting QEMU main loop");
     run_qemu_main(argc, (const char**)argv);
