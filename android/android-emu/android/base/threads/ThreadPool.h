@@ -56,11 +56,12 @@
 namespace android {
 namespace base {
 
-template <class Item>
+template <class ItemT>
 class ThreadPool {
     DISALLOW_COPY_AND_ASSIGN(ThreadPool);
 
 public:
+    using Item = ItemT;
     using Worker = WorkerThread<Optional<Item>>;
     using Processor = std::function<void(Item&&)>;
 
