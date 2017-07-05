@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "55b1c973_b83f3b4c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-07-05T17:40:57Z",
+      "side": 1,
+      "message": "Better this way?:\n\nD(\"Android qemu version \" EMULATOR_VERSION_STRING\n  \" (build id \" STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) \")\"\n  \" (CL:\" EMULATOR_CL_SHA1 \")\\n\");",
+      "range": {
+        "startLine": 373,
+        "startChar": 42,
+        "endLine": 376,
+        "endChar": 24
+      },
+      "revId": "77bb514109a47fdc5e80cef050d097f1194758e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
