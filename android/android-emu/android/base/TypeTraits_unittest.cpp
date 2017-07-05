@@ -49,6 +49,29 @@ TEST(TypeTraits, IsCallable) {
 
     static_assert(!is_callable_as<int(int), int>::value,
                   "bad required signature");
+
+
+    static_assert(is_callable_with_args<void(), void()>::value, "simple function");
+    static_assert(is_callable_with_args<void(&)(), void()>::value, "function reference");
+    static_assert(is_callable_with_args<void(*)(), void()>::value, "function pointer");
+    static_assert(is_callable_with_args<int(C&, C*), int(C&, C*)>::value,
+                  "function with arguments and return type");
+    static_assert(is_callable_with_args<decltype(lambda), C*(bool)>::value, "lambda");
+    static_assert(is_callable_with_args<std::function<bool(int)>, bool(int)>::value,
+                  "std::function");
+
+    static_assert(!is_callable_with_args<int, void()>::value, "int should not be callable");
+    static_assert(!is_callable_with_args<C, void()>::value, "incomplete type");
+    static_assert(!is_callable_with_args<void(), void(int)>::value, "different arguments");
+    static_assert(is_callable_with_args<int(), void()>::value, "different return types are ignored");
+    static_assert(is_callable_with_args<int(), short()>::value, "slightly different return types are ignored");
+    static_assert(!is_callable_with_args<int(int), int(int, int)>::value,
+                  "more arguments");
+    static_assert(!is_callable_with_args<int(int, int), int(int)>::value,
+                  "less arguments");
+
+    static_assert(!is_callable_with_args<int(int), int>::value,
+                  "bad required signature");
 }
 
 TEST(TypeTraits, IsTemplateInstantiation) {
