@@ -425,7 +425,7 @@
      <property name="editable">
       <bool>false</bool>
      </property>
-     <property name="currentText" stdset="0">
+     <property name="currentText">
       <string>Autodetect based on host (default)</string>
      </property>
      <property name="report_metrics" stdset="0">
@@ -477,20 +477,25 @@
      <property name="editable">
       <bool>false</bool>
      </property>
-     <property name="currentText" stdset="0">
-      <string>OpenGL ES 2.0 (default)</string>
+     <property name="currentText">
+      <string>Autoselect</string>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
      </property>
      <item>
       <property name="text">
-       <string>OpenGL ES 2.0 (default)</string>
+       <string>Autoselect</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Renderer maximum (up to OpenGL ES 3.1)</string>
+       <string>Host maximum (up to OpenGL ES 3.1)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Compatibility (OpenGL ES 1.1/2.0)</string>
       </property>
      </item>
     </widget>
