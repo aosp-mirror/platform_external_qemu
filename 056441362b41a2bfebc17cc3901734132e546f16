@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f0a981d1_dadf636c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T21:35:24Z",
+      "side": 1,
+      "message": ":D",
+      "parentUuid": "74938c09_f03b7823",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 18
+      },
+      "revId": "056441362b41a2bfebc17cc3901734132e546f16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "994841bb_3ea7aa59",
         "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "f3ae7b7a_2260328f",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T21:35:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "994841bb_3ea7aa59",
+      "range": {
+        "startLine": 303,
+        "startChar": 6,
+        "endLine": 305,
+        "endChar": 5
+      },
+      "revId": "056441362b41a2bfebc17cc3901734132e546f16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "08942966_8d9e74d5",
         "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2017-07-06T19:02:49Z",
       "side": 1,
       "message": "this is exactly the same as it was before, |cb| is the first member\n+ sizeof(variable) is safer than sizeof(type) - one could change the type and forget to update sizeof()",
+      "range": {
+        "startLine": 313,
+        "startChar": 0,
+        "endLine": 314,
+        "endChar": 40
+      },
+      "revId": "056441362b41a2bfebc17cc3901734132e546f16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "469ea514_d6d0e20c",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T21:35:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08942966_8d9e74d5",
       "range": {
         "startLine": 313,
         "startChar": 0,
