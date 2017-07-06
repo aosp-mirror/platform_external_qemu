@@ -14,6 +14,8 @@
 
 #include "android/opengl/NativeGpuInfo.h"
 
+#include "android/opengl/macTouchOpenGL.h"
+
 #include <CoreGraphics/CGDirectDisplay.h>
 #include <IOKit/graphics/IOGraphicsLib.h>
 #include <IOKit/IOTypes.h>
@@ -85,6 +87,12 @@ static auto GetGPUInfoMac() {
 }
 
 void getGpuInfoListNative(GpuInfoList* out) {
+    // This call initializes a pixel format,
+    // which should update the IOKit stuff to the
+    // correct GPU that will actually be used
+    // while the emulator is running.
+    macTouchOpenGL();
+
     auto gpulist = GetGPUInfoMac();
 
     char vendoridbuf[64] = {};

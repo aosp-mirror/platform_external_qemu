@@ -434,7 +434,8 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
-        android/camera/camera-capture-mac.m
+        android/camera/camera-capture-mac.m \
+        android/opengl/macTouchOpenGL.m
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -462,12 +463,13 @@ ifeq ($(BUILD_TARGET_OS),linux)
     ANDROID_EMU_BASE_LDLIBS += -lGL
 endif
 ifeq ($(BUILD_TARGET_OS),windows)
-    ANDROID_EMU_BASE_LDLIBS += -lpsapi
+    ANDROID_EMU_BASE_LDLIBS += -lpsapi -ld3d9
 endif
 ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,Accelerate
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,IOKit
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,OpenGL
 endif
 
 ANDROID_EMU_STATIC_LIBRARIES := \
