@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "0c8da503_b928ea6e",
+        "filename": "android/android-emu/android/base/memory/LazyInstance.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T18:54:57Z",
+      "side": 1,
+      "message": "Yeah, and *(int*)0 \u003d 1 can crash :)",
+      "parentUuid": "421b5d59_db73107b",
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df120513_4726e92d",
         "filename": "android/android-emu/android/base/memory/OnDemand.h",
         "patchSetId": 3
@@ -89,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "93e34890_36e8cdc1",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T18:54:57Z",
+      "side": 1,
+      "message": "Erwin is right, ::type is defined to be a Seq\u003c\u003e instance that contains integers from 0...S-1 in it. And typename is just a stupid C++ requirement to explicitly tell the compiler that ::type is a type, not some constant or function name.",
+      "parentUuid": "6d473fcf_6e3f2976",
+      "range": {
+        "startLine": 131,
+        "startChar": 17,
+        "endLine": 131,
+        "endChar": 46
+      },
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fe66489f_cf8c0c55",
         "filename": "android/android-emu/android/base/memory/OnDemand.h",
         "patchSetId": 3
@@ -100,6 +142,24 @@
       "writtenOn": "2017-07-06T17:20:11Z",
       "side": 1,
       "message": "Callers are still responsible for thread safety right? (Someone could just be destroying other).",
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dcdf9c47_26ee4765",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T18:54:57Z",
+      "side": 1,
+      "message": "absolutely. This class makes sure the creation and destruction are thread-safe (as it\u0027s pretty hard to efficiently synchronize from the outside, but other than that is on the user\u0027s side.",
+      "parentUuid": "fe66489f_cf8c0c55",
       "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -129,6 +189,30 @@
     },
     {
       "key": {
+        "uuid": "21d4b517_263b2276",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T18:54:57Z",
+      "side": 1,
+      "message": "Well, I thought \"Member\" prefix suggests it",
+      "parentUuid": "57b5fe74_3598d7ce",
+      "range": {
+        "startLine": 223,
+        "startChar": 0,
+        "endLine": 224,
+        "endChar": 51
+      },
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a515f8d_1b0dc78b",
         "filename": "android/android-emu/android/base/memory/OnDemand.h",
         "patchSetId": 3
@@ -140,6 +224,24 @@
       "writtenOn": "2017-07-06T17:20:11Z",
       "side": 1,
       "message": "I don\u0027t understand how the lambda delayed invocation works :-(",
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bc018c1_aa940d81",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T18:54:57Z",
+      "side": 1,
+      "message": "the lambda invocation is pretty straightforward:\n\n    void constructImpl(internal::Seq\u003cS...\u003e) const {\n\u003e\u003e\u003e\u003e   auto args \u003d mCtorArgsGetter(); \u003c\u003c\u003c\u003c\u003c\u003c\n\nWe store the lambda into |mCtorArgsGetter| member. MemberOnDemandT\u003c\u003e alias explicitly forces |mCtorArgsGetter| to be not a lambda but std::function\u003c\u003e that stores that lambda  inside - which is less efficient but the type is known at declaration time.\nAt the time of on-demand construction this class calls stored lambda to get constructor parameters, then unpacks them to call T\u0027s constructor. And this is what is complicated and explained in the \u0027template magic\u0027 comment",
+      "parentUuid": "7a515f8d_1b0dc78b",
       "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
