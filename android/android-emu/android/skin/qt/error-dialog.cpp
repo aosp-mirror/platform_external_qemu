@@ -11,28 +11,36 @@
 
 #include "android/skin/qt/error-dialog.h"
 
+#include "android/base/memory/OnDemand.h"
+
 #include <QMessageBox>
 
-static QMessageBox* sErrorDialog = nullptr;
+using Dialog = android::base::MemberOnDemandT<QMessageBox,
+                                              QMessageBox::Icon,
+                                              QString,
+                                              QString,
+                                              QMessageBox::StandardButton,
+                                              QWidget*>;
 
-void initErrorDialog(QWidget *parent)
-{
+static Dialog* sErrorDialog = nullptr;
+
+void initErrorDialog(QWidget* parent) {
     // This dialog will be deleted when the parent is deleted, which occurs
     // when the emulator closes.
-
     if (!sErrorDialog) {
-        sErrorDialog = new QMessageBox(QMessageBox::Warning, "", "",
-                                       QMessageBox::Ok, parent);
-        sErrorDialog->setModal(true);
+        sErrorDialog = new Dialog([parent] {
+            return std::make_tuple(QMessageBox::Warning, "", "",
+                                   QMessageBox::Ok, parent);
+        });
     }
 }
 
-void showErrorDialog(const QString& message, const QString& title)
-{
+void showErrorDialog(const QString& message, const QString& title) {
     if (sErrorDialog) {
-        sErrorDialog->setText(message);
-        sErrorDialog->setWindowTitle(title);
-        sErrorDialog->exec();
+        sErrorDialog->get().setModal(true);
+        sErrorDialog->get().setText(message);
+        sErrorDialog->get().setWindowTitle(title);
+        sErrorDialog->get().exec();
     }
 }
 
