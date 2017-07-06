@@ -1000,6 +1000,14 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = kTarget.qemuExtraArgs[idx];
     }
 
+    const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
+    if (filelock_create(coreHwIniPath) == NULL) {
+        // The AVD is already in use
+        derror("There's another emulator instance running with "
+               "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
+        return 1;
+    }
+
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
     // Setup GPU acceleration. This needs to go along with user interface
@@ -1128,17 +1136,9 @@ extern "C" int main(int argc, char **argv) {
      * launch the core with the -android-hw <file> option.
      */
     {
-        const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
         const auto hwIni = android::base::makeCustomScopedPtr(
                          iniFile_newEmpty(NULL), iniFile_free);
         androidHwConfig_write(hw, hwIni.get());
-
-        if (filelock_create(coreHwIniPath) == NULL) {
-            // The AVD is already in use
-            derror("There's another emulator instance running with "
-                   "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
-            return 1;
-        }
 
         /* While saving HW config, ignore valueless entries. This will not break
          * anything, but will significantly simplify comparing the current HW
