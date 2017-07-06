@@ -60,15 +60,6 @@ struct is_callable_as : std::false_type {};
 
 // This specialization is SFINAE-d out if template arguments can't be combined
 // into a call expression F(), or if the result of that call is not |R|
-template <class F, class R>
-struct is_callable_as<
-        F,
-        R(),
-        typename std::enable_if<std::is_same<
-                typename details::dummy<decltype(std::declval<F>()())>::type,
-                R>::value>::type> : std::true_type {};
-
-// One more specialization, for non empty argument list
 template <class F, class R, class... Args>
 struct is_callable_as<
         F,
@@ -77,6 +68,27 @@ struct is_callable_as<
                 std::is_same<typename details::dummy<decltype(std::declval<F>()(
                                      std::declval<Args>()...))>::type,
                              R>::value>::type> : std::true_type {};
+
+//
+// A similar predicate to only check arguments of the function call and ignore
+// the specified return type
+//
+//  is_callable_as<strcmp, int(const char*, const char*)>::value == true
+//  is_callable_as<strcmp, void(const char*, const char*)>::value == false
+//  is_callable_with_args<strcmp, void(const char*, const char*)>::value == true
+//
+template <class F, class Signature, class X = void>
+struct is_callable_with_args : std::false_type {};
+
+template <class F, class R, class... Args>
+struct is_callable_with_args<
+        F,
+        R(Args...),
+        typename std::enable_if<
+                !std::is_same<typename details::dummy<decltype(std::declval<F>()(
+                                     std::declval<Args>()...))>::type,
+                              F>::value>::type> : std::true_type {};
+
 // -----------------------------------------------------------------------------
 // Check if a type |T| is any instantiation of a template |U|. Examples:
 //
