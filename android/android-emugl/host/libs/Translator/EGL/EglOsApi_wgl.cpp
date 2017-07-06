@@ -1039,7 +1039,9 @@ public:
         return &mGlLib;
     }
 
-    virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
+    virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* cfg,
+                                                EGLNativeWindowType wnd) {
+        (void)cfg;
         return new WinSurface(wnd);
     }
 

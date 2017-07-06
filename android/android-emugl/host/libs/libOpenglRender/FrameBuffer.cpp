@@ -223,6 +223,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
         return false;
     }
 
+    if (s_egl.eglUseOsEglApi)
+        s_egl.eglUseOsEglApi(egl2egl);
     //
     // Initialize backend EGL display
     //

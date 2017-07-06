@@ -449,7 +449,8 @@ public:
         return &mGlLib;
     }
 
-    virtual EglOS::Surface* createWindowSurface(EGLNativeWindowType wnd) {
+    virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* pf,
+                                                EGLNativeWindowType wnd) {
         return new GlxSurface(wnd, GlxSurface::WINDOW);
     }
 private:
@@ -463,4 +464,9 @@ emugl::LazyInstance<GlxEngine> sHostEngine = LAZY_INSTANCE_INIT;
 // static
 EglOS::Engine* EglOS::Engine::getHostInstance() {
     return sHostEngine.ptr();
+}
+
+EglOS::Engine* EglOS::getEgl2EglHostInstance() {
+    fprintf(stderr, "ERROR: EGL to EGL is not supported on linux.\n");
+    return nullptr;
 }
