@@ -213,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "65e758c4_a92c5675",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T18:57:52Z",
+      "side": 1,
+      "message": "Oh I mean in the opposite way; the functionality of MemberOnDemandT is much more general than what \"Member\" suggests (it\u0027s just making the constructor arguments lazily evaluated) and could be named that way as well, so it\u0027d be clearer what\u0027s going on in code.",
+      "parentUuid": "21d4b517_263b2276",
+      "range": {
+        "startLine": 223,
+        "startChar": 0,
+        "endLine": 224,
+        "endChar": 51
+      },
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a515f8d_1b0dc78b",
         "filename": "android/android-emu/android/base/memory/OnDemand.h",
         "patchSetId": 3
