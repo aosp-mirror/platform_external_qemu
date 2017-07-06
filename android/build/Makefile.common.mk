@@ -84,11 +84,6 @@ else
     EMUGL_USER_CFLAGS :=
 endif
 
-ifdef BUILD_SNAPSHOT_PROFILE
-    EMULATOR_COMMON_CFLAGS += -DSNAPSHOT_PROFILE=$(BUILD_SNAPSHOT_PROFILE)
-    EMUGL_USER_CFLAGS += -DSNAPSHOT_PROFILE=$(BUILD_SNAPSHOT_PROFILE)
-endif
-
 ##############################################################################
 ##############################################################################
 ###

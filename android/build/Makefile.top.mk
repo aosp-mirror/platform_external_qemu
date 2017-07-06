@@ -60,6 +60,10 @@ BUILD_OPT_CFLAGS += -flto
 BUILD_OPT_LDFLAGS += -flto
 endif
 
+ifdef BUILD_SNAPSHOT_PROFILE
+    BUILD_TARGET_CFLAGS += -DSNAPSHOT_PROFILE=$(BUILD_SNAPSHOT_PROFILE)
+endif
+
 BUILD_TARGET_CFLAGS += $(BUILD_OPT_CFLAGS)
 
 # Generate position-independent binaries. Don't add -fPIC when targetting
