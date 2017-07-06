@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f2dd00f_0dde0dd4",
+        "filename": "android/android-emu/android/base/TypeTraits.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T13:58:25Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 88,
+        "startChar": 16,
+        "endLine": 88,
+        "endChar": 17
+      },
+      "revId": "81880ae38458196501c052318aedaf034f585bae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
