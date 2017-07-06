@@ -44,7 +44,8 @@ public:
 
     virtual RendererPtr initRenderer(int width,
                                      int height,
-                                     bool useSubWindow) override;
+                                     bool useSubWindow,
+                                     bool egl2egl) override;
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RenderLibImpl);
 

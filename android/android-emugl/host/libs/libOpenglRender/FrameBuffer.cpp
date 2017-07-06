@@ -207,7 +207,8 @@ void FrameBuffer::finalize() {
     }
 }
 
-bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
+bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
+        bool egl2egl) {
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
