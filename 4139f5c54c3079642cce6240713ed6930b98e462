@@ -22,6 +22,30 @@
       "revId": "4139f5c54c3079642cce6240713ed6930b98e462",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da0896c6_35ffe5df",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2757,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-06T23:01:04Z",
+      "side": 1,
+      "message": "Yes, actually let\u0027s leave it to a next CL where we will fix up its performance.",
+      "parentUuid": "94f77f8d_979a7eb9",
+      "range": {
+        "startLine": 2757,
+        "startChar": 0,
+        "endLine": 2757,
+        "endChar": 28
+      },
+      "revId": "4139f5c54c3079642cce6240713ed6930b98e462",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
