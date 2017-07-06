@@ -22,6 +22,54 @@
       "revId": "64f6b239a8cbdd7d7f57809a2c2cc2f3f49a1c8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2aa63b34_a6a3ace9",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T16:14:49Z",
+      "side": 1,
+      "message": "yes, extended window\u0027s constructor checks if the agent is already set and grabs it in that case itself",
+      "parentUuid": "358c74a9_4d204c8d",
+      "range": {
+        "startLine": 470,
+        "startChar": 0,
+        "endLine": 472,
+        "endChar": 5
+      },
+      "revId": "64f6b239a8cbdd7d7f57809a2c2cc2f3f49a1c8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc3a3704_b32fc9b8",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T16:14:49Z",
+      "side": 1,
+      "message": "yes, extended window\u0027s constructor checks if there\u0027s an agent present and grabs it itself in that case",
+      "parentUuid": "358c74a9_4d204c8d",
+      "range": {
+        "startLine": 470,
+        "startChar": 0,
+        "endLine": 472,
+        "endChar": 5
+      },
+      "revId": "64f6b239a8cbdd7d7f57809a2c2cc2f3f49a1c8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
