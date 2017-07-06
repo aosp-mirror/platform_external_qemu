@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "421b5d59_db73107b",
+        "filename": "android/android-emu/android/base/memory/LazyInstance.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-06T17:20:11Z",
+      "side": 1,
+      "message": "So the nonsensical: checkAndTransform\u003cState::Constructing, State::Done, State::Destroying\u003e can deadlock.",
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df120513_4726e92d",
         "filename": "android/android-emu/android/base/memory/OnDemand.h",
         "patchSetId": 3
@@ -48,6 +65,47 @@
     },
     {
       "key": {
+        "uuid": "6d473fcf_6e3f2976",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-06T17:20:11Z",
+      "side": 1,
+      "message": "Not sure either, but I think something like this happens:\nMakeSeq\u003c3\u003e \u003d\nMakeSeq\u003c2, 2\u003e \u003d\nMakeSeq\u003c1, 1, 2\u003e \u003d\nMakeSeq\u003c0, 0, 1, 2\u003e \u003d\u003d\u003e\nMakeSeq\u003c0, 0, 1, 2\u003e::type \u003d Seq\u003c0,1,2\u003e",
+      "parentUuid": "f949e696_19020e93",
+      "range": {
+        "startLine": 131,
+        "startChar": 17,
+        "endLine": 131,
+        "endChar": 46
+      },
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe66489f_cf8c0c55",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-06T17:20:11Z",
+      "side": 1,
+      "message": "Callers are still responsible for thread safety right? (Someone could just be destroying other).",
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "57b5fe74_3598d7ce",
         "filename": "android/android-emu/android/base/memory/OnDemand.h",
         "patchSetId": 3
@@ -65,6 +123,23 @@
         "endLine": 224,
         "endChar": 51
       },
+      "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a515f8d_1b0dc78b",
+        "filename": "android/android-emu/android/base/memory/OnDemand.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-06T17:20:11Z",
+      "side": 1,
+      "message": "I don\u0027t understand how the lambda delayed invocation works :-(",
       "revId": "542e8db5362d893acb8683e8572c9731ebf3c949",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
