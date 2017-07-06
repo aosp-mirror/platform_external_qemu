@@ -19,6 +19,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "GLcommon/GLutils.h"
 
 #include <GLcommon/ShareGroup.h>
 #include <GLES3/gl31.h>
@@ -672,7 +673,11 @@ void ProgramData::setLinkStatus(GLint status) {
         for (auto& s : attachedShaders) {
             if (s.localName) {
                 assert(s.shader);
-                s.linkedSource = s.shader->getCompiledSrc();
+                if (isGles2Gles()) {
+                    s.linkedSource = s.shader->getOriginalSrc();
+                } else {
+                    s.linkedSource = s.shader->getCompiledSrc();
+                }
             }
         }
         for (const auto &attribLoc : boundAttribLocs) {

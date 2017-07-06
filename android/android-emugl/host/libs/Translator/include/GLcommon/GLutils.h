@@ -20,6 +20,11 @@
 #include <inttypes.h>
 #include <stdio.h>
 
+// setGles2Gles(true) when mounting GLES translator on top of another
+// GLES library;
+void setGles2Gles(bool isGles2gles);
+bool isGles2Gles();
+
 typedef enum {
     GLES_1_1 = 1,
     GLES_2_0 = 2,
