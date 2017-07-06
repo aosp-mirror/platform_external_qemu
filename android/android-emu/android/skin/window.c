@@ -1835,8 +1835,7 @@ skin_window_redraw( SkinWindow*  window, SkinRect*  rect )
             ball_state_redraw( &window->ball, rect, window->surface );
 
         skin_surface_update(window->surface, rect);
-        skin_winsys_run_ui_update((SkinGenericFunction)skin_window_redraw_opengles,
-                                  window, false);
+        skin_window_redraw_opengles(window);
     }
 }
 

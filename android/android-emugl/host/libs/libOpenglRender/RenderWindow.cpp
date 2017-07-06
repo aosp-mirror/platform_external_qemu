@@ -146,7 +146,7 @@ struct RenderWindowMessage {
 
             case CMD_SETUP_SUBWINDOW:
                 D("CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d dpr=%f rotation=%f\n",
-                    (void*)msg.subwindow.parent,
+                    (void*)(intptr_t)msg.subwindow.parent,
                     msg.subwindow.wx,
                     msg.subwindow.wy,
                     msg.subwindow.ww,
@@ -315,11 +315,23 @@ private:
 RenderWindow::RenderWindow(int width,
                            int height,
                            bool use_thread,
-                           bool use_sub_window) {
+                           bool use_sub_window)
+    : mRepostThread([this] {
+          while (auto cmd = mRepostCommands.receive()) {
+              if (*cmd == RepostCommand::Sync) {
+                  continue;
+              } else if (*cmd == RepostCommand::Repost) {
+                  RenderWindowMessage msg = {CMD_REPAINT};
+                  (void)msg.process();
+              }
+          }
+      }) {
     if (use_thread) {
         mChannel = new RenderWindowChannel();
         mThread = new RenderWindowThread(mChannel);
         mThread->start();
+    } else {
+        mRepostThread.start();
     }
 
     RenderWindowMessage msg = {};
@@ -333,15 +345,18 @@ RenderWindow::RenderWindow(int width,
 RenderWindow::~RenderWindow() {
     D("Entering\n");
     removeSubWindow();
+    mRepostCommands.stop();
     D("Sending CMD_FINALIZE\n");
     RenderWindowMessage msg = {};
     msg.cmd = CMD_FINALIZE;
     (void) processMessage(msg);
 
-    if (mThread) {
+    if (useThread()) {
         mThread->wait(NULL);
         delete mThread;
         delete mChannel;
+    } else {
+        mRepostThread.wait();
     }
 }
 
@@ -396,6 +411,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
     msg.subwindow.rotation = zRot;
 
     mHasSubWindow = processMessage(msg);
+
     D("Exiting mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
     return mHasSubWindow;
 }
@@ -406,6 +422,10 @@ bool RenderWindow::removeSubWindow() {
         return false;
     }
     mHasSubWindow = false;
+    if (!useThread()) {
+        mRepostCommands.send(RepostCommand::Sync);
+        mRepostCommands.waitForEmpty();
+    }
 
     RenderWindowMessage msg = {};
     msg.cmd = CMD_REMOVE_SUBWINDOW;
@@ -442,8 +462,11 @@ void RenderWindow::repaint() {
 }
 
 bool RenderWindow::processMessage(const RenderWindowMessage& msg) {
-    if (mChannel) {
+    if (useThread()) {
         return mChannel->sendMessageAndGetResult(msg);
+    } else if (msg.cmd == CMD_REPAINT) {
+        mRepostCommands.send(RepostCommand::Repost);
+        return true;
     } else {
         return msg.process();
     }

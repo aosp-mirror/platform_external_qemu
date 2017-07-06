@@ -17,6 +17,8 @@
 
 #include "OpenglRender/render_api.h"
 
+#include "android/base/synchronization/MessageChannel.h"
+#include "android/base/threads/FunctorThread.h"
 #include "emugl/common/thread.h"
 
 class RenderWindowChannel;
@@ -123,11 +125,19 @@ public:
 
 private:
     bool processMessage(const RenderWindowMessage& msg);
+    bool useThread() const { return mThread != nullptr; }
 
     bool mValid = false;
     bool mHasSubWindow = false;
     emugl::Thread* mThread = nullptr;
     RenderWindowChannel* mChannel = nullptr;
+
+    // A worker thread to run repost() commands asynchronously.
+    enum class RepostCommand : char {
+        Repost, Sync
+    };
+    android::base::MessageChannel<RepostCommand, 10> mRepostCommands;
+    android::base::FunctorThread mRepostThread;
 };
 
 #endif  // ANDROID_EMUGL_LIBRENDER_RENDER_WINDOW_H
