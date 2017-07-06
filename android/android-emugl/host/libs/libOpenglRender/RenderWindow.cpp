@@ -75,6 +75,7 @@ struct RenderWindowMessage {
             int width;
             int height;
             bool useSubWindow;
+            bool egl2egl;
         } init;
 
         // CMD_SET_POST_CALLBACK
@@ -123,7 +124,8 @@ struct RenderWindowMessage {
                        msg.init.width, msg.init.height);
                 result = FrameBuffer::initialize(msg.init.width,
                                                  msg.init.height,
-                                                 msg.init.useSubWindow);
+                                                 msg.init.useSubWindow,
+                                                 msg.init.egl2egl);
                 break;
 
             case CMD_FINALIZE:
@@ -317,7 +319,8 @@ private:
 RenderWindow::RenderWindow(int width,
                            int height,
                            bool use_thread,
-                           bool use_sub_window)
+                           bool use_sub_window,
+                           bool egl2egl)
     : mRepostThread([this] {
           while (auto cmd = mRepostCommands.receive()) {
               if (*cmd == RepostCommand::Sync) {
@@ -341,6 +344,7 @@ RenderWindow::RenderWindow(int width,
     msg.init.width = width;
     msg.init.height = height;
     msg.init.useSubWindow = use_sub_window;
+    msg.init.egl2egl = egl2egl;
     mValid = processMessage(msg);
 }
 
