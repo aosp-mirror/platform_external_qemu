@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ac9af4cd_405af179",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T23:45:41Z",
+      "side": 1,
+      "message": "\"not higher than\" makes it run off, I just put 1.1/2.0 there",
+      "parentUuid": "d6689773_3c2af3f2",
+      "range": {
+        "startLine": 498,
+        "startChar": 30,
+        "endLine": 498,
+        "endChar": 35
+      },
+      "revId": "e6d66b4b3cc5c71baf6ae1c91f98224429ffeffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07646cf9_86ab8465",
         "filename": "android/android-emu/android/skin/winsys.h",
         "patchSetId": 1
