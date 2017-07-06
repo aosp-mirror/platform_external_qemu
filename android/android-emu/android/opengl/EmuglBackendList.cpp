@@ -52,11 +52,19 @@ bool EmuglBackendList::contains(const char* name) const {
 }
 
 std::string EmuglBackendList::getLibDirPath(const char* name) {
+    // remove the "_indirect" suffix
+    static constexpr android::base::StringView suffix("_indirect");
+    std::string nameNoSuffix(name);
+    int nameNoSuffixLen = (int)suffix.size() - (int)nameNoSuffix.size();
+    if (nameNoSuffixLen > 0 &&
+        suffix == nameNoSuffix.c_str() + nameNoSuffixLen) {
+        nameNoSuffix.erase(nameNoSuffixLen);
+    }
     return android::base::StringFormat(
             "%s/%s/gles_%s",
             mExecDir,
             mProgramBitness == 64 ? "lib64" : "lib",
-            name);
+            nameNoSuffix.c_str());
 }
 
 static const char kLibPrefix[] = "lib";
