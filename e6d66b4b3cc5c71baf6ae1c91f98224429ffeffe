@@ -45,6 +45,30 @@
       "revId": "e6d66b4b3cc5c71baf6ae1c91f98224429ffeffe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4d8d78b_83556f34",
+        "filename": "android/android-emu/android/skin/winsys.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T23:41:26Z",
+      "side": 1,
+      "message": "hmm that\u0027s a good point, then to prevent changes in behavior, let\u0027s just go with the current patch set (0: auto -\u003e auto, 1: max-\u003emax, 2: user shouldn\u0027t have compat option yet)",
+      "parentUuid": "07646cf9_86ab8465",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 43
+      },
+      "revId": "e6d66b4b3cc5c71baf6ae1c91f98224429ffeffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
