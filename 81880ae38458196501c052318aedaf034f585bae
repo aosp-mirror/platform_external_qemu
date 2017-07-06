@@ -46,6 +46,30 @@
       "revId": "81880ae38458196501c052318aedaf034f585bae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18440559_208937d9",
+        "filename": "android/android-emu/android/base/TypeTraits.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T18:02:06Z",
+      "side": 1,
+      "message": "Got it :) so no fixpoint function for us :(",
+      "parentUuid": "46d1f9e7_8433908f",
+      "range": {
+        "startLine": 88,
+        "startChar": 16,
+        "endLine": 88,
+        "endChar": 17
+      },
+      "revId": "81880ae38458196501c052318aedaf034f585bae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
