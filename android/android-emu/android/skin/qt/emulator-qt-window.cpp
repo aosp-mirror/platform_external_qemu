@@ -522,6 +522,7 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+    mClosed = true;
     crashhandler_exitmode(__FUNCTION__);
 
     // Make sure we cancel everything related to startup dialog here, otherwise
@@ -655,8 +656,7 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
 // Mask off the background of the skin PNG if we
 // are running frameless.
 
-void EmulatorQtWindow::maskWindowFrame()
-{
+void EmulatorQtWindow::maskWindowFrame() {
     if (!mStartupDone) {
         // The splash screen is still active. Don't mask that.
         return;
@@ -762,6 +762,9 @@ void EmulatorQtWindow::raise() {
 }
 
 void EmulatorQtWindow::show() {
+    if (mClosed) {
+        return;
+    }
     mContainer.show();
     QFrame::show();
     mToolWindow->show();
@@ -1118,6 +1121,9 @@ void EmulatorQtWindow::slot_setWindowTitle(QString title,
 void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
                                        QRect rect,
                                        QSemaphore* semaphore) {
+    if (mClosed) {
+        return;
+    }
     if (surface != mBackingSurface) {
         mBackingBitmapChanged = true;
         mBackingSurface = surface;
@@ -1170,11 +1176,15 @@ void EmulatorQtWindow::slot_screenChanged() {
     queueSkinEvent(createSkinEvent(kEventScreenChanged));
 }
 
-void EmulatorQtWindow::showEvent(QShowEvent*) {
+void EmulatorQtWindow::showEvent(QShowEvent* event) {
     mStartupTimer.stop();
     mStartupDialog.clear();
     mStartupDone = true;
 
+    if (mClosed) {
+        event->ignore();
+        return;
+    }
     if (mFirstShowEvent) {
         // moved from android_metrics_start() in metrics.cpp
         android_metrics_start_adb_liveness_checker(mAdbInterface->get());
@@ -1469,9 +1479,12 @@ SkinEvent* EmulatorQtWindow::createSkinEvent(SkinEventType type) {
 
 void EmulatorQtWindow::doResize(const QSize& size,
                                 bool isKbdShortcut) {
-    if (!mBackingSurface)
+    if (mClosed) {
         return;
-
+    }
+    if (!mBackingSurface) {
+        return;
+    }
     int originalWidth = mBackingSurface->original_w;
     int originalHeight = mBackingSurface->original_h;
 
