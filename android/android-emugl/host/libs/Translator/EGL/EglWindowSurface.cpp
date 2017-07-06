@@ -39,7 +39,7 @@ EglWindowSurface::EglWindowSurface(EglDisplay* dpy,
         m_win(win) {
     s_associatedWins.get().insert(win);
     EglOS::Engine* engine = EglGlobalInfo::getInstance()->getOsEngine();
-    m_native = engine->createWindowSurface(win);
+    m_native = engine->createWindowSurface(config->nativeFormat(), win);
 }
 
 EglWindowSurface::~EglWindowSurface() {

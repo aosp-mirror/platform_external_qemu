@@ -15,3 +15,5 @@ EGLBoolean eglPreSaveContext(EGLDisplay display, EGLContext contex, EGLStream st
 EGLBoolean eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
 
 EGLBoolean eglPostSaveContext(EGLDisplay display, EGLConfig config, EGLStream stream);
+
+void eglUseOsEglApi(EGLBoolean enable);
