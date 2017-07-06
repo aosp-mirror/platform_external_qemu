@@ -112,9 +112,6 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         # and will need to link against ncurses
         export LIBS=-lncurses
 
-        # And our mount.h does not include linux/fs.h so we are missing this
-        # define
-        export CFLAGS="-DMS_STRICTATIME=0x1000000 ${CFLAGS}"
         install_simple_package bluez "\
                 --enable-static \
                 --enable-pie \

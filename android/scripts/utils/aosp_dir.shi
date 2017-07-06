@@ -81,7 +81,7 @@ aosp_dir_parse_option () {
 aosp_prebuilt_toolchain_subdir_for () {
     case $1 in
         linux*)
-            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.11-4.8"
+            printf "prebuilts/gcc/linux-x86/host/x86_64-linux-glibc2.15-4.8"
             ;;
         darwin*)
             printf "prebuilts/clang/host/darwin-x86/clang-4053586"
