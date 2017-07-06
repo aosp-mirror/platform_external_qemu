@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc9b3ae2_4c6f1cd4",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T07:52:55Z",
+      "side": 1,
+      "message": "nit: static",
+      "range": {
+        "startLine": 271,
+        "startChar": 0,
+        "endLine": 271,
+        "endChar": 4
+      },
+      "revId": "df6dcae31ca1e70b208d7a8d4ff574f0fc4c9fa7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fcab0ace_18f7755d",
+        "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T07:52:55Z",
+      "side": 1,
+      "message": "what about this piece?",
+      "range": {
+        "startLine": 317,
+        "startChar": 8,
+        "endLine": 317,
+        "endChar": 21
+      },
+      "revId": "df6dcae31ca1e70b208d7a8d4ff574f0fc4c9fa7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "377acec4_6a13d916",
+        "filename": "android/android-emu/android/opengl/macTouchOpenGL.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T07:52:55Z",
+      "side": 1,
+      "message": "please add copyright header",
+      "revId": "df6dcae31ca1e70b208d7a8d4ff574f0fc4c9fa7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
