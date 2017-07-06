@@ -22,6 +22,30 @@
       "revId": "81880ae38458196501c052318aedaf034f585bae",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46d1f9e7_8433908f",
+        "filename": "android/android-emu/android/base/TypeTraits.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T18:00:16Z",
+      "side": 1,
+      "message": "this is a trick - it checks if the function return type isn\u0027t the same as the function type. It\u0027s next to impossible to make this happen (function to return itself), so is_same\u003c\u003e here is a placeholder for |true|. The only reason why it\u0027s used is to make use of SFINAE - if the thing isn\u0027t callable with the supplied arguments the whole expression doesn\u0027t compile, so it gets eliminated and is_callable_with_args uses the first specialization to return |false|",
+      "parentUuid": "6f2dd00f_0dde0dd4",
+      "range": {
+        "startLine": 88,
+        "startChar": 16,
+        "endLine": 88,
+        "endChar": 17
+      },
+      "revId": "81880ae38458196501c052318aedaf034f585bae",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
