@@ -92,13 +92,13 @@ RendererImpl::~RendererImpl() {
     mRenderWindow.reset();
 }
 
-bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
+bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl2egl) {
     if (mRenderWindow) {
         return false;
     }
 
     std::unique_ptr<RenderWindow> renderWindow(
-            new RenderWindow(width, height, kUseSubwindowThread, useSubWindow));
+            new RenderWindow(width, height, kUseSubwindowThread, useSubWindow, egl2egl));
     if (!renderWindow) {
         ERR("Could not create rendering window class\n");
         GL_LOG("Could not create rendering window class");
