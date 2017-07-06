@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "74938c09_f03b7823",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T19:04:51Z",
+      "side": 1,
+      "message": "Linus isn\u0027t happy with this CL :)\nhttp://i.imgur.com/aZKGe.jpg",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 18
+      },
+      "revId": "056441362b41a2bfebc17cc3901734132e546f16",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "994841bb_3ea7aa59",
         "filename": "android/android-emu/android/opengl/NativeGpuInfo_windows.cpp",
         "patchSetId": 2
