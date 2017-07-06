@@ -98,11 +98,15 @@ struct LazyInstanceState {
         Init = 0,
         Constructing = 1,
         Done = 2,
+        Destroying = 3,
     };
 
-    bool inInitState() const;
+    bool inNoObjectState() const;
     bool needConstruction();
     void doneConstructing();
+
+    bool needDestruction();
+    void doneDestroying();
 
     std::atomic<State> mState;
 };
@@ -122,7 +126,7 @@ static_assert(is_trivially_default_constructible<LazyInstanceState>::value,
 //
 template <class T>
 struct LazyInstance {
-    bool hasInstance() const { return !mState.inInitState(); }
+    bool hasInstance() const { return !mState.inNoObjectState(); }
 
     const T& get() const { return *ptr(); }
     T& get() { return *ptr(); }
