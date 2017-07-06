@@ -79,7 +79,7 @@ static void initGLESx(GLESVersion version) {
         DBG("EGL failed to initialize GLESv%d; incompatible interface\n", version);
         return;
     }
-    iface->initGLESx();
+    iface->initGLESx(EglGlobalInfo::isEgl2Egl());
 }
 
 /*****************************************  supported extensions  ***********************************************************************/
@@ -127,6 +127,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                EGLStream stream,
                                                const char* snapshotDir);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
 }
 
 #define CURRENT_THREAD() do {} while (0);
@@ -1232,8 +1233,6 @@ EGLAPI __eglMustCastToProperFunctionPointerType EGLAPIENTRY
        eglGetProcAddress(const char *procname){
     __eglMustCastToProperFunctionPointerType retVal = NULL;
 
-    initGlobalInfo();
-
     if(!strncmp(procname,"egl",3)) { //EGL proc
         for(int i=0;i < s_eglExtensionsSize;i++){
             if(strcmp(procname,s_eglExtensions[i].name) == 0){
@@ -1425,4 +1424,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     dpy->postLoadAllImages(stm);
     return true;
+}
+
+EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
+    EglGlobalInfo::setEgl2Egl(enable);
 }
