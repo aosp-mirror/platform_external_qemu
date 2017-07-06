@@ -70,6 +70,30 @@
       "revId": "64f6b239a8cbdd7d7f57809a2c2cc2f3f49a1c8a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0bee10b7_7d843616",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T16:15:24Z",
+      "side": 1,
+      "message": "rofl, I thought the first comment was gone",
+      "parentUuid": "cc3a3704_b32fc9b8",
+      "range": {
+        "startLine": 470,
+        "startChar": 0,
+        "endLine": 472,
+        "endChar": 5
+      },
+      "revId": "64f6b239a8cbdd7d7f57809a2c2cc2f3f49a1c8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
