@@ -689,7 +689,7 @@ void GLEScontext::postLoadRestoreCtx() {
 
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
-        this->dispatcher().glBindFramebufferEXT(target,
+        this->dispatcher().glBindFramebuffer(target,
                 getFBOGlobalName(buffer));
     };
     bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);

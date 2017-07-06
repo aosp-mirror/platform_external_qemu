@@ -40,7 +40,7 @@
 extern "C" {
 
 //decleration
-static void initGLESx();
+static void initGLESx(bool isGles2Gles);
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
@@ -74,8 +74,8 @@ static GLESiface  s_glesIface = {
 
 extern "C" {
 
-static void initGLESx() {
-    DBG("No special initialization necessary for GLES_CM\n");
+static void initGLESx(bool isGles2Gles) {
+    setGles2Gles(isGles2Gles);
     return;
 }
 

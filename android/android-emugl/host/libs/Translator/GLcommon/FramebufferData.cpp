@@ -154,7 +154,7 @@ void FramebufferData::restore(ObjectLocalName localName,
                         "binding egl image unsupported\n");
             } else {
                 assert(attachPoint.target == GL_RENDERBUFFER);
-                dispatcher.glFramebufferRenderbufferEXT(
+                dispatcher.glFramebufferRenderbuffer(
                         GL_FRAMEBUFFER,
                         s_index2Attachment(i),
                         attachPoint.target,
@@ -169,7 +169,7 @@ void FramebufferData::restore(ObjectLocalName localName,
                 fprintf(stderr, "FramebufferData::restore: warning: "
                         "a texture is deleted without unbinding FBO\n");
             }
-            dispatcher.glFramebufferTexture2DEXT(GL_FRAMEBUFFER,
+            dispatcher.glFramebufferTexture2D(GL_FRAMEBUFFER,
                     s_index2Attachment(i),
                     attachPoint.target,
                     texGlobalName,
@@ -277,7 +277,7 @@ void FramebufferData::detachObject(int idx) {
         switch(m_attachPoints[idx].target)
         {
         case GL_RENDERBUFFER_OES:
-            GLEScontext::dispatcher().glDeleteRenderbuffersEXT(1, &(m_attachPoints[idx].name));
+            GLEScontext::dispatcher().glDeleteRenderbuffers(1, &(m_attachPoints[idx].name));
             break;
         case GL_TEXTURE_2D:
             GLEScontext::dispatcher().glDeleteTextures(1, &(m_attachPoints[idx].name));
@@ -301,17 +301,17 @@ void FramebufferData::validate(GLEScontext* ctx)
         GLint type = GL_NONE;
         GLint name = 0;
 
-        ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+        ctx->dispatcher().glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
         if(type != GL_NONE)
         {
-            ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
+            ctx->dispatcher().glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
         }
         else
         {
-            ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
+            ctx->dispatcher().glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_TYPE, &type);
             if(type != GL_NONE)
             {
-                ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
+                ctx->dispatcher().glGetFramebufferAttachmentParameteriv(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT_OES, GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME, &name);
             }
             else
             {
@@ -328,10 +328,10 @@ void FramebufferData::validate(GLEScontext* ctx)
         {
             GLint prev;
             ctx->dispatcher().glGetIntegerv(GL_RENDERBUFFER_BINDING, &prev);
-            ctx->dispatcher().glBindRenderbufferEXT(GL_RENDERBUFFER, name);
-            ctx->dispatcher().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
-            ctx->dispatcher().glGetRenderbufferParameterivEXT(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
-            ctx->dispatcher().glBindRenderbufferEXT(GL_RENDERBUFFER, prev);
+            ctx->dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, name);
+            ctx->dispatcher().glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_WIDTH, &width);
+            ctx->dispatcher().glGetRenderbufferParameteriv(GL_RENDERBUFFER, GL_RENDERBUFFER_HEIGHT, &height);
+            ctx->dispatcher().glBindRenderbuffer(GL_RENDERBUFFER, prev);
         }
         else if(type == GL_TEXTURE)
         {
@@ -356,7 +356,7 @@ void FramebufferData::validate(GLEScontext* ctx)
         ctx->dispatcher().glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
         ctx->dispatcher().glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 
-        ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
+        ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, 0);
         setAttachment(GL_COLOR_ATTACHMENT0_OES, GL_TEXTURE_2D, tex, ObjectDataPtr(), true);
 
         ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, prev);
@@ -368,8 +368,8 @@ void FramebufferData::validate(GLEScontext* ctx)
         // drivers (e.g. ATI's) - after the framebuffer attachments
         // have changed, and before the next draw, unbind and rebind
         // the framebuffer to sort things out.
-        ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER,0);
-        ctx->dispatcher().glBindFramebufferEXT(
+        ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER,0);
+        ctx->dispatcher().glBindFramebuffer(
                 GL_FRAMEBUFFER,
                 ctx->getFBOGlobalName(m_fbName));
 

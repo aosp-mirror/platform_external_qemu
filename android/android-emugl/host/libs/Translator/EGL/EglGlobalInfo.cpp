@@ -19,6 +19,7 @@
 #include "EglDisplay.h"
 #include "EglOsApi.h"
 
+#include "GLcommon/GLutils.h"
 #include "emugl/common/lazy_instance.h"
 
 #include <string.h>
@@ -27,7 +28,6 @@ namespace {
 
 // Use a LazyInstance to ensure thread-safe initialization.
 emugl::LazyInstance<EglGlobalInfo> sSingleton = LAZY_INSTANCE_INIT;
-bool sEgl2Egl = false;
 
 }  // namespace
 
@@ -38,11 +38,11 @@ void EglGlobalInfo::setEgl2Egl(EGLBoolean enable) {
                 " after it is created, takes no effect.\n");
         return;
     }
-    sEgl2Egl = enable;
+    setGles2Gles(enable);
 }
 
 bool EglGlobalInfo::isEgl2Egl() {
-    return sEgl2Egl;
+    return isGles2Gles();
 }
 
 // static
@@ -51,7 +51,7 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
 }
 
 EglGlobalInfo::EglGlobalInfo() {
-    if (sEgl2Egl) {
+    if (isEgl2Egl()) {
         m_engine = EglOS::getEgl2EglHostInstance();
     } else {
         m_engine = EglOS::Engine::getHostInstance();
