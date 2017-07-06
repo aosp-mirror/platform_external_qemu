@@ -53,15 +53,39 @@ extern "C" void setUiEmuAgent(const UiEmuAgent* agentPtr) {
     }
 }
 
+ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
+    : mWindow(new ExtendedWindow(tw->mEmulatorWindow,
+                                 tw,
+                                 &tw->mShortcutKeyStore)) {
+    if (auto recorderPtr = tw->mUIEventRecorder.lock()) {
+        recorderPtr->startRecording(mWindow);
+    }
+    if (auto userActionsCounter = tw->mUserActionsCounter.lock()) {
+        userActionsCounter->startCountingForExtendedWindow(mWindow);
+    }
+
+    if (tw->mUiEmuAgent) {
+        mWindow->setAgent(tw->mUiEmuAgent);
+    }
+
+    // If extended window is created before the "..." button is pressed, it
+    // should be hid until that button is actually pressed.
+    mWindow->hide();
+}
+
+ToolWindow::ExtendedWindowHolder::~ExtendedWindowHolder() {
+    // ExtendedWindow has slots with subscribers, so use deleteLater()
+    // instead of a regular delete for it.
+    mWindow->deleteLater();
+}
+
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
                        ToolWindow::UIEventRecorderPtr event_recorder,
                        ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow(android::base::makeCustomScopedPtr<ExtendedWindow*>(
-              nullptr,
-              [](QObject* o) { o->deleteLater(); })),
+      mExtendedWindow([this] { return std::make_tuple(this); }),
       mUiEmuAgent(nullptr),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
@@ -172,6 +196,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
         }
     }
 
+    // Make sure we create the extended window even if user didn't open it.
+    QObject::connect(&mExtendedWindowCreateTimer, &QTimer::timeout,
+                     [this] { mExtendedWindow.get(); });
+    mExtendedWindowCreateTimer.setSingleShot(true);
+    mExtendedWindowCreateTimer.start(10 * 1000);
+
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
     int tmp_x = mToolsUi->close_button->x();
@@ -181,13 +211,16 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 #endif
 }
 
-ToolWindow::~ToolWindow() {}
+ToolWindow::~ToolWindow() {
+    mExtendedWindowCreateTimer.stop();
+    mExtendedWindowCreateTimer.disconnect();
+}
 
 void ToolWindow::raise() {
     QFrame::raise();
     if (mTopSwitched) {
-        mExtendedWindow->raise();
-        mExtendedWindow->activateWindow();
+        mExtendedWindow.get()->raise();
+        mExtendedWindow.get()->activateWindow();
         mTopSwitched = false;
     }
 }
@@ -200,8 +233,8 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
 
 void ToolWindow::hide() {
     QFrame::hide();
-    if (mExtendedWindow) {
-        mExtendedWindow->hide();
+    if (mExtendedWindow.hasInstance()) {
+        mExtendedWindow.get()->hide();
     }
 }
 
@@ -218,14 +251,7 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 
 void ToolWindow::hideEvent(QHideEvent*) {
     mIsExtendedWindowVisibleOnShow =
-            mExtendedWindow && mExtendedWindow->isVisible();
-}
-
-void ToolWindow::showEvent(QShowEvent* event) {
-    if (!mExtendedWindow) {
-        createExtendedWindow(); // But don't show it yet
-    }
-    QFrame::showEvent(event);
+            mExtendedWindow.hasInstance() && mExtendedWindow.get()->isVisible();
 }
 
 void ToolWindow::show() {
@@ -233,8 +259,7 @@ void ToolWindow::show() {
     setFixedSize(size());
 
     if (mIsExtendedWindowVisibleOnShow) {
-        assert(mExtendedWindow);
-        mExtendedWindow->show();
+        mExtendedWindow.get()->show();
     }
 }
 
@@ -423,10 +448,7 @@ void ToolWindow::closeExtendedWindow() {
     // If user is clicking the 'x' button like crazy, we may get multiple
     // close events here, so make sure the function doesn't screw the state for
     // a next call.
-    if (mExtendedWindow) {
-        mExtendedWindow->close();
-        mExtendedWindow.reset();
-    }
+    mExtendedWindow.clear();
 }
 
 void ToolWindow::dockMainWindow() {
@@ -445,8 +467,9 @@ void ToolWindow::raiseMainWindow() {
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     mUiEmuAgent = agPtr;
 
-    assert(mExtendedWindow);
-    mExtendedWindow->setAgent(agPtr);
+    if (mExtendedWindow.hasInstance()) {
+        mExtendedWindow.get()->setAgent(agPtr);
+    }
 
     if (agPtr->clipboard) {
         connect(this, SIGNAL(guestClipboardChanged(QString)),
@@ -561,37 +584,15 @@ void ToolWindow::onHostClipboardChanged() {
 
 void ToolWindow::showOrRaiseExtendedWindow(ExtendedWindowPane pane) {
     // Show the tabbed pane
-    assert(mExtendedWindow);
-
-    mExtendedWindow->showPane(pane);
-    mExtendedWindow->raise();
-    mExtendedWindow->activateWindow();
+    mExtendedWindow.get()->showPane(pane);
+    mExtendedWindow.get()->raise();
+    mExtendedWindow.get()->activateWindow();
 }
 
 void ToolWindow::on_more_button_clicked() {
-    assert(mExtendedWindow);
-
-    mExtendedWindow->show();
-    mExtendedWindow->raise();
-    mExtendedWindow->activateWindow();
-}
-
-void ToolWindow::createExtendedWindow() {
-    mExtendedWindow.reset(
-            new ExtendedWindow(mEmulatorWindow,
-                               this,
-                               &mShortcutKeyStore));
-    if (auto recorder_ptr = mUIEventRecorder.lock()) {
-        recorder_ptr->startRecording(mExtendedWindow.get());
-    }
-    if (auto user_actions_counter = mUserActionsCounter.lock()) {
-        user_actions_counter->startCountingForExtendedWindow(
-            mExtendedWindow.get());
-    }
-
-    // The extended window is created before the "..." button is pressed, so it
-    // should be hid until that button is actually pressed.
-    mExtendedWindow->hide();
+    mExtendedWindow.get()->show();
+    mExtendedWindow.get()->raise();
+    mExtendedWindow.get()->activateWindow();
 }
 
 void ToolWindow::paintEvent(QPaintEvent*) {

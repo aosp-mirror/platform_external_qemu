@@ -13,7 +13,7 @@
 #pragma once
 
 #include "android/base/containers/CircularBuffer.h"
-#include "android/base/memory/ScopedPtr.h"
+#include "android/base/memory/OnDemand.h"
 #include "android/skin/event.h"
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
@@ -58,6 +58,18 @@ class ToolWindow : public QFrame {
     using UserActionsCounterPtr =
             std::weak_ptr<android::qt::UserActionsCounter>;
 
+    class ExtendedWindowHolder final {
+        DISALLOW_COPY_AND_ASSIGN(ExtendedWindowHolder);
+
+    public:
+        ExtendedWindowHolder(ToolWindow* tw);
+        ~ExtendedWindowHolder();
+        ExtendedWindow* operator->() const { return mWindow; }
+
+    private:
+        ExtendedWindow* mWindow;
+    };
+
 public:
     ToolWindow(EmulatorQtWindow* emulatorWindow,
                QWidget* parent,
@@ -94,7 +106,6 @@ signals:
     void haveClipboardSharingKnown(bool have);
 
 private:
-    void createExtendedWindow();
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardKeyToEmulator(uint32_t keycode, bool down);
 
@@ -117,13 +128,11 @@ private:
     virtual void mousePressEvent(QMouseEvent* event) override;
     virtual void paintEvent(QPaintEvent*) override;
     virtual void hideEvent(QHideEvent* event) override;
-    virtual void showEvent(QShowEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    // ExtendedWindow has slots with subscribers, so use deleteLater() instead
-    // of regular delete for it.
-    android::base::ScopedCustomPtr<ExtendedWindow, void (*)(QObject*)>
+    android::base::MemberOnDemandT<ExtendedWindowHolder, ToolWindow*>
             mExtendedWindow;
+    QTimer mExtendedWindowCreateTimer;
     const UiEmuAgent* mUiEmuAgent;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
