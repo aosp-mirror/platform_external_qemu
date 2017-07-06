@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "358c74a9_4d204c8d",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T13:59:45Z",
+      "side": 1,
+      "message": "ok to skip construction here?",
+      "range": {
+        "startLine": 470,
+        "startChar": 0,
+        "endLine": 472,
+        "endChar": 5
+      },
+      "revId": "64f6b239a8cbdd7d7f57809a2c2cc2f3f49a1c8a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
