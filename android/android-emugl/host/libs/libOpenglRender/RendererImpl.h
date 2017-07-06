@@ -35,7 +35,7 @@ public:
     RendererImpl();
     ~RendererImpl();
 
-    bool initialize(int width, int height, bool useSubWindow);
+    bool initialize(int width, int height, bool useSubWindow, bool egl2egl);
     void stop();
 
 public:
