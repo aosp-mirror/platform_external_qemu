@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79013b4d_4cb4a59c",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T23:54:28Z",
+      "side": 1,
+      "message": "what about using strstr to get the position of _indirect, and then substr(0, strstr_result - name)?",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 37
+      },
+      "revId": "f356211c26f3b6558eec94060691d64b795e9896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8420ffc_1eafd6cd",
+        "filename": "android/android-emu/android/opengl/EmuglBackendScanner.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T23:54:28Z",
+      "side": 1,
+      "message": "!strcmp instead, we use it most other places at least",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 68
+      },
+      "revId": "f356211c26f3b6558eec94060691d64b795e9896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "191d82e1_a01beebf",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 352,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-06T23:54:28Z",
+      "side": 1,
+      "message": "nit: remove",
+      "revId": "f356211c26f3b6558eec94060691d64b795e9896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
