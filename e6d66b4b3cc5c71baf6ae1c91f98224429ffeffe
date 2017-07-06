@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6689773_3c2af3f2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T23:35:22Z",
+      "side": 1,
+      "message": "up to -\u003e not higher than?",
+      "range": {
+        "startLine": 498,
+        "startChar": 30,
+        "endLine": 498,
+        "endChar": 35
+      },
+      "revId": "e6d66b4b3cc5c71baf6ae1c91f98224429ffeffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07646cf9_86ab8465",
+        "filename": "android/android-emu/android/skin/winsys.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-06T23:35:22Z",
+      "side": 1,
+      "message": "btw, old values are already saved in QSettings. How will the new code work if it reads 0/1/2?",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 43
+      },
+      "revId": "e6d66b4b3cc5c71baf6ae1c91f98224429ffeffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
