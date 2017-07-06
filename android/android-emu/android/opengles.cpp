@@ -76,6 +76,7 @@ static int initOpenglesEmulationFuncs(ADynamicLibrary* rendererLib) {
 }
 
 static bool sRendererUsesSubWindow;
+static bool sEgl2egl;
 static emugl::RenderLibPtr sRenderLib = nullptr;
 static emugl::RendererPtr sRenderer = nullptr;
 
@@ -111,6 +112,13 @@ int android_initOpenglesEmulation() {
     if (const char* env = getenv("ANDROID_GL_SOFTWARE_RENDERER")) {
         if (env[0] != '\0' && env[0] != '0') {
             sRendererUsesSubWindow = false;
+        }
+    }
+
+    sEgl2egl = false;
+    if (const char* env = getenv("ANDROID_EGL_ON_EGL")) {
+        if (env[0] != '\0' && env[0] == '1') {
+            sEgl2egl = true;
         }
     }
 
@@ -162,7 +170,7 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     dma_ops.unlock = android_goldfish_dma_ops.unlock;
     sRenderLib->setDmaOps(dma_ops);
 
-    sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow);
+    sRenderer = sRenderLib->initRenderer(width, height, sRendererUsesSubWindow, sEgl2egl);
     if (!sRenderer) {
         D("Can't start OpenGLES renderer?");
         return -1;
