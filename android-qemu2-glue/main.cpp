@@ -1066,6 +1066,9 @@ extern "C" int main(int argc, char **argv) {
             if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
                 fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
             }
+            if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                fc::setEnabledOverride(fc::GLESDynamicVersion, false);
+            }
 
             if (fc::isEnabled(fc::ForceANGLE)) {
                 uiPreferredGlesBackend =
