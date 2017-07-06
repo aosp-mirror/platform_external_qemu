@@ -17,7 +17,8 @@ ifeq ($(BUILD_TARGET_OS),darwin)
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
-    host_OS_SRCS = EglOsApi_wgl.cpp
+    host_OS_SRCS = EglOsApi_wgl.cpp \
+                   EglOsApi_egl.cpp
     host_common_LDLIBS += -lgdi32
 endif
 
