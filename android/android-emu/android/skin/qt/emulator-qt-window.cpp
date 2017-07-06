@@ -116,7 +116,7 @@ void EmulatorQtWindow::create() {
 EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
-      mStartupDialog(this),
+      mStartupDialog([this] { return std::make_tuple(this); }),
       mToolWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
@@ -126,48 +126,74 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mForwardShortcutsToDevice(false),
       mPrevMousePosition(0, 0),
       mMainLoopThread(nullptr),
-      mAvdWarningBox(QMessageBox::Information,
-                     tr("Recommended AVD"),
-                     tr("Running an x86 based Android Virtual Device (AVD) is "
-                        "10x faster.<br/>"
-                        "We strongly recommend creating a new AVD."),
-                     QMessageBox::Ok,
-                     this),
-      mGpuWarningBox(QMessageBox::Information,
-                     tr("GPU Driver Issue"),
-                     tr("Your GPU driver information:\n\n"
-                        "%1\n"
-                        "Some users have experienced emulator stability issues "
-                        "with this driver version.  As a result, we're "
-                        "selecting a compatibility renderer.  Please check with "
-                        "your manufacturer to see if there is an updated "
-                        "driver available.")
-                             .arg(QString::fromStdString(
-                                      globalGpuInfoList().dump())),
-                     QMessageBox::Ok,
-                     this),
-      mAdbWarningBox(QMessageBox::Warning,
-                     tr("Detected ADB"),
-                     tr(""),
-                     QMessageBox::Ok,
-                     this),
-      mFirstShowEvent(true),
+      mAvdWarningBox([this] {
+          return std::make_tuple(
+                  QMessageBox::Information, tr("Recommended AVD"),
+                  tr("Running an x86 based Android Virtual Device (AVD) is "
+                     "10x faster.<br/>"
+                     "We strongly recommend creating a new AVD."),
+                  QMessageBox::Ok, this);
+      }),
+      mGpuWarningBox([this] {
+          return std::make_tuple(
+                  QMessageBox::Information, tr("GPU Driver Issue"),
+                  tr("Your GPU driver information:\n\n"
+                     "%1\n"
+                     "Some users have experienced emulator stability issues "
+                     "with this driver version.  As a result, we're "
+                     "selecting a compatibility renderer.  Please check with "
+                     "your manufacturer to see if there is an updated "
+                     "driver available.")
+                          .arg(QString::fromStdString(
+                                  globalGpuInfoList().dump())),
+                  QMessageBox::Ok, this);
+      }),
+      mAdbWarningBox([this] {
+          return std::make_tuple(QMessageBox::Warning, tr("Detected ADB"),
+                                 tr(""), QMessageBox::Ok, this);
+      }),
       mEventLogger(
-          std::make_shared<UIEventRecorder<android::base::CircularBuffer>>(
-              &mEventCapturer, 1000)),
+              std::make_shared<UIEventRecorder<android::base::CircularBuffer>>(
+                      &mEventCapturer,
+                      1000)),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
-      mAdbInterface(android::emulation::AdbInterface::create(mLooper)),
-      mApkInstaller(mAdbInterface.get()),
-      mFilePusher(mAdbInterface.get(),
+      mAdbInterface([this] {
+          return std::make_tuple(
+                  android::emulation::AdbInterface::create(mLooper));
+      }),
+      mApkInstaller([this] { return std::make_tuple(mAdbInterface->get()); }),
+      mFilePusher([this] {
+          return std::make_tuple(
+                  mAdbInterface->get(),
                   [this](StringView filePath, FilePusher::Result result) {
                       adbPushDone(filePath, result);
                   },
                   [this](double progress, bool done) {
                       adbPushProgress(progress, done);
-                  }),
-      mScreenCapturer(mAdbInterface.get()),
-      mInstallDialog(this),
-      mPushDialog(this),
+                  });
+      }),
+      mScreenCapturer([this] { return std::make_tuple(mAdbInterface->get()); }),
+      mInstallDialog([this] {
+          return std::make_tuple(this, [this](QProgressDialog* dialog) {
+              dialog->setWindowTitle(tr("APK Installer"));
+              dialog->setLabelText(tr("Installing APK..."));
+              dialog->setRange(0, 0);  // Makes it a "busy" dialog
+              dialog->setModal(true);
+              dialog->close();
+              QObject::connect(dialog, SIGNAL(canceled()), this,
+                               SLOT(slot_installCanceled()));
+          });
+      }),
+      mPushDialog([this] {
+          return std::make_tuple(this, [this](QProgressDialog* dialog) {
+              dialog->setWindowTitle(tr("File Copy"));
+              dialog->setLabelText(tr("Copying files..."));
+              dialog->setRange(0, kPushProgressBarMax);
+              dialog->close();
+              QObject::connect(dialog, SIGNAL(canceled()), this,
+                               SLOT(slot_adbPushCanceled()));
+          });
+      }),
       mStartedAdbStopProcess(false),
       mHaveBeenFrameless(false) {
     qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
@@ -175,8 +201,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<SkinGenericFunction>();
 
     android::base::ThreadLooper::setLooper(mLooper, true);
-    android::crashreport::CrashReporter::get()->hangDetector().addWatchedLooper(
-                mLooper);
+    CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
 
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
@@ -240,22 +265,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_runOnUiThread);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit,
                      this, &EmulatorQtWindow::slot_clearInstance);
-
-    // TODO: make dialogs affected by themes and changes
-    mInstallDialog.setWindowTitle(tr("APK Installer"));
-    mInstallDialog.setLabelText(tr("Installing APK..."));
-    mInstallDialog.setRange(0, 0);  // Makes it a "busy" dialog
-    mInstallDialog.setModal(true);
-    mInstallDialog.close();
-    QObject::connect(&mInstallDialog, SIGNAL(canceled()), this,
-                     SLOT(slot_installCanceled()));
-
-    mPushDialog.setWindowTitle(tr("File Copy"));
-    mPushDialog.setLabelText(tr("Copying files..."));
-    mPushDialog.setRange(0, kPushProgressBarMax);
-    mPushDialog.close();
-    QObject::connect(&mPushDialog, SIGNAL(canceled()), this,
-                     SLOT(slot_adbPushCanceled()));
 
     QObject::connect(mContainer.horizontalScrollBar(),
                      SIGNAL(valueChanged(int)), this,
@@ -351,12 +360,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
         if (!adbPath.isEmpty()) {
             adbPath = QDir::toNativeSeparators(adbPath);
-            mAdbInterface->setCustomAdbPath(adbPath.toStdString());
+            (*mAdbInterface)->setCustomAdbPath(adbPath.toStdString());
         }
     }
-
-    // moved from android_metrics_start() in metrics.cpp
-    android_metrics_start_adb_liveness_checker(mAdbInterface.get());
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
@@ -371,10 +377,8 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     if (mApkInstallCommand) {
         mApkInstallCommand->cancel();
     }
-    mInstallDialog.disconnect();
-    mInstallDialog.close();
-    mPushDialog.disconnect();
-    mPushDialog.close();
+    mInstallDialog.clear();
+    mPushDialog.clear();
 
     deleteErrorDialog();
     if (mToolWindow) {
@@ -420,15 +424,15 @@ void EmulatorQtWindow::showAvdArchWarning() {
 
     QSettings settings;
     if (settings.value(Ui::Settings::SHOW_AVD_ARCH_WARNING, true).toBool()) {
-        QObject::connect(&mAvdWarningBox,
+        QObject::connect(mAvdWarningBox.ptr(),
                          SIGNAL(buttonClicked(QAbstractButton*)), this,
                          SLOT(slot_avdArchWarningMessageAccepted()));
 
         QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
         checkbox->setCheckState(Qt::Unchecked);
-        mAvdWarningBox.setWindowModality(Qt::NonModal);
-        mAvdWarningBox.setCheckBox(checkbox);
-        mAvdWarningBox.show();
+        mAvdWarningBox->setWindowModality(Qt::NonModal);
+        mAvdWarningBox->setCheckBox(checkbox);
+        mAvdWarningBox->show();
     }
 }
 
@@ -456,15 +460,15 @@ void EmulatorQtWindow::showGpuWarning() {
 
     QSettings settings;
     if (settings.value(Ui::Settings::SHOW_GPU_WARNING, true).toBool()) {
-        QObject::connect(&mGpuWarningBox,
+        QObject::connect(mGpuWarningBox.ptr(),
                          SIGNAL(buttonClicked(QAbstractButton*)), this,
                          SLOT(slot_gpuWarningMessageAccepted()));
 
         QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
         checkbox->setCheckState(Qt::Unchecked);
-        mGpuWarningBox.setWindowModality(Qt::NonModal);
-        mGpuWarningBox.setCheckBox(checkbox);
-        mGpuWarningBox.show();
+        mGpuWarningBox->setWindowModality(Qt::NonModal);
+        mGpuWarningBox->setCheckBox(checkbox);
+        mGpuWarningBox->show();
     }
 }
 
@@ -473,36 +477,36 @@ void EmulatorQtWindow::slot_startupTick() {
     // window still hasn't appeared.
     // Show a pop-up that lets the user know we are working.
 
-    mStartupDialog.setWindowTitle(tr("Android Emulator"));
+    mStartupDialog->setWindowTitle(tr("Android Emulator"));
     // Hide close/minimize/maximize buttons
-    mStartupDialog.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
+    mStartupDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
                                   Qt::WindowTitleHint);
     // Make sure the icon is the same as in the main window
-    mStartupDialog.setWindowIcon(QApplication::windowIcon());
+    mStartupDialog->setWindowIcon(QApplication::windowIcon());
 
     // Emulator logo
     QLabel* label = new QLabel();
     label->setAlignment(Qt::AlignCenter);
     QSize size;
-    size.setWidth(mStartupDialog.size().width() / 2);
+    size.setWidth(mStartupDialog->size().width() / 2);
     size.setHeight(size.width());
     QPixmap pixmap = windowIcon().pixmap(size);
     label->setPixmap(pixmap);
-    mStartupDialog.setLabel(label);
+    mStartupDialog->setLabel(label);
 
     // The default progress bar on Windows isn't centered for some reason
     QProgressBar* bar = new QProgressBar();
     bar->setAlignment(Qt::AlignHCenter);
-    mStartupDialog.setBar(bar);
+    mStartupDialog->setBar(bar);
 
-    mStartupDialog.setRange(0, 0);      // Don't show % complete
-    mStartupDialog.setCancelButton(0);  // No "cancel" button
-    mStartupDialog.setMinimumSize(mStartupDialog.sizeHint());
-    mStartupDialog.show();
+    mStartupDialog->setRange(0, 0);      // Don't show % complete
+    mStartupDialog->setCancelButton(0);  // No "cancel" button
+    mStartupDialog->setMinimumSize(mStartupDialog->sizeHint());
+    mStartupDialog->show();
 }
 
 void EmulatorQtWindow::slot_avdArchWarningMessageAccepted() {
-    QCheckBox* checkbox = mAvdWarningBox.checkBox();
+    QCheckBox* checkbox = mAvdWarningBox->checkBox();
     if (checkbox->checkState() == Qt::Checked) {
         QSettings settings;
         settings.setValue(Ui::Settings::SHOW_AVD_ARCH_WARNING, false);
@@ -510,7 +514,7 @@ void EmulatorQtWindow::slot_avdArchWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
-    QCheckBox* checkbox = mGpuWarningBox.checkBox();
+    QCheckBox* checkbox = mGpuWarningBox->checkBox();
     if (checkbox->checkState() == Qt::Checked) {
         QSettings settings;
         settings.setValue(Ui::Settings::SHOW_GPU_WARNING, false);
@@ -525,7 +529,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     // forever.
     mStartupTimer.stop();
     mStartupTimer.disconnect();
-    mStartupDialog.close();
+    mStartupDialog.clear();
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         // we dont want to restore to a state where the
@@ -653,7 +657,7 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
 
 void EmulatorQtWindow::maskWindowFrame()
 {
-    if (!mStartupDialog.wasCanceled()) {
+    if (!mStartupDone) {
         // The splash screen is still active. Don't mask that.
         return;
     }
@@ -784,7 +788,7 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways)
 {
     mFrameAlways = frameAlways;
     maskWindowFrame();
-    if (mStartupDialog.wasCanceled()) {
+    if (mStartupDone) {
         mContainer.show();
     }
 }
@@ -1106,7 +1110,7 @@ void EmulatorQtWindow::slot_setWindowTitle(QString title,
     // This is the first time that we know the android_serial_number_port
     // has been set. This port ensures AdbInterface can identify the correct
     // device if there is more than one.
-    mAdbInterface->setSerialNumberPort(android_serial_number_port);
+    (*mAdbInterface)->setSerialNumberPort(android_serial_number_port);
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -1150,13 +1154,13 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     // doesn't support CPU acceleration. If it does, recommend switching to an
     // x86 AVD. This cannot be done on the construction of the window since the
     // Qt UI thread has not been properly initialized yet.
-    if (mFirstShowEvent) {
+    if (mFirstShowWindowCall) {
         showAvdArchWarning();
         checkShouldShowGpuWarning();
         showGpuWarning();
         checkAdbVersionAndWarn();
+        mFirstShowWindowCall = false;
     }
-    mFirstShowEvent = false;
 
     if (semaphore != NULL)
         semaphore->release();
@@ -1164,6 +1168,18 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
 
 void EmulatorQtWindow::slot_screenChanged() {
     queueSkinEvent(createSkinEvent(kEventScreenChanged));
+}
+
+void EmulatorQtWindow::showEvent(QShowEvent*) {
+    mStartupTimer.stop();
+    mStartupDialog.clear();
+    mStartupDone = true;
+
+    if (mFirstShowEvent) {
+        // moved from android_metrics_start() in metrics.cpp
+        android_metrics_start_adb_liveness_checker(mAdbInterface->get());
+        mFirstShowEvent = false;
+    }
 }
 
 void EmulatorQtWindow::slot_horizontalScrollChanged(int value) {
@@ -1198,7 +1214,7 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    mScreenCapturer.capture(
+    mScreenCapturer->capture(
             savePath.toStdString(),
             [this](ScreenCapturer::Result result, StringView filePath) {
                 EmulatorQtWindow::screenshotDone(result);
@@ -1256,9 +1272,9 @@ void EmulatorQtWindow::runAdbInstall(const QString& path) {
     }
 
     // Show a dialog so the user knows something is happening
-    mInstallDialog.show();
+    mInstallDialog->show();
 
-    mApkInstallCommand = mApkInstaller.install(
+    mApkInstallCommand = mApkInstaller->install(
             path.toStdString(),
             [this](ApkInstaller::Result result, StringView errorString) {
                 installDone(result, errorString);
@@ -1267,7 +1283,7 @@ void EmulatorQtWindow::runAdbInstall(const QString& path) {
 
 void EmulatorQtWindow::installDone(ApkInstaller::Result result,
                                    StringView errorString) {
-    mInstallDialog.hide();
+    mInstallDialog->hide();
 
     QString msg;
     switch (result) {
@@ -1317,21 +1333,21 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
                 std::make_pair(url.toLocalFile().toStdString(), remoteFile));
     }
 
-    mFilePusher.pushFiles(file_paths);
+    mFilePusher->pushFiles(file_paths);
 }
 
 void EmulatorQtWindow::slot_adbPushCanceled() {
-    mFilePusher.cancel();
+    mFilePusher->cancel();
 }
 
 void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
     if (done) {
-        mPushDialog.hide();
+        mPushDialog->hide();
         return;
     }
 
-    mPushDialog.setValue(progress * kPushProgressBarMax);
-    mPushDialog.show();
+    mPushDialog->setValue(progress * kPushProgressBarMax);
+    mPushDialog->show();
 }
 
 void EmulatorQtWindow::adbPushDone(StringView filePath,
@@ -1694,11 +1710,11 @@ QRect EmulatorQtWindow::deviceGeometry() const {
 }
 
 android::emulation::AdbInterface* EmulatorQtWindow::getAdbInterface() const {
-    return mAdbInterface.get();
+    return mAdbInterface->get();
 }
 
 ScreenCapturer* EmulatorQtWindow::getScreenCapturer() {
-    return &mScreenCapturer;
+    return mScreenCapturer.ptr();
 }
 
 void EmulatorQtWindow::toggleZoomMode() {
@@ -1859,16 +1875,16 @@ void EmulatorQtWindow::wheelScrollTimeout() {
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
     QSettings settings;
-    if (!mAdbInterface->isAdbVersionCurrent() &&
+    if (!(*mAdbInterface)->isAdbVersionCurrent() &&
         settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool()) {
-        std::string adb_path = mAdbInterface->detectedAdbPath();
+        std::string adb_path = (*mAdbInterface)->detectedAdbPath();
         if (adb_path.empty()) {
-            mAdbWarningBox.setText(
+            mAdbWarningBox->setText(
                     tr("Could not automatically detect an ADB binary. Some "
                        "emulator functionality will not work until a custom "
                        "path to ADB  is added in the extended settings page."));
         } else {
-            mAdbWarningBox.setText(
+            mAdbWarningBox->setText(
                     tr("The ADB binary found at %1 is obsolete and has serious"
                        "performance problems with the Android Emulator. Please "
                        "update to a newer version to get significantly faster "
@@ -1877,21 +1893,21 @@ void EmulatorQtWindow::checkAdbVersionAndWarn() {
         }
         QSettings settings;
         if (settings.value(Ui::Settings::SHOW_ADB_WARNING, true).toBool()) {
-            QObject::connect(&mAdbWarningBox,
+            QObject::connect(mAdbWarningBox.ptr(),
                              SIGNAL(buttonClicked(QAbstractButton*)), this,
                              SLOT(slot_adbWarningMessageAccepted()));
 
             QCheckBox* checkbox = new QCheckBox(tr("Never show this again."));
             checkbox->setCheckState(Qt::Unchecked);
-            mAdbWarningBox.setWindowModality(Qt::NonModal);
-            mAdbWarningBox.setCheckBox(checkbox);
-            mAdbWarningBox.show();
+            mAdbWarningBox->setWindowModality(Qt::NonModal);
+            mAdbWarningBox->setCheckBox(checkbox);
+            mAdbWarningBox->show();
         }
     }
 }
 
 void EmulatorQtWindow::slot_adbWarningMessageAccepted() {
-    QCheckBox* checkbox = mAdbWarningBox.checkBox();
+    QCheckBox* checkbox = mAdbWarningBox->checkBox();
     if (checkbox->checkState() == Qt::Checked) {
         QSettings settings;
         settings.setValue(Ui::Settings::SHOW_ADB_WARNING, false);
@@ -1904,7 +1920,7 @@ void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
         return;
     }
     mStartedAdbStopProcess = true;
-    mAdbInterface->runAdbCommand(
+    (*mAdbInterface)->runAdbCommand(
             {"shell", "stop"},
             [this](const android::emulation::OptionalAdbCommandResult&) {
                 queueQuitEvent();
