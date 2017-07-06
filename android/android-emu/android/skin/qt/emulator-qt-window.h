@@ -13,6 +13,7 @@
 #pragma once
 
 #include "android/base/containers/CircularBuffer.h"
+#include "android/base/memory/OnDemand.h"
 #include "android/base/StringView.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/emulation/control/ApkInstaller.h"
@@ -72,6 +73,22 @@ private:
     StartFunction start_function;
     int argc;
     char** argv;
+};
+
+class CustomInitProgressDialog : public QProgressDialog {
+    Q_OBJECT
+
+public:
+    using InitFunc = std::function<void(QProgressDialog*)>;
+
+    CustomInitProgressDialog(QWidget* parent, InitFunc initFunc)
+        : QProgressDialog(parent) {
+        initFunc(this);
+    }
+    ~CustomInitProgressDialog() {
+        disconnect();
+        close();
+    }
 };
 
 class EmulatorQtWindow final : public QFrame {
@@ -308,10 +325,7 @@ private:
 
     // When the main window appears, close the "Starting..."
     // pop-up, if it was displayed.
-    void showEvent(QShowEvent* event) override {
-        mStartupTimer.stop();
-        mStartupDialog.close();
-    }
+    void showEvent(QShowEvent* event) override;
 
     // These are all called on first window show and
     // depend on AVD info, GPU info, etc.,
@@ -346,7 +360,8 @@ private:
 
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
-    QProgressDialog mStartupDialog;
+    android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
+    bool mStartupDone = false;
 
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingBitmap;
@@ -380,28 +395,54 @@ private:
 
     MainLoopThread* mMainLoopThread;
 
-    QMessageBox mAvdWarningBox;
+    using OnDemandMessageBox =
+            android::base::MemberOnDemandT<QMessageBox,
+                                           QMessageBox::Icon,
+                                           QString,
+                                           QString,
+                                           QMessageBox::StandardButton,
+                                           QWidget*>;
+
+    OnDemandMessageBox mAvdWarningBox;
+    OnDemandMessageBox mGpuWarningBox;
+    OnDemandMessageBox mAdbWarningBox;
 
     // First-show related warning messages state
     bool mGpuBlacklisted = false;
     bool mHasForcedRenderer = false;
     bool mShouldShowGpuWarning = false;
-    QMessageBox mGpuWarningBox;
-    QMessageBox mAdbWarningBox;
-    bool mFirstShowEvent;
+    bool mFirstShowWindowCall = true;
+    bool mFirstShowEvent = true;
 
     EventCapturer mEventCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
             mEventLogger;
 
     std::shared_ptr<android::qt::UserActionsCounter> mUserActionsCounter;
-    std::unique_ptr<android::emulation::AdbInterface> mAdbInterface;
+    android::base::MemberOnDemandT<
+            std::unique_ptr<android::emulation::AdbInterface>,
+            std::unique_ptr<android::emulation::AdbInterface>>
+            mAdbInterface;
     android::emulation::AdbCommandPtr mApkInstallCommand;
-    android::emulation::ApkInstaller mApkInstaller;
-    android::emulation::FilePusher mFilePusher;
-    android::emulation::ScreenCapturer mScreenCapturer;
-    QProgressDialog mInstallDialog;
-    QProgressDialog mPushDialog;
+    android::base::MemberOnDemandT<android::emulation::ApkInstaller,
+                                   android::emulation::AdbInterface*>
+            mApkInstaller;
+    android::base::MemberOnDemandT<
+            android::emulation::FilePusher,
+            android::emulation::AdbInterface*,
+            android::emulation::FilePusher::ResultCallback,
+            android::emulation::FilePusher::ProgressCallback>
+            mFilePusher;
+    android::base::MemberOnDemandT<android::emulation::ScreenCapturer,
+                                   android::emulation::AdbInterface*>
+            mScreenCapturer;
+
+    using OnDemandProgressDialog =
+            android::base::MemberOnDemandT<CustomInitProgressDialog,
+                                           QWidget*,
+                                           CustomInitProgressDialog::InitFunc>;
+    OnDemandProgressDialog mInstallDialog;
+    OnDemandProgressDialog mPushDialog;
 
     QTimer mWheelScrollTimer;
     QPoint mWheelScrollPos;
