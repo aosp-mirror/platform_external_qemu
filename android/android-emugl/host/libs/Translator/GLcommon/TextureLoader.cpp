@@ -29,7 +29,7 @@ void TextureLoader::loadTexture(uint32_t texId, loader_t loader) {
 
 bool TextureLoader::readIndex() {
 #if SNAPSHOT_PROFILE > 1
-    auto start = base::System::get()->getHighResTimeUs();
+    auto start = android::base::System::get()->getHighResTimeUs();
 #endif
     assert(mIndex.size() == 0);
     uint64_t indexPos = mStream.getBe64();
@@ -47,7 +47,7 @@ bool TextureLoader::readIndex() {
     }
 #if SNAPSHOT_PROFILE > 1
     printf("Texture readIndex() time: %.03f\n",
-           (base::System::get()->getHighResTimeUs() - start) / 1000.0);
+           (android::base::System::get()->getHighResTimeUs() - start) / 1000.0);
 #endif
     return true;
 }

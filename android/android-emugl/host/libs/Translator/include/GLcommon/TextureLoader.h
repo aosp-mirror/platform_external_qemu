@@ -38,6 +38,6 @@ private:
     std::unordered_map<uint32_t, int64_t> mIndex;
     android::base::Lock mLock;
 #if SNAPSHOT_PROFILE > 1
-    base::System::WallDuration mStartTime;
+    android::base::System::WallDuration mStartTime;
 #endif
 };
