@@ -45,10 +45,11 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch() {
         }
     }
 
-    // TODO: Remove restriction when core profile is working
 #ifdef __APPLE__
-    if (emugl::getRenderer() != SELECTED_RENDERER_SWIFTSHADER) {
-        res = GLES_DISPATCH_MAX_VERSION_2;
+    if (emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion) &&
+        res > GLES_DISPATCH_MAX_VERSION_2) {
+        // TODO: Remove restriction when ES 3.1 is working on Mac
+        res = GLES_DISPATCH_MAX_VERSION_3_0;
     }
 #endif
 
