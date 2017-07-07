@@ -3206,7 +3206,6 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
-    (void)dataSize;
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
@@ -3317,15 +3316,21 @@ GL_APICALL void GL_APIENTRY glGenVertexArraysOES(GLsizei n, GLuint* arrays) {
 
 GL_APICALL void GL_APIENTRY glBindVertexArrayOES(GLuint array) {
     GET_CTX_V2();
-    if (ctx->setVertexArrayObject(array)) {
-        // TODO: This could be useful for a glIsVertexArray
-        // that doesn't use the host GPU, but currently, it doesn't
-        // really work. VAOs need to be bound first if glIsVertexArray
-        // is to return true, and for now let's just ask the GPU
-        // directly.
-        ctx->setVAOEverBound();
+    if (!array) {
+        array = ctx->getDefaultVAO();
+        ctx->dispatcher().glBindVertexArray(array);
+    } else {
+        if (ctx->setVertexArrayObject(array)) {
+            // TODO: This could be useful for a glIsVertexArray
+            // that doesn't use the host GPU, but currently, it doesn't
+            // really work. VAOs need to be bound first if glIsVertexArray
+            // is to return true, and for now let's just ask the GPU
+            // directly.
+            ctx->setVAOEverBound();
+        }
+        ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
     }
-    ctx->dispatcher().glBindVertexArray(ctx->getVAOGlobalName(array));
+    ctx->setVertexArrayObject(array);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * arrays) {
