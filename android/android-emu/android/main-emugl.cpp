@@ -37,6 +37,15 @@ bool androidEmuglConfigInit(EmuglConfig* config,
     if (avdName) {
         gpuMode.reset(path_getAvdGpuMode(avdName));
         gpuEnabled = (gpuMode.get() != nullptr);
+        // If the user has hw config set to mesa, not-so-silently overrule that.
+        if (!gpuOption && !strcmp(gpuMode.get(), "mesa")) {
+            fprintf(stderr,
+                    "Your AVD has been configured with the Mesa renderer, "
+                    "which is deprecated. This AVD is being auto-switched to "
+                    "the current and better-supported \'swiftshader\' renderer. "
+                    "Please update your AVD config.ini's hw.gpu.mode to match.\n");
+            gpuMode.reset(::strdup("swiftshader"));
+        }
     } else if (!gpuOption) {
         // In the case of a platform build, use the 'auto' mode by default.
         gpuMode.reset(::strdup("auto"));

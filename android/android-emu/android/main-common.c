@@ -1869,6 +1869,7 @@ bool configAndStartRenderer(
     D("%s", config.status);
 
     const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
+
 #ifdef _WIN32
     // BUG: https://code.google.com/p/android/issues/detail?id=199427
     // Booting will be severely slowed down, if not disabled outright, when
