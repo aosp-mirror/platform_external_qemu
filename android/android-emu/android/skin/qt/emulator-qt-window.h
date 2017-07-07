@@ -413,6 +413,9 @@ private:
     bool mShouldShowGpuWarning = false;
     bool mFirstShowWindowCall = true;
     bool mFirstShowEvent = true;
+    // Some events may arrive after closing the main window (e.g. async screen
+    // redraw requests); we want to ignore those when exiting.
+    bool mClosed = false;
 
     EventCapturer mEventCapturer;
     std::shared_ptr<UIEventRecorder<android::base::CircularBuffer>>
