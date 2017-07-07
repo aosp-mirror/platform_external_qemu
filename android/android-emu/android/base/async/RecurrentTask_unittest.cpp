@@ -133,7 +133,8 @@ TEST(RecurrentTaskTest, stopFromCallback) {
     EXPECT_EQ(1, count);
 }
 
-TEST(RecurrentTaskTest, stopAndWait) {
+// TODO: this test is unstable as TestLooper isn't thread-safe.
+TEST(RecurrentTaskTest, DISABLED_stopAndWait) {
     TestLooper looper;
     int count = 0;
     RecurrentTask task(&looper,
