@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-ShaderParser::ShaderParser(GLenum type) : ObjectData(SHADER_DATA), m_type(type) {}
+ShaderParser::ShaderParser(GLenum type, bool coreProfile) : ObjectData(SHADER_DATA), m_type(type), m_coreProfile(coreProfile) {}
 
 GenNameInfo ShaderParser::getGenNameInfo() const {
     switch (m_type) {
@@ -55,6 +55,7 @@ ShaderParser::ShaderParser(android::base::Stream* stream) : ObjectData(stream) {
     m_compileStatus = stream->getByte();
     m_deleteStatus = stream->getByte();
     m_valid = stream->getByte();
+    m_coreProfile = stream->getByte();
 }
 
 void ShaderParser::onSave(android::base::Stream* stream) const {
@@ -76,6 +77,7 @@ void ShaderParser::onSave(android::base::Stream* stream) const {
     stream->putByte(m_compileStatus);
     stream->putByte(m_deleteStatus);
     stream->putByte(m_valid);
+    stream->putByte(m_coreProfile);
 }
 
 void ShaderParser::restore(ObjectLocalName localName,
@@ -106,8 +108,13 @@ void ShaderParser::convertESSLToGLSL(int esslVersion) {
     std::string parsedSource;
     m_valid =
         ANGLEShaderParser::translate(
-            esslVersion, m_originalSrc.c_str(), m_type,
-            &infolog, &parsedSource, &m_shaderLinkInfo);
+            m_coreProfile,
+            esslVersion,
+            m_originalSrc.c_str(),
+            m_type,
+            &infolog,
+            &parsedSource,
+            &m_shaderLinkInfo);
 
     if (!m_valid) {
         m_infoLog = static_cast<const GLchar*>(infolog.c_str());

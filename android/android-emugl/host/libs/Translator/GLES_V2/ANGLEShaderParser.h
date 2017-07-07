@@ -50,7 +50,8 @@ bool globalInitialize(
         int maxProgramTexelOffset,
         int maxDualSourceDrawBuffers);
 
-bool translate(int esslVersion, const char* src, GLenum shaderType,
+bool translate(bool hostUsesCoreProfile,
+               int esslVersion, const char* src, GLenum shaderType,
                std::string* outInfolog, std::string* outObjCode,
                ShaderLinkInfo* outShaderLinkInfo);
 }

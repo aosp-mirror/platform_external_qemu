@@ -25,7 +25,7 @@
 
 class ShaderParser : public ObjectData {
 public:
-    ShaderParser(GLenum type = 0);
+    ShaderParser(GLenum type, bool coreProfile);
     ShaderParser(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
     virtual void restore(ObjectLocalName localName,
@@ -65,6 +65,7 @@ public:
 
     virtual GenNameInfo getGenNameInfo() const override;
     const char* getCompiledSrc() const { return m_compiledSrc.c_str(); }
+
 private:
     void convertESSLToGLSL(int esslVersion);
 
@@ -80,5 +81,6 @@ private:
     bool        m_deleteStatus = false;
     bool        m_valid = true;
     ANGLEShaderParser::ShaderLinkInfo m_shaderLinkInfo;
+    bool        m_coreProfile = false;
 };
 #endif
