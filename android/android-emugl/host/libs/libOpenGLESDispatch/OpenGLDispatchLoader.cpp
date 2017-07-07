@@ -31,6 +31,10 @@ const GLESv2Dispatch* LazyLoadedGLESv2Dispatch::get() {
     }
 }
 
+LazyLoadedGLESv2Dispatch::LazyLoadedGLESv2Dispatch() {
+    mValid = gles2_dispatch_init(&mDispatch);
+}
+
 android::base::LazyInstance<LazyLoadedEGLDispatch> sEGLDispatch = LAZY_INSTANCE_INIT;
 
 // static
@@ -42,3 +46,5 @@ const EGLDispatch* LazyLoadedEGLDispatch::get() {
         return nullptr;
     }
 }
+
+LazyLoadedEGLDispatch::LazyLoadedEGLDispatch() { mValid = init_egl_dispatch(); }
