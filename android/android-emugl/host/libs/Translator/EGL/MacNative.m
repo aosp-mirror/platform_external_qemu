@@ -63,49 +63,148 @@
 }
 @end
 
+int getAttrListLength(NSOpenGLPixelFormatAttribute* list) {
+    int count = 0;
+    while (list[count++] != 0);
+    return count ? (count - 1) : 0;
+}
+
+static const NSOpenGLPixelFormatAttribute core32TestProfile[] = {
+    NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
+    NSOpenGLPFADoubleBuffer,
+    NSOpenGLPFAColorSize   ,32,
+    NSOpenGLPFADepthSize   ,24,
+    NSOpenGLPFAStencilSize ,8,
+    0
+};
+
+static const NSOpenGLPixelFormatAttribute core41TestProfile[] = {
+    NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
+    NSOpenGLPFADoubleBuffer,
+    NSOpenGLPFAColorSize   ,32,
+    NSOpenGLPFADepthSize   ,24,
+    NSOpenGLPFAStencilSize ,8,
+    0
+};
+
+void setupCoreProfileNativeFormats() {
+
+    NSOpenGLPixelFormat* core41Supported =
+        [[NSOpenGLPixelFormat alloc] initWithAttributes: core41TestProfile];
+
+    if (core41Supported) {
+        setCoreProfileLevel(NSOpenGLProfileVersion4_1Core);
+        [core41Supported release];
+        return;
+    }
+
+    NSOpenGLPixelFormat* core32Supported =
+        [[NSOpenGLPixelFormat alloc] initWithAttributes: core32TestProfile];
+
+    if (core32Supported) {
+        setCoreProfileLevel(NSOpenGLProfileVersion3_2Core);
+        [core32Supported release];
+        return;
+    }
+}
+
 int getNumPixelFormats(){
     int size;
-    NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
+    NSOpenGLPixelFormatAttribute** attrib_lists =
+        getPixelFormatsAttributes(&size);
     return size;
 }
 
-void* getPixelFormat(int i){
+void* finalizePixelFormat(bool coreProfile,
+                          int attribsId) {
     int size;
-    NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    return [[NSOpenGLPixelFormat alloc] initWithAttributes:attrib_lists[i]];
+    NSOpenGLPixelFormatAttribute** attrib_lists =
+        getPixelFormatsAttributes(&size);
+
+    assert(attribsId < size);
+
+    NSOpenGLPixelFormatAttribute* attrs =
+        attrib_lists[attribsId];
+
+    NSOpenGLPixelFormatAttribute* selected_variant =
+        coreProfile ?
+        getCoreProfileAttributes() :
+        getLegacyProfileAttributes();
+
+    // Format it as |variant| |attribs|
+    int variant_size =
+        getAttrListLength(selected_variant);
+    int attrib_size = getAttrListLength(attrs);
+    int numAttribsTotal = attrib_size + variant_size + 1; // for trailing 0
+
+    NSOpenGLPixelFormatAttribute* newAttrs =
+        malloc(sizeof(NSOpenGLPixelFormatAttribute) * numAttribsTotal);
+
+    int variant_part_bytes =
+        sizeof(NSOpenGLPixelFormatAttribute) * variant_size;
+    int attribs_part_bytes =
+        sizeof(NSOpenGLPixelFormatAttribute) * attrib_size;
+
+    memcpy(newAttrs, selected_variant, variant_part_bytes);
+    memcpy((char*)newAttrs + variant_part_bytes,
+           attrs, attribs_part_bytes);
+    newAttrs[numAttribsTotal - 1] = 0;
+
+    void* finalizedFormat =
+        [[NSOpenGLPixelFormat alloc] initWithAttributes: newAttrs];
+
+    free(newAttrs);
+
+    return finalizedFormat;
 }
 
-int getPixelFormatDefinitionAlpha(int i) {
-    int size;
-    NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    NSOpenGLPixelFormatAttribute* attribs = attrib_lists[i];
-    while (*attribs) {
-        switch (*attribs) {
+static bool sIsKeyValueAttrib(NSOpenGLPixelFormatAttribute attrib) {
+    switch (attrib) {
         // These are the ones that take a value, according to the current
         // NSOpenGLPixelFormat docs
+        case NSOpenGLPFAOpenGLProfile:
         case NSOpenGLPFAAuxBuffers:
         case NSOpenGLPFAColorSize:
+        case NSOpenGLPFAAlphaSize:
         case NSOpenGLPFADepthSize:
         case NSOpenGLPFAStencilSize:
         case NSOpenGLPFAAccumSize:
         case NSOpenGLPFARendererID:
         case NSOpenGLPFAScreenMask:
-            attribs += 2;
-            break;
-        case NSOpenGLPFAAlphaSize:
-            return attribs[1];
-            break;
-        // All other attributes are boolean attributes that don't take a value
+            return true;
         default:
+            return false;
+    }
+}
+
+int getPixelFormatAttrib(int i, int _query) {
+    NSOpenGLPixelFormatAttribute query =
+        (NSOpenGLPixelFormatAttribute)_query;
+    int size;
+    NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
+    int attributes_num = i % size;
+    NSOpenGLPixelFormatAttribute* attribs = attrib_lists[attributes_num];
+    int res = 0;
+    while (*attribs) {
+        if (sIsKeyValueAttrib(*attribs)) {
+            if (query == *attribs) {
+                return attribs[1];
+            }
+            attribs += 2;
+        } else {
+            // these are boolean attribs.
+            // their mere presence signals
+            // that the query should return true.
+            if (query == *attribs) {
+                return 1;
+            }
             attribs++;
         }
     }
+    // return 0 if key not found---takes care of all boolean attribs,
+    // and we depend on returning alpha=0 to make the default
+    // config for GLSurfaceView happy.
     return 0;
-}
-
-void getPixelFormatAttrib(void* pixelFormat,int attrib,int* val){
-    NSOpenGLPixelFormat *frmt = (NSOpenGLPixelFormat *)pixelFormat;
-    [frmt getValues:val forAttribute:attrib forVirtualScreen:0];
 }
 
 void* nsCreateContext(void* format,void* share){
