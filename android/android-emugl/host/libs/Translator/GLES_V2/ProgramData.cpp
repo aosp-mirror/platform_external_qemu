@@ -27,6 +27,8 @@
 #include <string.h>
 #include <unordered_set>
 
+using android::base::StringView;
+
 GLUniformDesc::GLUniformDesc(const char* name, GLint location, GLsizei count, GLboolean transpose,
             GLenum type, GLsizei size, unsigned char* val)
         : mCount(count), mTranspose(transpose), mType(type)
@@ -598,6 +600,38 @@ GLuint ProgramData::getAttachedComputeShader() const {
 
 GLuint ProgramData::getAttachedShader(GLenum type) const {
     return attachedShaders[s_glShaderType2ShaderType(type)].localName;
+}
+
+StringView
+ProgramData::getTranslatedName(StringView userVarName) const {
+    for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+        ShaderParser* sp = attachedShaders[i].shader;
+        if (!sp) continue;
+        const ANGLEShaderParser::ShaderLinkInfo& linkInfo =
+            sp->getShaderLinkInfo();
+
+        if (const auto name = android::base::find(linkInfo.nameMap,
+                                                  userVarName)) {
+            return *name;
+        }
+    }
+    return userVarName;
+}
+
+StringView
+ProgramData::getDetranslatedName(StringView driverName) const {
+    for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+        ShaderParser* sp = attachedShaders[i].shader;
+        if (!sp) continue;
+        const ANGLEShaderParser::ShaderLinkInfo& linkInfo =
+            sp->getShaderLinkInfo();
+
+        if (const auto name = android::base::find(linkInfo.nameMapReverse,
+                                                  driverName)) {
+            return *name;
+        }
+    }
+    return driverName;
 }
 
 bool ProgramData::attachShader(GLuint shader, ShaderParser* shaderData,
