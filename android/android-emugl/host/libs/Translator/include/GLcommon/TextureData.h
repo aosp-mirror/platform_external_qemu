@@ -17,6 +17,7 @@
 #pragma once
 
 #include "android/base/files/Stream.h"
+
 #include "GLcommon/ObjectData.h"
 
 #include <memory>
@@ -72,6 +73,7 @@ public:
     void setSaveableTexture(SaveableTexturePtr&& saveableTexture);
     SaveableTexturePtr releaseSaveableTexture();
     void setTexParam(GLenum pname, GLint param);
+    GLenum getSwizzle(GLenum component) const;
 protected:
     std::unordered_map<GLenum, GLint> m_texParam;
     SaveableTexturePtr m_saveableTexture;
