@@ -3292,7 +3292,6 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
-    (void)dataSize;
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
@@ -3425,6 +3424,7 @@ GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * ar
 
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     GET_CTX_V2_RET(0);
+    if (!array) return GL_FALSE;
     // TODO: Figure out how to answer this completely in software.
     // Currently, state gets weird so we need to ask the GPU directly.
     return ctx->dispatcher().glIsVertexArray(ctx->getVAOGlobalName(array));
