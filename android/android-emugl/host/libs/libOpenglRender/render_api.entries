@@ -1,9 +1,16 @@
 !render_api
 
 %#include "OpenglRender/RenderLib.h"
+%typedef bool (*render_api_feature_is_enabled_t)(uint32_t);
 %
 
 # Initializes the library and tries to load the corresponding EGL/GLES
 # translation libraries.
 # Returns either the library accessor smart pointer or null on failure.
-emugl::RenderLibPtr initLibrary(void);
+emugl::RenderLibPtr initLibrary(render_api_feature_is_enabled_t feature_is_enabled_func);
+
+# Allows Translator and other libraries to access feature control.
+bool renderApiFeatureIsEnabled(uint32_t feature);
+
+# Allows Translator and other libraries to access the current GLES version.
+void renderApiGlesVersion(int* maj, int* min);
