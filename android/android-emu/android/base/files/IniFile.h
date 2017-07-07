@@ -73,8 +73,9 @@ public:
     // Check if a certain key exists in the file.
     bool hasKey(StringView key) const;
 
-    // Make sure the string can be used as a valid key
+    // Make sure the string can be used as a valid key/value
     static std::string makeValidKey(StringView str);
+    static std::string makeValidValue(StringView str);
 
     // ///////////////////// Value Getters
     // //////////////////////////////////////
