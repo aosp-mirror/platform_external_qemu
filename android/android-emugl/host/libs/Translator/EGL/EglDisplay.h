@@ -107,7 +107,7 @@ private:
     static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 
     int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
-    void addSimplePixelFormat(int red_size, int green_size, int blue_size, int alpha_size);
+    void addSimplePixelFormat(int red_size, int green_size, int blue_size, int alpha_size, int renderable_type);
     void addMissingConfigs(void);
     void initConfigurations(int renderableType);
 

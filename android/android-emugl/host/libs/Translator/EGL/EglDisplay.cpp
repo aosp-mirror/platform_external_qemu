@@ -217,7 +217,8 @@ public:
 void EglDisplay::addSimplePixelFormat(int red_size,
                                       int green_size,
                                       int blue_size,
-                                      int alpha_size) {
+                                      int alpha_size,
+                                      int renderable_type) {
     std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigs::StaticCompare());
 
     EGLConfig match;
@@ -234,7 +235,7 @@ void EglDisplay::addSimplePixelFormat(int red_size,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
-                    EGL_DONT_CARE,
+                    renderable_type,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     EGL_DONT_CARE,
@@ -282,8 +283,12 @@ void EglDisplay::addSimplePixelFormat(int red_size,
 }
 
 void EglDisplay::addMissingConfigs() {
-    addSimplePixelFormat(5, 6, 5, 0); // RGB_565
-    addSimplePixelFormat(8, 8, 8, 0); // RGB_888
+    EGLint es1only = EGL_OPENGL_ES_BIT;
+    EGLint es23only = EGL_OPENGL_ES2_BIT | EGL_OPENGL_ES3_BIT;
+    addSimplePixelFormat(5, 6, 5, 0, es1only);
+    addSimplePixelFormat(8, 8, 8, 0, es1only);
+    addSimplePixelFormat(5, 6, 5, 0, es23only);
+    addSimplePixelFormat(8, 8, 8, 0, es23only);
     // (Host GPUs that are newer may not list RGB_888
     // out of the box.)
 }
