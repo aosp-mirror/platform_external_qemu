@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "802463d3_0b3f5276",
+        "filename": "android/android-emugl/host/libs/libGLES12Translator/common/log.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-07T04:51:02Z",
+      "side": 0,
+      "message": "making sure it isn\u0027t used with some #define",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 23
+      },
+      "revId": "4f046ab6f58414cc3304d2bf2c8282a4c1667fe1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
