@@ -103,6 +103,8 @@ private:
     System::WallDuration mStartTimeUs;
 #ifdef _WIN32
     long long mFreqPerSec = 0;    // 0 means 'high perf counter isn't available'
+#elif defined(__APPLE__)
+    clock_serv_t mClockServ;
 #endif
 
 public:
@@ -112,9 +114,17 @@ public:
         if (::QueryPerformanceFrequency(&freq)) {
             mFreqPerSec = freq.QuadPart;
         }
+#elif defined(__APPLE__)
+        host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &mClockServ);
 #endif
         mStartTimeUs = getUs();
     }
+
+#ifdef __APPLE__
+    ~TickCountImpl() {
+        mach_port_deallocate(mach_task_self(), mClockServ);
+    }
+#endif
 
     System::WallDuration getStartTimeUs() const {
         return mStartTimeUs;
@@ -132,13 +142,9 @@ public:
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000000ll + ts.tv_nsec / 1000;
-#else // MAC
-    clock_serv_t clockServ;
+#else // APPLE
     mach_timespec_t mts;
-    host_get_clock_service(mach_host_self(), SYSTEM_CLOCK, &clockServ);
     clock_get_time(clockServ, &mts);
-    mach_port_deallocate(mach_task_self(), clockServ);
-
     return mts.tv_sec * 1000000ll + mts.tv_nsec / 1000;
 #endif
     }
