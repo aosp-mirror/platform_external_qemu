@@ -244,6 +244,9 @@ public:
     virtual int getMaxCombinedTexUnits() { return getMaxTexUnits(); }
     virtual void drawValidate(void);
 
+    // Core profile accessors
+    bool isCoreProfile() const { return m_coreProfile; }
+    void setCoreProfile(bool core) { m_coreProfile = core; }
     // Default FBO emulation. Do not call this from GLEScontext context;
     // it needs dynamic dispatch (from GLEScmContext or GLESv2Context DLLs)
     // to pick up on the right functions.
@@ -524,6 +527,8 @@ private:
     // m_vaoNameSpace is an empty shell that holds the names but not the data
     // TODO(yahan): consider moving the data into it?
     NameSpace* m_vaoNameSpace = nullptr;
+
+    bool                  m_coreProfile = false;
 };
 
 #endif
