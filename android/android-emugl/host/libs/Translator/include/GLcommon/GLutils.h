@@ -25,6 +25,11 @@
 void setGles2Gles(bool isGles2gles);
 bool isGles2Gles();
 
+// is/setCoreProfile sets the global variable for
+// when core profile is in use.
+void setCoreProfile(bool isCore);
+bool isCoreProfile();
+
 typedef enum {
     GLES_1_1 = 1,
     GLES_2_0 = 2,

@@ -80,6 +80,7 @@ static void initGLESx(bool isGles2Gles) {
 }
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
+    setCoreProfile(ctx->isCoreProfile());
     if (!ctx->isInitialized()) {
         ctx->setShareGroup(grp);
         ctx->init(s_eglIface->eglGetGlLibrary());

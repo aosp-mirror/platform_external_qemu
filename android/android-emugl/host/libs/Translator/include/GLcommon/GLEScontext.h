@@ -373,6 +373,10 @@ public:
     // postLoad is triggered after setting up ShareGroup
     virtual void postLoad();
     virtual void restore();
+
+    bool isCoreProfile() const { return m_coreProfile; }
+    void setCoreProfile(bool core) { m_coreProfile = core; }
+
 protected:
     void initDefaultFboImpl(
         GLint width, GLint height,
@@ -524,6 +528,8 @@ private:
     // m_vaoNameSpace is an empty shell that holds the names but not the data
     // TODO(yahan): consider moving the data into it?
     NameSpace* m_vaoNameSpace = nullptr;
+
+    bool m_coreProfile = false;
 };
 
 #endif

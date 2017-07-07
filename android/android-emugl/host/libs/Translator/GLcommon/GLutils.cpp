@@ -20,6 +20,7 @@ bool isPowerOf2(int num) {
 }
 
 static bool s_gles2Gles = false;
+static bool s_coreProfile = false;
 
 void setGles2Gles(bool isGles2Gles) {
     s_gles2Gles = isGles2Gles;
@@ -27,4 +28,12 @@ void setGles2Gles(bool isGles2Gles) {
 
 bool isGles2Gles() {
     return s_gles2Gles;
+}
+
+void setCoreProfile(bool isCore) {
+    s_coreProfile = isCore;
+}
+
+bool isCoreProfile() {
+    return s_coreProfile;
 }
