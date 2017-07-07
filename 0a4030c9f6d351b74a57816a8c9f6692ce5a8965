@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7c1f4d87_d93082be",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2855,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T17:58:51Z",
+      "side": 1,
+      "message": "ANGLE does not like GL_UNSIGNED_SHORT here - and GL_UNSIGNED_BYTE is already having higher precision than GL_UNSIGNED_SHORT_5_5_5_1.",
+      "parentUuid": "833bfc37_258808c3",
+      "range": {
+        "startLine": 2855,
+        "startChar": 31,
+        "endLine": 2855,
+        "endChar": 35
+      },
+      "revId": "0a4030c9f6d351b74a57816a8c9f6692ce5a8965",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7a4c4691_2bafb708",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLDispatch.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "42921e84_34f4b5e6",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLDispatch.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T17:58:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a4c4691_2bafb708",
+      "range": {
+        "startLine": 59,
+        "startChar": 14,
+        "endLine": 59,
+        "endChar": 78
+      },
+      "revId": "0a4030c9f6d351b74a57816a8c9f6692ce5a8965",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d4714ba5_b276ca09",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLutils.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2017-07-07T05:09:06Z",
       "side": 1,
       "message": "how many static bools for this flag we\u0027ve got already? :)",
+      "range": {
+        "startLine": 22,
+        "startChar": 12,
+        "endLine": 22,
+        "endChar": 23
+      },
+      "revId": "0a4030c9f6d351b74a57816a8c9f6692ce5a8965",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d8a1872_adf7e26d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLutils.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T17:58:51Z",
+      "side": 1,
+      "message": "Each dll has one :( actually libEGL has an extra one, I should remove it.",
+      "parentUuid": "d4714ba5_b276ca09",
       "range": {
         "startLine": 22,
         "startChar": 12,
