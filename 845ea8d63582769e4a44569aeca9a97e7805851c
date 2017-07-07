@@ -22,6 +22,30 @@
       "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf44b12f_9eeadbe1",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T18:00:51Z",
+      "side": 1,
+      "message": "there\u0027s also, if (erasePos \u003d nameNoSuffix.find(\"_indirect\") !\u003d std::string::npos) nameNoSuffix.erase(erasePos), then remove the definition of suffix altogether\n\nThat doesnt handle a backend name that has \"_indirect\" all on its own (resulting in \"_indirect_indirect\") but it still works for our use cases.",
+      "parentUuid": "9417db2a_6f8915f4",
+      "range": {
+        "startLine": 58,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 27
+      },
+      "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
