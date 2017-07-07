@@ -63,26 +63,94 @@
 }
 @end
 
-int getNumPixelFormats(){
-    int size;
-    NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    return size;
+int getAttrListLength(NSOpenGLPixelFormatAttribute* list) {
+    int count = 0;
+    while (list[count++] != 0);
+    return count;
 }
 
-void* getPixelFormat(int i){
-    int size;
+static NSOpenGLPixelFormatAttribute core32TestProfile[] = {
+    NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
+    NSOpenGLPFADoubleBuffer,
+    NSOpenGLPFAColorSize   ,32,
+    NSOpenGLPFADepthSize   ,24,
+    NSOpenGLPFAStencilSize ,8,
+    0
+};
+
+static NSOpenGLPixelFormatAttribute core41TestProfile[] = {
+    NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
+    NSOpenGLPFADoubleBuffer,
+    NSOpenGLPFAColorSize   ,32,
+    NSOpenGLPFADepthSize   ,24,
+    NSOpenGLPFAStencilSize ,8,
+    0
+};
+
+void setupCoreProfileNativeFormats() {
+
+    void* core41Supported = [[NSOpenGLPixelFormat alloc] initWithAttributes: core41TestProfile];
+
+    if (core41Supported) {
+        setCoreProfileLevel(NSOpenGLProfileVersion4_1Core);
+        return;
+    }
+
+    void* core32Supported = [[NSOpenGLPixelFormat alloc] initWithAttributes: core32TestProfile];
+
+    if (core32Supported) {
+        setCoreProfileLevel(NSOpenGLProfileVersion3_2Core);
+        return;
+    }
+}
+
+int getNumPixelFormats(){
+    int size, variants;
     NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    return [[NSOpenGLPixelFormat alloc] initWithAttributes:attrib_lists[i]];
+    NSOpenGLPixelFormatAttribute** variant_lists = getPixelFormatVariants(&variants);
+    return size * variants;
+}
+
+void* getPixelFormat(int i) {
+    int size, variants;
+    NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
+    NSOpenGLPixelFormatAttribute** variant_lists = getPixelFormatVariants(&variants);
+
+    int variant_num = i % variants;
+    int attributes_num = i % size;
+    NSOpenGLPixelFormatAttribute* selected_variant = variant_lists[variant_num];
+    NSOpenGLPixelFormatAttribute* selected_attribs = attrib_lists[attributes_num];
+
+    int variant_size = getAttrListLength(selected_variant) - 1; // for trailing 0
+    int attrib_size = getAttrListLength(selected_attribs);
+    int numAttribsTotal = attrib_size + variant_size;
+
+    NSOpenGLPixelFormatAttribute* newAttrs =
+        malloc(sizeof(NSOpenGLPixelFormatAttribute) * numAttribsTotal);
+
+    int variant_part_bytes = sizeof(NSOpenGLPixelFormatAttribute) * variant_size;
+    int attribs_part_bytes = sizeof(NSOpenGLPixelFormatAttribute) * attrib_size;
+    memcpy(newAttrs, selected_variant, variant_part_bytes);
+    memcpy((char*)newAttrs + variant_part_bytes, selected_attribs, attribs_part_bytes);
+
+    void* nativeResult =
+        [[NSOpenGLPixelFormat alloc] initWithAttributes: newAttrs];
+
+    free(newAttrs);
+
+    return nativeResult;
 }
 
 int getPixelFormatDefinitionAlpha(int i) {
     int size;
     NSOpenGLPixelFormatAttribute** attrib_lists = getPixelFormatsAttributes(&size);
-    NSOpenGLPixelFormatAttribute* attribs = attrib_lists[i];
+    int attributes_num = i % size;
+    NSOpenGLPixelFormatAttribute* attribs = attrib_lists[attributes_num];
     while (*attribs) {
         switch (*attribs) {
         // These are the ones that take a value, according to the current
         // NSOpenGLPixelFormat docs
+        case NSOpenGLPFAOpenGLProfile:
         case NSOpenGLPFAAuxBuffers:
         case NSOpenGLPFAColorSize:
         case NSOpenGLPFADepthSize:
