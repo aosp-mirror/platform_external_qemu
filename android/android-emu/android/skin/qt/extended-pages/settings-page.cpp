@@ -183,21 +183,25 @@ SettingsPage::SettingsPage(QWidget* parent)
             settings.value(Ui::Settings::GLESAPILEVEL_PREFERENCE, 0).toInt());
 
     switch (glesapilevel_pref) {
-    case WINSYS_GLESAPILEVEL_PREFERENCE_GLES20:
+    case WINSYS_GLESAPILEVEL_PREFERENCE_AUTO:
         mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(
-                WINSYS_GLESAPILEVEL_PREFERENCE_GLES20);
+                WINSYS_GLESAPILEVEL_PREFERENCE_AUTO);
         break;
     case WINSYS_GLESAPILEVEL_PREFERENCE_MAX:
         mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(
                 WINSYS_GLESAPILEVEL_PREFERENCE_MAX);
         break;
+    case WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT:
+        mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(
+                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT);
+        break;
     default:
         fprintf(stderr,
                 "%s: warning: unknown GLES API level preference value 0x%x. "
-                "Setting to GLES2.\n",
+                "Setting to Auto.\n",
                 __func__, (unsigned int)glesapilevel_pref);
         mUi->set_glesApiLevelPrefComboBox->setCurrentIndex(
-                WINSYS_GLESAPILEVEL_PREFERENCE_GLES20);
+                WINSYS_GLESAPILEVEL_PREFERENCE_AUTO);
         break;
     }
 
@@ -437,8 +441,9 @@ void SettingsPage::on_set_glesBackendPrefComboBox_currentIndexChanged(int index)
 
 void SettingsPage::on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index) {
     switch (index) {
-    case WINSYS_GLESAPILEVEL_PREFERENCE_GLES20:
+    case WINSYS_GLESAPILEVEL_PREFERENCE_AUTO:
     case WINSYS_GLESAPILEVEL_PREFERENCE_MAX:
+    case WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT:
         set_glesApiLevel_to((WinsysPreferredGlesApiLevel)index);
         break;
     default:
