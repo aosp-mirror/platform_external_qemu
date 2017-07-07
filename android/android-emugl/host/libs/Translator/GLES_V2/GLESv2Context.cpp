@@ -91,6 +91,12 @@ void GLESv2Context::init(GlLibrary* glLib) {
 
         // Create emulated IBO
         dispatcher().glGenBuffers(1, &m_emulatedClientIBO);
+
+        if (isCoreProfile()) {
+            // Create emulated default VAO
+            glGenVertexArrays(1, &m_defaultVAO);
+            glBindVertexArray(getDefaultVAO());
+        }
     }
     m_initialized = true;
 }
@@ -142,6 +148,10 @@ GLESv2Context::~GLESv2Context() {
         s_glDispatch.glDeleteBuffers(1, &m_emulatedClientIBO);
     }
     s_glDispatch.glDeleteBuffers(m_emulatedClientVBOs.size(), &m_emulatedClientVBOs[0]);
+
+    if (m_defaultVAO) {
+        glDeleteVertexArrays(1, &m_defaultVAO);
+    }
 }
 
 void GLESv2Context::onSave(android::base::Stream* stream) const {
