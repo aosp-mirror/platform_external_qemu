@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "18698ebd_c9711285",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T00:36:47Z",
+      "side": 1,
+      "message": "Np. Still, I\u0027d prefer that strstr be used to look for the string ending, or at least this be cleaned up; it really shouldn\u0027t take this many lines of code to detect the suffix of a string and if there should be that many, make it a library function.",
+      "parentUuid": "bac994a6_83782ddc",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 37
+      },
+      "revId": "f356211c26f3b6558eec94060691d64b795e9896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8420ffc_1eafd6cd",
         "filename": "android/android-emu/android/opengl/EmuglBackendScanner.cpp",
         "patchSetId": 2
