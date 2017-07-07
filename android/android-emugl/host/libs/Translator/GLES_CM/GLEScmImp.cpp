@@ -2298,6 +2298,96 @@ GL_API void GL_APIENTRY glGetTexGenxvOES (GLenum coord, GLenum pname, GLfixed *p
     params[0] = F2X(tmpParams[0]);
 }
 
+void glDrawTexOES_core (float x, float y, float z, float width, float height) {
+    GET_CTX_CM()
+    GLDispatch& gl = ctx->dispatcher();
+
+    // get viewport
+    GLint viewport[4] = {};
+    ctx->dispatcher().glGetIntegerv(GL_VIEWPORT,viewport);
+
+
+    // track previous vbo/ibo
+    GLuint prev_vbo;
+    GLuint prev_ibo;
+    gl.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prev_vbo);
+    gl.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prev_ibo);
+
+    // compile shaders, generate vbo/ibo if not done already
+    GLEScmContext::DrawTexOESCoreState drawTexState =
+        ctx->getDrawTexOESCoreState();
+
+    GLuint prog = drawTexState.program;
+    GLuint vbo = drawTexState.vbo;
+    GLuint vao = drawTexState.vao;
+
+    gl.glUseProgram(prog);
+
+    gl.glBindVertexArray(vao);
+
+    GLint samplerLoc = gl.glGetUniformLocation(prog, "tex_sampler");
+
+    // Compute screen coordinates for our texture.
+    // Recenter, rescale. (e.g., [0, 0, 1080, 1920] -> [-1, -1, 1, 1])
+    float xNdc = 2.0f * (float)(x - viewport[0] - viewport[2] / 2) / (float)viewport[2];
+    float yNdc = 2.0f * (float)(y - viewport[1] - viewport[3] / 2) / (float)viewport[3];
+    float wNdc = 2.0f * (float)width / (float)viewport[2];
+    float hNdc = 2.0f * (float)height / (float)viewport[3];
+
+    for (int i = 0; i < ctx->getMaxTexUnits(); i++) {
+        if (ctx->isTextureUnitEnabled(GL_TEXTURE0 + i)) {
+            GLuint bindedTex = ctx->getBindedTexture(GL_TEXTURE0 + i, GL_TEXTURE_2D);
+            ObjectLocalName tex = ctx->getTextureLocalName(GL_TEXTURE_2D, bindedTex);
+
+            auto objData = ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
+
+            if (objData) {
+                TextureData* texData = (TextureData*)objData;
+
+                float texCropX = (float)(texData->crop_rect[0]);
+                float texCropY = (float)(texData->crop_rect[1]);
+
+                float texCropW = (float)(texData->crop_rect[2]);
+                float texCropH = (float)(texData->crop_rect[3]);
+
+                float texW = (float)(texData->width);
+                float texH = (float)(texData->height);
+
+                // Now we know the vertex attributes (pos, texcoord).
+                // Our vertex attributes are formatted with interleaved
+                // position and texture coordinate:
+                float vertexAttrs[] = {
+                    xNdc, yNdc,
+                    texCropX / texW, texCropY / texH,
+
+                    xNdc + wNdc, yNdc,
+                    (texCropX + texCropW) / texW, texCropY / texH,
+
+                    xNdc + wNdc, yNdc + hNdc,
+                    (texCropX + texCropW) / texW, (texCropY + texCropH) / texH,
+
+                    xNdc, yNdc + hNdc,
+                    texCropX / texW, (texCropY + texCropH) / texH,
+                };
+
+                gl.glBindBuffer(GL_ARRAY_BUFFER, vbo);
+                gl.glBufferData(GL_ARRAY_BUFFER, sizeof(vertexAttrs),
+                                vertexAttrs, GL_STREAM_DRAW);
+            }
+
+            gl.glActiveTexture(GL_TEXTURE0 + i);
+            gl.glUniform1i(samplerLoc, i);
+            gl.glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
+    }
+
+    gl.glBindVertexArray(0);
+    gl.glUseProgram(0);
+
+    gl.glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+    gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
+}
+
 template <class T, GLenum TypeName>
 void glDrawTexOES (T x, T y, T z, T width, T height) {
     GET_CTX()
@@ -2306,102 +2396,106 @@ void glDrawTexOES (T x, T y, T z, T width, T height) {
 
     ctx->drawValidate();
 
-    int numClipPlanes;
+    if (isCoreProfile()) {
+        glDrawTexOES_core((float)x, (float)y, (float)z, (float)width, (float)height);
+    } else {
+        int numClipPlanes;
 
-    GLint viewport[4] = {};
-    z = (z>1 ? 1 : (z<0 ?  0 : z));
+        GLint viewport[4] = {};
+        z = (z>1 ? 1 : (z<0 ?  0 : z));
 
-    T vertices[4*3] = {
-        x , y, z,
-        x , static_cast<T>(y+height), z,
-        static_cast<T>(x+width), static_cast<T>(y+height), z,
-        static_cast<T>(x+width), y, z
-    };
-    GLfloat texels[ctx->getMaxTexUnits()][4*2];
-    memset((void*)texels, 0, ctx->getMaxTexUnits()*4*2*sizeof(GLfloat));
+        T vertices[4*3] = {
+            x , y, z,
+            x , static_cast<T>(y+height), z,
+            static_cast<T>(x+width), static_cast<T>(y+height), z,
+            static_cast<T>(x+width), y, z
+        };
+        GLfloat texels[ctx->getMaxTexUnits()][4*2];
+        memset((void*)texels, 0, ctx->getMaxTexUnits()*4*2*sizeof(GLfloat));
 
-    ctx->dispatcher().glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
-    ctx->dispatcher().glPushAttrib(GL_TRANSFORM_BIT);
+        ctx->dispatcher().glPushClientAttrib(GL_CLIENT_VERTEX_ARRAY_BIT);
+        ctx->dispatcher().glPushAttrib(GL_TRANSFORM_BIT);
 
-    //setup projection matrix to draw in viewport aligned coordinates
-    ctx->dispatcher().glMatrixMode(GL_PROJECTION);
-    ctx->dispatcher().glPushMatrix();
-    ctx->dispatcher().glLoadIdentity();
-    ctx->dispatcher().glGetIntegerv(GL_VIEWPORT,viewport);
-    ctx->dispatcher().glOrtho(viewport[0],viewport[0] + viewport[2],viewport[1],viewport[1]+viewport[3],0,-1);
-    //setup texture matrix
-    ctx->dispatcher().glMatrixMode(GL_TEXTURE);
-    ctx->dispatcher().glPushMatrix();
-    ctx->dispatcher().glLoadIdentity();
-    //setup modelview matrix
-    ctx->dispatcher().glMatrixMode(GL_MODELVIEW);
-    ctx->dispatcher().glPushMatrix();
-    ctx->dispatcher().glLoadIdentity();
-    //backup vbo's
-    int array_buffer,element_array_buffer;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&array_buffer);
-    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,&element_array_buffer);
-    ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER,0);
-    ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
+        //setup projection matrix to draw in viewport aligned coordinates
+        ctx->dispatcher().glMatrixMode(GL_PROJECTION);
+        ctx->dispatcher().glPushMatrix();
+        ctx->dispatcher().glLoadIdentity();
+        ctx->dispatcher().glGetIntegerv(GL_VIEWPORT,viewport);
+        ctx->dispatcher().glOrtho(viewport[0],viewport[0] + viewport[2],viewport[1],viewport[1]+viewport[3],0,-1);
+        //setup texture matrix
+        ctx->dispatcher().glMatrixMode(GL_TEXTURE);
+        ctx->dispatcher().glPushMatrix();
+        ctx->dispatcher().glLoadIdentity();
+        //setup modelview matrix
+        ctx->dispatcher().glMatrixMode(GL_MODELVIEW);
+        ctx->dispatcher().glPushMatrix();
+        ctx->dispatcher().glLoadIdentity();
+        //backup vbo's
+        int array_buffer,element_array_buffer;
+        glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&array_buffer);
+        glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,&element_array_buffer);
+        ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER,0);
+        ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,0);
 
-    //disable clip planes
-    ctx->dispatcher().glGetIntegerv(GL_MAX_CLIP_PLANES,&numClipPlanes);
-    for (int i=0;i<numClipPlanes;++i)
-        ctx->dispatcher().glDisable(GL_CLIP_PLANE0+i);
+        //disable clip planes
+        ctx->dispatcher().glGetIntegerv(GL_MAX_CLIP_PLANES,&numClipPlanes);
+        for (int i=0;i<numClipPlanes;++i)
+            ctx->dispatcher().glDisable(GL_CLIP_PLANE0+i);
 
-    int nTexPtrs = 0;
-    for (int i=0;i<ctx->getMaxTexUnits();++i) {
-        if (ctx->isTextureUnitEnabled(GL_TEXTURE0+i)) {
-            TextureData * texData = NULL;
-            unsigned int texname = ctx->getBindedTexture(GL_TEXTURE0+i,GL_TEXTURE_2D);
-            ObjectLocalName tex = ctx->getTextureLocalName(GL_TEXTURE_2D,texname);
-            ctx->dispatcher().glClientActiveTexture(GL_TEXTURE0+i);
-            auto objData = ctx->shareGroup()->getObjectData(
-                    NamedObjectType::TEXTURE, tex);
-            if (objData) {
-                texData = (TextureData*)objData;
-                //calculate texels
-                texels[i][0] = (float)(texData->crop_rect[0])/(float)(texData->width);
-                texels[i][1] = (float)(texData->crop_rect[1])/(float)(texData->height);
+        int nTexPtrs = 0;
+        for (int i=0;i<ctx->getMaxTexUnits();++i) {
+            if (ctx->isTextureUnitEnabled(GL_TEXTURE0+i)) {
+                TextureData * texData = NULL;
+                unsigned int texname = ctx->getBindedTexture(GL_TEXTURE0+i,GL_TEXTURE_2D);
+                ObjectLocalName tex = ctx->getTextureLocalName(GL_TEXTURE_2D,texname);
+                ctx->dispatcher().glClientActiveTexture(GL_TEXTURE0+i);
+                auto objData = ctx->shareGroup()->getObjectData(
+                        NamedObjectType::TEXTURE, tex);
+                if (objData) {
+                    texData = (TextureData*)objData;
+                    //calculate texels
+                    texels[i][0] = (float)(texData->crop_rect[0])/(float)(texData->width);
+                    texels[i][1] = (float)(texData->crop_rect[1])/(float)(texData->height);
 
-                texels[i][2] = (float)(texData->crop_rect[0])/(float)(texData->width);
-                texels[i][3] = (float)(texData->crop_rect[3]+texData->crop_rect[1])/(float)(texData->height);
+                    texels[i][2] = (float)(texData->crop_rect[0])/(float)(texData->width);
+                    texels[i][3] = (float)(texData->crop_rect[3]+texData->crop_rect[1])/(float)(texData->height);
 
-                texels[i][4] = (float)(texData->crop_rect[2]+texData->crop_rect[0])/(float)(texData->width);
-                texels[i][5] = (float)(texData->crop_rect[3]+texData->crop_rect[1])/(float)(texData->height);
+                    texels[i][4] = (float)(texData->crop_rect[2]+texData->crop_rect[0])/(float)(texData->width);
+                    texels[i][5] = (float)(texData->crop_rect[3]+texData->crop_rect[1])/(float)(texData->height);
 
-                texels[i][6] = (float)(texData->crop_rect[2]+texData->crop_rect[0])/(float)(texData->width);
-                texels[i][7] = (float)(texData->crop_rect[1])/(float)(texData->height);
+                    texels[i][6] = (float)(texData->crop_rect[2]+texData->crop_rect[0])/(float)(texData->width);
+                    texels[i][7] = (float)(texData->crop_rect[1])/(float)(texData->height);
 
-                ctx->dispatcher().glTexCoordPointer(2,GL_FLOAT,0,texels[i]);
-                nTexPtrs++;
-             }
+                    ctx->dispatcher().glTexCoordPointer(2,GL_FLOAT,0,texels[i]);
+                    nTexPtrs++;
+                }
+            }
         }
+
+        if (nTexPtrs>0) {
+            //draw rectangle - only if we have some textures enabled & ready
+            ctx->dispatcher().glEnableClientState(GL_VERTEX_ARRAY);
+            ctx->dispatcher().glVertexPointer(3,TypeName,0,vertices);
+            ctx->dispatcher().glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+            ctx->dispatcher().glDrawArrays(GL_TRIANGLE_FAN,0,4);
+        }
+
+        //restore vbo's
+        ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER,array_buffer);
+        ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,element_array_buffer);
+
+        //restore matrix state
+
+        ctx->dispatcher().glMatrixMode(GL_MODELVIEW);
+        ctx->dispatcher().glPopMatrix();
+        ctx->dispatcher().glMatrixMode(GL_TEXTURE);
+        ctx->dispatcher().glPopMatrix();
+        ctx->dispatcher().glMatrixMode(GL_PROJECTION);
+        ctx->dispatcher().glPopMatrix();
+
+        ctx->dispatcher().glPopAttrib();
+        ctx->dispatcher().glPopClientAttrib();
     }
-
-    if (nTexPtrs>0) {
-        //draw rectangle - only if we have some textures enabled & ready
-        ctx->dispatcher().glEnableClientState(GL_VERTEX_ARRAY);
-        ctx->dispatcher().glVertexPointer(3,TypeName,0,vertices);
-        ctx->dispatcher().glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        ctx->dispatcher().glDrawArrays(GL_TRIANGLE_FAN,0,4);
-    }
-
-    //restore vbo's
-    ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER,array_buffer);
-    ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,element_array_buffer);
-
-    //restore matrix state
-
-    ctx->dispatcher().glMatrixMode(GL_MODELVIEW);
-    ctx->dispatcher().glPopMatrix();
-    ctx->dispatcher().glMatrixMode(GL_TEXTURE);
-    ctx->dispatcher().glPopMatrix();
-    ctx->dispatcher().glMatrixMode(GL_PROJECTION);
-    ctx->dispatcher().glPopMatrix();
-
-    ctx->dispatcher().glPopAttrib();
-    ctx->dispatcher().glPopClientAttrib();
 }
 
 GL_API void GL_APIENTRY glDrawTexsOES (GLshort x, GLshort y, GLshort z, GLshort width, GLshort height) {
