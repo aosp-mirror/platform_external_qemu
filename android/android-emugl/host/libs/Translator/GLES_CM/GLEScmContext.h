@@ -33,6 +33,17 @@ class GLEScmContext: public GLEScontext
 {
 public:
     virtual void init(GlLibrary* glLib);
+
+    struct DrawTexOESCoreState {
+        GLuint vshader;
+        GLuint fshader;
+        GLuint program;
+        GLuint vbo;
+        GLuint ibo;
+        GLuint vao;
+    };
+    const DrawTexOESCoreState& getDrawTexOESCoreState();
+
     GLEScmContext(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream);
     void setActiveTexture(GLenum tex);
@@ -69,6 +80,9 @@ private:
     GLESpointer*          m_texCoords = nullptr;
     int                   m_pointsIndex = -1;
     unsigned int          m_clientActiveTexture = 0;
+
+    // Core profile drawTex stuff
+    DrawTexOESCoreState   m_drawTexOESCoreState = {};
 };
 
 #endif
