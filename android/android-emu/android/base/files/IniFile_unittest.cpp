@@ -11,6 +11,7 @@
 
 #include "android/base/files/IniFile.h"
 
+#include "android/base/system/System.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/base/ArraySize.h"
 
@@ -232,6 +233,69 @@ TEST_F(IniFileTest, valueFormat) {
     EXPECT_EQ("value with trailing spaces", mIni->getString("key2", ""));
     EXPECT_EQ("\"value with redundant quotes\"", mIni->getString("key3", ""));
     EXPECT_EQ("", mIni->getString("keyAllSpaces", "nonemptydefault"));
+}
+
+
+TEST_F(IniFileTest, environmentSubstitution) {
+    std::string UNKNOWN = "X_UNKNOWN_X";
+    while(System::get()->envGet(UNKNOWN).size() != 0) {
+      UNKNOWN = UNKNOWN.append("X");
+    }
+
+    EXPECT_EQ("", System::get()->envGet(UNKNOWN));
+
+    static const vector<string> fileData = {
+            "TEST = %%TEST%%",
+            string("FOO = %").append(UNKNOWN).append("%")
+    };
+
+    writeIniFileData(fileData);
+
+    const char* NON = "NOT_IN_THE_MAP";
+    ASSERT_TRUE(mIni->read());
+
+    // Make sure substition happens for something in the file.
+    EXPECT_EQ("%TEST%", mIni->getString("TEST", ""));
+
+    // And for default values
+    EXPECT_EQ("%HI%", mIni->getString(NON, "%%HI%%"));
+    EXPECT_EQ("%HI", mIni->getString(NON, "%HI"));
+    EXPECT_EQ("%%HI%%", mIni->getString(NON, "%%%%HI%%%%"));
+    EXPECT_EQ("", mIni->getString(NON, ""));
+    EXPECT_EQ("", mIni->getString(NON, "%INVA%%LID_ENV_NAME%"));
+
+
+    // Check that we can substitute all the environment variables.
+    for(auto env : System::get()->envGetAll()) {
+      string name = env.substr(0, env.find_first_of('='));
+
+      // Empty environment names??!
+      if (name.size() == 0) continue;
+
+      string escaped = string("%").append(name).append("%");
+      string value = System::get()->envGet(name);
+      EXPECT_EQ(value, mIni->getString(NON, escaped));
+
+
+      escaped = string("%%HELLO%% %").append(name).append("%");
+      string expect = string("%HELLO% ").append(value);
+      EXPECT_EQ(expect, mIni->getString(NON, escaped));
+
+      escaped = string("%%%").append(name).append("%%%");
+      expect = string("%").append(value).append("%");
+      EXPECT_EQ(expect, mIni->getString(NON, escaped));
+    }
+
+    // It should work with numbers too..
+    System::get()->envSet(UNKNOWN, "15.5");
+    EXPECT_EQ(15.5, mIni->getDouble("FOO", -1.2));
+    System::get()->envSet(UNKNOWN, "");
+
+    System::get()->envSet(UNKNOWN, "42");
+    EXPECT_EQ(42, mIni->getInt("FOO", 0));
+
+    System::get()->envSet(UNKNOWN, "true");
+    EXPECT_EQ(true, mIni->getBool("FOO", false));
 }
 
 TEST_F(IniFileTest, readMalformedFile) {

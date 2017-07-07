@@ -12,6 +12,7 @@
 #include "android/base/files/IniFile.h"
 
 #include "android/base/Log.h"
+#include "android/base/system/System.h"
 
 #include <iomanip>
 #include <istream>
@@ -284,22 +285,80 @@ std::string IniFile::makeValidKey(StringView str) {
     return res.str();
 }
 
+// Substitute environment variables inside a string.
+// Substitution is based on %ENVIRONMENT_VARIABLE%
+// Double %% is treated as an escape.
+// If a string is not terminated (i.e a starting %, but
+// no ending %) the whole string will be returned.
+//
+// For example:
+// "%PAGER%" => "less"
+// "%PAG%%ER%" => "" ("PAG%ER" is not a valid name)
+// "%FOO" => "%FOO" (Not terminated)
+// "%%HI%%" => "%HI%" (Escaped)
+// Note that: %%%USER%%% is parsed as %(USER)% and not %(USER%)%
+string envSubst(const StringView& fix) {
+    size_t len = fix.size();
+
+    string res;
+    string var;
+    string* curr = &res;
+    for (unsigned int i = 0; i < len; i++) {
+        char ch = fix[i];
+
+        // A normal character will be added to the current string
+        if (ch != '%') {
+            curr->append(1, ch);
+            continue;
+        }
+
+        // Let's see if we are closing
+        if (curr == &var) {
+            res.append(System::get()->envGet(var));
+            var.clear();
+            curr = &res;
+            continue;
+        }
+
+        // Check if we have a case of escapism..
+        // Note that len-1 >= 0
+        char next = (i < len - 1) ? fix[i + 1] : '\0';
+
+        if (next == '%') {
+            // Escaped, let's skip it.
+            curr->append(1, ch);
+            i++;
+        } else {
+            // We open and start a env variable name.
+            curr = &var;
+        }
+    }
+
+    // Return full string for unterminated piece.
+    if (curr == &var) {
+        res.append("%");
+        res.append(var);
+    }
+
+    return res;
+}
+
 string IniFile::getString(const string& key, StringView defaultValue) const {
     auto citer = mData.find(key);
-    return (citer == std::end(mData)) ? defaultValue : StringView(citer->second);
+    return envSubst((citer == std::end(mData)) ? defaultValue : StringView(citer->second));
 }
 
 int IniFile::getInt(const string& key, int defaultValue) const {
-    auto citer = mData.find(key);
-    if (citer == std::end(mData)) {
+    if (mData.find(key) == std::end(mData)) {
         return defaultValue;
     }
 
+    auto citer = getString(key, "");
     char* end;
     errno = 0;
-    const int result = strtol(citer->second.c_str(), &end, 10);
+    const int result = strtol(citer.c_str(), &end, 10);
     if (errno || *end != 0) {
-        LOG(VERBOSE) << "Malformed int value " << citer->second << " for key "
+        LOG(VERBOSE) << "Malformed int value " << citer << " for key "
                      << key;
         return defaultValue;
     }
@@ -307,16 +366,16 @@ int IniFile::getInt(const string& key, int defaultValue) const {
 }
 
 int64_t IniFile::getInt64(const string& key, int64_t defaultValue) const {
-    auto citer = mData.find(key);
-    if (citer == std::end(mData)) {
+    if (mData.find(key) == std::end(mData)) {
         return defaultValue;
     }
 
+    auto citer = getString(key, "");
     char* end;
     errno = 0;
-    const int64_t result = strtoll(citer->second.c_str(), &end, 10);
+    const int64_t result = strtoll(citer.c_str(), &end, 10);
     if (errno || *end != 0) {
-        LOG(VERBOSE) << "Malformed int64 value " << citer->second << " for key "
+        LOG(VERBOSE) << "Malformed int64 value " << citer << " for key "
                      << key;
         return defaultValue;
     }
@@ -324,16 +383,16 @@ int64_t IniFile::getInt64(const string& key, int64_t defaultValue) const {
 }
 
 double IniFile::getDouble(const string& key, double defaultValue) const {
-    auto citer = mData.find(key);
-    if (citer == std::end(mData)) {
+    if (mData.find(key) == std::end(mData)) {
         return defaultValue;
     }
 
+    auto citer = getString(key, "");
     char* end;
     errno = 0;
-    const double result = strtod(citer->second.c_str(), &end);
+    const double result = strtod(citer.c_str(), &end);
     if (errno || *end != 0) {
-        LOG(VERBOSE) << "Malformed double value " << citer->second
+        LOG(VERBOSE) << "Malformed double value " << citer
                      << " for key " << key;
         return defaultValue;
     }
@@ -353,12 +412,11 @@ static bool isBoolFalse(StringView value) {
 }
 
 bool IniFile::getBool(const string& key, bool defaultValue) const {
-    auto citer = mData.find(key);
-    if (citer == std::end(mData)) {
+    if (mData.find(key) == std::end(mData)) {
         return defaultValue;
     }
 
-    const string& value = citer->second;
+    const string& value = getString(key, "");
     if (isBoolTrue(value)) {
         return true;
     } else if (isBoolFalse(value)) {
