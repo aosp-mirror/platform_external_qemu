@@ -205,6 +205,12 @@ intptr_t RenderThread::main() {
     tInfo.m_gl2Dec.initGL(gles2_dispatch_get_proc_func, nullptr);
     initRenderControlContext(&tInfo.m_rcDec);
 
+    if (!mChannel) {
+        DBG("Exited a loader RenderThread @%p\n", this);
+        mFinished = true;
+        return 0;
+    }
+
     ChannelStream stream(mChannel, RenderChannel::Buffer::kSmallSize);
     ReadBuffer readBuf(kStreamBufferSize);
 

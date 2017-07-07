@@ -15,10 +15,13 @@
 */
 #include "GLESv1Decoder.h"
 
+#include "android/base/memory/LazyInstance.h"
+
 #include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include <atomic>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,6 +29,22 @@
 static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
 }
+
+static GLESv1Decoder::get_proc_func_t sGetProcFunc;
+static void* sGetProcFuncData;
+
+namespace {
+
+struct ContextTemplateLoader {
+    ContextTemplateLoader() {
+        context.initDispatchByName(sGetProcFunc, sGetProcFuncData);
+    }
+    gles1_decoder_context_t context;
+};
+
+}  // namespace
+
+static android::base::LazyInstance<ContextTemplateLoader> sContextTemplate = {};
 
 GLESv1Decoder::GLESv1Decoder()
 {
@@ -37,10 +56,11 @@ GLESv1Decoder::~GLESv1Decoder()
 {
 }
 
-
 int GLESv1Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
-    this->initDispatchByName(getProcFunc, getProcFuncData);
+    sGetProcFunc = getProcFunc;
+    sGetProcFuncData = getProcFuncData;
+    static_cast<gles1_decoder_context_t&>(*this) = sContextTemplate->context;
 
     glGetCompressedTextureFormats = s_glGetCompressedTextureFormats;
     glVertexPointerOffset = s_glVertexPointerOffset;
