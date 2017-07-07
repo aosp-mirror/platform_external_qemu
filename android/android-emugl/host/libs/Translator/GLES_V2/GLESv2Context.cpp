@@ -21,6 +21,8 @@
 #include "ShaderParser.h"
 #include "ProgramData.h"
 
+#include "emugl/common/crash_reporter.h"
+
 #include <string.h>
 
 static const char kGLES20StringPart[] = "OpenGL ES 2.0";
@@ -81,6 +83,14 @@ void GLESv2Context::init(GlLibrary* glLib) {
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
 
+        // Create emulated client VBOs
+        GLint neededClientVBOs = 0;
+        dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &neededClientVBOs);
+        m_emulatedClientVBOs.resize(neededClientVBOs, 0);
+        dispatcher().glGenBuffers(neededClientVBOs, &m_emulatedClientVBOs[0]);
+
+        // Create emulated IBO
+        dispatcher().glGenBuffers(1, &m_emulatedClientIBO);
     }
     m_initialized = true;
 }
@@ -119,6 +129,8 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
                     GLuint val = stream->getBe32();
                     return std::make_pair(idx, val);
                 });
+        size_t numEmulatedClientVBOs = (size_t)stream->getByte();
+        m_emulatedClientVBOs.resize(numEmulatedClientVBOs);
     } else {
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
@@ -126,6 +138,10 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
 }
 
 GLESv2Context::~GLESv2Context() {
+    if (m_emulatedClientIBO) {
+        s_glDispatch.glDeleteBuffers(1, &m_emulatedClientIBO);
+    }
+    s_glDispatch.glDeleteBuffers(m_emulatedClientVBOs.size(), &m_emulatedClientVBOs[0]);
 }
 
 void GLESv2Context::onSave(android::base::Stream* stream) const {
@@ -142,6 +158,7 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
                 stream->putBe32(item.first);
                 stream->putBe32(item.second);
             });
+    stream->putByte((uint8_t)m_emulatedClientVBOs.size());
 }
 
 void GLESv2Context::postLoadRestoreCtx() {
@@ -151,6 +168,9 @@ void GLESv2Context::postLoadRestoreCtx() {
     const GLuint globalProgramName = shareGroup()->getGlobalName(
             NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
     dispatcher.glUseProgram(globalProgramName);
+
+    dispatcher.glGenBuffers(m_emulatedClientVBOs.size(), &m_emulatedClientVBOs[0]);
+    dispatcher.glGenBuffers(1, &m_emulatedClientIBO);
 
     // vertex attribute pointers
     for (const auto& vaoIte : m_vaoStateMap) {
@@ -341,6 +361,110 @@ void GLESv2Context::validateAtt0PostDraw(void)
     }
 }
 
+void GLESv2Context::drawWithEmulations(
+    DrawCallCmd cmd,
+    GLenum mode,
+    GLint first,
+    GLsizei count,
+    GLenum type,
+    const GLvoid* indices,
+    GLsizei primcount,
+    GLuint start,
+    GLuint end) {
+
+    if (getMajorVersion() < 3) {
+        drawValidate();
+    }
+
+    bool needClientVBOSetup = !vertexAttributesBufferBacked();
+
+    bool needClientIBOSetup =
+        (cmd != DrawCallCmd::Arrays &&
+         cmd != DrawCallCmd::ArraysInstanced) &&
+        !isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
+    bool needPointEmulation = mode == GL_POINTS;
+
+    if (needPointEmulation) {
+        // Enable texture generation for GL_POINTS and gl_PointSize shader variable
+        // GLES2 assumes this is enabled by default, we need to set this state for GL
+        s_glDispatch.glEnable(GL_POINT_SPRITE);
+        s_glDispatch.glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+    }
+
+    if (needClientVBOSetup) {
+        GLESConversionArrays tmpArrs;
+        setupArraysPointers(tmpArrs, 0, count, type, indices, false);
+        if (needAtt0PreDrawValidation()) {
+            if (indices) {
+                validateAtt0PreDraw(findMaxIndex(count, type, indices));
+            } else {
+                validateAtt0PreDraw(count);
+            }
+        }
+    }
+
+    GLuint prevIBO;
+    if (needClientIBOSetup) {
+        int bpv = 2;
+        switch (type) {
+            case GL_UNSIGNED_BYTE:
+                bpv = 1;
+                break;
+            case GL_UNSIGNED_SHORT:
+                bpv = 2;
+                break;
+            case GL_UNSIGNED_INT:
+                bpv = 4;
+                break;
+        }
+
+        size_t dataSize = bpv * count;
+
+        s_glDispatch.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prevIBO);
+        s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_emulatedClientIBO);
+        s_glDispatch.glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
+    }
+
+    const GLvoid* indicesOrOffset =
+        needClientIBOSetup ? nullptr : indices;
+
+    switch (cmd) {
+        case DrawCallCmd::Elements:
+            s_glDispatch.glDrawElements(mode, count, type, indicesOrOffset);
+            break;
+        case DrawCallCmd::ElementsInstanced:
+            s_glDispatch.glDrawElementsInstanced(mode, count, type,
+                                                 indicesOrOffset,
+                                                 primcount);
+            break;
+        case DrawCallCmd::RangeElements:
+            s_glDispatch.glDrawRangeElements(mode, start, end, count, type,
+                                             indicesOrOffset);
+            break;
+        case DrawCallCmd::Arrays:
+            s_glDispatch.glDrawArrays(mode, first, count);
+            break;
+        case DrawCallCmd::ArraysInstanced:
+            s_glDispatch.glDrawArraysInstanced(mode, first, count, primcount);
+            break;
+        default:
+            emugl_crash_reporter("drawWithEmulations has corrupt call parameters!");
+    }
+
+    if (needClientIBOSetup) {
+        s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prevIBO);
+    }
+
+    if (needClientVBOSetup) {
+        validateAtt0PostDraw();
+    }
+
+    if (needPointEmulation) {
+        s_glDispatch.glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        s_glDispatch.glDisable(GL_POINT_SPRITE);
+    }
+}
+
 void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
     ArraysMap::iterator it;
 
@@ -352,26 +476,38 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
             continue;
         }
 
-        setupArr(p->getArrayData(),
-                 array_id,
-                 p->getType(),
-                 p->getSize(),
-                 p->getStride(),
-                 p->getNormalized(),
-                 -1,
-                 p->isIntPointer());
+        setupArrWithDataSize(
+            p->getDataSize(),
+            p->getArrayData(),
+            array_id,
+            p->getType(),
+            p->getSize(),
+            p->getStride(),
+            p->getNormalized(),
+            -1,
+            p->isIntPointer());
     }
 }
 
 //setting client side arr
-void GLESv2Context::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
+void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
+                                         GLenum arrayType, GLenum dataType,
+                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt){
     // is not really a client side arr.
     if (arr == NULL) return;
 
-    if (isInt)
-        s_glDispatch.glVertexAttribIPointer(arrayType, size, dataType, stride, arr);
-    else
-        s_glDispatch.glVertexAttribPointer(arrayType, size, dataType, normalized, stride, arr);
+    GLuint prevArrayBuffer;
+    s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
+    s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, m_emulatedClientVBOs[arrayType]);
+    s_glDispatch.glBufferData(GL_ARRAY_BUFFER, datasize, arr, GL_STREAM_DRAW);
+
+    if (isInt) {
+        s_glDispatch.glVertexAttribIPointer(arrayType, size, dataType, stride, 0);
+    } else {
+        s_glDispatch.glVertexAttribPointer(arrayType, size, dataType, normalized, stride, 0);
+    }
+
+    s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, prevArrayBuffer);
 }
 
 void GLESv2Context::setVertexAttribDivisor(GLuint bindingindex, GLuint divisor) {
