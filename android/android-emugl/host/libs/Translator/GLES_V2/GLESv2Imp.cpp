@@ -94,6 +94,8 @@ extern "C" {
 
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
+    setCoreProfile(ctx->isCoreProfile());
+
     if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
     }
