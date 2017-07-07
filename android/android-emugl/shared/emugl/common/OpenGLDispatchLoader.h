@@ -14,8 +14,6 @@
 
 #pragma once
 
-#include "android/base/system/System.h"
-
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
@@ -26,9 +24,7 @@ struct LazyLoadedGLESv2Dispatch : public GLESv2Dispatch {
     // was an error when trying to initialize/load the library.
     static const GLESv2Dispatch* get();
 
-    LazyLoadedGLESv2Dispatch() {
-        mValid = gles2_dispatch_init(&mDispatch);
-    }
+    LazyLoadedGLESv2Dispatch();
 
 private:
     GLESv2Dispatch mDispatch;
@@ -38,12 +34,12 @@ private:
 // Helper class used to lazily initialize the global EGL dispatch table
 // in a thread safe way. Note that the dispatch table is provided by
 // libOpenGLESDispatch as the 's_egl' global variable.
-struct LazyLoadedEGLDispatch : public EGLDispatch {
+struct LazyLoadedEGLDispatch {
     // Return pointer to EGLDispatch table, or nullptr if there was
     // an error when trying to initialize/load the library.
     static const EGLDispatch* get();
 
-    LazyLoadedEGLDispatch() { mValid = init_egl_dispatch(); }
+    LazyLoadedEGLDispatch();
 
 private:
     bool mValid;
