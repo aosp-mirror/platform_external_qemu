@@ -36,6 +36,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             int apiLevel,
                             bool hasGoogleApis,
                             const char* gpuOption,
+                            char** hwGpuModePtr,
                             int wantedBitness,
                             bool noWindow,
                             enum WinsysPreferredGlesBackend uiPreferredBackend);
