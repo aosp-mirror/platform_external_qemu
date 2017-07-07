@@ -73,6 +73,9 @@ EglContext::EglContext(EglDisplay *dpy,
             glesCtx->postLoad();
         }
         m_hndl = ++s_nextContextHndl;
+        // Set the GLES context to be core profile if this is.
+        m_glesContext->setCoreProfile(
+            profile_mask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
     } else {
         m_hndl = 0;
     }
