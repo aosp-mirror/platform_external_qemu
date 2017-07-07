@@ -306,3 +306,128 @@ void deleteRenderbufferGlobal(GLuint rbo) {
         GLEScontext::dispatcher().glDeleteRenderbuffers(1, &rbo);
     }
 }
+
+bool isCubeMapFaceTarget(GLenum target) {
+    switch (target) {
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_X:
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_X:
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_Y:
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_Y:
+        case GL_TEXTURE_CUBE_MAP_POSITIVE_Z:
+        case GL_TEXTURE_CUBE_MAP_NEGATIVE_Z:
+            return true;
+    }
+    return false;
+}
+
+bool isCoreProfileEmulatedFormat(GLenum format) {
+    switch (format) {
+    case GL_ALPHA:
+    case GL_LUMINANCE:
+    case GL_LUMINANCE_ALPHA:
+        return true;
+    default:
+        return false;
+    }
+}
+
+GLenum getCoreProfileEmulatedFormat(GLenum format) {
+    switch (format) {
+        case GL_ALPHA:
+        case GL_LUMINANCE:
+            return GL_RED;
+        case GL_LUMINANCE_ALPHA:
+            return GL_RG;
+    }
+    return format;
+}
+
+GLint getCoreProfileEmulatedInternalFormat(GLint internalformat, GLenum type) {
+    switch (internalformat) {
+        case GL_ALPHA:
+        case GL_LUMINANCE:
+            switch (type) {
+                case GL_UNSIGNED_BYTE:
+                    return GL_R8;
+                case GL_FLOAT:
+                    return GL_R32F;
+                case GL_HALF_FLOAT:
+                    return GL_R16F;
+            }
+            return GL_R8;
+        case GL_LUMINANCE_ALPHA:
+            switch (type) {
+                case GL_UNSIGNED_BYTE:
+                    return GL_RG8;
+                case GL_FLOAT:
+                    return GL_RG32F;
+                case GL_HALF_FLOAT:
+                    return GL_RG16F;
+            }
+    }
+    fprintf(stderr,
+            "%s: warning: unsupported alpha/luminance internal format 0x%x type 0x%x\n",
+            __func__, internalformat, type);
+    return GL_R8;
+}
+
+TextureSwizzle getSwizzleForEmulatedFormat(GLenum format) {
+    TextureSwizzle res;
+    switch (format) {
+        case GL_ALPHA:
+            res.toRed   = GL_ZERO;
+            res.toGreen = GL_ZERO;
+            res.toBlue  = GL_ZERO;
+            res.toAlpha = GL_RED;
+            break;
+        case GL_LUMINANCE:
+            res.toRed   = GL_RED;
+            res.toGreen = GL_RED;
+            res.toBlue  = GL_RED;
+            res.toAlpha = GL_ONE;
+            break;
+        case GL_LUMINANCE_ALPHA:
+            res.toRed   = GL_RED;
+            res.toGreen = GL_RED;
+            res.toBlue  = GL_RED;
+            res.toAlpha = GL_GREEN;
+            break;
+        default:
+            break;
+    }
+    return res;
+}
+
+GLenum swizzleComponentOf(const TextureSwizzle& s, GLenum component) {
+    switch (component) {
+    case GL_RED: return s.toRed;
+    case GL_GREEN: return s.toGreen;
+    case GL_BLUE: return s.toBlue;
+    case GL_ALPHA: return s.toAlpha;
+    }
+    // Identity map for GL_ZERO / GL_ONE
+    return component;
+}
+
+TextureSwizzle concatSwizzles(const TextureSwizzle& first,
+                              const TextureSwizzle& next) {
+
+    TextureSwizzle result;
+    result.toRed = swizzleComponentOf(first, next.toRed);
+    result.toGreen = swizzleComponentOf(first, next.toGreen);
+    result.toBlue = swizzleComponentOf(first, next.toBlue);
+    result.toAlpha = swizzleComponentOf(first, next.toAlpha);
+    return result;
+}
+
+bool isSwizzleParam(GLenum pname) {
+    switch (pname) {
+    case GL_TEXTURE_SWIZZLE_R:
+    case GL_TEXTURE_SWIZZLE_G:
+    case GL_TEXTURE_SWIZZLE_B:
+    case GL_TEXTURE_SWIZZLE_A:
+        return true;
+    default:
+        return false;
+    }
+}
