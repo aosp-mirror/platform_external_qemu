@@ -118,6 +118,30 @@
       "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "020ba5b7_31b8591c",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T18:34:16Z",
+      "side": 1,
+      "message": "Ok, then why not switch to ANGLE under translator by default, take the performance hit, and avoid taking the hit of more complex GPU configs and then refactoring \"temporary\" code in the future?\n\nThe configs we make users use ANGLE on are usually very limited by the host GPU fill rate anyway; we are not using ANGLE on GTX 970 or Quadro K2200.\n\nQuestion is if the performance hit is 20% regardless of how fast the underlying host GPU; try a performance comparison of ANGLE using a Intel HD 4000 before and after putting it under the translator. (There\u0027s also a Intel HD 4600 paird with a similarly slow Quadro K1100M on the laptop next to my desk). If it doesn\u0027t make much difference, we should definitely just switch it to be under translator by default.",
+      "parentUuid": "4062cf35_b9093bb6",
+      "range": {
+        "startLine": 58,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 27
+      },
+      "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
