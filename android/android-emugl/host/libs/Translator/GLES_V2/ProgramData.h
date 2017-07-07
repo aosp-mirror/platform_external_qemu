@@ -18,6 +18,8 @@
 
 #include "ShaderParser.h"
 
+#include "android/base/StringView.h"
+
 #include <memory>
 #include <sstream>
 #include <string>
@@ -69,6 +71,9 @@ public:
     GLuint getAttachedFragmentShader() const;
     GLuint getAttachedComputeShader() const;
     GLuint getAttachedShader(GLenum type) const;
+
+    android::base::StringView getTranslatedName(const std::string& userVarName) const;
+    android::base::StringView getDetranslatedName(const std::string& driverName) const;
 
     bool attachShader(GLuint shader, ShaderParser* shaderData, GLenum type);
     bool isAttached(GLuint shader) const;
