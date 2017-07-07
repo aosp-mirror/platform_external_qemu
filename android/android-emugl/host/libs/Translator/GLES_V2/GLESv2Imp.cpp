@@ -863,7 +863,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
         }
         const GLuint localShaderName = ctx->shareGroup()->genName(
                                                 shaderProgramType, 0, true);
-        ShaderParser* sp = new ShaderParser(type);
+        ShaderParser* sp = new ShaderParser(type, isCoreProfile());
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localShaderName, ObjectDataPtr(sp));
         return localShaderName;
