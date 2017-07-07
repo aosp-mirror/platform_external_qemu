@@ -40,6 +40,7 @@ public:
     GLuint getBufferName() const;
     GLboolean getNormalized() const { return m_normalize ? GL_TRUE : GL_FALSE; }
     const GLvoid* getData() const;
+    const GLsizei getDataSize() const { return m_dataSize; }
     unsigned int getBufferOffset() const;
     void redirectPointerData();
     void getBufferConversions(const RangeList& rl, RangeList& rlOut);
