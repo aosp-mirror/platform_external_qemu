@@ -25,7 +25,16 @@
 
 typedef void (gles2_APIENTRY *glVertexAttribPointerWithDataSize_server_proc_t) (GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*, GLsizei);
 
-class GLESv2Decoder : public gles2_decoder_context_t
+struct gles2_decoder_extended_context : gles2_decoder_context_t {
+    glVertexAttribPointerWithDataSize_server_proc_t glVertexAttribPointerWithDataSize;
+
+    int initDispatch( void *(*getProc)(const char *name, void *userData), void *userData);
+
+private:
+    using gles2_server_context_t::initDispatchByName;
+};
+
+class GLESv2Decoder : public gles2_decoder_extended_context
 {
 public:
     typedef void *(*get_proc_func_t)(const char *name, void *userData);
@@ -33,7 +42,6 @@ public:
     ~GLESv2Decoder();
     int initGL(get_proc_func_t getProcFunc, void *getProcFuncData);
     void setContextData(GLDecoderContextData *contextData) { m_contextData = contextData; }
-    glVertexAttribPointerWithDataSize_server_proc_t glVertexAttribPointerWithDataSize;
 protected:
     GLSnapshot::GLSnapshotState *m_snapshot;
 private:

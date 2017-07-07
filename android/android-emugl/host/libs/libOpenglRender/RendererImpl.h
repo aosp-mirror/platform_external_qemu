@@ -82,6 +82,8 @@ private:
 
     class ProcessCleanupThread;
     std::unique_ptr<ProcessCleanupThread> mCleanupThread;
+
+    std::unique_ptr<RenderThread> mLoaderRenderThread;
 };
 
 }  // namespace emugl

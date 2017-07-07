@@ -17,6 +17,8 @@
 #include "GLESv2Decoder.h"
 #include "GLESv2Dispatch.h"
 
+#include "android/base/memory/LazyInstance.h"
+
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
 #include <GLES2/gl2ext.h>
@@ -31,6 +33,32 @@
 static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
 }
+
+int gles2_decoder_extended_context::initDispatch(
+        GLESv2Decoder::get_proc_func_t getProc, void *userData) {
+    gles2_server_context_t::initDispatchByName(getProc, userData);
+    glVertexAttribPointerWithDataSize =
+            (glVertexAttribPointerWithDataSize_server_proc_t)
+            getProc("glVertexAttribPointerWithDataSize", userData);
+    return 0;
+}
+
+
+static GLESv2Decoder::get_proc_func_t sGetProcFunc;
+static void* sGetProcFuncData;
+
+namespace {
+
+struct ContextTemplateLoader {
+    ContextTemplateLoader() {
+        context.initDispatch(sGetProcFunc, sGetProcFuncData);
+    }
+    gles2_decoder_extended_context context;
+};
+
+}  // namespace
+
+static android::base::LazyInstance<ContextTemplateLoader> sContextTemplate = {};
 
 GLESv2Decoder::GLESv2Decoder()
 {
@@ -65,10 +93,9 @@ void *GLESv2Decoder::s_getProc(const char *name, void *userData)
 
 int GLESv2Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
-    this->initDispatchByName(getProcFunc, getProcFuncData);
-    glVertexAttribPointerWithDataSize =
-            (glVertexAttribPointerWithDataSize_server_proc_t)
-            getProcFunc("glVertexAttribPointerWithDataSize", getProcFuncData);
+    sGetProcFunc = getProcFunc;
+    sGetProcFuncData = getProcFuncData;
+    static_cast<gles2_decoder_extended_context&>(*this) = sContextTemplate->context;
 
     glGetCompressedTextureFormats = s_glGetCompressedTextureFormats;
     glVertexAttribPointerData = s_glVertexAttribPointerData;
