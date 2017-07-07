@@ -28,27 +28,25 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                             int apiLevel,
                             bool hasGoogleApis,
                             const char* gpuOption,
+                            char** hwGpuModePtr,
                             int wantedBitness,
                             bool noWindow,
                             enum WinsysPreferredGlesBackend uiPreferredBackend) {
     bool gpuEnabled = false;
-    ScopedCPtr<char> gpuMode;
-
     if (avdName) {
-        gpuMode.reset(path_getAvdGpuMode(avdName));
-        gpuEnabled = (gpuMode.get() != nullptr);
+        gpuEnabled = hwGpuModePtr && (*hwGpuModePtr);
         // If the user has hw config set to mesa, not-so-silently overrule that.
-        if (!gpuOption && !strcmp(gpuMode.get(), "mesa")) {
+        if (!gpuOption && !strcmp(*hwGpuModePtr, "mesa")) {
             fprintf(stderr,
                     "Your AVD has been configured with the Mesa renderer, "
                     "which is deprecated. This AVD is being auto-switched to "
                     "the current and better-supported \'swiftshader\' renderer. "
                     "Please update your AVD config.ini's hw.gpu.mode to match.\n");
-            gpuMode.reset(::strdup("swiftshader"));
+            str_reset(hwGpuModePtr, "swiftshader");
         }
     } else if (!gpuOption) {
         // In the case of a platform build, use the 'auto' mode by default.
-        gpuMode.reset(::strdup("auto"));
+        str_reset(hwGpuModePtr, "swiftshader");
         gpuEnabled = true;
     }
 
@@ -62,8 +60,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
     bool blacklisted = false;
     bool onBlacklist = false;
 
-    const char* gpuChoice = gpuOption ? gpuOption : gpuMode.get();
-
+    const char* gpuChoice = gpuOption ? gpuOption : *hwGpuModePtr;
     // If the user has specified a renderer
     // that is neither "auto" nor "host",
     // don't check the blacklist.
@@ -97,7 +94,7 @@ bool androidEmuglConfigInit(EmuglConfig* config,
     }
 
     bool result = emuglConfig_init(
-            config, gpuEnabled, gpuMode.get(), gpuOption, wantedBitness,
+            config, gpuEnabled, *hwGpuModePtr, gpuOption, wantedBitness,
             noWindow, blacklisted, hasGuestRenderer, uiPreferredBackend);
 
     return result;
