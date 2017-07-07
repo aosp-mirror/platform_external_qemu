@@ -46,9 +46,9 @@ enum SyncThreadOpCode {
 
 struct SyncThreadCmd {
     SyncThreadOpCode opCode = SYNC_THREAD_INIT;
+    bool needReply = false;
     FenceSync* fenceSync = nullptr;
     uint64_t timeline = 0;
-    bool needReply = false;
 };
 
 struct RenderThreadInfo;
