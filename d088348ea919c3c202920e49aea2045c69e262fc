@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c3601d7e_7a89160b",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1584,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-07-07T06:08:29Z",
+      "side": 1,
+      "message": "+1 that seems more manageable.",
+      "parentUuid": "210b2327_be0a4d78",
+      "range": {
+        "startLine": 1584,
+        "startChar": 40,
+        "endLine": 1584,
+        "endChar": 47
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68c47142_7a676efa",
         "filename": "android/android-emu/android/main-common.c",
         "patchSetId": 2
