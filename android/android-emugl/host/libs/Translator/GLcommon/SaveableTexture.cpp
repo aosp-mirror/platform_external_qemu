@@ -21,7 +21,7 @@
 #include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
-#include "GLES2/gl2ext.h"
+#include "GLcommon/TextureUtils.h"
 
 #include <algorithm>
 
@@ -453,7 +453,12 @@ void SaveableTexture::onSave(
                         s_texImageSize(m_format, m_type, 1, width, height) *
                         depth);
                 if (!buffer->empty()) {
-                    dispatcher.glGetTexImage(target, level, m_format, m_type,
+                    GLenum neededBufferFormat = m_format;
+                    if (isCoreProfile()) {
+                        neededBufferFormat =
+                            getCoreProfileEmulatedFormat(m_format);
+                    }
+                    dispatcher.glGetTexImage(target, level, neededBufferFormat, m_type,
                                              buffer->data());
                 }
                 saveBuffer(stream, *buffer);
@@ -487,6 +492,7 @@ void SaveableTexture::onSave(
         // Snapshot texture param
         auto saveParam = [this, stream, &dispatcher](GLenum pname) {
             GLint param;
+
             dispatcher.glGetTexParameteriv(m_target, pname, &param);
             stream->putBe32(param);
         };
@@ -579,11 +585,19 @@ void SaveableTexture::restore() {
                                         ? nullptr
                                         : levelData[level].m_data.data();
                         if (!level || pixels) {
+                            GLint resultInternalFormat = m_internalFormat;
+                            GLenum resultFormat = m_format;
+                            GLEScontext::prepareCoreProfileEmulatedTexture(
+                                nullptr /* no TextureData */,
+                                false /* not 3D */,
+                                target, m_format, m_type,
+                                &resultInternalFormat,
+                                &resultFormat);
                             dispatcher.glTexImage2D(
-                                    target, level, m_internalFormat,
+                                    target, level, resultInternalFormat,
                                     levelData[level].m_width,
                                     levelData[level].m_height, m_border,
-                                    m_format, m_type, pixels);
+                                    resultFormat, m_type, pixels);
                         }
                     }
                     levelData.reset();
@@ -598,6 +612,14 @@ void SaveableTexture::restore() {
                                         ? nullptr
                                         : levelData[level].m_data.data();
                         if (!level || pixels) {
+                            GLint resultInternalFormat = m_internalFormat;
+                            GLenum resultFormat = m_format;
+                            GLEScontext::prepareCoreProfileEmulatedTexture(
+                                nullptr /* no TextureData */,
+                                true /* is 3D */,
+                                target, m_format, m_type,
+                                &resultInternalFormat,
+                                &resultFormat);
                             dispatcher.glTexImage3D(
                                     target, level, m_internalFormat,
                                     levelData[level].m_width,
