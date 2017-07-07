@@ -49,6 +49,54 @@
     },
     {
       "key": {
+        "uuid": "ac1c03ff_ad6ba84a",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1584,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T13:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "210b2327_be0a4d78",
+      "range": {
+        "startLine": 1584,
+        "startChar": 40,
+        "endLine": 1584,
+        "endChar": 47
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3ab3f20c_8cfcb1f7",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1584,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T13:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3601d7e_7a89160b",
+      "range": {
+        "startLine": 1584,
+        "startChar": 40,
+        "endLine": 1584,
+        "endChar": 47
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68c47142_7a676efa",
         "filename": "android/android-emu/android/main-common.c",
         "patchSetId": 2
@@ -72,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "9c1befba_652af492",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1848,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T13:38:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68c47142_7a676efa",
+      "range": {
+        "startLine": 1848,
+        "startChar": 8,
+        "endLine": 1848,
+        "endChar": 22
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "838798bc_3848019b",
         "filename": "android/android-emu/android/main-emugl.cpp",
         "patchSetId": 2
@@ -83,6 +155,30 @@
       "writtenOn": "2017-07-07T04:56:11Z",
       "side": 1,
       "message": "can it be null? line 37 checks for that",
+      "range": {
+        "startLine": 39,
+        "startChar": 34,
+        "endLine": 39,
+        "endChar": 47
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "45759451_4e98eba0",
+        "filename": "android/android-emu/android/main-emugl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T13:38:11Z",
+      "side": 1,
+      "message": "good point. This function is called with \u0026hw-\u003ehw_gpu_mode as |hwGpuModePtr| and I tried to delete the hw.gpu.mode line from config.ini, both \u0026hw-\u003ehw_gpu_mode and hw-\u003ehw_gpu_mode are still not null (and works). It seems the android hw structure is aggressively populated, so we should be good.",
+      "parentUuid": "838798bc_3848019b",
       "range": {
         "startLine": 39,
         "startChar": 34,
