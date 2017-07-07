@@ -252,7 +252,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     QObject::connect(this, &EmulatorQtWindow::setDeviceGeometry, this,
                      &EmulatorQtWindow::slot_setDeviceGeometry);
     QObject::connect(this, &EmulatorQtWindow::setWindowIcon, this,
-                     &EmulatorQtWindow::slot_setWindowIcon);
+                     &EmulatorQtWindow::slot_setWindowIcon, Qt::QueuedConnection);
     QObject::connect(this, &EmulatorQtWindow::setWindowPos, this,
                      &EmulatorQtWindow::slot_setWindowPos);
     QObject::connect(this, &EmulatorQtWindow::setTitle, this,
