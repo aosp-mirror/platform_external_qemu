@@ -503,9 +503,8 @@ protected:
     GLint m_defaultFBOSamples = 0;
     GLenum m_defaultFBODrawBuffer = GL_COLOR_ATTACHMENT0;
     GLenum m_defaultFBOReadBuffer = GL_COLOR_ATTACHMENT0;
-private:
 
-    virtual void setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride, GLboolean normalized, int pointsIndex = -1, bool isInt = false) = 0 ;
+private:
 
     GLenum                m_glError = GL_NO_ERROR;
     int                   m_maxTexUnits;

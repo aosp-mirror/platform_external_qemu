@@ -1173,15 +1173,35 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
     s_glDrawPre(ctx, mode);
 
-    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
+    bool canDirectlyDraw =
+        ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+        (ctx->vertexAttributesBufferBacked());
+
+    if (canDirectlyDraw) {
         ctx->dispatcher().glDrawElements(mode,count,type,indices);
-    } else {
-        s_glDrawEmulateClientArraysPre(ctx);
+        s_glDrawPost(ctx, mode);
+        return;
+    }
+
+    bool needClientVBOSetup =
+        (!ctx->vertexAttributesBufferBacked());
+
+    bool needClientIBOSetup =
+        !ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+    if (needClientVBOSetup) {
         GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
+        s_glDrawSetupArraysPre(ctx, tmpArrs, 0, count, type, indices, false);
+    }
+
+    if (needClientIBOSetup) {
+        ctx->emulatedClientIBODraw(mode, count, type, indices);
+    } else {
         ctx->dispatcher().glDrawElements(mode,count,type,indices);
+    }
+
+    if (needClientVBOSetup) {
         s_glDrawSetupArraysPost(ctx);
-        s_glDrawEmulateClientArraysPost(ctx);
     }
 
     s_glDrawPost(ctx, mode);
