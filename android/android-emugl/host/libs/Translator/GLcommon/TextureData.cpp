@@ -16,12 +16,15 @@
 
 #include "GLcommon/TextureData.h"
 
+#include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 
 #include <cassert>
 
+using android::base::findOrDefault;
 
 TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     // The current TextureData structure is wrong when dealing with mipmaps.
@@ -90,4 +93,27 @@ SaveableTexturePtr TextureData::releaseSaveableTexture() {
 
 void TextureData::setTexParam(GLenum pname, GLint param) {
     m_texParam[pname] = param;
+}
+
+GLenum TextureData::getSwizzle(GLenum component) const {
+    GLenum defaultComponent = GL_ZERO;
+
+    switch (component) {
+    case GL_TEXTURE_SWIZZLE_R:
+        defaultComponent = GL_RED;
+        break;
+    case GL_TEXTURE_SWIZZLE_G:
+        defaultComponent = GL_GREEN;
+        break;
+    case GL_TEXTURE_SWIZZLE_B:
+        defaultComponent = GL_BLUE;
+        break;
+    case GL_TEXTURE_SWIZZLE_A:
+        defaultComponent = GL_ALPHA;
+        break;
+    default:
+        break;
+    }
+
+    return findOrDefault(m_texParam, component, defaultComponent);
 }
