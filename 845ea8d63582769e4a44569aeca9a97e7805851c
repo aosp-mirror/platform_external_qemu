@@ -142,6 +142,30 @@
       "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d24c73a_bdd7ce88",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T18:39:11Z",
+      "side": 1,
+      "message": "Absolute numbers also matter too. If Antutu goes from 15 to 12 FPS, that\u0027s not really an earth-shattering performance drop.\n\nOn the other hand, If Antutu goes from 60 to even 50, that is much more noticeable and worse (But the GPU needs to be pretty damn good to even hit 60 on Antutu already; we wouldnt make users use ANGLE in that situation). As another example, if 1080p30 was achieveable and now it\u0027s not achievable, also bad. Etc.",
+      "parentUuid": "020ba5b7_31b8591c",
+      "range": {
+        "startLine": 58,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 27
+      },
+      "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
