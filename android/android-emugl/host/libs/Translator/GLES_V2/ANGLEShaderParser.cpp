@@ -164,6 +164,12 @@ bool globalInitialize(
 
 static void getShaderLinkInfo(ShHandle compilerHandle,
                               ShaderLinkInfo* linkInfo) {
+
+    linkInfo->nameMap = *ShGetNameHashingMap(compilerHandle);
+    for (const auto& elt : linkInfo->nameMap) {
+        linkInfo->nameMapReverse[elt.second] = elt.first;
+    }
+
     auto uniforms = ShGetUniforms(compilerHandle);
     auto varyings = ShGetVaryings(compilerHandle);
     auto attributes = ShGetAttributes(compilerHandle);

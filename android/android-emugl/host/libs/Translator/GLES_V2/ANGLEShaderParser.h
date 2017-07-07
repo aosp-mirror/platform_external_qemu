@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -29,6 +30,8 @@ struct ShaderLinkInfo {
     std::vector<sh::Attribute> attributes;
     std::vector<sh::OutputVariable> outputVars;
     std::vector<sh::InterfaceBlock> interfaceBlocks;
+    std::map<std::string, std::string> nameMap;
+    std::map<std::string, std::string> nameMapReverse;
 };
 
 bool globalInitialize(
