@@ -101,7 +101,7 @@ int android_initOpenglesEmulation() {
         goto BAD_EXIT;
     }
 
-    sRenderLib = initLibrary();
+    sRenderLib = initLibrary((render_api_feature_is_enabled_t)android::featurecontrol::isEnabled);
     if (!sRenderLib) {
         derror("OpenGLES initialization failed!");
         goto BAD_EXIT;
@@ -142,7 +142,6 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
     sRenderLib->setSnapshotDirGetter(&android::snapshot::getSnapshotDir);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
-    sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
     sRenderLib->setSyncDevice(goldfish_sync_create_timeline,
             goldfish_sync_create_fence,
             goldfish_sync_timeline_inc,

@@ -5,9 +5,12 @@
 #define RENDER_API_FUNCTIONS_H
 
 #include "OpenglRender/RenderLib.h"
+typedef bool (*render_api_feature_is_enabled_t)(uint32_t);
 
 #define LIST_RENDER_API_FUNCTIONS(X) \
-  X(emugl::RenderLibPtr, initLibrary, (), ()) \
+  X(emugl::RenderLibPtr, initLibrary, (render_api_feature_is_enabled_t feature_is_enabled_func), (feature_is_enabled_func)) \
+  X(bool, renderApiFeatureIsEnabled, (uint32_t feature), (feature)) \
+  X(void, renderApiGlesVersion, (int* maj, int* min), (maj, min)) \
 
 
 #endif  // RENDER_API_FUNCTIONS_H
