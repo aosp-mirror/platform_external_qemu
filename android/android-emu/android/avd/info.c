@@ -1577,3 +1577,28 @@ const char* avdInfo_getSdCardSize(const AvdInfo* i) {
     return (i->configIni) ? iniFile_getString(i->configIni, SDCARD_SIZE, "")
                           : NULL;
 }
+
+// This is a one-off mitigation of users getting black screen forever on startup
+// because guest rendering does not work.
+// TODO: Fix guest rendering for the next image update.
+// Let's try not to add any more build id's to this.
+bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i) {
+    switch (i->apiLevel) {
+    case 19:
+        return i->incrementalVersion == 4087698;
+    case 21:
+        return i->incrementalVersion == 4088174;
+    case 22:
+        return i->incrementalVersion == 4088218;
+    case 23:
+        return i->incrementalVersion == 4088240;
+    case 24:
+        return i->incrementalVersion == 4088244;
+    case 25:
+        return i->incrementalVersion == 4153093;
+    case 26:
+        return i->incrementalVersion == 4074420;
+    default:
+        return false;
+    }
+}
