@@ -130,6 +130,8 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize);
+
 
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
@@ -144,6 +146,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glEGLImageTargetTexture2DOES"] = (__translatorMustCastToProperFunctionPointerType)glEGLImageTargetTexture2DOES;
         (*s_glesExtensions)["glEGLImageTargetRenderbufferStorageOES"]=(__translatorMustCastToProperFunctionPointerType)glEGLImageTargetRenderbufferStorageOES;
         (*s_glesExtensions)["glVertexAttribPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribPointerWithDataSize;
+        (*s_glesExtensions)["glVertexAttribIPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexAttribIPointerWithDataSize;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -1102,36 +1105,6 @@ static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
     }
 }
 
-static void s_glDrawEmulateClientArraysPre(GLESv2Context* ctx) {
-    GLuint currarrbinding = 0;
-    GLuint curreltbinding = 0;
-    if (ctx->shareGroup()) {
-        currarrbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ARRAY_BUFFER));
-        curreltbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ELEMENT_ARRAY_BUFFER));
-        if (currarrbinding)
-            ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
-        if (curreltbinding)
-            ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    }
-}
-
-static void s_glDrawEmulateClientArraysPost(GLESv2Context* ctx) {
-    GLuint currarrbinding = 0;
-    GLuint curreltbinding = 0;
-    if (ctx->shareGroup()) {
-        currarrbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ARRAY_BUFFER));
-        curreltbinding =
-            ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, ctx->getBuffer(GL_ELEMENT_ARRAY_BUFFER));
-        if (currarrbinding)
-            ctx->dispatcher().glBindBuffer(GL_ARRAY_BUFFER, currarrbinding);
-        if (curreltbinding)
-            ctx->dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, curreltbinding);
-    }
-}
-
 static void s_glDrawSetupArraysPre(GLESv2Context* ctx, GLESConversionArrays& tmpArrs, GLint first, GLsizei count, GLenum type, const GLvoid* indices, bool direct) {
     ctx->setupArraysPointers(tmpArrs,first,count,type,indices,direct);
 
@@ -1173,15 +1146,38 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
     s_glDrawPre(ctx, mode);
 
-    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
-        ctx->dispatcher().glDrawElements(mode,count,type,indices);
-    } else {
-        s_glDrawEmulateClientArraysPre(ctx);
+    bool canDirectlyDraw =
+        ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+        ctx->vertexAttributesBufferBacked();
+
+    if (canDirectlyDraw) {
+        ctx->dispatcher().glDrawElements(mode, count, type, indices);
+        s_glDrawPost(ctx, mode);
+        return;
+    }
+
+    bool needClientVBOSetup =
+        (!ctx->vertexAttributesBufferBacked());
+
+    bool needClientIBOSetup =
+        !ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
+
+    if (needClientVBOSetup) {
         GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
-        ctx->dispatcher().glDrawElements(mode,count,type,indices);
+        s_glDrawSetupArraysPre(ctx, tmpArrs, 0, count, type, indices, false);
+    }
+
+    if (needClientIBOSetup) {
+        ctx->emulatedClientIBODraw((GLESv2Context::DrawCallParams){
+                GLESv2Context::DrawCallCmd::Elements,
+                mode, count, type, indices,
+                0, 0, 0 /* primcount, start, end (unused) */});
+    } else {
+        ctx->dispatcher().glDrawElements(mode, count, type, indices);
+    }
+
+    if (needClientVBOSetup) {
         s_glDrawSetupArraysPost(ctx);
-        s_glDrawEmulateClientArraysPost(ctx);
     }
 
     s_glDrawPost(ctx, mode);

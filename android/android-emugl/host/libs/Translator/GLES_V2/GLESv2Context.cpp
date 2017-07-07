@@ -81,6 +81,14 @@ void GLESv2Context::init(GlLibrary* glLib) {
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
 
+        // Create emulated client VBOs
+        GLint neededClientVBOs;
+        dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &neededClientVBOs);
+        m_emulatedClientVBOs.resize(neededClientVBOs, 0);
+        dispatcher().glGenBuffers(neededClientVBOs, &m_emulatedClientVBOs[0]);
+
+        // Create emulated IBO
+        dispatcher().glGenBuffers(1, &m_emulatedClientIBO);
     }
     m_initialized = true;
 }
@@ -341,6 +349,59 @@ void GLESv2Context::validateAtt0PostDraw(void)
     }
 }
 
+void GLESv2Context::emulatedClientIBODraw(const GLESv2Context::DrawCallParams& callParams) {
+    int bpv = 2;
+    switch (callParams.type) {
+    case GL_UNSIGNED_BYTE:
+        bpv = 1;
+        break;
+    case GL_UNSIGNED_SHORT:
+        bpv = 2;
+        break;
+    case GL_UNSIGNED_INT:
+        bpv = 4;
+        break;
+    }
+
+    size_t dataSize = bpv * callParams.count;
+
+    GLuint prevIBO;
+
+    s_glDispatch.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prevIBO);
+    s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_emulatedClientIBO);
+    s_glDispatch.glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, callParams.ptr, GL_STATIC_DRAW);
+
+    switch (callParams.cmd) {
+    case Elements:
+        s_glDispatch.glDrawElements(callParams.mode,
+                                    callParams.count,
+                                    callParams.type,
+                                    (GLvoid*)0);
+        break;
+    case ElementsInstanced:
+        s_glDispatch.glDrawElementsInstanced(callParams.mode,
+                                             callParams.count,
+                                             callParams.type,
+                                             (GLvoid*)0,
+                                             callParams.primcount);
+        break;
+    case RangeElements:
+        s_glDispatch.glDrawRangeElements(callParams.mode,
+                                         callParams.start,
+                                         callParams.end,
+                                         callParams.count,
+                                         callParams.type,
+                                         (GLvoid*)0);
+        break;
+    default:
+        fprintf(stderr, "%s: has corrupt call params. call cmd: 0x%x\n",
+                __func__, callParams.cmd);
+        abort();
+    }
+
+    s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prevIBO);
+}
+
 void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) {
     ArraysMap::iterator it;
 
@@ -352,26 +413,38 @@ void GLESv2Context::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
             continue;
         }
 
-        setupArr(p->getArrayData(),
-                 array_id,
-                 p->getType(),
-                 p->getSize(),
-                 p->getStride(),
-                 p->getNormalized(),
-                 -1,
-                 p->isIntPointer());
+        setupArrWithDataSize(
+            p->getDataSize(),
+            p->getArrayData(),
+            array_id,
+            p->getType(),
+            p->getSize(),
+            p->getStride(),
+            p->getNormalized(),
+            -1,
+            p->isIntPointer());
     }
 }
 
 //setting client side arr
-void GLESv2Context::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
+void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
+                                         GLenum arrayType, GLenum dataType,
+                                         GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt){
     // is not really a client side arr.
     if (arr == NULL) return;
 
-    if (isInt)
-        s_glDispatch.glVertexAttribIPointer(arrayType, size, dataType, stride, arr);
-    else
-        s_glDispatch.glVertexAttribPointer(arrayType, size, dataType, normalized, stride, arr);
+    GLuint prevArrayBuffer;
+    s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);
+    s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, m_emulatedClientVBOs[arrayType]);
+    s_glDispatch.glBufferData(GL_ARRAY_BUFFER, datasize, arr, GL_STATIC_DRAW);
+
+    if (isInt) {
+        s_glDispatch.glVertexAttribIPointer(arrayType, size, dataType, stride, 0);
+    } else {
+        s_glDispatch.glVertexAttribPointer(arrayType, size, dataType, normalized, stride, 0);
+    }
+
+    s_glDispatch.glBindBuffer(GL_ARRAY_BUFFER, prevArrayBuffer);
 }
 
 void GLESv2Context::setVertexAttribDivisor(GLuint bindingindex, GLuint divisor) {
