@@ -599,6 +599,22 @@ GLuint ProgramData::getAttachedShader(GLenum type) const {
     return attachedShaders[s_glShaderType2ShaderType(type)].localName;
 }
 
+std::string ProgramData::getTranslatedName(const std::string& userVarName) const {
+    for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+        ShaderParser* sp = attachedShaders[i].shader;
+        if (!sp) continue;
+        const ANGLEShaderParser::ShaderLinkInfo& linkInfo =
+            sp->getShaderLinkInfo();
+
+        if (const auto name = android::base::find(linkInfo.nameMap, userVarName)) {
+            if (*name != userVarName) {
+                return *name;
+            }
+        }
+    }
+    return userVarName;
+}
+
 bool ProgramData::attachShader(GLuint shader, ShaderParser* shaderData,
         GLenum type) {
     AttachedShader& s = attachedShaders[s_glShaderType2ShaderType(type)];
