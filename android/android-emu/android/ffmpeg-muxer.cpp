@@ -156,7 +156,7 @@ static int write_frame(ffmpeg_recorder* recorder,
                        AVStream* st,
                        AVPacket* pkt) {
     // rescale output packet timestamp values from codec to stream timebase
-    av_packet_rescale_ts(pkt, *time_base, st->time_base);
+    // av_packet_rescale_ts(pkt, *time_base, st->time_base);
     pkt->stream_index = st->index;
 
     // Write the compressed frame to the media file.
@@ -291,11 +291,8 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
             derror("Error while converting\n");
             return ret;
         }
+        ost->frame->pts = frame->pts;
         frame = ost->frame;
-
-        frame->pts =
-                av_rescale_q(ost->samples_count,
-                             (AVRational){1, c->sample_rate}, c->time_base);
         ost->samples_count += dst_nb_samples;
     }
 
@@ -491,6 +488,58 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     if (recorder == NULL)
         return;
 
+    if (recorder->audio_capturer != NULL) {
+        AudioCaptureEngine* engine = AudioCaptureEngine::get();
+        if (engine != NULL)
+            engine->stop(recorder->audio_capturer);
+        delete recorder->audio_capturer;
+    }
+
+    // flush the remaining audio packet
+    if (recorder->audio_st.audio_leftover_len > 0) {
+        AVFrame* frame = recorder->audio_st.tmp_frame;
+        int frame_size = frame->nb_samples *
+                         recorder->audio_st.st->codec->channels *
+                         sizeof(int16_t);  // 16-bit
+        if (recorder->audio_st.audio_leftover_len <
+            frame_size) {  // this should always true
+            int size = frame_size - recorder->audio_st.audio_leftover_len;
+            uint8_t* zeros = new uint8_t[size];
+            if (zeros != nullptr) {
+                ffmpeg_encode_audio_frame(recorder, zeros, size);
+                delete[] zeros;
+            }
+        }
+    }
+
+    // flush video encoding with a NULL frame
+    for (int i = 0; i < 5; i++) {
+        AVPacket pkt = {0};
+        int got_packet = 0;
+        av_init_packet(&pkt);
+        avcodec_encode_video2(recorder->video_st.st->codec, &pkt, NULL,
+                              &got_packet);
+        if (got_packet) {
+            write_frame(recorder, recorder->oc,
+                        &recorder->video_st.st->codec->time_base,
+                        recorder->video_st.st, &pkt);
+        }
+    }
+
+    // flush audio encoding with a NULL frame
+    for (int i = 0; i < 5; i++) {
+        AVPacket pkt = {0};
+        int got_packet;
+        av_init_packet(&pkt);
+        avcodec_encode_audio2(recorder->audio_st.st->codec, &pkt, NULL,
+                              &got_packet);
+        if (got_packet) {
+            write_frame(recorder, recorder->oc,
+                        &recorder->audio_st.st->codec->time_base,
+                        recorder->audio_st.st, &pkt);
+        }
+    }
+
     // Write the trailer, if any. The trailer must be written before you
     // close the CodecContexts open when you wrote the header; otherwise
     // av_write_trailer() may try to use memory that was freed on
@@ -503,13 +552,6 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
 
     if (recorder->have_audio)
         close_audio_stream(recorder->oc, &recorder->audio_st);
-
-    if (recorder->audio_capturer != NULL) {
-        AudioCaptureEngine* engine = AudioCaptureEngine::get();
-        if (engine != NULL)
-            engine->stop(recorder->audio_capturer);
-        delete recorder->audio_capturer;
-    }
 
     if (recorder->audio_st.audio_leftover != nullptr) {
         free(recorder->audio_st.audio_leftover);
@@ -640,7 +682,7 @@ int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
     c->channels = av_get_channel_layout_nb_channels(c->channel_layout);
     ost->st->time_base = (AVRational){1, 1000000 /*c->sample_rate*/};
 
-    c->time_base = ost->st->time_base;
+    // c->time_base = ost->st->time_base;
 
     VERBOSE_PRINT(
             capture,
@@ -781,9 +823,6 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     VideoOutputStream* ost = &recorder->video_st;
     AVCodecContext* c = ost->st->codec;
 
-    uint64_t elapseUS = android::base::System::get()->getHighResTimeUs() -
-                        recorder->start_time;
-
     if (ost->sws_ctx == NULL) {
         ost->sws_ctx = sws_getContext(c->width, c->height, AV_PIX_FMT_RGBA,
                                       c->width, c->height, c->pix_fmt,
@@ -798,8 +837,10 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     sws_scale(ost->sws_ctx, (const uint8_t* const*)&rgb_pixels, linesize, 0,
               c->height, ost->frame->data, ost->frame->linesize);
 
-    ost->frame->pts =
-            (int64_t)(((double)elapseUS * ost->st->time_base.den) / 1000000.00);
+    uint64_t elapsedUS = android::base::System::get()->getHighResTimeUs() -
+                         recorder->start_time;
+    ost->frame->pts = (int64_t)(((double)elapsedUS * ost->st->time_base.den) /
+                                1000000.00);
     rc = write_video_frame(recorder, recorder->oc, ost, ost->frame);
 
     return rc;
@@ -836,12 +877,6 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
     if (recorder->oc == NULL)
         return -1;
 
-    uint64_t elapseUS = android::base::System::get()->getHighResTimeUs() -
-                        recorder->start_time;
-
-    int64_t pts =
-            (int64_t)(((double)elapseUS * ost->st->time_base.den) / 1000000.00);
-
     AVFrame* frame = ost->tmp_frame;
     int frame_size = frame->nb_samples * ost->st->codec->channels *
                      sizeof(int16_t);  // 16-bit
@@ -855,6 +890,11 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
             memcpy(ost->audio_leftover + ost->audio_leftover_len, buf,
                    frame_size - ost->audio_leftover_len);
             memcpy(frame->data[0], ost->audio_leftover, frame_size);
+            uint64_t elapsedUS =
+                    android::base::System::get()->getHighResTimeUs() -
+                    recorder->start_time;
+            int64_t pts = (int64_t)(
+                    ((double)elapsedUS * ost->st->time_base.den) / 1000000.00);
             frame->pts = pts;
             write_audio_frame(recorder, recorder->oc, ost, frame);
             buf += (frame_size - ost->audio_leftover_len);
@@ -869,6 +909,10 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
 
     while (remaining >= frame_size) {
         memcpy(frame->data[0], buf, frame_size);
+        uint64_t elapsedUS = android::base::System::get()->getHighResTimeUs() -
+                             recorder->start_time;
+        int64_t pts = (int64_t)(((double)elapsedUS * ost->st->time_base.den) /
+                                1000000.00);
         frame->pts = pts;
         write_audio_frame(recorder, recorder->oc, ost, frame);
         buf += frame_size;
