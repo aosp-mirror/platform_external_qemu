@@ -96,7 +96,7 @@ bool GLDispatch::isInitialized() const {
 }
 
 // Holds the level of GLES 3.x support after dispatchFuncs runs.
-static GLDispatchMaxGLESVersion s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_2;
+static GLDispatchMaxGLESVersion s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_3_1;
 static bool s_got_gles_support_level = false;
 
 void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
