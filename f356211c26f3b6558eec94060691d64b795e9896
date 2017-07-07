@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "06a83652_e0cc5fb4",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T00:17:21Z",
+      "side": 1,
+      "message": "Try checking for the \u0027\\0\u0027 for end of string, or make sure the lengths of _indirect and the rest of the string match (rest of string length is just strlen(strstr",
+      "parentUuid": "0688a5f3_15d17014",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 37
+      },
+      "revId": "f356211c26f3b6558eec94060691d64b795e9896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8420ffc_1eafd6cd",
         "filename": "android/android-emu/android/opengl/EmuglBackendScanner.cpp",
         "patchSetId": 2
