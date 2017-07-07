@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "bac994a6_83782ddc",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T00:32:16Z",
+      "side": 1,
+      "message": "memcmp will check the ending \u0027\\0\u0027. But yes there could be a situation that nameSize+1 \u003c sizeof(postfix). Thanks for the finding.",
+      "parentUuid": "06a83652_e0cc5fb4",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 37
+      },
+      "revId": "f356211c26f3b6558eec94060691d64b795e9896",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b8420ffc_1eafd6cd",
         "filename": "android/android-emu/android/opengl/EmuglBackendScanner.cpp",
         "patchSetId": 2
