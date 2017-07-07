@@ -1920,6 +1920,51 @@ void GLEScontext::initDefaultFBO(
         dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
 }
 
+
+void GLEScontext::prepareCoreProfileEmulatedTexture(TextureData* texData, bool is3d, GLenum target,
+                                                    GLenum format, GLenum type,
+                                                    GLint* internalformat_out, GLenum* format_out) {
+    if (format != GL_ALPHA &&
+        format != GL_LUMINANCE &&
+        format != GL_LUMINANCE_ALPHA) {
+        return;
+    }
+
+    if (isCubeMapFaceTarget(target)) {
+        target = is3d ? GL_TEXTURE_CUBE_MAP_ARRAY_EXT : GL_TEXTURE_CUBE_MAP;
+    }
+
+    // Set up the swizzle from the underlying supported
+    // host format to the emulated format.
+    // Make sure to re-apply any user-specified custom swizlz
+    TextureSwizzle userSwz; // initialized to identity map
+
+    if (texData) {
+        userSwz.toRed = texData->getSwizzle(GL_TEXTURE_SWIZZLE_R);
+        userSwz.toGreen = texData->getSwizzle(GL_TEXTURE_SWIZZLE_G);
+        userSwz.toBlue = texData->getSwizzle(GL_TEXTURE_SWIZZLE_B);
+        userSwz.toAlpha = texData->getSwizzle(GL_TEXTURE_SWIZZLE_A);
+    }
+
+    TextureSwizzle swz =
+        concatSwizzles(getSwizzleForEmulatedFormat(format),
+                       userSwz);
+
+    dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, swz.toRed);
+    dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, swz.toGreen);
+    dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, swz.toBlue);
+    dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, swz.toAlpha);
+
+    // Change the format/internalformat communicated to GL.
+    GLenum emulatedFormat =
+        getCoreProfileEmulatedFormat(format);
+    GLint emulatedInternalFormat =
+        getCoreProfileEmulatedInternalFormat(format, type);
+
+    if (format_out) *format_out = emulatedFormat;
+    if (internalformat_out) *internalformat_out = emulatedInternalFormat;
+}
+
 bool GLEScontext::isFBO(ObjectLocalName p_localName) {
     return m_fboNameSpace->isObject(p_localName);
 }

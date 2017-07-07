@@ -505,8 +505,10 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
+    if (!ctx->isCoreProfile()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
-    ctx->dispatcher().glTexParameteri(target,GL_DEPTH_TEXTURE_MODE,GL_RED);
+        ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
@@ -2306,20 +2308,37 @@ GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
     }
 }
 
+static bool sShouldEmulateSwizzles(TextureData* texData, GLenum target, GLenum pname) {
+    return texData && isCoreProfile() && isSwizzleParam(pname) &&
+           isCoreProfileEmulatedFormat(texData->format);
+}
+
 GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glGetTexParameterfv(target,pname,params);
 
+    TextureData* texData = getTextureTargetData(target);
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        *params = (GLfloat)(texData->getSwizzle(pname));
+    } else {
+        ctx->dispatcher().glGetTexParameterfv(target,pname,params);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GLint* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glGetTexParameteriv(target,pname,params);
+
+    TextureData* texData = getTextureTargetData(target);
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        *params = texData->getSwizzle(pname);
+    } else {
+        ctx->dispatcher().glGetTexParameteriv(target,pname,params);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfloat* params){
@@ -2947,13 +2966,35 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
+
+    if (isCoreProfile()) {
+        GLEScontext::prepareCoreProfileEmulatedTexture(
+            getTextureTargetData(target),
+            false, target, format, type,
+            &internalformat, &format);
+    }
+
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
+
     err = ctx->dispatcher().glGetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+}
+
+static void sEmulateUserTextureSwizzle(TextureData* texData,
+                                       GLenum target, GLenum pname, GLint param) {
+    GET_CTX_V2();
+    TextureSwizzle emulatedBaseSwizzle =
+        getSwizzleForEmulatedFormat(texData->format);
+    GLenum userSwz =
+        texData->getSwizzle(pname);
+    GLenum hostEquivalentSwizzle =
+        swizzleComponentOf(emulatedBaseSwizzle, userSwz);
+    ctx->dispatcher().glTexParameteri(target, pname, hostEquivalentSwizzle);
 }
 
 GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloat param){
@@ -2961,15 +3002,37 @@ GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloa
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glTexParameterf(target,pname,param);
+
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        texData->setTexParam(pname, (GLint)param);
+    }
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, (GLint)param);
+    } else {
+        ctx->dispatcher().glTexParameterf(target,pname,param);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glTexParameterfv(target,pname,params);
+
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        texData->setTexParam(pname, (GLint)params[0]);
+    }
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, (GLint)params[0]);
+    } else {
+        ctx->dispatcher().glTexParameterfv(target,pname,params);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
@@ -2979,8 +3042,14 @@ GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint 
     if (texData) {
         texData->setTexParam(pname, param);
     }
-    ctx->dispatcher().glTexParameteri(target,pname,param);
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, param);
+    } else {
+        ctx->dispatcher().glTexParameteri(target,pname,param);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
@@ -2990,7 +3059,13 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
     if (texData) {
         texData->setTexParam(pname, params[0]);
     }
-    ctx->dispatcher().glTexParameteriv(target,pname,params);
+
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, params[0]);
+    } else {
+        ctx->dispatcher().glTexParameteriv(target,pname,params);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
@@ -2999,6 +3074,7 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
+
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
@@ -3017,6 +3093,10 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     if (type==GL_HALF_FLOAT_OES)
         type = GL_HALF_FLOAT_NV;
 
+    if (isCoreProfile() &&
+        isCoreProfileEmulatedFormat(format)) {
+        format = getCoreProfileEmulatedFormat(format);
+    }
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 

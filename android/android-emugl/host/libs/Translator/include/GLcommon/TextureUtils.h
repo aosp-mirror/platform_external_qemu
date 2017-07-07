@@ -41,4 +41,36 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
 void deleteRenderbufferGlobal(GLuint rbo);
 GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat);
 
+bool isCubeMapFaceTarget(GLenum target);
+bool isCoreProfileEmulatedFormat(GLenum format);
+GLenum getCoreProfileEmulatedFormat(GLenum format);
+GLint getCoreProfileEmulatedInternalFormat(GLint internalformat, GLenum type);
+
+// TextureSwizzle: Structure to represent texture swizzling and help wth
+// emulation of swizzle state.
+//
+// |to(Red|Green|Blue|Alpha)| represent the components
+// (GL_(RED|GREEN|BLUE|ALPHA|ZERO|ONE)) that should be mapped
+// from a source to destination image.
+//
+// For example, i.e., if |toRed| = GL_GREEN, the red component of the
+// destination is read from the green component of the source.
+//
+// The functions below encode the swizzles to emulate deprecated formats
+// such as GL_ALPHA/LUMINANCE plus utility functions to obtain the
+// result of concatenating two swizzles in a row.
+struct TextureSwizzle {
+    GLenum toRed = GL_RED;
+    GLenum toGreen = GL_GREEN;
+    GLenum toBlue = GL_BLUE;
+    GLenum toAlpha = GL_ALPHA;
+};
+
+TextureSwizzle getSwizzleForEmulatedFormat(GLenum format);
+GLenum swizzleComponentOf(const TextureSwizzle& s, GLenum component);
+TextureSwizzle concatSwizzles(const TextureSwizzle& first,
+                              const TextureSwizzle& next);
+
+bool isSwizzleParam(GLenum pname);
+
 #endif

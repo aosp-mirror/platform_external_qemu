@@ -220,6 +220,10 @@ public:
     virtual const GLESpointer* getPointer(GLenum arrType);
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
 
+    static void prepareCoreProfileEmulatedTexture(TextureData* texData, bool is3d, GLenum target,
+                                                  GLenum format, GLenum type,
+                                                  GLint* internalformat_out, GLenum* format_out);
+
     void bindBuffer(GLenum target,GLuint buffer);
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride = 0);
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
