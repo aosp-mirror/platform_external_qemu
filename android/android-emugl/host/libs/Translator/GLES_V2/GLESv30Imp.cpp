@@ -261,16 +261,24 @@ GL_APICALL void GL_APIENTRY glVertexAttribI4uiv(GLuint index, const GLuint * v) 
     ctx->dispatcher().glVertexAttribI4uiv(index, v);
 }
 
+GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
+    GET_CTX_V2();
+    SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
+
+    s_glPrepareVertexAttribPointer(ctx, index, size, type, false, stride, ptr, dataSize, true);
+    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        ctx->dispatcher().glVertexAttribIPointer(index, size, type, stride, ptr);
+    }
+}
+
 GL_APICALL void GL_APIENTRY glVertexAttribIPointer(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid * pointer) {
     GET_CTX_V2();
 
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     s_glPrepareVertexAttribPointer(ctx, index, size, type, false, stride, pointer, 0, true);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
-    ctx->dispatcher().glVertexAttribIPointer(index, size, type, stride, pointer);
-
+        ctx->dispatcher().glVertexAttribIPointer(index, size, type, stride, pointer);
     }
-
 }
 
 GL_APICALL void GL_APIENTRY glGetVertexAttribIiv(GLuint index, GLenum pname, GLint * params) {
@@ -297,16 +305,16 @@ GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsi
 
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode)),GL_INVALID_ENUM);
-    s_glDrawPre(ctx, mode);
-    if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+    if (ctx->vertexAttributesBufferBacked()) {
+        s_glDrawPre(ctx, mode);
         ctx->dispatcher().glDrawArraysInstanced(mode, first, count, primcount);
+        s_glDrawPost(ctx, mode);
     } else {
-        GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx, tmpArrs, first, count, 0, NULL, true);
-        ctx->dispatcher().glDrawArraysInstanced(mode,first,count, primcount);
-        s_glDrawSetupArraysPost(ctx);
+        ctx->drawWithEmulations(
+                GLESv2Context::DrawCallCmd::ArraysInstanced,
+                mode, first, count,
+                0, nullptr, primcount, 0, 0 /* type, indices, start, end unused */);
     }
-    s_glDrawPost(ctx, mode);
 }
 
 GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount) {
@@ -314,18 +322,18 @@ GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, 
 
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
-    s_glDrawPre(ctx, mode);
-    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
-        ctx->dispatcher().glDrawElementsInstanced(mode,count,type,indices, primcount);
+
+    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+        ctx->vertexAttributesBufferBacked()) {
+        s_glDrawPre(ctx, mode);
+        ctx->dispatcher().glDrawElementsInstanced(mode, count, type, indices, primcount);
+        s_glDrawPost(ctx, mode);
     } else {
-        s_glDrawEmulateClientArraysPre(ctx);
-        GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
-        ctx->dispatcher().glDrawElementsInstanced(mode,count,type,indices, primcount);
-        s_glDrawSetupArraysPost(ctx);
-        s_glDrawEmulateClientArraysPost(ctx);
+        ctx->drawWithEmulations(
+                GLESv2Context::DrawCallCmd::ElementsInstanced,
+                mode, 0 /* first (unused) */, count, type, indices, primcount,
+                0, 0 /* start, end (unused) */);
     }
-    s_glDrawPost(ctx, mode);
 }
 
 GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type, const GLvoid * indices) {
@@ -333,19 +341,18 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
 
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
-    s_glDrawPre(ctx, mode);
-    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER)) {
-        ctx->dispatcher().glDrawRangeElements(mode,start,end,count,type,indices);
+
+    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+        ctx->vertexAttributesBufferBacked()) {
+        s_glDrawPre(ctx, mode);
+        ctx->dispatcher().glDrawRangeElements(mode, start, end, count, type, indices);
+        s_glDrawPost(ctx, mode);
     } else {
-        s_glDrawEmulateClientArraysPre(ctx);
-        GLESConversionArrays tmpArrs;
-        s_glDrawSetupArraysPre(ctx,tmpArrs,0,count,type,indices,false);
-        ctx->dispatcher().glDrawRangeElements(mode,start,end,count,type,indices);
-        s_glDrawSetupArraysPost(ctx);
-        s_glDrawEmulateClientArraysPost(ctx);
+        ctx->drawWithEmulations(
+                GLESv2Context::DrawCallCmd::RangeElements,
+                mode, 0 /* first (unused) */, count, type, indices, 0 /* primcount (unused) */,
+                start, end);
     }
-    s_glDrawPost(ctx, mode);
-    ctx->dispatcher().glDrawRangeElements(mode, start, end, count, type, indices);
 }
 
 GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
