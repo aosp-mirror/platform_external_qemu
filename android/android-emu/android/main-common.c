@@ -1827,6 +1827,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
 static RendererConfig lastRendererConfig;
 
+static bool isGuestRendererChoice(const char* choice) {
+    return choice && (!strcmp(choice, "off") ||
+                       !strcmp(choice, "guest"));
+}
+
 bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
@@ -1837,12 +1842,29 @@ bool configAndStartRenderer(
     char* api_arch = avdInfo_getTargetAbi(avd);
     bool isGoogle = avdInfo_isGoogleApis(avd);
 
+    if (avdInfo_sysImgGuestRenderingBlacklisted(avd) &&
+        (isGuestRendererChoice(opts->gpu) ||
+         isGuestRendererChoice(hw->hw_gpu_mode))) {
+        dwarning("Your AVD has been configured with an in-guest renderer, "
+                 "but there are issues with the current system image build "
+                 "preventing guest rendering from working. "
+                 "We are switching to the \'swiftshader\' software renderer "
+                 "until the next system image update. "
+                 "Sorry for the inconvenience.");
+        if (opts->gpu) {
+            str_reset(&opts->gpu, "swiftshader");
+        } else {
+            str_reset(&hw->hw_gpu_mode, "swiftshader");
+        }
+    }
+
     if (!androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
                 api_level,
                 isGoogle,
                 opts->gpu,
+                &hw->hw_gpu_mode,
                 0,
                 opts->no_window,
                 uiPreferredBackend)) {
