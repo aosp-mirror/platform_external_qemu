@@ -30,6 +30,10 @@ bool EglContext::usingSurface(SurfacePtr surface) {
   return surface.get() == m_read.get() || surface.get() == m_draw.get();
 }
 
+bool EglContext::isCoreProfile() const {
+    return m_native->isCoreProfile();
+}
+
 EglContext::EglContext(EglDisplay *dpy,
                        uint64_t shareGroupId,
                        EglConfig* config,

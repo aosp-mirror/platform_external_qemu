@@ -55,6 +55,7 @@ public:
     GLEScontext* getGlesContext() { return m_glesContext; }
     void setSurfaces(SurfacePtr read, SurfacePtr draw);
     unsigned int getHndl() { return m_hndl; }
+    bool isCoreProfile() const;
 
     ~EglContext();
     void onSave(android::base::Stream* stream);

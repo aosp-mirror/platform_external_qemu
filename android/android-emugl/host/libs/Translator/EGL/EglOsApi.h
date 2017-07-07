@@ -54,21 +54,43 @@ protected:
     SurfaceType mType;
 };
 
+// TODO: Whether or not to enable core profile contexts in underlying GL.
+// Stages:
+// 1. Only on Mac when GLES3 is enabled.
+// 2. (After fixing core profile dEQP) All platforms when GLES3 is enabled.
+// 3. (After fixing all GLES1 issues) Unconditionally
+bool shouldEnableCoreProfile();
+
 // An interface class for engine-specific implementation of a GL context.
 class Context {
 public:
     Context() {}
+    Context(bool isCoreProfile) : mCoreProfile(isCoreProfile) {}
     virtual ~Context() {}
+
+    bool isCoreProfile() const {
+        return mCoreProfile;
+    }
+
+protected:
+    bool mCoreProfile = false;
 };
 
 // Base class used to wrap engine-specific pixel format descriptors.
 class PixelFormat {
 public:
     PixelFormat() {}
+    PixelFormat(bool isCoreProfile) : mCoreProfile(isCoreProfile) {}
 
     virtual ~PixelFormat() {}
 
     virtual PixelFormat* clone() = 0;
+
+    bool isCoreProfile() const {
+        return mCoreProfile;
+    }
+protected:
+    bool mCoreProfile = false;
 };
 
 // Small structure used to describe the properties of an engine-specific
