@@ -94,6 +94,30 @@
       "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4062cf35_b9093bb6",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T18:27:33Z",
+      "side": 1,
+      "message": "At this moment we just need an experimental config. Later we might switch to ANGLE under translator by default, once we solve all performance issues. So yes, this code is \"temporary\".",
+      "parentUuid": "f6cb7689_50f2fa49",
+      "range": {
+        "startLine": 58,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 27
+      },
+      "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
