@@ -504,8 +504,10 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
+    if (!ctx->isCoreProfile()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
-    ctx->dispatcher().glTexParameteri(target,GL_DEPTH_TEXTURE_MODE,GL_RED);
+        ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
@@ -2908,6 +2910,38 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     *err_out = GL_NO_ERROR;
 }
 
+static void sPrepareTextureForCoreProfile(
+    GLenum target,
+    GLint internalformat, GLenum format,
+    GLint* internalformat_out,
+    GLenum* format_out) {
+    GET_CTX_V2();
+
+    // GL_ALPHA is deprecated
+    if ((!format_out || format == GL_ALPHA) &&
+        (!internalformat_out || internalformat == GL_ALPHA)) {
+
+        if (format_out) *format_out = GL_RED;
+        if (internalformat_out) *internalformat_out = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_RED);
+    // GL_LUMINANCE is deprecated
+    } else if ((!format_out || format == GL_LUMINANCE) &&
+               (!internalformat_out || internalformat == GL_LUMINANCE)) {
+
+        if (format_out) *format_out = GL_RED;
+        if (internalformat_out) *internalformat_out = GL_RED;
+
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_RED);
+        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+    }
+}
+
 GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels){
     GET_CTX_V2();
     // clear previous error
@@ -2915,6 +2949,13 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+
+    if (ctx->isCoreProfile()) {
+        sPrepareTextureForCoreProfile(
+            target, internalformat, format,
+            &internalformat, &format);
+    }
+
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
@@ -2967,6 +3008,13 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
+
+    if (ctx->isCoreProfile()) {
+        sPrepareTextureForCoreProfile(
+            target, 0, format,
+            nullptr, &format);
+    }
+
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
