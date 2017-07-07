@@ -111,6 +111,12 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow) {
 
     mRenderWindow = std::move(renderWindow);
     GL_LOG("OpenGL renderer initialized successfully");
+
+    // This render thread won't do anything but will only preload resources
+    // for the real threads to start faster.
+    mLoaderRenderThread.reset(new RenderThread(nullptr));
+    mLoaderRenderThread->start();
+
     return true;
 }
 
@@ -181,6 +187,11 @@ RenderChannelPtr RendererImpl::createRenderChannel(
                                }),
                 mChannels.end());
         mChannels.emplace_back(channel);
+
+        // Take the time to check if our loader thread is done as well.
+        if (mLoaderRenderThread && mLoaderRenderThread->isFinished()) {
+            mLoaderRenderThread.reset();
+        }
 
         DBG("Started new RenderThread (total %" PRIu64 ") @%p\n",
             static_cast<uint64_t>(mChannels.size()), channel->renderThread());
