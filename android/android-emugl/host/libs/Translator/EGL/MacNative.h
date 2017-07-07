@@ -24,15 +24,23 @@ typedef enum {                               // Mac equivalence
                  MAC_DRAW_TO_WINDOW    = 80, // NSOpenGLPFAWindow
                  MAC_DRAW_TO_PBUFFER   = 90, // NSOpenGLPFAPixelBuffer
                  MAC_SAMPLES_PER_PIXEL = 56, // NSOpenGLPFASamples
+                 MAC_OPENGL_PROFILE    = 99, // NSOpenGLPFAOpenGLProfile
                  MAC_COLOR_SIZE        = 8,  // NSOpenGLPFAColorSize
                  MAC_ALPHA_SIZE        = 11, // NSOpenGLPFAAlphaSize
                  MAC_DEPTH_SIZE        = 12, // NSOpenGLPFADepthSize
                  MAC_STENCIL_SIZE      = 13  // NSOpenGLPFAStencilSize
              } MacPixelFormatAttribs;
 
+typedef enum {
+                 MAC_OPENGL_PROFILE_LEGACY = 0x1000, // NSOpenGLPFAOpenGLProfile
+                 MAC_OPENGL_PROFILE_3_2    = 0x3200, // NSOpenGLProfileVersion3_2Core
+                 MAC_OPENGL_PROFILE_4_1    = 0x4100, // NSOpenGLProfileVersion4_1Core
+             } MacOpenGLProfileVersions;
+
 
 extern "C"{
 
+void  setupCoreProfileNativeFormats();
 int   getNumPixelFormats();
 void* getPixelFormat(int i);
 int   getPixelFormatDefinitionAlpha(int i);
