@@ -70,6 +70,30 @@
       "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6cb7689_50f2fa49",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T18:18:13Z",
+      "side": 1,
+      "message": "thinking about it more, we want the user to use angle under Translator by default for snapshots to work in all cases, right?\n\nIn that case, we can just go the other way around completely and have a list of backends that are working with ES on ES translation for sure and we are choosing to switch users to it\n\nFewer configs \u003d better at this point",
+      "parentUuid": "f6c192f3_b00899e8",
+      "range": {
+        "startLine": 58,
+        "startChar": 3,
+        "endLine": 60,
+        "endChar": 27
+      },
+      "revId": "845ea8d63582769e4a44569aeca9a97e7805851c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
