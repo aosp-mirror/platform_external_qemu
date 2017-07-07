@@ -271,9 +271,12 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
 
-        ctx->dispatcher().glBindAttribLocation(globalProgramName,index,name);
-
         ProgramData* pData = (ProgramData*)objData;
+
+        ctx->dispatcher().glBindAttribLocation(
+            globalProgramName, index,
+            pData->getTranslatedName(name).c_str());
+
         pData->bindAttribLocation(name, index);
     }
 }
@@ -705,8 +708,9 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             if (GLESv2Validate::isCompressedFormat(internalformat)) {
                 texData->compressed = true;
                 texData->compressedFormat = internalformat;
-                texData->internalFormat = decompressedInternalFormat(
-                    internalformat);
+                texData->internalFormat =
+                    decompressedInternalFormat(ctx,
+                                               internalformat);
             } else {
                 texData->internalFormat = internalformat;
             }
@@ -1323,6 +1327,59 @@ GL_APICALL void  GL_APIENTRY glGenTextures(GLsizei n, GLuint* textures){
     }
 }
 
+static void s_getActiveAttribOrUniform(
+    bool isUniform,
+    GLEScontext* ctx, ProgramData* pData, GLuint globalProgramName,
+    GLuint index, GLsizei bufsize,
+    GLsizei* length, GLint* size, GLenum* type, GLchar* name) {
+
+    auto& gl = ctx->dispatcher();
+
+    GLsizei hostBufSize = 256;
+    GLsizei hostLen = 0;
+    GLint hostSize = 0;
+    GLenum hostType = 0;
+    gl.glGetProgramiv(globalProgramName,
+                      isUniform ? GL_ACTIVE_UNIFORM_MAX_LENGTH :
+                      GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
+                      (GLint*)&hostBufSize);
+
+    std::string hostVarName(hostBufSize + 1, 0);
+    char watch_val = 0xfe;
+    hostVarName[0] = watch_val;
+
+    if (isUniform) {
+        gl.glGetActiveUniform(globalProgramName, index,
+                hostBufSize, &hostLen, &hostSize, &hostType,
+                &hostVarName[0]);
+    } else {
+        gl.glGetActiveAttrib(globalProgramName, index,
+                hostBufSize, &hostLen, &hostSize, &hostType,
+                &hostVarName[0]);
+    }
+
+    // here, something failed on the host side,
+    // so bail early.
+    if (hostVarName[0] == watch_val) {
+        return;
+    }
+
+    // Got a valid string from host GL, but
+    // we need to return the exact strlen to the GL user.
+    hostVarName.resize(strlen(hostVarName.c_str()));
+
+    // Things seem to have gone right, so translate the name
+    // and fill out all applicable guest fields.
+    auto guestVarName = pData->getDetranslatedName(hostVarName);
+
+    if (length) *length = guestVarName.size();
+    if (size) *size = hostSize;
+    if (type) *type = hostType;
+    // use the guest's bufsize, but don't run over.
+    if (name) memcpy(name, guestVarName.c_str(),
+            std::min((int)bufsize, (int)(guestVarName.size() + 1)));
+}
+
 GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name){
     GET_CTX();
     if(ctx->shareGroup().get()) {
@@ -1332,7 +1389,18 @@ GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLs
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ctx->dispatcher().glGetActiveAttrib(globalProgramName,index,bufsize,length,size,type,name);
+
+        GLint numActiveAttributes = 0;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_ACTIVE_ATTRIBUTES,
+                                         &numActiveAttributes);
+        SET_ERROR_IF(index >= numActiveAttributes, GL_INVALID_VALUE);
+        SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
+
+        ProgramData* pData = (ProgramData *)objData;
+        s_getActiveAttribOrUniform(
+            false, ctx, (ProgramData*)objData,globalProgramName,
+            index, bufsize,
+            length, size, type, name);
     }
 }
 
@@ -1345,7 +1413,18 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ctx->dispatcher().glGetActiveUniform(globalProgramName,index,bufsize,length,size,type,name);
+
+        GLint numActiveUniforms = 0;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_ACTIVE_UNIFORMS,
+                                         &numActiveUniforms);
+        SET_ERROR_IF(index >= numActiveUniforms, GL_INVALID_VALUE);
+        SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
+
+        ProgramData* pData = (ProgramData *)objData;
+        s_getActiveAttribOrUniform(
+            true, ctx, (ProgramData*)objData, globalProgramName,
+            index, bufsize,
+            length, size, type, name);
     }
 }
 
@@ -1381,7 +1460,9 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          ProgramData* pData = (ProgramData*)objData;
          RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,
                               GL_INVALID_OPERATION, -1);
-         int ret = ctx->dispatcher().glGetAttribLocation(globalProgramName, name);
+         int ret = ctx->dispatcher().glGetAttribLocation(
+                       globalProgramName,
+                       pData->getTranslatedName(name).c_str());
          if (ret != -1) {
              pData->linkedAttribLocation(name, ret);
          }
@@ -2251,7 +2332,12 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
-        return ctx->dispatcher().glGetUniformLocation(globalProgramName,name);
+
+        // On core profile, it's possible to have renamed
+        // a bunch of variables to avoid ES -> core name collisions.
+        // Sort it out here.
+        return ctx->dispatcher().glGetUniformLocation(
+                   globalProgramName, pData->getTranslatedName(name).c_str());
     }
     return -1;
 }
