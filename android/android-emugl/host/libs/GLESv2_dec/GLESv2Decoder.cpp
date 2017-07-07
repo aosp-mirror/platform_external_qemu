@@ -40,6 +40,9 @@ int gles2_decoder_extended_context::initDispatch(
     glVertexAttribPointerWithDataSize =
             (glVertexAttribPointerWithDataSize_server_proc_t)
             getProc("glVertexAttribPointerWithDataSize", userData);
+    glVertexAttribIPointerWithDataSize =
+            (glVertexAttribIPointerWithDataSize_server_proc_t)
+            getProc("glVertexAttribIPointerWithDataSize", userData);
     return 0;
 }
 
@@ -414,7 +417,13 @@ void GLESv2Decoder::s_glVertexAttribIPointerDataAEMU(void *self, GLuint indx, GL
         ctx->m_contextData->storePointerData(indx, data, datalen);
         // note - the stride of the data is always zero when it comes out of the codec.
         // See gl2.attrib for the packing function call.
-        ctx->glVertexAttribIPointer(indx, size, type, 0, ctx->m_contextData->pointerData(indx));
+        if ((void*)ctx->glVertexAttribIPointerWithDataSize != gles2_unimplemented) {
+            ctx->glVertexAttribIPointerWithDataSize(indx, size, type, 0,
+                ctx->m_contextData->pointerData(indx), datalen);
+        } else {
+            ctx->glVertexAttribIPointer(indx, size, type, 0,
+                ctx->m_contextData->pointerData(indx));
+        }
     }
 }
 
