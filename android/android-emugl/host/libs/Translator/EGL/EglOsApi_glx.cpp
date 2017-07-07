@@ -26,6 +26,15 @@
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 
+namespace EglOS {
+
+bool shouldEnableCoreProfile() {
+    // TODO: Enable core profile for Linux
+    return false;
+}
+
+} // namespace EglOS
+
 namespace {
 
 typedef Display X11Display;

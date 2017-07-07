@@ -22,6 +22,7 @@ ifeq ($(BUILD_TARGET_OS),windows)
 endif
 
 host_common_SRC_FILES :=      \
+     EglOsApi_common.cpp      \
      $(host_OS_SRCS)          \
      ThreadInfo.cpp           \
      EglImp.cpp               \
