@@ -23,6 +23,8 @@
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
 
+#include <GLES2/gl2ext.h>
+
 #include <functional>
 #include <memory>
 

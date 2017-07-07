@@ -41,4 +41,23 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
 void deleteRenderbufferGlobal(GLuint rbo);
 GLenum decompressedInternalFormat(GLenum compressedFormat);
 
+bool isCubeMapFaceTarget(GLenum target);
+bool isCoreProfileEmulatedFormat(GLenum format);
+GLenum getCoreProfileEmulatedFormat(GLenum format);
+GLint getCoreProfileEmulatedInternalFormat(GLint internalformat, GLenum type);
+
+struct TextureSwizzle {
+    GLenum toRed = GL_RED;
+    GLenum toGreen = GL_GREEN;
+    GLenum toBlue = GL_BLUE;
+    GLenum toAlpha = GL_ALPHA;
+};
+
+TextureSwizzle getSwizzleForEmulatedFormat(GLenum format);
+GLenum swizzleComponentOf(const TextureSwizzle& s, GLenum component);
+TextureSwizzle concatSwizzles(const TextureSwizzle& first,
+                              const TextureSwizzle& next);
+
+bool isSwizzleParam(GLenum pname);
+
 #endif
