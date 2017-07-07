@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3dcafdb3_75b92c3b",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglGlobalInfo.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T18:11:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89920c8b_5ce15219",
+      "range": {
+        "startLine": 36,
+        "startChar": 46,
+        "endLine": 36,
+        "endChar": 51
+      },
+      "revId": "69c09604395f2f256eebff2e1811fad28ef9f385",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c349b331_7f027f72",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
         "patchSetId": 7
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6d50c1a6_3f632969",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T18:11:59Z",
+      "side": 1,
+      "message": "well this file is actually 80% different from EglOsApi_wgl (although the copyright statement can still date back to 6 years ago).",
+      "parentUuid": "c349b331_7f027f72",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 2
+      },
+      "revId": "69c09604395f2f256eebff2e1811fad28ef9f385",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bf94c207_5176a78a",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
         "patchSetId": 7
@@ -59,6 +107,30 @@
       "writtenOn": "2017-07-07T05:04:20Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 2,
+        "startChar": 16,
+        "endLine": 2,
+        "endChar": 20
+      },
+      "revId": "69c09604395f2f256eebff2e1811fad28ef9f385",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f1c27bb2_937b52e2",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-07T18:11:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bf94c207_5176a78a",
       "range": {
         "startLine": 2,
         "startChar": 16,
