@@ -164,6 +164,11 @@ bool globalInitialize(
 
 static void getShaderLinkInfo(ShHandle compilerHandle,
                               ShaderLinkInfo* linkInfo) {
+
+    std::map<std::string, std::string> thismap = *ShGetNameHashingMap(compilerHandle);
+
+    linkInfo->nameMap = thismap;
+
     auto uniforms = ShGetUniforms(compilerHandle);
     auto varyings = ShGetVaryings(compilerHandle);
     auto attributes = ShGetAttributes(compilerHandle);
