@@ -20,4 +20,8 @@
 #include <Cocoa/Cocoa.h>
 NSOpenGLPixelFormatAttribute** getPixelFormatsAttributes(int* size);
 
+void setCoreProfileLevel(NSOpenGLPixelFormatAttribute level);
+
+NSOpenGLPixelFormatAttribute* getLegacyProfileAttributes();
+NSOpenGLPixelFormatAttribute* getCoreProfileAttributes();
 #endif
