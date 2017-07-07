@@ -91,6 +91,12 @@ void GLESv2Context::init(GlLibrary* glLib) {
 
         // Create emulated IBO
         dispatcher().glGenBuffers(1, &m_emulatedClientIBO);
+
+        if (isCoreProfile()) {
+            // Create emulated default VAO
+            glGenVertexArrays(1, &m_defaultVAO);
+            glBindVertexArray(getDefaultVAO());
+        }
     }
     m_initialized = true;
 }
