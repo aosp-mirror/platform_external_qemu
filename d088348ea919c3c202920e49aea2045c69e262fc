@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "210b2327_be0a4d78",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1584,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-07T04:56:11Z",
+      "side": 1,
+      "message": "please put a comment that this is a one off solution so people won\u0027t keep adding builds here\nI\u0027d prefer to have this kind of filter in server feature flags instead",
+      "range": {
+        "startLine": 1584,
+        "startChar": 40,
+        "endLine": 1584,
+        "endChar": 47
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "68c47142_7a676efa",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1848,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-07T04:56:11Z",
+      "side": 1,
+      "message": "dwarning() ?",
+      "range": {
+        "startLine": 1848,
+        "startChar": 8,
+        "endLine": 1848,
+        "endChar": 22
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "838798bc_3848019b",
+        "filename": "android/android-emu/android/main-emugl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-07T04:56:11Z",
+      "side": 1,
+      "message": "can it be null? line 37 checks for that",
+      "range": {
+        "startLine": 39,
+        "startChar": 34,
+        "endLine": 39,
+        "endChar": 47
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
