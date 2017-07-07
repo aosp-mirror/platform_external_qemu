@@ -1968,17 +1968,14 @@ ObjectLocalName GLEScontext::genVAOName(ObjectLocalName p_localName,
 }
 
 void GLEScontext::deleteVAO(ObjectLocalName p_localName) {
-    if (p_localName == 0) return;
     m_vaoNameSpace->deleteName(p_localName);
 }
 
 unsigned int GLEScontext::getVAOGlobalName(ObjectLocalName p_localName) {
-    if (p_localName == 0) return 0;
     return m_vaoNameSpace->getGlobalName(p_localName);
 }
 
 ObjectLocalName GLEScontext::getVAOLocalName(unsigned int p_globalName) {
-    if (p_globalName == 0) return 0;
     return m_vaoNameSpace->getLocalName(p_globalName);
 }
 
