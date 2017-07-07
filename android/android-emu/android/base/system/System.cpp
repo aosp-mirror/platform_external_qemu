@@ -144,7 +144,7 @@ public:
     return ts.tv_sec * 1000000ll + ts.tv_nsec / 1000;
 #else // APPLE
     mach_timespec_t mts;
-    clock_get_time(clockServ, &mts);
+    clock_get_time(mClockServ, &mts);
     return mts.tv_sec * 1000000ll + mts.tv_nsec / 1000;
 #endif
     }
