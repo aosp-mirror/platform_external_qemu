@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "8b1358af_e2d1d934",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1584,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-07T13:41:55Z",
+      "side": 1,
+      "message": "On server flags: we can do it in server flags, but guest rendering seems to be failing due to the guest code, and not host system details. So I think that effort to add a feature flag component to this would be about equal to the effort to fix it in the guest; let\u0027s concentrate on the latter.",
+      "parentUuid": "3ab3f20c_8cfcb1f7",
+      "range": {
+        "startLine": 1584,
+        "startChar": 40,
+        "endLine": 1584,
+        "endChar": 47
+      },
+      "revId": "d088348ea919c3c202920e49aea2045c69e262fc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "68c47142_7a676efa",
         "filename": "android/android-emu/android/main-common.c",
         "patchSetId": 2
