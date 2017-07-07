@@ -17,12 +17,17 @@
 
 #include "emugl/common/OpenGLDispatchLoader.h"
 #include "ErrorLog.h"
+#include "GLESVersionDetector.h"
 #include "OpenGLESDispatch/DispatchTables.h"
 #include "RenderLibImpl.h"
 
+#include "emugl/common/feature_control.h"
+#include "emugl/common/misc.h"
+
 #include <memory>
 
-RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary() {
+RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY
+initLibrary(render_api_feature_is_enabled_t feature_is_enabled_func) {
     //
     // Load EGL Plugin
     //
@@ -47,5 +52,23 @@ RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary() {
         return nullptr;
     }
 
-    return emugl::RenderLibPtr(new emugl::RenderLibImpl());
+    emugl::RenderLibPtr res(new emugl::RenderLibImpl());
+    res->setFeatureController((emugl_feature_is_enabled_t)feature_is_enabled_func);
+    /* Run GLES version detector now that we have the dlls
+     * and feature control function. This is needed to detect whether to use
+     * core profile and it needs at least be done earlier than Framebuffer
+     * initialization; here, it's done as early as possible.*/
+    calcMaxVersionFromDispatch();
+
+    return res;
+}
+
+RENDER_APICALL bool RENDER_APIENTRY
+renderApiFeatureIsEnabled(uint32_t feature) {
+    return emugl_feature_is_enabled((android::featurecontrol::Feature)feature);
+}
+
+RENDER_APICALL void RENDER_APIENTRY
+renderApiGlesVersion(int* maj, int* min) {
+    emugl::getGlesVersion(maj, min);
 }
