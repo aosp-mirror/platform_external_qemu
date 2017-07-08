@@ -281,9 +281,12 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
     // AVD name is a user-generated data, so won't report it.
     eventAvdInfo->set_api_level(avdInfo_getApiLevel(android_avdInfo));
     eventAvdInfo->set_image_kind(
-            avdInfo_isGoogleApis(android_avdInfo)
-                    ? android_studio::EmulatorAvdInfo::GOOGLE
-                    : android_studio::EmulatorAvdInfo::AOSP);
+            avdInfo_isUserBuild(android_avdInfo) &&
+                            isEnabled(android::featurecontrol::PlayStoreImage)
+                    ? android_studio::EmulatorAvdInfo::PLAY_STORE_KIND
+                    : avdInfo_isGoogleApis(android_avdInfo)
+                              ? android_studio::EmulatorAvdInfo::GOOGLE
+                              : android_studio::EmulatorAvdInfo::AOSP);
     eventAvdInfo->set_arch(toClearcutLogGuestArch(android_hw->hw_cpu_arch));
     if (avdInfo_inAndroidBuild(android_avdInfo)) {
         // no real AVD, so no creation times or file infos.
@@ -301,7 +304,11 @@ static void fillAvdMetrics(android_studio::AndroidStudioEvent* event) {
         eventAvdInfo->set_build_timestamp(buildTimestamp);
         VERBOSE_PRINT(metrics, "AVD build timestamp %ld", buildTimestamp);
     }
-    eventAvdInfo->set_build_id(ini.getString("ro.build.display.id", ""));
+    auto buildId = ini.getString("ro.build.fingerprint", "");
+    if (buildId.empty()) {
+        buildId = ini.getString("ro.build.display.id", "");
+    }
+    eventAvdInfo->set_build_id(buildId);
 
     fillAvdFileInfo(eventAvdInfo, android_studio::EmulatorAvdFile::KERNEL,
                 android_hw->kernel_path,
