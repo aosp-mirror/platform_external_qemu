@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e198054_ed68cf47",
+        "filename": "android/android-emu/android/base/files/IniFile.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-08T01:20:23Z",
+      "side": 1,
+      "message": "we might want a similar function to escape a value string, to make sure that it\u0027s written out without any accidental envvar substitutions",
+      "range": {
+        "startLine": 273,
+        "startChar": 21,
+        "endLine": 273,
+        "endChar": 33
+      },
+      "revId": "c6113656e5eb850b53c95e2ba131f31646a6304d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "379a11aa_1e4ead87",
+        "filename": "android/android-emu/android/base/files/IniFile.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 298,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-08T01:20:23Z",
+      "side": 1,
+      "message": "Most of the predefined variables are different on Windows/non-windows. we\u0027re heading into some really troublesome future now...",
+      "range": {
+        "startLine": 294,
+        "startChar": 0,
+        "endLine": 298,
+        "endChar": 31
+      },
+      "revId": "c6113656e5eb850b53c95e2ba131f31646a6304d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "484e8221_9c5a5751",
+        "filename": "android/android-emu/android/base/files/IniFile.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-08T01:20:23Z",
+      "side": 1,
+      "message": "nits:\n1. static\n2. pass StringView by value, it\u0027s a pointer and a size",
+      "range": {
+        "startLine": 300,
+        "startChar": 0,
+        "endLine": 300,
+        "endChar": 40
+      },
+      "revId": "c6113656e5eb850b53c95e2ba131f31646a6304d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5dece325_f031eda0",
+        "filename": "android/android-emu/android/base/files/IniFile.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 390,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-08T01:20:23Z",
+      "side": 1,
+      "message": "this and in similar places - it\u0027s not an iterator anymore",
+      "range": {
+        "startLine": 390,
+        "startChar": 9,
+        "endLine": 390,
+        "endChar": 14
+      },
+      "revId": "c6113656e5eb850b53c95e2ba131f31646a6304d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7cac687e_76cdd41c",
+        "filename": "android/android-emu/android/base/files/IniFile.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-08T01:20:23Z",
+      "side": 1,
+      "message": "what about this one?",
+      "range": {
+        "startLine": 482,
+        "startChar": 45,
+        "endLine": 482,
+        "endChar": 58
+      },
+      "revId": "c6113656e5eb850b53c95e2ba131f31646a6304d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f149f5df_be09297e",
+        "filename": "android/android-emu/android/base/files/IniFile_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-08T01:20:23Z",
+      "side": 1,
+      "message": "just create a TestSystem class and define your own variables for testing",
+      "range": {
+        "startLine": 240,
+        "startChar": 1,
+        "endLine": 243,
+        "endChar": 5
+      },
+      "revId": "c6113656e5eb850b53c95e2ba131f31646a6304d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
