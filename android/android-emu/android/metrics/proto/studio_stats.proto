@@ -843,6 +843,7 @@ message EmulatorAvdInfo {
     UNKNOWN_EMULATOR_AVD_IMAGE_KIND = 0;
     AOSP = 1;
     GOOGLE = 2;
+    PLAY_STORE_KIND = 3;
   }
   // Other AVD properties that can combine with EmulatorAvdImageKind.
   enum EmulatorAvdProperty {
