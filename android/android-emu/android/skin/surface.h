@@ -32,18 +32,16 @@ extern void          skin_surface_unrefp( SkinSurface*  *psurface );
 extern int skin_surface_width(SkinSurface* s);
 extern int skin_surface_height(SkinSurface* s);
 
-/* Create a surface for the given dimensions. The "original" dimensions are the dimensions
- * of the original image, while the regular dimensions are those at which the image is scaled to
- * for display.
+/* Create a surface for the given dimensions or source. The "original"
+ * dimensions are the dimensions of the original image, while the regular
+ * dimensions are those at which the image is scaled to for display.
  */
-extern SkinSurface*  skin_surface_create( int w, int h, int original_w, int original_h );
-
-/* Create a surface from a given pixel buffer. */
-extern SkinSurface*  skin_surface_create_argb32_from(
-                            int                  w,
-                            int                  h,
-                            int                  pitch,
-                            uint32_t*            pixels);
+extern SkinSurface* skin_surface_create(int w, int h, int original_w, int original_h);
+extern SkinSurface* skin_surface_create_from_data(const void* data, int size);
+extern SkinSurface* skin_surface_create_from_file(const char* path);
+extern SkinSurface* skin_surface_create_derived(SkinSurface* source,
+                                                SkinRotation rotation,
+                                                int blend);
 
 /* Check if a surface needs to be resized at all: only when the "original" dimensions change
  * does the surface need to be re-created. Otherwise, it can simply be updated with the appropriate

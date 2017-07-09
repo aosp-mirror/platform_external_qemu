@@ -579,9 +579,7 @@ trackball_draw(TrackBall ball, int x, int y, SkinSurface* dst)
                       ball->surface,
                       &src_rect,
                       SKIN_BLIT_COPY);
-    //skin_surface_update(dst, &rd);
 }
-
 
 SkinTrackBall*
 skin_trackball_create  ( const SkinTrackBallParameters*  params )
