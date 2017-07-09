@@ -14,6 +14,9 @@
 
 #include "android/skin/rect.h"
 #include "android/skin/surface.h"
+#include "android/utils/compiler.h"
+
+ANDROID_BEGIN_HEADER
 
 /* skin image file objects */
 
@@ -30,12 +33,14 @@ typedef struct SkinImageDesc {
     int           blend;     /* blending, 0..256 value */
 } SkinImageDesc;
 
-#define  SKIN_BLEND_NONE   0
-#define  SKIN_BLEND_HALF   128
-#define  SKIN_BLEND_FULL   256
+enum {
+    SKIN_BLEND_NONE = 0,
+    SKIN_BLEND_HALF = 128,
+    SKIN_BLEND_FULL = 256
+};
 
 /* a special value returned when an image cannot be properly loaded */
-extern SkinImage*    SKIN_IMAGE_NONE;
+extern SkinImage* const SKIN_IMAGE_NONE;
 
 /* return the SkinSurface* pointer of a given skin image */
 extern SkinSurface*  skin_image_surface( SkinImage*  image );
@@ -82,3 +87,5 @@ extern SkinImage*    skin_image_clone( SkinImage*  source );
 extern SkinImage*    skin_image_clone_full( SkinImage*       source,
                                             SkinRotation     rotation,
                                             int              blend );
+
+ANDROID_END_HEADER
