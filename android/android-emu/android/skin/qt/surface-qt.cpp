@@ -25,6 +25,8 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/utils/setenv.h"
 
+#include <memory>
+
 #define  DEBUG  1
 
 #if DEBUG
@@ -36,30 +38,6 @@
 #endif
 
 static int next_id = 0;
-
-extern SkinSurface *skin_surface_create(int w, int h, int original_w, int original_h)
-{
-    auto s = new SkinSurface();
-    auto window = EmulatorQtWindow::getInstancePtr();
-    if (window == NULL) return NULL;
-    if (s != NULL) {
-        QSemaphore semaphore;
-        window->createBitmap(s, original_w, original_h, &semaphore);
-        semaphore.acquire();
-        s->refcount = 1;
-        s->w = w;
-        s->h = h;
-        s->original_w = original_w;
-        s->original_h = original_h;
-        s->id = next_id++;
-        s->window = window;
-        D("Created surface %d %d w,%d h, original %d, %d", s->id, w, h, original_w, original_h);
-    }
-    else {
-        D( "not enough memory to allocate new skin surface !" );
-    }
-    return  s;
-}
 
 static void skin_surface_free(SkinSurface *s)
 {
@@ -78,8 +56,7 @@ extern void skin_surface_unrefp(SkinSurface* *psurface)
     SkinSurface *surf = *psurface;
     if (surf) {
         D("skin_surface_unref %d", surf->id);
-        if (--surf->refcount <= 0)
-            skin_surface_free(surf);
+        skin_surface_free(surf);
         *psurface = NULL;
     }
 }
@@ -90,24 +67,69 @@ extern int skin_surface_width(SkinSurface *s)
     return s->w;
 }
 
-extern SkinSurface* skin_surface_create_argb32_from(int w, int h, int pitch, uint32_t *pixels)
-{
-    D("skin_surface_create_argb32_from %d, %d, pitch %d", w, h, pitch);
-    SkinSurface* s = skin_surface_create(w, h, w, h);
-    SkinRect rect;
-    rect.size.h = h;
-    rect.size.w = w;
-    rect.pos.x = 0;
-    rect.pos.y = 0;
-    skin_surface_upload(s, &rect, pixels, pitch);
-    return s;
+template <class FillBitmapFunc>
+static SkinSurface* createSkinSurface(FillBitmapFunc&& fillBitmap) {
+    auto s = std::unique_ptr<SkinSurface>(new SkinSurface());
+    if (!s) {
+        return nullptr;
+    }
+    s->window = EmulatorQtWindow::getInstancePtr();
+    if (!s->window) {
+        return nullptr;
+    }
+    fillBitmap(s.get());
+    if (!s->bitmap) {
+        return nullptr;
+    }
+    s->id = next_id++;
+    return s.release();
 }
 
-extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h, int original_w, int original_h)
+extern SkinSurface *skin_surface_create(int w, int h, int original_w, int original_h)
+{
+    return createSkinSurface([w, h, original_w, original_h](SkinSurface* s) {
+        s->bitmap = new SkinSurfaceBitmap(original_w, original_h);
+        s->w = w;
+        s->h = h;
+    });
+}
+
+extern SkinSurface* skin_surface_create_from_data(const void* data, int size) {
+    return createSkinSurface([data, size](SkinSurface* s) {
+        s->bitmap = new SkinSurfaceBitmap((const unsigned char*)data, size);
+        s->w = s->bitmap->size().width();
+        s->h = s->bitmap->size().height();
+    });
+}
+
+extern SkinSurface* skin_surface_create_from_file(const char* path) {
+    return createSkinSurface([path](SkinSurface* s) {
+        s->bitmap = new SkinSurfaceBitmap(path);
+        s->w = s->bitmap->size().width();
+        s->h = s->bitmap->size().height();
+    });
+}
+
+extern SkinSurface* skin_surface_create_derived(SkinSurface* source,
+                                                SkinRotation rotation,
+                                                int blend) {
+    return createSkinSurface([source, rotation, blend](SkinSurface* s) {
+        s->w = source->w;
+        s->h = source->h;
+        if (rotation == SKIN_ROTATION_90 || rotation == SKIN_ROTATION_270) {
+            std::swap(s->w, s->h);
+        }
+        s->bitmap = new SkinSurfaceBitmap(*source->bitmap, rotation, blend);
+    });
+}
+
+
+extern SkinSurface* skin_surface_resize(SkinSurface *surface, int w, int h,
+                                        int original_w, int original_h)
 {
     if ( surface == NULL ) {
         return skin_surface_create(w, h, original_w, original_h);
-    } else if ( surface->original_w == original_w && surface->original_h == original_h ) {
+    } else if (surface->bitmap->size() == QSize(original_w, original_h)) {
         surface->w = w;
         surface->h = h;
         return surface;
@@ -170,13 +192,14 @@ extern void skin_surface_fill(SkinSurface *dst, SkinRect *rect, uint32_t argb_pr
 extern void skin_surface_upload(SkinSurface *surface, const SkinRect *rect, const void *pixels, int pitch)
 {
     D("skin_surface_upload %d: %d,%d,%d,%d", surface->id, rect->pos.x, rect->pos.y, rect->size.w, rect->size.h);
+    assert(QSize(surface->w, surface->h) == surface->bitmap->size());
     if (rect->pos.x == 0 && rect->pos.y == 0 &&
-        rect->size.h == surface->h && rect->size.w == surface->w &&
-        pitch == surface->w * 4) {
-        memcpy(surface->bitmap->bits(), pixels, surface->h * surface->w * 4);
+        QSize(rect->size.w, rect->size.h) == surface->bitmap->size() &&
+        pitch == rect->size.w * 4) {
+        memcpy(surface->bitmap->get().bits(), pixels, surface->h * surface->w * 4);
     } else {
         const uint32_t *src = (const uint32_t*)pixels;
-        uint32_t *dst = ((uint32_t*)surface->bitmap->bits()) + surface->w * rect->pos.y;
+        uint32_t *dst = ((uint32_t*)surface->bitmap->get().bits()) + surface->w * rect->pos.y;
         for (int y = rect->pos.y; y < rect->pos.y + rect->size.h; y++) {
             for (int x = rect->pos.x; x < rect->pos.x + rect->size.w; x++) {
                 *(dst + x) = *(src + x - rect->pos.x);
@@ -195,8 +218,8 @@ extern void skin_surface_get_scaled_rect(SkinSurface *surface, const SkinRect *f
     int fromh = from->size.h;
     int w = surface->w;
     int h = surface->h;
-    int original_w = surface->original_w;
-    int original_h = surface->original_h;
+    int original_w = surface->bitmap->size().width();
+    int original_h = surface->bitmap->size().height();
     to->pos.x = from->pos.x * w / original_w;
     to->pos.y = from->pos.y * h / original_h;
     to->size.w = from->size.w * w / original_w;
@@ -206,8 +229,8 @@ extern void skin_surface_get_scaled_rect(SkinSurface *surface, const SkinRect *f
 
 extern void skin_surface_reverse_map(SkinSurface *surface, int *x, int *y)
 {
-    int new_x = *x * surface->original_w / surface->w;
-    int new_y = *y * surface->original_h / surface->h;
+    int new_x = *x * surface->bitmap->size().width() / surface->w;
+    int new_y = *y * surface->bitmap->size().height() / surface->h;
 #if 0
     D("skin_surface_reverse_map %d: %d,%d to %d,%d", surface->id, *x, *y, new_x, new_y);
 #endif

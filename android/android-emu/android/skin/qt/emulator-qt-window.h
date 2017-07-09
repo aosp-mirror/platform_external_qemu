@@ -36,6 +36,7 @@
 #include <QDropEvent>
 #include <QFrame>
 #include <QImage>
+#include <QImageReader>
 #include <QMessageBox>
 #include <QMouseEvent>
 #include <QMoveEvent>
@@ -55,6 +56,7 @@ class EmulatorWindow;
 }
 
 typedef struct SkinSurface SkinSurface;
+class SkinSurfaceBitmap;
 
 Q_DECLARE_METATYPE(SkinGenericFunction);
 
@@ -156,23 +158,16 @@ public:
      faster.
      */
 signals:
-    void blit(QImage* src,
+    void blit(SkinSurfaceBitmap* src,
               QRect srcRect,
-              QImage* dst,
+              SkinSurfaceBitmap* dst,
               QPoint dstPos,
               QPainter::CompositionMode op,
               QSemaphore* semaphore = NULL);
-    void createBitmap(SkinSurface* s,
-                      int w,
-                      int h,
-                      QSemaphore* semaphore = NULL);
     void fill(SkinSurface* s,
               QRect rect,
               QColor color,
               QSemaphore* semaphore = NULL);
-    void getBitmapInfo(SkinSurface* s,
-                       SkinSurfacePixels* pix,
-                       QSemaphore* semaphore = NULL);
     void getDevicePixelRatio(double* out_dpr, QSemaphore* semaphore = NULL);
     void getScreenDimensions(QRect* out_rect, QSemaphore* semaphore = NULL);
     void getFramePos(int* x, int* y, QSemaphore* semaphore = NULL);
@@ -246,24 +241,17 @@ public slots:
 
 private slots:
     void slot_adbWarningMessageAccepted();
-    void slot_blit(QImage* src,
+    void slot_blit(SkinSurfaceBitmap* src,
                    QRect srcRect,
-                   QImage* dst,
+                   SkinSurfaceBitmap* dst,
                    QPoint dstPos,
                    QPainter::CompositionMode op,
                    QSemaphore* semaphore = NULL);
     void slot_clearInstance();
-    void slot_createBitmap(SkinSurface* s,
-                           int w,
-                           int h,
-                           QSemaphore* semaphore = NULL);
     void slot_fill(SkinSurface* s,
                    QRect rect,
                    QColor color,
                    QSemaphore* semaphore = NULL);
-    void slot_getBitmapInfo(SkinSurface* s,
-                            SkinSurfacePixels* pix,
-                            QSemaphore* semaphore = NULL);
     void slot_getDevicePixelRatio(double* out_dpr,
                                   QSemaphore* semaphore = NULL);
     void slot_getScreenDimensions(QRect* out_rect,
@@ -364,7 +352,7 @@ private:
     bool mStartupDone = false;
 
     SkinSurface* mBackingSurface;
-    QPixmap mScaledBackingBitmap;
+    QPixmap mScaledBackingImage;
     bool mBackingBitmapChanged = true;
 
     QQueue<SkinEvent*> mSkinEventQueue;
@@ -458,10 +446,40 @@ private:
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
 
+class SkinSurfaceBitmap {
+    DISALLOW_COPY_AND_ASSIGN(SkinSurfaceBitmap);
+
+public:
+    SkinSurfaceBitmap(int w, int h);
+    SkinSurfaceBitmap(const char* path);
+    SkinSurfaceBitmap(const unsigned char* data, int size);
+    SkinSurfaceBitmap(const SkinSurfaceBitmap& other, int rotation, int blend);
+    ~SkinSurfaceBitmap();
+
+    QSize size() const;
+
+    void fill(const QRect& area, const QColor& color);
+    void drawFrom(SkinSurfaceBitmap* what, QPoint where, const QRect& area,
+                  QPainter::CompositionMode op);
+
+    QImage& get();
+
+private:
+    void readImage();
+    void applyPendingTransformations();
+    bool hasPendingTransformations() const;
+    void resetReader();
+
+    QImage image;
+    QImageReader reader;
+    QSize cachedSize;
+    int pendingRotation = 0;
+    int pendingBlend = 256;
+};
+
 struct SkinSurface {
-    int refcount;
     int id;
-    QImage* bitmap;
-    int w, h, original_w, original_h;
+    int w, h;
     EmulatorQtWindow::Ptr window;
+    SkinSurfaceBitmap* bitmap;
 };
