@@ -20,7 +20,7 @@
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/utils/debug.h"
 
-#define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+#define  D(...)  do {  if (VERBOSE_CHECK(memory)) dprint(__VA_ARGS__); } while (0)
 
 static const uint32_t kMemUsageMetricsReportIntervalMs = 60 * 1000;
 

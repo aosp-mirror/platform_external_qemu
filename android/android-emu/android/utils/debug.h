@@ -61,6 +61,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(goldfishsync, "Goldfish Sync Device")                         \
     _VERBOSE_TAG(syncthreads, "HostGPU Sync Threads")                          \
     _VERBOSE_TAG(capture, "Video and audio capture debugging")                 \
+    _VERBOSE_TAG(memory, "Memory Usage Report")                                \
     _VERBOSE_TAG(car, "Emulated car data")
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
