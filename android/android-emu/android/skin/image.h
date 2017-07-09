@@ -35,7 +35,7 @@ typedef struct SkinImageDesc {
 #define  SKIN_BLEND_FULL   256
 
 /* a special value returned when an image cannot be properly loaded */
-extern SkinImage*    SKIN_IMAGE_NONE;
+extern SkinImage* const SKIN_IMAGE_NONE;
 
 /* return the SkinSurface* pointer of a given skin image */
 extern SkinSurface*  skin_image_surface( SkinImage*  image );
