@@ -26,7 +26,7 @@
 #include <openssl/x509v3.h>
 #endif
 
-#include <hardware/keymaster_defs.h>
+#include <android/keymaster/keymaster_defs.h>
 #include <keymaster/logger.h>
 
 namespace keymaster {
