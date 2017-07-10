@@ -27,8 +27,6 @@
 #include <stdbool.h>
 
 #include <lib/rng/trusty_rng.h>
-#include <interface/hwrng/hwrng.h>
-#include <trusty_std.h>
 
 /*
  *	This is the generic part of the trusty app rng service.
@@ -51,6 +49,9 @@ static uint64_t counter;
 static uint8_t rand_bytes_buf[AES_BLOCK_SIZE];
 static uint32_t rand_bytes_pos;
 static bool rng_initialized;
+
+#define ERR_INVALID_ARGS 1
+#define NO_ERROR 0
 
 static int aes_encrypt_ecb(uint8_t *dst, const uint8_t *src,
 			const uint8_t *key_bytes, size_t key_size_bits)
@@ -141,81 +142,8 @@ done:
 	return err;
 }
 
-__WEAK int trusty_rng_hw_rand(uint8_t *data, size_t len)
+int trusty_rng_hw_rand(uint8_t *data, size_t len)
 {
-	struct hwrng_req req_hdr = {
-		.len = len
-	};
-
-	iovec_t tx_iov = {
-		.base = &req_hdr,
-		.len = sizeof(req_hdr),
-	};
-
-	ipc_msg_t tx_msg = {
-		.iov = &tx_iov,
-		.num_iov = 1,
-	};
-
-	iovec_t rx_iov = {
-		.base = data,
-		.len = len,
-	};
-	ipc_msg_t rx_msg = {
-		.iov = &rx_iov,
-		.num_iov = 1,
-	};
-
-	long rc = connect(HWRNG_PORT, IPC_CONNECT_WAIT_FOR_PORT);
-	if (rc < 0) {
-		return rc;
-	}
-
-	handle_t chan = (handle_t) rc;
-
-	rc = send_msg(chan, &tx_msg);
-	if (rc < 0) {
-		goto err;
-	}
-
-	if (rc != sizeof(req_hdr)) {
-		rc = ERR_IO;
-		goto err;
-	}
-
-	while (rx_msg.iov[0].len > 0) {
-		uevent_t uevt;
-		rc = wait(chan, &uevt, -1);
-		if (rc != NO_ERROR) {
-			goto err;
-		}
-
-		ipc_msg_info_t inf;
-		rc = get_msg(chan, &inf);
-		if (rc != NO_ERROR) {
-			goto err;
-		}
-
-		if (inf.len > rx_msg.iov[0].len) {
-			// received too much data
-			rc = ERR_BAD_LEN;
-			goto err;
-		}
-
-		rc = read_msg(chan, inf.id, 0, &rx_msg);
-		if (rc < 0) {
-			goto err;
-		}
-
-		size_t rx_size = (size_t) rc;
-		rx_msg.iov[0].base += rx_size;
-		rx_msg.iov[0].len -= rx_size;
-		put_msg(chan, inf.id);
-	}
-
-	rc = NO_ERROR;
-err:
-	close(chan);
-	return rc;
+    return NO_ERROR;
 }
 

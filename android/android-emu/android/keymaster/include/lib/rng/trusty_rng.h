@@ -18,12 +18,12 @@
 
 #pragma once
 
-#include <compiler.h>
+#include "android/utils/compiler.h"
 
-__BEGIN_CDECLS
+ANDROID_BEGIN_HEADER
 
 int trusty_rng_secure_rand(uint8_t *data, size_t len);
 int trusty_rng_add_entropy(const uint8_t *data, size_t len);
 int trusty_rng_hw_rand(uint8_t *data, size_t len);
 
-__END_CDECLS
+ANDROID_END_HEADER

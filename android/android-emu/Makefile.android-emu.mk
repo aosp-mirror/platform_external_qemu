@@ -370,6 +370,9 @@ LOCAL_SRC_FILES := \
     android/keymaster/rsa_operation.cpp \
     android/keymaster/serializable.cpp \
     android/keymaster/symmetric_key.cpp \
+    android/keymaster/trusty_keymaster_context.cpp \
+    android/keymaster/trusty_keymaster_enforcement.cpp \
+    android/keymaster/trusty_rng.c \
     android/loadpng.c \
     android/main-common.c \
     android/main-help.cpp \
