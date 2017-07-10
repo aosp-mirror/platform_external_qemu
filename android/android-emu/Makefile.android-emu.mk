@@ -357,6 +357,7 @@ LOCAL_SRC_FILES := \
     android/keymaster/hmac_operation.cpp \
     android/keymaster/key.cpp \
     android/keymaster/keymaster_enforcement.cpp \
+    android/keymaster/keymaster_ipc.cpp \
     android/keymaster/keymaster_tags.cpp \
     android/keymaster/logger.cpp \
     android/keymaster/ocb.c \
