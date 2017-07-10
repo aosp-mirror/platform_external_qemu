@@ -66,6 +66,8 @@ using namespace android::emulation;
 struct VideoOutputStream {
     AVStream* st;
 
+    AVCodecID codec_id;
+
     // video width and height
     int width;
     int height;
@@ -84,6 +86,8 @@ struct VideoOutputStream {
 
 typedef struct AudioOutputStream {
     AVStream* st;
+
+    AVCodecID codec_id;
 
     int bit_rate;
     int sample_rate;
@@ -157,6 +161,8 @@ static int write_frame(ffmpeg_recorder* recorder,
                        AVPacket* pkt) {
     // rescale output packet timestamp values from codec to stream timebase
     // av_packet_rescale_ts(pkt, *time_base, st->time_base);
+
+    pkt->dts = AV_NOPTS_VALUE;
     pkt->stream_index = st->index;
 
     // Write the compressed frame to the media file.
@@ -204,14 +210,19 @@ static int open_audio(AVFormatContext* oc,
     AVCodecContext* c;
     int nb_samples;
     int ret;
-    AVDictionary* opt = NULL;
+    AVDictionary* opts = NULL;
 
     c = ost->st->codec;
 
     // open it
-    av_dict_copy(&opt, opt_arg, 0);
-    ret = avcodec_open2(c, codec, &opt);
-    av_dict_free(&opt);
+    av_dict_copy(&opts, opt_arg, 0);
+    // vp9
+    if (ost->st->codec->codec_id == AV_CODEC_ID_VP9) {
+        av_dict_set(&opts, "deadline", "realtime" /*"good"*/, 0);
+        av_dict_set(&opts, "cpu-used", "8", 0);
+    }
+    ret = avcodec_open2(c, codec, &opts);
+    av_dict_free(&opts);
     if (ret < 0) {
         derror("Could not open audio codec: %s\n", avErr2Str(ret).c_str());
         return -1;
@@ -449,6 +460,11 @@ static void close_video_stream(AVFormatContext* oc, VideoOutputStream* ost) {
     sws_freeContext(ost->sws_ctx);
 }
 
+static bool has_suffix(const std::string& str, const std::string& suffix) {
+    return str.size() >= suffix.size() &&
+           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
 ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     static bool registered = false;
     ffmpeg_recorder* recorder = NULL;
@@ -480,6 +496,14 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
 
     recorder->oc = oc;
     recorder->start_time = android::base::System::get()->getHighResTimeUs();
+
+    if (has_suffix(path, ".webm")) {
+        recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
+        recorder->video_st.codec_id = AV_CODEC_ID_VP9;
+    } else {
+        recorder->audio_st.codec_id = AV_CODEC_ID_AAC;
+        recorder->video_st.codec_id = AV_CODEC_ID_H264;
+    }
 
     return recorder;
 }
@@ -627,7 +651,7 @@ int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
         return -1;
 
     AudioOutputStream* ost = &recorder->audio_st;
-    enum AVCodecID codec_id = AV_CODEC_ID_AAC;
+    AVCodecID codec_id = ost->codec_id;
     AVFormatContext* oc = recorder->oc;
     AVOutputFormat* fmt = oc->oformat;
 
@@ -719,7 +743,7 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
         return -1;
 
     VideoOutputStream* ost = &recorder->video_st;
-    enum AVCodecID codec_id = AV_CODEC_ID_H264;
+    AVCodecID codec_id = ost->codec_id;
     AVFormatContext* oc = recorder->oc;
     AVOutputFormat* fmt = oc->oformat;
 
@@ -761,9 +785,14 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
     // of which frame timestamps are represented. For fixed-fps content,
     // timebase should be 1/framerate and timestamp increments should be
     // identical to 1.
-    ost->st->time_base = (AVRational){1, 1000000};  // microsecond timebase
-
+    if (codec_id == AV_CODEC_ID_VP9) {
+        ost->st->time_base = (AVRational){1, fps};
+    } else {
+        ost->st->time_base = (AVRational){1, 1000000};  // microsecond timebase
+    }
     c->time_base = ost->st->time_base;
+
+    ost->st->avg_frame_rate = (AVRational){1, fps};
 
     c->gop_size = 12;  // emit one intra frame every twelve frames at most
     c->pix_fmt = STREAM_PIX_FMT;
