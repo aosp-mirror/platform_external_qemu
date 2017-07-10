@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1f03c3d_43c41861",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2300,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-10T20:11:13Z",
+      "side": 1,
+      "message": "const?",
+      "revId": "ba464917bf96634da29169cf92e7969d6063d588",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15708210_a81e4c8e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2304,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-10T20:11:13Z",
+      "side": 1,
+      "message": "1. I don\u0027t see any TypeName uses here. Missed it?\n2. T needs to be convertible to float as per lines 2347-50\nWhat about getting rid of a template at all? Just make it double or float for everything",
+      "range": {
+        "startLine": 2304,
+        "startChar": 9,
+        "endLine": 2304,
+        "endChar": 35
+      },
+      "revId": "ba464917bf96634da29169cf92e7969d6063d588",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "afbd50e3_4c1b4ed5",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2374,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-10T20:11:13Z",
+      "side": 1,
+      "message": "float[] ?",
+      "range": {
+        "startLine": 2374,
+        "startChar": 16,
+        "endLine": 2374,
+        "endChar": 34
+      },
+      "revId": "ba464917bf96634da29169cf92e7969d6063d588",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
