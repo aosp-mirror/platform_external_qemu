@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "68fcc37a_afd84280",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-10T19:22:06Z",
+      "side": 1,
+      "message": "It was on my request, and I just wanted to be cautious about the transition.\nI prefer to run more tests locally with this option enabled and only then make it the default",
+      "parentUuid": "045f8769_46ba498e",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 28
+      },
+      "revId": "4ad94434596130fac17066aba59fab8a7c962eb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e51e528_cb63f418",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
         "patchSetId": 3
