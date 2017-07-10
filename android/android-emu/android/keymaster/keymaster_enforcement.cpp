@@ -22,7 +22,7 @@
 
 #include <openssl/evp.h>
 
-#include <android/keymaster/hw_auth_token.h>
+#include <hardware/hw_auth_token.h>
 #include <keymaster/android_keymaster_utils.h>
 #include <keymaster/logger.h>
 
