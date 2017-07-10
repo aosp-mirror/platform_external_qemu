@@ -218,6 +218,10 @@ intptr_t RenderThread::main() {
         &tInfo, &checksumCalc, &stream, &readBuf
     };
 
+    // Framebuffer initialization is asynchronous, so we need to make sure
+    // it's completely initialized before running any GL commands.
+    FrameBuffer::waitUntilInitialized();
+
     // This is the only place where we try loading from snapshot.
     // But the context bind / restoration will be delayed after receiving
     // the first GL command.
