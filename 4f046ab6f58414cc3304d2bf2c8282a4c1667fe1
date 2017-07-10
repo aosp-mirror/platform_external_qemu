@@ -22,6 +22,30 @@
       "revId": "4f046ab6f58414cc3304d2bf2c8282a4c1667fe1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d36ef6e7_cfde9133",
+        "filename": "android/android-emugl/host/libs/libGLES12Translator/common/log.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-10T19:08:40Z",
+      "side": 0,
+      "message": "./android/scripts/package-release.sh --darwin-ssh\u003d*\n\nSucceeds.",
+      "parentUuid": "802463d3_0b3f5276",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 23
+      },
+      "revId": "4f046ab6f58414cc3304d2bf2c8282a4c1667fe1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

@@ -91,6 +91,30 @@
       "revId": "4ad94434596130fac17066aba59fab8a7c962eb4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b03d8bd8_2b9ea200",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 438,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-10T19:08:40Z",
+      "side": 1,
+      "message": "There\u0027s a bug in gcc which incorrectly accepts the following:\n\n//-------------------------\nstruct S {\n  explicit S(int \u003d 0) {}\n};\n\nS s \u003d {};\n//-------------------------\n(See https://gcc.gnu.org/bugzilla/show_bug.cgi?id\u003d54835)\n\nWe don\u0027t see this on Mac because we use a different set of stl headers.",
+      "parentUuid": "6ead74fa_7cbd9a30",
+      "range": {
+        "startLine": 438,
+        "startChar": 0,
+        "endLine": 438,
+        "endChar": 89
+      },
+      "revId": "4ad94434596130fac17066aba59fab8a7c962eb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
