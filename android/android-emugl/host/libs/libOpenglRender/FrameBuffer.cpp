@@ -33,6 +33,7 @@
 #include <stdio.h>
 #include <string.h>
 
+using android::base::AutoLock;
 using android::base::Stream;
 
 namespace {
@@ -428,7 +429,7 @@ FrameBuffer::~FrameBuffer() {
 
 void FrameBuffer::setPostCallback(emugl::Renderer::OnPostCallback onPost,
                                   void* onPostContext) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     m_onPost = onPost;
     m_onPostContext = onPostContext;
     if (m_onPost && !m_fbImage) {
@@ -465,7 +466,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         return false;
     }
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     // If the subwindow doesn't exist, create it with the appropriate dimensions
     if (!m_subWin) {
@@ -567,7 +568,7 @@ bool FrameBuffer::removeSubWindow() {
             __FUNCTION__);
         return false;
     }
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     return removeSubWindow_locked();
 }
 
@@ -590,7 +591,7 @@ bool FrameBuffer::removeSubWindow_locked() {
     return removed;
 }
 
-HandleType FrameBuffer::genHandle() {
+HandleType FrameBuffer::genHandle_locked() {
     HandleType id;
     do {
         id = ++s_nextHandle;
@@ -605,10 +606,10 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           int p_height,
                                           GLenum p_internalFormat,
                                           FrameworkFormat p_frameworkFormat) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     HandleType ret = 0;
 
-    ret = genHandle();
+    ret = genHandle_locked();
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
                                           ret, m_colorBufferHelper));
@@ -630,7 +631,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
 HandleType FrameBuffer::createRenderContext(int p_config,
                                             HandleType p_share,
                                             GLESApi version) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     HandleType ret = 0;
 
@@ -650,7 +651,7 @@ HandleType FrameBuffer::createRenderContext(int p_config,
     EGLContext sharedContext =
             share.get() ? share->getEGLContext() : EGL_NO_CONTEXT;
 
-    ret = genHandle();
+    ret = genHandle_locked();
     RenderContextPtr rctx(RenderContext::create(
             m_eglDisplay, config->getEglConfig(), sharedContext, ret, version));
     if (rctx.get() != NULL) {
@@ -675,7 +676,7 @@ HandleType FrameBuffer::createRenderContext(int p_config,
 HandleType FrameBuffer::createWindowSurface(int p_config,
                                             int p_width,
                                             int p_height) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     HandleType ret = 0;
 
@@ -684,7 +685,7 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
         return ret;
     }
 
-    ret = genHandle();
+    ret = genHandle_locked();
     WindowSurfacePtr win(WindowSurface::create(
             getDisplay(), config->getEglConfig(), p_width, p_height, ret));
     if (win.get() != NULL) {
@@ -707,7 +708,7 @@ void FrameBuffer::drainRenderContext() {
         return;
     }
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     for (const HandleType contextHandle : tinfo->m_contextSet) {
         m_contexts.erase(contextHandle);
@@ -721,7 +722,7 @@ void FrameBuffer::drainWindowSurface() {
         return;
     }
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     ScopedBind bind(m_colorBufferHelper);
     for (const HandleType winHandle : tinfo->m_windowSet) {
         const auto winIt = m_windows.find(winHandle);
@@ -736,7 +737,7 @@ void FrameBuffer::drainWindowSurface() {
 }
 
 void FrameBuffer::DestroyRenderContext(HandleType p_context) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     m_contexts.erase(p_context);
     RenderThreadInfo* tinfo = RenderThreadInfo::get();
@@ -755,7 +756,7 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context) {
 }
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     DestroyWindowSurfaceLocked(p_surface);
 }
 
@@ -781,7 +782,7 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -802,7 +803,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     closeColorBufferLocked(p_colorbuffer);
 
     uint64_t puid = tInfo->m_puid;
@@ -838,7 +839,7 @@ bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     cleanupProcGLObjects_locked(puid);
 }
 
@@ -900,7 +901,7 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
 }
 
 bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
@@ -918,7 +919,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
 
 bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
                                               HandleType p_colorbuffer) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
@@ -952,7 +953,7 @@ void FrameBuffer::readColorBuffer(HandleType p_colorbuffer,
                                   GLenum format,
                                   GLenum type,
                                   void* pixels) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -971,7 +972,7 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     GLenum format,
                                     GLenum type,
                                     void* pixels) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -985,7 +986,7 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
 }
 
 bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -997,7 +998,7 @@ bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
 }
 
 bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -1011,7 +1012,7 @@ bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
 bool FrameBuffer::bindContext(HandleType p_context,
                               HandleType p_drawSurface,
                               HandleType p_readSurface) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     WindowSurfacePtr draw, read;
     RenderContextPtr ctx;
@@ -1133,7 +1134,7 @@ HandleType FrameBuffer::createClientImage(HandleType context,
                                           GLuint buffer) {
     EGLContext eglContext = EGL_NO_CONTEXT;
     if (context) {
-        emugl::Mutex::AutoLock mutex(m_lock);
+        AutoLock mutex(m_lock);
         RenderContextMap::const_iterator rcIt = m_contexts.find(context);
         if (rcIt == m_contexts.end()) {
             // bad context handle
@@ -1151,7 +1152,7 @@ HandleType FrameBuffer::createClientImage(HandleType context,
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     uint64_t puid = tInfo->m_puid;
     if (puid) {
-        emugl::Mutex::AutoLock mutex(m_lock);
+        AutoLock mutex(m_lock);
         m_procOwnedEGLImages[puid].insert(imgHnd);
     }
     return imgHnd;
@@ -1166,7 +1167,7 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     uint64_t puid = tInfo->m_puid;
     if (puid) {
-        emugl::Mutex::AutoLock mutex(m_lock);
+        AutoLock mutex(m_lock);
         m_procOwnedEGLImages[puid].erase(image);
         // We don't explicitly call m_procOwnedEGLImages.erase(puid) when the
         // size reaches 0, since it could go between zero and one many times in
@@ -1400,7 +1401,7 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevContext
     //     m_prevReadSurf
     //     m_prevDrawSurf
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     // set up a context because some snapshot commands try using GL
     ScopedBind scopedBind(m_colorBufferHelper);
     // eglPreSaveContext labels all guest context textures to be saved
@@ -1458,7 +1459,7 @@ void FrameBuffer::onSave(Stream* stream) {
 }
 
 bool FrameBuffer::onLoad(Stream* stream) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     // cleanups
     {
         ScopedBind scopedBind(m_colorBufferHelper);
