@@ -367,7 +367,7 @@ public:
     void unlock();
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
-    HandleType genHandle();
+    HandleType genHandle_locked();
 
     bool bindSubwin_locked();
     bool removeSubWindow_locked();
