@@ -1268,12 +1268,18 @@ typedef struct {
     int wh;
     int fbw;
     int fbh;
-    float dpr;
     float rot;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
     gles_show_data* data = p;
+    double dpr = 1.0;
+#ifdef __APPLE__
+    // If the window is on a retina monitor, the framebuffer size needs to be
+    // adjusted to the actual number of pixels.
+    skin_winsys_get_device_pixel_ratio(&dpr);
+#endif
+
     data->window->win_funcs->opengles_show(skin_winsys_get_window_handle(),
                                            data->wx,
                                            data->wy,
@@ -1281,7 +1287,7 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->wh,
                                            data->fbw,
                                            data->fbh,
-                                           data->dpr,
+                                           dpr,
                                            data->rot);
     AFREE(data);
     s_opengles_window_created = true;
@@ -1298,16 +1304,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
     data->fbw = window->framebuffer.w;
     data->fbh = window->framebuffer.h;
-    data->dpr = 1.0;
-
 #if defined(__APPLE__)
-    // If the window is on a retina monitor, the framebuffer size needs to be
-    // adjusted to the actual number of pixels.
-    double dpr;
-    if (skin_winsys_get_device_pixel_ratio(&dpr) == 0) {
-        data->dpr = dpr;
-    }
-
     // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
     // have code to transform window (y-down) coordinates into cartesian coordinates at that
     // level, but Qt seems to do this transformation on its own. This means the transformation
