@@ -117,6 +117,10 @@ static void enableSigChild() {
 #endif
 }
 
+static bool onMainQtThread() {
+    return QThread::currentThread() == qApp->thread();
+}
+
 std::shared_ptr<void> skin_winsys_get_shared_ptr() {
     return std::static_pointer_cast<void>(EmulatorQtWindow::getInstancePtr());
 }
@@ -161,7 +165,7 @@ extern int skin_winsys_get_device_pixel_ratio(double *dpr)
         D("%s: Could not get window handle", __FUNCTION__);
         return -1;
     }
-    if (QThread::currentThread() == QApplication::instance()->thread()) {
+    if (onMainQtThread()) {
         // Main GUI thread - the call is blocking already.
         window->getDevicePixelRatio(dpr, nullptr);
     } else {
@@ -194,14 +198,19 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
         *x = g->window_pos_x;
         *y = g->window_pos_y;
     } else {
-        QSemaphore semaphore;
         EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
         if (window == NULL) {
             D("%s: Could not get window handle", __FUNCTION__);
             return;
         }
-        window->getWindowPos(x, y, &semaphore);
-        semaphore.acquire();
+
+        if (onMainQtThread()) {
+            window->getWindowPos(x, y, nullptr);
+        } else {
+            QSemaphore semaphore;
+            window->getWindowPos(x, y, &semaphore);
+            semaphore.acquire();
+        }
     }
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
 }
@@ -242,15 +251,19 @@ extern void skin_winsys_save_window_pos() {
 extern bool skin_winsys_is_window_fully_visible()
 {
     D("skin_winsys_is_window_fully_visible");
-    QSemaphore semaphore;
     EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
     if (window == NULL) {
         D("%s: Could not get window handle", __FUNCTION__);
         return true;
     }
     bool value;
-    window->isWindowFullyVisible(&value, &semaphore);
-    semaphore.acquire();
+    if (onMainQtThread()) {
+        window->isWindowFullyVisible(&value);
+    } else {
+        QSemaphore semaphore;
+        window->isWindowFullyVisible(&value, &semaphore);
+        semaphore.acquire();
+    }
     D("%s: result = %s", __FUNCTION__, value ? "true" : "false");
     return value;
 }
