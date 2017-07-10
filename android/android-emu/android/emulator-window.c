@@ -133,17 +133,11 @@ static void emulator_window_keyboard_event(void* opaque, SkinKeyCode keycode, in
 }
 
 static int emulator_window_opengles_show_window(
-    void* window, int x, int y, int vw, int vh, int w, int h, float dpr, float rotation) {
+        void* window, int x, int y, int vw, int vh, int w, int h, float dpr,
+        float rotation, bool deleteExisting) {
     if (s_use_emugl_subwindow) {
-        return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr, rotation);
-    } else {
-        return 0;
-    }
-}
-
-static int emulator_window_opengles_hide_window(void) {
-    if (s_use_emugl_subwindow) {
-        return android_hideOpenglesWindow();
+        return android_showOpenglesWindow(window, x, y, vw, vh, w, h, dpr,
+                                          rotation, deleteExisting);
     } else {
         return 0;
     }
@@ -184,7 +178,6 @@ emulator_window_setup( EmulatorWindow*  emulator )
         .rotary_input_event = &emulator_window_window_rotary_input_event,
         .set_device_orientation = &emulator_window_set_device_orientation,
         .opengles_show = &emulator_window_opengles_show_window,
-        .opengles_hide = &emulator_window_opengles_hide_window,
         .opengles_setTranslation = &emulator_window_opengles_set_translation,
         .opengles_redraw = &emulator_window_opengles_redraw_window,
     };

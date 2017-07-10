@@ -1248,18 +1248,6 @@ skin_window_show_trackball( SkinWindow*  window, int  enable )
     }
 }
 
-// Track the state of opengles subwindow: we need to create it synchronously,
-// but the following show operations can be async.
-static bool s_opengles_window_created = false;
-
-/* Hide the OpenGL ES framebuffer */
-static void
-skin_window_hide_opengles( SkinWindow* window )
-{
-    window->win_funcs->opengles_hide();
-    s_opengles_window_created = false;
-}
-
 typedef struct {
     SkinWindow* window;
     int wx;
@@ -1269,6 +1257,7 @@ typedef struct {
     int fbw;
     int fbh;
     float rot;
+    bool deleteExisting;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
@@ -1288,9 +1277,9 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->fbw,
                                            data->fbh,
                                            dpr,
-                                           data->rot);
+                                           data->rot,
+                                           data->deleteExisting);
     AFREE(data);
-    s_opengles_window_created = true;
 }
 
 static void
@@ -1320,7 +1309,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
 /* Show the OpenGL ES framebuffer window */
 static void
-skin_window_show_opengles( SkinWindow* window )
+skin_window_show_opengles(SkinWindow* window, bool deleteExisting)
 {
     ADisplay* disp = window->layout.displays;
 
@@ -1328,11 +1317,8 @@ skin_window_show_opengles( SkinWindow* window )
     ANEW0(data);
     skin_window_setup_opengles_subwindow(window, data);
     data->rot = disp->rotation * 90.;
-
-    // We need to wait for the subwindow creation if it doesn't exist; otherwise
-    // it's Ok to run just the show command asynchronously.
-    bool wait = !s_opengles_window_created;
-    skin_winsys_run_ui_update(&skin_window_run_opengles_show, data, wait);
+    data->deleteExisting = deleteExisting;
+    skin_winsys_run_ui_update(&skin_window_run_opengles_show, data, false);
 }
 
 static void skin_window_redraw_opengles(SkinWindow* window) {
@@ -1449,7 +1435,7 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
                                   data, false);
     }
 
-    skin_window_show_opengles(window);
+    skin_window_show_opengles(window, false);
 
     return window;
 }
@@ -1538,7 +1524,7 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
     subwindow.size.h = window->framebuffer.h;
 
     skin_window_recompute_subwindow_rect(window, &subwindow);
-    skin_window_show_opengles(window);
+    skin_window_show_opengles(window, false);
 
     // Compute the margins around the sub-window, then transform the current scroll values
     // to take into account these margins.
@@ -1636,7 +1622,7 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     window->framebuffer.h = drect.size.h;
 
     if (skin_window_recompute_subwindow_rect(window, &drect)) {
-        skin_window_show_opengles(window);
+        skin_window_show_opengles(window, false);
     }
 }
 
@@ -1730,7 +1716,7 @@ skin_window_zoomed_window_resized( SkinWindow* window, int dx, int dy, int w, in
     window->scroll_h = scroll_h;
 
     if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
-        skin_window_show_opengles(window);
+        skin_window_show_opengles(window, false);
     }
 }
 
@@ -2007,8 +1993,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     case kEventScreenChanged:
         // Re-setup the OpenGL ES subwindow with a potentially different
         // framebuffer size (e.g., 2x for retina screens).
-        skin_window_hide_opengles(window);
-        skin_window_show_opengles(window);
+        skin_window_show_opengles(window, true);
         break;
 
     default:

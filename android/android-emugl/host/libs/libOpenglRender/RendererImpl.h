@@ -44,14 +44,15 @@ public:
     void setPostCallback(OnPostCallback onPost,
                                  void* context) final;
     bool showOpenGLSubwindow(FBNativeWindowType window,
-                                     int wx,
-                                     int wy,
-                                     int ww,
-                                     int wh,
-                                     int fbw,
-                                     int fbh,
-                                     float dpr,
-                                     float zRot) final;
+                             int wx,
+                             int wy,
+                             int ww,
+                             int wh,
+                             int fbw,
+                             int fbh,
+                             float dpr,
+                             float zRot,
+                             bool deleteExisting) final;
     bool destroyOpenGLSubwindow() final;
     void setOpenGLDisplayRotation(float zRot) final;
     void setOpenGLDisplayTranslation(float px, float py) final;

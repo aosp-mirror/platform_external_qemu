@@ -112,7 +112,8 @@ public:
     bool setupSubWindow(FBNativeWindowType p_window,
                         int wx, int wy,
                         int ww, int wh,
-                        int fbw, int fbh, float dpr, float zRot);
+                        int fbw, int fbh, float dpr, float zRot,
+                        bool deleteExisting);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.
@@ -124,6 +125,11 @@ public:
     // Return a pointer to the global instance. initialize() must be called
     // previously, or this will return NULL.
     static FrameBuffer *getFB() { return s_theFrameBuffer; }
+
+    // Wait for a FrameBuffer instance to be initialized and ready to use.
+    // This function blocks the caller until there is a valid initialized
+    // object in getFB() and
+    static void waitUntilInitialized();
 
     // Return the capabilities of the underlying display.
     const FrameBufferCaps &getCaps() const { return m_caps; }
