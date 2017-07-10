@@ -15,11 +15,25 @@
 #pragma once
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
-// Helper class to hold a global GLESv2Dispatch that is initialized lazily
-// in a thread-safe way. The instance is leaked on program exit.
-struct LazyLoadedGLESv2Dispatch : public GLESv2Dispatch {
+// Helper classes to hold global EGLDispatch, GLESv1Dispatch and GLESv2Dispatch
+// objects, initialized lazily in a thread-safe way. The instances are leaked on
+// program exit.
+
+struct LazyLoadedGLESv1Dispatch {
+    // Return pointer to global GLESv1Dispatch instance, or nullptr if there
+    // was an error when trying to initialize/load the library.
+    static const GLESv1Dispatch* get();
+
+    LazyLoadedGLESv1Dispatch();
+
+private:
+    bool mValid;
+};
+
+struct LazyLoadedGLESv2Dispatch {
     // Return pointer to global GLESv2Dispatch instance, or nullptr if there
     // was an error when trying to initialize/load the library.
     static const GLESv2Dispatch* get();
@@ -27,13 +41,11 @@ struct LazyLoadedGLESv2Dispatch : public GLESv2Dispatch {
     LazyLoadedGLESv2Dispatch();
 
 private:
-    GLESv2Dispatch mDispatch;
     bool mValid;
 };
 
-// Helper class used to lazily initialize the global EGL dispatch table
-// in a thread safe way. Note that the dispatch table is provided by
-// libOpenGLESDispatch as the 's_egl' global variable.
+// Note that the dispatch table is provided by libOpenGLESDispatch as the
+// 's_egl' global variable.
 struct LazyLoadedEGLDispatch {
     // Return pointer to EGLDispatch table, or nullptr if there was
     // an error when trying to initialize/load the library.
