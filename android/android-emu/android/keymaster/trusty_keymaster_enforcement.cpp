@@ -18,9 +18,6 @@
 
 #include <openssl/hmac.h>
 
-extern "C" {
-#include <trusty_std.h>
-}
 
 #include <hardware/hw_auth_token.h>
 #include <keymaster/android_keymaster_utils.h>
@@ -69,14 +66,8 @@ bool TrustyKeymasterEnforcement::ValidateTokenSignature(const hw_auth_token_t& t
 }
 
 uint64_t TrustyKeymasterEnforcement::milliseconds_since_boot() const {
-    status_t rv;
-    int64_t secure_time_ns = 0;
-    rv = gettime(0, 0, &secure_time_ns);
-    if (rv || secure_time_ns < 0) {
-        LOG_S("Error getting time. Error: %d, time: %lld", rv, secure_time_ns);
-        secure_time_ns = 0xFFFFFFFFFFFFFFFFL; // UINT64_MAX isn't defined (b/22120972)
-    }
-    return static_cast<uint64_t>(secure_time_ns) / 1000 / 1000;
+    LOG_D("Error getting time is not implemtned", 0);
+    return static_cast<uint64_t>(0) / 1000 / 1000;
 }
 
 }  // namespace keymaster

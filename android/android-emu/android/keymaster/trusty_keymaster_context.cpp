@@ -18,7 +18,6 @@
 
 extern "C" {
 #include <lib/rng/trusty_rng.h>
-#include <lib/hwkey/hwkey.h>
 }
 
 #include <keymaster/android_keymaster_utils.h>
@@ -312,31 +311,8 @@ enum DerivationParams {
 };
 
 keymaster_error_t TrustyKeymasterContext::DeriveMasterKey(KeymasterKeyBlob* master_key) const {
-    LOG_D("Deriving master key", 0);
+    LOG_D("TODO: Deriving master key not implemented", 0);
 
-    long rc = hwkey_open();
-    if (rc < 0) {
-        return KM_ERROR_UNKNOWN_ERROR;
-    }
-
-    hwkey_session_t session = (hwkey_session_t)rc;
-
-    if (!master_key->Reset(kAesKeySize)) {
-        LOG_S("Could not allocate memory for master key buffer", 0);
-        return KM_ERROR_MEMORY_ALLOCATION_FAILED;
-    }
-
-    uint32_t kdf_version = HWKEY_KDF_VERSION_1;
-    rc = hwkey_derive(session, &kdf_version, kMasterKeyDerivationData, master_key->writable_data(),
-                      kAesKeySize);
-
-    if (rc < 0) {
-        LOG_S("Error deriving master key: %d", rc);
-        return KM_ERROR_UNKNOWN_ERROR;
-    }
-
-    hwkey_close(session);
-    LOG_I("Key derivation complete", 0);
     return KM_ERROR_OK;
 }
 
