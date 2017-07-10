@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "e8f2b9f2_362c9f7c",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-10T23:35:12Z",
+      "side": 1,
+      "message": "Is this one of those things where it\u0027s either 0, 1, or 256 depending on both other.pendingBlend being 256 and/or blend being 256?",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 60
+      },
+      "revId": "16e98ead7ba7c25b5bfdb618b0a2c0fa011d52b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2bbe8043_62b17028",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
@@ -13,6 +36,24 @@
       "writtenOn": "2017-07-10T21:04:54Z",
       "side": 1,
       "message": "this is always true?",
+      "revId": "16e98ead7ba7c25b5bfdb618b0a2c0fa011d52b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46816418_3cb1aa92",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-10T23:35:12Z",
+      "side": 1,
+      "message": "Yeah from the second else if it looks like.\n\nMaybe is debug code; if it\u0027s transparent, something is wrong, there\u0027s something else running at the same time that steps on the pendingBlend value. idk\n\nCan we add more documentation on what |pendingBlend| does? I\u0027m having trouble understanding it / mapping it back to what the old skin code does. Does it just hold 256 if we\u0027re done determining color of skinsurfacebitmap\u0027s pixels? In that case maybe a enum with Start, NotReadyYet, Done or something like that is better.",
+      "parentUuid": "2bbe8043_62b17028",
       "revId": "16e98ead7ba7c25b5bfdb618b0a2c0fa011d52b6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
