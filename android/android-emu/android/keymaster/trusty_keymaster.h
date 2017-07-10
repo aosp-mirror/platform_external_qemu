@@ -21,6 +21,9 @@
 
 #include "trusty_keymaster_context.h"
 
+#define NO_ERROR 0
+#define ERR_GENERIC 1
+
 namespace keymaster {
 
 class TrustyKeymaster : public AndroidKeymaster {
