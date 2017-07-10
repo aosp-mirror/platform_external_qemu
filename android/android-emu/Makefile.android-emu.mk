@@ -67,7 +67,10 @@ include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
-ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
+ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES) \
+                        $(_ANDROID_EMU_ROOT)/../../../boringssl/include \
+                        $(_ANDROID_EMU_ROOT)/android/keymaster/include \
+                        $(_ANDROID_EMU_ROOT)/android/keymaster
 
 ###############################################################################
 #
@@ -337,6 +340,36 @@ LOCAL_SRC_FILES := \
     android/hw-sensors.c \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
+    android/keymaster/aes_key.cpp \
+    android/keymaster/aes_operation.cpp \
+    android/keymaster/android_keymaster.cpp \
+    android/keymaster/android_keymaster_messages.cpp \
+    android/keymaster/android_keymaster_utils.cpp \
+    android/keymaster/asymmetric_key.cpp \
+    android/keymaster/asymmetric_key_factory.cpp \
+    android/keymaster/attestation_record.cpp \
+    android/keymaster/auth_encrypted_key_blob.cpp \
+    android/keymaster/authorization_set.cpp \
+    android/keymaster/ec_key.cpp \
+    android/keymaster/ec_key_factory.cpp \
+    android/keymaster/ecdsa_operation.cpp \
+    android/keymaster/hmac_key.cpp \
+    android/keymaster/hmac_operation.cpp \
+    android/keymaster/key.cpp \
+    android/keymaster/keymaster_enforcement.cpp \
+    android/keymaster/keymaster_tags.cpp \
+    android/keymaster/logger.cpp \
+    android/keymaster/ocb.c \
+    android/keymaster/ocb_utils.cpp \
+    android/keymaster/openssl_err.cpp \
+    android/keymaster/openssl_utils.cpp \
+    android/keymaster/operation.cpp \
+    android/keymaster/operation_table.cpp \
+    android/keymaster/rsa_key.cpp \
+    android/keymaster/rsa_key_factory.cpp \
+    android/keymaster/rsa_operation.cpp \
+    android/keymaster/serializable.cpp \
+    android/keymaster/symmetric_key.cpp \
     android/loadpng.c \
     android/main-common.c \
     android/main-help.cpp \

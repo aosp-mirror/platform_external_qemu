@@ -595,7 +595,7 @@ keymaster_error_t AesEvpDecryptOperation::ProcessAllButTagLengthBytes(const Buff
     if (!output->reserve(to_process + AES_BLOCK_SIZE))
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
 
-    keymaster_error_t error;
+    keymaster_error_t error = KM_ERROR_OK;
     if (!ProcessTagBufContentsAsData(to_process_from_tag_buf, output, &error))
         return error;
 
