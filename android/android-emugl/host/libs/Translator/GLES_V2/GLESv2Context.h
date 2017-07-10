@@ -82,7 +82,8 @@ private:
 
     GLuint m_useProgram = 0;
     ObjectDataPtr m_useProgramData = {};
-    std::unordered_map<GLuint, GLuint> m_bindSampler = {};
+
+    std::unordered_map<GLuint, GLuint> m_bindSampler;
 };
 
 #endif
