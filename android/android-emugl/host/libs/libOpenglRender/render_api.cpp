@@ -15,23 +15,18 @@
 */
 #include "OpenglRender/render_api.h"
 
+#include "emugl/common/OpenGLDispatchLoader.h"
 #include "ErrorLog.h"
-#include "OpenGLESDispatch/EGLDispatch.h"
-#include "OpenGLESDispatch/GLESv1Dispatch.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "OpenGLESDispatch/DispatchTables.h"
 #include "RenderLibImpl.h"
 
 #include <memory>
 
-GLESv2Dispatch s_gles2;
-GLESv1Dispatch s_gles1;
-
-RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary()
-{
+RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary() {
     //
     // Load EGL Plugin
     //
-    if (!init_egl_dispatch()) {
+    if (!LazyLoadedEGLDispatch::get()) {
         // Failed to load EGL
         printf("Failed to init_egl_dispatch\n");
         return nullptr;
@@ -40,14 +35,14 @@ RENDER_APICALL emugl::RenderLibPtr RENDER_APIENTRY initLibrary()
     //
     // Load GLES Plugin
     //
-    if (!gles1_dispatch_init(&s_gles1)) {
+    if (!LazyLoadedGLESv1Dispatch::get()) {
         // Failed to load GLES
         ERR("Failed to gles1_dispatch_init\n");
         return nullptr;
     }
 
     /* failure to init the GLES2 dispatch table is not fatal */
-    if (!gles2_dispatch_init(&s_gles2)) {
+    if (!LazyLoadedGLESv2Dispatch::get()) {
         ERR("Failed to gles2_dispatch_init\n");
         return nullptr;
     }
