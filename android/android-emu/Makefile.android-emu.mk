@@ -69,6 +69,15 @@ include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
+ANDROID_EMU_CFLAGS :=
+ifeq ($(BUILD_TARGET_OS),linux)
+    # These headers used to be included with the gcc prebuilds, but
+    # now they aren't.
+    # Note: make sure the system dirs take precedence.
+    ANDROID_EMU_CFLAGS += -idirafter $(_ANDROID_EMU_ROOT)/../../linux-headers/
+endif
+
+
 ###############################################################################
 #
 #  android-emu-base
@@ -82,7 +91,7 @@ ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
 
 $(call start-emulator-library,android-emu-base)
 
-LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS)
+LOCAL_CFLAGS := $(EMULATOR_COMMON_CFLAGS) $(ANDROID_EMU_CFLAGS)
 
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -216,6 +225,7 @@ LOCAL_CFLAGS := \
     $(EMULATOR_COMMON_CFLAGS) \
     $(LIBCURL_CFLAGS) \
     $(LIBXML2_CFLAGS) \
+    $(ANDROID_EMU_CFLAGS) \
 
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
@@ -761,6 +771,7 @@ LOCAL_CFLAGS += \
     $(EMULATOR_COMMON_CFLAGS) \
     $(ANDROID_SKIN_CFLAGS) \
     $(LIBXML2_CFLAGS) \
+    $(ANDROID_EMU_CFLAGS) \
 
 # ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
 # string literals which are being glued together
