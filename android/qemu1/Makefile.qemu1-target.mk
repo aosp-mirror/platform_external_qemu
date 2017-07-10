@@ -224,6 +224,12 @@ else
 
 endif
 
+LOCAL_CFLAGS += $(call if-target-clang,\
+            -Wno-address-of-packed-member \
+            -Wno-tautological-compare \
+            -Wno-tautological-pointer-compare \
+            ) \
+
 $(call gen-hw-config-defs)
 $(call gen-hx-header,qemu-options.hx,qemu-options.def,os-posix.c os-win32.c)
 $(call end-emulator-library)

@@ -14,12 +14,14 @@
 
 #pragma once
 
-#ifdef __cplusplus
+#if defined(__cplusplus) && ! defined(__clang__)
 #define ANDROID_NORETURN [[noreturn]]
-#else  // !__cplusplus
+#else  // !__cplusplus || __clang__
 #ifdef _MSC_VER
 #define ANDROID_NORETURN __declspec(noreturn)
 #else  // !_MSC_VER
 #define ANDROID_NORETURN __attribute__((noreturn))
 #endif  // !_MSC_VER
-#endif  // !__cplusplus
+#endif  // !__cplusplus || __clang__
+
+

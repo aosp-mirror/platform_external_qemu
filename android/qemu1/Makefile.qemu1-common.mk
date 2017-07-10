@@ -143,20 +143,25 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_CFLAGS := \
     $(QEMU1_COMMON_CFLAGS) \
-    -W \
     -Wno-sign-compare \
     -fno-strict-aliasing \
     -Wno-unused-parameter \
     -D_XOPEN_SOURCE=600 \
     -D_BSD_SOURCE=1 \
     -DCONFIG_BDRV_WHITELIST=\"\" \
+    $(call if-target-clang,\
+            -Wno-address-of-packed-member \
+            -Wno-tautological-compare \
+            -Wno-tautological-pointer-compare \
+            ) \
     $(EMULATOR_LIBQEMU_CFLAGS) \
     $(AUDIO_CFLAGS) \
+
 
 # this is very important, otherwise the generated binaries may
 # not link properly on our build servers
 ifeq ($(BUILD_TARGET_OS),linux)
-LOCAL_CFLAGS += -fno-stack-protector
+  LOCAL_CFLAGS += -fno-stack-protector
 endif
 
 LOCAL_SRC_FILES += \

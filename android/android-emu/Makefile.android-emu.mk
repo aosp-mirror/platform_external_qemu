@@ -775,11 +775,7 @@ LOCAL_CFLAGS += \
 
 # ffmpeg targets C, so it doesn't care that C++11 requres a space bewteen
 # string literals which are being glued together
-ifeq ($(BUILD_TARGET_OS),darwin)
-    LOCAL_CXXFLAGS += -Wno-reserved-user-defined-literal
-else
-    LOCAL_CXXFLAGS += -Wno-literal-suffix
-endif
+LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
 
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \

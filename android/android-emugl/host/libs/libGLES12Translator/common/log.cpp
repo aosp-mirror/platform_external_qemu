@@ -46,15 +46,3 @@ int PrintLogBuf(int bufID, int prio, const char* tag, const char* fmt, ...) {
 }
 
 }  // namespace arc
-
-int __android_log_print(int prio, const char *tag, const char *fmt, ...)
-{
-    va_list ap;
-    char buf[LOG_BUF_SIZE];
-
-    va_start(ap, fmt);
-    vsnprintf(buf, LOG_BUF_SIZE, fmt, ap);
-    va_end(ap);
-
-    return arc::PrintLogBuf(0, prio, tag, buf);
-}

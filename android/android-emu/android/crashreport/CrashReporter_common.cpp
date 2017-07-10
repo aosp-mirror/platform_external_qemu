@@ -48,6 +48,13 @@ using android::base::StringView;
 using android::base::System;
 using android::base::Uuid;
 
+// Tautologies are used in combination with defines to:
+// # Make sure the proper define is passed in
+// # Make sure we can optimize the tautologies out.
+//
+// Think of them as typesafe #ifdef
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wtautological-compare"
 namespace android {
 namespace crashreport {
 
@@ -325,7 +332,7 @@ void crashhandler_die(const char* message) {
     }
 }
 
-void crashhandler_die_format_v(const char* format, va_list args) {
+void __attribute__((noreturn)) crashhandler_die_format_v(const char* format, va_list args) {
     char message[2048] = {};
     vsnprintf(message, sizeof(message) - 1, format, args);
     crashhandler_die(message);
@@ -348,5 +355,6 @@ void crashhandler_exitmode(const char* message) {
 bool crashhandler_copy_attachment(const char* destination, const char* source) {
     return CrashReporter::get()->attachFile(source, destination);
 }
+#pragma clang diagnostic pop
 
 }  // extern "C"

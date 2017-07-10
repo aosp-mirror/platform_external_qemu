@@ -25,7 +25,7 @@
 
 namespace emugl {
 
-SharedLibrary::LibraryMap SharedLibrary::s_libraryMap = {};
+SharedLibrary::LibraryMap SharedLibrary::s_libraryMap = LibraryMap();
 
 // static
 SharedLibrary* SharedLibrary::open(const char* libraryName) {

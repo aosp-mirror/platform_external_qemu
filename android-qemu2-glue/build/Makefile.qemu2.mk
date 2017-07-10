@@ -124,14 +124,16 @@ QEMU2_CFLAGS := \
     -D_GNU_SOURCE \
     -D_FILE_OFFSET_BITS=64 \
     $(call qemu2-if-darwin, -Wno-initializer-overrides) \
+    $(call if-target-clang,\
+	    -Wno-address-of-packed-member \
+	    -Wno-tautological-pointer-compare \
+	    -Wno-tautological-compare \
+	    -Wno-tautological-pointer-compare \
+	    -Wno-format-security) \
 
 QEMU2_CFLAGS += \
     -Wno-unused-function \
-    $(call qemu2-if-darwin, \
-        -Wno-unused-value \
-        -Wno-parentheses-equality \
-        -Wno-self-assign \
-        , \
+    $(call if-target-clang,, \
         -Wno-unused-variable \
         -Wno-unused-but-set-variable \
         -Wno-maybe-uninitialized \
