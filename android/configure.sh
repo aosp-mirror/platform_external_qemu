@@ -1307,16 +1307,6 @@ if [ -z "$OPTION_PREBUILT_QEMU2" ]; then
     fi
 fi
 
-case "$HOST_OS" in
-    linux)
-            log "Copying missing toolchain headers"
-            mkdir -p "${OUT_DIR}/build/linux"
-            for HEADER in userfaultfd.h; do
-              cp "${QEMU2_TOP_DIR}/linux-headers/linux/${HEADER}" "${OUT_DIR}/build/linux/"
-            done
-        ;;
-esac
-
 clean_temp
 
 echo "Ready to go. Type 'make' to build emulator"

@@ -76,6 +76,12 @@ EMULATOR_COMMON_INCLUDES := \
     $(generated-proto-sources-dir) \
     $(LIBMMAN_WIN32_INCLUDES) \
 
+ifeq ($(BUILD_TARGET_OS),linux)
+    # These headers used to be included with the gcc prebuilds, but
+    # now they aren't.
+    EMULATOR_COMMON_INCLUDES += $(LOCAL_PATH)/linux-headers/
+endif
+
 EMUGL_SRCDIR := $(LOCAL_PATH)/android/android-emugl
 EMUGL_INCLUDES := $(EMUGL_SRCDIR)/host/include
 ifeq (true,$(BUILD_EMUGL_PRINTOUT))
