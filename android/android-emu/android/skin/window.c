@@ -1341,6 +1341,53 @@ static void skin_window_redraw_opengles(SkinWindow* window) {
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
 
+typedef struct {
+    SkinWindow* window;
+    SkinRect monitor;
+    int win_w;
+    int win_h;
+} EnsureFullyVisibleData;
+
+static void skin_window_ensure_fully_visible(void* ptr) {
+    EnsureFullyVisibleData* data = ptr;
+    if (!skin_winsys_is_window_fully_visible()) {
+        int new_x, new_y;
+
+        if (VERBOSE_CHECK(init)) {
+            int win_x, win_y, win_w, win_h;
+            skin_winsys_get_window_pos(&win_x, &win_y);
+            win_w = skin_surface_width(data->window->surface);
+            win_h = skin_surface_height(data->window->surface);
+
+            dprint("Window was not fully visible: "
+                    "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
+                    data->monitor.pos.x,
+                    data->monitor.pos.y,
+                    data->monitor.size.w,
+                    data->monitor.size.h,
+                    win_x,
+                    win_y,
+                    win_w,
+                    win_h);
+        }
+
+        /* First, we recenter the window */
+        new_x = (data->monitor.size.w - data->win_w)/2;
+        new_y = (data->monitor.size.h - data->win_h)/2;
+
+        /* If it is still too large, we ensure the top-border is visible */
+        if (new_y < 0)
+            new_y = 0;
+
+        VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
+
+        /* Done */
+        skin_winsys_set_window_pos(new_x, new_y);
+        dprint( "emulator window was out of view and was recentered\n" );
+    }
+    AFREE(data);
+}
+
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
                                int y,
@@ -1390,41 +1437,16 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     }
     skin_winsys_set_window_pos(x, y);
 
-    /* Check that the window is fully visible */
-    if (enable_scale && !skin_winsys_is_window_fully_visible()) {
-        int new_x, new_y;
-
-        if (VERBOSE_CHECK(init)) {
-            int win_x, win_y, win_w, win_h;
-            skin_winsys_get_window_pos(&win_x, &win_y);
-            win_w = skin_surface_width(window->surface);
-            win_h = skin_surface_height(window->surface);
-
-            dprint("Window was not fully visible: "
-                    "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
-                    monitor.pos.x,
-                    monitor.pos.y,
-                    monitor.size.w,
-                    monitor.size.h,
-                    win_x,
-                    win_y,
-                    win_w,
-                    win_h);
-        }
-
-        /* First, we recenter the window */
-        new_x = (monitor.size.w - win_w)/2;
-        new_y = (monitor.size.h - win_h)/2;
-
-        /* If it is still too large, we ensure the top-border is visible */
-        if (new_y < 0)
-            new_y = 0;
-
-        VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
-
-        /* Done */
-        skin_winsys_set_window_pos(new_x, new_y);
-        dprint( "emulator window was out of view and was recentered\n" );
+    /* Ensure that the window is fully visible */
+    if (enable_scale) {
+        EnsureFullyVisibleData* data;
+        ANEW0(data);
+        data->window = window;
+        data->monitor = monitor;
+        data->win_w = win_w;
+        data->win_h = win_h;
+        skin_winsys_run_ui_update(skin_window_ensure_fully_visible,
+                                  data, false);
     }
 
     skin_window_show_opengles(window);
