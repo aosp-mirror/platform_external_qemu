@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "d6c1d340_5289f6be",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2017-07-10T19:24:19Z",
+      "side": 1,
+      "message": "Thanks for the clarification.  Keep us posted on your testing, and let us know if you encounter any issues.",
+      "parentUuid": "68fcc37a_afd84280",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 28
+      },
+      "revId": "4ad94434596130fac17066aba59fab8a7c962eb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e51e528_cb63f418",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
         "patchSetId": 3
