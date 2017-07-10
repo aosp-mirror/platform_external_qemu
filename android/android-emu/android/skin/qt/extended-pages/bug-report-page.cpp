@@ -31,6 +31,7 @@
 
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QFontMetrics>
 #include <QMovie>
 
 #include <algorithm>
@@ -108,7 +109,11 @@ BugreportPage::BugreportPage(QWidget* parent)
     // Set AVD name
     const char* deviceName = avdInfo_getName(android_avdInfo);
     mReportingFields.deviceName = std::string(deviceName);
-    mUi->bug_deviceLabel->setText(QString(deviceName));
+    QFontMetrics metrics(mUi->bug_deviceLabel->font());
+    QString elidedText = metrics.elidedText(
+            QString::fromStdString(mReportingFields.deviceName), Qt::ElideRight,
+            mUi->bug_deviceLabel->width());
+    mUi->bug_deviceLabel->setText(elidedText);
 
     // Set OS Description
     mReportingFields.hostOsName = System::get()->getOsName();

@@ -47,9 +47,6 @@
      <bold>true</bold>
     </font>
    </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: #00bea4; color: #ffffff</string>
-   </property>
    <property name="text">
     <string>SAVE REPORT</string>
    </property>
@@ -244,18 +241,27 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
   </widget>
   <widget class="QLabel" name="bug_emulatorVersionLabel">
    <property name="geometry">
     <rect>
      <x>312</x>
      <y>250</y>
-     <width>130</width>
-     <height>20</height>
+     <width>155</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
    </property>
   </widget>
   <widget class="QLabel" name="bug_deviceLabel">
@@ -263,12 +269,15 @@
     <rect>
      <x>312</x>
      <y>300</y>
-     <width>130</width>
-     <height>20</height>
+     <width>155</width>
+     <height>40</height>
     </rect>
    </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="wordWrap">
+    <bool>false</bool>
    </property>
    <property name="ColorGroup" stdset="0">
     <string>Link</string>
@@ -279,8 +288,8 @@
     <rect>
      <x>470</x>
      <y>300</y>
-     <width>130</width>
-     <height>20</height>
+     <width>150</width>
+     <height>40</height>
     </rect>
    </property>
    <property name="text">
@@ -292,8 +301,8 @@
     <rect>
      <x>470</x>
      <y>250</y>
-     <width>130</width>
-     <height>20</height>
+     <width>150</width>
+     <height>30</height>
     </rect>
    </property>
    <property name="text">
@@ -305,7 +314,7 @@
     <rect>
      <x>312</x>
      <y>230</y>
-     <width>137</width>
+     <width>155</width>
      <height>19</height>
     </rect>
    </property>
@@ -327,7 +336,7 @@
     <rect>
      <x>470</x>
      <y>230</y>
-     <width>126</width>
+     <width>150</width>
      <height>19</height>
     </rect>
    </property>
@@ -349,7 +358,7 @@
     <rect>
      <x>470</x>
      <y>280</y>
-     <width>111</width>
+     <width>150</width>
      <height>19</height>
     </rect>
    </property>
@@ -371,7 +380,7 @@
     <rect>
      <x>312</x>
      <y>280</y>
-     <width>146</width>
+     <width>155</width>
      <height>19</height>
     </rect>
    </property>
@@ -424,6 +433,12 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
    </property>
    <property name="readOnly">
     <bool>true</bool>
@@ -508,7 +523,7 @@
     <rect>
      <x>16</x>
      <y>540</y>
-     <width>101</width>
+     <width>120</width>
      <height>30</height>
     </rect>
    </property>
