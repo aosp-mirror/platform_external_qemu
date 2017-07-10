@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "045f8769_46ba498e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1058860
+      },
+      "writtenOn": "2017-07-10T17:59:28Z",
+      "side": 1,
+      "message": "Can you share any issues/concerns that prevent Clang from being the default?\n\nAnything we can do to help?",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 28
+      },
+      "revId": "4ad94434596130fac17066aba59fab8a7c962eb4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e51e528_cb63f418",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
         "patchSetId": 3
