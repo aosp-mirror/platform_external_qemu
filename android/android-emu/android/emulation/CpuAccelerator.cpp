@@ -79,6 +79,32 @@ using base::StringAppendFormat;
 using base::ScopedFd;
 using base::Version;
 
+// For detecting that the cpu can run with fast virtualization
+// without requiring workarounds such as resetting SMP=1.
+//
+// Technically, we need  rdmsr to detect ept/ug support,
+// but that instruction is only available
+// as root. So just say yes if the processor has features that were
+// only introduced the same time as the feature.
+// EPT: popcnt
+// UG: aes + pclmulqsq
+bool hasModernX86VirtualizationFeatures() {
+    uint32_t cpuid_function1_ecx;
+    android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
+
+    uint32_t popcnt_support = 1 << 23;
+    uint32_t aes_support = 1 << 25;
+    uint32_t pclmulqsq_support = 1 << 1;
+
+    bool eptSupport = cpuid_function1_ecx & popcnt_support;
+    bool ugSupport =
+        (cpuid_function1_ecx & aes_support) &&
+        (cpuid_function1_ecx & pclmulqsq_support);
+
+    return eptSupport && ugSupport;
+}
+
+
 namespace {
 
 struct GlobalState {
@@ -660,26 +686,6 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 #if HAVE_HVF
 
 using android::base::System;
-
-// Technically, we need  rdmsr to detect ept/ug support,
-// but that instruction is only available
-// as root. So just say yes if the processor has features that were
-// only introduced the same time as the feature.
-// EPT: popcnt
-// UG: aes
-static bool cpuCanRunHVF() {
-    uint32_t cpuid_function1_ecx;
-    android_get_x86_cpuid(1, 0, NULL, NULL, &cpuid_function1_ecx, NULL);
-
-    uint32_t popcnt_support = 1 << 23;
-    uint32_t aes_support = 1 << 25;
-
-    bool eptSupport = cpuid_function1_ecx & popcnt_support;
-    bool ugSupport = cpuid_function1_ecx & aes_support;
-
-    return eptSupport && ugSupport;
-}
-
 AndroidCpuAcceleration ProbeHVF(std::string* status) {
     status->clear();
 
@@ -710,7 +716,7 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
     }
 
     // Also need EPT and UG
-    if (!cpuCanRunHVF()) {
+    if (!android::hasModernX86VirtualizationFeatures()) {
         status->assign(
                 "CPU doesn't support EPT and/or UG features "
                 "needed for Hypervisor.Framework");
