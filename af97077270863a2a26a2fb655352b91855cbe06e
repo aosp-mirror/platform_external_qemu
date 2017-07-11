@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "18745db3_c23b3b7b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "A lot of the code depends on GL_MAX_VERTEX_ATTRIBS, so if it fails we have much more serious problems. Initialized to 0",
+      "parentUuid": "9cfd684c_1ff4db52",
+      "range": {
+        "startLine": 86,
+        "startChar": 59,
+        "endLine": 86,
+        "endChar": 75
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "794109b4_2626fea7",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 9
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "37bc7410_50b9e575",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "794109b4_2626fea7",
+      "range": {
+        "startLine": 159,
+        "startChar": 12,
+        "endLine": 159,
+        "endChar": 19
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c72bf86_de6834ea",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 9
@@ -59,6 +107,30 @@
       "writtenOn": "2017-07-11T18:16:17Z",
       "side": 1,
       "message": "GLESv2Context::init will be triggered before restore, so no need to initialize them here again?",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 171,
+        "endChar": 53
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02d32e7a_45f6f3bc",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "I needed to put it here, or I had a segfault on restore",
+      "parentUuid": "9c72bf86_de6834ea",
       "range": {
         "startLine": 170,
         "startChar": 0,
@@ -118,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "340bbe68_4eecc0e8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "hes more referring to the buffer will only be used once anyway so might as well give a driver hint that the data doesn\u0027t need to be long lived\n\nThen might as well change it to GL_STREAM_DRAW since it\u0027s only done as the draw call happens (1:1 write : draw) (Done)",
+      "parentUuid": "26bb6dd8_2b6d9444",
+      "range": {
+        "startLine": 423,
+        "startChar": 78,
+        "endLine": 423,
+        "endChar": 92
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea01a281_525489cd",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 9
@@ -129,6 +225,30 @@
       "writtenOn": "2017-07-11T18:17:51Z",
       "side": 1,
       "message": "nullptr",
+      "range": {
+        "startLine": 427,
+        "startChar": 29,
+        "endLine": 427,
+        "endChar": 39
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80044342_9dffb702",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ea01a281_525489cd",
       "range": {
         "startLine": 427,
         "startChar": 29,
@@ -164,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "e8a99503_63adc55b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "694f6b04_fad1b40e",
+      "range": {
+        "startLine": 451,
+        "startChar": 12,
+        "endLine": 451,
+        "endChar": 19
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b718367e_67ca5214",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 9
@@ -175,6 +319,30 @@
       "writtenOn": "2017-07-11T18:16:17Z",
       "side": 1,
       "message": "GL_DYNAMIC_DRAW, same reason as with IBO",
+      "range": {
+        "startLine": 502,
+        "startChar": 62,
+        "endLine": 502,
+        "endChar": 76
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "daaf71ed_1e7b3d22",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 502,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b718367e_67ca5214",
       "range": {
         "startLine": 502,
         "startChar": 62,
@@ -210,6 +378,30 @@
     },
     {
       "key": {
+        "uuid": "85ca4fa0_5dc75aa0",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8f583ec3_85424712",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 8
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c9a2d0b3_8ed6d46c",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
         "patchSetId": 9
@@ -233,6 +425,30 @@
     },
     {
       "key": {
+        "uuid": "32ef88b8_289fc01a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c9a2d0b3_8ed6d46c",
+      "range": {
+        "startLine": 109,
+        "startChar": 44,
+        "endLine": 109,
+        "endChar": 49
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3d79001e_77cf27ee",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 9
@@ -244,6 +460,30 @@
       "writtenOn": "2017-07-11T18:17:51Z",
       "side": 1,
       "message": "what for?",
+      "range": {
+        "startLine": 1085,
+        "startChar": 7,
+        "endLine": 1085,
+        "endChar": 13
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "977195ef_99ba2195",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T18:35:13Z",
+      "side": 1,
+      "message": "moar inlining optimization?",
+      "parentUuid": "3d79001e_77cf27ee",
       "range": {
         "startLine": 1085,
         "startChar": 7,
