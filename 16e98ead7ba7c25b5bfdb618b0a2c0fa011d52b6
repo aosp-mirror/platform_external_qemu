@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "b5511791_a7aa6336",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T01:00:45Z",
+      "side": 1,
+      "message": "Ah ok so it\u0027s really for blending and not debug, and it\u0027s multiplicative blending in 8-bit fixed point, neat",
+      "parentUuid": "e4cdcdd7_a1c36007",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 60
+      },
+      "revId": "16e98ead7ba7c25b5bfdb618b0a2c0fa011d52b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2bbe8043_62b17028",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
