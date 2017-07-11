@@ -88,6 +88,8 @@ typedef enum {
     ANDROID_CPU_ACCELERATOR_MAX,
 } AndroidCpuAccelerator;
 
+bool androidCpuAcceleration_hasModernX86VirtualizationFeatures();
+
 /* Returns the auto-selected CPU accelerator. */
 AndroidCpuAccelerator androidCpuAcceleration_getAccelerator();
 
