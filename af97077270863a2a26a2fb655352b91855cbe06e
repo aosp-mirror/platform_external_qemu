@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "9cfd684c_1ff4db52",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "is it possible that it fails and we try to resize to garbage size?",
+      "range": {
+        "startLine": 86,
+        "startChar": 59,
+        "endLine": 86,
+        "endChar": 75
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "794109b4_2626fea7",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "I doubt you\u0027ll ever need more than a byte here :)",
+      "range": {
+        "startLine": 159,
+        "startChar": 12,
+        "endLine": 159,
+        "endChar": 19
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c72bf86_de6834ea",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 9
@@ -48,6 +94,76 @@
     },
     {
       "key": {
+        "uuid": "26bb6dd8_2b6d9444",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "really? how?",
+      "parentUuid": "19e15fa1_20dda562",
+      "range": {
+        "startLine": 423,
+        "startChar": 78,
+        "endLine": 423,
+        "endChar": 92
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea01a281_525489cd",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 427,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "nullptr",
+      "range": {
+        "startLine": 427,
+        "startChar": 29,
+        "endLine": 427,
+        "endChar": 39
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "694f6b04_fad1b40e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "nit: please use the crashhandler\u0027s abort call",
+      "range": {
+        "startLine": 451,
+        "startChar": 12,
+        "endLine": 451,
+        "endChar": 19
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b718367e_67ca5214",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 9
@@ -64,6 +180,75 @@
         "startChar": 62,
         "endLine": 502,
         "endChar": 76
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f583ec3_85424712",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "nit: enum class",
+      "range": {
+        "startLine": 40,
+        "startChar": 4,
+        "endLine": 40,
+        "endChar": 8
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c9a2d0b3_8ed6d46c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "nit: no need to explicitly call a default ctor; even more, in clang this syntax doesn\u0027t work",
+      "range": {
+        "startLine": 109,
+        "startChar": 44,
+        "endLine": 109,
+        "endChar": 49
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d79001e_77cf27ee",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1085,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T18:17:51Z",
+      "side": 1,
+      "message": "what for?",
+      "range": {
+        "startLine": 1085,
+        "startChar": 7,
+        "endLine": 1085,
+        "endChar": 13
       },
       "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
