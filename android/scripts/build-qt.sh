@@ -282,7 +282,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         ) || panic "Could not configure Qt build!"
 
         # Build everything now.
-        QT_MODULES="qtbase qtsvg"
+        QT_MODULES="qtbase qtsvg qtimageformats"
         QT_TARGET_BUILD_MODULES=
         QT_TARGET_INSTALL_MODULES=
         for QT_MODULE in $QT_MODULES; do
