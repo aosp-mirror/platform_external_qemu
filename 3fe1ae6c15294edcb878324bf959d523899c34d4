@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "2d55e355_264c70e6",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T20:47:54Z",
+      "side": 1,
+      "message": "Got it, thanks",
+      "parentUuid": "66b59267_a6e1003a",
+      "range": {
+        "startLine": 318,
+        "startChar": 0,
+        "endLine": 320,
+        "endChar": 35
+      },
+      "revId": "3fe1ae6c15294edcb878324bf959d523899c34d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5af0c7f3_4b2fa98a",
         "filename": "android/android-emu/android/snapshot/RamLoader.h",
         "patchSetId": 2
