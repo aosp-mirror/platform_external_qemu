@@ -99,13 +99,8 @@ HostHwInfo::HostHwInfo() {
 }
 
 // static
-HostHwInfo* HostHwInfo::get() {
-    return sHostHwInfo.ptr();
-}
-
-// static
-HostHwInfo::Info HostHwInfo::query() {
-    return sHostHwInfo.get().info;
+const HostHwInfo::Info& HostHwInfo::query() {
+    return sHostHwInfo->info;
 }
 
 } // namespace android
