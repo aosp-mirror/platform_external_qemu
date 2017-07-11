@@ -44,6 +44,11 @@ enum CpuAccelerator {
     CPU_ACCELERATOR_MAX,
 };
 
+// Returns whether or not the CPU supports all modern x86
+// virtualization features, so that we don't have to
+// use SMP = 1.
+bool hasModernX86VirtualizationFeatures();
+
 // Return the CPU accelerator technology usable on the current machine.
 // This only returns a non-CPU_ACCELERATOR_NONE if corresponding accelerator
 // can be used properly. Otherwise it will return CPU_ACCELERATOR_NONE.

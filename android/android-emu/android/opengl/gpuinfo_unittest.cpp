@@ -16,67 +16,6 @@
 
 #include <gtest/gtest.h>
 
-static const char osx_single_gpu[] =
-"Graphics/Displays:\n"
-"\n"
-"    Intel Iris Pro:\n"
-"\n"
-"      Chipset Model: Intel Iris Pro\n"
-"      Type: GPU\n"
-"      Bus: Built-In\n"
-"      VRAM (Dynamic, Max): 1536 MB\n"
-"      Vendor: Intel (0x8086)\n"
-"      Device ID: 0x0d26\n"
-"      Revision ID: 0x0008\n"
-"      Displays:\n"
-"        Color LCD:\n"
-"          Display Type: Retina LCD\n"
-"          Resolution: 2880 x 1800 Retina\n"
-"          Retina: Yes\n"
-"          Pixel Depth: 32-Bit Color (ARGB8888)\n"
-"          Main Display: Yes\n"
-"          Mirror: Off\n"
-"          Online: Yes\n"
-"          Built-In: Yes\n";
-
-static const char osx_dual_gpu[] =
-"Intel HD Graphics 4000:\n"
-"\n"
-"     Chipset Model: Intel HD Graphics 4000\n"
-"     Type: GPU\n"
-"     Bus: Built-In\n"
-"     VRAM (Total): 512 MB\n"
-"     Vendor: Intel (0x8086)\n"
-"     Device ID: 0x0166\n"
-"     Revision ID: 0x0009\n"
-"     gMux Version: 3.2.19 [3.2.8]\n"
-"     Displays:\n"
-"       Color LCD:\n"
-"         Display Type: LCD\n"
-"         Resolution: 2880 X 1800\n"
-"         Retina: Yes\n"
-"         Pixel Depth: 32-Bit Color (ARGB8888)\n"
-"         Main Display: Yes\n"
-"         Mirror: Off\n"
-"         Online: Yes\n"
-"         Built-In: Yes\n"
-"         Connection Type: DisplayPort\n"
-"\n"
-"\n"
-"   NVIDIA GeForce GT 650M:\n"
-"\n"
-"\n"
-"     Chipset Model: NVIDIA GeForce GT 650M\n"
-"     Type: GPU\n"
-"     Bus: PCIe\n"
-"     PCIe Lane Width: x8\n"
-"     VRAM (Total): 1024 MB\n"
-"     Vendor: NVIDIA (0x10de)\n"
-"     Device ID: 0x0fd5\n"
-"     Revision ID: 0x00a2\n"
-"     ROM Revision: 3688\n"
-"     gMux Version: 3.2.19 [3.2.8]\n";
-
 static const char win_noinstalleddrivers[] = 
 "\r\n"
 "\r\n"
@@ -426,7 +365,7 @@ static const char linux_mesadri[] =
 "OpenGL version string: 3.0 Mesa 10.4.2 (git-)\n"
 "\n";
 
-static const char linux_no_glxinfo[] =
+static const char linux_2[] =
 "Rev: 05\n"
 "\n"
 "Device: 04:00.0\n"
@@ -445,60 +384,7 @@ static const char linux_no_glxinfo[] =
 "\n"
 "\n";
 
-static const char linux_no_lspci[] =
-"\n"
-"\n"
-"OpenGL version string: 3.0 Mesa 10.4.2 (git-)\n"
-"\n";
-
-TEST(parse_gpu_info_list_osx, SingleGpu) {
-    std::string contents(osx_single_gpu);
-
-    GpuInfoList gpulist;
-    parse_gpu_info_list_osx(contents, &gpulist);
-
-    EXPECT_TRUE(gpulist.infos.size() == 1);
-
-    GpuInfo info = gpulist.currGpu();
-
-    EXPECT_TRUE(info.current_gpu);
-    EXPECT_STREQ("Intel (0x8086)", info.make.c_str());
-    EXPECT_STREQ("Intel Iris Pro", info.model.c_str());
-    EXPECT_STREQ("0x0d26", info.device_id.c_str());
-    EXPECT_STREQ("0x0008", info.revision_id.c_str());
-    EXPECT_TRUE(info.version.empty());
-    EXPECT_TRUE(info.renderer.empty());
-    EXPECT_TRUE(info.dlls.empty());
-}
-
-TEST(parse_gpu_info_list_osx, DualGpu) {
-    std::string contents(osx_dual_gpu);
-
-    GpuInfoList gpulist;
-    parse_gpu_info_list_osx(contents, &gpulist);
-
-    EXPECT_TRUE(gpulist.infos.size() == 2);
-
-    GpuInfo& intel_info = gpulist.infos[0];
-    EXPECT_TRUE(intel_info.current_gpu);
-    EXPECT_STREQ("Intel (0x8086)", intel_info.make.c_str());
-    EXPECT_STREQ("Intel HD Graphics 4000", intel_info.model.c_str());
-    EXPECT_STREQ("0x0166", intel_info.device_id.c_str());
-    EXPECT_STREQ("0x0009", intel_info.revision_id.c_str());
-    EXPECT_TRUE(intel_info.version.empty());
-    EXPECT_TRUE(intel_info.renderer.empty());
-    EXPECT_TRUE(intel_info.dlls.empty());
-
-    GpuInfo& nvidia_info = gpulist.infos[1];
-    EXPECT_FALSE(nvidia_info.current_gpu);
-    EXPECT_STREQ("NVIDIA (0x10de)", nvidia_info.make.c_str());
-    EXPECT_STREQ("NVIDIA GeForce GT 650M", nvidia_info.model.c_str());
-    EXPECT_STREQ("0x0fd5", nvidia_info.device_id.c_str());
-    EXPECT_STREQ("0x00a2", nvidia_info.revision_id.c_str());
-    EXPECT_TRUE(nvidia_info.version.empty());
-    EXPECT_TRUE(nvidia_info.renderer.empty());
-    EXPECT_TRUE(nvidia_info.dlls.empty());
-}
+#ifdef _WIN32
 
 TEST(parse_gpu_info_list_windows, WinNoInstalledDriversContinueCase) {
     std::string contents(win_noinstalleddrivers);
@@ -596,6 +482,8 @@ TEST(parse_gpu_info_list_windows, DualGpu) {
     EXPECT_STREQ("igd12umd32", intel_info.dlls[7].c_str());
 }
 
+#elif defined(__linux__)
+
 TEST(parse_gpu_info_list_linux, EmptyStr) {
     std::string contents;
 
@@ -606,7 +494,7 @@ TEST(parse_gpu_info_list_linux, EmptyStr) {
 }
 
 TEST(parse_gpu_info_list_linux, NoGlxInfo) {
-    std::string contents(linux_no_glxinfo);
+    std::string contents(linux_2);
 
     GpuInfoList gpulist;
     parse_gpu_info_list_linux(contents, &gpulist);
@@ -615,12 +503,12 @@ TEST(parse_gpu_info_list_linux, NoGlxInfo) {
 }
 
 TEST(parse_gpu_info_list_linux, Nolspci) {
-    std::string contents(linux_no_lspci);
+    std::string contents("\n");
 
     GpuInfoList gpulist;
     parse_gpu_info_list_linux(contents, &gpulist);
 
-    EXPECT_TRUE(gpulist.infos.size() == 1);
+    EXPECT_TRUE(gpulist.infos.size() == 0);
 }
 
 TEST(parse_gpu_info_list_linux, SingleGpu) {
@@ -661,6 +549,7 @@ TEST(parse_gpu_info_list_linux, MesaDRI) {
     EXPECT_TRUE(nvidia_info.dlls.empty());
 }
 
+
 TEST(gpuinfo_query_blacklist, testBlacklist_Pos) {
     const BlacklistEntry test_list[] = {
         {"10de", nullptr, "13ba", nullptr, nullptr, nullptr, nullptr}
@@ -680,19 +569,21 @@ TEST(gpuinfo_query_blacklist, testBlacklist_Pos) {
 
 TEST(gpuinfo_query_blacklist, testBlacklist_Neg) {
     const BlacklistEntry test_list[] = {
-        {"10de", nullptr, "13ba", nullptr, nullptr, nullptr, nullptr},
-        {"NVIDIA", "NVIDIA Quadro K600", nullptr, nullptr, nullptr, nullptr, nullptr},
+        {"10dd", nullptr, "13ba", nullptr, nullptr, nullptr, nullptr},
+        {"ATI", "NVIDIA Quadro K600", nullptr, nullptr, nullptr, nullptr, nullptr},
         {"ASDF", "Intel Iris Pro", nullptr, nullptr, nullptr, nullptr, nullptr}
     };
 
     int test_list_len = sizeof(test_list) / sizeof(BlacklistEntry);
 
-    std::string contents(osx_single_gpu);
+    std::string contents(linux_2);
     GpuInfoList gpulist;
-    parse_gpu_info_list_osx(contents, &gpulist);
+    parse_gpu_info_list_linux(contents, &gpulist);
     bool on_blacklist = gpuinfo_query_blacklist(&gpulist,
                                                 test_list,
                                                 test_list_len);
 
     EXPECT_FALSE(on_blacklist);
 }
+
+#endif  // __linux__

@@ -102,7 +102,6 @@ typedef enum {
 struct AvdInfo {
     /* for the Android build system case */
     char      inAndroidBuild;
-    char      isEncryptionEnabled;
     char*     androidOut;
     char*     androidBuildRoot;
     char*     targetArch;
@@ -978,10 +977,6 @@ int avdInfo_getSkinHardwareIni( AvdInfo* i, char* skinName, char* skinDirPath)
     return 0;
 }
 
-int avdInfo_isEncryptionEnabledInBuild(const AvdInfo* i) {
-    return (i->inAndroidBuild && i->isEncryptionEnabled);
-}
-
 AvdInfo*
 avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
                             const char*     androidOut,
@@ -1012,35 +1007,10 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
 
     _avdInfo_extractBuildProperties(i);
 
-    if (i->apiLevel >= 25) {
-         /*
-           copy encryptionkey.img
-        */
-        char encryptionimg_path[1024];
-        snprintf(encryptionimg_path, sizeof(encryptionimg_path),
-                "%s/device/generic/goldfish/data/etc/encryptionkey.img",
-                androidBuildRoot);
-        const bool encryption_enabled = path_exists(encryptionimg_path);
-        if (!encryption_enabled) {
-            dwarning("%s does not exists\n", encryptionimg_path);
-            i->isEncryptionEnabled = 0;
-        } else {
-            i->isEncryptionEnabled = 1;
-            char dest_encryptionimg_path[1024];
-            snprintf(dest_encryptionimg_path, sizeof(dest_encryptionimg_path),
-                    "%s/encryptionkey.img",
-                    androidOut);
-            if (!path_exists(dest_encryptionimg_path)) {
-                if(path_copy_file(dest_encryptionimg_path, encryptionimg_path) != 0) {
-                    derror("cannot copy from %s to %s\n", encryptionimg_path,
-                            dest_encryptionimg_path);
-                    goto FAIL;
-                }
-            }
-        }
-    }
     str_reset(&i->deviceName, "<build>");
 
+    i->numSearchPaths = 1;
+    i->searchPaths[0] = strdup(androidOut);
     /* out/target/product/<name>/config.ini, if exists, provide configuration
      * from build files. */
     if (_avdInfo_getConfigIni(i) < 0 ||
@@ -1576,4 +1546,29 @@ const char* avdInfo_getTag(const AvdInfo* i) {
 const char* avdInfo_getSdCardSize(const AvdInfo* i) {
     return (i->configIni) ? iniFile_getString(i->configIni, SDCARD_SIZE, "")
                           : NULL;
+}
+
+// This is a one-off mitigation of users getting black screen forever on startup
+// because guest rendering does not work.
+// TODO: Fix guest rendering for the next image update.
+// Let's try not to add any more build id's to this.
+bool avdInfo_sysImgGuestRenderingBlacklisted(const AvdInfo* i) {
+    switch (i->apiLevel) {
+    case 19:
+        return i->incrementalVersion == 4087698;
+    case 21:
+        return i->incrementalVersion == 4088174;
+    case 22:
+        return i->incrementalVersion == 4088218;
+    case 23:
+        return i->incrementalVersion == 4088240;
+    case 24:
+        return i->incrementalVersion == 4088244;
+    case 25:
+        return i->incrementalVersion == 4153093;
+    case 26:
+        return i->incrementalVersion == 4074420;
+    default:
+        return false;
+    }
 }

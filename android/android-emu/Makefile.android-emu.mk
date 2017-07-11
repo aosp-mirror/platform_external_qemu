@@ -370,6 +370,7 @@ LOCAL_SRC_FILES := \
     android/opengl/GLProcessPipe.cpp \
     android/opengl/gpuinfo.cpp \
     android/opengl/logger.cpp \
+    android/opengl/NativeGpuInfo_$(BUILD_TARGET_OS).cpp \
     android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
@@ -423,7 +424,8 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
     LOCAL_SRC_FILES += \
-        android/camera/camera-capture-mac.m
+        android/camera/camera-capture-mac.m \
+        android/opengl/macTouchOpenGL.m
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
@@ -448,12 +450,17 @@ ANDROID_EMU_BASE_LDLIBS := \
 
 ifeq ($(BUILD_TARGET_OS),linux)
     ANDROID_EMU_BASE_LDLIBS += -lrt
+    ANDROID_EMU_BASE_LDLIBS += -lX11
+    ANDROID_EMU_BASE_LDLIBS += -lGL
 endif
 ifeq ($(BUILD_TARGET_OS),windows)
-    ANDROID_EMU_BASE_LDLIBS += -lpsapi
+    ANDROID_EMU_BASE_LDLIBS += -lpsapi -ld3d9
 endif
 ifeq ($(BUILD_TARGET_OS),darwin)
     ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,AppKit
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,Accelerate
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,IOKit
+    ANDROID_EMU_BASE_LDLIBS += -Wl,-framework,OpenGL
 endif
 
 ANDROID_EMU_STATIC_LIBRARIES := \

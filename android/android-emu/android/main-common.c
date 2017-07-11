@@ -81,7 +81,6 @@ int guest_data_partition_mounted = 0;
 bool emulator_has_network_option = false;
 
 #define ONE_MB (1024 * 1024)
-#define TWO_GB (uint64_t)(2LL * 1024LL * 1024LL * 1024LL)
 
 unsigned convertBytesToMB( uint64_t  size )
 {
@@ -875,14 +874,6 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             // If the -partition-size option is given that should override
             // whatever setting was in the config file.
             defaultBytes = defaultPartitionSize;
-        }
-
-        // studio avd manager does not allow user to change
-        // partition size, set a lower limit to 2GB
-        if (feature_is_enabled(kFeature_PlayStoreImage)) {
-            if (defaultBytes < TWO_GB) {
-                defaultBytes = TWO_GB;
-            }
         }
 
         uint64_t     dataBytes;
@@ -1748,6 +1739,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
 static RendererConfig lastRendererConfig;
 
+static bool isGuestRendererChoice(const char* choice) {
+    return choice && (!strcmp(choice, "off") ||
+                       !strcmp(choice, "guest"));
+}
+
 bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opts, AndroidHwConfig* hw,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
@@ -1758,12 +1754,29 @@ bool configAndStartRenderer(
     char* api_arch = avdInfo_getTargetAbi(avd);
     bool isGoogle = avdInfo_isGoogleApis(avd);
 
+    if (avdInfo_sysImgGuestRenderingBlacklisted(avd) &&
+        (isGuestRendererChoice(opts->gpu) ||
+         isGuestRendererChoice(hw->hw_gpu_mode))) {
+        dwarning("Your AVD has been configured with an in-guest renderer, "
+                 "but there are issues with the current system image build "
+                 "preventing guest rendering from working. "
+                 "We are switching to the \'swiftshader\' software renderer "
+                 "until the next system image update. "
+                 "Sorry for the inconvenience.");
+        if (opts->gpu) {
+            str_reset(&opts->gpu, "swiftshader");
+        } else {
+            str_reset(&hw->hw_gpu_mode, "swiftshader");
+        }
+    }
+
     if (!androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
                 api_level,
                 isGoogle,
                 opts->gpu,
+                &hw->hw_gpu_mode,
                 0,
                 opts->no_window,
                 uiPreferredBackend)) {
@@ -1790,6 +1803,7 @@ bool configAndStartRenderer(
     D("%s", config.status);
 
     const char* gpu_mode = opts->gpu ? opts->gpu : hw->hw_gpu_mode;
+
 #ifdef _WIN32
     // BUG: https://code.google.com/p/android/issues/detail?id=199427
     // Booting will be severely slowed down, if not disabled outright, when

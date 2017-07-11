@@ -21,6 +21,7 @@
 #include "android/boot-properties.h"
 #include "android/cmdline-option.h"
 #include "android/constants.h"
+#include "android/cpu_accelerator.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/error-messages.h"
@@ -89,6 +90,7 @@ extern bool android_op_writable_system;
 
 using namespace android::base;
 using android::base::System;
+namespace fc = android::featurecontrol;
 
 namespace {
 
@@ -281,8 +283,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             }
             break;
         case IMAGE_TYPE_ENCRYPTION_KEY:
-            if ((android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
-                avdInfo_isEncryptionEnabledInBuild(avd)) &&
+            if (fc::isEnabled(fc::EncryptUserData) &&
                 hw->disk_encryptionKeyPartition_path != NULL && strcmp(hw->disk_encryptionKeyPartition_path, "")) {
                 filePath = hw->disk_encryptionKeyPartition_path;
                 driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
@@ -540,7 +541,7 @@ extern "C" int main(int argc, char **argv) {
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
-    if (android::featurecontrol::isEnabled(android::featurecontrol::LogcatPipe) && opts->logcat) {
+    if (fc::isEnabled(fc::LogcatPipe) && opts->logcat) {
         boot_property_add_logcat_pipe(opts->logcat);
         // we have done with -logcat option.
         opts->logcat = NULL;
@@ -672,6 +673,15 @@ extern "C" int main(int argc, char **argv) {
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
 
+    // studio avd manager does not allow user to change
+    // partition size, set a lower limit to 2GB
+    constexpr auto kMinPlaystoreImageSize = 2LL * 1024 * 1024 * 1024;
+    if (fc::isEnabled(fc::PlayStoreImage)) {
+        if (android_hw->disk_dataPartition_size < kMinPlaystoreImageSize) {
+            android_hw->disk_dataPartition_size = kMinPlaystoreImageSize;
+        }
+    }
+
     // Create userdata file from init version if needed.
     if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
         std::unique_ptr<char[]> initDir(avdInfo_getDataInitDirPath(avd));
@@ -741,8 +751,7 @@ extern "C" int main(int argc, char **argv) {
     }
 
     // create encryptionkey.img file if needed
-    if (android::featurecontrol::isEnabled(android::featurecontrol::EncryptUserData) ||
-            avdInfo_isEncryptionEnabledInBuild(avd)) {
+    if (fc::isEnabled(fc::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
             if(!createInitalEncryptionKeyPartition(hw)) {
                 derror("Encryption is requested but failed to create encrypt partition.");
@@ -792,7 +801,7 @@ extern "C" int main(int argc, char **argv) {
 
     // Set env var to "on" for Intel PMU if the feature is enabled.
     // cpu.c will then read that.
-    if (android::featurecontrol::isEnabled(android::featurecontrol::IntelPerformanceMonitoringUnit)) {
+    if (fc::isEnabled(fc::IntelPerformanceMonitoringUnit)) {
         System::get()->envSet("ANDROID_EMU_FEATURE_IntelPerformanceMonitoringUnit", "on");
     }
 
@@ -831,6 +840,15 @@ extern "C" int main(int argc, char **argv) {
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     // SMP Support.
     std::string ncores;
+
+   if (hw->hw_cpu_ncore > 1 &&
+       !androidCpuAcceleration_hasModernX86VirtualizationFeatures()) {
+       dwarning("Not all modern X86 virtualization features supported, which "
+                "introduces problems with slowdown when running Android on "
+                " multicore vCPUs. Setting AVD to run with 1 vCPU core only.");
+       hw->hw_cpu_ncore = 1;
+   }
+
     if (hw->hw_cpu_ncore > 1) {
         args[n++] = "-smp";
 
@@ -992,16 +1010,18 @@ extern "C" int main(int argc, char **argv) {
         {
             // Should enable OpenGL ES 3.x?
             if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
-                android::featurecontrol::setIfNotOverridenOrGuestDisabled(
-                        android::featurecontrol::GLESDynamicVersion, true);
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
+            }
+            if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                fc::setEnabledOverride(fc::GLESDynamicVersion, false);
             }
 
-            if (android::featurecontrol::isEnabled(android::featurecontrol::ForceANGLE)) {
+            if (fc::isEnabled(fc::ForceANGLE)) {
                 uiPreferredGlesBackend =
                     skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
             }
 
-            if (android::featurecontrol::isEnabled(android::featurecontrol::ForceSwiftshader)) {
+            if (fc::isEnabled(fc::ForceSwiftshader)) {
                 uiPreferredGlesBackend =
                     skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
             }
@@ -1023,8 +1043,7 @@ extern "C" int main(int argc, char **argv) {
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
 
         if (shouldDisableAsyncSwap) {
-            android::featurecontrol::setEnabledOverride(
-                    android::featurecontrol::GLAsyncSwap, false);
+            fc::setEnabledOverride(fc::GLAsyncSwap, false);
         }
 
         char* kernel_parameters = emulator_getKernelParameters(
