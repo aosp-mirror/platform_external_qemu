@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e4cdcdd7_a1c36007",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T00:03:15Z",
+      "side": 1,
+      "message": "well, not really. It\u0027s mixing two numbers in 0-256 range to produce some kind of average for them. |other.pendingBlend| is usually 256, meaning fully opaque picture. |blend| is how much less opaque you want it to become.\ne.g. 256 * 128 -\u003e 128 (you want to make the image half as transparent as it was)\nor 128 * 128 -\u003e 64 (same, now its alpha is 64/256)\nif either of values is 256 then it keeps the other value as is.\n\nThat\u0027s the simplest formula I could come up with",
+      "parentUuid": "e8f2b9f2_362c9f7c",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 60
+      },
+      "revId": "16e98ead7ba7c25b5bfdb618b0a2c0fa011d52b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2bbe8043_62b17028",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
@@ -54,6 +78,24 @@
       "side": 1,
       "message": "Yeah from the second else if it looks like.\n\nMaybe is debug code; if it\u0027s transparent, something is wrong, there\u0027s something else running at the same time that steps on the pendingBlend value. idk\n\nCan we add more documentation on what |pendingBlend| does? I\u0027m having trouble understanding it / mapping it back to what the old skin code does. Does it just hold 256 if we\u0027re done determining color of skinsurfacebitmap\u0027s pixels? In that case maybe a enum with Start, NotReadyYet, Done or something like that is better.",
       "parentUuid": "2bbe8043_62b17028",
+      "revId": "16e98ead7ba7c25b5bfdb618b0a2c0fa011d52b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5feb0ee0_030c96ea",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T00:03:15Z",
+      "side": 1,
+      "message": "thanks, I totally missed it. I added the first two special cases later as optimizations, and now this check is obsolete",
+      "parentUuid": "46816418_3cb1aa92",
       "revId": "16e98ead7ba7c25b5bfdb618b0a2c0fa011d52b6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
