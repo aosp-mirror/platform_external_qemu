@@ -22,6 +22,30 @@
       "revId": "3052def89e53557ea252b639ee0e8411d6818ffe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b163513_42ab88a4",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1098,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T20:00:56Z",
+      "side": 1,
+      "message": "async_query_host_gpu_SyncBlacklisted() doesn\u0027t affect anything on the render side, AFAIK. Am I wrong?\nFor the rest of the changes, there\u0027s no need to call it at all if we\u0027ve already decided to disable async swap",
+      "parentUuid": "53ce66d5_ba666008",
+      "range": {
+        "startLine": 1094,
+        "startChar": 0,
+        "endLine": 1098,
+        "endChar": 72
+      },
+      "revId": "3052def89e53557ea252b639ee0e8411d6818ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
