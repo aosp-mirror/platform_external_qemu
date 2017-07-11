@@ -21,6 +21,7 @@
 #include "android/boot-properties.h"
 #include "android/cmdline-option.h"
 #include "android/constants.h"
+#include "android/cpu_accelerator.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
 #include "android/error-messages.h"
@@ -894,6 +895,15 @@ extern "C" int main(int argc, char **argv) {
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     // SMP Support.
     std::string ncores;
+
+   if (hw->hw_cpu_ncore > 1 &&
+       !androidCpuAcceleration_hasModernX86VirtualizationFeatures()) {
+       dwarning("Not all modern X86 virtualization features supported, which "
+                "introduces problems with slowdown when running Android on "
+                " multicore vCPUs. Setting AVD to run with 1 vCPU core only.");
+       hw->hw_cpu_ncore = 1;
+   }
+
     if (hw->hw_cpu_ncore > 1) {
         args[n++] = "-smp";
 
