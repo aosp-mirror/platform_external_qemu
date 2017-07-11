@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "65d2bb73_47c19879",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T19:06:53Z",
+      "side": 1,
+      "message": ":D",
+      "range": {
+        "startLine": 209,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 12
+      },
+      "revId": "3fe1ae6c15294edcb878324bf959d523899c34d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd4ac6a8_0504436c",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T19:06:53Z",
+      "side": 1,
+      "message": "what\u0027s the reason for this extra case?",
+      "range": {
+        "startLine": 318,
+        "startChar": 0,
+        "endLine": 320,
+        "endChar": 35
+      },
+      "revId": "3fe1ae6c15294edcb878324bf959d523899c34d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5af0c7f3_4b2fa98a",
+        "filename": "android/android-emu/android/snapshot/RamLoader.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T19:06:53Z",
+      "side": 1,
+      "message": "nit: remove?",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 4
+      },
+      "revId": "3fe1ae6c15294edcb878324bf959d523899c34d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
