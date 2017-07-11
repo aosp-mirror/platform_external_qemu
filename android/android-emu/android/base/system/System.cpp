@@ -46,6 +46,18 @@
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
+#include <CoreFoundation/CoreFoundation.h>
+
+// Instead of including this private header let's copy its important
+// definitions in.
+// #include <CoreFoundation/CFPriv.h>
+extern "C" {
+/* System Version file access */
+CF_EXPORT CFDictionaryRef _CFCopySystemVersionDictionary(void);
+CF_EXPORT CFDictionaryRef _CFCopyServerVersionDictionary(void);
+CF_EXPORT const CFStringRef _kCFSystemVersionProductNameKey;
+CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
+}  // extern "C"
 #endif  // __APPLE__
 
 #include <algorithm>
@@ -532,15 +544,85 @@ public:
         }
         lastSuccessfulValue = osName.toString();
         return lastSuccessfulValue;
-#elif defined(__APPLE__) || defined(__linux__)
+#elif defined(__APPLE__)
+        // Taken from https://opensource.apple.com/source/DarwinTools/DarwinTools-1/sw_vers.c
+        /*
+         * Copyright (c) 2005 Finlay Dobbie
+         * All rights reserved.
+         *
+         * Redistribution and use in source and binary forms, with or without
+         * modification, are permitted provided that the following conditions
+         * are met:
+         * 1. Redistributions of source code must retain the above copyright
+         *    notice, this list of conditions and the following disclaimer.
+         * 2. Redistributions in binary form must reproduce the above copyright
+         *    notice, this list of conditions and the following disclaimer in the
+         *    documentation and/or other materials provided with the distribution.
+         * 3. Neither the name of Finlay Dobbie nor the names of his contributors
+         *    may be used to endorse or promote products derived from this software
+         *    without specific prior written permission.
+         *
+         * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+         * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+         * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+         * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+         * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+         * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+         * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+         * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+         * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+         * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+         * POSSIBILITY OF SUCH DAMAGE.
+         */
+
+        CFDictionaryRef dict = _CFCopyServerVersionDictionary();
+        if (!dict) {
+            dict = _CFCopySystemVersionDictionary();
+        }
+        if (!dict) {
+             LOG(VERBOSE) << "Failed to get a version dictionary";
+             return "<Unknown>";
+        }
+
+        CFStringRef str =
+                CFStringCreateWithFormat(
+                    nullptr, nullptr,
+                    CFSTR("%@ %@"),
+                    CFDictionaryGetValue(dict, _kCFSystemVersionProductNameKey),
+                    CFDictionaryGetValue(dict, _kCFSystemVersionProductVersionKey));
+        if (!str) {
+            CFRelease(dict);
+            LOG(VERBOSE) << "Failed to get a version string from a dictionary";
+            return "<Unknown>";
+        }
+        int length = CFStringGetLength(str);
+        if (!length) {
+            CFRelease(str);
+            CFRelease(dict);
+            LOG(VERBOSE) << "Failed to get a version string length";
+            return "<Unknown>";
+        }
+        std::string version(length, '\0');
+        if (!CFStringGetCString(str, &version[0], version.size() + 1, CFStringGetSystemEncoding())) {
+            CFRelease(str);
+            CFRelease(dict);
+            LOG(VERBOSE) << "Failed to get a version string as C string";
+            return "<Unknown>";
+        }
+        CFRelease(str);
+        CFRelease(dict);
+        lastSuccessfulValue = std::move(version);
+        return lastSuccessfulValue;
+
+#elif defined(__linux__)
         using android::base::ScopedFd;
         using android::base::trim;
         const auto versionNumFile = android::base::makeCustomScopedPtr(
-                tempfile_create(), tempfile_close);
+              tempfile_create(), tempfile_close);
 
         if (!versionNumFile) {
           string errorStr =
-              "Error: Internal error: could not create a temporary file";
+            "Error: Internal error: could not create a temporary file";
           LOG(VERBOSE) << errorStr;
           return errorStr;
         }
@@ -548,12 +630,7 @@ public:
         string tempPath = tempfile_path(versionNumFile.get());
 
         int exitCode = -1;
-
-#if defined(__APPLE__)
-        vector<string> command{"sw_vers"};
-#else  // __linux__
         vector<string> command{"lsb_release", "-d"};
-#endif
         runCommand(command,
                    RunOptions::WaitForCompletion |
                            RunOptions::TerminateOnTimeout |
@@ -583,23 +660,8 @@ public:
           LOG(VERBOSE) << errorStr;
           return errorStr;
         }
-        string result;
-#if defined(__APPLE__)
-        char productName[256];
-        char productVersion[256];
-        memset(productName, 0, 256);
-        memset(productVersion, 0, 256);
-        android::base::SscanfWithCLocale(
-                contents.c_str(),
-                "ProductName: %[^\n]\nProductVersion:%[^\n]\n", productName,
-                productVersion);
-
-        lastSuccessfulValue = StringFormat("%s %s", trim(string(productName)),
-                                           trim(string(productVersion)));
-#else   // __linux__
         //"lsb_release -d" output is "Description:      [os-product-version]"
         lastSuccessfulValue = trim(contents.substr(12, contents.size() - 12));
-#endif  //!__APPLE__
         return lastSuccessfulValue;
 #else
 #error getOsName(): unsupported OS;
