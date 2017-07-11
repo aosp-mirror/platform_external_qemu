@@ -46,6 +46,30 @@
       "revId": "3052def89e53557ea252b639ee0e8411d6818ffe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cfd44667_e0c51f20",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1098,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-11T20:46:18Z",
+      "side": 1,
+      "message": "ah ok, I see what\u0027s going on, never mind. The feature is even set after in the first place lol. That seemed to work OK so far, I guess since the guest isn\u0027t starting and asking for GL extension strings yet that\u0027s why the code even before the CL works heh",
+      "parentUuid": "5b163513_42ab88a4",
+      "range": {
+        "startLine": 1094,
+        "startChar": 0,
+        "endLine": 1098,
+        "endChar": 72
+      },
+      "revId": "3052def89e53557ea252b639ee0e8411d6818ffe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
