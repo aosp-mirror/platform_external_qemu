@@ -26,6 +26,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "emugl/common/logging.h"
@@ -33,7 +34,10 @@
 #include <stdio.h>
 #include <string.h>
 
+using android::base::AutoLock;
+using android::base::LazyInstance;
 using android::base::Stream;
+using android::base::System;
 
 namespace {
 
@@ -142,7 +146,43 @@ static bool s_hasExtension(const char* extensionsStr, const char* wantedExtensio
     return false;
 }
 
+// A condition variable needed to wait for framebuffer initialization.
+namespace {
+struct InitializedGlobals {
+    android::base::Lock lock;
+    android::base::ConditionVariable condVar;
+};
+}  // namespace
+
+// |sInitialized| caches the initialized framebuffer state - this way
+// happy path doesn't need to lock the mutex.
+static std::atomic<bool> sInitialized{false};
+static LazyInstance<InitializedGlobals> sGlobals = {};
+
+void FrameBuffer::waitUntilInitialized() {
+    if (sInitialized.load(std::memory_order_relaxed)) {
+        return;
+    }
+
+#if SNAPSHOT_PROFILE > 1
+    const auto startTime = System::get()->getHighResTimeUs();
+#endif
+    {
+        AutoLock l(sGlobals->lock);
+        sGlobals->condVar.wait(
+                &l, [] { return sInitialized.load(std::memory_order_acquire); });
+    }
+#if SNAPSHOT_PROFILE > 1
+    printf("Waited for FrameBuffer initialization for %.03f ms\n",
+           (System::get()->getHighResTimeUs() - startTime) / 1000.0);
+#endif
+}
+
 void FrameBuffer::finalize() {
+    AutoLock lock(sGlobals->lock);
+    sInitialized.store(true, std::memory_order_relaxed);
+    sGlobals->condVar.broadcastAndUnlock(&lock);
+
     m_colorbuffers.clear();
     if (m_useSubWindow) {
         removeSubWindow_locked();
@@ -404,6 +444,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow) {
     // Keep the singleton framebuffer pointer
     //
     s_theFrameBuffer = fb.release();
+    if (!useSubWindow) {
+        // Nothing else to do - we're ready to rock!
+        AutoLock lock(sGlobals->lock);
+        sInitialized.store(true, std::memory_order_release);
+        sGlobals->condVar.broadcastAndUnlock(&lock);
+    }
+
     GL_LOG("basic EGL initialization successful");
     return true;
 }
@@ -428,7 +475,7 @@ FrameBuffer::~FrameBuffer() {
 
 void FrameBuffer::setPostCallback(emugl::Renderer::OnPostCallback onPost,
                                   void* onPostContext) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     m_onPost = onPost;
     m_onPostContext = onPostContext;
     if (m_onPost && !m_fbImage) {
@@ -456,7 +503,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int fbw,
                                  int fbh,
                                  float dpr,
-                                 float zRot) {
+                                 float zRot,
+                                 bool deleteExisting) {
     bool success = false;
 
     if (!m_useSubWindow) {
@@ -465,7 +513,12 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         return false;
     }
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
+
+    if (deleteExisting) {
+        // TODO: look into reusing the existing native window when possible.
+        removeSubWindow_locked();
+    }
 
     // If the subwindow doesn't exist, create it with the appropriate dimensions
     if (!m_subWin) {
@@ -557,6 +610,15 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
         unbind_locked();
     }
+    mutex.unlock();
+
+    // Nobody ever checks for the return code, so there will be no retries or
+    // even aborted run; if we don't mark the framebuffer as initialized here
+    // its users will hang forever; if we do mark it, they will crash - which
+    // is a better outcome (crash report == bug fixed).
+    AutoLock lock(sGlobals->lock);
+    sInitialized.store(true, std::memory_order_relaxed);
+    sGlobals->condVar.broadcastAndUnlock(&lock);
 
     return success;
 }
@@ -567,7 +629,11 @@ bool FrameBuffer::removeSubWindow() {
             __FUNCTION__);
         return false;
     }
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock lock(sGlobals->lock);
+    sInitialized.store(false, std::memory_order_relaxed);
+    sGlobals->condVar.broadcastAndUnlock(&lock);
+
+    AutoLock mutex(m_lock);
     return removeSubWindow_locked();
 }
 
@@ -590,7 +656,7 @@ bool FrameBuffer::removeSubWindow_locked() {
     return removed;
 }
 
-HandleType FrameBuffer::genHandle() {
+HandleType FrameBuffer::genHandle_locked() {
     HandleType id;
     do {
         id = ++s_nextHandle;
@@ -605,10 +671,10 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
                                           int p_height,
                                           GLenum p_internalFormat,
                                           FrameworkFormat p_frameworkFormat) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     HandleType ret = 0;
 
-    ret = genHandle();
+    ret = genHandle_locked();
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
                                           ret, m_colorBufferHelper));
@@ -630,7 +696,7 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
 HandleType FrameBuffer::createRenderContext(int p_config,
                                             HandleType p_share,
                                             GLESApi version) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     HandleType ret = 0;
 
@@ -650,7 +716,7 @@ HandleType FrameBuffer::createRenderContext(int p_config,
     EGLContext sharedContext =
             share.get() ? share->getEGLContext() : EGL_NO_CONTEXT;
 
-    ret = genHandle();
+    ret = genHandle_locked();
     RenderContextPtr rctx(RenderContext::create(
             m_eglDisplay, config->getEglConfig(), sharedContext, ret, version));
     if (rctx.get() != NULL) {
@@ -675,7 +741,7 @@ HandleType FrameBuffer::createRenderContext(int p_config,
 HandleType FrameBuffer::createWindowSurface(int p_config,
                                             int p_width,
                                             int p_height) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     HandleType ret = 0;
 
@@ -684,7 +750,7 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
         return ret;
     }
 
-    ret = genHandle();
+    ret = genHandle_locked();
     WindowSurfacePtr win(WindowSurface::create(
             getDisplay(), config->getEglConfig(), p_width, p_height, ret));
     if (win.get() != NULL) {
@@ -707,7 +773,7 @@ void FrameBuffer::drainRenderContext() {
         return;
     }
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     for (const HandleType contextHandle : tinfo->m_contextSet) {
         m_contexts.erase(contextHandle);
@@ -721,7 +787,7 @@ void FrameBuffer::drainWindowSurface() {
         return;
     }
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     ScopedBind bind(m_colorBufferHelper);
     for (const HandleType winHandle : tinfo->m_windowSet) {
         const auto winIt = m_windows.find(winHandle);
@@ -736,7 +802,7 @@ void FrameBuffer::drainWindowSurface() {
 }
 
 void FrameBuffer::DestroyRenderContext(HandleType p_context) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     m_contexts.erase(p_context);
     RenderThreadInfo* tinfo = RenderThreadInfo::get();
@@ -755,7 +821,7 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context) {
 }
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     DestroyWindowSurfaceLocked(p_surface);
 }
 
@@ -781,7 +847,7 @@ void FrameBuffer::DestroyWindowSurfaceLocked(HandleType p_surface) {
 int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -802,7 +868,7 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
 void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
 
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     closeColorBufferLocked(p_colorbuffer);
 
     uint64_t puid = tInfo->m_puid;
@@ -838,7 +904,7 @@ bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     cleanupProcGLObjects_locked(puid);
 }
 
@@ -900,7 +966,7 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
 }
 
 bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
@@ -918,7 +984,7 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
 
 bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
                                               HandleType p_colorbuffer) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     WindowSurfaceMap::iterator w(m_windows.find(p_surface));
     if (w == m_windows.end()) {
@@ -952,7 +1018,7 @@ void FrameBuffer::readColorBuffer(HandleType p_colorbuffer,
                                   GLenum format,
                                   GLenum type,
                                   void* pixels) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -971,7 +1037,7 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
                                     GLenum format,
                                     GLenum type,
                                     void* pixels) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -985,7 +1051,7 @@ bool FrameBuffer::updateColorBuffer(HandleType p_colorbuffer,
 }
 
 bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -997,7 +1063,7 @@ bool FrameBuffer::bindColorBufferToTexture(HandleType p_colorbuffer) {
 }
 
 bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
@@ -1011,7 +1077,7 @@ bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
 bool FrameBuffer::bindContext(HandleType p_context,
                               HandleType p_drawSurface,
                               HandleType p_readSurface) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
 
     WindowSurfacePtr draw, read;
     RenderContextPtr ctx;
@@ -1133,7 +1199,7 @@ HandleType FrameBuffer::createClientImage(HandleType context,
                                           GLuint buffer) {
     EGLContext eglContext = EGL_NO_CONTEXT;
     if (context) {
-        emugl::Mutex::AutoLock mutex(m_lock);
+        AutoLock mutex(m_lock);
         RenderContextMap::const_iterator rcIt = m_contexts.find(context);
         if (rcIt == m_contexts.end()) {
             // bad context handle
@@ -1151,7 +1217,7 @@ HandleType FrameBuffer::createClientImage(HandleType context,
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     uint64_t puid = tInfo->m_puid;
     if (puid) {
-        emugl::Mutex::AutoLock mutex(m_lock);
+        AutoLock mutex(m_lock);
         m_procOwnedEGLImages[puid].insert(imgHnd);
     }
     return imgHnd;
@@ -1166,7 +1232,7 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     uint64_t puid = tInfo->m_puid;
     if (puid) {
-        emugl::Mutex::AutoLock mutex(m_lock);
+        AutoLock mutex(m_lock);
         m_procOwnedEGLImages[puid].erase(image);
         // We don't explicitly call m_procOwnedEGLImages.erase(puid) when the
         // size reaches 0, since it could go between zero and one many times in
@@ -1325,8 +1391,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     // output FPS statistics
     //
     if (m_fpsStats) {
-        long long currTime =
-                android::base::System::get()->getHighResTimeUs() / 1000;
+        long long currTime = System::get()->getHighResTimeUs() / 1000;
         m_statsNumFrames++;
         if (currTime - m_statsStartTime >= 1000) {
             float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
@@ -1400,7 +1465,7 @@ void FrameBuffer::onSave(Stream* stream) {
     //     m_prevContext
     //     m_prevReadSurf
     //     m_prevDrawSurf
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     // set up a context because some snapshot commands try using GL
     ScopedBind scopedBind(m_colorBufferHelper);
     // eglPreSaveContext labels all guest context textures to be saved
@@ -1458,7 +1523,7 @@ void FrameBuffer::onSave(Stream* stream) {
 }
 
 bool FrameBuffer::onLoad(Stream* stream) {
-    emugl::Mutex::AutoLock mutex(m_lock);
+    AutoLock mutex(m_lock);
     // cleanups
     {
         ScopedBind scopedBind(m_colorBufferHelper);
@@ -1489,8 +1554,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
         assert(m_windows.empty());
         assert(m_colorbuffers.empty());
 #ifdef SNAPSHOT_PROFILE
-        android::base::System::Duration texTime =
-                android::base::System::get()->getUnixTimeUs();
+        System::Duration texTime = System::get()->getUnixTimeUs();
 #endif
         if (s_egl.eglLoadAllImages) {
             std::string snapshotPath = emugl_get_snapshot_dir(false);
@@ -1498,9 +1562,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
         }
 #ifdef SNAPSHOT_PROFILE
         printf("Texture load time: %lld ms\n",
-               (long long)(android::base::System::get()->getUnixTimeUs() -
-                           texTime) /
-                       1000);
+               (long long)(System::get()->getUnixTimeUs() - texTime) / 1000);
 #endif
     }
     // See comment about subwindow position in onSave().

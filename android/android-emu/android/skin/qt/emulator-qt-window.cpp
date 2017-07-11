@@ -1,4 +1,4 @@
-/* Copyright (C) 2015-2016 The Android Open Source Project
+/* Copyright (C) 2015-2017 The Android Open Source Project
  **
  ** This software is licensed under the terms of the GNU General Public
  ** License version 2, as published by the Free Software Foundation, and
@@ -108,6 +108,161 @@ constexpr Qt::WindowFlags EmulatorQtWindow::FRAME_WINDOW_FLAGS_MASK;
 // uncapitalized "download").
 const StringView EmulatorQtWindow::kRemoteDownloadsDirApi10 =
         "/sdcard/download/";
+
+SkinSurfaceBitmap::SkinSurfaceBitmap(int w, int h) : cachedSize(w, h) {}
+
+SkinSurfaceBitmap::SkinSurfaceBitmap(const char* path) : reader(path) {
+    cachedSize = reader.size();
+}
+
+SkinSurfaceBitmap::SkinSurfaceBitmap(const unsigned char* data, int size) {
+    auto array =
+            new QByteArray(QByteArray::fromRawData((const char*)data, size));
+    auto buffer = new QBuffer(array);
+    buffer->open(QIODevice::ReadOnly);
+    reader.setDevice(buffer);
+    cachedSize = reader.size();
+}
+
+SkinSurfaceBitmap::SkinSurfaceBitmap(const SkinSurfaceBitmap& other,
+                                     int rotation,
+                                     int blend)
+    : image(other.image), cachedSize(other.cachedSize) {
+    // Mix two alpha blend values to produce some average in the same 0..256
+    // range as the original one. Round it up to minimize chances when we end up
+    // with |pendingBlend| == 0.
+    pendingBlend = (blend * other.pendingBlend + SKIN_BLEND_FULL - 1) /
+                   SKIN_BLEND_FULL;
+    pendingRotation = (rotation + other.pendingRotation) & 3;
+
+    if (other.reader.device()) {
+        if (other.reader.fileName().isEmpty()) {
+            auto otherBuffer = qobject_cast<QBuffer*>(other.reader.device());
+            auto array = new QByteArray(otherBuffer->buffer());
+            auto buffer = new QBuffer(array);
+            buffer->open(QIODevice::ReadOnly);
+            reader.setDevice(buffer);
+        } else {
+            reader.setFileName(other.reader.fileName());
+        }
+    }
+}
+
+void SkinSurfaceBitmap::resetReader() {
+    if (reader.device()) {
+        if (auto buffer = qobject_cast<QBuffer*>(reader.device())) {
+            delete &buffer->buffer();
+            delete buffer;
+        } else {
+            reader.device()->moveToThread(QThread::currentThread());
+        }
+        reader.setDevice(nullptr);
+    }
+}
+
+SkinSurfaceBitmap::~SkinSurfaceBitmap() {
+    resetReader();
+}
+
+QSize SkinSurfaceBitmap::size() const {
+    return (pendingRotation & 1) ? cachedSize.transposed() : cachedSize;
+}
+
+void SkinSurfaceBitmap::applyPendingTransformations() {
+    if (!hasPendingTransformations()) {
+        return;
+    }
+
+    readImage();
+    if (pendingBlend == SKIN_BLEND_FULL) {
+        if (pendingRotation == SKIN_ROTATION_180) {
+            // can shortcut it with mirroring
+            image = image.mirrored(true, true);
+        } else {
+            // a simple transformation is still enough here
+            QMatrix transform;
+            transform.rotate(pendingRotation * 90);
+            image = image.transformed(transform);
+        }
+    } else {
+        QImage newImage(size(), QImage::Format_ARGB32_Premultiplied);
+        QPainter painter(&newImage);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.setOpacity(pendingBlend / double(SKIN_BLEND_FULL));
+        painter.rotate(pendingRotation * 90);
+        painter.drawImage(QPoint(), image);
+        painter.end();
+        image = newImage;
+    }
+    pendingBlend = SKIN_BLEND_FULL;
+    pendingRotation = SKIN_ROTATION_0;
+    cachedSize = image.size();
+}
+
+bool SkinSurfaceBitmap::hasPendingTransformations() const {
+    return pendingRotation != SKIN_ROTATION_0 ||
+           pendingBlend != SKIN_BLEND_FULL;
+}
+
+void SkinSurfaceBitmap::fill(const QRect& area, const QColor& color) {
+    if (area.topLeft() == QPoint() && area.size() == size()) {
+        // simple case - fill the whole image
+        if (image.isNull() || (pendingRotation & 1)) {
+            image = QImage(size(), QImage::Format_ARGB32_Premultiplied);
+        }
+        image.fill(color);
+        resetReader();
+        pendingBlend = SKIN_BLEND_FULL;
+        pendingRotation = SKIN_ROTATION_0;
+        cachedSize = image.size();
+    } else {
+        QPainter painter(&get());
+        painter.fillRect(area, color);
+    }
+}
+
+void SkinSurfaceBitmap::drawFrom(SkinSurfaceBitmap* what,
+                                 QPoint where,
+                                 const QRect& area,
+                                 QPainter::CompositionMode op) {
+    if (area.topLeft() == QPoint() && area.size() == size() &&
+        what->get().size() == area.size() &&
+        op == QPainter::CompositionMode_Source) {
+        image = what->get();
+        resetReader();
+        pendingBlend = SKIN_BLEND_FULL;
+        pendingRotation = SKIN_ROTATION_0;
+        cachedSize = image.size();
+    } else {
+        QPainter painter(&get());
+        painter.setCompositionMode(op);
+        painter.drawImage(where, what->get(), area);
+    }
+}
+
+QImage& SkinSurfaceBitmap::get() {
+    readImage();
+    applyPendingTransformations();
+    return image;
+}
+
+void SkinSurfaceBitmap::readImage() {
+    if (!image.isNull()) {
+        return;
+    }
+    if (reader.device()) {
+        reader.read(&image);
+        if (image.format() != QImage::Format_ARGB32_Premultiplied) {
+            image = image.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+        }
+        resetReader();
+    } else {
+        image = QImage(cachedSize, QImage::Format_ARGB32_Premultiplied);
+        image.fill(0);
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
 
 void EmulatorQtWindow::create() {
     sInstance.get() = Ptr(new EmulatorQtWindow());
@@ -227,12 +382,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     QObject::connect(this, &EmulatorQtWindow::blit, this,
                      &EmulatorQtWindow::slot_blit);
-    QObject::connect(this, &EmulatorQtWindow::createBitmap, this,
-                     &EmulatorQtWindow::slot_createBitmap);
     QObject::connect(this, &EmulatorQtWindow::fill, this,
                      &EmulatorQtWindow::slot_fill);
-    QObject::connect(this, &EmulatorQtWindow::getBitmapInfo, this,
-                     &EmulatorQtWindow::slot_getBitmapInfo);
     QObject::connect(this, &EmulatorQtWindow::getDevicePixelRatio, this,
                      &EmulatorQtWindow::slot_getDevicePixelRatio);
     QObject::connect(this, &EmulatorQtWindow::getScreenDimensions, this,
@@ -280,6 +431,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
+
+    // Our paintEvent() always fills the whole window.
+    setAttribute(Qt::WA_OpaquePaintEvent);
 
     bool shortcutBool =
             settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false)
@@ -739,19 +893,19 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
     QRect bg(QPoint(0, 0), this->size());
     painter.fillRect(bg, Qt::black);
 
-    if (mBackingSurface && !mBackingSurface->bitmap->isNull()) {
+    if (mBackingSurface) {
         QRect r(0, 0, mBackingSurface->w, mBackingSurface->h);
         if (mBackingBitmapChanged) {
-            const auto pixmap = QPixmap::fromImage(*mBackingSurface->bitmap);
-            mScaledBackingBitmap = pixmap.scaled(r.size() * devicePixelRatio(),
-                                                 Qt::KeepAspectRatio,
-                                                 Qt::SmoothTransformation);
+            mScaledBackingImage = QPixmap::fromImage(
+                                       mBackingSurface->bitmap->get().scaled(
+                                           r.size() * devicePixelRatio(),
+                                           Qt::KeepAspectRatio,
+                                           Qt::SmoothTransformation));
             mBackingBitmapChanged = false;
         }
-
-        if (!mScaledBackingBitmap.isNull()) {
-            mScaledBackingBitmap.setDevicePixelRatio(devicePixelRatio());
-            painter.drawPixmap(r, mScaledBackingBitmap);
+        if (!mScaledBackingImage.isNull()) {
+            mScaledBackingImage.setDevicePixelRatio(devicePixelRatio());
+            painter.drawPixmap(r, mScaledBackingImage);
         }
     }
 }
@@ -833,22 +987,6 @@ void EmulatorQtWindow::startThread(StartFunction f, int argc, char** argv) {
     }
 }
 
-void EmulatorQtWindow::slot_blit(QImage* src,
-                                 QRect srcRect,
-                                 QImage* dst,
-                                 QPoint dstPos,
-                                 QPainter::CompositionMode op,
-                                 QSemaphore* semaphore) {
-    if (mBackingSurface && dst == mBackingSurface->bitmap) {
-        mBackingBitmapChanged = true;
-    }
-    QPainter painter(dst);
-    painter.setCompositionMode(op);
-    painter.drawImage(dstPos, *src, srcRect);
-    if (semaphore != NULL)
-        semaphore->release();
-}
-
 void EmulatorQtWindow::slot_clearInstance() {
 #ifndef __APPLE__
     if (mToolWindow) {
@@ -861,40 +999,29 @@ void EmulatorQtWindow::slot_clearInstance() {
     sInstance.get().reset();
 }
 
-void EmulatorQtWindow::slot_createBitmap(SkinSurface* s,
-                                         int w,
-                                         int h,
-                                         QSemaphore* semaphore) {
-    s->bitmap = new QImage(w, h, QImage::Format_ARGB32);
-    if (s->bitmap->isNull()) {
-        // Failed to create image, warn user.
-        showErrorDialog(tr("Failed to allocate memory for the skin bitmap."
-                           "Try configuring your AVD to not have a skin."),
-                        tr("Error displaying skin"));
-    } else {
-        s->bitmap->fill(0);
+void EmulatorQtWindow::slot_blit(SkinSurfaceBitmap* src,
+                                 QRect srcRect,
+                                 SkinSurfaceBitmap* dst,
+                                 QPoint dstPos,
+                                 QPainter::CompositionMode op,
+                                 QSemaphore* semaphore) {
+    if (mBackingSurface && dst == mBackingSurface->bitmap) {
+        mBackingBitmapChanged = true;
     }
-    if (semaphore != NULL)
+    dst->drawFrom(src, dstPos, srcRect, op);
+    if (semaphore) {
         semaphore->release();
+    }
 }
 
 void EmulatorQtWindow::slot_fill(SkinSurface* s,
                                  QRect rect,
                                  QColor color,
                                  QSemaphore* semaphore) {
-    QPainter painter(s->bitmap);
-    painter.fillRect(rect, color);
-    if (semaphore != NULL)
-        semaphore->release();
-}
-
-void EmulatorQtWindow::slot_getBitmapInfo(SkinSurface* s,
-                                          SkinSurfacePixels* pix,
-                                          QSemaphore* semaphore) {
-    pix->pixels = (uint32_t*)s->bitmap->bits();
-    pix->w = s->original_w;
-    pix->h = s->original_h;
-    pix->pitch = s->bitmap->bytesPerLine();
+    if (mBackingSurface && s == mBackingSurface) {
+        mBackingBitmapChanged = true;
+    }
+    s->bitmap->fill(rect, color);
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -1073,10 +1200,10 @@ void EmulatorQtWindow::slot_requestUpdate(QRect rect,
     if (!mBackingSurface)
         return;
 
-    QRect r(rect.x() * mBackingSurface->w / mBackingSurface->original_w,
-            rect.y() * mBackingSurface->h / mBackingSurface->original_h,
-            rect.width() * mBackingSurface->w / mBackingSurface->original_w,
-            rect.height() * mBackingSurface->h / mBackingSurface->original_h);
+    QRect r(rect.x() * mBackingSurface->w / mBackingSurface->bitmap->size().width(),
+            rect.y() * mBackingSurface->h / mBackingSurface->bitmap->size().height(),
+            rect.width() * mBackingSurface->w / mBackingSurface->bitmap->size().width(),
+            rect.height() * mBackingSurface->h / mBackingSurface->bitmap->size().height());
     update(r);
     if (semaphore != NULL)
         semaphore->release();
@@ -1485,8 +1612,8 @@ void EmulatorQtWindow::doResize(const QSize& size,
     if (!mBackingSurface) {
         return;
     }
-    int originalWidth = mBackingSurface->original_w;
-    int originalHeight = mBackingSurface->original_h;
+    int originalWidth = mBackingSurface->bitmap->size().width();
+    int originalHeight = mBackingSurface->bitmap->size().height();
 
     auto newSize = QSize(originalWidth,
                          originalHeight).scaled(size, Qt::KeepAspectRatio);
@@ -1794,7 +1921,7 @@ void EmulatorQtWindow::zoomIn(const QPoint& focus,
     // should be at a 1:1 pixel mapping with the monitor. We allow going
     // to twice this size.
     double scale =
-            ((double)size().width() / (double)mBackingSurface->original_w);
+            ((double)size().width() / (double)mBackingSurface->bitmap->size().width());
     double maxZoom = mZoomFactor * 2.0 / scale;
 
     if (scale < 2) {
@@ -1831,7 +1958,7 @@ void EmulatorQtWindow::zoomTo(const QPoint& focus, const QSize& rectSize) {
     // should be at a 1:1 pixel mapping with the monitor. We allow going to
     // twice this size.
     double scale =
-            ((double)size().width() / (double)mBackingSurface->original_w);
+            ((double)size().width() / (double)mBackingSurface->bitmap->size().width());
 
     // Calculate the "ideal" zoom factor, which would perfectly frame this
     // rectangle, and the "maximum" zoom factor, which makes scale = 1, and

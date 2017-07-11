@@ -16,26 +16,46 @@
 
 #include "android/base/memory/LazyInstance.h"
 
-// Must be declared outside of LazyLoadedGLESv2Dispatch scope due to the use of
+#include "OpenGLESDispatch/DispatchTables.h"
+
+GLESv1Dispatch s_gles1;
+GLESv2Dispatch s_gles2;
+
+using android::base::LazyInstance;
+
+// Must be declared outside of LazyLoaded*Dispatch scope due to the use of
 // sizeof(T) within the template definition.
-android::base::LazyInstance<LazyLoadedGLESv2Dispatch> sGLESv2Dispatch =
-        LAZY_INSTANCE_INIT;
+LazyInstance<LazyLoadedGLESv1Dispatch> sGLESv1Dispatch = LAZY_INSTANCE_INIT;
+LazyInstance<LazyLoadedGLESv2Dispatch> sGLESv2Dispatch = LAZY_INSTANCE_INIT;
+LazyInstance<LazyLoadedEGLDispatch> sEGLDispatch = LAZY_INSTANCE_INIT;
+
+// static
+const GLESv1Dispatch* LazyLoadedGLESv1Dispatch::get() {
+    LazyLoadedGLESv1Dispatch* instance = sGLESv1Dispatch.ptr();
+    if (instance->mValid) {
+        return &s_gles1;
+    } else {
+        return nullptr;
+    }
+}
+
+LazyLoadedGLESv1Dispatch::LazyLoadedGLESv1Dispatch() {
+    mValid = gles1_dispatch_init(&s_gles1);
+}
 
 // static
 const GLESv2Dispatch* LazyLoadedGLESv2Dispatch::get() {
     LazyLoadedGLESv2Dispatch* instance = sGLESv2Dispatch.ptr();
     if (instance->mValid) {
-        return &instance->mDispatch;
+        return &s_gles2;
     } else {
         return nullptr;
     }
 }
 
 LazyLoadedGLESv2Dispatch::LazyLoadedGLESv2Dispatch() {
-    mValid = gles2_dispatch_init(&mDispatch);
+    mValid = gles2_dispatch_init(&s_gles2);
 }
-
-android::base::LazyInstance<LazyLoadedEGLDispatch> sEGLDispatch = LAZY_INSTANCE_INIT;
 
 // static
 const EGLDispatch* LazyLoadedEGLDispatch::get() {

@@ -1248,18 +1248,6 @@ skin_window_show_trackball( SkinWindow*  window, int  enable )
     }
 }
 
-// Track the state of opengles subwindow: we need to create it synchronously,
-// but the following show operations can be async.
-static bool s_opengles_window_created = false;
-
-/* Hide the OpenGL ES framebuffer */
-static void
-skin_window_hide_opengles( SkinWindow* window )
-{
-    window->win_funcs->opengles_hide();
-    s_opengles_window_created = false;
-}
-
 typedef struct {
     SkinWindow* window;
     int wx;
@@ -1268,12 +1256,19 @@ typedef struct {
     int wh;
     int fbw;
     int fbh;
-    float dpr;
     float rot;
+    bool deleteExisting;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
     gles_show_data* data = p;
+    double dpr = 1.0;
+#ifdef __APPLE__
+    // If the window is on a retina monitor, the framebuffer size needs to be
+    // adjusted to the actual number of pixels.
+    skin_winsys_get_device_pixel_ratio(&dpr);
+#endif
+
     data->window->win_funcs->opengles_show(skin_winsys_get_window_handle(),
                                            data->wx,
                                            data->wy,
@@ -1281,10 +1276,10 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->wh,
                                            data->fbw,
                                            data->fbh,
-                                           data->dpr,
-                                           data->rot);
+                                           dpr,
+                                           data->rot,
+                                           data->deleteExisting);
     AFREE(data);
-    s_opengles_window_created = true;
 }
 
 static void
@@ -1298,16 +1293,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
     data->fbw = window->framebuffer.w;
     data->fbh = window->framebuffer.h;
-    data->dpr = 1.0;
-
 #if defined(__APPLE__)
-    // If the window is on a retina monitor, the framebuffer size needs to be
-    // adjusted to the actual number of pixels.
-    double dpr;
-    if (skin_winsys_get_device_pixel_ratio(&dpr) == 0) {
-        data->dpr = dpr;
-    }
-
     // The native GL subwindow for OSX (using Cocoa) uses cartesian (y-up) coordinates. We
     // have code to transform window (y-down) coordinates into cartesian coordinates at that
     // level, but Qt seems to do this transformation on its own. This means the transformation
@@ -1323,7 +1309,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
 /* Show the OpenGL ES framebuffer window */
 static void
-skin_window_show_opengles( SkinWindow* window )
+skin_window_show_opengles(SkinWindow* window, bool deleteExisting)
 {
     ADisplay* disp = window->layout.displays;
 
@@ -1331,11 +1317,8 @@ skin_window_show_opengles( SkinWindow* window )
     ANEW0(data);
     skin_window_setup_opengles_subwindow(window, data);
     data->rot = disp->rotation * 90.;
-
-    // We need to wait for the subwindow creation if it doesn't exist; otherwise
-    // it's Ok to run just the show command asynchronously.
-    bool wait = !s_opengles_window_created;
-    skin_winsys_run_ui_update(&skin_window_run_opengles_show, data, wait);
+    data->deleteExisting = deleteExisting;
+    skin_winsys_run_ui_update(&skin_window_run_opengles_show, data, false);
 }
 
 static void skin_window_redraw_opengles(SkinWindow* window) {
@@ -1343,6 +1326,53 @@ static void skin_window_redraw_opengles(SkinWindow* window) {
 }
 
 static int  skin_window_reset_internal (SkinWindow*, SkinLayout*);
+
+typedef struct {
+    SkinWindow* window;
+    SkinRect monitor;
+    int win_w;
+    int win_h;
+} EnsureFullyVisibleData;
+
+static void skin_window_ensure_fully_visible(void* ptr) {
+    EnsureFullyVisibleData* data = ptr;
+    if (!skin_winsys_is_window_fully_visible()) {
+        int new_x, new_y;
+
+        if (VERBOSE_CHECK(init)) {
+            int win_x, win_y, win_w, win_h;
+            skin_winsys_get_window_pos(&win_x, &win_y);
+            win_w = skin_surface_width(data->window->surface);
+            win_h = skin_surface_height(data->window->surface);
+
+            dprint("Window was not fully visible: "
+                    "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
+                    data->monitor.pos.x,
+                    data->monitor.pos.y,
+                    data->monitor.size.w,
+                    data->monitor.size.h,
+                    win_x,
+                    win_y,
+                    win_w,
+                    win_h);
+        }
+
+        /* First, we recenter the window */
+        new_x = (data->monitor.size.w - data->win_w)/2;
+        new_y = (data->monitor.size.h - data->win_h)/2;
+
+        /* If it is still too large, we ensure the top-border is visible */
+        if (new_y < 0)
+            new_y = 0;
+
+        VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
+
+        /* Done */
+        skin_winsys_set_window_pos(new_x, new_y);
+        dprint( "emulator window was out of view and was recentered\n" );
+    }
+    AFREE(data);
+}
 
 SkinWindow* skin_window_create(SkinLayout* slayout,
                                int x,
@@ -1393,44 +1423,19 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     }
     skin_winsys_set_window_pos(x, y);
 
-    /* Check that the window is fully visible */
-    if (enable_scale && !skin_winsys_is_window_fully_visible()) {
-        int new_x, new_y;
-
-        if (VERBOSE_CHECK(init)) {
-            int win_x, win_y, win_w, win_h;
-            skin_winsys_get_window_pos(&win_x, &win_y);
-            win_w = skin_surface_width(window->surface);
-            win_h = skin_surface_height(window->surface);
-
-            dprint("Window was not fully visible: "
-                    "monitor=[%d,%d,%d,%d] window=[%d,%d,%d,%d]",
-                    monitor.pos.x,
-                    monitor.pos.y,
-                    monitor.size.w,
-                    monitor.size.h,
-                    win_x,
-                    win_y,
-                    win_w,
-                    win_h);
-        }
-
-        /* First, we recenter the window */
-        new_x = (monitor.size.w - win_w)/2;
-        new_y = (monitor.size.h - win_h)/2;
-
-        /* If it is still too large, we ensure the top-border is visible */
-        if (new_y < 0)
-            new_y = 0;
-
-        VERBOSE_PRINT(init, "Window repositioned to [%d,%d]", new_x, new_y);
-
-        /* Done */
-        skin_winsys_set_window_pos(new_x, new_y);
-        dprint( "emulator window was out of view and was recentered\n" );
+    /* Ensure that the window is fully visible */
+    if (enable_scale) {
+        EnsureFullyVisibleData* data;
+        ANEW0(data);
+        data->window = window;
+        data->monitor = monitor;
+        data->win_w = win_w;
+        data->win_h = win_h;
+        skin_winsys_run_ui_update(skin_window_ensure_fully_visible,
+                                  data, false);
     }
 
-    skin_window_show_opengles(window);
+    skin_window_show_opengles(window, false);
 
     return window;
 }
@@ -1519,7 +1524,7 @@ skin_window_scroll_updated( SkinWindow* window, int dx, int xmax, int dy, int ym
     subwindow.size.h = window->framebuffer.h;
 
     skin_window_recompute_subwindow_rect(window, &subwindow);
-    skin_window_show_opengles(window);
+    skin_window_show_opengles(window, false);
 
     // Compute the margins around the sub-window, then transform the current scroll values
     // to take into account these margins.
@@ -1617,7 +1622,7 @@ skin_window_resize( SkinWindow*  window, int resize_container )
     window->framebuffer.h = drect.size.h;
 
     if (skin_window_recompute_subwindow_rect(window, &drect)) {
-        skin_window_show_opengles(window);
+        skin_window_show_opengles(window, false);
     }
 }
 
@@ -1711,7 +1716,7 @@ skin_window_zoomed_window_resized( SkinWindow* window, int dx, int dy, int w, in
     window->scroll_h = scroll_h;
 
     if (skin_window_recompute_subwindow_rect(window, &subwindow)) {
-        skin_window_show_opengles(window);
+        skin_window_show_opengles(window, false);
     }
 }
 
@@ -1988,8 +1993,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     case kEventScreenChanged:
         // Re-setup the OpenGL ES subwindow with a potentially different
         // framebuffer size (e.g., 2x for retina screens).
-        skin_window_hide_opengles(window);
-        skin_window_show_opengles(window);
+        skin_window_show_opengles(window, true);
         break;
 
     default:
