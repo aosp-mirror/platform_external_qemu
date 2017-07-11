@@ -21,19 +21,18 @@ namespace android {
 class HostHwInfo {
 public:
     HostHwInfo();
-    static HostHwInfo* get();
 
     struct Info {
         std::string cpu_manufacturer;
         bool virt_support;
         bool running_in_vm;
-        int os_bit_count;
+        int16_t os_bit_count;
         uint32_t cpu_model_name;
         std::string os_platform;
         const GpuInfoList* gpuinfolist;
     };
 
-    static Info query();
+    static const Info& query();
 
 private:
     Info info;
