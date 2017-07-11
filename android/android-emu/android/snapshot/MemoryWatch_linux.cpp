@@ -194,11 +194,20 @@ void MemoryAccessWatch::doneRegistering() {
 }
 
 bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
-    uffdio_copy copyStruct = {(uintptr_t)ptr, (uintptr_t)data, length};
-    if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_COPY, &copyStruct)) {
-        derror("%s: %s copy host: %p from: %p\n", __func__, strerror(errno),
-               (void*)copyStruct.dst, (void*)copyStruct.src);
-        return false;
+    if (data) {
+        uffdio_copy copyStruct = {(uintptr_t)ptr, (uintptr_t)data, length};
+        if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_COPY, &copyStruct)) {
+            derror("%s: %s copy host: %p from: %p\n", __func__, strerror(errno),
+                   (void*)copyStruct.dst, (void*)copyStruct.src);
+            return false;
+        }
+    } else {
+        uffdio_zeropage zeroStruct = {(uintptr_t)ptr, length};
+        if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_ZEROPAGE, &zeroStruct)) {
+            derror("%s: %s zero host: %p\n", __func__, strerror(errno),
+                   (void*)zeroStruct.range.start);
+            return false;
+        }
     }
     uffdio_range rangeStruct{(uintptr_t)ptr, length};
     if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_UNREGISTER, &rangeStruct)) {

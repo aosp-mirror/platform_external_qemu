@@ -38,6 +38,7 @@ public:
     bool startLoading();
     bool wasStarted() const { return mWasStarted; }
 
+    
 private:
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
 
@@ -59,7 +60,7 @@ private:
     bool readIndex();
     bool registerPageWatches();
 
-    void zeroOutPage(const RamBlock& block, uint32_t offset);
+    void zeroOutPage(const Page& page);
     uint8_t* pagePtr(const Page& page) const;
     uint32_t pageSize(const Page& page) const;
     Page& page(void* ptr);
@@ -69,9 +70,11 @@ private:
 
     void readerWorker();
     MemoryAccessWatch::IdleCallbackResult backgroundPageLoad();
+    MemoryAccessWatch::IdleCallbackResult fillPageInBackground(Page* page);
     void interruptReading();
 
     bool readAllPages();
+    void startDecompressor();
 
     base::StdioStream mStream;
     int mStreamFd;  // An FD for the |mStream|'s underlying open file.
