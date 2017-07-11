@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cb1e3892_8bd624bd",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-11T00:29:07Z",
+      "side": 1,
+      "message": "I am confused by those memory order flags. What does it mean to be \"relaxed\" or \"acquire\"?",
+      "range": {
+        "startLine": 173,
+        "startChar": 55,
+        "endLine": 173,
+        "endChar": 75
+      },
+      "revId": "8d57b4a3deef9cb24081d4ced925fe25b0e3feff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
