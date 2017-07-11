@@ -22,6 +22,10 @@
 
 extern "C" {
 
+bool androidCpuAcceleration_hasModernX86VirtualizationFeatures() {
+    return android::hasModernX86VirtualizationFeatures();
+}
+
 AndroidCpuAcceleration androidCpuAcceleration_getStatus(
         char** status_p) {
     AndroidCpuAcceleration result = android::GetCurrentCpuAcceleratorStatusCode();
