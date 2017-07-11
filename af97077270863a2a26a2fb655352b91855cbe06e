@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "a29d789f_0c1856d8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 423,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-11T18:38:47Z",
+      "side": 1,
+      "message": "This is because this code block refreshes the element array buffer data whenever a new draw is issued with client element array, even if they are passing the same data (I doubt if the driver would figure out the data changes).\n\nAnd in the case this code block is not triggered, the IBO is not used by GL at all.",
+      "parentUuid": "26bb6dd8_2b6d9444",
+      "range": {
+        "startLine": 423,
+        "startChar": 78,
+        "endLine": 423,
+        "endChar": 92
+      },
+      "revId": "af97077270863a2a26a2fb655352b91855cbe06e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ea01a281_525489cd",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
         "patchSetId": 9
