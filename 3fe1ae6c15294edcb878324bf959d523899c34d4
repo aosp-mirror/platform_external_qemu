@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7e24b9da_454b6d04",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T20:04:25Z",
+      "side": 1,
+      "message": "it used contain small chunks of pages. Now it usually holds all pages at once in a single big range, so could be \u003e4G",
+      "parentUuid": "65d2bb73_47c19879",
+      "range": {
+        "startLine": 209,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 12
+      },
+      "revId": "3fe1ae6c15294edcb878324bf959d523899c34d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fd4ac6a8_0504436c",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-07-11T19:06:53Z",
       "side": 1,
       "message": "what\u0027s the reason for this extra case?",
+      "range": {
+        "startLine": 318,
+        "startChar": 0,
+        "endLine": 320,
+        "endChar": 35
+      },
+      "revId": "3fe1ae6c15294edcb878324bf959d523899c34d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "66b59267_a6e1003a",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T20:04:25Z",
+      "side": 1,
+      "message": "previously this piece of code only handled empty pages - it needed to find the next empty page and send it into a message channel into a reader thread\nNow it also needs to handle zeroed-out pages. These pages don\u0027t need to go into a reader thread as there\u0027s nothing to read - so we check if it\u0027s a page that\u0027s already read but has |data| \u003d\u003d nullptr - in that case we just fill it immediately",
+      "parentUuid": "fd4ac6a8_0504436c",
       "range": {
         "startLine": 318,
         "startChar": 0,
