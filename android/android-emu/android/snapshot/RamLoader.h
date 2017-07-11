@@ -59,7 +59,7 @@ private:
     bool readIndex();
     bool registerPageWatches();
 
-    void zeroOutPage(const RamBlock& block, uint32_t offset);
+    void zeroOutPage(const Page& page);
     uint8_t* pagePtr(const Page& page) const;
     uint32_t pageSize(const Page& page) const;
     Page& page(void* ptr);
@@ -69,6 +69,7 @@ private:
 
     void readerWorker();
     MemoryAccessWatch::IdleCallbackResult backgroundPageLoad();
+    MemoryAccessWatch::IdleCallbackResult fillPageInBackground(Page* page);
     void interruptReading();
 
     bool readAllPages();
