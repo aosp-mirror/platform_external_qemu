@@ -932,8 +932,10 @@ extern "C" int main(int argc, char **argv) {
     args[n++] = hw->disk_ramdisk_path;
 
     // Dedicated IOThread for all disk IO
+#if defined(CONFIG_LINUX) && (defined(TARGET_X86_64) || defined(TARGET_I386))
     args[n++] = "-object";
     args[n++] = "iothread,id=disk-iothread";
+#endif
 
     // Don't create the default CD drive and floppy disk devices - Android
     // won't appreciate it.
@@ -1060,7 +1062,6 @@ extern "C" int main(int argc, char **argv) {
 #endif
 
         // Feature flags-related last-microsecond renderer changes
-        bool shouldDisableAsyncSwap = false;
         {
             // Should enable OpenGL ES 3.x?
             if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
@@ -1079,13 +1080,6 @@ extern "C" int main(int argc, char **argv) {
                 uiPreferredGlesBackend =
                     skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
             }
-
-            // Features to disable or enable depending on rendering backend
-            // and gpu make/model/version
-            /* Disable the GLAsyncSwap for ANGLE so far */
-            shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
-            shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
-
         }
 
         RendererConfig rendererConfig;
@@ -1093,9 +1087,15 @@ extern "C" int main(int argc, char **argv) {
             avd, opts, hw, uiPreferredGlesBackend,
             &rendererConfig);
 
-        shouldDisableAsyncSwap |=
+        /* Disable the GLAsyncSwap for ANGLE so far */
+        bool shouldDisableAsyncSwap =
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+        // Features to disable or enable depending on rendering backend
+        // and gpu make/model/version
+        shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
+        shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
+                                 async_query_host_gpu_SyncBlacklisted();
 
         if (shouldDisableAsyncSwap) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
