@@ -22,6 +22,30 @@
       "revId": "8d57b4a3deef9cb24081d4ced925fe25b0e3feff",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b62193e4_7ff71b44",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-11T00:36:24Z",
+      "side": 1,
+      "message": "Not just you, everyone gets confused with these all the time.\nThere\u0027s no simple explanation because it\u0027s too complicated for anyone to understand, but in two words - \"relaxed\" means \"don\u0027t synchronize any other variables with other threads\", \"acquire\" - get values for all variables written in other threads so after this line this thread has all latest values, \"release\" - send all writes to other threads.\n\nThe point here is that this order only applies to _other_ variables. The atomic variable itself is always synchronized with all threads, that\u0027s why it is atomic. So we only set memory order to anything other than relaxed if we care about something going on the other thread.\n\nMore advanced explanation is here: https://bartoszmilewski.com/2008/12/01/c-atomics-and-memory-ordering/\nand in many other places. But it takes lots of time to start getting it. And don\u0027t worry, I believe that there\u0027s no single person on Earth that actually understands it correctly :)",
+      "parentUuid": "cb1e3892_8bd624bd",
+      "range": {
+        "startLine": 173,
+        "startChar": 55,
+        "endLine": 173,
+        "endChar": 75
+      },
+      "revId": "8d57b4a3deef9cb24081d4ced925fe25b0e3feff",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
