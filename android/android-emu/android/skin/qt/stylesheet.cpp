@@ -257,7 +257,7 @@ struct StylesheetValues {
         {"TEXT_COLOR",                      "#212121"},  // Main page text
         {"TITLE_COLOR",                     "#757575"},  // Main page titles
         {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
-        {"LINK_COLOR",                      "#1A0DAB"},  // Highlighted link
+        {"LINK_COLOR",                      "#0288D1"},  // Highlighted link
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
     };
 
@@ -285,7 +285,7 @@ struct StylesheetValues {
         {"TEXT_COLOR",                   "#eeeeee"},
         {"TITLE_COLOR",                  "#bec1c3"},
         {"TOOL_COLOR",                   "#00bea4"},
-        {"LINK_COLOR",                   "#42A5F5"},
+        {"LINK_COLOR",                   "#29B6F6"},
         {THEME_PATH_VAR,                    "dark"},
     };
 
