@@ -64,13 +64,6 @@ static bool isPageZeroed(const uint8_t* ptr, int size) {
     return buffer_is_zero(ptr, size);
 }
 
-static std::string readRamFileUuid(QEMUFile* f) {
-    int uuidSize = qemu_get_byte(f);
-    std::string uuid(uuidSize, '\0');
-    qemu_get_buffer(f, (uint8_t*)&uuid[0], uuidSize);
-    return uuid;
-}
-
 static int onSaveVmStart(const char* name) {
     android::snapshot::setSnapshotName(name);
     auto dir = getSnapshotDir(name, true);
