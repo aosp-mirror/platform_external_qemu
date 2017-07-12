@@ -17,6 +17,7 @@
 
 #include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
+#include "GLcommon/GLutils.h"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -290,6 +291,8 @@ void FramebufferData::detachObject(int idx) {
 
 void FramebufferData::validate(GLEScontext* ctx)
 {
+    // Do not validate if on another GLES2 backend
+    if (isGles2Gles()) return;
     if(!getAttachment(GL_COLOR_ATTACHMENT0_OES, NULL, NULL))
     {
         // GLES does not require the framebuffer to have a color attachment.
