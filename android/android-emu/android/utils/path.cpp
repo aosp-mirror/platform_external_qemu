@@ -20,6 +20,7 @@
 #include "android/utils/path.h"
 
 #include "android/base/system/Win32UnicodeString.h"
+#include "android/base/files/ScopedFileHandle.h"
 
 #include <memory>
 #include <stdio.h>
@@ -53,6 +54,7 @@
 
 #ifdef _WIN32
 using android::base::arraySize;
+using android::base::ScopedFileHandle;
 using android::base::Win32UnicodeString;
 #endif  // _WIN32
 
@@ -255,6 +257,69 @@ path_get_size( const char*  path, uint64_t  *psize )
  **/
 
 APosixStatus
+path_is_same_file(const char* left, const char* right, bool* isSame) {
+#ifdef _WIN32
+    wchar_t wideLeft[PATH_MAX + 1], wideRight[PATH_MAX + 1];
+    if (Win32UnicodeString::convertFromUtf8(wideLeft, arraySize(wideLeft),
+                                            left) < 0) {
+        return -1;
+    }
+    if (Win32UnicodeString::convertFromUtf8(wideRight, arraySize(wideRight),
+                                            right) < 0) {
+        return -1;
+    }
+    // FILE_FLAG_BACKUP_SEMANTICS is used so that we can get handles to
+    // directories. That way the same code can be used for both files and
+    // directories.
+    ScopedFileHandle leftHandle(CreateFileW(wideLeft, 0,
+            FILE_SHARE_DELETE | FILE_SHARE_WRITE | FILE_SHARE_READ,
+            nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr));
+    if (!leftHandle.valid()) {
+        return -1;
+    }
+    ScopedFileHandle rightHandle(CreateFileW(wideRight, 0,
+            FILE_SHARE_DELETE | FILE_SHARE_WRITE | FILE_SHARE_READ,
+            nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr));
+    if (!rightHandle.valid()) {
+        return -1;
+    }
+
+    BY_HANDLE_FILE_INFORMATION leftInfo;
+    if (!GetFileInformationByHandle(leftHandle.get(), &leftInfo)) {
+        return -1;
+    }
+
+    BY_HANDLE_FILE_INFORMATION rightInfo;
+    if (!GetFileInformationByHandle(rightHandle.get(), &rightInfo)) {
+        return -1;
+    }
+
+    // According to the MSDN documentation for GetFileInformationByHandle this
+    // is how to determine if two paths point to the same file.
+    *isSame =
+        leftInfo.dwVolumeSerialNumber == rightInfo.dwVolumeSerialNumber &&
+        leftInfo.nFileIndexHigh == rightInfo.nFileIndexHigh &&
+        leftInfo.nFileIndexLow == rightInfo.nFileIndexLow;
+    return 0;
+#else
+    struct stat leftStat;
+    int status = stat(left, &leftStat);
+    if (status != 0) {
+        return status;
+    }
+    struct stat rightStat;
+    status = stat(right, &rightStat);
+    if (status != 0) {
+        return status;
+    }
+    *isSame =
+        leftStat.st_dev == rightStat.st_dev &&
+        leftStat.st_ino == rightStat.st_ino;
+    return 0;
+#endif
+}
+
+APosixStatus
 path_empty_file( const char*  path )
 {
 #ifdef _WIN32
@@ -328,6 +393,15 @@ APosixStatus path_copy_file_impl(const char*  dest, const char*  source) {
 APosixStatus
 path_copy_file( const char*  dest, const char*  source )
 {
+    bool isSameFile = false;
+    int status = path_is_same_file(source, dest, &isSameFile);
+    if (status != 0) {
+        return status;
+    }
+    if (isSameFile) {
+        // It's the same file, nothing to do.
+        return 0;
+    }
     if (android_access(source, R_OK) < 0) {
         D("%s: source file is un-readable: %s\n",
           __FUNCTION__, source);
@@ -362,6 +436,15 @@ path_copy_file( const char*  dest, const char*  source )
 
 APosixStatus path_copy_file_safe(const char* dest, const char* source)
 {
+    bool isSameFile = false;
+    int status = path_is_same_file(source, dest, &isSameFile);
+    if (status != 0) {
+        return status;
+    }
+    if (isSameFile) {
+        // It's the same file, nothing to do.
+        return 0;
+    }
     return path_copy_file_impl<1024>(dest, source);
 }
 
@@ -549,6 +632,15 @@ char* path_join(const char* part1, const char* part2) {
 }
 
 APosixStatus path_copy_dir(const char* dst, const char* src) {
+    bool isSameFile = false;
+    int status = path_is_same_file(src, dst, &isSameFile);
+    if (status != 0) {
+        return status;
+    }
+    if (isSameFile) {
+        // It's the same file, nothing to do.
+        return 0;
+    }
     auto dirScanner = android::base::makeCustomScopedPtr(
                             dirScanner_new(src), dirScanner_free);
     if (!dirScanner) return false;
