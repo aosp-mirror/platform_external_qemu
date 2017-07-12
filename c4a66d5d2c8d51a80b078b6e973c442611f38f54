@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e470304_e7a79627",
+        "filename": "android/android-emu/android/opengl/EmuglBackendList.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T18:12:38Z",
+      "side": 1,
+      "message": "static constexpr StringView",
+      "range": {
+        "startLine": 56,
+        "startChar": 3,
+        "endLine": 56,
+        "endChar": 21
+      },
+      "revId": "c4a66d5d2c8d51a80b078b6e973c442611f38f54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
