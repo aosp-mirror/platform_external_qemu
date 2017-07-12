@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ebfb792_9e42e6df",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T18:13:41Z",
+      "side": 1,
+      "message": "2017 :)",
+      "range": {
+        "startLine": 2,
+        "startChar": 19,
+        "endLine": 2,
+        "endChar": 20
+      },
+      "revId": "4fba36b8a996aefed7688072583354d65a5e0af9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
