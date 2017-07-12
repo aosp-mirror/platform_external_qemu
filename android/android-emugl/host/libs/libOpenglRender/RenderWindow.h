@@ -59,7 +59,8 @@ public:
     //
     // Note that this call doesn't display anything, it just initializes
     // the library, use setupSubWindow() to display something.
-    RenderWindow(int width, int height, bool use_thread, bool use_sub_window);
+    RenderWindow(int width, int height, bool use_thread, bool use_sub_window,
+            bool egl2egl);
 
     // Destructor. This will automatically call removeSubWindow() is needed.
     ~RenderWindow();

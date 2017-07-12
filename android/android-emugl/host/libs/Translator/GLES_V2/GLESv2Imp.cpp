@@ -36,6 +36,7 @@
 #include "ShaderParser.h"
 #include "ProgramData.h"
 #include "GLcommon/TextureUtils.h"
+#include "GLcommon/GLutils.h"
 #include "GLcommon/FramebufferData.h"
 
 #include "ANGLEShaderParser.h"
@@ -48,7 +49,7 @@
 extern "C" {
 
 //decleration
-static void initGLESx();
+static void initGLESx(bool isGles2Gles);
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
@@ -117,7 +118,9 @@ static GLEScontext* createGLESxContext(int maj, int min,
 
 static bool shaderParserInitialized = false;
 
-static void initGLESx() { }
+static void initGLESx(bool isGles2Gles) {
+    setGles2Gles(isGles2Gles);
+}
 
 static void deleteGLESContext(GLEScontext* ctx) {
     delete ctx;
@@ -407,7 +410,7 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
     bool isDefaultFBO = !framebuffer;
     if (isDefaultFBO) {
        globalFrameBufferName = ctx->getDefaultFBOGlobalName();
-       ctx->dispatcher().glBindFramebufferEXT(target, globalFrameBufferName);
+       ctx->dispatcher().glBindFramebuffer(target, globalFrameBufferName);
        ctx->setFramebufferBinding(target, 0);
     } else {
         globalFrameBufferName = framebuffer;
@@ -424,7 +427,7 @@ GL_APICALL void  GL_APIENTRY glBindFramebuffer(GLenum target, GLuint framebuffer
             auto fbObj = ctx->getFBOData(framebuffer);
             fbObj->setBoundAtLeastOnce();
         }
-        ctx->dispatcher().glBindFramebufferEXT(target,globalFrameBufferName);
+        ctx->dispatcher().glBindFramebuffer(target,globalFrameBufferName);
         ctx->setFramebufferBinding(target, framebuffer);
     }
 
@@ -450,7 +453,7 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
                     NamedObjectType::RENDERBUFFER, renderbuffer);
         }
     }
-    ctx->dispatcher().glBindRenderbufferEXT(target,globalRenderBufferName);
+    ctx->dispatcher().glBindRenderbuffer(target,globalRenderBufferName);
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
@@ -555,7 +558,7 @@ GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
     RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target), GL_INVALID_ENUM, GL_FRAMEBUFFER_COMPLETE);
     // We used to issue ctx->drawValidate() here, but it can corrupt the status of
     // separately bound draw/read framebuffer objects. So we just don't call it now.
-    return ctx->dispatcher().glCheckFramebufferStatusEXT(target);
+    return ctx->dispatcher().glCheckFramebufferStatus(target);
 }
 
 GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
@@ -1254,7 +1257,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
             // This renderbuffer object is an eglImage target
             // attach the eglimage's texture instead the renderbuffer.
             //
-            ctx->dispatcher().glFramebufferTexture2DEXT(target,
+            ctx->dispatcher().glFramebufferTexture2D(target,
                                     attachment,
                                     GL_TEXTURE_2D,
                                     rbData->eglImageGlobalTexObject->getGlobalName(),
@@ -1263,7 +1266,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferRenderbuffer(GLenum target, GLenum att
         }
     }
 
-    ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalRenderbufferName);
+    ctx->dispatcher().glFramebufferRenderbuffer(target,attachment,renderbuffertarget,globalRenderbufferName);
 
     sUpdateFboEmulation(ctx);
 }
@@ -1288,7 +1291,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
                 NamedObjectType::TEXTURE, texname);
     }
 
-    ctx->dispatcher().glFramebufferTexture2DEXT(target,attachment,textarget,globalTextureName,level);
+    ctx->dispatcher().glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
 
     // Update the the current framebuffer object attachment state
     GLuint fbName = ctx->getFramebufferBinding(target);
@@ -1327,7 +1330,7 @@ GL_APICALL void  GL_APIENTRY glGenerateMipmap(GLenum target){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
     // Assuming we advertised GL_OES_texture_npot
-    ctx->dispatcher().glGenerateMipmapEXT(target);
+    ctx->dispatcher().glGenerateMipmap(target);
 }
 
 GL_APICALL void  GL_APIENTRY glGenFramebuffers(GLsizei n, GLuint* framebuffers){
@@ -1900,7 +1903,7 @@ GL_APICALL void  GL_APIENTRY glGetFramebufferAttachmentParameteriv(GLenum target
             attachment = GL_STENCIL_ATTACHMENT;
     }
 
-    ctx->dispatcher().glGetFramebufferAttachmentParameterivEXT(target,attachment,pname,params);
+    ctx->dispatcher().glGetFramebufferAttachmentParameteriv(target,attachment,pname,params);
 
     if (ctx->isDefaultFBOBound(target) && *params == GL_RENDERBUFFER) {
         *params = GL_FRAMEBUFFER_DEFAULT;
@@ -1967,7 +1970,7 @@ GL_APICALL void  GL_APIENTRY glGetRenderbufferParameteriv(GLenum target, GLenum 
         }
     }
 
-    ctx->dispatcher().glGetRenderbufferParameterivEXT(target,pname,params);
+    ctx->dispatcher().glGetRenderbufferParameteriv(target,pname,params);
     if (pname == GL_RENDERBUFFER_INTERNAL_FORMAT && *params == GL_RGBA) {
         *params = GL_RGBA4;
     }
@@ -2642,7 +2645,11 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
         GLsizei height, GLint* err) {
     GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
-    if (ctx->getMajorVersion() < 3) {
+    // HACK: angle does not like GL_DEPTH_COMPONENT24_OES
+    if (isGles2Gles() && internalformat == GL_DEPTH_COMPONENT24_OES) {
+        internal = GL_DEPTH_COMPONENT16;
+    }
+    if (!isGles2Gles() && ctx->getMajorVersion() < 3) {
         switch (internalformat) {
             case GL_RGB565:
                 internal = GL_RGB;
@@ -2686,7 +2693,7 @@ GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum interna
     internalformat = sPrepareRenderbufferStorage(internalformat, width, height,
             &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
-    ctx->dispatcher().glRenderbufferStorageEXT(target,internalformat,width,height);
+    ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
 }
 
 GL_APICALL void  GL_APIENTRY glSampleCoverage(GLclampf value, GLboolean invert){
@@ -2747,8 +2754,13 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         ShaderParser* sp = (ShaderParser*)objData;
         int esslVersion = sDetectShaderESSLVersion(ctx, string);
         sp->setSrc(esslVersion, count, string, length);
-        ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
+        if (isGles2Gles()) {
+            ctx->dispatcher().glShaderSource(globalShaderName, count, string,
+                                         length);
+        } else {
+            ctx->dispatcher().glShaderSource(globalShaderName, 1, sp->parsedLines(),
                                          NULL);
+        }
     }
 }
 
@@ -2810,7 +2822,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     bool isCompressedFormat =
         GLESv2Validate::isCompressedFormat(internalformat);
 
-    if (!isCompressedFormat) {
+    if (!isCompressedFormat && !isGles2Gles()) {
         VALIDATE(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
         VALIDATE(!GLESv2Validate::pixelFrmt(ctx, format), GL_INVALID_ENUM);
@@ -2836,11 +2848,11 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
             &format, &type, &internalformat);
 
-    if (!isCompressedFormat && ctx->getMajorVersion() < 3) {
+    if (!isCompressedFormat && ctx->getMajorVersion() < 3 && !isGles2Gles()) {
         if (type==GL_HALF_FLOAT_OES)
             type = GL_HALF_FLOAT_NV;
         if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
-            type = GL_UNSIGNED_SHORT;
+            type = GL_UNSIGNED_BYTE;
         if (type == GL_FLOAT)
             internalformat = (format == GL_RGBA) ? GL_RGBA32F : GL_RGB32F;
     }
@@ -3286,16 +3298,16 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
         // underlying texture of the img
         GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
+            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
                                                    rbData->attachedFB);
         }
-        ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+        ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER_EXT,
                                                     rbData->attachedPoint,
                                                     GL_TEXTURE_2D,
                                                     img->globalTexObj->getGlobalName(),
                                                     0);
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
+            ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER_EXT,
                                                    prevFB);
         }
     }

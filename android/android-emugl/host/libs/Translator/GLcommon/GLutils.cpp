@@ -18,3 +18,13 @@
 bool isPowerOf2(int num) {
     return (num & (num -1)) == 0;
 }
+
+static bool s_gles2Gles = false;
+
+void setGles2Gles(bool isGles2Gles) {
+    s_gles2Gles = isGles2Gles;
+}
+
+bool isGles2Gles() {
+    return s_gles2Gles;
+}

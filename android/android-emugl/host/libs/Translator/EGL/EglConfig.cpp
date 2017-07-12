@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include "EglConfig.h"
+#include "EglGlobalInfo.h"
 
 #include <functional>
 
@@ -626,8 +627,13 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
        return false;
    }
 
-   if(dummy.m_renderable_type != EGL_DONT_CARE &&
-      ((dummy.m_renderable_type & m_renderable_type) != dummy.m_renderable_type)) {
+   EGLint renderableType = dummy.m_renderable_type;
+   // HACK: ANGLE does not support gles1
+   if (EglGlobalInfo::isEgl2Egl()) {
+       renderableType &= ~(EGLint)EGL_OPENGL_ES_BIT;
+   }
+   if (renderableType != EGL_DONT_CARE &&
+       ((renderableType & m_renderable_type) != renderableType)) {
        CHOOSE_CONFIG_DLOG("m_renderable_type does not match.");
        return false;
    }

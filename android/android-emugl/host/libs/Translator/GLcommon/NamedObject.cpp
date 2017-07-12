@@ -40,10 +40,10 @@ NamedObject::NamedObject(GenNameInfo genNameInfo,
                 GLEScontext::dispatcher().glGenTextures(1,&m_globalName);
                 break;
             case NamedObjectType::RENDERBUFFER:
-                GLEScontext::dispatcher().glGenRenderbuffersEXT(1, &m_globalName);
+                GLEScontext::dispatcher().glGenRenderbuffers(1, &m_globalName);
                 break;
             case NamedObjectType::FRAMEBUFFER:
-                GLEScontext::dispatcher().glGenFramebuffersEXT(1,&m_globalName);
+                GLEScontext::dispatcher().glGenFramebuffers(1,&m_globalName);
                 break;
             case NamedObjectType::SHADER_OR_PROGRAM:
                 switch (genNameInfo.m_shaderProgramType) {
@@ -90,10 +90,10 @@ NamedObject::~NamedObject() {
         GLEScontext::dispatcher().glDeleteTextures(1, &m_globalName);
         break;
     case NamedObjectType::RENDERBUFFER:
-        GLEScontext::dispatcher().glDeleteRenderbuffersEXT(1, &m_globalName);
+        GLEScontext::dispatcher().glDeleteRenderbuffers(1, &m_globalName);
         break;
     case NamedObjectType::FRAMEBUFFER:
-        GLEScontext::dispatcher().glDeleteFramebuffersEXT(1, &m_globalName);
+        GLEScontext::dispatcher().glDeleteFramebuffers(1, &m_globalName);
         break;
     case NamedObjectType::SHADER_OR_PROGRAM:
         if (GLEScontext::dispatcher().glIsProgram(m_globalName)) {

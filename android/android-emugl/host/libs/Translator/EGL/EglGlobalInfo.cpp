@@ -19,6 +19,7 @@
 #include "EglDisplay.h"
 #include "EglOsApi.h"
 
+#include "GLcommon/GLutils.h"
 #include "emugl/common/lazy_instance.h"
 
 #include <string.h>
@@ -30,14 +31,31 @@ emugl::LazyInstance<EglGlobalInfo> sSingleton = LAZY_INSTANCE_INIT;
 
 }  // namespace
 
+void EglGlobalInfo::setEgl2Egl(EGLBoolean enable) {
+    if (sSingleton.hasInstance()) {
+        fprintf(stderr,
+                "WARNING: setting EGL engine type"
+                " after it is created, takes no effect.\n");
+        return;
+    }
+    setGles2Gles(enable);
+}
+
+bool EglGlobalInfo::isEgl2Egl() {
+    return isGles2Gles();
+}
+
 // static
 EglGlobalInfo* EglGlobalInfo::getInstance() {
     return sSingleton.ptr();
 }
 
 EglGlobalInfo::EglGlobalInfo() {
-    // TODO(digit): Choose alternate engine based on env. variable?
-    m_engine = EglOS::Engine::getHostInstance();
+    if (isEgl2Egl()) {
+        m_engine = EglOS::getEgl2EglHostInstance();
+    } else {
+        m_engine = EglOS::Engine::getHostInstance();
+    }
     m_display = m_engine->getDefaultDisplay();
 }
 

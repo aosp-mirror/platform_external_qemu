@@ -40,6 +40,9 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
 #define LOAD_GL_FUNC(return_type, func_name, signature, args)  do { \
         if (!func_name) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
+            /*Check alias*/ \
+            if (!address) address = (void *)getGLFuncAddress(#func_name "OES", glLib); \
+            if (!address) address = (void *)getGLFuncAddress(#func_name "EXT", glLib); \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
             } else { \

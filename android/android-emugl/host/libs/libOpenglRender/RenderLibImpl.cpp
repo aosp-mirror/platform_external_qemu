@@ -80,13 +80,13 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
 }
 
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
-                                        bool useSubWindow) {
+                                        bool useSubWindow, bool egl2egl) {
     if (!mRenderer.expired()) {
         return nullptr;
     }
 
     const auto res = std::make_shared<RendererImpl>();
-    if (!res->initialize(width, height, useSubWindow)) {
+    if (!res->initialize(width, height, useSubWindow, egl2egl)) {
         return nullptr;
     }
     mRenderer = res;
