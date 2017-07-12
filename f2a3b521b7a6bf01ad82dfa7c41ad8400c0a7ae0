@@ -70,6 +70,30 @@
       "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd2ed54e_41ffb5a4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-12T18:20:58Z",
+      "side": 1,
+      "message": "Oh I see what you are saying; here, we\u0027re more actually looking for the first ShaderParser object where the names do differ, so we can\u0027t just return any result.",
+      "parentUuid": "592ce9a5_9e513a6e",
+      "range": {
+        "startLine": 610,
+        "startChar": 12,
+        "endLine": 610,
+        "endChar": 39
+      },
+      "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
