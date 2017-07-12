@@ -22,6 +22,30 @@
       "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "577628fe_ab89c2a3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-12T17:59:48Z",
+      "side": 1,
+      "message": "Right; for core profile, GLES2 shaders can have variable names like |texture| that conflict with builtin functions in desktop core profile shaders like |texture|. See the commit message for more info.\n\nThen the rest of the translator must know about the modified names to pass to the underlying GL.",
+      "parentUuid": "4aec4217_78c44250",
+      "range": {
+        "startLine": 610,
+        "startChar": 12,
+        "endLine": 610,
+        "endChar": 39
+      },
+      "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
