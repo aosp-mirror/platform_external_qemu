@@ -46,6 +46,30 @@
       "revId": "7980f149db4570dbef5a185ee73c77ba8987b791",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05721fda_bbc00a45",
+        "filename": "android/android-emugl/host/include/OpenglRender/render_api_functions.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-12T20:58:54Z",
+      "side": 1,
+      "message": "That might work as well. Under what situation do we need to enable core profile?",
+      "parentUuid": "44339979_2dfd3d21",
+      "range": {
+        "startLine": 12,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 67
+      },
+      "revId": "7980f149db4570dbef5a185ee73c77ba8987b791",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
