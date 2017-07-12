@@ -74,9 +74,10 @@ void android_get_x86_cpuid(uint32_t function,
 
 bool android_get_x86_cpuid_vendor_id_is_vmhost(const char* vendor_id) {
     static const char* const VMHostCPUID[] = {
-        "KVMKVMKVM",    // KVM
-        "Microsoft Hv", // Microsoft Hyper-V or Windows Virtual PC
         "VMwareVMware", // VMware
+        "KVMKVMKVM",    // KVM
+        "VBoxVBoxVBox", // VirtualBox
+        "Microsoft Hv", // Microsoft Hyper-V or Windows Virtual PC
         "XenVMMXenVMM", // Xen HVM
     };
 
@@ -152,6 +153,9 @@ CpuVendorVmType android_get_x86_cpuid_vendor_vmhost_type(const char* vendor_id) 
     }
     if (strcmp(vendor_id, "Microsoft Hv") == 0) {
         return VENDOR_VM_HYPERV;
+    }
+    if (strcmp(vendor_id, "XenVMMXenVMM") == 0) {
+        return VENDOR_VM_XEN;
     }
 
     return VENDOR_VM_OTHER;
