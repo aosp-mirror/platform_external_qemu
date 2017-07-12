@@ -14,6 +14,7 @@
 
 #include <android/utils/compiler.h>
 #include <android/utils/system.h>
+#include <stdbool.h>
 #include <stdint.h>  /* for uint64_t */
 
 #ifndef _WIN32
@@ -142,6 +143,11 @@ extern char*  path_get_absolute( const char* path );
 
 /** OTHER FILE UTILITIES
  **
+ **  path_is_same() checks the filesystem to see if two paths point to the
+ **  same file or directory. This will follow symbolic links, handle case
+ **  insensitive filesystem, and relative paths and still identify if the
+ **  files or directories are the same.
+ **
  **  path_empty_file() creates an empty file at a given path location.
  **  if the file already exists, it is truncated without warning
  **
@@ -157,6 +163,13 @@ extern char*  path_get_absolute( const char* path );
  **  load_text_file() reads a file into a heap-allocated memory block,
  **  and appends a 0 to it. the caller must free it
  **/
+
+/* Checks the filesystem to see if two paths point to the same file or
+ * directory. This will follow symbolic links, handle case insensitive
+ * filesystem and relative paths and still identify if the files or directories
+ * are the same.
+ */
+APosixStatus path_is_same(const char* left, const char* right, bool* isSame);
 
 /* creates an empty file at a given location. If the file already
  * exists, it is truncated without warning. returns 0 on success,
