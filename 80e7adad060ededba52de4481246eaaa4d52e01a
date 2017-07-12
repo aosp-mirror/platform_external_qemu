@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c6a4a8e8_d281024d",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 5
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T20:34:36Z",
+      "side": 1,
+      "message": "count - 1\n?",
+      "revId": "80e7adad060ededba52de4481246eaaa4d52e01a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f923fbe7_60981e1b",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 5
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T20:34:36Z",
+      "side": 1,
+      "message": "make these const?",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 88,
+        "endChar": 2
+      },
+      "revId": "80e7adad060ededba52de4481246eaaa4d52e01a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51e9bab4_87bfb8a6",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacNative.m",
+        "patchSetId": 5
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T20:34:36Z",
+      "side": 1,
+      "message": "should you release the object?",
+      "range": {
+        "startLine": 96,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 15
+      },
+      "revId": "80e7adad060ededba52de4481246eaaa4d52e01a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e3c80b6c_0cebe1f8",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/MacPixelFormatsAttribs.m",
+        "patchSetId": 5
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T20:34:36Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 186,
+        "endChar": 2
+      },
+      "revId": "80e7adad060ededba52de4481246eaaa4d52e01a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
