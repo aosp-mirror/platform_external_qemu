@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8af845fa_2d02211b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2258,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T19:46:15Z",
+      "side": 1,
+      "message": "My suggestion about returning const reference - it would work, but still pretty scary\nif you change the parameter and return value to StringView that would definitely work here, and will save you one std::string construction with allocation and |name| copying",
+      "range": {
+        "startLine": 2258,
+        "startChar": 45,
+        "endLine": 2258,
+        "endChar": 62
+      },
+      "revId": "cb35144f0b47b28bdefaf377e018e0ff93de24fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
