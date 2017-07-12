@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "aa3e0d11_b5fd6320",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ShaderParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-12T17:51:30Z",
+      "side": 1,
+      "message": "nit: this line is too long",
+      "revId": "abf1378f400ca6c15879453db520019383fcfc7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
