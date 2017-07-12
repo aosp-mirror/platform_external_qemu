@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2732a38a_5ca82bf0",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglGlobalInfo.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T18:10:43Z",
+      "side": 1,
+      "message": "nit: still a typo",
+      "range": {
+        "startLine": 36,
+        "startChar": 46,
+        "endLine": 36,
+        "endChar": 51
+      },
+      "revId": "6c7747a0059d904d8b8e27d6194caf02c432671b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
