@@ -46,6 +46,30 @@
       "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "592ce9a5_9e513a6e",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-12T18:10:09Z",
+      "side": 1,
+      "message": "if *name \u003d\u003d userVarName then should we also return the same thing? This if statement does not seem necessary for me.",
+      "parentUuid": "577628fe_ab89c2a3",
+      "range": {
+        "startLine": 610,
+        "startChar": 12,
+        "endLine": 610,
+        "endChar": 39
+      },
+      "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
