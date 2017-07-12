@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "58b334fa_d5648510",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T18:43:37Z",
+      "side": 1,
+      "message": "please assign it directly, otherwise there are two copies",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 170,
+        "endChar": 32
+      },
+      "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "514b7df6_5d9aec05",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 602,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-12T18:43:37Z",
+      "side": 1,
+      "message": "as I understand, you return either the passed-in reference, or a reference to the renamed variable here. Both references live longer than the function call, so it\u0027s safe to return a const string\u0026 instead of a copy. IMO",
+      "range": {
+        "startLine": 602,
+        "startChar": 0,
+        "endLine": 602,
+        "endChar": 12
+      },
+      "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4aec4217_78c44250",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
         "patchSetId": 5
