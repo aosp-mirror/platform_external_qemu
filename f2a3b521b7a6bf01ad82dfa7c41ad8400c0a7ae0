@@ -118,6 +118,30 @@
       "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6798938_973ea381",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-12T18:37:49Z",
+      "side": 1,
+      "message": "If the same name appears in two shaders, then it\u0027ll be switched over the same way. This case accounts for when a uniform appears in one shader (and needs translating) but not another.",
+      "parentUuid": "77a81f60_317f17d5",
+      "range": {
+        "startLine": 610,
+        "startChar": 12,
+        "endLine": 610,
+        "endChar": 39
+      },
+      "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
