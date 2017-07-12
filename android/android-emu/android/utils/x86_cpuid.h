@@ -107,6 +107,7 @@ typedef enum {
     VENDOR_VM_VBOX,
     VENDOR_VM_HYPERV,
     VENDOR_VM_KVM,
+    VENDOR_VM_XEN,
     VENDOR_VM_NOTVM,
     VENDOR_VM_OTHER
 } CpuVendorVmType;

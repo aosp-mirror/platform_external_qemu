@@ -351,7 +351,6 @@ AndroidCpuAcceleration ProbeHaxCpu(std::string* status) {
     android_get_x86_cpuid_vendor_id(vendor_id, sizeof(vendor_id));
 
     if (android_get_x86_cpuid_vendor_id_is_vmhost(vendor_id)) {
-
         StringAppendFormat(status,
                            "Android Emulator does not support nested virtualization.  "
                            "Your CPU: '%s'",
@@ -370,18 +369,46 @@ AndroidCpuAcceleration ProbeHaxCpu(std::string* status) {
 
     if (!android_get_x86_cpuid_vmx_support()) {
         if (android_get_x86_cpuid_is_vcpu()) {
+            // Try asking the hypervisor directly.
+            char hv_vendor_id[16] = {};
+            android_get_x86_cpuid_vmhost_vendor_id(hv_vendor_id,
+                                                   sizeof(hv_vendor_id));
 #ifdef _WIN32
-            // The vcpu bit is set but your vendor id is not one of the known VM ids
-            // You are probably running under Hyper-V
-            status->assign("Please disable Hyper-V before using the Android Emulator.  "
-                           "Start a command prompt as Administrator, run 'bcdedit /set "
-                           "hypervisorlaunchtype off', reboot.");
-            return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
+            auto vmhost = android_get_x86_cpuid_vendor_vmhost_type(hv_vendor_id);
+            if (vmhost == VENDOR_VM_HYPERV) {
+                // Last part: check if this is the host or guest Hyper-V system.
+                auto hvStatus = GetHyperVStatus();
+                if (hvStatus.first == ANDROID_HYPERV_RUNNING) {
+                    // Host
+                    status->assign("Please disable Hyper-V before using the Android Emulator.  "
+                                   "Start a command prompt as Administrator, run 'bcdedit /set "
+                                   "hypervisorlaunchtype off', reboot.");
+                    return ANDROID_CPU_ACCELERATION_HYPERV_ENABLED;
+                } else {
+                    // Guest
+                    StringAppendFormat(status,
+                                       "Android Emulator does not support nested virtualization.  "
+                                       "Your VM host: '%s' (Hyper-V)",
+                                       hv_vendor_id);
+                    return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
+                }
+            } else if (vmhost != VENDOR_VM_NOTVM) {
+                StringAppendFormat(status,
+                                   "Android Emulator does not support nested virtualization.  "
+                                   "Your VM host: '%s'",
+                                   hv_vendor_id);
+                return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
+            } else {
+                StringAppendFormat(status,
+                                   "Android Emulator does not support nested virtualization.  "
+                                   "Your VM host doesn't disclose its name.");
+                return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
+            }
 #else // OSX
             StringAppendFormat(status,
                                "Android Emulator does not support nested virtualization.  "
-                               "Your CPU: '%s'",
-                               vendor_id);
+                               "Your CPU: '%s', VM host: '%s'",
+                               vendor_id, hv_vendor_id);
             return ANDROID_CPU_ACCELERATION_NESTED_NOT_SUPPORTED;
 #endif
         }
