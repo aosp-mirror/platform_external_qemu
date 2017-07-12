@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2c8bca09_bc134021",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_common.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-12T17:38:13Z",
+      "side": 1,
+      "message": "do you want to use kRenderApiLibName instead?",
+      "range": {
+        "startLine": 56,
+        "startChar": 16,
+        "endLine": 56,
+        "endChar": 41
+      },
+      "revId": "5af7e34619341ffbffd99976e0e4788643b733c0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
