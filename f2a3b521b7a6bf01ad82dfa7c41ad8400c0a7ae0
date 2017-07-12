@@ -94,6 +94,30 @@
       "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77a81f60_317f17d5",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-12T18:35:57Z",
+      "side": 1,
+      "message": "hmm... any chance it might change the name in one shader but not another? It might cause a bigger issue as uniforms with the same name are supposed to be the same uniform.",
+      "parentUuid": "fd2ed54e_41ffb5a4",
+      "range": {
+        "startLine": 610,
+        "startChar": 12,
+        "endLine": 610,
+        "endChar": 39
+      },
+      "revId": "f2a3b521b7a6bf01ad82dfa7c41ad8400c0a7ae0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
