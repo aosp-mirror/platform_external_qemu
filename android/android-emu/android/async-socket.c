@@ -831,10 +831,12 @@ _on_async_socket_recv(AsyncSocket* as)
         _async_socket_advance_reader(as);
         /* Lets see if there are still active readers, and enable, or disable
          * read I/O callback accordingly. */
-        if (as->readers_head != NULL) {
-            loopIo_wantRead(as->io);
-        } else {
-            loopIo_dontWantRead(as->io);
+        if (as->io) {
+            if (as->readers_head != NULL) {
+                loopIo_wantRead(as->io);
+            } else {
+                loopIo_dontWantRead(as->io);
+            }
         }
         async_socket_io_release(asr);
         return 0;
@@ -895,10 +897,12 @@ _on_async_socket_recv(AsyncSocket* as)
 
     /* Lets see if there are still active readers, and enable, or disable read
      * I/O callback accordingly. */
-    if (as->readers_head != NULL) {
-        loopIo_wantRead(as->io);
-    } else {
-        loopIo_dontWantRead(as->io);
+    if (as->io) {
+        if (as->readers_head != NULL) {
+            loopIo_wantRead(as->io);
+        } else {
+            loopIo_dontWantRead(as->io);
+        }
     }
 
     async_socket_io_release(asr);
@@ -943,10 +947,12 @@ _on_async_socket_send(AsyncSocket* as)
         _async_socket_advance_writer(as);
         /* Lets see if there are still active writers, and enable, or disable
          * write I/O callback accordingly. */
-        if (as->writers_head != NULL) {
-            loopIo_wantWrite(as->io);
-        } else {
-            loopIo_dontWantWrite(as->io);
+        if (as->io) {
+            if (as->writers_head != NULL) {
+                loopIo_wantWrite(as->io);
+            } else {
+                loopIo_dontWantWrite(as->io);
+            }
         }
         async_socket_io_release(asw);
         return 0;
@@ -1007,10 +1013,12 @@ _on_async_socket_send(AsyncSocket* as)
 
     /* Lets see if there are still active writers, and enable, or disable write
      * I/O callback accordingly. */
-    if (as->writers_head != NULL) {
-        loopIo_wantWrite(as->io);
-    } else {
-        loopIo_dontWantWrite(as->io);
+    if (as->io) {
+        if (as->writers_head != NULL) {
+            loopIo_wantWrite(as->io);
+        } else {
+            loopIo_dontWantWrite(as->io);
+        }
     }
 
     async_socket_io_release(asw);
