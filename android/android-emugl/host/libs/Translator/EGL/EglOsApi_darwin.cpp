@@ -22,6 +22,9 @@
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #include <list>
 #include <numeric>
 
@@ -50,7 +53,8 @@ private:
 
 class MacContext : public EglOS::Context {
 public:
-    explicit MacContext(void* context) : mContext(context) {}
+    explicit MacContext(bool isCoreProfile, void* context) :
+        EglOS::Context(isCoreProfile), mContext(context) {}
 
     virtual ~MacContext() {
         nsDestroyContext(mContext);
@@ -209,11 +213,13 @@ public:
     }
 
     virtual EglOS::Context* createContext(
+            EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
-        bool isCoreProfile = true;
+        bool isCoreProfile =
+            profileMask | EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
         void* nsFormat =
             finalizePixelFormat(isCoreProfile,
                                 MacPixelFormat::from(pixelFormat)->handle());
