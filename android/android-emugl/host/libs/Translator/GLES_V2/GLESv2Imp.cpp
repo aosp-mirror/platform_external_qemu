@@ -707,8 +707,9 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             if (GLESv2Validate::isCompressedFormat(internalformat)) {
                 texData->compressed = true;
                 texData->compressedFormat = internalformat;
-                texData->internalFormat = decompressedInternalFormat(
-                    internalformat);
+                texData->internalFormat =
+                    decompressedInternalFormat(ctx,
+                                               internalformat);
             } else {
                 texData->internalFormat = internalformat;
             }
