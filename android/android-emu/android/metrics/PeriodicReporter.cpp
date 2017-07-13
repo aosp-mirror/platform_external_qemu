@@ -128,6 +128,10 @@ void PeriodicReporter::reportForPerPeriodData(
                   "where capturing a reference by value resulted in silent bad "
                   "code generation");
 
+    if (!mMetricsReporter) {
+        return;
+    }
+
     mMetricsReporter->reportConditional(
             [this, data](android_studio::AndroidStudioEvent* event) {
                 AutoLock lock(mLock);
