@@ -56,15 +56,19 @@ extern char* op_http_proxy;
 using android::VmLock;
 using android::DmaMap;
 
+static void QEMU_NORETURN
+sQemu2AbortHandler(const char* format, va_list args) {
+    crashhandler_die_format_v(format, args);
+    while(1) { abort(); }
+}
+
 bool qemu_android_emulation_early_setup() {
     // Ensure that the looper is set for the main thread and for any
     // future thread created by QEMU.
     qemu_looper_setForThread();
     qemu_thread_register_setup_callback(qemu_looper_setForThread);
 
-    qemu_abort_set_handler([](const char* format, va_list args) {
-        crashhandler_die_format_v(format, args);
-    });
+    qemu_abort_set_handler(sQemu2AbortHandler);
 
     // Make sure we override the ctrl-C handler as soon as possible.
     qemu_set_ctrlc_handler(&skin_winsys_quit_request);
