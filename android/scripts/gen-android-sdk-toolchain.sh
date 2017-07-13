@@ -328,8 +328,7 @@ prepare_build_for_host () {
                 panic "Please install XCode on this machine!"
             fi
             log "OSX: Installed SDKs: $OSX_SDK_INSTALLED_LIST"
-
-            for supported_sdk in $OSX_SDK_SUPPORTED
+            for supported_sdk in $(echo "$OSX_SDK_SUPPORTED" | tr ' ' '\n' | sort -r)
             do
                 POSSIBLE_OSX_SDK_VERSION=$(echo "$OSX_SDK_INSTALLED_LIST" | tr ' ' '\n' | grep $supported_sdk | head -1)
                 if [ -n "$POSSIBLE_OSX_SDK_VERSION" ]; then
