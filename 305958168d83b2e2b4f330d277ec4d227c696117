@@ -25,6 +25,29 @@
     },
     {
       "key": {
+        "uuid": "a6562d73_d0764a75",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T00:56:20Z",
+      "side": 1,
+      "message": "nit: sorting order",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 48
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "99374e29_24403208",
         "filename": "android/android-emu/android/utils/path.cpp",
         "patchSetId": 2
@@ -69,6 +92,98 @@
       "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b57e839_b69de20b",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T00:56:20Z",
+      "side": 1,
+      "message": "is this a public function now? if not, you can make it (1) static and (2) return just a bool",
+      "range": {
+        "startLine": 260,
+        "startChar": 0,
+        "endLine": 260,
+        "endChar": 17
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00abea5c_5a03cd7c",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T00:56:20Z",
+      "side": 1,
+      "message": "MAX_PATH is the right name for Windows",
+      "range": {
+        "startLine": 262,
+        "startChar": 21,
+        "endLine": 262,
+        "endChar": 29
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ea83c519_767918f9",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T00:56:20Z",
+      "side": 1,
+      "message": "nit: you would need only one buffer if you open first file, then convert the second name and open that.",
+      "range": {
+        "startLine": 262,
+        "startChar": 0,
+        "endLine": 281,
+        "endChar": 5
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b6020838_da0ab96d",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T00:56:20Z",
+      "side": 1,
+      "message": "to make sure it doesn\u0027t exist, and not failed to open, you need to check if GetLastError() \u003d\u003d ERROR_FILE_NOT_FOUND\notherwise it could be some permission issue or whatever",
+      "range": {
+        "startLine": 286,
+        "startChar": 8,
+        "endLine": 286,
+        "endChar": 68
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     },
     {
       "key": {
