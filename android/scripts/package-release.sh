@@ -360,6 +360,10 @@ OPT_CRASH_PROD=
 option_register_var "--crash-prod" OPT_CRASH_PROD \
        "Upload crashes to production."
 
+OPT_CLANG=
+option_register_var "--clang" OPT_CLANG \
+       "Compile using clang when available."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -767,6 +771,11 @@ fi
 
 if [ "$OPT_DEBUG" ]; then
     var_append REBUILD_FLAGS "--debug"
+fi
+
+
+if [ "$OPT_CLANG" ]; then
+    var_append REBUILD_FLAGS "--clang"
 fi
 
 if [ "$OPT_PREBUILT_QEMU2" ]; then

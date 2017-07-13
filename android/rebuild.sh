@@ -25,6 +25,9 @@ for OPT; do
         --mingw)
             MINGW=true
             ;;
+        --clang)
+            OPT_CLANG=--clang
+            ;;
         --verbose)
             VERBOSE=$(( $VERBOSE + 1 ))
             ;;
@@ -133,7 +136,7 @@ if [ "$VERBOSE" -ne 2 ]; then
     echo "Configuring build."
 fi
 export IN_ANDROID_REBUILD_SH=1
-run android/configure.sh --out-dir=$OUT_DIR "$@" ||
+run android/configure.sh --out-dir=$OUT_DIR "$@" $OPT_CLANG ||
     panic "Configuration error, please run ./android/configure.sh to see why."
 
 CONFIG_MAKE=$OUT_DIR/build/config.make

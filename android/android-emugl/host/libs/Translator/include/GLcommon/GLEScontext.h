@@ -435,14 +435,14 @@ protected:
     GLsizei m_scissorWidth = 0;
     GLsizei m_scissorHeight = 0;
 
-    std::unordered_map<GLenum, bool> m_glEnableList = {};
+    std::unordered_map<GLenum, bool> m_glEnableList = std::unordered_map<GLenum, bool>();
 
     GLenum m_blendSrcRgb = GL_ONE;
     GLenum m_blendDstRgb = GL_ZERO;
     GLenum m_blendSrcAlpha = GL_ONE;
     GLenum m_blendDstAlpha = GL_ZERO;
 
-    std::unordered_map<GLenum, GLint> m_glPixelStoreiList = {};
+    std::unordered_map<GLenum, GLint> m_glPixelStoreiList;
 
     GLenum m_cullFace = GL_BACK;
     GLenum m_frontFace = GL_CCW;

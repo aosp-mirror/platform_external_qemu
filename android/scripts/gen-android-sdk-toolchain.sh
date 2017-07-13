@@ -72,6 +72,9 @@ option_register_var "--no-ccache" OPT_NO_CCACHE "Don't try to probe and use ccac
 OPT_CXX11=
 option_register_var "--cxx11" OPT_CXX11 "Enable C++11 features."
 
+OPT_CLANG=
+option_register_var "--clang" OPT_CLANG "Prefer clang over gcc in Linux."
+
 option_parse "$@"
 
 if [ "$PARAMETER_COUNT" != 1 ]; then
@@ -170,14 +173,16 @@ gen_wrapper_program ()
     local DST_FILE="$4/${SRC_PREFIX}$PROG"
     local CLANG_BINDIR="$5"
     local FLAGS=""
-    local LDFLAGS=""
+    local POST_FLAGS=""
 
     case $PROG in
       cc|gcc|cpp|clang)
           FLAGS=$FLAGS" $EXTRA_CFLAGS"
+          POST_FLAGS=" $POST_CFLAGS"
           ;;
       c++|g++|clang++)
           FLAGS=$FLAGS" $EXTRA_CXXFLAGS"
+          POST_FLAGS=" $POST_CXXFLAGS"
           ;;
       ar) FLAGS=$FLAGS" $EXTRA_ARFLAGS";;
       as) FLAGS=$FLAGS" $EXTRA_ASFLAGS";;
@@ -242,7 +247,7 @@ gen_wrapper_program ()
 $EXTRA_ENV_SETUP
 
 # Tool invokation.
-${DST_PREFIX}$DST_PROG $FLAGS "\$@" $LDFLAGS
+${DST_PREFIX}$DST_PROG $FLAGS "\$@" $POST_FLAGS
 EOF
     chmod +x "$DST_FILE"
     log "  Generating: ${SRC_PREFIX}$PROG"
@@ -258,7 +263,8 @@ gen_wrapper_toolchain () {
     local DST_DIR="$3"
     local CLANG_BINDIR="$4"
     local PROG
-    local PROGRAMS="cc gcc clang c++ g++ clang++ cpp as ld ar ranlib strip strings nm objdump objcopy dlltool"
+    local COMPILERS="cc gcc clang c++ g++ clang++ cpp"
+    local PROGRAMS="as ld ar ranlib strip strings nm objdump objcopy dlltool"
 
     log "Generating toolchain wrappers in: $DST_DIR"
     run mkdir -p "$DST_DIR"
@@ -289,8 +295,12 @@ gen_wrapper_toolchain () {
         fi
     fi
 
-    for PROG in $PROGRAMS; do
+    for PROG in $COMPILERS; do
         gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR" "$CLANG_BINDIR"
+    done
+
+    for PROG in $PROGRAMS; do
+        gen_wrapper_program $PROG "$SRC_PREFIX" "$DST_PREFIX" "$DST_DIR"
     done
 
     EXTRA_CFLAGS=
@@ -313,10 +323,19 @@ prepare_build_for_host () {
     TOOLCHAIN_PREFIX=
     EXTRA_ENV_SETUP=
     PREBUILT_TOOLCHAIN_SUBDIR=$(aosp_prebuilt_toolchain_subdir_for $CURRENT_HOST)
-	PREBUILT_TOOLCHAIN_DIR=$AOSP_DIR/$PREBUILT_TOOLCHAIN_SUBDIR
+    PREBUILT_TOOLCHAIN_DIR=$AOSP_DIR/$PREBUILT_TOOLCHAIN_SUBDIR
     TOOLCHAIN_PREFIX=$(aosp_prebuilt_toolchain_prefix_for $CURRENT_HOST)
-	CLANG_BINDIR=
+    CLANG_BINDIR=
+    DST_PREFIX=$PREBUILT_TOOLCHAIN_DIR/bin/$TOOLCHAIN_PREFIX
+
     case $CURRENT_HOST in
+        linux-*)
+            if [ "$OPT_CLANG" ]; then
+                CLANG_BINDIR=$AOSP_DIR/$(aosp_prebuilt_clang_dir_for linux)
+            else
+                CLANG_BINDIR=
+            fi
+            ;;
         darwin-*)
             OSX_VERSION=$(sw_vers -productVersion)
             OSX_DEPLOYMENT_TARGET=10.8
@@ -366,9 +385,17 @@ prepare_build_for_host () {
     case $CURRENT_HOST in
         linux-x86_64)
             GNU_CONFIG_HOST=x86_64-linux
+            EXTRA_CFLAGS="-m64"
+            EXTRA_CXXFLAGS="-m64 -D__OLD_STD_VERSION__=1"
+            POST_CFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu"
+            POST_CXXFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/x86_64-linux-gnu"
             ;;
         linux-x86)
             GNU_CONFIG_HOST=i686-linux
+            EXTRA_CFLAGS="-m32"
+            EXTRA_CXXFLAGS="-m32 -D__OLD_STD_VERSION__=1"
+            POST_CFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/i386-linux-gnu"
+            POST_CXXFLAGS="-I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include -I$PREBUILT_TOOLCHAIN_DIR/sysroot/usr/include/i386-linux-gnu"
             ;;
         windows-x86)
             GNU_CONFIG_HOST=i686-w64-mingw32
@@ -376,23 +403,8 @@ prepare_build_for_host () {
         windows-x86_64)
             GNU_CONFIG_HOST=x86_64-w64-mingw32
             ;;
-        darwin-*)
-            # Use host compiler.
-            GNU_CONFIG_HOST=
-            ;;
-        *)
-            panic "Host system '$CURRENT_HOST' is not supported by this script!"
-            ;;
-    esac
-
-    if [ "$OPT_BINPREFIX" ]; then
-        BINPREFIX=${OPT_BINPREFIX%%-}
-    else
-        BINPREFIX=$GNU_CONFIG_HOST
-    fi
-
-    case $CURRENT_HOST in
         darwin-x86_64)
+            GNU_CONFIG_HOST=
 
             common_FLAGS="-target x86_64-apple-darwin12.0.0"
             var_append common_FLAGS " -isysroot $OSX_SDK_ROOT"
@@ -404,33 +416,29 @@ prepare_build_for_host () {
                 var_append EXTRA_CXXFLAGS "-stdlib=libc++"
             fi
             EXTRA_LDFLAGS="-syslibroot $OSX_SDK_ROOT"
-            ;;
-        darwin-x86)
-            panic "Host system '$CURRENT_HOST' is not supported by this script!"
-            ;;
-        *-x86)
-            EXTRA_CFLAGS="-m32"
-            EXTRA_CXXFLAGS="-m32"
-            ;;
-        *-x86_64)
-            EXTRA_CFLAGS="-m64"
-            EXTRA_CXXFLAGS="-m64"
+            DST_PREFIX=
             ;;
         *)
             panic "Host system '$CURRENT_HOST' is not supported by this script!"
             ;;
     esac
 
-    if [ "$OPT_CXX11" ]; then
-        case $CURRENT_HOST in
-            darwin*)
-                var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
-                ;;
+    if [ "$OPT_BINPREFIX" ]; then
+      BINPREFIX=${OPT_BINPREFIX%%-}
+    else
+      BINPREFIX=$GNU_CONFIG_HOST
+    fi
 
-            *)
-                var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
-                ;;
-        esac
+
+    if [ "$OPT_CXX11" ]; then
+      case $CURRENT_HOST in
+        darwin*)
+          var_append EXTRA_CXXFLAGS "-std=c++14" "-Werror=c++14-compat"
+          ;;
+        *)
+          var_append EXTRA_CXXFLAGS "-std=c++11" "-Werror=c++11-compat"
+          ;;
+      esac
     fi
 
     CROSS_PREFIX=${GNU_CONFIG_HOST}-
@@ -468,11 +476,6 @@ prepare_build_for_host () {
             log "$CURRENT_TEXT Generating ${BINPREFIX%%-} wrapper toolchain in $INSTALL_DIR"
         else
             log "$CURRENT_TEXT Generating host wrapper toolchain in $INSTALL_DIR"
-        fi
-        if [ "$CLANG_BINDIR" ]; then
-            DST_PREFIX=""
-        else
-            DST_PREFIX=$PREBUILT_TOOLCHAIN_DIR/bin/$TOOLCHAIN_PREFIX
         fi
         gen_wrapper_toolchain "$BINPREFIX" "$DST_PREFIX" "$INSTALL_DIR" "$CLANG_BINDIR"
 

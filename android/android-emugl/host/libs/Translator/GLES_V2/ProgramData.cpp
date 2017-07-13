@@ -230,7 +230,7 @@ static std::unordered_map<GLuint, GLUniformDesc> collectUniformInfo(GLuint pname
 
 static std::unordered_map<GLuint, GLuint> collectUniformBlockInfo(GLuint pname) {
     if (gl_dispatch_get_max_version() < GL_DISPATCH_MAX_GLES_VERSION_3_0) {
-        return {};
+        return std::unordered_map<GLuint, GLuint>();
     }
     GLint uniformBlockCount = 0;
     std::unordered_map<GLuint, GLuint> uniformBlocks;
