@@ -14,6 +14,9 @@
 
 #include "android/emulation/control/GooglePlayServices.h"
 
+#include <istream>
+#include <string>
+
 namespace android {
 namespace emulation {
 
