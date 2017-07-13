@@ -57,8 +57,14 @@ protected:
 // An interface class for engine-specific implementation of a GL context.
 class Context {
 public:
-    Context() {}
-    virtual ~Context() {}
+    Context(bool coreProfile = false) : mCoreProfile(coreProfile) {}
+    bool isCoreProfile() const {
+        return mCoreProfile;
+    }
+protected:
+    ~Context() {}
+private:
+    bool mCoreProfile = false;
 };
 
 // Base class used to wrap engine-specific pixel format descriptors.
@@ -142,7 +148,9 @@ public:
                                              unsigned int* height) = 0;
 
     virtual Context* createContext(
-            const PixelFormat* pixelFormat, Context* sharedContext) = 0;
+            EGLint profileMask,
+            const PixelFormat* pixelFormat,
+            Context* sharedContext) = 0;
 
     virtual bool destroyContext(Context* context) = 0;
 

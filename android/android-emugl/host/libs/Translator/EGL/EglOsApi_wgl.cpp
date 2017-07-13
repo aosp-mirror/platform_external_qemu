@@ -868,8 +868,11 @@ public:
     }
 
     virtual EglOS::Context* createContext(
+            EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
+        (void)profileMask;
+
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
         HDC dpy = mGlobals->getDummyDC(format);
         if (!dpy) {
