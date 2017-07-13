@@ -35,12 +35,14 @@ EglContext::EglContext(EglDisplay *dpy,
                        EglConfig* config,
                        GLEScontext* glesCtx,
                        GLESVersion ver,
+                       EGLint profileMask,
                        ObjectNameManager* mngr,
                        android::base::Stream* stream) :
         m_dpy(dpy),
         m_config(config),
         m_glesContext(glesCtx),
         m_version(ver),
+        m_profileMask(profileMask),
         m_mngr(mngr)
 {
     if (stream) {
@@ -48,9 +50,14 @@ EglContext::EglContext(EglDisplay *dpy,
         m_config = dpy->getConfig(configId);
         shareGroupId = static_cast<uint64_t>(stream->getBe64());
     }
+
     EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
-    m_native = dpy->nativeType()->createContext(
-            m_config->nativeFormat(), globalSharedContext);
+    m_native =
+        dpy->nativeType()->createContext(
+            m_profileMask,
+            m_config->nativeFormat(),
+            globalSharedContext);
+
     if (m_native) {
         // When loading from a snapshot, the first context within a share group
         // will load share group data.

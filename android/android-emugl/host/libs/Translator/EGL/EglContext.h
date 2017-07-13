@@ -42,6 +42,7 @@ public:
                EglConfig* config,
                GLEScontext* glesCtx,
                GLESVersion ver,
+               EGLint profile_mask,
                ObjectNameManager* mngr,
                android::base::Stream* stream);
     bool usingSurface(SurfacePtr surface);
@@ -75,6 +76,7 @@ private:
     GLESVersion m_version;
     ObjectNameManager* m_mngr = nullptr;
     unsigned int m_hndl = 0;
+    EGLint m_profileMask = 0;
 };
 
 #endif

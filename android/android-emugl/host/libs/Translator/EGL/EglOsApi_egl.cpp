@@ -189,8 +189,10 @@ public:
     void queryConfigs(int renderableType,
                       AddConfigCallback* addConfigFunc,
                       void* addConfigOpaque);
-    emugl::SmartPtr<Context> createContext(const PixelFormat* pixelFormat,
-                                           Context* sharedContext);
+    virtual emugl::SmartPtr<Context>
+    createContext(EGLint profileMask,
+                  const PixelFormat* pixelFormat,
+                  Context* sharedContext) override;
     Surface* createPbufferSurface(const PixelFormat* pixelFormat,
                                   const PbufferInfo* info);
     Surface* createWindowSurface(PixelFormat* pf, EGLNativeWindowType win);
@@ -306,8 +308,11 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
 }
 
 emugl::SmartPtr<Context>
-EglOsEglDisplay::createContext(const PixelFormat* pixelFormat,
+EglOsEglDisplay::createContext(EGLint profileMask,
+                               const PixelFormat* pixelFormat,
                                Context* sharedContext) {
+    (void)profileMask;
+
     D("%s\n", __FUNCTION__);
     const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
     D("with config %p\n", format->mConfigId);
