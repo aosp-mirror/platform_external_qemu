@@ -68,7 +68,8 @@ private:
 
 class MacContext : public EglOS::Context {
 public:
-    explicit MacContext(void* context) : mContext(context) {}
+    explicit MacContext(bool isCoreProfile, void* context) :
+        EglOS::Context(isCoreProfile), mContext(context) {}
 
     virtual ~MacContext() {
         nsDestroyContext(mContext);
@@ -227,12 +228,13 @@ public:
     }
 
     virtual EglOS::Context* createContext(
+            EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
         bool isCoreProfile =
-            profileMask | EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
+            profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
 
         auto key = std::make_pair(isCoreProfile,
                                   MacPixelFormat::from(pixelFormat)->handle());
