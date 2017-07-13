@@ -29,7 +29,10 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
+
+#include "emugl/common/feature_control.h"
 #include "emugl/common/logging.h"
+#include "emugl/common/misc.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -76,6 +79,25 @@ private:
 FrameBuffer* FrameBuffer::s_theFrameBuffer = NULL;
 HandleType FrameBuffer::s_nextHandle = 0;
 
+static const GLint gles2ContextAttribsESOrGLCompat[] =
+   { EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE };
+
+static const GLint gles2ContextAttribsCoreGL[] =
+   { EGL_CONTEXT_CLIENT_VERSION, 2,
+     EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
+     EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+     EGL_NONE };
+
+const GLint* getGles2ContextAttribs() {
+#ifdef __APPLE__
+    if (emugl::getRenderer() == SELECTED_RENDERER_HOST &&
+        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+        return gles2ContextAttribsCoreGL;
+    }
+#endif
+    return gles2ContextAttribsESOrGLCompat;
+}
+
 static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     EGLConfig config;
     EGLSurface surface;
@@ -99,11 +121,8 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
         return NULL;
     }
 
-    static const GLint gles2ContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
-                                                EGL_NONE};
-
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
-                                            gles2ContextAttribs);
+                                            getGles2ContextAttribs());
     if (ctx == EGL_NO_CONTEXT) {
         ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
@@ -307,12 +326,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     fb->m_eglConfig = all_configs[exact_match_index];
 
-    static const GLint glContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2,
-                                             EGL_NONE};
-
     GL_LOG("attempting to create egl context");
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
-                                              EGL_NO_CONTEXT, glContextAttribs);
+                                              EGL_NO_CONTEXT, getGles2ContextAttribs());
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
         ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
         return false;
@@ -329,7 +345,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     fb->m_pbufContext =
             s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
-                                   fb->m_eglContext, glContextAttribs);
+                                   fb->m_eglContext, getGles2ContextAttribs());
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
         ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
         return false;
