@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "57a634bb_6806f788",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-07-13T00:30:20Z",
+      "side": 1,
+      "message": "Yeah, it handles directories too. Good idea, I\u0027ll change the name.",
+      "parentUuid": "99374e29_24403208",
+      "range": {
+        "startLine": 260,
+        "startChar": 0,
+        "endLine": 260,
+        "endChar": 17
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2144dccf_28355c20",
         "filename": "android/android-emu/android/utils/path.cpp",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2017-07-13T00:14:12Z",
       "side": 1,
       "message": "nit: seem three blocks of same code, replace with a short function ?",
+      "range": {
+        "startLine": 639,
+        "startChar": 3,
+        "endLine": 647,
+        "endChar": 5
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb2544b0_9be2ad60",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 647,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-07-13T00:30:20Z",
+      "side": 1,
+      "message": "Actually what about just doing:\nif (status !\u003d 0 || isSame) {\n    return status;\n}\n\nThat would remove one of the if statements. Even with an additional function there would still be an if statements so it\u0027s the same.",
+      "parentUuid": "2144dccf_28355c20",
       "range": {
         "startLine": 639,
         "startChar": 3,
