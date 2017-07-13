@@ -36,7 +36,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>104</y>
+       <y>106</y>
        <width>41</width>
        <height>24</height>
       </rect>
@@ -57,59 +57,11 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QGroupBox" name="set_glesApiLevelTitle">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>234</y>
-       <width>261</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>OpenGL ES API Level (requires restart)</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
-    <widget class="QGroupBox" name="set_glesBackendTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>234</y>
-       <width>261</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>OpenGL ES renderer (requires restart)</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
     <widget class="QGroupBox" name="set_crashReprotPrefTitle">
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>160</y>
+       <y>162</y>
        <width>281</width>
        <height>21</height>
       </rect>
@@ -165,7 +117,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>104</y>
+       <y>106</y>
        <width>280</width>
        <height>31</height>
       </rect>
@@ -196,7 +148,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>178</y>
+       <y>182</y>
        <width>280</width>
        <height>31</height>
       </rect>
@@ -282,8 +234,8 @@
     <widget class="QCheckBox" name="set_frameAlways">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>326</y>
+       <x>324</x>
+       <y>258</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -342,7 +294,7 @@
      <property name="geometry">
       <rect>
        <x>370</x>
-       <y>104</y>
+       <y>106</y>
        <width>191</width>
        <height>31</height>
       </rect>
@@ -360,8 +312,8 @@
     <widget class="QGroupBox" name="set_frameAlwaysTitle">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>308</y>
+       <x>324</x>
+       <y>238</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -405,105 +357,11 @@
       <string>Title</string>
      </property>
     </widget>
-    <widget class="QComboBox" name="set_glesBackendPrefComboBox">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>252</y>
-       <width>280</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="currentText">
-      <string>Autodetect based on host (default)</string>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-     <item>
-      <property name="text">
-       <string>Autodetect based on host (default)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>ANGLE (D3D11)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>ANGLE (D3D9)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>SwiftShader</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Desktop native OpenGL</string>
-      </property>
-     </item>
-    </widget>
-    <widget class="QComboBox" name="set_glesApiLevelPrefComboBox">
-     <property name="geometry">
-      <rect>
-       <x>324</x>
-       <y>252</y>
-       <width>280</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">padding: 3px 3px 3px 3px;</string>
-     </property>
-     <property name="editable">
-      <bool>false</bool>
-     </property>
-     <property name="currentText">
-      <string>Autoselect</string>
-     </property>
-     <property name="report_metrics" stdset="0">
-      <bool>false</bool>
-     </property>
-     <item>
-      <property name="text">
-       <string>Autoselect</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Host maximum (up to OpenGL ES 3.1)</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Compatibility (OpenGL ES 1.1/2.0)</string>
-      </property>
-     </item>
-    </widget>
     <widget class="QPushButton" name="set_adbPathButton">
      <property name="geometry">
       <rect>
        <x>572</x>
-       <y>104</y>
+       <y>106</y>
        <width>32</width>
        <height>32</height>
       </rect>
@@ -581,7 +439,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>178</y>
+       <y>258</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -606,7 +464,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>160</y>
+       <y>238</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -629,8 +487,8 @@
     <widget class="QCheckBox" name="set_clipboardSharing">
      <property name="geometry">
       <rect>
-       <x>324</x>
-       <y>326</y>
+       <x>20</x>
+       <y>182</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -654,8 +512,8 @@
     <widget class="QGroupBox" name="set_clipboardSharingTitle">
      <property name="geometry">
       <rect>
-       <x>324</x>
-       <y>308</y>
+       <x>20</x>
+       <y>162</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -1046,6 +904,148 @@
     <zorder>set_proxyResults</zorder>
     <zorder>set_proxyResultsTitle</zorder>
    </widget>
+   <widget class="QWidget" name="tab_3">
+    <attribute name="title">
+     <string>Advanced</string>
+    </attribute>
+    <widget class="QGroupBox" name="set_glesBackendTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>10</y>
+       <width>261</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>OpenGL ES renderer (requires restart)</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_glesApiLevelTitle">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>10</y>
+       <width>261</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>OpenGL ES API level (requires restart)</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="set_glesBackendPrefComboBox">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>30</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText">
+      <string>Autodetect based on host (default)</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Autodetect based on host (default)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ANGLE (D3D11)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>ANGLE (D3D9)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>SwiftShader</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Desktop native OpenGL</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QComboBox" name="set_glesApiLevelPrefComboBox">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>30</y>
+       <width>280</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="editable">
+      <bool>false</bool>
+     </property>
+     <property name="currentText">
+      <string>OpenGL ES 2.0 (default)</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>OpenGL ES 2.0 (default)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Renderer maximum (up to OpenGL ES 3.1)</string>
+      </property>
+     </item>
+    </widget>
+   </widget>
   </widget>
  </widget>
  <customwidgets>
@@ -1064,12 +1064,10 @@
   <tabstop>set_autoFindAdb</tabstop>
   <tabstop>set_adbPathBox</tabstop>
   <tabstop>set_adbPathButton</tabstop>
-  <tabstop>set_onTop</tabstop>
-  <tabstop>set_crashReportPrefComboBox</tabstop>
-  <tabstop>set_glesBackendPrefComboBox</tabstop>
-  <tabstop>set_glesApiLevelPrefComboBox</tabstop>
-  <tabstop>set_frameAlways</tabstop>
   <tabstop>set_clipboardSharing</tabstop>
+  <tabstop>set_crashReportPrefComboBox</tabstop>
+  <tabstop>set_onTop</tabstop>
+  <tabstop>set_frameAlways</tabstop>
   <tabstop>set_useStudio</tabstop>
   <tabstop>set_noProxy</tabstop>
   <tabstop>set_manualConfig</tabstop>
@@ -1079,6 +1077,9 @@
   <tabstop>set_loginName</tabstop>
   <tabstop>set_loginPassword</tabstop>
   <tabstop>set_proxyApply</tabstop>
+  <tabstop>set_proxyResults</tabstop>
+  <tabstop>set_glesBackendPrefComboBox</tabstop>
+  <tabstop>set_glesApiLevelPrefComboBox</tabstop>
  </tabstops>
  <resources>
   <include location="../resources.qrc"/>
