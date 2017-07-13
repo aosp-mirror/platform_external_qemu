@@ -194,3 +194,7 @@ int keymaster_main(void) {
 
     return 0;
 }
+
+extern "C" void android_init_keymaster(void) {
+    keymaster_main();
+}

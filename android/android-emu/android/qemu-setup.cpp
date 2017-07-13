@@ -28,6 +28,7 @@
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
 #include "android/car.h"
+#include "android/keymaster/keymaster_emu.h"
 #include "android/logcat-pipe.h"
 #include "android/opengles-pipe.h"
 #include "android/proxy/proxy_setup.h"
@@ -315,6 +316,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
+    android_init_keymaster();
 
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
