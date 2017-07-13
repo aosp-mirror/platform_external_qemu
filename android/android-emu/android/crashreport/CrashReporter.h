@@ -17,6 +17,7 @@
 #include "android/base/StringView.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/CommonReportedInfo.h"
+#include "android/crashreport/common.h"
 #include "android/crashreport/CrashSystem.h"
 #include "android/crashreport/HangDetector.h"
 
@@ -128,7 +129,7 @@ public:
     // fastest possible way. The process doesn't show/print any message to the
     // user with the possible exception of "Segmentation fault".
     void GenerateDump(const char* message);
-    void GenerateDumpAndDie(const char* message);
+    ANDROID_NORETURN void GenerateDumpAndDie(const char* message);
 
     void SetExitMode(const char* message);
 

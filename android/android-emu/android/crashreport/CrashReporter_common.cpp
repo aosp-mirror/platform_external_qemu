@@ -126,6 +126,7 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
     //    between, so some real crash could stick in the middle
     volatile int* volatile ptr = nullptr;
     *ptr = 1313;  // die
+    abort();      // make compiler believe it doesn't return
 }
 
 void CrashReporter::SetExitMode(const char* msg) {
