@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78abde61_a86cb0af",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T21:02:59Z",
+      "side": 1,
+      "message": "what\u0027s |profileMask|?",
+      "range": {
+        "startLine": 235,
+        "startChar": 13,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "eec78713ec31911c413170da4fd4844f90c8a624",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c80c05ce_bc6693da",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T21:02:59Z",
+      "side": 1,
+      "message": "\u0026 ?",
+      "range": {
+        "startLine": 235,
+        "startChar": 24,
+        "endLine": 235,
+        "endChar": 25
+      },
+      "revId": "eec78713ec31911c413170da4fd4844f90c8a624",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
