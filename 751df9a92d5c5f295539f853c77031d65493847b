@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23d9f0d3_fa4ba3ac",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderContext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-13T19:55:06Z",
+      "side": 1,
+      "message": "nit: you can do contextAttribs.data() since c++11 or something",
+      "revId": "751df9a92d5c5f295539f853c77031d65493847b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
