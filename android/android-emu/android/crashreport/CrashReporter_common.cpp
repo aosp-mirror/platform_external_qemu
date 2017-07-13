@@ -126,6 +126,7 @@ void CrashReporter::GenerateDumpAndDie(const char* message) {
     //    between, so some real crash could stick in the middle
     volatile int* volatile ptr = nullptr;
     *ptr = 1313;  // die
+    abort();      // make compiler believe it doesn't return
 }
 
 void CrashReporter::SetExitMode(const char* msg) {
@@ -318,9 +319,7 @@ void crashhandler_cleanup() {
 void crashhandler_die(const char* message) {
     if (const auto reporter = CrashReporter::get()) {
         reporter->GenerateDumpAndDie(message);
-        // convince the compiler and everyone else that we will never return
-        abort();
-    } else {
+        } else {
         I("Emulator: exiting becase of the internal error '%s'\n", message);
         _exit(1);
     }
@@ -336,7 +335,6 @@ void crashhandler_die_format(const char* format, ...) {
     va_list args;
     va_start(args, format);
     crashhandler_die_format_v(format, args);
-    va_end(args);   // hehe
 }
 
 void crashhandler_add_string(const char* name, const char* string) {
