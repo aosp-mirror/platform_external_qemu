@@ -18,6 +18,11 @@
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
+#include "android/base/containers/SmallVector.h"
+
+#include "emugl/common/feature_control.h"
+#include "emugl/common/misc.h"
+
 #include <assert.h>
 #include <OpenglCodecCommon/ErrorLog.h>
 
@@ -55,17 +60,30 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
         minorVersion = 1;
     }
 
-    const EGLint contextAttribs[] = {
+    android::base::SmallFixedVector<EGLint, 7> contextAttribs = {
         EGL_CONTEXT_CLIENT_VERSION, majorVersion,
         EGL_CONTEXT_MINOR_VERSION_KHR, minorVersion,
-        EGL_NONE
     };
+
+    // Use core profile across all context majorVersions
+    // only for Mac -gpu host renderer (TODO: Linux/Win),
+    // and only when GLESDynamicVersion is enabled.
+#ifdef __APPLE__
+    if (emugl::getRenderer() == SELECTED_RENDERER_HOST &&
+        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+        contextAttribs.push_back(EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR);
+        contextAttribs.push_back(EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
+    }
+#endif
+
+    contextAttribs.push_back(EGL_NONE);
+
     EGLContext context;
     if (stream && s_egl.eglLoadContext) {
-        context = s_egl.eglLoadContext(display, contextAttribs, stream);
+        context = s_egl.eglLoadContext(display, &contextAttribs[0], stream);
     } else {
         context = s_egl.eglCreateContext(
-            display, config, sharedContext, contextAttribs);
+            display, config, sharedContext, &contextAttribs[0]);
     }
     if (context == EGL_NO_CONTEXT) {
         fprintf(stderr, "%s: failed to create context (EGL_NO_CONTEXT result)\n", __func__);
