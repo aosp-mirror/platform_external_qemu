@@ -24,6 +24,7 @@
 
 #include "qemu/osdep.h"
 
+#include "qemu/abort.h"
 #include "hw/hw.h"
 #include "hw/loader.h"
 #include "hw/i386/pc.h"
@@ -213,6 +214,17 @@ static void pc_init1(MachineState *machine,
         isa_bus = isa_bus_new(NULL, get_system_memory(), system_io,
                               &error_abort);
         no_hpet = 1;
+    }
+    /* There've been crashes with |isa_bus| == NULL reported in the next line.
+     * Let's explicitly check for it and collect as much information as we can
+     * to help with diagnosing the issue.
+     */
+    if (!isa_bus) {
+        qemu_abort("Internal error: no ISA bus when initializing the PC object; "
+                   "host type '%s', pci type '%s', pci enabled '%s', "
+                   "accel '%s', cpu model '%s'",
+                   host_type, pci_type, (pcmc->pci_enabled ? "true" : "false"),
+                   machine->accel, machine->cpu_model);
     }
     isa_bus_irqs(isa_bus, pcms->gsi);
 
