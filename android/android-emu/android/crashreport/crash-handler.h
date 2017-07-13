@@ -23,6 +23,7 @@
 #else
 #include <stdbool.h>
 #endif
+#include <stdarg.h>
 
 ANDROID_BEGIN_HEADER
 
@@ -45,6 +46,7 @@ void crashhandler_die(const char* message) __attribute__((noinline));
 
 // A variadic overload with C interface
 void crashhandler_die_format(const char* format, ...);
+void crashhandler_die_format_v(const char* format, va_list args);
 
 // Append a string to the crash report. One is free to free both of the
 // parameters after the call - function doesn't take ownership of them.

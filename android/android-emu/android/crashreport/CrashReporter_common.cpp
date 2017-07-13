@@ -326,15 +326,17 @@ void crashhandler_die(const char* message) {
     }
 }
 
-void crashhandler_die_format(const char* format, ...) {
+void crashhandler_die_format_v(const char* format, va_list args) {
     char message[2048] = {};
-    va_list args;
-
-    va_start(args, format);
     vsnprintf(message, sizeof(message) - 1, format, args);
-    va_end(args);
-
     crashhandler_die(message);
+}
+
+void crashhandler_die_format(const char* format, ...) {
+    va_list args;
+    va_start(args, format);
+    crashhandler_die_format_v(format, args);
+    va_end(args);   // hehe
 }
 
 void crashhandler_add_string(const char* name, const char* string) {
