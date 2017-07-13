@@ -13,12 +13,13 @@
 #include "android/skin/qt/emulator-qt-window.h"
 
 #include "android/android.h"
+#include "android/base/Optional.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
-#include "android/base/Optional.h"
 #include "android/base/threads/Async.h"
+#include "android/bugreport.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
@@ -26,11 +27,11 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
-#include "android/metrics/metrics.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/metrics/metrics.h"
 #include "android/metrics/proto/studio_stats.pb.h"
-#include "android/opengles.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/opengles.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/QtLooper.h"
@@ -517,6 +518,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             (*mAdbInterface)->setCustomAdbPath(adbPath.toStdString());
         }
     }
+    // initialize bug report after AdbInterface is created
+    void* opaque = (void*)getAdbInterface();
+    bugReportInit(opaque, 1);
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {

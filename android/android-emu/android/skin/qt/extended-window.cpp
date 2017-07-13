@@ -62,7 +62,6 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
-    mExtendedUi->bugreportPage->initialize(mEmulatorWindow);
 
      connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
@@ -164,6 +163,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
+        mExtendedUi->bugreportPage->setBugreportAgent(agentPtr->bugreport);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
         }
