@@ -89,6 +89,21 @@ else
     log "pkg-config is not installed on this system."
 fi
 
+display_darwin_warning() {
+  # Fancy colors
+  RED=`tput setaf 1`
+  RESET=`tput sgr0`
+  echo "${RED}"
+  dump "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-"
+  dump "WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!!"
+  dump "Make sure you are compiling against the lowest supported SDK in"
+  dump "Newer SDKs might not be backwards compatible, possibly breaking"
+  dump "the build for other users"
+  dump "The mac you are building on must have this SDK installed!"
+  dump "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-"
+  echo "${RESET}"
+}
+
 # Handle zlib, only on Win32 because the zlib configure script
 # doesn't know how to generate a static library with -fPIC!
 do_windows_zlib_package () {
@@ -285,6 +300,12 @@ build_qemu_android_deps () {
     local PREFIX=$(builder_install_prefix)
 
     export PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
+    case $1 in
+        darwin-*)
+          display_darwin_warning
+          ;;
+    esac
+
     # Handle zlib for Windows
     case $1 in
         windows-*)
@@ -465,6 +486,9 @@ if [ -z "$OPT_FORCE" ]; then
 fi
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
+    # Let the people know that this is risky..
+    display_darwin_warning
+
     # Perform remote Darwin build first.
     dump "Remote qemu-android-deps build for: $DARWIN_SYSTEMS"
     builder_prepare_remote_darwin_build
