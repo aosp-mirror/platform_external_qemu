@@ -19,6 +19,8 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/crashreport/crash-handler.h"
+
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/skin/LibuiAgent.h"
@@ -42,6 +44,7 @@ extern "C" {
 
 #include "qemu/osdep.h"
 #include "qemu-common.h"
+#include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "qemu/thread.h"
 
@@ -58,6 +61,10 @@ bool qemu_android_emulation_early_setup() {
     // future thread created by QEMU.
     qemu_looper_setForThread();
     qemu_thread_register_setup_callback(qemu_looper_setForThread);
+
+    qemu_abort_set_handler([](const char* format, va_list args) {
+        crashhandler_die_format_v(format, args);
+    });
 
     // Make sure we override the ctrl-C handler as soon as possible.
     qemu_set_ctrlc_handler(&skin_winsys_quit_request);
