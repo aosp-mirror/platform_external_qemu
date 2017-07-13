@@ -12,8 +12,9 @@
 
 #include "android/skin/qt/emulator-qt-no-window.h"
 
-#include "android/base/memory/LazyInstance.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/base/memory/LazyInstance.h"
+#include "android/bugreport.h"
 #include "android/globals.h"
 #include "android/skin/qt/QtLooper.h"
 
@@ -56,7 +57,8 @@ EmulatorQtNoWindow::EmulatorQtNoWindow(QObject* parent)
                      &EmulatorQtNoWindow::slot_clearInstance);
     QObject::connect(this, &EmulatorQtNoWindow::requestClose, this,
                      &EmulatorQtNoWindow::slot_requestClose);
-
+    // initialize bug report after AdbInterface is created
+    bugReportInit((void*)(mAdbInterface.get()), 0);
 }
 
 EmulatorQtNoWindow::Ptr EmulatorQtNoWindow::getInstancePtr() {

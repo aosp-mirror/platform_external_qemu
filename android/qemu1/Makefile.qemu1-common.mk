@@ -172,6 +172,7 @@ LOCAL_SRC_FILES += \
     android-qemu1-glue/emulation/serial_line.cpp \
     android-qemu1-glue/emulation/VmLock.cpp \
     android-qemu1-glue/looper-qemu.cpp \
+    android-qemu1-glue/qemu-bug-report-agent-impl.cpp \
     android-qemu1-glue/qemu-cellular-agent-impl.c \
     android-qemu1-glue/qemu-display-agent-impl.cpp \
     android-qemu1-glue/qemu-finger-agent-impl.c \

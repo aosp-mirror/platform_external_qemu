@@ -53,6 +53,11 @@ public:
     // be invoked upon completion.
     void capture(android::base::StringView outputDirectoryPath,
                  ResultCallback resultCallback);
+    // Returns true if the screnncap or pull command is currently in the process
+    // of execution.
+    bool isInFlight() const {
+        return mCaptureCommand != nullptr || mPullCommand != nullptr;
+    };
 
 private:
     void pullScreencap(ResultCallback resultCallback,
