@@ -118,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "95d758ae_4df210e4",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 260,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-07-13T15:44:11Z",
+      "side": 1,
+      "message": "Returning a bool means we\u0027re discarding the possible failures in encoding conversion (probably unlikely) and getting file info. But I think it should probably be a public function anyway, I\u0027ll add it to the header file.",
+      "parentUuid": "2b57e839_b69de20b",
+      "range": {
+        "startLine": 260,
+        "startChar": 0,
+        "endLine": 260,
+        "endChar": 17
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00abea5c_5a03cd7c",
         "filename": "android/android-emu/android/utils/path.cpp",
         "patchSetId": 2
@@ -129,6 +153,30 @@
       "writtenOn": "2017-07-13T00:56:20Z",
       "side": 1,
       "message": "MAX_PATH is the right name for Windows",
+      "range": {
+        "startLine": 262,
+        "startChar": 21,
+        "endLine": 262,
+        "endChar": 29
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e070b98f_0f471fab",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-07-13T15:44:11Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "00abea5c_5a03cd7c",
       "range": {
         "startLine": 262,
         "startChar": 21,
@@ -164,6 +212,30 @@
     },
     {
       "key": {
+        "uuid": "3d7f3ca1_3978df65",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-07-13T15:44:11Z",
+      "side": 1,
+      "message": "Will do.",
+      "parentUuid": "ea83c519_767918f9",
+      "range": {
+        "startLine": 262,
+        "startChar": 0,
+        "endLine": 281,
+        "endChar": 5
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6020838_da0ab96d",
         "filename": "android/android-emu/android/utils/path.cpp",
         "patchSetId": 2
@@ -175,6 +247,30 @@
       "writtenOn": "2017-07-13T00:56:20Z",
       "side": 1,
       "message": "to make sure it doesn\u0027t exist, and not failed to open, you need to check if GetLastError() \u003d\u003d ERROR_FILE_NOT_FOUND\notherwise it could be some permission issue or whatever",
+      "range": {
+        "startLine": 286,
+        "startChar": 8,
+        "endLine": 286,
+        "endChar": 68
+      },
+      "revId": "305958168d83b2e2b4f330d277ec4d227c696117",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8d7c53b4_7745ebe1",
+        "filename": "android/android-emu/android/utils/path.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-07-13T15:44:11Z",
+      "side": 1,
+      "message": "Good point, will do.",
+      "parentUuid": "b6020838_da0ab96d",
       "range": {
         "startLine": 286,
         "startChar": 8,
