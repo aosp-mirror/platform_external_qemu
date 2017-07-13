@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "d01ae67c_1fae4088",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderContext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T21:05:53Z",
+      "side": 1,
+      "message": "if you make it SmallVector\u003cEGLint, 7\u003e, there will be no heap allocations",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 39
+      },
+      "revId": "751df9a92d5c5f295539f853c77031d65493847b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "23d9f0d3_fa4ba3ac",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderContext.cpp",
         "patchSetId": 4
@@ -31,6 +54,24 @@
       "side": 1,
       "message": "const CharT* data() const; (1)\t\nCharT* data();             (2)\t(since C++17)\nNot yet :(",
       "parentUuid": "23d9f0d3_fa4ba3ac",
+      "revId": "751df9a92d5c5f295539f853c77031d65493847b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4d431771_bb4ac05d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderContext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T21:05:53Z",
+      "side": 1,
+      "message": "oh, it\u0027s vector, not a string. Sorry, Yahan is right.",
+      "parentUuid": "15d65e7c_f8718221",
       "revId": "751df9a92d5c5f295539f853c77031d65493847b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
