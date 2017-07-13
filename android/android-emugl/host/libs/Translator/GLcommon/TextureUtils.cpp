@@ -130,14 +130,16 @@ ETC2ImageFormat getEtcFormat(GLenum internalformat) {
     return etcFormat;
 }
 
-GLenum decompressedInternalFormat(GLenum compressedFormat) {
+GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
     switch (compressedFormat) {
         // ETC2 formats
         case GL_COMPRESSED_RGB8_ETC2:
         case GL_ETC1_RGB8_OES:
+            if (ctx->isCoreProfile()) return GL_RGB8;
             return GL_RGB;
         case GL_COMPRESSED_RGBA8_ETC2_EAC:
         case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+            if (ctx->isCoreProfile()) return GL_RGBA8;
             return GL_RGBA;
         case GL_COMPRESSED_SRGB8_ETC2:
             return GL_SRGB8;
@@ -156,6 +158,7 @@ GLenum decompressedInternalFormat(GLenum compressedFormat) {
         case GL_PALETTE4_R5_G6_B5_OES:
         case GL_PALETTE8_RGB8_OES:
         case GL_PALETTE8_R5_G6_B5_OES:
+            if (ctx->isCoreProfile()) return GL_RGB8;
             return GL_RGB;
         case GL_PALETTE4_RGBA8_OES:
         case GL_PALETTE4_RGBA4_OES:
@@ -163,6 +166,7 @@ GLenum decompressedInternalFormat(GLenum compressedFormat) {
         case GL_PALETTE8_RGBA8_OES:
         case GL_PALETTE8_RGBA4_OES:
         case GL_PALETTE8_RGB5_A1_OES:
+            if (ctx->isCoreProfile()) return GL_RGBA8;
             return GL_RGBA;
         default:
             return compressedFormat;
@@ -188,7 +192,7 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
     if (isEtcFormat(internalformat)) {
         GLint format = GL_RGB;
         GLint type = GL_UNSIGNED_BYTE;
-        GLint convertedInternalFormat = decompressedInternalFormat(internalformat);
+        GLint convertedInternalFormat = decompressedInternalFormat(ctx, internalformat);
         ETC2ImageFormat etcFormat = EtcRGB8;
         switch (internalformat) {
             case GL_COMPRESSED_RGB8_ETC2:
