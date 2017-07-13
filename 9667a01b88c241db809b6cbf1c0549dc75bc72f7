@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc791ae2_708116fe",
+        "filename": "android/android-emu/android/crashreport/CrashReporter_common.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-13T01:49:08Z",
+      "side": 1,
+      "message": "Poor va_end",
+      "range": {
+        "startLine": 339,
+        "startChar": 0,
+        "endLine": 339,
+        "endChar": 27
+      },
+      "revId": "9667a01b88c241db809b6cbf1c0549dc75bc72f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
