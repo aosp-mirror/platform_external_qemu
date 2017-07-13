@@ -322,8 +322,11 @@ public:
     }
 
     virtual emugl::SmartPtr<EglOS::Context> createContext(
+            EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
+        (void)profileMask;
+
         ErrorHandler handler(mDisplay);
         GLXContext ctx = glXCreateNewContext(
                 mDisplay,
