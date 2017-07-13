@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9befa9bf_748fbc8d",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-13T19:59:26Z",
+      "side": 1,
+      "message": "you will need to modify EglOsApi_wgl and EglOsApi_glx as well.",
+      "range": {
+        "startLine": 151,
+        "startChar": 12,
+        "endLine": 151,
+        "endChar": 31
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
