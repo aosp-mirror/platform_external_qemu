@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "befc79bb_39d76aa9",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "let\u0027s not add Qt object into non-Qt code. Qt is purely a GUI library in the emulator, and managing bugreport data doesn\u0027t have anything to do with GUI",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 15
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b584d932_16bbdfa1",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "nit: I believe the existence check isn\u0027t needed - deleteFile() will fail if it didn\u0027t exist, but who cares?",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 94,
+        "endChar": 9
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0d8d0d41_a93d7f90",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "what about passing a created instance of ScreenCapturer into initialize() instead of |hasWindow|? if passed ScreenCapturer is null there will be no screenshot",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 13
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d3d9c2ad_9de819ce",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "this isn\u0027t thread-safe. Please use LazyInstance\u003c\u003e instead of unique_ptr for it.",
+      "range": {
+        "startLine": 378,
+        "startChar": 0,
+        "endLine": 378,
+        "endChar": 37
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c6465c5_5a7e5f18",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "hasWindow !\u003d 0",
+      "range": {
+        "startLine": 411,
+        "startChar": 46,
+        "endLine": 411,
+        "endChar": 75
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1bf91746_5c59864e",
+        "filename": "android/android-emu/android/bugreport.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "should this be a flags enum, so you could use it in saveBugreport() as well?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 14
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c76189c_1f2888cb",
+        "filename": "android/android-emu/android/bugreport.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "what about returning a BugreportData* here that would contain everything? Then one would need to pass it to other functions to perform modifications, e.g. saveBugreport(data) or sendToGoogle(data); This way there\u0027s an explicit interface for what being done, and no implicit dependencies on some static variables.",
+      "range": {
+        "startLine": 31,
+        "startChar": 5,
+        "endLine": 31,
+        "endChar": 22
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "78c88a96_7aaf0b6a",
+        "filename": "android/android-emu/android/bugreport_data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "please add a copyright header",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 12
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e996b82_e35e2db1",
+        "filename": "android/android-emu/android/bugreport_data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "no need to have this - it\u0027s only needed for headers compatible with C",
+      "range": {
+        "startLine": 6,
+        "startChar": 0,
+        "endLine": 6,
+        "endChar": 20
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd7a8ff_61f4b02d",
+        "filename": "android/android-emu/android/bugreport_data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "initialize to false please",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 2
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3ebf26e_beb3becb",
+        "filename": "android/android-emu/android/emulation/control/AdbBugReportServices.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "nit: remove",
+      "range": {
+        "startLine": 59,
+        "startChar": 74,
+        "endLine": 59,
+        "endChar": 75
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "666284d7_6b14357c",
+        "filename": "android/android-emu/android/emulation/control/bugreport_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-13T22:59:45Z",
+      "side": 1,
+      "message": "what\u0027s the purpose of this agent? Agents as of now serve two purposes:\n1. Isolate engine-specific code (qemu1, qemu2) from the AndroidEmu library, to make sure AndroidEmu remains generic and doesn\u0027t need to call into an engine directly\n2. Isolate the non-UI part of AndroidEmu library from the UI part, to make sure emulator is able to run without UI.\n\nBugreport object, as I see in the CL, is a part of a generic non-UI AndroidEmu library. It\u0027s totally OK for the UI code to call into it directly - e.g. Qt code already uses metrics reporter and crash reporter directly\n\nAnother question is why do we need to have a C interface for a bug reporter? As of now, I only see C++ code initializing it and calling into it. C interfaces are legacy interfaces, they remain from the times when most of the code was in C. We still need to create them if a C source needs to call into a service, but here I only see emulator Qt window (and Qt no-window) use it. Is there a way to expose the C++ interface directly?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 18
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
