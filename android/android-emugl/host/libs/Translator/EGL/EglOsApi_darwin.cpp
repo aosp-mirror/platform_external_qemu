@@ -49,8 +49,7 @@ private:
 
 class MacContext : public EglOS::Context {
 public:
-    explicit MacContext(void* context) :
-        EglOS::Context(), mContext(context) {}
+    explicit MacContext(void* context) : mContext(context) {}
 
     ~MacContext() {
         nsDestroyContext(mContext);
@@ -236,8 +235,11 @@ public:
     }
 
     virtual emugl::SmartPtr<EglOS::Context> createContext(
+            EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
+        (void)profileMask;
+
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
         return std::make_shared<MacContext>(
