@@ -875,7 +875,6 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
 
     // TODO: Investigate these ignored flags and see which are needed
     (void)context_flags;
-    (void)profile_mask;
     (void)reset_notification_strategy;
 
     GLESVersion glesVersion;
@@ -923,9 +922,10 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
     }
 
     ContextPtr ctx(new EglContext(dpy, shareGroupId, cfg,
-                              glesCtx, glesVersion,
-                              dpy->getManager(glesVersion),
-                              stream));
+                                  glesCtx, glesVersion,
+                                  profile_mask,
+                                  dpy->getManager(glesVersion),
+                                  stream));
     if(ctx->nativeType()) {
         return dpy->addContext(ctx);
     } else {

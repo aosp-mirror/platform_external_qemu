@@ -59,8 +59,13 @@ protected:
 // An interface class for engine-specific implementation of a GL context.
 class Context {
 public:
-    Context() = default;
+    Context(bool coreProfile = false) : mCoreProfile(coreProfile) {}
+    bool isCoreProfile() const {
+        return mCoreProfile;
+    }
     DISALLOW_COPY_AND_ASSIGN(Context);
+private:
+    bool mCoreProfile = false;
 };
 
 // Base class used to wrap engine-specific pixel format descriptors.
@@ -144,6 +149,7 @@ public:
                                              unsigned int* height) = 0;
 
     virtual emugl::SmartPtr<Context> createContext(
+            EGLint profileMask,
             const PixelFormat* pixelFormat,
             Context* sharedContext) = 0;
 
