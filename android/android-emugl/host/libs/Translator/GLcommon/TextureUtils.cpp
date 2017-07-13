@@ -130,15 +130,22 @@ ETC2ImageFormat getEtcFormat(GLenum internalformat) {
     return etcFormat;
 }
 
-GLenum decompressedInternalFormat(GLenum compressedFormat) {
+GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat) {
+    bool needSizedInternalFormat =
+        isCoreProfile() ||
+        (ctx->getMajorVersion() >= 3);
+
+    GLenum glrgb = needSizedInternalFormat ? GL_RGB8 : GL_RGB;
+    GLenum glrgba = needSizedInternalFormat ? GL_RGBA8 : GL_RGBA;
+
     switch (compressedFormat) {
         // ETC2 formats
         case GL_COMPRESSED_RGB8_ETC2:
         case GL_ETC1_RGB8_OES:
-            return GL_RGB;
+            return glrgb;
         case GL_COMPRESSED_RGBA8_ETC2_EAC:
         case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-            return GL_RGBA;
+            return glrgba;
         case GL_COMPRESSED_SRGB8_ETC2:
             return GL_SRGB8;
         case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
@@ -156,14 +163,14 @@ GLenum decompressedInternalFormat(GLenum compressedFormat) {
         case GL_PALETTE4_R5_G6_B5_OES:
         case GL_PALETTE8_RGB8_OES:
         case GL_PALETTE8_R5_G6_B5_OES:
-            return GL_RGB;
+            return glrgb;
         case GL_PALETTE4_RGBA8_OES:
         case GL_PALETTE4_RGBA4_OES:
         case GL_PALETTE4_RGB5_A1_OES:
         case GL_PALETTE8_RGBA8_OES:
         case GL_PALETTE8_RGBA4_OES:
         case GL_PALETTE8_RGB5_A1_OES:
-            return GL_RGBA;
+            return glrgba;
         default:
             return compressedFormat;
     }
@@ -188,7 +195,7 @@ void doCompressedTexImage2D(GLEScontext* ctx, GLenum target, GLint level,
     if (isEtcFormat(internalformat)) {
         GLint format = GL_RGB;
         GLint type = GL_UNSIGNED_BYTE;
-        GLint convertedInternalFormat = decompressedInternalFormat(internalformat);
+        GLint convertedInternalFormat = decompressedInternalFormat(ctx, internalformat);
         ETC2ImageFormat etcFormat = EtcRGB8;
         switch (internalformat) {
             case GL_COMPRESSED_RGB8_ETC2:
