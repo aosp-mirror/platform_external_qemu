@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/crashreport/common.h"
 #include "android/utils/compiler.h"
 
 #ifdef __cplusplus
@@ -42,11 +43,12 @@ void crashhandler_cleanup(void);
 
 // Abort the program execution immidiately; when showing a crash dialog, use
 // show |message| to the user instead of standard 'emulator have crashed'
-void crashhandler_die(const char* message) __attribute__((noinline));
+ANDROID_NORETURN void crashhandler_die(const char* message)
+    __attribute__((noinline));
 
 // A variadic overload with C interface
-void crashhandler_die_format(const char* format, ...);
-void crashhandler_die_format_v(const char* format, va_list args);
+ANDROID_NORETURN void crashhandler_die_format(const char* format, ...);
+ANDROID_NORETURN void crashhandler_die_format_v(const char* format, va_list args);
 
 // Append a string to the crash report. One is free to free both of the
 // parameters after the call - function doesn't take ownership of them.
@@ -66,7 +68,7 @@ ANDROID_END_HEADER
 #ifdef __cplusplus
 // A variadic overload for a convenient message formatting
 template <class... Args>
-void crashhandler_die(const char* format, Args&&... args) {
+ANDROID_NORETURN void crashhandler_die(const char* format, Args&&... args) {
     char buffer[2048] = {};    // 2048 is enough for everyone ;)
     snprintf(buffer, sizeof(buffer) - 1, format,
              android::base::unpackFormatArg(std::forward<Args>(args))...);
