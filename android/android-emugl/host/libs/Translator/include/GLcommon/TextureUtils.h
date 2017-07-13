@@ -39,6 +39,6 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
                                           GLsizei imageSize, const GLvoid* data,
                                           glTexImage2D_t glTexImage2DPtr);
 void deleteRenderbufferGlobal(GLuint rbo);
-GLenum decompressedInternalFormat(GLenum compressedFormat);
+GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat);
 
 #endif
