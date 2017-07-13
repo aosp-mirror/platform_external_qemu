@@ -100,10 +100,11 @@ void MemoryUsageReporter::stop() {
 
 bool MemoryUsageReporter::checkMemoryUsage() {
     System::MemUsage usage = System::get()->getMemUsage();
+    uint64_t uptime = System::get()->getProcessTimes().wallClockMs;
 
-    D("MemoryReport: Epoch: %lu, Res/ResMax/Virt/VirtMax: "
+    D("MemoryReport: uptime: %" PRIu64 ", Res/ResMax/Virt/VirtMax: "
       "%" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64,
-      time,
+      uptime,
       usage.resident,
       usage.resident_max,
       usage.virt,
