@@ -75,6 +75,10 @@ struct VideoOutputStream {
     int bit_rate;
     int fps;
 
+#ifdef DEBUG_VIDEO
+    int64_t frame_count;
+    int64_t write_frame_count;
+#endif
     // pts of the next frame that will be generated
     int64_t next_pts;
 
@@ -91,6 +95,11 @@ typedef struct AudioOutputStream {
 
     int bit_rate;
     int sample_rate;
+
+#ifdef DEBUG_AUDIO
+    int64_t frame_count;
+    int64_t write_frame_count;
+#endif
 
     // pts of the next frame that will be generated
     int64_t next_pts;
@@ -141,7 +150,11 @@ static std::string avErr2Str(int errnum) {
 static void log_packet(const AVFormatContext* fmt_ctx, const AVPacket* pkt) {
     AVRational* time_base = &fmt_ctx->streams[pkt->stream_index]->time_base;
 
+#if defined(DEBUG_VIDEO) || defined(DEBUG_AUDIO)
+    printf(
+#else
     VERBOSE_PRINT(capture,
+#endif
                   "pts:%s pts_time:%s dts:%s dts_time:%s duration:%s "
                   "duration_time:%s "
                   "stream_index:%d\n",
@@ -216,11 +229,7 @@ static int open_audio(AVFormatContext* oc,
 
     // open it
     av_dict_copy(&opts, opt_arg, 0);
-    // vp9
-    if (ost->st->codec->codec_id == AV_CODEC_ID_VP9) {
-        av_dict_set(&opts, "deadline", "realtime" /*"good"*/, 0);
-        av_dict_set(&opts, "cpu-used", "8", 0);
-    }
+
     ret = avcodec_open2(c, codec, &opts);
     av_dict_free(&opts);
     if (ret < 0) {
@@ -306,7 +315,9 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
         frame = ost->frame;
         ost->samples_count += dst_nb_samples;
     }
-
+#ifdef DEBUG_AUDIO
+    printf("Encoding audio frame %d\n", ost->frame_count++);
+#endif
     ret = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
     if (ret < 0) {
         derror("Error encoding audio frame: %s\n", avErr2Str(ret).c_str());
@@ -314,6 +325,12 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
     }
 
     if (got_packet) {
+#ifdef DEBUG_AUDIO
+        printf("%sWriting audio frame %d\n",
+               pkt.flags & AV_PKT_FLAG_KEY ? "(KEY) " : "",
+               ost->write_frame_count++);
+        log_packet(oc, &pkt);
+#endif
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
@@ -321,6 +338,8 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
             return ret;
         }
     }
+
+    av_free_packet(&pkt);
 
     return (frame || got_packet) ? 0 : 1;
 }
@@ -356,13 +375,19 @@ static int open_video(AVFormatContext* oc,
                       AVDictionary* opt_arg) {
     int ret;
     AVCodecContext* c = ost->st->codec;
-    AVDictionary* opt = NULL;
+    AVDictionary* opts = NULL;
 
-    av_dict_copy(&opt, opt_arg, 0);
+    av_dict_copy(&opts, opt_arg, 0);
+
+    // vp9
+    if (ost->st->codec->codec_id == AV_CODEC_ID_VP9) {
+        av_dict_set(&opts, "deadline", "realtime" /*"good"*/, 0);
+        av_dict_set(&opts, "cpu-used", "8", 0);
+    }
 
     // open the codec
-    ret = avcodec_open2(c, codec, &opt);
-    av_dict_free(&opt);
+    ret = avcodec_open2(c, codec, &opts);
+    av_dict_free(&opts);
     if (ret < 0) {
         derror("Could not open video codec: %s\n", avErr2Str(ret).c_str());
         return ret;
@@ -420,11 +445,15 @@ static int write_video_frame(ffmpeg_recorder* recorder,
 
         android::base::AutoLock lock(recorder->out_pkt_lock);
         ret = av_interleaved_write_frame(oc, &pkt);
+        av_free_packet(&pkt);
     } else {
         AVPacket pkt = {0};
         av_init_packet(&pkt);
 
         // encode the frame
+#ifdef DEBUG_VIDEO
+        printf("Encoding video frame %d\n", ost->frame_count++);
+#endif
         ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
         if (ret < 0) {
             derror("Error encoding video frame: %s\n", avErr2Str(ret).c_str());
@@ -432,10 +461,17 @@ static int write_video_frame(ffmpeg_recorder* recorder,
         }
 
         if (got_packet) {
+#ifdef DEBUG_VIDEO
+            printf("%sWriting frame %d\n",
+                   (pkt.flags & AV_PKT_FLAG_KEY) ? "(KEY) " : "",
+                   ost->write_frame_count++);
+            log_packet(oc, &pkt);
+#endif
             ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         } else {
             ret = 0;
         }
+        av_free_packet(&pkt);
     }
 
     if (ret < 0) {
@@ -465,8 +501,9 @@ static bool has_suffix(const std::string& str, const std::string& suffix) {
            str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
 
+static bool registered = false;
+
 ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
-    static bool registered = false;
     ffmpeg_recorder* recorder = NULL;
     AVFormatContext* oc = NULL;
 
@@ -481,7 +518,8 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     memset(recorder, 0, sizeof(ffmpeg_recorder));
     recorder->path = strdup(path);
 
-    // Initialize libavcodec, and register all codecs and formats.
+    // Initialize libavcodec, and register all codecs and formats. does not hurt
+    // to register multiple times
     if (!registered) {
         av_register_all();
         registered = true;
@@ -519,8 +557,26 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         delete recorder->audio_capturer;
     }
 
+    // flush video encoding with a NULL frame
+    while (recorder->have_video) {
+        AVPacket pkt = {0};
+        int got_packet = 0;
+        av_init_packet(&pkt);
+        int ret = avcodec_encode_video2(recorder->video_st.st->codec, &pkt,
+                                        NULL, &got_packet);
+        if (ret < 0 || !got_packet)
+            break;
+#ifdef DEBUG_VIDEO
+        printf("%s: Writing frame %d\n", __func__, recorder->video_st.write_frame_count++);
+#endif
+        write_frame(recorder, recorder->oc,
+                    &recorder->video_st.st->codec->time_base,
+                    recorder->video_st.st, &pkt);
+        av_free_packet(&pkt);
+    }
+
     // flush the remaining audio packet
-    if (recorder->audio_st.audio_leftover_len > 0) {
+    if (recorder->have_audio && (recorder->audio_st.audio_leftover_len > 0)) {
         AVFrame* frame = recorder->audio_st.tmp_frame;
         int frame_size = frame->nb_samples *
                          recorder->audio_st.st->codec->channels *
@@ -536,32 +592,22 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         }
     }
 
-    // flush video encoding with a NULL frame
-    for (int i = 0; i < 5; i++) {
-        AVPacket pkt = {0};
-        int got_packet = 0;
-        av_init_packet(&pkt);
-        avcodec_encode_video2(recorder->video_st.st->codec, &pkt, NULL,
-                              &got_packet);
-        if (got_packet) {
-            write_frame(recorder, recorder->oc,
-                        &recorder->video_st.st->codec->time_base,
-                        recorder->video_st.st, &pkt);
-        }
-    }
-
     // flush audio encoding with a NULL frame
-    for (int i = 0; i < 5; i++) {
+    while (recorder->have_audio) {
         AVPacket pkt = {0};
         int got_packet;
         av_init_packet(&pkt);
-        avcodec_encode_audio2(recorder->audio_st.st->codec, &pkt, NULL,
-                              &got_packet);
-        if (got_packet) {
-            write_frame(recorder, recorder->oc,
-                        &recorder->audio_st.st->codec->time_base,
-                        recorder->audio_st.st, &pkt);
-        }
+        int ret = avcodec_encode_audio2(recorder->audio_st.st->codec, &pkt,
+                                        NULL, &got_packet);
+        if (ret < 0 || !got_packet)
+            break;
+#ifdef DEBUG_AUDIO
+                printf("%s: Writing audio frame %d\n", __func__, recorder->audio_st.write_frame_count++);
+#endif
+        write_frame(recorder, recorder->oc,
+                    &recorder->audio_st.st->codec->time_base,
+                    recorder->audio_st.st, &pkt);
+        av_free_packet(&pkt);
     }
 
     // Write the trailer, if any. The trailer must be written before you
@@ -659,6 +705,10 @@ int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
 
     ost->bit_rate = bit_rate;
     ost->sample_rate = sample_rate;
+#ifdef DEBUG_AUDIO
+    ost->frame_count = 0;
+    ost->write_frame_count = 0;
+#endif
 
     // find the encoder
     AVCodec* codec = avcodec_find_encoder(codec_id);
@@ -738,7 +788,8 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
                            int width,
                            int height,
                            int bit_rate,
-                           int fps) {
+                           int fps,
+                           int intra_spacing) {
     if (recorder == NULL)
         return -1;
 
@@ -753,6 +804,10 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
     ost->height = height;
     ost->bit_rate = bit_rate;
     ost->fps = fps;
+#ifdef DEBUG_VIDEO
+    ost->frame_count = 0;
+    ost->write_frame_count = 0;
+#endif
 
     // find the encoder
     AVCodec* codec = avcodec_find_encoder(codec_id);
@@ -794,7 +849,7 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 
     ost->st->avg_frame_rate = (AVRational){1, fps};
 
-    c->gop_size = 12;  // emit one intra frame every twelve frames at most
+    c->gop_size = intra_spacing;  // emit one intra frame every twelve frames at most
     c->pix_fmt = STREAM_PIX_FMT;
     if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO) {
         // just for testing, we also add B frames
@@ -957,4 +1012,299 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
     }
 
     return 0;
+}
+
+static int encode_write_frame(AVFormatContext* ofmt_ctx,
+                              AVFrame* filt_frame,
+                              unsigned int stream_index,
+                              int* got_frame) {
+    int ret;
+    int got_frame_local;
+    AVPacket enc_pkt;
+
+    if (!got_frame)
+        got_frame = &got_frame_local;
+
+    enc_pkt.data = NULL;
+    enc_pkt.size = 0;
+    av_init_packet(&enc_pkt);
+    ret = avcodec_encode_video2(ofmt_ctx->streams[stream_index]->codec,
+                                &enc_pkt, filt_frame, got_frame);
+    if (ret < 0)
+        return ret;
+    if (!(*got_frame))
+        return 0;
+
+    // prepare packet for muxing
+    enc_pkt.stream_index = stream_index;
+    av_packet_rescale_ts(&enc_pkt,
+                         ofmt_ctx->streams[stream_index]->codec->time_base,
+                         ofmt_ctx->streams[stream_index]->time_base);
+    // mux encoded frame
+    ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
+    av_free_packet(&enc_pkt);
+    return ret;
+}
+
+static int flush_encoder(AVFormatContext* ofmt_ctx, unsigned int stream_index) {
+    int ret;
+    int got_frame;
+
+    if (!(ofmt_ctx->streams[stream_index]->codec->codec->capabilities &
+          AV_CODEC_CAP_DELAY))
+        return 0;
+
+    while (1) {
+        av_log(NULL, AV_LOG_INFO, "Flushing stream #%u encoder\n",
+               stream_index);
+        ret = encode_write_frame(ofmt_ctx, NULL, stream_index, &got_frame);
+        if (ret < 0)
+            break;
+        if (!got_frame)
+            return 0;
+    }
+    return ret;
+}
+
+// convert a mp4 or webm video into animated gif
+// params:
+//     input_video_file - the input video file in webm or mp4 format
+//     output_video_file - the output animated gif file
+//     gif_bit_rate - bit rate for the gif file, usually smaller number
+//                    to reduce the file size
+int ffmpeg_convert_to_animated_gif(const char* input_video_file,
+                                   const char* output_video_file,
+                                   int gif_bit_rate) {
+    int ret;
+    AVFormatContext* ifmt_ctx;
+    AVFormatContext* ofmt_ctx;
+    AVPacket packet = {0};
+    AVFrame* frame = NULL;
+    AVFrame* tmp_frame = NULL;
+    int video_stream_index = -1;
+    AVStream* out_stream = NULL;
+    AVStream* in_stream = NULL;
+    AVCodecContext* dec_ctx;
+    AVCodecContext* enc_ctx;
+    AVCodec* encoder;
+    struct SwsContext* sws_ctx = NULL;
+    unsigned int i;
+    int got_frame;
+
+    // Initialize libavcodec, and register all codecs and formats. does not hurt
+    // to register multiple times
+    if (!registered) {
+        av_register_all();
+        registered = true;
+    }
+
+    // open the input video file
+    ifmt_ctx = NULL;
+    if ((ret = avformat_open_input(&ifmt_ctx, input_video_file, NULL, NULL)) <
+        0) {
+        derror("Cannot open input file:%s\n", input_video_file);
+        return ret;
+    }
+
+    if ((ret = avformat_find_stream_info(ifmt_ctx, NULL)) < 0) {
+        derror("Cannot find stream information\n");
+        return ret;
+    }
+
+    av_dump_format(ifmt_ctx, 0, input_video_file, 0);
+
+    // find the video stream, GIF supports only video, no audio
+    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+        AVStream* stream;
+        AVCodecContext* codec_ctx;
+        stream = ifmt_ctx->streams[i];
+        codec_ctx = stream->codec;
+
+        if (codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
+            codec_ctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+            // Open decoder
+            ret = avcodec_open2(
+                    codec_ctx, avcodec_find_decoder(codec_ctx->codec_id), NULL);
+            if (ret < 0) {
+                derror("Failed to open decoder for stream #%u\n", i);
+                return ret;
+            }
+            video_stream_index = i;
+            break;
+        }
+    }
+
+    if (video_stream_index == -1) {
+        derror("Cannot find video stream\n");
+        return -1;
+    }
+
+    // open the output gif file
+    ofmt_ctx = NULL;
+    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, output_video_file);
+    if (ofmt_ctx == NULL) {
+        derror("Could not create output context for %s\n", output_video_file);
+        avformat_close_input(&ifmt_ctx);
+        return AVERROR_UNKNOWN;
+    }
+
+    out_stream = avformat_new_stream(ofmt_ctx, NULL);
+    if (out_stream == NULL) {
+        derror("Failed allocating output stream\n");
+        ret = AVERROR_UNKNOWN;
+        goto Exit;
+    }
+
+    in_stream = ifmt_ctx->streams[video_stream_index];
+    dec_ctx = in_stream->codec;
+    enc_ctx = out_stream->codec;
+
+    if (dec_ctx->codec_type != AVMEDIA_TYPE_VIDEO) {
+        derror("Failed to find video stream\n");
+        return AVERROR_UNKNOWN;
+    }
+
+    encoder = avcodec_find_encoder(AV_CODEC_ID_GIF);
+    if (encoder == NULL) {
+        derror("GIF encoder not found\n");
+        ret = AVERROR_INVALIDDATA;
+        goto Exit;
+    }
+
+    if ((encoder->capabilities & CODEC_CAP_EXPERIMENTAL) != 0) {
+        enc_ctx->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+    }
+
+    enc_ctx->height = dec_ctx->height;
+    enc_ctx->width = dec_ctx->width;
+    enc_ctx->bit_rate = gif_bit_rate;
+    enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
+    // take first format from list of supported formats, which should be
+    // AV_PIX_FMT_RGB8
+    enc_ctx->pix_fmt = encoder->pix_fmts[0];
+
+    enc_ctx->time_base = dec_ctx->time_base;
+
+    ret = avcodec_open2(enc_ctx, encoder, NULL);
+    if (ret < 0) {
+        derror("Cannot open video encoder for GIF\n");
+        goto Exit;
+    }
+
+    if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
+        enc_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+    av_dump_format(ofmt_ctx, 0, output_video_file, 1);
+
+    if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE)) {
+        ret = avio_open(&ofmt_ctx->pb, output_video_file, AVIO_FLAG_WRITE);
+        if (ret < 0) {
+            derror("Could not open output file '%s'", output_video_file);
+            goto Exit;
+        }
+    }
+
+    // init muxer, write output file header
+    ret = avformat_write_header(ofmt_ctx, NULL);
+    if (ret < 0) {
+        derror("Error occurred in avformat_write_header()\n");
+        goto Exit;
+    }
+
+    packet.data = NULL;
+    packet.size = 0;
+
+    if (dec_ctx->pix_fmt != enc_ctx->pix_fmt) {
+        sws_ctx = sws_getContext(enc_ctx->width, enc_ctx->height,
+                                 dec_ctx->pix_fmt, enc_ctx->width,
+                                 enc_ctx->height,
+                                 /*AV_PIX_FMT_RGBA*/ enc_ctx->pix_fmt,
+                                 SCALE_FLAGS, NULL, NULL, NULL);
+        if (sws_ctx == NULL) {
+            derror("Could not initialize the conversion context\n");
+            goto Exit;
+        }
+    }
+
+    // read all packets, decode, convert, then encode to gif format
+    while (1) {
+        if ((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
+            break;
+        int stream_index = packet.stream_index;
+        if (stream_index != video_stream_index)
+            continue;
+
+        frame = av_frame_alloc();
+        if (!frame) {
+            ret = AVERROR(ENOMEM);
+            break;
+        }
+
+        tmp_frame = alloc_picture(enc_ctx->pix_fmt, enc_ctx->width,
+                                  enc_ctx->height);
+        if (!tmp_frame) {
+            ret = AVERROR(ENOMEM);
+            break;
+        }
+
+        av_packet_rescale_ts(&packet,
+                             ifmt_ctx->streams[stream_index]->time_base,
+                             ifmt_ctx->streams[stream_index]->codec->time_base);
+        ret = avcodec_decode_video2(ifmt_ctx->streams[stream_index]->codec,
+                                    frame, &got_frame, &packet);
+
+        av_free_packet(&packet);
+
+        if (ret < 0) {
+            av_frame_free(&frame);
+            av_frame_free(&tmp_frame);
+            derror("Decoding failed\n");
+            break;
+        }
+
+        if (got_frame) {
+            frame->pts = av_frame_get_best_effort_timestamp(frame);
+            if (sws_ctx != NULL)
+                sws_scale(sws_ctx, frame->data, frame->linesize, 0,
+                          enc_ctx->height, tmp_frame->data,
+                          tmp_frame->linesize);
+            tmp_frame->pts = frame->pts;
+            ret = encode_write_frame(ofmt_ctx, tmp_frame, stream_index, NULL);
+            av_frame_free(&frame);
+            av_frame_free(&tmp_frame);
+            if (ret < 0) {
+                break;
+            }
+        } else {
+            av_frame_free(&frame);
+            av_frame_free(&tmp_frame);
+        }
+    }
+
+    // flush encoder
+    ret = flush_encoder(ofmt_ctx, video_stream_index);
+    if (ret < 0) {
+        derror("Flushing encoder failed\n");
+        goto Exit;
+    }
+
+    av_write_trailer(ofmt_ctx);
+
+Exit:
+    if (sws_ctx != NULL)
+        sws_freeContext(sws_ctx);
+
+    if (video_stream_index != -1) {
+        avcodec_close(ifmt_ctx->streams[video_stream_index]->codec);
+        if (ofmt_ctx->streams[video_stream_index] &&
+            ofmt_ctx->streams[video_stream_index]->codec)
+            avcodec_close(ofmt_ctx->streams[video_stream_index]->codec);
+    }
+
+    avformat_close_input(&ifmt_ctx);
+    if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
+        avio_closep(&ofmt_ctx->pb);
+    avformat_free_context(ofmt_ctx);
+
+    return ret;
 }
