@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "38c76c16_2d67a293",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1353,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "60e880ce_8289d074",
+      "range": {
+        "startLine": 1353,
+        "startChar": 69,
+        "endLine": 1353,
+        "endChar": 76
+      },
+      "revId": "0e6ca55dced237fc24d86d0ccdbbd2345acdea34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b964630e_175867ab",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 10
@@ -60,6 +84,30 @@
       "writtenOn": "2017-07-13T23:07:42Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 1379,
+        "startChar": 69,
+        "endLine": 1379,
+        "endChar": 76
+      },
+      "revId": "0e6ca55dced237fc24d86d0ccdbbd2345acdea34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4eb61eb5_b7c8d10b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1379,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b964630e_175867ab",
       "range": {
         "startLine": 1379,
         "startChar": 69,
