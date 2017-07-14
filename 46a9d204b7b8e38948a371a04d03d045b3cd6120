@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a6db2893_7988c39c",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "66b3104a_bcca7a83",
+      "range": {
+        "startLine": 45,
+        "startChar": 22,
+        "endLine": 45,
+        "endChar": 34
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "1c4add56_ffaa9b81",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-07-13T21:10:08Z",
       "side": 1,
       "message": "what about a single ctor Context(bool coreProfile \u003d false) : mCoreProfile(coreProfile) {}\n?",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 60
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b434f954_a68bf775",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1c4add56_ffaa9b81",
       "range": {
         "startLine": 60,
         "startChar": 0,
@@ -94,6 +142,54 @@
     },
     {
       "key": {
+        "uuid": "08eab716_8aa533c2",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eae3141d_e9aeae33",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 25
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f01b6c9_4ced7305",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:48Z",
+      "side": 1,
+      "message": "I\u0027m not really sure. I don\u0027t think we end up copying it since EglContexts (that contain this) are managed by smart ptrs.",
+      "parentUuid": "3ad1d263_cf34043c",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 11
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "09e7358b_db3eef3a",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
         "patchSetId": 2
@@ -105,6 +201,30 @@
       "writtenOn": "2017-07-13T21:10:08Z",
       "side": 1,
       "message": "why protected? do you expect the subclasses to modify the value?",
+      "range": {
+        "startLine": 67,
+        "startChar": 3,
+        "endLine": 67,
+        "endChar": 30
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bbb39de3_5c9ddba0",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "09e7358b_db3eef3a",
       "range": {
         "startLine": 67,
         "startChar": 3,
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "91f41621_58e6caf0",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9befa9bf_748fbc8d",
+      "range": {
+        "startLine": 151,
+        "startChar": 12,
+        "endLine": 151,
+        "endChar": 31
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "86b0f833_26811619",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
         "patchSetId": 2
@@ -151,6 +295,30 @@
       "writtenOn": "2017-07-13T21:10:08Z",
       "side": 1,
       "message": "\u0026",
+      "range": {
+        "startLine": 222,
+        "startChar": 24,
+        "endLine": 222,
+        "endChar": 25
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c55e783_2e082faa",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T21:26:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86b0f833_26811619",
       "range": {
         "startLine": 222,
         "startChar": 24,
