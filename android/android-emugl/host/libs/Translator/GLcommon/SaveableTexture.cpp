@@ -20,6 +20,7 @@
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
+#include "GLcommon/GLutils.h"
 #include "GLES2/gl2ext.h"
 
 #include <algorithm>
@@ -397,6 +398,10 @@ void SaveableTexture::onSave(
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         assert(dispatcher.glGetIntegerv);
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+                pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
+                continue;
+            }
             dispatcher.glGetIntegerv(pixelStoreIndexes[i], &pixelStorePrev[i]);
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
@@ -425,14 +430,16 @@ void SaveableTexture::onSave(
                 1 + floor(log2((float)std::max(m_width, m_height)));
         auto saveTex = [this, stream, numLevels, &dispatcher, buffer](
                                GLenum target, bool isDepth) {
+            GLint width = m_width;
+            GLint height = m_height;
             for (unsigned int level = 0; level < numLevels; level++) {
-                GLint width = 1;
-                GLint height = 1;
                 GLint depth = 1;
-                dispatcher.glGetTexLevelParameteriv(target, level,
-                                                    GL_TEXTURE_WIDTH, &width);
-                dispatcher.glGetTexLevelParameteriv(target, level,
-                                                    GL_TEXTURE_HEIGHT, &height);
+                if (!isGles2Gles()) {
+                    dispatcher.glGetTexLevelParameteriv(target, level,
+                                                        GL_TEXTURE_WIDTH, &width);
+                    dispatcher.glGetTexLevelParameteriv(target, level,
+                                                        GL_TEXTURE_HEIGHT, &height);
+                }
                 stream->putBe32(width);
                 stream->putBe32(height);
                 if (isDepth) {
@@ -450,6 +457,10 @@ void SaveableTexture::onSave(
                                              buffer->data());
                 }
                 saveBuffer(stream, *buffer);
+                if (isGles2Gles()) {
+                    width = std::max(width/2, 1);
+                    height = std::max(height/2, 1);
+                }
             }
         };
         switch (m_target) {
@@ -485,6 +496,10 @@ void SaveableTexture::onSave(
         saveParam(GL_TEXTURE_WRAP_T);
         // Restore environment
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+                pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
+                continue;
+            }
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
                                          pixelStorePrev[i]);
@@ -516,8 +531,11 @@ void SaveableTexture::restore() {
         static constexpr GLint pixelStoreDesired[] = {0, 0, 0, 0, 0, 1};
 
         GLint pixelStorePrev[android::base::arraySize(pixelStoreIndexes)];
-
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+                pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
+                continue;
+            }
             dispatcher.glGetIntegerv(pixelStoreIndexes[i], &pixelStorePrev[i]);
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
@@ -618,6 +636,10 @@ void SaveableTexture::restore() {
         dispatcher.glTexParameteri(m_target, GL_TEXTURE_WRAP_T, mTexWrapT);
         // Restore environment
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
+            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+                pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
+                continue;
+            }
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
                                          pixelStorePrev[i]);
