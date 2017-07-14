@@ -758,7 +758,7 @@ extern "C" int main(int argc, char **argv) {
                         adbKeyPath.c_str());
                 android_chmod(guestAdbKeyPath.c_str(), 0777);
             } else {
-                dwarning("cannot read adb public key file: %d",
+                dwarning("cannot read adb public key file: %s",
                          adbKeyPath.c_str());
             }
             android_createExt4ImageFromDir(hw->disk_dataPartition_path,
