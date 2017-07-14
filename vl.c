@@ -931,6 +931,7 @@ static int create_qcow2_images(void) {
     /* List of paths to all images that can be mounted.*/
     const char* const image_paths[] = {
         android_hw->disk_systemPartition_initPath,
+        android_hw->disk_vendorPartition_initPath,
         android_hw->disk_cachePartition_path,
         android_hw->disk_dataPartition_path,
         android_hw->hw_sdCard_path,
@@ -947,7 +948,7 @@ static int create_qcow2_images(void) {
         }
         if (!strcmp(backing_image_path,
                     android_hw->disk_systemPartition_initPath)) {
-            /* System image is a special case, the backing image is
+            /* System & vendor image are special cases, the backing image is
              * in the SDK folder, but the QCoW2 image that the emulator
              * uses is created on a per-AVD basis and is placed in the
              * AVD's data folder.
@@ -956,6 +957,13 @@ static int create_qcow2_images(void) {
                 "system.img." QCOW2_SUFFIX;
             qcow2_image_path =
                 path_join(avd_data_dir, sysimage_qcow2_basename);
+        } else if (android_hw->disk_vendorPartition_initPath &&
+                !strcmp(backing_image_path,
+                    android_hw->disk_vendorPartition_initPath)) {
+            static const char vendorimage_qcow2_basename[] =
+                "vendor.img." QCOW2_SUFFIX;
+            qcow2_image_path =
+                path_join(avd_data_dir, vendorimage_qcow2_basename);
         } else {
             /* For all the other images except system image,
              * just create another file alongside them
