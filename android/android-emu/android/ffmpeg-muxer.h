@@ -47,7 +47,7 @@ typedef struct ffmpeg_recorder ffmpeg_recorder;
 //   NULL if failed
 //
 // this method is thread safe
-ffmpeg_recorder *ffmpeg_create_recorder(const char *path);
+ffmpeg_recorder* ffmpeg_create_recorder(const char* path);
 
 //
 // Save the output file and delete the recorder, this method must be called.
@@ -55,7 +55,7 @@ ffmpeg_recorder *ffmpeg_create_recorder(const char *path);
 //  recorder: the recorder pointer returned from ffmpeg_create_recorder()
 //
 // this method is thread safe
-void ffmpeg_delete_recorder(ffmpeg_recorder *recorder);
+void ffmpeg_delete_recorder(ffmpeg_recorder* recorder);
 
 // Add an audio track from the specified format, audio track is optional
 // stero audio and PCM format are assumed
@@ -70,7 +70,8 @@ void ffmpeg_delete_recorder(ffmpeg_recorder *recorder);
 //   < 0  if failed
 //
 // this method is thread safe
-int ffmpeg_add_audio_track(ffmpeg_recorder *recorder, int bit_rate,
+int ffmpeg_add_audio_track(ffmpeg_recorder* recorder,
+                           int bit_rate,
                            int sample_rate);
 
 // Add a video track from the specified format, video track is required in
@@ -84,13 +85,18 @@ int ffmpeg_add_audio_track(ffmpeg_recorder *recorder, int bit_rate,
 //              for example, 512 * 1024 * 1024. It should be higher than audio
 //              bit rate
 //   fps - frame rate per second, 30 and 60 are good numbers
+//   intra_spacing - the intra-frame spacing (key frames)
 // return:
 //   0    if successful
 //   < 0  if failed
 //
 // this method is thread safe
-int ffmpeg_add_video_track(ffmpeg_recorder *recorder, int width, int height,
-                           int bit_rate, int fps);
+int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
+                           int width,
+                           int height,
+                           int bit_rate,
+                           int fps,
+                           int intra_spacing = 12);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
@@ -102,7 +108,8 @@ int ffmpeg_add_video_track(ffmpeg_recorder *recorder, int width, int height,
 //   < 0  if failed
 //
 // this method is thread safe
-int ffmpeg_encode_audio_frame(ffmpeg_recorder *recorder, uint8_t *buffer, 
+int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
+                              uint8_t* buffer,
                               int size);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
@@ -117,7 +124,18 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder *recorder, uint8_t *buffer,
 //   < 0  if failed
 //
 // this method is thread safe
-int ffmpeg_encode_video_frame(ffmpeg_recorder *recorder,
-                              const uint8_t *rgb_pixels, int size);
+int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
+                              const uint8_t* rgb_pixels,
+                              int size);
+
+// convert a mp4 or webm video into animated gif
+// params:
+//     input_video_file - the input video file in webm or mp4 format
+//     output_video_file - the output animated gif file
+//     gif_bit_rate - bit rate for the gif file, usually smaller number
+//                    to reduce the file size
+int ffmpeg_convert_to_animated_gif(const char* input_video_file,
+                                   const char* output_video_file,
+                                   int gif_bit_rate);
 
 ANDROID_END_HEADER
