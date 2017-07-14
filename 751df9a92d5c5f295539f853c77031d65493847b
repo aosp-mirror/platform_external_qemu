@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a4b67e4e_ec25d7e0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderContext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T23:42:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d01ae67c_1fae4088",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 39
+      },
+      "revId": "751df9a92d5c5f295539f853c77031d65493847b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "23d9f0d3_fa4ba3ac",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderContext.cpp",
         "patchSetId": 4
@@ -72,6 +96,24 @@
       "side": 1,
       "message": "oh, it\u0027s vector, not a string. Sorry, Yahan is right.",
       "parentUuid": "15d65e7c_f8718221",
+      "revId": "751df9a92d5c5f295539f853c77031d65493847b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bea3c6ec_72cdf201",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderContext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T23:42:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d431771_bb4ac05d",
       "revId": "751df9a92d5c5f295539f853c77031d65493847b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
