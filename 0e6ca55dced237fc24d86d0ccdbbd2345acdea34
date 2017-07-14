@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "60e880ce_8289d074",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1353,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-14T16:41:09Z",
+      "side": 1,
+      "message": "Ah shit, looks like it\u0027s time to emulate most of the interface of this function :D :D : D",
+      "parentUuid": "6520cfce_ecff8173",
+      "range": {
+        "startLine": 1353,
+        "startChar": 69,
+        "endLine": 1353,
+        "endChar": 76
+      },
+      "revId": "0e6ca55dced237fc24d86d0ccdbbd2345acdea34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b964630e_175867ab",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 10
