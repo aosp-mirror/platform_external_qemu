@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "51477a6d_759ab50b",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 378,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-14T01:15:55Z",
+      "side": 1,
+      "message": "will LazyInstance\u003c\u003e  call into the de-constructor of Bugreport class? Will LazyInstance\u003cunique_ptr\u003c\u003e\u003e save us here? I need to make sure that the de-constructor is called for the reason of deleting the temp files.",
+      "parentUuid": "d3d9c2ad_9de819ce",
+      "range": {
+        "startLine": 378,
+        "startChar": 0,
+        "endLine": 378,
+        "endChar": 37
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7c6465c5_5a7e5f18",
         "filename": "android/android-emu/android/bugreport.cpp",
         "patchSetId": 2
@@ -140,6 +164,30 @@
     },
     {
       "key": {
+        "uuid": "387e8b6b_f937b63a",
+        "filename": "android/android-emu/android/bugreport.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-14T01:15:55Z",
+      "side": 1,
+      "message": "Good point.",
+      "parentUuid": "1bf91746_5c59864e",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 22,
+        "endChar": 14
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c76189c_1f2888cb",
         "filename": "android/android-emu/android/bugreport.h",
         "patchSetId": 2
@@ -151,6 +199,30 @@
       "writtenOn": "2017-07-13T22:59:45Z",
       "side": 1,
       "message": "what about returning a BugreportData* here that would contain everything? Then one would need to pass it to other functions to perform modifications, e.g. saveBugreport(data) or sendToGoogle(data); This way there\u0027s an explicit interface for what being done, and no implicit dependencies on some static variables.",
+      "range": {
+        "startLine": 31,
+        "startChar": 5,
+        "endLine": 31,
+        "endChar": 22
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "72d39724_b8fbb912",
+        "filename": "android/android-emu/android/bugreport.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-14T01:15:55Z",
+      "side": 1,
+      "message": "I do agree that without the callback, the interface would look much cleaner but they will actually require us to change generateBugreport() into four different interface , each of them of generate AdbBugreport, AdbLogcat, AvdDetails and Screenshot. Then, the UI code will call into each of them. I have no objection about this plan since the interface will be blocking anyway.",
+      "parentUuid": "8c76189c_1f2888cb",
       "range": {
         "startLine": 31,
         "startChar": 5,
@@ -220,6 +292,30 @@
       "writtenOn": "2017-07-13T22:59:45Z",
       "side": 1,
       "message": "initialize to false please",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 28,
+        "endChar": 2
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99399e16_22838b2e",
+        "filename": "android/android-emu/android/bugreport_data.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-14T01:15:55Z",
+      "side": 1,
+      "message": "will do.",
+      "parentUuid": "8bd7a8ff_61f4b02d",
       "range": {
         "startLine": 24,
         "startChar": 0,
