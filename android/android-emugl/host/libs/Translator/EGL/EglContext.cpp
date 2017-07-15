@@ -59,7 +59,7 @@ EglContext::EglContext(EglDisplay *dpy,
                         android::base::Stream* stream) {
                             return glesCtx->loadObject(type, localName, stream);
                         };
-        m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId,
+        m_shareGroup = mngr->attachOrCreateShareGroup(m_native.get(), shareGroupId,
                 stream, func);
         if (stream) {
             glesCtx->setShareGroup(m_shareGroup);
@@ -95,7 +95,7 @@ EglContext::~EglContext()
             m_config->nativeFormat(), &pbInfo);
     assert(pb);
     if (pb) {
-        const bool res = m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
+        const bool res = m_dpy->nativeType()->makeCurrent(pb, pb, m_native.get());
         assert(res);
         (void)res;
         pbSurface.setNativePbuffer(pb);
@@ -107,7 +107,7 @@ EglContext::~EglContext()
     //
     g_eglInfo->getIface(version())->setShareGroup(m_glesContext, {});
     if (m_mngr) {
-        m_mngr->deleteShareGroup(m_native);
+        m_mngr->deleteShareGroup(m_native.get());
     }
     m_shareGroup.reset();
 
