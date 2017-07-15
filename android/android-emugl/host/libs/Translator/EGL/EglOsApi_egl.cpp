@@ -138,7 +138,29 @@ public:
     EGLint mClientCtxVer;
 };
 
-struct EglOsEglContext : public EglOS::Context {
+class EglOsEglContext : public EglOS::Context {
+public:
+    EglOsEglContext(EglOsEglDispatcher* dispatcher,
+                    EGLDisplay display,
+                    EGLContext context) :
+        mDispatcher(dispatcher),
+        mDisplay(display),
+        mNativeCtx(context) { }
+
+    ~EglOsEglContext() {
+        D("%s %p\n", __FUNCTION__, mNativeCtx);
+        if (!mDispatcher->eglDestroyContext(mDisplay, mNativeCtx)) {
+            // TODO: print a better error message
+        }
+    }
+
+    EGLContext context() const {
+        return mNativeCtx;
+    }
+
+private:
+    EglOsEglDispatcher* mDispatcher = nullptr;
+    EGLDisplay mDisplay;
     EGLContext mNativeCtx;
 };
 
@@ -167,9 +189,8 @@ public:
     void queryConfigs(int renderableType,
                       AddConfigCallback* addConfigFunc,
                       void* addConfigOpaque);
-    Context* createContext(const PixelFormat* pixelFormat,
-                           Context* sharedContext);
-    bool destroyContext(Context* context);
+    emugl::SmartPtr<Context> createContext(const PixelFormat* pixelFormat,
+                                           Context* sharedContext);
     Surface* createPbufferSurface(const PixelFormat* pixelFormat,
                                   const PbufferInfo* info);
     Surface* createWindowSurface(PixelFormat* pf, EGLNativeWindowType win);
@@ -284,35 +305,25 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
     D("Host gets %d configs\n", numConfigs);
 }
 
-Context* EglOsEglDisplay::createContext(const PixelFormat* pixelFormat,
-                                        Context* sharedContext) {
+emugl::SmartPtr<Context>
+EglOsEglDisplay::createContext(const PixelFormat* pixelFormat,
+                               Context* sharedContext) {
     D("%s\n", __FUNCTION__);
     const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
+    D("with config %p\n", format->mConfigId);
     // Always GLES2
     EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
     EglOsEglContext* nativeSharedCtx = (EglOsEglContext*)sharedContext;
-    EglOsEglContext* ctx = new EglOsEglContext();
-    D("with config %p\n", format->mConfigId);
-    ctx->mNativeCtx = mDispatcher.eglCreateContext(
+    EGLContext newNativeCtx = mDispatcher.eglCreateContext(
             mDisplay, format->mConfigId,
-            nativeSharedCtx ? nativeSharedCtx->mNativeCtx : nullptr,
+            nativeSharedCtx ? nativeSharedCtx->context() : nullptr,
             attrib_list);
     CHECK_EGL_ERR
+    emugl::SmartPtr<Context> res =
+        std::make_shared<EglOsEglContext>(
+            &mDispatcher, mDisplay, newNativeCtx);
     D("%s done\n", __FUNCTION__);
-    return ctx;
-}
-
-bool EglOsEglDisplay::destroyContext(Context* context) {
-    D("%s %p\n", __FUNCTION__, context);
-    if (!context)
-        return false;
-    EglOsEglContext* ctx = (EglOsEglContext*)context;
-    if (!mDispatcher.eglDestroyContext(mDisplay, ctx->mNativeCtx)) {
-        // TODO: print a better error message
-        return false;
-    }
-    delete ctx;
-    return true;
+    return res;
 }
 
 Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
@@ -377,11 +388,11 @@ bool EglOsEglDisplay::makeCurrent(Surface* read,
         D("warning: makeCurrent a context without surface\n");
         return false;
     }
-    D("%s %p\n", __FUNCTION__, ctx ? ctx->mNativeCtx : nullptr);
+    D("%s %p\n", __FUNCTION__, ctx ? ctx->context() : nullptr);
     bool ret = mDispatcher.eglMakeCurrent(
             mDisplay, drawSfc ? drawSfc->getHndl() : EGL_NO_SURFACE,
             readSfc ? readSfc->getHndl() : EGL_NO_SURFACE,
-            ctx ? ctx->mNativeCtx : EGL_NO_CONTEXT);
+            ctx ? ctx->context() : EGL_NO_CONTEXT);
     if (readSfc) {
         D("make current surface type %d %d\n", readSfc->type(),
           drawSfc->type());

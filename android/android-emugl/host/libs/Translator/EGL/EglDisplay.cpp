@@ -37,14 +37,6 @@ EglDisplay::EglDisplay(EGLNativeDisplayType dpy,
 EglDisplay::~EglDisplay() {
     emugl::Mutex::AutoLock mutex(m_lock);
 
-    //
-    // Destroy the global context if one was created.
-    // (should be true for windows platform only)
-    //
-    if (m_globalSharedContext != NULL) {
-        m_idpy->destroyContext(m_globalSharedContext);
-    }
-
     m_configs.clear();
 
     delete m_manager[GLES_1_1];
@@ -551,7 +543,7 @@ EglOS::Context* EglDisplay::getGlobalSharedContext() const {
                 cfg->nativeFormat(), NULL);
     }
 
-    return m_globalSharedContext;
+    return m_globalSharedContext.get();
 #endif
 }
 
