@@ -233,14 +233,22 @@ private:
 // Implementation of EglOS::Context based on GLX.
 class GlxContext : public EglOS::Context {
 public:
-    explicit GlxContext(GLXContext context) : mContext(context) {}
+    explicit GlxContext(X11Display* display,
+                        GLXContext context) :
+        mDisplay(display),
+        mContext(context) {}
 
     GLXContext context() const { return mContext; }
+
+    ~GlxContext() {
+        glXDestroyContext(mDisplay, mContext);
+    }
 
     static GLXContext contextFor(EglOS::Context* context) {
         return static_cast<GlxContext*>(context)->context();
     }
 private:
+    X11Display* mDisplay = nullptr;
     GLXContext mContext = nullptr;
 };
 
@@ -313,7 +321,7 @@ public:
         return depth >= configDepth;
     }
 
-    virtual EglOS::Context* createContext(
+    virtual emugl::SmartPtr<EglOS::Context> createContext(
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
         ErrorHandler handler(mDisplay);
@@ -328,7 +336,7 @@ public:
             return NULL;
         }
 
-        return new GlxContext(ctx);
+        return std::make_shared<GlxContext>(mDisplay, ctx);
     }
 
     virtual bool destroyContext(EglOS::Context* context) {
