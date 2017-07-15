@@ -49,9 +49,10 @@ private:
 
 class MacContext : public EglOS::Context {
 public:
-    explicit MacContext(void* context) : mContext(context) {}
+    explicit MacContext(void* context) :
+        EglOS::Context(), mContext(context) {}
 
-    virtual ~MacContext() {
+    ~MacContext() {
         nsDestroyContext(mContext);
     }
 
@@ -234,19 +235,14 @@ public:
         return ret && match;
     }
 
-    virtual EglOS::Context* createContext(
+    virtual emugl::SmartPtr<EglOS::Context> createContext(
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
-        return new MacContext(
-                nsCreateContext(MacPixelFormat::from(pixelFormat)->handle(),
-                                macSharedContext));
-    }
-
-    virtual bool destroyContext(EglOS::Context* context) {
-        delete context;
-        return true;
+        return std::make_shared<MacContext>(
+                   nsCreateContext(MacPixelFormat::from(pixelFormat)->handle(),
+                       macSharedContext));
     }
 
     virtual EglOS::Surface* createPbufferSurface(
