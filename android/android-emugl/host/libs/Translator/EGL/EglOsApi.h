@@ -16,6 +16,8 @@
 #ifndef EGL_OS_API_H
 #define EGL_OS_API_H
 
+#include "emugl/common/smart_ptr.h"
+
 #include <EGL/egl.h>
 
 #define PBUFFER_MAX_WIDTH  32767
@@ -58,6 +60,7 @@ protected:
 class Context {
 public:
     Context() {}
+protected:
     virtual ~Context() {}
 };
 
@@ -141,10 +144,14 @@ public:
                                              unsigned int* width,
                                              unsigned int* height) = 0;
 
-    virtual Context* createContext(
-            const PixelFormat* pixelFormat, Context* sharedContext) = 0;
+    virtual emugl::SmartPtr<Context> createContext(
+            const PixelFormat* pixelFormat,
+            Context* sharedContext) = 0;
 
-    virtual bool destroyContext(Context* context) = 0;
+    virtual bool destroyContext(emugl::SmartPtr<Context> context) {
+        context.reset();
+        return true;
+    }
 
     virtual Surface* createPbufferSurface(
             const PixelFormat* pixelFormat, const PbufferInfo* info) = 0;

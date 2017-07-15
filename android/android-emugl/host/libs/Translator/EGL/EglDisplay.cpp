@@ -41,7 +41,7 @@ EglDisplay::~EglDisplay() {
     // Destroy the global context if one was created.
     // (should be true for windows platform only)
     //
-    if (m_globalSharedContext != NULL) {
+    if (m_globalSharedContext) {
         m_idpy->destroyContext(m_globalSharedContext);
     }
 
