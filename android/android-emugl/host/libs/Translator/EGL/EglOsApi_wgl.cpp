@@ -486,7 +486,15 @@ private:
 
 class WinContext : public EglOS::Context {
 public:
-    explicit WinContext(HGLRC ctx) : mCtx(ctx) {}
+    explicit WinContext(const WglExtensionsDispatch* dispatch, HGLRC ctx) :
+        mDispatch(dispatch), mCtx(ctx) {}
+
+    ~WinContext() {
+        if (!mDispatch->wglDeleteContext(mCtx)) {
+            fprintf(stderr, "error deleting WGL context! error 0x%x\n",
+                    GetLastError());
+        }
+    }
 
     HGLRC context() const { return mCtx; }
 
@@ -495,6 +503,7 @@ public:
     }
 
 private:
+    const WglExtensionsDispatch* mDispatch = nullptr;
     HGLRC mCtx = nullptr;
 };
 
@@ -867,7 +876,7 @@ public:
         return ret;
     }
 
-    virtual EglOS::Context* createContext(
+    virtual emugl::SmartPtr<EglOS::Context> createContext(
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
@@ -883,19 +892,7 @@ public:
                 return NULL;
             }
         }
-        return new WinContext(ctx);
-    }
-
-    virtual bool destroyContext(EglOS::Context* context) {
-        if (!context) {
-            return false;
-        }
-        if (!mDispatch->wglDeleteContext(WinContext::from(context))) {
-            GetLastError();
-            return false;
-        }
-        delete context;
-        return true;
+        return std::make_shared<WinContext>(mDispatch, ctx);
     }
 
     virtual EglOS::Surface* createPbufferSurface(
