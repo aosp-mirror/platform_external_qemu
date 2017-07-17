@@ -21,18 +21,6 @@
 #include "jdct.h"		/* Private declarations for DCT subsystem */
 
 #ifdef ANDROID_ARMV6_IDCT
-  #undef ANDROID_ARMV6_IDCT
-  #ifdef __arm__
-    #include <machine/cpu-features.h>
-    #if __ARM_ARCH__ >= 6
-      #define ANDROID_ARMV6_IDCT
-    #else
-      #warning "ANDROID_ARMV6_IDCT is disabled"
-    #endif
-  #endif
-#endif
-
-#ifdef ANDROID_ARMV6_IDCT
 
 /* Intentionally declare the prototype with arguments of primitive types instead
  * of type-defined ones. This will at least generate some warnings if jmorecfg.h
