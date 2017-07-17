@@ -45,6 +45,54 @@
       "revId": "eec78713ec31911c413170da4fd4844f90c8a624",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2f672c6_b5590c09",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T16:00:46Z",
+      "side": 1,
+      "message": "It\u0027s EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR of https://www.khronos.org/registry/EGL/extensions/KHR/EGL_KHR_create_context.txt, a way for desktop GL to integrate with EGL (ES doesn\u0027t care about this), to set the compatibility or core profile property of a new context.\n\nSince OpenGL ES doesn\u0027t care about this, we can steal it for configuring the host-side GL to use core profile, from RenderControl, directly vs pulling in libOpenglRender again in the EGL translator (Thank you and Yahan for pushing on it)",
+      "parentUuid": "78abde61_a86cb0af",
+      "range": {
+        "startLine": 235,
+        "startChar": 13,
+        "endLine": 235,
+        "endChar": 23
+      },
+      "revId": "eec78713ec31911c413170da4fd4844f90c8a624",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7eb4350_dee316ef",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T16:00:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c80c05ce_bc6693da",
+      "range": {
+        "startLine": 235,
+        "startChar": 24,
+        "endLine": 235,
+        "endChar": 25
+      },
+      "revId": "eec78713ec31911c413170da4fd4844f90c8a624",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
