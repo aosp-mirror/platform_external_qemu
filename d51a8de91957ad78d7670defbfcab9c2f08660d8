@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c69cb95_5b71cb98",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 922,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T18:27:23Z",
+      "side": 1,
+      "message": "nit: what about using milliseconds or microseconds timestamps? to be more precise about the delay",
+      "range": {
+        "startLine": 919,
+        "startChar": 0,
+        "endLine": 922,
+        "endChar": 17
+      },
+      "revId": "d51a8de91957ad78d7670defbfcab9c2f08660d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
