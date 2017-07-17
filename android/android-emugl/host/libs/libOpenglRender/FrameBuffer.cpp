@@ -33,6 +33,7 @@
 #include <string.h>
 
 using android::base::Stream;
+using android::base::System;
 
 namespace {
 
