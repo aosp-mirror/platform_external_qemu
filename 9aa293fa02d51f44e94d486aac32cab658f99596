@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "559a5828_51a9ace0",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1020,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-17T17:26:33Z",
+      "side": 1,
+      "message": "So got_frame is used to indicate a special return value? Is it possible to include this somehow in the return type? It took me a while to:\n\n- figure out what got_frame does and why it sometimes can be NULL.\n- figure out that a return value of 0 can mean two different things.\n- Why not return AVERROR_EOF?\n\nIf you want to keep it, could you add some documentation to make it easier to understand?",
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a5ce177e_ea6e447f",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1237,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-17T17:26:33Z",
+      "side": 1,
+      "message": "Consider using a smartpointer that calls av_frame_free.",
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f145058_d27fcede",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1246,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-17T17:26:33Z",
+      "side": 1,
+      "message": "should frame be freed here?",
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
