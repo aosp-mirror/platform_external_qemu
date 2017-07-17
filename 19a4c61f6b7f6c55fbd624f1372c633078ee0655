@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "f20fdacf_4cc57d64",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T23:47:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a52be01b_771328b0",
+      "range": {
+        "startLine": 69,
+        "startChar": 11,
+        "endLine": 69,
+        "endChar": 19
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3c93fd08_2e918b06",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
         "patchSetId": 3
@@ -60,6 +84,30 @@
       "writtenOn": "2017-07-17T18:24:12Z",
       "side": 1,
       "message": "nit: \u003d default",
+      "range": {
+        "startLine": 62,
+        "startChar": 13,
+        "endLine": 62,
+        "endChar": 16
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b174413_45dac236",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T23:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c93fd08_2e918b06",
       "range": {
         "startLine": 62,
         "startChar": 13,
@@ -118,6 +166,54 @@
     },
     {
       "key": {
+        "uuid": "cd707788_7f089162",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T23:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b9005890_00211110",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 64,
+        "endChar": 11
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0b4ef7d_da9fa2a3",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T23:47:26Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b7bb48d3_8cfa6be8",
+      "range": {
+        "startLine": 64,
+        "startChar": 23,
+        "endLine": 64,
+        "endChar": 25
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b2ece40_f3e3d331",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
         "patchSetId": 3
@@ -141,6 +237,30 @@
     },
     {
       "key": {
+        "uuid": "ac2c4870_3ec55102",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T23:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b2ece40_f3e3d331",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 11
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c77d02fd_0e4f2459",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
         "patchSetId": 3
@@ -152,6 +272,30 @@
       "writtenOn": "2017-07-17T18:24:12Z",
       "side": 1,
       "message": "const",
+      "range": {
+        "startLine": 157,
+        "startChar": 23,
+        "endLine": 157,
+        "endChar": 25
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3085fad4_c6877cf9",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T23:47:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c77d02fd_0e4f2459",
       "range": {
         "startLine": 157,
         "startChar": 23,
