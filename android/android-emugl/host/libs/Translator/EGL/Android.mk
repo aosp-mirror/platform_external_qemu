@@ -5,21 +5,25 @@ host_common_LDLIBS :=
 
 ifeq ($(BUILD_TARGET_OS),linux)
     host_OS_SRCS = EglOsApi_glx.cpp \
-                   EglOsApi_egl.cpp
+                   EglOsApi_egl.cpp \
+                   CoreProfileConfigs_linux.cpp \
+
     host_common_LDLIBS += -lGL -lX11 -ldl -lpthread
 endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
     host_OS_SRCS = EglOsApi_darwin.cpp \
                    MacNative.m   \
-                   MacPixelFormatsAttribs.m
+                   MacPixelFormatsAttribs.m \
 
     host_common_LDLIBS += -Wl,-framework,AppKit
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
     host_OS_SRCS = EglOsApi_wgl.cpp \
-                   EglOsApi_egl.cpp
+                   EglOsApi_egl.cpp \
+                   CoreProfileConfigs_windows.cpp \
+
     host_common_LDLIBS += -lgdi32
 endif
 

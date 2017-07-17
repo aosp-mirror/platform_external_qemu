@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2016 The Android Open Source Project
+* Copyright (C) 2017 The Android Open Source Project
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 #pragma once
 
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
+int getNumCoreProfileCtxAttribs();
 
-// Used to determine maximum supported GLES version.
-GLESDispatchMaxVersion calcMaxVersionFromDispatch();
+const int* getCoreProfileCtxAttribs(int index);
 
-// For determining whether or not to use core profile OpenGL.
-bool shouldEnableCoreProfile();
+void getCoreProfileCtxAttribsVersion(const int* attribs, int* maj, int* min);
