@@ -4,7 +4,9 @@ host_OS_SRCS :=
 host_common_LDLIBS :=
 
 ifeq ($(BUILD_TARGET_OS),linux)
-    host_OS_SRCS = EglOsApi_glx.cpp
+    host_OS_SRCS = EglOsApi_glx.cpp \
+                   GlxCoreProfileConfigs.cpp \
+
     host_common_LDLIBS += -lGL -lX11 -ldl -lpthread
 endif
 

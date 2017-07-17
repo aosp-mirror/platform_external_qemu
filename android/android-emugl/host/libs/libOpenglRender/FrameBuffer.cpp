@@ -89,12 +89,10 @@ static const GLint gles2ContextAttribsCoreGL[] =
      EGL_NONE };
 
 const GLint* getGles2ContextAttribs() {
-#ifdef __APPLE__
     if (emugl::getRenderer() == SELECTED_RENDERER_HOST &&
         emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
         return gles2ContextAttribsCoreGL;
     }
-#endif
     return gles2ContextAttribsESOrGLCompat;
 }
 
