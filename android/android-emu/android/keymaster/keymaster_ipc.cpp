@@ -45,7 +45,7 @@ extern "C" {
 using namespace keymaster;
 
 
-TrustyKeymaster* device;
+static TrustyKeymaster* device = nullptr;
 int32_t message_version = -1;
 
 
@@ -78,11 +78,6 @@ static long do_dispatch(void (AndroidKeymaster::*operation)(const Request&, Resp
     rsp.Serialize(out->get(), out->get() + *out_size);
 
     return NO_ERROR;
-}
-
-static uint32_t get_msg(keymaster_message* msg) {
-    LOG_I("not implemented for emulator yet", 0);
-    return 0;
 }
 
 static long keymaster_dispatch_non_secure(keymaster_message* msg,
@@ -162,7 +157,19 @@ static long keymaster_dispatch_non_secure(keymaster_message* msg,
     }
 }
 
-int keymaster_main(void) {
+int keymaster_ipc_call(std::vector<uint8_t> &input, std::vector<uint8_t> *output) {
+    // do some converting and call other method
+    keymaster_message *msg =  reinterpret_cast<keymaster_message*>(input.data());
+    UniquePtr<uint8_t[]> out;
+    uint32_t payload_size=input.size();
+    uint32_t out_size=0;
+    keymaster_dispatch_non_secure(msg, payload_size, &out, &out_size);
+    output->resize(out_size);
+    memcpy(output->data(), out.get(), out_size);
+    return 0;
+}
+
+int keymaster_ipc_init(void) {
 
     device = new TrustyKeymaster(new TrustyKeymasterContext, 16);
 
@@ -180,21 +187,5 @@ int keymaster_main(void) {
       LOG_E("Error %d determining AndroidKeymaster version.", response.error);
       return ERR_GENERIC;
     }
-
-
-    /* enter main event loop */
-
-    keymaster_message msg;
-    UniquePtr<uint8_t[]> out_buf;
-    uint32_t outsize=0;
-    while (true) {
-        uint32_t payload = get_msg(&msg);
-        keymaster_dispatch_non_secure(&msg, payload, &out_buf, &outsize);
-    }
-
     return 0;
-}
-
-extern "C" void android_init_keymaster(void) {
-    keymaster_main();
 }
