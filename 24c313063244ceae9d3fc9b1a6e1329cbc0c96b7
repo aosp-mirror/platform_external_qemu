@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f383c0b8_d36a1d75",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T23:01:33Z",
+      "side": 1,
+      "message": "please make the destructor protected \u003d default\notherwise one might somehow manage to delete it via base class and leak the actual native OS context",
+      "range": {
+        "startLine": 62,
+        "startChar": 4,
+        "endLine": 62,
+        "endChar": 11
+      },
+      "revId": "24c313063244ceae9d3fc9b1a6e1329cbc0c96b7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
