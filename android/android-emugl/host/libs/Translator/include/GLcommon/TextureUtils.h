@@ -13,8 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#ifndef _TEXTURE_UTILS_H
-#define _TEXTURE_UTILS_H
+#pragma once
 
 #include "GLEScontext.h"
 #include "PaletteTexture.h"
@@ -41,4 +40,21 @@ void  doCompressedTexImage2D(GLEScontext * ctx, GLenum target, GLint level,
 void deleteRenderbufferGlobal(GLuint rbo);
 GLenum decompressedInternalFormat(GLEScontext* ctx, GLenum compressedFormat);
 
-#endif
+bool isCubeMapFaceTarget(GLenum target);
+bool isCoreProfileEmulatedFormat(GLenum format);
+GLenum getEmulatedAlphaLuminanceFormat(GLenum format);
+GLint getEmulatedAlphaLuminanceInternalFormat(GLint internalformat, GLenum type);
+
+struct TextureSwizzle {
+    GLenum toRed = GL_RED;
+    GLenum toGreen = GL_GREEN;
+    GLenum toBlue = GL_BLUE;
+    GLenum toAlpha = GL_ALPHA;
+};
+
+TextureSwizzle getSwizzleForEmulatedFormat(GLenum format);
+GLenum swizzleComponentOf(const TextureSwizzle& s, GLenum component);
+TextureSwizzle concatSwizzles(const TextureSwizzle& first,
+                              const TextureSwizzle& next);
+
+bool isSwizzleParam(GLenum pname);

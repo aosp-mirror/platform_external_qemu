@@ -559,6 +559,7 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
 
     GLint err = GL_NO_ERROR;
     GLenum format, type;
+
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
     for (GLsizei i = 0; i < levels; i++)
         sPrepareTexImage2D(target, i, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
@@ -847,6 +848,13 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
     SET_ERROR_IF(!GLESv2Validate::isCompressedFormat(internalFormat) &&
                  !GLESv2Validate::pixelSizedFrmt(ctx, internalFormat, format, type),
                  GL_INVALID_OPERATION);
+
+    if (ctx->isCoreProfile()) {
+        sPrepareTextureForCoreProfile(
+            true, target, format, type,
+            &internalFormat, &format);
+    }
+
     s_glInitTexImage3D(target, level, internalFormat, width, height, depth, border);
     ctx->dispatcher().glTexImage3D(target, level, internalFormat, width, height, depth, border, format, type, data);
 }
@@ -862,6 +870,13 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
 
 GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid * data) {
     GET_CTX_V2();
+
+    if (ctx->isCoreProfile()) {
+        sPrepareTextureForCoreProfile(
+            true, target, format, type,
+            nullptr, &format);
+    }
+
     ctx->dispatcher().glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, data);
 }
 

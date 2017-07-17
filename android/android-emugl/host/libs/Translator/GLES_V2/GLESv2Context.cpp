@@ -395,10 +395,14 @@ void GLESv2Context::drawWithEmulations(
     bool needPointEmulation = mode == GL_POINTS;
 
     if (needPointEmulation) {
-        // Enable texture generation for GL_POINTS and gl_PointSize shader variable
-        // GLES2 assumes this is enabled by default, we need to set this state for GL
-        s_glDispatch.glEnable(GL_POINT_SPRITE);
-        s_glDispatch.glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        if (isCoreProfile()) {
+            // s_glDispatch.glEnable(GL_PROGRAM_POINT_SIZE);
+        } else {
+            // Enable texture generation for GL_POINTS and gl_PointSize shader variable
+            // GLES2 assumes this is enabled by default, we need to set this state for GL
+            s_glDispatch.glEnable(GL_POINT_SPRITE);
+            s_glDispatch.glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        }
     }
 
     if (needClientVBOSetup) {
@@ -470,8 +474,10 @@ void GLESv2Context::drawWithEmulations(
     }
 
     if (needPointEmulation) {
+        if (!isCoreProfile()) {
         s_glDispatch.glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         s_glDispatch.glDisable(GL_POINT_SPRITE);
+        }
     }
 }
 

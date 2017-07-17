@@ -1078,6 +1078,16 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glDisable(GLenum cap){
     GET_CTX();
+    if (ctx->isCoreProfile()) {
+        switch (cap) {
+        case GL_TEXTURE_2D:
+        case GL_POINT_SPRITE_OES:
+            return;
+        case GL_VERTEX_PROGRAM_POINT_SIZE:
+            cap = GL_PROGRAM_POINT_SIZE;
+            break;
+        }
+    }
     ctx->setEnable(cap, false);
     ctx->dispatcher().glDisable(cap);
 }
@@ -1094,10 +1104,12 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
     if (ctx->getMajorVersion() < 3)
         ctx->drawValidate();
 
-    if (mode == GL_POINTS) {
-        //Enable texture generation for GL_POINTS and gl_PointSize shader variable
-        //GLES2 assumes this is enabled by default, we need to set this state for GL
-        if (mode==GL_POINTS) {
+    //Enable texture generation for GL_POINTS and gl_PointSize shader variable
+    //GLES2 assumes this is enabled by default, we need to set this state for GL
+    if (mode==GL_POINTS) {
+        if (ctx->isCoreProfile()) {
+            ctx->dispatcher().glEnable(GL_PROGRAM_POINT_SIZE);
+        } else {
             ctx->dispatcher().glEnable(GL_POINT_SPRITE);
             ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
         }
@@ -1106,9 +1118,11 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
     if (mode == GL_POINTS) {
-        if (mode==GL_POINTS) {
-            ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        if (ctx->isCoreProfile()) {
+            ctx->dispatcher().glDisable(GL_PROGRAM_POINT_SIZE);
+        } else {
             ctx->dispatcher().glDisable(GL_POINT_SPRITE);
+            ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         }
     }
 }
@@ -1150,6 +1164,16 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
 GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
     GET_CTX();
+    if (ctx->isCoreProfile()) {
+        switch (cap) {
+        case GL_TEXTURE_2D:
+        case GL_POINT_SPRITE_OES:
+            return;
+        case GL_VERTEX_PROGRAM_POINT_SIZE:
+            cap = GL_PROGRAM_POINT_SIZE;
+            break;
+        }
+    }
     ctx->setEnable(cap, true);
     ctx->dispatcher().glEnable(cap);
 }
@@ -2446,6 +2470,7 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribPointerv(GLuint index, GLenum pnam
 
 GL_APICALL void  GL_APIENTRY glHint(GLenum target, GLenum mode){
     GET_CTX();
+    if (target == GL_GENERATE_MIPMAP_HINT) return;
     SET_ERROR_IF(!GLESv2Validate::hintTargetMode(target,mode),GL_INVALID_ENUM);
     ctx->dispatcher().glHint(target,mode);
 }
@@ -2901,35 +2926,53 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
 }
 
 static void sPrepareTextureForCoreProfile(
+    bool is3d,
     GLenum target,
-    GLint internalformat, GLenum format,
-    GLint* internalformat_out,
-    GLenum* format_out) {
+    GLenum format, GLenum type,
+    GLint* internalformat_out, GLenum* format_out) {
+
+    if (format != GL_ALPHA &&
+        format != GL_LUMINANCE &&
+        format != GL_LUMINANCE_ALPHA) {
+        return;
+    }
+
     GET_CTX_V2();
 
-    // GL_ALPHA is deprecated
-    if ((!format_out || format == GL_ALPHA) &&
-        (!internalformat_out || internalformat == GL_ALPHA)) {
-
-        if (format_out) *format_out = GL_RED;
-        if (internalformat_out) *internalformat_out = GL_RED;
-
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_RED);
-    // GL_LUMINANCE is deprecated
-    } else if ((!format_out || format == GL_LUMINANCE) &&
-               (!internalformat_out || internalformat == GL_LUMINANCE)) {
-
-        if (format_out) *format_out = GL_RED;
-        if (internalformat_out) *internalformat_out = GL_RED;
-
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, GL_RED);
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, GL_RED);
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, GL_RED);
-        ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, GL_ONE);
+    if (isCubeMapFaceTarget(target)) {
+        target = is3d ? GL_TEXTURE_CUBE_MAP_ARRAY_EXT : GL_TEXTURE_CUBE_MAP;
     }
+
+    // Set up the swizzle from the underlying supported
+    // host format to the emulated format.
+    // Make sure to re-apply any user-specified custom swizlz
+    TextureSwizzle userSwz; // initialized to identity map
+
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        userSwz.toRed = texData->getSwizzle(GL_TEXTURE_SWIZZLE_R);
+        userSwz.toGreen = texData->getSwizzle(GL_TEXTURE_SWIZZLE_G);
+        userSwz.toBlue = texData->getSwizzle(GL_TEXTURE_SWIZZLE_B);
+        userSwz.toAlpha = texData->getSwizzle(GL_TEXTURE_SWIZZLE_A);
+    }
+
+    TextureSwizzle swz =
+        concatSwizzles(getSwizzleForEmulatedFormat(format),
+                       userSwz);
+
+    ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_R, swz.toRed);
+    ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_G, swz.toGreen);
+    ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_B, swz.toBlue);
+    ctx->dispatcher().glTexParameteri(target, GL_TEXTURE_SWIZZLE_A, swz.toAlpha);
+
+    // Change the format/internalformat communicated to GL.
+    GLenum emulatedFormat =
+        getEmulatedAlphaLuminanceFormat(format);
+    GLint emulatedInternalFormat =
+        getEmulatedAlphaLuminanceInternalFormat(format, type);
+
+    if (format_out) *format_out = emulatedFormat;
+    if (internalformat_out) *internalformat_out = emulatedInternalFormat;
 }
 
 GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const GLvoid* pixels){
@@ -2942,7 +2985,7 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
 
     if (ctx->isCoreProfile()) {
         sPrepareTextureForCoreProfile(
-            target, internalformat, format,
+            false, target, format, type,
             &internalformat, &format);
     }
 
@@ -3001,7 +3044,7 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
 
     if (ctx->isCoreProfile()) {
         sPrepareTextureForCoreProfile(
-            target, 0, format,
+            false, target, format, type,
             nullptr, &format);
     }
 
