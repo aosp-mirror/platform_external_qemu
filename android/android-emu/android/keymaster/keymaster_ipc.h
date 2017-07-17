@@ -16,7 +16,6 @@
 
 #pragma once
 
-#define KEYMASTER_PORT "com.android.trusty.keymaster"
 #define KEYMASTER_MAX_BUFFER_LENGTH 4096
 
 // Commands
@@ -42,16 +41,9 @@ enum keymaster_command {
 	KM_GET_KEY_CHARACTERISTICS      = (15 << KEYMASTER_REQ_SHIFT),
 };
 
-#ifdef __ANDROID__
 
-/**
- * keymaster_message - Serial header for communicating with KM server
- * @cmd: the command, one of keymaster_command.
- * @payload: start of the serialized command specific payload
- */
-struct keymaster_message {
-	uint32_t cmd;
-	uint8_t payload[0];
-};
 
-#endif
+int keymaster_ipc_init(void);
+
+int keymaster_ipc_call(std::vector<uint8_t> &input, std::vector<uint8_t> *output);
+

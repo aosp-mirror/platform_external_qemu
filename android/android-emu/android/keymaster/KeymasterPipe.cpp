@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/keymaster/KeymasterPipe.h"
+#include "android/keymaster/keymaster_ipc.h"
 #include "android/utils/debug.h"
 
 #include <assert.h>
@@ -123,6 +124,7 @@ void KeymasterPipe::addToRecvBuffer(const uint8_t* data, uint32_t len) {
 void KeymasterPipe::decodeAndExecute() {
     mGuestRecvBufferHead = 0;
     // Tell the guest we are ready to send the return value
+    keymaster_ipc_call(mCommandBuffer, &mGuestRecvBuffer);
     mState = State::WaitingForGuestRecv;
 }
 
@@ -133,4 +135,9 @@ void registerKeymasterPipeService() {
 
 extern "C" void android_init_keymaster_pipe(void) {
     android::registerKeymasterPipeService();
+}
+
+extern "C" void android_init_keymaster(void) {
+    keymaster_ipc_init();
+    android_init_keymaster_pipe();
 }
