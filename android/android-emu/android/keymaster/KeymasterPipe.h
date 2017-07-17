@@ -12,8 +12,6 @@
 
 #include "android/emulation/AndroidPipe.h"
 
-#include "android/keymaster/Keymaster.h"
-
 #include <memory>
 #include <vector>
 
