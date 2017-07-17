@@ -18,10 +18,14 @@
 
 #include "DispatchTables.h"
 
+#include "android/base/system/System.h"
 #include "emugl/common/feature_control.h"
 #include "emugl/common/misc.h"
 
 #include <algorithm>
+
+using android::base::System;
+using android::base::OsType;
 
 GLESDispatchMaxVersion calcMaxVersionFromDispatch() {
     // Detect the proper OpenGL ES version to advertise to the system.
@@ -76,4 +80,17 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch() {
     emugl::setGlesVersion(maj, min);
 
     return res;
+}
+
+// For determining whether or not to use core profile OpenGL.
+bool shouldEnableCoreProfile() {
+
+    // TODO: Remove once CTS conformant
+    if (System::get()->getOsType() == OsType::Linux &&
+        emugl_feature_is_enabled(android::featurecontrol::PlayStoreImage)) {
+        return false;
+    }
+
+    return emugl::getRenderer() == SELECTED_RENDERER_HOST &&
+           emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion);
 }
