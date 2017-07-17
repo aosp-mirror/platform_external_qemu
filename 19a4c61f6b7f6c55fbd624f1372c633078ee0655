@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "99c15256_58d8ef5d",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-17T17:21:02Z",
+      "side": 1,
+      "message": "A unique_ptr might just do the job? Since I don\u0027t think it is actually shared.",
+      "range": {
+        "startLine": 69,
+        "startChar": 11,
+        "endLine": 69,
+        "endChar": 19
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
