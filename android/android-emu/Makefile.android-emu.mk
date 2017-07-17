@@ -374,6 +374,7 @@ LOCAL_SRC_FILES := \
     android/keymaster/trusty_keymaster_context.cpp \
     android/keymaster/trusty_keymaster_enforcement.cpp \
     android/keymaster/trusty_rng.c \
+    android/keymaster/KeymasterPipe.cpp \
     android/loadpng.c \
     android/main-common.c \
     android/main-help.cpp \
