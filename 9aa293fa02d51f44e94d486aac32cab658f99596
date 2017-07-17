@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "bda73c6a_9c27942a",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:32:58Z",
+      "side": 1,
+      "message": "we usually define a D() macro on top of the source to do this kind of selection, e.g. in android/android-emu/android/emulation/AndroidPipe.cpp",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 153,
+        "endChar": 48
+      },
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d79d35e1_6e331baf",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:32:58Z",
+      "side": 1,
+      "message": "should we only delete it on function success, or when?\nit\u0027s really hard to manage memory when it gets deleted far away from the allocation place and only conditionally. Use smart pointers instead to at least update the information about allocated/deleted state",
+      "range": {
+        "startLine": 342,
+        "startChar": 0,
+        "endLine": 342,
+        "endChar": 25
+      },
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e012d40c_e8aa999b",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 504,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:32:58Z",
+      "side": 1,
+      "message": "nit: sRegistered, or, better, sIsRegistered\n\nbtw, it isn\u0027t thread safe unless there\u0027s some external synchronization. Is that ok?",
+      "range": {
+        "startLine": 504,
+        "startChar": 12,
+        "endLine": 504,
+        "endChar": 22
+      },
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "559a5828_51a9ace0",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
@@ -47,6 +116,52 @@
       "writtenOn": "2017-07-17T17:26:33Z",
       "side": 1,
       "message": "should frame be freed here?",
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3aedf39e_3ed9aa8d",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1288,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:32:58Z",
+      "side": 1,
+      "message": "this is so C that it cries to be seen. C++\u0027s smart pointers are safer and simpler - you can\u0027t forget to clean them",
+      "range": {
+        "startLine": 1288,
+        "startChar": 0,
+        "endLine": 1288,
+        "endChar": 18
+      },
+      "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f6635d7_4e5ef57b",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:32:58Z",
+      "side": 1,
+      "message": "should it really be a part of the main emulation library? what about a separate executable or dll for this?",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 139,
+        "endChar": 53
+      },
       "revId": "9aa293fa02d51f44e94d486aac32cab658f99596",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
