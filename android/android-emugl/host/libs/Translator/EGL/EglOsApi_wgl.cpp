@@ -15,6 +15,7 @@
 */
 #include "EglOsApi.h"
 
+#include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
 #include "emugl/common/thread_store.h"
@@ -28,6 +29,8 @@
 #include <GLES/glplatform.h>
 #include <GL/gl.h>
 #include <GL/wglext.h>
+
+#include <EGL/eglext.h>
 
 #include <unordered_map>
 
@@ -292,10 +295,15 @@ HWND createDummyWindow() {
     X(int, wglReleasePbufferDCARB, (HPBUFFERARB hPbuffer, HDC hdc)) \
     X(BOOL, wglDestroyPbufferARB, (HPBUFFERARB hPbuffer)) \
 
+// List of functions defined by WGL_ARB_create_context
+#define LIST_WGL_ARB_create_context_FUNCTIONS(X) \
+    X(HGLRC, wglCreateContextAttribsARB, (HDC hDC, HGLRC hshareContext, const int *attribList)) \
+
 #define LIST_WGL_EXTENSIONS_FUNCTIONS(X) \
     LIST_WGL_ARB_pixel_format_FUNCTIONS(X) \
     LIST_WGL_ARB_make_current_read_FUNCTIONS(X) \
     LIST_WGL_ARB_pbuffer_FUNCTIONS(X) \
+    LIST_WGL_ARB_create_context_FUNCTIONS(X) \
 
 // A structure used to hold pointers to WGL extension functions.
 struct WglExtensionsDispatch : public WglBaseDispatch {
@@ -354,6 +362,7 @@ public:
         LOAD_WGL_EXTENSION(WGL_ARB_pixel_format)
         LOAD_WGL_EXTENSION(WGL_ARB_make_current_read)
         LOAD_WGL_EXTENSION(WGL_ARB_pbuffer)
+        LOAD_WGL_EXTENSION(WGL_ARB_create_context)
 
         // Done.
         return result;
@@ -566,6 +575,13 @@ public:
         return getInternalDC(nullptr);
     }
 
+    HDC getDefaultNontrivialDC() {
+        return mNontrivialDC;
+    }
+    void setNontrivialDC(const WinPixelFormat* format) {
+        mNontrivialDC = getInternalDC(format);
+    }
+
     // Return a thread-local device context associated with a specific
     // pixel format. The result is owned by this instance, and is automatically
     // reclaimed on thread exit. Don't try to call ReleaseDC() on it.
@@ -670,6 +686,7 @@ private:
 
     const WglBaseDispatch* mDispatch = nullptr;
     emugl::ThreadStore mTls;
+    HDC mNontrivialDC = nullptr;
 };
 
 bool initPixelFormat(HDC dc, const WglExtensionsDispatch* dispatch) {
@@ -805,6 +822,11 @@ void pixelFormatToConfig(WinGlobals* globals,
     info.config_id = (EGLint) index;
     info.frmt = new WinPixelFormat(frmt, index);
 
+    if (!globals->getDefaultNontrivialDC() &&
+        info.red_size >= 8) {
+        globals->setNontrivialDC(WinPixelFormat::from(info.frmt));
+    }
+
     (*addConfigFunc)(addConfigOpaque, &info);
 }
 
@@ -842,6 +864,8 @@ public:
                     addConfigFunc,
                     addConfigOpaque);
         }
+
+        queryCoreProfileSupport();
     }
 
     virtual bool isValidNativeWin(EglOS::Surface* win) {
@@ -880,7 +904,6 @@ public:
             EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
-        (void)profileMask;
 
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
         HDC dpy = mGlobals->getDummyDC(format);
@@ -888,13 +911,24 @@ public:
             return nullptr;
         }
 
-        HGLRC ctx = mDispatch->wglCreateContext(dpy);
-        if (ctx && sharedContext) {
-            if (!mDispatch->wglShareLists(WinContext::from(sharedContext), ctx)) {
-                mDispatch->wglDeleteContext(ctx);
-                return NULL;
+        bool useCoreProfile =
+            mCoreProfileSupported &&
+            (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
+
+        HGLRC ctx;
+        if (useCoreProfile) {
+            ctx = mDispatch->wglCreateContextAttribsARB(
+                dpy, WinContext::from(sharedContext), mCoreProfileCtxAttribs);
+        } else {
+            ctx = mDispatch->wglCreateContext(dpy);
+            if (ctx && sharedContext) {
+                if (!mDispatch->wglShareLists(WinContext::from(sharedContext), ctx)) {
+                    mDispatch->wglDeleteContext(ctx);
+                    return NULL;
+                }
             }
         }
+
         return std::make_shared<WinContext>(mDispatch, ctx);
     }
 
@@ -1007,6 +1041,43 @@ public:
     }
 
 private:
+    // Returns the highest level of OpenGL core profile support in
+    // this WGL implementation.
+    void queryCoreProfileSupport() {
+        mCoreProfileSupported = false;
+
+        if (!mDispatch->wglCreateContextAttribsARB) {
+            // Not supported, don't even try.
+            return;
+        }
+
+        // Ascending index order of context attribs :
+        // decreasing GL major/minor version
+        HGLRC testContext = nullptr;
+        HDC dpy = mGlobals->getDefaultNontrivialDC();
+
+        for (int i = 0; i < getNumCoreProfileCtxAttribs(); i++) {
+            const int* attribs = getCoreProfileCtxAttribs(i);
+            testContext =
+                mDispatch->wglCreateContextAttribsARB(
+                        dpy, nullptr /* no shared context */,
+                        attribs);
+
+            if (testContext) {
+                mCoreProfileSupported = true;
+                mCoreProfileCtxAttribs = attribs;
+                int glmaj, glmin;
+                getCoreProfileCtxAttribsVersion(attribs, &glmaj, &glmin);
+                mDispatch->wglDeleteContext(testContext);
+                return;
+            }
+        }
+    }
+
+    bool mCoreProfileSupported = false;
+    const int* mCoreProfileCtxAttribs = nullptr;
+    WinPixelFormat* mDefaultPixelFormat = nullptr;
+
     const WglExtensionsDispatch* mDispatch = nullptr;
     WinGlobals* mGlobals = nullptr;
 };

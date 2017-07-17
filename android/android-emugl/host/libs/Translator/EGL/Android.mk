@@ -4,7 +4,9 @@ host_OS_SRCS :=
 host_common_LDLIBS :=
 
 ifeq ($(BUILD_TARGET_OS),linux)
-    host_OS_SRCS = EglOsApi_glx.cpp
+    host_OS_SRCS = EglOsApi_glx.cpp \
+                   CoreProfileConfigs_linux.cpp \
+
     host_common_LDLIBS += -lGL -lX11 -ldl -lpthread
 endif
 
@@ -18,7 +20,8 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
     host_OS_SRCS = EglOsApi_wgl.cpp \
-                   EglOsApi_egl.cpp
+                   EglOsApi_egl.cpp \
+                   CoreProfileConfigs_windows.cpp \
     host_common_LDLIBS += -lgdi32
 endif
 
