@@ -38,9 +38,15 @@
 struct ColorBufferRef {
     ColorBufferPtr cb;
     uint32_t refcount;  // number of client-side references
-    bool opened; // tracks whether opened at least once. In O+,
+
+    // Tracks whether opened at least once. In O+,
     // color buffers can be created/closed immediately,
-    // but then registered (opened) afterwards
+    // but then registered (opened) afterwards.
+    bool opened;
+
+    // Tracks the time when this buffer got a close request while not being
+    // opened yet.
+    android::base::System::Duration closedTs;
 };
 
 typedef std::unordered_map<HandleType, std::pair<WindowSurfacePtr, HandleType> > WindowSurfaceMap;
@@ -216,9 +222,9 @@ public:
     // createColorBuffer(). Note that if the reference count reaches 0,
     // the instance is destroyed automatically.
     void closeColorBuffer(HandleType p_colorbuffer);
-    bool closeColorBufferLocked(HandleType p_colorbuffer);
 
     void cleanupProcGLObjects(uint64_t puid);
+
     // Equivalent for eglMakeCurrent() for the current display.
     // |p_context|, |p_drawSurface| and |p_readSurface| are the handle values
     // of the context, the draw surface and the read surface, respectively.
@@ -378,7 +384,13 @@ private:
 
     bool bindSubwin_locked();
     bool removeSubWindow_locked();
-    void cleanupProcGLObjects_locked(uint64_t puid);
+    void cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
+
+    void markOpened(ColorBufferRef* cbRef);
+    void closeColorBufferLocked(HandleType p_colorbuffer, bool forced = false);
+    void performDelayedColorBufferCloseLocked();
+    void eraseDelayedCloseColorBufferLocked(
+            HandleType cb, android::base::System::Duration ts);
 
 private:
     static FrameBuffer *s_theFrameBuffer;
@@ -407,6 +419,24 @@ private:
     RenderContextMap m_contexts;
     WindowSurfaceMap m_windows;
     ColorBufferMap m_colorbuffers;
+
+    // A collection of color buffers that were closed without any usages
+    // (|opened| == false).
+    //
+    // If a buffer reached |refcount| == 0 while not being |opened|, instead of
+    // deleting it we remember the timestamp when this happened. Later, we
+    // check if the buffer stayed unopened long enough and if it did, we delete
+    // it permanently. On the other hand, if the color buffer was used then
+    // we don't care about timestamps anymore.
+    //
+    // Note: this collection is ordered by |ts| field.
+    struct ColorBufferCloseInfo {
+        android::base::System::Duration ts; // when we got the close request.
+        HandleType cbHandle;    // 0 == already closed, do nothing
+    };
+    using ColorBufferDelayedClose = std::vector<ColorBufferCloseInfo>;
+    ColorBufferDelayedClose m_colorBufferDelayedCloseList;
+
     ColorBuffer::Helper* m_colorBufferHelper = nullptr;
 
     EGLSurface m_eglSurface = EGL_NO_SURFACE;
