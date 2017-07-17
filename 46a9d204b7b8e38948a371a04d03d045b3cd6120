@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "8de7fd33_dab1e727",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:35:48Z",
+      "side": 1,
+      "message": "then let\u0027s explicitly make it noncopyable with DISALLOW_COPY_AND_ASSIGN\nit\u0027s quite unfortunate when someone accidentally copies it and references already deleted native resource later",
+      "parentUuid": "9f01b6c9_4ced7305",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 11
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "09e7358b_db3eef3a",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
         "patchSetId": 2
