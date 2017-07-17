@@ -22,6 +22,145 @@
       "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a52be01b_771328b0",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglContext.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:24:12Z",
+      "side": 1,
+      "message": "unique_ptr\u003c\u003e can\u0027t store a deleter based on the object type. shared_ptr captures a deleter at the creation time, so it will delete the correct context even without virtual functions",
+      "parentUuid": "99c15256_58d8ef5d",
+      "range": {
+        "startLine": 69,
+        "startChar": 11,
+        "endLine": 69,
+        "endChar": 19
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c93fd08_2e918b06",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:24:12Z",
+      "side": 1,
+      "message": "nit: \u003d default",
+      "range": {
+        "startLine": 62,
+        "startChar": 13,
+        "endLine": 62,
+        "endChar": 16
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7bb48d3_8cfa6be8",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:24:12Z",
+      "side": 1,
+      "message": "same \u003d default",
+      "range": {
+        "startLine": 64,
+        "startChar": 23,
+        "endLine": 64,
+        "endChar": 25
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b9005890_00211110",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:24:12Z",
+      "side": 1,
+      "message": "delete?",
+      "range": {
+        "startLine": 64,
+        "startChar": 4,
+        "endLine": 64,
+        "endChar": 11
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8b2ece40_f3e3d331",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:24:12Z",
+      "side": 1,
+      "message": "delete",
+      "range": {
+        "startLine": 55,
+        "startChar": 4,
+        "endLine": 55,
+        "endChar": 11
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c77d02fd_0e4f2459",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:24:12Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 157,
+        "startChar": 23,
+        "endLine": 157,
+        "endChar": 25
+      },
+      "revId": "19a4c61f6b7f6c55fbd624f1372c633078ee0655",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
