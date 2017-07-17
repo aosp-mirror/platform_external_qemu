@@ -22,6 +22,30 @@
       "revId": "d51a8de91957ad78d7670defbfcab9c2f08660d8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce50e9cb_216ce9a0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 922,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-17T18:38:52Z",
+      "side": 1,
+      "message": "I don\u0027t think we need any precision here - we could keep them for a minute with no real harm done, and using seconds was just my first choice. I was going to make it 5 sec at first, so even with milliseconds it\u0027s an overkill of precision",
+      "parentUuid": "5c69cb95_5b71cb98",
+      "range": {
+        "startLine": 919,
+        "startChar": 0,
+        "endLine": 922,
+        "endChar": 17
+      },
+      "revId": "d51a8de91957ad78d7670defbfcab9c2f08660d8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
