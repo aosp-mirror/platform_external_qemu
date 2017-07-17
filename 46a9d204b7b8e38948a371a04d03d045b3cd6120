@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "23218d11_c97052a8",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-17T23:47:48Z",
+      "side": 1,
+      "message": "Done (in https://android-review.googlesource.com/#/c/436259/)",
+      "parentUuid": "8de7fd33_dab1e727",
+      "range": {
+        "startLine": 65,
+        "startChar": 4,
+        "endLine": 65,
+        "endChar": 11
+      },
+      "revId": "46a9d204b7b8e38948a371a04d03d045b3cd6120",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "09e7358b_db3eef3a",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
         "patchSetId": 2
