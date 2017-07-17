@@ -184,6 +184,7 @@ void FrameBuffer::finalize() {
     sGlobals->condVar.broadcastAndUnlock(&lock);
 
     m_colorbuffers.clear();
+    m_colorBufferDelayedCloseList.clear();
     if (m_useSubWindow) {
         removeSubWindow_locked();
     }
@@ -858,8 +859,8 @@ int FrameBuffer::openColorBuffer(HandleType p_colorbuffer) {
         ERR("FB: openColorBuffer cb handle %#x not found\n", p_colorbuffer);
         return -1;
     }
-    (*c).second.refcount++;
-    (*c).second.opened = true;
+    c->second.refcount++;
+    markOpened(&c->second);
 
     uint64_t puid = tInfo->m_puid;
     if (puid) {
@@ -883,27 +884,76 @@ void FrameBuffer::closeColorBuffer(HandleType p_colorbuffer) {
     }
 }
 
-bool FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer) {
+void FrameBuffer::closeColorBufferLocked(HandleType p_colorbuffer,
+                                         bool forced) {
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
     if (c == m_colorbuffers.end()) {
         // This is harmless: it is normal for guest system to issue
         // closeColorBuffer command when the color buffer is already
         // garbage collected on the host. (we dont have a mechanism
         // to give guest a notice yet)
-        return true;
+        return;
     }
+
     // The guest can and will gralloc_alloc/gralloc_free and then
     // gralloc_register a buffer, due to API level (O+) or
     // timing issues.
     // So, we don't actually close the color buffer when refcount
     // reached zero, unless it has been opened at least once already.
-    if (--(*c).second.refcount == 0 &&
-        (*c).second.opened) {
-        m_colorbuffers.erase(c);
-        return true;
+    // Instead, put it on a 'delayed close' list to return to it later.
+    if (--c->second.refcount == 0) {
+        if (c->second.opened || forced) {
+            eraseDelayedCloseColorBufferLocked(c->first, c->second.closedTs);
+            m_colorbuffers.erase(c);
+        } else {
+            c->second.closedTs = System::get()->getUnixTime();
+            m_colorBufferDelayedCloseList.push_back(
+                    {c->second.closedTs, p_colorbuffer});
+        }
     }
 
-    return false;
+    performDelayedColorBufferCloseLocked();
+}
+
+void FrameBuffer::performDelayedColorBufferCloseLocked() {
+    // Let's wait just long enough to make sure it's not because of instant
+    // timestamp change (end of previous second -> beginning of a next one),
+    // but not for long - this is a workaround for race conditions, and they
+    // are quick.
+    static constexpr int kColorBufferClosingDelaySec = 2;
+
+    const auto now = System::get()->getUnixTime();
+    auto it = m_colorBufferDelayedCloseList.begin();
+    while (it != m_colorBufferDelayedCloseList.end() &&
+           it->ts + kColorBufferClosingDelaySec <= now) {
+        if (it->cbHandle != 0) {
+            m_colorbuffers.erase(it->cbHandle);
+        }
+        ++it;
+    }
+    m_colorBufferDelayedCloseList.erase(
+                m_colorBufferDelayedCloseList.begin(), it);
+}
+
+void FrameBuffer::eraseDelayedCloseColorBufferLocked(
+        HandleType cb, android::base::System::Duration ts)
+{
+    // Find the first delayed buffer with a timestamp <= |ts|
+    auto it = std::lower_bound(
+                  m_colorBufferDelayedCloseList.begin(),
+                  m_colorBufferDelayedCloseList.end(), ts,
+                  [](const ColorBufferCloseInfo& ci, System::Duration ts) {
+        return ci.ts < ts;
+    });
+    while (it != m_colorBufferDelayedCloseList.end() &&
+           it->ts == ts) {
+        // if this is the one we need - clear it out.
+        if (it->cbHandle == cb) {
+            it->cbHandle = 0;
+            break;
+        }
+        ++it;
+    }
 }
 
 void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
@@ -911,7 +961,7 @@ void FrameBuffer::cleanupProcGLObjects(uint64_t puid) {
     cleanupProcGLObjects_locked(puid);
 }
 
-void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
+void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid, bool forced) {
     {
         ScopedBind bind(m_colorBufferHelper);
         // Clean up window surfaces
@@ -920,7 +970,7 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
             if (procIte != m_procOwnedWindowSurfaces.end()) {
                 for (auto whndl : procIte->second) {
                     auto w = m_windows.find(whndl);
-                    closeColorBufferLocked(w->second.second);
+                    closeColorBufferLocked(w->second.second, forced);
                     m_windows.erase(w);
                 }
                 m_procOwnedWindowSurfaces.erase(procIte);
@@ -934,7 +984,7 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
             auto procIte = m_procOwnedColorBuffers.find(puid);
             if (procIte != m_procOwnedColorBuffers.end()) {
                 for (auto cb : procIte->second) {
-                    closeColorBufferLocked(cb);
+                    closeColorBufferLocked(cb, forced);
                 }
                 m_procOwnedColorBuffers.erase(procIte);
             }
@@ -966,6 +1016,12 @@ void FrameBuffer::cleanupProcGLObjects_locked(uint64_t puid) {
             m_procOwnedRenderContext.erase(procIte);
         }
     }
+}
+
+void FrameBuffer::markOpened(ColorBufferRef* cbRef) {
+    cbRef->opened = true;
+    eraseDelayedCloseColorBufferLocked(cbRef->cb->getHndl(), cbRef->closedTs);
+    cbRef->closedTs = 0;
 }
 
 bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
@@ -1004,7 +1060,7 @@ bool FrameBuffer::setWindowSurfaceColorBuffer(HandleType p_surface,
     }
 
     (*w).second.first->setColorBuffer((*c).second.cb);
-    (*c).second.opened = true;
+    markOpened(&c->second);
     if (w->second.second) {
         closeColorBufferLocked(w->second.second);
     }
@@ -1345,7 +1401,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     m_lastPostedColorBuffer = p_colorbuffer;
 
     if (m_subWin) {
-        c->second.opened = true;
+        markOpened(&c->second);
         GLuint tex = c->second.cb->scale();
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
@@ -1500,10 +1556,16 @@ void FrameBuffer::onSave(Stream* stream) {
                    [](Stream* s, const RenderContextMap::value_type& pair) {
         pair.second->onSave(s);
     });
+
+    // We don't need to save |m_colorBufferCloseTsMap| here - there's enough
+    // information to reconstruct it when loading.
+    System::Duration now = System::get()->getUnixTime();
     saveCollection(stream, m_colorbuffers,
-                   [](Stream* s, const ColorBufferMap::value_type& pair) {
+                   [now](Stream* s, const ColorBufferMap::value_type& pair) {
         pair.second.cb->onSave(s);
         s->putBe32(pair.second.refcount);
+        s->putByte(pair.second.opened);
+        s->putBe32(std::max<System::Duration>(0, pair.second.closedTs - now));
     });
     stream->putBe32(m_lastPostedColorBuffer);
     saveCollection(stream, m_windows,
@@ -1530,29 +1592,35 @@ bool FrameBuffer::onLoad(Stream* stream) {
     // cleanups
     {
         ScopedBind scopedBind(m_colorBufferHelper);
-        if (m_procOwnedColorBuffers.empty()
-                && m_procOwnedEGLImages.empty()
-                && m_procOwnedRenderContext.empty()
-                && (!m_contexts.empty() || !m_windows.empty()
-                || !m_colorbuffers.empty())) {
-            // we are likely on a legacy system image, which does not have process
-            // owned objects. We need to force cleanup everything
+        if (m_procOwnedWindowSurfaces.empty() &&
+            m_procOwnedColorBuffers.empty() && m_procOwnedEGLImages.empty() &&
+            m_procOwnedRenderContext.empty() &&
+            (!m_contexts.empty() || !m_windows.empty() ||
+             m_colorbuffers.size() > m_colorBufferDelayedCloseList.size())) {
+            // we are likely on a legacy system image, which does not have
+            // process owned objects. We need to force cleanup everything
             m_contexts.clear();
             m_windows.clear();
             m_colorbuffers.clear();
+        } else {
+            while (m_procOwnedWindowSurfaces.size()) {
+                cleanupProcGLObjects_locked(
+                        m_procOwnedWindowSurfaces.begin()->first, true);
+            }
+            while (m_procOwnedColorBuffers.size()) {
+                cleanupProcGLObjects_locked(
+                        m_procOwnedColorBuffers.begin()->first, true);
+            }
+            while (m_procOwnedEGLImages.size()) {
+                cleanupProcGLObjects_locked(
+                        m_procOwnedEGLImages.begin()->first, true);
+            }
+            while (m_procOwnedRenderContext.size()) {
+                cleanupProcGLObjects_locked(
+                        m_procOwnedRenderContext.begin()->first, true);
+            }
         }
-        while (m_procOwnedWindowSurfaces.size()) {
-            cleanupProcGLObjects_locked(m_procOwnedWindowSurfaces.begin()->first);
-        }
-        while (m_procOwnedColorBuffers.size()) {
-            cleanupProcGLObjects_locked(m_procOwnedColorBuffers.begin()->first);
-        }
-        while (m_procOwnedEGLImages.size()) {
-            cleanupProcGLObjects_locked(m_procOwnedEGLImages.begin()->first);
-        }
-        while (m_procOwnedRenderContext.size()) {
-            cleanupProcGLObjects_locked(m_procOwnedRenderContext.begin()->first);
-        }
+        m_colorBufferDelayedCloseList.clear();
         assert(m_contexts.empty());
         assert(m_windows.empty());
         assert(m_colorbuffers.empty());
@@ -1588,13 +1656,19 @@ bool FrameBuffer::onLoad(Stream* stream) {
     });
     assert(!android::base::find(m_contexts, 0));
 
+    auto now = System::get()->getUnixTime();
     loadCollection(stream, &m_colorbuffers,
-                   [this](Stream* stream) -> ColorBufferMap::value_type {
+                   [this, now](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
                                               m_colorBufferHelper));
         const HandleType handle = cb->getHndl();
         const unsigned refCount = stream->getBe32();
-        return { handle, { std::move(cb), refCount } };
+        const bool opened = stream->getByte();
+        const System::Duration closedTs = now + stream->getBe32();
+        if (!opened && refCount == 0) {
+            m_colorBufferDelayedCloseList.push_back({closedTs, handle});
+        }
+        return { handle, { std::move(cb), refCount, opened, closedTs } };
     });
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
 
