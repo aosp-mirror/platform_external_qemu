@@ -68,13 +68,11 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
     // Use core profile across all context majorVersions
     // only for Mac -gpu host renderer (TODO: Linux/Win),
     // and only when GLESDynamicVersion is enabled.
-#ifdef __APPLE__
     if (emugl::getRenderer() == SELECTED_RENDERER_HOST &&
         emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
         contextAttribs.push_back(EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR);
         contextAttribs.push_back(EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
     }
-#endif
 
     contextAttribs.push_back(EGL_NONE);
 
