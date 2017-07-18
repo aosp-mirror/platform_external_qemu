@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "9bc05c0c_57726d90",
+        "filename": "scripts/convert_avd_to_cros.bat",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-07-18T18:17:52Z",
+      "side": 1,
+      "message": "Also maybe move the script to the android/scripts subdir, since it\u0027s unrelated to upstream qemu?",
+      "revId": "fe4ea22493befee3906ab1511e2471871bf50fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "557e8ad8_daeea181",
         "filename": "scripts/convert_avd_to_cros.bat",
         "patchSetId": 3
