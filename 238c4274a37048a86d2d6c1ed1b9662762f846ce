@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4aa53465_1e2fbed2",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-18T18:27:30Z",
+      "side": 1,
+      "message": "are you sure this size is always equal to the frame buffer size? do we want to make an assert somewhere?",
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36c95dad_0fc2c6e3",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1365,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-18T18:27:30Z",
+      "side": 1,
+      "message": "indentation?",
+      "range": {
+        "startLine": 1340,
+        "startChar": 0,
+        "endLine": 1365,
+        "endChar": 23
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d621d814_3cc8d391",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 447,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-18T18:27:30Z",
+      "side": 1,
+      "message": "use unique pointer? for m_fbImage as well?",
+      "range": {
+        "startLine": 447,
+        "startChar": 4,
+        "endLine": 447,
+        "endChar": 18
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
