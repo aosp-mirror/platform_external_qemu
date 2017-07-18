@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "713feb2c_34144cb8",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T18:36:21Z",
+      "side": 1,
+      "message": "StringView as well?",
+      "range": {
+        "startLine": 75,
+        "startChar": 48,
+        "endLine": 75,
+        "endChar": 66
+      },
+      "revId": "c426efd203827629d8e799b2dae239ee179d1657",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

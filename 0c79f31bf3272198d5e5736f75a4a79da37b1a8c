@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9d4dc3b_cd2b16d3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ANGLEShaderParser.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T18:36:21Z",
+      "side": 1,
+      "message": "what is this for?",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 168,
+        "endChar": 86
+      },
+      "revId": "0c79f31bf3272198d5e5736f75a4a79da37b1a8c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ca7b838_417c242b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.h",
+        "patchSetId": 17
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T18:36:21Z",
+      "side": 1,
+      "message": "please change this to StringView as well\nOtherwise if user passes a char*, c++ creates a temporary std::string for the parameter. Then when you return it, returned StringView will have a pointer to destroyed temporary\u0027s internal buffer\nyou can create an std::string inside for lookups, but don\u0027t put it into the public interface",
+      "range": {
+        "startLine": 75,
+        "startChar": 49,
+        "endLine": 75,
+        "endChar": 67
+      },
+      "revId": "0c79f31bf3272198d5e5736f75a4a79da37b1a8c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
