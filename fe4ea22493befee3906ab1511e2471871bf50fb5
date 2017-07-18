@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "29aa45a6_cb704100",
+        "filename": "scripts/convert_avd_to_cros.bat",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-07-18T19:07:32Z",
+      "side": 1,
+      "message": "OK with moving the script?",
+      "parentUuid": "9bc05c0c_57726d90",
+      "revId": "fe4ea22493befee3906ab1511e2471871bf50fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "557e8ad8_daeea181",
         "filename": "scripts/convert_avd_to_cros.bat",
         "patchSetId": 3
@@ -101,6 +119,30 @@
       "side": 1,
       "message": "Yes. But it doesn\u0027t hurt. any way we will replace it with hw.cpu.arch\u003dx86_64",
       "parentUuid": "de146013_f78717ae",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 41
+      },
+      "revId": "fe4ea22493befee3906ab1511e2471871bf50fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7ac8e74_49e69c42",
+        "filename": "scripts/convert_avd_to_cros.bat",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-07-18T19:07:32Z",
+      "side": 1,
+      "message": "Yes, but it\u0027s more a sanity check to make sure the state of the AVD is well understood by the script and is expected. In case it\u0027s accidentally run against a non-CrOS AVD for example. There are other checks in the script that *should* catch this, but 2 sanity checks are better than one :-)",
+      "parentUuid": "267a4d3f_78668ce9",
       "range": {
         "startLine": 27,
         "startChar": 0,
