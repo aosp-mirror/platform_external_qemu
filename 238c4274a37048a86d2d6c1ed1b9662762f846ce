@@ -19,6 +19,121 @@
     },
     {
       "key": {
+        "uuid": "ef5819e6_290bdba2",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "unqiue_ptr\u003cchar[]\u003e?",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 17
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "12e2a1b0_b7c623e4",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "some name different from member IMO is better here",
+      "range": {
+        "startLine": 43,
+        "startChar": 36,
+        "endLine": 43,
+        "endChar": 42
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1277749d_86347085",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "please add initializers to all POD variables",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 21
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51838986_caae37fb",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "you could try WorkerThread\u003cFrame\u003e instead of handcrafted threading here\nAnd if Frame is movable you can pass it by value instead of extra heap allocations",
+      "range": {
+        "startLine": 59,
+        "startChar": 0,
+        "endLine": 63,
+        "endChar": 21
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4dfc1292_620e8fb7",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "delete?",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 33
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36c95dad_0fc2c6e3",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 6
@@ -35,6 +150,75 @@
         "startChar": 0,
         "endLine": 1365,
         "endChar": 23
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fd682e3_48c47334",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1375,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "free the allocated framebuffer memory here? 2*4*w*h could be quite significant size, e.g. pixel xl would require 30MB here. Something with 4K screen would compe closer to 100MB",
+      "range": {
+        "startLine": 1375,
+        "startChar": 0,
+        "endLine": 1375,
+        "endChar": 24
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b6da42f_4310f52d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1395,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "it should be an atomic, otherwise it\u0027s not guaranteed to be updated in this thread. std::atomic\u003cbool\u003e instead of a plain bool will work 100%",
+      "range": {
+        "startLine": 1395,
+        "startChar": 8,
+        "endLine": 1395,
+        "endChar": 22
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f89d8f11_cff69ab8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1490,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-18T23:20:13Z",
+      "side": 1,
+      "message": "I\u0027m curious why do we need to have everything built into FrameBuffer instead of a custom onPost callback for screen recording?",
+      "range": {
+        "startLine": 1482,
+        "startChar": 3,
+        "endLine": 1490,
+        "endChar": 5
       },
       "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
