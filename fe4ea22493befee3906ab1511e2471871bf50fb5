@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "557e8ad8_daeea181",
+        "filename": "scripts/convert_avd_to_cros.bat",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-07-18T16:21:39Z",
+      "side": 1,
+      "message": "nit: put it on a separate line to be consistent with previous case. Same for further occurrences.",
+      "range": {
+        "startLine": 25,
+        "startChar": 14,
+        "endLine": 25,
+        "endChar": 24
+      },
+      "revId": "fe4ea22493befee3906ab1511e2471871bf50fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de146013_f78717ae",
+        "filename": "scripts/convert_avd_to_cros.bat",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-07-18T16:21:39Z",
+      "side": 1,
+      "message": "Won\u0027t that also match hw.cpu.arch\u003dx86_64 ?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 41
+      },
+      "revId": "fe4ea22493befee3906ab1511e2471871bf50fb5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
