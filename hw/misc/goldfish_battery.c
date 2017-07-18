@@ -19,20 +19,25 @@
 #include <assert.h>
 
 enum {
-	/* status register */
-	BATTERY_INT_STATUS	    = 0x00,
-	/* set this to enable IRQ */
-	BATTERY_INT_ENABLE	    = 0x04,
+    /* status register */
+    BATTERY_INT_STATUS = 0x00,
+    /* set this to enable IRQ */
+    BATTERY_INT_ENABLE = 0x04,
 
-	BATTERY_AC_ONLINE       = 0x08,
-	BATTERY_STATUS          = 0x0C,
-	BATTERY_HEALTH          = 0x10,
-	BATTERY_PRESENT         = 0x14,
-	BATTERY_CAPACITY        = 0x18,
+    BATTERY_AC_ONLINE = 0x08,
+    BATTERY_STATUS = 0x0C,
+    BATTERY_HEALTH = 0x10,
+    BATTERY_PRESENT = 0x14,
+    BATTERY_CAPACITY = 0x18,
+    BATTERY_VOLTAGE = 0x1C,
+    BATTERY_TEMP = 0x20,
+    BATTERY_CHARGE_COUNTER = 0x24,
+    BATTERY_VOLTAGE_MAX = 0x28,
+    BATTERY_CURRENT_MAX = 0x2c,
 
-	BATTERY_STATUS_CHANGED	= 1U << 0,
-	AC_STATUS_CHANGED   	= 1U << 1,
-	BATTERY_INT_MASK        = BATTERY_STATUS_CHANGED | AC_STATUS_CHANGED,
+    BATTERY_STATUS_CHANGED = 1U << 0,
+    AC_STATUS_CHANGED = 1U << 1,
+    BATTERY_INT_MASK = BATTERY_STATUS_CHANGED | AC_STATUS_CHANGED,
 };
 
 #define TYPE_GOLDFISH_BATTERY "goldfish_battery"
@@ -55,6 +60,11 @@ struct goldfish_battery_state {
     uint32_t present;
     uint32_t capacity;
     uint32_t hw_has_battery;
+    uint32_t voltage;
+    uint32_t temp;
+    uint32_t charge_counter;
+    uint32_t voltage_max;
+    uint32_t current_max;
 };
 
 /* update this each time you update the battery_state struct */
@@ -185,6 +195,21 @@ int goldfish_battery_read_prop(int property)
         case POWER_SUPPLY_PROP_CAPACITY:
             retVal = battery_state->capacity;
             break;
+        case POWER_SUPPLY_PROP_VOLTAGE_NOW:
+            retVal = battery_state->voltage;
+            break;
+        case POWER_SUPPLY_PROP_TEMP:
+            retVal = battery_state->temp;
+            break;
+        case POWER_SUPPLY_PROP_CHARGE_COUNTER:
+            retVal = battery_state->charge_counter;
+            break;
+        case POWER_SUPPLY_PROP_VOLTAGE_MAX:
+            retVal = battery_state->voltage_max;
+            break;
+        case POWER_SUPPLY_PROP_CURRENT_MAX:
+            retVal = battery_state->current_max;
+            break;
         default:
             retVal = 0;
             break;
@@ -261,7 +286,16 @@ static uint64_t goldfish_battery_read(void *opaque, hwaddr offset, unsigned size
             return s->present;
         case BATTERY_CAPACITY:
             return s->capacity;
-
+        case BATTERY_VOLTAGE:
+            return s->voltage;
+        case BATTERY_TEMP:
+            return s->temp;
+        case BATTERY_CHARGE_COUNTER:
+            return s->charge_counter;
+        case BATTERY_VOLTAGE_MAX:
+            return s->voltage_max;
+        case BATTERY_CURRENT_MAX:
+            return s->current_max;
         default:
             error_report ("goldfish_battery_read: Bad offset " TARGET_FMT_plx,
                     offset);
@@ -326,6 +360,11 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
     s->health = POWER_SUPPLY_HEALTH_GOOD;
     s->present = 1;     // battery is present
     s->capacity = 100;   // 100% charged
+    s->voltage = 5000000;  // 5 volt
+    s->temp = 250;         // 25 celsuis
+    s->charge_counter = 10;
+    s->voltage_max = 5000000;  // 5 volt
+    s->current_max = 5000000;  // 5 amp
 }
 
 static void goldfish_battery_class_init(ObjectClass *klass, void *data)
