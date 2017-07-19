@@ -18,6 +18,7 @@
 #include "android/base/files/StreamSerializing.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
+#include "GLcommon/TextureData.h"
 
 #include <GLES/gl.h>
 #include <GLES/glext.h>
@@ -225,6 +226,26 @@ GLuint FramebufferData::getAttachment(GLenum attachment,
     if (outTarget) *outTarget = m_attachPoints[idx].target;
     if (outObj) *outObj = m_attachPoints[idx].obj;
     return m_attachPoints[idx].name;
+}
+
+GLint FramebufferData::getAttachmentInternalFormat(GLEScontext* ctx, GLenum attachment) {
+    int idx = attachmentPointIndex(attachment);
+
+    // Don't expose own attachments.
+    if (m_attachPoints[idx].owned) return 0;
+
+    GLenum target = m_attachPoints[idx].target;
+    GLuint name = m_attachPoints[idx].name;
+
+    if (target == GL_RENDERBUFFER) {
+        RenderbufferData* rbData = (RenderbufferData*)
+            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, name);
+        return rbData ? rbData->internalformat : 0;
+    } else {
+        TextureData* texData = (TextureData*)
+            ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, name);
+        return texData? texData->internalFormat : 0;
+    }
 }
 
 int FramebufferData::attachmentPointIndex(GLenum attachment)
