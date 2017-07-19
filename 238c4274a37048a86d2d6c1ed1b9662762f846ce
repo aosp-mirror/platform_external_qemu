@@ -290,6 +290,30 @@
     },
     {
       "key": {
+        "uuid": "38e658d0_0e1d6aff",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1490,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-07-19T17:32:31Z",
+      "side": 1,
+      "message": "I initially implemented it as another post callback, but the encoder was having issues dealing with the variable framerate since the post call only occurs when the frame is updated. I needed a way to get a consistent framerate, but didn\u0027t think implementing it here would make sense, so I did it in screen-recorder.cpp. That way, if screen-recorder wants x fps, it will just call getFrame() at x fps.",
+      "parentUuid": "f89d8f11_cff69ab8",
+      "range": {
+        "startLine": 1482,
+        "startChar": 3,
+        "endLine": 1490,
+        "endChar": 5
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d621d814_3cc8d391",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 6
