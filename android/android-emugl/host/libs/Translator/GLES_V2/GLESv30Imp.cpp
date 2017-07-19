@@ -812,24 +812,17 @@ GL_APICALL GLint GL_APIENTRY glGetFragDataLocation(GLuint program, const char * 
 
 GL_APICALL void GL_APIENTRY glGetInteger64v(GLenum pname, GLint64 * data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetInteger64v(pname, data);
-
     s_glStateQueryTv<GLint64>(true, pname, data, s_glGetInteger64v_wrapper);
-
 }
 
 GL_APICALL void GL_APIENTRY glGetIntegeri_v(GLenum target, GLuint index, GLint * data) {
     GET_CTX_V2();
-
     s_glStateQueryTi_v<GLint>(target, index, data, s_glGetIntegeri_v_wrapper);
-
 }
 
 GL_APICALL void GL_APIENTRY glGetInteger64i_v(GLenum target, GLuint index, GLint64 * data) {
     GET_CTX_V2();
-
     s_glStateQueryTi_v<GLint64>(target, index, data, s_glGetInteger64i_v_wrapper);
-
 }
 
 GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * data) {
