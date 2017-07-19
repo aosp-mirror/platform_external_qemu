@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8ac24833_a6565e94",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-19T18:33:00Z",
+      "side": 1,
+      "message": "I will move the QT code into the UI-code aka bugreport-page.cpp",
+      "parentUuid": "befc79bb_39d76aa9",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 15
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b584d932_16bbdfa1",
         "filename": "android/android-emu/android/bugreport.cpp",
         "patchSetId": 2
@@ -59,6 +83,30 @@
       "writtenOn": "2017-07-13T22:59:45Z",
       "side": 1,
       "message": "what about passing a created instance of ScreenCapturer into initialize() instead of |hasWindow|? if passed ScreenCapturer is null there will be no screenshot",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 108,
+        "endChar": 13
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba3a9cb9_2ad4f85e",
+        "filename": "android/android-emu/android/bugreport.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-19T18:33:00Z",
+      "side": 1,
+      "message": "This is very much doable since we initialize the bugreport in emulator-qt-window.cpp and emulator-qt-no-window.cpp.",
+      "parentUuid": "0d8d0d41_a93d7f90",
       "range": {
         "startLine": 100,
         "startChar": 0,
@@ -386,6 +434,30 @@
       "writtenOn": "2017-07-13T22:59:45Z",
       "side": 1,
       "message": "what\u0027s the purpose of this agent? Agents as of now serve two purposes:\n1. Isolate engine-specific code (qemu1, qemu2) from the AndroidEmu library, to make sure AndroidEmu remains generic and doesn\u0027t need to call into an engine directly\n2. Isolate the non-UI part of AndroidEmu library from the UI part, to make sure emulator is able to run without UI.\n\nBugreport object, as I see in the CL, is a part of a generic non-UI AndroidEmu library. It\u0027s totally OK for the UI code to call into it directly - e.g. Qt code already uses metrics reporter and crash reporter directly\n\nAnother question is why do we need to have a C interface for a bug reporter? As of now, I only see C++ code initializing it and calling into it. C interfaces are legacy interfaces, they remain from the times when most of the code was in C. We still need to create them if a C source needs to call into a service, but here I only see emulator Qt window (and Qt no-window) use it. Is there a way to expose the C++ interface directly?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 18
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f92a3ee7_d7e04c1f",
+        "filename": "android/android-emu/android/emulation/control/bugreport_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-19T18:33:00Z",
+      "side": 1,
+      "message": "In response to the purpose of this agent. \nActually, Bugreport object is compiled into the emulator-libui module instead of android-emu module because bugreport agent requires QT library. Thus, the bugreport agent is NOT isolating non-UI from UI. I think it\u0027d be okay to make the bugreport agent not relying on the QT library by moving the sendToGoolge logic into the UI code. \n\nIn response to the use case:\nanother use case is for the console command, where console.c needs a C-interface.",
+      "parentUuid": "666284d7_6b14357c",
       "range": {
         "startLine": 20,
         "startChar": 0,
