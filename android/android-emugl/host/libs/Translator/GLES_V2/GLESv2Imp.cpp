@@ -1078,6 +1078,14 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glDisable(GLenum cap){
     GET_CTX();
+    if (isCoreProfile()) {
+        switch (cap) {
+        case GL_TEXTURE_2D:
+        case GL_POINT_SPRITE_OES:
+            // always enabled in core
+            return;
+        }
+    }
     ctx->setEnable(cap, false);
     ctx->dispatcher().glDisable(cap);
 }
@@ -1094,20 +1102,20 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
     if (ctx->getMajorVersion() < 3)
         ctx->drawValidate();
 
-    if (mode == GL_POINTS) {
-        //Enable texture generation for GL_POINTS and gl_PointSize shader variable
-        //GLES2 assumes this is enabled by default, we need to set this state for GL
-        if (mode==GL_POINTS) {
+    //Enable texture generation for GL_POINTS and gl_PointSize shader variable
+    //GLES2 assumes this is enabled by default, we need to set this state for GL
+    if (mode==GL_POINTS) {
+        ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        if (!isCoreProfile()) {
             ctx->dispatcher().glEnable(GL_POINT_SPRITE);
-            ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
         }
     }
 }
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
     if (mode == GL_POINTS) {
-        if (mode==GL_POINTS) {
-            ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        if (!isCoreProfile()) {
             ctx->dispatcher().glDisable(GL_POINT_SPRITE);
         }
     }
@@ -1150,6 +1158,13 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
 GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
     GET_CTX();
+    if (isCoreProfile()) {
+        switch (cap) {
+        case GL_TEXTURE_2D:
+        case GL_POINT_SPRITE_OES:
+            return;
+        }
+    }
     ctx->setEnable(cap, true);
     ctx->dispatcher().glEnable(cap);
 }
@@ -2446,6 +2461,10 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribPointerv(GLuint index, GLenum pnam
 
 GL_APICALL void  GL_APIENTRY glHint(GLenum target, GLenum mode){
     GET_CTX();
+
+    if (isCoreProfile() &&
+        target == GL_GENERATE_MIPMAP_HINT) return;
+
     SET_ERROR_IF(!GLESv2Validate::hintTargetMode(target,mode),GL_INVALID_ENUM);
     ctx->dispatcher().glHint(target,mode);
 }
