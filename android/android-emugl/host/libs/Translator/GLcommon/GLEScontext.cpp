@@ -1999,6 +1999,86 @@ ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) {
     return m_fboNameSpace->getLocalName(p_globalName);
 }
 
+int GLEScontext::queryCurrFboBits(ObjectLocalName localFboName, GLenum pname) {
+    GLint colorInternalFormat = 0;
+    GLint depthInternalFormat = 0;
+    GLint stencilInternalFormat = 0;
+    bool combinedDepthStencil = false;
+
+    if (!localFboName) {
+        colorInternalFormat = m_defaultFBOColorFormat;
+        // FBO 0 defaulting to d24s8
+        depthInternalFormat =
+            m_defaultFBODepthFormat ? m_defaultFBODepthFormat : GL_DEPTH24_STENCIL8;
+        stencilInternalFormat =
+            m_defaultFBOStencilFormat ? m_defaultFBOStencilFormat : GL_DEPTH24_STENCIL8;
+    } else {
+        FramebufferData* fbData = getFBOData(localFboName);
+
+        std::vector<GLenum> colorAttachments(getCaps()->maxDrawBuffers);
+        std::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);
+
+        bool hasColorAttachment = false;
+        GLenum target;
+        ObjectDataPtr attachmentData;
+
+        for (auto attachment : colorAttachments) {
+            GLint internalFormat =
+                fbData->getAttachmentInternalFormat(this, attachment);
+
+            // Only defined if all used color attachments are the same
+            // internal format.
+            if (internalFormat) {
+                if (hasColorAttachment &&
+                    colorInternalFormat != internalFormat) {
+                    colorInternalFormat = 0;
+                    break;
+                }
+                colorInternalFormat = internalFormat;
+                hasColorAttachment = true;
+            }
+        }
+
+        GLint depthStencilFormat =
+            fbData->getAttachmentInternalFormat(this, GL_DEPTH_STENCIL_ATTACHMENT);
+
+        if (depthStencilFormat) {
+            combinedDepthStencil = true;
+            depthInternalFormat = depthStencilFormat;
+            stencilInternalFormat = depthStencilFormat;
+        }
+
+        if (!combinedDepthStencil) {
+            depthInternalFormat =
+                fbData->getAttachmentInternalFormat(this, GL_DEPTH_ATTACHMENT);
+            stencilInternalFormat =
+                fbData->getAttachmentInternalFormat(this, GL_STENCIL_ATTACHMENT);
+        }
+    }
+
+    FramebufferChannelBits res =
+        glFormatToChannelBits(colorInternalFormat,
+                              depthInternalFormat,
+                              stencilInternalFormat);
+
+    switch (pname) {
+    case GL_RED_BITS:
+        return res.red;
+    case GL_GREEN_BITS:
+        return res.green;
+    case GL_BLUE_BITS:
+        return res.blue;
+    case GL_ALPHA_BITS:
+        return res.alpha;
+    case GL_DEPTH_BITS:
+        return res.depth;
+    case GL_STENCIL_BITS:
+        return res.stencil;
+    }
+
+    return 0;
+}
+
 bool GLEScontext::isVAO(ObjectLocalName p_localName) {
     VAOStateMap::iterator it = m_vaoStateMap.find(p_localName);
     if (it == m_vaoStateMap.end()) return false;
