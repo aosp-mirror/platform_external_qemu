@@ -118,17 +118,12 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     return -1;
 }
 
-static bool is_mod(int key) {
-    return (key == LINUX_KEY_LEFTALT ||
-            key == LINUX_KEY_LEFTCTRL ||
-            key == LINUX_KEY_LEFTSHIFT);
-}
-
 /* If it's running chrome os images, remapping key code here so
  * the emulator toolbar also does the "expected" thing for chrome os.
  * Also fix some incorrected key codes.
  */
 static int map_cros_key(int* code) {
+    if (!android_hw->hw_arc) return -1;
     /* Android emulator uses Qt, and it maps qt key to linux key and
      * send it here.
      * Actually underlying qemu is expecting something else and it calls
@@ -196,12 +191,11 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
-        if (android_hw->hw_arc) {
-            if (mod || is_mod(keycode) || map_cros_key(&keycode) == 0) {
-                skin_keyboard_add_key_event(kb, keycode, down);
-                skin_keyboard_flush(kb);
-                return;
-            }
+
+        if (map_cros_key(&keycode) == 0) {
+            skin_keyboard_add_key_event(kb, keycode, down);
+            skin_keyboard_flush(kb);
+            return;
         }
 
         /* first, try the keyboard-mode-independent keys */
