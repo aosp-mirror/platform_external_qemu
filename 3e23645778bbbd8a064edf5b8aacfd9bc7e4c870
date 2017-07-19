@@ -22,6 +22,30 @@
       "revId": "3e23645778bbbd8a064edf5b8aacfd9bc7e4c870",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da6d03ac_6c9470a6",
+        "filename": "android/scripts/convert_avd_to_cros.bat",
+        "patchSetId": 7
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-07-19T18:32:58Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3598b77b_2fa85851",
+      "range": {
+        "startLine": 36,
+        "startChar": 2,
+        "endLine": 36,
+        "endChar": 42
+      },
+      "revId": "3e23645778bbbd8a064edf5b8aacfd9bc7e4c870",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
