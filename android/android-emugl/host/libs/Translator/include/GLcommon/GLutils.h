@@ -16,6 +16,8 @@
 #ifndef GL_UTILS_H
 #define GL_UTILS_H
 
+#include <GLES/gl.h>
+
 #include <assert.h>
 #include <inttypes.h>
 #include <stdio.h>
@@ -67,5 +69,18 @@ inline unsigned int SafeUIntFromPointerFileLine(const void* ptr,
 
 #define SafeUIntFromPointer(ptr) \
     SafeUIntFromPointerFileLine((ptr), __FILE__, __LINE__)
+
+struct FramebufferChannelBits {
+    int red;
+    int green;
+    int blue;
+    int alpha;
+    int depth;
+    int stencil;
+};
+
+FramebufferChannelBits glFormatToChannelBits(GLenum colorFormat,
+                                             GLenum depthFormat,
+                                             GLenum stencilFormat);
 
 #endif

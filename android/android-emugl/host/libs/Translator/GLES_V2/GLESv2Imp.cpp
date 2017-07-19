@@ -1523,7 +1523,7 @@ static void s_glGetInteger64i_v_wrapper(GLenum pname, GLuint index, GLint64* dat
     ctx->dispatcher().glGetInteger64i_v(pname, index, data);
 }
 
-template <typename T>
+template <class T>
 static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc<T> getter) {
     T i;
     GET_CTX_V2();
@@ -1690,10 +1690,23 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             *params = myT;
         }
         break;
-
+    // Core-profile related fixes
     case GL_GENERATE_MIPMAP_HINT:
         if (isCoreProfile()) {
             *params = ctx->getHint(GL_GENERATE_MIPMAP_HINT);
+        } else {
+            getter(pname, params);
+        }
+        break;
+    case GL_RED_BITS:
+    case GL_GREEN_BITS:
+    case GL_BLUE_BITS:
+    case GL_ALPHA_BITS:
+    case GL_DEPTH_BITS:
+    case GL_STENCIL_BITS:
+        if (isCoreProfile()) {
+            GLuint fboBinding = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+            *params = (T)ctx->queryCurrFboBits(fboBinding, pname);
         } else {
             getter(pname, params);
         }
@@ -1819,6 +1832,19 @@ GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
     case GL_GENERATE_MIPMAP_HINT:
         if (isCoreProfile()) {
             TO_GLBOOL(params, ctx->getHint(GL_GENERATE_MIPMAP_HINT));
+        } else {
+            s_glGetBooleanv_wrapper(pname, params);
+        }
+        break;
+    case GL_RED_BITS:
+    case GL_GREEN_BITS:
+    case GL_BLUE_BITS:
+    case GL_ALPHA_BITS:
+    case GL_DEPTH_BITS:
+    case GL_STENCIL_BITS:
+        if (isCoreProfile()) {
+            GLuint fboBinding = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+            TO_GLBOOL(params, ctx->queryCurrFboBits(fboBinding, pname));
         } else {
             s_glGetBooleanv_wrapper(pname, params);
         }
