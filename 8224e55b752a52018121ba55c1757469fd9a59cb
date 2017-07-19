@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4884d57e_0e92cd9f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1083,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-19T17:47:06Z",
+      "side": 1,
+      "message": "If we skip those, will textures show up in the place where they are not supposed to be? Maybe we should file a bug for this and fix it later?",
+      "range": {
+        "startLine": 1083,
+        "startChar": 13,
+        "endLine": 1083,
+        "endChar": 26
+      },
+      "revId": "8224e55b752a52018121ba55c1757469fd9a59cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
