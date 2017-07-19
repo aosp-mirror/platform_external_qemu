@@ -482,6 +482,21 @@ extern "C" int main(int argc, char **argv) {
         return exitStatus;
     }
 
+    // just because we know that we're in the new emulator as we got here
+    opts->ranchu = 1;
+
+    avd = android_avdInfo;
+
+    // Lock the AVD as soon as we can to make sure other copy won't do anything
+    // stupid before detecting that the AVD is already in use.
+    const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
+    if (filelock_create(coreHwIniPath) == NULL) {
+        // The AVD is already in use
+        derror("There's another emulator instance running with "
+               "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
+        return 1;
+    }
+
     // Update server-based hw config / feature flags.
     // Must be done after emulator_parseCommonCommandLineOptions,
     // since that calls createAVD which sets up critical info needed
@@ -496,11 +511,6 @@ extern "C" int main(int argc, char **argv) {
      printf("Finished feature flag application and host hw query with uptime %" PRIu64 " ms\n",
             get_uptime_ms());
 #endif
-
-    // just because we know that we're in the new emulator as we got here
-    opts->ranchu = 1;
-
-    avd = android_avdInfo;
 
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
@@ -1010,14 +1020,6 @@ extern "C" int main(int argc, char **argv) {
     /* append extra qemu parameters if any */
     for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
         args[n++] = kTarget.qemuExtraArgs[idx];
-    }
-
-    const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
-    if (filelock_create(coreHwIniPath) == NULL) {
-        // The AVD is already in use
-        derror("There's another emulator instance running with "
-               "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
-        return 1;
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
