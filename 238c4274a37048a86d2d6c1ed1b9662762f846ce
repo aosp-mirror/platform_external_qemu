@@ -19,6 +19,29 @@
     },
     {
       "key": {
+        "uuid": "5940416f_0872f687",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-19T17:29:49Z",
+      "side": 1,
+      "message": "For debug macros, I think we just add #define DEBUG_**** 0 at the top and then if you want to debug, #define it to 1, instead of relying on //",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 23
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef5819e6_290bdba2",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 6
@@ -134,6 +157,23 @@
     },
     {
       "key": {
+        "uuid": "d1a0bd25_130ee55a",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-19T17:29:49Z",
+      "side": 1,
+      "message": "Adding a screen_recorder_send_frame(w, h, format, type, void* pixels) or anything compatible with the post callback seems like it would help us to make the change independent of FrameBuffer",
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "36c95dad_0fc2c6e3",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 6
@@ -214,6 +254,30 @@
       "writtenOn": "2017-07-18T23:20:13Z",
       "side": 1,
       "message": "I\u0027m curious why do we need to have everything built into FrameBuffer instead of a custom onPost callback for screen recording?",
+      "range": {
+        "startLine": 1482,
+        "startChar": 3,
+        "endLine": 1490,
+        "endChar": 5
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5dcdff84_aebf3286",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1490,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-19T17:29:49Z",
+      "side": 1,
+      "message": "+1\n\nThe changes in FrameBuffer could be because you might be wondering how to pass through an existing post callback; I believe a way to do it without touching the existing FrameBuffer code is to communicate the post callback from android_setPostCallback to the screen recorder as well, and then reset the FrameBuffer\u0027s post callback when recording is enabled.\n\nAlso, why are there two calls to onPost here?",
+      "parentUuid": "f89d8f11_cff69ab8",
       "range": {
         "startLine": 1482,
         "startChar": 3,
