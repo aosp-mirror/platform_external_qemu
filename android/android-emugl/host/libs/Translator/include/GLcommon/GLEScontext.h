@@ -373,6 +373,7 @@ public:
     ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName);
     unsigned int getFBOGlobalName(ObjectLocalName p_localName);
     ObjectLocalName getFBOLocalName(unsigned int p_globalName);
+    int queryCurrFboBits(ObjectLocalName localFboName, GLenum pname);
 
     bool isVAO(ObjectLocalName p_localName);
     ObjectLocalName genVAOName(ObjectLocalName p_localName = 0,
@@ -519,6 +520,8 @@ protected:
     GLint m_defaultFBOWidth = 0;
     GLint m_defaultFBOHeight = 0;
     GLint m_defaultFBOColorFormat = 0;
+    GLint m_defaultFBODepthFormat = 0;
+    GLint m_defaultFBOStencilFormat = 0;
     GLint m_defaultFBOSamples = 0;
     GLenum m_defaultFBODrawBuffer = GL_COLOR_ATTACHMENT0;
     GLenum m_defaultFBOReadBuffer = GL_COLOR_ATTACHMENT0;
