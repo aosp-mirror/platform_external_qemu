@@ -17,7 +17,9 @@
 #ifndef GLES_CONTEXT_H
 #define GLES_CONTEXT_H
 
+#include "android/base/containers/Lookup.h"
 #include "android/base/files/Stream.h"
+
 #include "emugl/common/mutex.h"
 #include "GLDispatch.h"
 #include "GLESpointer.h"
@@ -326,6 +328,15 @@ public:
     void setClearDepth(GLclampf depth);
     void setClearStencil(GLint s);
 
+    // Core profile doesn't support GL_GENERATE_MIPMAP_HINT,
+    // so just emulate it here with no-ops.
+    void setHint(GLenum target, GLenum mode) {
+        m_hints[target] = mode;
+    }
+    GLenum getHint(GLenum target) const {
+        return android::base::findOrDefault(m_hints, target, GL_DONT_CARE);
+    }
+
     static GLDispatch& dispatcher(){return s_glDispatch;};
 
     static int getMaxLights(){return s_glSupport.maxLights;}
@@ -530,6 +541,8 @@ private:
     NameSpace* m_vaoNameSpace = nullptr;
 
     bool m_coreProfile = false;
+
+    std::unordered_map<GLenum, GLenum> m_hints;
 };
 
 #endif
