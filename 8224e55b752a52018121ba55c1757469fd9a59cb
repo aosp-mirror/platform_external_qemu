@@ -22,6 +22,30 @@
       "revId": "8224e55b752a52018121ba55c1757469fd9a59cb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fe3a9742_aac44f7b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1083,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-19T18:24:53Z",
+      "side": 1,
+      "message": "Yeah that could happen. I will see if unbinding all textures might also work, and/or see what ANGLE does, if not we\u0027ll file and bug and come back to it later.",
+      "parentUuid": "4884d57e_0e92cd9f",
+      "range": {
+        "startLine": 1083,
+        "startChar": 13,
+        "endLine": 1083,
+        "endChar": 26
+      },
+      "revId": "8224e55b752a52018121ba55c1757469fd9a59cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
