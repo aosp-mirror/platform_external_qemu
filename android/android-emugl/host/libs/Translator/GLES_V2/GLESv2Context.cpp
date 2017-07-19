@@ -188,15 +188,19 @@ void GLESv2Context::postLoadRestoreCtx() {
                 break;
             }
             switch (glesPointer->getAttribType()) {
-                case GLESpointer::BUFFER:
+                case GLESpointer::BUFFER: {
+                    const GLuint globalBufferName = shareGroup()
+                            ->getGlobalName(NamedObjectType::VERTEXBUFFER,
+                                            glesPointer->getBufferName());
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
-                            glesPointer->getBufferName());
+                            globalBufferName);
                     dispatcher.glVertexAttribPointer(glesPointerIte.first,
                             glesPointer->getSize(),
                             glesPointer->getType(), glesPointer->isNormalize(),
                             glesPointer->getStride(),
                             (GLvoid*)(size_t)glesPointer->getBufferOffset());
                     break;
+                }
                 case GLESpointer::VALUE:
                     switch (glesPointer->getValueCount()) {
                         case 1:
