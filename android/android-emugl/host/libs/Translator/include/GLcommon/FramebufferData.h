@@ -62,6 +62,8 @@ public:
                          GLenum *outTarget,
                          ObjectDataPtr *outObj);
 
+    GLint getAttachmentInternalFormat(class GLEScontext* ctx, GLenum attachment);
+
     void validate(class GLEScontext* ctx);
 
     void setBoundAtLeastOnce() {
