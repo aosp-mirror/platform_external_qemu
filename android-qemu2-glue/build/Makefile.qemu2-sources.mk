@@ -220,7 +220,6 @@ QEMU2_COMMON_SOURCES := \
     hw/usb/hcd-ohci.c \
     hw/usb/hcd-uhci.c \
     hw/usb/hcd-xhci.c \
-    hw/usb/host-stub.c \
     hw/usb/libhw.c \
     hw/virtio/virtio-bus.c \
     hw/virtio/virtio-mmio.c \
@@ -344,6 +343,8 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     backends/rng-random.c \
     block/raw-posix.c \
     hw/usb/dev-mtp.c \
+    hw/usb/host-legacy.c \
+    hw/usb/host-libusb.c \
     net/tap-bsd.c \
     net/tap.c \
     net/vhost-user.c \
@@ -363,6 +364,8 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     hw/tpm/tpm_passthrough.c \
     hw/tpm/tpm_util.c \
     hw/usb/dev-mtp.c \
+    hw/usb/host-legacy.c \
+    hw/usb/host-libusb.c \
     net/l2tpv3.c \
     net/tap-linux.c \
     net/tap.c \
@@ -378,6 +381,7 @@ QEMU2_COMMON_SOURCES_windows-x86 := \
     audio/winaudio.c \
     block/raw-win32.c \
     block/win32-aio.c \
+    hw/usb/host-stub.c \
     net/tap-win32.c \
     os-win32.c \
 
@@ -388,6 +392,7 @@ QEMU2_COMMON_SOURCES_windows-x86_64 := \
     audio/winaudio.c \
     block/raw-win32.c \
     block/win32-aio.c \
+    hw/usb/host-stub.c \
     net/tap-win32.c \
     os-win32.c \
 
