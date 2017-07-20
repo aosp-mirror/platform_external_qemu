@@ -33,8 +33,11 @@
 #include <GLcommon/GLESvalidate.h>
 #include <GLcommon/TextureUtils.h>
 #include <GLcommon/FramebufferData.h>
+#include <GLcommon/ScopedGLState.h>
 #include <strings.h>
 #include <string.h>
+
+#include <numeric>
 
 //decleration
 static void convertFixedDirectLoop(const char* dataIn,unsigned int strideIn,void* dataOut,unsigned int nBytes,unsigned int strideOut,int attribSize);
@@ -511,22 +514,31 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
 }
 
 GLEScontext::~GLEScontext() {
+    auto& gl = dispatcher();
+
+    if (m_textureEmulationProg) {
+        gl.glDeleteProgram(m_textureEmulationProg);
+        gl.glDeleteTextures(2, m_textureEmulationTextures);
+        gl.glDeleteFramebuffers(1, &m_textureEmulationFBO);
+        gl.glDeleteVertexArrays(1, &m_textureEmulationVAO);
+    }
+
     if (m_defaultFBO) {
-        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
-        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
-        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
-        dispatcher().glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
-        dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        dispatcher().glDeleteFramebuffers(1, &m_defaultFBO);
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, m_defaultFBO);
+        gl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+        gl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+        gl.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        gl.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        gl.glDeleteFramebuffers(1, &m_defaultFBO);
     }
 
     if (m_defaultReadFBO && (m_defaultReadFBO != m_defaultFBO)) {
-        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
-        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
-        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
-        dispatcher().glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
-        dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        dispatcher().glDeleteFramebuffers(1, &m_defaultReadFBO);
+        gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+        gl.glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 0);
+        gl.glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+        gl.glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
+        gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+        gl.glDeleteFramebuffers(1, &m_defaultReadFBO);
     }
 
     m_defaultFBO = 0;
@@ -2083,6 +2095,194 @@ int GLEScontext::queryCurrFboBits(ObjectLocalName localFboName, GLenum pname) {
     }
 
     return 0;
+}
+
+static const char kTexImageEmulationVShaderSrc[] = R"(#version 330 core
+out vec2 v_texcoord;
+void main() {
+    const vec2 quad_pos[6] = vec2[6](
+        vec2(0.0, 0.0),
+        vec2(0.0, 1.0),
+        vec2(1.0, 0.0),
+        vec2(0.0, 1.0),
+        vec2(1.0, 0.0),
+        vec2(1.0, 1.0));
+
+    gl_Position = vec4((quad_pos[gl_VertexID] * 2.0) - 1.0, 0.0, 1.0);
+    v_texcoord = quad_pos[gl_VertexID];
+})";
+
+static const char kTexImageEmulationFShaderSrc[] = R"(#version 330 core
+uniform sampler2D source_tex;
+in vec2 v_texcoord;
+out vec4 color;
+void main() {
+   color = texture(source_tex, v_texcoord);
+})";
+
+void GLEScontext::initTexImageEmulation() {
+    if (m_textureEmulationProg) return;
+
+    auto& gl = dispatcher();
+
+    GLuint vshader =
+        compileAndValidateCoreShader(GL_VERTEX_SHADER,
+                                     kTexImageEmulationVShaderSrc);
+    GLuint fshader =
+        compileAndValidateCoreShader(GL_FRAGMENT_SHADER,
+                                     kTexImageEmulationFShaderSrc);
+    m_textureEmulationProg = linkAndValidateProgram(vshader, fshader);
+    m_textureEmulationSamplerLoc =
+        gl.glGetUniformLocation(m_textureEmulationProg, "source_tex");
+
+    gl.glGenFramebuffers(1, &m_textureEmulationFBO);
+    gl.glGenTextures(2, m_textureEmulationTextures);
+    gl.glGenVertexArrays(1, &m_textureEmulationVAO);
+}
+
+void GLEScontext::copyTexImageWithEmulation(
+        TextureData* texData,
+        bool isSubImage,
+        GLenum target,
+        GLint level,
+        GLenum internalformat,
+        GLint xoffset, GLint yoffset,
+        GLint x, GLint y,
+        GLsizei width, GLsizei height,
+        GLint border) {
+
+    // Create objects used for emulation if they don't exist already.
+    initTexImageEmulation();
+    auto& gl = dispatcher();
+
+    // Save all affected state.
+    ScopedGLState state;
+    state.pushForCoreProfileTextureEmulation();
+
+    // render to an intermediate texture with the same format:
+    // 1. Get the format
+    FramebufferData* fbData =
+        getFBOData(getFramebufferBinding(GL_READ_FRAMEBUFFER));
+    GLint readFbInternalFormat =
+        fbData ? fbData->getAttachmentInternalFormat(this, GL_COLOR_ATTACHMENT0) :
+                 m_defaultFBOColorFormat;
+
+    // 2. Create the texture for textures[0] with this format, and initialize
+    // it to the current FBO read buffer.
+    gl.glBindTexture(GL_TEXTURE_2D, m_textureEmulationTextures[0]);
+    gl.glCopyTexImage2D(GL_TEXTURE_2D, 0, readFbInternalFormat,
+                        x, y, width, height, 0);
+
+    // 3. Set swizzle of textures[0] so they are read in the right way
+    // when drawing to textures[1].
+    TextureSwizzle swz = getInverseSwizzleForEmulatedFormat(texData->format);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swz.toRed);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, swz.toGreen);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, swz.toBlue);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, swz.toAlpha);
+    // Also, nearest filtering
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    // 4. Initialize textures[1] with same width/height, and use it to back
+    // the FBO that holds the swizzled results.
+    gl.glBindTexture(GL_TEXTURE_2D, m_textureEmulationTextures[1]);
+    gl.glTexImage2D(GL_TEXTURE_2D, 0, readFbInternalFormat, width, height, 0,
+                    baseFormatOfInternalFormat(readFbInternalFormat),
+                    accurateTypeOfInternalFormat(readFbInternalFormat),
+                    nullptr);
+    // Also, nearest filtering
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    gl.glBindFramebuffer(GL_FRAMEBUFFER, m_textureEmulationFBO);
+    gl.glFramebufferTexture2D(
+        GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+        m_textureEmulationTextures[1], 0);
+
+    // 5. Draw textures[0] to our FBO, making sure all state is compatible.
+    gl.glDisable(GL_BLEND);
+    gl.glDisable(GL_SCISSOR_TEST);
+    gl.glDisable(GL_DEPTH_TEST);
+    gl.glDisable(GL_STENCIL_TEST);
+    gl.glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    gl.glDisable(GL_SAMPLE_COVERAGE);
+    gl.glDisable(GL_CULL_FACE);
+    gl.glDisable(GL_POLYGON_OFFSET_FILL);
+    gl.glDisable(GL_RASTERIZER_DISCARD);
+
+    gl.glViewport(0, 0, width, height);
+    gl.glDepthRange(0.0f, 1.0f);
+    gl.glColorMask(1, 1, 1, 1);
+
+    gl.glBindTexture(GL_TEXTURE_2D, m_textureEmulationTextures[0]);
+    GLint texUnit; gl.glGetIntegerv(GL_ACTIVE_TEXTURE, &texUnit);
+
+    gl.glUseProgram(m_textureEmulationProg);
+    gl.glUniform1i(m_textureEmulationSamplerLoc, texUnit - GL_TEXTURE0);
+
+    gl.glBindVertexArray(m_textureEmulationVAO);
+
+    gl.glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // now the emulated version has been rendered and written to the read FBO
+    // with the correct swizzle.
+    if (isCubeMapFaceTarget(target)) {
+        gl.glBindTexture(GL_TEXTURE_CUBE_MAP, texData->globalName);
+    } else {
+        gl.glBindTexture(target, texData->globalName);
+    }
+
+    if (isSubImage) {
+        gl.glCopyTexSubImage2D(target, level, xoffset, yoffset, 0, 0, width, height);
+    } else {
+        gl.glCopyTexImage2D(target, level, internalformat, 0, 0, width, height, border);
+    }
+}
+
+GLuint GLEScontext::compileAndValidateCoreShader(GLenum shaderType, const char* src) {
+    GLDispatch& gl = dispatcher();
+
+    GLuint shader = gl.glCreateShader(shaderType);
+    gl.glShaderSource(shader, 1, (const GLchar* const*)&src, nullptr);
+    gl.glCompileShader(shader);
+
+    GLint compileStatus;
+    gl.glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+
+    if (compileStatus != GL_TRUE) {
+        GLsizei infoLogLength = 0;
+        gl.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength + 1, 0);
+        gl.glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
+        fprintf(stderr, "%s: fail to compile. infolog %s\n", __func__, &infoLog[0]);
+    }
+
+    return shader;
+}
+
+GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
+    GLDispatch& gl = dispatcher();
+
+    GLuint program = gl.glCreateProgram();
+    gl.glAttachShader(program, vshader);
+    gl.glAttachShader(program, fshader);
+    gl.glLinkProgram(program);
+
+    GLint linkStatus;
+    gl.glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
+
+    if (linkStatus != GL_TRUE) {
+        GLsizei infoLogLength = 0;
+        gl.glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> infoLog(infoLogLength + 1, 0);
+        gl.glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
+
+        fprintf(stderr, "%s: fail to link program. infolog: %s\n", __func__,
+                &infoLog[0]);
+    }
+
+    return program;
 }
 
 bool GLEScontext::isVAO(ObjectLocalName p_localName) {

@@ -375,6 +375,17 @@ public:
     ObjectLocalName getFBOLocalName(unsigned int p_globalName);
     int queryCurrFboBits(ObjectLocalName localFboName, GLenum pname);
 
+    void copyTexImageWithEmulation(
+        TextureData* texData,
+        bool isSubImage,
+        GLenum target,
+        GLint level,
+        GLenum internalformat,
+        GLint xoffset, GLint yoffset,
+        GLint x, GLint y,
+        GLsizei width, GLsizei height,
+        GLint border);
+
     bool isVAO(ObjectLocalName p_localName);
     ObjectLocalName genVAOName(ObjectLocalName p_localName = 0,
             bool genLocal = 0);
@@ -526,6 +537,18 @@ protected:
     GLenum m_defaultFBODrawBuffer = GL_COLOR_ATTACHMENT0;
     GLenum m_defaultFBOReadBuffer = GL_COLOR_ATTACHMENT0;
 
+    // Texture emulation state
+    void initTexImageEmulation();
+    GLuint m_textureEmulationFBO = 0;
+    GLuint m_textureEmulationTextures[2] = {};
+    GLuint m_textureEmulationProg = 0;
+    GLuint m_textureEmulationVAO = 0;
+    GLuint m_textureEmulationVBO = 0;
+    GLuint m_textureEmulationSamplerLoc = 0;
+
+    // Utility functions for emulation
+    GLuint compileAndValidateCoreShader(GLenum shaderType, const char* src);
+    GLuint linkAndValidateProgram(GLuint vshader, GLuint fshader);
 private:
 
     GLenum                m_glError = GL_NO_ERROR;
