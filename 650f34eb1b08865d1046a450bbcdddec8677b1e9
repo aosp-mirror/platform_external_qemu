@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "61b37a35_54a021a5",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-20T23:02:56Z",
+      "side": 1,
+      "message": "Ah this is another WIP for another CL, will take it out and fix later.",
+      "parentUuid": "86034e05_9171d34c",
+      "range": {
+        "startLine": 1121,
+        "startChar": 7,
+        "endLine": 1121,
+        "endChar": 35
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3bbd02f9_075b6cb0",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2017-07-20T22:27:36Z",
       "side": 1,
       "message": "what for?",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 18
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "492bbb1f_bf4c8141",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-20T23:02:56Z",
+      "side": 1,
+      "message": "it\u0027s for std::iota, and needed to compile on mac",
+      "parentUuid": "3bbd02f9_075b6cb0",
       "range": {
         "startLine": 39,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "8d08ad0d_2794b177",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-20T23:02:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4bfdb79f_3d7d27b6",
+      "range": {
+        "startLine": 2119,
+        "startChar": 4,
+        "endLine": 2131,
+        "endChar": 52
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f70eadbc_42a1326c",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 5
@@ -82,6 +154,30 @@
       "writtenOn": "2017-07-20T22:27:36Z",
       "side": 1,
       "message": "holy shit :)",
+      "range": {
+        "startLine": 2134,
+        "startChar": 18,
+        "endLine": 2134,
+        "endChar": 43
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8baf1ed3_c4717b26",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2134,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-20T23:02:56Z",
+      "side": 1,
+      "message": "Yeah, this was quite a process. I based it off of ANGLE\u0027s BlitGL.cpp and adapted it. I now know a few more ways glDrawArrays can GL_INVALID_OPERATION or otherwise fail to show anything :)",
+      "parentUuid": "f70eadbc_42a1326c",
       "range": {
         "startLine": 2134,
         "startChar": 18,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "c9468ff3_0362c217",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ScopedGLState.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-20T23:02:56Z",
+      "side": 1,
+      "message": "Wow, that seems to work! I guess that\u0027s because names isn\u0027t going to pass on to anywhere else.",
+      "parentUuid": "01515ac4_c7488397",
+      "range": {
+        "startLine": 70,
+        "startChar": 31,
+        "endLine": 70,
+        "endChar": 50
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cf1cb822_3b1be0e4",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/ScopedGLState.cpp",
         "patchSetId": 5
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "46719f0a_3283e291",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ScopedGLState.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-20T23:02:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cf1cb822_3b1be0e4",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 99,
+        "endChar": 19
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0a6f19c5_4d60efae",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/ScopedGLState.h",
         "patchSetId": 5
@@ -151,6 +295,30 @@
       "writtenOn": "2017-07-20T22:27:36Z",
       "side": 1,
       "message": "disallow copy and assign?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 21
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e48a0dbc_de663599",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/ScopedGLState.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-20T23:02:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a6f19c5_4d60efae",
       "range": {
         "startLine": 26,
         "startChar": 0,
