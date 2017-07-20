@@ -37,7 +37,7 @@ if not ERRORLEVEL 1 (
   echo Failed
   exit /b
 )
-findstr image.sysdir.1=system-images/chromeos-m.*/x86 %AVD_CONFIG_INI%
+findstr /r image.sysdir.1=system-images\\chromeos-m.*\\x86 %AVD_CONFIG_INI%
 if ERRORLEVEL 1 (
   echo AVD %AVD_NAME% is not a Chrome OS image
   echo Failed
