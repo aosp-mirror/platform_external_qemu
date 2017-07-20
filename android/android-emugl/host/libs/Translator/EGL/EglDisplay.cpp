@@ -274,8 +274,8 @@ void EglDisplay::addSimplePixelFormat(int red_size,
 }
 
 void EglDisplay::addMissingConfigs() {
-    addSimplePixelFormat(5, 6, 5, 0); // RGB_565
-    addSimplePixelFormat(8, 8, 8, 0); // RGB_888
+    // addSimplePixelFormat(5, 6, 5, 0); // RGB_565
+    // addSimplePixelFormat(8, 8, 8, 0); // RGB_888
     // (Host GPUs that are newer may not list RGB_888
     // out of the box.)
 }
@@ -559,6 +559,7 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
     // Also, disallow high MSAA.
     // Just don't use those configs.
     if (info->red_size > 8 ||
+        info->alpha_size < 8 ||
         info->green_size > 8 ||
         info->blue_size > 8 ||
         info->depth_size < 24 ||
