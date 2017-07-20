@@ -375,6 +375,7 @@ public:
     ObjectLocalName getFBOLocalName(unsigned int p_globalName);
     int queryCurrFboBits(ObjectLocalName localFboName, GLenum pname);
 
+    // Texture emulation
     void copyTexImageWithEmulation(
         TextureData* texData,
         bool isSubImage,
@@ -385,6 +386,13 @@ public:
         GLint x, GLint y,
         GLsizei width, GLsizei height,
         GLint border);
+
+    // Primitive restart emulation
+    void setPrimitiveRestartEnabled(bool enabled);
+    bool primitiveRestartEnabled() const {
+        return m_primitiveRestartEnabled;
+    }
+    void updatePrimitiveRestartIndex(GLenum type);
 
     bool isVAO(ObjectLocalName p_localName);
     ObjectLocalName genVAOName(ObjectLocalName p_localName = 0,
@@ -549,6 +557,7 @@ protected:
     // Utility functions for emulation
     GLuint compileAndValidateCoreShader(GLenum shaderType, const char* src);
     GLuint linkAndValidateProgram(GLuint vshader, GLuint fshader);
+
 private:
 
     GLenum                m_glError = GL_NO_ERROR;
@@ -573,6 +582,8 @@ private:
     bool m_coreProfile = false;
 
     std::unordered_map<GLenum, GLenum> m_hints;
+
+    bool m_primitiveRestartEnabled = false;
 };
 
 #endif

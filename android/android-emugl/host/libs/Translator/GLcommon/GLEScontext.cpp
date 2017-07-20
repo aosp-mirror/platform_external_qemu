@@ -2285,6 +2285,37 @@ GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
     return program;
 }
 
+// Primitive restart emulation
+#define GL_PRIMITIVE_RESTART              0x8F9D
+#define GL_PRIMITIVE_RESTART_INDEX        0x8F9E
+
+void GLEScontext::setPrimitiveRestartEnabled(bool enabled) {
+    auto& gl = dispatcher();
+
+    if (enabled) {
+        gl.glEnable(GL_PRIMITIVE_RESTART);
+    } else {
+        gl.glDisable(GL_PRIMITIVE_RESTART);
+    }
+
+    m_primitiveRestartEnabled = enabled;
+}
+
+void GLEScontext::updatePrimitiveRestartIndex(GLenum type) {
+    auto& gl = dispatcher();
+    switch (type) {
+    case GL_UNSIGNED_BYTE:
+        gl.glPrimitiveRestartIndex(0xff);
+        break;
+    case GL_UNSIGNED_SHORT:
+        gl.glPrimitiveRestartIndex(0xffff);
+        break;
+    case GL_UNSIGNED_INT:
+        gl.glPrimitiveRestartIndex(0xffffffff);
+        break;
+    }
+}
+
 bool GLEScontext::isVAO(ObjectLocalName p_localName) {
     VAOStateMap::iterator it = m_vaoStateMap.find(p_localName);
     if (it == m_vaoStateMap.end()) return false;
