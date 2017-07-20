@@ -54,6 +54,8 @@ struct TextureSwizzle {
 };
 
 TextureSwizzle getSwizzleForEmulatedFormat(GLenum format);
+TextureSwizzle getInverseSwizzleForEmulatedFormat(GLenum format);
+
 GLenum swizzleComponentOf(const TextureSwizzle& s, GLenum component);
 TextureSwizzle concatSwizzles(const TextureSwizzle& first,
                               const TextureSwizzle& next);
