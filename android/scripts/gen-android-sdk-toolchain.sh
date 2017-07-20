@@ -42,7 +42,7 @@ The script will put under <install-dir>/ various tools, e.g.
 You can use the --print=<tool> option to print the corresponding name
 or path, *instead* of creating a toolchain. Valid values for <tool> are:
 
-   binprefix       -> Print the binprefix (e.g. 'x86_64-linux-')
+   Gbinprefix       -> Print the binprefix (e.g. 'x86_64-linux-')
    cc              -> Print the compiler name (e.g. 'x86_64_linux-cc')
    c++             -> Print the c++ compiler name.
    ld, ar, as, ... -> Same for other tools.
@@ -399,9 +399,11 @@ prepare_build_for_host () {
             ;;
         windows-x86)
             GNU_CONFIG_HOST=i686-w64-mingw32
+            EXTRA_CFLAGS="-m32"
             ;;
         windows-x86_64)
             GNU_CONFIG_HOST=x86_64-w64-mingw32
+            EXTRA_CFLAGS="-m64"
             ;;
         darwin-x86_64)
             GNU_CONFIG_HOST=
