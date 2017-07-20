@@ -419,6 +419,12 @@ void GLESv2Context::drawWithEmulations(
         !isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
     bool needPointEmulation = mode == GL_POINTS;
 
+#ifdef __APPLE__
+    if (primitiveRestartEnabled() && type) {
+        updatePrimitiveRestartIndex(type);
+    }
+#endif
+
     if (needPointEmulation) {
         s_glDispatch.glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
         if (!isCoreProfile()) {

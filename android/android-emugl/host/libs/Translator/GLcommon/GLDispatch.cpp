@@ -125,6 +125,7 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     /* Load OpenGL ES 3.x functions through 3.1. Not all are supported;
      * leave it up to EGL to determine support level. */
     LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
+    LIST_GLES3_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
     LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
 
     if (s_got_gles_support_level) return;

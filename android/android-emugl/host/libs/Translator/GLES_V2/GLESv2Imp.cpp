@@ -1113,6 +1113,14 @@ GL_APICALL void  GL_APIENTRY glDisable(GLenum cap){
             return;
         }
     }
+#ifdef __APPLE__
+    switch (cap) {
+    case GL_PRIMITIVE_RESTART_FIXED_INDEX:
+        ctx->setPrimitiveRestartEnabled(false);
+        ctx->setEnable(cap, false);
+        return;
+    }
+#endif
     ctx->setEnable(cap, false);
     ctx->dispatcher().glDisable(cap);
 }
@@ -1125,7 +1133,7 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 }
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
-static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
+static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
     if (ctx->getMajorVersion() < 3)
         ctx->drawValidate();
 
@@ -1137,6 +1145,12 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
             ctx->dispatcher().glEnable(GL_POINT_SPRITE);
         }
     }
+
+#ifdef __APPLE__
+    if (ctx->primitiveRestartEnabled() && type) {
+        ctx->updatePrimitiveRestartIndex(type);
+    }
+#endif
 }
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
@@ -1172,7 +1186,7 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
-        s_glDrawPre(ctx, mode);
+        s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawElements(mode, count, type, indices);
         s_glDrawPost(ctx, mode);
     } else {
@@ -1192,6 +1206,14 @@ GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
             return;
         }
     }
+#ifdef __APPLE__
+    switch (cap) {
+    case GL_PRIMITIVE_RESTART_FIXED_INDEX:
+        ctx->setPrimitiveRestartEnabled(true);
+        ctx->setEnable(cap, true);
+        return;
+    }
+#endif
     ctx->setEnable(cap, true);
     ctx->dispatcher().glEnable(cap);
 }

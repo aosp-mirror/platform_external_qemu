@@ -325,7 +325,7 @@ GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, 
 
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
-        s_glDrawPre(ctx, mode);
+        s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawElementsInstanced(mode, count, type, indices, primcount);
         s_glDrawPost(ctx, mode);
     } else {
@@ -344,7 +344,7 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
 
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
-        s_glDrawPre(ctx, mode);
+        s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawRangeElements(mode, start, end, count, type, indices);
         s_glDrawPost(ctx, mode);
     } else {
