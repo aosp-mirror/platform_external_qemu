@@ -315,6 +315,9 @@ $$(eval $$(call build-install-symbol,$$(_SRC),$$(_DST)))
 # also copy over debug-info link
 ifeq (darwin,$(BUILD_TARGET_OS))
 _DEBUG_INFO_SRC := $$(_SRC).dSYM
+else
+_DEBUG_INFO_SRC := $$(_SRC)
+endif # BUILD_TARGET_OS=darwin
 _DEBUG_INFO := $$(call local-debug-info-install-path,$$(_DST))
 _BUILD_DEBUG_INFOS += $$(_DEBUG_INFO)
 $$(_DEBUG_INFO): PRIVATE_DEBUG_INFO := $$(_DEBUG_INFO)
@@ -322,7 +325,6 @@ $$(_DEBUG_INFO): PRIVATE_DEBUG_INFO_SRC := $$(_DEBUG_INFO_SRC)
 $$(_DEBUG_INFO): $$(_SRC)
 	@echo "Installing symlink debug info: $$(PRIVATE_DEBUG_INFO)"
 	$(hide) cp -fa $$(PRIVATE_DEBUG_INFO_SRC) $$(PRIVATE_DEBUG_INFO)
-endif # BUILD_TARGET_OS=darwin
 
 endif # BUILD_GENERATE_SYMBOLS
 endef
