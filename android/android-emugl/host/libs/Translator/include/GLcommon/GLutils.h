@@ -83,4 +83,7 @@ FramebufferChannelBits glFormatToChannelBits(GLenum colorFormat,
                                              GLenum depthFormat,
                                              GLenum stencilFormat);
 
+GLenum baseFormatOfInternalFormat(GLint internalformat);
+GLenum accurateTypeOfInternalFormat(GLint internalformat);
+
 #endif
