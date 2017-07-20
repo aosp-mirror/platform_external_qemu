@@ -629,8 +629,6 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
     if (cis[0].pixel_format == 0) {
         /* Unsupported pixel format. */
         E("Pixel format reported by the camera device is unsupported");
-        [video_dev release];
-        video_dev = nil;
         return 0;
     }
 
@@ -643,13 +641,9 @@ int camera_enumerate_devices(CameraInfo* cis, int max) {
         cis[0].inp_channel = 0;
         cis[0].display_name = ASTRDUP("webcam0");
         cis[0].in_use = 0;
-        [video_dev release];
-        video_dev = nil;
         return 1;
     } else {
         E("Unable to allocate memory for camera information.");
-        [video_dev release];
-        video_dev = nil;
         return 0;
     }
 }
