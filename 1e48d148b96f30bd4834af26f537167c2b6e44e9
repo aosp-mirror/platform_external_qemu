@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "be7f7cac_7e7e8cb2",
+        "filename": "android/scripts/gen-android-sdk-toolchain.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-07-20T22:17:00Z",
+      "side": 1,
+      "message": "Extra space",
+      "range": {
+        "startLine": 45,
+        "startChar": 19,
+        "endLine": 45,
+        "endChar": 20
+      },
+      "revId": "1e48d148b96f30bd4834af26f537167c2b6e44e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
