@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86034e05_9171d34c",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1121,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-20T22:27:36Z",
+      "side": 1,
+      "message": "please add a break or bad things will happen later.",
+      "range": {
+        "startLine": 1121,
+        "startChar": 7,
+        "endLine": 1121,
+        "endChar": 35
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bbd02f9_075b6cb0",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-20T22:27:36Z",
+      "side": 1,
+      "message": "what for?",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 18
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bfdb79f_3d7d27b6",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-20T22:27:36Z",
+      "side": 1,
+      "message": "when these get freed?",
+      "range": {
+        "startLine": 2119,
+        "startChar": 4,
+        "endLine": 2131,
+        "endChar": 52
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f70eadbc_42a1326c",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2134,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-20T22:27:36Z",
+      "side": 1,
+      "message": "holy shit :)",
+      "range": {
+        "startLine": 2134,
+        "startChar": 18,
+        "endLine": 2134,
+        "endChar": 43
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "01515ac4_c7488397",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ScopedGLState.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-20T22:27:36Z",
+      "side": 1,
+      "message": "curious if std::initializer_list\u003c\u003e would work here - it doesn\u0027t allocate heap memory",
+      "range": {
+        "startLine": 70,
+        "startChar": 31,
+        "endLine": 70,
+        "endChar": 50
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cf1cb822_3b1be0e4",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ScopedGLState.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-20T22:27:36Z",
+      "side": 1,
+      "message": "cref?",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 99,
+        "endChar": 19
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a6f19c5_4d60efae",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/ScopedGLState.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-20T22:27:36Z",
+      "side": 1,
+      "message": "disallow copy and assign?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 21
+      },
+      "revId": "650f34eb1b08865d1046a450bbcdddec8677b1e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
