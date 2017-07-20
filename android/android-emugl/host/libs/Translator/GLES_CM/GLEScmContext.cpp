@@ -58,51 +58,6 @@ void main() {
 }
 )";
 
-static GLuint s_compileAndValidateCoreShader(GLEScontext* ctx, GLenum shaderType, const char* src) {
-    GLDispatch& gl = ctx->dispatcher();
-
-    GLuint shader = gl.glCreateShader(shaderType);
-    gl.glShaderSource(shader, 1, (const GLchar* const*)&src, nullptr);
-    gl.glCompileShader(shader);
-
-    GLint compileStatus;
-    gl.glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
-
-    if (compileStatus != GL_TRUE) {
-        GLsizei infoLogLength = 0;
-        gl.glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-        std::vector<char> infoLog(infoLogLength + 1, 0);
-        gl.glGetShaderInfoLog(shader, infoLogLength, nullptr, &infoLog[0]);
-        fprintf(stderr, "%s: fail to compile. infolog %s\n", __func__, &infoLog[0]);
-    }
-
-    return shader;
-}
-
-static GLuint s_linkAndValidateProgram(GLEScontext* ctx, GLuint vshader, GLuint fshader) {
-    GLDispatch& gl = ctx->dispatcher();
-
-    GLuint program = gl.glCreateProgram();
-    gl.glAttachShader(program, vshader);
-    gl.glAttachShader(program, fshader);
-    gl.glLinkProgram(program);
-
-    GLint linkStatus;
-    gl.glGetProgramiv(program, GL_LINK_STATUS, &linkStatus);
-
-    if (linkStatus != GL_TRUE) {
-        GLsizei infoLogLength = 0;
-        gl.glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
-        std::vector<char> infoLog(infoLogLength + 1, 0);
-        gl.glGetProgramInfoLog(program, infoLogLength, nullptr, &infoLog[0]);
-
-        fprintf(stderr, "%s: fail to link program. infolog: %s\n", __func__,
-                &infoLog[0]);
-    }
-
-    return program;
-}
-
 static const uint32_t sDrawTexIbo[] = {
     0, 1, 2, 0, 2, 3,
 };
@@ -110,13 +65,12 @@ static const uint32_t sDrawTexIbo[] = {
 const GLEScmContext::DrawTexOESCoreState& GLEScmContext::getDrawTexOESCoreState() {
     if (!m_drawTexOESCoreState.program) {
         m_drawTexOESCoreState.vshader =
-            s_compileAndValidateCoreShader(this, GL_VERTEX_SHADER, kDrawTexOESCore_vshader);
+            compileAndValidateCoreShader(GL_VERTEX_SHADER, kDrawTexOESCore_vshader);
         m_drawTexOESCoreState.fshader =
-            s_compileAndValidateCoreShader(this, GL_FRAGMENT_SHADER, kDrawTexOESCore_fshader);
+            compileAndValidateCoreShader(GL_FRAGMENT_SHADER, kDrawTexOESCore_fshader);
         m_drawTexOESCoreState.program =
-            s_linkAndValidateProgram(
-                this, m_drawTexOESCoreState.vshader,
-                      m_drawTexOESCoreState.fshader);
+            linkAndValidateProgram(m_drawTexOESCoreState.vshader,
+                                   m_drawTexOESCoreState.fshader);
     }
     if (!m_drawTexOESCoreState.vao) {
         GLDispatch& gl = dispatcher();
