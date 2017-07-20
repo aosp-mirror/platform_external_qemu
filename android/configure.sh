@@ -669,6 +669,13 @@ if [ "$HOST_OS" = "linux" ] ; then
 fi
 
 ###
+###  libusb probe
+###
+if [ "$HOST_OS" = "linux" -o "$HOST_OS" = "darwin" ] ; then
+  probe_prebuilts_dir "usb" LIBUSB_PREBUILTS_DIR common/libusb
+fi
+
+###
 ###  x264 probe
 ###
 probe_prebuilts_dir "x264" X264_PREBUILTS_DIR common/x264
@@ -1123,6 +1130,10 @@ echo "LIBVPX_PREBUILTS_DIR := $LIBVPX_PREBUILTS_DIR" >> $config_mk
 
 if [ "$HOST_OS" = "linux" ]; then
   echo "LIBBLUEZ_PREBUILTS_DIR := $LIBBLUEZ_PREBUILTS_DIR" >> $config_mk
+fi
+
+if [ "$HOST_OS" = "linux" -o "$HOST_OS" = "darwin" ]; then
+  echo "LIBUSB_PREBUILTS_DIR := $LIBUSB_PREBUILTS_DIR" >> $config_mk
 fi
 
 if [ $OPTION_DEBUG = "yes" ] ; then

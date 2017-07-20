@@ -29,6 +29,10 @@ ifeq ($(BUILD_TARGET_OS),linux)
   include $(LOCAL_PATH)/android/third_party/libbluez.mk
 endif
 
+# Libusb only works on darwin/linux
+ifneq ($(BUILD_TARGET_OS),windows)
+  include $(LOCAL_PATH)/android/third_party/libusb.mk
+endif
 
 ifeq (true,$(BUILD_BENCHMARKS))
 include $(LOCAL_PATH)/android/third_party/regex-win32/sources.mk
