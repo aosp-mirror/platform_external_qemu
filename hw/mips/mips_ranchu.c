@@ -76,7 +76,6 @@ typedef struct {
 enum {
     RANCHU_GOLDFISH_PIC,
     RANCHU_GOLDFISH_TTY,
-    RANCHU_GOLDFISH_TIMER,
     RANCHU_GOLDFISH_RTC,
     RANCHU_GOLDFISH_BATTERY,
     RANCHU_GOLDFISH_FB,
@@ -86,6 +85,7 @@ enum {
     RANCHU_GOLDFISH_SYNC,
     RANCHU_GOLDFISH_RESET,
     RANCHU_GOLDFISH_PSTORE,
+    RANCHU_GOLDFISH_TIMER,
     RANCHU_MMIO,
 };
 
@@ -122,48 +122,53 @@ static DevMapEntry devmap[] = {
           "goldfish_tty", "goldfish_tty",
           "google,goldfish-tty\0generic,goldfish-tty", 2
         },
+    /* This is just a fake node to fool kernels < v4.4.
+     * It's required during a call to estimate_cpu_frequency().
+     * Essentially it will be using Goldfish RTC device.
+     * This should be removed once we officially switch to v4.4.
+     */
     [RANCHU_GOLDFISH_TIMER] = {
         GOLDFISH_IO_SPACE + 0x05000, 0x1000, 5,
           "goldfish_timer", "goldfish_timer",
           "google,goldfish-timer\0generic,goldfish-timer", 2
         },
     [RANCHU_GOLDFISH_RTC] = {
-        GOLDFISH_IO_SPACE + 0x06000, 0x1000, 6,
+        GOLDFISH_IO_SPACE + 0x05000, 0x1000, 5,
           "goldfish_rtc", "goldfish_rtc",
           "google,goldfish-rtc\0generic,goldfish-rtc", 2
         },
     [RANCHU_GOLDFISH_BATTERY] = {
-        GOLDFISH_IO_SPACE + 0x07000, 0x1000, 7,
+        GOLDFISH_IO_SPACE + 0x06000, 0x1000, 6,
           "goldfish_battery", "goldfish_battery",
           "google,goldfish-battery\0generic,goldfish-battery", 2
         },
     [RANCHU_GOLDFISH_FB] = {
-        GOLDFISH_IO_SPACE + 0x08000, 0x0100, 8,
+        GOLDFISH_IO_SPACE + 0x07000, 0x0100, 7,
           "goldfish_fb", "goldfish_fb",
           "google,goldfish-fb\0generic,goldfish-fb", 2
         },
     [RANCHU_GOLDFISH_EVDEV] = {
-        GOLDFISH_IO_SPACE + 0x09000, 0x1000, 9,
+        GOLDFISH_IO_SPACE + 0x08000, 0x1000, 8,
           "goldfish-events", "goldfish_events",
           "google,goldfish-events-keypad\0generic,goldfish-events-keypad", 2
         },
     [RANCHU_GOLDFISH_PIPE] = {
-        GOLDFISH_IO_SPACE + 0x0A000, 0x2000, 10,
+        GOLDFISH_IO_SPACE + 0x09000, 0x2000, 9,
           "goldfish_pipe", "android_pipe",
           "google,android-pipe\0generic,android-pipe", 2
         },
     [RANCHU_GOLDFISH_AUDIO] = {
-        GOLDFISH_IO_SPACE + 0x0C000, 0x0100, 11,
+        GOLDFISH_IO_SPACE + 0x0B000, 0x0100, 10,
           "goldfish_audio", "goldfish_audio",
           "google,goldfish-audio\0generic,goldfish-audio", 2
         },
     [RANCHU_GOLDFISH_SYNC] = {
-        GOLDFISH_IO_SPACE + 0x0D000, 0x2000, 12,
+        GOLDFISH_IO_SPACE + 0x0C000, 0x2000, 11,
           "goldfish_sync", "goldfish_sync",
           "google,goldfish-sync\0generic,goldfish-sync", 2
         },
     [RANCHU_GOLDFISH_RESET] = {
-        GOLDFISH_IO_SPACE + 0x0F000, 0x0100, -1,
+        GOLDFISH_IO_SPACE + 0x0E000, 0x0100, -1,
           "goldfish_reset", "goldfish_reset",
           "google,goldfish-reset\0generic,goldfish-reset\0syscon\0simple-mfd", 4
         },
@@ -636,7 +641,7 @@ static const MemoryRegionOps goldfish_reset_io_ops = {
 };
 
 /* create_device(void* fdt, DevMapEntry* dev, qemu_irq* pic,
- *               int num_devices, int is_virtio)
+ *               int num_devices, bool is_virtio, bool to_attach)
  *
  * In case of interrupt controller dev->irq stores
  * dt handle previously referenced as interrupt-parent
@@ -645,9 +650,11 @@ static const MemoryRegionOps goldfish_reset_io_ops = {
  * @dev - Device information (base, irq, name)
  * @pic - Interrupt controller parent. If NULL, 'intc' node assumed.
  * @num_devices - If you want to allocate multiple continuous device mappings
+ * @is_virtio - Virtio devices should be added in revers order
+ * @to_attach - Controls whether we should try to attach this device to a sysbus
  */
 static void create_device(void *fdt, DevMapEntry *dev, qemu_irq *pic,
-                          int num_devices, int is_virtio)
+                          int num_devices, bool is_virtio, bool to_attach)
 {
     int i, j;
 
@@ -679,10 +686,12 @@ static void create_device(void *fdt, DevMapEntry *dev, qemu_irq *pic,
                  * first, and then add dtb nodes in reverse order so that they
                  * appear in the finished device tree lowest address first.
                  */
-                sysbus_create_simple(dev->qemu_name,
-                    dev->base + (num_devices - i - 1) * dev->size,
-                    pic[dev->irq + num_devices - i - 1]);
-            } else {
+                if (to_attach) {
+                    sysbus_create_simple(dev->qemu_name,
+                        dev->base + (num_devices - i - 1) * dev->size,
+                        pic[dev->irq + num_devices - i - 1]);
+                }
+            } else if (to_attach) {
                 sysbus_create_simple(dev->qemu_name, base, pic[dev->irq + i]);
             }
         }
@@ -870,7 +879,7 @@ static void mips_ranchu_init(MachineState *machine)
     }
 
     /* Create goldfish_pic controller node in dt */
-    create_device(fdt, &devmap[RANCHU_GOLDFISH_PIC], NULL, 1, 0);
+    create_device(fdt, &devmap[RANCHU_GOLDFISH_PIC], NULL, 1, false, true);
 
     /* Make sure the first 3 serial ports are associated with a device. */
     for (i = 0; i < 3; i++) {
@@ -882,17 +891,27 @@ static void mips_ranchu_init(MachineState *machine)
     }
 
     /* Create 3 Goldfish TTYs */
-    create_device(fdt, &devmap[RANCHU_GOLDFISH_TTY], s->gfpic, MAX_GF_TTYS, 1);
+    create_device(fdt, &devmap[RANCHU_GOLDFISH_TTY], s->gfpic, MAX_GF_TTYS,
+                  true, true);
 
     /* Other Goldfish Platform devices */
-    for (i = RANCHU_GOLDFISH_SYNC; i >= RANCHU_GOLDFISH_TIMER ; i--) {
-        create_device(fdt, &devmap[i], s->gfpic, 1, 0);
+    for (i = RANCHU_GOLDFISH_SYNC; i >= RANCHU_GOLDFISH_RTC ; i--) {
+        create_device(fdt, &devmap[i], s->gfpic, 1, 0, 0);
     }
 
     create_pm_device(fdt, &devmap[RANCHU_GOLDFISH_RESET]);
 
     /* Virtio MMIO devices */
-    create_device(fdt, &devmap[RANCHU_MMIO], s->gfpic, VIRTIO_TRANSPORTS, 1);
+    create_device(fdt, &devmap[RANCHU_MMIO], s->gfpic, VIRTIO_TRANSPORTS,
+                  true, true);
+
+    if (!rp->bootinfo.use_uhi) {
+        /* Create a fake Goldfish Timer node
+         * This is required for kernels < v4.4
+         */
+        create_device(fdt, &devmap[RANCHU_GOLDFISH_TIMER], s->gfpic, 1,
+                      true, false);
+    }
 
     kernel_entry = android_load_kernel(rp);
 
