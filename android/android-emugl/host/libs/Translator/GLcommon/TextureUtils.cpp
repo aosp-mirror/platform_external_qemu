@@ -364,6 +364,7 @@ GLint getCoreProfileEmulatedInternalFormat(GLint internalformat, GLenum type) {
                 case GL_HALF_FLOAT:
                     return GL_RG16F;
             }
+            return GL_RG8;
     }
     fprintf(stderr,
             "%s: warning: unsupported alpha/luminance internal format 0x%x type 0x%x\n",
@@ -391,6 +392,35 @@ TextureSwizzle getSwizzleForEmulatedFormat(GLenum format) {
             res.toGreen = GL_RED;
             res.toBlue  = GL_RED;
             res.toAlpha = GL_GREEN;
+            break;
+        default:
+            break;
+    }
+    return res;
+}
+
+// Inverse swizzle: if we were writing fragments back to this texture,
+// how should the components be re-arranged?
+TextureSwizzle getInverseSwizzleForEmulatedFormat(GLenum format) {
+    TextureSwizzle res;
+    switch (format) {
+        case GL_ALPHA:
+            res.toRed   = GL_ALPHA;
+            res.toGreen = GL_ZERO;
+            res.toBlue  = GL_ZERO;
+            res.toAlpha = GL_ZERO;
+            break;
+        case GL_LUMINANCE:
+            res.toRed   = GL_RED;
+            res.toGreen = GL_ZERO;
+            res.toBlue  = GL_ZERO;
+            res.toAlpha = GL_ZERO;
+            break;
+        case GL_LUMINANCE_ALPHA:
+            res.toRed   = GL_RED;
+            res.toGreen = GL_ALPHA;
+            res.toBlue  = GL_ZERO;
+            res.toAlpha = GL_ZERO;
             break;
         default:
             break;

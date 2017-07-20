@@ -776,17 +776,42 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
                     GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
-    // TODO: set up the correct format and type
-    s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            nullptr, nullptr, nullptr);
-    ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
+
+    GLenum format = baseFormatOfInternalFormat((GLint)internalformat);
+    GLenum type = accurateTypeOfInternalFormat((GLint)internalformat);
+    s_glInitTexImage2D(
+        target, level, internalformat, width, height, border,
+        &format, &type, (GLint*)&internalformat);
+
+    TextureData* texData = getTextureTargetData(target);
+    if (texData && isCoreProfile() &&
+        isCoreProfileEmulatedFormat(texData->format)) {
+        GLEScontext::prepareCoreProfileEmulatedTexture(
+            getTextureTargetData(target),
+            false, target, format, type,
+            (GLint*)&internalformat, &format);
+        ctx->copyTexImageWithEmulation(
+            texData, false, target, level, internalformat,
+            0, 0, x, y, width, height, border);
+    } else {
+        ctx->dispatcher().glCopyTexImage2D(
+            target, level, internalformat,
+            x, y, width, height, border);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
-    ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
+    TextureData* texData = getTextureTargetData(target);
+    if (texData && isCoreProfile() &&
+        isCoreProfileEmulatedFormat(texData->format)) {
+        ctx->copyTexImageWithEmulation(
+            texData, true, target, level, 0, xoffset, yoffset, x, y, width, height, 0);
+    } else {
+        ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
+    }
 }
 
 GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){

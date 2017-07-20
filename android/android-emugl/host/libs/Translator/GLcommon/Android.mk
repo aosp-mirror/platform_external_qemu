@@ -15,6 +15,7 @@ host_common_SRC_FILES :=     \
      PaletteTexture.cpp      \
      RangeManip.cpp          \
      SaveableTexture.cpp     \
+     ScopedGLState.cpp       \
      ShareGroup.cpp          \
      TextureData.cpp         \
      TextureLoader.cpp       \
