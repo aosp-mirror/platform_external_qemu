@@ -939,9 +939,19 @@ static int create_qcow2_images(void) {
         android_hw->hw_sdCard_path,
         android_hw->disk_encryptionKeyPartition_path,
     };
+    /* List of paths to all images for cros.*/
+    const char* const image_paths_hw_arc[] = {
+        android_hw->disk_systemPartition_initPath,
+    };
+    int count = ARRAY_SIZE(image_paths);
+    const char* const * images = image_paths;
+    if (android_hw->hw_arc) {
+        count = 1;
+        images = image_paths_hw_arc;
+    }
     int p;
-    for (p = 0; p < ARRAY_SIZE(image_paths); p++) {
-        const char* backing_image_path = image_paths[p];
+    for (p = 0; p < count; p++) {
+        const char* backing_image_path = images[p];
         char* qcow2_image_path = NULL;
         if (!backing_image_path ||
             *backing_image_path == '\0') {
