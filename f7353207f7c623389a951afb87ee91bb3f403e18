@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d3c1be0_50a99cda",
+        "filename": "android/android-emu/android/camera/camera-capture-mac.m",
+        "patchSetId": 2
+      },
+      "lineNbr": 647,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-21T04:46:46Z",
+      "side": 0,
+      "message": "how are these changes related to the cl description",
+      "range": {
+        "startLine": 646,
+        "startChar": 0,
+        "endLine": 647,
+        "endChar": 24
+      },
+      "revId": "f7353207f7c623389a951afb87ee91bb3f403e18",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
