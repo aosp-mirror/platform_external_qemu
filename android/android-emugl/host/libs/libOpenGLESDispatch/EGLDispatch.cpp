@@ -25,7 +25,11 @@ EGLDispatch s_egl;
 #define DEFAULT_EGL_LIB EMUGL_LIBNAME("EGL_translator")
 
 #define RENDER_EGL_LOAD_FIELD(return_type, function_name, signature) \
-    s_egl. function_name = (function_name ## _t) lib->findSymbol(#function_name);
+    s_egl. function_name = (function_name ## _t) lib->findSymbol(#function_name); \
+
+#define RENDER_EGL_LOAD_FIELD_WITH_EGL(return_type, function_name, signature) \
+    if ((!s_egl. function_name) && s_egl.eglGetProcAddress) s_egl. function_name = \
+            (function_name ## _t) s_egl.eglGetProcAddress(#function_name); \
 
 #define RENDER_EGL_LOAD_OPTIONAL_FIELD(return_type, function_name, signature) \
     if (s_egl.eglGetProcAddress) s_egl. function_name = \
@@ -43,6 +47,7 @@ bool init_egl_dispatch() {
         return false;
     }
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD)
+    LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD_WITH_EGL)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_LOAD_OPTIONAL_FIELD)
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_LOAD_FIELD)
 
