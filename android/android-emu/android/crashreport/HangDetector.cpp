@@ -124,6 +124,18 @@ void HangDetector::addWatchedLooper(base::Looper* looper) {
     mLoopers.back()->startHangCheck();
 }
 
+void HangDetector::pause(bool paused) {
+    base::AutoLock lock(mLock);
+    mPaused = paused;
+    if (paused) {
+        for (auto&& lw : mLoopers) {
+            lw->cancelHangCheck();
+        }
+    } else {
+        mWorkerThreadCv.signalAndUnlock(&lock);
+    }
+}
+
 void HangDetector::stop() {
     {
         base::AutoLock lock(mLock);
@@ -142,13 +154,17 @@ void HangDetector::workerThread() {
         const auto waitUntilUs = base::System::get()->getUnixTimeUs() +
                                  kHangLoopIterationTimeoutMs * 1000;
         while (!mStopping &&
-               base::System::get()->getUnixTimeUs() < waitUntilUs) {
+               (base::System::get()->getUnixTimeUs() < waitUntilUs ||
+                mPaused)) {
             mWorkerThreadCv.timedWait(&mLock, waitUntilUs);
         }
+        if (mStopping) {
+            break;
+        }
+        if (mPaused) {
+            continue;
+        }
         for (auto&& lw : mLoopers) {
-            if (mStopping) {
-                return;
-            }
             lw->process(mHangCallback);
         }
     }
