@@ -15,6 +15,8 @@
 */
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include "OpenGLESDispatch/EGLDispatch.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,6 +44,8 @@ static GLESDispatchMaxVersion s_max_supported_gles_version = GLES_DISPATCH_MAX_V
 //
 bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
 {
+    init_egl_dispatch();
+
     const char *libName = getenv("ANDROID_GLESv2_LIB");
     if (!libName) {
         libName = DEFAULT_GLES_V2_LIB;
@@ -60,7 +64,10 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
     //
 #define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) \
     dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
-            s_gles2_lib->findSymbol(#function_name));
+            s_gles2_lib->findSymbol(#function_name)); \
+    if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            s_egl.eglGetProcAddress(#function_name)); \
 
     LIST_GLES2_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
 

@@ -16,6 +16,8 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include "OpenGLESDispatch/EGLDispatch.h"
+
 #include "android/utils/debug.h"
 
 #include <stdio.h>
@@ -114,6 +116,8 @@ LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
         } while(0);
 
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
+    init_egl_dispatch();
+
     dispatch_table->underlying_gles2_api = NULL;
 
     const char* libName = getenv("ANDROID_GLESv1_LIB");
@@ -146,7 +150,10 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 #define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) do { \
         dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
                 s_gles1_lib->findSymbol(#function_name)); \
-        } while(0);
+            if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
+            dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+                s_egl.eglGetProcAddress(#function_name)); \
+        } while(0); \
 
         LIST_GLES1_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
 
