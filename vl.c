@@ -937,7 +937,9 @@ static int create_qcow2_images(void) {
         android_hw->disk_encryptionKeyPartition_path,
     };
     int p;
-    for (p = 0; p < ARRAY_SIZE(image_paths); p++) {
+    /* chrome os only use the first image: system image */
+    int count  = android_hw->hw_arc ? 1 : ARRAY_SIZE(image_paths);
+    for (p = 0; p < count; p++) {
         const char* backing_image_path = image_paths[p];
         char* qcow2_image_path = NULL;
         if (!backing_image_path ||
