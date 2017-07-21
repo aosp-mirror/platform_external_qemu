@@ -675,7 +675,8 @@ extern "C" int main(int argc, char **argv) {
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
 
     // Create userdata file from init version if needed.
-    if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
+    if (!hw->hw_arc &&
+        (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
         std::unique_ptr<char[]> initDir(avdInfo_getDataInitDirPath(avd));
         if (path_exists(initDir.get())) {
             std::string dataPath = PathUtils::join(
@@ -720,7 +721,7 @@ extern "C" int main(int argc, char **argv) {
                    hw->disk_dataPartition_initPath);
         }
     }
-    else {
+    else if (!hw->hw_arc) {
         // Resize userdata-qemu.img if the size is smaller than what config.ini
         // says.
         // This can happen as user wants a larger data partition without wiping
@@ -758,14 +759,18 @@ extern "C" int main(int argc, char **argv) {
     bool createEmptyCacheFile = false;
 
     // Make sure there's a temp cache partition if there wasn't a permanent one
-    if (!hw->disk_cachePartition_path ||
-        strcmp(hw->disk_cachePartition_path, "") == 0) {
+    if ((!hw->disk_cachePartition_path ||
+         strcmp(hw->disk_cachePartition_path, "") == 0) &&
+        !hw->hw_arc) {
         str_reset(&hw->disk_cachePartition_path,
                   tempfile_path(tempfile_create()));
         createEmptyCacheFile = true;
     }
 
-    createEmptyCacheFile |= !path_exists(hw->disk_cachePartition_path);
+    if (!path_exists(hw->disk_cachePartition_path) &&
+        !hw->hw_arc) {
+        createEmptyCacheFile = true;
+    }
 
     if (createEmptyCacheFile) {
         D("Creating empty ext4 cache partition: %s",
