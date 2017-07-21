@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e648aacb_739413c1",
+        "filename": "android/android-emu/android/crashreport/HangDetector.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-21T18:09:17Z",
+      "side": 1,
+      "message": "is this the right place? should it be before the signaling?",
+      "range": {
+        "startLine": 136,
+        "startChar": 4,
+        "endLine": 136,
+        "endChar": 21
+      },
+      "revId": "f6a2bab17b3ab797cc89e1617a4ad878b825d85d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
