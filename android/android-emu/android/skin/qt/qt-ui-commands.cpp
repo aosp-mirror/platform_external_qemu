@@ -29,6 +29,7 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(SHOW_PANE_LOCATION, "Location"),
         INIT_COMMAND(SHOW_PANE_CELLULAR, "Cellular"),
         INIT_COMMAND(SHOW_PANE_BATTERY, "Battery"),
+        INIT_COMMAND(SHOW_PANE_BUGREPORT, "Bugreport"),
         INIT_COMMAND(SHOW_PANE_PHONE, "Phone"),
         INIT_COMMAND(SHOW_PANE_MICROPHONE, "Microphone"),
         INIT_COMMAND(SHOW_PANE_VIRTSENSORS, "Virtual sensors"),
