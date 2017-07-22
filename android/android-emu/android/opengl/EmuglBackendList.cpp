@@ -55,7 +55,7 @@ std::string EmuglBackendList::getLibDirPath(const char* name) {
     // remove the "_indirect" suffix
     static constexpr android::base::StringView suffix("_indirect");
     std::string nameNoSuffix(name);
-    int nameNoSuffixLen = (int)suffix.size() - (int)nameNoSuffix.size();
+    int nameNoSuffixLen = (int)nameNoSuffix.size() - (int)suffix.size();
     if (nameNoSuffixLen > 0 &&
         suffix == nameNoSuffix.c_str() + nameNoSuffixLen) {
         nameNoSuffix.erase(nameNoSuffixLen);
