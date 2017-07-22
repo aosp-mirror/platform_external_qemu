@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6183f85a_c4d79ce1",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 954,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-07-22T22:15:58Z",
+      "side": 1,
+      "message": "Can you group this together with next if (!hw-\u003ehw_arc) clause?",
+      "range": {
+        "startLine": 954,
+        "startChar": 4,
+        "endLine": 954,
+        "endChar": 5
+      },
+      "revId": "acf05fb501a8a85be6e1d3da99f1e0037c48634f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
