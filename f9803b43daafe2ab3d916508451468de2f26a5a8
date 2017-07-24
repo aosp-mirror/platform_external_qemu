@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73031ec0_5f3a1020",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TextureUtils.h",
+        "patchSetId": 27
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-24T16:31:01Z",
+      "side": 1,
+      "message": "a short comment about this structure could help you later to understand the code :)",
+      "revId": "f9803b43daafe2ab3d916508451468de2f26a5a8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
