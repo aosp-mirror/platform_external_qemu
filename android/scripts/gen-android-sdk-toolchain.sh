@@ -399,9 +399,11 @@ prepare_build_for_host () {
             ;;
         windows-x86)
             GNU_CONFIG_HOST=i686-w64-mingw32
+            EXTRA_CFLAGS="-m32"
             ;;
         windows-x86_64)
             GNU_CONFIG_HOST=x86_64-w64-mingw32
+            EXTRA_CFLAGS="-m64"
             ;;
         darwin-x86_64)
             GNU_CONFIG_HOST=
