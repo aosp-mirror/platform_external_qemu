@@ -1156,6 +1156,61 @@ help_dns_server(stralloc_t*  out)
     );
 }
 
+static void
+help_net_tap(stralloc_t*  out)
+{
+    PRINTF(
+    "  by default, the emulator uses user mode networking which does address\n"
+    "  translation of all network traffic. Use -net-tap <tap interface> to switch\n"
+    "  to TAP network mode where Android will use a TAP interface to connect to\n"
+    "  the host network directly. Android will attempt to configure the TAP\n"
+    "  network using DHCP for IPv4 and SLAAC for IPv6. To be able to access the\n"
+    "  network that the host is connected to the TAP interface should be bridged\n"
+    "  with another network interface on the host.\n\n"
+
+    "  <tap interface> is the name of a TAP network interface such as tap0. It\n"
+    "  is NOT the path to the TAP device, just the name of the device.\n\n"
+
+    "  NOTE: Using this disables other options such as net-speed, net-delay,\n"
+    "        -dns-server, -http-proxy, -tcpdump, and -shared-net-id\n\n"
+    );
+}
+
+static void
+help_net_tap_script_up(stralloc_t*  out)
+{
+    PRINTF(
+    "  when using the -net-tap option it is sometimes useful to run a script when\n"
+    "  TAP interface is enabled. Depending on the host system the TAP interface\n"
+    "  might not be up until the emulator enables it. A common operation in such\n"
+    "  a script is to add the TAP interface to a bridge so that it can be part of\n"
+    "  the host network.\n"
+
+    "  <script> the path to a script to be run when the TAP interface goes up.\n"
+
+    "  NOTE: The script will be run with the same privileges as the emulator.\n"
+    "        Ensure that this is sufficient for whatever operations the script\n"
+    "        performs.\n\n"
+    );
+}
+
+static void
+help_net_tap_script_down(stralloc_t*  out)
+{
+    PRINTF(
+    "  when using the -net-tap option it is sometimes useful to run a script when\n"
+    "  TAP interface is disabled. Depending on the host system the TAP interface\n"
+    "  might be disabled when the emulator exits. A common operation in such\n"
+    "  a script is to remove the TAP interface from a bridge that it was previously\n"
+    "  part of.\n"
+
+    "  <script> the path to a script to be run when the TAP interface goes down.\n"
+
+    "  NOTE: The script will be run with the same privileges as the emulator.\n"
+    "        Ensure that this is sufficient for whatever operations the script\n"
+    "        performs.\n\n"
+    );
+}
 
 static void
 help_cpu_delay(stralloc_t*  out)

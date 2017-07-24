@@ -976,8 +976,26 @@ extern "C" int main(int argc, char **argv) {
     }
 
     // Network
+    std::string netdevArg;
     args[n++] = "-netdev";
-    args[n++] = "user,id=mynet";
+    if (opts->net_tap) {
+        const char* upScript = opts->net_tap_script_up ?
+            opts->net_tap_script_up : "no";
+        const char* downScript = opts->net_tap_script_down ?
+            opts->net_tap_script_down : "no";
+        netdevArg = StringFormat("tap,id=mynet,script=%s,downscript=%s,"
+                                 "ifname=%s", upScript, downScript,
+                                 opts->net_tap);
+        args[n++] = netdevArg.c_str();
+    } else {
+        if (opts->net_tap_script_up) {
+            dwarning("-net-tap-script-up ignored without -net-tap option");
+        }
+        if (opts->net_tap_script_down) {
+            dwarning("-net-tap-script-down ignored without -net-tap option");
+        }
+        args[n++] = "user,id=mynet";
+    }
     args[n++] = "-device";
     std::string netDevice =
             StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
