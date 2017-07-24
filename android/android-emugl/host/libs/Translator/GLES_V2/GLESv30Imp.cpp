@@ -325,7 +325,7 @@ GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, 
 
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
-        s_glDrawPre(ctx, mode);
+        s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawElementsInstanced(mode, count, type, indices, primcount);
         s_glDrawPost(ctx, mode);
     } else {
@@ -344,7 +344,7 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
 
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
-        s_glDrawPre(ctx, mode);
+        s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawRangeElements(mode, start, end, count, type, indices);
         s_glDrawPost(ctx, mode);
     } else {
@@ -479,7 +479,11 @@ GL_APICALL void GL_APIENTRY glInvalidateFramebuffer(GLenum target, GLsizei numAt
     }
 
     std::vector<GLenum> emulatedAttachments = sGetEmulatedAttachmentList(ctx, target, numAttachments, attachments);
-    ctx->dispatcher().glInvalidateFramebuffer(target, numAttachments, &emulatedAttachments[0]);
+    if (ctx->dispatcher().glInvalidateFramebuffer) {
+        ctx->dispatcher().glInvalidateFramebuffer(target, numAttachments, &emulatedAttachments[0]);
+    } else {
+        // If we are missing glInvalidateFramebuffer, just don't do anything and hope things work out.
+    }
 }
 
 GL_APICALL void GL_APIENTRY glInvalidateSubFramebuffer(GLenum target, GLsizei numAttachments, const GLenum * attachments, GLint x, GLint y, GLsizei width, GLsizei height) {
@@ -501,7 +505,11 @@ GL_APICALL void GL_APIENTRY glInvalidateSubFramebuffer(GLenum target, GLsizei nu
     }
 
     std::vector<GLenum> emulatedAttachments = sGetEmulatedAttachmentList(ctx, target, numAttachments, attachments);
-    ctx->dispatcher().glInvalidateSubFramebuffer(target, numAttachments, &emulatedAttachments[0], x, y, width, height);
+    if (ctx->dispatcher().glInvalidateSubFramebuffer) {
+        ctx->dispatcher().glInvalidateSubFramebuffer(target, numAttachments, &emulatedAttachments[0], x, y, width, height);
+    } else {
+        // If we are missing glInvalidateSubFramebuffer, just don't do anything and hope things work out.
+    }
 }
 
 GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer) {
@@ -812,24 +820,17 @@ GL_APICALL GLint GL_APIENTRY glGetFragDataLocation(GLuint program, const char * 
 
 GL_APICALL void GL_APIENTRY glGetInteger64v(GLenum pname, GLint64 * data) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetInteger64v(pname, data);
-
     s_glStateQueryTv<GLint64>(true, pname, data, s_glGetInteger64v_wrapper);
-
 }
 
 GL_APICALL void GL_APIENTRY glGetIntegeri_v(GLenum target, GLuint index, GLint * data) {
     GET_CTX_V2();
-
     s_glStateQueryTi_v<GLint>(target, index, data, s_glGetIntegeri_v_wrapper);
-
 }
 
 GL_APICALL void GL_APIENTRY glGetInteger64i_v(GLenum target, GLuint index, GLint64 * data) {
     GET_CTX_V2();
-
     s_glStateQueryTi_v<GLint64>(target, index, data, s_glGetInteger64i_v_wrapper);
-
 }
 
 GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint internalFormat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const GLvoid * data) {
@@ -839,7 +840,16 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
     SET_ERROR_IF(!GLESv2Validate::isCompressedFormat(internalFormat) &&
                  !GLESv2Validate::pixelSizedFrmt(ctx, internalFormat, format, type),
                  GL_INVALID_OPERATION);
+
     s_glInitTexImage3D(target, level, internalFormat, width, height, depth, border);
+
+    if (isCoreProfile()) {
+        GLEScontext::prepareCoreProfileEmulatedTexture(
+            getTextureTargetData(target),
+            true, target, format, type,
+            &internalFormat, &format);
+    }
+
     ctx->dispatcher().glTexImage3D(target, level, internalFormat, width, height, depth, border, format, type, data);
 }
 
@@ -854,6 +864,11 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
 
 GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const GLvoid * data) {
     GET_CTX_V2();
+
+    if (isCoreProfile() &&
+        isCoreProfileEmulatedFormat(format)) {
+        format = getCoreProfileEmulatedFormat(format);
+    }
     ctx->dispatcher().glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, data);
 }
 

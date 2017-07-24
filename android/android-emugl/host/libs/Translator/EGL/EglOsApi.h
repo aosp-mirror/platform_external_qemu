@@ -16,6 +16,10 @@
 #ifndef EGL_OS_API_H
 #define EGL_OS_API_H
 
+#include "android/base/Compiler.h"
+
+#include "emugl/common/smart_ptr.h"
+
 #include <EGL/egl.h>
 
 #define PBUFFER_MAX_WIDTH  32767
@@ -46,8 +50,6 @@ public:
 
     explicit Surface(SurfaceType type) : mType(type) {}
 
-    virtual ~Surface() {}
-
     SurfaceType type() const { return mType; }
 
 protected:
@@ -57,8 +59,14 @@ protected:
 // An interface class for engine-specific implementation of a GL context.
 class Context {
 public:
-    Context() {}
-    virtual ~Context() {}
+    Context(bool coreProfile = false) : mCoreProfile(coreProfile) {}
+    bool isCoreProfile() const {
+        return mCoreProfile;
+    }
+protected:
+    ~Context() = default;
+private:
+    bool mCoreProfile = false;
 };
 
 // Base class used to wrap engine-specific pixel format descriptors.
@@ -126,7 +134,7 @@ struct PbufferInfo {
 // connection.
 class Display {
 public:
-    Display() {}
+    Display() = default;
     virtual ~Display() {}
 
     virtual void queryConfigs(int renderableType,
@@ -141,10 +149,10 @@ public:
                                              unsigned int* width,
                                              unsigned int* height) = 0;
 
-    virtual Context* createContext(
-            const PixelFormat* pixelFormat, Context* sharedContext) = 0;
-
-    virtual bool destroyContext(Context* context) = 0;
+    virtual emugl::SmartPtr<Context> createContext(
+            EGLint profileMask,
+            const PixelFormat* pixelFormat,
+            Context* sharedContext) = 0;
 
     virtual Surface* createPbufferSurface(
             const PixelFormat* pixelFormat, const PbufferInfo* info) = 0;
@@ -156,6 +164,8 @@ public:
                              Context* context) = 0;
 
     virtual void swapBuffers(Surface* srfc) = 0;
+
+    DISALLOW_COPY_AND_ASSIGN(Display);
 };
 
 // An interface class to model a specific underlying GL graphics subsystem
@@ -163,7 +173,7 @@ public:
 // host.
 class Engine {
 public:
-    Engine() {}
+    Engine() = default;
     virtual ~Engine() {}
 
     // Return a Display instance to the default display / window.

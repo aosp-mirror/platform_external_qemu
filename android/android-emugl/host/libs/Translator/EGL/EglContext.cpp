@@ -35,12 +35,14 @@ EglContext::EglContext(EglDisplay *dpy,
                        EglConfig* config,
                        GLEScontext* glesCtx,
                        GLESVersion ver,
+                       EGLint profileMask,
                        ObjectNameManager* mngr,
                        android::base::Stream* stream) :
         m_dpy(dpy),
         m_config(config),
         m_glesContext(glesCtx),
         m_version(ver),
+        m_profileMask(profileMask),
         m_mngr(mngr)
 {
     if (stream) {
@@ -48,9 +50,14 @@ EglContext::EglContext(EglDisplay *dpy,
         m_config = dpy->getConfig(configId);
         shareGroupId = static_cast<uint64_t>(stream->getBe64());
     }
+
     EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
-    m_native = dpy->nativeType()->createContext(
-            m_config->nativeFormat(), globalSharedContext);
+    m_native =
+        dpy->nativeType()->createContext(
+            m_profileMask,
+            m_config->nativeFormat(),
+            globalSharedContext);
+
     if (m_native) {
         // When loading from a snapshot, the first context within a share group
         // will load share group data.
@@ -59,13 +66,20 @@ EglContext::EglContext(EglDisplay *dpy,
                         android::base::Stream* stream) {
                             return glesCtx->loadObject(type, localName, stream);
                         };
-        m_shareGroup = mngr->attachOrCreateShareGroup(m_native, shareGroupId,
+        m_shareGroup = mngr->attachOrCreateShareGroup(m_native.get(), shareGroupId,
                 stream, func);
         if (stream) {
             glesCtx->setShareGroup(m_shareGroup);
             glesCtx->postLoad();
         }
         m_hndl = ++s_nextContextHndl;
+
+        // Set the GLES-side core profile flag,
+        // and the global EGL flag.
+        bool usingCoreProfile =
+            m_profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
+        setCoreProfile(usingCoreProfile);
+        glesCtx->setCoreProfile(usingCoreProfile);
     } else {
         m_hndl = 0;
     }
@@ -95,7 +109,7 @@ EglContext::~EglContext()
             m_config->nativeFormat(), &pbInfo);
     assert(pb);
     if (pb) {
-        const bool res = m_dpy->nativeType()->makeCurrent(pb, pb, m_native);
+        const bool res = m_dpy->nativeType()->makeCurrent(pb, pb, m_native.get());
         assert(res);
         (void)res;
         pbSurface.setNativePbuffer(pb);
@@ -107,7 +121,7 @@ EglContext::~EglContext()
     //
     g_eglInfo->getIface(version())->setShareGroup(m_glesContext, {});
     if (m_mngr) {
-        m_mngr->deleteShareGroup(m_native);
+        m_mngr->deleteShareGroup(m_native.get());
     }
     m_shareGroup.reset();
 
@@ -126,10 +140,6 @@ EglContext::~EglContext()
         m_dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
     }
 
-    //
-    // remove the context in the underlying OS layer
-    //
-    m_dpy->nativeType()->destroyContext(m_native);
 }
 
 void EglContext::setSurfaces(SurfacePtr read,SurfacePtr draw)

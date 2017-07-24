@@ -83,14 +83,8 @@ void GLESv2Context::init(GlLibrary* glLib) {
             dispatcher().glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         }
 
-        // Create emulated client VBOs
-        GLint neededClientVBOs = 0;
-        dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &neededClientVBOs);
-        m_emulatedClientVBOs.resize(neededClientVBOs, 0);
-        dispatcher().glGenBuffers(neededClientVBOs, &m_emulatedClientVBOs[0]);
-
-        // Create emulated IBO
-        dispatcher().glGenBuffers(1, &m_emulatedClientIBO);
+        initEmulatedVAO();
+        initEmulatedBuffers();
     }
     m_initialized = true;
 }
@@ -106,6 +100,30 @@ void GLESv2Context::initDefaultFBO(
             readWidth, readHeight, readColorFormat, readDepthstencilFormat, readMultisamples,
             eglReadSurfaceRBColorId, eglReadSurfaceRBDepthId
             );
+}
+
+
+void GLESv2Context::initEmulatedVAO() {
+    if (!isCoreProfile()) return;
+
+    // Create emulated default VAO
+    genVAOName(0, false);
+    dispatcher().glBindVertexArray(getVAOGlobalName(0));
+}
+
+void GLESv2Context::initEmulatedBuffers() {
+    if (m_emulatedClientVBOs.empty()) {
+        // Create emulated client VBOs
+        GLint neededClientVBOs = 0;
+        dispatcher().glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &neededClientVBOs);
+        m_emulatedClientVBOs.resize(neededClientVBOs, 0);
+        dispatcher().glGenBuffers(neededClientVBOs, &m_emulatedClientVBOs[0]);
+    }
+
+    if (!m_emulatedClientIBO) {
+        // Create emulated IBO
+        dispatcher().glGenBuffers(1, &m_emulatedClientIBO);
+    }
 }
 
 GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
@@ -129,8 +147,6 @@ GLESv2Context::GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
                     GLuint val = stream->getBe32();
                     return std::make_pair(idx, val);
                 });
-        size_t numEmulatedClientVBOs = (size_t)stream->getByte();
-        m_emulatedClientVBOs.resize(numEmulatedClientVBOs);
     } else {
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
@@ -141,7 +157,14 @@ GLESv2Context::~GLESv2Context() {
     if (m_emulatedClientIBO) {
         s_glDispatch.glDeleteBuffers(1, &m_emulatedClientIBO);
     }
-    s_glDispatch.glDeleteBuffers(m_emulatedClientVBOs.size(), &m_emulatedClientVBOs[0]);
+
+    if (!m_emulatedClientVBOs.empty()) {
+        s_glDispatch.glDeleteBuffers(
+            m_emulatedClientVBOs.size(),
+            &m_emulatedClientVBOs[0]);
+    }
+
+    deleteVAO(0);
 }
 
 void GLESv2Context::onSave(android::base::Stream* stream) const {
@@ -158,7 +181,6 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
                 stream->putBe32(item.first);
                 stream->putBe32(item.second);
             });
-    stream->putByte((uint8_t)m_emulatedClientVBOs.size());
 }
 
 void GLESv2Context::postLoadRestoreCtx() {
@@ -169,8 +191,8 @@ void GLESv2Context::postLoadRestoreCtx() {
             NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
     dispatcher.glUseProgram(globalProgramName);
 
-    dispatcher.glGenBuffers(m_emulatedClientVBOs.size(), &m_emulatedClientVBOs[0]);
-    dispatcher.glGenBuffers(1, &m_emulatedClientIBO);
+    initEmulatedBuffers();
+    initEmulatedVAO();
 
     // vertex attribute pointers
     for (const auto& vaoIte : m_vaoStateMap) {
@@ -232,12 +254,13 @@ void GLESv2Context::postLoadRestoreCtx() {
         }
     }
     if (m_glesMajorVersion >= 3) {
-        dispatcher.glBindVertexArray(m_currVaoState.vaoId());
+        dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
         auto bindBufferRangeFunc =
                 [this](GLenum target,
                     const std::vector<BufferBinding>& bufferBindings) {
                     for (unsigned int i = 0; i < bufferBindings.size(); i++) {
                         const BufferBinding& bd = bufferBindings[i];
+                        if (!bd.size) return; // avoid GL_INVALID_VALUE
                         GLuint globalName = this->shareGroup()->getGlobalName(
                                 NamedObjectType::VERTEXBUFFER,
                                 bd.buffer);
@@ -249,10 +272,14 @@ void GLESv2Context::postLoadRestoreCtx() {
                 m_indexedTransformFeedbackBuffers);
         bindBufferRangeFunc(GL_UNIFORM_BUFFER,
                 m_indexedUniformBuffers);
-        bindBufferRangeFunc(GL_ATOMIC_COUNTER_BUFFER,
-                m_indexedAtomicCounterBuffers);
-        bindBufferRangeFunc(GL_SHADER_STORAGE_BUFFER,
-                m_indexedShaderStorageBuffers);
+
+        if (m_glesMinorVersion >= 1) {
+            bindBufferRangeFunc(GL_ATOMIC_COUNTER_BUFFER,
+                    m_indexedAtomicCounterBuffers);
+            bindBufferRangeFunc(GL_SHADER_STORAGE_BUFFER,
+                    m_indexedShaderStorageBuffers);
+        }
+
         // buffer bindings
         auto bindBuffer = [this](GLenum target, GLuint buffer) {
             this->dispatcher().glBindBuffer(target,
@@ -264,10 +291,14 @@ void GLESv2Context::postLoadRestoreCtx() {
         bindBuffer(GL_PIXEL_UNPACK_BUFFER, m_pixelUnpackBuffer);
         bindBuffer(GL_TRANSFORM_FEEDBACK_BUFFER, m_transformFeedbackBuffer);
         bindBuffer(GL_UNIFORM_BUFFER, m_uniformBuffer);
-        bindBuffer(GL_ATOMIC_COUNTER_BUFFER, m_atomicCounterBuffer);
-        bindBuffer(GL_DISPATCH_INDIRECT_BUFFER, m_dispatchIndirectBuffer);
-        bindBuffer(GL_DRAW_INDIRECT_BUFFER, m_drawIndirectBuffer);
-        bindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBuffer);
+
+        if (m_glesMinorVersion >= 1) {
+            bindBuffer(GL_ATOMIC_COUNTER_BUFFER, m_atomicCounterBuffer);
+            bindBuffer(GL_DISPATCH_INDIRECT_BUFFER, m_dispatchIndirectBuffer);
+            bindBuffer(GL_DRAW_INDIRECT_BUFFER, m_drawIndirectBuffer);
+            bindBuffer(GL_SHADER_STORAGE_BUFFER, m_shaderStorageBuffer);
+        }
+
         for (const auto& bindSampler : m_bindSampler) {
             dispatcher.glBindSampler(bindSampler.first,
                     shareGroup()->getGlobalName(NamedObjectType::SAMPLER,
@@ -388,11 +419,19 @@ void GLESv2Context::drawWithEmulations(
         !isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
     bool needPointEmulation = mode == GL_POINTS;
 
+#ifdef __APPLE__
+    if (primitiveRestartEnabled() && type) {
+        updatePrimitiveRestartIndex(type);
+    }
+#endif
+
     if (needPointEmulation) {
-        // Enable texture generation for GL_POINTS and gl_PointSize shader variable
-        // GLES2 assumes this is enabled by default, we need to set this state for GL
-        s_glDispatch.glEnable(GL_POINT_SPRITE);
         s_glDispatch.glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        if (!isCoreProfile()) {
+            // Enable texture generation for GL_POINTS and gl_PointSize shader variable
+            // GLES2 assumes this is enabled by default, we need to set this state for GL
+            s_glDispatch.glEnable(GL_POINT_SPRITE);
+        }
     }
 
     if (needClientVBOSetup) {
@@ -465,7 +504,9 @@ void GLESv2Context::drawWithEmulations(
 
     if (needPointEmulation) {
         s_glDispatch.glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
-        s_glDispatch.glDisable(GL_POINT_SPRITE);
+        if (!isCoreProfile()) {
+            s_glDispatch.glDisable(GL_POINT_SPRITE);
+        }
     }
 }
 

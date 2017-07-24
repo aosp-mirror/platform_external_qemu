@@ -39,6 +39,70 @@ void GLEScmContext::init(GlLibrary* glLib) {
     m_initialized = true;
 }
 
+static const char kDrawTexOESCore_vshader[] = R"(#version 330 core
+layout(location = 0) in vec2 pos;
+layout(location = 1) in vec2 texcoord;
+out vec2 texcoord_varying;
+void main() {
+    gl_Position = vec4(pos.x, pos.y, 0.5, 1.0);
+    texcoord_varying = texcoord;
+}
+)";
+
+static const char kDrawTexOESCore_fshader[] = R"(#version 330 core
+uniform sampler2D tex_sampler;
+in vec2 texcoord_varying;
+out vec4 frag_color;
+void main() {
+    frag_color = texture(tex_sampler, texcoord_varying);
+}
+)";
+
+static const uint32_t sDrawTexIbo[] = {
+    0, 1, 2, 0, 2, 3,
+};
+
+const GLEScmContext::DrawTexOESCoreState& GLEScmContext::getDrawTexOESCoreState() {
+    if (!m_drawTexOESCoreState.program) {
+        m_drawTexOESCoreState.vshader =
+            compileAndValidateCoreShader(GL_VERTEX_SHADER, kDrawTexOESCore_vshader);
+        m_drawTexOESCoreState.fshader =
+            compileAndValidateCoreShader(GL_FRAGMENT_SHADER, kDrawTexOESCore_fshader);
+        m_drawTexOESCoreState.program =
+            linkAndValidateProgram(m_drawTexOESCoreState.vshader,
+                                   m_drawTexOESCoreState.fshader);
+    }
+    if (!m_drawTexOESCoreState.vao) {
+        GLDispatch& gl = dispatcher();
+
+        gl.glGenVertexArrays(1, &m_drawTexOESCoreState.vao);
+        gl.glBindVertexArray(m_drawTexOESCoreState.vao);
+
+        // Initialize VBO
+        // Save IBO, attrib arrays/pointers to VAO
+        gl.glGenBuffers(1, &m_drawTexOESCoreState.ibo);
+        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_drawTexOESCoreState.ibo);
+        gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(sDrawTexIbo), sDrawTexIbo, GL_STATIC_DRAW);
+
+        gl.glGenBuffers(1, &m_drawTexOESCoreState.vbo);
+        gl.glBindBuffer(GL_ARRAY_BUFFER, m_drawTexOESCoreState.vbo);
+
+        gl.glEnableVertexAttribArray(0); // pos
+        gl.glEnableVertexAttribArray(1); // texcoord
+
+        gl.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)0);
+        gl.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
+                                 (GLvoid*)(uintptr_t)(2 * sizeof(float)));
+
+        gl.glBindVertexArray(0);
+
+        gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
+        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    return m_drawTexOESCoreState;
+}
+
 void GLEScmContext::initDefaultFBO(
         GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
         GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,

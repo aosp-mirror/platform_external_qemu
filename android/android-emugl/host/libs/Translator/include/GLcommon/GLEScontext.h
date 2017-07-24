@@ -17,7 +17,9 @@
 #ifndef GLES_CONTEXT_H
 #define GLES_CONTEXT_H
 
+#include "android/base/containers/Lookup.h"
 #include "android/base/files/Stream.h"
+
 #include "emugl/common/mutex.h"
 #include "GLDispatch.h"
 #include "GLESpointer.h"
@@ -218,6 +220,10 @@ public:
     virtual const GLESpointer* getPointer(GLenum arrType);
     virtual void setupArraysPointers(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct) = 0;
 
+    static void prepareCoreProfileEmulatedTexture(TextureData* texData, bool is3d, GLenum target,
+                                                  GLenum format, GLenum type,
+                                                  GLint* internalformat_out, GLenum* format_out);
+
     void bindBuffer(GLenum target,GLuint buffer);
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride = 0);
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
@@ -326,6 +332,15 @@ public:
     void setClearDepth(GLclampf depth);
     void setClearStencil(GLint s);
 
+    // Core profile doesn't support GL_GENERATE_MIPMAP_HINT,
+    // so just emulate it here with no-ops.
+    void setHint(GLenum target, GLenum mode) {
+        m_hints[target] = mode;
+    }
+    GLenum getHint(GLenum target) const {
+        return android::base::findOrDefault(m_hints, target, GL_DONT_CARE);
+    }
+
     static GLDispatch& dispatcher(){return s_glDispatch;};
 
     static int getMaxLights(){return s_glSupport.maxLights;}
@@ -358,6 +373,26 @@ public:
     ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName);
     unsigned int getFBOGlobalName(ObjectLocalName p_localName);
     ObjectLocalName getFBOLocalName(unsigned int p_globalName);
+    int queryCurrFboBits(ObjectLocalName localFboName, GLenum pname);
+
+    // Texture emulation
+    void copyTexImageWithEmulation(
+        TextureData* texData,
+        bool isSubImage,
+        GLenum target,
+        GLint level,
+        GLenum internalformat,
+        GLint xoffset, GLint yoffset,
+        GLint x, GLint y,
+        GLsizei width, GLsizei height,
+        GLint border);
+
+    // Primitive restart emulation
+    void setPrimitiveRestartEnabled(bool enabled);
+    bool primitiveRestartEnabled() const {
+        return m_primitiveRestartEnabled;
+    }
+    void updatePrimitiveRestartIndex(GLenum type);
 
     bool isVAO(ObjectLocalName p_localName);
     ObjectLocalName genVAOName(ObjectLocalName p_localName = 0,
@@ -373,6 +408,10 @@ public:
     // postLoad is triggered after setting up ShareGroup
     virtual void postLoad();
     virtual void restore();
+
+    bool isCoreProfile() const { return m_coreProfile; }
+    void setCoreProfile(bool core) { m_coreProfile = core; }
+
 protected:
     void initDefaultFboImpl(
         GLint width, GLint height,
@@ -500,9 +539,24 @@ protected:
     GLint m_defaultFBOWidth = 0;
     GLint m_defaultFBOHeight = 0;
     GLint m_defaultFBOColorFormat = 0;
+    GLint m_defaultFBODepthFormat = 0;
+    GLint m_defaultFBOStencilFormat = 0;
     GLint m_defaultFBOSamples = 0;
     GLenum m_defaultFBODrawBuffer = GL_COLOR_ATTACHMENT0;
     GLenum m_defaultFBOReadBuffer = GL_COLOR_ATTACHMENT0;
+
+    // Texture emulation state
+    void initTexImageEmulation();
+    GLuint m_textureEmulationFBO = 0;
+    GLuint m_textureEmulationTextures[2] = {};
+    GLuint m_textureEmulationProg = 0;
+    GLuint m_textureEmulationVAO = 0;
+    GLuint m_textureEmulationVBO = 0;
+    GLuint m_textureEmulationSamplerLoc = 0;
+
+    // Utility functions for emulation
+    GLuint compileAndValidateCoreShader(GLenum shaderType, const char* src);
+    GLuint linkAndValidateProgram(GLuint vshader, GLuint fshader);
 
 private:
 
@@ -524,6 +578,12 @@ private:
     // m_vaoNameSpace is an empty shell that holds the names but not the data
     // TODO(yahan): consider moving the data into it?
     NameSpace* m_vaoNameSpace = nullptr;
+
+    bool m_coreProfile = false;
+
+    std::unordered_map<GLenum, GLenum> m_hints;
+
+    bool m_primitiveRestartEnabled = false;
 };
 
 #endif

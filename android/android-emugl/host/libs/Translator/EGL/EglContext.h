@@ -42,10 +42,11 @@ public:
                EglConfig* config,
                GLEScontext* glesCtx,
                GLESVersion ver,
+               EGLint profile_mask,
                ObjectNameManager* mngr,
                android::base::Stream* stream);
     bool usingSurface(SurfacePtr surface);
-    EglOS::Context* nativeType() const { return m_native; }
+    EglOS::Context* nativeType() const { return m_native.get(); }
     bool getAttrib(EGLint attrib, EGLint* value);
     const SurfacePtr& read() const { return m_read; };
     const SurfacePtr& draw() const { return m_draw; };
@@ -66,7 +67,7 @@ public:
 private:
     static unsigned int s_nextContextHndl;
     EglDisplay* m_dpy = nullptr;
-    EglOS::Context* m_native = nullptr;
+    emugl::SmartPtr<EglOS::Context> m_native = {};
     EglConfig* m_config = nullptr;
     GLEScontext* m_glesContext = nullptr;
     ShareGroupPtr m_shareGroup;
@@ -75,6 +76,7 @@ private:
     GLESVersion m_version;
     ObjectNameManager* m_mngr = nullptr;
     unsigned int m_hndl = 0;
+    EGLint m_profileMask = 0;
 };
 
 #endif

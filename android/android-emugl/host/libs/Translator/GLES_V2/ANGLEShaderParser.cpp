@@ -41,12 +41,20 @@ static ShShaderSpec sInputSpecForVersion(int esslVersion) {
     return SH_GLES31_SPEC;
 }
 
-static ShShaderOutput sOutputSpecForVersion(int esslVersion) {
+static ShShaderOutput sOutputSpecForVersion(bool coreProfileHost, int esslVersion) {
     switch (esslVersion) {
         case 100:
-            return SH_GLSL_COMPATIBILITY_OUTPUT;
+            if (coreProfileHost) {
+                return SH_GLSL_330_CORE_OUTPUT;
+            } else {
+                return SH_GLSL_COMPATIBILITY_OUTPUT;
+            }
         case 300:
-            return SH_GLSL_150_CORE_OUTPUT;
+            if (coreProfileHost) {
+                return SH_GLSL_330_CORE_OUTPUT;
+            } else {
+                return SH_GLSL_150_CORE_OUTPUT;
+            }
         case 310:
             return SH_GLSL_430_CORE_OUTPUT;
     }
@@ -67,13 +75,13 @@ struct ShaderSpecKeyCompare {
 typedef std::map<ShaderSpecKey, ShHandle, ShaderSpecKeyCompare> ShaderCompilerMap;
 static ShaderCompilerMap sCompilerMap;
 
-static ShHandle getShaderCompiler(ShaderSpecKey key) {
+static ShHandle getShaderCompiler(bool coreProfileHost, ShaderSpecKey key) {
     if (sCompilerMap.find(key) == sCompilerMap.end()) {
         sCompilerMap[key] =
             ShConstructCompiler(
                     key.shaderType,
                     sInputSpecForVersion(key.esslVersion),
-                    sOutputSpecForVersion(key.esslVersion),
+                    sOutputSpecForVersion(coreProfileHost, key.esslVersion),
                     &kResources);
     }
     return sCompilerMap[key];
@@ -164,6 +172,12 @@ bool globalInitialize(
 
 static void getShaderLinkInfo(ShHandle compilerHandle,
                               ShaderLinkInfo* linkInfo) {
+
+    linkInfo->nameMap = *ShGetNameHashingMap(compilerHandle);
+    for (const auto& elt : linkInfo->nameMap) {
+        linkInfo->nameMapReverse[elt.second] = elt.first;
+    }
+
     auto uniforms = ShGetUniforms(compilerHandle);
     auto varyings = ShGetVaryings(compilerHandle);
     auto attributes = ShGetAttributes(compilerHandle);
@@ -177,7 +191,8 @@ static void getShaderLinkInfo(ShHandle compilerHandle,
     if (interfaceBlocks) linkInfo->interfaceBlocks = *interfaceBlocks;
 }
 
-bool translate(int esslVersion,
+bool translate(bool hostUsesCoreProfile,
+               int esslVersion,
                const char* src,
                GLenum shaderType,
                std::string* outInfolog,
@@ -213,7 +228,7 @@ bool translate(int esslVersion,
     key.shaderType = shaderType;
     key.esslVersion = esslVersion;
 
-    ShHandle compilerHandle = getShaderCompiler(key);
+    ShHandle compilerHandle = getShaderCompiler(hostUsesCoreProfile, key);
 
     if (!compilerHandle) {
         fprintf(stderr, "%s: no compiler handle for shader type 0x%x, ESSL version %d\n",

@@ -17,14 +17,33 @@
 
 #include "MacNative.h"
 
+#include "android/base/containers/Lookup.h"
+
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 #include <list>
+#include <numeric>
+#include <unordered_map>
 
 #define MAX_PBUFFER_MIPMAP_LEVEL 1
+
+using FinalizedConfigKey = std::pair<bool, int>;
+struct FinalizedConfigHash {
+    std::size_t operator () (const FinalizedConfigKey& p) const {
+        return p.second + 9001 * (p.first ? 1 : 0);
+    }
+};
+using FinalizedConfigMap =
+    std::unordered_map<FinalizedConfigKey, void*, FinalizedConfigHash>;
+
+static emugl::LazyInstance<FinalizedConfigMap> sFinalizedConfigs =
+    LAZY_INSTANCE_INIT;
 
 namespace {
 
@@ -49,9 +68,10 @@ private:
 
 class MacContext : public EglOS::Context {
 public:
-    explicit MacContext(void* context) : mContext(context) {}
+    explicit MacContext(bool isCoreProfile, void* context) :
+        EglOS::Context(isCoreProfile), mContext(context) {}
 
-    virtual ~MacContext() {
+    ~MacContext() {
         nsDestroyContext(mContext);
     }
 
@@ -65,25 +85,18 @@ private:
     void* mContext = nullptr;
 };
 
-typedef std::list<void*> NativeFormatList;
+typedef std::list<int> NativeFormatList;
 
-NativeFormatList s_nativeFormats;
+static int sNumNativeFormats = 0;
 
 void initNativeConfigs(){
-    int nConfigs = getNumPixelFormats();
-    if (s_nativeFormats.empty()) {
-        for(int i = 0; i < nConfigs; i++) {
-             void* frmt = getPixelFormat(i);
-             if (frmt) {
-                 s_nativeFormats.push_back(frmt);
-             }
-        }
-    }
+    sNumNativeFormats = getNumPixelFormats();
+    setupCoreProfileNativeFormats();
 }
 
 class MacPixelFormat : public EglOS::PixelFormat {
 public:
-    MacPixelFormat(void* handle, int redSize, int greenSize, int blueSize) :
+    MacPixelFormat(int handle, int redSize, int greenSize, int blueSize) :
             mHandle(handle),
             mRedSize(redSize),
             mGreenSize(greenSize),
@@ -93,7 +106,7 @@ public:
         return new MacPixelFormat(mHandle, mRedSize, mGreenSize, mBlueSize);
     }
 
-    void* handle() const { return mHandle; }
+    int handle() const { return mHandle; }
     int redSize() const { return mRedSize; }
     int greenSize() const { return mGreenSize; }
     int blueSize() const { return mBlueSize; }
@@ -106,7 +119,7 @@ private:
     MacPixelFormat();
     MacPixelFormat(const MacPixelFormat& other);
 
-    void* mHandle = nullptr;
+    int mHandle = 0;
     int mRedSize = 0;
     int mGreenSize = 0;
     int mBlueSize = 0;
@@ -114,38 +127,22 @@ private:
 
 
 void pixelFormatToConfig(int index,
-                         int renderableType,
-                         void* frmt,
                          EglOS::AddConfigCallback addConfigFunc,
                          void* addConfigOpaque) {
     EglOS::ConfigInfo info = {};
-    EGLint doubleBuffer;
-    getPixelFormatAttrib(frmt, MAC_HAS_DOUBLE_BUFFER, &doubleBuffer);
-    if (!doubleBuffer) {
-        return; //pixel double buffer
-    }
 
-    EGLint window = 0, pbuffer = 0;
-    getPixelFormatAttrib(frmt, MAC_DRAW_TO_WINDOW, &window);
-    getPixelFormatAttrib(frmt, MAC_DRAW_TO_PBUFFER, &pbuffer);
-
-    info.surface_type = 0;
-    if (window) {
-        info.surface_type |= EGL_WINDOW_BIT;
-    }
-    if (pbuffer) {
-        info.surface_type |= EGL_PBUFFER_BIT;
-    }
-    if (!info.surface_type) {
-        return;
-    }
+    info.surface_type = EGL_WINDOW_BIT | EGL_PBUFFER_BIT;
 
     //default values
     info.native_visual_id = 0;
     info.native_visual_type = EGL_NONE;
     info.caveat = EGL_NONE;
     info.native_renderable = EGL_FALSE;
-    info.renderable_type = renderableType;
+
+    info.renderable_type = EGL_OPENGL_ES_BIT |
+                           EGL_OPENGL_ES2_BIT |
+                           EGL_OPENGL_ES3_BIT;
+
     info.max_pbuffer_width = PBUFFER_MAX_WIDTH;
     info.max_pbuffer_height = PBUFFER_MAX_HEIGHT;
     info.max_pbuffer_size = PBUFFER_MAX_PIXELS;
@@ -162,23 +159,20 @@ void pixelFormatToConfig(int index,
      * matching config. Thus, make sure alpha is zero (or at least signalled as
      * zero to the calling EGL layer) for the configs where it was intended to
      * be zero. */
-    if (getPixelFormatDefinitionAlpha(index) == 0) {
-        info.alpha_size = 0;
-    } else {
-        getPixelFormatAttrib(frmt, MAC_ALPHA_SIZE, &info.alpha_size);
-    }
-    getPixelFormatAttrib(frmt, MAC_DEPTH_SIZE, &info.depth_size);
-    getPixelFormatAttrib(frmt, MAC_STENCIL_SIZE, &info.stencil_size);
-    getPixelFormatAttrib(frmt, MAC_SAMPLES_PER_PIXEL, &info.samples_per_pixel);
+    info.alpha_size = getPixelFormatAttrib(index, MAC_ALPHA_SIZE);
+
+    info.depth_size = getPixelFormatAttrib(index, MAC_DEPTH_SIZE);
+    info.stencil_size = getPixelFormatAttrib(index, MAC_STENCIL_SIZE);
+    info.samples_per_pixel = getPixelFormatAttrib(index, MAC_SAMPLES_PER_PIXEL);
 
     //TODO: ask guy if it is OK
     GLint colorSize = 0;
-    getPixelFormatAttrib(frmt, MAC_COLOR_SIZE, &colorSize);
+    colorSize = (GLint)getPixelFormatAttrib(index, MAC_COLOR_SIZE);
     info.red_size = info.green_size = info.blue_size = (colorSize / 4);
 
     info.config_id = (EGLint) index;
     info.frmt = new MacPixelFormat(
-            frmt, info.red_size, info.green_size, info.blue_size);
+            index, info.red_size, info.green_size, info.blue_size);
 
     (*addConfigFunc)(addConfigOpaque, &info);
 }
@@ -192,15 +186,11 @@ public:
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
         initNativeConfigs();
-        int i = 0;
-        for (NativeFormatList::iterator it = s_nativeFormats.begin();
-                it != s_nativeFormats.end();
-                ++it) {
-            pixelFormatToConfig(i++,
-                                renderableType,
-                                *it,
-                                addConfigFunc,
-                                addConfigOpaque);
+        for (int i = 0; i < sNumNativeFormats; i++) {
+            pixelFormatToConfig(
+                i,
+                addConfigFunc,
+                addConfigOpaque);
         }
     }
 
@@ -234,19 +224,34 @@ public:
         return ret && match;
     }
 
-    virtual EglOS::Context* createContext(
+    virtual emugl::SmartPtr<EglOS::Context> createContext(
+            EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
+
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
-        return new MacContext(
-                nsCreateContext(MacPixelFormat::from(pixelFormat)->handle(),
-                                macSharedContext));
-    }
 
-    virtual bool destroyContext(EglOS::Context* context) {
-        delete context;
-        return true;
+        bool isCoreProfile =
+            profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
+
+        auto key = std::make_pair(isCoreProfile,
+                                  MacPixelFormat::from(pixelFormat)->handle());
+
+        void* nsFormat = nullptr;
+        if (auto format = android::base::find(sFinalizedConfigs.get(), key)) {
+            nsFormat = *format;
+        } else {
+            nsFormat =
+                finalizePixelFormat(isCoreProfile,
+                        MacPixelFormat::from(pixelFormat)->handle());
+            sFinalizedConfigs.get()[key] = nsFormat;
+        }
+
+        return std::make_shared<MacContext>(
+                   isCoreProfile,
+                   nsCreateContext(nsFormat,
+                                   macSharedContext));
     }
 
     virtual EglOS::Surface* createPbufferSurface(

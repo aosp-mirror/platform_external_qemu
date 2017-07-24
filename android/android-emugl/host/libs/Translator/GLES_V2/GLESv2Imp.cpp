@@ -94,6 +94,8 @@ extern "C" {
 
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
+    setCoreProfile(ctx->isCoreProfile());
+
     if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
     }
@@ -271,9 +273,11 @@ GL_APICALL void  GL_APIENTRY glBindAttribLocation(GLuint program, GLuint index, 
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
 
-        ctx->dispatcher().glBindAttribLocation(globalProgramName,index,name);
-
         ProgramData* pData = (ProgramData*)objData;
+
+        ctx->dispatcher().glBindAttribLocation(
+            globalProgramName, index, pData->getTranslatedName(name).c_str());
+
         pData->bindAttribLocation(name, index);
     }
 }
@@ -501,8 +505,10 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
+    if (!ctx->isCoreProfile()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
-    ctx->dispatcher().glTexParameteri(target,GL_DEPTH_TEXTURE_MODE,GL_RED);
+        ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
@@ -705,8 +711,9 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             if (GLESv2Validate::isCompressedFormat(internalformat)) {
                 texData->compressed = true;
                 texData->compressedFormat = internalformat;
-                texData->internalFormat = decompressedInternalFormat(
-                    internalformat);
+                texData->internalFormat =
+                    decompressedInternalFormat(ctx,
+                                               internalformat);
             } else {
                 texData->internalFormat = internalformat;
             }
@@ -769,17 +776,42 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
                     GLESv2Validate::textureTargetEx(ctx, target))), GL_INVALID_ENUM);
     SET_ERROR_IF((GLESv2Validate::textureIsCubeMap(target) && width != height), GL_INVALID_VALUE);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
-    // TODO: set up the correct format and type
-    s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            nullptr, nullptr, nullptr);
-    ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
+
+    GLenum format = baseFormatOfInternalFormat((GLint)internalformat);
+    GLenum type = accurateTypeOfInternalFormat((GLint)internalformat);
+    s_glInitTexImage2D(
+        target, level, internalformat, width, height, border,
+        &format, &type, (GLint*)&internalformat);
+
+    TextureData* texData = getTextureTargetData(target);
+    if (texData && isCoreProfile() &&
+        isCoreProfileEmulatedFormat(texData->format)) {
+        GLEScontext::prepareCoreProfileEmulatedTexture(
+            getTextureTargetData(target),
+            false, target, format, type,
+            (GLint*)&internalformat, &format);
+        ctx->copyTexImageWithEmulation(
+            texData, false, target, level, internalformat,
+            0, 0, x, y, width, height, border);
+    } else {
+        ctx->dispatcher().glCopyTexImage2D(
+            target, level, internalformat,
+            x, y, width, height, border);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
-    ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
+    TextureData* texData = getTextureTargetData(target);
+    if (texData && isCoreProfile() &&
+        isCoreProfileEmulatedFormat(texData->format)) {
+        ctx->copyTexImageWithEmulation(
+            texData, true, target, level, 0, xoffset, yoffset, x, y, width, height, 0);
+    } else {
+        ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
+    }
 }
 
 GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
@@ -860,7 +892,7 @@ GL_APICALL GLuint GL_APIENTRY glCreateShader(GLenum type){
         }
         const GLuint localShaderName = ctx->shareGroup()->genName(
                                                 shaderProgramType, 0, true);
-        ShaderParser* sp = new ShaderParser(type);
+        ShaderParser* sp = new ShaderParser(type, isCoreProfile());
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,
                                          localShaderName, ObjectDataPtr(sp));
         return localShaderName;
@@ -1073,6 +1105,22 @@ GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glDisable(GLenum cap){
     GET_CTX();
+    if (isCoreProfile()) {
+        switch (cap) {
+        case GL_TEXTURE_2D:
+        case GL_POINT_SPRITE_OES:
+            // always enabled in core
+            return;
+        }
+    }
+#ifdef __APPLE__
+    switch (cap) {
+    case GL_PRIMITIVE_RESTART_FIXED_INDEX:
+        ctx->setPrimitiveRestartEnabled(false);
+        ctx->setEnable(cap, false);
+        return;
+    }
+#endif
     ctx->setEnable(cap, false);
     ctx->dispatcher().glDisable(cap);
 }
@@ -1085,24 +1133,30 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 }
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
-static void s_glDrawPre(GLESv2Context* ctx, GLenum mode) {
+static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
     if (ctx->getMajorVersion() < 3)
         ctx->drawValidate();
 
-    if (mode == GL_POINTS) {
-        //Enable texture generation for GL_POINTS and gl_PointSize shader variable
-        //GLES2 assumes this is enabled by default, we need to set this state for GL
-        if (mode==GL_POINTS) {
+    //Enable texture generation for GL_POINTS and gl_PointSize shader variable
+    //GLES2 assumes this is enabled by default, we need to set this state for GL
+    if (mode==GL_POINTS) {
+        ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        if (!isCoreProfile()) {
             ctx->dispatcher().glEnable(GL_POINT_SPRITE);
-            ctx->dispatcher().glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
         }
     }
+
+#ifdef __APPLE__
+    if (ctx->primitiveRestartEnabled() && type) {
+        ctx->updatePrimitiveRestartIndex(type);
+    }
+#endif
 }
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
     if (mode == GL_POINTS) {
-        if (mode==GL_POINTS) {
-            ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
+        if (!isCoreProfile()) {
             ctx->dispatcher().glDisable(GL_POINT_SPRITE);
         }
     }
@@ -1132,7 +1186,7 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
-        s_glDrawPre(ctx, mode);
+        s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawElements(mode, count, type, indices);
         s_glDrawPost(ctx, mode);
     } else {
@@ -1145,6 +1199,21 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
 
 GL_APICALL void  GL_APIENTRY glEnable(GLenum cap){
     GET_CTX();
+    if (isCoreProfile()) {
+        switch (cap) {
+        case GL_TEXTURE_2D:
+        case GL_POINT_SPRITE_OES:
+            return;
+        }
+    }
+#ifdef __APPLE__
+    switch (cap) {
+    case GL_PRIMITIVE_RESTART_FIXED_INDEX:
+        ctx->setPrimitiveRestartEnabled(true);
+        ctx->setEnable(cap, true);
+        return;
+    }
+#endif
     ctx->setEnable(cap, true);
     ctx->dispatcher().glEnable(cap);
 }
@@ -1323,6 +1392,60 @@ GL_APICALL void  GL_APIENTRY glGenTextures(GLsizei n, GLuint* textures){
     }
 }
 
+static void s_getActiveAttribOrUniform(bool isUniform, GLEScontext* ctx,
+                                       ProgramData* pData,
+                                       GLuint globalProgramName, GLuint index,
+                                       GLsizei bufsize, GLsizei* length,
+                                       GLint* size, GLenum* type,
+                                       GLchar* name) {
+    auto& gl = ctx->dispatcher();
+
+    GLsizei hostBufSize = 256;
+    GLsizei hostLen = 0;
+    GLint hostSize = 0;
+    GLenum hostType = 0;
+    gl.glGetProgramiv(
+        globalProgramName,
+        isUniform ? GL_ACTIVE_UNIFORM_MAX_LENGTH : GL_ACTIVE_ATTRIBUTE_MAX_LENGTH,
+        (GLint*)&hostBufSize);
+
+    std::string hostVarName(hostBufSize + 1, 0);
+    char watch_val = 0xfe;
+    hostVarName[0] = watch_val;
+
+    if (isUniform) {
+        gl.glGetActiveUniform(globalProgramName, index, hostBufSize, &hostLen,
+                              &hostSize, &hostType, &hostVarName[0]);
+    } else {
+        gl.glGetActiveAttrib(globalProgramName, index, hostBufSize, &hostLen,
+                             &hostSize, &hostType, &hostVarName[0]);
+    }
+
+    // here, something failed on the host side,
+    // so bail early.
+    if (hostVarName[0] == watch_val) {
+        return;
+    }
+
+    // Got a valid string from host GL, but
+    // we need to return the exact strlen to the GL user.
+    hostVarName.resize(strlen(hostVarName.c_str()));
+
+    // Things seem to have gone right, so translate the name
+    // and fill out all applicable guest fields.
+    auto guestVarName = pData->getDetranslatedName(hostVarName);
+
+    // Don't overstate how many non-nullterminator characters
+    // we are returning.
+    int strlenForGuest = std::min((int)(bufsize - 1), (int)guestVarName.size());
+
+    if (length) *length = strlenForGuest;
+    if (size) *size = hostSize;
+    if (type) *type = hostType;
+    // use the guest's bufsize, but don't run over.
+    if (name) memcpy(name, guestVarName.c_str(), strlenForGuest + 1);
+}
+
 GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufsize, GLsizei* length, GLint* size, GLenum* type, GLchar* name){
     GET_CTX();
     if(ctx->shareGroup().get()) {
@@ -1332,7 +1455,17 @@ GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLs
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ctx->dispatcher().glGetActiveAttrib(globalProgramName,index,bufsize,length,size,type,name);
+
+        GLint numActiveAttributes = 0;
+        ctx->dispatcher().glGetProgramiv(
+            globalProgramName, GL_ACTIVE_ATTRIBUTES, &numActiveAttributes);
+        SET_ERROR_IF(index >= numActiveAttributes, GL_INVALID_VALUE);
+        SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
+
+        ProgramData* pData = (ProgramData*)objData;
+        s_getActiveAttribOrUniform(false, ctx, (ProgramData*)objData,
+                                   globalProgramName, index, bufsize, length,
+                                   size, type, name);
     }
 }
 
@@ -1345,7 +1478,17 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         auto objData = ctx->shareGroup()->getObjectData(
                 NamedObjectType::SHADER_OR_PROGRAM, program);
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
-        ctx->dispatcher().glGetActiveUniform(globalProgramName,index,bufsize,length,size,type,name);
+
+        GLint numActiveUniforms = 0;
+        ctx->dispatcher().glGetProgramiv(globalProgramName, GL_ACTIVE_UNIFORMS,
+                                         &numActiveUniforms);
+        SET_ERROR_IF(index >= numActiveUniforms, GL_INVALID_VALUE);
+        SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
+
+        ProgramData* pData = (ProgramData*)objData;
+        s_getActiveAttribOrUniform(true, ctx, (ProgramData*)objData,
+                                   globalProgramName, index, bufsize, length,
+                                   size, type, name);
     }
 }
 
@@ -1381,7 +1524,8 @@ GL_APICALL int GL_APIENTRY glGetAttribLocation(GLuint program, const GLchar* nam
          ProgramData* pData = (ProgramData*)objData;
          RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,
                               GL_INVALID_OPERATION, -1);
-         int ret = ctx->dispatcher().glGetAttribLocation(globalProgramName, name);
+         int ret = ctx->dispatcher().glGetAttribLocation(
+             globalProgramName, pData->getTranslatedName(name).c_str());
          if (ret != -1) {
              pData->linkedAttribLocation(name, ret);
          }
@@ -1426,7 +1570,7 @@ static void s_glGetInteger64i_v_wrapper(GLenum pname, GLuint index, GLint64* dat
     ctx->dispatcher().glGetInteger64i_v(pname, index, data);
 }
 
-template <typename T>
+template <class T>
 static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc<T> getter) {
     T i;
     GET_CTX_V2();
@@ -1593,6 +1737,27 @@ static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc
             *params = myT;
         }
         break;
+    // Core-profile related fixes
+    case GL_GENERATE_MIPMAP_HINT:
+        if (isCoreProfile()) {
+            *params = ctx->getHint(GL_GENERATE_MIPMAP_HINT);
+        } else {
+            getter(pname, params);
+        }
+        break;
+    case GL_RED_BITS:
+    case GL_GREEN_BITS:
+    case GL_BLUE_BITS:
+    case GL_ALPHA_BITS:
+    case GL_DEPTH_BITS:
+    case GL_STENCIL_BITS:
+        if (isCoreProfile()) {
+            GLuint fboBinding = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+            *params = (T)ctx->queryCurrFboBits(fboBinding, pname);
+        } else {
+            getter(pname, params);
+        }
+        break;
     default:
         getter(pname,params);
         break;
@@ -1705,6 +1870,30 @@ GL_APICALL void  GL_APIENTRY glGetBooleanv(GLenum pname, GLboolean* params){
         if (ctx->shareGroup().get()) {
             s_glGetIntegerv_wrapper(pname,&i);
             TO_GLBOOL(params,ctx->shareGroup()->getLocalName(NamedObjectType::SAMPLER, i));
+        }
+        break;
+    case GL_VERTEX_ARRAY_BINDING:
+        s_glGetIntegerv_wrapper(pname,&i);
+        TO_GLBOOL(params, ctx->getVAOLocalName(i));
+        break;
+    case GL_GENERATE_MIPMAP_HINT:
+        if (isCoreProfile()) {
+            TO_GLBOOL(params, ctx->getHint(GL_GENERATE_MIPMAP_HINT));
+        } else {
+            s_glGetBooleanv_wrapper(pname, params);
+        }
+        break;
+    case GL_RED_BITS:
+    case GL_GREEN_BITS:
+    case GL_BLUE_BITS:
+    case GL_ALPHA_BITS:
+    case GL_DEPTH_BITS:
+    case GL_STENCIL_BITS:
+        if (isCoreProfile()) {
+            GLuint fboBinding = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+            TO_GLBOOL(params, ctx->queryCurrFboBits(fboBinding, pname));
+        } else {
+            s_glGetBooleanv_wrapper(pname, params);
         }
         break;
     default:
@@ -2192,20 +2381,37 @@ GL_APICALL const GLubyte* GL_APIENTRY glGetString(GLenum name){
     }
 }
 
+static bool sShouldEmulateSwizzles(TextureData* texData, GLenum target, GLenum pname) {
+    return texData && isCoreProfile() && isSwizzleParam(pname) &&
+           isCoreProfileEmulatedFormat(texData->format);
+}
+
 GL_APICALL void  GL_APIENTRY glGetTexParameterfv(GLenum target, GLenum pname, GLfloat* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glGetTexParameterfv(target,pname,params);
 
+    TextureData* texData = getTextureTargetData(target);
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        *params = (GLfloat)(texData->getSwizzle(pname));
+    } else {
+        ctx->dispatcher().glGetTexParameterfv(target,pname,params);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glGetTexParameteriv(GLenum target, GLenum pname, GLint* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glGetTexParameteriv(target,pname,params);
+
+    TextureData* texData = getTextureTargetData(target);
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        *params = texData->getSwizzle(pname);
+    } else {
+        ctx->dispatcher().glGetTexParameteriv(target,pname,params);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfloat* params){
@@ -2251,7 +2457,12 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
-        return ctx->dispatcher().glGetUniformLocation(globalProgramName,name);
+
+        // On core profile, it's possible to have renamed
+        // a bunch of variables to avoid ES -> core name collisions.
+        // Sort it out here.
+        return ctx->dispatcher().glGetUniformLocation(
+            globalProgramName, pData->getTranslatedName(name).c_str());
     }
     return -1;
 }
@@ -2362,7 +2573,13 @@ GL_APICALL void  GL_APIENTRY glGetVertexAttribPointerv(GLuint index, GLenum pnam
 GL_APICALL void  GL_APIENTRY glHint(GLenum target, GLenum mode){
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::hintTargetMode(target,mode),GL_INVALID_ENUM);
-    ctx->dispatcher().glHint(target,mode);
+
+    if (isCoreProfile() &&
+        target == GL_GENERATE_MIPMAP_HINT) {
+        ctx->setHint(target, mode);
+    } else {
+        ctx->dispatcher().glHint(target,mode);
+    }
 }
 
 GL_APICALL GLboolean    GL_APIENTRY glIsEnabled(GLenum cap){
@@ -2822,13 +3039,35 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+
     sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
+
+    if (isCoreProfile()) {
+        GLEScontext::prepareCoreProfileEmulatedTexture(
+            getTextureTargetData(target),
+            false, target, format, type,
+            &internalformat, &format);
+    }
+
     ctx->dispatcher().glTexImage2D(target,level,internalformat,width,height,border,format,type,pixels);
+
     err = ctx->dispatcher().glGetError();
     if (err != GL_NO_ERROR) {
         fprintf(stderr, "%s: got err :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
+}
+
+static void sEmulateUserTextureSwizzle(TextureData* texData,
+                                       GLenum target, GLenum pname, GLint param) {
+    GET_CTX_V2();
+    TextureSwizzle emulatedBaseSwizzle =
+        getSwizzleForEmulatedFormat(texData->format);
+    GLenum userSwz =
+        texData->getSwizzle(pname);
+    GLenum hostEquivalentSwizzle =
+        swizzleComponentOf(emulatedBaseSwizzle, userSwz);
+    ctx->dispatcher().glTexParameteri(target, pname, hostEquivalentSwizzle);
 }
 
 GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloat param){
@@ -2836,15 +3075,37 @@ GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloa
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glTexParameterf(target,pname,param);
+
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        texData->setTexParam(pname, (GLint)param);
+    }
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, (GLint)param);
+    } else {
+        ctx->dispatcher().glTexParameterf(target,pname,param);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const GLfloat* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
                    GLESv2Validate::textureParams(ctx, pname)),
                  GL_INVALID_ENUM);
-    ctx->dispatcher().glTexParameterfv(target,pname,params);
+
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        texData->setTexParam(pname, (GLint)params[0]);
+    }
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, (GLint)params[0]);
+    } else {
+        ctx->dispatcher().glTexParameterfv(target,pname,params);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint param){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
@@ -2854,8 +3115,14 @@ GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint 
     if (texData) {
         texData->setTexParam(pname, param);
     }
-    ctx->dispatcher().glTexParameteri(target,pname,param);
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, param);
+    } else {
+        ctx->dispatcher().glTexParameteri(target,pname,param);
+    }
 }
+
 GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const GLint* params){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) &&
@@ -2865,7 +3132,13 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
     if (texData) {
         texData->setTexParam(pname, params[0]);
     }
-    ctx->dispatcher().glTexParameteriv(target,pname,params);
+
+
+    if (sShouldEmulateSwizzles(texData, target, pname)) {
+        sEmulateUserTextureSwizzle(texData, target, pname, params[0]);
+    } else {
+        ctx->dispatcher().glTexParameteriv(target,pname,params);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid* pixels){
@@ -2874,6 +3147,7 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelFrmt(ctx,format), GL_INVALID_ENUM);
     SET_ERROR_IF(!GLESv2Validate::pixelType(ctx,type),GL_INVALID_ENUM);
+
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
@@ -2892,6 +3166,10 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     if (type==GL_HALF_FLOAT_OES)
         type = GL_HALF_FLOAT_NV;
 
+    if (isCoreProfile() &&
+        isCoreProfileEmulatedFormat(format)) {
+        format = getCoreProfileEmulatedFormat(format);
+    }
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
@@ -3139,7 +3417,7 @@ static void s_glPrepareVertexAttribPointer(GLESv2Context* ctx, GLuint index, GLi
     ctx->setVertexAttribBindingIndex(index, index);
     GLsizei effectiveStride = stride;
     if (stride == 0) {
-        effectiveStride = GLESv2Validate::sizeOfType(type) * size; 
+        effectiveStride = GLESv2Validate::sizeOfType(type) * size;
         switch (type) {
             case GL_INT_2_10_10_10_REV:
             case GL_UNSIGNED_INT_2_10_10_10_REV:
@@ -3167,7 +3445,6 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribPointerWithDataSize(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
-    (void)dataSize;
     GET_CTX_V2();
     SET_ERROR_IF((!GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     if (type == GL_HALF_FLOAT_OES) type = GL_HALF_FLOAT;
@@ -3300,6 +3577,7 @@ GL_APICALL void GL_APIENTRY glDeleteVertexArraysOES(GLsizei n, const GLuint * ar
 
 GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
     GET_CTX_V2_RET(0);
+    if (!array) return GL_FALSE;
     // TODO: Figure out how to answer this completely in software.
     // Currently, state gets weird so we need to ask the GPU directly.
     return ctx->dispatcher().glIsVertexArray(ctx->getVAOGlobalName(array));
