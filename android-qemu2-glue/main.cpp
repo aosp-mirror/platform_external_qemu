@@ -943,14 +943,6 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = lcd_density.c_str();
     }
 
-    // Kernel image
-    args[n++] = "-kernel";
-    args[n++] = hw->kernel_path;
-
-    // Ramdisk
-    args[n++] = "-initrd";
-    args[n++] = hw->disk_ramdisk_path;
-
     // Dedicated IOThread for all disk IO
 #if defined(CONFIG_LINUX) && (defined(TARGET_X86_64) || defined(TARGET_I386))
     args[n++] = "-object";
@@ -961,18 +953,37 @@ extern "C" int main(int argc, char **argv) {
     // won't appreciate it.
     args[n++] = "-nodefaults";
 
-    /*
-     * add partition parameters with the sequence
-     * pre-defined in targetInfo.imagePartitionTypes
-     */
-    int s;
-    int drvIndex = 0;
-    for (s = 0; s < kMaxPartitions; s++) {
-        bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM
-                    || kTarget.imagePartitionTypes[s] == IMAGE_TYPE_VENDOR) ?
-                    android_op_writable_system : true;
-        makePartitionCmd(args, &n, &drvIndex, hw,
-                         kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
+    if (!hw->hw_arc) {
+        // Kernel image
+        args[n++] = "-kernel";
+        args[n++] = hw->kernel_path;
+
+        // Ramdisk
+        args[n++] = "-initrd";
+        args[n++] = hw->disk_ramdisk_path;
+
+        /*
+         * add partition parameters with the sequence
+         * pre-defined in targetInfo.imagePartitionTypes
+         */
+        int s;
+        int drvIndex = 0;
+        for (s = 0; s < kMaxPartitions; s++) {
+            bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM
+                        || kTarget.imagePartitionTypes[s] == IMAGE_TYPE_VENDOR) ?
+                        android_op_writable_system : true;
+            makePartitionCmd(args, &n, &drvIndex, hw,
+                             kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
+        }
+    } else {
+        /* hw->hw_arc: ChromeOS single disk image, use regular block device
+         * instead of virtio block device */
+        StringView filePath = avdInfo_getContentPath(avd);
+        std::string driveParam = StringFormat("index=0,id=system,file=%s"
+                                              PATH_SEP "system.img.qcow2",
+                                              filePath);
+        args[n++] = "-drive";
+        args[n++] = ASTRDUP(driveParam.c_str());
     }
 
     // Network
@@ -1137,8 +1148,10 @@ extern "C" int main(int argc, char **argv) {
                 args[n++] = argv[i];
             }
         }
-        args[n++] = "-append";
-        args[n++] = ASTRDUP(append_arg.c_str());
+        if (!hw->hw_arc) {
+            args[n++] = "-append";
+            args[n++] = ASTRDUP(append_arg.c_str());
+        }
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
