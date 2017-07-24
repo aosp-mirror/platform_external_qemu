@@ -19,7 +19,6 @@
 #include "DispatchTables.h"
 #include "NativeSubWindow.h"
 #include "RenderThreadInfo.h"
-#include "SnapshotDirGetter.h"
 #include "gles2_dec.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -1531,7 +1530,8 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
     });
 }
 
-void FrameBuffer::onSave(Stream* stream) {
+void FrameBuffer::onSave(Stream* stream,
+                         const android::snapshot::TextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
     //     m_eglSurface
     //     m_eglContext
@@ -1552,8 +1552,7 @@ void FrameBuffer::onSave(Stream* stream) {
             s_egl.eglPreSaveContext(m_eglDisplay, ctx.second->getEGLContext(),
                     stream);
         }
-        std::string snapshotPath(emugl_get_snapshot_dir(true));
-        s_egl.eglSaveAllImages(m_eglDisplay, stream, snapshotPath.c_str());
+        s_egl.eglSaveAllImages(m_eglDisplay, stream, &textureSaver);
     }
     // Don't save subWindow's x/y/w/h here - those are related to the current
     // emulator UI state, not guest state that we're saving.
@@ -1603,7 +1602,8 @@ void FrameBuffer::onSave(Stream* stream) {
     }
 }
 
-bool FrameBuffer::onLoad(Stream* stream) {
+bool FrameBuffer::onLoad(Stream* stream,
+                         const android::snapshot::TextureLoaderPtr& textureLoader) {
     AutoLock mutex(m_lock);
     // cleanups
     {
@@ -1644,8 +1644,7 @@ bool FrameBuffer::onLoad(Stream* stream) {
         System::Duration texTime = System::get()->getUnixTimeUs();
 #endif
         if (s_egl.eglLoadAllImages) {
-            std::string snapshotPath = emugl_get_snapshot_dir(false);
-            s_egl.eglLoadAllImages(m_eglDisplay, stream, snapshotPath.c_str());
+            s_egl.eglLoadAllImages(m_eglDisplay, stream, &textureLoader);
         }
 #ifdef SNAPSHOT_PROFILE
         printf("Texture load time: %lld ms\n",
