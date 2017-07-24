@@ -15,13 +15,14 @@
 #pragma once
 
 #include "android/emulation/control/battery_agent.h"
+#include "android/emulation/control/bugreport_agent.h"
 #include "android/emulation/control/car_data_agent.h"
 #include "android/emulation/control/cellular_agent.h"
 #include "android/emulation/control/clipboard_agent.h"
 #include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
-#include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
+#include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
@@ -70,6 +71,9 @@ extern const QAndroidNetAgent* const gQAndroidNetAgent;
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
 
 extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
+
+// Defined in android-qemu2-glue/qemu-bug-report-agent-impl.cpp
+extern const QBugreportAgent* const gQBugreportAgent;
 
 extern const QCarDataAgent* const gQCarDataAgent;
 

@@ -48,9 +48,7 @@ public:
     void generateBugReport(android::base::StringView outputDirectoryPath,
                            ResultCallback resultCallback);
     // Returns true if the adb bugreport command is currently in the process of execution.
-    bool isBugReportInFlight() const {
-        return mAdbBugReportCommand != nullptr;
-    };
+    bool isBugReportInFlight() const { return mAdbBugReportCommand != nullptr; }
 
     void generateAdbLogcatInMemory(ResultOutputCallback resultCallback);
 

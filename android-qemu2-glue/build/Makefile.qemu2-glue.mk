@@ -30,6 +30,7 @@ LOCAL_SRC_FILES := \
     net-android.cpp \
     proxy/slirp_proxy.cpp \
     qemu-battery-agent-impl.c \
+    qemu-bug-report-agent-impl.cpp \
     qemu-cellular-agent-impl.c \
     qemu-clipboard-agent-impl.cpp \
     qemu-display-agent-impl.cpp \
