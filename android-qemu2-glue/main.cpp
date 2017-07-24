@@ -9,10 +9,10 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
-#include "android/base/memory/ScopedPtr.h"
 #include "android/base/StringFormat.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
 
@@ -24,36 +24,37 @@
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/emulation/ParameterList.h"
 #include "android/error-messages.h"
-#include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/filesystems/ext4_resize.h"
 #include "android/filesystems/ext4_utils.h"
 #include "android/globals.h"
 #include "android/help.h"
 #include "android/kernel/kernel_utils.h"
-#include "android/main-common.h"
 #include "android/main-common-ui.h"
+#include "android/main-common.h"
 #include "android/main-kernel-parameters.h"
-#include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/opengles.h"
 #include "android/process_setup.h"
 #include "android/session_phase_reporter.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/file_io.h"
-#include "android/utils/path.h"
-#include "android/utils/lineinput.h"
-#include "android/utils/property_file.h"
 #include "android/utils/filelock.h"
+#include "android/utils/lineinput.h"
+#include "android/utils/path.h"
+#include "android/utils/property_file.h"
 #include "android/utils/stralloc.h"
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
 #include "android/utils/win32_cmdline_quote.h"
 
-#include "android/skin/winsys.h"
 #include "android/skin/qt/init-qt.h"
+#include "android/skin/winsys.h"
 
 #include "config-target.h"
 
@@ -62,10 +63,10 @@ extern "C" {
 #include "hw/misc/goldfish_pstore.h"
 }
 
-#include "android/ui-emu-agent.h"
 #include "android-qemu2-glue/emulation/serial_line.h"
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
+#include "android/ui-emu-agent.h"
 
 #ifdef TARGET_AARCH64
 #define TARGET_ARM64
@@ -81,7 +82,11 @@ extern "C" {
 #include <unistd.h>
 
 #include "android/version.h"
-#define  D(...)  do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+#define D(...)                   \
+    do {                         \
+        if (VERBOSE_CHECK(init)) \
+            dprint(__VA_ARGS__); \
+    } while (0)
 
 extern bool android_op_wipe_data;
 extern bool android_op_writable_system;
@@ -140,61 +145,67 @@ struct TargetInfo {
 // The current target architecture information!
 const TargetInfo kTarget = {
 #ifdef TARGET_ARM64
-    "arm64",
-    "aarch64",
-    "cortex-a57",
-    "ttyAMA",
-    "virtio-blk-device",
-    "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-    {NULL},
+        "arm64",
+        "aarch64",
+        "cortex-a57",
+        "ttyAMA",
+        "virtio-blk-device",
+        "virtio-net-device",
+        {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
+         IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+        {NULL},
 #elif defined(TARGET_ARM)
-    "arm",
-    "arm",
-    "cortex-a15",
-    "ttyAMA",
-    "virtio-blk-device",
-    "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-    {NULL},
+        "arm",
+        "arm",
+        "cortex-a15",
+        "ttyAMA",
+        "virtio-blk-device",
+        "virtio-net-device",
+        {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
+         IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+        {NULL},
 #elif defined(TARGET_MIPS64)
-    "mips64",
-    "mips64el",
-    "MIPS64R6-generic",
-    "ttyGF",
-    "virtio-blk-device",
-    "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-    {NULL},
+        "mips64",
+        "mips64el",
+        "MIPS64R6-generic",
+        "ttyGF",
+        "virtio-blk-device",
+        "virtio-net-device",
+        {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
+         IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+        {NULL},
 #elif defined(TARGET_MIPS)
-    "mips",
-    "mipsel",
-    "74Kf",
-    "ttyGF",
-    "virtio-blk-device",
-    "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
-    {NULL},
+        "mips",
+        "mipsel",
+        "74Kf",
+        "ttyGF",
+        "virtio-blk-device",
+        "virtio-net-device",
+        {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY,
+         IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+        {NULL},
 #elif defined(TARGET_X86_64)
-    "x86_64",
-    "x86_64",
-    "android64",
-    "ttyS",
-    "virtio-blk-pci",
-    "virtio-net-pci",
-    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_VENDOR, IMAGE_TYPE_SD_CARD},
-    {"-vga", "none", NULL},
+        "x86_64",
+        "x86_64",
+        "android64",
+        "ttyS",
+        "virtio-blk-pci",
+        "virtio-net-pci",
+        {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA,
+         IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_VENDOR, IMAGE_TYPE_SD_CARD},
+        {"-vga", "none", NULL},
 #elif defined(TARGET_I386)  // Both i386 and x86_64 targets define this macro
-    "x86",
-    "i386",
-    "android32",
-    "ttyS",
-    "virtio-blk-pci",
-    "virtio-net-pci",
-    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_VENDOR, IMAGE_TYPE_SD_CARD},
-    {"-vga", "none", NULL},
+        "x86",
+        "i386",
+        "android32",
+        "ttyS",
+        "virtio-blk-pci",
+        "virtio-net-pci",
+        {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA,
+         IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_VENDOR, IMAGE_TYPE_SD_CARD},
+        {"-vga", "none", NULL},
 #else
-    #error No target platform is defined
+#error No target platform is defined
 #endif
 };
 
@@ -208,176 +219,281 @@ static std::string getNthParentDir(const char* path, size_t n) {
     return PathUtils::recompose(dirs);
 }
 
-/* generate parameters for each partition by type.
- * Param:
- *  args - array to hold parameters for qemu
- *  argsPosition - current index in the parameter array
- *  driveIndex - a sequence number for the drive parameter
- *  hw - the hardware configuration that conatains image info.
- *  type - what type of partition parameter to generate
-*/
+/* Generate a hardware-qemu.ini for this AVD. The real hardware
+ * configuration is ususally stored in several files, e.g. the AVD's
+ * config.ini plus the skin-specific hardware.ini.
+ *
+ * The new file will group all definitions and will be used to
+ * launch the core with the -android-hw <file> option.
+ */
+static int genHwIniFile(AndroidHwConfig* hw, const char* coreHwIniPath) {
+    const auto hwIni = android::base::makeCustomScopedPtr(
+            iniFile_newEmpty(NULL), iniFile_free);
+    androidHwConfig_write(hw, hwIni.get());
 
-static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
-                             AndroidHwConfig* hw, ImageType type, bool writable,
-                             int apiLevel, AvdInfo* avd) {
-    int n   = *argsPosition;
-    int idx = *driveIndex;
-
-#if defined(TARGET_X86_64) || defined(TARGET_I386)
-    /* for x86, 'if=none' is necessary for virtio blk*/
-    std::string driveParam("if=none,");
-#else
-    std::string driveParam;
-#endif
-
-    std::string deviceParam;
-    ScopedCPtr<const char> allocatedPath;
-    StringView filePath;
-    bool qCow2Format = true;
-    switch (type) {
-        case IMAGE_TYPE_SYSTEM:
-            // API 15 and under images need a read+write system image.
-            // API > 15 uses read-only system partition. You can override this
-            // explicitly by passing -writable-system to emulator.
-            if (apiLevel <= 15) {
-                writable = true;
-            }
-            if (writable) {
-                const char* systemDir = avdInfo_getContentPath(avd);
-                filePath = path_join(systemDir, "system.img.qcow2");
-                driveParam += StringFormat("index=%d,id=system,file=%s",
-                                           idx++, filePath);
-            } else {
-                qCow2Format = false;
-                filePath = avdInfo_getSystemInitImagePath(avd);
-                driveParam += StringFormat("index=%d,id=system,file=%s"
-                                           ",read-only",
-                                           idx++, filePath);
-            }
-            allocatedPath.reset(filePath.c_str());
-            deviceParam = StringFormat("%s,drive=system",
-                                       kTarget.storageDeviceType);
-            break;
-        case IMAGE_TYPE_VENDOR:
-            if (!hw->disk_vendorPartition_path
-                    && !hw->disk_vendorPartition_initPath) {
-                // we do not have a vendor image to mount
-                return;
-            }
-            filePath = avdInfo_getContentPath(avd);
-            driveParam += StringFormat("index=%d,id=vendor,file=%s"
-                                       PATH_SEP "vendor.img.qcow2",
-                                        idx++, filePath);
-            // You can override this explicitly
-            // by passing -writable-system to emulator.
-            if (!writable) driveParam += ",read-only";
-            deviceParam = StringFormat("%s,drive=vendor",
-                                       kTarget.storageDeviceType);
-            break;
-        case IMAGE_TYPE_CACHE:
-            filePath = hw->disk_cachePartition_path;
-            driveParam += StringFormat("index=%d,id=cache,file=%s.qcow2",
-                                      idx++,
-                                      filePath);
-            deviceParam = StringFormat("%s,drive=cache",
-                                       kTarget.storageDeviceType);
-            break;
-        case IMAGE_TYPE_USER_DATA:
-            filePath = hw->disk_dataPartition_path;
-            driveParam += StringFormat("index=%d,id=userdata,file=%s.qcow2",
-                                      idx++,
-                                      filePath);
-            deviceParam = StringFormat("%s,drive=userdata",
-                                       kTarget.storageDeviceType);
-            break;
-        case IMAGE_TYPE_SD_CARD:
-            if (hw->hw_sdCard_path != NULL && strcmp(hw->hw_sdCard_path, "")) {
-                filePath = hw->hw_sdCard_path;
-                driveParam += StringFormat("index=%d,id=sdcard,file=%s.qcow2",
-                                          idx++, filePath);
-                deviceParam = StringFormat("%s,drive=sdcard",
-                                           kTarget.storageDeviceType);
-            } else {
-                /* no sdcard is defined */
-                return;
-            }
-            break;
-        case IMAGE_TYPE_ENCRYPTION_KEY:
-            if (fc::isEnabled(fc::EncryptUserData) &&
-                hw->disk_encryptionKeyPartition_path != NULL && strcmp(hw->disk_encryptionKeyPartition_path, "")) {
-                filePath = hw->disk_encryptionKeyPartition_path;
-                driveParam += StringFormat("index=%d,id=encrypt,file=%s.qcow2",
-                                           idx++, filePath);
-                deviceParam = StringFormat("%s,drive=encrypt",
-                                           kTarget.storageDeviceType);
-            } else {
-                /* no encryption partition is defined */
-                return;
-            }
-            break;
-        default:
-            dwarning("Unknown Image type %d\n", type);
-            return;
+    /* While saving HW config, ignore valueless entries. This will
+     * not break anything, but will significantly simplify comparing
+     * the current HW config with the one that has been associated
+     * with a snapshot (in case VM starts from a snapshot for this
+     * instance of emulator). */
+    if (iniFile_saveToFileClean(hwIni.get(), coreHwIniPath) < 0) {
+        derror("Could not write hardware.ini to %s: %s", coreHwIniPath,
+               strerror(errno));
+        return 2;
     }
 
-    if (qCow2Format) {
-        // Disable extra qcow2 checks as we're on its stable version.
-        // Disable cache flushes as well, as Android issues way too many flush
-        // commands for nothing.
-        driveParam += ",overlap-check=none,cache=unsafe";
-
-        // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
-        // larger images.
-        System::FileSize diskSize;
-        if (System::get()->pathFileSize(filePath, &diskSize)) {
-            // L2 cache size should be "disk_size_GB / 131072" as per QEMU docs
-            // with a default of 1MB. Round it up just in case.
-            const int l2CacheSize =
-                    std::max<int>((diskSize + (1024 * 1024 * 1024 - 1)) /
-                                          (1024 * 1024 * 1024) * 131072,
-                                  1024 * 1024);
-            driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
+    /* In verbose mode, dump the file's content */
+    if (VERBOSE_CHECK(init)) {
+        auto file = makeCustomScopedPtr(fopen(coreHwIniPath, "rt"), fclose);
+        if (file.get() == NULL) {
+            derror("Could not open hardware configuration file: "
+                   "%s\n",
+                   coreHwIniPath);
+        } else {
+            LineInput* input = lineInput_newFromStdFile(file.get());
+            const char* line;
+            printf("Content of hardware configuration file:\n");
+            while ((line = lineInput_getLine(input)) != NULL) {
+                printf("  %s\n", line);
+            }
+            printf(".\n");
+            lineInput_free(input);
         }
     }
 
-    // Move the disk operations into the dedicated 'disk thread', and
-    // enable modern notification mode for the hosts that support it (Linux).
-#if defined(TARGET_X86_64) || defined(TARGET_I386)
-#ifdef CONFIG_LINUX
-    // eventfd is required for this, and only available on kvm.
-    deviceParam += ",iothread=disk-iothread";
-#endif
-    deviceParam += ",modern-pio-notify";
-#endif
-
-    args[n++] = "-drive";
-    args[n++] = ASTRDUP(driveParam.c_str());
-    args[n++] = "-device";
-    args[n++] = ASTRDUP(deviceParam.c_str());
-    /* update the index */
-    *argsPosition = n;
-    *driveIndex = idx;
+    return 0;
 }
 
+static int createUserData(AvdInfo* avd,
+                          std::string dataPath,
+                          AndroidHwConfig* hw) {
+    ScopedCPtr<char> initDir(avdInfo_getDataInitDirPath(avd));
+    if (path_exists(initDir.get())) {
+        path_copy_dir(dataPath.c_str(), initDir.get());
+        std::string adbKeyPath = PathUtils::join(
+                android::ConfigDirs::getUserDirectory(), "adbkey.pub");
+        if (path_is_regular(adbKeyPath.c_str()) &&
+            path_can_read(adbKeyPath.c_str())) {
+            std::string guestAdbKeyDir =
+                    PathUtils::join(dataPath, "misc", "adb");
+            std::string guestAdbKeyPath =
+                    PathUtils::join(guestAdbKeyDir, "adb_keys");
+            path_mkdir_if_needed(guestAdbKeyDir.c_str(), 0777);
+            path_copy_file(guestAdbKeyPath.c_str(), adbKeyPath.c_str());
+            android_chmod(guestAdbKeyPath.c_str(), 0777);
+        } else {
+            dwarning("cannot read adb public key file: %s", adbKeyPath.c_str());
+        }
+        android_createExt4ImageFromDir(
+                hw->disk_dataPartition_path, dataPath.c_str(),
+                android_hw->disk_dataPartition_size, "data");
+        // TODO: remove dataPath folder
+    } else if (path_exists(hw->disk_dataPartition_initPath)) {
+        D("Creating: %s\n", hw->disk_dataPartition_path);
+
+        if (path_copy_file(hw->disk_dataPartition_path,
+                           hw->disk_dataPartition_initPath) < 0) {
+            derror("Could not create %s: %s", hw->disk_dataPartition_path,
+                   strerror(errno));
+            return 1;
+        }
+
+        resizeExt4Partition(android_hw->disk_dataPartition_path,
+                            android_hw->disk_dataPartition_size);
+    } else {
+        derror("Missing initial data partition file: %s",
+               hw->disk_dataPartition_initPath);
+    }
+
+    return 0;
+}
+
+/**
+ * Class that's capable of creating that partition parameters
+ */
+class PartitionParameters {
+ public:
+    static android::ParameterList create(AndroidHwConfig* hw, AvdInfo* avd) {
+        return PartitionParameters(hw, avd).create();
+    }
+
+ private:
+    PartitionParameters(AndroidHwConfig* hw, AvdInfo* avd)
+        : m_hw(hw), m_avd(avd), m_driveIndex(0) {}
+
+    android::ParameterList create() {
+      android::ParameterList args;
+      for (auto type : kTarget.imagePartitionTypes) {
+        bool writable =
+            (type == IMAGE_TYPE_SYSTEM || type == IMAGE_TYPE_VENDOR)
+            ? android_op_writable_system
+            : true;
+        args.add(createPartionParameters(type, writable));
+      }
+      return args;
+    }
+
+    android::ParameterList createPartionParameters(ImageType type,
+                                                   bool writable) {
+        int apiLevel = avdInfo_getApiLevel(m_avd);
+
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+        /* for x86, 'if=none' is necessary for virtio blk*/
+        std::string driveParam("if=none,");
+#else
+        std::string driveParam;
+#endif
+
+        std::string deviceParam;
+        ScopedCPtr<const char> allocatedPath;
+        StringView filePath;
+        bool qCow2Format = true;
+        switch (type) {
+            case IMAGE_TYPE_SYSTEM:
+                // API 15 and under images need a read+write system image.
+                // API > 15 uses read-only system partition. You can override
+                // this explicitly by passing -writable-system to emulator.
+                if (apiLevel <= 15) {
+                    writable = true;
+                }
+                if (writable) {
+                    const char* systemDir = avdInfo_getContentPath(m_avd);
+                    filePath = path_join(systemDir, "system.img.qcow2");
+                    driveParam += StringFormat("index=%d,id=system,file=%s",
+                                               m_driveIndex++, filePath);
+                } else {
+                    qCow2Format = false;
+                    filePath = avdInfo_getSystemInitImagePath(m_avd);
+                    driveParam += StringFormat(
+                            "index=%d,id=system,file=%s"
+                            ",read-only",
+                            m_driveIndex++, filePath);
+                }
+                allocatedPath.reset(filePath.c_str());
+                deviceParam = StringFormat("%s,drive=system",
+                                           kTarget.storageDeviceType);
+                break;
+            case IMAGE_TYPE_VENDOR:
+                if (!m_hw->disk_vendorPartition_path &&
+                    !m_hw->disk_vendorPartition_initPath) {
+                    // we do not have a vendor image to mount
+                    return {};
+                }
+                filePath = avdInfo_getContentPath(m_avd);
+                driveParam += StringFormat("index=%d,id=vendor,file=%s" PATH_SEP
+                                           "vendor.img.qcow2",
+                                           m_driveIndex++, filePath);
+                // You can override this explicitly
+                // by passing -writable-system to emulator.
+                if (!writable)
+                    driveParam += ",read-only";
+                deviceParam = StringFormat("%s,drive=vendor",
+                                           kTarget.storageDeviceType);
+                break;
+            case IMAGE_TYPE_CACHE:
+                filePath = m_hw->disk_cachePartition_path;
+                driveParam += StringFormat("index=%d,id=cache,file=%s.qcow2",
+                                           m_driveIndex++, filePath);
+                deviceParam = StringFormat("%s,drive=cache",
+                                           kTarget.storageDeviceType);
+                break;
+            case IMAGE_TYPE_USER_DATA:
+                filePath = m_hw->disk_dataPartition_path;
+                driveParam += StringFormat("index=%d,id=userdata,file=%s.qcow2",
+                                           m_driveIndex++, filePath);
+                deviceParam = StringFormat("%s,drive=userdata",
+                                           kTarget.storageDeviceType);
+                break;
+            case IMAGE_TYPE_SD_CARD:
+                if (m_hw->hw_sdCard_path != NULL &&
+                    strcmp(m_hw->hw_sdCard_path, "")) {
+                    filePath = m_hw->hw_sdCard_path;
+                    driveParam +=
+                            StringFormat("index=%d,id=sdcard,file=%s.qcow2",
+                                         m_driveIndex++, filePath);
+                    deviceParam = StringFormat("%s,drive=sdcard",
+                                               kTarget.storageDeviceType);
+                } else {
+                    /* no sdcard is defined */
+                    return {};
+                }
+                break;
+            case IMAGE_TYPE_ENCRYPTION_KEY:
+                if (fc::isEnabled(fc::EncryptUserData) &&
+                    m_hw->disk_encryptionKeyPartition_path != NULL &&
+                    strcmp(m_hw->disk_encryptionKeyPartition_path, "")) {
+                    filePath = m_hw->disk_encryptionKeyPartition_path;
+                    driveParam +=
+                            StringFormat("index=%d,id=encrypt,file=%s.qcow2",
+                                         m_driveIndex++, filePath);
+                    deviceParam = StringFormat("%s,drive=encrypt",
+                                               kTarget.storageDeviceType);
+                } else {
+                    /* no encryption partition is defined */
+                    return {};
+                }
+                break;
+            default:
+                dwarning("Unknown Image type %d\n", type);
+                return {};
+        }
+
+        if (qCow2Format) {
+            // Disable extra qcow2 checks as we're on its stable version.
+            // Disable cache flushes as well, as Android issues way too many
+            // flush commands for nothing.
+            driveParam += ",overlap-check=none,cache=unsafe";
+
+            // Default qcow2's L2 cache size is up to 8GB. Let's increase it for
+            // larger images.
+            System::FileSize diskSize;
+            if (System::get()->pathFileSize(filePath, &diskSize)) {
+                // L2 cache size should be "disk_size_GB / 131072" as per QEMU
+                // docs with a default of 1MB. Round it up just in case.
+                const int l2CacheSize =
+                        std::max<int>((diskSize + (1024 * 1024 * 1024 - 1)) /
+                                              (1024 * 1024 * 1024) * 131072,
+                                      1024 * 1024);
+                driveParam += StringFormat(",l2-cache-size=%d", l2CacheSize);
+            }
+        }
+
+// Move the disk operations into the dedicated 'disk thread', and
+// enable modern notification mode for the hosts that support it (Linux).
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+#ifdef CONFIG_LINUX
+        // eventfd is required for this, and only available on kvm.
+        deviceParam += ",iothread=disk-iothread";
+#endif
+        deviceParam += ",modern-pio-notify";
+#endif
+
+        return {"-drive", driveParam, "-device", deviceParam};
+    }
+
+private:
+    int m_driveIndex;
+    AndroidHwConfig* m_hw;
+    AvdInfo* m_avd;
+};
 
 }  // namespace
 
+extern "C" int run_qemu_main(int argc, const char** argv);
 
-extern "C" int run_qemu_main(int argc, const char **argv);
-
-static void enter_qemu_main_loop(int argc, char **argv) {
+static void enter_qemu_main_loop(int argc, char** argv) {
 #ifndef _WIN32
     sigset_t set;
     sigemptyset(&set);
     pthread_sigmask(SIG_SETMASK, &set, NULL);
 #endif
-    // stick a version here for qemu-system binary
+// stick a version here for qemu-system binary
 #if defined ANDROID_SDK_TOOLS_BUILD_NUMBER
-    D("Android qemu version %s (CL:%s)\n", EMULATOR_VERSION_STRING
+    D("Android qemu version %s (CL:%s)\n",
+      EMULATOR_VERSION_STRING
       " (build_id " STRINGIFY(ANDROID_SDK_TOOLS_BUILD_NUMBER) ")",
       EMULATOR_CL_SHA1);
 #endif
-
 
     D("Starting QEMU main loop");
     run_qemu_main(argc, (const char**)argv);
@@ -395,58 +511,49 @@ static void enter_qemu_main_loop(int argc, char **argv) {
 #endif
 
 static bool createInitalEncryptionKeyPartition(AndroidHwConfig* hw) {
-    char* userdata_dir = path_dirname(hw->disk_dataPartition_path);
+    ScopedCPtr<char> userdata_dir(path_dirname(hw->disk_dataPartition_path));
     if (!userdata_dir) {
         derror("no userdata_dir");
         return false;
     }
-    hw->disk_encryptionKeyPartition_path = path_join(userdata_dir, "encryptionkey.img");
-    free(userdata_dir);
+    hw->disk_encryptionKeyPartition_path =
+            path_join(userdata_dir.get(), "encryptionkey.img");
     if (path_exists(hw->disk_systemPartition_initPath)) {
-        char* sysimg_dir = path_dirname(hw->disk_systemPartition_initPath);
-        if (!sysimg_dir) {
+        ScopedCPtr<char> sysimg_dir(path_dirname(hw->disk_systemPartition_initPath));
+        if (!sysimg_dir.get()) {
             derror("no sysimg_dir %s", hw->disk_systemPartition_initPath);
             return false;
         }
-        char* init_encryptionkey_img_path = path_join(sysimg_dir, "encryptionkey.img");
-        free(sysimg_dir);
-        if (path_exists(init_encryptionkey_img_path)) {
-            if (path_copy_file(hw->disk_encryptionKeyPartition_path, init_encryptionkey_img_path) >= 0) {
-                free(init_encryptionkey_img_path);
+        ScopedCPtr<char> init_encryptionkey_img_path(
+                path_join(sysimg_dir.get(), "encryptionkey.img"));
+        if (path_exists(init_encryptionkey_img_path.get())) {
+            if (path_copy_file(hw->disk_encryptionKeyPartition_path,
+                               init_encryptionkey_img_path.get()) >= 0) {
                 return true;
             }
         } else {
             derror("no init encryptionkey.img");
         }
-        free(init_encryptionkey_img_path);
     } else {
         derror("no system partition %s", hw->disk_systemPartition_initPath);
     }
     return false;
 }
 
-extern AndroidProxyCB *gAndroidProxyCB;
-extern "C" int main(int argc, char **argv) {
-    process_early_setup(argc, argv);
-
-    android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
-
+extern AndroidProxyCB* gAndroidProxyCB;
+extern "C" int main(int argc, char** argv) {
     if (argc < 1) {
         fprintf(stderr, "Invalid invocation (no program path)\n");
         return 1;
     }
 
+    process_early_setup(argc, argv);
+    android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
+
     // Start GPU information query to use it later for the renderer seleciton.
     async_query_host_gpu_start();
 
-    /* The emulator always uses the first serial port for kernel messages
-     * and the second one for qemud. So start at the third if we need one
-     * for logcat or 'shell'
-     */
-    const char* args[128];
-    args[0] = argv[0];
-    int n = 1;  // next parameter index
-
+    android::ParameterList args = {argv[0]};
     AndroidHwConfig* hw = android_hw;
     AvdInfo* avd;
     AndroidOptions opts[1];
@@ -456,25 +563,24 @@ extern "C" int main(int argc, char **argv) {
     gAndroidProxyCB->ProxyUnset = qemu_android_remove_http_proxy;
     qemu_android_init_http_proxy_ops();
 
-    if (!emulator_parseCommonCommandLineOptions(&argc,
-                                                &argv,
-                                                kTarget.androidArch,
-                                                true,  // is_qemu2
-                                                opts,
-                                                hw,
-                                                &android_avdInfo,
-                                                &exitStatus)) {
+    if (!emulator_parseCommonCommandLineOptions(
+                &argc, &argv, kTarget.androidArch,
+                true,  // is_qemu2
+                opts, hw, &android_avdInfo, &exitStatus)) {
         // Special case for QEMU positional parameters.
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
             // of options in |args| (|argc| must be positive here).
-            for (n = 1; n <= argc; ++n) {
-                args[n] = argv[n - 1];
+            // NOTE: emulator_parseCommonCommandLineOptions has side effects
+            // and modififes argc, as well as argv. Because of these magical
+            // side effects we are *NOT* just copying over argc, argv.
+            for (int n = 1; n <= argc; ++n) {
+                args.add(argv[n - 1]);
             }
 
             // Skip the translation of command-line options and jump
             // straight to qemu_main().
-            enter_qemu_main_loop(n, (char**)args);
+            enter_qemu_main_loop(args.size(), args.array());
             return 0;
         }
 
@@ -493,7 +599,8 @@ extern "C" int main(int argc, char **argv) {
     if (filelock_create(coreHwIniPath) == NULL) {
         // The AVD is already in use
         derror("There's another emulator instance running with "
-               "the current AVD '%s'. Exiting...\n", avdInfo_getName(avd));
+               "the current AVD '%s'. Exiting...\n",
+               avdInfo_getName(avd));
         return 1;
     }
 
@@ -502,65 +609,46 @@ extern "C" int main(int argc, char **argv) {
     // since that calls createAVD which sets up critical info needed
     // by featurecontrol component itself.
 #if (SNAPSHOT_PROFILE > 1)
-     printf("Starting feature flag application and host hw query with uptime %" PRIu64 " ms\n",
-            get_uptime_ms());
+    printf("Starting feature flag application and host hw query with uptime "
+           "%" PRIu64 " ms\n",
+           get_uptime_ms());
 #endif
     feature_initialize();
     feature_update_from_server();
 #if (SNAPSHOT_PROFILE > 1)
-     printf("Finished feature flag application and host hw query with uptime %" PRIu64 " ms\n",
-            get_uptime_ms());
+    printf("Finished feature flag application and host hw query with uptime "
+           "%" PRIu64 " ms\n",
+           get_uptime_ms());
 #endif
 
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
     }
 
-    char boot_prop_ip[128] = {};
     if (opts->shared_net_id) {
-        char*  end;
-        long   shared_net_id = strtol(opts->shared_net_id, &end, 0);
+        char* end;
+        long shared_net_id = strtol(opts->shared_net_id, &end, 0);
         if (end == NULL || *end || shared_net_id < 1 || shared_net_id > 255) {
-            fprintf(stderr, "option -shared-net-id must be an integer between 1 and 255\n");
+            fprintf(stderr,
+                    "option -shared-net-id must be an integer between 1 and "
+                    "255\n");
             return 1;
         }
-        snprintf(boot_prop_ip, sizeof(boot_prop_ip),
-                 "net.shared_net_ip=10.1.2.%ld", shared_net_id);
-    }
-    if (boot_prop_ip[0]) {
-        args[n++] = "-boot-property";
-        args[n++] = boot_prop_ip;
+        args.add("-boot-property");
+        args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
     }
 
 #ifdef CONFIG_NAND_LIMITS
-    if (opts->nand_limits) {
-        args[n++] = "-nand-limits";
-        args[n++] = opts->nand_limits;
-    }
+    args.add2If("-nand-limits", opts->nand_limits);
 #endif
 
-    if (opts->timezone) {
-        args[n++] = "-timezone";
-        args[n++] = opts->timezone;
-    }
+    args.add2If("-timezone", opts->timezone);
+    args.add2If("-cpu-delay", opts->cpu_delay);
+    args.add2If("-dns-server", opts->dns_server);
+    args.addIf("-skip-adb-auth", opts->skip_adb_auth);
 
-    if (opts->audio && !strcmp(opts->audio, "none")) {
-        args[n++] = "-no-audio";
-    }
-
-    if (opts->cpu_delay) {
-        args[n++] = "-cpu-delay";
-        args[n++] = opts->cpu_delay;
-    }
-
-    if (opts->dns_server) {
-        args[n++] = "-dns-server";
-        args[n++] = opts->dns_server;
-    }
-
-    if (opts->skip_adb_auth) {
-        args[n++] = "-skip-adb-auth";
-    }
+    if (opts->audio && !strcmp(opts->audio, "none"))
+        args.add("-no-audio");
 
     /** SNAPSHOT STORAGE HANDLING */
 
@@ -571,103 +659,66 @@ extern "C" int main(int argc, char **argv) {
         //       already printed by emulator_parseCommonCommandLineOptions().
 #ifdef QEMU2_SNAPSHOT_SUPPORT
         /* We still use QEMU command-line options for the following since
-        * they can change from one invokation to the next and don't really
-        * correspond to the hardware configuration itself.
-        */
-        if (!opts->no_snapshot_load) {
-            args[n++] = "-loadvm";
-            args[n++] = ASTRDUP(opts->snapshot);
-        }
-
-        if (!opts->no_snapshot_save) {
-            args[n++] = "-savevm-on-exit";
-            args[n++] = ASTRDUP(opts->snapshot);
-        }
-
-        if (opts->no_snapshot_update_time) {
-            args[n++] = "-snapshot-no-time-update";
-        }
+         * they can change from one invokation to the next and don't really
+         * correspond to the hardware configuration itself.
+         */
+        if (!opts->no_snapshot_load)
+            args.add2("-loadvm", opts->snapshot);
+        if (!opts->no_snapshot_save)
+            args.add2("-savevm-on-exit", opts->snapshot);
+        if (opts->no_snapshot_update_time)
+            args.add("-snapshot-no-time-update");
 #endif  // QEMU2_SNAPSHOT_SUPPORT
     }
 
     if (fc::isEnabled(fc::LogcatPipe) && opts->logcat) {
-        boot_property_add_logcat_pipe(opts->logcat);
-        // we have done with -logcat option.
-        opts->logcat = NULL;
+                boot_property_add_logcat_pipe(opts->logcat);
+                // we have done with -logcat option.
+                opts->logcat = NULL;
     }
 
-    {
-        // Always setup a single serial port, that can be connected
-        // either to the 'null' chardev, or the -shell-serial one,
-        // which by default will be either 'stdout' (Posix) or 'con:'
-        // (Windows).
-        const char* serial =
-                (opts->shell || opts->logcat || opts->show_kernel)
-                ? opts->shell_serial : "null";
-        args[n++] = "-serial";
-        args[n++] = serial;
-    }
+    // Always setup a single serial port, that can be connected
+    // either to the 'null' chardev, or the -shell-serial one,
+    // which by default will be either 'stdout' (Posix) or 'con:'
+    // (Windows).
+    const char* serial = (opts->shell || opts->logcat || opts->show_kernel)
+                                 ? opts->shell_serial
+                                 : "null";
+    args.add2("-serial", serial);
 
-    if (opts->radio) {
-        args[n++] = "-radio";
-        args[n++] = opts->radio;
-    }
-
-    if (opts->gps) {
-        args[n++] = "-gps";
-        args[n++] = opts->gps;
-    }
-
-    if (opts->code_profile) {
-        args[n++] = "-code-profile";
-        args[n++] = opts->code_profile;
-    }
+    args.add2If("-radio", opts->radio);
+    args.add2If("-gps", opts->gps);
+    args.add2If("-code-profile", opts->code_profile);
 
     /* Pass boot properties to the core. First, those from boot.prop,
      * then those from the command-line */
     const FileData* bootProperties = avdInfo_getBootProperties(avd);
     if (!fileData_isEmpty(bootProperties)) {
         PropertyFileIterator iter[1];
-        propertyFileIterator_init(iter,
-                                  bootProperties->data,
+        propertyFileIterator_init(iter, bootProperties->data,
                                   bootProperties->size);
         while (propertyFileIterator_next(iter)) {
-            char temp[MAX_PROPERTY_NAME_LEN + MAX_PROPERTY_VALUE_LEN + 2];
-            snprintf(temp, sizeof temp, "%s=%s", iter->name, iter->value);
-            args[n++] = "-boot-property";
-            args[n++] = ASTRDUP(temp);
+            args.add("-boot-property");
+            args.addFormat("%s=%s", iter->name, iter->value);
         }
     }
 
-    if (opts->prop != NULL) {
-        ParamList*  pl = opts->prop;
-        for ( ; pl != NULL; pl = pl->next ) {
-            args[n++] = "-boot-property";
-            args[n++] = pl->param;
-        }
+    for (ParamList* pl = opts->prop; pl != NULL; pl = pl->next) {
+        args.add2("-boot-property", pl->param);
     }
 
-    if (opts->ports) {
-        args[n++] = "-android-ports";
-        args[n++] = opts->ports;
-    }
-
+    args.add2If("-android-ports", opts->ports);
     if (opts->port) {
         int console_port = -1;
         int adb_port = -1;
         if (!android_parse_port_option(opts->port, &console_port, &adb_port)) {
             return 1;
         }
-        std::string portsOption = StringFormat("%d,%d",
-                                               console_port, adb_port);
-        args[n++] = "-android-ports";
-        args[n++] = strdup(portsOption.c_str());
+        args.add("-android-ports");
+        args.addFormat("%d,%d", console_port, adb_port);
     }
 
-    if (opts->report_console) {
-        args[n++] = "-android-report-console";
-        args[n++] = opts->report_console;
-    }
+    args.add2If("-android-report-console", opts->report_console);
 
     if (opts->http_proxy) {
         if (!qemu_android_setup_http_proxy(opts->http_proxy)) {
@@ -691,9 +742,10 @@ extern "C" int main(int argc, char **argv) {
             derror("Charmap file does not exist: %s", opts->charmap);
             return 1;
         }
-        /* We need to store the charmap name in the hardware configuration.
-         * However, the charmap file itself is only used by the UI component
-         * and doesn't need to be set to the emulation engine.
+        /* We need to store the charmap name in the hardware
+         * configuration. However, the charmap file itself is only used
+         * by the UI component and doesn't need to be set to the
+         * emulation engine.
          */
         kcm_extract_charmap_name(opts->charmap, charmap_name,
                                  sizeof(charmap_name));
@@ -725,18 +777,18 @@ extern "C" int main(int argc, char **argv) {
     std::string dataPath = PathUtils::join(avdInfo_getContentPath(avd), "data");
     std::string pstorePath = PathUtils::join(dataPath, "misc", "pstore");
     std::string pstoreFile = PathUtils::join(pstorePath, "pstore.bin");
+    if (android_op_wipe_data) {
+        path_delete_file(pstoreFile.c_str());
+    }
     path_mkdir_if_needed(pstorePath.c_str(), 0777);
     android_chmod(pstorePath.c_str(), 0777);
 
     mem_map pstore = {.start = GOLDFISH_PSTORE_MEM_BASE,
                       .size = GOLDFISH_PSTORE_MEM_SIZE};
 
-    std::string goldfish_config = StringFormat("goldfish_pstore,addr=0x%" PRIx64
-                             ",size=0x%" PRIx64 ",file=%s",
-                             pstore.start, pstore.size, pstoreFile.c_str());
-
-    args[n++] = "-device";
-    args[n++] = goldfish_config.c_str();
+    args.add("-device");
+    args.addFormat("goldfish_pstore,addr=0x%" PRIx64 ",size=0x%" PRIx64 ",file=%s",
+             pstore.start, pstore.size, pstoreFile.c_str());
 
     // studio avd manager does not allow user to change
     // partition size, set a lower limit to 2GB
@@ -749,66 +801,25 @@ extern "C" int main(int argc, char **argv) {
 
     // Create userdata file from init version if needed.
     if (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path)) {
-        // Clean out the pstore on wipe as well.
-        path_delete_file(pstoreFile.c_str());
-        std::unique_ptr<char[]> initDir(avdInfo_getDataInitDirPath(avd));
-        if (path_exists(initDir.get())) {
-            path_copy_dir(dataPath.c_str(), initDir.get());
-            std::string adbKeyPath = PathUtils::join(
-                    android::ConfigDirs::getUserDirectory(), "adbkey.pub");
-            if (path_is_regular(adbKeyPath.c_str())
-                    && path_can_read(adbKeyPath.c_str())) {
-                std::string guestAdbKeyDir = PathUtils::join(
-                        dataPath, "misc", "adb");
-                std::string guestAdbKeyPath = PathUtils::join(
-                        guestAdbKeyDir, "adb_keys");
-                path_mkdir_if_needed(guestAdbKeyDir.c_str(), 0777);
-                path_copy_file(
-                        guestAdbKeyPath.c_str(),
-                        adbKeyPath.c_str());
-                android_chmod(guestAdbKeyPath.c_str(), 0777);
-            } else {
-                dwarning("cannot read adb public key file: %s",
-                         adbKeyPath.c_str());
-            }
-            android_createExt4ImageFromDir(hw->disk_dataPartition_path,
-                    dataPath.c_str(),
-                    android_hw->disk_dataPartition_size,
-                    "data");
-            // TODO: remove dataPath folder
-        } else if (path_exists(hw->disk_dataPartition_initPath)) {
-            D("Creating: %s\n", hw->disk_dataPartition_path);
-
-            if (path_copy_file(hw->disk_dataPartition_path,
-                               hw->disk_dataPartition_initPath) < 0) {
-                derror("Could not create %s: %s", hw->disk_dataPartition_path,
-                       strerror(errno));
-                return 1;
-            }
-
-            resizeExt4Partition(android_hw->disk_dataPartition_path,
-                                android_hw->disk_dataPartition_size);
-        } else {
-            derror("Missing initial data partition file: %s",
-                   hw->disk_dataPartition_initPath);
-        }
-    }
-    else {
-        // Resize userdata-qemu.img if the size is smaller than what config.ini
-        // says.
-        // This can happen as user wants a larger data partition without wiping
-        // it.
-        // b.android.com/196926
+      int ret = createUserData(avd, dataPath, hw);
+      if (ret != 0)
+        return ret;
+    } else {
+        // Resize userdata-qemu.img if the size is smaller than what
+        // config.ini says. This can happen as user wants a larger data
+        // partition without wiping it. b.android.com/196926
         System::FileSize current_data_size;
         if (System::get()->pathFileSize(hw->disk_dataPartition_path,
                                         &current_data_size)) {
             System::FileSize partition_size = static_cast<System::FileSize>(
                     android_hw->disk_dataPartition_size);
             if (android_hw->disk_dataPartition_size > 0 &&
-                    current_data_size < partition_size) {
-                dwarning("userdata partition is resized from %d M to %d M\n",
-                         (int)(current_data_size / (1024 * 1024)),
-                         (int)(partition_size / (1024 * 1024)));
+                current_data_size < partition_size) {
+                dwarning(
+                        "userdata partition is resized from %d M to %d "
+                        "M\n",
+                        (int)(current_data_size / (1024 * 1024)),
+                        (int)(partition_size / (1024 * 1024)));
                 resizeExt4Partition(android_hw->disk_dataPartition_path,
                                     android_hw->disk_dataPartition_size);
             }
@@ -818,14 +829,16 @@ extern "C" int main(int argc, char **argv) {
     // create encryptionkey.img file if needed
     if (fc::isEnabled(fc::EncryptUserData)) {
         if (hw->disk_encryptionKeyPartition_path == NULL) {
-            if(!createInitalEncryptionKeyPartition(hw)) {
-                derror("Encryption is requested but failed to create encrypt partition.");
+            if (!createInitalEncryptionKeyPartition(hw)) {
+                derror("Encryption is requested but failed to create "
+                       "encrypt "
+                       "partition.");
                 return 1;
             }
         }
     } else {
         dwarning("encryption is off");
-      }
+    }
 
     bool createEmptyCacheFile = false;
 
@@ -842,10 +855,9 @@ extern "C" int main(int argc, char **argv) {
     if (createEmptyCacheFile) {
         D("Creating empty ext4 cache partition: %s",
           hw->disk_cachePartition_path);
-        int ret = android_createEmptyExt4Image(
-                hw->disk_cachePartition_path,
-                hw->disk_cachePartition_size,
-                "cache");
+        int ret = android_createEmptyExt4Image(hw->disk_cachePartition_path,
+                                               hw->disk_cachePartition_size,
+                                               "cache");
         if (ret < 0) {
             derror("Could not create %s: %s", hw->disk_cachePartition_path,
                    strerror(-ret));
@@ -856,181 +868,153 @@ extern "C" int main(int argc, char **argv) {
     android_report_session_phase(ANDROID_SESSION_PHASE_INITACCEL);
 
     // Make sure we always use the custom Android CPU definition.
-    args[n++] = "-cpu";
+    args.add("-cpu");
 #if defined(TARGET_MIPS)
-    args[n++] = (hw->hw_cpu_model && hw->hw_cpu_model[0]) ? hw->hw_cpu_model
-                                                          : kTarget.qemuCpu;
+    args.add((hw->hw_cpu_model && hw->hw_cpu_model[0]) ? hw->hw_cpu_model
+                                                       : kTarget.qemuCpu);
 #else
-    args[n++] = kTarget.qemuCpu;
+    args.add(kTarget.qemuCpu);
 #endif
 
     // Set env var to "on" for Intel PMU if the feature is enabled.
     // cpu.c will then read that.
     if (fc::isEnabled(fc::IntelPerformanceMonitoringUnit)) {
-        System::get()->envSet("ANDROID_EMU_FEATURE_IntelPerformanceMonitoringUnit", "on");
+        System::get()->envSet(
+                "ANDROID_EMU_FEATURE_IntelPerformanceMonitoringUnit", "on");
     }
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     char* accel_status = NULL;
     CpuAccelMode accel_mode = ACCEL_AUTO;
-    const bool accel_ok = handleCpuAcceleration(opts, avd,
-                                                &accel_mode, &accel_status);
+    const bool accel_ok =
+            handleCpuAcceleration(opts, avd, &accel_mode, &accel_status);
 
     if (accel_mode == ACCEL_ON) {  // 'accel on' is specified'
         if (!accel_ok) {
-            derror("CPU acceleration is not supported on this machine!");
+            derror("CPU acceleration is not supported on this "
+                   "machine!");
             derror("Reason: %s", accel_status);
+            AFREE(accel_status);
             return 1;
         }
-        args[n++] = ASTRDUP(kEnableAccelerator);
+        args.add(kEnableAccelerator);
     } else if (accel_mode == ACCEL_AUTO) {
         if (accel_ok) {
-            args[n++] = ASTRDUP(kEnableAccelerator);
+            args.add(kEnableAccelerator);
         }
-    }
-    else if (accel_mode == ACCEL_HVF) {
+    } else if (accel_mode == ACCEL_HVF) {
 #if CONFIG_HVF
-        args[n++] = ASTRDUP(kEnableAcceleratorHVF);
+        args.add(kEnableAcceleratorHVF);
 #endif
-    } // else, add other special situations to enable particular
-      // acceleration backends (e.g., HyperV/KVM on Windows,
-      // KVM on Mac, etc.)
+    }  // else, add other special situations to enable particular
+       // acceleration backends (e.g., HyperV/KVM on Windows,
+       // KVM on Mac, etc.)
 
     AFREE(accel_status);
 #else   // !TARGET_X86_64 && !TARGET_I386
-    args[n++] = "-machine";
-    args[n++] = "type=ranchu";
+    args.add2("-machine", "type=ranchu");
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
     // SMP Support.
-    std::string ncores;
-
-   if (hw->hw_cpu_ncore > 1 &&
-       !androidCpuAcceleration_hasModernX86VirtualizationFeatures()) {
-       dwarning("Not all modern X86 virtualization features supported, which "
+    if (hw->hw_cpu_ncore > 1 &&
+        !androidCpuAcceleration_hasModernX86VirtualizationFeatures()) {
+        dwarning(
+                "Not all modern X86 virtualization features supported, which "
                 "introduces problems with slowdown when running Android on "
-                " multicore vCPUs. Setting AVD to run with 1 vCPU core only.");
-       hw->hw_cpu_ncore = 1;
-   }
+                "multicore vCPUs. Setting AVD to run with 1 vCPU core only.");
+        hw->hw_cpu_ncore = 1;
+    }
 
     if (hw->hw_cpu_ncore > 1) {
-        args[n++] = "-smp";
+        args.add("-smp");
 
 #ifdef _WIN32
         if (hw->hw_cpu_ncore > 16) {
-            dwarning("HAXM does not support more than 16 cores. Number of cores set to 16");
+            dwarning(
+                    "HAXM does not support more than 16 cores. Number of cores "
+                    "set to 16");
             hw->hw_cpu_ncore = 16;
         }
 #endif
-        ncores = StringFormat("cores=%d", hw->hw_cpu_ncore);
-        args[n++] = ncores.c_str();
+        args.addFormat("cores=%d", hw->hw_cpu_ncore);
     }
 #endif  // !TARGET_X86_64 && !TARGET_I386
 
     // Memory size
-    args[n++] = "-m";
-    std::string memorySize = StringFormat("%d", hw->hw_ramSize);
-    args[n++] = memorySize.c_str();
+    args.add("-m");
+    args.addFormat("%d", hw->hw_ramSize);
 
     int apiLevel = avd ? avdInfo_getApiLevel(avd) : 1000;
 
     // Support for changing default lcd-density
-    std::string lcd_density;
     if (hw->hw_lcd_density) {
-        args[n++] = "-lcd-density";
-        lcd_density = StringFormat("%d", hw->hw_lcd_density);
-        args[n++] = lcd_density.c_str();
+                args.add("-lcd-density");
+                args.addFormat("%d", hw->hw_lcd_density);
     }
 
-    // Dedicated IOThread for all disk IO
+    // Kernel image, ramdisk
+
+// Dedicated IOThread for all disk IO
 #if defined(CONFIG_LINUX) && (defined(TARGET_X86_64) || defined(TARGET_I386))
-    args[n++] = "-object";
-    args[n++] = "iothread,id=disk-iothread";
+    args.add2("-object", "iothread,id=disk-iothread");
 #endif
 
     // Don't create the default CD drive and floppy disk devices - Android
     // won't appreciate it.
-    args[n++] = "-nodefaults";
+    args.add("-nodefaults");
 
     if (!hw->hw_arc) {
-        // Kernel image
-        args[n++] = "-kernel";
-        args[n++] = hw->kernel_path;
-
-        // Ramdisk
-        args[n++] = "-initrd";
-        args[n++] = hw->disk_ramdisk_path;
-
-        /*
-         * add partition parameters with the sequence
-         * pre-defined in targetInfo.imagePartitionTypes
-         */
-        int s;
-        int drvIndex = 0;
-        for (s = 0; s < kMaxPartitions; s++) {
-            bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM
-                        || kTarget.imagePartitionTypes[s] == IMAGE_TYPE_VENDOR) ?
-                        android_op_writable_system : true;
-            makePartitionCmd(args, &n, &drvIndex, hw,
-                             kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
-        }
+        args.add(
+                {"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+        // add partition parameters with the sequence pre-defined in
+        // targetInfo.imagePartitionTypes
+        args.add(PartitionParameters::create(hw, avd));
     } else {
-        /* hw->hw_arc: ChromeOS single disk image, use regular block device
-         * instead of virtio block device */
-        StringView filePath = avdInfo_getContentPath(avd);
-        std::string driveParam = StringFormat("index=0,id=system,file=%s"
-                                              PATH_SEP "system.img.qcow2",
-                                              filePath);
-        args[n++] = "-drive";
-        args[n++] = ASTRDUP(driveParam.c_str());
+        // hw->hw_arc: ChromeOS single disk image, use regular block device
+        // instead of virtio block device
+        args.add("-drive");
+        args.addFormat("index=0,id=system,file=%s" PATH_SEP "system.img.qcow2",
+                       avdInfo_getContentPath(avd));
     }
 
     // Network
-    args[n++] = "-netdev";
-    args[n++] = "user,id=mynet";
-    args[n++] = "-device";
-    std::string netDevice =
-            StringFormat("%s,netdev=mynet", kTarget.networkDeviceType);
-    args[n++] = netDevice.c_str();
+    args.add2("-netdev", "user,id=mynet");
+    args.add("-device");
+    args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
+    args.add("-show-cursor");
 
-    args[n++] = "-show-cursor";
-
-    std::string tcpdumpArg;
     if (opts->tcpdump) {
-        args[n++] = "-object";
-        tcpdumpArg = StringFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
-                                  opts->tcpdump);
-        args[n++] = tcpdumpArg.c_str();
+        args.add("-object");
+        args.addFormat("filter-dump,id=mytcpdump,netdev=mynet,file=%s",
+                       opts->tcpdump);
     }
 
     // Graphics
     if (opts->no_window) {
-        args[n++] = "-nographic";
+        args.add("-nographic");
         // also disable the qemu monitor which will otherwise grab stdio
-        args[n++] = "-monitor";
-        args[n++] = "none";
+        args.add2("-monitor", "none");
     }
 
     // Data directory (for keymaps and PC Bios).
-    args[n++] = "-L";
-    std::string dataDir = getNthParentDir(args[0], 3U);
+    args.add("-L");
+    std::string dataDir = getNthParentDir(argv[0], 3U);
     if (dataDir.empty()) {
         dataDir = "lib/pc-bios";
     } else {
         dataDir += "/lib/pc-bios";
     }
-    args[n++] = dataDir.c_str();
+    args.add(dataDir);
 
-    // Audio enable hda by default for x86 and x64 platforms
+// Audio enable hda by default for x86 and x64 platforms
 #if defined(TARGET_X86_64) || defined(TARGET_I386)
-    args[n++] = "-soundhw";
-    args[n++] = "hda";
+    args.add2("-soundhw", "hda");
 #endif
 
     /* append extra qemu parameters if any */
     for (int idx = 0; kTarget.qemuExtraArgs[idx] != NULL; idx++) {
-        args[n++] = kTarget.qemuExtraArgs[idx];
+        args.add(kTarget.qemuExtraArgs[idx]);
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
@@ -1072,10 +1056,10 @@ extern "C" int main(int argc, char **argv) {
                get_uptime_ms());
 #endif
 
-        // Use advancedFeatures to override renderer if the user has selected
-        // in UI that the preferred renderer is "autoselected".
+        // Use advancedFeatures to override renderer if the user has
+        // selected in UI that the preferred renderer is "autoselected".
         WinsysPreferredGlesBackend uiPreferredGlesBackend =
-            skin_winsys_get_preferred_gles_backend();
+                skin_winsys_get_preferred_gles_backend();
 #ifndef _WIN32
         if (uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE ||
             uiPreferredGlesBackend == WINSYS_GLESBACKEND_PREFERENCE_ANGLE9) {
@@ -1087,33 +1071,37 @@ extern "C" int main(int argc, char **argv) {
         // Feature flags-related last-microsecond renderer changes
         {
             // Should enable OpenGL ES 3.x?
-            if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
-                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion, true);
+            if (skin_winsys_get_preferred_gles_apilevel() ==
+                WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
+                fc::setIfNotOverridenOrGuestDisabled(fc::GLESDynamicVersion,
+                                                     true);
             }
-            if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+            if (skin_winsys_get_preferred_gles_apilevel() ==
+                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
                 fc::setEnabledOverride(fc::GLESDynamicVersion, false);
             }
 
             if (fc::isEnabled(fc::ForceANGLE)) {
                 uiPreferredGlesBackend =
-                    skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
+                        skin_winsys_override_glesbackend_if_auto(
+                                WINSYS_GLESBACKEND_PREFERENCE_ANGLE);
             }
 
             if (fc::isEnabled(fc::ForceSwiftshader)) {
                 uiPreferredGlesBackend =
-                    skin_winsys_override_glesbackend_if_auto(WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
+                        skin_winsys_override_glesbackend_if_auto(
+                                WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER);
             }
         }
 
         RendererConfig rendererConfig;
-        configAndStartRenderer(
-            avd, opts, hw, uiPreferredGlesBackend,
-            &rendererConfig);
+        configAndStartRenderer(avd, opts, hw, uiPreferredGlesBackend,
+                               &rendererConfig);
 
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
-            rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
+                rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
         shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
@@ -1124,109 +1112,57 @@ extern "C" int main(int argc, char **argv) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
         }
 
-        char* kernel_parameters = emulator_getKernelParameters(
+        ScopedCPtr<char> kernel_parameters(emulator_getKernelParameters(
                 opts, kTarget.androidArch, apiLevel, kTarget.ttyPrefix,
-                hw->kernel_parameters,
-                rendererConfig.glesMode, rendererConfig.bootPropOpenglesVersion,
-                rendererConfig.glFramebufferSizeBytes,
-                pstore,
-                true  /* isQemu2 */);
+                hw->kernel_parameters, rendererConfig.glesMode,
+                rendererConfig.bootPropOpenglesVersion,
+                rendererConfig.glFramebufferSizeBytes, pstore,
+                true /* isQemu2 */));
 
-        if (!kernel_parameters) {
+        if (!kernel_parameters.get()) {
             return 1;
         }
 
         /* append the kernel parameters after -qemu */
-        std::string append_arg(kernel_parameters);
-        free(kernel_parameters);
+        std::string append_arg(kernel_parameters.get());
         for (int i = 0; i < argc; ++i) {
             if (!strcmp(argv[i], "-append")) {
                 if (++i < argc) {
-                    android::base::StringAppendFormat(&append_arg, " %s", argv[i]);
+                    android::base::StringAppendFormat(&append_arg, " %s",
+                                                      argv[i]);
                 }
             } else {
-                args[n++] = argv[i];
+                args.add(argv[i]);
             }
         }
+
         if (!hw->hw_arc) {
-            args[n++] = "-append";
-            args[n++] = ASTRDUP(append_arg.c_str());
+          args.add("-append");
+          args.add(append_arg);
         }
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
 
-    /* Generate a hardware-qemu.ini for this AVD. The real hardware
-     * configuration is ususally stored in several files, e.g. the AVD's
-     * config.ini plus the skin-specific hardware.ini.
-     *
-     * The new file will group all definitions and will be used to
-     * launch the core with the -android-hw <file> option.
-     */
-    {
-        const auto hwIni = android::base::makeCustomScopedPtr(
-                         iniFile_newEmpty(NULL), iniFile_free);
-        androidHwConfig_write(hw, hwIni.get());
+    // Generate a hardware-qemu.ini for this AVD.
+    int ret = genHwIniFile(hw, coreHwIniPath);
+    if (ret != 0)
+      return ret;
 
-        /* While saving HW config, ignore valueless entries. This will not break
-         * anything, but will significantly simplify comparing the current HW
-         * config with the one that has been associated with a snapshot (in case
-         * VM starts from a snapshot for this instance of emulator). */
-        if (iniFile_saveToFileClean(hwIni.get(), coreHwIniPath) < 0) {
-            derror("Could not write hardware.ini to %s: %s", coreHwIniPath, strerror(errno));
-            return 2;
-        }
-        args[n++] = "-android-hw";
-        args[n++] = strdup(coreHwIniPath);
+    args.add2("-android-hw", coreHwIniPath);
+    crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
 
-        crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
-
-        /* In verbose mode, dump the file's content */
-        if (VERBOSE_CHECK(init)) {
-            FILE* file = fopen(coreHwIniPath, "rt");
-            if (file == NULL) {
-                derror("Could not open hardware configuration file: %s\n",
-                       coreHwIniPath);
-            } else {
-                LineInput* input = lineInput_newFromStdFile(file);
-                const char* line;
-                printf("Content of hardware configuration file:\n");
-                while ((line = lineInput_getLine(input)) !=  NULL) {
-                    printf("  %s\n", line);
-                }
-                printf(".\n");
-                lineInput_free(input);
-                fclose(file);
-            }
-        }
-    }
-
-    args[n] = NULL;
-    // Check if we had enough slots in |args|.
-    assert(n < (int)(sizeof(args)/sizeof(args[0])));
-
-    if(VERBOSE_CHECK(init)) {
-        int i;
+    if (VERBOSE_CHECK(init)) {
         printf("QEMU options list:\n");
-        for(i = 0; i < n; i++) {
-            printf("emulator: argv[%02d] = \"%s\"\n", i, args[i]);
+        for (int i = 0; i < args.size(); i++) {
+            printf("emulator: argv[%02d] = \"%s\"\n", i, args[i].c_str());
         }
-        /* Dump final command-line option to make debugging the core easier */
-        printf("Concatenated QEMU options:\n");
-        for (i = 0; i < n; i++) {
-            /* To make it easier to copy-paste the output to a command-line,
-             * quote anything that contains spaces.
-             */
-            if (strchr(args[i], ' ') != NULL) {
-                printf(" '%s'", args[i]);
-            } else {
-                printf(" %s", args[i]);
-            }
-        }
-        printf("\n");
+        // Dump final command-line option to make debugging the core easier
+        printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
 
-    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, n, (char**)args);
+    skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
+                             args.array());
     skin_winsys_enter_main_loop(opts->no_window);
 
     emulator_finiUserInterface();

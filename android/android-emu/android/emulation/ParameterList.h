@@ -32,6 +32,8 @@ class ParameterList {
 public:
     // Default constructor.
     ParameterList() = default;
+    ParameterList(int argc, char** argv);
+    ParameterList(std::initializer_list<std::string> lst);
 
     // Return the number of items in the list.
     size_t size() const;
@@ -52,6 +54,9 @@ public:
     // A variant of toString() that returns instead a heap-allocated C string
     // that must be free-d by the caller.
     char* toCStringCopy() const;
+
+    // Adds a set of parameters to the list.
+    void add(const ParameterList& other);
 
     // Add new parameter |param| to the list.
     void add(const std::string& param);

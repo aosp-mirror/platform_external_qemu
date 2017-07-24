@@ -91,18 +91,28 @@ TEST(ParameterList, Add2If) {
 TEST(ParameterList, toString) {
     ParameterList list;
     list.add2("foo", "bar");
-    list.add("zoo");
+    list.add(" zoo ");
     EXPECT_EQ(3U, list.size());
-    EXPECT_STREQ("foo bar zoo", list.toString().c_str());
+#ifdef _WIN32
+    const char* expect_str =  "foo bar \" zoo \"";
+#else
+    const char* expect_str = "foo bar ' zoo '";
+#endif
+    EXPECT_STREQ(expect_str, list.toString().c_str());
 }
 
 TEST(ParameterList, toCStringCopy) {
     ParameterList list;
     list.add2("foo", "bar");
-    list.add("zoo");
+    list.add(" zoo ");
     EXPECT_EQ(3U, list.size());
     char* str = list.toCStringCopy();
-    EXPECT_STREQ("foo bar zoo", str);
+#ifdef _WIN32
+    const char* expect_str =  "foo bar \" zoo \"";
+#else
+    const char* expect_str = "foo bar ' zoo '";
+#endif
+    EXPECT_STREQ(expect_str, str);
     ::free(str);
 }
 
