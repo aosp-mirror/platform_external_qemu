@@ -97,7 +97,7 @@ class GlesContext {
 
   // Draw functions.
   void Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
-            GLenum type, const GLvoid* indices);
+            GLenum type, const GLvoid* indices, bool bindVtx = true);
 
   // EGL image functions
   bool BindImageToTexture(GLenum target, EglImagePtr image);

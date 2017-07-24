@@ -1345,7 +1345,7 @@ void PointerContext::BindPointers(GLint first, GLint last) {
     const size_t offset_first = stride * first;
     const size_t offset_last = stride * last;
     const unsigned char* data =
-      reinterpret_cast<const unsigned char*>(ptr.pointer);
+      reinterpret_cast<const unsigned char*>(ptr.pointer) + offset_first;
 
     // TODO(crbug.com/482070): Convert any elements in the buffer data that are
     // of type GL_FIXED to GL_FLOAT before copying it to our buffer object.
@@ -1363,7 +1363,7 @@ void PointerContext::BindPointers(GLint first, GLint last) {
 
     PASS_THROUGH(context_, BufferSubData, GL_ARRAY_BUFFER,
                  offset + offset_first, offset_last - offset_first,
-                 data + offset_first);
+                 data);
     PASS_THROUGH(context_, VertexAttribPointer, index, ptr.size,
                  ptr.type == GL_FIXED ? GL_FLOAT : ptr.type,
                  ptr.normalize, ptr.stride, reinterpret_cast<void*>(offset));
