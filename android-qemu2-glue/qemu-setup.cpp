@@ -20,6 +20,7 @@
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/snapshot/interface.h"
 
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -38,7 +39,6 @@
 #include "android-qemu2-glue/proxy/slirp_proxy.h"
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/snapshot_compression.h"
-#include "android-qemu2-glue/snapshot_hooks.h"
 
 extern "C" {
 
@@ -94,11 +94,12 @@ bool qemu_android_emulation_early_setup() {
     }
 
     if (isEnabled(android::featurecontrol::Feature::FastSnapshotV1)) {
-        qemu_snapshot_hooks_setup();
+        androidSnapshot_initialize(gQAndroidVmOperations);
     }
     qemu_snapshot_compression_setup();
 
-    android::emulation::AudioCaptureEngine::set(new android::qemu::QemuAudioCaptureEngine());
+    android::emulation::AudioCaptureEngine::set(
+                new android::qemu::QemuAudioCaptureEngine());
 
     return true;
 }
@@ -137,4 +138,6 @@ bool qemu_android_emulation_setup() {
     return true;
 }
 
-void qemu_android_emulation_teardown() {}
+void qemu_android_emulation_teardown() {
+    androidSnapshot_finalize();
+}
