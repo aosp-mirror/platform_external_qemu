@@ -43,5 +43,6 @@ $(call emugl-import,libGLcommon)
 
 LOCAL_LDLIBS += $(host_common_LDLIBS)
 LOCAL_SRC_FILES := $(host_common_SRC_FILES)
+LOCAL_STATIC_LIBRARIES += android-emu android-emu-base
 
 $(call emugl-end-module)

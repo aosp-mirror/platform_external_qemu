@@ -226,19 +226,21 @@ void RendererImpl::resumeAll() {
     repaintOpenGLDisplay();
 }
 
-void RendererImpl::save(android::base::Stream* stream) {
+void RendererImpl::save(android::base::Stream* stream,
+                        const android::snapshot::TextureSaverPtr& textureSaver) {
     stream->putByte(mStopped);
     if (mStopped) {
         return;
     }
     auto fb = FrameBuffer::getFB();
     assert(fb);
-    fb->onSave(stream);
+    fb->onSave(stream, textureSaver);
 
     FenceSync::onSave(stream);
 }
 
-bool RendererImpl::load(android::base::Stream* stream) {
+bool RendererImpl::load(android::base::Stream* stream,
+                        const android::snapshot::TextureLoaderPtr& textureLoader) {
 #ifdef SNAPSHOT_PROFILE
     android::base::System::Duration startTime
             = android::base::System::get()->getUnixTimeUs();
@@ -260,7 +262,7 @@ bool RendererImpl::load(android::base::Stream* stream) {
 
     bool res = true;
 
-    res = fb->onLoad(stream);
+    res = fb->onLoad(stream, textureLoader);
     FenceSync::onLoad(stream);
 
     return res;

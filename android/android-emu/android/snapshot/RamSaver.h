@@ -39,16 +39,13 @@ public:
         Compress = 0x4,
     };
 
-    using ZeroChecker = bool (*)(const uint8_t* ptr, int size);
-
-    RamSaver(base::StdioStream&& stream,
-             ZeroChecker zeroChecker,
-             Flags flags);
+    RamSaver(base::StdioStream&& stream, Flags flags);
     ~RamSaver();
 
     void registerBlock(const RamBlock& block);
     void savePage(int64_t blockOffset, int64_t pageOffset, int32_t pageSize);
     void join();
+    bool hasError() const { return mHasError; }
 
 private:
     struct QueuedPageInfo {
@@ -79,7 +76,7 @@ private:
 
         int64_t startPosInFile;
         int32_t version = 1;
-        int32_t flags = (int32_t)Flags::None;
+        int32_t flags = (int32_t)Flags::Empty;
         int32_t totalPages = 0;
         std::vector<Block> blocks;
     };
@@ -93,8 +90,9 @@ private:
                    int32_t dataSize);
 
     base::StdioStream mStream;
-    ZeroChecker mZeroChecker;
     Flags mFlags;
+    bool mJoined = false;
+    bool mHasError = false;
     int mLastBlockIndex = 0;
 
     base::Optional<Compressor<QueuedPageInfo>> mCompressor;
