@@ -22,6 +22,30 @@
       "revId": "f6a2bab17b3ab797cc89e1617a4ad878b825d85d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "716d2113_3cf01882",
+        "filename": "android/android-emu/android/crashreport/HangDetector.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-24T22:59:35Z",
+      "side": 1,
+      "message": "you\u0027re right, thanks",
+      "parentUuid": "e648aacb_739413c1",
+      "range": {
+        "startLine": 136,
+        "startChar": 4,
+        "endLine": 136,
+        "endChar": 21
+      },
+      "revId": "f6a2bab17b3ab797cc89e1617a4ad878b825d85d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
