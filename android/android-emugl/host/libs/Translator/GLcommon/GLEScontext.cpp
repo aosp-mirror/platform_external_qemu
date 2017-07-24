@@ -826,6 +826,10 @@ ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,
 
 const GLvoid* GLEScontext::setPointer(GLenum arrType,GLint size,GLenum type,GLsizei stride,const GLvoid* data, GLsizei dataSize, bool normalize, bool isInt) {
     GLuint bufferName = m_arrayBuffer;
+    auto vertexAttrib = m_currVaoState.find(arrType);
+    if (vertexAttrib == m_currVaoState.end()) {
+        return nullptr;
+    }
     if(bufferName) {
         unsigned int offset = SafeUIntFromPointer(data);
         GLESbuffer* vbo = static_cast<GLESbuffer*>(
@@ -845,7 +849,10 @@ GLint GLEScontext::getUnpackAlignment() {
 }
 
 void GLEScontext::enableArr(GLenum arr,bool enable) {
-    m_currVaoState[arr]->enable(enable);
+    auto vertexAttrib = m_currVaoState.find(arr);
+    if (vertexAttrib != m_currVaoState.end()) {
+        vertexAttrib->second->enable(enable);
+    }
 }
 
 bool GLEScontext::isArrEnabled(GLenum arr) {
@@ -1093,38 +1100,32 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
 }
 
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride) {
+    VertexAttribBindingVector* bindings = nullptr;
     switch (target) {
     case GL_TRANSFORM_FEEDBACK_BUFFER:
-        m_indexedTransformFeedbackBuffers[index].buffer = buffer;
-        m_indexedTransformFeedbackBuffers[index].offset = offset;
-        m_indexedTransformFeedbackBuffers[index].size = size;
-        m_indexedTransformFeedbackBuffers[index].stride = stride;
+        bindings = &m_indexedTransformFeedbackBuffers;
         break;
     case GL_UNIFORM_BUFFER:
-        m_indexedUniformBuffers[index].buffer = buffer;
-        m_indexedUniformBuffers[index].offset = offset;
-        m_indexedUniformBuffers[index].size = size;
-        m_indexedUniformBuffers[index].stride = stride;
+        bindings = &m_indexedUniformBuffers;
         break;
     case GL_ATOMIC_COUNTER_BUFFER:
-        m_indexedAtomicCounterBuffers[index].buffer = buffer;
-        m_indexedAtomicCounterBuffers[index].offset = offset;
-        m_indexedAtomicCounterBuffers[index].size = size;
-        m_indexedAtomicCounterBuffers[index].stride = stride;
+        bindings = &m_indexedAtomicCounterBuffers;
         break;
     case GL_SHADER_STORAGE_BUFFER:
-        m_indexedShaderStorageBuffers[index].buffer = buffer;
-        m_indexedShaderStorageBuffers[index].offset = offset;
-        m_indexedShaderStorageBuffers[index].size = size;
-        m_indexedShaderStorageBuffers[index].stride = stride;
+        bindings = &m_indexedShaderStorageBuffers;
         break;
     default:
-        m_currVaoState.bufferBindings()[index].buffer = buffer;
-        m_currVaoState.bufferBindings()[index].offset = offset;
-        m_currVaoState.bufferBindings()[index].size = size;
-        m_currVaoState.bufferBindings()[index].stride = stride;
-        return;
+        bindings = &m_currVaoState.bufferBindings();
+        break;
     }
+    if (index >= bindings->size()) {
+            return;
+    }
+    auto& bufferBinding = (*bindings)[index];
+    bufferBinding.buffer = buffer;
+    bufferBinding.offset = offset;
+    bufferBinding.size = size;
+    bufferBinding.stride = stride;
 }
 
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) {
