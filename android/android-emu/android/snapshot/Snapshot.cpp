@@ -9,19 +9,24 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Snapshot.h"
 
-#include "android/avd/info.h"
-#include "android/base/files/PathUtils.h"
-#include "android/globals.h"
+#include "android/snapshot/PathUtils.h"
 
 namespace android {
 namespace snapshot {
 
-std::string getSnapshotDir(const char* snapshotName) {
-    auto dir = avdInfo_getContentPath(android_avdInfo);
-    auto path = base::PathUtils::join(dir, "snapshots", snapshotName);
-    return path;
+Snapshot::Snapshot(const char* name)
+    : mName(name), mDataDir(getSnapshotDir(name)) {}
+
+bool Snapshot::save() {
+    return true;
+}
+
+bool Snapshot::load() {
+    // TODO: verify the snapshot data and check if it's compatible with the
+    // current AVD configuration, host and emulator parameters.
+    return true;
 }
 
 }  // namespace snapshot

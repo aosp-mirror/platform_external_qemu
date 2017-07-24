@@ -409,10 +409,17 @@ LOCAL_SRC_FILES := \
     android/snapshot.c \
     android/snapshot/Compressor.cpp \
     android/snapshot/Decompressor.cpp \
+    android/snapshot/interface.cpp \
+    android/snapshot/Loader.cpp \
     android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
+    android/snapshot/PathUtils.cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
-    android/snapshot/PathUtils.cpp \
+    android/snapshot/Saver.cpp \
+    android/snapshot/Snapshot.cpp \
+    android/snapshot/Snapshotter.cpp \
+    android/snapshot/TextureLoader.cpp \
+    android/snapshot/TextureSaver.cpp \
     android/telephony/debug.c \
     android/telephony/gsm.c \
     android/telephony/modem.c \

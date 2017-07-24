@@ -14,8 +14,13 @@
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/common.h"
 
 #include <functional>
+#include <vector>
+
+namespace android {
+namespace snapshot {
 
 class TextureSaver {
     DISALLOW_COPY_AND_ASSIGN(TextureSaver);
@@ -26,7 +31,10 @@ public:
     using Buffer = android::base::SmallVector<unsigned char>;
     using saver_t = std::function<void(android::base::Stream*, Buffer*)>;
     // Save texture to mStream as well as update the index
-    void saveTexture(uint32_t texId, saver_t saver);
+    void saveTexture(uint32_t texId, const saver_t& saver);
+    void done();
+
+    bool hasError() const { return mHasError; }
 
 private:
     struct FileIndex {
@@ -40,7 +48,6 @@ private:
         std::vector<Texture> textures;
     };
 
-    void done();
     void writeIndex();
 
     android::base::StdioStream mStream;
@@ -48,9 +55,14 @@ private:
     android::base::SmallFixedVector<unsigned char, 128> mBuffer;
 
     FileIndex mIndex;
+    bool mFinished = false;
+    bool mHasError = false;
 
 #if SNAPSHOT_PROFILE > 1
     android::base::System::WallDuration mStartTime =
             android::base::System::get()->getHighResTimeUs();
 #endif
 };
+
+}  // namespace snapshot
+}  // namespace android

@@ -9,19 +9,31 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/snapshot/PathUtils.h"
+#pragma once
 
-#include "android/avd/info.h"
-#include "android/base/files/PathUtils.h"
-#include "android/globals.h"
+#include "android/base/StringView.h"
+#include <string>
 
 namespace android {
 namespace snapshot {
 
-std::string getSnapshotDir(const char* snapshotName) {
-    auto dir = avdInfo_getContentPath(android_avdInfo);
-    auto path = base::PathUtils::join(dir, "snapshots", snapshotName);
-    return path;
+class Snapshot final {
+public:
+    Snapshot(const char* name);
+
+    base::StringView name() const { return mName; }
+    base::StringView dataDir() const { return mDataDir; }
+
+    bool save();
+    bool load();
+
+private:
+    base::StringView mName;
+    std::string mDataDir;
+};
+
+inline bool operator==(const Snapshot& l, const Snapshot& r) {
+    return l.name() == r.name();
 }
 
 }  // namespace snapshot

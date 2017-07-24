@@ -17,6 +17,7 @@
 #define _LIBRENDER_FRAMEBUFFER_H
 
 #include "android/base/files/Stream.h"
+#include "android/snapshot/common.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
@@ -372,8 +373,10 @@ public:
 
     ~FrameBuffer();
 
-    void onSave(android::base::Stream* stream);
-    bool onLoad(android::base::Stream* stream);
+    void onSave(android::base::Stream* stream,
+                const android::snapshot::TextureSaverPtr& textureSaver);
+    bool onLoad(android::base::Stream* stream,
+                const android::snapshot::TextureLoaderPtr& textureLoader);
 
     // lock and unlock handles (RenderContext, ColorBuffer, WindowSurface)
     void lock();

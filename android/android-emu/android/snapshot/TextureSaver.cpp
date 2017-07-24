@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "GLcommon/TextureSaver.h"
+#include "android/snapshot/TextureSaver.h"
 
 #include "android/base/system/System.h"
 
@@ -19,6 +19,9 @@
 #include <utility>
 
 using android::base::System;
+
+namespace android {
+namespace snapshot {
 
 TextureSaver::TextureSaver(android::base::StdioStream&& stream)
     : mStream(std::move(stream)) {
@@ -30,24 +33,28 @@ TextureSaver::~TextureSaver() {
     done();
 }
 
-void TextureSaver::saveTexture(uint32_t texId, saver_t saver) {
+void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
     assert(mIndex.textures.end() ==
-           std::find_if(
-                   mIndex.textures.begin(),
-                   mIndex.textures.end(), [texId](FileIndex::Texture & tex) {
-                       return tex.texId == texId;
-                   }));
+           std::find_if(mIndex.textures.begin(), mIndex.textures.end(),
+                        [texId](FileIndex::Texture& tex) {
+                            return tex.texId == texId;
+                        }));
     mIndex.textures.push_back({texId, (int64_t)ftell(mStream.get())});
     saver(&mStream, &mBuffer);
 }
 
 void TextureSaver::done() {
+    if (mFinished) {
+        return;
+    }
     mIndex.startPosInFile = ftell(mStream.get());
     writeIndex();
 #if SNAPSHOT_PROFILE > 1
     printf("Texture saving time: %.03f\n",
            (System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
 #endif
+    mHasError = ferror(mStream.get()) != 0;
+    mFinished = true;
 }
 
 void TextureSaver::writeIndex() {
@@ -69,3 +76,6 @@ void TextureSaver::writeIndex() {
     fseek(mStream.get(), 0, SEEK_SET);
     mStream.putBe64(mIndex.startPosInFile);
 }
+
+}  // namespace snapshot
+}  // namespace android
