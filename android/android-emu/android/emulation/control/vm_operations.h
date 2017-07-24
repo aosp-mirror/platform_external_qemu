@@ -18,8 +18,46 @@
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 ANDROID_BEGIN_HEADER
+
+typedef struct {
+    int (*onStart)(void* opaque, const char* name);
+    void (*onEnd)(void* opaque, const char* name, int res);
+} SnapshotCallbackPair;
+
+typedef enum {
+    SNAPSHOT_SAVE,
+    SNAPSHOT_LOAD,
+    SNAPSHOT_DEL,
+    SNAPSHOT_OPS_COUNT
+} SnapshotOperation;
+
+typedef struct {
+    const char* id;
+    int64_t startOffset;
+    uint8_t* hostPtr;
+    int64_t totalSize;
+    int32_t pageSize;
+} SnapshotRamBlock;
+
+typedef struct {
+    void (*registerBlock)(void* opaque,
+                          SnapshotOperation operation,
+                          const SnapshotRamBlock* block);
+    int (*startLoading)(void* opaque);
+    void (*savePage)(void* opaque,
+                     int64_t blockOffset,
+                     int64_t pageOffset,
+                     int32_t size);
+    int (*savingComplete)(void* opaque);
+} SnapshotRamCallbacks;
+
+typedef struct {
+    SnapshotCallbackPair ops[SNAPSHOT_OPS_COUNT];
+    SnapshotRamCallbacks ramOps;
+} SnapshotCallbacks;
 
 // C interface to expose Qemu implementations of common VM related operations.
 typedef struct QAndroidVmOperations {
@@ -44,6 +82,11 @@ typedef struct QAndroidVmOperations {
     bool (*snapshotDelete)(const char* name,
                            void* opaque,
                            LineConsumerCallback errConsumer);
+
+    // Sets a set of callback to listen for snapshot operations.
+    void (*setSnapshotCallbacks)(void* opaque,
+                                 const SnapshotCallbacks* callbacks);
+
 } QAndroidVmOperations;
 
 ANDROID_END_HEADER
