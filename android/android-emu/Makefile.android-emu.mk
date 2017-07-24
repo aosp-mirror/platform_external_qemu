@@ -262,6 +262,7 @@ LOCAL_SRC_FILES := \
     android/base/sockets/SocketDrainer.cpp \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
+    android/bugreport.cpp \
     android/camera/camera-common.cpp \
     android/camera/camera-list.cpp \
     android/camera/camera-service.c \
