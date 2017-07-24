@@ -9,15 +9,28 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "GLcommon/TextureLoader.h"
+#include "android/snapshot/TextureLoader.h"
 
 #include <assert.h>
+
+namespace android {
+namespace snapshot {
 
 TextureLoader::TextureLoader(android::base::StdioStream&& stream)
     : mStream(std::move(stream)) {}
 
 bool TextureLoader::start() {
-    return readIndex();
+    if (mStarted) {
+        return !mHasError;
+    }
+
+    mStarted = true;
+    bool res = readIndex();
+    if (!res) {
+        mHasError = true;
+        return false;
+    }
+    return true;
 }
 
 void TextureLoader::loadTexture(uint32_t texId, loader_t loader) {
@@ -25,6 +38,9 @@ void TextureLoader::loadTexture(uint32_t texId, loader_t loader) {
     assert(mIndex.count(texId));
     fseek(mStream.get(), mIndex[texId], SEEK_SET);
     loader(&mStream);
+    if (ferror(mStream.get())) {
+        mHasError = true;
+    }
 }
 
 bool TextureLoader::readIndex() {
@@ -51,3 +67,6 @@ bool TextureLoader::readIndex() {
 #endif
     return true;
 }
+
+}  // namespace snapshot
+}  // namespace android

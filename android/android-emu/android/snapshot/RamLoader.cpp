@@ -52,9 +52,8 @@ struct RamLoader::Page {
     }
 };
 
-RamLoader::RamLoader(base::StdioStream&& stream, ZeroChecker zeroChecker)
+RamLoader::RamLoader(base::StdioStream&& stream)
     : mStream(std::move(stream)),
-      mZeroChecker(zeroChecker),
       mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace(
@@ -89,12 +88,13 @@ void RamLoader::registerBlock(const RamBlock& block) {
     mIndex.blocks.push_back({block});
 }
 
-bool RamLoader::startLoading() {
+bool RamLoader::start() {
 #if SNAPSHOT_PROFILE > 1
     mStartTime = base::System::get()->getHighResTimeUs();
 #endif
     mWasStarted = true;
     if (!readIndex()) {
+        mHasError = true;
         return false;
     }
     if (!mAccessWatch) {
@@ -102,6 +102,7 @@ bool RamLoader::startLoading() {
     }
 
     if (!registerPageWatches()) {
+        mHasError = true;
         return false;
     }
     mBackgroundPageIt = mIndex.pages.begin();
@@ -118,7 +119,7 @@ void RamLoader::interruptReading() {
 void RamLoader::zeroOutPage(const Page& page) {
     auto ptr = pagePtr(page);
     const RamBlock& block = mIndex.blocks[page.blockIndex].ramBlock;
-    if (!mZeroChecker(ptr, block.pageSize)) {
+    if (!isBufferZeroed(ptr, block.pageSize)) {
         memset(ptr, 0, block.pageSize);
     }
 }
@@ -397,6 +398,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
             delete[] buf;
         }
         page.state.store(uint8_t(State::Error));
+        mHasError = true;
         return false;
     }
 
@@ -415,6 +417,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
                     delete[] decompressed;
                 }
                 page.state.store(uint8_t(State::Error));
+                mHasError = true;
                 return false;
             }
             buf = decompressed;
@@ -445,6 +448,9 @@ void RamLoader::fillPageData(Page* pagePtr) {
     if (mAccessWatch) {
         bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
                                           page.data);
+        if (!res) {
+            mHasError = true;
+        }
         page.state.store(uint8_t(res ? State::Filled : State::Error),
                          std::memory_order_release);
     }
@@ -481,6 +487,7 @@ bool RamLoader::readAllPages() {
 
     for (Page* page : sortedPages) {
         if (!readDataFromDisk(page, pagePtr(*page))) {
+            mHasError = true;
             return false;
         }
     }
@@ -498,6 +505,7 @@ void RamLoader::startDecompressor() {
         page->data = nullptr;
         if (!res) {
             derror("Decompressing page %p failed", pagePtr(*page));
+            mHasError = true;
             page->state.store(uint8_t(State::Error));
         }
     });

@@ -16,6 +16,7 @@
 #include "OpenglRender/RenderChannel.h"
 #include "OpenglRender/render_api_platform_types.h"
 #include "android/base/files/Stream.h"
+#include "android/snapshot/common.h"
 
 #include <functional>
 #include <memory>
@@ -151,8 +152,10 @@ public:
     // Resumes all channels after snapshot saving or loading.
     virtual void resumeAll() = 0;
 
-    virtual void save(android::base::Stream* stream) = 0;
-    virtual bool load(android::base::Stream* stream) = 0;
+    virtual void save(android::base::Stream* stream,
+                      const android::snapshot::TextureSaverPtr& textureSaver) = 0;
+    virtual bool load(android::base::Stream* stream,
+                      const android::snapshot::TextureLoaderPtr& textureLoader) = 0;
 
 protected:
     ~Renderer() = default;

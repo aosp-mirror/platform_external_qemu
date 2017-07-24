@@ -122,10 +122,10 @@ EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *a
 
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
                                                EGLStream stream,
-                                               const char* snapshotDir);
+                                               const void* textureSaver);
 EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                EGLStream stream,
-                                               const char* snapshotDir);
+                                               const void* textureLoader);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
 }
@@ -1396,26 +1396,33 @@ EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream)
 
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
                                                EGLStream stream,
-                                               const char* snapshotDir) {
+                                               const void* textureSaver) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     assert(iface->saveTexture);
-    if (!iface || !iface->saveTexture) return true;
+    if (!iface || !iface->saveTexture)
+        return true;
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
-    dpy->onSaveAllImages(stm, snapshotDir, iface->saveTexture);
+    dpy->onSaveAllImages(
+            stm,
+            *static_cast<const android::snapshot::TextureSaverPtr*>(textureSaver),
+            iface->saveTexture);
     return EGL_TRUE;
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                EGLStream stream,
-                                               const char* snapshotDir) {
+                                               const void* textureLoader) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     assert(iface->createTexture);
     if (!iface || !iface->createTexture)
         return true;
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
-    dpy->onLoadAllImages(stm, snapshotDir, iface->createTexture);
+    dpy->onLoadAllImages(
+            stm,
+            *static_cast<const android::snapshot::TextureLoaderPtr*>(textureLoader),
+            iface->createTexture);
     return EGL_TRUE;
 }
 

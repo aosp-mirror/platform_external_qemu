@@ -16,6 +16,7 @@
 #include "android/opengl-snapshot.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/GLProcessPipe.h"
+#include "android/snapshot/Snapshotter.h"
 
 #ifdef SNAPSHOT_PROFILE
 #include "android/base/system/System.h"
@@ -85,7 +86,8 @@ public:
             }
             int version = stream->getBe32();
             (void)version;
-            renderer->load(stream);
+            renderer->load(stream,
+                           snapshot::Snapshotter::get().loader().textureLoader());
 #ifdef SNAPSHOT_PROFILE
             printf("OpenglEs preload time: %lld ms\n",
                     (long long)(android::base::System::get()->getUnixTimeUs()
@@ -112,7 +114,8 @@ public:
                 renderer->pauseAllPreSave();
                 stream->putByte(1);
                 stream->putBe32(OPENGL_SAVE_VERSION);
-                renderer->save(stream);
+                renderer->save(stream,
+                               snapshot::Snapshotter::get().saver().textureSaver());
             } else {
                 stream->putByte(0);
             }

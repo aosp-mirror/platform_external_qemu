@@ -18,8 +18,6 @@ host_common_SRC_FILES :=     \
      ScopedGLState.cpp       \
      ShareGroup.cpp          \
      TextureData.cpp         \
-     TextureLoader.cpp       \
-     TextureSaver.cpp        \
      TextureUtils.cpp
 
 host_GL_COMMON_LINKER_FLAGS :=
