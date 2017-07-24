@@ -15,6 +15,18 @@
 
 namespace android {
 
+ParameterList::ParameterList(int argc, char** argv) {
+    for (int i = 0; i < argc; i++) {
+        add(argv[i]);
+    }
+}
+
+ParameterList::ParameterList(std::initializer_list<std::string> lst) {
+    for (auto s : lst) {
+        add(s);
+    }
+}
+
 size_t ParameterList::size() const {
     return mParams.size();
 }
@@ -35,7 +47,11 @@ std::string ParameterList::toString() const {
         if (n > 0) {
             result += ' ';
         }
-        result += mParams[n];
+        auto param = mParams[n];
+        if (param.find(' ') != std::string::npos)
+          result.append("'").append(param).append("'");
+        else
+        result += param;
     }
     return result;
 }
@@ -46,6 +62,12 @@ char* ParameterList::toCStringCopy() const {
 
 void ParameterList::add(const std::string& param) {
     mParams.push_back(param);
+}
+
+void ParameterList::add(const ParameterList other) {
+    for (auto s : other.mParams) {
+        add(s);
+    }
 }
 
 void ParameterList::add(std::string&& param) {
