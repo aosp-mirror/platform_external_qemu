@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "43fc1633_5228c668",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-24T18:16:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "277e7ecd_380cf934",
+      "range": {
+        "startLine": 90,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 33
+      },
+      "revId": "181654dea7ffa956e39eecd64378263c644057d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9616adfb_a2bae710",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2017-07-17T21:07:06Z",
       "side": 1,
       "message": "what\u0027s the purpose of having a list of numbers 0..nConfigs?\ncould we just save |nConfigs| alone?",
+      "range": {
+        "startLine": 94,
+        "startChar": 0,
+        "endLine": 96,
+        "endChar": 40
+      },
+      "revId": "181654dea7ffa956e39eecd64378263c644057d3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e1358d86_f8a76a58",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-24T18:16:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9616adfb_a2bae710",
       "range": {
         "startLine": 94,
         "startChar": 0,
