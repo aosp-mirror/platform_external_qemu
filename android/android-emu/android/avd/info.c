@@ -1234,6 +1234,23 @@ avdInfo_getVendorInitImagePath( const AvdInfo*  i )
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
+const char*
+avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
+{
+    char* vendor_path = avdInfo_getVendorImagePath(i);
+    if (vendor_path) {
+        free(vendor_path);
+        char* encryption_path = avdInfo_getEncryptionKeyImagePath(i);
+        if (encryption_path) {
+            free(encryption_path);
+            return "/dev/block/vde";
+        } else {
+            return "/dev/block/vdd";
+        }
+    }
+    return NULL;
+}
+
 char*
 avdInfo_getDataImagePath( const AvdInfo*  i )
 {
