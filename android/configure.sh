@@ -518,7 +518,7 @@ if [ "$PCBIOS_PROBE" = "yes" ]; then
         log "PC Bios    : Could not find prebuilts directory."
     else
         mkdir -p $OUT_DIR/lib/pc-bios || panic "Could not create dir $OUT_DIR/lib/pc-bios"
-        for BIOS_FILE in bios.bin vgabios-cirrus.bin bios-256k.bin efi-virtio.rom kvmvapic.bin linuxboot.bin; do
+        for BIOS_FILE in bios.bin vgabios-cirrus.bin vgabios-virtio.bin bios-256k.bin efi-virtio.rom kvmvapic.bin linuxboot.bin; do
             log "PC Bios    : Copying $BIOS_FILE"
             cp -f $PCBIOS_DIR/$BIOS_FILE $OUT_DIR/lib/pc-bios/$BIOS_FILE ||
                 panic "Missing BIOS file: $PCBIOS_DIR/$BIOS_FILE"

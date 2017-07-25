@@ -17,6 +17,7 @@
 #include "android-qemu2-glue/display.h"
 
 #include "android/emulator-window.h"
+#include "android/globals.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -85,9 +86,18 @@ static void android_display_update(DisplayChangeListener* dcl,
     }
 }
 
+static pixman_image_t  *qfb_image;
+
 static void android_display_switch(DisplayChangeListener* dcl,
-                                   DisplaySurface* new_surface_unused) {
+                                   DisplaySurface* new_surface) {
     if (QFrameBuffer* qfbuff = asDcl(dcl)->fb) {
+        if (android_hw->hw_arc) {
+            pixman_image_composite(PIXMAN_OP_OVER,
+                                   new_surface->image, NULL,
+                                   qfb_image,
+                                   0, 0, 0, 0, 0, 0,
+                                   qfbuff->width, qfbuff->height);
+        }
         qframebuffer_rotate(qfbuff, 0);
     }
 }
@@ -113,10 +123,25 @@ static QemuConsole* find_graphic_console() {
     return NULL;
 }
 
+static int last_graphic_console_index() {
+    int last = -1;
+    for (int i = 0;; i++) {
+        QemuConsole* const c = qemu_console_lookup_by_index(i);
+        if (!c) {
+            break;
+        }
+        if (qemu_console_is_graphic(c)) {
+            last = i;
+        }
+    }
+    return last;
+}
+
 static DisplayChangeListenerOps dclOps = {};
 
+
 bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
-    QemuConsole* const con = find_graphic_console();
+    QemuConsole* con = find_graphic_console();
     if (!con) {
         return false;
     }
@@ -134,7 +159,25 @@ bool android_display_init(DisplayState* ds, QFrameBuffer* qf) {
 
     auto surface = qemu_create_displaysurface_from(
             qf->width, qf->height, format, qf->pitch, (uint8_t*)qf->pixels);
-
+    if (android_hw->hw_arc) {
+        /* We don't use goldfish_fb in cros now. so
+         * just pick up last graphic console */
+        int index = last_graphic_console_index();
+        if (index < 0) {
+            return false;
+        }
+        console_select(index);
+        con = qemu_console_lookup_by_index(index);
+        QemuUIInfo info = {
+            0, 0,
+            (uint32_t)qf->width,
+            (uint32_t)qf->height,
+        };
+        dpy_set_ui_info(con, &info);
+        qfb_image = pixman_image_create_bits(format,
+                                             qf->width, qf->height,
+                                             (uint32_t*)qf->pixels, qf->pitch);
+    }
     dpy_gfx_replace_surface(con, surface);
 
     /* Register a change listener for it */
