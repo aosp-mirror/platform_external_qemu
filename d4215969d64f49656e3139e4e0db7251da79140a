@@ -22,6 +22,54 @@
       "revId": "d4215969d64f49656e3139e4e0db7251da79140a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff8fb801_5a9a5d62",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1278,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2017-07-25T16:32:20Z",
+      "side": 1,
+      "message": "That would require calling an AndroidEmu API here, right? Could we enable /system first and add support for /vendor in another patch?",
+      "parentUuid": "8e0e5ad0_48c73de6",
+      "range": {
+        "startLine": 1278,
+        "startChar": 7,
+        "endLine": 1278,
+        "endChar": 11
+      },
+      "revId": "d4215969d64f49656e3139e4e0db7251da79140a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ce3bc2b_a96df572",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1278,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2017-07-25T16:32:20Z",
+      "side": 1,
+      "message": "Right, but I suppose that would require calling an AndroidEmu API here. Could we enable /system first and add support for /vendor in another patch?",
+      "parentUuid": "8e0e5ad0_48c73de6",
+      "range": {
+        "startLine": 1278,
+        "startChar": 7,
+        "endLine": 1278,
+        "endChar": 11
+      },
+      "revId": "d4215969d64f49656e3139e4e0db7251da79140a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
