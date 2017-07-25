@@ -15,6 +15,8 @@
 
 #include <assert.h>
 
+#define DEBUG 1
+
 #ifdef DEBUG
 #  include <stdio.h>
 #  define  D(...)    do { printf("%s:%d: ", __FUNCTION__, __LINE__); printf(__VA_ARGS__); fflush(stdout); } while (0)
@@ -61,6 +63,7 @@ int KeymasterPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
     } else {
         mState = State::WaitingForGuestRecvPartial;
     }
+    D("keymaster guest receive buffer size %d\n", bytesRecv);
     return bytesRecv;
 }
 
@@ -70,7 +73,7 @@ int KeymasterPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     while (numBuffers > 0) {
         const uint8_t* data = nullptr;
         size_t dataSize = 0;
-        D("keymaster receive buffer size %lu\n", buffers->size);
+        D("keymaster host receive buffer size %lu\n", buffers->size);
         switch (mState) {
             case State::WaitingForGuestSend: {
                 if (buffers->size < 8) {
@@ -111,9 +114,11 @@ int KeymasterPipe::onGuestSend(const AndroidPipeBuffer* buffers,
     }
     if (mCommandBufferOffset == mCommandBuffer.size()) {
         // decode and execute the command
+        D("keymaster host call decodeAndExecute\n");
         decodeAndExecute();
         mCommandBuffer.clear();
     }
+    D("keymaster host receive buffer size %d\n", bytesSent);
     return bytesSent;
 }
 

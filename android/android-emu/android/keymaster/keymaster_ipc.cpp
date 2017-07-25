@@ -23,6 +23,8 @@ extern "C" {
 #include <stdio.h>
 #include <string.h>
 
+#  define  DD(...)    do { printf("%s:%d: ", __FUNCTION__, __LINE__); printf(__VA_ARGS__); printf("\n");fflush(stdout); } while (0)
+
 #include <err.h>
 
 #include <interface/keymaster/keymaster.h>
@@ -83,76 +85,92 @@ static long do_dispatch(void (AndroidKeymaster::*operation)(const Request&, Resp
 static long keymaster_dispatch_non_secure(keymaster_message* msg,
                                           uint32_t payload_size, UniquePtr<uint8_t[]>* out,
                                           uint32_t* out_size) {
-    LOG_D("Dispatching command %d", msg->cmd);
+    DD("Dispatching command %d", msg->cmd);
     switch (msg->cmd) {
     case KM_GENERATE_KEY:
-        LOG_D("Dispatching GENERATE_KEY, size: %d", payload_size);
+        DD("Dispatching GENERATE_KEY, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::GenerateKey, msg, payload_size, out, out_size);
 
     case KM_BEGIN_OPERATION:
-        LOG_D("Dispatching BEGIN_OPERATION, size: %d", payload_size);
+        DD("Dispatching BEGIN_OPERATION, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::BeginOperation, msg, payload_size, out, out_size);
 
     case KM_UPDATE_OPERATION:
-        LOG_D("Dispatching UPDATE_OPERATION, size: %d", payload_size);
+        DD("Dispatching UPDATE_OPERATION, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::UpdateOperation, msg, payload_size, out, out_size);
 
     case KM_FINISH_OPERATION:
-        LOG_D("Dispatching FINISH_OPERATION, size: %d", payload_size);
+        DD("Dispatching FINISH_OPERATION, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::FinishOperation, msg, payload_size, out, out_size);
 
     case KM_IMPORT_KEY:
-        LOG_D("Dispatching IMPORT_KEY, size: %d", payload_size);
+        DD("Dispatching IMPORT_KEY, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::ImportKey, msg, payload_size, out, out_size);
 
     case KM_EXPORT_KEY:
-        LOG_D("Dispatching EXPORT_KEY, size: %d", payload_size);
+        DD("Dispatching EXPORT_KEY, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::ExportKey, msg, payload_size, out, out_size);
 
     case KM_GET_VERSION:
-        LOG_D("Dispatching GET_VERSION, size: %d", payload_size);
+        DD("Dispatching GET_VERSION, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::GetVersion, msg, payload_size, out, out_size);
 
     case KM_ADD_RNG_ENTROPY:
-        LOG_D("Dispatching ADD_RNG_ENTROPY, size: %d", payload_size);
+        DD("Dispatching ADD_RNG_ENTROPY, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::AddRngEntropy, msg, payload_size, out, out_size);
 
     case KM_GET_SUPPORTED_ALGORITHMS:
-        LOG_D("Dispatching GET_SUPPORTED_ALGORITHMS, size: %d", payload_size);
+        DD("Dispatching GET_SUPPORTED_ALGORITHMS, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::SupportedAlgorithms, msg, payload_size, out, out_size);
 
     case KM_GET_SUPPORTED_BLOCK_MODES:
-        LOG_D("Dispatching GET_SUPPORTED_BLOCK_MODES, size: %d", payload_size);
+        DD("Dispatching GET_SUPPORTED_BLOCK_MODES, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::SupportedBlockModes, msg, payload_size, out, out_size);
 
     case KM_GET_SUPPORTED_PADDING_MODES:
-        LOG_D("Dispatching GET_SUPPORTED_PADDING_MODES, size: %d", payload_size);
+        DD("Dispatching GET_SUPPORTED_PADDING_MODES, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::SupportedPaddingModes, msg, payload_size, out,
                            out_size);
 
     case KM_GET_SUPPORTED_DIGESTS:
-        LOG_D("Dispatching GET_SUPPORTED_DIGESTS, size: %d", payload_size);
+        DD("Dispatching GET_SUPPORTED_DIGESTS, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::SupportedDigests, msg, payload_size, out, out_size);
 
     case KM_GET_SUPPORTED_IMPORT_FORMATS:
-        LOG_D("Dispatching GET_SUPPORTED_IMPORT_FORMATS, size: %d", payload_size);
+        DD("Dispatching GET_SUPPORTED_IMPORT_FORMATS, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::SupportedImportFormats, msg, payload_size, out,
                            out_size);
 
     case KM_GET_SUPPORTED_EXPORT_FORMATS:
-        LOG_D("Dispatching GET_SUPPORTED_EXPORT_FORMATS, size: %d", payload_size);
+        DD("Dispatching GET_SUPPORTED_EXPORT_FORMATS, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::SupportedExportFormats, msg, payload_size, out,
                            out_size);
 
     case KM_GET_KEY_CHARACTERISTICS:
-        LOG_D("Dispatching GET_KEY_CHARACTERISTICS, size: %d", payload_size);
+        DD("Dispatching GET_KEY_CHARACTERISTICS, size: %d", payload_size);
         return do_dispatch(&TrustyKeymaster::GetKeyCharacteristics, msg, payload_size, out,
                            out_size);
 
+    case KM_ATTEST_KEY:
+        DD("Dispatching ATTEST_KEY, size: %d", payload_size);
+        return do_dispatch(&TrustyKeymaster::AttestKey, msg, payload_size, out,
+                           out_size);
+
+    case KM_UPGRADE_KEY:
+        DD("Dispatching UPGRADE_KEY, size: %d", payload_size);
+        return do_dispatch(&TrustyKeymaster::UpgradeKey, msg, payload_size, out,
+                           out_size);
+
+    case KM_CONFIGURE:
+        DD("Dispatching CONFIGURE, size: %d", payload_size);
+        return do_dispatch(&TrustyKeymaster::Configure, msg, payload_size, out,
+                           out_size);
+
     case KM_ABORT_OPERATION:
-        LOG_D("Dispatching ABORT_OPERATION, size %d", payload_size);
+        DD("Dispatching ABORT_OPERATION, size %d", payload_size);
         return do_dispatch(&TrustyKeymaster::AbortOperation, msg, payload_size, out, out_size);
     default:
+        DD("cannot find command %d", msg->cmd);
         return ERR_NOT_IMPLEMENTED;
     }
 }
@@ -164,8 +182,11 @@ int keymaster_ipc_call(std::vector<uint8_t> &input, std::vector<uint8_t> *output
     uint32_t payload_size=input.size();
     uint32_t out_size=0;
     keymaster_dispatch_non_secure(msg, payload_size, &out, &out_size);
-    output->resize(out_size);
-    memcpy(output->data(), out.get(), out_size);
+    DD("output size %d\n", (int)(out_size));
+    output->resize(8+out_size);
+    int64_t out64 = out_size;
+    memcpy(output->data(), &(out64), 8);
+    memcpy(output->data() + 8, out.get(), out_size);
     return 0;
 }
 
