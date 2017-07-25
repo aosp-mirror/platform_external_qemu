@@ -179,7 +179,17 @@ mingw_build_angle_package() {
     chmod +x src/copy_compiler_dll.bat &&
 
     # Set build flags, make sure all header files are found
-    export CXXFLAGS="-O2 -g -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 -std=c++11 -msse2 -DUNICODE -D_UNICODE -g -Isrc -Iinclude" &&
+    local ARCHFLAG=""
+    case $SYSTEM in
+        windows-x86)
+            ARCHFLAG=" -m32"
+            ;;
+        windows-x86_64)
+            ARCHFLAG=" -m64"
+            ;;
+    esac
+
+    export CXXFLAGS="-O2 -g $ARCHFLAG -pipe -Wall -Wp,-D_FORTIFY_SOURCE=2 -fexceptions --param=ssp-buffer-size=4 -std=c++11 -msse2 -DUNICODE -D_UNICODE -g -Isrc -Iinclude" &&
     export CXX="$MINGW_PREFIX-w64-mingw32-g++" &&
     export AR="$MINGW_PREFIX-w64-mingw32-ar" &&
 
