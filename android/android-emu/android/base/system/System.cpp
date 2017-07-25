@@ -1691,7 +1691,7 @@ Optional<System::Duration> System::pathCreationTimeInternal(StringView path) {
 }
 
 // static
-void System::addLibrarySearchDir(StringView path) {
+std::string System::addLibrarySearchDir(StringView path) {
     System* system = System::get();
     const char* varName = kLibrarySearchListEnvVarName;
 
@@ -1703,6 +1703,16 @@ void System::addLibrarySearchDir(StringView path) {
         libSearchPath = path;
     }
     system->envSet(varName, libSearchPath);
+    std::string newPath = system->envGet(varName);
+
+    // We expect the search path to be changed.
+    // There are rare cases where a user is using some
+    // restricted shell, which we would catch here.
+    if (libSearchPath.compare(newPath) != 0) {
+        LOG(WARNING) << "Unable to update " << varName
+                     << ", to: " << libSearchPath;
+    }
+    return newPath;
 }
 
 // static

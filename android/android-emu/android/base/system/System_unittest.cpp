@@ -355,11 +355,15 @@ TEST(System, isRemoteSession) {
 }
 
 TEST(System, addLibrarySearchDir) {
-    TestSystem testSys("/foo/bar", 32);
-    TestTempDir* testDir = testSys.getTempRoot();
-    ASSERT_TRUE(testDir->makeSubDir("lib"));
-    testSys.addLibrarySearchDir("lib");
+  // We cannot use the Testsystem, as we want to make sure
+  // that the underlying os will actually modify the search
+  // path.
+  System* sys = System::get();
+  TestTempDir tmpdir("TestSystem");
+  std::string newPath = sys->addLibrarySearchDir(tmpdir.path());
+  ASSERT_TRUE(newPath.find(tmpdir.path()) == 0);
 }
+
 
 TEST(System, findBundledExecutable) {
 #ifdef _WIN32
