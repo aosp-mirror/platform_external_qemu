@@ -41,7 +41,7 @@ class TrustyKeymasterContext : public KeymasterContext {
 
     keymaster_error_t SetSystemVersion(uint32_t /* os_version */,
                                        uint32_t /* os_patchlevel */) override {
-        return KM_ERROR_UNIMPLEMENTED;
+        return KM_ERROR_OK;
     }
 
     void GetSystemVersion(uint32_t* os_version, uint32_t* os_patchlevel) const override {};

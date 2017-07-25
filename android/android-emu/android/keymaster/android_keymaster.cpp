@@ -36,6 +36,8 @@
 #include "operation.h"
 #include "operation_table.h"
 
+#define  DD(...)    do { printf("%s:%d: ", __FUNCTION__, __LINE__); printf(__VA_ARGS__); printf("\n");fflush(stdout); } while (0)
+
 namespace keymaster {
 
 namespace {
@@ -99,6 +101,7 @@ void AndroidKeymaster::GetVersion(const GetVersionRequest&, GetVersionResponse* 
     rsp->minor_ver = MINOR_VER;
     rsp->subminor_ver = SUBMINOR_VER;
     rsp->error = KM_ERROR_OK;
+DD("major %d minor %d sub %d", MAJOR_VER, MINOR_VER, SUBMINOR_VER);
 }
 
 void AndroidKeymaster::SupportedAlgorithms(const SupportedAlgorithmsRequest& /* request */,
@@ -455,6 +458,7 @@ void AndroidKeymaster::Configure(const ConfigureRequest& request, ConfigureRespo
     if (!response)
         return;
     response->error = context_->SetSystemVersion(request.os_version, request.os_patchlevel);
+    DD("response is %d", response->error);
 }
 
 bool AndroidKeymaster::has_operation(keymaster_operation_handle_t op_handle) const {
