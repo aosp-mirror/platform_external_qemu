@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a1e4848_8d771100",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-07-25T19:12:23Z",
+      "side": 1,
+      "message": "hardware configuration used to be",
+      "range": {
+        "startLine": 222,
+        "startChar": 50,
+        "endLine": 223,
+        "endChar": 28
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0606d69f_75afae03",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-07-25T19:12:23Z",
+      "side": 1,
+      "message": "Now, this file groups all definitions and is",
+      "range": {
+        "startLine": 226,
+        "startChar": 3,
+        "endLine": 226,
+        "endChar": 54
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "30fe26d6_78574686",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-07-25T19:12:23Z",
+      "side": 1,
+      "message": "Alignment is off. I\u0027d rather you added the braces, too.",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 24
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
