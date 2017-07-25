@@ -204,6 +204,18 @@ char*  avdInfo_getSystemInitImagePath( const AvdInfo*  i );
 char*  avdInfo_getVendorImagePath( const AvdInfo* i );
 char*  avdInfo_getVendorInitImagePath( const AvdInfo*  i );
 
+/*
+   used for device tree support for early boot of O
+   for O:
+   for arm it is /dev/block/vdd
+   for x86/64 it is /dev/block/vdd if encryption disable
+   for x86/64 it is /dev/block/vde if encryption enabled
+   should always use the following method to get the right
+   path, as things may change for P and afterwards
+   returns NULL if there is no vendor image
+   */
+const char*  avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i );
+
 char*  avdInfo_getDataImagePath( const AvdInfo*  i );
 char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
 
