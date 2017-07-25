@@ -1234,6 +1234,63 @@ avdInfo_getVendorInitImagePath( const AvdInfo*  i )
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
+static bool
+is_x86ish(const AvdInfo* i)
+{
+    if (strncmp(i->targetAbi, "x86", 3) == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static bool
+is_armish(const AvdInfo* i)
+{
+    if (strncmp(i->targetAbi, "arm", 3) == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+const char*
+avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
+{
+    char* vendor_path = avdInfo_getVendorInitImagePath(i);
+    if (vendor_path) {
+        free(vendor_path);
+        char* encryption_path = avdInfo_getEncryptionKeyImagePath(i);
+        if (encryption_path) {
+            free(encryption_path);
+            if (is_x86ish(i)) {
+                return "/dev/block/pci/pci0000:00/0000:00:07.0/by-name/vendor";
+            } if (is_armish(i)) {
+                return "/dev/block/platform/a004000.virtio_mmio/by-name/vendor";
+            }
+        } else {
+            if (is_x86ish(i)) {
+                return "/dev/block/pci/pci0000:00/0000:00:06.0/by-name/vendor";
+            } else if (is_armish(i)) {
+                return "/dev/block/platform/a003e00.virtio_mmio/by-name/vendor";
+            }
+        }
+    }
+    return NULL;
+}
+
+const char*
+avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i )
+{
+    if (is_x86ish(i)) {
+        return "/dev/block/pci/pci0000:00/0000:00:03.0/by-name/system";
+    } if (is_armish(i)) {
+        return "/dev/block/platform/a003800.virtio_mmio/by-name/system";
+    } else {
+        return "/dev/block/vda";
+    }
+}
+
 char*
 avdInfo_getDataImagePath( const AvdInfo*  i )
 {
