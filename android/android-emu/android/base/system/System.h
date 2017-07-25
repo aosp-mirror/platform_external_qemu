@@ -215,7 +215,7 @@ public:
     // only alters an environment variable like PATH or LD_LIBRARY_PATH,
     // and thus typically takes effect only after spawning/executing a new
     // process.
-    static void addLibrarySearchDir(StringView dirPath);
+    static std::string addLibrarySearchDir(StringView dirPath);
 
     // /////////////////////////////////////////////////////////////////////////
     // Path functions that interact with the file system.
