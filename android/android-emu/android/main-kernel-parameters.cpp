@@ -27,6 +27,11 @@
 
 using android::base::StringFormat;
 
+// Note: The ACPI _HID that follows devices/ must match the one defined in the
+// ACPI tables (hw/i386/acpi_build.c)
+static const char kSysfsAndroidDtDir[] =
+        "/sys/bus/platform/devices/ANDR0001:00/properties/android/";
+
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    int apiLevel,
@@ -129,6 +134,12 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (isQemu2 &&
             android::featurecontrol::isEnabled(android::featurecontrol::Wifi)) {
         params.add("qemu.wifi=1");
+    }
+
+    if (isQemu2 && isX86ish) {
+        // x86 and x86_64 platforms use an alternative Android DT directory that
+        // mimics the layout of /proc/device-tree/firmware/android/
+        params.addFormat("androidboot.android_dt_dir=%s", kSysfsAndroidDtDir);
     }
 
     if (avdKernelParameters && avdKernelParameters[0]) {
