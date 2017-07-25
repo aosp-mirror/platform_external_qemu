@@ -12,7 +12,7 @@
 #include "android/snapshot/Snapshotter.h"
 
 #include "android/snapshot/interface.h"
-
+#include "android/crashreport/CrashReporter.h"
 #include "android/utils/path.h"
 
 #include <assert.h>
@@ -82,14 +82,14 @@ const SnapshotCallbacks Snapshotter::kCallbacks = {
                 // del
                 {// start
                  [](void* opaque, const char* name) {
+                     auto snapshot = static_cast<Snapshotter*>(opaque);
+                     snapshot->onStartDelete(name);
                      return 0;
                  },
                  // end
                  [](void* opaque, const char* name, int res) {
-                     if (res == 0) {
-                         auto snapshot = static_cast<Snapshotter*>(opaque);
-                         snapshot->onDelete(name);
-                     }
+                     auto snapshot = static_cast<Snapshotter*>(opaque);
+                     snapshot->onDeletingComplete(name, res);
                  }},
         },
         // ramOps
@@ -174,6 +174,7 @@ OperationStatus Snapshotter::save(const char* name) {
 }
 
 void Snapshotter::onStartSaving(const char* name) {
+    crashreport::CrashReporter::get()->hangDetector().pause(true);
     mLoader.clear();
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.emplace(name);
@@ -183,9 +184,11 @@ void Snapshotter::onStartSaving(const char* name) {
 void Snapshotter::onSavingComplete(const char* name, int res) {
     assert(mSaver && name == mSaver->snapshot().name());
     mSaver->complete(res == 0);
+    crashreport::CrashReporter::get()->hangDetector().pause(false);
 }
 
 void Snapshotter::onStartLoading(const char* name) {
+    crashreport::CrashReporter::get()->hangDetector().pause(true);
     mSaver.clear();
     if (!mLoader || isComplete(*mLoader)) {
         mLoader.emplace(name);
@@ -195,9 +198,15 @@ void Snapshotter::onStartLoading(const char* name) {
 void Snapshotter::onLoadingComplete(const char* name, int res) {
     assert(mLoader && name == mLoader->snapshot().name());
     mLoader->complete(res == 0);
+    crashreport::CrashReporter::get()->hangDetector().pause(false);
 }
 
-void Snapshotter::onDelete(const char* name) {
+void Snapshotter::onStartDelete(const char* name) {
+    crashreport::CrashReporter::get()->hangDetector().pause(true);
+}
+
+void Snapshotter::onDeletingComplete(const char* name, int res) {
+    if (res == 0) {
     if (mSaver && mSaver->snapshot().name() == name) {
         mSaver.clear();
     }
@@ -205,6 +214,8 @@ void Snapshotter::onDelete(const char* name) {
         mLoader.clear();
     }
     path_delete_dir(Snapshot(name).dataDir().c_str());
+    }
+    crashreport::CrashReporter::get()->hangDetector().pause(false);
 }
 
 }  // namespace snapshot

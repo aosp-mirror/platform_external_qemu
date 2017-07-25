@@ -49,7 +49,8 @@ private:
     void onSavingComplete(const char* name, int res);
     void onStartLoading(const char* name);
     void onLoadingComplete(const char* name, int res);
-    void onDelete(const char* name);
+    void onStartDelete(const char* name);
+    void onDeletingComplete(const char* name, int res);
 
     QAndroidVmOperations mVmOperations;
     android::base::Optional<Saver> mSaver;
