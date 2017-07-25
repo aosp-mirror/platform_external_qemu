@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6bcba54a_8111b91b",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-25T20:56:22Z",
+      "side": 1,
+      "message": "you can make it even simpler:\n\nVertexAttribBindingVector* bindings;\nswitch (...){\n   case X: bindings \u003d \u0026m_indexedTransformFeedbackBuffers;\n      break;\n   case Y: ...\n}\nif (index \u003e bindings-\u003esize()) return;\nauto\u0026 bufferBinding \u003d (*bindings)[index];\n...",
+      "range": {
+        "startLine": 1105,
+        "startChar": 0,
+        "endLine": 1139,
+        "endChar": 35
+      },
+      "revId": "2d67a82647b58d66dc29119ec166a39d6b62c524",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
