@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "caabbb04_a32418c4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-25T01:10:24Z",
+      "side": 1,
+      "message": "nit: unneeded",
+      "range": {
+        "startLine": 578,
+        "startChar": 74,
+        "endLine": 578,
+        "endChar": 88
+      },
+      "revId": "23fafac71ff7e3380aaa470dfaf385db85f6d429",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e3f1442_d4844793",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1148,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-25T01:10:24Z",
+      "side": 1,
+      "message": "this switch should only select the BufferBinding vector to work with, the actual index checking and filling can go later as a common step",
+      "range": {
+        "startLine": 1103,
+        "startChar": 0,
+        "endLine": 1148,
+        "endChar": 5
+      },
+      "revId": "23fafac71ff7e3380aaa470dfaf385db85f6d429",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
