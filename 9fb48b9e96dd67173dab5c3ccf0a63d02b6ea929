@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83cb1e87_709d808c",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 771,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-25T02:59:47Z",
+      "side": 1,
+      "message": "I suggest moving the !hw-\u003ehw_arc to the first if (for \"make sure there\u0027s a temp cache partition\") so you won\u0027t reset the hw-\u003edisk_cachePartition-path memory address to anything.",
+      "range": {
+        "startLine": 762,
+        "startChar": 1,
+        "endLine": 771,
+        "endChar": 46
+      },
+      "revId": "9fb48b9e96dd67173dab5c3ccf0a63d02b6ea929",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25b688a3_25346580",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 941,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-25T02:59:47Z",
+      "side": 1,
+      "message": "to make this more robust, I recommend making a separate image_paths_hw_arc array instead of assuming it is the first entry. I know it shows as the first entry above, but we get rid of an easy-to-make error this way.",
+      "range": {
+        "startLine": 940,
+        "startChar": 0,
+        "endLine": 941,
+        "endChar": 65
+      },
+      "revId": "9fb48b9e96dd67173dab5c3ccf0a63d02b6ea929",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
