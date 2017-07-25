@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "android/snapshot/common.h"
 #include "emugl/common/mutex.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/ObjectData.h"
@@ -130,14 +131,16 @@ public:
     void preSaveAddEglImage(const EglImage* eglImage);
     void preSaveAddTex(const TextureData* texture);
     void onSave(android::base::Stream* stream,
-                const char* snapshotDir,
+                const android::snapshot::TextureSaverPtr& textureSaver,
                 SaveableTexture::saver_t saver);
     void onLoad(android::base::Stream* stream,
-                const char* snapshotDir,
+                const android::snapshot::TextureLoaderPtr& textureLoader,
                 SaveableTexture::creator_t creator);
     void postLoad(android::base::Stream* stream);
     const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);
 private:
+    void clearTextureMap();
+
     emugl::Mutex m_lock;
     // m_textureMap is only used when saving / loading a snapshot
     // It is empty in all other situations

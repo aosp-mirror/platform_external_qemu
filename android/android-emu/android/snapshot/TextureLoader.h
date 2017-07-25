@@ -15,9 +15,13 @@
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/common.h"
 
 #include <functional>
 #include <unordered_map>
+
+namespace android {
+namespace snapshot {
 
 // TODO: idle loader implementation
 class TextureLoader {
@@ -31,13 +35,20 @@ public:
     // Move file position to texId and trigger loader
     void loadTexture(uint32_t texId, loader_t loader);
 
+    bool hasError() const { return mHasError; }
+
 private:
     bool readIndex();
 
     android::base::StdioStream mStream;
     std::unordered_map<uint32_t, int64_t> mIndex;
     android::base::Lock mLock;
+    bool mStarted = false;
+    bool mHasError = false;
 #if SNAPSHOT_PROFILE > 1
     android::base::System::WallDuration mStartTime;
 #endif
 };
+
+}  // namespace snapshot
+}  // namespace android

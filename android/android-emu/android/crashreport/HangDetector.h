@@ -47,6 +47,7 @@ public:
     ~HangDetector();
 
     void addWatchedLooper(base::Looper* looper);
+    void pause(bool paused);
     void stop();
 
 private:
@@ -68,6 +69,7 @@ private:
     const HangCallback mHangCallback;
 
     std::vector<std::unique_ptr<LooperWatcher>> mLoopers;
+    bool mPaused = false;
     bool mStopping = false;
     base::Lock mLock;
     base::ConditionVariable mWorkerThreadCv;

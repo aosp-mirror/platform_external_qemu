@@ -148,7 +148,6 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
 
     sRenderLib->setRenderer(emuglConfig_get_current_renderer());
     sRenderLib->setAvdInfo(guestPhoneApi, guestApiLevel);
-    sRenderLib->setSnapshotDirGetter(&android::snapshot::getSnapshotDir);
     sRenderLib->setCrashReporter(&crashhandler_die_format);
     sRenderLib->setFeatureController(&android::featurecontrol::isEnabled);
     sRenderLib->setSyncDevice(goldfish_sync_create_timeline,
@@ -304,8 +303,7 @@ android_redrawOpenglesWindow(void)
     }
 }
 
-const emugl::RendererPtr& android_getOpenglesRenderer()
-{
+const emugl::RendererPtr& android_getOpenglesRenderer() {
     return sRenderer;
 }
 

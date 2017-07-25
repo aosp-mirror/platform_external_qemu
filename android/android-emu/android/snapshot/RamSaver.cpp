@@ -23,10 +23,8 @@ namespace snapshot {
 
 using android::base::System;
 
-RamSaver::RamSaver(base::StdioStream&& stream,
-                   ZeroChecker zeroChecker,
-                   Flags flags)
-    : mStream(std::move(stream)), mZeroChecker(zeroChecker), mFlags(flags) {
+RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
+    : mStream(std::move(stream)), mFlags(flags) {
     // Put a placeholder for the index offset right now.
     mStream.putBe64(0);
     if (nonzero(mFlags & Flags::Compress)) {
@@ -87,8 +85,13 @@ void RamSaver::savePage(int64_t blockOffset,
 static constexpr int kStopMarkerIndex = -1;
 
 void RamSaver::join() {
+    if (mJoined) {
+        return;
+    }
     passToSaveHandler({kStopMarkerIndex});
     mSavingWorker.clear();
+    mJoined = true;
+    mHasError = ferror(mStream.get()) != 0;
 }
 
 void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
@@ -118,7 +121,7 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
 
     auto ptr = block.ramBlock.hostPtr + pi.pageIndex * block.ramBlock.pageSize;
 
-    if (mZeroChecker(ptr, block.ramBlock.pageSize)) {
+    if (isBufferZeroed(ptr, block.ramBlock.pageSize)) {
         page.sizeOnDisk = 0;
     } else {
         if (mCompressor) {
@@ -162,8 +165,9 @@ void RamSaver::writeIndex() {
     int64_t prevFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
     for (const FileIndex::Block& b : mIndex.blocks) {
-        mStream.putByte(b.ramBlock.id.size());
-        mStream.write(b.ramBlock.id.data(), b.ramBlock.id.size());
+        auto id = base::StringView(b.ramBlock.id);
+        mStream.putByte(id.size());
+        mStream.write(id.data(), id.size());
         mStream.putBe32(b.pages.size());
         for (const FileIndex::Block::Page& page : b.pages) {
             mStream.putPackedNum(
@@ -174,9 +178,7 @@ void RamSaver::writeIndex() {
                 if (compressed) {
                     deltaPos -= prevPageSizeOnDisk;
                 } else {
-                    if (deltaPos % b.ramBlock.pageSize != 0) {
-                        printf("%d %d\n", (int)deltaPos, (int)b.ramBlock.pageSize);
-                    }
+                    assert(deltaPos % b.ramBlock.pageSize == 0);
                     deltaPos /= b.ramBlock.pageSize;
                 }
                 putDelta(&mStream, deltaPos);

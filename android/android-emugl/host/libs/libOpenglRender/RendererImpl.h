@@ -21,6 +21,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/snapshot/common.h"
 
 #include "RenderThread.h"
 
@@ -62,8 +63,10 @@ public:
     void pauseAllPreSave() final;
     void resumeAll() final;
 
-    void save(android::base::Stream* stream) final;
-    bool load(android::base::Stream* stream) final;
+    void save(android::base::Stream* stream,
+              const android::snapshot::TextureSaverPtr& textureSaver) final;
+    bool load(android::base::Stream* stream,
+              const android::snapshot::TextureLoaderPtr& textureLoader) final;
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);

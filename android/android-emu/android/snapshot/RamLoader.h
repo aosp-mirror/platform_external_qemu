@@ -21,6 +21,7 @@
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/common.h"
 
+#include <atomic>
 #include <cstdint>
 #include <vector>
 
@@ -31,14 +32,16 @@ class RamLoader {
     DISALLOW_COPY_AND_ASSIGN(RamLoader);
 
 public:
-    RamLoader(base::StdioStream&& stream, ZeroChecker zeroChecker);
+    RamLoader(base::StdioStream&& stream);
     ~RamLoader();
 
     void registerBlock(const RamBlock& block);
-    bool startLoading();
+    bool start();
     bool wasStarted() const { return mWasStarted; }
+    void join();
 
-    
+    bool hasError() const { return mHasError; }
+
 private:
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
 
@@ -78,8 +81,8 @@ private:
 
     base::StdioStream mStream;
     int mStreamFd;  // An FD for the |mStream|'s underlying open file.
-    ZeroChecker mZeroChecker;
     bool mWasStarted = false;
+    std::atomic<bool> mHasError { false };
 
     base::Optional<MemoryAccessWatch> mAccessWatch;
     base::FunctorThread mReaderThread;

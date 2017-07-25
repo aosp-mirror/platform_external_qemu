@@ -599,7 +599,7 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
 }
 
 void EglDisplay::onSaveAllImages(android::base::Stream* stream,
-                                 const char* snapshotDir,
+                                 const android::snapshot::TextureSaverPtr& textureSaver,
                                  SaveableTexture::saver_t saver) {
     // we could consider calling presave for all ShareGroups from here
     // but it would introduce overheads because not all share groups need to be
@@ -613,7 +613,7 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
         touchEglImage(image.second.get());
         getGlobalNameSpace()->preSaveAddEglImage(image.second.get());
     }
-    m_globalNameSpace.onSave(stream, snapshotDir, saver);
+    m_globalNameSpace.onSave(stream, textureSaver, saver);
     saveCollection(stream, m_eglImages, [](
             android::base::Stream* stream,
             const ImagesHndlMap::value_type& img) {
@@ -625,7 +625,7 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
 }
 
 void EglDisplay::onLoadAllImages(android::base::Stream* stream,
-                                 const char* snapshotDir,
+                                 const android::snapshot::TextureLoaderPtr& textureLoader,
                                  SaveableTexture::creator_t creator) {
     if (!m_eglImages.empty()) {
         // Could be triggered by this bug:
@@ -634,7 +634,7 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
     }
     m_eglImages.clear();
     emugl::Mutex::AutoLock mutex(m_lock);
-    m_globalNameSpace.onLoad(stream, snapshotDir, creator);
+    m_globalNameSpace.onLoad(stream, textureLoader, creator);
     loadCollection(stream, &m_eglImages, [this](
         android::base::Stream* stream) {
         unsigned int hndl = stream->getBe32();
