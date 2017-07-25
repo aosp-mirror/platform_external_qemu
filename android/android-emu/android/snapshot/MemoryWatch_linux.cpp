@@ -177,13 +177,15 @@ bool MemoryAccessWatch::valid() const {
 }
 
 bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
-    madvise(start, length, MADV_DONTNEED);
     uffdio_register regStruct = {{(uintptr_t)start, length},
-                                 UFFDIO_REGISTER_MODE_MISSING};
+                                  UFFDIO_REGISTER_MODE_MISSING};
     if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_REGISTER, &regStruct)) {
-        derror("%s userfault register: %s", __func__, strerror(errno));
+        derror("%s userfault register(%p, %d): %s", __func__,
+               start, (int)length, strerror(errno));
+        mImpl->mUserfaultFd.close();
         return false;
     }
+    madvise(start, length, MADV_DONTNEED);
     return true;
 }
 
@@ -209,11 +211,15 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
             return false;
         }
     }
-    uffdio_range rangeStruct{(uintptr_t)ptr, length};
-    if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_UNREGISTER, &rangeStruct)) {
-        derror("%s: userfault unregister %s", __func__, strerror(errno));
-        return false;
-    }
+
+    // TODO: figure out why this kills emulator on some Linux machines.
+    //
+    // uffdio_range rangeStruct{(uintptr_t)ptr, length};
+    // if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_UNREGISTER, &rangeStruct)) {
+    //     derror("%s: userfault unregister %p - %s", __func__, ptr,
+    //            strerror(errno));
+    // }
+    //
     return true;
 }
 
