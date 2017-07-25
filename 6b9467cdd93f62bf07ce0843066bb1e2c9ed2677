@@ -22,6 +22,30 @@
       "revId": "6b9467cdd93f62bf07ce0843066bb1e2c9ed2677",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02a93463_44ef7ebe",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-25T00:08:05Z",
+      "side": 1,
+      "message": "I\u0027m going to implement these in one of the followup CLs, so androidEmu library can initiate snapshot operations",
+      "parentUuid": "b4cc76c0_d5442cb1",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 22
+      },
+      "revId": "6b9467cdd93f62bf07ce0843066bb1e2c9ed2677",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
