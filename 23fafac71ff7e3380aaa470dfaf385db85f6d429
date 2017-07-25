@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bcb4b8ff_9aafcb6a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Context.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-25T16:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "caabbb04_a32418c4",
+      "range": {
+        "startLine": 578,
+        "startChar": 74,
+        "endLine": 578,
+        "endChar": 88
+      },
+      "revId": "23fafac71ff7e3380aaa470dfaf385db85f6d429",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e3f1442_d4844793",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "side": 1,
       "message": "that seems like a good idea, I think the reason I originally had it like this was because something messed up and m_currVaoState.bufferBindings() bound to a non-const ref didn\u0027t seem to reflect the values back in it later on, it\u0027s probably cause of something else I had wrong at the time but just be careful with it.",
       "parentUuid": "9e3f1442_d4844793",
+      "range": {
+        "startLine": 1103,
+        "startChar": 0,
+        "endLine": 1148,
+        "endChar": 5
+      },
+      "revId": "23fafac71ff7e3380aaa470dfaf385db85f6d429",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0c6f2bce_4c84dd27",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1148,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-07-25T16:58:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "540d9fc7_8c5efa76",
       "range": {
         "startLine": 1103,
         "startChar": 0,
