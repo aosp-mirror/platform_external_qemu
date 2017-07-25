@@ -22,6 +22,30 @@
       "revId": "d26e67ac92bd31f8b221a6c2d61b7ebe6420a0af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca7e23ec_ae88753b",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-25T07:21:26Z",
+      "side": 1,
+      "message": "it uses 4 bytes for string length. here 1 is enough",
+      "parentUuid": "f30312b9_7d07c78e",
+      "range": {
+        "startLine": 168,
+        "startChar": 0,
+        "endLine": 169,
+        "endChar": 35
+      },
+      "revId": "d26e67ac92bd31f8b221a6c2d61b7ebe6420a0af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
