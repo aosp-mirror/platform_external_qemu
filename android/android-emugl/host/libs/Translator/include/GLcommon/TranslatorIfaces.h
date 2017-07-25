@@ -76,7 +76,7 @@ typedef struct {
     void                                            (*deleteSync)(GLsync);
     void                                            (*saveTexture)(SaveableTexture*, android::base::Stream*, android::base::SmallVector<unsigned char>* buffer);
     SaveableTexture* (*createTexture)(GlobalNameSpace*,
-                                      std::function<void(SaveableTexture*)>);
+                                      std::function<void(SaveableTexture*)>&&);
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
 } GLESiface;
