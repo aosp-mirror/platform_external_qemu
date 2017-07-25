@@ -1234,6 +1234,136 @@ avdInfo_getVendorInitImagePath( const AvdInfo*  i )
     return _avdInfo_getContentOrSdkFilePath(i, imageName);
 }
 
+static bool
+is_x86ish(const AvdInfo* i)
+{
+    if (strncmp(i->targetAbi, "x86", 3) == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static bool
+is_armish(const AvdInfo* i)
+{
+    if (strncmp(i->targetAbi, "arm", 3) == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+/*
+    arm is pretty tricky: the system image device path
+    changes depending on the number of disks: the last
+    one seems always a003e00, we need to know how many
+    devices it actually has
+*/
+const char* const arm_device_id[] = {
+    "a003e00",
+    "a003c00",
+    "a003a00",
+    "a003800",
+    "a003600",
+};
+
+static
+bool has_sdcard(const AvdInfo* i) {
+    char* path = avdInfo_getSdCardPath(i);
+    if (path) {
+        free(path);
+        return true;
+    }
+    return false;
+}
+
+static
+bool has_vendor(const AvdInfo* i) {
+    char* path = avdInfo_getVendorInitImagePath(i);
+    if (path) {
+        free(path);
+        return true;
+    }
+    path = avdInfo_getVendorImagePath(i);
+    if (path) {
+        free(path);
+        return true;
+    }
+    return false;
+}
+
+static
+bool has_encryption(const AvdInfo* i) {
+    char* path = avdInfo_getEncryptionKeyImagePath(i);
+    if (path) {
+        free(path);
+        return true;
+    }
+    return false;
+}
+
+
+static
+char* get_arm_device_path(const AvdInfo* info, const char* image)
+{
+    const char* device_table[6] = {"", "","" ,"" ,"" , ""};
+    int i = 0;
+    if (has_sdcard(info)) {
+        device_table[i++] = "sdcard";
+    }
+    if (has_vendor(info)) {
+        device_table[i++] = "vendor";
+    }
+    device_table[i++] = "userdata";
+    device_table[i++] = "cache";
+    device_table[i++] = "system";
+    int count = ARRAY_SIZE(device_table);
+    for ( i=0; i < count; ++i) {
+        if (strcmp(image, device_table[i]) ==0) {
+            break;
+        }
+    }
+    if (i == count) {
+        return NULL;
+    }
+    char buf[1024];
+    snprintf(buf, sizeof(buf), "/dev/block/platform/%s.virtio_mmio/by-name/%s",
+            arm_device_id[i], image);
+    return strdup(buf);
+}
+
+char*
+avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
+{
+    if (!has_vendor(i)) {
+        return NULL;
+    }
+
+    if (is_x86ish(i)) {
+        if (has_encryption(i)) {
+            return strdup("/dev/block/pci/pci0000:00/0000:00:07.0/by-name/vendor");
+        } else {
+            return strdup("/dev/block/pci/pci0000:00/0000:00:06.0/by-name/vendor");
+        }
+    } else if (is_armish(i)) {
+        return get_arm_device_path(i, "vendor");
+    }
+    return NULL;
+}
+
+char*
+avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i )
+{
+    if (is_x86ish(i)) {
+        return strdup("/dev/block/pci/pci0000:00/0000:00:03.0/by-name/system");
+    } if (is_armish(i)) {
+        return get_arm_device_path(i, "system");
+    } else {
+        return strdup("/dev/block/vda");
+    }
+}
+
 char*
 avdInfo_getDataImagePath( const AvdInfo*  i )
 {
