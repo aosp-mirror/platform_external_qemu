@@ -204,6 +204,20 @@ char*  avdInfo_getSystemInitImagePath( const AvdInfo*  i );
 char*  avdInfo_getVendorImagePath( const AvdInfo* i );
 char*  avdInfo_getVendorInitImagePath( const AvdInfo*  i );
 
+/*
+   The following two methods are used for device tree support
+   for early boot of O should always use the following method
+   to get the right path, as things may change for P and afterwards
+*/
+
+/* always returns valid string */
+char*  avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i );
+/*
+   returns NULL if not applicable
+*/
+char*  avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i );
+
+
 char*  avdInfo_getDataImagePath( const AvdInfo*  i );
 char*  avdInfo_getDefaultDataImagePath( const AvdInfo*  i );
 
