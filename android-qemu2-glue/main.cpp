@@ -1033,6 +1033,12 @@ extern "C" int main(int argc, char **argv) {
         args[n++] = kTarget.qemuExtraArgs[idx];
     }
 
+    if (hw->hw_arc) {
+        /* We don't use goldfish_fb in cros. just use virtio vga now */
+        args[n++] = "-vga";
+        args[n++] = "virtio";
+    }
+
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
 
     // Setup GPU acceleration. This needs to go along with user interface
