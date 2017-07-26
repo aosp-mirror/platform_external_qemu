@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66fafe19_1a954554",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-07-26T15:00:22Z",
+      "side": 1,
+      "message": "Looks like you have a mixture of spaces and tabs (oh the horror!)",
+      "range": {
+        "startLine": 114,
+        "startChar": 0,
+        "endLine": 114,
+        "endChar": 2
+      },
+      "revId": "6de82441e230c5efc0edb1f4a63b211fb6be5a3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "867817cf_28373524",
+        "filename": "android/scripts/build-qemu-android.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-07-26T15:00:22Z",
+      "side": 1,
+      "message": "Could you use\n    linux-*|darwin-*)\n?",
+      "range": {
+        "startLine": 264,
+        "startChar": 12,
+        "endLine": 264,
+        "endChar": 20
+      },
+      "revId": "6de82441e230c5efc0edb1f4a63b211fb6be5a3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
