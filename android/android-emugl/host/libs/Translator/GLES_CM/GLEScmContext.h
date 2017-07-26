@@ -16,6 +16,8 @@
 #ifndef GLES_CM_CONTEX_H
 #define GLES_CM_CONTEX_H
 
+#include "CoreProfileEngine.h"
+
 #include <GLcommon/GLDispatch.h>
 #include <GLcommon/GLESpointer.h>
 #include <GLcommon/GLESbuffer.h>
@@ -28,21 +30,12 @@
 typedef std::unordered_map<GLfloat,std::vector<int> > PointSizeIndices;
 
 class GlLibrary;
+class CoreProfileEngine;
 
 class GLEScmContext: public GLEScontext
 {
 public:
     virtual void init(EGLiface* eglIface);
-
-    struct DrawTexOESCoreState {
-        GLuint vshader;
-        GLuint fshader;
-        GLuint program;
-        GLuint vbo;
-        GLuint ibo;
-        GLuint vao;
-    };
-    const DrawTexOESCoreState& getDrawTexOESCoreState();
 
     GLEScmContext(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream);
@@ -56,17 +49,54 @@ public:
     virtual const GLESpointer* getPointer(GLenum arrType);
     int  getMaxTexUnits();
 
-    virtual bool glGetIntegerv(GLenum pname, GLint *params);
-    virtual bool glGetBooleanv(GLenum pname, GLboolean *params);
-    virtual bool glGetFloatv(GLenum pname, GLfloat *params);
-    virtual bool glGetFixedv(GLenum pname, GLfixed *params);
-
     virtual void initDefaultFBO(
             GLint width, GLint height, GLint colorFormat, GLint depthstencilFormat, GLint multisamples,
             GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
             GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
             GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
     ~GLEScmContext();
+
+    // Emulated GLES1
+
+    // Errors coming from emulation on core profile
+    GLint getErrorCoreProfile();
+
+    // API
+    virtual bool glGetIntegerv(GLenum pname, GLint *params);
+    virtual bool glGetBooleanv(GLenum pname, GLboolean *params);
+    virtual bool glGetFloatv(GLenum pname, GLfloat *params);
+    virtual bool glGetFixedv(GLenum pname, GLfixed *params);
+
+    void enable(GLenum cap);
+    void disable(GLenum cap);
+
+    void shadeModel(GLenum mode);
+
+    void matrixMode(GLenum mode);
+    void loadIdentity();
+    void pushMatrix();
+    void popMatrix();
+    void multMatrixf(const GLfloat* m);
+
+    void frustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar);
+
+    void texEnvf(GLenum target, GLenum pname, GLfloat param);
+    void texEnvfv(GLenum target, GLenum pname, const GLfloat* params);
+    void enableClientState(GLenum clientState);
+
+    void drawTexOES(float x, float y, float z, float width, float height);
+
+    void rotatef(float angle, float x, float y, float z);
+    void scalef(float x, float y, float z);
+    void translatef(float x, float y, float z);
+
+    void color4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
+    void color4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha);
+
+    void drawArrays(GLenum mode, GLint first, GLsizei count);
+    void drawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices);
+
+    void clientActiveTexture(GLenum texture);
 protected:
 
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
@@ -77,12 +107,14 @@ private:
     void drawPointsData(GLESConversionArrays& arrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw);
     void initExtensionString();
 
+    CoreProfileEngine& core() { return *m_coreProfileEngine; }
+
     GLESpointer*          m_texCoords = nullptr;
     int                   m_pointsIndex = -1;
     unsigned int          m_clientActiveTexture = 0;
 
-    // Core profile drawTex stuff
-    DrawTexOESCoreState   m_drawTexOESCoreState = {};
+    // Core profile stuff
+    CoreProfileEngine*    m_coreProfileEngine;
 };
 
 #endif
