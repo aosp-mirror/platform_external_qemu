@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 #include "EglOsApi.h"
+#include "EglOsDisplay_glx.h"
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
@@ -252,154 +253,163 @@ private:
     GLXContext mContext = nullptr;
 };
 
+} // namespace
+
 // Implementation of EglOS::Display based on GLX.
-class GlxDisplay : public EglOS::Display {
-public:
-    explicit GlxDisplay(X11Display* disp) : mDisplay(disp) {}
+GlxDisplay::GlxDisplay() : mDisplay(XOpenDisplay(0)) {}
 
-    virtual ~GlxDisplay() { XCloseDisplay(mDisplay); }
+GlxDisplay::~GlxDisplay() { XCloseDisplay(mDisplay); }
 
-    virtual void queryConfigs(int renderableType,
-                              EglOS::AddConfigCallback* addConfigFunc,
-                              void* addConfigOpaque) {
-        int n;
-        GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
-        if (frmtList) {
-            for(int i = 0; i < n; i++) {
-                pixelFormatToConfig(
-                        mDisplay,
-                        renderableType,
-                        frmtList[i],
-                        addConfigFunc,
-                        addConfigOpaque);
-            }
-            XFree(frmtList);
+void GlxDisplay::queryConfigs(int renderableType,
+                          EglOS::AddConfigCallback* addConfigFunc,
+                          void* addConfigOpaque) {
+    int n;
+    GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
+    if (frmtList) {
+        for(int i = 0; i < n; i++) {
+            pixelFormatToConfig(
+                    mDisplay,
+                    renderableType,
+                    frmtList[i],
+                    addConfigFunc,
+                    addConfigOpaque);
         }
+        XFree(frmtList);
+    }
+}
+
+bool GlxDisplay::isValidNativeWin(EglOS::Surface* win) {
+    //printf("%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
+    if (!win) {
+        return false;
+    } else {
+        return isValidNativeWin(GlxSurface::drawableFor(win));
+    }
+}
+
+bool GlxDisplay::isValidNativeWin(EGLNativeWindowType win) {
+    //printf("%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
+    Window root;
+    int t;
+    unsigned int u;
+    ErrorHandler handler(mDisplay);
+    if (!XGetGeometry(mDisplay, win, &root, &t, &t, &u, &u, &u, &u)) {
+        fprintf(stderr, "%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
+        if (int err = handler.getLastError()) {
+            fprintf(stderr, "%s: %s %d, err %d\n", __FUNCTION__, __FILE__, __LINE__, err);
+        }
+        return false;
+    }
+    if (int err = handler.getLastError()) {
+        fprintf(stderr, "%s: %s %d, err %d\n", __FUNCTION__, __FILE__, __LINE__, err);
+        return false;
+    }
+    return handler.getLastError() == 0;
+}
+
+bool GlxDisplay::checkWindowPixelFormatMatch(
+        EGLNativeWindowType win,
+        const EglOS::PixelFormat* pixelFormat,
+        unsigned int* width,
+        unsigned int* height) {
+    //printf("%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
+    //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
+    unsigned int depth, configDepth, border;
+    int r, g, b, x, y;
+    GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
+
+    IS_SUCCESS(glXGetFBConfigAttrib(
+            mDisplay, fbconfig, GLX_RED_SIZE, &r));
+    IS_SUCCESS(glXGetFBConfigAttrib(
+            mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
+    IS_SUCCESS(glXGetFBConfigAttrib(
+            mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
+    configDepth = r + g + b;
+    Window root;
+    if (!XGetGeometry(
+            mDisplay, win, &root, &x, &y, width, height, &border, &depth)) {
+        return false;
+    }
+    return depth >= configDepth;
+}
+
+emugl::SmartPtr<EglOS::Context> GlxDisplay::createContext(
+        EGLint profileMask,
+        const EglOS::PixelFormat* pixelFormat,
+        EglOS::Context* sharedContext) {
+    (void)profileMask;
+
+    ErrorHandler handler(mDisplay);
+    GLXContext ctx = glXCreateNewContext(
+            mDisplay,
+            GlxPixelFormat::from(pixelFormat),
+            GLX_RGBA_TYPE,
+            sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
+            true);
+
+    if (handler.getLastError()) {
+        return NULL;
     }
 
-    virtual bool isValidNativeWin(EglOS::Surface* win) {
-        if (!win) {
-            return false;
-        } else {
-            return isValidNativeWin(GlxSurface::drawableFor(win));
-        }
-    }
+    return std::make_shared<GlxContext>(mDisplay, ctx);
+}
 
-    virtual bool isValidNativeWin(EGLNativeWindowType win) {
-        Window root;
-        int t;
-        unsigned int u;
-        ErrorHandler handler(mDisplay);
-        if (!XGetGeometry(mDisplay, win, &root, &t, &t, &u, &u, &u, &u)) {
-            return false;
-        }
-        return handler.getLastError() == 0;
-    }
+bool GlxDisplay::destroyContext(EglOS::Context* context) {
+    glXDestroyContext(mDisplay, GlxContext::contextFor(context));
+    return true;
+}
 
-    virtual bool checkWindowPixelFormatMatch(
-            EGLNativeWindowType win,
-            const EglOS::PixelFormat* pixelFormat,
-            unsigned int* width,
-            unsigned int* height) {
-        //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
-        unsigned int depth, configDepth, border;
-        int r, g, b, x, y;
-        GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
+EglOS::Surface* GlxDisplay::createPbufferSurface(
+        const EglOS::PixelFormat* pixelFormat,
+        const EglOS::PbufferInfo* info) {
+    const int attribs[] = {
+        GLX_PBUFFER_WIDTH, info->width,
+        GLX_PBUFFER_HEIGHT, info->height,
+        GLX_LARGEST_PBUFFER, info->largest,
+        None
+    };
+    GLXPbuffer pb = glXCreatePbuffer(
+            mDisplay,
+            GlxPixelFormat::from(pixelFormat),
+            attribs);
+    return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
+}
 
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_RED_SIZE, &r));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
-        IS_SUCCESS(glXGetFBConfigAttrib(
-                mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
-        configDepth = r + g + b;
-        Window root;
-        if (!XGetGeometry(
-                mDisplay, win, &root, &x, &y, width, height, &border, &depth)) {
-            return false;
-        }
-        return depth >= configDepth;
-    }
-
-    virtual emugl::SmartPtr<EglOS::Context> createContext(
-            EGLint profileMask,
-            const EglOS::PixelFormat* pixelFormat,
-            EglOS::Context* sharedContext) {
-        (void)profileMask;
-
-        ErrorHandler handler(mDisplay);
-        GLXContext ctx = glXCreateNewContext(
-                mDisplay,
-                GlxPixelFormat::from(pixelFormat),
-                GLX_RGBA_TYPE,
-                sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
-                true);
-
-        if (handler.getLastError()) {
-            return NULL;
-        }
-
-        return std::make_shared<GlxContext>(mDisplay, ctx);
-    }
-
-    virtual bool destroyContext(EglOS::Context* context) {
-        glXDestroyContext(mDisplay, GlxContext::contextFor(context));
+bool GlxDisplay::releasePbuffer(EglOS::Surface* pb) {
+    if (!pb) {
+        return false;
+    } else {
+        glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
         return true;
     }
+}
 
-    virtual EglOS::Surface* createPbufferSurface(
-            const EglOS::PixelFormat* pixelFormat,
-            const EglOS::PbufferInfo* info) {
-        const int attribs[] = {
-            GLX_PBUFFER_WIDTH, info->width,
-            GLX_PBUFFER_HEIGHT, info->height,
-            GLX_LARGEST_PBUFFER, info->largest,
-            None
-        };
-        GLXPbuffer pb = glXCreatePbuffer(
+bool GlxDisplay::makeCurrent(EglOS::Surface* read,
+                         EglOS::Surface* draw,
+                         EglOS::Context* context) {
+    ErrorHandler handler(mDisplay);
+    bool retval = false;
+    if (!context && !read && !draw) {
+        // unbind
+        retval = glXMakeContextCurrent(mDisplay, 0, 0, NULL);
+    }
+    else if (context && read && draw) {
+        retval = glXMakeContextCurrent(
                 mDisplay,
-                GlxPixelFormat::from(pixelFormat),
-                attribs);
-        return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
+                GlxSurface::drawableFor(draw),
+                GlxSurface::drawableFor(read),
+                GlxContext::contextFor(context));
     }
+    return (handler.getLastError() == 0) && retval;
+}
 
-    virtual bool releasePbuffer(EglOS::Surface* pb) {
-        if (!pb) {
-            return false;
-        } else {
-            glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
-            return true;
-        }
+void GlxDisplay::swapBuffers(EglOS::Surface* srfc) {
+    if (srfc) {
+        glXSwapBuffers(mDisplay, GlxSurface::drawableFor(srfc));
     }
+}
 
-    virtual bool makeCurrent(EglOS::Surface* read,
-                             EglOS::Surface* draw,
-                             EglOS::Context* context) {
-        ErrorHandler handler(mDisplay);
-        bool retval = false;
-        if (!context && !read && !draw) {
-            // unbind
-            retval = glXMakeContextCurrent(mDisplay, 0, 0, NULL);
-        }
-        else if (context && read && draw) {
-            retval = glXMakeContextCurrent(
-                    mDisplay,
-                    GlxSurface::drawableFor(draw),
-                    GlxSurface::drawableFor(read),
-                    GlxContext::contextFor(context));
-        }
-        return (handler.getLastError() == 0) && retval;
-    }
-
-    virtual void swapBuffers(EglOS::Surface* srfc) {
-        if (srfc) {
-            glXSwapBuffers(mDisplay, GlxSurface::drawableFor(srfc));
-        }
-    }
-
-private:
-    X11Display* mDisplay = nullptr;
-};
+namespace {
 
 class GlxLibrary : public GlLibrary {
 public:
@@ -453,7 +463,7 @@ private:
 class GlxEngine : public EglOS::Engine {
 public:
     virtual EglOS::Display* getDefaultDisplay() {
-        return new GlxDisplay(XOpenDisplay(0));
+        return new GlxDisplay();
     }
 
     virtual GlLibrary* getGlLibrary() {
@@ -477,7 +487,7 @@ EglOS::Engine* EglOS::Engine::getHostInstance() {
     return sHostEngine.ptr();
 }
 
-EglOS::Engine* EglOS::getEgl2EglHostInstance() {
+/*EglOS::Engine* EglOS::getEgl2EglHostInstance() {
     fprintf(stderr, "ERROR: EGL to EGL is not supported on linux.\n");
     return nullptr;
-}
+}*/

@@ -16,6 +16,7 @@
 
 #include "EglOsApi.h"
 
+#include "EglOsDisplay_glx.h"
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 #include "emugl/common/lazy_instance.h"
@@ -25,7 +26,7 @@
 #include <GLES2/gl2.h>
 #include <memory>
 
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #define D(...) fprintf(stderr, __VA_ARGS__);
 #define CHECK_EGL_ERR                                                 \
@@ -39,6 +40,18 @@
 #define D(...) ((void)0);
 #define CHECK_EGL_ERR ((void)0);
 #endif
+
+#ifdef __WIN32
+
+static const char* kEGLLibName = "libEGL.dll";
+static const char* kGLES2LibName = "libGLESv2.dll";
+
+#elif defined(__linux__)
+
+#include <X11/Xlib.h>
+static const char* kEGLLibName = "libEGL.so";
+static const char* kGLES2LibName = "libGLESv2.so";
+#endif // __linux__
 
 // List of EGL functions of interest to probe with GetProcAddress()
 #define LIST_EGL_FUNCTIONS(X)                                                  \
@@ -66,9 +79,6 @@
     X(EGLSurface, eglCreateWindowSurface,                                      \
       (EGLDisplay display, EGLConfig config,                                   \
        EGLNativeWindowType native_window, EGLint const* attrib_list))
-
-static const char* kEGLLibName = "libEGL.dll";
-static const char* kGLES2LibName = "libGLESv2.dll";
 
 namespace {
 using namespace EglOS;
@@ -178,9 +188,10 @@ private:
     EGLNativeWindowType mWin;
 };
 
-class EglOsEglDisplay : public EglOS::Display {
+class EglOsEglDisplay : public GlxDisplay {
 public:
     EglOsEglDisplay() {
+        printf("creating egl display\n");
         mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
         mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
         CHECK_EGL_ERR
@@ -204,13 +215,30 @@ public:
             return false;
         EglOsEglSurface* surface = (EglOsEglSurface*)win;
         return surface->type() == EglOsEglSurface::WINDOW &&
-               isValidNativeWin(surface->getWin());
+               GlxDisplay::isValidNativeWin(surface->getWin());
     }
-    bool isValidNativeWin(EGLNativeWindowType win) { return IsWindow(win); }
+    /*
+    bool isValidNativeWin(EGLNativeWindowType win) {
+#ifdef _WIN32
+        return IsWindow(win);
+#elif defined(__linux__)
+        Window root;
+        int t;
+        unsigned int u;
+        ErrorHandler handler(mDisplay);
+        if (!XGetGeometry(mDisplay, win, &root, &t, &t, &u, &u, &u, &u)) {
+            return false;
+        }
+        return handler.getLastError() == 0;
+#endif // __linux__
+        // Mac not supported yet
+        
+    }*/
     bool checkWindowPixelFormatMatch(EGLNativeWindowType win,
                                      const PixelFormat* pixelFormat,
                                      unsigned int* width,
                                      unsigned int* height) {
+#ifdef _WIN32
         RECT r;
         if (!GetClientRect(win, &r)) {
             return false;
@@ -218,6 +246,15 @@ public:
         *width = r.right - r.left;
         *height = r.bottom - r.top;
         return true;
+#elif defined(__linux__)
+        //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
+        unsigned int depth, configDepth, border;
+        int x, y;
+        Window root;
+        return XGetGeometry(
+                GlxDisplay::mDisplay, win, &root, &x, &y, width, height, &border, &depth);
+#endif // __linux__
+        // Mac not supported yet
     }
 
 private:

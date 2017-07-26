@@ -1176,6 +1176,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
                               read ? read->getEGLSurface() : EGL_NO_SURFACE,
                               ctx ? ctx->getEGLContext() : EGL_NO_CONTEXT)) {
         ERR("eglMakeCurrent failed\n");
+        fprintf(stderr, "%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
         return false;
     }
 
@@ -1317,8 +1318,10 @@ bool FrameBuffer::bind_locked() {
         prevDrawSurf != m_pbufSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_pbufSurface, m_pbufSurface,
                                   m_pbufContext)) {
-            if (!m_shuttingDown)
+            if (!m_shuttingDown) {
                 ERR("eglMakeCurrent failed\n");
+                fprintf(stderr, "%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
+            }
             return false;
         }
     } else {
@@ -1340,6 +1343,7 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
+            fprintf(stderr, "%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
             ERR("eglMakeCurrent failed\n");
             return false;
         }
