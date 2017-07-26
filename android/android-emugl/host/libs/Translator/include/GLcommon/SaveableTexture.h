@@ -53,12 +53,12 @@ public:
                              Buffer* buffer);
     // loader_t is supposed to setup a stream and trigger loadFromStream.
     typedef std::function<void(SaveableTexture*)> loader_t;
-    using creator_t = SaveableTexture* (*)(GlobalNameSpace*, loader_t);
+    using creator_t = SaveableTexture* (*)(GlobalNameSpace*, loader_t&&);
     using restorer_t = void (*)(SaveableTexture*);
 
     SaveableTexture() = delete;
     SaveableTexture(SaveableTexture&&) = delete;
-    SaveableTexture(GlobalNameSpace* globalNameSpace, loader_t loader);
+    SaveableTexture(GlobalNameSpace* globalNameSpace, loader_t&& loader);
     SaveableTexture& operator=(SaveableTexture&&) = delete;
 
     SaveableTexture(const EglImage& eglImage);
@@ -100,7 +100,7 @@ private:
     GLint mTexMinFilter;
     GLint mTexWrapS;
     GLint mTexWrapT;
-    loader_t m_loader = nullptr;
+    loader_t m_loader;
     GlobalNameSpace* m_globalNamespace = nullptr;
 };
 

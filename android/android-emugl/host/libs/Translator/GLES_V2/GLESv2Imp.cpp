@@ -59,7 +59,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
                         android::base::SmallVector<unsigned char>* buffer);
 static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
-                                      SaveableTexture::loader_t loader);
+                                      SaveableTexture::loader_t&& loader);
 static void restoreTexture(SaveableTexture* texture);
 }
 
@@ -168,8 +168,8 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
 }
 
 static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
-                                      SaveableTexture::loader_t loader) {
-    return new SaveableTexture(globalNameSpace, loader);
+                                      SaveableTexture::loader_t&& loader) {
+    return new SaveableTexture(globalNameSpace, std::move(loader));
 }
 
 static void restoreTexture(SaveableTexture* texture) {

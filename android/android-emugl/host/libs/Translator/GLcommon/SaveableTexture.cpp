@@ -316,8 +316,8 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_globalName(texture.globalName) {}
 
 SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
-                                 loader_t loader)
-    : m_loader(loader), m_globalNamespace(globalNameSpace) {
+                                 loader_t&& loader)
+    : m_loader(std::move(loader)), m_globalNamespace(globalNameSpace) {
     mNeedRestore = true;
 }
 

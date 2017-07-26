@@ -29,11 +29,11 @@ class TextureLoader {
 
 public:
     TextureLoader(android::base::StdioStream&& stream);
-    ~TextureLoader() = default;
+
     using loader_t = std::function<void(android::base::Stream*)>;
     bool start();
     // Move file position to texId and trigger loader
-    void loadTexture(uint32_t texId, loader_t loader);
+    void loadTexture(uint32_t texId, const loader_t& loader);
 
     bool hasError() const { return mHasError; }
 

@@ -33,7 +33,7 @@ bool TextureLoader::start() {
     return true;
 }
 
-void TextureLoader::loadTexture(uint32_t texId, loader_t loader) {
+void TextureLoader::loadTexture(uint32_t texId, const loader_t& loader) {
     android::base::AutoLock scopedLock(mLock);
     assert(mIndex.count(texId));
     fseek(mStream.get(), mIndex[texId], SEEK_SET);
