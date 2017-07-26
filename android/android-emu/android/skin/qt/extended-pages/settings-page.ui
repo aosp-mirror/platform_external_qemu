@@ -26,7 +26,7 @@
     <cursorShape>ArrowCursor</cursorShape>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>2</number>
    </property>
    <widget class="QWidget" name="tab_1">
     <attribute name="title">
@@ -1029,19 +1029,24 @@
       <bool>false</bool>
      </property>
      <property name="currentText">
-      <string>OpenGL ES 2.0 (default)</string>
+      <string>Autoselect</string>
      </property>
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
      </property>
      <item>
       <property name="text">
-       <string>OpenGL ES 2.0 (default)</string>
+       <string>Autoselect</string>
       </property>
      </item>
      <item>
       <property name="text">
        <string>Renderer maximum (up to OpenGL ES 3.1)</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Compatibility (OpenGL ES 1.1/2.0)</string>
       </property>
      </item>
     </widget>
