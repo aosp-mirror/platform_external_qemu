@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "42505e6f_1bff1e20",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 3
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T16:26:12Z",
+      "side": 1,
+      "message": "making sure you\u0027ve changed the script and not edited this file directly",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 60
+      },
+      "revId": "6de82441e230c5efc0edb1f4a63b211fb6be5a3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "66fafe19_1a954554",
         "filename": "android-qemu2-glue/build/Makefile.qemu2.mk",
         "patchSetId": 3
