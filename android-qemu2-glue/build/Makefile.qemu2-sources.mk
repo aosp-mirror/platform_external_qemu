@@ -77,7 +77,6 @@ QEMU2_COMMON_SOURCES := \
     crypto/block.c \
     crypto/cipher.c \
     crypto/desrfb.c \
-    crypto/hash-glib.c \
     crypto/hash.c \
     crypto/init.c \
     crypto/ivgen-essiv.c \
@@ -85,7 +84,6 @@ QEMU2_COMMON_SOURCES := \
     crypto/ivgen-plain64.c \
     crypto/ivgen.c \
     crypto/pbkdf.c \
-    crypto/random-platform.c \
     crypto/secret.c \
     crypto/tlscreds.c \
     crypto/tlscredsanon.c \
@@ -343,11 +341,15 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     audio/coreaudio.c \
     backends/rng-random.c \
     block/raw-posix.c \
+    crypto/hash-gcrypt.c \
+    crypto/pbkdf-gcrypt.c \
+    crypto/random-gcrypt.c \
     hw/usb/dev-mtp.c \
     net/tap-bsd.c \
     net/tap.c \
     net/vhost-user.c \
     os-posix.c \
+    slirp/ip_icmp_ping.c \
 
 QEMU2_COMMON_SOURCES_linux-x86_64 := \
     aio-posix.c \
@@ -356,16 +358,20 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     backends/hostmem-file.c \
     backends/rng-random.c \
     block/raw-posix.c \
+    crypto/hash-glib.c \
+    crypto/random-platform.c \
     fsdev/qemu-fsdev-dummy.c \
     fsdev/qemu-fsdev-opts.c \
     hw/input/virtio-input-host.c \
     hw/tpm/tpm_passthrough.c \
     hw/tpm/tpm_util.c \
     hw/usb/dev-mtp.c \
+    net/l2tpv3.c \
     net/tap-linux.c \
     net/tap.c \
     net/vhost-user.c \
     os-posix.c \
+    slirp/ip_icmp_ping.c \
     ui/input-linux.c \
 
 QEMU2_COMMON_SOURCES_windows-x86 := \
@@ -375,6 +381,8 @@ QEMU2_COMMON_SOURCES_windows-x86 := \
     audio/winaudio.c \
     block/raw-win32.c \
     block/win32-aio.c \
+    crypto/hash-glib.c \
+    crypto/random-platform.c \
     net/tap-win32.c \
     os-win32.c \
 
@@ -385,6 +393,8 @@ QEMU2_COMMON_SOURCES_windows-x86_64 := \
     audio/winaudio.c \
     block/raw-win32.c \
     block/win32-aio.c \
+    crypto/hash-glib.c \
+    crypto/random-platform.c \
     net/tap-win32.c \
     os-win32.c \
 
