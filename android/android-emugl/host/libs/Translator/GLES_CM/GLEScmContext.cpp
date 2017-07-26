@@ -35,72 +35,12 @@ void GLEScmContext::init(GlLibrary* glLib) {
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      "OpenGL ES-CM 1.1");
+
+        if (isCoreProfile()) {
+            m_coreProfileEngine = new CoreProfileEngine(this);
+        }
     }
     m_initialized = true;
-}
-
-static const char kDrawTexOESCore_vshader[] = R"(#version 330 core
-layout(location = 0) in vec2 pos;
-layout(location = 1) in vec2 texcoord;
-out vec2 texcoord_varying;
-void main() {
-    gl_Position = vec4(pos.x, pos.y, 0.5, 1.0);
-    texcoord_varying = texcoord;
-}
-)";
-
-static const char kDrawTexOESCore_fshader[] = R"(#version 330 core
-uniform sampler2D tex_sampler;
-in vec2 texcoord_varying;
-out vec4 frag_color;
-void main() {
-    frag_color = texture(tex_sampler, texcoord_varying);
-}
-)";
-
-static const uint32_t sDrawTexIbo[] = {
-    0, 1, 2, 0, 2, 3,
-};
-
-const GLEScmContext::DrawTexOESCoreState& GLEScmContext::getDrawTexOESCoreState() {
-    if (!m_drawTexOESCoreState.program) {
-        m_drawTexOESCoreState.vshader =
-            compileAndValidateCoreShader(GL_VERTEX_SHADER, kDrawTexOESCore_vshader);
-        m_drawTexOESCoreState.fshader =
-            compileAndValidateCoreShader(GL_FRAGMENT_SHADER, kDrawTexOESCore_fshader);
-        m_drawTexOESCoreState.program =
-            linkAndValidateProgram(m_drawTexOESCoreState.vshader,
-                                   m_drawTexOESCoreState.fshader);
-    }
-    if (!m_drawTexOESCoreState.vao) {
-        GLDispatch& gl = dispatcher();
-
-        gl.glGenVertexArrays(1, &m_drawTexOESCoreState.vao);
-        gl.glBindVertexArray(m_drawTexOESCoreState.vao);
-
-        // Initialize VBO
-        // Save IBO, attrib arrays/pointers to VAO
-        gl.glGenBuffers(1, &m_drawTexOESCoreState.ibo);
-        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_drawTexOESCoreState.ibo);
-        gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(sDrawTexIbo), sDrawTexIbo, GL_STATIC_DRAW);
-
-        gl.glGenBuffers(1, &m_drawTexOESCoreState.vbo);
-        gl.glBindBuffer(GL_ARRAY_BUFFER, m_drawTexOESCoreState.vbo);
-
-        gl.glEnableVertexAttribArray(0); // pos
-        gl.glEnableVertexAttribArray(1); // texcoord
-
-        gl.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (GLvoid*)0);
-        gl.glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float),
-                                 (GLvoid*)(uintptr_t)(2 * sizeof(float)));
-
-        gl.glBindVertexArray(0);
-
-        gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
-        gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    }
-
-    return m_drawTexOESCoreState;
 }
 
 void GLEScmContext::initDefaultFBO(
@@ -512,4 +452,159 @@ bool GLEScmContext::glGetIntegerv(GLenum pname, GLint *params)
     }
 
     return true;
+}
+
+GLint GLEScmContext::getErrorCoreProfile() {
+    return core().getAndClearLastError();
+}
+
+void GLEScmContext::matrixMode(GLenum mode) {
+    if (isCoreProfile()) {
+        core().matrixMode(mode);
+    } else {
+        dispatcher().glMatrixMode(mode);
+    }
+}
+
+void GLEScmContext::loadIdentity() {
+    if (isCoreProfile()) {
+        core().loadIdentity();
+    } else {
+        dispatcher().glLoadIdentity();
+    }
+}
+
+void GLEScmContext::pushMatrix() {
+    if (isCoreProfile()) {
+        core().pushMatrix();
+    } else {
+        dispatcher().glPushMatrix();
+    }
+}
+
+void GLEScmContext::popMatrix() {
+    if (isCoreProfile()) {
+        core().popMatrix();
+    } else {
+        dispatcher().glPopMatrix();
+    }
+}
+
+void GLEScmContext::multMatrixf(const GLfloat* m) {
+    if (isCoreProfile()) {
+        core().multMatrixf(m);
+    } else {
+        dispatcher().glMultMatrixf(m);
+    }
+}
+
+void GLEScmContext::frustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
+    if (isCoreProfile()) {
+        core().frustumf(left, right, bottom, top, zNear,zFar);
+    } else {
+        dispatcher().glFrustum(left,right,bottom,top,zNear,zFar);
+    }
+}
+
+void GLEScmContext::texEnvf(GLenum target, GLenum pname, GLfloat param) {
+    if (isCoreProfile()) {
+        core().texEnvf(target, pname, param);
+    } else {
+        dispatcher().glTexEnvf(target, pname, param);
+    }
+}
+
+void GLEScmContext::texEnvfv(GLenum target, GLenum pname, const GLfloat* params) {
+
+    if (isCoreProfile()) {
+        core().texEnvfv(target, pname, params);
+    } else {
+        dispatcher().glTexEnvfv(target, pname, params);
+    }
+
+}
+
+void GLEScmContext::enableClientState(GLenum clientState) {
+    if (isCoreProfile()) {
+        core().enableClientState(clientState);
+    } else {
+        dispatcher().glEnableClientState(clientState);
+    }
+}
+
+void GLEScmContext::drawTexOES(float x, float y, float z, float width, float height) {
+    core().drawTexOES(x, y, z, width, height);
+}
+
+void GLEScmContext::rotatef(float angle, float x, float y, float z) {
+    if (isCoreProfile()) {
+        core().rotatef(angle, x, y, z);
+    } else {
+        dispatcher().glRotatef(angle, x, y, z);
+    }
+}
+
+void GLEScmContext::color4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
+    if (isCoreProfile()) {
+        core().color4f(red,green,blue,alpha);
+    } else{
+        dispatcher().glColor4f(red,green,blue,alpha);
+    }
+}
+
+void GLEScmContext::color4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha) {
+    if (isCoreProfile()) {
+        core().color4ub(red,green,blue,alpha);
+    } else{
+        dispatcher().glColor4ub(red,green,blue,alpha);
+    }
+}
+
+void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
+    drawValidate();
+
+    if (!isArrEnabled(GL_VERTEX_ARRAY)) return;
+
+    if (isCoreProfile()) {
+        // GLESConversionArrays tmpArrs; TODO
+        ArraysMap::iterator it;
+        m_pointsIndex = -1;
+
+        // going over all clients arrays Pointers
+        for (it = m_currVaoState.begin();
+             it != m_currVaoState.end(); ++it) {
+            GLenum array_id = (*it).first;
+            GLESpointer* p  = (*it).second;
+            if (array_id == GL_VERTEX_ARRAY ||
+                array_id == GL_NORMAL_ARRAY ||
+                array_id == GL_COLOR_ARRAY ||
+                array_id == GL_POINT_SIZE_ARRAY_OES ||
+                array_id == GL_TEXTURE_COORD_ARRAY) {
+                core().setupArrayForDraw(array_id, p, first, count);
+            }
+        }
+
+        GLenum activeTexture = m_clientActiveTexture + GL_TEXTURE0;
+        setClientActiveTexture(activeTexture);
+        core().clientActiveTexture(activeTexture);
+        core().drawArrays(mode, first, count);
+    } else {
+        GLESConversionArrays tmpArrs;
+
+        setupArraysPointers(tmpArrs,first,count,0,NULL,true);
+
+        if (mode == GL_POINTS && isArrEnabled(GL_POINT_SIZE_ARRAY_OES)){
+            drawPointsArrs(tmpArrs,first,count);
+        } else {
+            dispatcher().glDrawArrays(mode,first,count);
+        }
+    }
+}
+
+void GLEScmContext::clientActiveTexture(GLenum texture) {
+    if (isCoreProfile()) {
+        core().clientActiveTexture(texture);
+    } else {
+        dispatcher().glClientActiveTexture(texture);
+    }
 }
