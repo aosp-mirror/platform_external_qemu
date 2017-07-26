@@ -52,6 +52,7 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
 
     if (version == GLESApi_CM && shouldEmulateGLES1) {
         clientVersion = GLESApi_2;
+        majorVersion = 2;
     } else if (version == GLESApi_3_0) {
         majorVersion = 3;
         minorVersion = 0;

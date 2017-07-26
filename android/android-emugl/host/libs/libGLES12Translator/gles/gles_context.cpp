@@ -427,7 +427,7 @@ void GlesContext::DrawFullscreenQuad(GLuint texture, bool flip_v) {
 }
 
 void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
-            GLenum type, const GLvoid* indices) {
+            GLenum type, const GLvoid* indices, bool bindVtx) {
   LOG_ALWAYS_FATAL_IF(draw != kDrawArrays && draw != kDrawElements);
   if (!CanDraw()) {
     return;
@@ -441,19 +441,25 @@ void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
                                    program_uses_external_as_2d);
 
   if (draw == kDrawArrays) {
-    pointer_context_.PrepareBuffersForDrawArrays(first, count);
+    if (bindVtx) {
+        pointer_context_.PrepareBuffersForDrawArrays(first, count);
+    }
     PASS_THROUGH(this, DrawArrays, mode, first, count);
   } else {
-    indices = pointer_context_.PrepareBuffersForDrawElements(count, type,
-                                                             indices);
+    if (bindVtx) {
+        indices = pointer_context_.PrepareBuffersForDrawElements(count, type,
+                                                                 indices);
+    }
     PASS_THROUGH(this, DrawElements, mode, count, type, indices);
   }
 
   // Restore the buffer bindings as the pointer context may have changed them.
-  PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
-               share_group_->GetBufferGlobalName(array_buffer_binding_));
-  PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER,
-               share_group_->GetBufferGlobalName(element_buffer_binding_));
+  if (bindVtx) {
+    PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
+                 share_group_->GetBufferGlobalName(array_buffer_binding_));
+    PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER,
+                 share_group_->GetBufferGlobalName(element_buffer_binding_));
+  }
   texture_context_.RestoreTextures();
   ClearProgramObject();
 }
@@ -628,7 +634,7 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
 
     // DrawTex() needs texture environments etc, so we use GLES1 emulation to
     // avoid unnecessary complexity.
-    Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0);
+    Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0, false);
   }
 
   // Restore enabled_set_

@@ -338,7 +338,10 @@ ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
 
 void GLESv2Context::setAttribValue(int idx, unsigned int count,
         const GLfloat* val) {
-    m_currVaoState[idx]->setValue(count, val);
+    auto vertexAttrib = m_currVaoState.find(idx);
+    if (vertexAttrib != m_currVaoState.end()) {
+        vertexAttrib->second->setValue(count, val);
+    }
 }
 
 void GLESv2Context::setAttribute0value(float x, float y, float z, float w)
@@ -556,15 +559,24 @@ void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
 }
 
 void GLESv2Context::setVertexAttribDivisor(GLuint bindingindex, GLuint divisor) {
+    if (bindingindex >= m_currVaoState.bufferBindings().size()) {
+        return;
+    }
     m_currVaoState.bufferBindings()[bindingindex].divisor = divisor;
 }
 
 void GLESv2Context::setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex) {
-    m_currVaoState[attribindex]->setBindingIndex(bindingindex);
+    auto vertexAttrib = m_currVaoState.find(attribindex);
+    if (vertexAttrib != m_currVaoState.end()) {
+        vertexAttrib->second->setBindingIndex(bindingindex);
+    }
 }
 
 void GLESv2Context::setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt) {
-    m_currVaoState[attribindex]->setFormat(size, type, normalized == GL_TRUE ? true : false, reloffset, isInt);
+    auto vertexAttrib = m_currVaoState.find(attribindex);
+    if (vertexAttrib != m_currVaoState.end()) {
+        vertexAttrib->second->setFormat(size, type, normalized == GL_TRUE, reloffset, isInt);
+    }
 }
 
 void GLESv2Context::setBindSampler(GLuint unit, GLuint sampler) {
