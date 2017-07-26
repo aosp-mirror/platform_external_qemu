@@ -47,6 +47,7 @@ private:
     Framebuffer mFBHeight;
     GLuint mVertexBuffer;
     GLenum mTextureDataType;
+    GLenum mTextureFilteringMode = GL_LINEAR;
 };
 
 #endif

@@ -50,3 +50,14 @@ void emugl::setRenderer(SelectedRenderer renderer) {
 SelectedRenderer emugl::getRenderer() {
     return s_renderer;
 }
+
+bool emugl::hasExtension(const char* extensionsStr, const char* wantedExtension) {
+    const char* match = strstr(extensionsStr, wantedExtension);
+    size_t wantedTerminatorOffset = strlen(wantedExtension);
+    if (match &&
+        (match[wantedTerminatorOffset] == ' ' ||
+         match[wantedTerminatorOffset] == '\0')) {
+        return true;
+    }
+    return false;
+}

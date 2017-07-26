@@ -20,6 +20,8 @@
 #include "FrameBuffer.h"
 #include "android/utils/debug.h"
 
+#include "emugl/common/misc.h"
+
 #include "GLES2/gl2ext.h"
 
 #include <stdio.h>
@@ -199,11 +201,37 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
         mFactor(1),
         mFBWidth({0,}),
         mFBHeight({0,}),
-        // Instead of using a float texture, make it unsigned byte.
-        // That's most likely the input/output in the end anyway, (TODO) until
-        // HDR is common on both guest and host, and we'll cross that bridge
-        // when we get there.
+        // Use unsigned byte as the default since it has the most support
+        // and is the input/output format in the end
+        // (TODO) until HDR is common on both guest and host, and we'll
+        // cross that bridge when we get there.
         mTextureDataType(GL_UNSIGNED_BYTE) {
+
+    // Fix color banding by trying to use a texture type with a high precision.
+    const char* exts = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
+
+    bool hasColorBufferFloat =
+        emugl::getRenderer() == SELECTED_RENDERER_HOST ||
+        emugl::hasExtension(exts, "GL_EXT_color_buffer_float");
+    bool hasColorBufferHalfFloat =
+        emugl::hasExtension(exts, "GL_EXT_color_buffer_half_float");
+    bool hasTextureFloat =
+        emugl::hasExtension(exts, "GL_OES_texture_float");
+    bool hasTextureHalfFloat =
+        emugl::hasExtension(exts, "GL_OES_texture_half_float");
+    bool hasTextureFloatLinear =
+        emugl::hasExtension(exts, "GL_OES_texture_float_linear");
+
+    if (hasColorBufferFloat && hasTextureFloat) {
+        mTextureDataType = GL_FLOAT;
+    } else if (hasColorBufferHalfFloat && hasTextureHalfFloat) {
+        mTextureDataType = GL_HALF_FLOAT_OES;
+    }
+
+    if (hasTextureFloat || hasTextureHalfFloat) {
+        mTextureFilteringMode =
+            hasTextureFloatLinear ? GL_LINEAR : GL_NEAREST;
+    }
 
     s_gles2.glGenTextures(1, &mFBWidth.texture);
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
@@ -214,8 +242,8 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
 
     s_gles2.glGenTextures(1, &mFBHeight.texture);
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBHeight.texture);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mTextureFilteringMode);
+    s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mTextureFilteringMode);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     s_gles2.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 

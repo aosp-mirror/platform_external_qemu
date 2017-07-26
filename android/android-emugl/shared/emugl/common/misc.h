@@ -31,5 +31,9 @@ namespace emugl {
     void setRenderer(SelectedRenderer renderer);
     SelectedRenderer getRenderer();
 
+    // Extension string query
+    bool hasExtension(const char* extensionsStr,
+                      const char* wantedExtension);
+
     using Profiler = android::base::Profiler;
 }
