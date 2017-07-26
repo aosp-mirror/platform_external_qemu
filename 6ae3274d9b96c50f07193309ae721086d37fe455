@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1bf39e64_5479b1ac",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T18:49:38Z",
+      "side": 1,
+      "message": "I believe it looked really ugly with bytes here",
+      "range": {
+        "startLine": 202,
+        "startChar": 0,
+        "endLine": 206,
+        "endChar": 44
+      },
+      "revId": "6ae3274d9b96c50f07193309ae721086d37fe455",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
