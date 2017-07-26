@@ -414,6 +414,10 @@ public:
     bool isCoreProfile() const { return m_coreProfile; }
     void setCoreProfile(bool core) { m_coreProfile = core; }
 
+    // Utility functions for emulation
+    static GLuint compileAndValidateCoreShader(GLenum shaderType, const char* src);
+    static GLuint linkAndValidateProgram(GLuint vshader, GLuint fshader);
+
 protected:
     void initDefaultFboImpl(
         GLint width, GLint height,
@@ -555,10 +559,6 @@ protected:
     GLuint m_textureEmulationVAO = 0;
     GLuint m_textureEmulationVBO = 0;
     GLuint m_textureEmulationSamplerLoc = 0;
-
-    // Utility functions for emulation
-    GLuint compileAndValidateCoreShader(GLenum shaderType, const char* src);
-    GLuint linkAndValidateProgram(GLuint vshader, GLuint fshader);
 
 private:
 
