@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0cdcaaa3_ea8863d2",
+        "filename": "hw/i386/acpi-build.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1269,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2017-07-26T11:15:26Z",
+      "side": 1,
+      "message": "We need to allocate more space if /vendor exists. I can fix it (without testing).",
+      "range": {
+        "startLine": 1269,
+        "startChar": 29,
+        "endLine": 1269,
+        "endChar": 30
+      },
+      "revId": "ebfe073a0d3ddc70110cfca68def591de5e14b0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
