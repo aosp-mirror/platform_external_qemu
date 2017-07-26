@@ -12,8 +12,15 @@
 #include "android/emulation/ParameterList.h"
 
 #include "android/base/misc/StringUtils.h"
+#include "android/base/system/Win32Utils.h"
 
 namespace android {
+
+ParameterList::ParameterList(int argc, char** argv)
+    : mParams(argv, argv + argc) {}
+
+ParameterList::ParameterList(std::initializer_list<std::string> lst)
+    : mParams(lst) {}
 
 size_t ParameterList::size() const {
     return mParams.size();
@@ -29,15 +36,24 @@ char** ParameterList::array() const {
     return &mArray[0];
 }
 
+// Properly escapes individual parameters depending on the platform
+inline static std::string quoteCommandLine(const std::string& line) {
+#ifdef _WIN32
+  return base::Win32Utils::quoteCommandLine(line);
+#else
+  return line.find(' ') == std::string::npos ? line : '\'' + line + '\'';
+#endif
+}
+
 std::string ParameterList::toString() const {
-    std::string result;
-    for (size_t n = 0; n < mParams.size(); ++n) {
-        if (n > 0) {
-            result += ' ';
-        }
-        result += mParams[n];
+  std::string result;
+  for (size_t n = 0; n < mParams.size(); ++n) {
+    if (n > 0) {
+      result += ' ';
     }
-    return result;
+    result += quoteCommandLine(mParams[n]);
+  }
+  return result;
 }
 
 char* ParameterList::toCStringCopy() const {
@@ -46,6 +62,10 @@ char* ParameterList::toCStringCopy() const {
 
 void ParameterList::add(const std::string& param) {
     mParams.push_back(param);
+}
+
+void ParameterList::add(const ParameterList& other) {
+    mParams.insert(mParams.end(), other.mParams.begin(), other.mParams.end());
 }
 
 void ParameterList::add(std::string&& param) {
