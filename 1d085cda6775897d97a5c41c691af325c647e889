@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0294f5f3_e0435f7e",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/EGLDispatch.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T18:22:21Z",
+      "side": 1,
+      "message": "I believe this duplicates the efforts from OpenGLDispatchLoader.h/cpp - it\u0027s already doing this one time initialization thing",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 44
+      },
+      "revId": "1d085cda6775897d97a5c41c691af325c647e889",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03f89d76_4ca1cf97",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T18:22:21Z",
+      "side": 1,
+      "message": "use LazyLoadedEGLDispatch here instead",
+      "range": {
+        "startLine": 119,
+        "startChar": 4,
+        "endLine": 119,
+        "endChar": 24
+      },
+      "revId": "1d085cda6775897d97a5c41c691af325c647e889",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1b08758b_cf9433b1",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/GLESv2Dispatch.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T18:22:21Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 24
+      },
+      "revId": "1d085cda6775897d97a5c41c691af325c647e889",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
