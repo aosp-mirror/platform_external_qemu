@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e4476f22_277931e0",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "Will fix, ClangFormat moved things around.",
+      "parentUuid": "b5101765_edd2a114",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 20
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a1e4848_8d771100",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 2
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "32378a70_9bd56e6b",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "We had some misunderstanding, will leave as is.",
+      "parentUuid": "0606d69f_75afae03",
+      "range": {
+        "startLine": 226,
+        "startChar": 3,
+        "endLine": 226,
+        "endChar": 54
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16cbce16_dda4c61f",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 2
@@ -88,6 +136,24 @@
     },
     {
       "key": {
+        "uuid": "db1cceb7_74511680",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "16cbce16_dda4c61f",
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8caed734_b5835334",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 2
@@ -99,6 +165,30 @@
       "writtenOn": "2017-07-25T21:30:08Z",
       "side": 1,
       "message": "please use ScopedCPtr\u003c\u003e here - unqiue_ptr calls delete/delete[], while AVD functions allocate via malloc(). Using delete on malloced memory is undefined behavior",
+      "range": {
+        "startLine": 271,
+        "startChar": 4,
+        "endLine": 271,
+        "endChar": 27
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02131134_535b73f8",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "8caed734_b5835334",
       "range": {
         "startLine": 271,
         "startChar": 4,
@@ -134,6 +224,30 @@
     },
     {
       "key": {
+        "uuid": "98f242e7_3514b31d",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "38b6f31a_964d19fc",
+      "range": {
+        "startLine": 315,
+        "startChar": 6,
+        "endLine": 315,
+        "endChar": 31
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "552d11dc_cd3c37e8",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 2
@@ -157,6 +271,30 @@
     },
     {
       "key": {
+        "uuid": "d4423fac_1065b3f5",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 558,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "Well, turns out that the function above has some magical side effects.. Let me clarify the comment above to make that clearer.\n\n(Not a big fan of the side effects)",
+      "parentUuid": "552d11dc_cd3c37e8",
+      "range": {
+        "startLine": 558,
+        "startChar": 13,
+        "endLine": 558,
+        "endChar": 38
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ae25d37_e8910861",
         "filename": "android-qemu2-glue/main.cpp",
         "patchSetId": 2
@@ -168,6 +306,30 @@
       "writtenOn": "2017-07-25T21:30:08Z",
       "side": 1,
       "message": "nit: why did this comment lose indentation?",
+      "range": {
+        "startLine": 587,
+        "startChar": 0,
+        "endLine": 590,
+        "endChar": 38
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4238253_f8eeecf2",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 590,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "ClangFormat",
+      "parentUuid": "2ae25d37_e8910861",
       "range": {
         "startLine": 587,
         "startChar": 0,
@@ -226,6 +388,30 @@
     },
     {
       "key": {
+        "uuid": "9e695844_747a5a8b",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "0a3a3008_2956894a",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 5
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "be9e2ea5_2310ec9c",
         "filename": "android/android-emu/android/emulation/ParameterList.cpp",
         "patchSetId": 2
@@ -266,6 +452,30 @@
     },
     {
       "key": {
+        "uuid": "7691d1c1_87ea23a2",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "fe16eb4b_19c97fa5",
+      "range": {
+        "startLine": 25,
+        "startChar": 2,
+        "endLine": 27,
+        "endChar": 5
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4e9b88c4_0866f657",
         "filename": "android/android-emu/android/emulation/ParameterList.cpp",
         "patchSetId": 2
@@ -277,6 +487,30 @@
       "writtenOn": "2017-07-25T21:30:08Z",
       "side": 1,
       "message": "appending a single character as a character (\u0027\\\u0027\u0027) is more efficient\n+ there\u0027s a Windows-specific function Win32Utils::quoteCommandLine() - it\u0027s more correct for some peculiar cases",
+      "range": {
+        "startLine": 52,
+        "startChar": 24,
+        "endLine": 52,
+        "endChar": 27
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d48f40a9_00b4165e",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "4e9b88c4_0866f657",
       "range": {
         "startLine": 52,
         "startChar": 24,
@@ -312,6 +546,30 @@
     },
     {
       "key": {
+        "uuid": "5b3c9d99_3d63f2a5",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "Will fix.",
+      "parentUuid": "30fe26d6_78574686",
+      "range": {
+        "startLine": 54,
+        "startChar": 8,
+        "endLine": 54,
+        "endChar": 24
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "838e34c2_5d04a559",
         "filename": "android/android-emu/android/emulation/ParameterList.cpp",
         "patchSetId": 2
@@ -323,6 +581,30 @@
       "writtenOn": "2017-07-25T21:30:08Z",
       "side": 1,
       "message": "reference",
+      "range": {
+        "startLine": 68,
+        "startChar": 9,
+        "endLine": 68,
+        "endChar": 13
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "390cdc03_0d55266b",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "838e34c2_5d04a559",
       "range": {
         "startLine": 68,
         "startChar": 9,
@@ -358,6 +640,30 @@
     },
     {
       "key": {
+        "uuid": "0b41aa6c_c2bde187",
+        "filename": "android/android-emu/android/emulation/ParameterList.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "af27bcf1_dd8bf644",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 5
+      },
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "03779308_23110056",
         "filename": "android/android-emu/android/emulation/ParameterList.h",
         "patchSetId": 2
@@ -369,6 +675,24 @@
       "writtenOn": "2017-07-25T21:30:08Z",
       "side": 1,
       "message": "\u0026",
+      "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76f7e639_bb324af1",
+        "filename": "android/android-emu/android/emulation/ParameterList.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T18:57:41Z",
+      "side": 1,
+      "message": "will fix.",
+      "parentUuid": "03779308_23110056",
       "revId": "bb4b74ff96126d0d144792b754e7204308b2eb08",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
