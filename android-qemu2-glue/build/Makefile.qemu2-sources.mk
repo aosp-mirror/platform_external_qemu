@@ -348,6 +348,7 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     net/tap.c \
     net/vhost-user.c \
     os-posix.c \
+    slirp/ip_icmp_ping.c \
 
 QEMU2_COMMON_SOURCES_linux-x86_64 := \
     aio-posix.c \
@@ -362,10 +363,12 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     hw/tpm/tpm_passthrough.c \
     hw/tpm/tpm_util.c \
     hw/usb/dev-mtp.c \
+    net/l2tpv3.c \
     net/tap-linux.c \
     net/tap.c \
     net/vhost-user.c \
     os-posix.c \
+    slirp/ip_icmp_ping.c \
     ui/input-linux.c \
 
 QEMU2_COMMON_SOURCES_windows-x86 := \

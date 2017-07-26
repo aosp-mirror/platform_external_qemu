@@ -157,6 +157,20 @@ $(program_directory)/build-qemu-android-deps.sh \
     $EXTRA_FLAGS \
         || panic "could not check or rebuild qemu-android dependencies."
 
+display_darwin_warning() {
+  # Fancy colors
+  RED=`tput setaf 1`
+  RESET=`tput sgr0`
+  echo "${RED}"
+  dump "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-"
+  dump "WARNING!! WARNING!! WARNING!! WARNING!! WARNING!! WARNING!!"
+  dump "Make sure the mac you are building on DOES not have any"
+  dump "libraries installed that are not found on a clean factory mac."
+  dump "For example homebrew with gcrypt, or a private openssl library"
+  dump "or anything else for that matter."
+  dump "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=-"
+  echo "${RESET}"
+}
 # Local build of qemu-android binaries.
 # $1: host os name.
 # $2: AOSP source directory
@@ -433,6 +447,8 @@ EOF
 
 if [ "$DARWIN_SSH" -a "$DARWIN_SYSTEMS" ]; then
     dump "Remote build for: $DARWIN_SYSTEMS"
+
+    display_darwin_warning
     builder_prepare_remote_darwin_build
 
     copy_directory "$QEMU_SRCDIR" "$DARWIN_PKG_DIR/qemu-src"

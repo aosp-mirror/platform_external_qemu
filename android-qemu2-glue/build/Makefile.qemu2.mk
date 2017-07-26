@@ -260,7 +260,6 @@ LOCAL_SRC_FILES += \
         util/coroutine-sigaltstack.c \
         ) \
     $(call qemu2-if-posix, \
-        slirp/ip_icmp_ping.c \
         util/event_notifier-posix.c \
         util/mmap-alloc.c \
         util/oslib-posix.c \
