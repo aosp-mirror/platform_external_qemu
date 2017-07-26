@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "224637c8_26a8433b",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1715,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T00:29:30Z",
+      "side": 1,
+      "message": "what this CL is for? There are only two cases when setenv() may fail:\n\n[EINVAL]\nThe name argument is a null pointer, points to an empty string, or points to a string containing an \u0027\u003d\u0027 character.\n[ENOMEM]\nInsufficient memory was available to add a variable or its value to the environment.\n\nneither is a regular emulator usecase, and EINVAL conditions can be easily checked for",
+      "range": {
+        "startLine": 1707,
+        "startChar": 0,
+        "endLine": 1715,
+        "endChar": 19
+      },
+      "revId": "553f2bc20161c52baec6aa14fdb36e43aaa3ea41",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
