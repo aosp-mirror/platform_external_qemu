@@ -455,6 +455,7 @@ void SaveableTexture::onSave(
                 if (!buffer->empty()) {
                     GLenum neededBufferFormat = m_format;
                     if (isCoreProfile()) {
+                        fprintf(stderr, "%s: emu\n", __func__);
                         neededBufferFormat =
                             getCoreProfileEmulatedFormat(m_format);
                     }
