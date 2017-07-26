@@ -1,0 +1,91 @@
+/*
+* Copyright (C) 2017 The Android Open Source Project
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+
+static const char kDrawTexOESCore_vshader[] = R"(#version 330 core
+layout(location = 0) in vec2 pos;
+layout(location = 1) in vec2 texcoord;
+out vec2 texcoord_varying;
+void main() {
+    gl_Position = vec4(pos.x, pos.y, 0.5, 1.0);
+    texcoord_varying = texcoord;
+}
+)";
+
+static const char kDrawTexOESCore_fshader[] = R"(#version 330 core
+uniform sampler2D tex_sampler;
+in vec2 texcoord_varying;
+out vec4 frag_color;
+void main() {
+    frag_color = texture(tex_sampler, texcoord_varying);
+}
+)";
+
+static const char kGeometryDrawVShaderSrc[] = R"(#version 330 core
+layout(location = 0) in vec4 pos;
+layout(location = 1) in vec3 normal;
+layout(location = 2) in vec4 color;
+layout(location = 3) in float pointsize;
+layout(location = 4) in vec4 texcoord;
+
+uniform mat4 projection;
+uniform mat4 modelview;
+
+out vec4 pos_varying;
+out vec3 normal_varying;
+out vec4 color_varying;
+out float pointsize_varying;
+out vec4 texcoord_varying;
+
+void main() {
+
+    pos_varying = pos;
+    normal_varying = normal;
+    color_varying = color; // TODO: flat shading
+    pointsize_varying = pointsize;
+    texcoord_varying = texcoord;
+
+    gl_Position = projection * modelview * pos;
+}
+)";
+
+static const char kGeometryDrawFShaderSrc[] = R"(#version 330 core
+uniform sampler2D tex_sampler;
+uniform bool enable_textures;
+uniform bool enable_lighting;
+uniform bool enable_fog;
+
+in vec4 pos_varying;
+in vec3 normal_varying;
+in vec4 color_varying;
+in float pointsize_varying;
+in vec4 texcoord_varying;
+
+out vec4 frag_color;
+
+void main() {
+    if (enable_textures) {
+        frag_color = texture(tex_sampler, texcoord_varying.xy);
+    } else {
+        frag_color = color_varying;
+    }
+
+    if (enable_lighting) {
+    frag_color= vec4(1,1,0,1);
+    }
+}
+)";
+
+
