@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94885391_62d6e0a3",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T19:54:43Z",
+      "side": 0,
+      "message": "the idea was to set it to anything you need, not to the one used to run the tests. Static function makes it impossible to override for testing :(",
+      "range": {
+        "startLine": 156,
+        "startChar": 9,
+        "endLine": 156,
+        "endChar": 18
+      },
+      "revId": "0b5479da0ec34a66e3631431a9c67dddf9691136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
