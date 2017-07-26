@@ -22,6 +22,30 @@
       "revId": "0b5479da0ec34a66e3631431a9c67dddf9691136",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bb6e8f6_a37a9644",
+        "filename": "android/android-emu/android/base/testing/TestSystem.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-07-26T21:08:28Z",
+      "side": 0,
+      "message": "This is true:\n\nOptions:\n\n1) We don\u0027t take this change.\n2) We refactor System to take some Os trait/policy getting both if needed. For example: TestSystem\u003cWin32\u003e winSys; This would probably help with cleaning up a lot of #ifdefs in this code as well. \n3) We live without setting it.",
+      "parentUuid": "94885391_62d6e0a3",
+      "range": {
+        "startLine": 156,
+        "startChar": 9,
+        "endLine": 156,
+        "endChar": 18
+      },
+      "revId": "0b5479da0ec34a66e3631431a9c67dddf9691136",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
