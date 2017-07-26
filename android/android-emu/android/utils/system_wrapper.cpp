@@ -49,5 +49,5 @@ void add_library_search_dir(const char* dirPath) {
 
 char* get_host_os_type() {
     return android::base::strDup(
-            android::base::toString(System::get()->getOsType()));
+            android::base::toString(System::getOsType()));
 }

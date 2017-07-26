@@ -47,7 +47,13 @@ enum class OsType {
     Linux
 };
 
-std::string toString(OsType osType);
+constexpr const char* toString(const OsType osType) {
+    return osType == OsType::Windows
+                   ? "Windows"
+                   : (osType == OsType::Linux
+                              ? "Linux"
+                              : (osType == OsType::Mac ? "Mac" : "Unknown"));
+};
 
 enum class RunOptions {
     // Can't use None here: X.h defines None to 0L.
@@ -117,7 +123,17 @@ public:
     virtual int getHostBitness() const = 0;
 
     // Return the current OS type
-    virtual OsType getOsType() const = 0;
+    static constexpr OsType getOsType() {
+#ifdef _WIN32
+      return OsType::Windows;
+#elif defined(__APPLE__)
+      return OsType::Mac;
+#elif defined(__linux__)
+      return OsType::Linux;
+#else
+#error getOsType(): unsupported OS;
+#endif
+    }
 
     // Return the current OS product/version name.
     // Return error string in the format of "Error: [reason]"
