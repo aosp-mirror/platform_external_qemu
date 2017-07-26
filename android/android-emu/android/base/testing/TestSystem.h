@@ -126,8 +126,6 @@ public:
 
     virtual int getHostBitness() const override { return mHostBitness; }
 
-    virtual OsType getOsType() const override { return mOsType; }
-
     virtual std::string getOsName() override { return mOsName; }
 
     virtual bool isRunningUnderWine() const override { return mUnderWine; }
@@ -152,8 +150,6 @@ public:
     }
 
     void setCurrentProcessId(Pid pid) { mPid = pid; }
-
-    void setOsType(OsType type) { mOsType = type; }
 
     virtual std::string envGet(StringView varname) const override {
         for (size_t n = 0; n < mEnvPairs.size(); n += 2) {
@@ -423,7 +419,6 @@ private:
     mutable Duration mUnixTime;
     mutable Duration mUnixTimeLastQueried = 0;
     bool mUnixTimeLive = false;
-    OsType mOsType = OsType::Windows;
     std::string mOsName = "";
     bool mUnderWine = false;
     Pid mPid = 0;

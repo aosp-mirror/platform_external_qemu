@@ -66,7 +66,7 @@ HostHwInfo::HostHwInfo() {
     info.running_in_vm = cpuFlags & ANDROID_CPU_INFO_VM;
     info.os_bit_count = System::get()->getHostBitness();
     info.cpu_model_name = model_family_stepping;
-    info.os_platform = android::base::toString(System::get()->getOsType());
+    info.os_platform = android::base::toString(System::getOsType());
     info.gpuinfolist = &globalGpuInfoList();
 
     D("cpu info:\n"
