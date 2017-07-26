@@ -198,18 +198,12 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
         mHeight(height),
         mFactor(1),
         mFBWidth({0,}),
-        mFBHeight({0,}) {
-    // SwiftShader strictly follows the GLESv2 spec and doesn't allow rendering
-    // into full GL_FLOAT textures. Let's detect it and reduce the precision
-    // on demand. BTW, GL_HALF_FLOAT is also only present in GLESv3, so use the
-    // extension instead.
-    const char* vendor, *renderer, *version;
-    FrameBuffer::getFB()->getGLStrings(&vendor, &renderer, &version);
-    if (renderer && strstr(renderer, "SwiftShader")) {
-        mTextureDataType = GL_HALF_FLOAT_OES;
-    } else {
-        mTextureDataType = GL_FLOAT;
-    }
+        mFBHeight({0,}),
+        // Instead of using a float texture, make it unsigned byte.
+        // That's most likely the input/output in the end anyway, (TODO) until
+        // HDR is common on both guest and host, and we'll cross that bridge
+        // when we get there.
+        mTextureDataType(GL_UNSIGNED_BYTE) {
 
     s_gles2.glGenTextures(1, &mFBWidth.texture);
     s_gles2.glBindTexture(GL_TEXTURE_2D, mFBWidth.texture);
