@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfc2f57b_bb1564fa",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/TextureResize.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-26T20:45:28Z",
+      "side": 1,
+      "message": "does it work if this is the last extension?",
+      "range": {
+        "startLine": 212,
+        "startChar": 8,
+        "endLine": 212,
+        "endChar": 46
+      },
+      "revId": "03360e2853e867994e878c8108ff88e5aa30a555",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
