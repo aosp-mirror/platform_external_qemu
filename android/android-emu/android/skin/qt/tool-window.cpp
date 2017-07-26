@@ -124,6 +124,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
             "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
             "Ctrl+Shift+C SHOW_PANE_CELLULAR\n"
             "Ctrl+Shift+B SHOW_PANE_BATTERY\n"
+            "Ctrl+Shift+U SHOW_PANE_BUGREPORT\n"
             "Ctrl+Shift+P SHOW_PANE_PHONE\n"
             "Ctrl+Shift+M SHOW_PANE_MICROPHONE\n"
             "Ctrl+Shift+V SHOW_PANE_VIRTSENSORS\n"
@@ -278,6 +279,11 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::SHOW_PANE_BATTERY:
             if (down) {
                 showOrRaiseExtendedWindow(PANE_IDX_BATTERY);
+            }
+            break;
+        case QtUICommand::SHOW_PANE_BUGREPORT:
+            if (down) {
+                showOrRaiseExtendedWindow(PANE_IDX_BUGREPORT);
             }
             break;
         case QtUICommand::SHOW_PANE_PHONE:
