@@ -157,13 +157,6 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
 // (Note: This does not affect the detection of possible core profile configs,
 // just whether to use them)
 bool shouldEnableCoreProfile() {
-
-    // TODO: Remove once CTS conformant
-    if (System::get()->getOsType() == OsType::Linux &&
-        emugl_feature_is_enabled(android::featurecontrol::PlayStoreImage)) {
-        return false;
-    }
-
     return emugl::getRenderer() == SELECTED_RENDERER_HOST &&
            emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion);
 }
