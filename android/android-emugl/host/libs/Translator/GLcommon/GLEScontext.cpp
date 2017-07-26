@@ -2258,6 +2258,7 @@ void GLEScontext::copyTexImageWithEmulation(
     }
 }
 
+// static
 GLuint GLEScontext::compileAndValidateCoreShader(GLenum shaderType, const char* src) {
     GLDispatch& gl = dispatcher();
 
@@ -2279,6 +2280,7 @@ GLuint GLEScontext::compileAndValidateCoreShader(GLenum shaderType, const char* 
     return shader;
 }
 
+// static
 GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
     GLDispatch& gl = dispatcher();
 
