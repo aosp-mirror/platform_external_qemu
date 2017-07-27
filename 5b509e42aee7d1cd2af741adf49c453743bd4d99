@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "4dea6e04_ebf5ed29",
+        "filename": "android/android-emu/android/opengl/EmuglBackendScanner.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-27T19:15:24Z",
+      "side": 1,
+      "message": "that\u0027s a good idea actually - Windows also doesn\u0027t differentiate between / and \\ path separators (sometimes)",
+      "parentUuid": "9a0e2f9d_ddd2f615",
+      "range": {
+        "startLine": 67,
+        "startChar": 57,
+        "endLine": 67,
+        "endChar": 68
+      },
+      "revId": "5b509e42aee7d1cd2af741adf49c453743bd4d99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f13eb916_3b15d926",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
         "patchSetId": 2
