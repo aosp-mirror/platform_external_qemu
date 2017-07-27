@@ -999,7 +999,7 @@ extern "C" int main(int argc, char** argv) {
 
     // Data directory (for keymaps and PC Bios).
     args.add("-L");
-    std::string dataDir = getNthParentDir(argv[0], 3U);
+    std::string dataDir = getNthParentDir(args[0], 3U);
     if (dataDir.empty()) {
         dataDir = "lib/pc-bios";
     } else {
