@@ -2129,7 +2129,43 @@ void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks)
     }
 }
 
+/* Default error reporting callback for snapshot functions */
+static void report_error_err_cb(void* dummy, Error* err, const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    if (err) {
+        if (fmt) {
+            error_vprepend(&err, fmt, ap);
+        }
+        error_report_err(err);
+    } else if (fmt) {
+        error_vreport(fmt, ap);
+    }
+    va_end(ap);
+}
+
+/* Fill the message callback struct to report messages into |mon| */
+static QEMUMessageCallback make_monitor_message_cb(Monitor* mon)
+{
+    typedef void (*print_func)(void* opaque, const char* fmt, ...);
+
+    QEMUMessageCallback result = {
+            .opaque = mon,
+            .out = (print_func)monitor_printf,
+            .err = report_error_err_cb,
+    };
+    return result;
+}
+
 void hmp_savevm(Monitor *mon, const QDict *qdict)
+{
+    const char *name = qdict_get_try_str(qdict, "name");
+    QEMUMessageCallback cb = make_monitor_message_cb(mon);
+    qemu_savevm(name, &cb);
+}
+
+int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 {
 #if SNAPSHOT_PROFILE
     int64_t beginTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
@@ -2142,28 +2178,27 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
     uint64_t vm_state_size;
     qemu_timeval tv;
     struct tm tm;
-    const char *name = qdict_get_try_str(qdict, "name");
     Error *local_err = NULL;
     AioContext *aio_context;
 
     if (!bdrv_all_can_snapshot(&bs)) {
-        monitor_printf(mon, "Device '%s' is writable but does not "
+        messages->out(messages->opaque, "Device '%s' is writable but does not "
                        "support snapshots.\n", bdrv_get_device_name(bs));
-        return;
+        return -1;
     }
 
     /* Delete old snapshots of the same name */
     if (name && bdrv_all_delete_snapshot(name, &bs1, &local_err) < 0) {
-        error_reportf_err(local_err,
-                          "Error while deleting snapshot on device '%s': ",
-                          bdrv_get_device_name(bs1));
-        return;
+        messages->err(messages->opaque, local_err,
+                     "Error while deleting snapshot on device '%s': ",
+                     bdrv_get_device_name(bs1));
+        return -1;
     }
 
     bs = bdrv_all_find_vmstate_bs();
     if (bs == NULL) {
-        monitor_printf(mon, "No block device can accept snapshots\n");
-        return;
+        messages->out(messages->opaque, "No block device can accept snapshots\n");
+        return -1;
     }
     aio_context = bdrv_get_aio_context(bs);
 
@@ -2171,8 +2206,8 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
 
     ret = global_state_store();
     if (ret) {
-        monitor_printf(mon, "Error saving global state\n");
-        return;
+        messages->out(messages->opaque, "Error saving global state\n");
+        return ret;
     }
     vm_stop(RUN_STATE_SAVE_VM);
 
@@ -2203,8 +2238,8 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
     if (s_snapshot_callbacks.savevm.on_start) {
         ret = s_snapshot_callbacks.savevm.on_start(name);
         if (ret) {
-            monitor_printf(mon, "Error %d from the snapshot callback\n", ret);
-            return;
+            messages->out(messages->opaque, "Error %d from the snapshot callback\n", ret);
+            return ret;
         }
     }
 
@@ -2212,7 +2247,7 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
     f = qemu_fopen_bdrv(bs, 1);
     if (!f) {
         ret = -1;
-        monitor_printf(mon, "Could not open VM state file\n");
+        messages->out(messages->opaque, "Could not open VM state file\n");
         goto the_end;
     }
     qemu_file_set_hooks(f, sSaveFileHooks);
@@ -2227,7 +2262,7 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
     vm_state_size = qemu_ftell(f);
     qemu_fclose(f);
     if (ret < 0) {
-        error_report_err(local_err);
+        messages->err(messages->opaque, local_err, NULL);
         goto the_end;
     }
 
@@ -2239,7 +2274,7 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
 
     ret = bdrv_all_create_snapshot(sn, bs, vm_state_size, &bs);
     if (ret < 0) {
-        monitor_printf(mon, "Error while creating snapshot on '%s'\n",
+        messages->out(messages->opaque, "Error while creating snapshot on '%s'\n",
                        bdrv_get_device_name(bs));
     }
 
@@ -2262,6 +2297,8 @@ void hmp_savevm(Monitor *mon, const QDict *qdict)
     if (saved_vm_running) {
         vm_start();
     }
+
+    return ret;
 }
 
 void qmp_xen_save_devices_state(const char *filename, Error **errp)
@@ -2324,7 +2361,25 @@ void qmp_xen_load_devices_state(const char *filename, Error **errp)
     migration_incoming_state_destroy();
 }
 
+/* Loadvm wants to print messages directly to the console */
+static void printf_wrap_cb(void* dummy, const char* fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    vprintf(fmt, ap);
+    va_end(ap);
+}
+
 int load_vmstate(const char *name)
+{
+    QEMUMessageCallback cb = {
+        .opaque = NULL,
+        .out = printf_wrap_cb,
+        .err = report_error_err_cb,
+    };
+    return qemu_loadvm(name, &cb);
+}
+
+int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
 {
 #if SNAPSHOT_PROFILE
     int64_t beginTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
@@ -2336,20 +2391,23 @@ int load_vmstate(const char *name)
     AioContext *aio_context;
 
     if (!bdrv_all_can_snapshot(&bs)) {
-        error_report("Device '%s' is writable but does not support snapshots.",
+        messages->err(messages->opaque, NULL,
+                     "Device '%s' is writable but does not support snapshots.",
                      bdrv_get_device_name(bs));
         return -ENOTSUP;
     }
     ret = bdrv_all_find_snapshot(name, &bs);
     if (ret < 0) {
-        error_report("Device '%s' does not have the requested snapshot '%s'",
+        messages->err(messages->opaque, NULL,
+                     "Device '%s' does not have the requested snapshot '%s'",
                      bdrv_get_device_name(bs), name);
         return ret;
     }
 
     bs_vm_state = bdrv_all_find_vmstate_bs();
     if (!bs_vm_state) {
-        error_report("No block device supports snapshots");
+        messages->err(messages->opaque, NULL,
+                     "No block device supports snapshots");
         return -ENOTSUP;
     }
     aio_context = bdrv_get_aio_context(bs_vm_state);
@@ -2361,8 +2419,9 @@ int load_vmstate(const char *name)
     if (ret < 0) {
         return ret;
     } else if (sn.vm_state_size == 0) {
-        error_report("This is a disk-only snapshot. Revert to it offline "
-            "using qemu-img.");
+        messages->err(messages->opaque, NULL,
+                     "This is a disk-only snapshot. Revert to it offline "
+                     "using qemu-img.");
         return -EINVAL;
     }
 
@@ -2376,7 +2435,8 @@ int load_vmstate(const char *name)
 
     ret = bdrv_all_goto_snapshot(name, &bs);
     if (ret < 0) {
-        error_report("Error %d while activating snapshot '%s' on '%s'",
+        messages->err(messages->opaque, NULL,
+                     "Error %d while activating snapshot '%s' on '%s'",
                      ret, name, bdrv_get_device_name(bs));
         return ret;
     }
@@ -2389,7 +2449,8 @@ int load_vmstate(const char *name)
     if (s_snapshot_callbacks.loadvm.on_start) {
         ret = s_snapshot_callbacks.loadvm.on_start(name);
         if (ret) {
-            error_report("Error %d from the snapshot callback", ret);
+            messages->err(messages->opaque, NULL,
+                         "Error %d from the snapshot callback", ret);
             return -EINVAL;
         }
     }
@@ -2397,7 +2458,7 @@ int load_vmstate(const char *name)
     /* restore the VM state */
     f = qemu_fopen_bdrv(bs_vm_state, 0);
     if (!f) {
-        error_report("Could not open VM state file");
+        messages->err(messages->opaque, NULL, "Could not open VM state file");
         return -EINVAL;
     }
     qemu_file_set_hooks(f, sLoadFileHooks);
@@ -2423,7 +2484,8 @@ int load_vmstate(const char *name)
     }
 
     if (ret < 0) {
-        error_report("Error %d while loading VM state", ret);
+        messages->err(messages->opaque, NULL,
+                     "Error %d while loading VM state", ret);
         return ret;
     }
 
@@ -2440,15 +2502,22 @@ int load_vmstate(const char *name)
 
 void hmp_delvm(Monitor *mon, const QDict *qdict)
 {
+    const char *name = qdict_get_try_str(qdict, "name");
+    QEMUMessageCallback cb = make_monitor_message_cb(mon);
+    qemu_delvm(name, &cb);
+}
+
+int qemu_delvm(const char* name, const QEMUMessageCallback* messages)
+{
     BlockDriverState *bs;
     Error *err;
     int ret;
-    const char *name = qdict_get_str(qdict, "name");
 
     if (s_snapshot_callbacks.delvm.on_start) {
         ret = s_snapshot_callbacks.delvm.on_start(name);
         if (ret) {
-            error_reportf_err(err, "Error %d from the snapshot callback", ret);
+            messages->err(messages->opaque, err,
+                          "Error %d from the snapshot callback", ret);
             return;
         }
     }
@@ -2460,13 +2529,19 @@ void hmp_delvm(Monitor *mon, const QDict *qdict)
     }
 
     if (ret < 0) {
-        error_reportf_err(err,
-                          "Error while deleting snapshot on device '%s': ",
-                          bdrv_get_device_name(bs));
+        messages->err(messages->opaque, err,
+                      "Error while deleting snapshot on device '%s': ",
+                      bdrv_get_device_name(bs));
     }
 }
 
 void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
+{
+    QEMUMessageCallback cb = make_monitor_message_cb(mon);
+    qemu_listvms(NULL, NULL, &cb);
+}
+
+int qemu_listvms(char(*names)[256], int* names_count, const QEMUMessageCallback* messages)
 {
     BlockDriverState *bs, *bs1;
     BdrvNextIterator it1;
@@ -2496,8 +2571,11 @@ void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
 
     bs = bdrv_all_find_vmstate_bs();
     if (!bs) {
-        monitor_printf(mon, "No available block device supports snapshots\n");
-        return;
+        messages->out(messages->opaque, "No available block device supports snapshots\n");
+        if (names_count) {
+            *names_count = 0;
+        }
+        return 0;
     }
     aio_context = bdrv_get_aio_context(bs);
 
@@ -2506,8 +2584,8 @@ void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
     aio_context_release(aio_context);
 
     if (nb_sns < 0) {
-        monitor_printf(mon, "bdrv_snapshot_list: error %d\n", nb_sns);
-        return;
+        messages->out(messages->opaque, "bdrv_snapshot_list: error %d\n", nb_sns);
+        return nb_sns;
     }
 
     for (bs1 = bdrv_first(&it1); bs1; bs1 = bdrv_next(&it1)) {
@@ -2538,8 +2616,11 @@ void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
     }
 
     if (no_snapshot) {
-        monitor_printf(mon, "There is no snapshot available.\n");
-        return;
+        messages->out(messages->opaque, "There is no snapshot available.\n");
+        if (names_count) {
+            *names_count = 0;
+        }
+        return 0;
     }
 
     global_snapshots = g_new0(int, nb_sns);
@@ -2548,6 +2629,9 @@ void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
         SnapshotEntry *next_sn;
         if (bdrv_all_find_snapshot(sn_tab[i].name, &bs1) == 0) {
             global_snapshots[total] = i;
+            if (names && names_count && total < *names_count) {
+                strcpy(names[total], sn_tab[i].name);
+            }
             total++;
             QTAILQ_FOREACH(image_entry, &image_list, next) {
                 QTAILQ_FOREACH_SAFE(snapshot_entry, &image_entry->snapshots,
@@ -2562,37 +2646,37 @@ void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
         }
     }
 
-    monitor_printf(mon, "List of snapshots present on all disks:\n");
+    messages->out(messages->opaque, "List of snapshots present on all disks:\n");
 
     if (total > 0) {
-        bdrv_snapshot_dump((fprintf_function)monitor_printf, mon, NULL);
-        monitor_printf(mon, "\n");
+        bdrv_snapshot_dump((fprintf_function)messages->out, messages->opaque, NULL);
+        messages->out(messages->opaque, "\n");
         for (i = 0; i < total; i++) {
             sn = &sn_tab[global_snapshots[i]];
             /* The ID is not guaranteed to be the same on all images, so
              * overwrite it.
              */
             pstrcpy(sn->id_str, sizeof(sn->id_str), "--");
-            bdrv_snapshot_dump((fprintf_function)monitor_printf, mon, sn);
-            monitor_printf(mon, "\n");
+            bdrv_snapshot_dump((fprintf_function)messages->out, messages->opaque, sn);
+            messages->out(messages->opaque, "\n");
         }
     } else {
-        monitor_printf(mon, "None\n");
+        messages->out(messages->opaque, "None\n");
     }
 
     QTAILQ_FOREACH(image_entry, &image_list, next) {
         if (QTAILQ_EMPTY(&image_entry->snapshots)) {
             continue;
         }
-        monitor_printf(mon,
+        messages->out(messages->opaque,
                        "\nList of partial (non-loadable) snapshots on '%s':\n",
                        image_entry->imagename);
-        bdrv_snapshot_dump((fprintf_function)monitor_printf, mon, NULL);
-        monitor_printf(mon, "\n");
+        bdrv_snapshot_dump((fprintf_function)messages->out, messages->opaque, NULL);
+        messages->out(messages->opaque, "\n");
         QTAILQ_FOREACH(snapshot_entry, &image_entry->snapshots, next) {
-            bdrv_snapshot_dump((fprintf_function)monitor_printf, mon,
+            bdrv_snapshot_dump((fprintf_function)messages->out, messages->opaque,
                                &snapshot_entry->sn);
-            monitor_printf(mon, "\n");
+            messages->out(messages->opaque, "\n");
         }
     }
 
@@ -2607,6 +2691,10 @@ void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
     g_free(sn_tab);
     g_free(global_snapshots);
 
+    if (names_count) {
+        *names_count = total;
+    }
+    return 0;
 }
 
 void vmstate_register_ram(MemoryRegion *mr, DeviceState *dev)
