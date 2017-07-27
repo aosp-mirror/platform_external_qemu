@@ -55,6 +55,12 @@ int qemu_fdt_setprop_phandle(void *fdt, const char *node_path,
                              const char *property,
                              const char *target_node_path);
 /**
+ * call back for special handling of device tree
+ */
+typedef void (*QemuDeviceTreeSetupFunc)(void *);
+void qemu_device_tree_setup_callback(QemuDeviceTreeSetupFunc setup_func);
+
+/**
  * qemu_fdt_getprop: retrieve the value of a given property
  * @fdt: pointer to the device tree blob
  * @node_path: node path

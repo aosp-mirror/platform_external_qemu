@@ -47,6 +47,7 @@ extern "C" {
 #include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "qemu/thread.h"
+#include "sysemu/device_tree.h"
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -55,6 +56,31 @@ extern char* op_http_proxy;
 
 using android::VmLock;
 using android::DmaMap;
+
+extern "C" {
+void ranchu_device_tree_setup(void *fdt) {
+    /* fstab */
+    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab", "compatible", "android,fstab");
+
+    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "compatible", "android,system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "dev","/dev/block/platform/a003800.virtio_mmio/by-name/system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "fsmgr_flags", "wait");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "mnt_flags", "ro");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "type", "ext4");
+
+    const char* vendor_path = "/dev/block/platform/a003e00.virtio_mmio/by-name/vendor";
+    if (vendor_path) {
+        qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/vendor");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "compatible", "android,vendor");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "dev", vendor_path);
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "fsmgr_flags", "wait");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "mnt_flags", "ro");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "type", "ext4");
+    }
+}
+}
 
 bool qemu_android_emulation_early_setup() {
     // Ensure that the looper is set for the main thread and for any
