@@ -18,6 +18,7 @@
 #include "android/base/Log.h"
 #include "android/console.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/globals.h"
 #include "android/skin/LibuiAgent.h"
 #include "android/skin/winsys.h"
 #include "android-qemu2-glue/emulation/android_pipe_device.h"
@@ -40,6 +41,8 @@ extern "C" {
 #include "qemu/abort.h"
 #include "qemu/main-loop.h"
 #include "qemu/thread.h"
+#include "sysemu/device_tree.h"
+#include "sysemu/ranchu.h"
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -53,6 +56,32 @@ static void QEMU_NORETURN
 sQemu2AbortHandler(const char* format, va_list args) {
     crashhandler_die_format_v(format, args);
     while(1) { abort(); }
+}
+
+extern "C" void ranchu_device_tree_setup(void *fdt) {
+    /* fstab */
+    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab", "compatible", "android,fstab");
+
+    char* system_path = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
+    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "compatible", "android,system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "dev", system_path);
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "fsmgr_flags", "wait");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "mnt_flags", "ro");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "type", "ext4");
+    free(system_path);
+
+    char* vendor_path = avdInfo_getVendorImageDevicePathInGuest(android_avdInfo);
+    if (vendor_path) {
+        qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/vendor");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "compatible", "android,vendor");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "dev", vendor_path);
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "fsmgr_flags", "wait");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "mnt_flags", "ro");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "type", "ext4");
+        free(vendor_path);
+    }
 }
 
 bool qemu_android_emulation_early_setup() {
