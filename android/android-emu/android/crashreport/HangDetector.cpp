@@ -85,7 +85,7 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
             l.unlock();
 
             derror("%s", message.c_str());
-            if (hangCallback) {
+            if (hangCallback && !android::base::IsDebuggerAttached()) {
                 hangCallback(message);
             }
         }
