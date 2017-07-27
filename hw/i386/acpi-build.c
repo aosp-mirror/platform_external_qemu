@@ -1237,6 +1237,13 @@ static void build_goldfish_device_aml(Aml *scope,
     aml_append(crs, aml_memory32_fixed(iomem_base, iomem_size, AML_READ_WRITE));
     aml_append(crs, aml_interrupt(AML_CONSUMER_PRODUCER, AML_EDGE,
                                   AML_ACTIVE_HIGH, AML_SHARED, &irq_number, 1));
+    aml_append(crs,
+                       aml_qword_memory(AML_POS_DECODE, AML_MIN_FIXED,
+                                        AML_MAX_FIXED,
+                                        AML_CACHEABLE, AML_READ_WRITE,
+                                        0, iomem_base, iomem_base + iomem_size,
+                                        0, iomem_size));
+
     aml_append(dev, aml_name_decl("_CRS", crs));
     aml_append(scope, dev);
 }
