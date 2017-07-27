@@ -553,7 +553,8 @@ extern "C" int main(int argc, char** argv) {
     // Start GPU information query to use it later for the renderer seleciton.
     async_query_host_gpu_start();
 
-    android::ParameterList args = {argv[0]};
+    const char* executable = argv[0];
+    android::ParameterList args = {executable};
     AndroidHwConfig* hw = android_hw;
     AvdInfo* avd;
     AndroidOptions opts[1];
@@ -999,7 +1000,7 @@ extern "C" int main(int argc, char** argv) {
 
     // Data directory (for keymaps and PC Bios).
     args.add("-L");
-    std::string dataDir = getNthParentDir(argv[0], 3U);
+    std::string dataDir = getNthParentDir(executable, 3U);
     if (dataDir.empty()) {
         dataDir = "lib/pc-bios";
     } else {
