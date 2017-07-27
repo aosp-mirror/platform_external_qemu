@@ -4706,11 +4706,17 @@ APIENTRY_IMPL(void, TexParameterxv, GLenum target, GLenum pname, const GLfixed* 
     APITRACE();
     GLfloat tmp[kMaxParamElementSize];
     Convert(tmp, ParamSize(pname), params);
-    if (pname == GL_TEXTURE_WRAP_S || pname == GL_TEXTURE_WRAP_T ||
-            pname == GL_TEXTURE_CROP_RECT_OES) {
-        TRCALL(glTexParameteriv(target, pname, reinterpret_cast<const GLint*>(params)));
-    } else {
-        TRCALL(glTexParameterfv(target, pname, tmp));
+    switch (pname) {
+        case GL_TEXTURE_CROP_RECT_OES:
+        case GL_TEXTURE_MAG_FILTER:
+        case GL_TEXTURE_MIN_FILTER:
+        case GL_GENERATE_MIPMAP:
+        case GL_TEXTURE_WRAP_S:
+        case GL_TEXTURE_WRAP_T:
+            TRCALL(glTexParameteriv(target, pname, reinterpret_cast<const GLint*>(params)));
+            break;
+        default:
+            TRCALL(glTexParameterfv(target, pname, tmp));
     }
 }
 
