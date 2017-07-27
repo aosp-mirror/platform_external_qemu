@@ -1019,8 +1019,7 @@ extern "C" int main(int argc, char** argv) {
 
     if (hw->hw_arc) {
         /* We don't use goldfish_fb in cros. just use virtio vga now */
-        args[n++] = "-vga";
-        args[n++] = "virtio";
+        args.add2("-vga", "virtio");
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
