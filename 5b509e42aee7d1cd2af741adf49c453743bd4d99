@@ -22,6 +22,53 @@
       "revId": "5b509e42aee7d1cd2af741adf49c453743bd4d99",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3448e8_672c0b0a",
+        "filename": "android/android-emu/android/opengl/EmuglBackendScanner.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-27T14:37:55Z",
+      "side": 1,
+      "message": "Our convention has been to name all backends all lowercase :D D:",
+      "parentUuid": "c6fd818c_1492f4f6",
+      "range": {
+        "startLine": 67,
+        "startChar": 57,
+        "endLine": 67,
+        "endChar": 68
+      },
+      "revId": "5b509e42aee7d1cd2af741adf49c453743bd4d99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f13eb916_3b15d926",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-27T14:37:55Z",
+      "side": 1,
+      "message": "Mac?",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 19
+      },
+      "revId": "5b509e42aee7d1cd2af741adf49c453743bd4d99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
