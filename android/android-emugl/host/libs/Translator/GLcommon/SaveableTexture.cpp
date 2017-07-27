@@ -587,12 +587,14 @@ void SaveableTexture::restore() {
                         if (!level || pixels) {
                             GLint resultInternalFormat = m_internalFormat;
                             GLenum resultFormat = m_format;
-                            GLEScontext::prepareCoreProfileEmulatedTexture(
-                                nullptr /* no TextureData */,
-                                false /* not 3D */,
-                                target, m_format, m_type,
-                                &resultInternalFormat,
-                                &resultFormat);
+                            if (isCoreProfile()) {
+                                GLEScontext::prepareCoreProfileEmulatedTexture(
+                                        nullptr /* no TextureData */,
+                                        false /* not 3D */,
+                                        target, m_format, m_type,
+                                        &resultInternalFormat,
+                                        &resultFormat);
+                            }
                             dispatcher.glTexImage2D(
                                     target, level, resultInternalFormat,
                                     levelData[level].m_width,
@@ -614,12 +616,14 @@ void SaveableTexture::restore() {
                         if (!level || pixels) {
                             GLint resultInternalFormat = m_internalFormat;
                             GLenum resultFormat = m_format;
-                            GLEScontext::prepareCoreProfileEmulatedTexture(
-                                nullptr /* no TextureData */,
-                                true /* is 3D */,
-                                target, m_format, m_type,
-                                &resultInternalFormat,
-                                &resultFormat);
+                            if (isCoreProfile()) {
+                                GLEScontext::prepareCoreProfileEmulatedTexture(
+                                        nullptr /* no TextureData */,
+                                        true /* is 3D */,
+                                        target, m_format, m_type,
+                                        &resultInternalFormat,
+                                        &resultFormat);
+                            }
                             dispatcher.glTexImage3D(
                                     target, level, m_internalFormat,
                                     levelData[level].m_width,
