@@ -42,6 +42,14 @@
 #include "monitor/monitor.h"
 #include "qapi/error.h"
 
+/*
+FIXME: cannot include the following:got
+poinsed CONFIG_ANDROID error
+#ifdef CONFIG_ANDROID
+#include "android/globals.h"
+#endif
+*/
+
 #define NUM_VIRTIO_TRANSPORTS 32
 
 /* Number of external interrupt lines to configure the GIC with */
@@ -131,6 +139,12 @@ static const int irqmap[] = {
     [RANCHU_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
 };
 
+static QemuDeviceTreeSetupFunc device_tree_setup_func;
+void qemu_device_tree_setup_callback(QemuDeviceTreeSetupFunc setup_func)
+{
+    device_tree_setup_func = setup_func;
+}
+
 static void create_fdt(VirtBoardInfo *vbi)
 {
     void *fdt = create_device_tree(&vbi->fdt_size);
@@ -152,6 +166,10 @@ static void create_fdt(VirtBoardInfo *vbi)
     qemu_fdt_add_subnode(fdt, "/firmware/android");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
+
+    if (device_tree_setup_func) {
+        device_tree_setup_func(fdt);
+    }
 
     /*
      * /chosen and /memory nodes must exist for load_dtb
