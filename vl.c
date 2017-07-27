@@ -26,6 +26,7 @@
 #include "qemu/cutils.h"
 #include "qemu/help_option.h"
 #include "qemu/uuid.h"
+#include "sysemu/device_tree.h"
 
 #ifdef CONFIG_SECCOMP
 #include "sysemu/seccomp.h"
@@ -4563,6 +4564,10 @@ static int main_impl(int argc, char** argv)
 
 #ifdef CONFIG_ANDROID
 
+    // setup device-tree call back
+#if defined(TARGET_AARCH64) || defined(TARGET_ARM)
+    qemu_device_tree_setup_callback(ranchu_device_tree_setup);
+#endif
     if (!qemu_android_emulation_early_setup()) {
         return 1;
     }
