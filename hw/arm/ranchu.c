@@ -42,6 +42,14 @@
 #include "monitor/monitor.h"
 #include "qapi/error.h"
 
+/*
+FIXME: cannot include the following:got
+poinsed CONFIG_ANDROID error
+#ifdef CONFIG_ANDROID
+#include "android/globals.h"
+#endif
+*/
+
 #define NUM_VIRTIO_TRANSPORTS 32
 
 /* Number of external interrupt lines to configure the GIC with */
@@ -152,6 +160,27 @@ static void create_fdt(VirtBoardInfo *vbi)
     qemu_fdt_add_subnode(fdt, "/firmware/android");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
+
+    /* fstab */
+    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab", "compatible", "android,fstab");
+
+    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "compatible", "android,system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "dev","/dev/block/platform/a003800.virtio_mmio/by-name/system");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "fsmgr_flags", "wait");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "mnt_flags", "ro");
+    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "type", "ext4");
+
+    const char* vendor_path = "/dev/block/platform/a003e00.virtio_mmio/by-name/vendor";
+    if (vendor_path) {
+        qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/vendor");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "compatible", "android,vendor");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "dev", vendor_path);
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "fsmgr_flags", "wait");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "mnt_flags", "ro");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "type", "ext4");
+    }
 
     /*
      * /chosen and /memory nodes must exist for load_dtb
