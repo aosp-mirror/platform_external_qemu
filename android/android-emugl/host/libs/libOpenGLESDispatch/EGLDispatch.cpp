@@ -15,9 +15,6 @@
 */
 #include "OpenGLESDispatch/EGLDispatch.h"
 
-#include "android/base/synchronization/Lock.h"
-#include "android/base/memory/LazyInstance.h"
-
 #include "emugl/common/shared_library.h"
 
 #include <stdio.h>
@@ -40,19 +37,7 @@ EGLDispatch s_egl;
     if (!s_egl.function_name || !s_egl.eglGetProcAddress) \
             RENDER_EGL_LOAD_FIELD(return_type, function_name, signature)
 
-struct AsyncEGLInitData {
-    bool initialized = false;
-    android::base::Lock lock;
-};
-
-static android::base::LazyInstance<AsyncEGLInitData> sInitData =
-    LAZY_INSTANCE_INIT;
-
 bool init_egl_dispatch() {
-    android::base::AutoLock lock(sInitData->lock);
-
-    if (sInitData->initialized) return true;
-
     const char *libName = getenv("ANDROID_EGL_LIB");
     if (!libName) libName = DEFAULT_EGL_LIB;
     char error[256];
@@ -66,8 +51,6 @@ bool init_egl_dispatch() {
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD_WITH_EGL)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_LOAD_OPTIONAL_FIELD)
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_LOAD_FIELD)
-
-    sInitData->initialized = true;
 
     return true;
 }
