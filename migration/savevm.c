@@ -2518,7 +2518,7 @@ int qemu_delvm(const char* name, const QEMUMessageCallback* messages)
         if (ret) {
             messages->err(messages->opaque, err,
                           "Error %d from the snapshot callback", ret);
-            return;
+            return -1;
         }
     }
 

@@ -14,7 +14,6 @@
 * limitations under the License.
 */
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
@@ -116,7 +115,6 @@ LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
         } while(0);
 
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
-    init_egl_dispatch();
 
     dispatch_table->underlying_gles2_api = NULL;
 

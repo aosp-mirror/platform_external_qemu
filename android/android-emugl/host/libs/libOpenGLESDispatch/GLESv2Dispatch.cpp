@@ -44,8 +44,6 @@ static GLESDispatchMaxVersion s_max_supported_gles_version = GLES_DISPATCH_MAX_V
 //
 bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table)
 {
-    init_egl_dispatch();
-
     const char *libName = getenv("ANDROID_GLESv2_LIB");
     if (!libName) {
         libName = DEFAULT_GLES_V2_LIB;
