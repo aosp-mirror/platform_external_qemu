@@ -177,7 +177,7 @@ AdbCommand::AdbCommand(android::base::Looper* looper,
                        const std::string& serial_string,
                        const std::vector<std::string>& command,
                        bool want_output,
-                       base::System::Duration timeout,
+                       base::System::Duration timeoutMs,
                        AdbCommand::ResultCallback callback)
     : mLooper(looper),
       mResultCallback(callback),
@@ -185,8 +185,7 @@ AdbCommand::AdbCommand(android::base::Looper* looper,
               System::get()->getTempDir(),
               std::string("adbcommand").append(Uuid::generate().toString()))),
       mWantOutput(want_output),
-      mTimeout(timeout),
-      mFinished(false) {
+      mTimeoutMs(timeoutMs) {
     mCommand.push_back(adb_path);
 
     // TODO: when run headless, the serial string won't be properly
@@ -222,11 +221,34 @@ void AdbCommand::taskDoneFunction(const OptionalAdbCommandResult& result) {
     if (!mCancelled) {
         mResultCallback(result);
     }
+    base::AutoLock lock(mLock);
     mFinished = true;
+    mCv.broadcastAndUnlock(&lock);
     // This may invalidate this object and clean it up.
     // DO NOT reference any internal state from this class after this
     // point.
     mTask.reset();
+}
+
+bool AdbCommand::wait(System::Duration timeoutMs) {
+    if (!mTask) {
+        return true;
+    }
+
+    base::AutoLock lock(mLock);
+    if (timeoutMs < 0) {
+        mCv.wait(&lock, [this]() { return mFinished; });
+        return true;
+    }
+
+    const auto deadlineUs =
+            base::System::get()->getUnixTimeUs() + timeoutMs * 1000;
+    while (!mFinished &&
+           base::System::get()->getUnixTimeUs() < deadlineUs) {
+        mCv.timedWait(&mLock, deadlineUs);
+    }
+
+    return mFinished;
 }
 
 void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
@@ -243,7 +265,7 @@ void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
     android::base::System::ProcessExitCode exit_code;
 
     bool command_ran = System::get()->runCommand(
-            mCommand, run_flags, mTimeout, &exit_code, &pid, mOutputFilePath);
+            mCommand, run_flags, mTimeoutMs, &exit_code, &pid, mOutputFilePath);
 
     if (command_ran) {
         *result = android::base::makeOptional<AdbCommandResult>(
