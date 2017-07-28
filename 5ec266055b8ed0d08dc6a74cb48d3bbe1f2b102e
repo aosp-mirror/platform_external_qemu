@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6cf4feb2_d1ed16d9",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-sources.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T20:35:21Z",
+      "side": 1,
+      "message": "where\u0027s the corresponding .py script change?",
+      "range": {
+        "startLine": 345,
+        "startChar": 0,
+        "endLine": 346,
+        "endChar": 26
+      },
+      "revId": "5ec266055b8ed0d08dc6a74cb48d3bbe1f2b102e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cb3f1ee1_9e16e943",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2.mk",
+        "patchSetId": 5
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T20:35:21Z",
+      "side": 1,
+      "message": "tabs",
+      "range": {
+        "startLine": 114,
+        "startChar": 0,
+        "endLine": 114,
+        "endChar": 3
+      },
+      "revId": "5ec266055b8ed0d08dc6a74cb48d3bbe1f2b102e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9df566d5_3e8ec208",
+        "filename": "android/scripts/build-qemu-android.sh",
+        "patchSetId": 5
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T20:35:21Z",
+      "side": 1,
+      "message": "nit: this definitely should be combined",
+      "range": {
+        "startLine": 278,
+        "startChar": 0,
+        "endLine": 281,
+        "endChar": 21
+      },
+      "revId": "5ec266055b8ed0d08dc6a74cb48d3bbe1f2b102e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
