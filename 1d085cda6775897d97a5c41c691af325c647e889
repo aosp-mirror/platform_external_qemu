@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e219690b_f06062d4",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/EGLDispatch.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-28T01:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0294f5f3_e0435f7e",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 44
+      },
+      "revId": "1d085cda6775897d97a5c41c691af325c647e889",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "03f89d76_4ca1cf97",
         "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "57f32749_11dcfb4c",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/GLESv1Dispatch.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-28T01:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "03f89d76_4ca1cf97",
+      "range": {
+        "startLine": 119,
+        "startChar": 4,
+        "endLine": 119,
+        "endChar": 24
+      },
+      "revId": "1d085cda6775897d97a5c41c691af325c647e889",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1b08758b_cf9433b1",
         "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/GLESv2Dispatch.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2017-07-26T18:22:21Z",
       "side": 1,
       "message": "ditto",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 24
+      },
+      "revId": "1d085cda6775897d97a5c41c691af325c647e889",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2be8d59_fcbfb915",
+        "filename": "android/android-emugl/host/libs/libOpenGLESDispatch/GLESv2Dispatch.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-28T01:47:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1b08758b_cf9433b1",
       "range": {
         "startLine": 47,
         "startChar": 0,
