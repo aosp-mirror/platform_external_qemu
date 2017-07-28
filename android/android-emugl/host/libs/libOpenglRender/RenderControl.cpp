@@ -202,7 +202,7 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     std::string eglStr(str);
-    if ((calcMaxVersionFromDispatch() >= GLES_DISPATCH_MAX_VERSION_3_0) &&
+    if ((FrameBuffer::getMaxGLESVersion() >= GLES_DISPATCH_MAX_VERSION_3_0) &&
         eglStr.find("EGL_KHR_create_context") == std::string::npos) {
         eglStr += "EGL_KHR_create_context ";
     }
@@ -309,13 +309,18 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     // We add the maximum supported GL protocol number into GL_EXTENSIONS
+
+    // filter extensions by name to match guest-side support
+    GLESDispatchMaxVersion maxVersion = FrameBuffer::getMaxGLESVersion();
+    if (name == GL_EXTENSIONS) {
+        glStr = filterExtensionsBasedOnMaxVersion(maxVersion, glStr);
+    }
+
     bool isChecksumEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLPipeChecksum);
     bool asyncSwapEnabled = shouldEnableAsyncSwap();
     bool dmaEnabled =
         emugl_feature_is_enabled(android::featurecontrol::GLDMA);
-    bool glesDynamicVersionEnabled =
-        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion);
 
     if (isChecksumEnabled && name == GL_EXTENSIONS) {
         glStr += ChecksumCalculatorThreadInfo::getMaxVersionString();
@@ -332,8 +337,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         glStr += " ";
     }
 
-    GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
-    if (name == GL_EXTENSIONS && glesDynamicVersionEnabled) {
+    if (name == GL_EXTENSIONS) {
         glStr += maxVersionToFeatureString(maxVersion);
         glStr += " ";
 
@@ -344,15 +348,16 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         }
     }
 
-    if (name == GL_EXTENSIONS &&
-        (!glesDynamicVersionEnabled ||
-         maxVersion < GLES_DISPATCH_MAX_VERSION_3_0)) {
-        removeExtension(glStr, "GL_EXT_color_buffer_float ");
-    }
-
-    if (glesDynamicVersionEnabled && name == GL_VERSION) {
-        GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
+    if (name == GL_VERSION) {
+        GLESDispatchMaxVersion maxVersion = FrameBuffer::getMaxGLESVersion();
         switch (maxVersion) {
+            // Underlying GLES implmentation's max version string
+            // is allowed to be higher than the version of the request
+            // for the context---it can create a higher version context,
+            // and return simply the max possible version overall.
+            case GLES_DISPATCH_MAX_VERSION_2:
+                glStr = replaceESVersionString(glStr, "2.0");
+                break;
             case GLES_DISPATCH_MAX_VERSION_3_0:
                 glStr = replaceESVersionString(glStr, "3.0");
                 break;
