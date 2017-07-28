@@ -932,8 +932,8 @@ static int create_qcow2_images(void) {
 
     /* List of paths to all images that can be mounted.*/
     const char* const image_paths[] = {
-        android_hw->disk_systemPartition_initPath,
-        android_hw->disk_vendorPartition_initPath,
+        android_hw->disk_systemPartition_path ?: android_hw->disk_systemPartition_initPath,
+        android_hw->disk_vendorPartition_path ?: android_hw->disk_vendorPartition_initPath,
         android_hw->disk_cachePartition_path,
         android_hw->disk_dataPartition_path,
         android_hw->hw_sdCard_path,
@@ -958,24 +958,21 @@ static int create_qcow2_images(void) {
             /* If the path is NULL or empty, just ignore it.*/
             continue;
         }
-        if (!strcmp(backing_image_path,
-                    android_hw->disk_systemPartition_initPath)) {
+        if (p < 2) {
             /* System & vendor image are special cases, the backing image is
              * in the SDK folder, but the QCoW2 image that the emulator
              * uses is created on a per-AVD basis and is placed in the
              * AVD's data folder.
              */
-            static const char sysimage_qcow2_basename[] =
-                "system.img." QCOW2_SUFFIX;
+            char* image_basename = path_basename(backing_image_path);
+            const char qcow2_suffix[] = "." QCOW2_SUFFIX;
+            size_t path_size = strlen(image_basename) + sizeof(qcow2_suffix) + 1;
+            char* image_qcow2_basename = malloc(path_size);
+            bufprint(image_qcow2_basename, image_qcow2_basename + path_size, "%s%s", image_basename, qcow2_suffix);
             qcow2_image_path =
-                path_join(avd_data_dir, sysimage_qcow2_basename);
-        } else if (android_hw->disk_vendorPartition_initPath &&
-                !strcmp(backing_image_path,
-                    android_hw->disk_vendorPartition_initPath)) {
-            static const char vendorimage_qcow2_basename[] =
-                "vendor.img." QCOW2_SUFFIX;
-            qcow2_image_path =
-                path_join(avd_data_dir, vendorimage_qcow2_basename);
+                path_join(avd_data_dir, image_qcow2_basename);
+            free(image_basename);
+            free(image_qcow2_basename);
         } else {
             /* For all the other images except system image,
              * just create another file alongside them
