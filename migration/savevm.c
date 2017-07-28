@@ -2533,6 +2533,8 @@ int qemu_delvm(const char* name, const QEMUMessageCallback* messages)
                       "Error while deleting snapshot on device '%s': ",
                       bdrv_get_device_name(bs));
     }
+
+    return ret;
 }
 
 void hmp_info_snapshots(Monitor *mon, const QDict *qdict)
