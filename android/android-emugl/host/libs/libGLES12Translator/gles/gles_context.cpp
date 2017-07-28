@@ -427,7 +427,7 @@ void GlesContext::DrawFullscreenQuad(GLuint texture, bool flip_v) {
 }
 
 void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
-            GLenum type, const GLvoid* indices, bool bindVtx) {
+            GLenum type, const GLvoid* indices) {
   LOG_ALWAYS_FATAL_IF(draw != kDrawArrays && draw != kDrawElements);
   if (!CanDraw()) {
     return;
@@ -441,25 +441,19 @@ void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
                                    program_uses_external_as_2d);
 
   if (draw == kDrawArrays) {
-    if (bindVtx) {
-        pointer_context_.PrepareBuffersForDrawArrays(first, count);
-    }
+    pointer_context_.PrepareBuffersForDrawArrays(first, count);
     PASS_THROUGH(this, DrawArrays, mode, first, count);
   } else {
-    if (bindVtx) {
-        indices = pointer_context_.PrepareBuffersForDrawElements(count, type,
-                                                                 indices);
-    }
+    indices = pointer_context_.PrepareBuffersForDrawElements(count, type,
+            indices);
     PASS_THROUGH(this, DrawElements, mode, count, type, indices);
   }
 
   // Restore the buffer bindings as the pointer context may have changed them.
-  if (bindVtx) {
-    PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
-                 share_group_->GetBufferGlobalName(array_buffer_binding_));
-    PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER,
-                 share_group_->GetBufferGlobalName(element_buffer_binding_));
-  }
+  PASS_THROUGH(this, BindBuffer, GL_ARRAY_BUFFER,
+               share_group_->GetBufferGlobalName(array_buffer_binding_));
+  PASS_THROUGH(this, BindBuffer, GL_ELEMENT_ARRAY_BUFFER,
+               share_group_->GetBufferGlobalName(element_buffer_binding_));
   texture_context_.RestoreTextures();
   ClearProgramObject();
 }
@@ -590,7 +584,12 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     }
     const GLint texture = texture_context_.GetTexture(GL_TEXTURE0 + i,
                                                       GL_TEXTURE_2D);
-    const TextureDataPtr texture_data = share_group_->GetTextureData(texture);
+    TextureDataPtr texture_data = {};
+    if (texture == 0) {
+        texture_data = texture_context_.GetDefaultTextureData(GL_TEXTURE_2D);
+    } else {
+        texture_data = share_group_->GetTextureData(texture);
+    }
     if (texture_data == NULL) {
       continue;
     }
@@ -613,9 +612,8 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
 
 
     pointer_context_.EnableArray(kTexCoord0VertexAttribute + i);
-    PASS_THROUGH(this, EnableVertexAttribArray, kTexCoord0VertexAttribute + i);
-    PASS_THROUGH(this, VertexAttribPointer, kTexCoord0VertexAttribute + i, 2,
-                 GL_FLOAT, GL_FALSE, 0, texels[i]);
+    pointer_context_.SetPointer(kTexCoord0VertexAttribute + i,
+            2, GL_FLOAT, 0, texels[i]);
     num_textures++;
   }
 
@@ -628,13 +626,11 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
       x + width, y, z,
     };
     pointer_context_.EnableArray(kPositionVertexAttribute);
-    PASS_THROUGH(this, EnableVertexAttribArray, kPositionVertexAttribute);
-    PASS_THROUGH(this, VertexAttribPointer, kPositionVertexAttribute, 3,
-                 GL_FLOAT, GL_FALSE, 0, vertices);
-
+    pointer_context_.SetPointer(kPositionVertexAttribute, 3,
+            GL_FLOAT, 0, vertices);
     // DrawTex() needs texture environments etc, so we use GLES1 emulation to
     // avoid unnecessary complexity.
-    Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0, false);
+    Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0);
   }
 
   // Restore enabled_set_
