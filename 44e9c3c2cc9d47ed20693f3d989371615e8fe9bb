@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "71f3b5bc_80693328",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T16:24:02Z",
+      "side": 1,
+      "message": "don\u0027t we have an enum for it somewhere?",
+      "range": {
+        "startLine": 60,
+        "startChar": 4,
+        "endLine": 60,
+        "endChar": 40
+      },
+      "revId": "44e9c3c2cc9d47ed20693f3d989371615e8fe9bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8c09cc9_dc1fe697",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T16:24:02Z",
+      "side": 1,
+      "message": "can we return this enum from the interface function, instead of a plain int?",
+      "revId": "44e9c3c2cc9d47ed20693f3d989371615e8fe9bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
