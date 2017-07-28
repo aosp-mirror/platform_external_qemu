@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "03a7c910_ec5b7c52",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_glx.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 324,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T17:12:16Z",
+      "side": 1,
+      "message": "nit: mFbConfigs.assign(frmtList, frmtList + n);",
+      "range": {
+        "startLine": 323,
+        "startChar": 12,
+        "endLine": 324,
+        "endChar": 70
+      },
+      "revId": "50e6b850898e5d48f1334fe360027615f3cf415a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
