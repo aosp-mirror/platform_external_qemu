@@ -99,7 +99,7 @@ extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLs
     const GLuint localProgramName =
         ctx->shareGroup()->genName(ShaderProgramType::PROGRAM, 0, true, glCreateShaderProgramvRET);
 
-    ProgramData* progdata = new ProgramData();
+    ProgramData* progdata = new ProgramData(ctx->getMajorVersion(), ctx->getMinorVersion());
     progdata->setLinkStatus(GL_TRUE);
 
     ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM, localProgramName, ObjectDataPtr(progdata));

@@ -193,6 +193,7 @@ class EglOsEglDisplay : public EglOS::Display {
 public:
     EglOsEglDisplay();
     ~EglOsEglDisplay();
+    virtual EglOS::GlesVersion getMaxGlesVersion();
     void queryConfigs(int renderableType,
                       AddConfigCallback* addConfigFunc,
                       void* addConfigOpaque);
@@ -235,6 +236,11 @@ EglOsEglDisplay::~EglOsEglDisplay() {
 #ifdef __linux__
     XCloseDisplay(mGlxDisplay);
 #endif // __linux__
+}
+
+EglOS::GlesVersion EglOsEglDisplay::getMaxGlesVersion() {
+    // TODO: Detect and return the highest version like in GLESVersionDetector.cpp
+    return EglOS::GlesVersion::ES2;
 }
 
 void EglOsEglDisplay::queryConfigs(int renderableType,
