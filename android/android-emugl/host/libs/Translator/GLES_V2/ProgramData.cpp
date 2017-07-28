@@ -68,10 +68,13 @@ static int s_glShaderType2ShaderType(GLenum type) {
     return ProgramData::NUM_SHADER_TYPE;
 }
 
-ProgramData::ProgramData() :  ObjectData(PROGRAM_DATA),
-                              LinkStatus(GL_FALSE),
-                              IsInUse(false),
-                              DeleteStatus(false) {}
+ProgramData::ProgramData(int glesMaj, int glesMin) :
+    ObjectData(PROGRAM_DATA),
+    LinkStatus(GL_FALSE),
+    IsInUse(false),
+    DeleteStatus(false),
+    mGlesMajorVersion(glesMaj),
+    mGlesMinorVersion(glesMin) {}
 
 ProgramData::ProgramData(android::base::Stream* stream) :
     ObjectData(stream) {
@@ -117,6 +120,8 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     LinkStatus = stream->getBe32();
     IsInUse = stream->getByte();
     DeleteStatus = stream->getByte();
+    mGlesMajorVersion = stream->getByte();
+    mGlesMinorVersion = stream->getByte();
     needRestore = true;
 }
 
@@ -231,9 +236,6 @@ static std::unordered_map<GLuint, GLUniformDesc> collectUniformInfo(GLuint pname
 }
 
 static std::unordered_map<GLuint, GLuint> collectUniformBlockInfo(GLuint pname) {
-    if (gl_dispatch_get_max_version() < GL_DISPATCH_MAX_GLES_VERSION_3_0) {
-        return std::unordered_map<GLuint, GLuint>();
-    }
     GLint uniformBlockCount = 0;
     std::unordered_map<GLuint, GLuint> uniformBlocks;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
@@ -249,9 +251,6 @@ static std::unordered_map<GLuint, GLuint> collectUniformBlockInfo(GLuint pname) 
 }
 
 static std::vector<std::string> collectTransformFeedbackInfo(GLuint pname) {
-    if (gl_dispatch_get_max_version() < GL_DISPATCH_MAX_GLES_VERSION_3_0) {
-        return {};
-    }
     GLint transformFeedbackCount = 0;
     GLint transformFeedbakMaxLength = 0;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
@@ -315,11 +314,11 @@ void ProgramData::onSave(android::base::Stream* stream) const {
     } else {
         std::unordered_map<GLuint, GLUniformDesc> uniformsOnSave =
                 collectUniformInfo(ProgramName);
-        std::unordered_map<GLuint, GLuint> uniformBlocks =
-                collectUniformBlockInfo(ProgramName);
-        std::vector<std::string> transformFeedbacks =
-                collectTransformFeedbackInfo(ProgramName);
-        if (gl_dispatch_get_max_version() >= GL_DISPATCH_MAX_GLES_VERSION_3_0) {
+        std::unordered_map<GLuint, GLuint> uniformBlocks;
+        std::vector<std::string> transformFeedbacks;
+        if (mGlesMajorVersion >= 3) {
+            collectUniformBlockInfo(ProgramName);
+            collectTransformFeedbackInfo(ProgramName);
             GLEScontext::dispatcher().glGetProgramiv(ProgramName,
                     GL_TRANSFORM_FEEDBACK_BUFFER_MODE,
                     (GLint*)&mTransformFeedbackBufferMode);
@@ -340,6 +339,9 @@ void ProgramData::onSave(android::base::Stream* stream) const {
     stream->putBe32(LinkStatus);
     stream->putByte(IsInUse);
     stream->putByte(DeleteStatus);
+
+    stream->putByte(mGlesMajorVersion);
+    stream->putByte(mGlesMinorVersion);
 }
 
 void ProgramData::postLoad(getObjDataPtr_t getObjDataPtr) {
@@ -393,7 +395,7 @@ void ProgramData::restore(ObjectLocalName localName,
             dispatcher.glBindAttribLocation(globalName, attribLocs.second,
                     attribLocs.first.c_str());
         }
-        if (gl_dispatch_get_max_version() >= GL_DISPATCH_MAX_GLES_VERSION_3_0) {
+        if (mGlesMajorVersion >= 3) {
             std::unique_ptr<const char*> varyings(
                     new const char*[mTransformFeedbacks.size()]);
             for (size_t i = 0; i < mTransformFeedbacks.size(); i++) {
