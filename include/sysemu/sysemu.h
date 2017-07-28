@@ -88,6 +88,26 @@ typedef struct {
 
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);
 
+/* A callback for regular and error message redirection */
+typedef struct {
+    void* opaque;
+    void (*out)(void* opaque, const char* fmt, ...);
+    void (*err)(void* opaque, Error* err, const char* fmt, ...);
+} QEMUMessageCallback;
+
+int qemu_savevm(const char* name, const QEMUMessageCallback* messages);
+int qemu_loadvm(const char* name, const QEMUMessageCallback* messages);
+int qemu_delvm(const char* name, const QEMUMessageCallback* messages);
+
+/* Populates the passed array of strings with the snapshot names.
+ * If |names_count| is not NULL, it must be the size of |names| array.
+ * On exit, it is set to the total snapshot count, regardless of its
+ * input value.
+ * Function also prints the formatted list of snapshots into the |messages|'s
+ * |out| callback. */
+int qemu_listvms(char (*names)[256], int* names_count,
+                 const QEMUMessageCallback* messages);
+
 void hmp_savevm(Monitor *mon, const QDict *qdict);
 int load_vmstate(const char *name);
 void hmp_delvm(Monitor *mon, const QDict *qdict);

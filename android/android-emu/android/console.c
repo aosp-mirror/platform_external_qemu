@@ -2223,7 +2223,7 @@ static int do_snapshot_save(ControlClient client, char* args) {
     }
 
     bool success =
-            vmopers(client)->snapshotSave(args, client, control_write_out_cb);
+            vmopers(client)->snapshotSave(args, client, control_write_err_cb);
     return success ? 0 : -1;
 }
 
@@ -2236,7 +2236,7 @@ static int do_snapshot_load(ControlClient client, char* args) {
     }
 
     bool success =
-            vmopers(client)->snapshotLoad(args, client, control_write_out_cb);
+            vmopers(client)->snapshotLoad(args, client, control_write_err_cb);
     return success ? 0 : -1;
 }
 
@@ -2249,7 +2249,7 @@ static int do_snapshot_del(ControlClient client, char* args) {
     }
 
     bool success =
-            vmopers(client)->snapshotDelete(args, client, control_write_out_cb);
+            vmopers(client)->snapshotDelete(args, client, control_write_err_cb);
     return success ? 0 : -1;
 }
 
