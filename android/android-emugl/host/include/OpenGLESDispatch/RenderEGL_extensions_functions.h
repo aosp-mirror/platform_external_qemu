@@ -13,6 +13,7 @@
   X(EGLSyncKHR, eglCreateSyncKHR, (EGLDisplay display, EGLenum type, const EGLint* attribs)) \
   X(EGLint, eglClientWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout)) \
   X(EGLBoolean, eglDestroySyncKHR, (EGLDisplay display, EGLSyncKHR sync)) \
+  X(EGLint, eglGetMaxGLESVersion, (EGLDisplay display)) \
 
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H

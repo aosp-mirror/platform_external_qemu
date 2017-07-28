@@ -53,19 +53,4 @@ private:
     static emugl::Mutex   s_lock;
 };
 
-// Used to query max GLES version support based on what the dispatch mechanism
-// has found in the system OpenGL library.
-// First, a enum for tracking the detected GLES version based on dispatch.
-// We support 2 minimally.
-// This is meant to communicate with GLESv2Dispatch to communicate the
-// max version up the stack.
-enum GLDispatchMaxGLESVersion {
-    GL_DISPATCH_MAX_GLES_VERSION_2 = 0,
-    GL_DISPATCH_MAX_GLES_VERSION_3_0 = 1,
-    GL_DISPATCH_MAX_GLES_VERSION_3_1 = 2,
-    GL_DISPATCH_MAX_GLES_VERSION_3_2 = 3,
-};
-
-extern "C" GL_APICALL GLDispatchMaxGLESVersion GL_APIENTRY gl_dispatch_get_max_version();
-
 #endif  // GL_DISPATCH_H

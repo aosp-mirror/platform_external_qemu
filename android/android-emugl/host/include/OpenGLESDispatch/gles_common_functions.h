@@ -76,7 +76,6 @@ typedef const GLubyte* GLconstubyteptr;
   X(void, glPushClientAttrib, (GLbitfield mask), (mask)) \
   X(void, glPopAttrib, (), ()) \
   X(void, glPopClientAttrib, (), ()) \
-  X(GLuint, gl_dispatch_get_max_version, (), ()) \
 
 
 #endif  // GLES_COMMON_FUNCTIONS_H

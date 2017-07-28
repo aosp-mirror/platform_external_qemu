@@ -59,7 +59,7 @@ public:
         COMPUTE,
         NUM_SHADER_TYPE
     };
-    ProgramData();
+    ProgramData(int glesMaj, int glesMin);
     ProgramData(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream) const override;
     virtual void postLoad(getObjDataPtr_t getObjDataPtr) override;
@@ -119,5 +119,8 @@ private:
     std::unordered_map<GLuint, GLuint> mUniformBlockBinding;
     std::vector<std::string> mTransformFeedbacks;
     GLenum mTransformFeedbackBufferMode = 0;
+
+    int mGlesMajorVersion = 2;
+    int mGlesMinorVersion = 0;
 };
 #endif

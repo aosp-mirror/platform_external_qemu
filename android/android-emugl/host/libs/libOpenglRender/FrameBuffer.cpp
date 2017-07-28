@@ -253,6 +253,14 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     GL_LOG("egl: %d %d", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
 
+    FrameBuffer::setMaxGLESVersion(calcMaxVersionFromDispatch(fb->m_eglDisplay));
+
+    int glesMaj, glesMin;
+    emugl::getGlesVersion(&glesMaj, &glesMin);
+
+    DBG("gles version: %d %d\n", glesMaj, glesMin);
+    GL_LOG("gles version: %d %d\n", glesMaj, glesMin);
+
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string
@@ -459,6 +467,18 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     GL_LOG("basic EGL initialization successful");
     return true;
+}
+
+
+static GLESDispatchMaxVersion sMaxGLESVersion = GLES_DISPATCH_MAX_VERSION_2;
+
+// static
+void FrameBuffer::setMaxGLESVersion(GLESDispatchMaxVersion version) {
+    sMaxGLESVersion = version;
+}
+
+GLESDispatchMaxVersion FrameBuffer::getMaxGLESVersion() {
+    return sMaxGLESVersion;
 }
 
 FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)

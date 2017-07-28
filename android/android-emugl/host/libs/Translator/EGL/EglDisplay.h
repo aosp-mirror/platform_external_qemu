@@ -56,6 +56,11 @@ public:
     // Return the number of known configurations for this EglDisplay.
     int nConfigs() const { return m_configs.size(); }
 
+    // Returns the max supported GLES version
+    EglOS::GlesVersion getMaxGlesVersion() const {
+        return nativeType()->getMaxGlesVersion();
+    }
+
     // Write up to |config_size| EGLConfig values into the |configs| array.
     // Return the number if values written.
     int getConfigs(EGLConfig* configs,int config_size) const;

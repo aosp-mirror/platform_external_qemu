@@ -90,6 +90,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay display, EGLenum type, const EGLint* attribs);
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout);
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
+EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -103,6 +104,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglClientWaitSyncKHR },
         {"eglDestroySyncKHR",
                 (__eglMustCastToProperFunctionPointerType)eglDestroySyncKHR },
+        {"eglGetMaxGLESVersion",
+                (__eglMustCastToProperFunctionPointerType)eglGetMaxGLESVersion },
 };
 
 static const int s_eglExtensionsSize =
@@ -1348,6 +1351,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync)
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteSync((GLsync)sync);
     return EGL_TRUE;
+}
+
+EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
+    // 0: es2 1: es3.0 2: es3.1 3: es3.2
+    VALIDATE_DISPLAY_RETURN(display, 0 /* gles2 */);
+    return (EGLint)dpy->getMaxGlesVersion();
 }
 
 /*********************************************************************************/
