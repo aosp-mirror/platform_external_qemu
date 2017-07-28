@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "128dff4d_e47d75e0",
+        "filename": "android-qemu2-glue/qemu-setup.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T23:52:28Z",
+      "side": 1,
+      "message": "FYI: extern \"C\" can be used without a block:\nextern \"C\" void foo() { ... }",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 10
+      },
+      "revId": "10cdf57321cc0e93bbf2808d40bc58e0e6672c04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a46450a_20dac424",
+        "filename": "hw/arm/ranchu.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T23:52:28Z",
+      "side": 1,
+      "message": "please don\u0027t forget to remove this",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 2
+      },
+      "revId": "10cdf57321cc0e93bbf2808d40bc58e0e6672c04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
