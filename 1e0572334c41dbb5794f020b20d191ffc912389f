@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f35b4cf6_50a39a94",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1002,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-07-28T17:16:24Z",
+      "side": 1,
+      "message": "I didn\u0027t find code related with this name changing in this cl.",
+      "range": {
+        "startLine": 1002,
+        "startChar": 56,
+        "endLine": 1002,
+        "endChar": 62
+      },
+      "revId": "1e0572334c41dbb5794f020b20d191ffc912389f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
