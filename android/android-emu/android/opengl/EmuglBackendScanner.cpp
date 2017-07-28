@@ -64,6 +64,9 @@ std::vector<std::string> EmuglBackendScanner::scanDir(const char* execDir,
         if (!strcmp(entry.c_str() + kBackendPrefixSize, "angle")) {
             names.push_back("angle_indirect");
         }
+        if (!strcmp(entry.c_str() + kBackendPrefixSize, "swiftshader")) {
+            names.push_back("swiftshader_indirect");
+        }
     }
 
     // Need to sort the backends in consistent order.
