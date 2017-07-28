@@ -186,6 +186,7 @@ public:
         CHECK_EGL_ERR
     };
     ~EglOsEglDisplay() = default;
+    virtual EglOS::GlesVersion getMaxGlesVersion();
     void queryConfigs(int renderableType,
                       AddConfigCallback* addConfigFunc,
                       void* addConfigOpaque);
@@ -224,6 +225,11 @@ private:
     EGLDisplay mDisplay;
     EglOsEglDispatcher mDispatcher;
 };
+
+EglOS::GlesVersion EglOsEglDisplay::getMaxGlesVersion() {
+    // TODO: Detect and return the highest version like in GLESVersionDetector.cpp
+    return GlesVersion_2;
+}
 
 void EglOsEglDisplay::queryConfigs(int renderableType,
                                    AddConfigCallback* addConfigFunc,

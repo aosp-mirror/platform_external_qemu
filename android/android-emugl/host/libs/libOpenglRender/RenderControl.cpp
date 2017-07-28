@@ -202,7 +202,7 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     std::string eglStr(str);
-    if ((calcMaxVersionFromDispatch() >= GLES_DISPATCH_MAX_VERSION_3_0) &&
+    if ((FrameBuffer::getMaxGLESVersion() >= GLES_DISPATCH_MAX_VERSION_3_0) &&
         eglStr.find("EGL_KHR_create_context") == std::string::npos) {
         eglStr += "EGL_KHR_create_context ";
     }
@@ -332,7 +332,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         glStr += " ";
     }
 
-    GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
+    GLESDispatchMaxVersion maxVersion = FrameBuffer::getMaxGLESVersion();
     if (name == GL_EXTENSIONS && glesDynamicVersionEnabled) {
         glStr += maxVersionToFeatureString(maxVersion);
         glStr += " ";
@@ -351,7 +351,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     if (glesDynamicVersionEnabled && name == GL_VERSION) {
-        GLESDispatchMaxVersion maxVersion = calcMaxVersionFromDispatch();
+        GLESDispatchMaxVersion maxVersion = FrameBuffer::getMaxGLESVersion();
         switch (maxVersion) {
             case GLES_DISPATCH_MAX_VERSION_3_0:
                 glStr = replaceESVersionString(glStr, "3.0");
