@@ -17,6 +17,8 @@
 #include "android/base/Optional.h"
 #include "android/base/StringView.h"
 #include "android/base/async/Looper.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
 
@@ -115,13 +117,18 @@ public:
     // Cancels the running command (has no effect if the command isn't running).
     void cancel() { mCancelled = true; }
 
+    // Block until the command finishes (and the done() callback returns), or
+    // timeout expires. Returns |true| if command finished, or was canceled, or
+    // wasn't even started (which should not happen), and |false| on timeout.
+    bool wait(base::System::Duration timeoutMs = -1);
+
 private:
     AdbCommand(android::base::Looper* looper,
                const std::string& adb_path,
                const std::string& serial_string,
                const std::vector<std::string>& command,
                bool want_output,
-               base::System::Duration timeout,
+               base::System::Duration timeoutMs,
                ResultCallback callback);
     void start(int checkTimeoutMs = 1000);
     void taskFunction(OptionalAdbCommandResult* result);
@@ -131,12 +138,15 @@ private:
     std::unique_ptr<android::base::ParallelTask<OptionalAdbCommandResult>>
             mTask;
     ResultCallback mResultCallback;
-    bool mCancelled = false;
     std::string mOutputFilePath;
     std::vector<std::string> mCommand;
     bool mWantOutput;
-    int mTimeout;
-    bool mFinished;
+    bool mCancelled = false;
+    bool mFinished = false;
+    int mTimeoutMs;
+    // To signal the command completion.
+    base::Lock mLock;
+    base::ConditionVariable mCv;
 };
 }
 }
