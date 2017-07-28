@@ -32,7 +32,7 @@ typedef enum {                               // Mac equivalence
              } MacPixelFormatAttribs;
 
 typedef enum {
-                 MAC_OPENGL_PROFILE_LEGACY = 0x1000, // NSOpenGLPFAOpenGLProfile
+                 MAC_OPENGL_PROFILE_LEGACY = 0x1000, // NSOpenGLProfileVersionLegacy
                  MAC_OPENGL_PROFILE_3_2    = 0x3200, // NSOpenGLProfileVersion3_2Core
                  MAC_OPENGL_PROFILE_4_1    = 0x4100, // NSOpenGLProfileVersion4_1Core
              } MacOpenGLProfileVersions;
@@ -40,7 +40,7 @@ typedef enum {
 
 extern "C"{
 
-void setupCoreProfileNativeFormats();
+int setupCoreProfileNativeFormats();
 
 int getNumPixelFormats();
 
