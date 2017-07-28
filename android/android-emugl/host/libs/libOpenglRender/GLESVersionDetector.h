@@ -13,13 +13,19 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-
 #pragma once
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
+#include <string>
 // Used to determine maximum supported GLES version.
-GLESDispatchMaxVersion calcMaxVersionFromDispatch();
+GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy);
 
 // For determining whether or not to use core profile OpenGL.
 bool shouldEnableCoreProfile();
+
+std::string filterExtensionsBasedOnMaxVersion(GLESDispatchMaxVersion ver, const std::string& exts);
+

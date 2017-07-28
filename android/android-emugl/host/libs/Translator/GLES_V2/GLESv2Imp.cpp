@@ -817,7 +817,9 @@ GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLi
 GL_APICALL GLuint GL_APIENTRY glCreateProgram(void){
     GET_CTX_RET(0);
     if(ctx->shareGroup().get()) {
-        ProgramData* programInfo = new ProgramData();
+        ProgramData* programInfo =
+            new ProgramData(ctx->getMajorVersion(),
+                            ctx->getMinorVersion());
         const GLuint localProgramName =
                 ctx->shareGroup()->genName(ShaderProgramType::PROGRAM, 0, true);
         ctx->shareGroup()->setObjectData(NamedObjectType::SHADER_OR_PROGRAM,

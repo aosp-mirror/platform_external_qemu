@@ -85,14 +85,18 @@ private:
     void* mContext = nullptr;
 };
 
-typedef std::list<int> NativeFormatList;
+class MacNativeSupportInfo {
+public:
+    MacNativeSupportInfo() :
+        numNativeFormats(getNumPixelFormats()),
+        maxOpenGLProfile((MacOpenGLProfileVersions)setupCoreProfileNativeFormats()) { }
+    int numNativeFormats = 0;
+    MacOpenGLProfileVersions maxOpenGLProfile =
+        MAC_OPENGL_PROFILE_LEGACY;
+};
 
-static int sNumNativeFormats = 0;
-
-void initNativeConfigs(){
-    sNumNativeFormats = getNumPixelFormats();
-    setupCoreProfileNativeFormats();
-}
+static emugl::LazyInstance<MacNativeSupportInfo> sSupportInfo =
+    LAZY_INSTANCE_INIT;
 
 class MacPixelFormat : public EglOS::PixelFormat {
 public:
@@ -182,11 +186,22 @@ class MacDisplay : public EglOS::Display {
 public:
     explicit MacDisplay(EGLNativeDisplayType dpy) : mDpy(dpy) {}
 
+    virtual EglOS::GlesVersion getMaxGlesVersion() {
+        switch (sSupportInfo->maxOpenGLProfile) {
+        case MAC_OPENGL_PROFILE_LEGACY:
+            return EglOS::GlesVersion_2;
+        case MAC_OPENGL_PROFILE_3_2:
+        case MAC_OPENGL_PROFILE_4_1:
+            return EglOS::GlesVersion_30;
+        default:
+            return EglOS::GlesVersion_2;
+        }
+    }
+
     virtual void queryConfigs(int renderableType,
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
-        initNativeConfigs();
-        for (int i = 0; i < sNumNativeFormats; i++) {
+        for (int i = 0; i < sSupportInfo->numNativeFormats; i++) {
             pixelFormatToConfig(
                 i,
                 addConfigFunc,
@@ -331,6 +346,7 @@ public:
     EGLNativeDisplayType dpy() const { return mDpy; }
 
 private:
+    EglOS::GlesVersion mMaxGlesVersion = EglOS::GlesVersion_2;
     EGLNativeDisplayType mDpy = {};
 };
 
