@@ -217,6 +217,13 @@ static std::string getNthParentDir(const char* path, size_t n) {
  *  type - what type of partition parameter to generate
 */
 
+static std::string get_qcow2_image_basename(const std::string& image) {
+    char* basename = path_basename(image.c_str());
+    std::string qcow2_basename(basename);
+    free(basename);
+    return qcow2_basename + ".qcow2";
+}
+
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
                              AndroidHwConfig* hw, ImageType type, bool writable,
                              int apiLevel, AvdInfo* avd) {
@@ -233,6 +240,7 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
     std::string deviceParam;
     ScopedCPtr<const char> allocatedPath;
     StringView filePath;
+    std::string sysImagePath, vendorImagePath;
     bool qCow2Format = true;
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
@@ -242,14 +250,16 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
             if (apiLevel <= 15) {
                 writable = true;
             }
+            sysImagePath = std::string(avdInfo_getSystemImagePath(avd) ?:
+                avdInfo_getSystemInitImagePath(avd));
             if (writable) {
                 const char* systemDir = avdInfo_getContentPath(avd);
-                filePath = path_join(systemDir, "system.img.qcow2");
+                filePath = path_join(systemDir, get_qcow2_image_basename(sysImagePath).c_str());
                 driveParam += StringFormat("index=%d,id=system,file=%s",
                                            idx++, filePath);
             } else {
                 qCow2Format = false;
-                filePath = avdInfo_getSystemInitImagePath(avd);
+                filePath = strdup(sysImagePath.c_str());
                 driveParam += StringFormat("index=%d,id=system,file=%s"
                                            ",read-only",
                                            idx++, filePath);
@@ -264,15 +274,24 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                 // we do not have a vendor image to mount
                 return;
             }
-            filePath = avdInfo_getContentPath(avd);
-            driveParam += StringFormat("index=%d,id=vendor,file=%s"
-                                       PATH_SEP "vendor.img.qcow2",
-                                        idx++, filePath);
-            // You can override this explicitly
-            // by passing -writable-system to emulator.
-            if (!writable) driveParam += ",read-only";
+            vendorImagePath = std::string(avdInfo_getVendorImagePath(avd) ?:
+                avdInfo_getVendorInitImagePath(avd));
+            if (writable) {
+                const char* systemDir = avdInfo_getContentPath(avd);
+                filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
+                driveParam += StringFormat("index=%d,id=vendor,file=%s",
+                                           idx++, filePath);
+            } else {
+                qCow2Format = false;
+                filePath = strdup(vendorImagePath.c_str());
+                driveParam += StringFormat("index=%d,id=vendor,file=%s"
+                                           ",read-only",
+                                           idx++, filePath);
+            }
+            allocatedPath.reset(filePath.c_str());
             deviceParam = StringFormat("%s,drive=vendor",
                                        kTarget.storageDeviceType);
+
             break;
         case IMAGE_TYPE_CACHE:
             filePath = hw->disk_cachePartition_path;
@@ -980,7 +999,7 @@ extern "C" int main(int argc, char **argv) {
          * instead of virtio block device */
         StringView filePath = avdInfo_getContentPath(avd);
         std::string driveParam = StringFormat("index=0,id=system,file=%s"
-                                              PATH_SEP "system.img.qcow2",
+                                              PATH_SEP "system-qemu.img.qcow2",
                                               filePath);
         args[n++] = "-drive";
         args[n++] = ASTRDUP(driveParam.c_str());
