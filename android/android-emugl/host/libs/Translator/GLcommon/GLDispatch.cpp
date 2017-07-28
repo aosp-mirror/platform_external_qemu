@@ -98,10 +98,6 @@ bool GLDispatch::isInitialized() const {
     return m_isLoaded;
 }
 
-// Holds the level of GLES 3.x support after dispatchFuncs runs.
-static GLDispatchMaxGLESVersion s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_2;
-static bool s_got_gles_support_level = false;
-
 void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(m_isLoaded)
@@ -128,44 +124,5 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     LIST_GLES3_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
     LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
 
-    if (s_got_gles_support_level) return;
-
-    // Now detect the maximum level of GLES 3.x support from the host system.
-    bool gles30_supported = true;
-    bool gles31_supported = true;
-    bool gles32_supported = false;
-    // For 3.0, we don't really need glInvalidate(Sub)Framebuffer.
-#define DETECT_GLES30_SUPPORT(return_type, function_name, signature, callargs) do { \
-    if (!function_name && \
-        strcmp(#function_name, "glInvalidateFramebuffer") && \
-        strcmp(#function_name, "glInvalidateSubFramebuffer") ) { \
-        gles30_supported = false; \
-    } \
-    } while(0); \
-
-    LIST_GLES3_ONLY_FUNCTIONS(DETECT_GLES30_SUPPORT)
-
-#define DETECT_GLES31_SUPPORT(return_type, function_name, signature, callargs) do { \
-    if (!function_name) { \
-        gles31_supported = false; } \
-    } while(0); \
-
-    LIST_GLES31_ONLY_FUNCTIONS(DETECT_GLES31_SUPPORT)
-
-    if (gles30_supported && gles31_supported && gles32_supported) {
-        s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_3_2;
-    } else if (gles30_supported && gles31_supported) {
-        s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_3_1;
-    } else if (gles30_supported) {
-        s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_3_0;
-    } else {
-        s_max_supported_gles_version = GL_DISPATCH_MAX_GLES_VERSION_2;
-    }
-
     m_isLoaded = true;
-    s_got_gles_support_level = true;
-}
-
-extern "C" GL_APICALL GLDispatchMaxGLESVersion GL_APIENTRY gl_dispatch_get_max_version() {
-    return s_max_supported_gles_version;
 }
