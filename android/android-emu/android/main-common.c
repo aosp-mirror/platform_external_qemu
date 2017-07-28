@@ -516,6 +516,45 @@ static AvdInfo* createAVD(AndroidOptions* opts, int* inAndroidBuild) {
     return ret;
 }
 
+static bool read_file_to_buf(const char* file, char* buf, int size){
+    int fd = open(file, O_RDONLY);
+    if (fd < 0) return false;
+    int ret = read(fd, buf, size);
+    close(fd);
+    if (ret != size) return false;
+    return true;
+}
+
+/* Check if an image is chrome os image by looking for special chrome os kernel
+ * partition GUID in gpt table.
+ */
+static bool is_cros_image(const char* image, const uint8_t* init_image) {
+    if (!image) {
+        image = init_image;
+    }
+    /* chrome os image is a whole disk image with GPT partitions.
+     * the first sector of disk is still MBR, the second sector is gpt
+     * partition table header. Then it follows partion entries with 128
+     * bytes per entry. chrome os kernel partion is in partition 2.
+     */
+    const int sector = 512;
+    const int entry = 128;
+    unsigned char buf[sector * 3];
+    if (!read_file_to_buf(image, buf, sizeof(buf))) return false;
+    /* Check if it's a valid MBR by verifying boot signature */
+    if (buf[sector-2] != 0x55 || buf[sector-1] != 0xaa) return false;
+    /* Check if it's a valid GPT partion table header */
+    if (strncmp(buf + sector, "EFI PART", 8)) return false;
+    /* Check if partion 2 is a chrome os kernel partition */
+    const char cros_kernel_guid[] = {0x5d, 0x2a, 0x3a, 0xfe, 0x32, 0x4f, 0xa7, 0x41,
+                                     0xb7, 0x25, 0xac, 0xcc, 0x32, 0x85, 0xa3, 0x09};
+    if (!memcmp(buf + 2 * sector + entry, cros_kernel_guid, sizeof(cros_kernel_guid))) {
+        D("Chrome os image detected: %s", image);
+        return true;
+    }
+    return false;
+}
+
 /*
  * handleCommonEmulatorOptions
  *
@@ -795,6 +834,11 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
             str_reset_null(&hw->disk_systemPartition_path);
             str_reset_nocopy(&hw->disk_systemPartition_initPath, initImage);
             D("Using initial system image: %s", initImage);
+        }
+        /* Automatically detect chrome os image */
+        if(!hw->hw_arc) {
+            hw->hw_arc = is_cros_image(hw->disk_systemPartition_path,
+                                       hw->disk_systemPartition_initPath);
         }
 
         /* Check the size of the system partition image.
