@@ -13,10 +13,12 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-
 #pragma once
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include <EGL/egl.h>
+#include <EGL/eglext.h>
+
 // Used to determine maximum supported GLES version.
-GLESDispatchMaxVersion calcMaxVersionFromDispatch();
+GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy);

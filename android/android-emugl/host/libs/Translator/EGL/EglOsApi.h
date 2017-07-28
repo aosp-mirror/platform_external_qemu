@@ -130,12 +130,21 @@ struct PbufferInfo {
     EGLint hasMipmap;
 };
 
+enum GlesVersion {
+    GlesVersion_2 = 0,
+    GlesVersion_30 = 1,
+    GlesVersion_31 = 2,
+    GlesVersion_32 = 3,
+};
+
 // A class to model the engine-specific implementation of a GL display
 // connection.
 class Display {
 public:
     Display() = default;
     virtual ~Display() {}
+
+    virtual GlesVersion getMaxGlesVersion() = 0;
 
     virtual void queryConfigs(int renderableType,
                               AddConfigCallback* addConfigFunc,
