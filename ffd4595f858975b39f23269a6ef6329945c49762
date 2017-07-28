@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7b9ff33_33d3789c",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 520,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T23:58:57Z",
+      "side": 1,
+      "message": "don\u0027t forget O_BINARY for Windows, otherwise you\u0027ll be surprised by \\n -\u003e \\r\\n conversion",
+      "range": {
+        "startLine": 520,
+        "startChar": 24,
+        "endLine": 520,
+        "endChar": 32
+      },
+      "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34796528_62cc6b76",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-28T23:58:57Z",
+      "side": 1,
+      "message": "is there a better way to detect it without reading the image? We\u0027re optimizing emulator startup as much as we can now to make snapshots load fast, and this code would add some milliseconds to each boot (especially when HDD is loaded).\nAll other device types are in the AVD flags, where we store if the image is a phone or a tablet, or something else. What about saving it in the avd too and not reading an extra file synchronously? Async read is fine - and that\u0027s what will happen later during the startup phase",
+      "range": {
+        "startLine": 531,
+        "startChar": 12,
+        "endLine": 531,
+        "endChar": 25
+      },
+      "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
