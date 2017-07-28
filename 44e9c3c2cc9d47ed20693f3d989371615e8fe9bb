@@ -39,6 +39,29 @@
       "revId": "44e9c3c2cc9d47ed20693f3d989371615e8fe9bb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "38f42762_9271abab",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1101621
+      },
+      "writtenOn": "2017-07-28T16:35:52Z",
+      "side": 1,
+      "message": "nit: doesn\u0027t or does not",
+      "range": {
+        "startLine": 31,
+        "startChar": 17,
+        "endLine": 31,
+        "endChar": 23
+      },
+      "revId": "44e9c3c2cc9d47ed20693f3d989371615e8fe9bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
