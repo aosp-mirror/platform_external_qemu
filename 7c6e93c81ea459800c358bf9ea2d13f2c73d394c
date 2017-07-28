@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "064f11f5_3e8a0cbe",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1121388
+      },
+      "writtenOn": "2017-07-28T23:21:07Z",
+      "side": 1,
+      "message": "Move to public.",
+      "revId": "7c6e93c81ea459800c358bf9ea2d13f2c73d394c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
