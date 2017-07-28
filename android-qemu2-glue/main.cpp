@@ -219,6 +219,13 @@ static std::string getNthParentDir(const char* path, size_t n) {
  *  type - what type of partition parameter to generate
 */
 
+static std::string get_qcow2_image_basename(const std::string& image) {
+    char* basename = path_basename(image.c_str());
+    std::string qcow2_basename(basename);
+    free(basename);
+    return qcow2_basename + ".qcow2";
+}
+
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
                              AndroidHwConfig* hw, ImageType type, bool writable,
                              int apiLevel, AvdInfo* avd) {
@@ -238,20 +245,31 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     std::string deviceParam;
     StringView filePath;
+    ScopedCPtr<const char> allocatedPath;
+    std::string sysImagePath, vendorImagePath;
+    bool qCow2Format = true;
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            filePath = avdInfo_getContentPath(avd);
-            driveParam += StringFormat("index=%d,id=system,file=%s"
-                                       PATH_SEP "system.img.qcow2",
-                                        idx++, filePath);
-            // API 15 and under images need a read+write
-            // system image.
-            if (apiLevel > 15) {
-                // API > 15 uses read-only system partition.
-                // You can override this explicitly
-                // by passing -writable-system to emulator.
-                if (!writable)
-                    driveParam += ",read-only";
+            // API 15 and under images need a read+write system image.
+            // API > 15 uses read-only system partition. You can override this
+            // explicitly by passing -writable-system to emulator.
+            if (apiLevel <= 15) {
+                writable = true;
+            }
+            sysImagePath = std::string(avdInfo_getSystemImagePath(avd) ?:
+                avdInfo_getSystemInitImagePath(avd));
+            if (writable) {
+                const char* systemDir = avdInfo_getContentPath(avd);
+                filePath = path_join(systemDir, get_qcow2_image_basename(sysImagePath).c_str());
+                driveParam += StringFormat("index=%d,id=system,file=%s",
+                                           idx++, filePath);
+                allocatedPath.reset(filePath.c_str());
+            } else {
+                qCow2Format = false;
+                filePath = sysImagePath.c_str();
+                driveParam += StringFormat("index=%d,id=system,file=%s"
+                                           ",read-only",
+                                           idx++, filePath);
             }
             deviceParam = StringFormat("%s,drive=system",
                                        kTarget.storageDeviceType);
@@ -262,15 +280,24 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                 // we do not have a vendor image to mount
                 return;
             }
-            filePath = avdInfo_getContentPath(avd);
-            driveParam += StringFormat("index=%d,id=vendor,file=%s"
-                                       PATH_SEP "vendor.img.qcow2",
-                                        idx++, filePath);
-            // You can override this explicitly
-            // by passing -writable-system to emulator.
-            if (!writable) driveParam += ",read-only";
+            vendorImagePath = std::string(avdInfo_getVendorImagePath(avd) ?:
+                avdInfo_getVendorInitImagePath(avd));
+            if (writable) {
+                const char* systemDir = avdInfo_getContentPath(avd);
+                filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
+                driveParam += StringFormat("index=%d,id=vendor,file=%s",
+                                           idx++, filePath);
+                allocatedPath.reset(filePath.c_str());
+            } else {
+                qCow2Format = false;
+                filePath = vendorImagePath.c_str();
+                driveParam += StringFormat("index=%d,id=vendor,file=%s"
+                                           ",read-only",
+                                           idx++, filePath);
+            }
             deviceParam = StringFormat("%s,drive=vendor",
                                        kTarget.storageDeviceType);
+
             break;
         case IMAGE_TYPE_CACHE:
             filePath = hw->disk_cachePartition_path;
