@@ -1,0 +1,8 @@
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Tao Wu <lepton@google.com>
+Submitted-by: Tao Wu <lepton@google.com>
+Submitted-at: Fri, 28 Jul 2017 19:47:02 +0000
+Reviewed-on: https://android-review.googlesource.com/446850
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
