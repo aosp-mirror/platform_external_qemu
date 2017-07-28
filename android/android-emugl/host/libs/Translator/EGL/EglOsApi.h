@@ -130,12 +130,35 @@ struct PbufferInfo {
     EGLint hasMipmap;
 };
 
+enum class GlesVersion {
+    ES2 = 0,
+    ES30 = 1,
+    ES31 = 2,
+    ES32 = 3,
+};
+
+inline GlesVersion calcMaxESVersionFromCoreVersion(int coreMajor, int coreMinor) {
+    switch (coreMajor) {
+        case 3:
+            return coreMinor > 1 ? EglOS::GlesVersion::ES30 : EglOS::GlesVersion::ES2;
+        case 4:
+            // 4.3 core has all the entry points we need, but we want 4.5 core for
+            // ARB_ES31_compatibility to avoid shader translation (for now. TODO:
+            // translate ESSL 310 to 4.3 shaders)
+            return coreMinor > 4 ? EglOS::GlesVersion::ES31 : EglOS::GlesVersion::ES30;
+        default:
+            return EglOS::GlesVersion::ES2;
+    }
+}
+
 // A class to model the engine-specific implementation of a GL display
 // connection.
 class Display {
 public:
     Display() = default;
     virtual ~Display() {}
+
+    virtual GlesVersion getMaxGlesVersion() = 0;
 
     virtual void queryConfigs(int renderableType,
                               AddConfigCallback* addConfigFunc,
