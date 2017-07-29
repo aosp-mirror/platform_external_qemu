@@ -22,6 +22,30 @@
       "revId": "f217ce18c896f54e484767e00f8c3f81444223ce",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "034ea201_e961c5a7",
+        "filename": "android/android-emu/android/emulation/control/AdbInterface.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T01:28:01Z",
+      "side": 1,
+      "message": "that\u0027s just a new default since C++11, so I think we should start getting used to it\nnoexcept allows more optimizations, especially noexcept move. And since we compile with -fno-exceptions, everything is noexcept in our code :)",
+      "parentUuid": "015f41f6_ebcae2d0",
+      "range": {
+        "startLine": 63,
+        "startChar": 28,
+        "endLine": 63,
+        "endChar": 36
+      },
+      "revId": "f217ce18c896f54e484767e00f8c3f81444223ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
