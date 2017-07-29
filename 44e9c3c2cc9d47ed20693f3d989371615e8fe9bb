@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "63eb3b4b_7cbbd655",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T00:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71f3b5bc_80693328",
+      "range": {
+        "startLine": 60,
+        "startChar": 4,
+        "endLine": 60,
+        "endChar": 40
+      },
+      "revId": "44e9c3c2cc9d47ed20693f3d989371615e8fe9bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a8c09cc9_dc1fe697",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
         "patchSetId": 2
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "dcd343f7_33e9aac1",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T00:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8c09cc9_dc1fe697",
+      "revId": "44e9c3c2cc9d47ed20693f3d989371615e8fe9bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "38f42762_9271abab",
         "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
         "patchSetId": 2
@@ -53,6 +95,30 @@
       "writtenOn": "2017-07-28T16:35:52Z",
       "side": 1,
       "message": "nit: doesn\u0027t or does not",
+      "range": {
+        "startLine": 31,
+        "startChar": 17,
+        "endLine": 31,
+        "endChar": 23
+      },
+      "revId": "44e9c3c2cc9d47ed20693f3d989371615e8fe9bb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e88275a_016b72b6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T00:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "38f42762_9271abab",
       "range": {
         "startLine": 31,
         "startChar": 17,
