@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "079f7975_4aa3ce69",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:11:15Z",
+      "side": 1,
+      "message": "hmmm, why? why not to create a substring of needed size, like StringView sub \u003d sv.subString(0, newSize);\n?",
+      "range": {
+        "startLine": 166,
+        "startChar": 0,
+        "endLine": 169,
+        "endChar": 5
+      },
+      "revId": "21da5367e633c6579b1f8b1030491ee0fbb0df3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17b77a79_b6229f4a",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:11:15Z",
+      "side": 1,
+      "message": "an idea: return a StringView(found, end())\nthis way it returns an emtpy view for no match, and a view that\u0027s exactly what you need if found",
+      "range": {
+        "startLine": 174,
+        "startChar": 4,
+        "endLine": 174,
+        "endChar": 10
+      },
+      "revId": "21da5367e633c6579b1f8b1030491ee0fbb0df3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6d191fc7_2c126e95",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:11:15Z",
+      "side": 1,
+      "message": "make it default to 0, and you only need one function",
+      "range": {
+        "startLine": 186,
+        "startChar": 40,
+        "endLine": 186,
+        "endChar": 51
+      },
+      "revId": "21da5367e633c6579b1f8b1030491ee0fbb0df3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c61f6537_7686a32b",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:11:15Z",
+      "side": 1,
+      "message": "just copy it",
+      "range": {
+        "startLine": 186,
+        "startChar": 16,
+        "endLine": 186,
+        "endChar": 33
+      },
+      "revId": "21da5367e633c6579b1f8b1030491ee0fbb0df3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3e40df4c_d4f76ce4",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:11:15Z",
+      "side": 1,
+      "message": "std::search() is safer IMO",
+      "range": {
+        "startLine": 190,
+        "startChar": 0,
+        "endLine": 193,
+        "endChar": 61
+      },
+      "revId": "21da5367e633c6579b1f8b1030491ee0fbb0df3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4df3272_34a73ddb",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 212,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:11:15Z",
+      "side": 1,
+      "message": "return { mString + std::min(mSize, begin), mSize -\n std::min(mSize, begin) };\n\nfor the (begin, len) version:\n\nreturn { mString + std::min(mSize, begin), std::min(len, mSize - std::min(mSize, begin)) };",
+      "range": {
+        "startLine": 206,
+        "startChar": 4,
+        "endLine": 212,
+        "endChar": 9
+      },
+      "revId": "21da5367e633c6579b1f8b1030491ee0fbb0df3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
