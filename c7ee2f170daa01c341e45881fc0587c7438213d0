@@ -46,6 +46,29 @@
       "revId": "c7ee2f170daa01c341e45881fc0587c7438213d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0aa20d0_d2921eda",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2501,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T06:04:43Z",
+      "side": 1,
+      "message": "nit: why the extra block? seems the else block in the previous version wasn\u0027t needed either.",
+      "range": {
+        "startLine": 2501,
+        "startChar": 0,
+        "endLine": 2501,
+        "endChar": 5
+      },
+      "revId": "c7ee2f170daa01c341e45881fc0587c7438213d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
