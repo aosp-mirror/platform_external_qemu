@@ -5093,7 +5093,6 @@ static int main_impl(int argc, char** argv)
     }
 
 #ifdef CONFIG_ANDROID
-    char *additional_kernel_params = NULL;
     int dns_count = 0;
     if (android_op_dns_server) {
         if (!qemu_android_emulation_setup_dns_servers(
