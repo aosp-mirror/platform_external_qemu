@@ -12,7 +12,10 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
 #include "android/utils/system.h"
+
+ANDROID_BEGIN_HEADER
 
 /* from the Linux kernel */
 
@@ -554,3 +557,5 @@ extern char*  android_event_bufprint_type_str( char*  buff, char*  end, int  typ
 /* returns the list of valid event code string aliases for a given event type */
 extern int    android_event_get_code_count( int  type );
 extern char*  android_event_bufprint_code_str( char*  buff, char*  end, int  type, int  code_index );
+
+ANDROID_END_HEADER
