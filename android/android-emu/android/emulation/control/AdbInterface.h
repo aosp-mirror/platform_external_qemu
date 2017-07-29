@@ -22,8 +22,8 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
 
-#include <iosfwd>
 #include <functional>
+#include <iosfwd>
 #include <memory>
 #include <string>
 #include <vector>
@@ -60,6 +60,8 @@ using OptionalAdbCommandResult = android::base::Optional<AdbCommandResult>;
 // asynchronously run ADB commands.
 class AdbInterface {
 public:
+    virtual ~AdbInterface() noexcept = default;
+
     // Returns true is the ADB version is fresh enough.
     virtual bool isAdbVersionCurrent() const = 0;
 
@@ -81,19 +83,18 @@ public:
     // Runs an adb command asynchronously.
     // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"
     // |result_callback| - the callback function that will be invoked on the
-    // calling
-    //                     thread after the command completes.
+    //                     calling thread after the command completes.
     // |timeout_ms| - how long to wait for the command to complete, in
-    // milliseconds.
+    //                milliseconds.
     // |want_output| - if set to true, the argument passed to the callback will
-    // contain the
+    //                 contain the
     //                 output of the command.
-    virtual AdbCommandPtr runAdbCommand(
-            const std::vector<std::string>& args,
-            std::function<void(const OptionalAdbCommandResult&)>
-                    result_callback,
-            base::System::Duration timeout_ms,
-            bool want_output = true) = 0;
+    using ResultCallback = std::function<void(const OptionalAdbCommandResult&)>;
+
+    virtual AdbCommandPtr runAdbCommand(const std::vector<std::string>& args,
+                                        ResultCallback&& result_callback,
+                                        base::System::Duration timeout_ms,
+                                        bool want_output = true) = 0;
 
     // Creates a new instance of the AdbInterface.
     static std::unique_ptr<AdbInterface> create(android::base::Looper* looper);
@@ -109,7 +110,7 @@ class AdbCommand : public std::enable_shared_from_this<AdbCommand> {
     friend android::emulation::TestAdbInterface;
 
 public:
-    using ResultCallback = std::function<void(const OptionalAdbCommandResult&)>;
+    using ResultCallback = AdbInterface::ResultCallback;
 
     // Returns true if the command is currently in the process of execution.
     bool inFlight() const { return static_cast<bool>(mTask); }
@@ -129,14 +130,13 @@ private:
                const std::vector<std::string>& command,
                bool want_output,
                base::System::Duration timeoutMs,
-               ResultCallback callback);
+               ResultCallback&& callback);
     void start(int checkTimeoutMs = 1000);
     void taskFunction(OptionalAdbCommandResult* result);
     void taskDoneFunction(const OptionalAdbCommandResult& result);
 
     android::base::Looper* mLooper;
-    std::unique_ptr<android::base::ParallelTask<OptionalAdbCommandResult>>
-            mTask;
+    std::unique_ptr<base::ParallelTask<OptionalAdbCommandResult>> mTask;
     ResultCallback mResultCallback;
     std::string mOutputFilePath;
     std::vector<std::string> mCommand;
@@ -148,5 +148,6 @@ private:
     base::Lock mLock;
     base::ConditionVariable mCv;
 };
-}
-}
+
+}  // namespace emulation
+}  // namespace android
