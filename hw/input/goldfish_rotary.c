@@ -58,7 +58,6 @@ static const MemoryRegionOps rotary_evdev_ops = {
 static void rotary_evdev_init(Object *obj)
 {
     GoldfishEvDevState *s = GOLDFISHEVDEV(obj, TYPE_ROTARYEVDEV);
-    DeviceState *dev = DEVICE(obj);
     SysBusDevice *sbd = SYS_BUS_DEVICE(obj);
 
     memory_region_init_io(&s->iomem, obj, &rotary_evdev_ops, s,
