@@ -15,6 +15,7 @@
 */
 #include "EglOsApi.h"
 
+#include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/shared_library.h"
@@ -25,6 +26,8 @@
 #include <string.h>
 #include <X11/Xlib.h>
 #include <GL/glx.h>
+
+#include <EGL/eglext.h>
 
 namespace {
 
@@ -73,6 +76,57 @@ int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
 
 #define EXIT_IF_FALSE(a) \
         do { if (a != Success) return; } while (0)
+
+class GlxLibrary : public GlLibrary {
+public:
+    typedef GlFunctionPointer (ResolverFunc)(const char* name);
+
+    // Important: Use libGL.so.1 explicitly, because it will always link to
+    // the vendor-specific version of the library. libGL.so might in some
+    // cases, depending on bad ldconfig configurations, link to the wrapper
+    // lib that doesn't behave the same.
+    GlxLibrary() {
+        static const char kLibName[] = "libGL.so.1";
+        char error[256];
+        mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
+        if (!mLib) {
+            ERR("%s: Could not open GL library %s [%s]\n",
+                __func__, kLibName, error);
+            return;
+        }
+        // NOTE: Don't use glXGetProcAddress here, only glXGetProcAddressARB
+        // is guaranteed to be supported by vendor-specific libraries.
+        static const char kResolverName[] = "glXGetProcAddressARB";
+        mResolver = reinterpret_cast<ResolverFunc*>(
+                mLib->findSymbol(kResolverName));
+        if (!mResolver) {
+            ERR("%s: Could not find resolver %s in %s\n",
+                __func__, kResolverName, kLibName);
+            mLib = NULL;
+        }
+    }
+
+    ~GlxLibrary() {
+    }
+
+    // override
+    virtual GlFunctionPointer findSymbol(const char* name) {
+        if (!mLib) {
+            return NULL;
+        }
+        GlFunctionPointer ret = (*mResolver)(name);
+        if (!ret) {
+            ret = reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
+        }
+        return ret;
+    }
+
+private:
+    emugl::SharedLibrary* mLib = nullptr;
+    ResolverFunc* mResolver = nullptr;
+};
+
+emugl::LazyInstance<GlxLibrary> sGlxLibrary = LAZY_INSTANCE_INIT;
 
 // Implementation of EglOS::PixelFormat based on GLX.
 class GlxPixelFormat : public EglOS::PixelFormat {
@@ -252,6 +306,7 @@ private:
     GLXContext mContext = nullptr;
 };
 
+
 // Implementation of EglOS::Display based on GLX.
 class GlxDisplay : public EglOS::Display {
 public:
@@ -265,6 +320,7 @@ public:
         int n;
         GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
         if (frmtList) {
+            mFBConfigs.assign(frmtList, frmtList + n);
             for(int i = 0; i < n; i++) {
                 pixelFormatToConfig(
                         mDisplay,
@@ -275,6 +331,23 @@ public:
             }
             XFree(frmtList);
         }
+
+        int glxMaj, glxMin;
+        bool successQueryVersion =
+            glXQueryVersion(mDisplay, &glxMaj, &glxMin);
+
+        if (successQueryVersion) {
+            if (glxMaj < 1 || (glxMaj >= 1 && glxMin < 4)) {
+                // core profile not supported in this GLX.
+                mCoreProfileSupported = false;
+            } else {
+                queryCoreProfileSupport();
+            }
+        } else {
+            ERR("%s: Could not query GLX version!\n", __func__);
+        }
+
+
     }
 
     virtual bool isValidNativeWin(EglOS::Surface* win) {
@@ -325,15 +398,28 @@ public:
             EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
-        (void)profileMask;
+
+        bool useCoreProfile = mCoreProfileSupported &&
+           (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
 
         ErrorHandler handler(mDisplay);
-        GLXContext ctx = glXCreateNewContext(
-                mDisplay,
-                GlxPixelFormat::from(pixelFormat),
-                GLX_RGBA_TYPE,
-                sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
-                true);
+
+        GLXContext ctx;
+        if (useCoreProfile) {
+            ctx = mCreateContextAttribs(
+                        mDisplay,
+                        GlxPixelFormat::from(pixelFormat),
+                        sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
+                        True /* try direct (supposed to fall back to indirect) */,
+                        mCoreProfileCtxAttribs);
+        } else {
+            ctx = glXCreateNewContext(
+                    mDisplay,
+                    GlxPixelFormat::from(pixelFormat),
+                    GLX_RGBA_TYPE,
+                    sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
+                    true);
+        }
 
         if (handler.getLastError()) {
             return NULL;
@@ -398,56 +484,51 @@ public:
     }
 
 private:
+    using CreateContextAttribs =
+        GLXContext (*)(X11Display*, GLXFBConfig, GLXContext, Bool, const int*);
+
+    // Returns the highest level of OpenGL core profile support in
+    // this GLX implementation.
+    void queryCoreProfileSupport() {
+        mCoreProfileSupported = false;
+
+        GlxLibrary* lib = sGlxLibrary.ptr();
+        mCreateContextAttribs =
+            (CreateContextAttribs)lib->findSymbol("glXCreateContextAttribsARB");
+
+        if (!mCreateContextAttribs) return;
+
+        // Ascending index order of context attribs :
+        // decreasing GL major/minor version
+        GLXContext testContext = nullptr;
+
+        for (int i = 0; i < getNumCoreProfileCtxAttribs(); i++) {
+            const int* attribs = getCoreProfileCtxAttribs(i);
+            testContext =
+                mCreateContextAttribs(
+                        mDisplay, mFBConfigs[0],
+                        nullptr /* no shared context */,
+                        True /* try direct (supposed to fall back to indirect) */,
+                        attribs);
+
+            if (testContext) {
+                mCoreProfileSupported = true;
+                mCoreProfileCtxAttribs = attribs;
+                int glmaj, glmin;
+                getCoreProfileCtxAttribsVersion(attribs, &glmaj, &glmin);
+                glXDestroyContext(mDisplay, testContext);
+                return;
+            }
+        }
+    }
+
+    CreateContextAttribs mCreateContextAttribs = nullptr;
+
+    bool mCoreProfileSupported = false;
+    const int* mCoreProfileCtxAttribs = nullptr;
+
     X11Display* mDisplay = nullptr;
-};
-
-class GlxLibrary : public GlLibrary {
-public:
-    typedef GlFunctionPointer (ResolverFunc)(const char* name);
-
-    // Important: Use libGL.so.1 explicitly, because it will always link to
-    // the vendor-specific version of the library. libGL.so might in some
-    // cases, depending on bad ldconfig configurations, link to the wrapper
-    // lib that doesn't behave the same.
-    GlxLibrary() {
-        static const char kLibName[] = "libGL.so.1";
-        char error[256];
-        mLib = emugl::SharedLibrary::open(kLibName, error, sizeof(error));
-        if (!mLib) {
-            ERR("%s: Could not open GL library %s [%s]\n",
-                __FUNCTION__, kLibName, error);
-            return;
-        }
-        // NOTE: Don't use glXGetProcAddress here, only glXGetProcAddressARB
-        // is guaranteed to be supported by vendor-specific libraries.
-        static const char kResolverName[] = "glXGetProcAddressARB";
-        mResolver = reinterpret_cast<ResolverFunc*>(
-                mLib->findSymbol(kResolverName));
-        if (!mResolver) {
-            ERR("%s: Could not find resolver %s in %s\n",
-                __FUNCTION__, kResolverName, kLibName);
-            mLib = NULL;
-        }
-    }
-
-    ~GlxLibrary() {
-    }
-
-    // override
-    virtual GlFunctionPointer findSymbol(const char* name) {
-        if (!mLib) {
-            return NULL;
-        }
-        GlFunctionPointer ret = (*mResolver)(name);
-        if (!ret) {
-            ret = reinterpret_cast<GlFunctionPointer>(mLib->findSymbol(name));
-        }
-        return ret;
-    }
-
-private:
-    emugl::SharedLibrary* mLib = nullptr;
-    ResolverFunc* mResolver = nullptr;
+    std::vector<GLXFBConfig> mFBConfigs;
 };
 
 class GlxEngine : public EglOS::Engine {
@@ -457,15 +538,13 @@ public:
     }
 
     virtual GlLibrary* getGlLibrary() {
-        return &mGlLib;
+        return sGlxLibrary.ptr();
     }
 
     virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* pf,
                                                 EGLNativeWindowType wnd) {
         return new GlxSurface(wnd, GlxSurface::WINDOW);
     }
-private:
-    GlxLibrary mGlLib;
 };
 
 emugl::LazyInstance<GlxEngine> sHostEngine = LAZY_INSTANCE_INIT;

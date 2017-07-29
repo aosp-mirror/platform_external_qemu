@@ -15,6 +15,8 @@
 */
 #include "RenderContext.h"
 
+#include "GLESVersionDetector.h"
+
 #include "OpenGLESDispatch/EGLDispatch.h"
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
@@ -66,16 +68,10 @@ RenderContext* RenderContext::createImpl(EGLDisplay display,
         EGL_CONTEXT_MINOR_VERSION_KHR, minorVersion,
     };
 
-    // Use core profile across all context majorVersions
-    // only for Mac -gpu host renderer (TODO: Linux/Win),
-    // and only when GLESDynamicVersion is enabled.
-#ifdef __APPLE__
-    if (emugl::getRenderer() == SELECTED_RENDERER_HOST &&
-        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+    if (shouldEnableCoreProfile()) {
         contextAttribs.push_back(EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR);
         contextAttribs.push_back(EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
     }
-#endif
 
     contextAttribs.push_back(EGL_NONE);
 
