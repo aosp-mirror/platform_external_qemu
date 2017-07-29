@@ -38,8 +38,17 @@ include-if-bitness-64 = \
     $(if $(strip $(LOCAL_IGNORE_BITNESS)$(filter true,$(LOCAL_HOST_BUILD))$(EMULATOR_BUILD_64BITS)),\
         $(eval include $1))
 
-BUILD_TARGET_CFLAGS := -g -fno-exceptions $(call if-target-clang,,-falign-functions -fno-unwind-tables)
-BUILD_TARGET_CXXFLAGS := -fno-rtti -DGOOGLE_PROTOBUF_NO_RTTI
+BUILD_WARNING_CFLAGS := -Wall -Wno-unknown-pragmas -Wno-sign-compare
+BUILD_WARNING_CXXFLAGS := -Wdelete-non-virtual-dtor
+
+BUILD_TARGET_CFLAGS := \
+    -g -fno-exceptions \
+    $(call if-target-clang,,-falign-functions -fno-unwind-tables) \
+    $(BUILD_WARNING_CFLAGS)
+BUILD_TARGET_CXXFLAGS := \
+    -fno-rtti \
+    -DGOOGLE_PROTOBUF_NO_RTTI \
+    $(BUILD_WARNING_CXXFLAGS)
 
 BUILD_OPT_CFLAGS :=
 BUILD_OPT_LDFLAGS :=
