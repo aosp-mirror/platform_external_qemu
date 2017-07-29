@@ -13,6 +13,7 @@
 
 #include "android/base/TypeTraits.h"
 
+#include <algorithm>
 #include <string>
 #include <string.h>
 
@@ -161,6 +162,53 @@ public:
     StringView& operator=(const StringView& other) {
         set(other);
         return *this;
+    }
+
+    // find() first occurrence of |other| with an initial offset.
+    // Returns absolute offset (does not include |off|).
+    size_t find(StringView other, size_t off = 0) {
+        // Trivial case
+        if (!other.mSize) return 0;
+        if (off < 0) return std::string::npos;
+
+        size_t safeOff = std::min(off, mSize);
+
+        const char* searchStart = mString + safeOff;
+        const char* searchEnd = searchStart + mSize - safeOff;
+
+        const char* res =
+            std::search(searchStart, searchEnd,
+                        other.mString, other.mString + other.mSize);
+        if (res == searchEnd) return std::string::npos;
+        return (size_t)((uintptr_t)res - (uintptr_t)mString);
+    }
+
+    // getSubstr(); returns this string starting at the first place |other|
+    // occurs, otherwise a blank string.
+    StringView getSubstr(StringView other, size_t off = 0) {
+        size_t loc = find(other, off);
+        if (loc == std::string::npos) return StringView("");
+        return { mString + loc, end() };
+    }
+
+    // Returns substring starting at |begin| and running for |len|,
+    // or the rest of the string if |len| is std::string::npos.
+    StringView substr(size_t begin, size_t len = std::string::npos) {
+        if (len == std::string::npos) {
+            len = mSize - begin;
+        }
+        size_t safeOff = std::min(begin, mSize);
+        size_t safeLen = std::min(len, mSize - safeOff);
+        return { mString + safeOff, safeLen };
+    }
+
+    // Returns substring starting at |begin| ending at |end|,
+    // or the rest of the string if |end is std::string::npos.
+    StringView substrAbs(size_t begin, size_t end = std::string::npos) {
+        if (end == std::string::npos) {
+            end = begin + mSize;
+        }
+        return substr(begin, end - begin);
     }
 
     // Convert to std::string when needed.
