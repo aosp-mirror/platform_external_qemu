@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b46dab1_86688a57",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-07-29T03:53:58Z",
+      "side": 1,
+      "message": "why it is not ControlClient ?",
+      "range": {
+        "startLine": 351,
+        "startChar": 23,
+        "endLine": 351,
+        "endChar": 39
+      },
+      "revId": "c7ee2f170daa01c341e45881fc0587c7438213d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
