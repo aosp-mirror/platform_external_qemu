@@ -845,10 +845,12 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_INVAL;
                 break;
             }
+#if !defined(TARGET_MIPS)
             // All passed buffers are allocated in the same guest process, so
             // know they all have the same offset from the host address.
             const ptrdiff_t diffFromGuest =
                     (intptr_t)buffers[0].data - (intptr_t)rwPtrs[0];
+#endif
             unsigned i;
             for (i = 1; i < buffers_count; ++i) {
 #if !defined(TARGET_MIPS)
