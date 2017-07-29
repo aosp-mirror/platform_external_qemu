@@ -161,6 +161,30 @@
       "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "928c3625_366e1dcb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:48:31Z",
+      "side": 1,
+      "message": "I can add a string split function to parse the extensions; that would probably be best here.",
+      "parentUuid": "9844e685_e6c88096",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 56
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
