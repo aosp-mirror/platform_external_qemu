@@ -210,6 +210,59 @@ TEST(StringView, Compare) {
     EXPECT_LT(StringView("12").compare(StringView("2")), 0);
 }
 
+TEST(StringView, Find) {
+    size_t no = std::string::npos;
+    // empty string
+    EXPECT_EQ(StringView("").find(StringView("")), 0);
+    EXPECT_EQ(StringView("1").find(StringView("")), 0);
+    EXPECT_EQ(StringView("").find(StringView("2")), no);
+
+    // non-empty strings, same length
+    EXPECT_EQ(StringView("1").find(StringView("1")), 0);
+    EXPECT_EQ(StringView("2").find(StringView("1")), no);
+    EXPECT_EQ(StringView("1").find(StringView("2")), no);
+
+    // non-empty strings, first shorter
+    EXPECT_EQ(StringView("2").find(StringView("12")), no);
+    EXPECT_EQ(StringView("1").find(StringView("11")), no);
+
+    // non-empty strings, first longer
+    EXPECT_EQ(StringView("11").find(StringView("1")), 0);
+    EXPECT_EQ(StringView("12").find(StringView("2")), 1);
+
+    // allocate a string with a stringview that is shorter.
+    std::string longString("a b c d e f g");
+    StringView longView(longString);
+    StringView shortView(longString);
+    shortView.setSize(1);
+
+    EXPECT_EQ(longView.find(StringView("d")), 6);
+    EXPECT_EQ(shortView.find(StringView("d")), no);
+
+    // two occurrences, which wins?
+    StringView twice("qwerty abcdabcd");
+    EXPECT_EQ(twice.find(StringView("abcd")), 7);
+}
+
+TEST(StringView, Substr) {
+    StringView empty = StringView("");
+
+    EXPECT_EQ(StringView("").substr(0, 0), empty);
+    EXPECT_EQ(StringView("").substr(1, 0), empty);
+    EXPECT_EQ(StringView("").substr(2, 0), empty);
+    EXPECT_EQ(StringView("1").substr(0, 0), empty);
+
+    EXPECT_EQ(StringView("1").substr(0, 1), StringView("1"));
+    EXPECT_EQ(StringView("2").substr(0, 1), StringView("2"));
+    EXPECT_TRUE(StringView("1").substr(0, 1) != StringView("2"));
+
+    EXPECT_EQ(StringView("12").substr(0, 1), StringView("1"));
+    EXPECT_EQ(StringView("12").substr(1, 1), StringView("2"));
+    EXPECT_EQ(StringView("12").substr(0, 2), StringView("12"));
+
+    EXPECT_EQ(StringView("1234").substr(1, 2), StringView("23"));
+}
+
 // TODO(digit): String
 
 }  // namespace base
