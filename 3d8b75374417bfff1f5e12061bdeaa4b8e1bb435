@@ -137,6 +137,30 @@
       "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9844e685_e6c88096",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:43:17Z",
+      "side": 1,
+      "message": "It\u0027s just size of whitelist * size of extension string. I don\u0027t expect it to be called in any performance critical code. It\u0027s a few times per context creation.\n\nThe usual time spent is ~3-15 us. I decided to give up performance here for a simpler looking implementation.",
+      "parentUuid": "a2dcaf1b_22defe3c",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 56
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
