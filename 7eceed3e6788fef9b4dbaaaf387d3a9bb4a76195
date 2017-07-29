@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05123452_3486a371",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "Since it\u0027s only one, let\u0027s consider naming this addSecondCallback or addRecordingCallback or something to make it more clear.",
+      "range": {
+        "startLine": 66,
+        "startChar": 17,
+        "endLine": 66,
+        "endChar": 28
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67b5f8de_b41bb74e",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "Will you still keep a buffer of frames? I recommend buffering at least 1 frame, double buffering, so the framebuffer post doesn\u0027t have to wait for a ffmpeg encode.",
+      "range": {
+        "startLine": 33,
+        "startChar": 14,
+        "endLine": 33,
+        "endChar": 24
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce5d84ad_9b143063",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "does that still apply? Are the two threads the one doing FrameBuffer::post() and FrameSenderThread encoding the results?\n\nWill we still need a separate encoding thread later on for higher FPS recording?",
+      "range": {
+        "startLine": 79,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 36
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "73de2433_6bb61ce7",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "rename this to |bytesPerPixel| or some other const variable",
+      "range": {
+        "startLine": 105,
+        "startChar": 80,
+        "endLine": 105,
+        "endChar": 84
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b0328a01_de36452e",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "Update comment",
+      "range": {
+        "startLine": 108,
+        "startChar": 15,
+        "endLine": 108,
+        "endChar": 33
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7e7f557_8d4a9f13",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "rename to a const variable",
+      "range": {
+        "startLine": 184,
+        "startChar": 27,
+        "endLine": 184,
+        "endChar": 42
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6512d36_3fb0dac8",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "rename to const variables",
+      "range": {
+        "startLine": 187,
+        "startChar": 47,
+        "endLine": 187,
+        "endChar": 63
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3dfeaef0_34a49184",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T02:34:47Z",
+      "side": 1,
+      "message": "Finish encoding? What if we Ctrl-C or click \u0027X\u0027 before it\u0027s done?",
+      "range": {
+        "startLine": 216,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 52
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
