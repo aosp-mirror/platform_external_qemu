@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "0a3901d9_7f4dc0fb",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-07-29T15:41:09Z",
+      "side": 1,
+      "message": "Yes, still need to at least double buffer the frames. This code right now cannot efficiently encode because the lock is being held way too long.",
+      "parentUuid": "67b5f8de_b41bb74e",
+      "range": {
+        "startLine": 33,
+        "startChar": 14,
+        "endLine": 33,
+        "endChar": 24
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ce5d84ad_9b143063",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 10
@@ -128,6 +152,30 @@
       "writtenOn": "2017-07-29T02:34:47Z",
       "side": 1,
       "message": "rename to a const variable",
+      "range": {
+        "startLine": 184,
+        "startChar": 27,
+        "endLine": 184,
+        "endChar": 42
+      },
+      "revId": "7eceed3e6788fef9b4dbaaaf387d3a9bb4a76195",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd998fc9_5f837344",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-07-29T15:41:09Z",
+      "side": 1,
+      "message": "Yup. Will put all of these codec configs into some external config file soon so users can adjust it.",
+      "parentUuid": "e7e7f557_8d4a9f13",
       "range": {
         "startLine": 184,
         "startChar": 27,
