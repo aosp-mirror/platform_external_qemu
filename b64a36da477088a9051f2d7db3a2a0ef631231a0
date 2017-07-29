@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d74d8ca9_e10a8196",
+        "filename": "android/android-emu/android/base/misc/StringUtils.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T18:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7bd36380_3eda83ea",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 82,
+        "endChar": 41
+      },
+      "revId": "b64a36da477088a9051f2d7db3a2a0ef631231a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "90f6fb8b_56c85c4a",
         "filename": "android/android-emu/android/base/misc/StringUtils.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-07-29T16:21:25Z",
       "side": 1,
       "message": "this makes the whole find 2-3x slower, with potential heap alocation for std::function\u003c\u003e\nIMO it\u0027s better to have a template version, like with STL algorithms:\n\ntemplate \u003cclass Func\u003e void iterSplit(StringView str, StringView splitBy, Func f);\n\nAnother thing - you could make a much more optimized version for splitting by a single character, or by a set of delimiters - e.g. split by any of \u0027;\u0027, \u0027,\u0027, \u0027/\u0027, \u0027 \u0027\n\nOne more issue: do you skip the empty strings when splitting (e.g. when string starts with a delimiter, or there are two delimiters at once)? please documemnt",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 56
+      },
+      "revId": "b64a36da477088a9051f2d7db3a2a0ef631231a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "24d9b077_6877df4b",
+        "filename": "android/android-emu/android/base/misc/StringUtils.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T18:11:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "90f6fb8b_56c85c4a",
       "range": {
         "startLine": 80,
         "startChar": 0,
