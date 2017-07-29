@@ -163,6 +163,56 @@ public:
         return *this;
     }
 
+    // Function to override size of the string.
+    void setSize(size_t newSize) {
+        mSize = newSize;
+    }
+
+    // Return if |other| is in string. If so,
+    // returns offset where |other| can be found.
+    // Otherwise, returns std::string::npos.
+    size_t find(const StringView& other) {
+        // Trivial case
+        if (!other.mSize) return 0;
+
+        void* res = memmem(mString, mSize,
+                           other.mString, other.mSize);
+        if (!res) return std::string::npos;
+        return (size_t)((uintptr_t)res - (uintptr_t)mString);
+    }
+
+    // find(), but with an initial offset. Returns absolute
+    // offset (does not include |off|).
+    size_t find(const StringView& other, size_t off) {
+        // Trivial case
+        if (!other.mSize) return 0;
+
+        void* res = memmem(mString + off, mSize - off,
+                           other.mString, other.mSize);
+        if (!res) return std::string::npos;
+        return (size_t)((uintptr_t)res - (uintptr_t)mString);
+    }
+
+    // NB: No bounds checking, PPE recommended.
+    StringView substr(size_t begin, size_t len) {
+        StringView res;
+        res.mString = len ? (mString + begin) : "\0";
+        res.mSize = len;
+        return res;
+    }
+
+    // Just going to the end.
+    StringView substr(size_t begin) {
+        StringView res;
+        res.mString = mSize ? (mString + begin) : "\0";
+        if (begin <= mSize) {
+            res.mSize = mSize - begin;
+        } else {
+            res.mSize = 0;
+        }
+        return res;
+    }
+
     // Convert to std::string when needed.
     operator std::string() const { return std::string(mString, mSize); }
 
