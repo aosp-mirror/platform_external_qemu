@@ -24,7 +24,6 @@ extern "C" {
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
 static bool buffer_zero_sse2(const void* buf, int len) {
-    __builtin_expect(len, 4096);
     buf = __builtin_assume_aligned(buf, 4096);
     __m128i t = _mm_load_si128((const __m128i*)buf);
     auto p = (__m128i*)(((uintptr_t)buf + 5 * 16));

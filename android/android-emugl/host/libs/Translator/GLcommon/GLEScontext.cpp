@@ -2038,9 +2038,6 @@ int GLEScontext::queryCurrFboBits(ObjectLocalName localFboName, GLenum pname) {
         std::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);
 
         bool hasColorAttachment = false;
-        GLenum target;
-        ObjectDataPtr attachmentData;
-
         for (auto attachment : colorAttachments) {
             GLint internalFormat =
                 fbData->getAttachmentInternalFormat(this, attachment);

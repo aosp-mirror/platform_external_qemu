@@ -95,10 +95,12 @@ const DisplayChangeListenerOps AndroidDisplayChangeListener::kOps = {
 
 }  // namespace
 
+static AndroidDisplayChangeListener* s_listener = nullptr;
+
 static void registerUpdateListener(AndroidDisplayUpdateCallback callback,
                                    void* opaque) {
-    static AndroidDisplayChangeListener* s_listener =
-            new AndroidDisplayChangeListener(callback, opaque);
+    assert(!s_listener);
+    s_listener = new AndroidDisplayChangeListener(callback, opaque);
 }
 
 static const QAndroidDisplayAgent displayAgent = {

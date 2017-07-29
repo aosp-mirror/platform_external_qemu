@@ -472,9 +472,9 @@ class PartitionParameters {
     }
 
 private:
-    int m_driveIndex;
     AndroidHwConfig* m_hw;
     AvdInfo* m_avd;
+    int m_driveIndex;
 };
 
 }  // namespace

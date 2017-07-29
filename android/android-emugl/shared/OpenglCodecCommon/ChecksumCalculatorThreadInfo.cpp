@@ -33,7 +33,7 @@ public:
     ChecksumCalculatorThreadStore() : ::emugl::ThreadStore(nullptr) {}
 };
 
-#ifdef TRACE_CHECKSUMHELPER
+#if TRACE_CHECKSUMHELPER
 std::atomic<size_t> sNumInstances(0);
 #endif  // TRACE_CHECKSUMHELPER
 }
