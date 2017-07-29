@@ -210,6 +210,127 @@ TEST(StringView, Compare) {
     EXPECT_LT(StringView("12").compare(StringView("2")), 0);
 }
 
+TEST(StringView, Find) {
+    size_t no = std::string::npos;
+    // empty string
+    EXPECT_EQ(0, StringView("").find(StringView("")));
+    EXPECT_EQ(0, StringView("1").find(StringView("")));
+    EXPECT_EQ(0, StringView("1").find(StringView(""), 96));
+    EXPECT_EQ(no, StringView("").find(StringView("2")));
+
+    // non-empty strings, same length
+    EXPECT_EQ(0, StringView("1").find(StringView("1")));
+    EXPECT_EQ(no, StringView("2").find(StringView("1")));
+    EXPECT_EQ(no, StringView("1").find(StringView("2")));
+
+    // non-empty strings, first shorter
+    EXPECT_EQ(no, StringView("2").find(StringView("12")));
+    EXPECT_EQ(no, StringView("1").find(StringView("11")));
+
+    // non-empty strings, first longer
+    EXPECT_EQ(0, StringView("11").find(StringView("1")));
+    EXPECT_EQ(1, StringView("12").find(StringView("2")));
+    EXPECT_EQ(0, StringView("12").find(StringView("1")));
+    EXPECT_EQ(no, StringView("12").find(StringView("1"), 1));
+
+    // allocate a string with a stringview that is shorter.
+    std::string longString("a b c d e f g");
+    StringView longView(longString);
+    StringView shortView(longString.substr(0,1));
+
+    EXPECT_EQ(6, longView.find(StringView("d")));
+    EXPECT_EQ(no, shortView.find(StringView("d")));
+
+    // two occurrences, which wins?
+    StringView twice("qwerty abcdabcd");
+    EXPECT_EQ(7, twice.find(StringView("abcd")));
+
+    // With offset?
+    EXPECT_EQ(11, twice.find(StringView("abcd"), 11));
+}
+
+TEST(StringView, GetSubstr) {
+    StringView empty = StringView("");
+
+    EXPECT_EQ(empty, StringView("").getSubstr(StringView("")));
+    EXPECT_EQ(empty, StringView("").getSubstr(StringView("1")));
+    EXPECT_EQ(empty, StringView("").getSubstr(StringView("12")));
+    EXPECT_EQ(StringView("1"), StringView("1").getSubstr(StringView("")));
+    EXPECT_EQ(StringView("12"), StringView("12").getSubstr(StringView("")));
+    EXPECT_EQ(empty, StringView("12").getSubstr(StringView("123")));
+
+    StringView s1234("12341234");
+    EXPECT_EQ(s1234, s1234.getSubstr(StringView("12341234")));
+    EXPECT_EQ(s1234, s1234.getSubstr(StringView("12")).c_str());
+    EXPECT_EQ(s1234.substr(1), s1234.getSubstr(StringView("23")).c_str());
+    EXPECT_EQ(s1234.substr(2), s1234.getSubstr(StringView("34")).c_str());
+
+    StringView s1234prefix = s1234.substr(0, 4);
+    EXPECT_EQ(empty, s1234prefix.getSubstr("3412"));
+}
+
+TEST(StringView, Substr) {
+    StringView empty = StringView("");
+
+    EXPECT_EQ(empty, StringView("").substr(0, 0));
+    EXPECT_EQ(empty, StringView("").substr(1, 0));
+    EXPECT_EQ(empty, StringView("").substr(2, 0));
+    EXPECT_EQ(empty, StringView("1").substr(0, 0));
+
+    EXPECT_EQ(StringView("1"), StringView("1").substr(0, 1));
+    EXPECT_EQ(StringView("2"), StringView("2").substr(0, 1));
+    EXPECT_TRUE(StringView("1").substr(0, 1) != StringView("2"));
+
+    EXPECT_EQ(StringView("1"), StringView("12").substr(0, 1));
+    EXPECT_EQ(StringView("2"), StringView("12").substr(1, 1));
+    EXPECT_EQ(StringView("12"), StringView("12").substr(0, 2));
+
+    EXPECT_EQ(StringView("23"), StringView("1234").substr(1, 2));
+
+    EXPECT_EQ(StringView(""), StringView("").substr(0));
+    EXPECT_EQ(StringView(""), StringView("").substr(1));
+    EXPECT_EQ(StringView(""), StringView("").substr(2));
+    EXPECT_EQ(StringView(""), StringView("1").substr(1));
+    EXPECT_EQ(StringView("1"), StringView("1").substr(0));
+
+    EXPECT_EQ(StringView("1234"), StringView("1234").substr(0));
+    EXPECT_EQ(StringView(""), StringView("1234").substr(4));
+    EXPECT_EQ(StringView("4"), StringView("1234").substr(3));
+    EXPECT_EQ(StringView("34"), StringView("1234").substr(2));
+    EXPECT_EQ(StringView("234"), StringView("1234").substr(1));
+}
+
+TEST(StringView, SubstrAbs) {
+    StringView empty = StringView("");
+
+    EXPECT_EQ(empty, StringView("").substrAbs(0, 0));
+    EXPECT_EQ(empty, StringView("").substrAbs(1, 1));
+    EXPECT_EQ(empty, StringView("").substrAbs(2, 2));
+    EXPECT_EQ(empty, StringView("1").substrAbs(0, 0));
+
+    EXPECT_EQ(StringView("1"), StringView("1").substrAbs(0, 1));
+    EXPECT_EQ(StringView("2"), StringView("2").substrAbs(0, 1));
+    EXPECT_TRUE(StringView("1").substrAbs(0, 1) != StringView("2"));
+
+    EXPECT_EQ(StringView("1"), StringView("12").substrAbs(0, 1));
+    EXPECT_EQ(StringView("2"), StringView("12").substrAbs(1, 2));
+    EXPECT_EQ(StringView("12"), StringView("12").substrAbs(0, 2));
+
+    EXPECT_EQ(StringView("23"), StringView("1234").substr(1, 2));
+
+    EXPECT_EQ(StringView(""), StringView("").substrAbs(0));
+    EXPECT_EQ(StringView(""), StringView("").substrAbs(1));
+    EXPECT_EQ(StringView(""), StringView("").substrAbs(2));
+    EXPECT_EQ(StringView(""), StringView("1").substrAbs(1));
+    EXPECT_EQ(StringView("1"), StringView("1").substrAbs(0));
+
+    EXPECT_EQ(StringView("1234"), StringView("1234").substrAbs(0));
+    EXPECT_EQ(StringView(""), StringView("1234").substrAbs(4));
+    EXPECT_EQ(StringView("4"), StringView("1234").substrAbs(3));
+    EXPECT_EQ(StringView("34"), StringView("1234").substrAbs(2));
+    EXPECT_EQ(StringView("234"), StringView("1234").substrAbs(1));
+}
+
 // TODO(digit): String
 
 }  // namespace base
