@@ -459,7 +459,7 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
     return true;
 #elif defined(__linux__)
     //TODO: to check what does ATI & NVIDIA enforce on win pixelformat
-    unsigned int depth, configDepth, border;
+    unsigned int depth, border;
     int x, y;
     Window root;
     return XGetGeometry(

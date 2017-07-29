@@ -1463,7 +1463,7 @@ GL_APICALL void  GL_APIENTRY glGetActiveAttrib(GLuint program, GLuint index, GLs
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
 
         ProgramData* pData = (ProgramData*)objData;
-        s_getActiveAttribOrUniform(false, ctx, (ProgramData*)objData,
+        s_getActiveAttribOrUniform(false, ctx, pData,
                                    globalProgramName, index, bufsize, length,
                                    size, type, name);
     }
@@ -1486,7 +1486,7 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
 
         ProgramData* pData = (ProgramData*)objData;
-        s_getActiveAttribOrUniform(true, ctx, (ProgramData*)objData,
+        s_getActiveAttribOrUniform(true, ctx, pData,
                                    globalProgramName, index, bufsize, length,
                                    size, type, name);
     }

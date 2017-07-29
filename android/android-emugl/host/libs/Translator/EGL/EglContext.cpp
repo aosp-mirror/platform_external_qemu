@@ -42,8 +42,8 @@ EglContext::EglContext(EglDisplay *dpy,
         m_config(config),
         m_glesContext(glesCtx),
         m_version(ver),
-        m_profileMask(profileMask),
-        m_mngr(mngr)
+        m_mngr(mngr),
+        m_profileMask(profileMask)
 {
     if (stream) {
         EGLint configId = EGLint(stream->getBe32());
