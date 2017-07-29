@@ -368,8 +368,6 @@ void slirp_init_custom_dns_servers(Slirp *slirp,
 {
     int n = 0;
     for (; n < dns_count; ++n) {
-        char temp[128];
-        int port;
         switch (dns[n].ss_family) {
         case AF_INET:
         case AF_INET6:

@@ -477,7 +477,6 @@ void icmp6_input(struct mbuf *m)
             icmp6_send_echoreply(m, slirp, ip, icmp);
         } else {
             struct socket *so;
-            struct sockaddr_storage addr;
             if ((so = socreate(slirp)) == NULL) goto end;
             if (icmp6_send(so, m, hlen) == 0) {
                 return;
@@ -554,7 +553,7 @@ void icmp6_receive(struct socket *so)
     int hlen = sizeof(struct ip6);
     u_char error_code;
     struct icmp6 *icp;
-    int id, len = -1;
+    int len = -1;
 
     m->m_data += hlen;
     m->m_len -= hlen;
