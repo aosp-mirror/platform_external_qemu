@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a2b1aec6_e4277b2c",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T01:53:46Z",
+      "side": 1,
+      "message": "nit: this comment became obsolete even before its first push to upstream!",
+      "range": {
+        "startLine": 59,
+        "startChar": 45,
+        "endLine": 59,
+        "endChar": 55
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "35a65de7_6ee3af65",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T01:53:46Z",
+      "side": 1,
+      "message": "nit: this is a C++ header, why not enum class?",
+      "range": {
+        "startLine": 133,
+        "startChar": 0,
+        "endLine": 133,
+        "endChar": 4
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bce58bd5_ae6c1ccf",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T01:53:46Z",
+      "side": 1,
+      "message": "nit: is this still used?",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 15
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5b9fd89d_9a848704",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T01:53:46Z",
+      "side": 1,
+      "message": "our goddamn coding style forbids mutable references :(\nit has to be a pointer",
+      "range": {
+        "startLine": 167,
+        "startChar": 41,
+        "endLine": 167,
+        "endChar": 42
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a1c121c_dc2e4597",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T01:53:46Z",
+      "side": 1,
+      "message": "please check for the version first - it\u0027s much faster",
+      "range": {
+        "startLine": 171,
+        "startChar": 55,
+        "endLine": 172,
+        "endChar": 33
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2dcaf1b_22defe3c",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T01:53:46Z",
+      "side": 1,
+      "message": "I don\u0027t even want to estimate the complexity of this code.\nfor each extension it: (1) scans the whole string for it, and (2) appends it to another string, with possible reallocation and memcpy. How often is this called and what\u0027s the usual time spent?",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 56
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
