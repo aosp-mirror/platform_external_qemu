@@ -48,8 +48,7 @@ public:
 
     virtual AdbCommandPtr runAdbCommand(
             const std::vector<std::string>& args,
-            std::function<void(const OptionalAdbCommandResult&)>
-                    result_callback,
+            ResultCallback&& result_callback,
             base::System::Duration timeout_ms,
             bool want_output = true) override final {
         if (mRunCommandCallback) {
@@ -60,7 +59,7 @@ public:
         // the command execution.
         auto command = std::shared_ptr<AdbCommand>(
                 new AdbCommand(mLooper, mAdbPath, mSerialString, args, want_output,
-                               timeout_ms, result_callback));
+                               timeout_ms, std::move(result_callback)));
         command->start(1);
         return command;
     }

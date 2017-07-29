@@ -28,69 +28,55 @@
 #include <string>
 #include <utility>
 
-using namespace android::base;
+using android::base::AutoLock;
+using android::base::Looper;
+using android::base::ParallelTask;
+using android::base::PathUtils;
+using android::base::RunOptions;
+using android::base::System;
+using android::base::Uuid;
+using android::base::Version;
+using android::base::makeOptional;
 
 namespace android {
 namespace emulation {
 
 class AdbInterfaceImpl final : public AdbInterface {
 public:
-    explicit AdbInterfaceImpl(android::base::Looper* looper);
+    explicit AdbInterfaceImpl(Looper* looper);
 
-    // Returns true is the ADB version is fresh enough.
-    bool isAdbVersionCurrent() const override final { return mAdbVersionCurrent; }
+    bool isAdbVersionCurrent() const final { return mAdbVersionCurrent; }
 
-    // Setup a custom adb path.
-    void setCustomAdbPath(const std::string& path) override final {
+    void setCustomAdbPath(const std::string& path) final {
         mCustomAdbPath = path;
     }
 
-    // Returns the automatically detected path to adb
-    const std::string& detectedAdbPath() const override final {
-        return mAutoAdbPath;
-    }
+    const std::string& detectedAdbPath() const final { return mAutoAdbPath; }
 
-    // Returns the path to adb binary
-    const std::string& adbPath() const override final {
+    const std::string& adbPath() const final {
         return mCustomAdbPath.empty() ? mAutoAdbPath : mCustomAdbPath;
     }
 
-    // Setup the port this interface is connected to
-    virtual void setSerialNumberPort(int port) override final {
+    virtual void setSerialNumberPort(int port) final {
         mSerialString = std::string("emulator-") + std::to_string(port);
     }
 
-    // Returns the path to emulator name
-    const std::string& serialString() const override final {
-        return mSerialString;
-    }
+    const std::string& serialString() const final { return mSerialString; }
 
-    // Runs an adb command asynchronously.
-    // |args| - the arguments to pass to adb, i.e. "shell dumpsys battery"
-    // |result_callback| - the callback function that will be invoked on the
-    // calling
-    //                     thread after the command completes.
-    // |timeout_ms| - how long to wait for the command to complete, in
-    // milliseconds.
-    // |want_output| - if set to true, the argument passed to the callback will
-    // contain the
-    //                 output of the command.
-    AdbCommandPtr runAdbCommand(
-            const std::vector<std::string>& args,
-            std::function<void(const OptionalAdbCommandResult&)>
-                    result_callback,
-            base::System::Duration timeout_ms,
-            bool want_output = true) override final;
+    AdbCommandPtr runAdbCommand(const std::vector<std::string>& args,
+                                ResultCallback&& result_callback,
+                                System::Duration timeout_ms,
+                                bool want_output = true) final;
 
 private:
-    android::base::Looper* mLooper;
+    Looper* mLooper;
     std::string mAutoAdbPath;
     std::string mCustomAdbPath;
     std::string mSerialString;
-    bool mAdbVersionCurrent;
+    bool mAdbVersionCurrent = false;
 };
 
-std::unique_ptr<AdbInterface> AdbInterface::create(android::base::Looper* looper) {
+std::unique_ptr<AdbInterface> AdbInterface::create(Looper* looper) {
     return std::unique_ptr<AdbInterface>{new AdbInterfaceImpl(looper)};
 }
 
@@ -123,8 +109,8 @@ static bool checkAdbVersion(const std::string& sdk_root_directory,
     }
 }
 
-AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
-    : mLooper(looper), mAdbVersionCurrent(false) {
+AdbInterfaceImpl::AdbInterfaceImpl(Looper* looper)
+    : mLooper(looper) {
     // First try finding ADB by the environment variable.
     auto sdk_root_by_env = android::ConfigDirs::getSdkRootDirectoryByEnv();
     if (!sdk_root_by_env.empty()) {
@@ -162,25 +148,26 @@ AdbInterfaceImpl::AdbInterfaceImpl(android::base::Looper* looper)
 
 AdbCommandPtr AdbInterfaceImpl::runAdbCommand(
         const std::vector<std::string>& args,
-        std::function<void(const OptionalAdbCommandResult&)> result_callback,
-        base::System::Duration timeout_ms,
+        ResultCallback&& result_callback,
+        System::Duration timeout_ms,
         bool want_output) {
     auto command = std::shared_ptr<AdbCommand>(new AdbCommand(
             mLooper, mCustomAdbPath.empty() ? mAutoAdbPath : mCustomAdbPath,
-            mSerialString, args, want_output, timeout_ms, result_callback));
+            mSerialString, args, want_output, timeout_ms,
+            std::move(result_callback)));
     command->start();
     return command;
 }
 
-AdbCommand::AdbCommand(android::base::Looper* looper,
+AdbCommand::AdbCommand(Looper* looper,
                        const std::string& adb_path,
                        const std::string& serial_string,
                        const std::vector<std::string>& command,
                        bool want_output,
-                       base::System::Duration timeoutMs,
-                       AdbCommand::ResultCallback callback)
+                       System::Duration timeoutMs,
+                       ResultCallback&& callback)
     : mLooper(looper),
-      mResultCallback(callback),
+      mResultCallback(std::move(callback)),
       mOutputFilePath(PathUtils::join(
               System::get()->getTempDir(),
               std::string("adbcommand").append(Uuid::generate().toString()))),
@@ -221,7 +208,7 @@ void AdbCommand::taskDoneFunction(const OptionalAdbCommandResult& result) {
     if (!mCancelled) {
         mResultCallback(result);
     }
-    base::AutoLock lock(mLock);
+    AutoLock lock(mLock);
     mFinished = true;
     mCv.broadcastAndUnlock(&lock);
     // This may invalidate this object and clean it up.
@@ -235,16 +222,14 @@ bool AdbCommand::wait(System::Duration timeoutMs) {
         return true;
     }
 
-    base::AutoLock lock(mLock);
+    AutoLock lock(mLock);
     if (timeoutMs < 0) {
         mCv.wait(&lock, [this]() { return mFinished; });
         return true;
     }
 
-    const auto deadlineUs =
-            base::System::get()->getUnixTimeUs() + timeoutMs * 1000;
-    while (!mFinished &&
-           base::System::get()->getUnixTimeUs() < deadlineUs) {
+    const auto deadlineUs = System::get()->getUnixTimeUs() + timeoutMs * 1000;
+    while (!mFinished && System::get()->getUnixTimeUs() < deadlineUs) {
         mCv.timedWait(&mLock, deadlineUs);
     }
 
@@ -253,23 +238,23 @@ bool AdbCommand::wait(System::Duration timeoutMs) {
 
 void AdbCommand::taskFunction(OptionalAdbCommandResult* result) {
     if (mCommand.empty() || mCommand.front().empty()) {
-        *result = {};
+        result->clear();
         return;
     }
 
-    RunOptions output_flag = mWantOutput ? System::RunOptions::DumpOutputToFile
-                                         : System::RunOptions::HideAllOutput;
-    RunOptions run_flags = System::RunOptions::WaitForCompletion |
-                           System::RunOptions::TerminateOnTimeout | output_flag;
+    RunOptions output_flag = mWantOutput ? RunOptions::DumpOutputToFile
+                                         : RunOptions::HideAllOutput;
+    RunOptions run_flags = RunOptions::WaitForCompletion |
+                           RunOptions::TerminateOnTimeout | output_flag;
     System::Pid pid;
-    android::base::System::ProcessExitCode exit_code;
+    System::ProcessExitCode exit_code;
 
     bool command_ran = System::get()->runCommand(
             mCommand, run_flags, mTimeoutMs, &exit_code, &pid, mOutputFilePath);
 
     if (command_ran) {
-        *result = android::base::makeOptional<AdbCommandResult>(
-                {exit_code, mWantOutput ? mOutputFilePath : std::string()});
+        result->emplace(exit_code,
+                        mWantOutput ? mOutputFilePath : std::string());
     }
 }
 
