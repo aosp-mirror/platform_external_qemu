@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "5013ef2b_1a4319d4",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_darwin.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T05:26:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bce58bd5_ae6c1ccf",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 15
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b9fd89d_9a848704",
         "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
         "patchSetId": 4
@@ -94,6 +118,30 @@
     },
     {
       "key": {
+        "uuid": "50abf0e2_8cff6c11",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T05:26:19Z",
+      "side": 1,
+      "message": "Using a mutable captured variable. Is that ok?",
+      "parentUuid": "5b9fd89d_9a848704",
+      "range": {
+        "startLine": 167,
+        "startChar": 41,
+        "endLine": 167,
+        "endChar": 42
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a1c121c_dc2e4597",
         "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
         "patchSetId": 4
@@ -105,6 +153,30 @@
       "writtenOn": "2017-07-29T01:53:46Z",
       "side": 1,
       "message": "please check for the version first - it\u0027s much faster",
+      "range": {
+        "startLine": 171,
+        "startChar": 55,
+        "endLine": 172,
+        "endChar": 33
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b16dc493_b8ac5da5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T05:26:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a1c121c_dc2e4597",
       "range": {
         "startLine": 171,
         "startChar": 55,
@@ -200,6 +272,30 @@
       "side": 1,
       "message": "ah, there could be an extra * size of whitelist complexity because of appending strings...",
       "parentUuid": "928c3625_366e1dcb",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 56
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f95fafbd_576e86bc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T05:26:19Z",
+      "side": 1,
+      "message": "Now uses iterSplit to scan the underlying string just once. It works on StringViews so there shouldn\u0027t be too many extra allocs. (Done)",
+      "parentUuid": "2608def3_c7cbf6b7",
       "range": {
         "startLine": 182,
         "startChar": 0,
