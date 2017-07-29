@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd1e66a3_b6f390e9",
+        "filename": "android/android-emu/android/base/misc/StringUtils.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:23:21Z",
+      "side": 1,
+      "message": "why not just split? :)",
+      "range": {
+        "startLine": 81,
+        "startChar": 5,
+        "endLine": 81,
+        "endChar": 14
+      },
+      "revId": "f500109ed9dd1b03e046b94413b4f26d971ee5e6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
