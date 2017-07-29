@@ -71,5 +71,22 @@ bool startsWith(StringView string, StringView prefix) {
             memcmp(string.data(), prefix.data(), prefix.size()) == 0;
 }
 
+void iterSplit(StringView str, StringView splitBy,
+               std::function<void (StringView)> func) {
+    if (splitBy.empty()) return;
+
+    size_t splitSize = splitBy.size();
+    size_t begin = 0;
+    size_t end = str.find(splitBy);
+
+    while (true) {
+        func(str.substrAbs(begin, end));
+        if (end == std::string::npos) return;
+        begin = end + splitSize;
+        end = str.find(splitBy, begin);
+    }
+}
+
+
 }  // namespace base
 }  // namespace android

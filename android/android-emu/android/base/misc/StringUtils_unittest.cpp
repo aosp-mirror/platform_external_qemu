@@ -161,5 +161,64 @@ TEST(StringUtils, startsWith) {
     }
 }
 
+TEST(StringUtils, iterSplit) {
+    std::vector<StringView> results;
+
+    StringViewFunc testFunc = [&results](StringView s) {
+        results.push_back(s);
+    };
+
+    iterSplit(StringView(""), StringView("abc"), testFunc);
+    EXPECT_EQ(results.size(), 1);
+
+    iterSplit(StringView("abc"), StringView(""), testFunc);
+    EXPECT_EQ(results.size(), 1);
+
+    results.clear();
+    iterSplit(StringView("abc"), StringView("a"), testFunc);
+    EXPECT_EQ(results.size(), 2);
+    EXPECT_EQ(results[0], StringView(""));
+    EXPECT_EQ(results[1], StringView("bc"));
+
+    results.clear();
+    iterSplit(StringView("aaa"), StringView("a"), testFunc);
+    EXPECT_EQ(4, results.size());
+    EXPECT_EQ(StringView(""), results[0]);
+    EXPECT_EQ(StringView(""), results[1]);
+    EXPECT_EQ(StringView(""), results[2]);
+    EXPECT_EQ(StringView(""), results[3]);
+
+    results.clear();
+    iterSplit(StringView("1a2a3a4"), StringView("a"), testFunc);
+    EXPECT_EQ(4, results.size());
+    EXPECT_EQ(StringView("1"), results[0]);
+    EXPECT_EQ(StringView("2"), results[1]);
+    EXPECT_EQ(StringView("3"), results[2]);
+    EXPECT_EQ(StringView("4"), results[3]);
+
+    results.clear();
+    iterSplit(StringView("1a2aa3a4"), StringView("a"), testFunc);
+    EXPECT_EQ(5, results.size());
+    EXPECT_EQ(StringView("1"), results[0]);
+    EXPECT_EQ(StringView("2"), results[1]);
+    EXPECT_EQ(StringView(""), results[2]);
+    EXPECT_EQ(StringView("3"), results[3]);
+    EXPECT_EQ(StringView("4"), results[4]);
+
+    results.clear();
+    iterSplit(StringView("The quick brown fox jumped over the lazy dog"),
+              StringView(" "), testFunc);
+    EXPECT_EQ(9, results.size());
+    EXPECT_EQ(StringView("The"), results[0]);
+    EXPECT_EQ(StringView("quick"), results[1]);
+    EXPECT_EQ(StringView("brown"), results[2]);
+    EXPECT_EQ(StringView("fox"), results[3]);
+    EXPECT_EQ(StringView("jumped"), results[4]);
+    EXPECT_EQ(StringView("over"), results[5]);
+    EXPECT_EQ(StringView("the"), results[6]);
+    EXPECT_EQ(StringView("lazy"), results[7]);
+    EXPECT_EQ(StringView("dog"), results[8]);
+}
+
 }  // namespace base
 }  // namespace android
