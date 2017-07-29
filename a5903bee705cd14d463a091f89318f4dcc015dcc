@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01d6fd7d_e1e8abf1",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:22:55Z",
+      "side": 1,
+      "message": "what about using std::string::npos here as the default to mean \"to the end\"? this way you would not need to do special checking in the iterSplit() function, and would only need a single version of substr()",
+      "range": {
+        "startLine": 197,
+        "startChar": 36,
+        "endLine": 197,
+        "endChar": 46
+      },
+      "revId": "a5903bee705cd14d463a091f89318f4dcc015dcc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
