@@ -185,6 +185,30 @@
       "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2608def3_c7cbf6b7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-29T04:55:38Z",
+      "side": 1,
+      "message": "ah, there could be an extra * size of whitelist complexity because of appending strings...",
+      "parentUuid": "928c3625_366e1dcb",
+      "range": {
+        "startLine": 182,
+        "startChar": 0,
+        "endLine": 219,
+        "endChar": 56
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
