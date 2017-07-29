@@ -467,6 +467,30 @@
       "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "98aeea8c_73e79cbb",
+        "filename": "android/android-emu/android/emulation/control/bugreport_agent.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T02:00:59Z",
+      "side": 1,
+      "message": "Thanks for the explanations.\n\nI believe that the bug reporting logic should not rely on the UI or Qt library, it should only be responsible for preparing the data to send. Then, UI or something else would wrap the methods and call them when to show the data to the user and send it to our bug tracker.\n\nRegarding the C interface, there\u0027s no need to make it an agent - just create a C wrapper interface for the required functions, as in FeatureControl.h/cpp and feature_control.h.\nAgents complicate lots of things, like tracking down what is there and where it gets set, and why do we need that another level of abstraction.\nFor the ui-non ui isolation, or to hide the engine interface from the rest of AndroidEmu library it\u0027s OK. Calling from one part of AndroidEmu into another one using a C agent needs to be solving some really complex problem.\n\nActually, let me check if I can just make the console.c code C++ now to get rid of that C interface requirement",
+      "parentUuid": "f92a3ee7_d7e04c1f",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 18
+      },
+      "revId": "920aeef4673587ed5c896419d8d640b656ea2197",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
