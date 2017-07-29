@@ -9,10 +9,12 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
-#ifndef _QEMU_TCPDUMP_H
-#define _QEMU_TCPDUMP_H
+#pragma once
+#include "android/utils/compiler.h"
 
 #include <stdint.h>
+
+ANDROID_BEGIN_HEADER
 
 /* global flag, set to 1 when packet captupe is active */
 extern int  qemu_tcpdump_active;
@@ -33,4 +35,4 @@ extern void qemu_tcpdump_packet( const void*  base, int  len );
  */
 extern void  qemu_tcpdump_stats( uint64_t  *pcount, uint64_t*  psize );
 
-#endif /* _QEMU_TCPDUMP_H */
+ANDROID_END_HEADER

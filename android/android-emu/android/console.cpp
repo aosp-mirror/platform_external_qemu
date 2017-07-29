@@ -22,6 +22,7 @@
  */
 
 #include "android/console.h"
+#include "android/console_internal.h"
 
 #include "android/android.h"
 #include "android/cmdline-option.h"
@@ -146,7 +147,7 @@ control_global_add_redir( ControlGlobal  global,
         int  old_max = global->max_redirs;
         int  new_max = old_max + (old_max >> 1) + 4;
 
-        Redir  new_redirs = realloc( global->redirs, new_max*sizeof(global->redirs[0]) );
+        auto new_redirs = (Redir)realloc( global->redirs, new_max*sizeof(global->redirs[0]) );
         if (new_redirs == NULL)
             return -1;
 
@@ -234,7 +235,7 @@ control_client_destroy( ControlClient  client )
         pnode = &node->next;
     }
 
-    free( client );
+    delete client;
 }
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -265,7 +266,7 @@ static void control_control_write(ControlClient client, const char* buff, int le
     int offset = 0;
     for (;;) {
         const char* pos = buff + offset;
-        const char* newline = memchr(pos, '\n', len - offset);
+        auto newline = (const char*)memchr(pos, '\n', len - offset);
         if (!newline) {
             // Done, send the rest as a single chunk.
             send_chunk(client->sock, buff + offset, len - offset);
@@ -310,14 +311,14 @@ static int  control_write( ControlClient  client, const char*  format, ... )
 }
 
 static int control_write_out_cb(void* opaque, const char* str, int strsize) {
-    ControlClient client = opaque;
+    auto client = (ControlClient)opaque;
     control_control_write(client, str, strsize);
     return strsize;
 }
 
 static int control_write_err_cb(void* opaque, const char* str, int strsize) {
     int ret = 0;
-    ControlClient client = opaque;
+    auto client = (ControlClient)opaque;
     ret += control_write(client, "KO: ");
     control_control_write(client, str, strsize);
     return ret + strsize;
@@ -338,15 +339,16 @@ typedef struct CommandDefRec_ {
 
 } CommandDefRec;
 
-static const CommandDefRec main_commands[];         /* forward */
-static const CommandDefRec main_commands_preauth[]; /* forward */
+namespace {
+extern const CommandDefRec main_commands[];         /* forward */
+extern const CommandDefRec main_commands_preauth[]; /* forward */
+}  // namespace
 
 static ControlClient
 control_client_create( Socket         socket,
                        ControlGlobal  global )
 {
-    ControlClient  client = calloc( sizeof(*client), 1 );
-
+    auto client =  new ControlClientRec();
     if (client) {
         socket_set_nodelay( socket );
         socket_set_nonblock( socket );
@@ -592,7 +594,7 @@ control_client_read_byte( ControlClient  client, unsigned char  ch )
 }
 
 static void control_client_read(void* opaque, int fd, unsigned events) {
-    ControlClient client = opaque;
+    auto client = (ControlClient)opaque;
     unsigned char buf[4096];
     int size;
 
@@ -648,7 +650,7 @@ static void control_client_read(void* opaque, int fd, unsigned events) {
 static void control_global_accept(void* opaque,
                                   int listen_fd,
                                   unsigned events) {
-    ControlGlobal global = opaque;
+    auto global = (ControlGlobal)opaque;
     ControlClient client;
     Socket fd;
 
@@ -1542,7 +1544,7 @@ static int
 do_gsm_signal( ControlClient  client, char*  args )
 {
     enum { SIGNAL_RSSI = 0, SIGNAL_BER, NUM_SIGNAL_PARAMS };
-    char*   p = args;
+    const char* p = args;
     int     top_param = -1;
     int     params[ NUM_SIGNAL_PARAMS ];
 
@@ -1601,7 +1603,7 @@ static int
 do_gsm_signal_profile( ControlClient  client, char*  args )
 {
     char* end;
-    char*   p = args;
+    const char* p = args;
     if (!p)
         p = "";
     int  val = strtol( p, &end, 10 );
@@ -2372,7 +2374,7 @@ do_geo_fix( ControlClient  client, char*  args )
 {
     // GEO_SAT2 provides bug backwards compatibility.
     enum { GEO_LONG = 0, GEO_LAT, GEO_ALT, GEO_SAT, GEO_SAT2, NUM_GEO_PARAMS };
-    char*   p = args;
+    const char* p = args;
     int     top_param = -1;
     double  altitude;
     double  params[ NUM_GEO_PARAMS ];
@@ -2489,26 +2491,29 @@ do_sensors_get( ControlClient client, char* args )
         return -1;
     }
 
+    char buffer[SENSORS_INFO_SIZE] = { 0 };
+
     int status = SENSOR_STATUS_UNKNOWN;
     char sensor[strlen(args) + 1];
     if (1 != sscanf( args, "%s", &sensor[0] ))
         goto SENSOR_STATUS_ERROR;
 
-    int sensor_id = android_sensors_get_id_from_name( sensor );
-    char buffer[SENSORS_INFO_SIZE] = { 0 };
-    float a, b, c;
-
-    if (sensor_id < 0) {
-        status = sensor_id;
-        goto SENSOR_STATUS_ERROR;
-    } else {
-        status = android_sensors_get( sensor_id, &a, &b, &c );
-        if (status != SENSOR_STATUS_OK)
+    {
+        int sensor_id = android_sensors_get_id_from_name( sensor );
+        if (sensor_id < 0) {
+            status = sensor_id;
             goto SENSOR_STATUS_ERROR;
-        snprintf( buffer, sizeof(buffer),
-                "%s = %g:%g:%g\r\n", sensor, a, b, c );
-        do_control_write( client, buffer );
-        return 0;
+        }
+        {
+            float a, b, c;
+            status = android_sensors_get( sensor_id, &a, &b, &c );
+            if (status != SENSOR_STATUS_OK)
+                goto SENSOR_STATUS_ERROR;
+
+            snprintf( buffer, sizeof(buffer), "%s = %g:%g:%g\r\n", sensor, a, b, c );
+            do_control_write( client, buffer );
+            return 0;
+        }
     }
 
 SENSOR_STATUS_ERROR:
@@ -2539,6 +2544,8 @@ do_sensors_set( ControlClient client, char* args )
         return -1;
     }
 
+    char buffer[SENSORS_INFO_SIZE] = { 0 };
+
     int status;
     char* sensor;
     char* value;
@@ -2565,42 +2572,44 @@ do_sensors_set( ControlClient client, char* args )
     if (! (strlen(sensor) && strlen(value)))
         goto INPUT_ERROR;
 
-    int sensor_id = android_sensors_get_id_from_name( sensor );
-    char buffer[SENSORS_INFO_SIZE] = { 0 };
-
-    if (sensor_id < 0) {
-        status = sensor_id;
-        goto SENSOR_STATUS_ERROR;
-    } else {
-        float fvalues[3];
-        status = android_sensors_get( sensor_id, &fvalues[0], &fvalues[1], &fvalues[2] );
-        if (status != SENSOR_STATUS_OK)
+    {
+        int sensor_id = android_sensors_get_id_from_name( sensor );
+        if (sensor_id < 0) {
+            status = sensor_id;
             goto SENSOR_STATUS_ERROR;
+        } else {
+            float fvalues[3];
+            status = android_sensors_get( sensor_id, &fvalues[0], &fvalues[1], &fvalues[2] );
+            if (status != SENSOR_STATUS_OK)
+                goto SENSOR_STATUS_ERROR;
 
-        /* Parsing the value part to get the sensor values(a, b, c) */
-        int i;
-        char* pnext;
-        char* pend = value + strlen(value);
-        for (i = 0; i < 3; i++, value = pnext + 1) {
-            pnext=strchr( value, ':' );
-            if (pnext) {
-                *pnext = 0;
-            } else {
-                pnext = pend;
+            {
+                /* Parsing the value part to get the sensor values(a, b, c) */
+                int i;
+                char* pnext;
+                char* pend = value + strlen(value);
+                for (i = 0; i < 3; i++, value = pnext + 1) {
+                    pnext=strchr( value, ':' );
+                    if (pnext) {
+                        *pnext = 0;
+                    } else {
+                        pnext = pend;
+                    }
+
+                    if (pnext > value) {
+                        if (1 != sscanf( value,"%g", &fvalues[i] ))
+                            goto INPUT_ERROR;
+                    }
+                }
             }
 
-            if (pnext > value) {
-                if (1 != sscanf( value,"%g", &fvalues[i] ))
-                    goto INPUT_ERROR;
-            }
+            status = android_sensors_set( sensor_id, fvalues[0], fvalues[1], fvalues[2] );
+            if (status != SENSOR_STATUS_OK)
+                goto SENSOR_STATUS_ERROR;
+
+            free( args_dup );
+            return 0;
         }
-
-        status = android_sensors_set( sensor_id, fvalues[0], fvalues[1], fvalues[2] );
-        if (status != SENSOR_STATUS_OK)
-            goto SENSOR_STATUS_ERROR;
-
-        free( args_dup );
-        return 0;
     }
 
 SENSOR_STATUS_ERROR:
@@ -2813,7 +2822,8 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
  *       response be less than 1024 characters.
  *       Do not expand the list to the point of breaking Android Studio.
  */
-static const CommandDefRec main_commands[] = {
+namespace {
+extern const CommandDefRec main_commands[] = {
         HELP_COMMAND,
 
         HELP_VERBOSE_COMMAND,
@@ -2894,6 +2904,8 @@ static const CommandDefRec main_commands[] = {
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
+}  // namespace
+
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
@@ -2964,7 +2976,8 @@ static const CommandDefRec vm_commands_preauth[] = {
 /* "preauth" commands are the set of commands that are legal before
  * authentication.  "avd name is special cased here because it is needed by
  * older versions of Android Studio */
-static const CommandDefRec main_commands_preauth[] = {
+namespace {
+extern const CommandDefRec main_commands_preauth[] = {
     HELP_COMMAND,
 
     HELP_VERBOSE_COMMAND,
@@ -2983,6 +2996,8 @@ static const CommandDefRec main_commands_preauth[] = {
     QUIT_COMMAND,
 
     {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+}  // namespace
 
 const char* android_console_auth_banner_get() {
     static char s_android_monitor_auth_banner[1024];
@@ -3026,8 +3041,7 @@ const char* android_console_help_banner_get() {
 
 void* test_control_client_create(Socket socket)
 {
-    ControlClient  client = calloc( sizeof(*client), 1 );
-
+    auto client = new ControlClientRec();
     if (client) {
         socket_set_nodelay( socket );
         socket_set_nonblock( socket );
@@ -3041,7 +3055,7 @@ void* test_control_client_create(Socket socket)
 
 void test_control_client_close(void* opaque)
 {
-    free(opaque);
+    delete (ControlClientRec*)opaque;
 }
 
 void send_test_string(void* opaque, const char* the_string)

@@ -269,7 +269,7 @@ LOCAL_SRC_FILES := \
     android/car.cpp \
     android/cmdline-option.cpp \
     android/CommonReportedInfo.cpp \
-    android/console.c \
+    android/console.cpp \
     android/console_auth.cpp \
     android/cpu_accelerator.cpp \
     android/crashreport/CrashSystem.cpp \
