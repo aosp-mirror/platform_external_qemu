@@ -501,7 +501,7 @@ public:
     ~WinContext() {
         if (!mDispatch->wglDeleteContext(mCtx)) {
             fprintf(stderr, "error deleting WGL context! error 0x%x\n",
-                    GetLastError());
+                    (unsigned)GetLastError());
         }
     }
 
