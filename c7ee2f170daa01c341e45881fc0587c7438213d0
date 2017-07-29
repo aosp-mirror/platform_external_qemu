@@ -69,6 +69,30 @@
       "revId": "c7ee2f170daa01c341e45881fc0587c7438213d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84076c48_863d3495",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2501,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T16:07:24Z",
+      "side": 1,
+      "message": "in C++ goto may not jump over initialization of some variable that\u0027s alive at the goto target label, otherwise its dtor would run but ctor won\u0027t. These blocks make all following variables go away before the target labels, so the issue doesn\u0027t happen",
+      "parentUuid": "f0aa20d0_d2921eda",
+      "range": {
+        "startLine": 2501,
+        "startChar": 0,
+        "endLine": 2501,
+        "endChar": 5
+      },
+      "revId": "c7ee2f170daa01c341e45881fc0587c7438213d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
