@@ -22,6 +22,30 @@
       "revId": "c7ee2f170daa01c341e45881fc0587c7438213d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e1d393ef_bfedaf85",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 351,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-29T04:48:13Z",
+      "side": 1,
+      "message": "ControlClient is a typedef for ControlClientRec*",
+      "parentUuid": "2b46dab1_86688a57",
+      "range": {
+        "startLine": 351,
+        "startChar": 23,
+        "endLine": 351,
+        "endChar": 39
+      },
+      "revId": "c7ee2f170daa01c341e45881fc0587c7438213d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
