@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "003c7001_4ed5512c",
+        "filename": "hw/arm/ranchu.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-07-31T19:55:09Z",
+      "side": 1,
+      "message": "done\nmoved to ranchu.h",
+      "parentUuid": "3b68afdb_b44ff9e5",
+      "range": {
+        "startLine": 135,
+        "startChar": 0,
+        "endLine": 139,
+        "endChar": 1
+      },
+      "revId": "1441ecaee07f794a2e38b066162946833ec3a817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "98c56cb3_57924eca",
         "filename": "include/sysemu/device_tree.h",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5756103b_166ca36a",
+        "filename": "include/sysemu/device_tree.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-07-31T19:55:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98c56cb3_57924eca",
+      "range": {
+        "startLine": 58,
+        "startChar": 3,
+        "endLine": 58,
+        "endChar": 12
+      },
+      "revId": "1441ecaee07f794a2e38b066162946833ec3a817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0cf31ded_82dd7de4",
         "filename": "vl.c",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2017-07-31T18:34:25Z",
       "side": 1,
       "message": "can you move it into the qemu_android_emulation_early_setup() ?",
+      "range": {
+        "startLine": 4567,
+        "startChar": 0,
+        "endLine": 4570,
+        "endChar": 6
+      },
+      "revId": "1441ecaee07f794a2e38b066162946833ec3a817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f4aaa3ac_9d5a2f00",
+        "filename": "vl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4570,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-07-31T19:55:09Z",
+      "side": 1,
+      "message": "that is the first one I tried, but run into the same poisoned TARGET_ARM compiler error :(",
+      "parentUuid": "0cf31ded_82dd7de4",
       "range": {
         "startLine": 4567,
         "startChar": 0,
