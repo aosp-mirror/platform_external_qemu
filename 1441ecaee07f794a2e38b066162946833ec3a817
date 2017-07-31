@@ -140,6 +140,30 @@
       "revId": "1441ecaee07f794a2e38b066162946833ec3a817",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9db3d100_8aaf4ad6",
+        "filename": "vl.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 4570,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T20:16:38Z",
+      "side": 1,
+      "message": "valid point, we build the glue code only once, not per-target\nwe may need specific functions to initialize a target architecture glue, but for now let it be here",
+      "parentUuid": "f4aaa3ac_9d5a2f00",
+      "range": {
+        "startLine": 4567,
+        "startChar": 0,
+        "endLine": 4570,
+        "endChar": 6
+      },
+      "revId": "1441ecaee07f794a2e38b066162946833ec3a817",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
