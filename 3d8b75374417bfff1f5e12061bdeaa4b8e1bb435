@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "34f7d728_55ec2393",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-31T17:00:27Z",
+      "side": 1,
+      "message": "Awesome!",
+      "parentUuid": "9e1cfde2_2c139ae8",
+      "range": {
+        "startLine": 167,
+        "startChar": 41,
+        "endLine": 167,
+        "endChar": 42
+      },
+      "revId": "3d8b75374417bfff1f5e12061bdeaa4b8e1bb435",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2a1c121c_dc2e4597",
         "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
         "patchSetId": 4
