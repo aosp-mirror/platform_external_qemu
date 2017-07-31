@@ -1184,27 +1184,34 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     const int minApiLevelVmHeapSize =
             androidHwConfig_getMinVmHeapSize(hw, avdInfo_getApiLevel(avd));
     const int minRamVmHeapSize = hw->hw_ramSize / 4;
-    int vmHeapSize = minRamVmHeapSize > minApiLevelVmHeapSize
+    int minVmHeapSize = minRamVmHeapSize > minApiLevelVmHeapSize
                              ? minRamVmHeapSize
                              : minApiLevelVmHeapSize;
-
     const int maxVmHeapSize =
             4 * minApiLevelVmHeapSize > 576 ? 576 : 4 * minApiLevelVmHeapSize;
-    if (vmHeapSize > maxVmHeapSize) {
-        vmHeapSize = maxVmHeapSize;
+
+    if (minVmHeapSize > maxVmHeapSize) {
+        minVmHeapSize = maxVmHeapSize;
     }
-    if (hw->vm_heapSize < vmHeapSize) {
+
+    if (hw->vm_heapSize < minVmHeapSize) {
         D("VM heap size %iMB is below hardware specified minimum of %iMB,"
           "setting it to that value",
-          hw->vm_heapSize, vmHeapSize);
+          hw->vm_heapSize, minVmHeapSize);
 
-        hw->vm_heapSize = vmHeapSize;
+        hw->vm_heapSize = minVmHeapSize;
 
-        const int minRamSize = vmHeapSize * 2;
+        const int minRamSize = minVmHeapSize * 2;
         if (hw->hw_ramSize < minRamSize) {
             hw->hw_ramSize = minRamSize;
             D("Increasing RAM to %iMB to accomodate min VM heap", minRamSize);
         }
+    }
+
+    if (hw->vm_heapSize > maxVmHeapSize) {
+        D("VM heap size %iMB is above maximum supported %iMB, "
+          "setting it to that value", hw->vm_heapSize, maxVmHeapSize);
+        hw->vm_heapSize = maxVmHeapSize;
     }
 
     const bool is_qemu1 = !is_qemu2;
