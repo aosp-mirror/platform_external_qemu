@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37916fc6_00775b90",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T21:06:38Z",
+      "side": 1,
+      "message": "this could be a whole gigabyte, in that case minSize \u003e maxSize\nI\u0027d prefer to enforce min \u003c\u003d max too",
+      "range": {
+        "startLine": 1186,
+        "startChar": 3,
+        "endLine": 1186,
+        "endChar": 52
+      },
+      "revId": "dda6a722f043c40edb42729aa160e8e36aefe21f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
