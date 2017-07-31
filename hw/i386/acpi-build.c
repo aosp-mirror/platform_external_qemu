@@ -64,6 +64,7 @@
 #include "hw/acpi/ipmi.h"
 
 #ifdef CONFIG_ANDROID
+#include "android/globals.h"
 #include "hw/acpi/goldfish_defs.h"
 #endif
 
@@ -1241,6 +1242,78 @@ static void build_goldfish_device_aml(Aml *scope,
     aml_append(scope, dev);
 }
 
+static Aml *append_string_property(Aml *package,
+                                const char *key,
+                                const char *value)
+{
+    Aml *property = aml_package(2);
+    aml_append(property, aml_string(key));
+    aml_append(property, aml_string(value));
+
+    aml_append(package, property);
+    return property;
+}
+
+static void build_android_dt_aml(Aml *scope,
+                                 const char *dev_name,
+                                 const char *hid_name,
+                                 const char *str_name)
+{
+
+    Aml *dev = aml_device(dev_name);
+    Aml *properties, *dsd;
+    char *system_device_in_guest, *vendor_device_in_guest;
+    int npartitions;
+
+    aml_append(dev, aml_name_decl("_HID", aml_string(hid_name)));
+    aml_append(dev, aml_name_decl("_STR", aml_unicode(str_name)));
+
+    /* All AVDs have a system.img. Some also have a vendor.img. */
+    system_device_in_guest = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
+    vendor_device_in_guest = avdInfo_getVendorImageDevicePathInGuest( android_avdInfo);
+    npartitions = vendor_device_in_guest ? 2 : 1;
+    /* 5 properties per partition, plus 2 more "compatible" nodes */
+    properties = aml_package(2 + npartitions * 5);
+    /* ACPI _DSD does not support nested properties (at least not in a
+     * straightforward manner), so we have to use a flat layout.
+     */
+    append_string_property(properties, "android.compatible",
+                           "android,firmware");
+    append_string_property(properties, "android.fstab.compatible",
+                           "android,fstab");
+
+    append_string_property(properties, "android.fstab.system.compatible",
+                           "android,system");
+    append_string_property(properties, "android.fstab.system.dev",
+                           system_device_in_guest);
+    append_string_property(properties, "android.fstab.system.type", "ext4");
+    append_string_property(properties, "android.fstab.system.mnt_flags", "ro");
+    append_string_property(properties, "android.fstab.system.fsmgr_flags",
+                           "wait");
+
+    free(system_device_in_guest);
+    if (vendor_device_in_guest) {
+        append_string_property(properties, "android.fstab.vendor.compatible",
+                               "android,vendor");
+        append_string_property(properties, "android.fstab.vendor.dev",
+                               vendor_device_in_guest);
+        append_string_property(properties, "android.fstab.vendor.type", "ext4");
+        append_string_property(properties, "android.fstab.vendor.mnt_flags",
+                               "ro");
+        append_string_property(properties, "android.fstab.vendor.fsmgr_flags",
+                               "wait");
+        free(vendor_device_in_guest);
+    }
+
+    dsd = aml_package(2);
+    /* Device Properties UUID. Cf. https://lwn.net/Articles/612062/ */
+    aml_append(dsd, aml_touuid("DAFFD814-6EBA-4D8C-8A91-BC9BBF4AA301"));
+    aml_append(dsd, properties);
+
+    aml_append(dev, aml_name_decl("_DSD", dsd));
+    aml_append(scope, dev);
+}
+
 static void build_goldfish_aml(Aml *table)
 {
     Aml *scope = aml_scope("_SB");
@@ -1285,6 +1358,7 @@ static void build_goldfish_aml(Aml *table)
                               GOLDFISH_ROTARY_IOMEM_SIZE,
                               GOLDFISH_ROTARY_IRQ);
 
+    build_android_dt_aml(scope, "ANDT", "ANDR0001", "android device tree");
     aml_append(table, scope);
 }
 #endif  /* CONFIG_ANDROID */
