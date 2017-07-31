@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16207469_12e0d91e",
+        "filename": "android/android-emu/android/base/misc/StringUtils.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T04:03:04Z",
+      "side": 1,
+      "message": "this is an arguable decision. If string only contains a single item, one might want to process it in the same way as if there were N of them, e.g. if (unlikely) there\u0027s only single GL extension in the string, you would still want |func| get called for it, instead of checking it later explicitly if |func| wasn\u0027t called.\n\nAnd your code already does exactly that ;)",
+      "range": {
+        "startLine": 76,
+        "startChar": 67,
+        "endLine": 77,
+        "endChar": 23
+      },
+      "revId": "d03e617c4a075dcfdf20edfd5ebcc0127af69c3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db42e4ff_787820dd",
+        "filename": "android/android-emu/android/base/misc/StringUtils_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T04:03:04Z",
+      "side": 1,
+      "message": "nit: you don\u0027t need to explicitly wrap every string into string view :)",
+      "range": {
+        "startLine": 171,
+        "startChar": 10,
+        "endLine": 171,
+        "endChar": 20
+      },
+      "revId": "d03e617c4a075dcfdf20edfd5ebcc0127af69c3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b715ed6b_c433cf3a",
+        "filename": "android/android-emu/android/base/misc/StringUtils_unittest.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T04:03:04Z",
+      "side": 1,
+      "message": "please also add a case for a multi-character delimiter (e.g. \"; \")",
+      "range": {
+        "startLine": 220,
+        "startChar": 0,
+        "endLine": 221,
+        "endChar": 1
+      },
+      "revId": "d03e617c4a075dcfdf20edfd5ebcc0127af69c3b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
