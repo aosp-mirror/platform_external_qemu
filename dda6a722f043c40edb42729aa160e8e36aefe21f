@@ -22,6 +22,30 @@
       "revId": "dda6a722f043c40edb42729aa160e8e36aefe21f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1d08cd4_5b3f788c",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1186,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-31T21:07:49Z",
+      "side": 1,
+      "message": "Hmm there is one thing about the code that makes the shared variable make more sense actually---if vmHeapSize (min) is set over max, it\u0027s set back down to max before the next step. But in the current patch set, I moved the max check at the end, so it still works hehe",
+      "parentUuid": "37916fc6_00775b90",
+      "range": {
+        "startLine": 1186,
+        "startChar": 3,
+        "endLine": 1186,
+        "endChar": 52
+      },
+      "revId": "dda6a722f043c40edb42729aa160e8e36aefe21f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
