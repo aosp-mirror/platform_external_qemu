@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cd1354bf_1fbd8ab7",
+        "filename": "android/android-emu/android/base/StringView.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 191,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T03:55:34Z",
+      "side": 1,
+      "message": "haha, it\u0027s the same as \"return other;\"\nit you returned a stringview starting at |loc| and ending in the end of |this| one could\u0027ve used it to repeat searches. now it\u0027s as good as \"bool contains(StringView other)\"",
+      "range": {
+        "startLine": 191,
+        "startChar": 15,
+        "endLine": 191,
+        "endChar": 45
+      },
+      "revId": "a483dfc34713e46be71420935b25650cce95b36d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
