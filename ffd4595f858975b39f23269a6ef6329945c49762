@@ -45,6 +45,30 @@
       "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd7f40d2_fd16d306",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-07-31T17:31:36Z",
+      "side": 1,
+      "message": "I did a benchmark on linux, this function cost 30 us (with gettimeofday), Could you share more with me why this kind of latency matters when loading snapshot? Thanks.",
+      "parentUuid": "34796528_62cc6b76",
+      "range": {
+        "startLine": 531,
+        "startChar": 12,
+        "endLine": 531,
+        "endChar": 25
+      },
+      "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
