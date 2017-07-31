@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d0e06faf_a296bb83",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1187,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T20:40:48Z",
+      "side": 1,
+      "message": "maybe we should rename it to |minVmHeapSize| as that\u0027s what this variable is about. later there should be two separate checks: one for min and one for max, instead of blending everything into one variable\n\nsomething like\n\nint min \u003d ...\nint max \u003d ...\nif (min \u003e max) min \u003d max;\n\nif (heapSize \u003c min) { print(adjusting for min) .... }\nif (heapSize \u003e max) { print(adjusting for max) .... }",
+      "range": {
+        "startLine": 1187,
+        "startChar": 8,
+        "endLine": 1187,
+        "endChar": 18
+      },
+      "revId": "4076e2a30f808f3c49c959acaa7971a59918144f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bec33c9e_4095f81e",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1198,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T20:40:48Z",
+      "side": 1,
+      "message": "I believe this assignment should only run if \"hw-\u003evm_heapSize \u003e vmHeapSize\", otherwise it\u0027s good as it is\nalso, the code is already quite a mess to read - we should have two separate specific branches now to check for min and for max, with two different variables.\nNow the same |vmHeapSize| gets adjusted for both min and max, and it turns out that at assignment point there\u0027s no way to understand if one should only assign if |hw-\u003evm_heapSize| is less or greater than |vmHeapSize|",
+      "range": {
+        "startLine": 1198,
+        "startChar": 8,
+        "endLine": 1198,
+        "endChar": 37
+      },
+      "revId": "4076e2a30f808f3c49c959acaa7971a59918144f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
