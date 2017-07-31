@@ -69,6 +69,30 @@
       "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77675674_60bd1506",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-07-31T17:33:34Z",
+      "side": 1,
+      "message": "BTW, actuall we\u0027ve already plan to put something in avd, so I am fine to revert this CL if the timing really matters for some reason.",
+      "parentUuid": "cd7f40d2_fd16d306",
+      "range": {
+        "startLine": 531,
+        "startChar": 12,
+        "endLine": 531,
+        "endChar": 25
+      },
+      "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
