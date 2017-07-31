@@ -242,8 +242,8 @@ static Version versionFromProto(const emulator_features::EmulatorVersion& ver) {
     return Version(
             ver.has_major() ? ver.major() : defaultVal,
             (ver.has_major() && ver.has_minor()) ? ver.minor() : defaultVal,
-            (ver.has_major() && ver.has_minor() && ver.has_micro())
-                    ? ver.micro()
+            (ver.has_major() && ver.has_minor() && ver.has_patch())
+                    ? ver.patch()
                     : defaultVal);
 }
 
