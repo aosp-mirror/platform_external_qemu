@@ -308,6 +308,13 @@ static int createUserData(AvdInfo* avd,
     return 0;
 }
 
+static std::string get_qcow2_image_basename(const std::string& image) {
+    char* basename = path_basename(image.c_str());
+    std::string qcow2_basename(basename);
+    free(basename);
+    return qcow2_basename + ".qcow2";
+}
+
 /**
  * Class that's capable of creating that partition parameters
  */
@@ -347,6 +354,7 @@ class PartitionParameters {
         std::string deviceParam;
         ScopedCPtr<const char> allocatedPath;
         StringView filePath;
+        std::string sysImagePath, vendorImagePath;
         bool qCow2Format = true;
         switch (type) {
             case IMAGE_TYPE_SYSTEM:
@@ -356,20 +364,21 @@ class PartitionParameters {
                 if (apiLevel <= 15) {
                     writable = true;
                 }
+                sysImagePath = std::string(avdInfo_getSystemImagePath(m_avd) ?:
+                avdInfo_getSystemInitImagePath(m_avd));
                 if (writable) {
                     const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(systemDir, "system.img.qcow2");
+                    filePath = path_join(systemDir, get_qcow2_image_basename(sysImagePath).c_str());
                     driveParam += StringFormat("index=%d,id=system,file=%s",
-                                               m_driveIndex++, filePath);
+                                           m_driveIndex++, filePath);
+                    allocatedPath.reset(filePath.c_str());
                 } else {
                     qCow2Format = false;
-                    filePath = avdInfo_getSystemInitImagePath(m_avd);
-                    driveParam += StringFormat(
-                            "index=%d,id=system,file=%s"
-                            ",read-only",
-                            m_driveIndex++, filePath);
+                    filePath = sysImagePath.c_str();
+                    driveParam += StringFormat("index=%d,id=system,file=%s"
+                                           ",read-only",
+                                           m_driveIndex++, filePath);
                 }
-                allocatedPath.reset(filePath.c_str());
                 deviceParam = StringFormat("%s,drive=system",
                                            kTarget.storageDeviceType);
                 break;
@@ -379,16 +388,23 @@ class PartitionParameters {
                     // we do not have a vendor image to mount
                     return {};
                 }
-                filePath = avdInfo_getContentPath(m_avd);
-                driveParam += StringFormat("index=%d,id=vendor,file=%s" PATH_SEP
-                                           "vendor.img.qcow2",
+                vendorImagePath = std::string(avdInfo_getVendorImagePath(m_avd) ?:
+                    avdInfo_getVendorInitImagePath(m_avd));
+                if (writable) {
+                    const char* systemDir = avdInfo_getContentPath(m_avd);
+                    filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
+                    driveParam += StringFormat("index=%d,id=vendor,file=%s",
                                            m_driveIndex++, filePath);
-                // You can override this explicitly
-                // by passing -writable-system to emulator.
-                if (!writable)
-                    driveParam += ",read-only";
+                    allocatedPath.reset(filePath.c_str());
+                } else {
+                    qCow2Format = false;
+                    filePath = vendorImagePath.c_str();
+                    driveParam += StringFormat("index=%d,id=vendor,file=%s"
+                                           ",read-only",
+                                           m_driveIndex++, filePath);
+                }
                 deviceParam = StringFormat("%s,drive=vendor",
-                                           kTarget.storageDeviceType);
+                                       kTarget.storageDeviceType);
                 break;
             case IMAGE_TYPE_CACHE:
                 filePath = m_hw->disk_cachePartition_path;
@@ -978,8 +994,15 @@ extern "C" int main(int argc, char** argv) {
         // hw->hw_arc: ChromeOS single disk image, use regular block device
         // instead of virtio block device
         args.add("-drive");
-        args.addFormat("index=0,id=system,file=%s" PATH_SEP "system.img.qcow2",
-                       avdInfo_getContentPath(avd));
+        char* path_qemu_sys = avdInfo_getSystemImagePath(avd);
+        if (path_qemu_sys) {
+            args.addFormat("index=0,id=system,file=%s" "system-qemu.img.qcow2",
+                    avdInfo_getContentPath(avd));
+            free(path_qemu_sys);
+        } else {
+            args.addFormat("index=0,id=system,file=%s" "system.img.qcow2",
+                    avdInfo_getContentPath(avd));
+        }
     }
 
     // Network
