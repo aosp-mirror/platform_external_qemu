@@ -46,6 +46,30 @@
       "revId": "dda6a722f043c40edb42729aa160e8e36aefe21f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca790d2d_b2b933b8",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1186,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T21:11:37Z",
+      "side": 1,
+      "message": "yes, with two warnings printed. It feels like emulator\u0027s not sure what it wants:\n\nwarning: VM heap size 100 is below hardware specified minimum of 1000, setting it to that value\nwarning: VM heap size 1000 is above maximum supported 576, setting it to that value",
+      "parentUuid": "c1d08cd4_5b3f788c",
+      "range": {
+        "startLine": 1186,
+        "startChar": 3,
+        "endLine": 1186,
+        "endChar": 52
+      },
+      "revId": "dda6a722f043c40edb42729aa160e8e36aefe21f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
