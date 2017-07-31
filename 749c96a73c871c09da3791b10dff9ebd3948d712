@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e7295032_52e797d4",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T04:11:28Z",
+      "side": 1,
+      "message": "nit: can you check for this flag to not even try 3.1 context?",
+      "range": {
+        "startLine": 123,
+        "startChar": 4,
+        "endLine": 128,
+        "endChar": 5
+      },
+      "revId": "749c96a73c871c09da3791b10dff9ebd3948d712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e3b8bf1_ad8a0da6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T04:11:28Z",
+      "side": 1,
+      "message": "do you add all of them if ver \u003e 2? then maybe check for the version first and return the original string without extra work?",
+      "range": {
+        "startLine": 230,
+        "startChar": 8,
+        "endLine": 230,
+        "endChar": 45
+      },
+      "revId": "749c96a73c871c09da3791b10dff9ebd3948d712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "67d8b99a_c0b06fcc",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T04:11:28Z",
+      "side": 1,
+      "message": "nit: check for non-empty |hostExt| to skip them quickly",
+      "range": {
+        "startLine": 231,
+        "startChar": 12,
+        "endLine": 231,
+        "endChar": 48
+      },
+      "revId": "749c96a73c871c09da3791b10dff9ebd3948d712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d51518f7_ae4d8cc0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GLESVersionDetector.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T04:11:28Z",
+      "side": 1,
+      "message": "I love it!",
+      "range": {
+        "startLine": 237,
+        "startChar": 4,
+        "endLine": 237,
+        "endChar": 41
+      },
+      "revId": "749c96a73c871c09da3791b10dff9ebd3948d712",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
