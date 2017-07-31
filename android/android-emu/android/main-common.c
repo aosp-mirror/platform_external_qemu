@@ -1191,7 +1191,11 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     const int maxVmHeapSize =
             4 * minApiLevelVmHeapSize > 576 ? 576 : 4 * minApiLevelVmHeapSize;
     if (vmHeapSize > maxVmHeapSize) {
+        D("VM heap size %iMB is above maximum supported %iMB, "
+          "setting it to that value", vmHeapSize, maxVmHeapSize);
         vmHeapSize = maxVmHeapSize;
+
+        hw->vm_heapSize = vmHeapSize;
     }
     if (hw->vm_heapSize < vmHeapSize) {
         D("VM heap size %iMB is below hardware specified minimum of %iMB,"
