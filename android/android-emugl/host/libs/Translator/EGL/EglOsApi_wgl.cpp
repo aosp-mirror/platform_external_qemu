@@ -836,6 +836,15 @@ public:
                WinGlobals* globals)
             : mDispatch(dispatch), mGlobals(globals) {}
 
+    virtual EglOS::GlesVersion getMaxGlesVersion() {
+        if (!mCoreProfileSupported) {
+            return EglOS::GlesVersion::ES2;
+        }
+
+        return EglOS::calcMaxESVersionFromCoreVersion(
+                   mCoreMajorVersion, mCoreMinorVersion);
+    }
+
     virtual void queryConfigs(int renderableType,
                               EglOS::AddConfigCallback addConfigFunc,
                               void* addConfigOpaque) {
@@ -1066,8 +1075,8 @@ private:
             if (testContext) {
                 mCoreProfileSupported = true;
                 mCoreProfileCtxAttribs = attribs;
-                int glmaj, glmin;
-                getCoreProfileCtxAttribsVersion(attribs, &glmaj, &glmin);
+                getCoreProfileCtxAttribsVersion(
+                    attribs, &mCoreMajorVersion, &mCoreMinorVersion);
                 mDispatch->wglDeleteContext(testContext);
                 return;
             }
@@ -1075,6 +1084,8 @@ private:
     }
 
     bool mCoreProfileSupported = false;
+    int mCoreMajorVersion = 4;
+    int mCoreMinorVersion = 5;
     const int* mCoreProfileCtxAttribs = nullptr;
     WinPixelFormat* mDefaultPixelFormat = nullptr;
 

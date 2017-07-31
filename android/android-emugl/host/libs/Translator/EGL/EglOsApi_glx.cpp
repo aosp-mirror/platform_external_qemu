@@ -314,6 +314,15 @@ public:
 
     virtual ~GlxDisplay() { XCloseDisplay(mDisplay); }
 
+    virtual EglOS::GlesVersion getMaxGlesVersion() {
+        if (!mCoreProfileSupported) {
+            return EglOS::GlesVersion::ES2;
+        }
+
+        return EglOS::calcMaxESVersionFromCoreVersion(
+                   mCoreMajorVersion, mCoreMinorVersion);
+    }
+
     virtual void queryConfigs(int renderableType,
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
@@ -334,7 +343,9 @@ public:
 
         int glxMaj, glxMin;
         bool successQueryVersion =
-            glXQueryVersion(mDisplay, &glxMaj, &glxMin);
+            glXQueryVersion(mDisplay,
+                            &glxMaj,
+                            &glxMin);
 
         if (successQueryVersion) {
             if (glxMaj < 1 || (glxMaj >= 1 && glxMin < 4)) {
@@ -346,8 +357,6 @@ public:
         } else {
             ERR("%s: Could not query GLX version!\n", __func__);
         }
-
-
     }
 
     virtual bool isValidNativeWin(EglOS::Surface* win) {
@@ -514,8 +523,8 @@ private:
             if (testContext) {
                 mCoreProfileSupported = true;
                 mCoreProfileCtxAttribs = attribs;
-                int glmaj, glmin;
-                getCoreProfileCtxAttribsVersion(attribs, &glmaj, &glmin);
+                getCoreProfileCtxAttribsVersion(
+                    attribs, &mCoreMajorVersion, &mCoreMinorVersion);
                 glXDestroyContext(mDisplay, testContext);
                 return;
             }
@@ -525,6 +534,8 @@ private:
     CreateContextAttribs mCreateContextAttribs = nullptr;
 
     bool mCoreProfileSupported = false;
+    int mCoreMajorVersion = 4;
+    int mCoreMinorVersion = 5;
     const int* mCoreProfileCtxAttribs = nullptr;
 
     X11Display* mDisplay = nullptr;

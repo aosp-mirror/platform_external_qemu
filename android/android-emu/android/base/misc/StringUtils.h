@@ -16,6 +16,7 @@
 
 #include "android/base/StringView.h"
 
+#include <functional>
 #include <iterator>
 #include <sstream>
 
@@ -71,6 +72,28 @@ std::string join(const Range& range) {
 std::string trim(const std::string& in);
 
 bool startsWith(StringView string, StringView prefix);
+
+// Iterates over a string's parts using |splitBy| as a delimiter.
+// |splitBy| must be a nonempty string well, or it's a no-op.
+// Otherwise, |func| is called on each of the splits, excluding the
+// characters that are part of |splitBy|.  If two |splitBy|'s occur in a row,
+// |func| will be called on a StringView("") in between. See
+// StringUtils_unittest.cpp for the full story.
+template <class Func>
+void split(StringView str, StringView splitBy, Func func) {
+    if (splitBy.empty()) return;
+
+    size_t splitSize = splitBy.size();
+    size_t begin = 0;
+    size_t end = str.find(splitBy);
+
+    while (true) {
+        func(str.substrAbs(begin, end));
+        if (end == std::string::npos) return;
+        begin = end + splitSize;
+        end = str.find(splitBy, begin);
+    }
+}
 
 }  // namespace base
 }  // namespace android

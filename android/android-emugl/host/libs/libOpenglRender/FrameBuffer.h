@@ -22,6 +22,7 @@
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
+#include "GLESVersionDetector.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
 #include "WindowSurface.h"
@@ -381,6 +382,10 @@ public:
     // lock and unlock handles (RenderContext, ColorBuffer, WindowSurface)
     void lock();
     void unlock();
+
+    static void setMaxGLESVersion(GLESDispatchMaxVersion version);
+    static GLESDispatchMaxVersion getMaxGLESVersion();
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();

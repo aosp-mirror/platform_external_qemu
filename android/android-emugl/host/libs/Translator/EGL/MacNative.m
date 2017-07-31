@@ -87,7 +87,7 @@ static const NSOpenGLPixelFormatAttribute core41TestProfile[] = {
     0
 };
 
-void setupCoreProfileNativeFormats() {
+int setupCoreProfileNativeFormats() {
 
     NSOpenGLPixelFormat* core41Supported =
         [[NSOpenGLPixelFormat alloc] initWithAttributes: core41TestProfile];
@@ -95,7 +95,7 @@ void setupCoreProfileNativeFormats() {
     if (core41Supported) {
         setCoreProfileLevel(NSOpenGLProfileVersion4_1Core);
         [core41Supported release];
-        return;
+        return (int)NSOpenGLProfileVersion4_1Core;
     }
 
     NSOpenGLPixelFormat* core32Supported =
@@ -104,8 +104,10 @@ void setupCoreProfileNativeFormats() {
     if (core32Supported) {
         setCoreProfileLevel(NSOpenGLProfileVersion3_2Core);
         [core32Supported release];
-        return;
+        return (int)NSOpenGLProfileVersion3_2Core;
     }
+
+    return (int)NSOpenGLProfileVersionLegacy;
 }
 
 int getNumPixelFormats(){
