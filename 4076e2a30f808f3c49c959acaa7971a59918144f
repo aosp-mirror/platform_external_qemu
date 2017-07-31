@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cca0cf43_7d4211e6",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1187,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-31T20:56:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0e06faf_a296bb83",
+      "range": {
+        "startLine": 1187,
+        "startChar": 8,
+        "endLine": 1187,
+        "endChar": 18
+      },
+      "revId": "4076e2a30f808f3c49c959acaa7971a59918144f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bec33c9e_4095f81e",
         "filename": "android/android-emu/android/main-common.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-07-31T20:40:48Z",
       "side": 1,
       "message": "I believe this assignment should only run if \"hw-\u003evm_heapSize \u003e vmHeapSize\", otherwise it\u0027s good as it is\nalso, the code is already quite a mess to read - we should have two separate specific branches now to check for min and for max, with two different variables.\nNow the same |vmHeapSize| gets adjusted for both min and max, and it turns out that at assignment point there\u0027s no way to understand if one should only assign if |hw-\u003evm_heapSize| is less or greater than |vmHeapSize|",
+      "range": {
+        "startLine": 1198,
+        "startChar": 8,
+        "endLine": 1198,
+        "endChar": 37
+      },
+      "revId": "4076e2a30f808f3c49c959acaa7971a59918144f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41dcea5e_c45dd594",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1198,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-07-31T20:56:56Z",
+      "side": 1,
+      "message": "Yeah that felt too difficult to understand, and was wondering if there could be something more to it than that. After your explanation and looking at it more I _believe_ there\u0027s no real reason to have the shared variable.",
+      "parentUuid": "bec33c9e_4095f81e",
       "range": {
         "startLine": 1198,
         "startChar": 8,
