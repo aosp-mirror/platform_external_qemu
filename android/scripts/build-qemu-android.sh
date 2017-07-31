@@ -268,6 +268,18 @@ build_qemu_android () {
                 ;;
         esac
 
+        LIBUSB_FLAGS=
+        case $1 in
+            windows-*)
+                # Libusb support on windows is not what we would like it to be
+                LIBUSB_FLAGS="--disable-libusb --disable-usb-redir"
+                ;;
+            *)
+                LIBUSB_FLAGS="--enable-libusb --enable-usb-redir"
+                ;;
+        esac
+
+
         PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig
         PKG_CONFIG_LIBDIR=$PREFIX/lib/pkgconfig
         case $1 in
@@ -338,6 +350,7 @@ EOF
             --extra-cflags="$EXTRA_CFLAGS" \
             --extra-ldflags="$EXTRA_LDFLAGS" \
             $DEBUG_FLAGS \
+            $LIBUSB_FLAGS \
             $AUDIO_BACKENDS_FLAG \
             --disable-attr \
             --disable-blobs \
@@ -353,7 +366,6 @@ EOF
             --disable-libnfs \
             --disable-libiscsi \
             --disable-libssh2 \
-            --disable-libusb \
             --disable-seccomp \
             --disable-spice \
             --disable-usb-redir \
