@@ -1191,6 +1191,8 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     const int maxVmHeapSize =
             4 * minApiLevelVmHeapSize > 576 ? 576 : 4 * minApiLevelVmHeapSize;
     if (vmHeapSize > maxVmHeapSize) {
+        D("VM heap size %iMB is above maximum supported %iMB, "
+          "setting it to that value", vmHeapSize, maxVmHeapSize);
         vmHeapSize = maxVmHeapSize;
     }
     if (hw->vm_heapSize < vmHeapSize) {
@@ -1198,14 +1200,14 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
           "setting it to that value",
           hw->vm_heapSize, vmHeapSize);
 
-        hw->vm_heapSize = vmHeapSize;
-
         const int minRamSize = vmHeapSize * 2;
         if (hw->hw_ramSize < minRamSize) {
             hw->hw_ramSize = minRamSize;
             D("Increasing RAM to %iMB to accomodate min VM heap", minRamSize);
         }
     }
+
+    hw->vm_heapSize = vmHeapSize;
 
     const bool is_qemu1 = !is_qemu2;
     if (is_qemu1 && avdInfo_getSnapshotPresent(avd)) {
