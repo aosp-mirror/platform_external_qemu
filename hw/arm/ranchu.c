@@ -31,6 +31,7 @@
 #include "hw/devices.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
+#include "sysemu/ranchu.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
 #include "hw/boards.h"
@@ -131,6 +132,12 @@ static const int irqmap[] = {
     [RANCHU_MMIO] = 16, /* ...to 16 + NUM_VIRTIO_TRANSPORTS - 1 */
 };
 
+static QemuDeviceTreeSetupFunc device_tree_setup_func;
+void qemu_device_tree_setup_callback(QemuDeviceTreeSetupFunc setup_func)
+{
+    device_tree_setup_func = setup_func;
+}
+
 static void create_fdt(VirtBoardInfo *vbi)
 {
     void *fdt = create_device_tree(&vbi->fdt_size);
@@ -152,6 +159,10 @@ static void create_fdt(VirtBoardInfo *vbi)
     qemu_fdt_add_subnode(fdt, "/firmware/android");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
+
+    if (device_tree_setup_func) {
+        device_tree_setup_func(fdt);
+    }
 
     /*
      * /chosen and /memory nodes must exist for load_dtb
