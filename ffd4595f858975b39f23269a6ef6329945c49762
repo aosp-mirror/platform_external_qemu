@@ -93,6 +93,30 @@
       "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3eff475f_abaed242",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 531,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-07-31T19:54:23Z",
+      "side": 1,
+      "message": "Timing does matter, just not that much (30 us is totally ok, unless it becomes 30ms on HDD)",
+      "parentUuid": "77675674_60bd1506",
+      "range": {
+        "startLine": 531,
+        "startChar": 12,
+        "endLine": 531,
+        "endChar": 25
+      },
+      "revId": "ffd4595f858975b39f23269a6ef6329945c49762",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
