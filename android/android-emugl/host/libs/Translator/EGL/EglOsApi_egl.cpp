@@ -468,7 +468,6 @@ bool EglOsEglDisplay::isValidNativeWin(EGLNativeWindowType win) {
     unsigned int width, height;
     return nsGetWinDims(win, &width, &height);
 #endif // __APPLE__
-    // Mac not supported yet
 }
 
 bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
@@ -502,7 +501,6 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
 
     return ret && match;
 #endif // __APPLE__
-    // Mac not supported yet
 }
 
 static emugl::LazyInstance<EglOsEglDisplay> sHostDisplay = LAZY_INSTANCE_INIT;
