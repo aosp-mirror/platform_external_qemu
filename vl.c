@@ -4608,11 +4608,21 @@ static int main_impl(int argc, char** argv)
     androidHwConfig_init(android_hw, 0);
     androidHwConfig_read(android_hw, hw_ini);
 
+    bool attemptedDefaultBoot = false;
+    if (!loadvm && feature_is_enabled(kFeature_FastSnapshotV1) &&
+        path_exists(
+            path_join(avdInfo_getContentPath(android_avdInfo),
+            path_join("snapshots", "default_boot")))) {
+        loadvm = "default_boot";
+        attemptedDefaultBoot = true;
+    }
+
     /* If we're loading VM from a snapshot, make sure that the current HW config
      * matches the one with which the VM has been saved. */
     if (loadvm && *loadvm && !snaphost_match_configs(hw_ini, loadvm)) {
         error_report("HW config doesn't match the one in the snapshot");
-        return 0;
+        if (!attemptedDefaultBoot)
+            return 0;
     }
 
     iniFile_free(hw_ini);
