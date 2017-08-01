@@ -7,6 +7,7 @@
 #include "hw/mips/bios.h"
 #include "net/net.h"
 #include "sysemu/device_tree.h"
+#include "sysemu/ranchu.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
 #include "hw/boards.h"
@@ -120,6 +121,12 @@ static DevMapEntry devmap[] = {
         "virtio-mmio", "virtio_mmio", "virtio,mmio", 1 },
     /* ...repeating for a total of VIRTIO_TRANSPORTS, each of that size */
 };
+
+static QemuDeviceTreeSetupFunc device_tree_setup_func;
+void qemu_device_tree_setup_callback(QemuDeviceTreeSetupFunc setup_func)
+{
+    device_tree_setup_func = setup_func;
+}
 
 struct mips_boot_info {
     const char* kernel_filename;
@@ -506,6 +513,10 @@ static void mips_ranchu_init(MachineState *machine)
     qemu_fdt_setprop_string(fdt, "/firmware/android", "compatible", "android,firmware");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "hardware", "ranchu");
     qemu_fdt_setprop_string(fdt, "/firmware/android", "revision", MIPS_RANCHU_REV);
+
+    if (device_tree_setup_func) {
+        device_tree_setup_func(fdt);
+    }
 
     /* CPU node */
     qemu_fdt_add_subnode(fdt, "/cpus");

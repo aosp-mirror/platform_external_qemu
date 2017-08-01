@@ -1254,6 +1254,16 @@ is_armish(const AvdInfo* i)
     }
 }
 
+static bool
+is_mipsish(const AvdInfo* i)
+{
+    if (strncmp(i->targetAbi, "mips", 4) == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 /*
     arm is pretty tricky: the system image device path
     changes depending on the number of disks: the last
@@ -1266,6 +1276,14 @@ const char* const arm_device_id[] = {
     "a003a00",
     "a003800",
     "a003600",
+};
+
+const char* const mips_device_id[] = {
+    "1f010800",
+    "1f010600",
+    "1f010400",
+    "1f010200",
+    "1f010000",
 };
 
 static
@@ -1305,7 +1323,7 @@ bool has_encryption(const AvdInfo* i) {
 
 
 static
-char* get_arm_device_path(const AvdInfo* info, const char* image)
+char* get_device_path(const AvdInfo* info, const char* image)
 {
     const char* device_table[6] = {"", "","" ,"" ,"" , ""};
     int i = 0;
@@ -1328,8 +1346,14 @@ char* get_arm_device_path(const AvdInfo* info, const char* image)
         return NULL;
     }
     char buf[1024];
-    snprintf(buf, sizeof(buf), "/dev/block/platform/%s.virtio_mmio/by-name/%s",
-            arm_device_id[i], image);
+
+    if (is_armish(info)) {
+        snprintf(buf, sizeof(buf), "/dev/block/platform/%s.virtio_mmio/by-name/%s",
+                arm_device_id[i], image);
+    } else if (is_mipsish(info)) {
+        snprintf(buf, sizeof(buf), "/dev/block/platform/%s.virtio_mmio/by-name/%s",
+                mips_device_id[i], image);
+    }
     return strdup(buf);
 }
 
@@ -1346,8 +1370,8 @@ avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
         } else {
             return strdup("/dev/block/pci/pci0000:00/0000:00:06.0/by-name/vendor");
         }
-    } else if (is_armish(i)) {
-        return get_arm_device_path(i, "vendor");
+    } else {
+        return get_device_path(i, "vendor");
     }
     return NULL;
 }
@@ -1357,10 +1381,8 @@ avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i )
 {
     if (is_x86ish(i)) {
         return strdup("/dev/block/pci/pci0000:00/0000:00:03.0/by-name/system");
-    } if (is_armish(i)) {
-        return get_arm_device_path(i, "system");
     } else {
-        return strdup("/dev/block/vda");
+        return get_device_path(i, "system");
     }
 }
 
