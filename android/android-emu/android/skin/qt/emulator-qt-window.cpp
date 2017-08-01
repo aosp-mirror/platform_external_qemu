@@ -85,7 +85,12 @@
 #include <string>
 #include <vector>
 
-using namespace android::base;
+using android::base::kNullopt;
+using android::base::LazyInstance;
+using android::base::makeOptional;
+using android::base::PathUtils;
+using android::base::ScopedCPtr;
+using android::base::StringView;
 using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
