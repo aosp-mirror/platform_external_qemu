@@ -46,6 +46,30 @@
       "revId": "d9ab5eecf384b2a83a318e8baacb9102776ea50d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e49bd053_a0b4a327",
+        "filename": "android/android-emu/android/snapshot/Saver.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:52:30Z",
+      "side": 0,
+      "message": "Then I believe we should make sure the textures are loaded before the whole Saver object gets created. That way there\u0027s a clear ordering among all snapshot objects - deleting old Loader forces everything to get loaded, so new Saver object is safe to do anything.\nIn this way we get a one-off solution instead, so it\u0027s pretty easy to screw up later",
+      "parentUuid": "5d5d8b1c_8ca0dad0",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 19
+      },
+      "revId": "d9ab5eecf384b2a83a318e8baacb9102776ea50d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
