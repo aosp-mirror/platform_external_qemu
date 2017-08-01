@@ -19,6 +19,11 @@
 #include "android/shaper.h"
 #include "android/telephony/modem_driver.h"
 
+static void cellular_setSimPresent(bool isPresent)
+{
+    amodem_set_sim_present(android_modem, isPresent);
+}
+
 static void cellular_setSignalStrength(int zeroTo31)
 {
     // (See do_gsm_signal() in android-qemu2-glue/console.c)
@@ -129,6 +134,8 @@ static const QAndroidCellularAgent sQAndroidCellularAgent = {
     .setSignalStrengthProfile = cellular_setSignalStrengthProfile,
     .setVoiceStatus = cellular_setVoiceStatus,
     .setDataStatus = cellular_setDataStatus,
-    .setStandard = cellular_setStandard};
+    .setStandard = cellular_setStandard,
+    .setSimPresent = cellular_setSimPresent};
+
 const QAndroidCellularAgent* const gQAndroidCellularAgent =
         &sQAndroidCellularAgent;

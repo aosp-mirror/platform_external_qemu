@@ -702,7 +702,7 @@ int amodem_state_load(AModem modem, SysFile* file)
 static AModemRec   _android_modem[1];
 
 AModem
-amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque )
+amodem_create( int  base_port, AModemUnsolFunc  unsol_func, int sim_present, void*  unsol_opaque )
 {
     AModem  modem = _android_modem;
     char nvfname[MAX_PATH];
@@ -719,7 +719,7 @@ amodem_create( int  base_port, AModemUnsolFunc  unsol_func, void*  unsol_opaque 
     modem->unsol_func   = unsol_func;
     modem->unsol_opaque = unsol_opaque;
 
-    modem->sim = asimcard_create(base_port);
+    modem->sim = asimcard_create(base_port, sim_present);
 
     sys_main_init();
 
@@ -740,6 +740,9 @@ amodem_destroy( AModem  modem )
     modem->sim = NULL;
 }
 
+void amodem_set_sim_present( AModem  modem, int is_present ) {
+    asimcard_set_status( modem->sim, is_present ? A_SIM_STATUS_READY : A_SIM_STATUS_ABSENT );
+}
 
 static int
 amodem_has_network( AModem  modem )

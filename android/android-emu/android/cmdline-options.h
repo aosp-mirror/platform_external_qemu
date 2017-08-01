@@ -54,7 +54,7 @@
  *    CFG_PARAM( name, "<param>", "description" )
  *        used to define a configuration-specific parameter option.
  *
- * NOTE: Keep in mind that optio names are converted by translating
+ * NOTE: Keep in mind that option names are converted by translating
  *       dashes into underscore.
  *
  *       This means that '-some-option' is equivalent to '-some_option'
@@ -140,6 +140,7 @@ OPT_PARAM( cpu_delay, "<cpudelay>", "throttle CPU emulation" )
 OPT_FLAG ( no_boot_anim, "disable animation for faster boot" )
 
 OPT_FLAG( no_window, "disable graphical window display" )
+OPT_FLAG( no_sim, "device has no SIM card" )
 OPT_FLAG( version, "display emulator version number" )
 
 OPT_PARAM( report_console, "<socket>", "report console port to remote socket" )

@@ -19,6 +19,8 @@
 
 #include <assert.h>
 
+extern int sim_is_present();
+
 #define MODEM_DEV_STATE_SAVE_VERSION 1
 
 static void modem_state_save(QEMUFile* file, void* opaque)
@@ -42,7 +44,7 @@ static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
 
 
 void qemu_android_modem_init(int base_port) {
-    android_modem_init(base_port);
+    android_modem_init(base_port, sim_is_present());
 
     assert(android_modem_serial_line != NULL);
 

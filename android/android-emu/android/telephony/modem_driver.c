@@ -40,7 +40,7 @@ typedef struct {
     int               in_sms;
 } ModemDriver;
 
-/* send unsollicited messages to the device */
+/* send unsolicited messages to the device */
 static void
 modem_driver_unsol( void*  _md, const char*  message)
 {
@@ -129,11 +129,11 @@ modem_driver_read( void*  _md, const uint8_t*  src, int  len )
 }
 
 static void
-modem_driver_init(int base_port, ModemDriver* dm, CSerialLine* sl) {
+modem_driver_init(int base_port, ModemDriver* dm, CSerialLine* sl, int sim_present) {
     dm->serial_line = sl;
     dm->in_pos = 0;
     dm->in_sms = 0;
-    dm->modem = amodem_create( base_port, modem_driver_unsol, dm );
+    dm->modem = amodem_create( base_port, modem_driver_unsol, sim_present, dm );
 
     android_serialline_addhandlers(sl,
                                    dm,
@@ -142,7 +142,7 @@ modem_driver_init(int base_port, ModemDriver* dm, CSerialLine* sl) {
 }
 
 
-void android_modem_init( int  base_port )
+void android_modem_init( int  base_port, int sim_present )
 {
     static ModemDriver  modem_driver[1];
 
@@ -151,7 +151,7 @@ void android_modem_init( int  base_port )
     android_telephony_debug_socket = VERBOSE_CHECK(socket);
 
     if (android_modem_serial_line != NULL) {
-        modem_driver_init(base_port, modem_driver, android_modem_serial_line);
+        modem_driver_init(base_port, modem_driver, android_modem_serial_line, sim_present);
         android_modem = modem_driver->modem;
     }
 }

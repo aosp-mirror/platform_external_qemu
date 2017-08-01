@@ -27,7 +27,7 @@ extern CSerialLine* android_modem_serial_line;
 extern AModem  android_modem;
 
 /* must be called before the VM runs if there is a modem to emulate */
-extern void   android_modem_init( int  base_port );
+extern void   android_modem_init( int  base_port, int sim_present );
 
 AModem android_modem_get();
 

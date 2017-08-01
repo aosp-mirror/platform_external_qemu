@@ -25,6 +25,7 @@ protected:
     void SetUp() override {
         mModem = amodem_create(kBasePort,
                                &ModemTest::onUnsolicitedCommand,
+                               1, // SIM is present
                                this);
     }
 
