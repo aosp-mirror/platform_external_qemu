@@ -263,6 +263,7 @@ void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
 void GlobalNameSpace::onSave(android::base::Stream* stream,
                              const TextureSaverPtr& textureSaver,
                              SaveableTexture::saver_t saver) {
+    textureSaver->initializeFile();
     saveCollection(
             stream, m_textureMap,
             [saver, &textureSaver](

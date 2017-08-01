@@ -26,7 +26,9 @@ class TextureSaver {
     DISALLOW_COPY_AND_ASSIGN(TextureSaver);
 
 public:
-    TextureSaver(android::base::StdioStream&& stream);
+    TextureSaver(const std::string& filename) :
+        mFilename(filename) { }
+    void initializeFile();
     ~TextureSaver();
     using Buffer = android::base::SmallVector<unsigned char>;
     using saver_t = std::function<void(android::base::Stream*, Buffer*)>;
@@ -50,13 +52,15 @@ private:
 
     void writeIndex();
 
-    android::base::StdioStream mStream;
+    android::base::StdioStream* mStream = nullptr;
     // mBuffer is a buffer for fetching data from GPU memory to RAM
     android::base::SmallFixedVector<unsigned char, 128> mBuffer;
 
     FileIndex mIndex;
     bool mFinished = false;
     bool mHasError = false;
+
+    std::string mFilename;
 
 #if SNAPSHOT_PROFILE > 1
     android::base::System::WallDuration mStartTime =
