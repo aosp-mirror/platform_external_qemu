@@ -39,10 +39,10 @@ typedef struct ASimCardRec_ {
 static ASimCardRec  _s_card[1];
 
 ASimCard
-asimcard_create(int port)
+asimcard_create(int port, int sim_present)
 {
     ASimCard  card    = _s_card;
-    card->status      = A_SIM_STATUS_READY;
+    card->status      = (sim_present ? A_SIM_STATUS_READY : A_SIM_STATUS_NOT_READY);
     card->pin_retries = 0;
     strncpy( card->pin, "0000", sizeof(card->pin) );
     strncpy( card->puk, "12345678", sizeof(card->puk) );

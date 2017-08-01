@@ -39,6 +39,7 @@ constexpr char UI_THEME[] = "set/theme";
 
 constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
 constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
+constexpr char CELLULAR_SIM_PRESENT[]     = "cell/sim_present";
 constexpr char CELLULAR_VOICE_STATUS[]    = "cell/voice_status";
 constexpr char CELLULAR_DATA_STATUS[]     = "cell/data_status";
 

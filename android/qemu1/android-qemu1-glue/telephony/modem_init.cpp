@@ -41,7 +41,7 @@ static int modem_state_load(QEMUFile* file, void* opaque, int version_id)
 
 
 void qemu_android_modem_init(int base_port) {
-    android_modem_init(base_port);
+    android_modem_init(base_port, 1); // In QEMU 1, always say a SIM is present
 
     if (android_modem_serial_line != nullptr) {
         register_savevm(nullptr,

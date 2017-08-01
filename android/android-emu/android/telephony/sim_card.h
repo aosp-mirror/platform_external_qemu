@@ -20,7 +20,7 @@ extern "C" {
 
 typedef struct ASimCardRec_*    ASimCard;
 
-extern ASimCard  asimcard_create( int from_port );
+extern ASimCard  asimcard_create( int from_port, int sim_present );
 extern void      asimcard_destroy( ASimCard  sim );
 
 typedef enum {
