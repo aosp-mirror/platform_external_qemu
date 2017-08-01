@@ -149,14 +149,21 @@ void HangDetector::stop() {
 }
 
 void HangDetector::workerThread() {
+    auto nextDeadline = []() {
+        return base::System::get()->getUnixTimeUs() +
+        kHangLoopIterationTimeoutMs * 1000;
+    };
     base::AutoLock lock(mLock);
     for (;;) {
-        const auto waitUntilUs = base::System::get()->getUnixTimeUs() +
-                                 kHangLoopIterationTimeoutMs * 1000;
+        auto waitUntilUs = nextDeadline();
         while (!mStopping &&
                (base::System::get()->getUnixTimeUs() < waitUntilUs ||
                 mPaused)) {
             mWorkerThreadCv.timedWait(&mLock, waitUntilUs);
+            if (mPaused) {
+                // If paused, avoid spinning.
+                waitUntilUs = nextDeadline();
+            }
         }
         if (mStopping) {
             break;
