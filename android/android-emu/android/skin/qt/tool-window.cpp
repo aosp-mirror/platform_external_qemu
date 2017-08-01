@@ -43,8 +43,6 @@
 #include <cassert>
 #include <string>
 
-using namespace android::base;
-
 static ToolWindow* twInstance = NULL;
 
 extern "C" void setUiEmuAgent(const UiEmuAgent* agentPtr) {

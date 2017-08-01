@@ -219,6 +219,27 @@ TEST(Optional, MakeOptional) {
         EXPECT_TRUE(o);
         EXPECT_STREQ("String", *o);
     }
+    {
+        auto o = makeOptional<std::string>("String");
+        static_assert(std::is_same<decltype(o), Optional<std::string>>::value,
+                      "Bad type deduction in makeOptional()");
+        EXPECT_TRUE(o);
+        EXPECT_STREQ("String", o->c_str());
+    }
+    {
+        auto o = makeOptional<std::string>(5, 'b');
+        static_assert(std::is_same<decltype(o), Optional<std::string>>::value,
+                      "Bad type deduction in makeOptional()");
+        EXPECT_TRUE(o);
+        EXPECT_STREQ("bbbbb", o->c_str());
+    }
+    {
+        auto o = makeOptional<std::string>();
+        static_assert(std::is_same<decltype(o), Optional<std::string>>::value,
+                      "Bad type deduction in makeOptional()");
+        EXPECT_TRUE(o);
+        EXPECT_STREQ("", o->c_str());
+    }
 }
 
 TEST(Optional, Move) {

@@ -98,25 +98,27 @@ namespace base {
 
 namespace details {
 
-// A base class to reduce the number of instantiations of the Optional's
-// internal storage
-template <size_t Size, size_t Align>
-class OptionalBase {
-protected:
-    using StoreT = typename std::aligned_storage<Size, Align>::type;
-
-    StoreT mStorage = {};
-
+// Base classes to reduce the number of instantiations of the Optional's
+// internal members.
+class OptionalFlagBase {
+public:
     void setConstructed(bool constructed) { mConstructed = constructed; }
     constexpr bool constructed() const { return mConstructed; }
     constexpr operator bool() const { return constructed(); }
     bool hasValue() const { return constructed(); }
 
-    constexpr OptionalBase(bool constructed = false)
+    constexpr OptionalFlagBase(bool constructed = false)
         : mConstructed(constructed) {}
 
 private:
     bool mConstructed = false;
+};
+
+template <size_t Size, size_t Align>
+class OptionalStorageBase {
+protected:
+    using StoreT = typename std::aligned_storage<Size, Align>::type;
+    StoreT mStorage = {};
 };
 
 }  // namespace details
@@ -130,7 +132,6 @@ struct NulloptT {
 struct InplaceT {
     constexpr explicit InplaceT(int) {}
 };
-
 
 // Tag values for null optional and inplace construction
 constexpr NulloptT kNullopt{1};
@@ -147,20 +148,26 @@ class Optional;
 //  E.g, for template <T> class Foo if you say 'Foo' inside the class, it
 //  actually means Foo<T>;
 template <class U>
-using is_any_optional = is_template_instantiation_of<
-        typename std::decay<U>::type, Optional>;
+using is_any_optional =
+        is_template_instantiation_of<typename std::decay<U>::type, Optional>;
 
 template <class T>
-class Optional : private details::OptionalBase<sizeof(T),
-                                               std::alignment_of<T>::value> {
+class Optional
+    : private details::OptionalFlagBase,
+      private details::OptionalStorageBase<sizeof(T),
+                                           std::alignment_of<T>::value> {
     // make sure all optionals are buddies - this is needed to implement
     // conversion from optionals of other types
-    template <class U> friend class Optional;
+    template <class U>
+    friend class Optional;
 
     template <class U>
     using self = Optional<U>;
 
-    using base_type = details::OptionalBase<sizeof(T), std::alignment_of<T>::value>;
+    using base_flag = details::OptionalFlagBase;
+    using base_storage =
+            details::OptionalStorageBase<sizeof(T),
+                                         std::alignment_of<T>::value>;
 
 public:
     // std::optional will have this, so let's provide it
@@ -179,12 +186,12 @@ public:
     constexpr Optional() {}
     constexpr Optional(NulloptT) {}
 
-    Optional(const Optional& other) : base_type(other.constructed()) {
+    Optional(const Optional& other) : base_flag(other.constructed()) {
         if (this->constructed()) {
             new (&get()) T(other.get());
         }
     }
-    Optional(Optional&& other) : base_type(other.constructed()) {
+    Optional(Optional&& other) : base_flag(other.constructed()) {
         if (this->constructed()) {
             new (&get()) T(std::move(other.get()));
         }
@@ -192,10 +199,9 @@ public:
 
     // Conversion constructor from optional of similar type
     template <class U,
-              class = enable_if_c<
-                  !is_any_optional<U>::value
-                  && std::is_constructible<T, U>::value>>
-    Optional(const Optional<U>& other) : base_type(other.constructed()) {
+              class = enable_if_c<!is_any_optional<U>::value &&
+                                  std::is_constructible<T, U>::value>>
+    Optional(const Optional<U>& other) : base_flag(other.constructed()) {
         if (this->constructed()) {
             new (&get()) T(other.get());
         }
@@ -203,34 +209,30 @@ public:
 
     // Move-conversion constructor
     template <class U,
-              class = enable_if_c<
-                  !is_any_optional<U>::value
-                  && std::is_constructible<T, U>::value>>
-    Optional(Optional<U>&& other) : base_type(other.constructed()) {
+              class = enable_if_c<!is_any_optional<U>::value &&
+                                  std::is_constructible<T, U>::value>>
+    Optional(Optional<U>&& other) : base_flag(other.constructed()) {
         if (this->constructed()) {
             new (&get()) T(std::move(other.get()));
         }
     }
 
     // Construction from a raw value
-    Optional(const T& value) : base_type(true) {
-        new (&get()) T(value);
-    }
+    Optional(const T& value) : base_flag(true) { new (&get()) T(value); }
     // Move construction from a raw value
-    Optional(T&& value) : base_type(true) {
-        new (&get()) T(std::move(value));
-    }
+    Optional(T&& value) : base_flag(true) { new (&get()) T(std::move(value)); }
 
     // Inplace construction from a list of |T|'s ctor arguments
     template <class... Args>
-    Optional(InplaceT, Args&&... args) : base_type(true) {
+    Optional(InplaceT, Args&&... args) : base_flag(true) {
         new (&get()) T(std::forward<Args>(args)...);
     }
 
     // Inplace construction from an initializer list passed into |T|'s ctor
     template <class U,
-              class = enable_if<std::is_constructible<T, std::initializer_list<U>>>>
-    Optional(InplaceT, std::initializer_list<U> il) : base_type(true) {
+              class = enable_if<
+                      std::is_constructible<T, std::initializer_list<U>>>>
+    Optional(InplaceT, std::initializer_list<U> il) : base_flag(true) {
         new (&get()) T(il);
     }
 
@@ -326,8 +328,9 @@ public:
     // to |T|, excluding the stuff implemented above explicitly
     template <class U,
               class = enable_if_c<
-                  !is_any_optional<typename std::decay<U>::type>::value
-                  && std::is_convertible<typename std::decay<U>::type, T>::value>>
+                      !is_any_optional<typename std::decay<U>::type>::value &&
+                      std::is_convertible<typename std::decay<U>::type,
+                                          T>::value>>
     Optional& operator=(U&& other) {
         if (this->constructed()) {
             get() = std::forward<U>(other);
@@ -339,8 +342,8 @@ public:
     }
 
     // Adopt value checkers from the parent
-    using base_type::operator bool;
-    using base_type::hasValue;
+    using base_flag::operator bool;
+    using base_flag::hasValue;
 
     T& value() { return get(); }
     constexpr const T& value() const { return get(); }
@@ -358,7 +361,6 @@ public:
 
     T* operator->() { return &get(); }
     constexpr const T* operator->() const { return &get(); }
-
 
     ~Optional() {
         if (this->constructed()) {
@@ -392,7 +394,8 @@ public:
     // In-place construction with possible destruction of the old value
     // initializer-list version
     template <class U,
-              class = enable_if<std::is_constructible<T, std::initializer_list<U>>>>
+              class = enable_if<
+                      std::is_constructible<T, std::initializer_list<U>>>>
     void emplace(std::initializer_list<U> il) {
         if (this->constructed()) {
             destruct();
@@ -405,7 +408,7 @@ private:
     // A helper function to convert the internal raw storage to T&
     constexpr const T& get() const {
         return *reinterpret_cast<const T*>(
-                    reinterpret_cast<const char*>(&this->mStorage));
+                reinterpret_cast<const char*>(&this->mStorage));
     }
 
     // Same thing, mutable
@@ -422,11 +425,15 @@ Optional<typename std::decay<T>::type> makeOptional(T&& t) {
     return Optional<typename std::decay<T>::type>(std::forward<T>(t));
 }
 
+template <class T, class... Args>
+Optional<typename std::decay<T>::type> makeOptional(Args&&... args) {
+    return Optional<typename std::decay<T>::type>(kInplace,
+                                                  std::forward<Args>(args)...);
+}
+
 template <class T>
 bool operator==(const Optional<T>& l, const Optional<T>& r) {
-    return bool(l)
-            ? bool(r) && *l == *r
-            : !bool(r);
+    return l.hasValue() ? r.hasValue() && *l == *r : !r.hasValue();
 }
 template <class T>
 bool operator==(const Optional<T>& l, NulloptT) {

@@ -36,7 +36,6 @@ using android::base::RunOptions;
 using android::base::System;
 using android::base::Uuid;
 using android::base::Version;
-using android::base::makeOptional;
 
 namespace android {
 namespace emulation {
