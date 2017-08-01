@@ -32,7 +32,7 @@ class GlLibrary;
 class GLEScmContext: public GLEScontext
 {
 public:
-    virtual void init(GlLibrary* glLib);
+    virtual void init(EGLiface* eglIface);
 
     struct DrawTexOESCoreState {
         GLuint vshader;

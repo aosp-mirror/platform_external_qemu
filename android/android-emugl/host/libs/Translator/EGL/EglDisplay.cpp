@@ -18,6 +18,7 @@
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 #include "EglConfig.h"
+#include "EglGlobalInfo.h"
 #include "EglOsApi.h"
 #include <GLcommon/GLutils.h>
 
@@ -484,10 +485,12 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
 }
 
 static void touchEglImage(EglImage* eglImage) {
+    eglImage->lock.lock();
     if (eglImage->saveableTexture) {
         eglImage->saveableTexture->fillEglImage(eglImage);
         eglImage->saveableTexture.reset();
     }
+    eglImage->lock.unlock();
 }
 
 ImagePtr EglDisplay::getImage(EGLImageKHR img,
@@ -634,7 +637,9 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
     }
     m_eglImages.clear();
     emugl::Mutex::AutoLock mutex(m_lock);
+    m_globalNameSpace.setEglIface(EglGlobalInfo::getInstance()->getEglIface());
     m_globalNameSpace.onLoad(stream, textureLoader, creator);
+
     loadCollection(stream, &m_eglImages, [this](
         android::base::Stream* stream) {
         unsigned int hndl = stream->getBe32();

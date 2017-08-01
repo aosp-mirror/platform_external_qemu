@@ -16,6 +16,10 @@
 namespace android {
 namespace snapshot {
 
+TextureLoader::~TextureLoader() {
+    fprintf(stderr, "%s: textureLoader dtor\n", __func__);
+}
+
 TextureLoader::TextureLoader(android::base::StdioStream&& stream)
     : mStream(std::move(stream)) {}
 
