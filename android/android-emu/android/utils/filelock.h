@@ -47,6 +47,7 @@ extern void filelock_init();
 typedef struct FileLock  FileLock;
 
 extern FileLock*  filelock_create ( const char*  path );
+extern FileLock*  filelock_create_patiently( const char* path );
 extern void       filelock_release( FileLock*  lock );
 
 ANDROID_END_HEADER
