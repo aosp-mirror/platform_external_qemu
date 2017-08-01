@@ -29,6 +29,7 @@ Saver::Saver(const Snapshot& snapshot)
         return;
     }
     {
+        fprintf(stderr, "%s: opening ram (Saver)\n", __func__);
         const auto ram = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "wb");
         if (!ram) {
@@ -38,15 +39,9 @@ Saver::Saver(const Snapshot& snapshot)
                           RamSaver::Flags::None);
     }
     {
-        const auto textures = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
-                "wb");
-        if (!textures) {
-            mRamSaver.clear();
-            return;
-        }
+        fprintf(stderr, "%s: Not opening texs (Saver)\n", __func__);
         mTextureSaver = std::make_shared<TextureSaver>(
-                            StdioStream(textures, StdioStream::kOwner));
+                            PathUtils::join(mSnapshot.dataDir(), "textures.bin"));
     }
 
     mStatus = OperationStatus::NotStarted;
@@ -64,6 +59,7 @@ Saver::~Saver() {
 
 void Saver::prepare()
 {
+    fprintf(stderr, "%s: prepare for saving\n", __func__);
     // TODO: run asynchronous saving preparation here (e.g. screenshot,
     // hardware info collection etc).
 }

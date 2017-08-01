@@ -613,12 +613,19 @@ extern "C" int main(int argc, char** argv) {
     // Lock the AVD as soon as we can to make sure other copy won't do anything
     // stupid before detecting that the AVD is already in use.
     const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
-    if (filelock_create(coreHwIniPath) == NULL) {
-        // The AVD is already in use
-        derror("There's another emulator instance running with "
-               "the current AVD '%s'. Exiting...\n",
-               avdInfo_getName(avd));
-        return 1;
+
+    if (!filelock_create("/Users/lfy/emu/external/qemu/savingSnapshot.lock")) {
+        fprintf(stderr, "%s: someone alreay saving snapshot, oops window\n", __func__);
+        FileLock* lock = filelock_create_patiently("/Users/lfy/emu/external/qemu/savingSnapshot.lock");
+        filelock_release(lock);
+    } else {
+        if (filelock_create(coreHwIniPath) == NULL) {
+            // The AVD is already in use
+            derror("There's another emulator instance running with "
+                    "the current AVD '%s'. Exiting...\n",
+                    avdInfo_getName(avd));
+            return 1;
+        }
     }
 
     // Update server-based hw config / feature flags.

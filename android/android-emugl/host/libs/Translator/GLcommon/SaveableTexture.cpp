@@ -330,6 +330,7 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     m_internalFormat = stream->getBe32();
     m_type = stream->getBe32();
     m_border = stream->getBe32();
+    fprintf(stderr, "%s: SaveableTexture %p Stream %p target 0x%x w %d h %d format 0x%x\n", __func__, this, stream, m_target, m_width, m_height, m_format);
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
@@ -519,6 +520,7 @@ void SaveableTexture::onSave(
 }
 
 void SaveableTexture::restore() {
+    fprintf(stderr, "%s: %p restore saveableTexture\n", __func__, this);
     assert(m_loader);
     m_loader(this);
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
@@ -552,6 +554,7 @@ void SaveableTexture::restore() {
         m_globalTexObj.reset(new NamedObject(
                 GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
         m_globalName = m_globalTexObj->getGlobalName();
+        fprintf(stderr, "%s: restored as %u\n", __func__, m_globalName);
         GLint prevTex = 0;
         switch (m_target) {
             case GL_TEXTURE_2D:
@@ -672,11 +675,15 @@ void SaveableTexture::restore() {
             }
         }
         dispatcher.glBindTexture(m_target, prevTex);
+    } else {
+        fprintf(stderr, "%s: not restoring, is 0x%x\n", __func__, m_target);
     }
 }
 
 const NamedObjectPtr& SaveableTexture::getGlobalObject() {
+    fprintf(stderr, "%s: %p restore this texture\n", __func__, this);
     touch();
+    fprintf(stderr, "%s: %p restored this texture\n", __func__, this);
     return m_globalTexObj;
 }
 

@@ -57,12 +57,14 @@ const SnapshotCallbacks Snapshotter::kCallbacks = {
                 // save
                 {// start
                  [](void* opaque, const char* name) {
+                     fprintf(stderr, "Snapshotter onStartSaving\n");
                      auto snapshot = static_cast<Snapshotter*>(opaque);
                      snapshot->onStartSaving(name);
                      return 0;
                  },
                  // end
                  [](void* opaque, const char* name, int res) {
+                     fprintf(stderr, "Snapshotter onSavingComplete\n");
                      auto snapshot = static_cast<Snapshotter*>(opaque);
                      snapshot->onSavingComplete(name, res);
                  }},

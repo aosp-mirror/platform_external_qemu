@@ -34,6 +34,7 @@ Loader::Loader(const Snapshot& snapshot)
     }
 
     {
+        fprintf(stderr, "%s: opening ram (Loader)\n", __func__);
         const auto ram = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
         if (!ram) {
@@ -42,6 +43,7 @@ Loader::Loader(const Snapshot& snapshot)
         mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner));
     }
     {
+        fprintf(stderr, "%s: opening texs (Loader)\n", __func__);
         const auto textures = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
                 "rb");

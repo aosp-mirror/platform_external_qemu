@@ -76,6 +76,7 @@ void NameSpace::touchTextures() {
         SaveableTexturePtr saveableTexture(texData->releaseSaveableTexture());
         if (saveableTexture) {
             NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
+            if (!texNamedObj.get()) { fprintf(stderr, "%s: no texNamedObj!\n", __func__); continue; }
             setGlobalObject(obj.first, texNamedObj);
             texData->globalName = texNamedObj->getGlobalName();
         }
@@ -86,6 +87,8 @@ void NameSpace::postLoadRestore(ObjectData::getGlobalName_t getGlobalName) {
     // Texture data are special, they got the global name from SaveableTexture
     // This is because texture data can be shared across multiple share groups
     if (m_type == NamedObjectType::TEXTURE) {
+        fprintf(stderr, "%s: touch textures on load\n", __func__);
+        touchTextures();
         touchTextures();
         return;
     }
@@ -118,6 +121,7 @@ void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
     // restore them to GPU, we do the restoration here.
     // TODO: skip restoration and write saveableTexture directly to the new
     // snapshot
+        fprintf(stderr, "%s: touch textures on save\n", __func__);
     touchTextures();
     for (const auto& obj : m_objectDataMap) {
         globalNameSpace->preSaveAddTex((const TextureData*)obj.second.get());
@@ -263,6 +267,7 @@ void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
 void GlobalNameSpace::onSave(android::base::Stream* stream,
                              const TextureSaverPtr& textureSaver,
                              SaveableTexture::saver_t saver) {
+    textureSaver->initializeFile();
     saveCollection(
             stream, m_textureMap,
             [saver, &textureSaver](

@@ -23,13 +23,16 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-TextureSaver::TextureSaver(android::base::StdioStream&& stream)
-    : mStream(std::move(stream)) {
+void TextureSaver::initializeFile() {
+    fprintf(stderr, "%s: initializing file %s\n", __func__, mFilename.c_str());
+    const auto textures = fopen(mFilename.c_str(), "wb");
+    mStream = new base::StdioStream(textures, base::StdioStream::kOwner);
     // Put a placeholder for the index offset right now.
-    mStream.putBe64(0);
+    mStream->putBe64(0);
 }
 
 TextureSaver::~TextureSaver() {
+    delete mStream;
     done();
 }
 
@@ -39,42 +42,42 @@ void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
                         [texId](FileIndex::Texture& tex) {
                             return tex.texId == texId;
                         }));
-    mIndex.textures.push_back({texId, (int64_t)ftell(mStream.get())});
-    saver(&mStream, &mBuffer);
+    mIndex.textures.push_back({texId, (int64_t)ftell(mStream->get())});
+    saver(mStream, &mBuffer);
 }
 
 void TextureSaver::done() {
     if (mFinished) {
         return;
     }
-    mIndex.startPosInFile = ftell(mStream.get());
+    mIndex.startPosInFile = ftell(mStream->get());
     writeIndex();
 #if SNAPSHOT_PROFILE > 1
     printf("Texture saving time: %.03f\n",
            (System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
 #endif
-    mHasError = ferror(mStream.get()) != 0;
+    mHasError = ferror(mStream->get()) != 0;
     mFinished = true;
 }
 
 void TextureSaver::writeIndex() {
 #if SNAPSHOT_PROFILE > 1
-    auto start = ftell(mStream.get());
+    auto start = ftell(mStream->get());
 #endif
 
-    mStream.putBe32(mIndex.version);
-    mStream.putBe32(mIndex.textures.size());
+    mStream->putBe32(mIndex.version);
+    mStream->putBe32(mIndex.textures.size());
     for (const FileIndex::Texture& b : mIndex.textures) {
-        mStream.putBe32(b.texId);
-        mStream.putBe64(b.filePos);
+        mStream->putBe32(b.texId);
+        mStream->putBe64(b.filePos);
     }
 #if SNAPSHOT_PROFILE > 1
-    auto end = ftell(mStream.get());
+    auto end = ftell(mStream->get());
     printf("texture: index size: %d\n", (int)(end - start));
 #endif
 
-    fseek(mStream.get(), 0, SEEK_SET);
-    mStream.putBe64(mIndex.startPosInFile);
+    fseek(mStream->get(), 0, SEEK_SET);
+    mStream->putBe64(mIndex.startPosInFile);
 }
 
 }  // namespace snapshot
