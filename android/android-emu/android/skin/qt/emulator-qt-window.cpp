@@ -41,6 +41,7 @@
 #include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/filelock.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -687,14 +688,18 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     mStartupDialog.clear();
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
+        if (!filelock_create("/Users/lfy/emu/external/qemu/savingSnapshot.lock")) {
+            fprintf(stderr, "%s: someone alreay saving snapshot, oops window\n", __func__);
+        }
+        if (mToolWindow) {
+            mToolWindow->hide();
+        }
+        mContainer.hide();
+        mOverlay.hide();
         // we dont want to restore to a state where the
         // framework is shut down by 'adb reboot -p'
         // so skip that step when saving vm on exit
-        if (savevm_on_exit) {
-            queueQuitEvent();
-        } else {
-            runAdbShellPowerDownAndQuit();
-        }
+        queueQuitEvent();
         event->ignore();
     } else {
         // It is only safe to stop the OpenGL ES
