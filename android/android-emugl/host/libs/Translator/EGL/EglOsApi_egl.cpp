@@ -336,7 +336,7 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
         ((EglOsEglPixelFormat*)configInfo.frmt)->mRedSize = configInfo.red_size;
         ((EglOsEglPixelFormat*)configInfo.frmt)->mGreenSize = configInfo.green_size;
         ((EglOsEglPixelFormat*)configInfo.frmt)->mBlueSize = configInfo.blue_size;
-#endif __APPLE__
+#endif // __APPLE__
         addConfigFunc(addConfigOpaque, &configInfo);
     }
     D("Host gets %d configs\n", numConfigs);
