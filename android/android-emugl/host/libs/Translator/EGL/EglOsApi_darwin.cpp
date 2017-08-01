@@ -407,7 +407,3 @@ EglOS::Engine* EglOS::Engine::getHostInstance() {
     return sHostEngine.ptr();
 }
 
-EglOS::Engine* EglOS::getEgl2EglHostInstance() {
-    fprintf(stderr, "ERROR: EGL to EGL is not supported on Mac.\n");
-    return nullptr;
-}

@@ -13,6 +13,7 @@ endif
 
 ifeq ($(BUILD_TARGET_OS),darwin)
     host_OS_SRCS = EglOsApi_darwin.cpp \
+                   EglOsApi_egl.cpp \
                    MacNative.m   \
                    MacPixelFormatsAttribs.m \
 

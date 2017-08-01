@@ -52,7 +52,14 @@ static const char* kGLES2LibName = "libGLESv2.dll";
 static const char* kEGLLibName = "libEGL.so";
 static const char* kGLES2LibName = "libGLESv2.so";
 
-#endif // __linux__
+#else // __APPLE__
+
+#include "MacNative.h"
+
+static const char* kEGLLibName = "libEGL.dylib";
+static const char* kGLES2LibName = "libGLESv2.dylib";
+
+#endif // __APPLE__
 
 // List of EGL functions of interest to probe with GetProcAddress()
 #define LIST_EGL_FUNCTIONS(X)                                                  \
@@ -147,6 +154,11 @@ public:
     }
     EGLConfig mConfigId;
     EGLint mClientCtxVer;
+#ifdef __APPLE__
+    int mRedSize = 0;
+    int mGreenSize = 0;
+    int mBlueSize = 0;
+#endif // __APPLE__
 };
 
 class EglOsEglContext : public EglOS::Context {
@@ -320,6 +332,11 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
                                        EGL_TRANSPARENT_BLUE_VALUE,
                                        &configInfo.trans_blue_val);
         CHECK_EGL_ERR
+#ifdef __APPLE__
+        ((EglOsEglPixelFormat*)configInfo.frmt)->mRedSize = configInfo.red_size;
+        ((EglOsEglPixelFormat*)configInfo.frmt)->mGreenSize = configInfo.green_size;
+        ((EglOsEglPixelFormat*)configInfo.frmt)->mBlueSize = configInfo.blue_size;
+#endif __APPLE__
         addConfigFunc(addConfigOpaque, &configInfo);
     }
     D("Host gets %d configs\n", numConfigs);
@@ -447,7 +464,10 @@ bool EglOsEglDisplay::isValidNativeWin(EGLNativeWindowType win) {
     int t;
     unsigned int u;
     return XGetGeometry(mGlxDisplay, win, &root, &t, &t, &u, &u, &u, &u) != 0;
-#endif // __linux__
+#else // __APPLE__
+    unsigned int width, height;
+    return nsGetWinDims(win, &width, &height);
+#endif // __APPLE__
     // Mac not supported yet
 }
 
@@ -470,7 +490,18 @@ bool EglOsEglDisplay::checkWindowPixelFormatMatch(EGLNativeWindowType win,
     Window root;
     return XGetGeometry(
             mGlxDisplay, win, &root, &x, &y, width, height, &border, &depth);
-#endif // __linux__
+#else // __APPLE__
+    bool ret = nsGetWinDims(win, width, height);
+
+    const EglOsEglPixelFormat* format = (EglOsEglPixelFormat*)pixelFormat;
+    int r = format->mRedSize;
+    int g = format->mGreenSize;
+    int b = format->mBlueSize;
+
+    bool match = nsCheckColor(win, r + g + b);
+
+    return ret && match;
+#endif // __APPLE__
     // Mac not supported yet
 }
 
