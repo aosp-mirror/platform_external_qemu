@@ -45,6 +45,10 @@ typedef struct QAndroidCellularAgent {
     // Sets the cellular data standard in use
     // Input: enum CellularStandard, above
     void (*setStandard)(enum CellularStandard);
+
+    // Sets whether the SIM card is present or not
+    // Input: bool isPresent, true if SIM is present
+    void (*setSimPresent)(bool isPresent);
 } QAndroidCellularAgent;
 
 ANDROID_END_HEADER

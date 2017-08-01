@@ -11,16 +11,19 @@
 #include "android/skin/qt/extended-pages/cellular-page.h"
 
 #include "android/emulation/control/cellular_agent.h"
+#include "android/globals.h"
 #include "android/main-common.h"
 #include "android/skin/qt/qt-settings.h"
 #include "ui_cellular-page.h"
 
+#include <QMessageBox>
 #include <QSettings>
 
 CellularPage::CellularPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::CellularPage()),
-    mCellularAgent(nullptr)
+    mCellularAgent(nullptr),
+    mSimChangeInfoWasShown(false)
 {
     mUi->setupUi(this);
 
@@ -46,13 +49,42 @@ CellularPage::CellularPage(QWidget *parent) :
     int dataStatus = settings.value(Ui::Settings::CELLULAR_DATA_STATUS,
                                     Cellular_Stat_Home).toInt();
     mUi->cell_dataStatusBox->setCurrentIndex(dataStatus);
+
+    // SIM present
+    mUi->cell_simBox->setChecked(simIsPresent());
 }
+
+// static
+bool CellularPage::simIsPresent() {
+    QSettings settings;
+
+    // Set the SIM present or absent
+    QString simKey(android_hw->avd_name);
+    simKey += "/";
+    simKey += Ui::Settings::CELLULAR_SIM_PRESENT;
+    return settings.value(simKey, true).toBool();
+}
+
+ANDROID_BEGIN_HEADER
+int sim_is_present() {
+    return (CellularPage::simIsPresent() ? 1 : 0);
+}
+ANDROID_END_HEADER
 
 void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
 
     if (!agent) return;
 
     mCellularAgent = agent;
+
+    QSettings settings;
+
+    // Tell the device if a SIM is present
+    if (mCellularAgent->setSimPresent) {
+        mCellularAgent->setSimPresent(simIsPresent());
+    }
+
+    // Network parameters
 
     if (emulator_has_network_option) {
         // The user specified network parameters on the command line.
@@ -62,8 +94,6 @@ void CellularPage::setCellularAgent(const QAndroidCellularAgent* agent) {
 
     // Get the settings that were previously saved. Give them
     // to the device.
-
-    QSettings settings;
 
     // Network type
     int cStandard = settings.value(Ui::Settings::CELLULAR_NETWORK_TYPE,
@@ -127,5 +157,33 @@ void CellularPage::on_cell_signalStatusBox_currentIndexChanged(int index)
     if (mCellularAgent && mCellularAgent->setSignalStrengthProfile) {
         CellularSignal signal = (CellularSignal)index;
         mCellularAgent->setSignalStrengthProfile(signal);
+    }
+}
+
+void CellularPage::on_cell_simBox_toggled(bool isPresent)
+{
+    bool previouslyPresent = simIsPresent();
+
+    if (previouslyPresent != isPresent) {
+        // Save the new setting
+        QSettings settings;
+        QString simKey(android_hw->avd_name);
+        simKey += "/";
+        simKey += Ui::Settings::CELLULAR_SIM_PRESENT;
+        settings.setValue(simKey, isPresent);
+
+        // Tell the device
+        if (mCellularAgent && mCellularAgent->setSimPresent) {
+            mCellularAgent->setSimPresent(isPresent);
+        }
+
+        if (!mSimChangeInfoWasShown) {
+            mSimChangeInfoWasShown = true;
+            QMessageBox infoBox;
+            infoBox.setText("For the SIM change to take effect, you must either "
+                            "toggle airplane mode or reboot the device.");
+            infoBox.addButton(tr("Got it"), QMessageBox::YesRole);
+            infoBox.exec();
+        }
     }
 }
