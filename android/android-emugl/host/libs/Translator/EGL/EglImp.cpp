@@ -201,6 +201,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
 }
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
+    fprintf(stderr, "%s: call\n", __func__);
     EglDisplay* dpy = NULL;
     EglOS::Display* internalDisplay = NULL;
 

@@ -17,6 +17,7 @@
 #define TRANSLATOR_IFACES_H
 
 #include "android/base/containers/SmallVector.h"
+#include "android/base/synchronization/Lock.h"
 #include "GLcommon/ShareGroup.h"
 
 #include <GLES/gl.h>
@@ -53,10 +54,12 @@ struct EglImage
     unsigned int format;
     unsigned int type;
     SaveableTexturePtr saveableTexture;
+    android::base::Lock lock;
 };
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
 typedef std::unordered_map<unsigned int, ImagePtr> ImagesHndlMap;
+typedef std::unordered_map<unsigned int, SaveableTexturePtr> SaveableTextureMap;
 
 class GLEScontext;
 class SaveableTexture;

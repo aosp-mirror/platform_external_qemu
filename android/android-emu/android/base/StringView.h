@@ -169,7 +169,6 @@ public:
     size_t find(StringView other, size_t off = 0) {
         // Trivial case
         if (!other.mSize) return 0;
-        if (off < 0) return std::string::npos;
 
         size_t safeOff = std::min(off, mSize);
 

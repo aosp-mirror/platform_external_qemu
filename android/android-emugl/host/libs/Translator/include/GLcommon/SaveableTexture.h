@@ -18,6 +18,7 @@
 
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/Stream.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/TextureData.h"
@@ -102,6 +103,7 @@ private:
     GLint mTexWrapT;
     loader_t m_loader;
     GlobalNameSpace* m_globalNamespace = nullptr;
+    android::base::Lock mLock;
 };
 
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
