@@ -77,7 +77,10 @@ void Loader::prepare() {
     // TODO: run asynchronous index loading here.
 }
 
-Loader::~Loader() = default;
+Loader::~Loader() {
+    fprintf(stderr, "%s: custom loader dtor.\n", __func__);
+    if (mTextureLoader) mTextureLoader->finalize();
+}
 
 void Loader::complete(bool succeeded) {
     mStatus = OperationStatus::Error;

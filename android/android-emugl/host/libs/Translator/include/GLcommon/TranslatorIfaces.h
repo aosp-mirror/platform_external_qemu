@@ -17,6 +17,7 @@
 #define TRANSLATOR_IFACES_H
 
 #include "android/base/containers/SmallVector.h"
+#include "android/base/synchronization/Lock.h"
 #include "GLcommon/ShareGroup.h"
 
 #include <GLES/gl.h>
@@ -57,6 +58,7 @@ struct EglImage
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
 typedef std::unordered_map<unsigned int, ImagePtr> ImagesHndlMap;
+typedef std::unordered_map<unsigned int, SaveableTexturePtr> SaveableTextureMap;
 
 class GLEScontext;
 class SaveableTexture;
@@ -97,6 +99,10 @@ struct EGLiface {
     // at runtime. This is implemented in the EGL library because on Windows
     // all functions returned by wglGetProcAddress() are context-dependent!
     GlLibrary* (*eglGetGlLibrary)();
+
+    // Context creation functions for auxiliary functions (e.g.,
+    // background loading)
+    bool (*createAndBindAuxiliaryContext)();
 };
 
 typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
