@@ -1913,10 +1913,7 @@ bool configAndStartRenderer(
     // successfully boots.
     // This workaround disables the boot animation under the above conditions,
     // which frees up the CPU enough for the device to boot.
-    // ANGLE: ANGLE doesn't have GLESv1 support (for now),
-    // so let's also disable the boot animation.
-    if (gpu_mode && (!strcmp(gpu_mode, "mesa") ||
-                !strcmp(gpu_mode, "angle"))) {
+    if (gpu_mode && (!strcmp(gpu_mode, "mesa"))) {
         opts->no_boot_anim = 1;
         D("Starting AVD without boot animation.\n");
     }
