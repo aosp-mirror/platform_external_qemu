@@ -20,7 +20,7 @@ void androidSnapshot_prepareForLoading(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_load(const char* name) {
-    return (AndroidSnapshotStatus)Snapshotter::get().load(name);
+    return AndroidSnapshotStatus(Snapshotter::get().load(name));
 }
 
 void androidSnapshot_prepareForSaving(const char* name) {
@@ -28,5 +28,5 @@ void androidSnapshot_prepareForSaving(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
-    return (AndroidSnapshotStatus)Snapshotter::get().save(name);
+    return AndroidSnapshotStatus(Snapshotter::get().save(name));
 }

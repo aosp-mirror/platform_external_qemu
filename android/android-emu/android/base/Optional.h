@@ -110,6 +110,7 @@ protected:
     void setConstructed(bool constructed) { mConstructed = constructed; }
     constexpr bool constructed() const { return mConstructed; }
     constexpr operator bool() const { return constructed(); }
+    bool hasValue() const { return constructed(); }
 
     constexpr OptionalBase(bool constructed = false)
         : mConstructed(constructed) {}
@@ -337,8 +338,9 @@ public:
         return *this;
     }
 
-    // Adopt operator bool() from the parent
+    // Adopt value checkers from the parent
     using base_type::operator bool;
+    using base_type::hasValue;
 
     T& value() { return get(); }
     constexpr const T& value() const { return get(); }

@@ -46,15 +46,15 @@ Saver::Saver(const Snapshot& snapshot)
             return;
         }
         mTextureSaver = std::make_shared<TextureSaver>(
-                            StdioStream(textures, StdioStream::kOwner));
+                StdioStream(textures, StdioStream::kOwner));
     }
 
     mStatus = OperationStatus::NotStarted;
 }
 
 Saver::~Saver() {
-    const bool deleteDirectory =
-            mStatus != OperationStatus::Ok && ((bool)mRamSaver || (bool)mTextureSaver);
+    const bool deleteDirectory = mStatus != OperationStatus::Ok &&
+                                 (mRamSaver.hasValue() || mTextureSaver.get());
     mRamSaver.clear();
     mTextureSaver.reset();
     if (deleteDirectory) {
@@ -62,8 +62,7 @@ Saver::~Saver() {
     }
 }
 
-void Saver::prepare()
-{
+void Saver::prepare() {
     // TODO: run asynchronous saving preparation here (e.g. screenshot,
     // hardware info collection etc).
 }
@@ -76,7 +75,8 @@ void Saver::complete(bool succeeded) {
     if (!mRamSaver || mRamSaver->hasError()) {
         return;
     }
-    if (!mTextureSaver || (mTextureSaver->done(), mTextureSaver->hasError())) {
+    if (!mTextureSaver ||
+        (static_cast<void>(mTextureSaver->done()), mTextureSaver->hasError())) {
         return;
     }
 

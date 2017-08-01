@@ -11,8 +11,8 @@
 
 #include "android/snapshot/Snapshotter.h"
 
-#include "android/snapshot/interface.h"
 #include "android/crashreport/CrashReporter.h"
+#include "android/snapshot/interface.h"
 #include "android/utils/path.h"
 
 #include <assert.h>
@@ -25,9 +25,11 @@ extern "C" {
 // when checking the whole aligned memory page.
 static bool buffer_zero_sse2(const void* buf, int len) {
     buf = __builtin_assume_aligned(buf, 4096);
-    __m128i t = _mm_load_si128((const __m128i*)buf);
-    auto p = (__m128i*)(((uintptr_t)buf + 5 * 16));
-    auto e = (__m128i*)(((uintptr_t)buf + len));
+    __m128i t = _mm_load_si128(static_cast<const __m128i*>(buf));
+    auto p = reinterpret_cast<__m128i*>(
+            (reinterpret_cast<intptr_t>(buf) + 5 * 16));
+    auto e =
+            reinterpret_cast<__m128i*>((reinterpret_cast<intptr_t>(buf) + len));
     const __m128i zero = _mm_setzero_si128();
 
     /* Loop over 16-byte aligned blocks of 64.  */
@@ -126,8 +128,8 @@ const SnapshotCallbacks Snapshotter::kCallbacks = {
 // TODO: implement an optimized SSE4 version and dynamically select it if host
 // supports SSE4.
 bool isBufferZeroed(const void* ptr, int32_t size) {
-    assert(((uintptr_t)ptr & (4096 - 1)) == 0); // page-aligned
-    assert(size >= 4096);   // at least one small page in |size|
+    assert((uintptr_t(ptr) & (4096 - 1)) == 0); // page-aligned
+    assert(size >= 4096);  // at least one small page in |size|
     return buffer_zero_sse2(ptr, size);
 }
 
@@ -200,19 +202,19 @@ void Snapshotter::onLoadingComplete(const char* name, int res) {
     crashreport::CrashReporter::get()->hangDetector().pause(false);
 }
 
-void Snapshotter::onStartDelete(const char* name) {
+void Snapshotter::onStartDelete(const char*) {
     crashreport::CrashReporter::get()->hangDetector().pause(true);
 }
 
 void Snapshotter::onDeletingComplete(const char* name, int res) {
     if (res == 0) {
-    if (mSaver && mSaver->snapshot().name() == name) {
-        mSaver.clear();
-    }
-    if (mLoader && mLoader->snapshot().name() == name) {
-        mLoader.clear();
-    }
-    path_delete_dir(Snapshot(name).dataDir().c_str());
+        if (mSaver && mSaver->snapshot().name() == name) {
+            mSaver.clear();
+        }
+        if (mLoader && mLoader->snapshot().name() == name) {
+            mLoader.clear();
+        }
+        path_delete_dir(Snapshot(name).dataDir().c_str());
     }
     crashreport::CrashReporter::get()->hangDetector().pause(false);
 }

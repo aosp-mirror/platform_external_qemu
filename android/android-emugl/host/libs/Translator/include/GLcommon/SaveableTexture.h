@@ -45,7 +45,8 @@ class TextureData;
 // EglImages and GLES textures are being loaded. Then TextureGlobal will be
 // destroyed.
 
-class SaveableTexture : public android::snapshot::LazySnapshotObj {
+class SaveableTexture :
+        public android::snapshot::LazySnapshotObj<SaveableTexture> {
 public:
     using Buffer = android::base::SmallVector<unsigned char>;
     using saver_t = void (*)(SaveableTexture*,
@@ -72,11 +73,12 @@ public:
     void fillEglImage(EglImage* eglImage);
     void loadFromStream(android::base::Stream* stream);
 
-private:
+public:
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up
-    void restore() override;
+    void restore();
 
+private:
     unsigned int m_target = GL_TEXTURE_2D;
     unsigned int m_width = 0;
     unsigned int m_height = 0;

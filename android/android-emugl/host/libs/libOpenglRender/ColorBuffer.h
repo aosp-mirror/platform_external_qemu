@@ -60,14 +60,15 @@ class YUVConverter;
 //
 // As an additional twist.
 
-class ColorBuffer : public android::snapshot::LazySnapshotObj {
+class ColorBuffer :
+        public android::snapshot::LazySnapshotObj<ColorBuffer> {
 public:
     // Helper interface class used during ColorBuffer operations. This is
     // introduced to remove coupling from the FrameBuffer class implementation.
     class Helper {
     public:
-        Helper() {}
-        virtual ~Helper() {}
+        Helper() = default;
+        virtual ~Helper();
         virtual bool setupContext() = 0;
         virtual void teardownContext() = 0;
         virtual TextureDraw* getTextureDraw() const = 0;
@@ -201,8 +202,8 @@ public:
 
     HandleType getHndl() const;
 
-protected:
-    void restore() override;
+public:
+    void restore();
 
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);

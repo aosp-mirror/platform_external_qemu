@@ -64,6 +64,8 @@ void unbindFbo() {
 
 }
 
+ColorBuffer::Helper::~Helper() = default;
+
 // static
 ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
                                  int p_width,

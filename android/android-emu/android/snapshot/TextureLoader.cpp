@@ -48,9 +48,9 @@ bool TextureLoader::readIndex() {
     auto start = android::base::System::get()->getHighResTimeUs();
 #endif
     assert(mIndex.size() == 0);
-    uint64_t indexPos = mStream.getBe64();
-    fseek(mStream.get(), indexPos, SEEK_SET);
-    int version = mStream.getBe32();
+    auto indexPos = mStream.getBe64();
+    fseek(mStream.get(), static_cast<int64_t>(indexPos), SEEK_SET);
+    auto version = mStream.getBe32();
     if (version != 1) {
         return false;
     }
@@ -58,7 +58,7 @@ bool TextureLoader::readIndex() {
     mIndex.reserve(texCount);
     for (uint32_t i = 0; i < texCount; i++) {
         uint32_t tex = mStream.getBe32();
-        int64_t filePos = mStream.getBe64();
+        uint64_t filePos = mStream.getBe64();
         mIndex.emplace(tex, filePos);
     }
 #if SNAPSHOT_PROFILE > 1

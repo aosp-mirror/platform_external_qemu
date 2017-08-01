@@ -16,12 +16,16 @@
 
 #pragma once
 
+#include "android/base/Compiler.h"
 #include "android/base/synchronization/Lock.h"
 
 namespace android {
+
+namespace base { class Stream; }
+
 namespace snapshot {
 
-// LazySnapshotObj is a base class for objects that uses lazy strategy for
+// LazySnapshotObj is a base class for objects that use lazy strategy for
 // snapshot loading. It separates heavy-weight loading / restoring operations
 // and only triggers it when the object needs to be used.
 // Please implement heavy-weight loading / restoring operations in restore()
@@ -31,29 +35,34 @@ namespace snapshot {
 // disk but does not load them into GPU. On restore it performs the heavy-weight
 // GPU data loading.
 
+template <class Derived>
 class LazySnapshotObj {
+    DISALLOW_COPY_AND_ASSIGN(LazySnapshotObj);
 public:
     LazySnapshotObj() = default;
     // Snapshot loader
-    LazySnapshotObj(android::base::Stream* stream) {
-        mNeedRestore = true;
-    }
+    LazySnapshotObj(base::Stream*) : mNeedRestore(true) {}
+
     void touch() {
-        android::base::AutoLock lock(mMutex);
-        if (!mNeedRestore) return;
-        restore();
+        base::AutoLock lock(mMutex);
+        if (!mNeedRestore) {
+            return;
+        }
+        static_cast<Derived*>(this)->restore();
         mNeedRestore = false;
     }
-    bool needRestore() {
-        android::base::AutoLock lock(mMutex);
+
+    bool needRestore() const {
+        base::AutoLock lock(mMutex);
         return mNeedRestore;
     }
+
 protected:
     ~LazySnapshotObj() = default;
-    virtual void restore() = 0;
     bool mNeedRestore = false;
+
 private:
-    android::base::Lock mMutex;
+    mutable base::Lock mMutex;
 };
 
 } // namespace snapshot

@@ -20,9 +20,8 @@ bool MemoryAccessWatch::isSupported() {
     return false;
 }
 
-MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
-                                     IdleCallback&& idleCallback)
-    : mImpl(new Impl()) {}
+MemoryAccessWatch::MemoryAccessWatch(AccessCallback&&, IdleCallback&&)
+    : mImpl(/*new Impl()*/) {}
 
 MemoryAccessWatch::~MemoryAccessWatch() {}
 
@@ -30,13 +29,13 @@ bool MemoryAccessWatch::valid() const {
     return false;
 }
 
-bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
+bool MemoryAccessWatch::registerMemoryRange(void*, size_t) {
     return false;
 }
 
 void MemoryAccessWatch::doneRegistering() {}
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
+bool MemoryAccessWatch::fillPage(void* , size_t, const void*) {
     return false;
 }
 
