@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1f7e7001_fd4893fd",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 471,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-01T01:03:09Z",
+      "side": 1,
+      "message": "nit: remove?",
+      "range": {
+        "startLine": 471,
+        "startChar": 0,
+        "endLine": 471,
+        "endChar": 28
+      },
+      "revId": "895bd8d23ae1934d5f53dd33ac986c7238d98743",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f5abc64_f5f8d7a9",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 505,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-01T01:03:09Z",
+      "side": 1,
+      "message": "remove?",
+      "range": {
+        "startLine": 504,
+        "startChar": 0,
+        "endLine": 505,
+        "endChar": 28
+      },
+      "revId": "895bd8d23ae1934d5f53dd33ac986c7238d98743",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
