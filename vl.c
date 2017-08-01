@@ -4534,7 +4534,7 @@ static int main_impl(int argc, char** argv)
 #ifdef CONFIG_ANDROID
 
     // setup device-tree callback
-#if defined(TARGET_AARCH64) || defined(TARGET_ARM)
+#if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
     qemu_device_tree_setup_callback(ranchu_device_tree_setup);
 #endif
     if (!qemu_android_emulation_early_setup()) {
