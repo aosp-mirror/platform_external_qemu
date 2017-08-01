@@ -28,7 +28,7 @@ RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
     // Put a placeholder for the index offset right now.
     mStream.putBe64(0);
     if (nonzero(mFlags & Flags::Compress)) {
-        mIndex.flags |= (int32_t)FileIndex::Flags::CompressedPages;
+        mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
         mCompressor.emplace(
                 [this](QueuedPageInfo&& pi, const uint8_t* data, int32_t size) {
                     writePage(pi, data, size);
@@ -47,32 +47,33 @@ RamSaver::~RamSaver() {
 }
 
 void RamSaver::registerBlock(const RamBlock& block) {
-    mIndex.blocks.push_back({block});
+    mIndex.blocks.push_back({block, {}});
 }
 
 void RamSaver::savePage(int64_t blockOffset,
-                        int64_t pageOffset,
+                        int64_t /*pageOffset*/,
                         int32_t pageSize) {
     assert(!mIndex.blocks.empty());
-    assert(mLastBlockIndex >= 0 && mLastBlockIndex < (int)mIndex.blocks.size());
-    if (blockOffset != mIndex.blocks[mLastBlockIndex].ramBlock.startOffset) {
-        mLastBlockIndex = std::distance(
+    assert(mLastBlockIndex >= 0 && mLastBlockIndex < int(mIndex.blocks.size()));
+    if (blockOffset !=
+        mIndex.blocks[size_t(mLastBlockIndex)].ramBlock.startOffset) {
+        mLastBlockIndex = int(std::distance(
                 mIndex.blocks.begin(),
                 std::find_if(mIndex.blocks.begin(), mIndex.blocks.end(),
                              [blockOffset](const FileIndex::Block& block) {
                                  return block.ramBlock.startOffset ==
                                         blockOffset;
-                             }));
-        assert(mLastBlockIndex < (int)mIndex.blocks.size());
+                             })));
+        assert(mLastBlockIndex < int(mIndex.blocks.size()));
     }
 
-    RamBlock& block = mIndex.blocks[mLastBlockIndex].ramBlock;
+    RamBlock& block = mIndex.blocks[size_t(mLastBlockIndex)].ramBlock;
     if (block.pageSize == 0) {
         block.pageSize = pageSize;
         // First time we see a page for this block - save all its pages now.
         assert(block.totalSize % block.pageSize == 0);
         auto numPages = int32_t(block.totalSize / block.pageSize);
-        mIndex.blocks[mLastBlockIndex].pages.resize(numPages);
+        mIndex.blocks[size_t(mLastBlockIndex)].pages.resize(numPages);
         for (int32_t i = 0; i != numPages; ++i) {
             passToSaveHandler({mLastBlockIndex, i});
         }
@@ -88,7 +89,7 @@ void RamSaver::join() {
     if (mJoined) {
         return;
     }
-    passToSaveHandler({kStopMarkerIndex});
+    passToSaveHandler({kStopMarkerIndex, 0});
     mSavingWorker.clear();
     mJoined = true;
     mHasError = ferror(mStream.get()) != 0;
@@ -115,8 +116,8 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
         return false;
     }
 
-    FileIndex::Block& block = mIndex.blocks[pi.blockIndex];
-    FileIndex::Block::Page& page = block.pages[pi.pageIndex];
+    FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
+    FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     ++mIndex.totalPages;
 
     auto ptr = block.ramBlock.hostPtr + pi.pageIndex * block.ramBlock.pageSize;
@@ -145,11 +146,11 @@ base::WorkerProcessingResult RamSaver::savePageInWorker(QueuedPageInfo&& pi) {
 // lowest bit as a marker for a negative number.
 static void putDelta(base::Stream* stream, int64_t delta) {
     if (delta >= 0) {
-        assert((delta & (1LL<<63)) == 0);
-        stream->putPackedNum(delta << 1);
+        assert((uint64_t(delta) & (1ULL << 63)) == 0);
+        stream->putPackedNum(uint64_t(delta) << 1);
     } else {
-        assert((-delta & (1LL<<63)) == 0);
-        stream->putPackedNum(((-delta) << 1) | 1);
+        assert((uint64_t(-delta) & (1ULL << 63)) == 0);
+        stream->putPackedNum((uint64_t(-delta) << 1) | 1);
     }
 }
 
@@ -158,21 +159,21 @@ void RamSaver::writeIndex() {
     auto start = mIndex.startPosInFile;
 #endif
 
-    bool compressed = (mIndex.flags & (int)IndexFlags::CompressedPages) != 0;
-    mStream.putBe32(mIndex.version);
-    mStream.putBe32(mIndex.flags);
-    mStream.putBe32(mIndex.totalPages);
+    bool compressed = (mIndex.flags & int(IndexFlags::CompressedPages)) != 0;
+    mStream.putBe32(uint32_t(mIndex.version));
+    mStream.putBe32(uint32_t(mIndex.flags));
+    mStream.putBe32(uint32_t(mIndex.totalPages));
     int64_t prevFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
     for (const FileIndex::Block& b : mIndex.blocks) {
         auto id = base::StringView(b.ramBlock.id);
-        mStream.putByte(id.size());
+        mStream.putByte(uint8_t(id.size()));
         mStream.write(id.data(), id.size());
-        mStream.putBe32(b.pages.size());
+        mStream.putBe32(uint32_t(b.pages.size()));
         for (const FileIndex::Block::Page& page : b.pages) {
-            mStream.putPackedNum(
+            mStream.putPackedNum(uint64_t(
                     compressed ? page.sizeOnDisk
-                               : (page.sizeOnDisk / b.ramBlock.pageSize));
+                               : (page.sizeOnDisk / b.ramBlock.pageSize)));
             if (page.sizeOnDisk) {
                 auto deltaPos = page.filePos - prevFilePos;
                 if (compressed) {
@@ -193,17 +194,17 @@ void RamSaver::writeIndex() {
 #endif
 
     fseek(mStream.get(), 0, SEEK_SET);
-    mStream.putBe64(mIndex.startPosInFile);
+    mStream.putBe64(uint64_t(mIndex.startPosInFile));
 }
 
 void RamSaver::writePage(const QueuedPageInfo& pi,
                          const void* dataPtr,
                          int32_t dataSize) {
-    FileIndex::Block& block = mIndex.blocks[pi.blockIndex];
-    FileIndex::Block::Page& page = block.pages[pi.pageIndex];
+    FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
+    FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     page.sizeOnDisk = dataSize;
     page.filePos = int64_t(ftell(mStream.get()));
-    mStream.write(dataPtr, dataSize);
+    mStream.write(dataPtr, size_t(dataSize));
 }
 
 }  // namespace snapshot

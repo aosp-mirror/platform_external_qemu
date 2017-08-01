@@ -57,10 +57,10 @@ static bool checkUserfaultFdCaps(int ufd) {
     }
 
     uint64_t ioctlMask =
-            (__u64)1 << _UFFDIO_REGISTER | (__u64)1 << _UFFDIO_UNREGISTER;
+            1ull << _UFFDIO_REGISTER | 1ull << _UFFDIO_UNREGISTER;
     if ((apiStruct.ioctls & ioctlMask) != ioctlMask) {
         dwarning("Missing userfault features: %llu",
-                 (unsigned long long)(~apiStruct.ioctls & ioctlMask));
+                 static_cast<unsigned long long>(~apiStruct.ioctls & ioctlMask));
         return false;
     }
 
@@ -75,7 +75,7 @@ public:
           mIdleCallback(std::move(idleCallback)),
           mPagefaultThread([this]() { pagefaultWorker(); }) {
         mUserfaultFd = base::ScopedFd(
-                syscall(__NR_userfaultfd, O_CLOEXEC | O_NONBLOCK));
+                int(syscall(__NR_userfaultfd, O_CLOEXEC | O_NONBLOCK)));
         if (!checkUserfaultFdCaps(mUserfaultFd.get())) {
             mUserfaultFd.close();
         }
@@ -87,7 +87,7 @@ public:
 
     void* readNextPagefaultAddr() const {
         uffd_msg msg;
-        const int ret =
+        const auto ret =
                 HANDLE_EINTR(read(mUserfaultFd.get(), &msg, sizeof(msg)));
         if (ret != sizeof(msg)) {
             if (errno == EAGAIN) {
@@ -111,7 +111,7 @@ public:
                    msg.event);
             return nullptr; /* It's not a page fault, shouldn't happen */
         }
-        return (void*)(uintptr_t)msg.arg.pagefault.address;
+        return reinterpret_cast<void*>(uintptr_t(msg.arg.pagefault.address));
     }
 
     void pagefaultWorker() {
@@ -160,7 +160,7 @@ public:
 };
 
 bool MemoryAccessWatch::isSupported() {
-    base::ScopedFd ufd(syscall(__NR_userfaultfd, O_CLOEXEC));
+    base::ScopedFd ufd(int(syscall(__NR_userfaultfd, O_CLOEXEC)));
     return checkUserfaultFdCaps(ufd.get());
 }
 
@@ -181,7 +181,7 @@ bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
                                   UFFDIO_REGISTER_MODE_MISSING};
     if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_REGISTER, &regStruct)) {
         derror("%s userfault register(%p, %d): %s", __func__,
-               start, (int)length, strerror(errno));
+               start, int(length), strerror(errno));
         mImpl->mUserfaultFd.close();
         return false;
     }
@@ -197,17 +197,18 @@ void MemoryAccessWatch::doneRegistering() {
 
 bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
     if (data) {
-        uffdio_copy copyStruct = {(uintptr_t)ptr, (uintptr_t)data, length};
+        uffdio_copy copyStruct = {uintptr_t(ptr), uintptr_t(data), length};
         if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_COPY, &copyStruct)) {
             derror("%s: %s copy host: %p from: %p\n", __func__, strerror(errno),
-                   (void*)copyStruct.dst, (void*)copyStruct.src);
+                   reinterpret_cast<void*>(copyStruct.dst),
+                   reinterpret_cast<void*>(copyStruct.src));
             return false;
         }
     } else {
-        uffdio_zeropage zeroStruct = {(uintptr_t)ptr, length};
+        uffdio_zeropage zeroStruct = {uintptr_t(ptr), length};
         if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_ZEROPAGE, &zeroStruct)) {
             derror("%s: %s zero host: %p\n", __func__, strerror(errno),
-                   (void*)zeroStruct.range.start);
+                   reinterpret_cast<void*>(zeroStruct.range.start));
             return false;
         }
     }

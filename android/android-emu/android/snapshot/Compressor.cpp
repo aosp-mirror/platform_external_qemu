@@ -29,9 +29,10 @@ int CompressorBase::workerCount() {
 std::pair<uint8_t*, int32_t> CompressorBase::compress(const uint8_t* data,
                                                       int32_t size) {
     auto outSize = LZ4_COMPRESSBOUND(size);
-    auto out = new uint8_t[outSize];
+    auto out = new uint8_t[size_t(outSize)];
     int32_t compressedSize =
-            LZ4_compress_fast((const char*)data, (char*)out, size, outSize, 1);
+            LZ4_compress_fast(reinterpret_cast<const char*>(data),
+                              reinterpret_cast<char*>(out), size, outSize, 1);
     return {out, compressedSize};
 }
 

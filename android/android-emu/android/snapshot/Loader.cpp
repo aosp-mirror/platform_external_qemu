@@ -50,7 +50,7 @@ Loader::Loader(const Snapshot& snapshot)
             return;
         }
         mTextureLoader = std::make_shared<TextureLoader>(
-                            StdioStream(textures, StdioStream::kOwner));
+                StdioStream(textures, StdioStream::kOwner));
     }
 
     mStatus = OperationStatus::NotStarted;

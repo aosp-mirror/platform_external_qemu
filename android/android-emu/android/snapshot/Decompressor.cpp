@@ -22,10 +22,11 @@ bool Decompressor::decompress(const uint8_t* data,
                               int32_t size,
                               uint8_t* outData,
                               int32_t outSize) {
-    const int res = LZ4_decompress_safe((const char*)data, (char*)outData, size,
-                                        outSize);
+    const int res = LZ4_decompress_safe(reinterpret_cast<const char*>(data),
+                                        reinterpret_cast<char*>(outData),
+                                        size, outSize);
     if (res != outSize) {
-        printf("Decompression failed: %d\n", res);
+        fprintf(stderr, "Decompression failed: %d\n", res);
     }
     return res == outSize;
 }

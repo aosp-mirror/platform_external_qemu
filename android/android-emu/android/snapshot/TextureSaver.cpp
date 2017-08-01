@@ -39,7 +39,7 @@ void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
                         [texId](FileIndex::Texture& tex) {
                             return tex.texId == texId;
                         }));
-    mIndex.textures.push_back({texId, (int64_t)ftell(mStream.get())});
+    mIndex.textures.push_back({texId, ftell(mStream.get())});
     saver(&mStream, &mBuffer);
 }
 
@@ -62,11 +62,11 @@ void TextureSaver::writeIndex() {
     auto start = ftell(mStream.get());
 #endif
 
-    mStream.putBe32(mIndex.version);
-    mStream.putBe32(mIndex.textures.size());
+    mStream.putBe32(static_cast<uint32_t>(mIndex.version));
+    mStream.putBe32(static_cast<uint32_t>(mIndex.textures.size()));
     for (const FileIndex::Texture& b : mIndex.textures) {
         mStream.putBe32(b.texId);
-        mStream.putBe64(b.filePos);
+        mStream.putBe64(static_cast<uint64_t>(b.filePos));
     }
 #if SNAPSHOT_PROFILE > 1
     auto end = ftell(mStream.get());
@@ -74,7 +74,7 @@ void TextureSaver::writeIndex() {
 #endif
 
     fseek(mStream.get(), 0, SEEK_SET);
-    mStream.putBe64(mIndex.startPosInFile);
+    mStream.putBe64(static_cast<uint64_t>(mIndex.startPosInFile));
 }
 
 }  // namespace snapshot

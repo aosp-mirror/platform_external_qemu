@@ -53,8 +53,7 @@ struct RamLoader::Page {
 };
 
 RamLoader::RamLoader(base::StdioStream&& stream)
-    : mStream(std::move(stream)),
-      mReaderThread([this]() { readerWorker(); }) {
+    : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace(
                 [this](void* ptr) {
@@ -85,7 +84,7 @@ RamLoader::~RamLoader() {
 }
 
 void RamLoader::registerBlock(const RamBlock& block) {
-    mIndex.blocks.push_back({block});
+    mIndex.blocks.push_back({block, {}, {}});
 }
 
 bool RamLoader::start() {
@@ -128,7 +127,7 @@ void RamLoader::zeroOutPage(const Page& page) {
     auto ptr = pagePtr(page);
     const RamBlock& block = mIndex.blocks[page.blockIndex].ramBlock;
     if (!isBufferZeroed(ptr, block.pageSize)) {
-        memset(ptr, 0, block.pageSize);
+        memset(ptr, 0, size_t(block.pageSize));
     }
 }
 
@@ -146,21 +145,21 @@ bool RamLoader::readIndex() {
 #endif
     mStreamFd = fileno(mStream.get());
     uint64_t indexPos = mStream.getBe64();
-    fseek(mStream.get(), indexPos, SEEK_SET);
+    fseek(mStream.get(), intptr_t(indexPos), SEEK_SET);
 
-    int version = mStream.getBe32();
+    auto version = mStream.getBe32();
     if (version != 1) {
         return false;
     }
-    mIndex.flags = (IndexFlags)mStream.getBe32();
+    mIndex.flags = IndexFlags(mStream.getBe32());
     const bool compressed = nonzero(mIndex.flags & IndexFlags::CompressedPages);
-    int pageCount = mStream.getBe32();
+    auto pageCount = mStream.getBe32();
     mIndex.pages.reserve(pageCount);
     int64_t runningFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
     for (size_t loadedBlockCount = 0; loadedBlockCount < mIndex.blocks.size();
          ++loadedBlockCount) {
-        const int nameLength = mStream.getByte();
+        const auto nameLength = mStream.getByte();
         char name[256];
         mStream.read(name, nameLength);
         name[nameLength] = 0;
@@ -176,34 +175,34 @@ bool RamLoader::readIndex() {
         block.pagesBegin = mIndex.pages.end();
 
         uint32_t blockPagesCount = mStream.getBe32();
-        for (int i = 0; i < (int)blockPagesCount; ++i) {
+        for (int i = 0; i < int(blockPagesCount); ++i) {
             auto sizeOnDisk = mStream.getPackedNum();
             if (sizeOnDisk == 0) {
                 // Empty page
                 mIndex.pages.emplace_back(State::Read);
                 Page& page = mIndex.pages.back();
-                page.blockIndex = blockIndex;
+                page.blockIndex = uint16_t(blockIndex);
                 page.sizeOnDisk = 0;
                 page.filePos = 0;
             } else {
                 mIndex.pages.emplace_back();
                 Page& page = mIndex.pages.back();
-                page.blockIndex = blockIndex;
-                page.sizeOnDisk = sizeOnDisk;
+                page.blockIndex = uint16_t(blockIndex);
+                page.sizeOnDisk = uint32_t(sizeOnDisk);
                 auto posDelta = getDelta(&mStream);
                 if (compressed) {
                     posDelta += prevPageSizeOnDisk;
                 } else {
-                    page.sizeOnDisk *= block.ramBlock.pageSize;
+                    page.sizeOnDisk *= uint32_t(block.ramBlock.pageSize);
                     posDelta *= block.ramBlock.pageSize;
                 }
                 runningFilePos += posDelta;
-                page.filePos = runningFilePos;
-                prevPageSizeOnDisk = page.sizeOnDisk;
+                page.filePos = uint64_t(runningFilePos);
+                prevPageSizeOnDisk = int32_t(page.sizeOnDisk);
             }
         }
         block.pagesEnd = mIndex.pages.end();
-        assert(block.pagesEnd - block.pagesBegin == (int)blockPagesCount);
+        assert(block.pagesEnd - block.pagesBegin == int(blockPagesCount));
     }
 
 #if SNAPSHOT_PROFILE > 1
@@ -241,12 +240,12 @@ bool RamLoader::registerPageWatches() {
 
 uint8_t* RamLoader::pagePtr(const RamLoader::Page& page) const {
     const FileIndex::Block& block = mIndex.blocks[page.blockIndex];
-    return block.ramBlock.hostPtr +
-           (uint64_t)(&page - &*block.pagesBegin) * block.ramBlock.pageSize;
+    return block.ramBlock.hostPtr + uint64_t(&page - &*block.pagesBegin) *
+                                            uint64_t(block.ramBlock.pageSize);
 }
 
 uint32_t RamLoader::pageSize(const RamLoader::Page& page) const {
-    return mIndex.blocks[page.blockIndex].ramBlock.pageSize;
+    return uint32_t(mIndex.blocks[page.blockIndex].ramBlock.pageSize);
 }
 
 template <class Num>
@@ -267,8 +266,8 @@ RamLoader::Page& RamLoader::page(void* ptr) {
     assert(blockIt->pagesBegin != blockIt->pagesEnd);
 
     assert(isPowerOf2(blockIt->ramBlock.pageSize));
-    auto pageStart =
-            (uint8_t*)(((uintptr_t)ptr) & ~(blockIt->ramBlock.pageSize - 1));
+    auto pageStart = reinterpret_cast<uint8_t*>(
+            (uintptr_t(ptr)) & uintptr_t(~(blockIt->ramBlock.pageSize - 1)));
     auto pageIndex = (pageStart - blockIt->ramBlock.hostPtr) /
                      blockIt->ramBlock.pageSize;
     auto pageIt = blockIt->pagesBegin + pageIndex;
@@ -295,8 +294,8 @@ void RamLoader::readerWorker() {
     mAccessWatch.clear();
 
 #if SNAPSHOT_PROFILE > 1
-        printf("Background loading complete in %.03f ms\n",
-               (base::System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
+    printf("Background loading complete in %.03f ms\n",
+           (base::System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
 #endif
 }
 
@@ -312,7 +311,7 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::backgroundPageLoad() {
         }
     }
 
-    for (int i = 0; i < (int)mReadingQueue.capacity(); ++i) {
+    for (int i = 0; i < int(mReadingQueue.capacity()); ++i) {
         // Find next page to queue.
         mBackgroundPageIt = std::find_if(
                 mBackgroundPageIt, mIndex.pages.end(), [](const Page& page) {
@@ -367,13 +366,14 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
 bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     Page& page = *pagePtr;
     if (page.sizeOnDisk == 0) {
-        assert(page.state.load(std::memory_order_relaxed) == uint8_t(State::Read));
+        assert(page.state.load(std::memory_order_relaxed) ==
+               uint8_t(State::Read));
         page.data = nullptr;
         return true;
     }
 
     auto state = uint8_t(State::Empty);
-    if (!page.state.compare_exchange_strong(state, (uint8_t)State::Reading,
+    if (!page.state.compare_exchange_strong(state, uint8_t(State::Reading),
                                             std::memory_order_acquire)) {
         // Spin until the reading thread finishes.
         while (state < uint8_t(State::Read)) {
@@ -395,12 +395,13 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
                           !preallocatedBuffer;
     auto buf = allocateBuffer ? new uint8_t[size]
                               : compressed ? compressedBuf : preallocatedBuffer;
-    auto read = HANDLE_EINTR(base::pread(mStreamFd, buf, size, page.filePos));
-    if (read != (int64_t)size) {
+    auto read = HANDLE_EINTR(
+            base::pread(mStreamFd, buf, size, off64_t(page.filePos)));
+    if (read != int64_t(size)) {
         derror("(%d) Reading page %p from disk returned less data: %d of %d at "
                "%lld",
-               errno, this->pagePtr(page), (int)read, (int)size,
-               (long long)page.filePos);
+               errno, this->pagePtr(page), int(read), int(size),
+               static_cast<long long>(page.filePos));
         if (allocateBuffer) {
             delete[] buf;
         }
@@ -417,8 +418,8 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
             auto decompressed = preallocatedBuffer
                                         ? preallocatedBuffer
                                         : new uint8_t[pageSize(page)];
-            if (!Decompressor::decompress(buf, size, decompressed,
-                                          pageSize(page))) {
+            if (!Decompressor::decompress(buf, int32_t(size), decompressed,
+                                          int32_t(pageSize(page)))) {
                 derror("Decompressing page %p failed", this->pagePtr(page));
                 if (!preallocatedBuffer) {
                     delete[] decompressed;
@@ -516,9 +517,9 @@ bool RamLoader::readAllPages() {
 
 void RamLoader::startDecompressor() {
     mDecompressor.emplace([this](Page* page) {
-        const bool res =
-                Decompressor::decompress(page->data, page->sizeOnDisk,
-                                         pagePtr(*page), pageSize(*page));
+        const bool res = Decompressor::decompress(
+                page->data, int32_t(page->sizeOnDisk), pagePtr(*page),
+                int32_t(pageSize(*page)));
         delete[] page->data;
         page->data = nullptr;
         if (!res) {
