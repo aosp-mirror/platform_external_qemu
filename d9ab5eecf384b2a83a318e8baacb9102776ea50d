@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "52c036e5_5d98c980",
+        "filename": "android/android-emu/android/snapshot/Saver.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 0,
+      "message": "why is this a problem, by the way?",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 19
+      },
+      "revId": "d9ab5eecf384b2a83a318e8baacb9102776ea50d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

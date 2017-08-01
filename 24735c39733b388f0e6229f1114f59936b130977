@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3fd6ffd9_9e1b38ec",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "let\u0027s use derror/dwarning for this kind of messages",
+      "range": {
+        "startLine": 621,
+        "startChar": 8,
+        "endLine": 622,
+        "endChar": 75
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11452364_6b4ac2be",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "does it mean we never lock hw.ini if snapshot operation was in progress?",
+      "range": {
+        "startLine": 626,
+        "startChar": 12,
+        "endLine": 626,
+        "endChar": 27
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d3c7593c_bf31a2c5",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 694,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "does it hide the extended window?",
+      "range": {
+        "startLine": 692,
+        "startChar": 3,
+        "endLine": 694,
+        "endChar": 9
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5db18493_a816e097",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "this path should be the one from the avd info",
+      "range": {
+        "startLine": 707,
+        "startChar": 34,
+        "endLine": 707,
+        "endChar": 82
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "edd21e57_fe6a3938",
+        "filename": "android/android-emu/android/snapshot/TextureSaver.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "unique_ptr\u003c\u003e?",
+      "range": {
+        "startLine": 28,
+        "startChar": 4,
+        "endLine": 28,
+        "endChar": 11
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7f0c9794_046af7d0",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 498,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "well, this is not nice way of doing it at all. why not waiting for the other PID to exit instead?",
+      "range": {
+        "startLine": 490,
+        "startChar": 0,
+        "endLine": 498,
+        "endChar": 1
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a532f9d1_3509fa26",
+        "filename": "android/android-emu/android/utils/filelock.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "filelock_wait_acquire()? or something similar",
+      "range": {
+        "startLine": 50,
+        "startChar": 18,
+        "endLine": 50,
+        "endChar": 43
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31082e8f_c6db58c3",
+        "filename": "android/android-emu/android/utils/filelock.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-01T19:45:24Z",
+      "side": 1,
+      "message": "or create_or_block\nanyway, it\u0027s better to be explicit that this function will block until the lock is there (sometimes because of strange bugs it means \u0027forever\u0027)",
+      "range": {
+        "startLine": 50,
+        "startChar": 27,
+        "endLine": 50,
+        "endChar": 42
+      },
+      "revId": "24735c39733b388f0e6229f1114f59936b130977",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
