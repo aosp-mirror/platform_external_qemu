@@ -484,10 +484,12 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
 }
 
 static void touchEglImage(EglImage* eglImage) {
+    eglImage->lock.lock();
     if (eglImage->saveableTexture) {
         eglImage->saveableTexture->fillEglImage(eglImage);
         eglImage->saveableTexture.reset();
     }
+    eglImage->lock.unlock();
 }
 
 ImagePtr EglDisplay::getImage(EGLImageKHR img,
@@ -601,6 +603,8 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
 void EglDisplay::onSaveAllImages(android::base::Stream* stream,
                                  const android::snapshot::TextureSaverPtr& textureSaver,
                                  SaveableTexture::saver_t saver) {
+    m_manager[GLES_2_0]->preSave();
+
     // we could consider calling presave for all ShareGroups from here
     // but it would introduce overheads because not all share groups need to be
     // saved
@@ -645,8 +649,12 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
                 m_globalNameSpace.getSaveableTextureFromLoad(globalName);
         return std::make_pair(hndl, std::move(eglImg));
     });
+    m_backgroundLoader.reset(
+        new GLBackgroundLoader(
+            &m_eglImages, m_globalNameSpace.getSaveableTextureMap()));
 }
 
 void EglDisplay::postLoadAllImages(android::base::Stream* stream) {
+    m_backgroundLoader->start();
     m_globalNameSpace.postLoad(stream);
 }

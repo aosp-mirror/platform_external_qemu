@@ -138,11 +138,14 @@ public:
                 SaveableTexture::creator_t creator);
     void postLoad(android::base::Stream* stream);
     const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);
-private:
+    SaveableTextureMap* getSaveableTextureMap() { return &m_textureMap; }
+
     void clearTextureMap();
+
+private:
 
     emugl::Mutex m_lock;
     // m_textureMap is only used when saving / loading a snapshot
     // It is empty in all other situations
-    std::unordered_map<unsigned int, SaveableTexturePtr> m_textureMap;
+    SaveableTextureMap m_textureMap;
 };
