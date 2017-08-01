@@ -58,6 +58,8 @@ private:
     bool mFinished = false;
     bool mHasError = false;
 
+    std::string mFilename;
+
 #if SNAPSHOT_PROFILE > 1
     android::base::System::WallDuration mStartTime =
             android::base::System::get()->getHighResTimeUs();

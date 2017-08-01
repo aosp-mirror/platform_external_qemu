@@ -52,6 +52,7 @@
 ImagePtr getEGLImage(unsigned int imageId);
 GLEScontext* getGLESContext();
 GlLibrary* getGlLibrary();
+bool createAndBindAuxiliaryContext();
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -71,6 +72,7 @@ static const EGLiface s_eglIface = {
     .getGLESContext = getGLESContext,
     .getEGLImage = getEGLImage,
     .eglGetGlLibrary = getGlLibrary,
+    .createAndBindAuxiliaryContext = createAndBindAuxiliaryContext,
 };
 
 static void initGLESx(GLESVersion version) {
@@ -193,6 +195,48 @@ GlLibrary* getGlLibrary() {
     return EglGlobalInfo::getInstance()->getOsEngine()->getGlLibrary();
 }
 
+bool createAndBindAuxiliaryContext() {
+    // create the context
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    eglBindAPI(EGL_OPENGL_ES_API);
+
+    static const GLint configAttribs[] = {
+        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+        EGL_RENDERABLE_TYPE,
+        EGL_OPENGL_ES2_BIT, EGL_NONE };
+
+    EGLConfig config;
+    int numConfigs;
+    if (!eglChooseConfig(dpy, configAttribs, &config, 1, &numConfigs) ||
+        numConfigs == 0) {
+        fprintf(stderr, "%s: could not find gles 2 config!\n", __func__);
+        return false;
+    }
+
+    static const EGLint pbufAttribs[] = {
+        EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+    EGLSurface surf = eglCreatePbufferSurface(dpy, config, pbufAttribs);
+    if (!surf) {
+        fprintf(stderr, "%s: could not create surface\n", __func__);
+        return false;
+    }
+
+    static const GLint gles2Attribs[] = {
+        EGL_CONTEXT_CLIENT_VERSION, 2,
+        EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
+        EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+        EGL_NONE };
+
+    EGLContext context = eglCreateContext(dpy, config, EGL_NO_CONTEXT, gles2Attribs);
+    if (!eglMakeCurrent(dpy, surf, surf, context)) {
+        fprintf(stderr, "%s: eglMakeCurrent failed\n", __func__);
+        return false;
+    }
+
+    return true;
+}
+
 EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
     CURRENT_THREAD();
     EGLint err = tls_thread->getError();
@@ -201,6 +245,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
 }
 
 EGLAPI EGLDisplay EGLAPIENTRY eglGetDisplay(EGLNativeDisplayType display_id) {
+    fprintf(stderr, "%s: call\n", __func__);
     EglDisplay* dpy = NULL;
     EglOS::Display* internalDisplay = NULL;
 
@@ -258,6 +303,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
 
     __translator_getGLESIfaceFunc func  = NULL;
     int renderableType = EGL_OPENGL_ES_BIT;
+
+    g_eglInfo->setEglIface(&s_eglIface);
 
     char error[256];
     // When running on top of another GLES library, we do not load GLES1

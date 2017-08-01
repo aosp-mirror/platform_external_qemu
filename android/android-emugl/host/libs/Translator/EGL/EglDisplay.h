@@ -27,6 +27,7 @@
 #include "EglOsApi.h"
 #include "EglSurface.h"
 #include "EglWindowSurface.h"
+#include "GLcommon/GLBackgroundLoader.h"
 #include "GLcommon/ObjectNameSpace.h"
 #include <memory>
 #include <unordered_map>
@@ -108,6 +109,7 @@ public:
                          const android::snapshot::TextureLoaderPtr& textureLoader,
                          SaveableTexture::creator_t creator);
     void postLoadAllImages(android::base::Stream* stream);
+
 private:
     static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 

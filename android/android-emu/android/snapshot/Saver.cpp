@@ -38,14 +38,15 @@ Saver::Saver(const Snapshot& snapshot)
                           RamSaver::Flags::None);
     }
     {
-        const auto textures = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
-                "wb");
-        if (!textures) {
-            mRamSaver.clear();
-            return;
-        }
-        mTextureSaver = std::make_shared<TextureSaver>(
+        fprintf(stderr, "%s: start texture save\n", __func__);
+       const auto textures = fopen(
+               PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
+               "wb");
+       if (!textures) {
+           mRamSaver.clear();
+           return;
+       }
+         mTextureSaver = std::make_shared<TextureSaver>(
                             StdioStream(textures, StdioStream::kOwner));
     }
 
