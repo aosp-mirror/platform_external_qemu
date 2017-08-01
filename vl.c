@@ -2170,6 +2170,9 @@ static bool main_loop_should_exit(void)
         qemu_system_suspend();
     }
     if (qemu_shutdown_requested()) {
+        fprintf(stderr, "%s: shutdown....\n", __func__);
+        save_vmstate("default_boot2");
+
         qemu_kill_report();
         qapi_event_send_shutdown(&error_abort);
         if (no_shutdown) {

@@ -690,11 +690,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         // we dont want to restore to a state where the
         // framework is shut down by 'adb reboot -p'
         // so skip that step when saving vm on exit
-        if (savevm_on_exit) {
-            queueQuitEvent();
-        } else {
-            runAdbShellPowerDownAndQuit();
-        }
+        queueQuitEvent();
         event->ignore();
     } else {
         // It is only safe to stop the OpenGL ES

@@ -2379,6 +2379,17 @@ int load_vmstate(const char *name)
     return qemu_loadvm(name, &cb);
 }
 
+int save_vmstate(const char *name)
+{
+    fprintf(stderr, "%s: saving to %s\n", __func__, name);
+    QEMUMessageCallback cb = {
+        .opaque = NULL,
+        .out = printf_wrap_cb,
+        .err = report_error_err_cb,
+    };
+    return qemu_savevm(name, &cb);
+}
+
 int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
 {
 #if SNAPSHOT_PROFILE
