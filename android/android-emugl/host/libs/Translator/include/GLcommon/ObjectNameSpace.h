@@ -18,9 +18,11 @@
 
 #include "android/snapshot/common.h"
 #include "emugl/common/mutex.h"
+#include "GLcommon/GLBackgroundLoader.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/ObjectData.h"
 #include "GLcommon/SaveableTexture.h"
+#include "GLcommon/TranslatorIfaces.h"
 
 #include <GLES/gl.h>
 #include <unordered_map>
@@ -138,11 +140,22 @@ public:
                 SaveableTexture::creator_t creator);
     void postLoad(android::base::Stream* stream);
     const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);
-private:
+    SaveableTextureMap* getSaveableTextureMap() { return &m_textureMap; }
+
     void clearTextureMap();
+
+    void setEglIface(const EGLiface* iface) {
+        m_eglIface = iface;
+    }
+
+private:
 
     emugl::Mutex m_lock;
     // m_textureMap is only used when saving / loading a snapshot
     // It is empty in all other situations
-    std::unordered_map<unsigned int, SaveableTexturePtr> m_textureMap;
+    SaveableTextureMap m_textureMap;
+
+    std::unique_ptr<GLBackgroundLoader>     m_backgroundLoader;
+
+    const EGLiface* m_eglIface;
 };

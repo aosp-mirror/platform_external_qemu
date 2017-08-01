@@ -38,15 +38,9 @@ Saver::Saver(const Snapshot& snapshot)
                           RamSaver::Flags::None);
     }
     {
-        const auto textures = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
-                "wb");
-        if (!textures) {
-            mRamSaver.clear();
-            return;
-        }
+        fprintf(stderr, "%s: start texture save\n", __func__);
         mTextureSaver = std::make_shared<TextureSaver>(
-                            StdioStream(textures, StdioStream::kOwner));
+                            PathUtils::join(mSnapshot.dataDir(), "textures.bin"));
     }
 
     mStatus = OperationStatus::NotStarted;

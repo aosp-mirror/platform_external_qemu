@@ -215,6 +215,7 @@ void FrameBuffer::finalize() {
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         bool egl2egl) {
+    fprintf(stderr, "%s: call\n", __func__);
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
@@ -1708,6 +1709,7 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadProcOwnedCollection(stream, &m_procOwnedRenderContext);
 
     if (s_egl.eglPostLoadAllImages) {
+        ScopedBind scopedBind(m_colorBufferHelper);
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
     return true;
