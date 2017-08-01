@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bb7fdc0_975c4f40",
+        "filename": "migration/savevm.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2384,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-01T18:34:36Z",
+      "side": 1,
+      "message": "nit: remove this?",
+      "revId": "266ae3e68865c94963a48771466bd8302a155bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18b32654_14734809",
+        "filename": "vl.c",
+        "patchSetId": 5
+      },
+      "lineNbr": 2174,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-01T18:34:36Z",
+      "side": 1,
+      "message": "nit: why not default_boot1?",
+      "range": {
+        "startLine": 2174,
+        "startChar": 22,
+        "endLine": 2174,
+        "endChar": 35
+      },
+      "revId": "266ae3e68865c94963a48771466bd8302a155bc6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
