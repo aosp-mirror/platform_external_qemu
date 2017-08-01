@@ -22,6 +22,30 @@
       "revId": "d9ab5eecf384b2a83a318e8baacb9102776ea50d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d5d8b1c_8ca0dad0",
+        "filename": "android/android-emu/android/snapshot/Saver.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-01T19:49:07Z",
+      "side": 0,
+      "message": "When we\u0027re reading from and then writing to the same snapshot file, some textures are not loaded until a save operation has begun, and previously, the snapshot file was fopened for \u0027wb\u0027 already, making tose texture read zeros or garbage data.",
+      "parentUuid": "52c036e5_5d98c980",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 19
+      },
+      "revId": "d9ab5eecf384b2a83a318e8baacb9102776ea50d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
