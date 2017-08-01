@@ -160,7 +160,9 @@ OperationStatus Snapshotter::load(const char* name) {
 }
 
 void Snapshotter::prepareForSaving(const char* name) {
+        fprintf(stderr, "%s: for %s\n", __func__, name);
     if (mLoader && mLoader->snapshot().name() == name) {
+        fprintf(stderr, "%s: clear loader\n", __func__);
         mLoader.clear();
     }
     mSaver.emplace(name);

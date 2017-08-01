@@ -676,11 +676,13 @@ void SaveableTexture::restore() {
 }
 
 const NamedObjectPtr& SaveableTexture::getGlobalObject() {
+    android::base::AutoLock lock(mLock);
     touch();
     return m_globalTexObj;
 }
 
 void SaveableTexture::fillEglImage(EglImage* eglImage) {
+    android::base::AutoLock lock(mLock);
     touch();
     eglImage->border = m_border;
     eglImage->format = m_format;

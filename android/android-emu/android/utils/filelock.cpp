@@ -487,3 +487,12 @@ filelock_create( const char*  file )
 
     return lock;
 }
+
+FileLock* filelock_wait_and_create(const char* path) {
+    FileLock* lock = nullptr;
+    while (!(lock = filelock_create(path))) {
+        fprintf(stderr, "%s: wait\n", __func__);
+        System::get()->sleepMs(250);
+    }
+    return lock;
+}
