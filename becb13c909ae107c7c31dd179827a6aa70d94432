@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c24b3597_5a874f89",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-02T20:46:22Z",
+      "side": 1,
+      "message": "please use a plain \u0027extern \"C\"\u0027 here",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 20
+      },
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0743fae8_6b5ac8a5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-02T20:46:22Z",
+      "side": 1,
+      "message": "true converts to 1 and false to 0 by the standard",
+      "range": {
+        "startLine": 70,
+        "startChar": 40,
+        "endLine": 70,
+        "endChar": 49
+      },
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a789b5e2_ad8312a9",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-02T20:46:22Z",
+      "side": 1,
+      "message": "nit: tr()\nserious: can we run some adb commands to do it for the user?",
+      "range": {
+        "startLine": 183,
+        "startChar": 28,
+        "endLine": 183,
+        "endChar": 29
+      },
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e02ba5c6_46bb2a05",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-02T20:46:22Z",
+      "side": 1,
+      "message": "nit: please initialize it right here",
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
