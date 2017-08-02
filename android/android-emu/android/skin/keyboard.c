@@ -11,6 +11,7 @@
 */
 #include "android/skin/keyboard.h"
 
+#include "android/globals.h"
 #include "android/skin/charmap.h"
 #include "android/skin/keycode.h"
 #include "android/skin/keycode-buffer.h"
@@ -117,6 +118,58 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     return -1;
 }
 
+/* If it's running chrome os images, remapping key code here so
+ * the emulator toolbar also does the "expected" thing for chrome os.
+ * Also fix some incorrected key codes.
+ */
+static int map_cros_key(int* code) {
+    /* Android emulator uses Qt, and it maps qt key to linux key and
+     * send it here.
+     * Actually underlying qemu is expecting something else and it calls
+     * it as "number". For most keys, "number" is as same as linux key,
+     * but it's different for some keys. Since Android emulator doesn't
+     * really use those special keys, it doesn't care about this bug. As
+     * a quick fix, we remap them here. Also remap some special cros keys
+     * here.
+     * This mapping can be generated from following 2 steps:
+     * linux_to_qcode in ui/input-linux.c maps linux key to qcode
+     * qcode_to_number in ui/input-keymap.c maps qcode to "number"
+     */
+    if ((*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) ||
+        *code ==  LINUX_KEY_ESC ||
+        *code ==  LINUX_KEY_TAB) return 0;
+    switch (*code) {
+    case LINUX_KEY_UP:
+        *code = 0xc8;
+        return 0;
+    case LINUX_KEY_DOWN:
+        *code = 0xd0;
+        return 0;
+    case LINUX_KEY_LEFT:
+        *code = 0xcb;
+        return 0;
+    case LINUX_KEY_RIGHT:
+        *code = 0xcd;
+        return 0;
+    case LINUX_KEY_VOLUMEUP:
+        *code = LINUX_KEY_F10;
+        return 0;
+    case LINUX_KEY_VOLUMEDOWN:
+        *code = LINUX_KEY_F9;
+        return 0;
+    case LINUX_KEY_BACK:
+        *code = LINUX_KEY_F1;
+        return 0;
+    case LINUX_KEY_HOME:
+        *code = LINUX_KEY_LEFTMETA;
+        return 0;
+    case KEY_APPSWITCH:
+        *code = LINUX_KEY_F5;
+        return 0;
+    }
+    return -1;
+}
+
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
@@ -138,6 +191,14 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
+
+        if (android_hw->hw_arc) {
+            if (map_cros_key(&keycode) == 0) {
+                skin_keyboard_add_key_event(kb, keycode, down);
+                skin_keyboard_flush(kb);
+                return;
+            }
+        }
 
         /* first, try the keyboard-mode-independent keys */
         int code = skin_keyboard_key_to_code(kb, keycode, mod, down);
