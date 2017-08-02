@@ -500,6 +500,7 @@ private:
     // this GLX implementation.
     void queryCoreProfileSupport() {
         mCoreProfileSupported = false;
+        ErrorHandler handler(mDisplay);
 
         GlxLibrary* lib = sGlxLibrary.ptr();
         mCreateContextAttribs =
