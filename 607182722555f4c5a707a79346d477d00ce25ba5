@@ -1,0 +1,199 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "66ed7e4b_ace1ae4b",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglDisplay.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 487,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "you should not need the lock here",
+      "range": {
+        "startLine": 487,
+        "startChar": 0,
+        "endLine": 487,
+        "endChar": 26
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a837161_0151457e",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "nit: remove?",
+      "range": {
+        "startLine": 204,
+        "startChar": 0,
+        "endLine": 204,
+        "endChar": 44
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b62ac7be_e6d95dd1",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "Please move this file to EGL to avoid circular dependency between EGL and GLcommon",
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50c1f59a_862d92fd",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "you don\u0027t need the Egl Image handles. Just need to call touch() for every saveable texture in m_textureMap will do the job. touch() is designed for this scenario and is thread safe.",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 5
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b3e8487_01b5ed51",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 679,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "touch() already has a lock",
+      "range": {
+        "startLine": 679,
+        "startChar": 4,
+        "endLine": 679,
+        "endChar": 40
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca3acbd4_22bc67ff",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 685,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "touch() already has a lock",
+      "range": {
+        "startLine": 685,
+        "startChar": 4,
+        "endLine": 685,
+        "endChar": 40
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "833a443d_7e483910",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/SaveableTexture.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "LazySnapshotObj already has a lock. Do you really need an additional one?",
+      "range": {
+        "startLine": 106,
+        "startChar": 4,
+        "endLine": 106,
+        "endChar": 30
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6f2bec2_486ee668",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TranslatorIfaces.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "do you really need this lock?",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 29
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34b4cd82_3d1a24f9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-02T19:52:06Z",
+      "side": 1,
+      "message": "nit: remove this?",
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
