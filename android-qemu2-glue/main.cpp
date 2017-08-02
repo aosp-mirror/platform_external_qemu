@@ -996,11 +996,11 @@ extern "C" int main(int argc, char** argv) {
         args.add("-drive");
         char* path_qemu_sys = avdInfo_getSystemImagePath(avd);
         if (path_qemu_sys) {
-            args.addFormat("index=0,id=system,file=%s" "system-qemu.img.qcow2",
+            args.addFormat("index=0,id=system,file=%s" PATH_SEP "system-qemu.img.qcow2",
                     avdInfo_getContentPath(avd));
             free(path_qemu_sys);
         } else {
-            args.addFormat("index=0,id=system,file=%s" "system.img.qcow2",
+            args.addFormat("index=0,id=system,file=%s" PATH_SEP "system.img.qcow2",
                     avdInfo_getContentPath(avd));
         }
     }
