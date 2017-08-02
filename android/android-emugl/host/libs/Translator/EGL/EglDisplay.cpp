@@ -483,8 +483,10 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
     return reinterpret_cast<EGLImageKHR>(m_nextEglImageId);
 }
 
-static void touchEglImage(EglImage* eglImage) {
+static void touchEglImage(EglImage* eglImage,
+        SaveableTexture::restorer_t restorer) {
     if (eglImage->saveableTexture) {
+        restorer(eglImage->saveableTexture.get());
         eglImage->saveableTexture->fillEglImage(eglImage);
         eglImage->saveableTexture.reset();
     }
@@ -499,7 +501,7 @@ ImagePtr EglDisplay::getImage(EGLImageKHR img,
     if (i == m_eglImages.end()) {
         return ImagePtr();
     }
-    touchEglImage(i->second.get());
+    touchEglImage(i->second.get(), restorer);
     return i->second;
 }
 
@@ -600,7 +602,8 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
 
 void EglDisplay::onSaveAllImages(android::base::Stream* stream,
                                  const android::snapshot::TextureSaverPtr& textureSaver,
-                                 SaveableTexture::saver_t saver) {
+                                 SaveableTexture::saver_t saver,
+                                 SaveableTexture::restorer_t restorer) {
     // we could consider calling presave for all ShareGroups from here
     // but it would introduce overheads because not all share groups need to be
     // saved
@@ -610,7 +613,7 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
         // yet restore them to GPU, we do the restoration here.
         // TODO: skip restoration and write saveableTexture directly to the
         // new snapshot for better performance
-        touchEglImage(image.second.get());
+        touchEglImage(image.second.get(), restorer);
         getGlobalNameSpace()->preSaveAddEglImage(image.second.get());
     }
     m_globalNameSpace.onSave(stream, textureSaver, saver);

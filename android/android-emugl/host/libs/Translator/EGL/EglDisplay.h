@@ -103,7 +103,8 @@ public:
 
     void onSaveAllImages(android::base::Stream* stream,
                          const android::snapshot::TextureSaverPtr& textureSaver,
-                         SaveableTexture::saver_t saver);
+                         SaveableTexture::saver_t saver,
+                         SaveableTexture::restorer_t restorer);
     void onLoadAllImages(android::base::Stream* stream,
                          const android::snapshot::TextureLoaderPtr& textureLoader,
                          SaveableTexture::creator_t creator);
