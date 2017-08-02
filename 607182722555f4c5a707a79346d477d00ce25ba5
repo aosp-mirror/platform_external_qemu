@@ -88,6 +88,30 @@
     },
     {
       "key": {
+        "uuid": "d893f402_fa28e166",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-02T19:55:22Z",
+      "side": 1,
+      "message": "I see, yeah that would work and make it a lot cleaner, thanks! The extra locks were for protecting things outside of touch(), but yeah it looks like we don\u0027t really need to protect anything outside of that.",
+      "parentUuid": "50c1f59a_862d92fd",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 71,
+        "endChar": 5
+      },
+      "revId": "607182722555f4c5a707a79346d477d00ce25ba5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9b3e8487_01b5ed51",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/SaveableTexture.cpp",
         "patchSetId": 9
