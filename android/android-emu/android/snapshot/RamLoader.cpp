@@ -396,7 +396,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     auto buf = allocateBuffer ? new uint8_t[size]
                               : compressed ? compressedBuf : preallocatedBuffer;
     auto read = HANDLE_EINTR(
-            base::pread(mStreamFd, buf, size, off64_t(page.filePos)));
+            base::pread(mStreamFd, buf, size, int64_t(page.filePos)));
     if (read != int64_t(size)) {
         derror("(%d) Reading page %p from disk returned less data: %d of %d at "
                "%lld",
