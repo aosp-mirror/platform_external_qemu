@@ -15,7 +15,10 @@
 #include "android/base/files/StdioStream.h"
 #include "android/utils/path.h"
 
+#include "android/snapshot/proto/snapshot.pb.h"
 #include "android/snapshot/TextureSaver.h"
+
+#include <fstream>
 
 using android::base::PathUtils;
 using android::base::StdioStream;
@@ -71,6 +74,17 @@ void Saver::complete(bool succeeded) {
     mStatus = OperationStatus::Error;
     if (!succeeded) {
         return;
+    }
+    {
+        emulator_snapshot::SnapshotProto snapshotProto;
+        snapshotProto.set_version(CURRENT_SNAPSHOT_VERSION);
+        std::ofstream snapshotProtoFile(
+                PathUtils::join(mSnapshot.dataDir(), "snapshot.pb"),
+                std::ios::binary);
+        if (!snapshotProtoFile.is_open() ||
+                !snapshotProto.SerializeToOstream(&snapshotProtoFile)) {
+            return;
+        }
     }
     if (!mRamSaver || mRamSaver->hasError()) {
         return;

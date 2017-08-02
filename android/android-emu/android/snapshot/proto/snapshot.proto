@@ -1,0 +1,7 @@
+syntax = "proto2";
+
+package emulator_snapshot;
+
+message SnapshotProto {
+    optional uint32 version = 1;
+}

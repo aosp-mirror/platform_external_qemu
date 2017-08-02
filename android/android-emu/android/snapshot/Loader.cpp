@@ -15,7 +15,10 @@
 #include "android/base/files/StdioStream.h"
 #include "android/utils/path.h"
 
+#include "android/snapshot/proto/snapshot.pb.h"
 #include "android/snapshot/TextureLoader.h"
+
+#include <fstream>
 
 using android::base::PathUtils;
 using android::base::StdioStream;
@@ -32,7 +35,21 @@ Loader::Loader(const Snapshot& snapshot)
     if (!mSnapshot.load()) {
         return;
     }
-
+    {
+        std::ifstream snapshotProtoFile(
+                PathUtils::join(mSnapshot.dataDir(), "snapshot.pb"),
+                std::ios::binary);
+        if (!snapshotProtoFile.is_open()) {
+            return;
+        }
+        emulator_snapshot::SnapshotProto snapshotProto;
+        snapshotProto.ParseFromIstream(&snapshotProtoFile);
+        if (!snapshotProto.has_version()
+            || snapshotProto.version() > CURRENT_SNAPSHOT_VERSION) {
+            fprintf(stderr, "Unsupported snapshot version!\n");
+            return;
+        }
+    }
     {
         const auto ram = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
