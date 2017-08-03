@@ -28,6 +28,8 @@ class TextureLoader {
     DISALLOW_COPY_AND_ASSIGN(TextureLoader);
 
 public:
+    using Finalizer = std::function<void()>;
+
     TextureLoader(android::base::StdioStream&& stream);
 
     using loader_t = std::function<void(android::base::Stream*)>;
@@ -36,6 +38,15 @@ public:
     void loadTexture(uint32_t texId, const loader_t& loader);
 
     bool hasError() const { return mHasError; }
+
+    void registerFinalizer(Finalizer func) {
+        mFinalizer = func;
+    }
+
+    void finalize() {
+        fprintf(stderr, "%s: TextureLoader finalize\n", __func__);
+        if (mFinalizer) mFinalizer();
+    }
 
 private:
     bool readIndex();
@@ -48,6 +59,7 @@ private:
 #if SNAPSHOT_PROFILE > 1
     android::base::System::WallDuration mStartTime;
 #endif
+    Finalizer mFinalizer = nullptr;
 };
 
 }  // namespace snapshot
