@@ -14,8 +14,6 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/utils/path.h"
-
-#include "android/snapshot/proto/snapshot.pb.h"
 #include "android/snapshot/TextureSaver.h"
 
 #include <fstream>
@@ -57,7 +55,7 @@ Saver::Saver(const Snapshot& snapshot)
 
 Saver::~Saver() {
     const bool deleteDirectory = mStatus != OperationStatus::Ok &&
-                                 (mRamSaver.hasValue() || mTextureSaver.get());
+                                 (mRamSaver || mTextureSaver);
     mRamSaver.clear();
     mTextureSaver.reset();
     if (deleteDirectory) {
@@ -74,17 +72,6 @@ void Saver::complete(bool succeeded) {
     mStatus = OperationStatus::Error;
     if (!succeeded) {
         return;
-    }
-    {
-        emulator_snapshot::SnapshotProto snapshotProto;
-        snapshotProto.set_version(CURRENT_SNAPSHOT_VERSION);
-        std::ofstream snapshotProtoFile(
-                PathUtils::join(mSnapshot.dataDir(), "snapshot.pb"),
-                std::ios::binary);
-        if (!snapshotProtoFile.is_open() ||
-                !snapshotProto.SerializeToOstream(&snapshotProtoFile)) {
-            return;
-        }
     }
     if (!mRamSaver || mRamSaver->hasError()) {
         return;
