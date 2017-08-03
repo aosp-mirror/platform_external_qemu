@@ -155,6 +155,7 @@ int main(int argc, char **argv)
 #include "android/skin/winsys.h"
 #include "android/snapshot.h"
 #include "android/snaphost-android.h"
+#include "android/snapshot/interface.h"
 #include "android/telephony/modem_driver.h"
 #include "android/update-check/update_check.h"
 #include "android/ui-emu-agent.h"
@@ -2170,6 +2171,13 @@ static bool main_loop_should_exit(void)
         qemu_system_suspend();
     }
     if (qemu_shutdown_requested()) {
+
+#ifdef CONFIG_ANDROID
+        if (feature_is_enabled(kFeature_FastSnapshotV1)) {
+            androidSnapshot_save("default_boot");
+        }
+#endif
+
         qemu_kill_report();
         qapi_event_send_shutdown(&error_abort);
         if (no_shutdown) {
