@@ -190,7 +190,7 @@ public:
     GLEScontext();
     GLEScontext(GlobalNameSpace* globalNameSpace, android::base::Stream* stream,
             GlLibrary* glLib);
-    virtual void init(GlLibrary* glLib);
+    virtual void init(EGLiface* eglIface);
     GLenum getGLerror();
     void setGLerror(GLenum err);
     void setShareGroup(ShareGroupPtr grp){m_shareGroup = grp;};
@@ -342,6 +342,8 @@ public:
     }
 
     static GLDispatch& dispatcher(){return s_glDispatch;};
+    static EGLiface* eglIface();
+    static void initEglIface(EGLiface* iface);
 
     static int getMaxLights(){return s_glSupport.maxLights;}
     static int getMaxClipPlanes(){return s_glSupport.maxClipPlane;}
