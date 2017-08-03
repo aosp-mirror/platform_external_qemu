@@ -852,7 +852,7 @@ public:
         return res;
     }
 
-    virtual bool isRemoteSession(std::string* sessionType) const {
+    bool isRemoteSession(std::string* sessionType) const final {
         if (envTest("NX_TEMP")) {
             if (sessionType) {
                 *sessionType = "NX";
@@ -864,6 +864,16 @@ public:
                 *sessionType = "Chrome Remote Desktop";
             }
             return true;
+        }
+        if (!envGet("SSH_CONNECTION").empty() && !envGet("SSH_CLIENT").empty()) {
+            // This can be a remote X11 session, let's check if DISPLAY is set
+            // to something uncommon.
+            if (envGet("DISPLAY").size() > 3) {
+                if (sessionType) {
+                    *sessionType = "X11 Forwarding";
+                }
+                return true;
+            }
         }
 #ifdef _WIN32
         if (GetSystemMetrics(SM_REMOTESESSION)) {
