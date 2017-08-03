@@ -132,6 +132,18 @@ public:
     // Get the current process ID
     virtual Pid getCurrentProcessId() const = 0;
 
+    // Wait for some process with ID |pid| to exit,
+    // with a maximum timeout |timeoutMs| in milliseconds.
+    // Returns true if we succesfully found the process and waited it out,
+    // or if there was no such process in the first place.
+    // Returns false if something went wrong.
+    enum class WaitExitResult {
+        Exited = 0,
+        Timeout = 1,
+        Error = 2,
+    };
+    virtual WaitExitResult waitForProcessExit(int pid, Duration timeoutMs) const = 0;
+
     // Get the number of hardware CPU cores available. Hyperthreading cores are
     // counted as separate here.
     virtual int getCpuCoreCount() const = 0;
