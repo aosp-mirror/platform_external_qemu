@@ -686,6 +686,55 @@ public:
 #endif
     }
 
+    bool waitForProcessExit(int pid, uint64_t timeoutMs) const override {
+#ifdef __APPLE__
+        struct kevent monitor;
+        struct kevent result;
+        int kq, kevent_ret;
+        struct timespec timeout;
+
+        timeout.tv_sec = timeoutMs / 1000;
+        timeout.tv_nsec = (timeoutMs % 1000) * 1000000;
+
+        kq = kqueue();
+
+        if (kq == -1) {
+            return false;
+        }
+
+        EV_SET(&monitor, pid, EVFILT_PROC, EV_ADD,
+               NOTE_EXIT , 0, nullptr);
+        memset(&result, 0, sizeof(struct kevent));
+
+        while (true) {
+            kevent_ret = kevent(kq, &monitor, 1 /* events to monitor */,
+                                    &result, 1 /* resulting events */,
+                                    &timeout);
+
+            if (!kevent_ret) { // timed out
+                return false;
+            }
+
+            if (result.fflags & NOTE_EXIT) {
+                return true;
+            }
+        }
+#elif defined(_WIN32)
+        HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, pid);
+        DWORD ret = WaitForSingleObject(process, timeoutMs);
+        if (!ret) {
+            fprintf(stderr, "%s: successfully waited.\n", __func__);
+        } else {
+            fprintf(stderr, "%s: Funny code 0x%lx\n", __func__, (unsigned long)ret);
+        }
+        CloseHandle(process);
+        return true;
+#else
+        return true;
+#endif
+    }
+
+
     int getCpuCoreCount() const override {
 #ifdef _WIN32
         SYSTEM_INFO si = {};
