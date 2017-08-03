@@ -58,6 +58,7 @@ struct EglImage
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
 typedef std::unordered_map<unsigned int, ImagePtr> ImagesHndlMap;
+typedef std::unordered_map<unsigned int, SaveableTexturePtr> SaveableTextureMap;
 
 class GLEScontext;
 class SaveableTexture;
