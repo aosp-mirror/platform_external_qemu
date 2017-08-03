@@ -37,6 +37,12 @@ ANDROID_BEGIN_HEADER
  */
 #define CORE_HARDWARE_INI "hardware-qemu.ini"
 
+/* The name of the snapshot lock file that is used to serialize
+ * snapshot operations on the same AVD across multiple emulator
+ * instances.
+ */
+#define SNAPSHOT_LOCK "snapshot.lock"
+
 /* The file where the crash reporter holds a copy of
  * the hardware properties. This file is in a temporary
  * directory set up by the crash reporter.
