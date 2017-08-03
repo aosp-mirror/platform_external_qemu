@@ -2,6 +2,32 @@ syntax = "proto2";
 
 package emulator_snapshot;
 
-message SnapshotProto {
-    optional uint32 version = 1;
+message Image {
+    enum Type {
+        IMAGE_TYPE_UNKNOWN = 0;
+        IMAGE_TYPE_KERNEL = 1;
+        IMAGE_TYPE_KERNEL_RANCHU = 2;
+        IMAGE_TYPE_SYSTEM = 3;
+        IMAGE_TYPE_SYSTEM_COPY = 4;
+        IMAGE_TYPE_DATA = 5;
+        IMAGE_TYPE_DATA_COPY = 6;
+        IMAGE_TYPE_RAMDISK = 7;
+        IMAGE_TYPE_SDCARD = 8;
+        IMAGE_TYPE_CACHE = 9;
+        IMAGE_TYPE_VENDOR = 10;
+        IMAGE_TYPE_ENCRYPTION_KEY = 11;
+    }
+
+    optional Type type = 1;
+    optional string path = 2;
+    optional bool present = 3;
+    optional int64 size = 4;
+    optional int64 modification_time = 5;
+}
+
+message Snapshot {
+    optional int32 version = 1;
+    optional int64 creation_time = 2;
+
+    repeated Image images = 3;
 }

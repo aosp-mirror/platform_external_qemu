@@ -71,5 +71,11 @@ bool startsWith(StringView string, StringView prefix) {
             memcmp(string.data(), prefix.data(), prefix.size()) == 0;
 }
 
+bool endsWith(StringView string, StringView suffix) {
+    return string.size() >= suffix.size() &&
+            memcmp(string.data() + string.size() - suffix.size(),
+                   suffix.data(), suffix.size()) == 0;
+}
+
 }  // namespace base
 }  // namespace android

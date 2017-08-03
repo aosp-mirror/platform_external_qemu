@@ -161,6 +161,29 @@ TEST(StringUtils, startsWith) {
     }
 }
 
+TEST(StringUtils, endsWith) {
+    struct {
+        const char* string;
+        const char* suffix;
+        bool res;
+    } test_data[] = {
+            {"", "", true},
+            {"123", "", true},
+            {"blah", "ah", true},
+            {" asD1f asdf sda ", " sda ", true},
+            {"blah", "bla", false},
+            {"123", "gasd", false},
+            {"123", "0123", false},
+            {"", "1", false},
+    };
+    size_t TEST_DATA_COUNT = sizeof(test_data) / sizeof(test_data[0]);
+
+    for (size_t i = 0; i < TEST_DATA_COUNT; i++) {
+        EXPECT_EQ(test_data[i].res, endsWith(test_data[i].string,
+                                             test_data[i].suffix));
+    }
+}
+
 TEST(StringUtils, split) {
     std::vector<StringView> results;
 
