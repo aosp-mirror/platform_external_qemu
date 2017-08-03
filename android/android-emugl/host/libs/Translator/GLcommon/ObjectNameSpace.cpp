@@ -311,6 +311,8 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
                 return std::make_pair(globalName,
                                       SaveableTexturePtr(saveableTexture));
             });
+    m_backgroundLoader.reset(new GLBackgroundLoader(*m_eglIface, *m_glesIface, m_textureMap));
+    textureLoader->registerFinalizer([this]() { m_backgroundLoader.reset(); });
 }
 
 void GlobalNameSpace::clearTextureMap() {
@@ -318,7 +320,7 @@ void GlobalNameSpace::clearTextureMap() {
 }
 
 void GlobalNameSpace::postLoad(android::base::Stream* stream) {
-    clearTextureMap();
+    m_backgroundLoader->start();
 }
 
 const SaveableTexturePtr& GlobalNameSpace::getSaveableTextureFromLoad(
@@ -326,4 +328,3 @@ const SaveableTexturePtr& GlobalNameSpace::getSaveableTextureFromLoad(
     assert(m_textureMap.count(oldGlobalName));
     return m_textureMap[oldGlobalName];
 }
-
