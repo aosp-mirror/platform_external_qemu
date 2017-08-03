@@ -22,11 +22,11 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
-void GLEScmContext::init(GlLibrary* glLib) {
+void GLEScmContext::init(EGLiface* eglIface) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_1_1, glLib);
-        GLEScontext::init(glLib);
+        s_glDispatch.dispatchFuncs(GLES_1_1, eglIface->eglGetGlLibrary());
+        GLEScontext::init(eglIface);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
         m_currVaoState[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];

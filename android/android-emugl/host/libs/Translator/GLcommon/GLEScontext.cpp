@@ -327,7 +327,22 @@ bool GLEScontext::vertexAttributesBufferBacked() {
     return true;
 }
 
-void GLEScontext::init(GlLibrary* glLib) {
+static EGLiface*      s_eglIface = nullptr;
+
+// static
+EGLiface* GLEScontext::eglIface() {
+    return s_eglIface;
+}
+
+// static
+void GLEScontext::initEglIface(EGLiface* iface) {
+    if (!s_eglIface) s_eglIface = iface;
+}
+
+void GLEScontext::init(EGLiface* eglIface) {
+    initEglIface(eglIface);
+
+    GlLibrary* glLib = s_eglIface->eglGetGlLibrary();
 
     if (!s_glExtensions) {
         initCapsLocked(reinterpret_cast<const GLubyte*>(
