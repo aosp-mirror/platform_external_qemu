@@ -31,6 +31,7 @@ using android::snapshot::TextureSaver;
 using android::snapshot::TextureLoader;
 using android::snapshot::TextureSaverPtr;
 using android::snapshot::TextureLoaderPtr;
+using android::snapshot::TextureLoaderWPtr;
 
 NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
         android::base::Stream* stream, ObjectData::loadObject_t loadObject) :
@@ -281,8 +282,9 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
 }
 
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
-                             const TextureLoaderPtr& textureLoader,
+                             const TextureLoaderWPtr& textureLoaderWPtr,
                              SaveableTexture::creator_t creator) {
+    const TextureLoaderPtr textureLoader = textureLoaderWPtr.lock();
     assert(m_textureMap.size() == 0);
     if (!textureLoader->start()) {
         fprintf(stderr,
@@ -291,7 +293,7 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
     }
     loadCollection(
             stream, &m_textureMap,
-            [this, creator, &textureLoader](android::base::Stream* stream) {
+            [this, creator, textureLoaderWPtr](android::base::Stream* stream) {
                 unsigned int globalName = stream->getBe32();
                 // A lot of function wrapping happens here.
                 // When touched, saveableTexture triggers
@@ -299,8 +301,11 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
                 // and the mutex, and triggers saveableTexture->loadFromStream
                 // for the real loading.
                 SaveableTexture* saveableTexture = creator(
-                        this, [globalName, textureLoader](
+                        this, [globalName, textureLoaderWPtr](
                                       SaveableTexture* saveableTexture) {
+                            TextureLoaderPtr textureLoader =
+                                textureLoaderWPtr.lock();
+                            if (!textureLoader) return;
                             textureLoader->loadTexture(
                                     globalName,
                                     [saveableTexture](
@@ -311,6 +316,11 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
                 return std::make_pair(globalName,
                                       SaveableTexturePtr(saveableTexture));
             });
+
+    m_backgroundLoader =
+        std::make_shared<GLBackgroundLoader>(
+            textureLoaderWPtr, *m_eglIface, *m_glesIface, m_textureMap);
+    textureLoader->acquireLoaderThread(m_backgroundLoader);
 }
 
 void GlobalNameSpace::clearTextureMap() {
@@ -318,7 +328,8 @@ void GlobalNameSpace::clearTextureMap() {
 }
 
 void GlobalNameSpace::postLoad(android::base::Stream* stream) {
-    clearTextureMap();
+    m_backgroundLoader->start();
+    m_backgroundLoader.reset(); // leave it to TextureLoader
 }
 
 const SaveableTexturePtr& GlobalNameSpace::getSaveableTextureFromLoad(
@@ -326,4 +337,3 @@ const SaveableTexturePtr& GlobalNameSpace::getSaveableTextureFromLoad(
     assert(m_textureMap.count(oldGlobalName));
     return m_textureMap[oldGlobalName];
 }
-
