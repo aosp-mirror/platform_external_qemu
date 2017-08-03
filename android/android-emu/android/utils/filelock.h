@@ -49,4 +49,10 @@ typedef struct FileLock  FileLock;
 extern FileLock*  filelock_create ( const char*  path );
 extern void       filelock_release( FileLock*  lock );
 
+// filelock_create_timeout:
+// Like filelock_create, but additionally waits |timeoutMs| for the
+// locking process to exit. If the timeout passes without acquistion,
+// returns null.
+extern FileLock*  filelock_create_timeout ( const char*  path, int timeoutMs );
+
 ANDROID_END_HEADER
