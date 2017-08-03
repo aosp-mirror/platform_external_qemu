@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a39db602_7ff86531",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 194,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T21:19:50Z",
+      "side": 1,
+      "message": "why 200 as minimum? it was there because it\u0027s a default, so it had to be good enough - but now, when the timeout is selectable we could allow it to be as little as 1",
+      "range": {
+        "startLine": 194,
+        "startChar": 17,
+        "endLine": 194,
+        "endChar": 20
+      },
+      "revId": "35faa93ddea290bf4b3f2bb2e1af8d94d6385f79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "175045a7_097d25ae",
+        "filename": "android/android-emu/android/utils/filelock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T21:19:50Z",
+      "side": 1,
+      "message": "without a comment these two parameters aren\u0027t self-explaining.\nI\u0027d expect filelock to call some system wait until file becomes unlocked, so there\u0027s no tries. so |timeout| is ok. but |tries| suggest there\u0027s some loop - in that case |timeout| could be either for a single try or for the whole operation.\n\nBtw, when you\u0027ve detected the pid of the process that\u0027s holding a lock, in Windows you have an API to wait for that process without a sleep loop:\n\n    HANDLE process \u003d OpenProcess(SYNCHRONIZE, FALSE, pid);\n    DWORD ret \u003d WaitForSingleObject(process, \u003ctimeout_ms\u003e);\n    CloseHandle(process);\n\nMac has something similar, but more complicated via kqueue with EVFILT_PROC+NOTE_EXIT. And on Linux there\u0027s no simple API, it\u0027s either polling or http://bewareofgeek.livejournal.com/2945.html",
+      "range": {
+        "startLine": 50,
+        "startChar": 58,
+        "endLine": 50,
+        "endChar": 82
+      },
+      "revId": "35faa93ddea290bf4b3f2bb2e1af8d94d6385f79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
