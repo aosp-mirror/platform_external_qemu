@@ -19,6 +19,7 @@
 #include "android/base/containers/SmallVector.h"
 #include "GLcommon/ShareGroup.h"
 
+#include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl3.h>
@@ -97,6 +98,22 @@ struct EGLiface {
     // at runtime. This is implemented in the EGL library because on Windows
     // all functions returned by wglGetProcAddress() are context-dependent!
     GlLibrary* (*eglGetGlLibrary)();
+
+    // Context creation functions for auxiliary functions (e.g.,
+    // background loading). Instead of going through the standard
+    // eglChooseConfig/eglCreatePbufferSurface/eglCreateContext/eglMakeCurrent,
+    // these functions set up a minimal context with pre-set configuration
+    // that allows one to easily run GL calls in separate threads.
+    // createAndBindAuxiliaryContext(): Creates a minimal context (1x1 pbuffer, with first config)
+    // and makes it the current context and writes the resulting context and surface to
+    // |context_out| and |surface_out|. Returns false if any step of context creation failed,
+    // true otherwise.
+    bool (*createAndBindAuxiliaryContext)(EGLContext* context_out, EGLSurface* surface_out);
+    // unbindAndDestroyAuxiliaryContext(): Cleans up the resulting |context| and |surface| from a
+    // createAndBindAuxiliaryContext() call; binds the null context and surface, then
+    // destroys the surface and context. Returns false if any step of cleanup failed,
+    // true otherwise.
+    bool (*unbindAndDestroyAuxiliaryContext)(EGLContext context, EGLSurface surface);
 };
 
 typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
