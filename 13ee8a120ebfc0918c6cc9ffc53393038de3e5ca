@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "43137809_47c1a8ff",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T21:40:16Z",
+      "side": 1,
+      "message": "there has to be a way to break out of this loop - e.g. if we\u0027re exiting or the user decided to load a different snapshot.",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 5
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7023c5ef_1bcba2bf",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T21:40:16Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 43
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6a8e5da5_c105ea14",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T21:40:16Z",
+      "side": 1,
+      "message": "make it a reference if we require it to always be set?",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 47
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
