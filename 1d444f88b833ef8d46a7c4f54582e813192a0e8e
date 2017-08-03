@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb1763d7_b49dc2a8",
+        "filename": "include/sysemu/sysemu.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T20:28:23Z",
+      "side": 1,
+      "message": "why do you need it instead of a generic androidSnapshot_save()?",
+      "range": {
+        "startLine": 113,
+        "startChar": 4,
+        "endLine": 113,
+        "endChar": 16
+      },
+      "revId": "1d444f88b833ef8d46a7c4f54582e813192a0e8e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
