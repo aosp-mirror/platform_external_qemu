@@ -83,6 +83,14 @@ public:
         m_gles_ifaces[ver] = iface;
     };
 
+    void setEglIface(const EGLiface* iface) {
+        m_eglIface = iface;
+    }
+
+    const EGLiface* getEglIface() {
+        return m_eglIface;
+    }
+
     // Return the current GLES interface pointer for a given GLES version.
     // |ver| is a version identifier, e.g. GLES_1_1 or GLES_2_0.
     const GLESiface* getIface(GLESVersion ver) const {
@@ -120,6 +128,7 @@ private:
     EglOS::Engine*                 m_engine = nullptr;
     EglOS::Display*                m_display = nullptr;
     const GLESiface*               m_gles_ifaces[MAX_GLES_VERSION] = {};
+    const EGLiface*                m_eglIface = nullptr;
     bool                           m_gles_extFuncs_inited[MAX_GLES_VERSION] = {};
     mutable emugl::Mutex           m_lock;
 };

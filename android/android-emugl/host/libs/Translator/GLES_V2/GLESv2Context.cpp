@@ -51,11 +51,11 @@ static const char* sPickVersionStringPart(int maj, int min) {
     return nullptr;
 }
 
-void GLESv2Context::init(GlLibrary* glLib) {
+void GLESv2Context::init(EGLiface* eglIface) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_2_0, glLib);
-        GLEScontext::init(glLib);
+        s_glDispatch.dispatchFuncs(GLES_2_0, eglIface->eglGetGlLibrary());
+        GLEScontext::init(eglIface);
         addVertexArrayObject(0);
         setVertexArrayObject(0);
         setAttribute0value(0.0, 0.0, 0.0, 1.0);
