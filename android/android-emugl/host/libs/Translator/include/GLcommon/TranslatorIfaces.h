@@ -19,6 +19,7 @@
 #include "android/base/containers/SmallVector.h"
 #include "GLcommon/ShareGroup.h"
 
+#include <EGL/egl.h>
 #include <GLES/gl.h>
 #include <GLES2/gl2.h>
 #include <GLES3/gl3.h>
@@ -97,6 +98,11 @@ struct EGLiface {
     // at runtime. This is implemented in the EGL library because on Windows
     // all functions returned by wglGetProcAddress() are context-dependent!
     GlLibrary* (*eglGetGlLibrary)();
+
+    // Context creation functions for auxiliary functions (e.g.,
+    // background loading)
+    bool (*createAndBindAuxiliaryContext)(EGLContext* context_out, EGLSurface* surface_out);
+    bool (*unbindAndDestroyAuxiliaryContext)(EGLContext context, EGLSurface surface);
 };
 
 typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);
