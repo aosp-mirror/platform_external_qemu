@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2406b575_d414a088",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T21:50:47Z",
+      "side": 1,
+      "message": "what if snapshot operation starts exactly after the filelock_release() but before the locking of hw.ini?",
+      "range": {
+        "startLine": 623,
+        "startChar": 0,
+        "endLine": 639,
+        "endChar": 5
+      },
+      "revId": "af1e7a8fe27ef4355a07e387b5c9546bfb66eea3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
