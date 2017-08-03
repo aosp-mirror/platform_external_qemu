@@ -77,7 +77,10 @@ void Loader::prepare() {
     // TODO: run asynchronous index loading here.
 }
 
-Loader::~Loader() = default;
+Loader::~Loader() {
+    // Wait for textureLoader to finish loading textures
+    if (mTextureLoader) mTextureLoader->finalize();
+}
 
 void Loader::complete(bool succeeded) {
     mStatus = OperationStatus::Error;
