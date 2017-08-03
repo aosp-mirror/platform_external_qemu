@@ -62,6 +62,11 @@ include $(_ANDROID_EMU_ROOT)/android/featurecontrol/proto/FeatureControlProto.mk
 
 ###############################################################################
 #
+# Snapshot protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/snapshot/proto/SnapshotProto.mk
+
+###############################################################################
+#
 # Crash report protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 
@@ -507,6 +512,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
     $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
+    $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
