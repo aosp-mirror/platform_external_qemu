@@ -148,12 +148,13 @@ Snapshotter& Snapshotter::get() {
     return *sSnapshotter;
 }
 
-void Snapshotter::prepareForLoading(const char* name) {
+OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {
         mSaver.clear();
     }
     mLoader.emplace(name);
     mLoader->prepare();
+    return mLoader->status();
 }
 
 OperationStatus Snapshotter::load(const char* name) {
@@ -161,12 +162,13 @@ OperationStatus Snapshotter::load(const char* name) {
     return mLoader->status();
 }
 
-void Snapshotter::prepareForSaving(const char* name) {
+OperationStatus Snapshotter::prepareForSaving(const char* name) {
     if (mLoader && mLoader->snapshot().name() == name) {
         mLoader.clear();
     }
     mSaver.emplace(name);
     mSaver->prepare();
+    return mSaver->status();
 }
 
 OperationStatus Snapshotter::save(const char* name) {

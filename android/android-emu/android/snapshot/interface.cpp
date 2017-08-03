@@ -15,16 +15,16 @@
 
 using android::snapshot::Snapshotter;
 
-void androidSnapshot_prepareForLoading(const char* name) {
-    Snapshotter::get().prepareForLoading(name);
+AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name) {
+    return AndroidSnapshotStatus(Snapshotter::get().prepareForLoading(name));
 }
 
 AndroidSnapshotStatus androidSnapshot_load(const char* name) {
     return AndroidSnapshotStatus(Snapshotter::get().load(name));
 }
 
-void androidSnapshot_prepareForSaving(const char* name) {
-    Snapshotter::get().prepareForSaving(name);
+AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
+    return AndroidSnapshotStatus(Snapshotter::get().prepareForSaving(name));
 }
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {

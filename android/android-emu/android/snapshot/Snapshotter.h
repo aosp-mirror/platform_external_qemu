@@ -34,9 +34,9 @@ public:
     ~Snapshotter();
     static Snapshotter& get();
 
-    void prepareForLoading(const char* name);
+    OperationStatus prepareForLoading(const char* name);
     OperationStatus load(const char* name);
-    void prepareForSaving(const char* name);
+    OperationStatus prepareForSaving(const char* name);
     OperationStatus save(const char* name);
 
     Saver& saver() { return *mSaver; }

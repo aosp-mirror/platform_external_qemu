@@ -22,10 +22,10 @@ typedef int AndroidSnapshotStatus;
 void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations);
 void androidSnapshot_finalize();
 
-void androidSnapshot_prepareForLoading(const char* name);
+AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name);
 AndroidSnapshotStatus androidSnapshot_load(const char* name);
 
-void androidSnapshot_prepareForSaving(const char* name);
+AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name);
 AndroidSnapshotStatus androidSnapshot_save(const char* name);
 
 ANDROID_END_HEADER
