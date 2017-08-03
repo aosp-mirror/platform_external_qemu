@@ -17,6 +17,7 @@
 #include "GLcommon/GLBackgroundLoader.h"
 
 #include "android/utils/system.h"
+#include "android/base/system/System.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/SaveableTexture.h"
 
@@ -33,6 +34,9 @@ intptr_t GLBackgroundLoader::main() {
     if (!m_eglIface.createAndBindAuxiliaryContext(&m_context, &m_surface)) {
         return 0;
     }
+
+    // Keep textureLoader around until we are done.
+    auto ptr = m_textureLoaderPtrWeak.lock();
 
     for (const auto& it: m_textureMap) {
         SaveableTexturePtr saveable = it.second;
