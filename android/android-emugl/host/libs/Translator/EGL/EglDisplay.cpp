@@ -18,6 +18,7 @@
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 #include "EglConfig.h"
+#include "EglGlobalInfo.h"
 #include "EglOsApi.h"
 #include <GLcommon/GLutils.h>
 
@@ -637,7 +638,11 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
     }
     m_eglImages.clear();
     emugl::Mutex::AutoLock mutex(m_lock);
+    m_globalNameSpace.setIfaces(
+        EglGlobalInfo::getInstance()->getEglIface(),
+        EglGlobalInfo::getInstance()->getIface(GLES_2_0));
     m_globalNameSpace.onLoad(stream, textureLoader, creator);
+
     loadCollection(stream, &m_eglImages, [this](
         android::base::Stream* stream) {
         unsigned int hndl = stream->getBe32();
