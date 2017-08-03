@@ -131,6 +131,21 @@ static bool retry(Func func, int tries = 4, int timeoutMs = 100) {
     }
 }
 
+template <class Func>
+static bool retry_with_limit(Func func, int tries = 4, int timeoutMs = 100) {
+    for (;;) {
+        --tries;
+        int retval = func(&tries);
+
+        if (retval) return true;
+        if (tries == 0) {
+            return false;
+        }
+
+        System::get()->sleepMs(timeoutMs);
+    }
+}
+
 static bool delete_file(const android::base::Win32UnicodeString& name) {
     return retry([&name]() {
         // Make sure the file isn't marked readonly, or deletion may fail.
@@ -148,16 +163,17 @@ static bool delete_dir(const android::base::Win32UnicodeString& name) {
 }
 
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock) {
+static int filelock_lock(FileLock* lock, int liveProcessTimeout /* TODO */) {
     lock->lock_handle = nullptr;
     const auto unicodeDir = android::base::Win32UnicodeString(lock->lock);
     const auto unicodeName = android::base::Win32UnicodeString(lock->temp);
 
     HANDLE lockHandle = INVALID_HANDLE_VALUE;
-    const bool createFileResult = retry(
-        [&lockHandle, &unicodeDir, &unicodeName]() {
+    const bool createFileResult = retry_with_limit(
+        [&lockHandle, &unicodeDir, &unicodeName, liveProcessTimeout](int* triesRemaining) {
             if (!::CreateDirectoryW(unicodeDir.c_str(), nullptr) &&
                 ::GetLastError() != ERROR_ALREADY_EXISTS) {
+                fprintf(stderr, "%s: error not already exists\n", __func__);
                 return false;
             }
 
@@ -181,8 +197,50 @@ static int filelock_lock(FileLock* lock) {
                     nullptr,          // no special security attributes
                     CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL,
                     nullptr);  // no template file
+            DWORD lastErr = GetLastError();
             if (lockHandle == INVALID_HANDLE_VALUE &&
-                GetLastError() == ERROR_ACCESS_DENIED) {
+                (lastErr == ERROR_ACCESS_DENIED ||
+                 lastErr == ERROR_SHARING_VIOLATION)) {
+
+                HANDLE getpidHandle =
+                    ::CreateFileW(
+                        unicodeName.c_str(),
+                        GENERIC_READ, // open only for reading
+                        FILE_SHARE_READ | FILE_SHARE_WRITE, // allow others to r+w the file (we only read, but
+                                                            // the write flag needs to be there to fit with
+                                                            // the original process, or this call fails)
+                        nullptr,               // default security
+                        OPEN_EXISTING,         // existing file only
+                        FILE_ATTRIBUTE_NORMAL, // normal file
+                        nullptr);              // no template file
+
+                // Read the pid of the locking process.
+                char buf[12] = {};
+                DWORD bytesRead;
+                if (!::ReadFile(getpidHandle, buf, 12, &bytesRead, nullptr)) {
+                    return false;
+                }
+
+                DWORD lockingPid;
+                if (sscanf(buf, "%lu", &lockingPid) == 1) {
+                    // Try waiting for the specified timeout for
+                    // the locking process to exit. If that doesn't work, bail.
+                    switch (System::get()->waitForProcessExit(lockingPid, liveProcessTimeout)) {
+                    // Need to stop if there is a timeout.
+                    case System::WaitExitResult::Timeout:
+                        *triesRemaining = 0;
+                    // Need to try again if we waited out the process.
+                    case System::WaitExitResult::Exited:
+                        *triesRemaining = 1;
+                    // Need to keep trying if there was an error.
+                    case System::WaitExitResult::Error:
+                    default:
+                        break;
+                    }
+                } else {
+                    return false;
+                }
+
                 // Sometimes a previous file gets readonly attribute even when
                 // its parent process has exited; that prevents us from opening
                 // it for writing.
@@ -226,7 +284,7 @@ static int filelock_lock(FileLock* lock) {
 }
 #else
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock) {
+static int filelock_lock(FileLock* lock, int live_process_timeout) {
     int    ret;
     int    temp_fd = -1;
     int    lock_fd = -1;
@@ -357,6 +415,28 @@ static int filelock_lock(FileLock* lock) {
             rc = HANDLE_EINTR(kill(lockpid, 0));
             if (rc == 0 || errno == EPERM) {
                 freshness = FRESHNESS_FRESH;
+                if (live_process_timeout) {
+                    // Try waiting for the specified timeout for
+                    // the locking process to exit. If that doesn't work, bail.
+                    // If we waited until the process exited, the process
+                    // is not fresh anymore.
+                    switch (System::get()->waitForProcessExit(lockpid, live_process_timeout)) {
+                    // Try agian just once if we waited out the process.
+                    case System::WaitExitResult::Exited:
+                        freshness = FRESHNESS_STALE;
+                        tries = 1;
+                        break;
+                    // Don't try again if timeout occurred.
+                    case System::WaitExitResult::Timeout:
+                        freshness = FRESHNESS_FRESH;
+                        tries = 0;
+                        break;
+                    // Keep trying no error.
+                    case System::WaitExitResult::Error:
+                    default:
+                        break;
+                    }
+                }
             } else if (rc < 0 && errno == ESRCH) {
                 freshness = FRESHNESS_STALE;
             }
@@ -432,9 +512,14 @@ filelock_atexit( void )
   // clean up the mutex. See b.android.com/209635
 }
 
+FileLock*
+filelock_create( const char*  file) {
+    return filelock_create_timeout(file, 0);
+}
+
 /* create a file lock */
 FileLock*
-filelock_create( const char*  file )
+filelock_create_timeout( const char*  file, int timeout)
 {
     int    file_len = strlen(file);
     int    lock_len = file_len + sizeof(LOCK_NAME);
@@ -464,7 +549,7 @@ filelock_create( const char*  file )
 #endif
     lock->locked = 0;
 
-    if (filelock_lock(lock) < 0) {
+    if (filelock_lock(lock, timeout) < 0) {
         free(paths);
         free(lock);
         return NULL;
