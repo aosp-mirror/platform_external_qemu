@@ -72,6 +72,7 @@ std::string join(const Range& range) {
 std::string trim(const std::string& in);
 
 bool startsWith(StringView string, StringView prefix);
+bool endsWith(StringView string, StringView suffix);
 
 // Iterates over a string's parts using |splitBy| as a delimiter.
 // |splitBy| must be a nonempty string well, or it's a no-op.
