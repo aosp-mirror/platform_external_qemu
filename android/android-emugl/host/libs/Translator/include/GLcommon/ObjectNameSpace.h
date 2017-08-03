@@ -18,9 +18,11 @@
 
 #include "android/snapshot/common.h"
 #include "emugl/common/mutex.h"
+#include "GLcommon/GLBackgroundLoader.h"
 #include "GLcommon/NamedObject.h"
 #include "GLcommon/ObjectData.h"
 #include "GLcommon/SaveableTexture.h"
+#include "GLcommon/TranslatorIfaces.h"
 
 #include <GLES/gl.h>
 #include <unordered_map>
@@ -134,15 +136,29 @@ public:
                 const android::snapshot::TextureSaverPtr& textureSaver,
                 SaveableTexture::saver_t saver);
     void onLoad(android::base::Stream* stream,
-                const android::snapshot::TextureLoaderPtr& textureLoader,
+                const android::snapshot::TextureLoaderWPtr& textureLoaderWPtr,
                 SaveableTexture::creator_t creator);
     void postLoad(android::base::Stream* stream);
     const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);
-private:
+    SaveableTextureMap* getSaveableTextureMap() { return &m_textureMap; }
+
     void clearTextureMap();
+
+    void setIfaces(const EGLiface* eglIface,
+                   const GLESiface* glesIface) {
+        m_eglIface = eglIface;
+        m_glesIface = glesIface;
+    }
+
+private:
 
     emugl::Mutex m_lock;
     // m_textureMap is only used when saving / loading a snapshot
     // It is empty in all other situations
-    std::unordered_map<unsigned int, SaveableTexturePtr> m_textureMap;
+    SaveableTextureMap m_textureMap;
+
+    std::shared_ptr<GLBackgroundLoader>     m_backgroundLoader;
+
+    const EGLiface* m_eglIface = nullptr;
+    const GLESiface* m_glesIface = nullptr;
 };

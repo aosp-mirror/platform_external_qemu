@@ -17,6 +17,7 @@
 #include "GLcommon/GLBackgroundLoader.h"
 
 #include "android/utils/system.h"
+#include "android/base/system/System.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/SaveableTexture.h"
 
@@ -34,7 +35,20 @@ intptr_t GLBackgroundLoader::main() {
         return 0;
     }
 
+    // Keep textureLoader around until we are done, or if the load
+    // has been canceled.
+    auto ptr = m_textureLoaderWPtr.lock();
+    if (!ptr) return 0;
+
+    // Release it to have more fine-grained acquiring inside the loop.
+    ptr.reset();
+
     for (const auto& it: m_textureMap) {
+        // Acquire the texture loader for each load; bail
+        // in case something else happened to interrupt loading.
+        auto ptr = m_textureLoaderWPtr.lock();
+        if (!ptr) return 0;
+
         SaveableTexturePtr saveable = it.second;
         if (saveable) {
             m_glesIface.restoreTexture(saveable.get());

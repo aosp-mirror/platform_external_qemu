@@ -15,23 +15,28 @@
 */
 #pragma once
 
+#include "android/snapshot/TextureLoader.h"
 #include "emugl/common/thread.h"
-
 #include "GLcommon/TranslatorIfaces.h"
 
 #include <EGL/egl.h>
 
+#include <memory>
+
 class GLBackgroundLoader : public emugl::Thread {
 public:
-    GLBackgroundLoader(const EGLiface& eglIface,
+    GLBackgroundLoader(const android::snapshot::TextureLoaderWPtr& textureLoaderWeak,
+                       const EGLiface& eglIface,
                        const GLESiface& glesIface,
                        SaveableTextureMap& textureMap) :
+        m_textureLoaderWPtr(textureLoaderWeak),
         m_eglIface(eglIface),
         m_glesIface(glesIface),
         m_textureMap(textureMap) { }
 
     intptr_t main();
 
+    const android::snapshot::TextureLoaderWPtr m_textureLoaderWPtr;
     const EGLiface& m_eglIface;
     const GLESiface& m_glesIface;
 
