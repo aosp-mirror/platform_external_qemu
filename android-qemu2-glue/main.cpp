@@ -613,12 +613,32 @@ extern "C" int main(int argc, char** argv) {
     // Lock the AVD as soon as we can to make sure other copy won't do anything
     // stupid before detecting that the AVD is already in use.
     const char* coreHwIniPath = avdInfo_getCoreHwIniPath(avd);
-    if (filelock_create(coreHwIniPath) == NULL) {
-        // The AVD is already in use
-        derror("There's another emulator instance running with "
-               "the current AVD '%s'. Exiting...\n",
+
+    // Before that, check for a snapshot lock to see if there is any pending
+    // snapshot operation, in which case we just wait it out.
+    const char* snapshotLockFilePath = avdInfo_getSnapshotLockFilePath(avd);
+    // 10 seconds
+    FileLock* snapshotLock =
+        filelock_create_timeout(snapshotLockFilePath,
+                                10000 /* ms */);
+    if (!snapshotLock) {
+        // Some snapshot operation took too long.
+        derror("A snapshot operation for '%s' is pending "
+               "and timeout has expired. Exiting...\n",
                avdInfo_getName(avd));
         return 1;
+    }
+
+    if (filelock_create(coreHwIniPath) == NULL) {
+            // The AVD is already in use
+            derror("There's another emulator instance running with "
+                    "the current AVD '%s'. Exiting...\n",
+                    avdInfo_getName(avd));
+            return 1;
+    }
+
+    if (snapshotLock) {
+        filelock_release(snapshotLock);
     }
 
     // Update server-based hw config / feature flags.
