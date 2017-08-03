@@ -2170,6 +2170,13 @@ static bool main_loop_should_exit(void)
         qemu_system_suspend();
     }
     if (qemu_shutdown_requested()) {
+
+#ifdef CONFIG_ANDROID
+        if (feature_is_enabled(kFeature_FastSnapshotV1)) {
+            save_vmstate("default_boot");
+        }
+#endif
+
         qemu_kill_report();
         qapi_event_send_shutdown(&error_abort);
         if (no_shutdown) {
