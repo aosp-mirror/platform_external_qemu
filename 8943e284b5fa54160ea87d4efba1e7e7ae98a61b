@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f25dd91_552c6389",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-03T21:44:06Z",
+      "side": 1,
+      "message": "an idea:\n\nthere\u0027s a different way - pass a weak_ptr\u003cTextureLoader\u003e into background loader constructor, and let it lock the weak pointer to get a shared one on each loop iteration. This way: 1. it would keep the loader alive until iteration finishes\n2. next iteration won\u0027t be able to lock the pointer, get null loader and would exit.\n\nThe only issue is to make sure the Loader\u0027s dtor blocks until TextureLoader is gone",
+      "range": {
+        "startLine": 314,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 79
+      },
+      "revId": "8943e284b5fa54160ea87d4efba1e7e7ae98a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
