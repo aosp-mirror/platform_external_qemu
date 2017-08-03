@@ -148,7 +148,7 @@ static bool delete_dir(const android::base::Win32UnicodeString& name) {
 }
 
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock) {
+static int filelock_lock(FileLock* lock, int startingTimeoutMs, int numTries) {
     lock->lock_handle = nullptr;
     const auto unicodeDir = android::base::Win32UnicodeString(lock->lock);
     const auto unicodeName = android::base::Win32UnicodeString(lock->temp);
@@ -190,8 +190,8 @@ static int filelock_lock(FileLock* lock) {
             }
             return lockHandle != INVALID_HANDLE_VALUE;
         },
-        5,      // tries
-        200);   // sleep timeout between tries
+        numTries,      // tries
+        std::max(200, startingTimeoutMs));   // sleep timeout between tries
 
     if (!createFileResult) {
         assert(lockHandle == INVALID_HANDLE_VALUE);
@@ -226,7 +226,7 @@ static int filelock_lock(FileLock* lock) {
 }
 #else
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock) {
+static int filelock_lock(FileLock* lock, int starting_timeout_ms, int num_tries) {
     int    ret;
     int    temp_fd = -1;
     int    lock_fd = -1;
@@ -234,7 +234,7 @@ static int filelock_lock(FileLock* lock) {
     FILE*  f = NULL;
     char   pid[8];
     struct stat  st_temp;
-    int sleep_duration_ms = 0;
+    int sleep_duration_ms = starting_timeout_ms;
 
     temp_fd = mkstemp(lock->temp);
 
@@ -259,7 +259,7 @@ static int filelock_lock(FileLock* lock) {
     }
 
     /* now attempt to link the temp file to the lock file */
-    for (tries = 4; tries > 0; tries--)
+    for (tries = num_tries; tries > 0; tries--)
     {
         const int kSleepDurationMsMax = 2000;  // 2 seconds.
         const int kSleepDurationMsIncrement = 50;
@@ -432,9 +432,14 @@ filelock_atexit( void )
   // clean up the mutex. See b.android.com/209635
 }
 
+FileLock*
+filelock_create( const char*  file) {
+    return filelock_try_create(file, 0, 5);
+}
+
 /* create a file lock */
 FileLock*
-filelock_create( const char*  file )
+filelock_try_create( const char*  file, int timeout, int tries )
 {
     int    file_len = strlen(file);
     int    lock_len = file_len + sizeof(LOCK_NAME);
@@ -464,7 +469,7 @@ filelock_create( const char*  file )
 #endif
     lock->locked = 0;
 
-    if (filelock_lock(lock) < 0) {
+    if (filelock_lock(lock, timeout, tries) < 0) {
         free(paths);
         free(lock);
         return NULL;
