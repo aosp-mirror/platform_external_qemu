@@ -259,6 +259,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
     __translator_getGLESIfaceFunc func  = NULL;
     int renderableType = EGL_OPENGL_ES_BIT;
 
+    g_eglInfo->setEglIface(&s_eglIface);
+
     char error[256];
     // When running on top of another GLES library, we do not load GLES1
     // We use GLES12Translator instead
