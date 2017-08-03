@@ -109,6 +109,7 @@ public:
                          const android::snapshot::TextureLoaderPtr& textureLoader,
                          SaveableTexture::creator_t creator);
     void postLoadAllImages(android::base::Stream* stream);
+
 private:
     static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 
