@@ -110,6 +110,7 @@ int qemu_listvms(char (*names)[256], int* names_count,
 
 void hmp_savevm(Monitor *mon, const QDict *qdict);
 int load_vmstate(const char *name);
+int save_vmstate(const char *name);
 void hmp_delvm(Monitor *mon, const QDict *qdict);
 void hmp_info_snapshots(Monitor *mon, const QDict *qdict);
 
