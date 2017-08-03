@@ -24,6 +24,7 @@ class TextureSaver;
 class TextureLoader;
 using TextureSaverPtr = std::shared_ptr<TextureSaver>;
 using TextureLoaderPtr = std::shared_ptr<TextureLoader>;
+using TextureLoaderPtrWeak = std::weak_ptr<TextureLoader>;
 
 using RamBlock = ::SnapshotRamBlock;
 
