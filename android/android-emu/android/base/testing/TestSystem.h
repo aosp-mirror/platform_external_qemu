@@ -136,6 +136,8 @@ public:
 
     virtual Pid getCurrentProcessId() const override { return mPid; }
 
+    virtual bool waitForProcessExit(int pid, uint64_t timeoutMs) const override { return true; }
+
     int getCpuCoreCount() const override { return mCoreCount; }
 
     void setCpuCoreCount(int count) { mCoreCount = count; }
