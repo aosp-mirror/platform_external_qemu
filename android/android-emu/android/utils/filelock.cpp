@@ -148,7 +148,7 @@ static bool delete_dir(const android::base::Win32UnicodeString& name) {
 }
 
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock) {
+static int filelock_lock(FileLock* lock, int liveProcessTimeout /* TODO */) {
     lock->lock_handle = nullptr;
     const auto unicodeDir = android::base::Win32UnicodeString(lock->lock);
     const auto unicodeName = android::base::Win32UnicodeString(lock->temp);
@@ -226,7 +226,7 @@ static int filelock_lock(FileLock* lock) {
 }
 #else
 /* returns 0 on success, -1 on failure */
-static int filelock_lock(FileLock* lock) {
+static int filelock_lock(FileLock* lock, int live_process_timeout) {
     int    ret;
     int    temp_fd = -1;
     int    lock_fd = -1;
@@ -354,9 +354,17 @@ static int filelock_lock(FileLock* lock) {
         }
         /* if there is a PID, check that it is still alive */
         if (lockpid > 0) {
+retry_freshness_query:
             rc = HANDLE_EINTR(kill(lockpid, 0));
             if (rc == 0 || errno == EPERM) {
                 freshness = FRESHNESS_FRESH;
+                if (live_process_timeout) {
+                    // If we waited until the process exited, try the freshness
+                    // query again.
+                    if (System::get()->waitForProcessExit(lockpid, live_process_timeout)) {
+                        goto retry_freshness_query;
+                    }
+                }
             } else if (rc < 0 && errno == ESRCH) {
                 freshness = FRESHNESS_STALE;
             }
@@ -432,9 +440,14 @@ filelock_atexit( void )
   // clean up the mutex. See b.android.com/209635
 }
 
+FileLock*
+filelock_create( const char*  file) {
+    return filelock_create_timeout(file, 0);
+}
+
 /* create a file lock */
 FileLock*
-filelock_create( const char*  file )
+filelock_create_timeout( const char*  file, int timeout)
 {
     int    file_len = strlen(file);
     int    lock_len = file_len + sizeof(LOCK_NAME);
@@ -464,7 +477,7 @@ filelock_create( const char*  file )
 #endif
     lock->locked = 0;
 
-    if (filelock_lock(lock) < 0) {
+    if (filelock_lock(lock, timeout) < 0) {
         free(paths);
         free(lock);
         return NULL;
