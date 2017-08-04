@@ -256,12 +256,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
         func  = loadIfaces(LIB_GLES_CM_NAME, error, sizeof(error));
         if (func) {
             g_eglInfo->setIface(func(&s_eglIface),GLES_1_1);
+            initGLESx(GLES_1_1);
         } else {
            fprintf(stderr, "%s: Could not find ifaces for GLES CM 1.1 [%s]\n",
                    __FUNCTION__, error);
-           return EGL_FALSE;
         }
-        initGLESx(GLES_1_1);
     }
     if(!g_eglInfo->getIface(GLES_2_0)) {
         func  = loadIfaces(LIB_GLES_V2_NAME, error, sizeof(error));
