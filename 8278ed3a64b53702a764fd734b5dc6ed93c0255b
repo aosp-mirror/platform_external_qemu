@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cc19fde7_739cf841",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T18:07:08Z",
+      "side": 1,
+      "message": "why not a loop?",
+      "range": {
+        "startLine": 357,
+        "startChar": 0,
+        "endLine": 371,
+        "endChar": 9
+      },
+      "revId": "8278ed3a64b53702a764fd734b5dc6ed93c0255b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
