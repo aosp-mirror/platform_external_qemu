@@ -1006,9 +1006,26 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Network
-    args.add2("-netdev", "user,id=mynet");
+    args.add("-netdev");
+    if (opts->net_tap) {
+        const char* upScript = opts->net_tap_script_up ?
+            opts->net_tap_script_up : "no";
+        const char* downScript = opts->net_tap_script_down ?
+            opts->net_tap_script_down : "no";
+        args.addFormat("tap,id=mynet,script=%s,downscript=%s,ifname=%s",
+                       upScript, downScript, opts->net_tap);
+    } else {
+        if (opts->net_tap_script_up) {
+            dwarning("-net-tap-script-up ignored without -net-tap option");
+        }
+        if (opts->net_tap_script_down) {
+            dwarning("-net-tap-script-down ignored without -net-tap option");
+        }
+        args.add("user,id=mynet");
+    }
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
+
     args.add("-show-cursor");
 
     if (opts->tcpdump) {

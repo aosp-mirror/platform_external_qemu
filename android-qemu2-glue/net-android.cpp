@@ -26,6 +26,11 @@ static void* s_opaque = nullptr;
 
 void android_qemu_init_slirp_shapers(void)
 {
+    if (net_slirp_state() == nullptr) {
+        // When running with a TAP interface slirp will not be active and in
+        // that case it doesn't make sense to set up the shapers.
+        return;
+    }
     android_net_delay_in = netdelay_create(
             [](void* data, size_t size, void* opaque) {
                 net_slirp_receive_raw(s_opaque,

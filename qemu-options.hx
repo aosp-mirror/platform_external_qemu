@@ -4168,6 +4168,30 @@ STEXI
 Set timezone instead of using host's default
 ETEXI
 
+DEF("net-tap", HAS_ARG, QEMU_OPTION_net_tap,
+    "-net-tap <tap interface> use the provided TAP interface for networking\n", QEMU_ARCH_ALL)
+STEXI
+@item -net-tap
+@findex -net-tap
+Use a TAP interface for networking instead of the default user network mode
+ETEXI
+
+DEF("net-tap-script-up", HAS_ARG, QEMU_OPTION_net_tap_script_up,
+    "-net-tap-script-up <script> script to run when TAP interface goes up\n", QEMU_ARCH_ALL)
+STEXI
+@item -net-tap-script-up
+@findex -net-tap-script-up
+Run a script when the TAP interface specifed by -net-tap goes up.
+ETEXI
+
+DEF("net-tap-script-down", HAS_ARG, QEMU_OPTION_net_tap_script_down,
+    "-net-tap-script-down <script> script to run when TAP interface goes down\n", QEMU_ARCH_ALL)
+STEXI
+@item -net-tap-script-down
+@findex -net-tap-script-down
+Run a script when the TAP interface specifed by -net-tap goes down.
+ETEXI
+
 #endif  // CONFIG_ANDROID
 
 HXCOMM This is the last statement. Insert new options before this line!

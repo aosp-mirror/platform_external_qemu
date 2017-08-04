@@ -77,7 +77,13 @@ static bool resolveHostNameToList(
 
 bool qemu_android_emulation_setup_dns_servers(const char* dns_servers,
                                               int* pcount) {
-    CHECK(net_slirp_state() != nullptr) << "slirp stack should be inited!";
+    if (net_slirp_state() == nullptr) {
+        // When running with a TAP interface slirp will not be active and it
+        // also does not make any sense to set up the DNS server translation.
+        // The guest will pick up whatever DNS server the host network provides
+        // through DHCP and RDNSS.
+        return true;
+    }
 
     if (!dns_servers || !dns_servers[0]) {
         // Empty list, use the default behaviour.
