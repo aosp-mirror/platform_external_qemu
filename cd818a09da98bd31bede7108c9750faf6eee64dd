@@ -22,6 +22,30 @@
       "revId": "cd818a09da98bd31bede7108c9750faf6eee64dd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "578eeb89_83756638",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-08-04T23:20:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2b5b8d02_f0c583c6",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 1
+      },
+      "revId": "cd818a09da98bd31bede7108c9750faf6eee64dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
