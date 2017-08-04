@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "35d0f885_c7b6ba39",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-08-04T16:10:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c24b3597_5a874f89",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 20
+      },
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0743fae8_6b5ac8a5",
         "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-02T20:46:22Z",
       "side": 1,
       "message": "true converts to 1 and false to 0 by the standard",
+      "range": {
+        "startLine": 70,
+        "startChar": 40,
+        "endLine": 70,
+        "endChar": 49
+      },
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44d2bbca_a10c08df",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-08-04T16:10:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0743fae8_6b5ac8a5",
       "range": {
         "startLine": 70,
         "startChar": 40,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e7662157_da53402a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-08-04T16:10:34Z",
+      "side": 1,
+      "message": "tr(): Done\nSerious: The System doesn\u0027t allow us to do this directly.\nIt could be done by simulating touches on the screen, but that would be unreliable.",
+      "parentUuid": "a789b5e2_ad8312a9",
+      "range": {
+        "startLine": 183,
+        "startChar": 28,
+        "endLine": 183,
+        "endChar": 29
+      },
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e02ba5c6_46bb2a05",
         "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.h",
         "patchSetId": 1
@@ -82,6 +154,24 @@
       "writtenOn": "2017-08-02T20:46:22Z",
       "side": 1,
       "message": "nit: please initialize it right here",
+      "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f2c72081_93b03486",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-08-04T16:10:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e02ba5c6_46bb2a05",
       "revId": "becb13c909ae107c7c31dd179827a6aa70d94432",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
