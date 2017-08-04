@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b5b8d02_f0c583c6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/cellular-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T20:40:38Z",
+      "side": 1,
+      "message": "nit: just like this\n\nextern \"C\" int sim_is_present() { ... }",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 1
+      },
+      "revId": "cd818a09da98bd31bede7108c9750faf6eee64dd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
