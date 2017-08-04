@@ -94,6 +94,30 @@
       "revId": "8943e284b5fa54160ea87d4efba1e7e7ae98a61b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "525667c6_1c00aa12",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T20:30:16Z",
+      "side": 1,
+      "message": "Yes, it is captured by all SaveableTexture objects so they can get the loader back even after the Loader got deleted - without background loading and without forced \u0027load all\u0027 it was the only way to make textures load after resetting the Loader\nNow they can capture only weak_ptr\u003c\u003e to never force it to live longer",
+      "parentUuid": "0cc51f48_3400e020",
+      "range": {
+        "startLine": 314,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 79
+      },
+      "revId": "8943e284b5fa54160ea87d4efba1e7e7ae98a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
