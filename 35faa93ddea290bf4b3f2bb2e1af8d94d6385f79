@@ -45,6 +45,30 @@
       "revId": "35faa93ddea290bf4b3f2bb2e1af8d94d6385f79",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9270755e_51be80dd",
+        "filename": "android/android-emu/android/utils/filelock.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T16:40:23Z",
+      "side": 1,
+      "message": "Thanks for the tips! Doing Windows now.",
+      "parentUuid": "175045a7_097d25ae",
+      "range": {
+        "startLine": 50,
+        "startChar": 58,
+        "endLine": 50,
+        "endChar": 82
+      },
+      "revId": "35faa93ddea290bf4b3f2bb2e1af8d94d6385f79",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
