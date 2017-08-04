@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b532e53c_7e18eb3e",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T16:40:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7040b471_4ee8e3f7",
+      "range": {
+        "startLine": 37,
+        "startChar": 9,
+        "endLine": 37,
+        "endChar": 13
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c610339b_83e86522",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-03T21:50:24Z",
       "side": 1,
       "message": "cref",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 26
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09edf497_bf264661",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T16:40:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c610339b_83e86522",
       "range": {
         "startLine": 38,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "1afd597f_0c941dba",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T16:40:02Z",
+      "side": 1,
+      "message": "At the moment, the loader destructor will wait for this thread to finish completely, so it should be safe from those issues as long as only one loader is alive at a a time and the saver doesn\u0027t intersect in time with the loader. Let\u0027s add the faster \"cancel current bg loading if exiting without save or loading/saving a different snapshot\" in a future iteration.",
+      "parentUuid": "43137809_47c1a8ff",
+      "range": {
+        "startLine": 37,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 5
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7023c5ef_1bcba2bf",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "3a7c350a_fd3008b2",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T16:40:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7023c5ef_1bcba2bf",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 36,
+        "endChar": 43
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6a8e5da5_c105ea14",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
         "patchSetId": 1
@@ -105,6 +201,30 @@
       "writtenOn": "2017-08-03T21:40:16Z",
       "side": 1,
       "message": "make it a reference if we require it to always be set?",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 47
+      },
+      "revId": "13ee8a120ebfc0918c6cc9ffc53393038de3e5ca",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2593c4cb_510bbeb9",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T16:40:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a8e5da5_c105ea14",
       "range": {
         "startLine": 40,
         "startChar": 0,
