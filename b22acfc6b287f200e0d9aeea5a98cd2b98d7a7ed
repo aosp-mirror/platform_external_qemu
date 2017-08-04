@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ebf5767a_2c12c02f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T18:18:46Z",
+      "side": 1,
+      "message": "cref",
+      "range": {
+        "startLine": 38,
+        "startChar": 8,
+        "endLine": 38,
+        "endChar": 26
+      },
+      "revId": "b22acfc6b287f200e0d9aeea5a98cd2b98d7a7ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
