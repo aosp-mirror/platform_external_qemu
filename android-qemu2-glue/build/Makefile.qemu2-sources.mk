@@ -25,6 +25,7 @@ QEMU2_COMMON_SOURCES := \
     block/blkverify.c \
     block/block-backend.c \
     block/bochs.c \
+    block/cat.c \
     block/cloop.c \
     block/commit.c \
     block/crypto.c \
