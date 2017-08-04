@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2260f114_fd062c06",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 713,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T18:25:07Z",
+      "side": 1,
+      "message": "derror?",
+      "range": {
+        "startLine": 713,
+        "startChar": 16,
+        "endLine": 713,
+        "endChar": 23
+      },
+      "revId": "fbf4faae56bf1b51259dfc4d02d358b1214b97e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29246865_5197a82a",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 718,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T18:25:07Z",
+      "side": 1,
+      "message": "I believe we should set |savevm_on_exit| if |fastSnapshotV1| is enabled, so there\u0027s no need to have a separate check",
+      "range": {
+        "startLine": 717,
+        "startChar": 12,
+        "endLine": 718,
+        "endChar": 26
+      },
+      "revId": "fbf4faae56bf1b51259dfc4d02d358b1214b97e8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
