@@ -70,6 +70,30 @@
       "revId": "8943e284b5fa54160ea87d4efba1e7e7ae98a61b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0cc51f48_3400e020",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T18:50:58Z",
+      "side": 1,
+      "message": "Ok, I\u0027ll look into that path.\n\nIn that case there seems to be something weird going on; TextureLoader dtor is not called the same time as Loader\u0027s dtor; it\u0027s called much later. It seems to have been shared_ptr\u0027ed somehwere else. Is that intended?",
+      "parentUuid": "2538e761_7b96382c",
+      "range": {
+        "startLine": 314,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 79
+      },
+      "revId": "8943e284b5fa54160ea87d4efba1e7e7ae98a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
