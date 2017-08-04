@@ -445,7 +445,7 @@ void GlesContext::Draw(DrawType draw, GLenum mode, GLint first, GLsizei count,
     PASS_THROUGH(this, DrawArrays, mode, first, count);
   } else {
     indices = pointer_context_.PrepareBuffersForDrawElements(count, type,
-                                                             indices);
+            indices);
     PASS_THROUGH(this, DrawElements, mode, count, type, indices);
   }
 
@@ -584,7 +584,12 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
     }
     const GLint texture = texture_context_.GetTexture(GL_TEXTURE0 + i,
                                                       GL_TEXTURE_2D);
-    const TextureDataPtr texture_data = share_group_->GetTextureData(texture);
+    TextureDataPtr texture_data = {};
+    if (texture == 0) {
+        texture_data = texture_context_.GetDefaultTextureData(GL_TEXTURE_2D);
+    } else {
+        texture_data = share_group_->GetTextureData(texture);
+    }
     if (texture_data == NULL) {
       continue;
     }
@@ -607,9 +612,8 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
 
 
     pointer_context_.EnableArray(kTexCoord0VertexAttribute + i);
-    PASS_THROUGH(this, EnableVertexAttribArray, kTexCoord0VertexAttribute + i);
-    PASS_THROUGH(this, VertexAttribPointer, kTexCoord0VertexAttribute + i, 2,
-                 GL_FLOAT, GL_FALSE, 0, texels[i]);
+    pointer_context_.SetPointer(kTexCoord0VertexAttribute + i,
+            2, GL_FLOAT, 0, texels[i]);
     num_textures++;
   }
 
@@ -622,10 +626,8 @@ void GlesContext::DrawTex(GLfloat x, GLfloat y, GLfloat z, GLfloat width,
       x + width, y, z,
     };
     pointer_context_.EnableArray(kPositionVertexAttribute);
-    PASS_THROUGH(this, EnableVertexAttribArray, kPositionVertexAttribute);
-    PASS_THROUGH(this, VertexAttribPointer, kPositionVertexAttribute, 3,
-                 GL_FLOAT, GL_FALSE, 0, vertices);
-
+    pointer_context_.SetPointer(kPositionVertexAttribute, 3,
+            GL_FLOAT, 0, vertices);
     // DrawTex() needs texture environments etc, so we use GLES1 emulation to
     // avoid unnecessary complexity.
     Draw(kDrawArrays, GL_TRIANGLE_FAN, 0, 4, 0, 0);
