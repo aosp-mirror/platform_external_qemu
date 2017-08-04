@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d7fc735_a9047542",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 723,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "please check if |process| is there - it could\u0027ve already exited, or you have no permissions to open it",
+      "range": {
+        "startLine": 723,
+        "startChar": 8,
+        "endLine": 723,
+        "endChar": 62
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e4451d7_cc3288a1",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 731,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "I love it! ;)",
+      "range": {
+        "startLine": 726,
+        "startChar": 0,
+        "endLine": 731,
+        "endChar": 20
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "93fa9da3_f1a26c49",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 736,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "famous linux api :(",
+      "range": {
+        "startLine": 736,
+        "startChar": 12,
+        "endLine": 736,
+        "endChar": 28
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d6a419f_347726e1",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 736,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "do you really want to start the function from unconditional sleep?",
+      "range": {
+        "startLine": 733,
+        "startChar": 8,
+        "endLine": 736,
+        "endChar": 28
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0581c010_33c5a2d9",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "with the waiting function retry() is harmful here - it would make you wait 5 times of a timeout",
+      "range": {
+        "startLine": 157,
+        "startChar": 34,
+        "endLine": 157,
+        "endChar": 40
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4389a2e_3e360f98",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "if not, you should not have more tries - otherwise again, you\u0027d be waiting for |tries| * timeout",
+      "range": {
+        "startLine": 397,
+        "startChar": 19,
+        "endLine": 399,
+        "endChar": 21
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70c8dedb_16e2fa17",
+        "filename": "android/android-emu/android/utils/filelock.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 52,
+        "startChar": 27,
+        "endLine": 52,
+        "endChar": 28
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8498cc0b_0d82f3ae",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "this isn\u0027t a good way of returning a value from waitWithTimeout()\n\nthe caller usually only cares about single thing: is the process still alive after function returns or not. So the return value is supposed to be at least |true| if there was no process with |pid| or it exited before the timeout, and |false| in case of timing out while process is still running. You could also create an enum { Exited, Timeout, Error } if you want to give more information back; or use an int as a poor man\u0027s enum with \u003c0, 0, 1 as values - like in Posix\n\nBut mixing together \u0027there was no such process\u0027 and \u0027failed to allocated memory\u0027 will make the function very tricky to use correctly.",
+      "range": {
+        "startLine": 139,
+        "startChar": 24,
+        "endLine": 139,
+        "endChar": 45
+      },
+      "revId": "038ef06af08c09683313ca83dc3fa860df151fb3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e059084_95e7a12c",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T23:16:44Z",
+      "side": 1,
+      "message": "Duration",
+      "range": {
+        "startLine": 140,
+        "startChar": 45,
+        "endLine": 140,
+        "endChar": 53
+      },
+      "revId": "038ef06af08c09683313ca83dc3fa860df151fb3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
