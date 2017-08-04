@@ -22,6 +22,30 @@
       "revId": "8278ed3a64b53702a764fd734b5dc6ed93c0255b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1613a351_8986b7b6",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-04T22:57:47Z",
+      "side": 1,
+      "message": "thought about this more and how if the wait is successful, the process must be a zombie, so just re-setting the freshness seems to be the right thing to do.",
+      "parentUuid": "cc19fde7_739cf841",
+      "range": {
+        "startLine": 357,
+        "startChar": 0,
+        "endLine": 371,
+        "endChar": 9
+      },
+      "revId": "8278ed3a64b53702a764fd734b5dc6ed93c0255b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
