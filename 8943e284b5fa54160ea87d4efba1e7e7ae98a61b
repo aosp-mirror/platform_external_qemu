@@ -46,6 +46,30 @@
       "revId": "8943e284b5fa54160ea87d4efba1e7e7ae98a61b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2538e761_7b96382c",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-04T18:19:42Z",
+      "side": 1,
+      "message": "no, that was a look at another way of implementing background loader without a finalizer callback",
+      "parentUuid": "46d8d7ff_dccef23c",
+      "range": {
+        "startLine": 314,
+        "startChar": 0,
+        "endLine": 315,
+        "endChar": 79
+      },
+      "revId": "8943e284b5fa54160ea87d4efba1e7e7ae98a61b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
