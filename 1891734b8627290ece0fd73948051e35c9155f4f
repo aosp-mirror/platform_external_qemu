@@ -213,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "73477522_cac8f476",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-05T00:10:29Z",
+      "side": 1,
+      "message": "Done (made it into retry with ability to modify number of tries to keep doing)",
+      "parentUuid": "0581c010_33c5a2d9",
+      "range": {
+        "startLine": 157,
+        "startChar": 34,
+        "endLine": 157,
+        "endChar": 40
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c4389a2e_3e360f98",
         "filename": "android/android-emu/android/utils/filelock.cpp",
         "patchSetId": 8
@@ -224,6 +248,30 @@
       "writtenOn": "2017-08-04T23:16:44Z",
       "side": 1,
       "message": "if not, you should not have more tries - otherwise again, you\u0027d be waiting for |tries| * timeout",
+      "range": {
+        "startLine": 397,
+        "startChar": 19,
+        "endLine": 399,
+        "endChar": 21
+      },
+      "revId": "1891734b8627290ece0fd73948051e35c9155f4f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "233bf47a_a6fe1662",
+        "filename": "android/android-emu/android/utils/filelock.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-05T00:10:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c4389a2e_3e360f98",
       "range": {
         "startLine": 397,
         "startChar": 19,
