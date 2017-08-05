@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3402ca08_96683a1e",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-05T00:09:29Z",
+      "side": 1,
+      "message": "That\u0027s a good point. Using an enum for this.",
+      "parentUuid": "8498cc0b_0d82f3ae",
+      "range": {
+        "startLine": 139,
+        "startChar": 24,
+        "endLine": 139,
+        "endChar": 45
+      },
+      "revId": "038ef06af08c09683313ca83dc3fa860df151fb3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4e059084_95e7a12c",
         "filename": "android/android-emu/android/base/system/System.h",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-04T23:16:44Z",
       "side": 1,
       "message": "Duration",
+      "range": {
+        "startLine": 140,
+        "startChar": 45,
+        "endLine": 140,
+        "endChar": 53
+      },
+      "revId": "038ef06af08c09683313ca83dc3fa860df151fb3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5cc2e3eb_213a082c",
+        "filename": "android/android-emu/android/base/system/System.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-05T00:09:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4e059084_95e7a12c",
       "range": {
         "startLine": 140,
         "startChar": 45,
