@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f2e04cc0_d68b67e6",
+        "filename": "vl.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 4616,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T20:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a36ea54e_1fab4f30",
+      "range": {
+        "startLine": 4615,
+        "startChar": 12,
+        "endLine": 4616,
+        "endChar": 21
+      },
+      "revId": "55f4e09089bb485df51bed23e4047d04caf1a440",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "429d4688_4689296f",
         "filename": "vl.c",
         "patchSetId": 18
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-04T18:27:30Z",
       "side": 1,
       "message": "don\u0027t call this for fast snapshots - our code that handles loading would do the same thing",
+      "range": {
+        "startLine": 4623,
+        "startChar": 29,
+        "endLine": 4623,
+        "endChar": 68
+      },
+      "revId": "55f4e09089bb485df51bed23e4047d04caf1a440",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e269e4a_a033dc09",
+        "filename": "vl.c",
+        "patchSetId": 18
+      },
+      "lineNbr": 4623,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T20:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "429d4688_4689296f",
       "range": {
         "startLine": 4623,
         "startChar": 29,

@@ -22,6 +22,30 @@
       "revId": "82d778bc1ad3906dc09280c2b686d986af50b56f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0248bf28_75f34267",
+        "filename": "vl.c",
+        "patchSetId": 26
+      },
+      "lineNbr": 4616,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T20:52:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "267145bd_592c16ec",
+      "range": {
+        "startLine": 4615,
+        "startChar": 11,
+        "endLine": 4616,
+        "endChar": 55
+      },
+      "revId": "82d778bc1ad3906dc09280c2b686d986af50b56f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
