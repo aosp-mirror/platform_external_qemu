@@ -101,8 +101,10 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init(s_eglIface->eglGetGlLibrary());
-        glBindTexture(GL_TEXTURE_2D,0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+        if (!isGles2Gles()) {
+            glBindTexture(GL_TEXTURE_2D,0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+        }
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -373,7 +375,7 @@ static void sSetDesktopGLEnable(const GLESv2Context* ctx, bool enable, GLenum ca
 // depending on the internal format and attachment combinations of the
 // framebuffer object.
 static void sUpdateFboEmulation(GLESv2Context* ctx) {
-    if (ctx->getMajorVersion() < 3) return;
+    if (ctx->getMajorVersion() < 3 || isGles2Gles()) return;
 
     std::vector<GLenum> colorAttachments(ctx->getCaps()->maxDrawBuffers);
     std::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);
@@ -466,9 +468,16 @@ GL_APICALL void  GL_APIENTRY glBindRenderbuffer(GLenum target, GLuint renderbuff
     ctx->setRenderbufferBinding(renderbuffer);
 }
 
+#define GL_CHECK_ERROR {\
+    GLenum err = ctx->dispatcher().glGetError(); \
+    if (err) fprintf(stderr, "%s: %s %d, gl error %d\n", __FUNCTION__, __FILE__, __LINE__, err); \
+}
+
+
 GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTarget(ctx, target), GL_INVALID_ENUM);
+    GL_CHECK_ERROR
 
     //for handling default texture (0)
     ObjectLocalName localTexName = ctx->getTextureLocalName(target,texture);
@@ -482,6 +491,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
             globalTextureName = ctx->shareGroup()->getGlobalName(
                     NamedObjectType::TEXTURE, localTexName);
         }
+        GL_CHECK_ERROR
 
         TextureData* texData = getTextureData(localTexName);
         if (texData->target==0)
@@ -492,12 +502,15 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
             fprintf(stderr, "%s: Set invalid operation!\n", __func__);
         }
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
+        GL_CHECK_ERROR
         texData->wasBound = true;
         texData->globalName = globalTextureName;
     }
 
+    GL_CHECK_ERROR
     ctx->setBindedTexture(target,texture);
     ctx->dispatcher().glBindTexture(target,globalTextureName);
+    GL_CHECK_ERROR
 
     if (ctx->getMajorVersion() < 3) return;
 
@@ -505,7 +518,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
-    if (!ctx->isCoreProfile()) {
+    if (!ctx->isCoreProfile() && !isGles2Gles()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
         ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
     }
