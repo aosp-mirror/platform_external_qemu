@@ -259,7 +259,7 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
                                    AddConfigCallback* addConfigFunc,
                                    void* addConfigOpaque) {
     D("%s\n", __FUNCTION__);
-    const EGLint attribList[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+    const EGLint attribList[] = {EGL_RENDERABLE_TYPE, renderableType,
                                  EGL_NONE};
     EGLint numConfigs = 0;
     mDispatcher.eglChooseConfig(mDisplay, attribList, nullptr, 0, &numConfigs);
@@ -352,7 +352,11 @@ EglOsEglDisplay::createContext(EGLint profileMask,
     const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
     D("with config %p\n", format->mConfigId);
     // Always GLES2
-    EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    EGLint attrib_list[3] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    if (format->mClientCtxVer & EGL_OPENGL_ES3_BIT) {
+        attrib_list[1] = 3;
+    }
+    // TODO: support GLES3.1
     EglOsEglContext* nativeSharedCtx = (EglOsEglContext*)sharedContext;
     EGLContext newNativeCtx = mDispatcher.eglCreateContext(
             mDisplay, format->mConfigId,
