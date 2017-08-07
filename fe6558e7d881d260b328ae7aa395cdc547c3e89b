@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a74c159_1d3b6401",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T16:50:22Z",
+      "side": 1,
+      "message": "nit: static?",
+      "revId": "fe6558e7d881d260b328ae7aa395cdc547c3e89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a615cc7d_565fe0c9",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/TranslatorIfaces.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T16:50:22Z",
+      "side": 1,
+      "message": "nit: could you please add a comment explaining how they should be different from the regular context creation functions?",
+      "range": {
+        "startLine": 102,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 26
+      },
+      "revId": "fe6558e7d881d260b328ae7aa395cdc547c3e89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
