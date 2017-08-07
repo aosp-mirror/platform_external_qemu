@@ -3,6 +3,7 @@ LOCAL_PATH := $(call my-dir)
 host_common_SRC_FILES :=     \
      etc.cpp                 \
      FramebufferData.cpp     \
+     GLBackgroundLoader.cpp  \
      GLDispatch.cpp          \
      GLutils.cpp             \
      GLEScontext.cpp         \

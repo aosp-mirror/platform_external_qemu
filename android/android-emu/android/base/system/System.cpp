@@ -686,6 +686,81 @@ public:
 #endif
     }
 
+    WaitExitResult waitForProcessExit(int pid, Duration timeoutMs) const override {
+#ifdef __APPLE__
+        struct kevent monitor;
+        struct kevent result;
+        int kq, kevent_ret;
+        struct timespec timeout;
+
+        timeout.tv_sec = timeoutMs / 1000;
+        timeout.tv_nsec = (timeoutMs % 1000) * 1000000;
+
+        kq = kqueue();
+
+        if (kq == -1) {
+            return WaitExitResult::Error;
+        }
+
+        EV_SET(&monitor, pid, EVFILT_PROC, EV_ADD,
+               NOTE_EXIT , 0, nullptr);
+        memset(&result, 0, sizeof(struct kevent));
+
+        while (true) {
+            kevent_ret = kevent(kq, &monitor, 1 /* events to monitor */,
+                                    &result, 1 /* resulting events */,
+                                    &timeout);
+
+            if (!kevent_ret) { // timed out
+                return WaitExitResult::Timeout;
+            }
+
+            if (result.fflags & NOTE_EXIT) {
+                return WaitExitResult::Exited;
+            }
+        }
+#elif defined(_WIN32)
+        HANDLE process = OpenProcess(SYNCHRONIZE, FALSE, pid);
+        if (!process) {
+            DWORD lastErr = GetLastError();
+            if (lastErr == ERROR_ACCESS_DENIED) {
+                return WaitExitResult::Error;
+            }
+            // For everything else, assume the process has
+            // exited.
+            return WaitExitResult::Exited;
+        }
+        DWORD ret = WaitForSingleObject(process, timeoutMs);
+        CloseHandle(process);
+        if (ret == WAIT_OBJECT_0) {
+            return WaitExitResult::Exited;
+        } else {
+            return WaitExitResult::Timeout;
+        }
+#else // linux
+        uint64_t remainingMs = timeoutMs;
+        const uint64_t pollMs = 100;
+
+        int ret = HANDLE_EINTR(kill(pid, 0));
+        if (ret < 0 && errno == ESRCH) {
+            return WaitExitResult::Exited; // successfully waited out the pid
+        }
+
+        while (true) {
+            sleepMs(pollMs);
+            ret = HANDLE_EINTR(kill(pid, 0));
+            if (ret < 0 && errno == ESRCH) {
+                return WaitExitResult::Exited; // successfully waited out the pid
+            }
+            if (remainingMs < pollMs) {
+                return WaitExitResult::Timeout; // timed out
+            }
+            remainingMs -= pollMs;
+        }
+#endif
+    }
+
+
     int getCpuCoreCount() const override {
 #ifdef _WIN32
         SYSTEM_INFO si = {};

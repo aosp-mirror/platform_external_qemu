@@ -52,6 +52,10 @@
 ImagePtr getEGLImage(unsigned int imageId);
 GLEScontext* getGLESContext();
 GlLibrary* getGlLibrary();
+static bool createAndBindAuxiliaryContext(
+    EGLContext* context_out, EGLSurface* surface_out);
+static bool unbindAndDestroyAuxiliaryContext(
+    EGLContext context, EGLSurface surface);
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -71,6 +75,8 @@ static const EGLiface s_eglIface = {
     .getGLESContext = getGLESContext,
     .getEGLImage = getEGLImage,
     .eglGetGlLibrary = getGlLibrary,
+    .createAndBindAuxiliaryContext = createAndBindAuxiliaryContext,
+    .unbindAndDestroyAuxiliaryContext = unbindAndDestroyAuxiliaryContext,
 };
 
 static void initGLESx(GLESVersion version) {
@@ -193,6 +199,90 @@ GlLibrary* getGlLibrary() {
     return EglGlobalInfo::getInstance()->getOsEngine()->getGlLibrary();
 }
 
+
+static const GLint kAuxiliaryContextAttribsCompat[] = {
+    EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE
+};
+
+static const GLint kAuxiliaryContextAttribsCore[] = {
+    EGL_CONTEXT_CLIENT_VERSION, 2,
+    EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
+    EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+    EGL_NONE
+};
+
+static bool createAndBindAuxiliaryContext(EGLContext* context_out, EGLSurface* surface_out) {
+    // create the context
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    eglBindAPI(EGL_OPENGL_ES_API);
+
+    static const GLint configAttribs[] = {
+        EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+        EGL_RENDERABLE_TYPE,
+        EGL_OPENGL_ES2_BIT, EGL_NONE };
+
+    EGLConfig config;
+    int numConfigs;
+    if (!eglChooseConfig(dpy, configAttribs, &config, 1, &numConfigs) ||
+        numConfigs == 0) {
+        fprintf(stderr, "%s: could not find gles 2 config!\n", __func__);
+        return false;
+    }
+
+    static const EGLint pbufAttribs[] =
+        { EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+    EGLSurface surface = eglCreatePbufferSurface(dpy, config, pbufAttribs);
+    if (!surface) {
+        fprintf(stderr, "%s: could not create surface\n", __func__);
+        return false;
+    }
+
+    EGLContext context =
+        eglCreateContext(dpy, config, EGL_NO_CONTEXT,
+            isCoreProfile() ? kAuxiliaryContextAttribsCore :
+                              kAuxiliaryContextAttribsCompat);
+
+    if (!eglMakeCurrent(dpy, surface, surface, context)) {
+        fprintf(stderr, "%s: eglMakeCurrent failed\n", __func__);
+        return false;
+    }
+
+    if (context_out) *context_out = context;
+    if (surface_out) *surface_out = surface;
+
+    return true;
+}
+
+static bool unbindAndDestroyAuxiliaryContext(EGLContext context, EGLSurface surface) {
+
+    // create the context
+    EGLDisplay dpy = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+
+    if (!eglMakeCurrent(
+            dpy, EGL_NO_SURFACE, EGL_NO_SURFACE,
+            EGL_NO_CONTEXT)) {
+        fprintf(stderr, "%s: failure to unbind current context!\n",
+                __func__);
+        return false;
+    }
+
+
+    if (!eglDestroySurface(dpy, surface)) {
+        fprintf(stderr, "%s: failure to destroy surface!\n",
+                __func__);
+        return false;
+    }
+
+    if (!eglDestroyContext(dpy, context)) {
+        fprintf(stderr, "%s: failure to destroy context!\n",
+                __func__);
+        return false;
+    }
+
+    return true;
+}
+
 EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
     CURRENT_THREAD();
     EGLint err = tls_thread->getError();
@@ -258,6 +348,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
 
     __translator_getGLESIfaceFunc func  = NULL;
     int renderableType = EGL_OPENGL_ES_BIT;
+
+    g_eglInfo->setEglIface(&s_eglIface);
 
     char error[256];
     // When running on top of another GLES library, we do not load GLES1

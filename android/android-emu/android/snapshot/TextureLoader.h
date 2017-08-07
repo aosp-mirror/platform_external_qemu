@@ -15,9 +15,11 @@
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
+#include "android/base/threads/Thread.h"
 #include "android/snapshot/common.h"
 
 #include <functional>
+#include <memory>
 #include <unordered_map>
 
 namespace android {
@@ -28,6 +30,8 @@ class TextureLoader {
     DISALLOW_COPY_AND_ASSIGN(TextureLoader);
 
 public:
+    using LoaderThreadPtr = std::shared_ptr<android::base::Thread>;
+
     TextureLoader(android::base::StdioStream&& stream);
 
     using loader_t = std::function<void(android::base::Stream*)>;
@@ -36,6 +40,14 @@ public:
     void loadTexture(uint32_t texId, const loader_t& loader);
 
     bool hasError() const { return mHasError; }
+
+    void acquireLoaderThread(LoaderThreadPtr thread) {
+        mLoaderThread = std::move(thread);
+    }
+
+    void join() {
+        if (mLoaderThread) mLoaderThread.reset();
+    }
 
 private:
     bool readIndex();
@@ -48,6 +60,7 @@ private:
 #if SNAPSHOT_PROFILE > 1
     android::base::System::WallDuration mStartTime;
 #endif
+    LoaderThreadPtr mLoaderThread;
 };
 
 }  // namespace snapshot

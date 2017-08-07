@@ -83,7 +83,7 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     setCoreProfile(ctx->isCoreProfile());
     if (!ctx->isInitialized()) {
         ctx->setShareGroup(grp);
-        ctx->init(s_eglIface->eglGetGlLibrary());
+        ctx->init(s_eglIface);
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
      }
