@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2b90d26f_9ade82e8",
+        "filename": "android/android-emu/android/base/system/System.cpp",
+        "patchSetId": 13
+      },
+      "lineNbr": 735,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T16:48:13Z",
+      "side": 1,
+      "message": "nit: please use \"ret \u003d\u003d WAIT_OBJECT_0\" here, it\u0027s easier to understand",
+      "range": {
+        "startLine": 735,
+        "startChar": 12,
+        "endLine": 735,
+        "endChar": 16
+      },
+      "revId": "c91d493e10cdabc7f00317edfaf563eb5866a2a7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
