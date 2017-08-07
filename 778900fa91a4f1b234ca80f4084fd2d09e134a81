@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9752ae4a_d3077af7",
+        "filename": "android/android-emu/android/snapshot/TextureLoader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T16:39:45Z",
+      "side": 1,
+      "message": "nit: not used anymore",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 44
+      },
+      "revId": "778900fa91a4f1b234ca80f4084fd2d09e134a81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d12c18c6_e66999c5",
+        "filename": "android/android-emu/android/snapshot/TextureLoader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T16:39:45Z",
+      "side": 1,
+      "message": "std::move() it, please",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 31
+      },
+      "revId": "778900fa91a4f1b234ca80f4084fd2d09e134a81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc3c4a47_596d5299",
+        "filename": "android/android-emu/android/snapshot/common.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T16:39:45Z",
+      "side": 1,
+      "message": "nit: this should\u0027ve been in a different CL",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 58
+      },
+      "revId": "778900fa91a4f1b234ca80f4084fd2d09e134a81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
