@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a828300e_5bda8567",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 280,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T17:46:37Z",
+      "side": 1,
+      "message": "nit: this is a gcc extension I\u0027d rather not use in portable C++",
+      "range": {
+        "startLine": 280,
+        "startChar": 72,
+        "endLine": 280,
+        "endChar": 74
+      },
+      "revId": "8d2da2dcff5db1e1183c050fb76979d4313ecc51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8d56f584_bd8ab8fa",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T17:46:37Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 288,
+        "startChar": 13,
+        "endLine": 288,
+        "endChar": 14
+      },
+      "revId": "8d2da2dcff5db1e1183c050fb76979d4313ecc51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16904a07_c819228a",
+        "filename": "vl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-07T17:46:37Z",
+      "side": 1,
+      "message": "I remember changing the emulator code to not use a .qcow2 image for the system.img in case we mount it read-only",
+      "range": {
+        "startLine": 951,
+        "startChar": 3,
+        "endLine": 955,
+        "endChar": 15
+      },
+      "revId": "8d2da2dcff5db1e1183c050fb76979d4313ecc51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
