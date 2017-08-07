@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0dbe5b64_74e65763",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T19:31:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0c1add1d_375f3227",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 45
+      },
+      "revId": "a342438ab9cd1719b8884aedd59900ba7deb14a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "238a8d92_826e38dc",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-07T16:36:36Z",
       "side": 1,
       "message": "what about using WPtr as a generic way of specifying weak ptr?\n\nusing FooPtr \u003d std::shared_ptr\u003cFoo\u003e;\nusing FooWPtr \u003d std::weak_ptr\u003cFoo\u003e;",
+      "range": {
+        "startLine": 34,
+        "startChar": 25,
+        "endLine": 34,
+        "endChar": 45
+      },
+      "revId": "a342438ab9cd1719b8884aedd59900ba7deb14a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8b7b234_2134435f",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T19:31:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "238a8d92_826e38dc",
       "range": {
         "startLine": 34,
         "startChar": 25,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "cd9cf318_a527f9b5",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/ObjectNameSpace.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T19:31:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f778a169_cbfeac96",
+      "range": {
+        "startLine": 306,
+        "startChar": 0,
+        "endLine": 307,
+        "endChar": 57
+      },
+      "revId": "a342438ab9cd1719b8884aedd59900ba7deb14a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ae04e76_a8e8fb89",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
         "patchSetId": 10
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "989f4889_9116e5d6",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLBackgroundLoader.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T19:31:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1ae04e76_a8e8fb89",
+      "range": {
+        "startLine": 28,
+        "startChar": 68,
+        "endLine": 28,
+        "endChar": 69
+      },
+      "revId": "a342438ab9cd1719b8884aedd59900ba7deb14a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bb45ca2_0c3f0484",
         "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
         "patchSetId": 10
@@ -105,6 +201,30 @@
       "writtenOn": "2017-08-07T16:36:36Z",
       "side": 1,
       "message": "\u0026",
+      "range": {
+        "startLine": 139,
+        "startChar": 61,
+        "endLine": 139,
+        "endChar": 62
+      },
+      "revId": "a342438ab9cd1719b8884aedd59900ba7deb14a5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b71868f4_2db99225",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/ObjectNameSpace.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-07T19:31:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1bb45ca2_0c3f0484",
       "range": {
         "startLine": 139,
         "startChar": 61,
