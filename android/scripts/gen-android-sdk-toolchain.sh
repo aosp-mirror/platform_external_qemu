@@ -161,7 +161,7 @@ fi
 #    EXTRA_WINDRESFLAGS
 #
 # As well as a special variable containing commands to setup the
-# environment before tool invokation:
+# environment before tool invocation:
 #
 #    EXTRA_ENV_SETUP
 #
@@ -174,6 +174,7 @@ gen_wrapper_program ()
     local CLANG_BINDIR="$5"
     local FLAGS=""
     local POST_FLAGS=""
+    local DST_PROG="$PROG"
 
     case $PROG in
       cc|gcc|cpp|clang)
@@ -186,11 +187,16 @@ gen_wrapper_program ()
           ;;
       ar) FLAGS=$FLAGS" $EXTRA_ARFLAGS";;
       as) FLAGS=$FLAGS" $EXTRA_ASFLAGS";;
-      ld|ld.bfd|ld.gold) FLAGS=$FLAGS" $EXTRA_LDFLAGS";;
+      ld|ld.bfd|ld.gold)
+        FLAGS=$FLAGS" $EXTRA_LDFLAGS"
+        case $CURRENT_HOST in
+          linux-*) DST_PROG=gcc;;
+          *) DST_PROG=ld;;
+        esac
+        ;;
       windres) FLAGS=$FLAGS" $EXTRA_WINDRESFLAGS";;
     esac
 
-    local DST_PROG="$PROG"
     if [ "$CLANG_BINDIR" ]; then
         CLANG_BINDIR=${CLANG_BINDIR%/}
         case $PROG in
@@ -246,7 +252,7 @@ gen_wrapper_program ()
 # Environment setup
 $EXTRA_ENV_SETUP
 
-# Tool invokation.
+# Tool invocation.
 ${DST_PREFIX}$DST_PROG $FLAGS "\$@" $POST_FLAGS
 EOF
     chmod +x "$DST_FILE"
@@ -263,8 +269,8 @@ gen_wrapper_toolchain () {
     local DST_DIR="$3"
     local CLANG_BINDIR="$4"
     local PROG
-    local COMPILERS="cc gcc clang c++ g++ clang++ cpp"
-    local PROGRAMS="as ld ar ranlib strip strings nm objdump objcopy dlltool"
+    local COMPILERS="cc gcc clang c++ g++ clang++ cpp ld"
+    local PROGRAMS="as ar ranlib strip strings nm objdump objcopy dlltool"
 
     log "Generating toolchain wrappers in: $DST_DIR"
     run mkdir -p "$DST_DIR"
