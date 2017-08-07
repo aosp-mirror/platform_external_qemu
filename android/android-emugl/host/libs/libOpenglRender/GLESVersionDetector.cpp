@@ -110,7 +110,10 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
         emugl_feature_is_enabled(
                 android::featurecontrol::PlayStoreImage);
 
-    if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
+    if (emugl::getRenderer() == SELECTED_RENDERER_HOST
+        || emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT
+        || emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT
+        || emugl::getRenderer() == SELECTED_RENDERER_ANGLE9_INDIRECT) {
         if (s_egl.eglGetMaxGLESVersion) {
             maxVersion =
                 (GLESDispatchMaxVersion)s_egl.eglGetMaxGLESVersion(dpy);

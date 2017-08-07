@@ -1020,6 +1020,10 @@ message EmulatorDetails {
     MESA = 4;
     SWIFTSHADER = 5;
     ANGLE = 6;
+    ANGLE9 = 7;
+    SWIFTSHADER_INDIRECT = 8;
+    ANGLE_INDIRECT = 9;
+    ANGLE9_INDIRECT = 10;
     ERROR_IN_EMULATOR_RENDERER = 255;
   }
 

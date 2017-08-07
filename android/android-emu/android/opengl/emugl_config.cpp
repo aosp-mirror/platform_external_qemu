@@ -99,6 +99,12 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode) {
         return SELECTED_RENDERER_ANGLE;
     } else if (!strcmp(gpu_mode, "angle9")) {
         return SELECTED_RENDERER_ANGLE9;
+    } else if (!strcmp(gpu_mode, "swiftshader_indirect")) {
+        return SELECTED_RENDERER_SWIFTSHADER_INDIRECT;
+    } else if (!strcmp(gpu_mode, "angle_indirect")) {
+        return SELECTED_RENDERER_ANGLE_INDIRECT;
+    } else if (!strcmp(gpu_mode, "angle9_indirect")) {
+        return SELECTED_RENDERER_ANGLE9_INDIRECT;
     } else if (!strcmp(gpu_mode, "error")) {
         return SELECTED_RENDERER_ERROR;
     } else {
