@@ -342,8 +342,6 @@ void GLEScontext::initEglIface(EGLiface* iface) {
 void GLEScontext::init(EGLiface* eglIface) {
     initEglIface(eglIface);
 
-    GlLibrary* glLib = s_eglIface->eglGetGlLibrary();
-
     if (!s_glExtensions) {
         initCapsLocked(reinterpret_cast<const GLubyte*>(
                 getHostExtensionsString(&s_glDispatch).c_str()));
