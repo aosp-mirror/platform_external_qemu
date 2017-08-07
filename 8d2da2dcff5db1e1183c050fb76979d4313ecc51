@@ -68,6 +68,30 @@
       "revId": "8d2da2dcff5db1e1183c050fb76979d4313ecc51",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a6e3500_7aac9e62",
+        "filename": "vl.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 955,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-07T18:15:59Z",
+      "side": 1,
+      "message": "right, emu-master-dev has made that changes;\nbut emu-2.4-release has not yet;\n\nIf not very critical, I want to keep 2.4 that way.\nif it is very critical, I can upload another CL to do the switch",
+      "parentUuid": "16904a07_c819228a",
+      "range": {
+        "startLine": 951,
+        "startChar": 3,
+        "endLine": 955,
+        "endChar": 15
+      },
+      "revId": "8d2da2dcff5db1e1183c050fb76979d4313ecc51",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
