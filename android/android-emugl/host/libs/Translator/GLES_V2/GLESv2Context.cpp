@@ -64,7 +64,7 @@ void GLESv2Context::init(EGLiface* eglIface) {
                      (const char*)dispatcher().glGetString(GL_RENDERER),
                      (const char*)dispatcher().glGetString(GL_VERSION),
                      sPickVersionStringPart(m_glesMajorVersion, m_glesMinorVersion));
-        if (m_glesMajorVersion > 2) {
+        if (m_glesMajorVersion > 2 && !isGles2Gles()) {
             // OpenGL ES assumes that colors computed by / given to shaders will be converted to / from SRGB automatically
             // by the underlying implementation.
             // Desktop OpenGL makes no such assumption, and requires glEnable(GL_FRAMEBUFFER_SRGB) for the automatic conversion

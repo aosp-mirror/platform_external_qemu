@@ -252,14 +252,16 @@ EglOsEglDisplay::~EglOsEglDisplay() {
 
 EglOS::GlesVersion EglOsEglDisplay::getMaxGlesVersion() {
     // TODO: Detect and return the highest version like in GLESVersionDetector.cpp
-    return EglOS::GlesVersion::ES2;
+    return EglOS::GlesVersion::ES30;
 }
 
 void EglOsEglDisplay::queryConfigs(int renderableType,
                                    AddConfigCallback* addConfigFunc,
                                    void* addConfigOpaque) {
     D("%s\n", __FUNCTION__);
-    const EGLint attribList[] = {EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+    // ANGLE does not support GLES1 and needs to use GLES12Translator
+    renderableType &= ~EGL_OPENGL_ES_BIT;
+    const EGLint attribList[] = {EGL_RENDERABLE_TYPE, renderableType,
                                  EGL_NONE};
     EGLint numConfigs = 0;
     mDispatcher.eglChooseConfig(mDisplay, attribList, nullptr, 0, &numConfigs);
@@ -351,8 +353,9 @@ EglOsEglDisplay::createContext(EGLint profileMask,
     D("%s\n", __FUNCTION__);
     const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
     D("with config %p\n", format->mConfigId);
-    // Always GLES2
-    EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+    // Always GLES3
+    EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
+    // TODO: support GLES3.1
     EglOsEglContext* nativeSharedCtx = (EglOsEglContext*)sharedContext;
     EGLContext newNativeCtx = mDispatcher.eglCreateContext(
             mDisplay, format->mConfigId,

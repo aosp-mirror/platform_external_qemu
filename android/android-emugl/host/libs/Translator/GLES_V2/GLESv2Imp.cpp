@@ -101,8 +101,10 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init(s_eglIface);
-        glBindTexture(GL_TEXTURE_2D,0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+        if (!isGles2Gles()) {
+            glBindTexture(GL_TEXTURE_2D,0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
+        }
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -373,7 +375,7 @@ static void sSetDesktopGLEnable(const GLESv2Context* ctx, bool enable, GLenum ca
 // depending on the internal format and attachment combinations of the
 // framebuffer object.
 static void sUpdateFboEmulation(GLESv2Context* ctx) {
-    if (ctx->getMajorVersion() < 3) return;
+    if (ctx->getMajorVersion() < 3 || isGles2Gles()) return;
 
     std::vector<GLenum> colorAttachments(ctx->getCaps()->maxDrawBuffers);
     std::iota(colorAttachments.begin(), colorAttachments.end(), GL_COLOR_ATTACHMENT0);
@@ -505,7 +507,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
-    if (!ctx->isCoreProfile()) {
+    if (!ctx->isCoreProfile() && !isGles2Gles()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
         ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
     }
