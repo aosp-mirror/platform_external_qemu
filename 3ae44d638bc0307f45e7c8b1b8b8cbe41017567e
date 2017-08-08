@@ -22,6 +22,30 @@
       "revId": "3ae44d638bc0307f45e7c8b1b8b8cbe41017567e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "362f935d_52fe0cd3",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_egl.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-08T00:20:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d81c8d3_efd75ec3",
+      "range": {
+        "startLine": 355,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 52
+      },
+      "revId": "3ae44d638bc0307f45e7c8b1b8b8cbe41017567e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
