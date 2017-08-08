@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "752dbd6c_556f3b40",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-08T19:05:55Z",
+      "side": 1,
+      "message": "should you just enforce the snapshot file to have host and return false if it does not?",
+      "range": {
+        "startLine": 275,
+        "startChar": 8,
+        "endLine": 275,
+        "endChar": 30
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
