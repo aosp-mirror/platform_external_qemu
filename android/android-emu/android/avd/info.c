@@ -133,6 +133,7 @@ struct AvdInfo {
     char*     skinName;     /* skin name */
     char*     skinDirPath;  /* skin directory */
     char*     coreHardwareIniPath;  /* core hardware.ini path */
+    char*     snapshotLockPath;  /* core snapshot.lock path */
 
     FileData  buildProperties[1];  /* build.prop file */
     FileData  bootProperties[1];   /* boot.prop file */
@@ -155,6 +156,7 @@ avdInfo_free( AvdInfo*  i )
         AFREE(i->skinName);
         AFREE(i->skinDirPath);
         AFREE(i->coreHardwareIniPath);
+        AFREE(i->snapshotLockPath);
 
         fileData_done(i->buildProperties);
         fileData_done(i->bootProperties);
@@ -798,6 +800,18 @@ _avdInfo_getCoreHwIniPath( AvdInfo* i, const char* basePath )
     return 0;
 }
 
+static int
+_avdInfo_getSnapshotLockFilePath( AvdInfo* i, const char* basePath )
+{
+    i->snapshotLockPath = _getFullFilePath(basePath, SNAPSHOT_LOCK);
+    if (i->snapshotLockPath == NULL) {
+        DD("Path too long for %s: %s", SNAPSHOT_LOCK, basePath);
+        return -1;
+    }
+    D("using core hw config path: %s", i->snapshotLockPath);
+    return 0;
+}
+
 
 static void
 _avdInfo_readPropertyFile(const AvdInfo* i,
@@ -885,7 +899,8 @@ avdInfo_new( const char*  name, AvdInfoParams*  params )
          _avdInfo_getRootIni(i) < 0     ||
          _avdInfo_getContentPath(i) < 0 ||
          _avdInfo_getConfigIni(i)   < 0 ||
-         _avdInfo_getCoreHwIniPath(i, i->contentPath) < 0 )
+         _avdInfo_getCoreHwIniPath(i, i->contentPath) < 0 ||
+         _avdInfo_getSnapshotLockFilePath(i, i->contentPath) < 0 )
         goto FAIL;
 
     i->apiLevel = _avdInfo_getApiLevel(i, &i->isMarshmallowOrHigher);
@@ -1014,7 +1029,8 @@ avdInfo_newForAndroidBuild( const char*     androidBuildRoot,
     /* out/target/product/<name>/config.ini, if exists, provide configuration
      * from build files. */
     if (_avdInfo_getConfigIni(i) < 0 ||
-        _avdInfo_getCoreHwIniPath(i, i->androidOut) < 0)
+        _avdInfo_getCoreHwIniPath(i, i->androidOut) < 0 ||
+        _avdInfo_getSnapshotLockFilePath(i, i->androidOut) < 0)
         goto FAIL;
 
     /* Read the build skin's hardware.ini, if any */
@@ -1517,6 +1533,11 @@ avdInfo_getCoreHwIniPath( const AvdInfo* i )
     return i->coreHardwareIniPath;
 }
 
+const char*
+avdInfo_getSnapshotLockFilePath( const AvdInfo* i )
+{
+    return i->snapshotLockPath;
+}
 
 void
 avdInfo_getSkinInfo( const AvdInfo*  i, char** pSkinName, char** pSkinDir )

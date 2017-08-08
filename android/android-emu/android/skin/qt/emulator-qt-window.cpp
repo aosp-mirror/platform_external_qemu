@@ -41,6 +41,7 @@
 #include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
+#include "android/utils/filelock.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -692,10 +693,29 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     mStartupDialog.clear();
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
+        // Hide everything right away.
+        if (mToolWindow) {
+            mToolWindow->hide();
+        }
+        mContainer.hide();
+        mOverlay.hide();
+
         // we dont want to restore to a state where the
         // framework is shut down by 'adb reboot -p'
         // so skip that step when saving vm on exit
-        if (savevm_on_exit) {
+        bool fastSnapshotV1 =
+            android::featurecontrol::isEnabled(
+                android::featurecontrol::FastSnapshotV1);
+
+        // Tell the system that we are in saving; create a file lock.
+        if (fastSnapshotV1) {
+            if (!filelock_create(avdInfo_getSnapshotLockFilePath(android_avdInfo))) {
+                derror("unable to lock snapshot save on exit!\n");
+            }
+        }
+
+        if (savevm_on_exit ||
+            fastSnapshotV1) {
             queueQuitEvent();
         } else {
             runAdbShellPowerDownAndQuit();

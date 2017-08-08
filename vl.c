@@ -155,6 +155,7 @@ int main(int argc, char **argv)
 #include "android/skin/winsys.h"
 #include "android/snapshot.h"
 #include "android/snaphost-android.h"
+#include "android/snapshot/interface.h"
 #include "android/telephony/modem_driver.h"
 #include "android/update-check/update_check.h"
 #include "android/ui-emu-agent.h"
@@ -2170,6 +2171,13 @@ static bool main_loop_should_exit(void)
         qemu_system_suspend();
     }
     if (qemu_shutdown_requested()) {
+
+#ifdef CONFIG_ANDROID
+        if (feature_is_enabled(kFeature_FastSnapshotV1)) {
+            androidSnapshot_save("default_boot");
+        }
+#endif
+
         qemu_kill_report();
         qapi_event_send_shutdown(&error_abort);
         if (no_shutdown) {
@@ -4601,11 +4609,24 @@ static int main_impl(int argc, char** argv)
     androidHwConfig_init(android_hw, 0);
     androidHwConfig_read(android_hw, hw_ini);
 
+    bool attemptedDefaultBoot = false;
+    const char* boot_snapshot_dir = path_join("snapshots", "default_boot");
+    const char* boot_snapshot_dir_full_path = path_join(avdInfo_getContentPath(android_avdInfo),
+                                                        boot_snapshot_dir);
+    if (!loadvm && feature_is_enabled(kFeature_FastSnapshotV1) &&
+        path_exists(boot_snapshot_dir_full_path)) {
+        loadvm = "default_boot";
+        attemptedDefaultBoot = true;
+    }
+    free(boot_snapshot_dir);
+    free(boot_snapshot_dir_full_path);
+
     /* If we're loading VM from a snapshot, make sure that the current HW config
      * matches the one with which the VM has been saved. */
     if (loadvm && *loadvm && !snaphost_match_configs(hw_ini, loadvm)) {
         error_report("HW config doesn't match the one in the snapshot");
-        return 0;
+        if (!attemptedDefaultBoot)
+            return 0;
     }
 
     iniFile_free(hw_ini);
@@ -5442,7 +5463,12 @@ static int main_impl(int argc, char** argv)
         printf("Starting snapshot load with uptime %lld ms\n",
                (long long)get_uptime_ms());
 #endif
+
+#if defined(CONFIG_ANDROID)
+        if (androidSnapshot_load(loadvm) < 0) {
+#else
         if (load_vmstate(loadvm) < 0) {
+#endif
             autostart = 0;
         }
     }
