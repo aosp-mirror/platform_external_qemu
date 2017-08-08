@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "38f0650f_d9b3e57f",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-08T20:04:47Z",
+      "side": 1,
+      "message": "good point",
+      "parentUuid": "278bdcc4_5d09da79",
+      "range": {
+        "startLine": 138,
+        "startChar": 16,
+        "endLine": 138,
+        "endChar": 52
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4c956c6c_08d641e1",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-08T19:14:54Z",
       "side": 1,
       "message": "We might have to go for equality check here. Seems to depend on which feature it is; e.g., GLESDynamicVersion / PlayStoreImage \u003d on invalidates the snapshot.",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 60
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ba9f8f0_58398f92",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-08T20:04:47Z",
+      "side": 1,
+      "message": "yes, and some features are totally harmless. I don\u0027t want to have another list of features here, let\u0027s enforce strict equality then",
+      "parentUuid": "4c956c6c_08d641e1",
       "range": {
         "startLine": 172,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "99a02df5_dcd279b3",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-08T20:04:47Z",
+      "side": 1,
+      "message": "I was hoping to preserve compatibility between different devices in case when the manufacturer and the driver are the same, or at least close. Is there a reason why snapshot on saved on 1060 would fail to load on 1080?",
+      "parentUuid": "ba42ec77_7e98eabf",
+      "range": {
+        "startLine": 226,
+        "startChar": 64,
+        "endLine": 226,
+        "endChar": 66
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "752dbd6c_556f3b40",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2017-08-08T19:05:55Z",
       "side": 1,
       "message": "should you just enforce the snapshot file to have host and return false if it does not?",
+      "range": {
+        "startLine": 275,
+        "startChar": 8,
+        "endLine": 275,
+        "endChar": 30
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "90fd20ac_c98cdc74",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-08T20:04:47Z",
+      "side": 1,
+      "message": "Then the code would break if we decide to stop using |host| in favor of some new field",
+      "parentUuid": "752dbd6c_556f3b40",
       "range": {
         "startLine": 275,
         "startChar": 8,
