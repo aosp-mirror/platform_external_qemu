@@ -14,8 +14,6 @@
 #include "android/base/StringView.h"
 #include <string>
 
-#define CURRENT_SNAPSHOT_VERSION 0
-
 namespace android {
 namespace snapshot {
 
@@ -30,7 +28,7 @@ public:
     bool load();
 
 private:
-    base::StringView mName;
+    std::string mName;
     std::string mDataDir;
 };
 

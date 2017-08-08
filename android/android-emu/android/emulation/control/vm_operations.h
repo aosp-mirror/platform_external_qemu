@@ -59,6 +59,20 @@ typedef struct {
     SnapshotRamCallbacks ramOps;
 } SnapshotCallbacks;
 
+typedef enum {
+    HV_UNKNOWN,
+    HV_NONE,
+    HV_KVM,
+    HV_HAXM,
+    HV_HVF,
+} VmHypervisorType;
+
+typedef struct {
+    VmHypervisorType hypervisorType;
+    int32_t numberOfCpuCores;
+    int64_t ramSizeBytes;
+} VmConfiguration;
+
 // C interface to expose Qemu implementations of common VM related operations.
 typedef struct QAndroidVmOperations {
     bool (*vmStop)(void);
@@ -86,6 +100,9 @@ typedef struct QAndroidVmOperations {
     // Sets a set of callback to listen for snapshot operations.
     void (*setSnapshotCallbacks)(void* opaque,
                                  const SnapshotCallbacks* callbacks);
+
+    // Fills in the supplied |out| with current VM configuration.
+    void (*getVmConfiguration)(VmConfiguration* out);
 
 } QAndroidVmOperations;
 

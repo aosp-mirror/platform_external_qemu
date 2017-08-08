@@ -119,6 +119,11 @@ LOCAL_SRC_FILES += \
         $(call qemu2-if-linux, hax-stub.c), \
         hax-stub.c \
     ) \
+    $(call qemu2-if-target,x86 x86_64, \
+        $(call qemu2-if-os, linux windows, hvf-stub.c), \
+        hvf-stub.c \
+    ) \
+
 
 LOCAL_PREBUILTS_OBJ_FILES += \
     $(call qemu2-if-windows,$(QEMU2_AUTO_GENERATED_DIR)/version.o)
