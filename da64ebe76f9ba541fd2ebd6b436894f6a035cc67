@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "68f300ee_69163070",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-08T22:14:55Z",
+      "side": 1,
+      "message": "Just checking: will there be a +info.model version for Mac or do you think we\u0027re OK with just the make + version?",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 58
+      },
+      "revId": "da64ebe76f9ba541fd2ebd6b436894f6a035cc67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
