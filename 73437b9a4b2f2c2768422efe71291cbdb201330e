@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "7f37db5c_d68c2b7a",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-08T20:45:48Z",
+      "side": 1,
+      "message": "I see, yeah there should be a good chance that just the driver version is good. Snapshots on 1060 vs 1080 on like 384.25 or whatever nvidia driver version should be OK, IDK about other vendors though.\n\nThen it seems like the best thing to try for now is just the make and driver version, and then later on see what breaks.\n\nFor Mac/Linux though, the driver version isn\u0027t meaningfully included in the gpu info and the model name seems prudent to add. Hardware is more samey for Mac also, so we still get to test migrations easily even if model name is added.",
+      "parentUuid": "99a02df5_dcd279b3",
+      "range": {
+        "startLine": 226,
+        "startChar": 64,
+        "endLine": 226,
+        "endChar": 66
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "752dbd6c_556f3b40",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 1
