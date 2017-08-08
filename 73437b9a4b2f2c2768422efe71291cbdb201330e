@@ -2,6 +2,75 @@
   "comments": [
     {
       "key": {
+        "uuid": "278bdcc4_5d09da79",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-08T19:14:54Z",
+      "side": 1,
+      "message": "Maybe have a common function for gpu info \"snapshot equivalence\"",
+      "range": {
+        "startLine": 138,
+        "startChar": 16,
+        "endLine": 138,
+        "endChar": 52
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4c956c6c_08d641e1",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-08T19:14:54Z",
+      "side": 1,
+      "message": "We might have to go for equality check here. Seems to depend on which feature it is; e.g., GLESDynamicVersion / PlayStoreImage \u003d on invalidates the snapshot.",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 60
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba42ec77_7e98eabf",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 226,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-08T19:14:54Z",
+      "side": 1,
+      "message": "What about also adding the currentIt-\u003edevice_id? currentIt-\u003eversion might not be set or could be common to different hardware GPUs, and model/device_id should be set for all platforms and says what the exact model name or PCI device id is for that GPU.",
+      "range": {
+        "startLine": 226,
+        "startChar": 64,
+        "endLine": 226,
+        "endChar": 66
+      },
+      "revId": "73437b9a4b2f2c2768422efe71291cbdb201330e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "752dbd6c_556f3b40",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 1
