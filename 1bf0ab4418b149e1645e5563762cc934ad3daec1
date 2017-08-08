@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9cca5354_94e816b4",
+        "filename": "android/android-emugl/host/libs/libGLES12Translator/gles/pass_through.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-08T20:09:40Z",
+      "side": 1,
+      "message": "please make sure to run a munch of tests to hit this lock - if code used to work before we may get a deadlock now",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 31,
+        "endChar": 21
+      },
+      "revId": "1bf0ab4418b149e1645e5563762cc934ad3daec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
