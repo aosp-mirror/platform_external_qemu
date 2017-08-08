@@ -28,6 +28,8 @@ extern "C" {
 #include "qapi/qmp/qobject.h"
 #include "qapi/qmp/qstring.h"
 #include "sysemu/sysemu.h"
+#include "sysemu/kvm.h"
+#include "exec/cpu-common.h"
 }
 
 #include <string>
@@ -301,6 +303,26 @@ static void set_snapshot_callbacks(void* opaque,
     }
 }
 
+// These are QEMU's functions to check for each specific hypervisor status.
+extern "C" int hax_enabled(void);
+extern "C" int hvf_enabled(void);
+
+static void get_vm_config(VmConfiguration* out) {
+    out->numberOfCpuCores = smp_cpus * smp_cores * smp_threads;
+    out->ramSizeBytes = int64_t(ram_size);
+    if (hax_enabled()) {
+        out->hypervisorType = HV_HAXM;
+    } else if (hvf_enabled()) {
+        out->hypervisorType = HV_HVF;
+    } else if (kvm_enabled()) {
+        out->hypervisorType = HV_KVM;
+    } else if (tcg_enabled()) {
+        out->hypervisorType = HV_NONE;
+    } else {
+        out->hypervisorType = HV_UNKNOWN;
+    }
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -310,6 +332,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotLoad = qemu_snapshot_load,
         .snapshotDelete = qemu_snapshot_delete,
         .setSnapshotCallbacks = set_snapshot_callbacks,
+        .getVmConfiguration = get_vm_config,
 };
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;
