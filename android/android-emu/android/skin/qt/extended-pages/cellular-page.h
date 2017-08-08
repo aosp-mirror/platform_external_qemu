@@ -31,15 +31,11 @@ private slots:
     void on_cell_standardBox_currentIndexChanged(int index);
     void on_cell_voiceStatusBox_currentIndexChanged(int index);
     void on_cell_signalStatusBox_currentIndexChanged(int index);
-    void on_cell_simBox_clicked(bool isPresent);
 
     // TODO: Implement Network delay setting
     // http://developer.android.com/tools/devices/emulator.html#netdelay
 
 private:
-    static bool simSetting(); // The UI setting for SIM presence
-
     std::unique_ptr<Ui::CellularPage> mUi;
     const QAndroidCellularAgent* mCellularAgent = nullptr;
-    bool  mSimChangeInfoWasShown = false;     // True after the info box has been shown
 };
