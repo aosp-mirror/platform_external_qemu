@@ -30,4 +30,7 @@ message Snapshot {
     optional int64 creation_time = 2;
 
     repeated Image images = 3;
+
+    optional int32 hypervisor = 4;
+    optional int32 renderer = 5;
 }

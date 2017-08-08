@@ -18,7 +18,9 @@
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
+#include "android/emulation/CpuAccelerator.h"
 #include "android/globals.h"
+#include "android/opengl/emugl_config.h"
 #include "android/snapshot/PathUtils.h"
 #include "android/snapshot/proto/snapshot.pb.h"
 #include "android/utils/fd.h"
@@ -154,6 +156,11 @@ bool Snapshot::save() {
         fillImageInfo(image.type, path.get(), snapshot.add_images());
     }
 
+    // android::GetCurrentCpuAccelerator() + 1 so that it is the same as in
+    // the metrics
+    snapshot.set_hypervisor(android::GetCurrentCpuAccelerator() + 1);
+    snapshot.set_renderer(emuglConfig_get_renderer(android_hw->hw_gpu_mode));
+
     google::protobuf::io::FileOutputStream stream(
             ::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
                    O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0755));
@@ -212,6 +219,14 @@ bool Snapshot::load() {
         }
     }
     if (matchedImages != snapshot.images_size()) {
+        return false;
+    }
+    if (!snapshot.has_hypervisor()
+        || snapshot.hypervisor() != android::GetCurrentCpuAccelerator() + 1) {
+        return false;
+    }
+    if (!snapshot.has_renderer()
+        || snapshot.renderer() != emuglConfig_get_renderer(android_hw->hw_gpu_mode)) {
         return false;
     }
 
