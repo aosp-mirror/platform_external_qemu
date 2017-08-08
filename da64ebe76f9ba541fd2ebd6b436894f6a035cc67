@@ -22,6 +22,30 @@
       "revId": "da64ebe76f9ba541fd2ebd6b436894f6a035cc67",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4b9fbd1d_0dc6a89f",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-08T22:38:14Z",
+      "side": 1,
+      "message": "You know, now I believe that being too strict is fine for now. Let\u0027s not make it too portable without fixing bigger issues first. Thanks for making sure I don\u0027t miss it!",
+      "parentUuid": "68f300ee_69163070",
+      "range": {
+        "startLine": 128,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 58
+      },
+      "revId": "da64ebe76f9ba541fd2ebd6b436894f6a035cc67",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
