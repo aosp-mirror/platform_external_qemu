@@ -219,6 +219,13 @@ static std::string getNthParentDir(const char* path, size_t n) {
  *  type - what type of partition parameter to generate
 */
 
+static std::string get_qcow2_image_basename(const std::string& image) {
+    char* basename = path_basename(image.c_str());
+    std::string qcow2_basename(basename);
+    free(basename);
+    return qcow2_basename + ".qcow2";
+}
+
 static void makePartitionCmd(const char** args, int* argsPosition, int* driveIndex,
                              AndroidHwConfig* hw, ImageType type, bool writable,
                              int apiLevel, AvdInfo* avd) {
@@ -238,12 +245,20 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
 
     std::string deviceParam;
     StringView filePath;
+    ScopedCPtr<const char> allocatedPath;
+    std::string sysImagePath, vendorImagePath;
+    bool qCow2Format = true;
     switch (type) {
         case IMAGE_TYPE_SYSTEM:
-            filePath = avdInfo_getContentPath(avd);
-            driveParam += StringFormat("index=%d,id=system,file=%s"
-                                       PATH_SEP "system.img.qcow2",
-                                        idx++, filePath);
+            sysImagePath = std::string(hw->disk_systemPartition_path ?
+                    hw->disk_systemPartition_path : hw->disk_systemPartition_initPath);
+            {
+                const char* systemDir = avdInfo_getContentPath(avd);
+                filePath = path_join(systemDir, get_qcow2_image_basename(sysImagePath).c_str());
+                driveParam += StringFormat("index=%d,id=system,file=%s",
+                                           idx++, filePath);
+                allocatedPath.reset(filePath.c_str());
+            }
             // API 15 and under images need a read+write
             // system image.
             if (apiLevel > 15) {
@@ -262,10 +277,16 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                 // we do not have a vendor image to mount
                 return;
             }
-            filePath = avdInfo_getContentPath(avd);
-            driveParam += StringFormat("index=%d,id=vendor,file=%s"
-                                       PATH_SEP "vendor.img.qcow2",
-                                        idx++, filePath);
+            vendorImagePath = std::string(hw->disk_vendorPartition_path ?
+                    hw->disk_vendorPartition_path : hw->disk_vendorPartition_initPath);
+            {
+                const char* systemDir = avdInfo_getContentPath(avd);
+                filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
+                driveParam += StringFormat("index=%d,id=vendor,file=%s",
+                                           idx++, filePath);
+                allocatedPath.reset(filePath.c_str());
+            }
+
             // You can override this explicitly
             // by passing -writable-system to emulator.
             if (!writable) driveParam += ",read-only";
