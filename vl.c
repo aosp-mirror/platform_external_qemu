@@ -4610,9 +4610,9 @@ static int main_impl(int argc, char** argv)
     androidHwConfig_read(android_hw, hw_ini);
 
     bool attemptedDefaultBoot = false;
-    const char* boot_snapshot_dir = path_join("snapshots", "default_boot");
-    const char* boot_snapshot_dir_full_path = path_join(avdInfo_getContentPath(android_avdInfo),
-                                                        boot_snapshot_dir);
+    char* boot_snapshot_dir = path_join("snapshots", "default_boot");
+    char* boot_snapshot_dir_full_path = path_join(avdInfo_getContentPath(android_avdInfo),
+                                                  boot_snapshot_dir);
     if (!loadvm && feature_is_enabled(kFeature_FastSnapshotV1) &&
         path_exists(boot_snapshot_dir_full_path)) {
         loadvm = "default_boot";
