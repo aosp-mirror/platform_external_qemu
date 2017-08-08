@@ -76,15 +76,14 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-array-bounds \
                       -Wno-builtin-requires-header \
                       -Wno-constant-conversion \
+                      -Wno-c++14-extensions \
                       -Wno-deprecated-register \
                       -Wno-extern-c-compat \
                       -Wno-gnu-designator \
                       -Wno-inconsistent-missing-override \
                       -Wno-initializer-overrides \
-                      -Wno-invalid-constexpr \
                       -Wno-macro-redefined \
                       -Wno-missing-braces \
-                      -Wno-missing-field-initializers \
                       -Wno-parentheses-equality \
                       -Wno-pessimizing-move \
                       -Wno-pointer-bool-conversion \
@@ -98,7 +97,7 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-const-variable \
                       -Wno-unused-function \
                       -Wno-unused-lambda-capture \
-                      -Wno-unused-private-field \
+                      -Wno-unused-variable \
                       -Wno-unused-value \
 
 BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS))

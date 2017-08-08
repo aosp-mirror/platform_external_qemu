@@ -52,7 +52,6 @@ AdbLivenessChecker::AdbLivenessChecker(
         android::base::StringView emulatorName,
         android::base::Looper::Duration checkIntervalMs)
     : mAdb(adb),
-      mLooper(looper),
       mReporter(reporter),
       mEmulatorName(emulatorName),
       mCheckIntervalMs(checkIntervalMs),

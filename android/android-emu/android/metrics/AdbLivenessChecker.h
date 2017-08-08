@@ -81,7 +81,6 @@ private:
     android::emulation::AdbInterface* mAdb;
     android::emulation::AdbCommandPtr mDevicesCommand;
     android::emulation::AdbCommandPtr mShellExitCommand;
-    android::base::Looper* const mLooper;
     MetricsReporter* const mReporter;
     const std::string mEmulatorName;
     const android::base::Looper::Duration mCheckIntervalMs;

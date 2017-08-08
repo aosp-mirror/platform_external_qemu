@@ -51,7 +51,6 @@ protected:
 private:
     bool checkMemoryUsage();
 
-    android::base::Looper* const mLooper;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
 

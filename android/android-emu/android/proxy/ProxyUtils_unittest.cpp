@@ -48,7 +48,7 @@ TEST(ProxyUtils, parseConfigurationString) {
              {IpAddress(0xc0a80012U), 3128, Optional<std::string>("user"),
               Optional<std::string>("pass")}},
             {"[::1]:7000", {IpAddress(kIpv6Loopback), 7000, {}, {}}},
-            {"proxy.example.com:3000", IpAddress(0x0a00002a), 3000, {}, {}},
+            {"proxy.example.com:3000", {IpAddress(0x0a00002a), 3000, {}, {}}},
     };
     for (const auto& item : kData) {
         ParseResult result = parseConfigurationString(item.input);

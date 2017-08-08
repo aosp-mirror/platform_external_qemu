@@ -33,8 +33,8 @@ public:
                      int port,
                      ConnectCallback connectCallback,
                      int socket4,
-                     int socket6)
-        : mLooper(looper), mPort(port), mConnectCallback(connectCallback) {
+                     int socket6) :
+        mPort(port), mConnectCallback(connectCallback) {
         if (socket4 >= 0) {
             mBoundSocket4.reset(looper->createFdWatch(socket4, onAccept, this));
             CHECK(mBoundSocket4.get());
@@ -114,7 +114,6 @@ private:
 
     ScopedSocketWatch mBoundSocket4;
     ScopedSocketWatch mBoundSocket6;
-    Looper* mLooper = nullptr;
     int mPort = 0;
     bool mListening = false;
     ConnectCallback mConnectCallback;

@@ -28,9 +28,11 @@
 class ContextAutoLock {
  public:
   ContextAutoLock(emugl::ContextGPU* context) : context_(context) {
+    context_->Lock();
   }
 
   ~ContextAutoLock() {
+    context_->Unlock();
   }
 
  private:

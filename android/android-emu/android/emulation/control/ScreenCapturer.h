@@ -66,8 +66,6 @@ private:
     AdbCommandPtr mPullCommand;
     const ResultCallback mResultCallback;
 
-    unsigned mNonDefaultCheckTimeoutForTestMs = 0;
-
     DISALLOW_COPY_AND_ASSIGN(ScreenCapturer);
 };
 

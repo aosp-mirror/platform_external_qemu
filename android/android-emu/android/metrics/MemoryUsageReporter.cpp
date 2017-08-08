@@ -42,8 +42,7 @@ MemoryUsageReporter::Ptr MemoryUsageReporter::create(
 MemoryUsageReporter::MemoryUsageReporter(
         android::base::Looper* looper,
         android::base::Looper::Duration checkIntervalMs)
-    : mLooper(looper),
-      mCheckIntervalMs(checkIntervalMs),
+    : mCheckIntervalMs(checkIntervalMs),
       // We use raw pointer to |this| instead of a shared_ptr to avoid cicrular
       // ownership. mRecurrentTask promises to cancel any outstanding tasks when
       // it's destructed.

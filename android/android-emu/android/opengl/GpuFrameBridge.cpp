@@ -59,7 +59,6 @@ public:
     // Constructor.
     Bridge(Looper* looper, Callback* callback, void* callbackOpaque) :
             GpuFrameBridge(),
-            mLooper(looper),
             mInSocket(-1),
             mOutSocket(-1),
             mFdWatch(NULL),
@@ -137,7 +136,6 @@ private:
         }
     }
 
-    Looper* mLooper;
     int mInSocket;
     int mOutSocket;
     Looper::FdWatch* mFdWatch;
