@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "4326321a_fab00584",
+        "filename": "android/android-emugl/host/libs/libGLES12Translator/gles/pass_through.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-08T21:33:28Z",
+      "side": 1,
+      "message": "I just noticed that this is auto-generated code. So maybe try to modify the code generator as well?",
+      "revId": "1bf0ab4418b149e1645e5563762cc934ad3daec1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9cca5354_94e816b4",
         "filename": "android/android-emugl/host/libs/libGLES12Translator/gles/pass_through.cpp",
         "patchSetId": 1
