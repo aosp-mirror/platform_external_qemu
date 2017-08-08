@@ -45,12 +45,12 @@ public:
 private:
     static const SnapshotCallbacks kCallbacks;
 
-    void onStartSaving(const char* name);
-    void onSavingComplete(const char* name, int res);
-    void onStartLoading(const char* name);
-    void onLoadingComplete(const char* name, int res);
-    void onStartDelete(const char* name);
-    void onDeletingComplete(const char* name, int res);
+    bool onStartSaving(const char* name);
+    bool onSavingComplete(const char* name, int res);
+    bool onStartLoading(const char* name);
+    bool onLoadingComplete(const char* name, int res);
+    bool onStartDelete(const char* name);
+    bool onDeletingComplete(const char* name, int res);
 
     QAndroidVmOperations mVmOperations;
     android::base::Optional<Saver> mSaver;
