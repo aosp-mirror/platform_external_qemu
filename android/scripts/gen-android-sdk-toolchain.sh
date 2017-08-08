@@ -190,8 +190,11 @@ gen_wrapper_program ()
       ld|ld.bfd|ld.gold)
         FLAGS=$FLAGS" $EXTRA_LDFLAGS"
         case $CURRENT_HOST in
-          linux-*) DST_PROG=gcc;;
-          *) DST_PROG=ld;;
+          linux*|windows*) DST_PROG=gcc;;
+          darwin*)
+            DST_PREFIX=$CLANG_BINDIR/
+            DST_PROG=clang
+            ;;
         esac
         ;;
       windres) FLAGS=$FLAGS" $EXTRA_WINDRESFLAGS";;
@@ -423,7 +426,7 @@ prepare_build_for_host () {
             if [ "$OPT_CXX11" ]; then
                 var_append EXTRA_CXXFLAGS "-stdlib=libc++"
             fi
-            EXTRA_LDFLAGS="-syslibroot $OSX_SDK_ROOT"
+            EXTRA_LDFLAGS="$common_FLAGS"
             DST_PREFIX=
             ;;
         *)
