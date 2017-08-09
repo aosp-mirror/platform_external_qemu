@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bd87dbce_1bd87210",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-09T20:36:36Z",
+      "side": 1,
+      "message": "why not simply do a single resize and supply a pre-resized vector as the second argument?\nmTextureMatrices.resize(kMaxTextureUnits, resizedValueToCopy)",
+      "range": {
+        "startLine": 31,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 5
+      },
+      "revId": "a02d465acf536615dfe2f56af97da9065d2e03a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0f379bdf_e3fd63db",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-09T20:36:36Z",
+      "side": 1,
+      "message": "could we not, please? including cpp files is really misleading to the reader. If you need it to be includable - make it a header",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 39
+      },
+      "revId": "a02d465acf536615dfe2f56af97da9065d2e03a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07133987_46895f89",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-09T20:36:36Z",
+      "side": 1,
+      "message": "nit: explicit",
+      "revId": "a02d465acf536615dfe2f56af97da9065d2e03a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69277850_0e27f221",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-09T20:36:36Z",
+      "side": 1,
+      "message": "why not unordered_set\u003cGLenum\u003e ?",
+      "range": {
+        "startLine": 117,
+        "startChar": 4,
+        "endLine": 117,
+        "endChar": 46
+      },
+      "revId": "a02d465acf536615dfe2f56af97da9065d2e03a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfeb8485_01e51489",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-09T20:36:36Z",
+      "side": 1,
+      "message": "what\u0027s the purpose of a setter with the same visibility as the member?",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 50
+      },
+      "revId": "a02d465acf536615dfe2f56af97da9065d2e03a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
