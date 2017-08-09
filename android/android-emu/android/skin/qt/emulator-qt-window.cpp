@@ -30,6 +30,7 @@
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengles.h"
+#include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -705,7 +706,8 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         // so skip that step when saving vm on exit
         bool fastSnapshotV1 =
             android::featurecontrol::isEnabled(
-                android::featurecontrol::FastSnapshotV1);
+                android::featurecontrol::FastSnapshotV1)
+            && emuglConfig_current_renderer_supports_snapshot();
 
         // Tell the system that we are in saving; create a file lock.
         if (fastSnapshotV1) {
