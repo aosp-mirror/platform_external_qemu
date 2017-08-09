@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "03c90c1f_4e5d907d",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-09T19:15:00Z",
+      "side": 1,
+      "message": "nit: supports",
+      "range": {
+        "startLine": 122,
+        "startChar": 34,
+        "endLine": 122,
+        "endChar": 41
+      },
+      "revId": "f007f2a3d812c8b4ab6af02991668bed86f5bcd9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
