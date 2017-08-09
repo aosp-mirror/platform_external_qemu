@@ -12,14 +12,21 @@
 #include "android/snapshot/Snapshot.h"
 
 #include "android/base/ArraySize.h"
+#include "android/base/Optional.h"
+#include "android/base/StringFormat.h"
 #include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedFd.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/base/system/System.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/featurecontrol/Features.h"
 #include "android/globals.h"
+#include "android/opengl/emugl_config.h"
+#include "android/opengl/gpuinfo.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/proto/snapshot.pb.h"
 #include "android/utils/fd.h"
 #include "android/utils/file_io.h"
@@ -32,16 +39,21 @@
 
 #include <algorithm>
 
-using android::base::endsWith;
 using android::base::IniFile;
-using android::base::makeCustomScopedPtr;
+using android::base::Optional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
 using android::base::ScopedFd;
+using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
+using android::base::endsWith;
+using android::base::makeCustomScopedPtr;
 
 namespace pb = emulator_snapshot;
+
+namespace android {
+namespace snapshot {
 
 static void fillImageInfo(pb::Image::Type type,
                           StringView path,
@@ -92,7 +104,7 @@ static bool verifyImageInfo(pb::Image::Type type,
     return true;
 }
 
-bool areConfigsEqual(const IniFile& expected, const IniFile& actual) {
+bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
     if (expected.size() != actual.size()) {
         return false;
     }
@@ -107,6 +119,73 @@ bool areConfigsEqual(const IniFile& expected, const IniFile& actual) {
         if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             return false;
         }
+    }
+
+    return true;
+}
+
+static std::string gpuDriverString(const GpuInfo& info) {
+    return StringFormat("%s-%s-%s", info.make, info.model, info.version);
+}
+
+static Optional<std::string> currentGpuDriverString() {
+    const auto& gpuList = globalGpuInfoList().infos;
+    auto currentIt =
+            std::find_if(gpuList.begin(), gpuList.end(),
+                         [](const GpuInfo& i) { return i.current_gpu; });
+    if (currentIt == gpuList.end() && !gpuList.empty()) {
+        currentIt = gpuList.begin();
+    }
+    if (currentIt == gpuList.end()) {
+        return {};
+    }
+    return gpuDriverString(*currentIt);
+}
+
+static bool verifyHost(const pb::Host& host) {
+    VmConfiguration vmConfig;
+    Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
+    if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
+        return false;
+    }
+    if (auto gpuString = currentGpuDriverString()) {
+        if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
+            return false;
+        }
+    } else if (host.has_gpu_driver()) {
+        return false;
+    }
+    return true;
+}
+
+static bool verifyConfig(const pb::Config& config) {
+    VmConfiguration vmConfig;
+    Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
+    if (config.has_cpu_core_count() &&
+        config.cpu_core_count() != vmConfig.numberOfCpuCores) {
+        return false;
+    }
+    if (config.has_ram_size_bytes() &&
+        config.ram_size_bytes() != vmConfig.ramSizeBytes) {
+        return false;
+    }
+    if (config.has_cpu_core_count() &&
+        config.cpu_core_count() != vmConfig.numberOfCpuCores) {
+        return false;
+    }
+    if (config.has_selected_renderer() &&
+        config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
+        return false;
+    }
+
+    const auto enabledFeatures = android::featurecontrol::getEnabled();
+    if (int(enabledFeatures.size()) != config.enabled_features().size() ||
+        !std::equal(config.enabled_features().begin(),
+                    config.enabled_features().end(), enabledFeatures.begin(),
+                    [](int l, android::featurecontrol::Feature r) {
+                        return int(l) == r;
+                    })) {
+        return false;
     }
 
     return true;
@@ -132,9 +211,6 @@ struct {
 
 static constexpr int kVersion = 1;
 
-namespace android {
-namespace snapshot {
-
 Snapshot::Snapshot(const char* name)
     : mName(name), mDataDir(getSnapshotDir(name)) {}
 
@@ -148,6 +224,20 @@ bool Snapshot::save() {
     pb::Snapshot snapshot;
     snapshot.set_version(kVersion);
     snapshot.set_creation_time(System::get()->getUnixTime());
+
+    VmConfiguration vmConfig;
+    Snapshotter::get().vmOperations().getVmConfiguration(&vmConfig);
+    snapshot.mutable_config()->set_cpu_core_count(vmConfig.numberOfCpuCores);
+    snapshot.mutable_config()->set_ram_size_bytes(vmConfig.ramSizeBytes);
+    snapshot.mutable_config()->set_selected_renderer(
+            int(emuglConfig_get_current_renderer()));
+    snapshot.mutable_host()->set_hypervisor(vmConfig.hypervisorType);
+    if (auto gpuString = currentGpuDriverString()) {
+        snapshot.mutable_host()->set_gpu_driver(*gpuString);
+    }
+    for (auto f : android::featurecontrol::getEnabled()) {
+        snapshot.mutable_config()->add_enabled_features(int(f));
+    }
 
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
@@ -188,13 +278,19 @@ bool Snapshot::load() {
     if (!snapshot.has_version() || snapshot.version() != kVersion) {
         return false;
     }
-    if (snapshot.images_size() > ARRAY_SIZE(kImages)) {
+    if (snapshot.has_host() && !verifyHost(snapshot.host())) {
+        return false;
+    }
+    if (snapshot.has_config() && !verifyConfig(snapshot.config())) {
+        return false;
+    }
+    if (snapshot.images_size() > int(ARRAY_SIZE(kImages))) {
         return false;
     }
     int matchedImages = 0;
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
-        auto it =
+        const auto it =
                 std::find_if(snapshot.images().begin(), snapshot.images().end(),
                              [type = image.type](const pb::Image& im) {
                                  return im.has_type() && im.type() == type;
@@ -223,7 +319,7 @@ bool Snapshot::load() {
     if (!actualConfig.read()) {
         return false;
     }
-    if (!areConfigsEqual(expectedConfig, actualConfig)) {
+    if (!areHwConfigsEqual(expectedConfig, actualConfig)) {
         return false;
     }
 

@@ -42,6 +42,8 @@ public:
     Saver& saver() { return *mSaver; }
     Loader& loader() { return *mLoader; }
 
+    const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
+
 private:
     static const SnapshotCallbacks kCallbacks;
 

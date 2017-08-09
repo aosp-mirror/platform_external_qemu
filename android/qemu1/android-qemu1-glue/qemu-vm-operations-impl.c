@@ -84,6 +84,10 @@ static void set_snapshot_callbacks(void* opaque,
     ; // QEMU1 doesn's support shapshot customizations
 }
 
+static void get_vm_config(VmConfiguration* out) {
+    memset(out, 0, sizeof(*out));
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
     .vmStop = qemu_vm_stop,
     .vmStart = qemu_vm_start,
@@ -93,5 +97,6 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
     .snapshotSave = qemu_snapshot_save,
     .snapshotDelete = qemu_snapshot_delete,
     .setSnapshotCallbacks = set_snapshot_callbacks,
+    .getVmConfiguration = get_vm_config,
 };
 const QAndroidVmOperations * const gQAndroidVmOperations = &sQAndroidVmOperations;
