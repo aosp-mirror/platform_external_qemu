@@ -119,6 +119,13 @@ SelectedRenderer emuglConfig_get_current_renderer() {
     return sCurrentRenderer;
 }
 
+bool emuglConfig_current_renderer_supports_snapshot() {
+    return sCurrentRenderer == SELECTED_RENDERER_HOST ||
+           sCurrentRenderer == SELECTED_RENDERER_OFF ||
+           sCurrentRenderer == SELECTED_RENDERER_GUEST ||
+           sCurrentRenderer == SELECTED_RENDERER_ANGLE_INDIRECT;
+}
+
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list proplist) {
     for (int i = 0; i < proplist.num_gpus; i++) {
         free(proplist.props[i].make);

@@ -101,6 +101,9 @@ SelectedRenderer emuglConfig_get_renderer(const char* gpu_mode);
 // Returns the renderer that is active, after config is done.
 SelectedRenderer emuglConfig_get_current_renderer();
 
+// Returns if the current renderer supports snapshot.
+bool emuglConfig_current_renderer_supports_snapshot();
+
 void free_emugl_host_gpu_props(emugl_host_gpu_prop_list props);
 
 // Initialize an EmuglConfig instance based on the AVD's hardware properties

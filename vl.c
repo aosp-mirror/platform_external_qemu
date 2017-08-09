@@ -2173,7 +2173,8 @@ static bool main_loop_should_exit(void)
     if (qemu_shutdown_requested()) {
 
 #ifdef CONFIG_ANDROID
-        if (feature_is_enabled(kFeature_FastSnapshotV1)) {
+        if (feature_is_enabled(kFeature_FastSnapshotV1)
+            && emuglConfig_current_renderer_supports_snapshot()) {
             androidSnapshot_save("default_boot");
         }
 #endif
@@ -4614,7 +4615,8 @@ static int main_impl(int argc, char** argv)
     char* boot_snapshot_dir_full_path = path_join(avdInfo_getContentPath(android_avdInfo),
                                                   boot_snapshot_dir);
     if (!loadvm && feature_is_enabled(kFeature_FastSnapshotV1) &&
-        path_exists(boot_snapshot_dir_full_path)) {
+        path_exists(boot_snapshot_dir_full_path) &&
+        emuglConfig_current_renderer_supports_snapshot()) {
         loadvm = "default_boot";
         attemptedDefaultBoot = true;
     }
