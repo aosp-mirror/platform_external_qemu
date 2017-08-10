@@ -39,12 +39,17 @@ class TrustyKeymasterContext : public KeymasterContext {
         return KM_SECURITY_LEVEL_TRUSTED_ENVIRONMENT;
     }
 
-    keymaster_error_t SetSystemVersion(uint32_t /* os_version */,
-                                       uint32_t /* os_patchlevel */) override {
+    keymaster_error_t SetSystemVersion(uint32_t os_version,
+                                       uint32_t os_patchlevel) override {
+        os_version_ = os_version;
+        os_patchlevel_ = os_patchlevel;
         return KM_ERROR_OK;
     }
 
-    void GetSystemVersion(uint32_t* os_version, uint32_t* os_patchlevel) const override {};
+    void GetSystemVersion(uint32_t* os_version, uint32_t* os_patchlevel) const override {
+        *os_version = os_version_;
+        *os_patchlevel = os_patchlevel_;
+    };
 
     KeyFactory* GetKeyFactory(keymaster_algorithm_t algorithm) const override;
     OperationFactory* GetOperationFactory(keymaster_algorithm_t algorithm,
@@ -114,6 +119,9 @@ class TrustyKeymasterContext : public KeymasterContext {
     mutable int calls_since_reseed_;
     uint8_t auth_token_key_[kAuthTokenKeySize];
     bool auth_token_key_initialized_;
+
+    uint32_t os_version_=80000;
+    uint32_t os_patchlevel_=201709;
 };
 
 }  // namespace keymaster

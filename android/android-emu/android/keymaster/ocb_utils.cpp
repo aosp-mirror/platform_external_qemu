@@ -99,11 +99,19 @@ static keymaster_error_t InitializeKeyWrappingContext(const AuthorizationSet& hw
     // Encrypt hash with master key to build derived key.
     AES_KEY aes_key;
     Eraser aes_key_eraser(AES_KEY);
-    if (0 !=
-        AES_set_encrypt_key(master_key.key_material, master_key.key_material_size * 8, &aes_key))
+    LOG_I("calling %s at %d", __func__, __LINE__);
+    if (!master_key.key_material) {
+        LOG_I("realy bad: key material null calling %s at %d", __func__, __LINE__);
+    }
+    
+    if (0 != AES_set_encrypt_key(master_key.key_material, master_key.key_material_size * 8, &aes_key)) {
+    LOG_I("calling %s at %d", __func__, __LINE__);
         return TranslateLastOpenSslError();
+    }
 
+    LOG_I("calling %s at %d", __func__, __LINE__);
     AES_encrypt(hash_buf.get(), derived_key.get(), &aes_key);
+    LOG_I("calling %s at %d", __func__, __LINE__);
 
     // Set up AES OCB context using derived key.
     if (ae_init(ctx->get(), derived_key.get(), AES_BLOCK_SIZE /* key length */, OCB_NONCE_LENGTH,
@@ -129,18 +137,22 @@ keymaster_error_t OcbEncryptKey(const AuthorizationSet& hw_enforced,
     if (!ctx.get())
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
 
+    LOG_I("calling %s at %d", __func__, __LINE__);
     keymaster_error_t error =
         InitializeKeyWrappingContext(hw_enforced, sw_enforced, hidden, master_key, &ctx);
+    LOG_I("calling %s at %d", __func__, __LINE__);
     if (error != KM_ERROR_OK)
         return error;
 
     if (!ciphertext->Reset(plaintext.key_material_size))
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
 
+    LOG_I("calling %s at %d", __func__, __LINE__);
     int ae_err = ae_encrypt(ctx.get(), nonce.peek_read(), plaintext.key_material,
                             plaintext.key_material_size, NULL /* additional data */,
                             0 /* additional data length */, ciphertext->writable_data(),
                             tag->peek_write(), 1 /* final */);
+    LOG_I("calling %s at %d", __func__, __LINE__);
     if (ae_err < 0) {
         LOG_E("Error %d while encrypting key", ae_err);
         return KM_ERROR_UNKNOWN_ERROR;

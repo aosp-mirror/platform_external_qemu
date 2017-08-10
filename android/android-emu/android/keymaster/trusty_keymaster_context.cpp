@@ -93,12 +93,14 @@ static keymaster_error_t TranslateAuthorizationSetError(AuthorizationSet::Error 
 }
 
 static keymaster_error_t SetAuthorizations(const AuthorizationSet& key_description,
-                                           keymaster_key_origin_t origin,
+                                           keymaster_key_origin_t origin, uint32_t os_version,
+                                           uint32_t os_patchlevel,
                                            AuthorizationSet* hw_enforced,
                                            AuthorizationSet* sw_enforced) {
     sw_enforced->Clear();
     hw_enforced->Clear();
 
+    LOG_D("SetAuthorizations", 0);
     for (auto& entry : key_description) {
 
         switch (entry.tag) {
@@ -169,6 +171,10 @@ static keymaster_error_t SetAuthorizations(const AuthorizationSet& key_descripti
 
     hw_enforced->push_back(TAG_ORIGIN, origin);
 
+
+    sw_enforced->push_back(TAG_OS_VERSION, os_version);
+    sw_enforced->push_back(TAG_OS_PATCHLEVEL, os_patchlevel);
+
     if (sw_enforced->is_valid() != AuthorizationSet::OK)
         return TranslateAuthorizationSetError(sw_enforced->is_valid());
     if (hw_enforced->is_valid() != AuthorizationSet::OK)
@@ -199,17 +205,23 @@ keymaster_error_t TrustyKeymasterContext::CreateKeyBlob(const AuthorizationSet& 
                                                         KeymasterKeyBlob* blob,
                                                         AuthorizationSet* hw_enforced,
                                                         AuthorizationSet* sw_enforced) const {
-    keymaster_error_t error = SetAuthorizations(key_description, origin, hw_enforced, sw_enforced);
+    uint32_t os_version=80000;
+    uint32_t os_patchlevel=201709;
+    keymaster_error_t error = SetAuthorizations(key_description, origin, os_version, os_patchlevel, hw_enforced, sw_enforced);
     if (error != KM_ERROR_OK)
         return error;
 
     AuthorizationSet hidden;
+    LOG_I("calling %s at %d", __func__, __LINE__);
     error = BuildHiddenAuthorizations(key_description, &hidden);
+    LOG_I("calling %s at %d", __func__, __LINE__);
     if (error != KM_ERROR_OK)
         return error;
 
     KeymasterKeyBlob master_key;
+    LOG_I("calling %s at %d", __func__, __LINE__);
     error = DeriveMasterKey(&master_key);
+    LOG_I("calling %s at %d", __func__, __LINE__);
     if (error != KM_ERROR_OK)
         return error;
 
@@ -218,14 +230,18 @@ keymaster_error_t TrustyKeymasterContext::CreateKeyBlob(const AuthorizationSet& 
     if (!nonce.peek_write() || !tag.peek_write())
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
 
+    LOG_I("calling %s at %d", __func__, __LINE__);
     error = GenerateRandom(nonce.peek_write(), OCB_NONCE_LENGTH);
+    LOG_I("calling %s at %d", __func__, __LINE__);
     if (error != KM_ERROR_OK)
         return error;
     nonce.advance_write(OCB_NONCE_LENGTH);
 
     KeymasterKeyBlob encrypted_key;
+    LOG_I("calling %s at %d", __func__, __LINE__);
     error = OcbEncryptKey(*hw_enforced, *sw_enforced, hidden, master_key, key_material, nonce,
                           &encrypted_key, &tag);
+    LOG_I("calling %s at %d", __func__, __LINE__);
 
     return SerializeAuthEncryptedBlob(encrypted_key, *hw_enforced, *sw_enforced, nonce, tag, blob);
 }

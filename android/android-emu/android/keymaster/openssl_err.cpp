@@ -43,9 +43,12 @@ static keymaster_error_t TranslateRsaError(int reason);
 keymaster_error_t TranslateLastOpenSslError(bool log_message) {
     unsigned long error = ERR_peek_last_error();
 
+    LOG_I("calling %s at %d", __func__, __LINE__);
     if (log_message) {
         LOG_D("%s", ERR_error_string(error, NULL));
+    LOG_I("calling %s at %d", __func__, __LINE__);
     }
+    LOG_I("calling %s at %d", __func__, __LINE__);
 
     int reason = ERR_GET_REASON(error);
 
@@ -57,6 +60,7 @@ keymaster_error_t TranslateLastOpenSslError(bool log_message) {
     case ERR_R_PASSED_NULL_PARAMETER:
     case ERR_R_INTERNAL_ERROR:
     case ERR_R_OVERFLOW:
+    LOG_I("calling %s at %d", __func__, __LINE__);
         return KM_ERROR_UNKNOWN_ERROR;
     default:
         break;
@@ -85,6 +89,7 @@ keymaster_error_t TranslateLastOpenSslError(bool log_message) {
 #endif
     }
 
+    LOG_I("calling %s at %d", __func__, __LINE__);
     LOG_E("Openssl error %d, %d", ERR_GET_LIB(error), reason);
     return KM_ERROR_UNKNOWN_ERROR;
 }

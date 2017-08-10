@@ -341,6 +341,11 @@ LOCAL_SRC_FILES := \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/keymaster/aes_key.cpp \
+    android/keymaster/keymaster0_engine.cpp \
+    android/keymaster/keymaster1_engine.cpp \
+    android/keymaster/integrity_assured_key_blob.cpp \
+    android/keymaster/ec_keymaster0_key.cpp \
+    android/keymaster/ec_keymaster1_key.cpp \
     android/keymaster/aes_operation.cpp \
     android/keymaster/android_keymaster.cpp \
     android/keymaster/android_keymaster_messages.cpp \
@@ -368,9 +373,15 @@ LOCAL_SRC_FILES := \
     android/keymaster/operation_table.cpp \
     android/keymaster/rsa_key.cpp \
     android/keymaster/rsa_key_factory.cpp \
+    android/keymaster/rsa_keymaster0_key.cpp \
+    android/keymaster/rsa_keymaster1_key.cpp \
+    android/keymaster/rsa_keymaster1_operation.cpp \
+    android/keymaster/ecdsa_keymaster1_operation.cpp \
     android/keymaster/rsa_operation.cpp \
     android/keymaster/serializable.cpp \
     android/keymaster/symmetric_key.cpp \
+    android/keymaster/soft_keymaster_device.cpp \
+    android/keymaster/soft_keymaster_context.cpp \
     android/keymaster/trusty_keymaster_context.cpp \
     android/keymaster/trusty_keymaster_enforcement.cpp \
     android/keymaster/trusty_rng.c \

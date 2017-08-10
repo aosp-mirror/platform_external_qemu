@@ -32,33 +32,34 @@ class TrustyLogger : public Logger {
     }
 
     virtual int log_msg(LogLevel level, const char* fmt, va_list args) const {
-        if (level < KEYMASTER_LOG_LEVEL) {
-            return 0;
-        }
+        //if (level < KEYMASTER_LOG_LEVEL) {
+        //    return 0;
+        //}
 
         int retval;
         switch (level) {
         case DEBUG_LVL:
-            retval = fprintf(stderr, "%s (debug): ", LOG_TAG);
+            retval = fprintf(stdout, "%s (debug): ", LOG_TAG);
             break;
         case INFO_LVL:
-            retval = fprintf(stderr, "%s (info): ", LOG_TAG);
+            retval = fprintf(stdout, "%s (info): ", LOG_TAG);
             break;
         case WARNING_LVL:
-            retval = fprintf(stderr, "%s (warn): ", LOG_TAG);
+            retval = fprintf(stdout, "%s (warn): ", LOG_TAG);
             break;
         case ERROR_LVL:
-            retval = fprintf(stderr, "%s (err): ", LOG_TAG);
+            retval = fprintf(stdout, "%s (err): ", LOG_TAG);
             break;
         case SEVERE_LVL:
-            retval = fprintf(stderr, "%s (severe): ", LOG_TAG);
+            retval = fprintf(stdout, "%s (severe): ", LOG_TAG);
             break;
         default:
-            retval = fprintf(stderr, "%s (critical): ", LOG_TAG);
+            retval = fprintf(stdout, "%s (critical): ", LOG_TAG);
             break;
         }
-        retval += vfprintf(stderr, fmt, args);
-        retval += fprintf(stderr, "\n");
+        retval += vfprintf(stdout, fmt, args);
+        retval += fprintf(stdout, "\n");
+        fflush(stdout);
         return retval;
     }
 };

@@ -1,0 +1,5 @@
+#define ALOGD(fmt, ...) do {} while (0)
+#define ALOGE(fmt, ...) do {} while (0)
+#define ALOGI(fmt, ...) do {} while (0)
+#define ALOGV(fmt, ...) do {} while (0)
+#define ALOGW(fmt, ...) do {} while (0)

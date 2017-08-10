@@ -56,6 +56,7 @@ keymaster_error_t RsaKeyFactory::GenerateKey(const AuthorizationSet& key_descrip
     if (!key_blob || !hw_enforced || !sw_enforced)
         return KM_ERROR_OUTPUT_PARAMETER_NULL;
 
+    LOG_D("calling %s", __func__);
     const AuthorizationSet& authorizations(key_description);
 
     uint64_t public_exponent;
@@ -69,6 +70,12 @@ keymaster_error_t RsaKeyFactory::GenerateKey(const AuthorizationSet& key_descrip
         LOG_E("No key size specified for RSA key generation", 0);
         return KM_ERROR_UNSUPPORTED_KEY_SIZE;
     }
+    uint32_t exponent_val;
+    if (!authorizations.GetTagValue(TAG_KEY_SIZE, &exponent_val)) {
+        LOG_E("No exponent specified for RSA key generation", 0);
+        return KM_ERROR_INVALID_ARGUMENT;
+    }
+
     if (key_size % 8 != 0 || key_size > kMaximumRsaKeySize) {
         LOG_E("Invalid key size of %u bits specified for RSA key generation", key_size);
         return KM_ERROR_UNSUPPORTED_KEY_SIZE;
@@ -81,19 +88,43 @@ keymaster_error_t RsaKeyFactory::GenerateKey(const AuthorizationSet& key_descrip
         return KM_ERROR_MEMORY_ALLOCATION_FAILED;
 
     if (!BN_set_word(exponent.get(), public_exponent) ||
-        !RSA_generate_key_ex(rsa_key.get(), key_size, exponent.get(), NULL /* callback */))
+        !RSA_generate_key_ex(rsa_key.get(), key_size, exponent.get(), NULL /* callback */)) {
+        LOG_E("erro at %s line %d", __func__, __LINE__);
         return TranslateLastOpenSslError();
+    }
 
-    if (EVP_PKEY_set1_RSA(pkey.get(), rsa_key.get()) != 1)
+    if (EVP_PKEY_set1_RSA(pkey.get(), rsa_key.get()) != 1) {
+        LOG_E("erro at %s line %d", __func__, __LINE__);
         return TranslateLastOpenSslError();
+    }
 
     KeymasterKeyBlob key_material;
     keymaster_error_t error = EvpKeyToKeyMaterial(pkey.get(), &key_material);
-    if (error != KM_ERROR_OK)
+    if (error != KM_ERROR_OK) {
+        LOG_E("erro at %s line %d", __func__, __LINE__);
         return error;
+    }
 
-    return context_->CreateKeyBlob(authorizations, KM_ORIGIN_GENERATED, key_material, key_blob,
+    sw_enforced->push_back(TAG_ALGORITHM, KM_ALGORITHM_RSA);
+    hw_enforced->push_back(TAG_ALGORITHM, KM_ALGORITHM_RSA);
+    
+    sw_enforced->push_back(TAG_KEY_SIZE, key_size);
+    hw_enforced->push_back(TAG_KEY_SIZE, key_size);
+    
+    sw_enforced->push_back(TAG_RSA_PUBLIC_EXPONENT, exponent_val);
+    hw_enforced->push_back(TAG_RSA_PUBLIC_EXPONENT, exponent_val);
+    
+    LOG_I("calling %s at %d", __func__, __LINE__);
+    keymaster_error_t my_error = context_->CreateKeyBlob(authorizations, KM_ORIGIN_GENERATED, key_material, key_blob,
                                    hw_enforced, sw_enforced);
+    LOG_I("calling %s at %d", __func__, __LINE__);
+
+
+    if (my_error != KM_ERROR_OK) {
+        LOG_E("erro at %s line %d", __func__, __LINE__);
+    }
+    return my_error;
+
 }
 
 keymaster_error_t RsaKeyFactory::ImportKey(const AuthorizationSet& key_description,

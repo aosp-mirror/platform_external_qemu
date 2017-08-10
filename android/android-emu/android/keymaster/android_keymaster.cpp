@@ -190,7 +190,7 @@ void AndroidKeymaster::GenerateKey(const GenerateKeyRequest& request,
                                    GenerateKeyResponse* response) {
     if (response == NULL)
         return;
-
+    DD("calling %s at %d", __func__, __LINE__);
     keymaster_algorithm_t algorithm;
     KeyFactory* factory = 0;
     UniquePtr<Key> key;
@@ -203,8 +203,12 @@ void AndroidKeymaster::GenerateKey(const GenerateKeyRequest& request,
         response->unenforced.Clear();
         response->error = factory->GenerateKey(request.key_description, &key_blob,
                                                &response->enforced, &response->unenforced);
-        if (response->error == KM_ERROR_OK)
+        if (response->error == KM_ERROR_OK) {
             response->key_blob = key_blob.release();
+            DD("calling %s at %d: OK", __func__, __LINE__);
+        } else {
+            DD("calling %s at %d: KO !", __func__, __LINE__);
+        }
     }
 }
 
