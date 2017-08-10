@@ -234,7 +234,7 @@ bool emuglConfig_init(EmuglConfig* config,
         }
         else if (!host_set_in_hwconfig && !no_window && !hasUiPreference &&
                    async_query_host_gpu_AngleWhitelisted()) {
-                gpu_mode = "angle_indirect";
+                gpu_mode = "angle";
                 D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
         }
         else if (no_window || (blacklisted && !hasUiPreference)) {
@@ -270,7 +270,7 @@ bool emuglConfig_init(EmuglConfig* config,
         } else {
             switch (uiPreferredBackend) {
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
-                    gpu_mode = "angle_indirect";
+                    gpu_mode = "angle";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
                     gpu_mode = "angle9";
