@@ -21,6 +21,8 @@ extern "C" {
 #include <emmintrin.h>
 }
 
+using android::base::System;
+
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
 static bool buffer_zero_sse2(const void* buf, int len) {
@@ -173,6 +175,10 @@ OperationStatus Snapshotter::save(const char* name) {
     return mSaver->status();
 }
 
+void Snapshotter::deleteSnapshot(const char* name) {
+    mVmOperations.snapshotDelete(name, this, nullptr);
+}
+
 bool Snapshotter::onStartSaving(const char* name) {
     crashreport::CrashReporter::get()->hangDetector().pause(true);
     mLoader.clear();
@@ -203,6 +209,7 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     assert(mLoader && name == mLoader->snapshot().name());
     mLoader->complete(res == 0);
     crashreport::CrashReporter::get()->hangDetector().pause(false);
+    mLastLoadUptimeMs = System::Duration(System::get()->getProcessTimes().wallClockMs);
     return mLoader->status() != OperationStatus::Error;
 }
 

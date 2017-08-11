@@ -114,23 +114,16 @@ void android_metrics_stop(MetricsStopReason reason) {
 }
 
 // Start the ADB liveness monitor. call this when GUI starts
-bool android_metrics_start_adb_liveness_checker(void *adbInterface)
-{
-    if (MetricsReporter::get().isReportingEnabled()) {
-        android::emulation::AdbInterface *adb = (android::emulation::AdbInterface *)
-                                                    adbInterface;
-        std::string emulatorName = adb->serialString();
-        if (emulatorName.empty())
-            emulatorName = sGlobalData->emulatorName;
-        sGlobalData->livenessChecker = android::metrics::AdbLivenessChecker::create(
-                adb, android::base::ThreadLooper::get(), &MetricsReporter::get(),
-                emulatorName, 20 * 1000);
-        sGlobalData->livenessChecker->start();
-
-        return true;
-    } else {
-        return false;
-    }
+bool android_metrics_start_adb_liveness_checker(
+        android::emulation::AdbInterface* adb) {
+    const std::string& emulatorName = adb->serialString().empty()
+                                              ? sGlobalData->emulatorName
+                                              : adb->serialString();
+    sGlobalData->livenessChecker = android::metrics::AdbLivenessChecker::create(
+            adb, android::base::ThreadLooper::get(), &MetricsReporter::get(),
+            emulatorName, 20 * 1000);
+    sGlobalData->livenessChecker->start();
+    return true;
 }
 
 static android_studio::EmulatorDetails::GuestCpuArchitecture

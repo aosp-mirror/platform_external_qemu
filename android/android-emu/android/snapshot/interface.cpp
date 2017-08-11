@@ -11,9 +11,11 @@
 
 #include "android/snapshot/interface.h"
 
+#include "android/metrics/AdbLivenessChecker.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/debug.h"
 
+using android::metrics::AdbLivenessChecker;
 using android::snapshot::FailureReason;
 using android::snapshot::OperationStatus;
 using android::snapshot::Snapshotter;
@@ -61,4 +63,16 @@ AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
     return AndroidSnapshotStatus(Snapshotter::get().save(name));
+}
+
+void androidSnapshot_delete(const char* name) {
+    Snapshotter::get().deleteSnapshot(name);
+}
+
+bool androidSnapshot_canSave() {
+    return AdbLivenessChecker::isEmulatorBooted();
+}
+
+int64_t androidSnapshot_lastLoadUptimeMs() {
+    return Snapshotter::get().lastLoadUptimeMs();
 }

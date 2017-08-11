@@ -38,7 +38,15 @@ typedef enum {
 
 void android_metrics_stop(MetricsStopReason reason);
 
-bool android_metrics_start_adb_liveness_checker(void* adbInterface);
+// A strongly-typed interface for C++ and a compatible one for C.
+#ifdef __cplusplus
+namespace android { namespace emulation { class AdbInterface; } }
+using AdbInterfacePtr = android::emulation::AdbInterface*;
+#else
+typedef void* AdbInterfacePtr;
+#endif
+
+bool android_metrics_start_adb_liveness_checker(AdbInterfacePtr adb);
 
 void android_metrics_report_common_info(bool openglAlive);
 

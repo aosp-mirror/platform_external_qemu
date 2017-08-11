@@ -45,6 +45,10 @@ public:
             android::base::StringView emulatorName,
             android::base::Looper::Duration checkIntervalMs);
 
+    // Query online / bootcomplete status of emulator.
+    static bool isEmulatorOnline();
+    static bool isEmulatorBooted();
+
     void start();
     void stop();
 
@@ -69,6 +73,7 @@ protected:
 
     // Called by the RecurrentTask.
     bool adbCheckRequest();
+    bool runBootCheck();
 
     // Called by the ParallelTask.
     void runCheckBlocking(CheckResult* result) const;
@@ -81,11 +86,13 @@ private:
     android::emulation::AdbInterface* mAdb;
     android::emulation::AdbCommandPtr mDevicesCommand;
     android::emulation::AdbCommandPtr mShellExitCommand;
+    android::emulation::AdbCommandPtr mBootCompleteCommand;
     android::base::Looper* const mLooper;
     MetricsReporter* const mReporter;
     const std::string mEmulatorName;
     const android::base::Looper::Duration mCheckIntervalMs;
     android::base::RecurrentTask mRecurrentTask;
+    android::base::RecurrentTask mBootCheckTask;
     int mRemainingAttempts;
     bool mIsOnline = false;
     bool mIsCheckRunning = false;
