@@ -45,6 +45,10 @@ public:
             android::base::StringView emulatorName,
             android::base::Looper::Duration checkIntervalMs);
 
+    // Query online / bootcomplete status of emulator.
+    static bool isEmulatorOnline();
+    static bool isEmulatorBooted();
+
     void start();
     void stop();
 
@@ -81,6 +85,7 @@ private:
     android::emulation::AdbInterface* mAdb;
     android::emulation::AdbCommandPtr mDevicesCommand;
     android::emulation::AdbCommandPtr mShellExitCommand;
+    android::emulation::AdbCommandPtr mBootCompleteCommand;
     android::base::Looper* const mLooper;
     MetricsReporter* const mReporter;
     const std::string mEmulatorName;

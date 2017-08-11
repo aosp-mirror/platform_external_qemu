@@ -28,4 +28,7 @@ AndroidSnapshotStatus androidSnapshot_load(const char* name);
 AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name);
 AndroidSnapshotStatus androidSnapshot_save(const char* name);
 
+bool androidSnapshot_canSave();
+void androidSnapshot_delete(const char* name);
+
 ANDROID_END_HEADER

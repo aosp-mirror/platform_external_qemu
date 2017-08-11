@@ -38,6 +38,7 @@ public:
     OperationStatus load(const char* name);
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(const char* name);
+    void deleteSnapshot(const char* name);
 
     Saver& saver() { return *mSaver; }
     Loader& loader() { return *mLoader; }

@@ -17,6 +17,7 @@
 #include "android/base/system/System.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/ConfigDirs.h"
 
@@ -25,6 +26,7 @@
 namespace android {
 namespace metrics {
 
+using android::base::LazyInstance;
 using android::base::PathUtils;
 using android::base::System;
 using android::ConfigDirs;
@@ -43,6 +45,23 @@ AdbLivenessChecker::Ptr AdbLivenessChecker::create(
     auto inst = Ptr(new AdbLivenessChecker(adb, looper, reporter, emulatorName,
                                            checkIntervalMs));
     return inst;
+}
+
+struct LivenessStatus {
+    bool online = false;
+    bool bootComplete = false;
+};
+
+static LazyInstance<LivenessStatus> sLivenessStatus =
+    LAZY_INSTANCE_INIT;
+
+// static
+bool AdbLivenessChecker::isEmulatorOnline() {
+    return sLivenessStatus->online;
+}
+
+bool AdbLivenessChecker::isEmulatorBooted() {
+    return sLivenessStatus->bootComplete;
 }
 
 AdbLivenessChecker::AdbLivenessChecker(
@@ -168,17 +187,34 @@ void AdbLivenessChecker::runCheckNonBlocking() {
             [this](const android::emulation::OptionalAdbCommandResult& result) {
                 if (!result || result->exit_code) {
                     reportCheckResult(CheckResult::kFailureAdbServerDead);
+                    sLivenessStatus->online = false;
                 } else {
                     mShellExitCommand = mAdb->runAdbCommand(
                         {"shell", "exit"},
                         [this](const android::emulation::OptionalAdbCommandResult& result2) {
                             if (!result2 || result2->exit_code) {
                                 reportCheckResult(CheckResult::kFailureEmulatorDead);
+                                sLivenessStatus->online = false;
                             } else {
                                 reportCheckResult(CheckResult::kOnline);
+                                sLivenessStatus->online = true;
                             }
 
                             mShellExitCommand.reset();
+                        },
+                        mCheckIntervalMs / 3,
+                        false);
+
+                    mBootCompleteCommand = mAdb->runAdbCommand(
+                        {"shell", "getprop", "dev.bootcomplete"},
+                        [this](const android::emulation::OptionalAdbCommandResult& result2) {
+                            // TODO: Drop boot completedness into metrics as well?
+                            if (!result2 || result2->exit_code) {
+                                sLivenessStatus->bootComplete = false;
+                            } else {
+                                sLivenessStatus->bootComplete = true;
+                            }
+                            mBootCompleteCommand.reset();
                         },
                         mCheckIntervalMs / 3,
                         false);
@@ -205,6 +241,9 @@ void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {
             case CheckResult::kOnline:
                 dropMetrics(result);
                 mIsOnline = true;
+                break;
+            case CheckResult::kBootCompleted:
+                mIsBootComplete = true;
                 break;
             default:
                 dropMetrics(CheckResult::kNoResult);

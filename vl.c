@@ -2174,8 +2174,13 @@ static bool main_loop_should_exit(void)
 
 #ifdef CONFIG_ANDROID
         if (feature_is_enabled(kFeature_FastSnapshotV1)
+            && androidSnapshot_canSave()
             && emuglConfig_current_renderer_supports_snapshot()) {
             androidSnapshot_save("default_boot");
+        } else if (feature_is_enabled(kFeature_FastSnapshotV1)
+                   && !androidSnapshot_canSave()) {
+            fprintf(stderr, "%s: cannot save in this state\n", __func__);
+            androidSnapshot_delete("default_boot");
         }
 #endif
 
