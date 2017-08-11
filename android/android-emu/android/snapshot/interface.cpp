@@ -11,8 +11,10 @@
 
 #include "android/snapshot/interface.h"
 
+#include "android/metrics/AdbLivenessChecker.h"
 #include "android/snapshot/Snapshotter.h"
 
+using android::metrics::AdbLivenessChecker;
 using android::snapshot::Snapshotter;
 
 AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name) {
@@ -29,4 +31,30 @@ AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
     return AndroidSnapshotStatus(Snapshotter::get().save(name));
+}
+
+void androidSnapshot_delete(const char* name) {
+    Snapshotter::get().deleteSnapshot(name);
+}
+
+bool androidSnapshot_canSave() {
+    return AdbLivenessChecker::isEmulatorBooted();
+}
+
+static bool sWantLoadBootSnapshot = true;
+static bool sWantSaveBootSnapshot = true;
+
+void androidSnapshot_setWantLoadBootSnapshot(bool enable) {
+    sWantLoadBootSnapshot = enable;
+}
+
+void androidSnapshot_setWantSaveBootSnapshot(bool enable) {
+    sWantSaveBootSnapshot = enable;
+}
+
+bool androidSnapshot_wantLoadBootSnapshot() {
+    return sWantLoadBootSnapshot;
+}
+bool androidSnapshot_wantSaveBootSnapshot() {
+    return sWantSaveBootSnapshot;
 }

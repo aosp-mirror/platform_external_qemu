@@ -2174,8 +2174,17 @@ static bool main_loop_should_exit(void)
 
 #ifdef CONFIG_ANDROID
         if (feature_is_enabled(kFeature_FastSnapshotV1)
+            && androidSnapshot_canSave()
+            && androidSnapshot_wantSaveBootSnapshot()
             && emuglConfig_current_renderer_supports_snapshot()) {
             androidSnapshot_save("default_boot");
+        } else if (feature_is_enabled(kFeature_FastSnapshotV1)
+                   && androidSnapshot_wantSaveBootSnapshot()
+                   && !androidSnapshot_canSave()) {
+            // Saving is wanted and renderer supports,
+            // but the state of the emulator is such that
+            // saving is a bad idea. In this case, don't save and:
+            androidSnapshot_delete("default_boot");
         }
 #endif
 
@@ -4618,6 +4627,7 @@ static int main_impl(int argc, char** argv)
     char* boot_snapshot_dir_full_path = path_join(avdInfo_getContentPath(android_avdInfo),
                                                   boot_snapshot_dir);
     if (!loadvm && feature_is_enabled(kFeature_FastSnapshotV1) &&
+        androidSnapshot_wantLoadBootSnapshot() &&
         path_exists(boot_snapshot_dir_full_path) &&
         emuglConfig_current_renderer_supports_snapshot()) {
         loadvm = "default_boot";

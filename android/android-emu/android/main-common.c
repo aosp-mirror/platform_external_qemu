@@ -27,6 +27,7 @@
 #include "android/opengles.h"
 #include "android/resource.h"
 #include "android/snapshot.h"
+#include "android/snapshot/interface.h"
 #include "android/user-config.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
@@ -1655,7 +1656,20 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     if (opts->snapstorage) {
         if (is_qemu2) {
-            dwarning("QEMU2 does not support snapshots - option will be ignored.");
+            dwarning("QEMU2 by itself does not support snapshot opts - "
+                     "option will be forwarded to androidSnapshot.");
+            if (opts->no_snapshot) {
+                androidSnapshot_setWantLoadBootSnapshot(false);
+                androidSnapshot_setWantSaveBootSnapshot(false);
+            }
+
+            if (!opts->no_snapshot_load) {
+                androidSnapshot_setWantLoadBootSnapshot(false);
+            }
+
+            if (!opts->no_snapshot_save) {
+                androidSnapshot_setWantSaveBootSnapshot(false);
+            }
         } else {
             // QEMU2 does not support some of the flags below, and the emulator will
             // fail to start if they are passed in, so for now, ignore them.
@@ -1666,11 +1680,21 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             * from the console though.
             */
             if (opts->no_snapshot) {
+                androidSnapshot_setWantLoadBootSnapshot(false);
+                androidSnapshot_setWantSaveBootSnapshot(false);
                 opts->no_snapshot_load = 1;
                 opts->no_snapshot_save = 1;
                 if (opts->snapshot) {
                     dwarning("ignoring -snapshot option due to the use of -no-snapshot.");
                 }
+            }
+
+            if (!opts->no_snapshot_load) {
+                androidSnapshot_setWantLoadBootSnapshot(false);
+            }
+
+            if (!opts->no_snapshot_save) {
+                androidSnapshot_setWantSaveBootSnapshot(false);
             }
 
             if (!opts->no_snapshot_load || !opts->no_snapshot_save) {

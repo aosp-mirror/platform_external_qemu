@@ -124,7 +124,7 @@ bool android_metrics_start_adb_liveness_checker(void *adbInterface)
             emulatorName = sGlobalData->emulatorName;
         sGlobalData->livenessChecker = android::metrics::AdbLivenessChecker::create(
                 adb, android::base::ThreadLooper::get(), &MetricsReporter::get(),
-                emulatorName, 20 * 1000);
+                emulatorName, 10 * 1000);
         sGlobalData->livenessChecker->start();
 
         return true;
