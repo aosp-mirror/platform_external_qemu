@@ -2178,7 +2178,16 @@ static bool main_loop_should_exit(void)
         if (!android_cmdLineOptions->no_snapshot_save &&
             feature_is_enabled(kFeature_FastSnapshotV1) &&
             emuglConfig_current_renderer_supports_snapshot()) {
-            androidSnapshot_save(DEFAULT_BOOT_SNAPSHOT_NAME);
+            if (androidSnapshot_canSave()) {
+                androidSnapshot_save(DEFAULT_BOOT_SNAPSHOT_NAME);
+            } else {
+                // Get rid of whatever was saved as a snapshot as the emulator
+                // ran for a while but we can't capture its current state to
+                // resume from exactly it later.
+                dwarning("Cleaning out the default boot snapshot to preserve "
+                         "changes in the current session.");
+                androidSnapshot_delete(DEFAULT_BOOT_SNAPSHOT_NAME);
+            }
         }
 #endif
 

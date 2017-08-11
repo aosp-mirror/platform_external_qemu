@@ -173,6 +173,10 @@ OperationStatus Snapshotter::save(const char* name) {
     return mSaver->status();
 }
 
+void Snapshotter::deleteSnapshot(const char* name) {
+    mVmOperations.snapshotDelete(name, this, nullptr);
+}
+
 bool Snapshotter::onStartSaving(const char* name) {
     crashreport::CrashReporter::get()->hangDetector().pause(true);
     mLoader.clear();

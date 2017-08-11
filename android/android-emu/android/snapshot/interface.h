@@ -33,4 +33,10 @@ AndroidSnapshotStatus androidSnapshot_load(const char* name);
 AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name);
 AndroidSnapshotStatus androidSnapshot_save(const char* name);
 
+void androidSnapshot_delete(const char* name);
+
+// Makes sure the emulator is in a state when snapshot can be saved, e.g.
+// all internals are initialized etc.
+bool androidSnapshot_canSave();
+
 ANDROID_END_HEADER
