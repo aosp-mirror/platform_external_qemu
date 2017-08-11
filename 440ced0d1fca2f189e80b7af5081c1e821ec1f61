@@ -66,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "0de9b549_8d569bd8",
+        "filename": "block/cat.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-11T18:14:26Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c310e182_5aaa23bd",
+      "revId": "440ced0d1fca2f189e80b7af5081c1e821ec1f61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "63c1d784_6e7591dc",
         "filename": "block/cat.c",
         "patchSetId": 2
@@ -77,6 +95,30 @@
       "writtenOn": "2017-08-10T00:26:46Z",
       "side": 1,
       "message": "this is a bit harsh, isn\u0027t it? you could return -EINVAL from the caller instead",
+      "range": {
+        "startLine": 129,
+        "startChar": 0,
+        "endLine": 129,
+        "endChar": 12
+      },
+      "revId": "440ced0d1fca2f189e80b7af5081c1e821ec1f61",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2defa192_8b7e5873",
+        "filename": "block/cat.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-11T18:14:26Z",
+      "side": 1,
+      "message": "Actually there is no way to reach this branch since I\u0027ve already checked that sector_num before calling this function. Changed to return -1 here and add assert at caller side.",
+      "parentUuid": "63c1d784_6e7591dc",
       "range": {
         "startLine": 129,
         "startChar": 0,
