@@ -22,6 +22,30 @@
       "revId": "542bd6b87011064fb79d8ad34f6ed1eba6f2fe81",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d16bbe2b_3feaf293",
+        "filename": "android/android-emu/android/snapshot/interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-11T16:24:54Z",
+      "side": 1,
+      "message": "good idea, it shouldn\u0027t happen but it might",
+      "parentUuid": "a90a147b_2e7f7efe",
+      "range": {
+        "startLine": 35,
+        "startChar": 8,
+        "endLine": 36,
+        "endChar": 77
+      },
+      "revId": "542bd6b87011064fb79d8ad34f6ed1eba6f2fe81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
