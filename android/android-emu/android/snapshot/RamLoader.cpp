@@ -78,9 +78,11 @@ RamLoader::RamLoader(base::StdioStream&& stream)
 }
 
 RamLoader::~RamLoader() {
-    interruptReading();
-    mReaderThread.wait();
-    assert(!mAccessWatch);
+    if (mWasStarted) {
+        interruptReading();
+        mReaderThread.wait();
+        assert(hasError() || !mAccessWatch);
+    }
 }
 
 void RamLoader::registerBlock(const RamBlock& block) {
