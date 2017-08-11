@@ -185,6 +185,8 @@ int main(int argc, char **argv)
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
+#define DEFAULT_BOOT_SNAPSHOT_NAME "default_boot"
+
 /////////////////////////////////////////////////////////////
 
 #define  LCD_DENSITY_LDPI      120
@@ -2173,9 +2175,10 @@ static bool main_loop_should_exit(void)
     if (qemu_shutdown_requested()) {
 
 #ifdef CONFIG_ANDROID
-        if (feature_is_enabled(kFeature_FastSnapshotV1)
-            && emuglConfig_current_renderer_supports_snapshot()) {
-            androidSnapshot_save("default_boot");
+        if (!android_cmdLineOptions->no_snapshot_save &&
+            feature_is_enabled(kFeature_FastSnapshotV1) &&
+            emuglConfig_current_renderer_supports_snapshot()) {
+            androidSnapshot_save(DEFAULT_BOOT_SNAPSHOT_NAME);
         }
 #endif
 
@@ -4614,24 +4617,28 @@ static int main_impl(int argc, char** argv)
     androidHwConfig_read(android_hw, hw_ini);
 
     bool attemptedDefaultBoot = false;
-    char* boot_snapshot_dir = path_join("snapshots", "default_boot");
-    char* boot_snapshot_dir_full_path = path_join(avdInfo_getContentPath(android_avdInfo),
-                                                  boot_snapshot_dir);
-    if (!loadvm && feature_is_enabled(kFeature_FastSnapshotV1) &&
-        path_exists(boot_snapshot_dir_full_path) &&
-        emuglConfig_current_renderer_supports_snapshot()) {
-        loadvm = "default_boot";
-        attemptedDefaultBoot = true;
+    bool fastSnapshotEnabled = feature_is_enabled(kFeature_FastSnapshotV1);
+    if (!android_cmdLineOptions->no_snapshot_load) {
+        char* boot_snapshot_dir_full_path =
+                path_join(avdInfo_getContentPath(android_avdInfo),
+                          "snapshots" PATH_SEP DEFAULT_BOOT_SNAPSHOT_NAME);
+        if (!loadvm && fastSnapshotEnabled &&
+                emuglConfig_current_renderer_supports_snapshot() &&
+                path_exists(boot_snapshot_dir_full_path)) {
+            loadvm = DEFAULT_BOOT_SNAPSHOT_NAME;
+            attemptedDefaultBoot = true;
+        }
+        free(boot_snapshot_dir_full_path);
     }
-    free(boot_snapshot_dir);
-    free(boot_snapshot_dir_full_path);
 
     /* If we're loading VM from a snapshot, make sure that the current HW config
      * matches the one with which the VM has been saved. */
-    if (loadvm && *loadvm && !snaphost_match_configs(hw_ini, loadvm)) {
+    if (loadvm && *loadvm && !fastSnapshotEnabled &&
+            !snaphost_match_configs(hw_ini, loadvm)) {
         error_report("HW config doesn't match the one in the snapshot");
-        if (!attemptedDefaultBoot)
+        if (!attemptedDefaultBoot) {
             return 0;
+        }
     }
 
     iniFile_free(hw_ini);
@@ -5464,18 +5471,25 @@ static int main_impl(int argc, char** argv)
     qemu_system_reset(VMRESET_SILENT);
     register_global_state();
     if (loadvm) {
-#if defined(CONFIG_ANDROID) && (SNAPSHOT_PROFILE > 1)
+#if defined(CONFIG_ANDROID)
+#if SNAPSHOT_PROFILE > 1
         printf("Starting snapshot load with uptime %lld ms\n",
                (long long)get_uptime_ms());
 #endif
-
-#if defined(CONFIG_ANDROID)
-        if (androidSnapshot_load(loadvm) < 0) {
+        const AndroidSnapshotStatus status = androidSnapshot_load(loadvm);
+        if (status != SNAPSHOT_STATUS_OK) {
+            if (status == SNAPSHOT_STATUS_ERROR_NOT_CHANGED) {
+                dwarning("Resuming with a clean boot");
+            } else {
+                derror("Resetting the system for a clean boot");
+                qemu_system_reset_request();
+            }
+        }
 #else
         if (load_vmstate(loadvm) < 0) {
-#endif
             autostart = 0;
         }
+#endif
     }
 
     qdev_prop_check_globals();
