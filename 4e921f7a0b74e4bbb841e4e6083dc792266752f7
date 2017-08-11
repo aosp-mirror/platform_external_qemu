@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "87ff3aae_7de56d5e",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-11T17:06:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6cb9a456_0eb24eec",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 2
+      },
+      "revId": "4e921f7a0b74e4bbb841e4e6083dc792266752f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1935bc4c_f08a7d28",
         "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "83eedbdf_560d1339",
+        "filename": "android/android-emu/android/metrics/AdbLivenessChecker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 213,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-11T17:06:27Z",
+      "side": 1,
+      "message": "Yeah that\u0027s good to do to make it work for host machines that are slower to boot the emulator and thus will benefit more from actually snapshot booting. I changed the check interval to 10 seconds and set it to 12 retries, so there\u0027s a 2 minute window now overall (as opposed to 1 minute earlier with 20 seconds and 3 retries).",
+      "parentUuid": "1935bc4c_f08a7d28",
+      "range": {
+        "startLine": 213,
+        "startChar": 33,
+        "endLine": 213,
+        "endChar": 70
+      },
+      "revId": "4e921f7a0b74e4bbb841e4e6083dc792266752f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c23f80ee_286990f1",
         "filename": "vl.c",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2017-08-11T16:04:38Z",
       "side": 1,
       "message": "not sure about deleting it here unconditionally. what if it was a no-snapshot boot (\"emulator ... -no-snapshot\")?",
+      "range": {
+        "startLine": 2183,
+        "startChar": 0,
+        "endLine": 2183,
+        "endChar": 51
+      },
+      "revId": "4e921f7a0b74e4bbb841e4e6083dc792266752f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "202ae710_1796d468",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2183,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-11T17:06:27Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c23f80ee_286990f1",
       "range": {
         "startLine": 2183,
         "startChar": 0,
