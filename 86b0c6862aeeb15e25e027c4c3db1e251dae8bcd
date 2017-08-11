@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "12d26f80_c08070b1",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 5482,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-11T02:57:45Z",
+      "side": 1,
+      "message": "nit: pack into \u0026\u0026?",
+      "range": {
+        "startLine": 5481,
+        "startChar": 0,
+        "endLine": 5482,
+        "endChar": 62
+      },
+      "revId": "86b0c6862aeeb15e25e027c4c3db1e251dae8bcd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
