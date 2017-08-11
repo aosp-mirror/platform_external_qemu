@@ -28,13 +28,14 @@ Loader::Loader(const Snapshot& snapshot)
         return;
     }
 
-    if (!mSnapshot.load()) {
+    if (!mSnapshot.preload()) {
         return;
     }
     {
         const auto ram = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "rb");
         if (!ram) {
+            mSnapshot.saveFailure(FailureReason::NoRamFile);
             return;
         }
         mRamLoader.emplace(StdioStream(ram, StdioStream::kOwner));
@@ -44,6 +45,7 @@ Loader::Loader(const Snapshot& snapshot)
                 PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),
                 "rb");
         if (!textures) {
+            mSnapshot.saveFailure(FailureReason::NoTexturesFile);
             mRamLoader.clear();
             return;
         }
@@ -58,6 +60,12 @@ void Loader::prepare() {
     // TODO: run asynchronous index loading here.
 }
 
+void Loader::start() {
+    if (!mSnapshot.load()) {
+        mStatus = OperationStatus::Error;
+    }
+}
+
 Loader::~Loader() {
     // Wait for textureLoader to finish loading textures
     if (mTextureLoader) mTextureLoader->join();
@@ -66,12 +74,21 @@ Loader::~Loader() {
 void Loader::complete(bool succeeded) {
     mStatus = OperationStatus::Error;
     if (!succeeded) {
+        if (!mSnapshot.failureReason()) {
+            mSnapshot.saveFailure(FailureReason::EmulationEngineFailed);
+        }
         return;
     }
     if (!mRamLoader || mRamLoader->hasError()) {
+        if (!mSnapshot.failureReason()) {
+            mSnapshot.saveFailure(FailureReason::RamFailed);
+        }
         return;
     }
     if (!mTextureLoader || mTextureLoader->hasError()) {
+        if (!mSnapshot.failureReason()) {
+            mSnapshot.saveFailure(FailureReason::TexturesFailed);
+        }
         return;
     }
 

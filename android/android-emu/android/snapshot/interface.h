@@ -17,7 +17,12 @@
 
 ANDROID_BEGIN_HEADER
 
-typedef int AndroidSnapshotStatus;
+typedef enum {
+    SNAPSHOT_STATUS_NOT_STARTED,
+    SNAPSHOT_STATUS_OK,
+    SNAPSHOT_STATUS_ERROR,
+    SNAPSHOT_STATUS_ERROR_NOT_CHANGED,
+} AndroidSnapshotStatus;
 
 void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations);
 void androidSnapshot_finalize();
