@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a90a147b_2e7f7efe",
+        "filename": "android/android-emu/android/snapshot/interface.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-11T03:03:30Z",
+      "side": 1,
+      "message": "what if this is kNullOpt, do we want to have a else { derror(snapshot cannot be loaded, errorcode not written); }?",
+      "range": {
+        "startLine": 35,
+        "startChar": 8,
+        "endLine": 36,
+        "endChar": 77
+      },
+      "revId": "542bd6b87011064fb79d8ad34f6ed1eba6f2fe81",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
