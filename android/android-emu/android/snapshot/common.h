@@ -13,6 +13,7 @@
 
 #include "android/base/StringView.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/snapshot/interface.h"
 
 #include <memory>
 #include <stdint.h>
@@ -34,9 +35,38 @@ enum class IndexFlags {
 };
 
 enum class OperationStatus {
-    NotStarted,
-    Ok,
-    Error
+    NotStarted = SNAPSHOT_STATUS_NOT_STARTED,
+    Ok = SNAPSHOT_STATUS_OK,
+    Error = SNAPSHOT_STATUS_ERROR
+};
+
+enum class FailureReason {
+    Empty = 0,
+
+    CorruptedData,
+    NoSnapshotPb,
+    BadSnapshotPb,
+    IncompatibleVersion,
+    NoRamFile,
+    NoTexturesFile,
+
+    UnrecoverableErrorLimit = 10000,
+
+    ConfigMismatchHostHypervisor,
+    ConfigMismatchHostGpu,
+    ConfigMismatchRenderer,
+    ConfigMismatchFeatures,
+    ConfigMismatchAvd,
+    SystemImageChanged,
+
+    ValidationErrorLimit = 20000,
+
+    InternalError,
+    EmulationEngineFailed,
+    RamFailed,
+    TexturesFailed,
+
+    InProgressLimit = 30000,
 };
 
 template <class Operation>

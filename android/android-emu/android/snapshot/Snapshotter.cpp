@@ -195,6 +195,7 @@ bool Snapshotter::onStartLoading(const char* name) {
     if (!mLoader || isComplete(*mLoader)) {
         mLoader.emplace(name);
     }
+    mLoader->start();
     return mLoader->status() != OperationStatus::Error;
 }
 
@@ -218,7 +219,7 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
         if (mLoader && mLoader->snapshot().name() == name) {
             mLoader.clear();
         }
-        path_delete_dir(Snapshot(name).dataDir().c_str());
+        path_delete_dir(Snapshot::dataDir(name).c_str());
     }
     crashreport::CrashReporter::get()->hangDetector().pause(false);
     return true;

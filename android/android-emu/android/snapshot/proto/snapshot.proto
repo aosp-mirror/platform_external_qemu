@@ -66,4 +66,9 @@ message Snapshot {
     //       hardware-qemu.ini; only add what's either not there or what
     //       could've been overridden during process initialization.
     optional Config config = 5;
+
+    // Set if the snapshot failed to load during the last attempt.
+    // Code is up to the application to define, with 0 meaning 'not failed' just
+    // in case.
+    optional int64 failed_to_load_reason_code = 7;
 }

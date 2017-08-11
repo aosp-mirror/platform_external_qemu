@@ -34,6 +34,7 @@ public:
     const Snapshot& snapshot() const { return mSnapshot; }
 
     void prepare();
+    void start();
     void complete(bool succeeded);
 
 private:
