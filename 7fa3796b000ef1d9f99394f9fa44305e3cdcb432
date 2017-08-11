@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44b82756_a747cc19",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1657,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-11T17:17:02Z",
+      "side": 1,
+      "message": "this is an old way of snapshotting, and it\u0027s never set for our snapshot implementation. I also don\u0027t think it\u0027s a good idea to move the knowledge about when we want to save/load into the class that\u0027s supposed to just handle the snapshotting itself.\nLet me take this over to implement it in the same way as in the rest of my CLs",
+      "range": {
+        "startLine": 1657,
+        "startChar": 0,
+        "endLine": 1657,
+        "endChar": 28
+      },
+      "revId": "7fa3796b000ef1d9f99394f9fa44305e3cdcb432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df604711_553e500b",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1666,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-11T17:17:02Z",
+      "side": 1,
+      "message": "why \"not\"?",
+      "range": {
+        "startLine": 1666,
+        "startChar": 16,
+        "endLine": 1666,
+        "endChar": 17
+      },
+      "revId": "7fa3796b000ef1d9f99394f9fa44305e3cdcb432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
