@@ -12,15 +12,47 @@
 #include "android/snapshot/interface.h"
 
 #include "android/snapshot/Snapshotter.h"
+#include "android/utils/debug.h"
 
+using android::snapshot::FailureReason;
+using android::snapshot::OperationStatus;
 using android::snapshot::Snapshotter;
 
 AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name) {
-    return AndroidSnapshotStatus(Snapshotter::get().prepareForLoading(name));
+    auto res = Snapshotter::get().prepareForLoading(name);
+    if (res == OperationStatus::Error) {
+        return SNAPSHOT_STATUS_ERROR_NOT_CHANGED;
+    } else {
+        return AndroidSnapshotStatus(res);
+    }
 }
 
 AndroidSnapshotStatus androidSnapshot_load(const char* name) {
-    return AndroidSnapshotStatus(Snapshotter::get().load(name));
+    auto res = Snapshotter::get().load(name);
+    if (res != OperationStatus::Ok) {
+        // Check if the error is about something done as just a check or
+        // we've started actually loading the VM data
+        if (auto failureReason =
+                    Snapshotter::get().loader().snapshot().failureReason()) {
+            if (*failureReason != FailureReason::Empty &&
+                *failureReason < FailureReason::ValidationErrorLimit) {
+                dwarning(
+                        "Snapshot '%s' can not be loaded (%d), state is "
+                        "unchanged.",
+                        name, int(*failureReason));
+                return SNAPSHOT_STATUS_ERROR_NOT_CHANGED;
+            } else {
+                derror("Snapshot '%s' can not be loaded (%d), emulator "
+                       "stopped.",
+                       name, int(*failureReason));
+            }
+        } else {
+            derror("Snapshot '%s' can not be loaded (reason not set), emulator "
+                   "stopped.",
+                   name);
+        }
+    }
+    return AndroidSnapshotStatus(res);
 }
 
 AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
