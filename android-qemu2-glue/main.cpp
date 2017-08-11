@@ -1048,7 +1048,7 @@ extern "C" int main(int argc, char **argv) {
 #endif
 
         // Feature flags-related last-microsecond renderer changes
-        bool shouldDisableAsyncSwap = false;
+        bool shouldDisableAdvancedGLFeatures = false;
         {
             // Should enable OpenGL ES 3.x?
             if (skin_winsys_get_preferred_gles_apilevel() == WINSYS_GLESAPILEVEL_PREFERENCE_MAX) {
@@ -1071,7 +1071,7 @@ extern "C" int main(int argc, char **argv) {
             // Features to disable or enable depending on rendering backend
             // and gpu make/model/version
             /* Disable the GLAsyncSwap for ANGLE so far */
-            shouldDisableAsyncSwap |= async_query_host_gpu_SyncBlacklisted();
+            shouldDisableAdvancedGLFeatures |= async_query_host_gpu_SyncBlacklisted();
 
         }
 
@@ -1080,12 +1080,13 @@ extern "C" int main(int argc, char **argv) {
             avd, opts, hw, uiPreferredGlesBackend,
             &rendererConfig);
 
-        shouldDisableAsyncSwap |=
+        shouldDisableAdvancedGLFeatures |=
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE ||
             rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
 
-        if (shouldDisableAsyncSwap) {
+        if (shouldDisableAdvancedGLFeatures) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
+            fc::setEnabledOverride(fc::GLESDynamicVersion, false);
         }
 
         char* kernel_parameters = emulator_getKernelParameters(
