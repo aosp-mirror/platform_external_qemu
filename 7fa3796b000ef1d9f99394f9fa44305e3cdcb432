@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cc20ab9e_8644bdb2",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1657,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-11T17:18:45Z",
+      "side": 1,
+      "message": "SGTM",
+      "parentUuid": "44b82756_a747cc19",
+      "range": {
+        "startLine": 1657,
+        "startChar": 0,
+        "endLine": 1657,
+        "endChar": 28
+      },
+      "revId": "7fa3796b000ef1d9f99394f9fa44305e3cdcb432",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "df604711_553e500b",
         "filename": "android/android-emu/android/main-common.c",
         "patchSetId": 2
