@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "110f3701_5b09ada2",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-12T04:33:59Z",
+      "side": 1,
+      "message": "this will short it from 20s to 10s for liveness check as well,\nis this intended ?",
+      "range": {
+        "startLine": 124,
+        "startChar": 26,
+        "endLine": 124,
+        "endChar": 28
+      },
+      "revId": "d16ddee28b9fd655621e359e45e1859aea63261e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
