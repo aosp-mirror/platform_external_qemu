@@ -41,6 +41,7 @@ const GLESv1Dispatch* LazyLoadedGLESv1Dispatch::get() {
 
 LazyLoadedGLESv1Dispatch::LazyLoadedGLESv1Dispatch() {
     LazyLoadedEGLDispatch::get();
+    LazyLoadedGLESv2Dispatch::get();
     mValid = gles1_dispatch_init(&s_gles1);
 }
 

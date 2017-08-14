@@ -1175,7 +1175,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
         g_eglInfo->sweepDestroySurfaces();
 
-        if (newDrawPtr->type() == EglSurface::PBUFFER &&
+        if (EglGlobalInfo::isEgl2Egl() &&
+            newDrawPtr->type() == EglSurface::PBUFFER &&
             newReadPtr->type() == EglSurface::PBUFFER) {
 
             EglPbufferSurface* tmpPbSurfacePtr =

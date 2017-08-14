@@ -138,7 +138,7 @@ void EglGlobalInfo::sweepDestroySurfaces() {
         assert(dpy);
         EGLSurface surface = elt.second;
         SurfacePtr surfacePtr = dpy->getSurface(surface);
-        if (surfacePtr) {
+        if (isEgl2Egl() && surfacePtr) {
             m_gles_ifaces[GLES_2_0]->deleteRbo(surfacePtr->glRboColor);
             m_gles_ifaces[GLES_2_0]->deleteRbo(surfacePtr->glRboDepth);
         }

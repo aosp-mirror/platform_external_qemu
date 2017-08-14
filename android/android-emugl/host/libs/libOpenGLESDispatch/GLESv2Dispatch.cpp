@@ -35,6 +35,10 @@ void gles2_unimplemented() {
     fprintf(stderr, "Called unimplemented GLES API\n");
 }
 
+emugl::SharedLibrary *gles2_get_lib() {
+    return s_gles2_lib;
+}
+
 //
 // This function is called only once during initialiation before
 // any thread has been created - hence it should NOT be thread safe.

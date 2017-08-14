@@ -16,6 +16,7 @@
 #include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include "OpenGLESDispatch/EGLDispatch.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
 #include "android/utils/debug.h"
 
@@ -188,9 +189,9 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
             if (!underlying_gles2_lib_name) {
                 underlying_gles2_lib_name = DEFAULT_UNDERLYING_GLES_V2_LIB;
             }
-            s_underlying_gles2_lib =
-                emugl::SharedLibrary::open(underlying_gles2_lib_name,
-                                           error, sizeof(error));
+            s_underlying_gles2_lib = gles2_get_lib();
+                //emugl::SharedLibrary::open(underlying_gles2_lib_name,
+                //                           error, sizeof(error));
             if (!s_underlying_gles2_lib) {
                 DPRINT("Could not load underlying gles2 lib %s [%s]",
                         libName, error);

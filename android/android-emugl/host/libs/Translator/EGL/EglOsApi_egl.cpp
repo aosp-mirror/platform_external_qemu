@@ -86,7 +86,8 @@ static const char* kGLES2LibName = "libGLESv2.dylib";
     X(EGLBoolean, eglSwapBuffers, (EGLDisplay display, EGLSurface surface))    \
     X(EGLSurface, eglCreateWindowSurface,                                      \
       (EGLDisplay display, EGLConfig config,                                   \
-       EGLNativeWindowType native_window, EGLint const* attrib_list))
+       EGLNativeWindowType native_window, EGLint const* attrib_list))          \
+    X(EGLBoolean, eglBindAPI, (EGLenum api))
 
 namespace {
 using namespace EglOS;
@@ -238,6 +239,7 @@ private:
 EglOsEglDisplay::EglOsEglDisplay() {
     mDisplay = mDispatcher.eglGetDisplay(EGL_DEFAULT_DISPLAY);
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
+    mDispatcher.eglBindAPI(EGL_OPENGL_ES_API);
     CHECK_EGL_ERR
 #ifdef __linux__
     mGlxDisplay = XOpenDisplay(0);
@@ -354,7 +356,7 @@ EglOsEglDisplay::createContext(EGLint profileMask,
     const EglOsEglPixelFormat* format = (const EglOsEglPixelFormat*)pixelFormat;
     D("with config %p\n", format->mConfigId);
     // Always GLES3
-    EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE};
+    EGLint attrib_list[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
     // TODO: support GLES3.1
     EglOsEglContext* nativeSharedCtx = (EglOsEglContext*)sharedContext;
     EGLContext newNativeCtx = mDispatcher.eglCreateContext(

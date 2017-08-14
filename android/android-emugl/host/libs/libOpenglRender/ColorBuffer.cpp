@@ -285,7 +285,8 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     // then call glCopyTexSubImage2D().
     GLuint tmpTex;
     GLint currTexBind;
-    if (tInfo->currContext->version() > GLESApi_CM) {
+    //if (tInfo->currContext->version() > GLESApi_CM) {
+    if (1) {
         s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
         s_gles2.glGenTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);

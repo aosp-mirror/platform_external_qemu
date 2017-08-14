@@ -104,7 +104,7 @@ void GLESv2Context::initDefaultFBO(
 
 
 void GLESv2Context::initEmulatedVAO() {
-    if (!isCoreProfile()) return;
+    if (!isCoreProfile() || isGles2Gles()) return;
 
     // Create emulated default VAO
     genVAOName(0, false);
@@ -112,6 +112,9 @@ void GLESv2Context::initEmulatedVAO() {
 }
 
 void GLESv2Context::initEmulatedBuffers() {
+    if (isGles2Gles()) {
+        return;
+    }
     if (m_emulatedClientVBOs.empty()) {
         // Create emulated client VBOs
         GLint neededClientVBOs = 0;
@@ -419,7 +422,8 @@ void GLESv2Context::drawWithEmulations(
     bool needClientIBOSetup =
         (cmd != DrawCallCmd::Arrays &&
          cmd != DrawCallCmd::ArraysInstanced) &&
-        !isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
+        !isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+        !isGles2Gles();
     bool needPointEmulation = mode == GL_POINTS;
 
 #ifdef __APPLE__
@@ -466,9 +470,11 @@ void GLESv2Context::drawWithEmulations(
 
         size_t dataSize = bpv * count;
 
-        s_glDispatch.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prevIBO);
-        s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_emulatedClientIBO);
-        s_glDispatch.glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
+        if (!isGles2Gles()) {
+            s_glDispatch.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, (GLint*)&prevIBO);
+            s_glDispatch.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_emulatedClientIBO);
+            s_glDispatch.glBufferData(GL_ELEMENT_ARRAY_BUFFER, dataSize, indices, GL_STREAM_DRAW);
+        }
     }
 
     const GLvoid* indicesOrOffset =
@@ -543,6 +549,14 @@ void GLESv2Context::setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,
                                          GLint size, GLsizei stride, GLboolean normalized, int index, bool isInt){
     // is not really a client side arr.
     if (arr == NULL) return;
+    if (isGles2Gles()) {
+        if (isInt) {
+            s_glDispatch.glVertexAttribIPointer(arrayType, size, dataType, stride, arr);
+        } else {
+            s_glDispatch.glVertexAttribPointer(arrayType, size, dataType, normalized, stride, arr);
+        }
+        return;
+    }
 
     GLuint prevArrayBuffer;
     s_glDispatch.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, (GLint*)&prevArrayBuffer);

@@ -19,6 +19,8 @@
 #include "OpenGLESDispatch/gles_functions.h"
 #include "KHR/khrplatform.h"
 
+#include "emugl/common/shared_library.h"
+
 // Define function pointer types.
 #define GLES2_DISPATCH_DEFINE_TYPE(return_type,func_name,signature,callargs) \
     typedef return_type (KHRONOS_APIENTRY * func_name ## _t) signature;
@@ -41,6 +43,8 @@ bool gles2_dispatch_init(GLESv2Dispatch* dispatch_table);
 void* gles2_dispatch_get_proc_func(const char* name, void* userData);
 // Used to check for unimplemented.
 void gles2_unimplemented();
+
+emugl::SharedLibrary *gles2_get_lib();
 
 // Used to query max GLES version support based on what the dispatch mechanism
 // has found in the GLESv2 library.

@@ -722,6 +722,9 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
 HandleType FrameBuffer::createRenderContext(int p_config,
                                             HandleType p_share,
                                             GLESApi version) {
+    if (version == GLESApi_CM) {
+        version = GLESApi_2;
+    }
     AutoLock mutex(m_lock);
     emugl::ReadWriteMutex::AutoWriteLock contextLock(m_contextStructureLock);
     HandleType ret = 0;
