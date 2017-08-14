@@ -775,7 +775,10 @@ typedef enum {
 
 } SmsCodingScheme;
 
-/* see TS 23.038 Section 5 for details */
+/* See ETSI TS 123 038 v14.0.0 (2017-04)
+ *     3GPP TS 23.038 v14.0.0 Release 14
+ *     section 4, SMS Data Coding Scheme.
+ */
 static SmsCodingScheme
 sms_get_coding_scheme( cbytes_t  *pcur,
                        cbytes_t   end )
@@ -789,26 +792,15 @@ sms_get_coding_scheme( cbytes_t  *pcur,
     dataCoding = *cur++;
     *pcur      = cur;
 
-    switch (dataCoding >> 4) {
-        case 0x00:
-        case 0x02:
-        case 0x03:
-            return SMS_CODING_SCHEME_GSM7;
+    if ((dataCoding & 0xC0) == 0x00) {
+        if ((dataCoding & 0x0C) == 0x00) return SMS_CODING_SCHEME_GSM7;
+        if ((dataCoding & 0x0C) == 0x08) return SMS_CODING_SCHEME_UCS2;
+        return SMS_CODING_SCHEME_UNKNOWN; // 8-bit data or reserved
+    }
 
-        case 0x01:
-            if (dataCoding == 0x10) return SMS_CODING_SCHEME_GSM7;
-            if (dataCoding == 0x11) return SMS_CODING_SCHEME_UCS2;
-            break;
-
-        case 0x04: case 0x05: case 0x06: case 0x07:
-            if (dataCoding & 0x20)           return SMS_CODING_SCHEME_UNKNOWN; /* compressed 7-bits */
-            if (((dataCoding >> 2) & 3) == 0) return SMS_CODING_SCHEME_GSM7;
-            if (((dataCoding >> 2) & 3) == 2) return SMS_CODING_SCHEME_UCS2;
-            break;
-
-        case 0xF:
-            if (!(dataCoding & 4)) return SMS_CODING_SCHEME_GSM7;
-            break;
+    if ((dataCoding & 0xF0) == 0xF0) {
+        if ((dataCoding & 0x04) == 0x00) return SMS_CODING_SCHEME_GSM7;
+        return SMS_CODING_SCHEME_UNKNOWN; // 8-bit data
     }
     return SMS_CODING_SCHEME_UNKNOWN;
 }
