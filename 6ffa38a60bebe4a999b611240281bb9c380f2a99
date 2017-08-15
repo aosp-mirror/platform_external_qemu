@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d02182f4_8962e140",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-15T23:31:33Z",
+      "side": 1,
+      "message": "maybe add an assert(size(length)\u003d\u003dMESSAGE_LENGTH_BUFFER_SIZE)?",
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
