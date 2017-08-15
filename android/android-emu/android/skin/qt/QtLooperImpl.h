@@ -14,6 +14,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/async/Looper.h"
 
+#include <QThread>
 #include <QTimer>
 #include <QtGlobal>
 
@@ -27,14 +28,35 @@ typedef ::android::base::Looper BaseLooper;
 typedef ::android::base::Looper::Timer BaseTimer;
 
 class TimerImpl : public QTimer {
+    DISALLOW_COPY_AND_ASSIGN(TimerImpl);
     Q_OBJECT
 
 public:
     TimerImpl(BaseTimer::Callback callback, void* opaque, BaseTimer* timer)
-        : QTimer(), mCallback(callback), mOpaque(opaque), mTimer(timer) {
-        QObject::connect(this, &TimerImpl::timeout, this,
-                         &TimerImpl::slot_timeout);
+        : mCallback(callback), mOpaque(opaque), mTimer(timer) {
+        connect(this, &QTimer::timeout, this, &TimerImpl::slot_timeout);
+        connect(this, &TimerImpl::signalStart, this,
+                static_cast<void (QTimer::*)(int)>(&QTimer::start));
+        // This connection is dangerous - one must check if it's running in a
+        // different thread than the QObject's thread or the signal deadlocks.
+        connect(this, &TimerImpl::signalStop, this, &QTimer::stop,
+                Qt::BlockingQueuedConnection);
     }
+
+    ~TimerImpl() { stop(); }
+
+    void start(int timeoutMs = 0) { emit signalStart(timeoutMs); }
+    void stop() {
+        if (thread() == QThread::currentThread()) {
+            QTimer::stop();
+        } else {
+            emit signalStop();
+        }
+    }
+
+signals:
+    void signalStart(int timeoutMs);
+    void signalStop();
 
 public slots:
     void slot_timeout() { mCallback(mOpaque, mTimer); }
@@ -43,11 +65,10 @@ private:
     BaseTimer::Callback mCallback;
     void* mOpaque;
     BaseTimer* mTimer;
-
-    DISALLOW_COPY_AND_ASSIGN(TimerImpl);
 };
 
 class TaskImpl : public QObject, public BaseLooper::Task {
+    DISALLOW_COPY_AND_ASSIGN(TaskImpl);
     Q_OBJECT
 
 public:
@@ -63,9 +84,7 @@ public:
                 Qt::QueuedConnection);
     }
 
-    ~TaskImpl() {
-        disconnect();
-    }
+    ~TaskImpl() { disconnect(); }
 
     void schedule() override {
         mCanceled = false;
