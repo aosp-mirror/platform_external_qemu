@@ -22,6 +22,30 @@
       "revId": "f357bdc895c64dbd0a050ca610123b6449c58b88",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "db397c97_c5707185",
+        "filename": "android/android-emu/android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-15T23:42:48Z",
+      "side": 1,
+      "message": "I\u0027m asking because if we guess wrong here and then later it should\u0027ve been screen 1 with different DPI, it will also look quite weird\nbut still it\u0027s better than nothing",
+      "parentUuid": "8eb11628_dfe292c1",
+      "range": {
+        "startLine": 126,
+        "startChar": 4,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "f357bdc895c64dbd0a050ca610123b6449c58b88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
