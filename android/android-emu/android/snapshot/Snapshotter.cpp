@@ -127,7 +127,7 @@ const SnapshotCallbacks Snapshotter::kCallbacks = {
 // TODO: implement an optimized SSE4 version and dynamically select it if host
 // supports SSE4.
 bool isBufferZeroed(const void* ptr, int32_t size) {
-    assert((uintptr_t(ptr) & (4096 - 1)) == 0); // page-aligned
+    assert((uintptr_t(ptr) & (4096 - 1)) == 0);  // page-aligned
     assert(size >= 4096);  // at least one small page in |size|
     return buffer_zero_sse2(ptr, size);
 }
@@ -209,7 +209,8 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     assert(mLoader && name == mLoader->snapshot().name());
     mLoader->complete(res == 0);
     crashreport::CrashReporter::get()->hangDetector().pause(false);
-    mLastLoadUptimeMs = System::Duration(System::get()->getProcessTimes().wallClockMs);
+    mLastLoadUptimeMs =
+            System::Duration(System::get()->getProcessTimes().wallClockMs);
     return mLoader->status() != OperationStatus::Error;
 }
 
