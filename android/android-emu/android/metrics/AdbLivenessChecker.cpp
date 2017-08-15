@@ -162,7 +162,7 @@ bool AdbLivenessChecker::runBootCheck() {
                     sLivenessStatus.bootComplete = false;
                 } else {
                     char out = 0;
-                    if ((*result->output >> out) && out == '1') {
+                    if (bool(*result->output >> out) && out == '1') {
                         sLivenessStatus.bootComplete = true;
                         mBootCheckTask.stopAsync();
                     } else {

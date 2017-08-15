@@ -339,9 +339,10 @@ bool Snapshot::load() {
     int matchedImages = 0;
     for (const auto& image : kImages) {
         ScopedCPtr<char> path(image.pathGetter(android_avdInfo));
+        const auto type = image.type;
         const auto it = std::find_if(
                 mSnapshotPb.images().begin(), mSnapshotPb.images().end(),
-                [type = image.type](const pb::Image& im) {
+                [type](const pb::Image& im) {
                     return im.has_type() && im.type() == type;
                 });
         if (it != mSnapshotPb.images().end()) {
