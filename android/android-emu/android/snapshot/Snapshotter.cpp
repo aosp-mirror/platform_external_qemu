@@ -55,75 +55,6 @@ static bool buffer_zero_sse2(const void* buf, int len) {
 namespace android {
 namespace snapshot {
 
-const SnapshotCallbacks Snapshotter::kCallbacks = {
-        // ops
-        {
-                // save
-                {// start
-                 [](void* opaque, const char* name) {
-                     auto snapshot = static_cast<Snapshotter*>(opaque);
-                     return snapshot->onStartSaving(name) ? 0 : -1;
-                 },
-                 // end
-                 [](void* opaque, const char* name, int res) {
-                     auto snapshot = static_cast<Snapshotter*>(opaque);
-                     snapshot->onSavingComplete(name, res);
-                 }},
-                // load
-                {// start
-                 [](void* opaque, const char* name) {
-                     auto snapshot = static_cast<Snapshotter*>(opaque);
-                     return snapshot->onStartLoading(name) ? 0 : -1;
-                 },
-                 // end
-                 [](void* opaque, const char* name, int res) {
-                     auto snapshot = static_cast<Snapshotter*>(opaque);
-                     snapshot->onLoadingComplete(name, res);
-                 }},
-                // del
-                {// start
-                 [](void* opaque, const char* name) {
-                     auto snapshot = static_cast<Snapshotter*>(opaque);
-                     return snapshot->onStartDelete(name) ? 0 : -1;
-                 },
-                 // end
-                 [](void* opaque, const char* name, int res) {
-                     auto snapshot = static_cast<Snapshotter*>(opaque);
-                     snapshot->onDeletingComplete(name, res);
-                 }},
-        },
-        // ramOps
-        {// registerBlock
-         [](void* opaque, SnapshotOperation operation, const RamBlock* block) {
-             auto snapshot = static_cast<Snapshotter*>(opaque);
-             if (operation == SNAPSHOT_LOAD) {
-                 snapshot->mLoader->ramLoader().registerBlock(*block);
-             } else if (operation == SNAPSHOT_SAVE) {
-                 snapshot->mSaver->ramSaver().registerBlock(*block);
-             }
-         },
-         // startLoading
-         [](void* opaque) {
-             auto snapshot = static_cast<Snapshotter*>(opaque);
-             snapshot->mLoader->ramLoader().start();
-             return snapshot->mLoader->ramLoader().hasError() ? -1 : 0;
-         },
-         // savePage
-         [](void* opaque,
-            int64_t blockOffset,
-            int64_t pageOffset,
-            int32_t size) {
-             auto snapshot = static_cast<Snapshotter*>(opaque);
-             snapshot->mSaver->ramSaver().savePage(blockOffset, pageOffset,
-                                                   size);
-         },
-         // savingComplete
-         [](void* opaque) {
-             auto snapshot = static_cast<Snapshotter*>(opaque);
-             snapshot->mSaver->ramSaver().join();
-             return snapshot->mSaver->ramSaver().hasError() ? -1 : 0;
-         }}};
-
 // TODO: implement an optimized SSE4 version and dynamically select it if host
 // supports SSE4.
 bool isBufferZeroed(const void* ptr, int32_t size) {
@@ -134,6 +65,74 @@ bool isBufferZeroed(const void* ptr, int32_t size) {
 
 Snapshotter::Snapshotter(const QAndroidVmOperations& vmOperations)
     : mVmOperations(vmOperations) {
+    static const SnapshotCallbacks kCallbacks = {
+            // ops
+            {
+                    // save
+                    {// start
+                     [](void* opaque, const char* name) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         return snapshot->onStartSaving(name) ? 0 : -1;
+                     },
+                     // end
+                     [](void* opaque, const char* name, int res) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         snapshot->onSavingComplete(name, res);
+                     }},
+                    // load
+                    {// start
+                     [](void* opaque, const char* name) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         return snapshot->onStartLoading(name) ? 0 : -1;
+                     },
+                     // end
+                     [](void* opaque, const char* name, int res) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         snapshot->onLoadingComplete(name, res);
+                     }},
+                    // del
+                    {// start
+                     [](void* opaque, const char* name) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         return snapshot->onStartDelete(name) ? 0 : -1;
+                     },
+                     // end
+                     [](void* opaque, const char* name, int res) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         snapshot->onDeletingComplete(name, res);
+                     }},
+            },
+            // ramOps
+            {// registerBlock
+             [](void* opaque, SnapshotOperation operation,
+                const RamBlock* block) {
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+                 if (operation == SNAPSHOT_LOAD) {
+                     snapshot->mLoader->ramLoader().registerBlock(*block);
+                 } else if (operation == SNAPSHOT_SAVE) {
+                     snapshot->mSaver->ramSaver().registerBlock(*block);
+                 }
+             },
+             // startLoading
+             [](void* opaque) {
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+                 snapshot->mLoader->ramLoader().start();
+                 return snapshot->mLoader->ramLoader().hasError() ? -1 : 0;
+             },
+             // savePage
+             [](void* opaque, int64_t blockOffset, int64_t pageOffset,
+                int32_t size) {
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+                 snapshot->mSaver->ramSaver().savePage(blockOffset, pageOffset,
+                                                       size);
+             },
+             // savingComplete
+             [](void* opaque) {
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+                 snapshot->mSaver->ramSaver().join();
+                 return snapshot->mSaver->ramSaver().hasError() ? -1 : 0;
+             }}};
+
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
 }
 

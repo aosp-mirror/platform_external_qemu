@@ -53,8 +53,6 @@ public:
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
 
 private:
-    static const SnapshotCallbacks kCallbacks;
-
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
     bool onStartLoading(const char* name);
