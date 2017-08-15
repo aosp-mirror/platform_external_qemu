@@ -11,10 +11,12 @@
 
 #pragma once
 
+#include "android/base/Compiler.h"
 #include "android/base/Optional.h"
-#include "android/snapshot/common.h"
+#include "android/base/system/System.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/Saver.h"
+#include "android/snapshot/common.h"
 
 #include "android/emulation/control/vm_operations.h"
 
@@ -32,6 +34,7 @@ class Snapshotter final {
 public:
     Snapshotter(const QAndroidVmOperations& vmOperations);
     ~Snapshotter();
+
     static Snapshotter& get();
 
     OperationStatus prepareForLoading(const char* name);
@@ -40,7 +43,9 @@ public:
     OperationStatus save(const char* name);
     void deleteSnapshot(const char* name);
 
-    base::System::Duration lastLoadUptimeMs() const { return mLastLoadUptimeMs; }
+    base::System::Duration lastLoadUptimeMs() const {
+        return mLastLoadUptimeMs;
+    }
 
     Saver& saver() { return *mSaver; }
     Loader& loader() { return *mLoader; }
