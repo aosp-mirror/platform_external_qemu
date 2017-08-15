@@ -22,6 +22,30 @@
       "revId": "d16ddee28b9fd655621e359e45e1859aea63261e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7434370_d109fa43",
+        "filename": "android/android-emu/android/metrics/metrics.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-15T00:44:04Z",
+      "side": 1,
+      "message": "Well, there are other consequences there, so I decided to make it a little bit more complicated but independent of this timeout. Please see the next patch set",
+      "parentUuid": "110f3701_5b09ada2",
+      "range": {
+        "startLine": 124,
+        "startChar": 26,
+        "endLine": 124,
+        "endChar": 28
+      },
+      "revId": "d16ddee28b9fd655621e359e45e1859aea63261e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
