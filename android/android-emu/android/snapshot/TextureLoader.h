@@ -25,7 +25,6 @@
 namespace android {
 namespace snapshot {
 
-// TODO: idle loader implementation
 class TextureLoader {
     DISALLOW_COPY_AND_ASSIGN(TextureLoader);
 
@@ -46,7 +45,10 @@ public:
     }
 
     void join() {
-        if (mLoaderThread) mLoaderThread.reset();
+        if (mLoaderThread) {
+            mLoaderThread->wait();
+            mLoaderThread.reset();
+        }
     }
 
 private:
