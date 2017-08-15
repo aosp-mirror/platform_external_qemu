@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8eb11628_dfe292c1",
+        "filename": "android/android-emu/android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-15T23:20:24Z",
+      "side": 1,
+      "message": "the very next statement checks if the number is \u003c0\ndo we know why it is only \u003c0 on 4k displays?",
+      "range": {
+        "startLine": 126,
+        "startChar": 4,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "f357bdc895c64dbd0a050ca610123b6449c58b88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
