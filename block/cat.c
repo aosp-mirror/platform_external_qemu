@@ -135,7 +135,6 @@ cat_co_rw(BlockDriverState *bs, int64_t sector_num, int nb_sectors, QEMUIOVector
 {
     int ret;
     BDRVCATState *s = bs->opaque;
-    void *buf;
 
     if (sector_num  < 0 || nb_sectors < 0 || sector_num + nb_sectors > bs->total_sectors) {
         return -EINVAL;
