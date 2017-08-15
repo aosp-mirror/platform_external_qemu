@@ -22,6 +22,8 @@
 
 #include "android/metrics/proto/studio_stats.pb.h"
 
+#include <istream>
+
 namespace android {
 namespace metrics {
 
