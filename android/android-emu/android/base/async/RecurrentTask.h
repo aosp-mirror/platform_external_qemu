@@ -61,17 +61,17 @@ public:
                   Looper::Duration taskIntervalMs)
         : mLooper(looper),
           mFunction(function),
-          mTaskIntervalMs(taskIntervalMs),
+          mTaskIntervalMs(int(taskIntervalMs)),
           mTimer(mLooper->createTimer(&RecurrentTask::taskCallback, this)) {}
 
     ~RecurrentTask() { stopAndWait(); }
 
-    void start() {
+    void start(bool runImmediately = false) {
         {
             AutoLock lock(mLock);
             mInFlight = true;
         }
-        mTimer->startRelative(mTaskIntervalMs);
+        mTimer->startRelative(runImmediately ? 0 : mTaskIntervalMs);
     }
 
     void stopAsync() {
@@ -104,6 +104,8 @@ public:
             mInTimerCondition.wait(&lock);
         }
     }
+
+    Looper::Duration taskIntervalMs() const { return mTaskIntervalMs; }
 
 protected:
     static void taskCallback(void* opaqueThis, Looper::Timer* timer) {
@@ -145,13 +147,13 @@ protected:
 private:
     Looper* const mLooper;
     const TaskFunction mFunction;
-    const Looper::Duration mTaskIntervalMs;
+    const int mTaskIntervalMs;
+    bool mInTimerCallback = false;
+    bool mInFlight = false;
     const std::unique_ptr<Looper::Timer> mTimer;
 
     mutable Lock mLock;
     ConditionVariable mInTimerCondition;
-    bool mInTimerCallback = false;
-    bool mInFlight = false;
 };
 
 }  // namespace base
