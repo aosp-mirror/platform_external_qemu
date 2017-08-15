@@ -118,6 +118,10 @@ void SizeTweaker::adjustSizesAndPositions() {
     }
 
     int screen_number = QApplication::desktop()->screenNumber(mSubject.data());
+    // sometimes, screen_number may be -1 if widget is not yet visible
+    // this fixes tiny toolbar on 4k displays
+    if (screen_number < 0)
+        screen_number = 0;
 
     // QDesktopWidget::screenNumber returns -1 if the widget is not on a screen.
     // The returned index *may* be out of bounds if the screen change event was
