@@ -38,6 +38,9 @@ public:
     OperationStatus load(const char* name);
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(const char* name);
+    void deleteSnapshot(const char* name);
+
+    base::System::Duration lastLoadUptimeMs() const { return mLastLoadUptimeMs; }
 
     Saver& saver() { return *mSaver; }
     Loader& loader() { return *mLoader; }
@@ -57,6 +60,8 @@ private:
     QAndroidVmOperations mVmOperations;
     android::base::Optional<Saver> mSaver;
     android::base::Optional<Loader> mLoader;
+
+    base::System::Duration mLastLoadUptimeMs = 0;
 };
 
 }  // namespace snapshot

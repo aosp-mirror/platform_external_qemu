@@ -30,7 +30,6 @@ using android::base::System;
 using android::ConfigDirs;
 using std::shared_ptr;
 
-static const char kAdbLivenessKey[] = "adb_liveness";
 static const int kMaxAttempts = 3;
 
 // static
@@ -43,6 +42,24 @@ AdbLivenessChecker::Ptr AdbLivenessChecker::create(
     auto inst = Ptr(new AdbLivenessChecker(adb, looper, reporter, emulatorName,
                                            checkIntervalMs));
     return inst;
+}
+
+namespace {
+struct LivenessStatus {
+    bool online;
+    bool bootComplete;
+};
+}  // namespace
+
+static LivenessStatus sLivenessStatus = {};
+
+// static
+bool AdbLivenessChecker::isEmulatorOnline() {
+    return sLivenessStatus.online;
+}
+
+bool AdbLivenessChecker::isEmulatorBooted() {
+    return sLivenessStatus.bootComplete;
 }
 
 AdbLivenessChecker::AdbLivenessChecker(
@@ -62,6 +79,9 @@ AdbLivenessChecker::AdbLivenessChecker(
       mRecurrentTask(looper,
                      [this]() { return adbCheckRequest(); },
                      mCheckIntervalMs),
+      mBootCheckTask(looper,
+                     [this]() { return runBootCheck(); },
+                     std::max<int>(mCheckIntervalMs / 100, 250)),
       mRemainingAttempts(kMaxAttempts) {
     // Don't call start() here: start() launches a parallel task that calls
     // shared_from_this(), which needs at least one shared pointer owning
@@ -75,15 +95,20 @@ AdbLivenessChecker::~AdbLivenessChecker() {
     if (mShellExitCommand) {
         mShellExitCommand->cancel();
     }
+    if (mBootCompleteCommand) {
+        mBootCompleteCommand->cancel();
+    }
     stop();
 }
 
 void AdbLivenessChecker::start() {
-    mRecurrentTask.start();
+    mRecurrentTask.start(true);
+    mBootCheckTask.start(true);
 }
 
 void AdbLivenessChecker::stop() {
     mRecurrentTask.stopAndWait();
+    mBootCheckTask.stopAndWait();
 }
 
 bool AdbLivenessChecker::adbCheckRequest() {
@@ -123,6 +148,33 @@ bool AdbLivenessChecker::adbCheckRequest() {
     return true;
 }
 
+bool AdbLivenessChecker::runBootCheck() {
+    if (sLivenessStatus.bootComplete) {
+        return false;
+    }
+    if (mBootCompleteCommand) {
+        return true;
+    }
+    mBootCompleteCommand = mAdb->runAdbCommand(
+            {"shell", "getprop", "dev.bootcomplete"},
+            [this](const android::emulation::OptionalAdbCommandResult& result) {
+                if (!result || result->exit_code || !result->output) {
+                    sLivenessStatus.bootComplete = false;
+                } else {
+                    char out = 0;
+                    if ((*result->output >> out) && out == '1') {
+                        sLivenessStatus.bootComplete = true;
+                        mBootCheckTask.stopAsync();
+                    } else {
+                        sLivenessStatus.bootComplete = false;
+                    }
+                }
+                mBootCompleteCommand.reset();
+            },
+            mBootCheckTask.taskIntervalMs(), true);
+    return true;
+}
+
 void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
     System::ProcessExitCode exitCode;
     const std::string& adbPath = mAdb->adbPath();
@@ -157,7 +209,7 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
 }
 
 void AdbLivenessChecker::runCheckNonBlocking() {
-    if (mDevicesCommand || mShellExitCommand) {
+    if (mDevicesCommand || mShellExitCommand || mBootCompleteCommand) {
         // already in progress
         return;
     }
@@ -168,14 +220,25 @@ void AdbLivenessChecker::runCheckNonBlocking() {
             [this](const android::emulation::OptionalAdbCommandResult& result) {
                 if (!result || result->exit_code) {
                     reportCheckResult(CheckResult::kFailureAdbServerDead);
+                    sLivenessStatus.online = false;
+                    sLivenessStatus.bootComplete = false;
+                    if (!mBootCheckTask.inFlight()) {
+                        mBootCheckTask.start(true);
+                    }
                 } else {
                     mShellExitCommand = mAdb->runAdbCommand(
                         {"shell", "exit"},
                         [this](const android::emulation::OptionalAdbCommandResult& result2) {
                             if (!result2 || result2->exit_code) {
                                 reportCheckResult(CheckResult::kFailureEmulatorDead);
+                                sLivenessStatus.online = false;
+                                sLivenessStatus.bootComplete = false;
+                                if (!mBootCheckTask.inFlight()) {
+                                    mBootCheckTask.start(true);
+                                }
                             } else {
                                 reportCheckResult(CheckResult::kOnline);
+                                sLivenessStatus.online = true;
                             }
 
                             mShellExitCommand.reset();
