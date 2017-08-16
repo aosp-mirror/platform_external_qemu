@@ -117,6 +117,7 @@ bool RamLoader::start() {
 }
 
 void RamLoader::join() {
+    mJoining = true;
     mReaderThread.wait();
 }
 
@@ -321,12 +322,20 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::backgroundPageLoad() {
                     return state == uint8_t(State::Empty) ||
                            (state == uint8_t(State::Read) && !page.data);
                 });
+#if SNAPSHOT_PROFILE > 2
+        const auto count = int(mBackgroundPageIt - mIndex.pages.begin());
+        if ((count % 10000) == 0 || count == int(mIndex.pages.size())) {
+            printf("Background loading: at page #%d of %d\n", count,
+                   int(mIndex.pages.size()));
+        }
+#endif
 
         if (mBackgroundPageIt == mIndex.pages.end()) {
             if (!mSentEndOfPagesMarker) {
                 mSentEndOfPagesMarker = mReadingQueue.trySend(nullptr);
             }
-            return MemoryAccessWatch::IdleCallbackResult::Wait;
+            return mJoining ? MemoryAccessWatch::IdleCallbackResult::RunAgain
+                            : MemoryAccessWatch::IdleCallbackResult::Wait;
         }
 
         if (mBackgroundPageIt->state.load(std::memory_order_relaxed) ==
@@ -340,7 +349,8 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::backgroundPageLoad() {
         } else {
             // The queue is full - let's wait for a while to give the reader
             // time to empty it.
-            return MemoryAccessWatch::IdleCallbackResult::Wait;
+            return mJoining ? MemoryAccessWatch::IdleCallbackResult::RunAgain
+                            : MemoryAccessWatch::IdleCallbackResult::Wait;
         }
     }
 
@@ -356,7 +366,8 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         // If we've loaded a page then this function took quite a while
         // and it's better to check for a pagefault before proceeding to
         // queuing pages into the reader thread.
-        return MemoryAccessWatch::IdleCallbackResult::RunAgain;
+        return mJoining ? MemoryAccessWatch::IdleCallbackResult::RunAgain
+                        : MemoryAccessWatch::IdleCallbackResult::Wait;
     } else {
         // null page == all pages were loaded, stop.
         mReadDataQueue.stop();

@@ -88,6 +88,7 @@ private:
     base::FunctorThread mReaderThread;
     Pages::iterator mBackgroundPageIt;
     bool mSentEndOfPagesMarker = false;
+    bool mJoining = false;
     base::MessageChannel<Page*, 32> mReadingQueue;
     base::MessageChannel<Page*, 32> mReadDataQueue;
 
