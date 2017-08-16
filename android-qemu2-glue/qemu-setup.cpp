@@ -121,9 +121,7 @@ bool qemu_android_emulation_early_setup() {
         return false;
     }
 
-    if (isEnabled(android::featurecontrol::Feature::FastSnapshotV1)) {
-        androidSnapshot_initialize(gQAndroidVmOperations);
-    }
+    androidSnapshot_initialize(gQAndroidVmOperations);
     qemu_snapshot_compression_setup();
 
     android::emulation::AudioCaptureEngine::set(
