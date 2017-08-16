@@ -75,7 +75,9 @@ static void goldfish_pstore_save_restore(goldfish_pstore *store, bool write) {
     fd = OPEN_READ(store->fname);
   }
   if (fd == -1) {
-    error_setg_errno(&local_err, errno, "Unable to open %s", store->fname);
+    if (write) {
+      error_setg_errno(&local_err, errno, "Unable to open %s", store->fname);
+    }
     goto Error;
   }
 
