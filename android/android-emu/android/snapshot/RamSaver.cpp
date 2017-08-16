@@ -120,8 +120,7 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     ++mIndex.totalPages;
 
-    auto ptr = block.ramBlock.hostPtr + pi.pageIndex * block.ramBlock.pageSize;
-
+    auto ptr = block.ramBlock.hostPtr + int64_t(pi.pageIndex) * block.ramBlock.pageSize;
     if (isBufferZeroed(ptr, block.ramBlock.pageSize)) {
         page.sizeOnDisk = 0;
     } else {
