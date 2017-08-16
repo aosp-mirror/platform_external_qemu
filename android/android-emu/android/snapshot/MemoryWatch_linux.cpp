@@ -56,11 +56,11 @@ static bool checkUserfaultFdCaps(int ufd) {
         return false;
     }
 
-    uint64_t ioctlMask =
-            1ull << _UFFDIO_REGISTER | 1ull << _UFFDIO_UNREGISTER;
+    uint64_t ioctlMask = 1ull << _UFFDIO_REGISTER | 1ull << _UFFDIO_UNREGISTER;
     if ((apiStruct.ioctls & ioctlMask) != ioctlMask) {
-        dwarning("Missing userfault features: %llu",
-                 static_cast<unsigned long long>(~apiStruct.ioctls & ioctlMask));
+        dwarning(
+                "Missing userfault features: %llu",
+                static_cast<unsigned long long>(~apiStruct.ioctls & ioctlMask));
         return false;
     }
 
@@ -135,14 +135,14 @@ public:
                 timeoutNs = 0;
             } else {
                 switch (mIdleCallback()) {
-                case IdleCallbackResult::RunAgain:
-                    timeoutNs = 0;
-                    break;
-                case IdleCallbackResult::Wait:
-                    timeoutNs = 10 * 1000 * 1000;
-                    break;
-                case IdleCallbackResult::AllDone:
-                    return;
+                    case IdleCallbackResult::RunAgain:
+                        timeoutNs = 0;
+                        break;
+                    case IdleCallbackResult::Wait:
+                        timeoutNs = 500 * 1000;
+                        break;
+                    case IdleCallbackResult::AllDone:
+                        return;
                 }
             }
         }
@@ -178,10 +178,10 @@ bool MemoryAccessWatch::valid() const {
 
 bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
     uffdio_register regStruct = {{(uintptr_t)start, length},
-                                  UFFDIO_REGISTER_MODE_MISSING};
+                                 UFFDIO_REGISTER_MODE_MISSING};
     if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_REGISTER, &regStruct)) {
-        derror("%s userfault register(%p, %d): %s", __func__,
-               start, int(length), strerror(errno));
+        derror("%s userfault register(%p, %d): %s", __func__, start,
+               int(length), strerror(errno));
         mImpl->mUserfaultFd.close();
         return false;
     }

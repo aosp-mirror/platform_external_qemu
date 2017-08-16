@@ -68,7 +68,12 @@ void Loader::start() {
 
 Loader::~Loader() {
     // Wait for textureLoader to finish loading textures
-    if (mTextureLoader) mTextureLoader->join();
+    if (mRamLoader && !mRamLoader->hasError()) {
+        mRamLoader->join();
+    }
+    if (mTextureLoader) {
+        mTextureLoader->join();
+    }
 }
 
 void Loader::complete(bool succeeded) {
