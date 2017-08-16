@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e1987eae_f035d937",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2226,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-08-16T15:45:08Z",
+      "side": 1,
+      "message": "Nit: we\u0027ve run",
+      "range": {
+        "startLine": 2226,
+        "startChar": 55,
+        "endLine": 2226,
+        "endChar": 64
+      },
+      "revId": "62996a43b55852413d9ee683b1369c3bdac32235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "02334ba6_344741af",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 2232,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-08-16T15:45:08Z",
+      "side": 1,
+      "message": "We also get here if the renderer does not support snapshot",
+      "range": {
+        "startLine": 2231,
+        "startChar": 46,
+        "endLine": 2232,
+        "endChar": 33
+      },
+      "revId": "62996a43b55852413d9ee683b1369c3bdac32235",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
