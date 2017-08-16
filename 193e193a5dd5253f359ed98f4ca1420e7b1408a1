@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1155dad9_5240d17a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "Can you add the bug ID and summary of the tests you ran?",
+      "range": {
+        "startLine": 10,
+        "startChar": 20,
+        "endLine": 11,
+        "endChar": 0
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0fccefe7_a964d928",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "Can you make those and other similar variables overridable by the environment?\nSo the script can be called with:\n$ CROS\u003d60-xxxxxx ./package-cros-sdk.sh",
+      "range": {
+        "startLine": 2,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 17
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d3ef55f_e22acc5c",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "\"${output}\". Same for other variables.\ngo/bashstyle#Quoting",
+      "range": {
+        "startLine": 9,
+        "startChar": 15,
+        "endLine": 9,
+        "endChar": 22
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "93a7fdba_66374794",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "Use [[ ]]\ngo/bashstyle#Test,_%5B_and_%5B%5B",
+      "range": {
+        "startLine": 25,
+        "startChar": 5,
+        "endLine": 25,
+        "endChar": 21
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f4b7304_1d86a13c",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "Can you add logging? So we have some progress info. Also, can you add newlines and a few comments? It\u0027s pretty hard to follow.",
+      "range": {
+        "startLine": 72,
+        "startChar": 6,
+        "endLine": 73,
+        "endChar": 0
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e8737f1d_c77669a3",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "More explicit names. CROS_BRANCH? CROS_MILESTONE?",
+      "range": {
+        "startLine": 80,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 6
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5078620_e73ea69d",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "\u003d\u003d",
+      "range": {
+        "startLine": 82,
+        "startChar": 11,
+        "endLine": 82,
+        "endChar": 12
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f7fa53d_6aef2282",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "Don\u0027t hardcode this, we won\u0027t necessarily pick the dev channel, most likely stable.",
+      "range": {
+        "startLine": 90,
+        "startChar": 53,
+        "endLine": 90,
+        "endChar": 64
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5cf7c6a_f73240d0",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 3
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-08-16T23:04:59Z",
+      "side": 1,
+      "message": "Why do you need to cd .., then cd x86?",
+      "range": {
+        "startLine": 98,
+        "startChar": 0,
+        "endLine": 99,
+        "endChar": 28
+      },
+      "revId": "193e193a5dd5253f359ed98f4ca1420e7b1408a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
