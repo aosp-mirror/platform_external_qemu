@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a116169b_5d1fe8c6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-16T04:35:39Z",
+      "side": 1,
+      "message": "this is not good, we need to figure out why",
+      "range": {
+        "startLine": 20,
+        "startChar": 25,
+        "endLine": 20,
+        "endChar": 50
+      },
+      "revId": "cf1249265cfb8e5f877785a656f6e4eaf637c108",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
