@@ -1918,6 +1918,7 @@ static uint32_t wakeup_reason_mask = ~(1 << QEMU_WAKEUP_REASON_NONE);
 
 #ifdef CONFIG_ANDROID
 static int64_t s_shutdown_request_uptime_ms;
+static int64_t s_reset_request_uptime_ms;
 #endif
 
 static void set_shutdown_requested() {
@@ -2074,6 +2075,9 @@ void qemu_system_reset_request(void)
         set_shutdown_requested();
     } else {
         reset_requested = 1;
+#ifdef CONFIG_ANDROID
+        s_reset_request_uptime_ms = get_uptime_ms();
+#endif
     }
     cpu_stop_current();
     qemu_notify_event();
@@ -2186,23 +2190,29 @@ static bool main_loop_should_exit(void)
         qemu_system_suspend();
     }
     if (qemu_shutdown_requested()) {
-
 #ifdef CONFIG_ANDROID
         if (!android_cmdLineOptions->no_snapshot_save &&
             feature_is_enabled(kFeature_FastSnapshotV1) &&
             emuglConfig_current_renderer_supports_snapshot()) {
             const int kMinUptimeForSavingMs = 500;
-            const int64_t sessionUptimeMs = s_shutdown_request_uptime_ms -
-                                            androidSnapshot_lastLoadUptimeMs();
+            const int64_t snapshotLoadUptimeMs =
+                    androidSnapshot_lastLoadUptimeMs();
+            const int64_t sessionUptimeMs =
+                    s_shutdown_request_uptime_ms - snapshotLoadUptimeMs;
             if (sessionUptimeMs > kMinUptimeForSavingMs) {
-                if (androidSnapshot_canSave()) {
+                const bool loaded =
+                        snapshotLoadUptimeMs > s_reset_request_uptime_ms;
+                if (loaded || androidSnapshot_canSave()) {
+                    dprint("Saving state on exit with session uptime %d ms",
+                           (int)sessionUptimeMs);
                     androidSnapshot_save(DEFAULT_BOOT_SNAPSHOT_NAME);
                 } else {
                     // Get rid of whatever was saved as a boot snapshot as the
                     // emulator ran for a while but we can't capture its current
-                    // state to resume from exactly it later.
-                    dwarning("Cleaning out the default boot snapshot to "
-                             "preserve changes made in the current session.");
+                    // state to resume later.
+                    dwarning(
+                            "Cleaning out the default boot snapshot to "
+                            "preserve changes made in the current session.");
                     androidSnapshot_delete(DEFAULT_BOOT_SNAPSHOT_NAME);
                 }
             } else {
