@@ -46,6 +46,30 @@
       "revId": "f357bdc895c64dbd0a050ca610123b6449c58b88",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16b2d62a_557c90b6",
+        "filename": "android/android-emu/android/skin/qt/size-tweaker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1078773
+      },
+      "writtenOn": "2017-08-16T05:10:30Z",
+      "side": 1,
+      "message": "IMO a good way to address this is to somehow defer the call to adjustSizesAndPositions until such time when the widget is fully visible.",
+      "parentUuid": "db397c97_c5707185",
+      "range": {
+        "startLine": 126,
+        "startChar": 4,
+        "endLine": 132,
+        "endChar": 5
+      },
+      "revId": "f357bdc895c64dbd0a050ca610123b6449c58b88",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
