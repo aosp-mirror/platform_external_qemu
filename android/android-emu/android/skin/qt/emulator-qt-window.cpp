@@ -691,6 +691,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     // forever.
     mStartupTimer.stop();
     mStartupTimer.disconnect();
+    mStartupDialog->hide();
     mStartupDialog.clear();
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
@@ -1332,6 +1333,7 @@ void EmulatorQtWindow::slot_screenChanged() {
 
 void EmulatorQtWindow::showEvent(QShowEvent* event) {
     mStartupTimer.stop();
+    mStartupDialog->hide();
     mStartupDialog.clear();
     mStartupDone = true;
 
