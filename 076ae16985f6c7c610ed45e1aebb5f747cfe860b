@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3da004c0_03ad36c4",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1337,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-16T21:49:31Z",
+      "side": 1,
+      "message": "are you sure this call to hide() helps? clear() is supposed to destroy the window - and destroying it should hide it as well",
+      "range": {
+        "startLine": 1336,
+        "startChar": 0,
+        "endLine": 1337,
+        "endChar": 27
+      },
+      "revId": "076ae16985f6c7c610ed45e1aebb5f747cfe860b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
