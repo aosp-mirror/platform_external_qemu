@@ -39,6 +39,7 @@
 #include "android/utils/system.h"
 #include "android/utils/bufprint.h"
 #include "android/version.h"
+#include "Keymaster3.h"
 
 
 #include <stdbool.h>
@@ -317,6 +318,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
     android_init_keymaster_pipe();
+    android_init_keymaster3();
 
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
