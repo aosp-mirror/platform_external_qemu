@@ -181,6 +181,17 @@ static void clean_up_android_out(const char* android_out) {
     delete_files(android_out, files_to_delete, ARRAY_SIZE(files_to_delete));
 }
 
+static void delete_snapshots_at(const char* content) {
+    if (char* const snapshotDir = path_join(content, "snapshots")) {
+        if (!path_delete_dir(snapshotDir)) {
+            D("Removed snapshot directory '%s'", snapshotDir);
+        } else {
+            D("Failed to remove snapshot directory '%s'", snapshotDir);
+        }
+        free(snapshotDir);
+    }
+}
+
 static bool checkOsVersion() {
 #ifndef _WIN32
     return true;
@@ -278,7 +289,7 @@ int main(int argc, char** argv)
         }
 
         if (!strcmp(opt, "-wipe-data")) {
-            cleanUpAvdContent= true;
+            cleanUpAvdContent = true;
             continue;
         }
 
@@ -464,10 +475,12 @@ int main(int argc, char** argv)
             char* avd_folder = path_getAvdContentPath(avdName);
             if (avd_folder) {
                 clean_up_avd_contents_except_config_ini(avd_folder);
+                delete_snapshots_at(avd_folder);
                 free(avd_folder);
             }
         } else if (androidOut) {
             clean_up_android_out(androidOut);
+            delete_snapshots_at(androidOut);
         }
     }
 
