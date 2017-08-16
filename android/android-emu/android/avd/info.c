@@ -808,7 +808,7 @@ _avdInfo_getSnapshotLockFilePath( AvdInfo* i, const char* basePath )
         DD("Path too long for %s: %s", SNAPSHOT_LOCK, basePath);
         return -1;
     }
-    D("using core hw config path: %s", i->snapshotLockPath);
+    D("using snapshot lock path: %s", i->snapshotLockPath);
     return 0;
 }
 
