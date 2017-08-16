@@ -1,0 +1,9 @@
+Code-Review+2: Yahan Zhou <yahan@google.com>
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Verified+1: Huihong Luo <huisinro@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Huihong Luo <huisinro@google.com>
+Submitted-at: Wed, 16 Aug 2017 22:30:09 +0000
+Reviewed-on: https://android-review.googlesource.com/459740
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
