@@ -2191,35 +2191,46 @@ static bool main_loop_should_exit(void)
     }
     if (qemu_shutdown_requested()) {
 #ifdef CONFIG_ANDROID
-        if (!android_cmdLineOptions->no_snapshot_save &&
-            feature_is_enabled(kFeature_FastSnapshotV1) &&
-            emuglConfig_current_renderer_supports_snapshot()) {
-            const int kMinUptimeForSavingMs = 500;
-            const int64_t snapshotLoadUptimeMs =
-                    androidSnapshot_lastLoadUptimeMs();
-            const int64_t sessionUptimeMs =
-                    s_shutdown_request_uptime_ms - snapshotLoadUptimeMs;
-            if (sessionUptimeMs > kMinUptimeForSavingMs) {
-                const bool loaded =
-                        snapshotLoadUptimeMs > s_reset_request_uptime_ms;
-                if (loaded || androidSnapshot_canSave()) {
-                    dprint("Saving state on exit with session uptime %d ms",
-                           (int)sessionUptimeMs);
-                    androidSnapshot_save(DEFAULT_BOOT_SNAPSHOT_NAME);
+        if (feature_is_enabled(kFeature_FastSnapshotV1)) {
+            if (!android_cmdLineOptions->no_snapshot_save &&
+                emuglConfig_current_renderer_supports_snapshot()) {
+                const int kMinUptimeForSavingMs = 500;
+                const int64_t snapshotLoadUptimeMs =
+                        androidSnapshot_lastLoadUptimeMs();
+                const int64_t sessionUptimeMs =
+                        s_shutdown_request_uptime_ms - snapshotLoadUptimeMs;
+                if (sessionUptimeMs > kMinUptimeForSavingMs) {
+                    const bool loaded =
+                            snapshotLoadUptimeMs > s_reset_request_uptime_ms;
+                    if (loaded || androidSnapshot_canSave()) {
+                        dprint("Saving state on exit with session uptime %d ms",
+                               (int)sessionUptimeMs);
+                        androidSnapshot_save(DEFAULT_BOOT_SNAPSHOT_NAME);
+                    } else {
+                        // Get rid of whatever was saved as a boot snapshot as
+                        // the emulator ran for a while but we can't capture its
+                        // current state to resume later.
+                        dwarning(
+                                "Cleaning out the default boot snapshot to "
+                                "preserve changes made in the current "
+                                "session.");
+                        androidSnapshot_delete(DEFAULT_BOOT_SNAPSHOT_NAME);
+                    }
                 } else {
-                    // Get rid of whatever was saved as a boot snapshot as the
-                    // emulator ran for a while but we can't capture its current
-                    // state to resume later.
                     dwarning(
-                            "Cleaning out the default boot snapshot to "
-                            "preserve changes made in the current session.");
-                    androidSnapshot_delete(DEFAULT_BOOT_SNAPSHOT_NAME);
+                            "Skipping state saving as emulator ran for just %d "
+                            "ms (<%d ms)",
+                            (int)sessionUptimeMs, kMinUptimeForSavingMs);
                 }
             } else {
+                // Again, preserve the state changes - we've ran for a while now
+                // and the AVD state is different from what could be saved in
+                // the default boot snapshot.
                 dwarning(
-                        "Skipping state saving as emulator ran for just %d ms "
-                        "(<%d ms)",
-                        (int)sessionUptimeMs, kMinUptimeForSavingMs);
+                        "Cleaning out the default boot snapshot to preserve "
+                        "the current session (command line option to not save "
+                        "snapshot).");
+                androidSnapshot_delete(DEFAULT_BOOT_SNAPSHOT_NAME);
             }
         }
 #endif

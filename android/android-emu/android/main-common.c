@@ -1636,6 +1636,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             dwarning("ignoring -snapstorage option due to the use of -no-snapstorage");
             str_reset_null(&opts->snapstorage);
         }
+
+        // Treat 'no-snapstorage' as a complete snapshots kill switch.
+        opts->no_snapshot = 1;
+        opts->no_snapshot_save = 1;
+        opts->no_snapshot_load = 1;
     } else {
         if (!opts->snapstorage && avdInfo_getSnapshotPresent(avd)) {
             str_reset_nocopy(&opts->snapstorage,
@@ -1652,7 +1657,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     /* If we have a valid snapshot storage path */
-
     if (opts->snapstorage) {
         if (is_qemu2) {
             dwarning("QEMU2 does not support snapshots - option will be ignored.");
