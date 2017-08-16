@@ -1,0 +1,158 @@
+// Copyright (C) 2014 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// libkeymaster_messages contains just the code necessary to communicate with a
+// AndroidKeymaster implementation, e.g. one running in TrustZone.
+cc_library_shared {
+    name: "libkeymaster_messages",
+    srcs: [
+        "android_keymaster_messages.cpp",
+        "android_keymaster_utils.cpp",
+        "authorization_set.cpp",
+        "keymaster_tags.cpp",
+        "logger.cpp",
+        "serializable.cpp",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+        "-DKEYMASTER_NAME_TAGS",
+    ],
+    clang: true,
+    // TODO(krasin): reenable coverage flags, when the new Clang toolchain is released.
+    // Currently, if enabled, these flags will cause an internal error in Clang.
+    clang_cflags: ["-fno-sanitize-coverage=edge,indirect-calls,8bit-counters,trace-cmp"],
+
+    export_include_dirs: ["include"],
+
+}
+
+// libkeymaster1 contains almost everything needed for a keymaster1
+// implementation, lacking only a subclass of the (abstract) KeymasterContext
+// class to provide environment-specific services and a wrapper to translate from
+// the function-based keymaster HAL API to the message-based AndroidKeymaster API.
+cc_library_shared {
+    name: "libkeymaster1",
+    srcs: [
+        "aes_key.cpp",
+        "aes_operation.cpp",
+        "android_keymaster.cpp",
+        "android_keymaster_messages.cpp",
+        "android_keymaster_utils.cpp",
+        "asymmetric_key.cpp",
+        "asymmetric_key_factory.cpp",
+        "attestation_record.cpp",
+        "auth_encrypted_key_blob.cpp",
+        "ec_key.cpp",
+        "ec_key_factory.cpp",
+        "ecdsa_operation.cpp",
+        "ecies_kem.cpp",
+        "hkdf.cpp",
+        "hmac.cpp",
+        "hmac_key.cpp",
+        "hmac_operation.cpp",
+        "integrity_assured_key_blob.cpp",
+        "iso18033kdf.cpp",
+        "kdf.cpp",
+        "key.cpp",
+        "keymaster_enforcement.cpp",
+        "nist_curve_key_exchange.cpp",
+        "ocb.c",
+        "ocb_utils.cpp",
+        "openssl_err.cpp",
+        "openssl_utils.cpp",
+        "operation.cpp",
+        "operation_table.cpp",
+        "rsa_key.cpp",
+        "rsa_key_factory.cpp",
+        "rsa_operation.cpp",
+        "symmetric_key.cpp",
+    ],
+
+    shared_libs: [
+        "libcrypto",
+        "libkeymaster_messages",
+    ],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+    ],
+    clang: true,
+    clang_cflags: [
+        "-Wno-error=unused-const-variable",
+        "-Wno-error=unused-private-field",
+        // TODO(krasin): reenable coverage flags, when the new Clang toolchain is released.
+        // Currently, if enabled, these flags will cause an internal error in Clang.
+        "-fno-sanitize-coverage=edge,indirect-calls,8bit-counters,trace-cmp"
+    ],
+
+    export_include_dirs: ["include"],
+
+}
+
+// libsoftkeymaster provides a software-based keymaster HAL implementation.
+// This is used by keystore as a fallback for when the hardware keymaster does
+// not support the request.
+cc_library_shared {
+    name: "libsoftkeymasterdevice",
+    srcs: [
+        "ec_keymaster0_key.cpp",
+        "ec_keymaster1_key.cpp",
+        "ecdsa_keymaster1_operation.cpp",
+        "keymaster0_engine.cpp",
+        "keymaster1_engine.cpp",
+        "keymaster_configuration.cpp",
+        "rsa_keymaster0_key.cpp",
+        "rsa_keymaster1_key.cpp",
+        "rsa_keymaster1_operation.cpp",
+        "soft_keymaster_context.cpp",
+        "soft_keymaster_device.cpp",
+        "soft_keymaster_logger.cpp",
+    ],
+    include_dirs: ["system/security/keystore"],
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wunused",
+    ],
+    clang: true,
+    clang_cflags: [
+        "-Wno-error=unused-const-variable",
+        "-Wno-error=unused-private-field",
+        // TODO(krasin): reenable coverage flags, when the new Clang toolchain is released.
+        // Currently, if enabled, these flags will cause an internal error in Clang.
+        "-fno-sanitize-coverage=edge,indirect-calls,8bit-counters,trace-cmp"
+    ],
+
+    shared_libs: [
+        "libkeymaster_messages",
+        "libkeymaster1",
+        "liblog",
+        "libcrypto",
+        "libcutils",
+    ],
+
+    export_include_dirs: ["include"],
+}
+
+// libkeymasterfiles is an empty library that exports all of the files in keymaster as includes.
+cc_library_static {
+    name: "libkeymasterfiles",
+    export_include_dirs: [
+        ".",
+        "include",
+    ],
+}
