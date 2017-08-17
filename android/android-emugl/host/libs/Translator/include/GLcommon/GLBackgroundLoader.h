@@ -28,7 +28,7 @@ public:
     GLBackgroundLoader(const android::snapshot::TextureLoaderWPtr& textureLoaderWeak,
                        const EGLiface& eglIface,
                        const GLESiface& glesIface,
-                       SaveableTextureMap& textureMap) :
+                       SaveableTextureMap textureMap) :
         m_textureLoaderWPtr(textureLoaderWeak),
         m_eglIface(eglIface),
         m_glesIface(glesIface),
@@ -43,5 +43,5 @@ public:
     EGLContext m_context = nullptr;
     EGLSurface m_surface = nullptr;
 
-    SaveableTextureMap& m_textureMap;
+    SaveableTextureMap m_textureMap;
 };

@@ -204,7 +204,7 @@ public:
     ObjectLocalName getDefaultTextureName(GLenum target);
     ObjectLocalName getTextureLocalName(GLenum target, unsigned int tex);
     bool isInitialized() { return m_initialized; };
-    bool needRestore();
+    bool needRestore() const;
     GLint getUnpackAlignment();
 
     bool  isArrEnabled(GLenum);

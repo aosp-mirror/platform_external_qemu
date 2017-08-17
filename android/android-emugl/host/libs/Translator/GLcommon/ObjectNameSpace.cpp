@@ -121,6 +121,9 @@ void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
     // snapshot
     touchTextures();
     for (const auto& obj : m_objectDataMap) {
+        TextureData* texData = (TextureData*)obj.second.get();
+        SaveableTexturePtr saveableTexture(texData->releaseSaveableTexture());
+        assert(!saveableTexture || !saveableTexture->needRestore());
         globalNameSpace->preSaveAddTex((const TextureData*)obj.second.get());
     }
 }
@@ -251,12 +254,20 @@ void NameSpace::setObjectData(ObjectLocalName p_localName,
 void GlobalNameSpace::preSaveAddEglImage(const EglImage* eglImage) {
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
     emugl::Mutex::AutoLock lock(m_lock);
+    if (m_textureMap.count(globalName)) {
+        assert(m_textureMap[globalName]->m_target == GL_TEXTURE_2D);
+    }
     m_textureMap.emplace(globalName,
             SaveableTexturePtr(new SaveableTexture(*eglImage)));
 }
 
 void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
+    int globalName = texture->globalName;
+    if (m_textureMap.count(globalName)) {
+        assert(m_textureMap[globalName]->m_target == 
+                texture->target);
+    }
     m_textureMap.emplace(texture->globalName,
             SaveableTexturePtr(new SaveableTexture(*texture)));
 }
@@ -313,6 +324,10 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
                                         saveableTexture->loadFromStream(stream);
                                     });
                         });
+                if (globalName == 159) {
+                    saveableTexture->mPrint = true;
+                }
+                        
                 return std::make_pair(globalName,
                                       SaveableTexturePtr(saveableTexture));
             });
@@ -330,6 +345,7 @@ void GlobalNameSpace::clearTextureMap() {
 void GlobalNameSpace::postLoad(android::base::Stream* stream) {
     m_backgroundLoader->start();
     m_backgroundLoader.reset(); // leave it to TextureLoader
+    clearTextureMap();
 }
 
 const SaveableTexturePtr& GlobalNameSpace::getSaveableTextureFromLoad(

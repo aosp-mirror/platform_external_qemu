@@ -614,6 +614,8 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
         // yet restore them to GPU, we do the restoration here.
         // TODO: skip restoration and write saveableTexture directly to the
         // new snapshot for better performance
+        assert(!image.second->saveableTexture
+                || !image.second->saveableTexture->needRestore());
         touchEglImage(image.second.get(), restorer);
         getGlobalNameSpace()->preSaveAddEglImage(image.second.get());
     }
@@ -651,6 +653,9 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
         eglImg->imageId = hndl;
         eglImg->saveableTexture =
                 m_globalNameSpace.getSaveableTextureFromLoad(globalName);
+        if (hndl == 122) {
+            fprintf(stderr, "old global name %d\n", (int)globalName);
+        }
         return std::make_pair(hndl, std::move(eglImg));
     });
 }

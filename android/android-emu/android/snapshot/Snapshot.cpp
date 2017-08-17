@@ -184,7 +184,7 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
         return false;
     }
 
-    const auto enabledFeatures = android::featurecontrol::getEnabled();
+    /*const auto enabledFeatures = android::featurecontrol::getEnabled();
     if (int(enabledFeatures.size()) != config.enabled_features().size() ||
         !std::equal(config.enabled_features().begin(),
                     config.enabled_features().end(), enabledFeatures.begin(),
@@ -193,7 +193,7 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
                     })) {
         saveFailure(FailureReason::ConfigMismatchFeatures);
         return false;
-    }
+    }*/
 
     return true;
 }

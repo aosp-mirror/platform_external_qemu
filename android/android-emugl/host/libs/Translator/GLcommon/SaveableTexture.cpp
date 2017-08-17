@@ -521,6 +521,10 @@ void SaveableTexture::onSave(
 void SaveableTexture::restore() {
     assert(m_loader);
     m_loader(this);
+    if (mPrint) {
+        printf("target 0x%x\n", m_target);
+        assert(m_target == GL_TEXTURE_2D);
+    }
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         // restore the texture
@@ -552,6 +556,7 @@ void SaveableTexture::restore() {
         m_globalTexObj.reset(new NamedObject(
                 GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
         m_globalName = m_globalTexObj->getGlobalName();
+        printf("saveable texture get global name %d\n", m_globalName);
         GLint prevTex = 0;
         switch (m_target) {
             case GL_TEXTURE_2D:

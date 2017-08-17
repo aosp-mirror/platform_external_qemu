@@ -3470,8 +3470,18 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::textureTargetLimited(target),GL_INVALID_ENUM);
     unsigned int imagehndl = SafeUIntFromPointer(image);
+    int err = ctx->dispatcher().glGetError();
+    if (err) {
+        fprintf(stderr, "err %d\n", err);
+        assert(!err);
+    }
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (img) {
+        err = ctx->dispatcher().glGetError();
+        if (err) {
+            fprintf(stderr, "err %d\n", err);
+            assert(!err);
+        }
         // Create the texture object in the underlying EGL implementation,
         // flag to the OpenGL layer to skip the image creation and map the
         // current binded texture object to the existing global object.
@@ -3480,7 +3490,18 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             // replace mapping and bind the new global object
             ctx->shareGroup()->replaceGlobalObject(NamedObjectType::TEXTURE, tex,
                                                    img->globalTexObj);
+            err = ctx->dispatcher().glGetError();
+            if (err) {
+                fprintf(stderr, "err %d\n", err);
+                assert(!err);
+            }
             ctx->dispatcher().glBindTexture(GL_TEXTURE_2D, img->globalTexObj->getGlobalName());
+            err = ctx->dispatcher().glGetError();
+            if (err) {
+                fprintf(stderr, "img %d global %d\n", (int)imagehndl, img->globalTexObj->getGlobalName());
+                fprintf(stderr, "err %d\n", err);
+                assert(!err);
+            }
             TextureData *texData = getTextureTargetData(target);
             SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
             texData->width = img->width;

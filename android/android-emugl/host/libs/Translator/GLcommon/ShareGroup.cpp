@@ -97,7 +97,7 @@ void ShareGroup::postLoadRestore() {
     }
 }
 
-bool ShareGroup::needRestore() {
+bool ShareGroup::needRestore() const {
     return m_needLoadRestore;
 }
 

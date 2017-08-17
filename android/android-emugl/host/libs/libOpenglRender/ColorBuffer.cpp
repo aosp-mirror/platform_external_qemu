@@ -43,10 +43,14 @@ bool bindFbo(GLuint* fbo, GLuint tex) {
         return true;
     }
 
+    assert(!s_gles2.glGetError());
     s_gles2.glGenFramebuffers(1, fbo);
+    assert(!s_gles2.glGetError());
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
+    assert(!s_gles2.glGetError());
     s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
                                    GL_TEXTURE_2D, tex, 0);
+    assert(!s_gles2.glGetError());
     GLenum status = s_gles2.glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
         ERR("ColorBuffer::bindFbo: FBO not complete: %#x\n", status);
@@ -280,6 +284,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     }
 
     touch();
+    //assert(!s_gles2.glGetError());
     // Copy the content of the current read surface into m_blitEGLImage.
     // This is done by creating a temporary texture, bind it to the EGLImage
     // then call glCopyTexSubImage2D().
@@ -475,13 +480,23 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
 
 void ColorBuffer::restore() {
     RecursiveScopedHelperContext context(m_helper);
+    assert(!s_gles2.glGetError());
     s_gles2.glGenTextures(1, &m_tex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
+    assert(!s_gles2.glGetError());
 
     s_gles2.glGenTextures(1, &m_blitTex);
+    assert(!s_gles2.glGetError());
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
+    assert(!s_gles2.glGetError());
+    printf("eglimg %d\n", (int)reinterpret_cast<size_t>(m_blitEGLImage));
     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+    {
+        int err = s_gles2.glGetError();
+        fprintf(stderr, "err %d\n", err);
+        assert(!err);
+    }
 
     m_resizer = new TextureResize(m_width, m_height);
     switch (m_frameworkFormat) {
@@ -495,4 +510,5 @@ void ColorBuffer::restore() {
         default:
             break;
     }
+    assert(!s_gles2.glGetError());
 }

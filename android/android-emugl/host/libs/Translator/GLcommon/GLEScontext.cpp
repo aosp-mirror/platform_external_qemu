@@ -381,7 +381,7 @@ void GLEScontext::restore() {
     }
 }
 
-bool GLEScontext::needRestore() {
+bool GLEScontext::needRestore() const {
     bool ret = m_needRestoreFromSnapshot;
     if (m_shareGroup) {
         ret |= m_shareGroup->needRestore();
@@ -587,6 +587,9 @@ void GLEScontext::postLoad() {
 }
 
 void GLEScontext::onSave(android::base::Stream* stream) const {
+    if (needRestore()) {
+        fprintf(stderr, "warning: saving a context that is not yet restored\n");
+    }
     stream->putByte(m_initialized);
     stream->putBe32(m_glesMajorVersion);
     stream->putBe32(m_glesMinorVersion);

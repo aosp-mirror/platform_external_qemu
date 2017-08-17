@@ -44,6 +44,9 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     compressedFormat = stream->getBe32();
     stream->read(crop_rect, sizeof(crop_rect));
     globalName = stream->getBe32();
+    if (globalName == 159) {
+        printf("tex 159 target 0x%x\n", target);
+    }
     loadCollection(stream, &m_texParam,
             [](android::base::Stream* stream) {
                 GLenum item = stream->getBe32();
@@ -54,6 +57,8 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
 
 void TextureData::onSave(android::base::Stream* stream) const {
     ObjectData::onSave(stream);
+    assert(!m_saveableTexture);
+    assert(globalName);
     // The current TextureData structure is wrong when dealing with mipmaps.
     stream->putBe32(target);
     stream->putBe32(width);
@@ -80,6 +85,7 @@ void TextureData::onSave(android::base::Stream* stream) const {
 
 void TextureData::restore(ObjectLocalName localName,
             getGlobalName_t getGlobalName) {
+    assert(!m_saveableTexture);
 }
 
 void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {

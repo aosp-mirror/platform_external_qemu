@@ -1384,6 +1384,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             if (!objData) return EGL_NO_IMAGE_KHR;
 
             TextureData *texData = (TextureData *)objData;
+            assert(texData->target == GL_TEXTURE_2D);
             if(!texData->width || !texData->height) return EGL_NO_IMAGE_KHR;
             img->width = texData->width;
             img->height = texData->height;

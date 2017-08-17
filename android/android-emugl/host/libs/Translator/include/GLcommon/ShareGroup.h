@@ -111,7 +111,7 @@ public:
     void postSave(android::base::Stream* stream);
     // postLoadRestore() restores resources on hardware GPU
     void postLoadRestore();
-    bool needRestore();
+    bool needRestore() const;
 private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace,
                         uint64_t sharedGroupID,

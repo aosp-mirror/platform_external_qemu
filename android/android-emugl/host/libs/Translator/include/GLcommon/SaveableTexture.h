@@ -77,8 +77,8 @@ public:
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up
     void restore();
-
-private:
+    bool mPrint = false;
+public:
     unsigned int m_target = GL_TEXTURE_2D;
     unsigned int m_width = 0;
     unsigned int m_height = 0;
