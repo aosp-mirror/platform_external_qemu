@@ -279,6 +279,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
       mStartupDialog([this] { return std::make_tuple(this); }),
+      mExitSavingDialog([this] { return std::make_tuple(this); }),
       mToolWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
@@ -547,6 +548,15 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mToolWindow = NULL;
     }
 
+    if (mStartupDialog.hasInstance()) {
+        mStartupDialog->hide();
+        mStartupDialog.clear();
+    }
+    if (mExitSavingDialog.hasInstance()) {
+        mExitSavingDialog->hide();
+        mExitSavingDialog.clear();
+    }
+
     delete mMainLoopThread;
 }
 
@@ -683,6 +693,7 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+    const bool alreadyClosed = mClosed;
     mClosed = true;
     crashhandler_exitmode(__FUNCTION__);
 
@@ -695,46 +706,73 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     mStartupDialog.clear();
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
-        // Hide everything right away.
-        if (mToolWindow) {
-            mToolWindow->hide();
-        }
-        mContainer.hide();
-        mOverlay.hide();
+        if (!alreadyClosed) {
+            // we dont want to restore to a state where the
+            // framework is shut down by 'adb reboot -p'
+            // so skip that step when saving vm on exit
+            const bool fastSnapshotV1 =
+                    android::featurecontrol::isEnabled(
+                            android::featurecontrol::FastSnapshotV1) &&
+                    emuglConfig_current_renderer_supports_snapshot();
 
-        // we dont want to restore to a state where the
-        // framework is shut down by 'adb reboot -p'
-        // so skip that step when saving vm on exit
-        bool fastSnapshotV1 =
-            android::featurecontrol::isEnabled(
-                android::featurecontrol::FastSnapshotV1)
-            && emuglConfig_current_renderer_supports_snapshot();
+            if (fastSnapshotV1) {
+                auto timer = new QTimer(this);
+                timer->setSingleShot(true);
+                connect(timer, &QTimer::timeout, [this]() {
+                    mExitSavingDialog->setWindowTitle(tr("Android Emulator"));
+                    // Hide close/minimize/maximize buttons
+                    mExitSavingDialog->setWindowFlags(Qt::Dialog |
+                                                      Qt::CustomizeWindowHint |
+                                                      Qt::WindowTitleHint);
+                    // Make sure the icon is the same as in the main window
+                    mExitSavingDialog->setWindowIcon(
+                            QApplication::windowIcon());
 
-        // Tell the system that we are in saving; create a file lock.
-        if (fastSnapshotV1) {
-            if (!filelock_create(avdInfo_getSnapshotLockFilePath(android_avdInfo))) {
-                derror("unable to lock snapshot save on exit!\n");
+                    auto label = new QLabel();
+                    label->setAlignment(Qt::AlignCenter);
+                    label->setText(tr("Saving state..."));
+                    mExitSavingDialog->setLabel(label);
+                    auto bar = new QProgressBar();
+                    bar->setAlignment(Qt::AlignHCenter);
+                    mExitSavingDialog->setBar(bar);
+                    mExitSavingDialog->setRange(0, 0);  // Don't show % complete
+                    mExitSavingDialog->setCancelButton(nullptr);    // None
+                    mExitSavingDialog->setMinimumSize(
+                            mExitSavingDialog->sizeHint()); // Recalculate size.
+                    mExitSavingDialog->show();
+                });
+                timer->start(200);
+
+                // Tell the system that we are in saving; create a file lock.
+                if (!filelock_create(
+                            avdInfo_getSnapshotLockFilePath(android_avdInfo))) {
+                    derror("unable to lock snapshot save on exit!\n");
+                }
             }
-        }
 
-        if (savevm_on_exit ||
-            fastSnapshotV1) {
-            queueQuitEvent();
-        } else {
-            runAdbShellPowerDownAndQuit();
+            if (fastSnapshotV1 || savevm_on_exit) {
+                queueQuitEvent();
+            } else {
+                runAdbShellPowerDownAndQuit();
+            }
         }
         event->ignore();
     } else {
-        // It is only safe to stop the OpenGL ES
-        // renderer after the main loop has exited.
-        // This is not necessarily before
-        // |skin_window_free| is called, especially
-        // on Windows!
+        if (mExitSavingDialog.hasInstance()) {
+            mExitSavingDialog->hide();
+            mExitSavingDialog.clear();
+        }
+
+        // It is only safe to stop the OpenGL ES renderer after the main loop
+        // has exited. This is not necessarily before |skin_window_free| is
+        // called, especially on Windows!
         android_stopOpenglesRenderer();
         if (mToolWindow) {
             mToolWindow->hide();
             mToolWindow->closeExtendedWindow();
         }
+        mContainer.hide();
+        mOverlay.hide();
         hide();
         event->accept();
     }
