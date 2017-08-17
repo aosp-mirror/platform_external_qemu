@@ -352,6 +352,8 @@ private:
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
     bool mStartupDone = false;
 
+    android::base::MemberOnDemandT<QProgressDialog, QWidget*> mExitSavingDialog;
+
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
     bool mBackingBitmapChanged = true;
