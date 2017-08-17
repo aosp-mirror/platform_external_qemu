@@ -22,6 +22,30 @@
       "revId": "495a1b36a624ea434ba085e521f1de2a6f6950d5",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "acf3577d_c4247e2f",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-17T22:35:52Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89a3d7c5_8c30c9d0",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 9
+      },
+      "revId": "495a1b36a624ea434ba085e521f1de2a6f6950d5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
