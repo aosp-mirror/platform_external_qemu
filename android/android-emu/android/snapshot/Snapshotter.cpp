@@ -26,7 +26,7 @@ using android::base::System;
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
 static bool buffer_zero_sse2(const void* buf, int len) {
-    buf = __builtin_assume_aligned(buf, 4096);
+    buf = __builtin_assume_aligned(buf, 1024);
     __m128i t = _mm_load_si128(static_cast<const __m128i*>(buf));
     auto p = reinterpret_cast<__m128i*>(
             (reinterpret_cast<intptr_t>(buf) + 5 * 16));
@@ -58,8 +58,8 @@ namespace snapshot {
 // TODO: implement an optimized SSE4 version and dynamically select it if host
 // supports SSE4.
 bool isBufferZeroed(const void* ptr, int32_t size) {
-    assert((uintptr_t(ptr) & (4096 - 1)) == 0);  // page-aligned
-    assert(size >= 4096);  // at least one small page in |size|
+    assert((uintptr_t(ptr) & (1024 - 1)) == 0);  // page-aligned
+    assert(size >= 1024);  // at least one small page in |size|
     return buffer_zero_sse2(ptr, size);
 }
 
