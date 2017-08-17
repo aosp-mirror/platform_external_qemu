@@ -104,11 +104,16 @@ static bool verifyImageInfo(pb::Image::Type type,
 }
 
 bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
-    if (expected.size() != actual.size()) {
-        return false;
-    }
+    // We need to explicitly check the list because when booted with -wipe-data
+    // the emulator will add a line (disk.dataPartition.initPath) which should
+    // not affect snapshot.
+    int numPathExpected = 0;
+    int numPathActual = 0;
     for (auto&& key : expected) {
         if (endsWith(key, ".path") || endsWith(key, ".initPath")) {
+            if (key != "disk.dataPartition.initPath") {
+                numPathExpected++;
+            }
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
@@ -120,7 +125,23 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
         }
     }
 
-    return true;
+    for (auto&& key : actual) {
+        if (endsWith(key, ".path") || endsWith(key, ".initPath")) {
+            if (key != "disk.dataPartition.initPath") {
+                numPathActual++;
+            }
+            continue;  // these contain absolute paths and will be checked
+                       // separately.
+        }
+        if (!expected.hasKey(key)) {
+            return false;
+        }
+        if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
+            return false;
+        }
+    }
+
+    return numPathActual == numPathExpected;
 }
 
 static std::string gpuDriverString(const GpuInfo& info) {
