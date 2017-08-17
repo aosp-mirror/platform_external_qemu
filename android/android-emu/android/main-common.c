@@ -1621,6 +1621,10 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     /** SNAPSHOT STORAGE HANDLING */
+    if (hw->fastboot_forceColdBoot) {
+        D("autoconfig: -no-snapstorage from AVD config.ini");
+        opts->no_snapstorage = 1;
+    }
 
     /* Determine snapstorage path. -no-snapstorage disables all snapshotting
      * support. This means you can't resume a snapshot at load, save it at
