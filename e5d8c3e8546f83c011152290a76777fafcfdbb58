@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c0e7853_f38517f1",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-18T16:37:08Z",
+      "side": 1,
+      "message": "nit: outside",
+      "range": {
+        "startLine": 203,
+        "startChar": 35,
+        "endLine": 203,
+        "endChar": 45
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ec3480c_d3a9b7a0",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-18T16:37:08Z",
+      "side": 1,
+      "message": "nit: \"handled with\" or \"handled on\" or \"handled in\", depending on what kEventTextInput is",
+      "range": {
+        "startLine": 218,
+        "startChar": 7,
+        "endLine": 218,
+        "endChar": 18
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8deb6715_cd24e47a",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-18T16:37:08Z",
+      "side": 1,
+      "message": "nit: I can\u0027t parse this comment, what should it mean?",
+      "range": {
+        "startLine": 231,
+        "startChar": 14,
+        "endLine": 231,
+        "endChar": 47
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1863672c_bc66dbbb",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-18T16:37:08Z",
+      "side": 1,
+      "message": "should it be 0 if you want to force it to be released?",
+      "range": {
+        "startLine": 232,
+        "startChar": 67,
+        "endLine": 232,
+        "endChar": 68
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
