@@ -1662,6 +1662,23 @@ static int convertKeyCode(int sym) {
             return kConvert[nn].keycode;
         }
     }
+    if (!android_hw->hw_arc) return -1;
+    static const struct {
+        int qt_sym;
+        int keycode;
+    } kCrosConvert[] = {
+            // Qt treats "SHIFT + TAB" as "Backtab", just convert it back to TAB.
+            KK(Backtab, TAB),
+            KK(Control, LEFTCTRL),
+            KK(Alt, LEFTALT),
+            KK(Shift, LEFTSHIFT),
+    };
+    const size_t kCrosConvertSize = sizeof(kCrosConvert) / sizeof(kCrosConvert[0]);
+    for (nn = 0; nn < kCrosConvertSize; ++nn) {
+        if (sym == kCrosConvert[nn].qt_sym) {
+            return kCrosConvert[nn].keycode;
+        }
+    }
     return -1;
 }
 

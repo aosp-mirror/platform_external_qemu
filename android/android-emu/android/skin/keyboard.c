@@ -118,6 +118,18 @@ skin_keyboard_key_to_code(SkinKeyboard*  keyboard,
     return -1;
 }
 
+static SkinKeyMod keycode_to_mod(int key) {
+    switch (key) {
+    case LINUX_KEY_LEFTALT:
+        return kKeyModLAlt;
+    case LINUX_KEY_LEFTCTRL:
+        return kKeyModLCtrl;
+    case LINUX_KEY_LEFTSHIFT:
+        return kKeyModLShift;
+    }
+    return 0;
+}
+
 /* If it's running chrome os images, remapping key code here so
  * the emulator toolbar also does the "expected" thing for chrome os.
  * Also fix some incorrected key codes.
@@ -170,10 +182,64 @@ static int map_cros_key(int* code) {
     return -1;
 }
 
+/* This funcion is used to track the modifier key status and keep it sync
+ * between guest and host. It returns the old status for the modifier_key
+ */
+static SkinKeyMod sync_modifier_key(int modifier_key, SkinKeyboard* kb,
+                                    int keycode, int mod, int down) {
+    static SkinKeyMod tracked = 0;
+    SkinKeyMod mask = keycode_to_mod(modifier_key);
+    SkinKeyMod old = tracked & mask;
+    if (keycode == modifier_key) {
+        if (down) {
+            tracked |= mask;
+        } else {
+            tracked &= ~mask;
+        }
+        return old;
+    }
+    /* From our tracking, this modifier key should be in pressed state.
+     * But from mod status, it's in released state. This happens sometimes
+     * if the release event happens outside of emulator window. Sync status
+     * now */
+    if (down && old && !(mod & mask)) {
+        skin_keyboard_add_key_event(kb, modifier_key, 0);
+        tracked &= ~mask;
+    }
+    return old;
+}
+
+static bool has_modifier_key(int keycode, int mod)
+{
+    if (keycode_to_mod(keycode)) {
+        return true;
+    }
+    /* Don't consider shift here since it will be
+     * handeled on kEventTextInput */
+    if (mod &(kKeyModLCtrl|kKeyModLAlt)) {
+        return true;
+    }
+    return false;
+}
+
 void
 skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
 {
     if (ev->type == kEventTextInput) {
+        SkinKeyMod mod = 0;
+        if (android_hw->hw_arc) {
+            /* skin_keyboard_process_unicode_event will generate capslock
+             * key events based on text. Since we've already send shift
+             * key events to guest in cros case, we have to make sure
+             * it's in released status. Otherwise shift key will
+             * interfer capslock. Here, we tell sync_modifier_key
+             * there is a key down event without any modifier key.
+             * sync_modifier_key will generate one shift release event
+             * if the old status for shift is in pressed status. The
+             * old status is returned in mod.
+             */
+            mod = sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, 0, 0, 1);
+        }
         // TODO(digit): For each Unicode value in the input text.
         const uint8_t* text = ev->u.text.text;
         const uint8_t* end = text + sizeof(ev->u.text.text);
@@ -187,13 +253,25 @@ skin_keyboard_process_event(SkinKeyboard*  kb, SkinEvent* ev, int  down)
             skin_keyboard_process_unicode_event(kb, codepoint, 0);
             text += len;
         }
+        if (android_hw->hw_arc && mod) {
+            /* If the tracked shift status was pressed, restore it by
+             * telling sync_modifier_key there is a shift pressed event.
+             * Also send out shift pressed event to guest.
+             */
+            sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb,
+                              LINUX_KEY_LEFTSHIFT, 0, 1);
+            skin_keyboard_add_key_event(kb, LINUX_KEY_LEFTSHIFT, 1);
+        }
         skin_keyboard_flush(kb);
     } else if (ev->type == kEventKeyDown || ev->type == kEventKeyUp) {
         int keycode = ev->u.key.keycode;
         int mod = ev->u.key.mod;
 
         if (android_hw->hw_arc) {
-            if (map_cros_key(&keycode) == 0) {
+            sync_modifier_key(LINUX_KEY_LEFTALT, kb, keycode, mod, down);
+            sync_modifier_key(LINUX_KEY_LEFTCTRL, kb, keycode, mod, down);
+            sync_modifier_key(LINUX_KEY_LEFTSHIFT, kb, keycode, mod, down);
+            if (has_modifier_key(keycode, mod) || map_cros_key(&keycode) == 0) {
                 skin_keyboard_add_key_event(kb, keycode, down);
                 skin_keyboard_flush(kb);
                 return;
