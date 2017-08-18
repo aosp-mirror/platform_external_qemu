@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "700e857f_aea40e2a",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 718,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-18T00:41:23Z",
+      "side": 1,
+      "message": "I believe the logic in vl.c is different from what we have here, and it will become even more different when we fix more bugs. Instead, I think we should have a skin_start_state_saving()/skin_end_state_saving() functions pair that would control this window. This way we can get rid of the duplicate UI logic and even make it prettier later without breaking things",
+      "range": {
+        "startLine": 717,
+        "startChar": 18,
+        "endLine": 718,
+        "endChar": 46
+      },
+      "revId": "90a4d2cc84adc7ccf54e193dcc95ca800284d395",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
