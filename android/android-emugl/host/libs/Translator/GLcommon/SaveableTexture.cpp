@@ -672,6 +672,7 @@ void SaveableTexture::restore() {
             }
         }
         dispatcher.glBindTexture(m_target, prevTex);
+        dispatcher.glFinish();
     }
 }
 

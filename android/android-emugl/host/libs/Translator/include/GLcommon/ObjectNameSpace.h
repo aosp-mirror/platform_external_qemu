@@ -161,4 +161,5 @@ private:
 
     const EGLiface* m_eglIface = nullptr;
     const GLESiface* m_glesIface = nullptr;
+    bool m_beginSave = false;
 };

@@ -68,11 +68,13 @@ void Loader::start() {
 
 Loader::~Loader() {
     // Wait for textureLoader to finish loading textures
+    printf("loader joint\n");
     if (mRamLoader && !mRamLoader->hasError()) {
         mRamLoader->join();
     }
     if (mTextureLoader) {
         mTextureLoader->join();
+        printf("texture loader joint\n");
     }
 }
 

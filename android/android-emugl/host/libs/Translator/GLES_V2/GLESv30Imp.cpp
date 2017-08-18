@@ -25,6 +25,7 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArray(GLuint array) {
 }
 
 GL_APICALL void * GL_APIENTRY glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access) {
+    printf("!!!glMapBufferRange!!! 0x%x\n", target);
     GET_CTX_V2_RET(0);
     RET_AND_SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target),GL_INVALID_ENUM,0);
     void * glMapBufferRangeRET = ctx->dispatcher().glMapBufferRange(target, offset, length, access);
@@ -32,6 +33,7 @@ GL_APICALL void * GL_APIENTRY glMapBufferRange(GLenum target, GLintptr offset, G
 }
 
 GL_APICALL GLboolean GL_APIENTRY glUnmapBuffer(GLenum target) {
+    printf("!!!glUnmapBuffer!!! 0x%x\n", target);
     GET_CTX_V2_RET(0);
     RET_AND_SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target),GL_INVALID_ENUM,0);
     GLboolean glUnmapBufferRET = ctx->dispatcher().glUnmapBuffer(target);
@@ -45,6 +47,7 @@ GL_APICALL void GL_APIENTRY glFlushMappedBufferRange(GLenum target, GLintptr off
 }
 
 GL_APICALL void GL_APIENTRY glBindBufferRange(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size) {
+    printf("!!!glBindBufferRange!!! 0x%x\n", target);
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target),GL_INVALID_ENUM);
 
@@ -57,6 +60,7 @@ GL_APICALL void GL_APIENTRY glBindBufferRange(GLenum target, GLuint index, GLuin
 }
 
 GL_APICALL void GL_APIENTRY glBindBufferBase(GLenum target, GLuint index, GLuint buffer) {
+    printf("!!!glBindBufferBase!!! 0x%x\n", target);
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::bufferTarget(ctx, target),GL_INVALID_ENUM);
 
@@ -688,6 +692,7 @@ GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GL
 
 GL_APICALL void GL_APIENTRY glSamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat * params) {
     GET_CTX_V2();
+    printf("!!!glSamplerParameterfv!!!\n");
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
         ctx->dispatcher().glSamplerParameterfv(globalSampler, pname, params);
@@ -696,6 +701,7 @@ GL_APICALL void GL_APIENTRY glSamplerParameterfv(GLuint sampler, GLenum pname, c
 
 GL_APICALL void GL_APIENTRY glSamplerParameteriv(GLuint sampler, GLenum pname, const GLint * params) {
     GET_CTX_V2();
+    printf("!!!glSamplerParameteriv!!!\n");
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
         ctx->dispatcher().glSamplerParameteriv(globalSampler, pname, params);

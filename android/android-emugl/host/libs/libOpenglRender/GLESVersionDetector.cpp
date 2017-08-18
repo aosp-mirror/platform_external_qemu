@@ -96,6 +96,7 @@ static bool sTryContextCreation(EGLDisplay dpy, GLESDispatchMaxVersion ver) {
 
 GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
     // Don't try to detect anything if GLESDynamicVersion is disabled.
+    //return GLES_DISPATCH_MAX_VERSION_2;
     if (!emugl_feature_is_enabled(
             android::featurecontrol::GLESDynamicVersion)) {
         return GLES_DISPATCH_MAX_VERSION_2;

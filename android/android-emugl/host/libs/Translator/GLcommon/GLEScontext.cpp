@@ -587,6 +587,10 @@ void GLEScontext::postLoad() {
 }
 
 void GLEScontext::onSave(android::base::Stream* stream) const {
+    if (m_glesMajorVersion < 2) {
+        fprintf(stderr, "warning: saving GLES version %d not supported\n",
+                m_glesMajorVersion);
+    }
     stream->putByte(m_initialized);
     stream->putBe32(m_glesMajorVersion);
     stream->putBe32(m_glesMinorVersion);

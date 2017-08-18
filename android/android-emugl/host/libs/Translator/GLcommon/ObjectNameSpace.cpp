@@ -251,12 +251,22 @@ void NameSpace::setObjectData(ObjectLocalName p_localName,
 void GlobalNameSpace::preSaveAddEglImage(const EglImage* eglImage) {
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
     emugl::Mutex::AutoLock lock(m_lock);
+    if (!m_beginSave) {
+        printf("adding eglImg for save\n");
+        assert(m_textureMap.empty());
+    }
+    m_beginSave = true;
     m_textureMap.emplace(globalName,
             SaveableTexturePtr(new SaveableTexture(*eglImage)));
 }
 
 void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
+    if (!m_beginSave) {
+        printf("adding texture for save\n");
+        assert(m_textureMap.empty());
+    }
+    m_beginSave = true;
     m_textureMap.emplace(texture->globalName,
             SaveableTexturePtr(new SaveableTexture(*texture)));
 }

@@ -209,6 +209,13 @@ static void saveHndlOrNull(obj_t obj, android::base::Stream* stream) {
 
 void WindowSurface::onSave(android::base::Stream* stream) const {
     stream->putBe32(getHndl());
+    assert(!mAttachedColorBuffer
+            || FrameBuffer::getFB()->getColorBuffer_locked(
+                    mAttachedColorBuffer->getHndl()));
+    assert(!mReadContext
+            || FrameBuffer::getFB()->getContext_locked(mReadContext->getHndl()));
+    assert(!mDrawContext
+            || FrameBuffer::getFB()->getContext_locked(mDrawContext->getHndl()));
     saveHndlOrNull(mAttachedColorBuffer, stream);
     saveHndlOrNull(mReadContext, stream);
     saveHndlOrNull(mDrawContext, stream);
