@@ -220,14 +220,15 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 ;;
         esac
 
-        build_package_openssl
+        export LDFLAGS="-L$INSTALL_DIR/$SYSTEM/lib"
+        export CPPFLAGS="-I$INSTALL_DIR/$SYSTEM/include"
 
         dump "$(builder_text) Building libcurl"
 
         builder_unpack_package_source curl
 
         # Libcurl has a libssl check in its configure script that assumes
-        # openssl is a dynamic library, so it brings all its library
+        # libssl is a dynamic library, so it brings all its library
         # dependencies.
         # But we build it only as a static library, that's why we need to add
         # explicit arguments for each platform.
@@ -237,7 +238,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
                 CURL_LIBS=LIBS="-lcrypt32"
                 ;;
             *)
-                CURL_LIBS=LIBS="-ldl"
+                CURL_LIBS=LIBS="-ldl -lpthread -lstdc++ "
                 ;;
         esac
 
@@ -282,7 +283,7 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
             --with-zlib="$(builder_install_prefix)" \
             --without-winssl \
             --without-darwinssl \
-            --with-ssl="$(builder_install_prefix)" \
+            --with-ssl="$INSTALL_DIR/$SYSTEM" \
             --without-gnutls \
             --without-polarssl \
             --without-cyassl \
@@ -300,18 +301,12 @@ for SYSTEM in $LOCAL_HOST_SYSTEMS; do
         copy_directory_files \
                 "$(builder_install_prefix)" \
                 "$INSTALL_DIR/$SYSTEM" \
-                lib/libcrypto.a \
-                lib/libssl.a \
                 lib/libz.a \
-                lib/libcurl.a \
-                bin/openssl$(builder_host_ext)
+                lib/libcurl.a
 
        copy_directory \
                "$(builder_install_prefix)/include/curl" \
                "$INSTALL_DIR/$SYSTEM/include/curl"
-       copy_directory \
-               "$(builder_install_prefix)/include/openssl" \
-               "${INSTALL_DIR}/${SYSTEM}/include/openssl"
 
         # Copy the curl executable; this is not necessary
         # but serves as a validation point
