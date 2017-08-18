@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e1a13dd_4bb16a8c",
+        "filename": "android/scripts/build-curl.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-18T19:32:58Z",
+      "side": 1,
+      "message": "nit: update the comments here?",
+      "range": {
+        "startLine": 230,
+        "startChar": 0,
+        "endLine": 234,
+        "endChar": 47
+      },
+      "revId": "d7bb628a032844e28c9fc792cfaaae24c6728675",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
