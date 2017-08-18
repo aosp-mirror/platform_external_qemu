@@ -365,16 +365,22 @@ bool Snapshot::load() {
     }
 
     IniFile expectedConfig(PathUtils::join(mDataDir, "hardware.ini"));
-    if (!expectedConfig.read()) {
+    if (!expectedConfig.read(false)) {
         saveFailure(FailureReason::CorruptedData);
         return false;
     }
     IniFile actualConfig(avdInfo_getCoreHwIniPath(android_avdInfo));
-    if (!actualConfig.read()) {
+    if (!actualConfig.read(false)) {
         saveFailure(FailureReason::InternalError);
         return false;
     }
-    if (!areHwConfigsEqual(expectedConfig, actualConfig)) {
+    IniFile expectedStripped;
+    androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&expectedConfig),
+                                  reinterpret_cast<CIniFile*>(&expectedStripped));
+    IniFile actualStripped;
+    androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
+                                  reinterpret_cast<CIniFile*>(&actualStripped));
+    if (!areHwConfigsEqual(expectedStripped, actualStripped)) {
         saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
