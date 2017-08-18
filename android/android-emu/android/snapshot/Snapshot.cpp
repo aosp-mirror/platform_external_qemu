@@ -264,6 +264,8 @@ bool Snapshot::save() {
         fillImageInfo(image.type, path.get(), mSnapshotPb.add_images());
     }
 
+    mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
+
     return writeSnapshotToDisk(mSnapshotPb, mDataDir);
 }
 
@@ -377,6 +379,9 @@ bool Snapshot::load() {
     if (!areHwConfigsEqual(expectedConfig, actualConfig)) {
         saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
+    }
+    if (mSnapshotPb.has_guest_data_partition_mounted()) {
+        guest_data_partition_mounted = mSnapshotPb.guest_data_partition_mounted();
     }
 
     return true;
