@@ -12,7 +12,10 @@
 #include "android/snapshot/Snapshotter.h"
 
 #include "android/crashreport/CrashReporter.h"
+#include "android/featurecontrol/FeatureControl.h"
+#include "android/metrics/StudioConfig.h"
 #include "android/snapshot/interface.h"
+#include "android/utils/debug.h"
 #include "android/utils/path.h"
 
 #include <assert.h>
@@ -236,6 +239,26 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
 }  // namespace android
 
 void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations) {
+    using android::base::Version;
+
+    static constexpr auto kMinStudioVersion = Version(3, 0, 0);
+    // Make sure the installed AndroidStudio is able to handle the snapshots
+    // feature.
+    if (isEnabled(android::featurecontrol::FastSnapshotV1)) {
+        auto version = android::studio::lastestAndroidStudioVersion();
+        if (version.isValid() && version < kMinStudioVersion) {
+            auto prettyVersion = Version(version.component<Version::kMajor>(),
+                                         version.component<Version::kMinor>(),
+                                         version.component<Version::kMicro>());
+            VERBOSE_PRINT(init,
+                          "Disabling snapshot boot - need Android Studio %s "
+                          " but found %s",
+                          kMinStudioVersion.toString().c_str(),
+                          prettyVersion.toString().c_str());
+            setEnabledOverride(android::featurecontrol::FastSnapshotV1, false);
+        }
+    }
+
     assert(android::snapshot::sSnapshotter == nullptr);
     android::snapshot::sSnapshotter =
             new android::snapshot::Snapshotter(*vmOperations);
