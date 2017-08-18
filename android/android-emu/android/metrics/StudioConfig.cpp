@@ -91,6 +91,26 @@ namespace studio {
 // value of the xml entry described in |match|.
 static Optional<string> parseStudioXML(const StudioXml* const match);
 
+static std::string findLatestAndroidStudioDir() {
+    System* sys = System::get();
+    // Get path to .AndroidStudio
+    std::string studio = sys->envGet("ANDROID_STUDIO_PREFERENCES");
+    if (!studio.empty()) {
+        return studio;
+    }
+
+    const std::string appDataPath =
+#ifdef __APPLE__
+        sys->getAppDataDirectory();
+#else
+        sys->getHomeDirectory();
+#endif  // __APPLE__
+    if (appDataPath.empty()) {
+        return {};
+    }
+    return latestAndroidStudioDir(appDataPath);
+}
+
 Version extractAndroidStudioVersion(const char* const dirName) {
     if (dirName == NULL) {
         return Version::invalid();
@@ -191,6 +211,18 @@ std::string pathToStudioXML(const std::string& studioPath,
     return PathUtils::recompose(vpath);
 }
 
+base::Version lastestAndroidStudioVersion() {
+    const auto studio = findLatestAndroidStudioDir();
+    if (studio.empty()) {
+        return {};
+    }
+    StringView basename;
+    PathUtils::split(studio, nullptr, &basename);
+    return basename.isNullTerminated()
+                   ? extractAndroidStudioVersion(basename.c_str())
+                   : extractAndroidStudioVersion(std::string(basename).c_str());
+}
+
 UpdateChannel updateChannel() {
     static const StudioXml channelInfo = {
             .filename = "updates.xml",
@@ -272,45 +304,28 @@ static std::string eval_studio_config_xml(xmlDocPtr doc,
 //   - Optional("") to indicate that we found the file, but |match| failed.
 //   - Optional(matched_vaule) in case of success.
 static Optional<string> parseStudioXML(const StudioXml* const match) {
-    Optional<string> retval;
-
-    System* sys = System::get();
-    // Get path to .AndroidStudio
-    std::string appDataPath;
-    std::string studio = sys->envGet("ANDROID_STUDIO_PREFERENCES");
+    std::string studio = findLatestAndroidStudioDir();
     if (studio.empty()) {
-#ifdef __APPLE__
-        appDataPath = sys->getAppDataDirectory();
-#else
-        appDataPath = sys->getHomeDirectory();
-#endif  // __APPLE__
-        if (appDataPath.empty()) {
-            return retval;
-        }
-        studio = latestAndroidStudioDir(appDataPath);
-    }
-    if (studio.empty()) {
-        return retval;
+        return {};
     }
 
     // Find match->filename xml file under .AndroidStudio
     std::string xml_path = pathToStudioXML(studio, match->filename);
     if (xml_path.empty()) {
         D("Failed to find %s in %s", match->filename, studio.c_str());
-        return retval;
+        return {};
     }
 
     xmlDocPtr doc = xmlReadFile(xml_path.c_str(), NULL, 0);
     if (doc == NULL)
-        return retval;
+        return {};
 
     // At this point, we assume that we have found the correct xml file.
     // If we fail to match within this file, we'll return an empty string
     // indicating that nothing matches.
     xmlNodePtr root = xmlDocGetRootElement(doc);
-    retval = eval_studio_config_xml(doc, root, match);
+    Optional<string> retval = eval_studio_config_xml(doc, root, match);
     xmlFreeDoc(doc);
-
     return retval;
 }
 

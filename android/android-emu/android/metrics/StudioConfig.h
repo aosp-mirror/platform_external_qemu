@@ -47,6 +47,9 @@ std::string latestAndroidStudioDir(const std::string& scanPath);
 std::string pathToStudioXML(const std::string& studioPath,
                             const std::string& filename);
 
+// Returns the latest installed Android Studio version.
+android::base::Version lastestAndroidStudioVersion();
+
 // Returns the currently selected update channel for the latest version
 // of Android Studio
 UpdateChannel updateChannel();
