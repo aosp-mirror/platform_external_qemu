@@ -95,4 +95,8 @@ int androidHwConfig_getKernelYaffs2Support( AndroidHwConfig* config );
 // kernel.newDeviceNaming.
 const char* androidHwConfig_getKernelSerialPrefix( AndroidHwConfig* config );
 
+// Remove all default values from the |source| ini file and write only
+// non-defaulted settings into |target|
+void androidHwConfig_stripDefaults(CIniFile* source, CIniFile* target);
+
 ANDROID_END_HEADER

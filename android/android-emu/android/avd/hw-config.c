@@ -476,3 +476,44 @@ const char* androidHwConfig_getKernelSerialPrefix(AndroidHwConfig* config )
         return "ttyS";
     }
 }
+
+void androidHwConfig_stripDefaults(CIniFile* source, CIniFile* target) {
+#define HWCFG_BOOL(n, s, d, a, t)                  \
+    if (iniFile_hasKey(source, s)) {               \
+        bool v = iniFile_getBoolean(source, s, d); \
+        if (v != stringToBoolean(d)) {             \
+            iniFile_setBoolean(target, s, v);      \
+        }                                          \
+    }
+#define HWCFG_INT(n, s, d, a, t)                  \
+    if (iniFile_hasKey(source, s)) {              \
+        int v = iniFile_getInteger(source, s, d); \
+        if (v != d) {                             \
+            iniFile_setInteger(target, s, v);     \
+        }                                         \
+    }
+#define HWCFG_STRING(n, s, d, a, t)                \
+    if (iniFile_hasKey(source, s)) {               \
+        char* v = iniFile_getString(source, s, d); \
+        if (strcmp(v, d) != 0) {                   \
+            iniFile_setValue(target, s, v);        \
+        }                                          \
+        free(v);                                   \
+    }
+#define HWCFG_DOUBLE(n, s, d, a, t)                 \
+    if (iniFile_hasKey(source, s)) {                \
+        double v = iniFile_getDouble(source, s, d); \
+        if (v != d) {                               \
+            iniFile_setDouble(target, s, v);        \
+        }                                           \
+    }
+#define HWCFG_DISKSIZE(n, s, d, a, t)                        \
+    if (iniFile_hasKey(source, s)) {                         \
+        hw_disksize_t v = iniFile_getDiskSize(source, s, d); \
+        if (v != diskSizeToInt64(d)) {                       \
+            iniFile_setDouble(target, s, v);                 \
+        }                                                    \
+    }
+
+#include "android/avd/hw-config-defs.h"
+}
