@@ -40,6 +40,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
+#include "android/snapshot/interface.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
@@ -713,7 +714,8 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
             const bool fastSnapshotV1 =
                     android::featurecontrol::isEnabled(
                             android::featurecontrol::FastSnapshotV1) &&
-                    emuglConfig_current_renderer_supports_snapshot();
+                    emuglConfig_current_renderer_supports_snapshot() &&
+                    androidSnapshot_canSave();
 
             if (fastSnapshotV1) {
                 auto timer = new QTimer(this);
