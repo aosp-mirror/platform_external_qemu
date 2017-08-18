@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e90922b6_771b8564",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-18T17:31:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c0e7853_f38517f1",
+      "range": {
+        "startLine": 203,
+        "startChar": 35,
+        "endLine": 203,
+        "endChar": 45
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8ec3480c_d3a9b7a0",
         "filename": "android/android-emu/android/skin/keyboard.c",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-18T16:37:08Z",
       "side": 1,
       "message": "nit: \"handled with\" or \"handled on\" or \"handled in\", depending on what kEventTextInput is",
+      "range": {
+        "startLine": 218,
+        "startChar": 7,
+        "endLine": 218,
+        "endChar": 18
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dde122af_f8e8b4d4",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-18T17:31:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ec3480c_d3a9b7a0",
       "range": {
         "startLine": 218,
         "startChar": 7,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "08ac44a3_73966290",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 231,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-18T17:31:35Z",
+      "side": 1,
+      "message": "Add more comments, hope it\u0027s more clear now",
+      "parentUuid": "8deb6715_cd24e47a",
+      "range": {
+        "startLine": 231,
+        "startChar": 14,
+        "endLine": 231,
+        "endChar": 47
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1863672c_bc66dbbb",
         "filename": "android/android-emu/android/skin/keyboard.c",
         "patchSetId": 1
@@ -82,6 +154,30 @@
       "writtenOn": "2017-08-18T16:37:08Z",
       "side": 1,
       "message": "should it be 0 if you want to force it to be released?",
+      "range": {
+        "startLine": 232,
+        "startChar": 67,
+        "endLine": 232,
+        "endChar": 68
+      },
+      "revId": "e5d8c3e8546f83c011152290a76777fafcfdbb58",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9739c088_5fae91e5",
+        "filename": "android/android-emu/android/skin/keyboard.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-18T17:31:35Z",
+      "side": 1,
+      "message": "Add more comments, hope it helps.",
+      "parentUuid": "1863672c_bc66dbbb",
       "range": {
         "startLine": 232,
         "startChar": 67,
