@@ -26,16 +26,34 @@ namespace android {
 namespace base {
 
 class IniFile {
+    DISALLOW_COPY_AND_ASSIGN(IniFile);
+
 public:
-    typedef uint64_t DiskSize;
-    typedef std::unordered_map<std::string, std::string> MapType;
-    typedef std::vector<std::string> KeyListType;
+    using DiskSize = uint64_t;
+    using MapType = std::unordered_map<std::string, std::string>;
+    using ElementOrderList = std::vector<const MapType::value_type*>;
+
+    // A custom iterator to return the keys in original order.
+    class const_iterator : public ElementOrderList::const_iterator {
+    public:
+        using value_type = std::string;
+
+        explicit const_iterator(ElementOrderList::const_iterator keyIterator)
+            : ElementOrderList::const_iterator(keyIterator) {}
+
+        const value_type& operator*() const {
+            return ElementOrderList::const_iterator::operator*()->first;
+        }
+        const value_type* operator->() const {
+            return &**this;
+        }
+    };
 
     // Note that the constructor _does not_ read data from the backing file.
     // Call |Read| to read the data.
     // When created without a backing file, all |read|/|write*| operations will
     // fail unless |setBackingFile| is called to point to a valid file path.
-    explicit IniFile(const std::string& backingFilePath = {})
+    explicit IniFile(StringView backingFilePath = {})
         : mBackingFilePath(backingFilePath) {}
 
     // This constructor reads the data from memory at |data| of |size| bytes.
@@ -48,7 +66,7 @@ public:
 
     // Reads data into IniFile from the the backing file, overwriting any
     // existing data.
-    bool read();
+    bool read(bool keepComments = true);
     // Same thing, but parses an already read file data.
     // Note: write operations fail unless there's a backing file set
     bool readFromMemory(StringView data);
@@ -130,23 +148,20 @@ public:
     //      first added.
     //  Only const_iterator is provided. Use |set*| functions to modify the
     //  IniFile.
-    typedef KeyListType::const_iterator const_iterator;
-    const_iterator begin() const { return std::begin(mKeys); }
-    const_iterator end() const { return std::end(mKeys); }
+    const_iterator begin() const { return const_iterator(std::begin(mOrderList)); }
+    const_iterator end() const { return const_iterator(std::end(mOrderList)); }
 
 protected:
-    void parseStream(std::istream* inFile);
+    void parseStream(std::istream* inFile, bool keepComments);
     void updateData(const std::string& key, std::string&& value);
     bool writeCommon(bool discardEmpty);
 
 private:
     MapType mData;
-    KeyListType mKeys;
+    ElementOrderList mOrderList;
     std::vector<std::pair<int, std::string>> mComments;
     std::string mBackingFilePath;
     bool mDirty = true;
-
-    DISALLOW_COPY_AND_ASSIGN(IniFile);
 };
 
 }  // namespace base

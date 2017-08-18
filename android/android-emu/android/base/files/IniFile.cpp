@@ -73,7 +73,7 @@ static CIterator eat(CIterator citer, CIterator cend, Pred pred) {
     return citer;
 }
 
-void IniFile::parseStream(std::istream* in) {
+void IniFile::parseStream(std::istream* in, bool keepComments) {
     string line;
     int lineno = 0;
     // This is the line number we'd print at if the IniFile were immediately
@@ -92,12 +92,16 @@ void IniFile::parseStream(std::istream* in) {
         // Handle empty lines, comments.
         if (citer == cend) {
             LOG(VERBOSE) << "Line " << lineno << ": Skipped empty line.";
-            mComments.emplace_back(outputLineno, std::move(line));
+            if (keepComments) {
+                mComments.emplace_back(outputLineno, std::move(line));
+            }
             continue;
         }
         if (*citer == '#' || *citer == ';') {
             LOG(VERBOSE) << "Line " << lineno << ": Skipped comment line.";
-            mComments.emplace_back(outputLineno, std::move(line));
+            if (keepComments) {
+                mComments.emplace_back(outputLineno, std::move(line));
+            }
             continue;
         }
 
@@ -145,15 +149,18 @@ void IniFile::parseStream(std::istream* in) {
         }
 
         // Everything parsed.
-        mData[key] = std::move(value);
-        mKeys.push_back(std::move(key));
+        auto insertRes = mData.emplace(std::move(key), std::string());
+        insertRes.first->second = std::move(value);
+        if (insertRes.second) {
+            mOrderList.push_back(&*insertRes.first);
+        }
     }
 }
 
-bool IniFile::read() {
+bool IniFile::read(bool keepComments) {
     mDirty = false;
     mData.clear();
-    mKeys.clear();
+    mOrderList.clear();
     mComments.clear();
 
     if (mBackingFilePath.empty()) {
@@ -182,7 +189,7 @@ bool IniFile::read() {
         return false;
     }
 
-    parseStream(&inFile);
+    parseStream(&inFile, keepComments);
     return true;
 }
 
@@ -190,7 +197,7 @@ bool IniFile::readFromMemory(StringView data)
 {
     mDirty = false;
     mData.clear();
-    mKeys.clear();
+    mOrderList.clear();
     mComments.clear();
 
     // Create a streambuf that's able to do a single pass over an array only.
@@ -209,7 +216,7 @@ bool IniFile::readFromMemory(StringView data)
         return false;
     }
 
-    parseStream(&in);
+    parseStream(&in, true);
     return true;
 }
 
@@ -229,7 +236,7 @@ bool IniFile::writeCommon(bool discardEmpty) {
 
     int lineno = 0;
     auto commentIter = std::begin(mComments);
-    for (const auto& key : mKeys) {
+    for (const auto& pair : mOrderList) {
         ++lineno;
 
         // Write comments
@@ -239,11 +246,13 @@ bool IniFile::writeCommon(bool discardEmpty) {
             outFile << commentIter->second << "\n";
         }
 
-        const string& value = mData.at(key);
+
+        const string& value = pair->second;
         if (discardEmpty && value.empty()) {
             continue;
         }
-        outFile << key << " = " << value << "\n";
+        const string& key = pair->first;
+        outFile << key << " = " << value << '\n';
     }
 
     mDirty = false;
@@ -318,7 +327,7 @@ static string envSubst(const StringView fix) {
 
         // A normal character will be added to the current string
         if (ch != '%') {
-            curr->append(1, ch);
+            curr->push_back(ch);
             continue;
         }
 
@@ -341,7 +350,7 @@ static string envSubst(const StringView fix) {
 
         if (next == '%') {
             // Escaped, let's skip it.
-            curr->append(1, ch);
+            curr->push_back(ch);
             i++;
         } else {
             // We open and start a env variable name.
@@ -351,7 +360,7 @@ static string envSubst(const StringView fix) {
 
     // Return full string for unterminated piece.
     if (curr == &var) {
-        res.append("%");
+        res.push_back('%');
         res.append(var);
     }
 
@@ -508,14 +517,12 @@ IniFile::DiskSize IniFile::getDiskSize(const string& key,
 void IniFile::updateData(const string& key, string&& value) {
     mDirty = true;
     // note: may not move here, as it's currently unspecified if failed
-    //  insertion moves from |value| or not.
-    auto result = mData.emplace(key, value);
+    //  insertion moves from |value| or not. Move it separately instead.
+    auto result = mData.emplace(key, std::string());
+    result.first->second = std::move(value);
     if (result.second) {
-       // New element was created.
-       mKeys.push_back(key);
-    } else {
-        // emplace does not update an existing value.
-        result.first->second = std::move(value);
+        // New element was created.
+        mOrderList.push_back(&*result.first);
     }
 }
 
