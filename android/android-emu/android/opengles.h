@@ -71,7 +71,7 @@ void android_setOpenglesTranslation(float px, float py);
 void android_redrawOpenglesWindow(void);
 
 /* Stop the renderer process */
-void android_stopOpenglesRenderer(void);
+void android_stopOpenglesRenderer(bool wait);
 
 /* set to TRUE if you want to use fast GLES pipes, 0 if you want to
  * fallback to local TCP ones

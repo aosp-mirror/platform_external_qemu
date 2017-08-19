@@ -29,7 +29,6 @@
 #include "android/metrics/metrics.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
-#include "android/opengles.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
@@ -705,8 +704,10 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     // forever.
     mStartupTimer.stop();
     mStartupTimer.disconnect();
-    mStartupDialog->hide();
-    mStartupDialog.clear();
+    if (mStartupDialog.hasInstance()) {
+        mStartupDialog->hide();
+        mStartupDialog.clear();
+    }
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         if (!alreadyClosed) {
@@ -766,11 +767,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
             mExitSavingDialog->hide();
             mExitSavingDialog.clear();
         }
-
-        // It is only safe to stop the OpenGL ES renderer after the main loop
-        // has exited. This is not necessarily before |skin_window_free| is
-        // called, especially on Windows!
-        android_stopOpenglesRenderer();
 
         if (mToolWindow) {
             mToolWindow->hide();

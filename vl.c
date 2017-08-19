@@ -3363,7 +3363,7 @@ static int global_init_func(void *opaque, QemuOpts *opts, Error **errp)
     return 0;
 }
 
-static int main_impl(int argc, char** argv);
+static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void));
 
 #if defined(CONFIG_ANDROID)
 
@@ -3428,12 +3428,13 @@ static void android_reporting_teardown(void)
     android_teardown_metrics();
 }
 
-int run_qemu_main(int argc, char **argv)
+int run_qemu_main(int argc, char **argv, void (*on_main_loop_done)(void))
 #else
+static void on_main_loop_done(void) {}
 int main(int argc, char **argv)
 #endif
 {
-    const int res = main_impl(argc, argv);
+    const int res = main_impl(argc, argv, on_main_loop_done);
 
     /* make sure we run the exit notifiers deterministically if we can */
     qemu_exit_notifiers_notify();
@@ -3441,7 +3442,7 @@ int main(int argc, char **argv)
     return res;
 }
 
-static int main_impl(int argc, char** argv)
+static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 {
     int i;
     int snapshot, linux_boot;
@@ -5587,6 +5588,11 @@ static int main_impl(int argc, char** argv)
 
     bdrv_close_all();
     pause_all_vcpus();
+
+    if (on_main_loop_done) {
+        on_main_loop_done();
+    }
+
     res_free();
 #ifdef CONFIG_TPM
     tpm_cleanup();

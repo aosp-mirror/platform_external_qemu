@@ -495,7 +495,9 @@ private:
 
 }  // namespace
 
-extern "C" int run_qemu_main(int argc, const char** argv);
+extern "C" int run_qemu_main(int argc,
+                             const char** argv,
+                             void (*on_main_loop_done)(void));
 
 static void enter_qemu_main_loop(int argc, char** argv) {
 #ifndef _WIN32
@@ -512,7 +514,16 @@ static void enter_qemu_main_loop(int argc, char** argv) {
 #endif
 
     D("Starting QEMU main loop");
-    run_qemu_main(argc, (const char**)argv);
+    run_qemu_main(argc, (const char**)argv, [] {
+        skin_winsys_run_ui_update(
+                [](void*) {
+                    // It is only safe to stop the OpenGL ES renderer after the
+                    // main loop has exited. This is not necessarily before
+                    // |skin_window_free| is called, especially on Windows!
+                    android_stopOpenglesRenderer(false);
+                },
+                nullptr, false);
+    });
     D("Done with QEMU main loop");
 
     if (android_init_error_occurred()) {
