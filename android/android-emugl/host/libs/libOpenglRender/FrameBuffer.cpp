@@ -188,6 +188,15 @@ void FrameBuffer::finalize() {
     sInitialized.store(true, std::memory_order_relaxed);
     sGlobals->condVar.broadcastAndUnlock(&lock);
 
+    if (m_shuttingDown) {
+        // The only visible thing in the framebuffer is subwindow. Everything else
+        // will get cleaned when the process exits.
+        if (m_useSubWindow) {
+            removeSubWindow_locked();
+        }
+        return;
+    }
+
     m_colorbuffers.clear();
     m_colorBufferDelayedCloseList.clear();
     if (m_useSubWindow) {
@@ -794,6 +803,10 @@ HandleType FrameBuffer::createWindowSurface(int p_config,
 }
 
 void FrameBuffer::drainRenderContext() {
+    if (m_shuttingDown) {
+        return;
+    }
+
     RenderThreadInfo* const tinfo = RenderThreadInfo::get();
     if (tinfo->m_contextSet.empty()) {
         return;
@@ -808,6 +821,9 @@ void FrameBuffer::drainRenderContext() {
 }
 
 void FrameBuffer::drainWindowSurface() {
+    if (m_shuttingDown) {
+        return;
+    }
     RenderThreadInfo* const tinfo = RenderThreadInfo::get();
     if (tinfo->m_windowSet.empty()) {
         return;
@@ -847,6 +863,9 @@ void FrameBuffer::DestroyRenderContext(HandleType p_context) {
 }
 
 void FrameBuffer::DestroyWindowSurface(HandleType p_surface) {
+    if (m_shuttingDown) {
+        return;
+    }
     AutoLock mutex(m_lock);
     DestroyWindowSurfaceLocked(p_surface);
 }
@@ -1158,6 +1177,10 @@ bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
 bool FrameBuffer::bindContext(HandleType p_context,
                               HandleType p_drawSurface,
                               HandleType p_readSurface) {
+    if (m_shuttingDown) {
+        return false;
+    }
+
     AutoLock mutex(m_lock);
 
     WindowSurfacePtr draw, read;
