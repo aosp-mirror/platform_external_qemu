@@ -135,7 +135,6 @@ static SkinKeyMod keycode_to_mod(int key) {
  * Also fix some incorrected key codes.
  */
 static int map_cros_key(int* code) {
-    if (!android_hw->hw_arc) return -1;
     /* Android emulator uses Qt, and it maps qt key to linux key and
      * send it here.
      * Actually underlying qemu is expecting something else and it calls
@@ -149,7 +148,8 @@ static int map_cros_key(int* code) {
      * qcode_to_number in ui/input-keymap.c maps qcode to "number"
      */
     if ((*code >= LINUX_KEY_F1 && *code <= LINUX_KEY_F10) ||
-        *code ==  LINUX_KEY_ESC) return 0;
+        *code ==  LINUX_KEY_ESC ||
+        *code ==  LINUX_KEY_TAB) return 0;
     switch (*code) {
     case LINUX_KEY_UP:
         *code = 0xc8;
