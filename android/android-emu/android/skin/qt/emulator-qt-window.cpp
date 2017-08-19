@@ -552,6 +552,9 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mStartupDialog->hide();
         mStartupDialog.clear();
     }
+
+    mExitSavingTimer.stop();
+    mExitSavingTimer.disconnect();
     if (mExitSavingDialog.hasInstance()) {
         mExitSavingDialog->hide();
         mExitSavingDialog.clear();
@@ -716,9 +719,8 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
                     emuglConfig_current_renderer_supports_snapshot();
 
             if (fastSnapshotV1) {
-                auto timer = new QTimer(this);
-                timer->setSingleShot(true);
-                connect(timer, &QTimer::timeout, [this]() {
+                mExitSavingTimer.setSingleShot(true);
+                connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
                     mExitSavingDialog->setWindowTitle(tr("Android Emulator"));
                     // Hide close/minimize/maximize buttons
                     mExitSavingDialog->setWindowFlags(Qt::Dialog |
@@ -741,7 +743,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
                             mExitSavingDialog->sizeHint()); // Recalculate size.
                     mExitSavingDialog->show();
                 });
-                timer->start(200);
+                mExitSavingTimer.start(200);
 
                 // Tell the system that we are in saving; create a file lock.
                 if (!filelock_create(
@@ -758,6 +760,8 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         event->ignore();
     } else {
+        mExitSavingTimer.stop();
+        mExitSavingTimer.disconnect();
         if (mExitSavingDialog.hasInstance()) {
             mExitSavingDialog->hide();
             mExitSavingDialog.clear();
@@ -767,6 +771,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         // has exited. This is not necessarily before |skin_window_free| is
         // called, especially on Windows!
         android_stopOpenglesRenderer();
+
         if (mToolWindow) {
             mToolWindow->hide();
             mToolWindow->closeExtendedWindow();

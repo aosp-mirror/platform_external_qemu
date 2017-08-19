@@ -352,6 +352,7 @@ private:
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
     bool mStartupDone = false;
 
+    QTimer mExitSavingTimer;
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mExitSavingDialog;
 
     SkinSurface* mBackingSurface;
