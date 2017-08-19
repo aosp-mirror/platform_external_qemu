@@ -1982,6 +1982,10 @@ bool configAndStartRenderer(
     return true;
 }
 
-RendererConfig getLastRendererConfig() {
+RendererConfig getLastRendererConfig(void) {
     return lastRendererConfig;
+}
+
+void stopRenderer(void) {
+    android_stopOpenglesRenderer();
 }

@@ -22,11 +22,6 @@
 
 #include <stdint.h>
 
-// NOTE: This include is only here to prevent QEMU2 from failing to compile
-//       calls to str_reset, whose declaration has been moved to
-//       android/utils/string.h.
-#include "android/utils/string.h"
-
 ANDROID_BEGIN_HEADER
 
 // Special value return
@@ -84,8 +79,15 @@ bool configAndStartRenderer(
          AvdInfo* avd, AndroidOptions* opt, AndroidHwConfig* hw,
          enum WinsysPreferredGlesBackend uiPreferredBackend,
          RendererConfig* config_out);
+
+// stopRenderer() - stop all the render threads and wait until their exit.
+// NOTE: It is only safe to stop the OpenGL ES renderer after the main loop
+//   has exited. This is not necessarily before |skin_window_free| is called,
+//   especially on Windows!
+void stopRenderer(void);
+
 // After configAndStartRenderer is called, one can query last output values:
-RendererConfig getLastRendererConfig();
+RendererConfig getLastRendererConfig(void);
 
 // HACK: Value will be true if emulator_parseCommonCommandLineOptions()
 //       has seen a network-related option (e.g. -netspeed). This is
@@ -95,9 +97,6 @@ RendererConfig getLastRendererConfig();
 extern bool emulator_has_network_option;
 
 /* Common routines used by both android-qemu1-glue/main.c and android/main-ui.c */
-
-// For QEMU2 only
-#define reassign_string(pstr, value) str_reset(pstr, value)
 
 unsigned convertBytesToMB( uint64_t  size );
 uint64_t convertMBToBytes( unsigned  megaBytes );
