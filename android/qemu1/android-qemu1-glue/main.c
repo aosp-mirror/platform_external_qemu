@@ -280,6 +280,7 @@ int main(int argc, char **argv) {
 
     skin_winsys_enter_main_loop(opts->no_window);
 
+    stopRenderer();
     emulator_finiUserInterface();
 
     qemu_parameters_free(qemuParams);

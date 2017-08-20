@@ -786,7 +786,7 @@ extern "C" int main(int argc, char** argv) {
          */
         kcm_extract_charmap_name(opts->charmap, charmap_name,
                                  sizeof(charmap_name));
-        reassign_string(&hw->hw_keyboard_charmap, charmap_name);
+        str_reset(&hw->hw_keyboard_charmap, charmap_name);
     }
 
 // TODO: imement network
@@ -1238,6 +1238,7 @@ extern "C" int main(int argc, char** argv) {
                              args.array());
     skin_winsys_enter_main_loop(opts->no_window);
 
+    stopRenderer();
     emulator_finiUserInterface();
 
     process_late_teardown();
