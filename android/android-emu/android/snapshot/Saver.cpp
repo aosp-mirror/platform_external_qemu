@@ -13,13 +13,14 @@
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
-#include "android/utils/path.h"
+#include "android/base/system/System.h"
 #include "android/snapshot/TextureSaver.h"
-
-#include <fstream>
+#include "android/utils/debug.h"
+#include "android/utils/path.h"
 
 using android::base::PathUtils;
 using android::base::StdioStream;
+using android::base::System;
 
 namespace android {
 namespace snapshot {
@@ -35,8 +36,18 @@ Saver::Saver(const Snapshot& snapshot)
         if (!ram) {
             return;
         }
-        mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner),
-                          RamSaver::Flags::None);
+        auto flags = RamSaver::Flags::None;
+        const auto compressEnvVar =
+                System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
+        if (compressEnvVar == "1" || compressEnvVar == "yes" ||
+            compressEnvVar == "true") {
+            VERBOSE_PRINT(init,
+                          "autoconfig: enabled snapshot RAM compression from "
+                          "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
+                          compressEnvVar.c_str());
+            flags |= RamSaver::Flags::Compress;
+        }
+        mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
     }
     {
         const auto textures = fopen(
