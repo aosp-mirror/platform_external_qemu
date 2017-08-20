@@ -391,15 +391,17 @@ intptr_t RenderThread::main() {
     // exit sync thread, if any.
     SyncThread::destroySyncThread();
 
-    // Release references to the current thread's context/surfaces if any
-    FrameBuffer::getFB()->bindContext(0, 0, 0);
-    if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
-        fprintf(stderr,
-                "ERROR: RenderThread exiting with current context/surfaces\n");
-    }
+    if (!FrameBuffer::getFB()->isShuttingDown()) {
+        // Release references to the current thread's context/surfaces if any
+        FrameBuffer::getFB()->bindContext(0, 0, 0);
+        if (tInfo.currContext || tInfo.currDrawSurf || tInfo.currReadSurf) {
+            fprintf(stderr,
+                    "ERROR: RenderThread exiting with current context/surfaces\n");
+        }
 
-    FrameBuffer::getFB()->drainWindowSurface();
-    FrameBuffer::getFB()->drainRenderContext();
+        FrameBuffer::getFB()->drainWindowSurface();
+        FrameBuffer::getFB()->drainRenderContext();
+    }
 
     DBG("Exited a RenderThread @%p\n", this);
 

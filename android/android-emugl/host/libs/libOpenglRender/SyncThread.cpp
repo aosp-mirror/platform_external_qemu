@@ -87,7 +87,7 @@ void SyncThread::cleanup() {
     DPRINT("enter");
     SyncThreadCmd to_send;
     to_send.opCode = SYNC_THREAD_EXIT;
-    sendAndWaitForResult(to_send);
+    sendAsync(to_send);
     DPRINT("exit");
 }
 
@@ -278,8 +278,7 @@ void SyncThread::destroySyncThread() {
     if (!tInfo->syncThread) return;
 
     tInfo->syncThread->cleanup();
-    intptr_t exitStatus;
-    tInfo->syncThread->wait(&exitStatus);
+    tInfo->syncThread->wait();
     tInfo->destroySyncThread();
 }
 

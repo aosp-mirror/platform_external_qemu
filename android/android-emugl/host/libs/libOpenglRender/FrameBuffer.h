@@ -371,6 +371,7 @@ public:
                               HandleType* surfOut);
 
     void setShuttingDown() { m_shuttingDown = true; }
+    bool isShuttingDown() const { return m_shuttingDown; }
 
     ~FrameBuffer();
 
