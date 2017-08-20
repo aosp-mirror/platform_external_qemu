@@ -1987,5 +1987,5 @@ RendererConfig getLastRendererConfig(void) {
 }
 
 void stopRenderer(void) {
-    android_stopOpenglesRenderer();
+    android_stopOpenglesRenderer(true);
 }

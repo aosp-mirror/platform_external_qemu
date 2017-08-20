@@ -253,12 +253,14 @@ void android_getOpenglesVersion(int* maj, int* min) {
 }
 
 void
-android_stopOpenglesRenderer(void)
+android_stopOpenglesRenderer(bool wait)
 {
     if (sRenderer) {
-        sRenderer->stop();
-        sRenderer.reset();
-        android_stop_opengl_logger();
+        sRenderer->stop(wait);
+        if (wait) {
+            sRenderer.reset();
+            android_stop_opengl_logger();
+        }
     }
 }
 

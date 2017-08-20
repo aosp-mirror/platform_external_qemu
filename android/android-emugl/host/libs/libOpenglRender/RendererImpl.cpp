@@ -72,6 +72,10 @@ public:
         mCleanupProcessIds.send(processId);
     }
 
+    void stop() {
+        mCleanupProcessIds.stop();
+    }
+
     void waitForCleanup() {
         mCleanupProcessIds.waitForEmpty();
     }
@@ -88,7 +92,7 @@ RendererImpl::RendererImpl() {
 }
 
 RendererImpl::~RendererImpl() {
-    stop();
+    stop(true);
     mRenderWindow.reset();
 }
 
@@ -97,8 +101,8 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl
         return false;
     }
 
-    std::unique_ptr<RenderWindow> renderWindow(
-            new RenderWindow(width, height, kUseSubwindowThread, useSubWindow, egl2egl));
+    std::unique_ptr<RenderWindow> renderWindow(new RenderWindow(
+            width, height, kUseSubwindowThread, useSubWindow, egl2egl));
     if (!renderWindow) {
         ERR("Could not create rendering window class\n");
         GL_LOG("Could not create rendering window class");
@@ -120,7 +124,7 @@ bool RendererImpl::initialize(int width, int height, bool useSubWindow, bool egl
     return true;
 }
 
-void RendererImpl::stop() {
+void RendererImpl::stop(bool wait) {
     android::base::AutoLock lock(mChannelsLock);
     mStopped = true;
     auto channels = std::move(mChannels);
@@ -132,17 +136,26 @@ void RendererImpl::stop() {
     for (const auto& c : channels) {
         c->stopFromHost();
     }
+    // We're stopping the renderer, so there's no need to clean up resources
+    // of some pending processes: we'll destroy everything soon.
+    mCleanupThread->stop();
+
+    mStoppedChannels.insert(mStoppedChannels.end(),
+                            std::make_move_iterator(channels.begin()),
+                            std::make_move_iterator(channels.end()));
+
+    if (!wait) {
+        return;
+    }
+
     // Each render channel is referenced in the corresponing pipe object, so
     // even if we clear the |channels| vector they could still be alive
     // for a while. This means we need to make sure to wait for render thread
     // exit explicitly.
-    for (const auto& c : channels) {
+    for (const auto& c : mStoppedChannels) {
         c->renderThread()->wait();
     }
-
-    // We're stopping the renderer, so there's no need to clean up resources
-    // of some pending processes: we'll destroy everything soon.
-    mCleanupThread.reset();
+    mStoppedChannels.clear();
 }
 
 void RendererImpl::cleanupRenderThreads() {

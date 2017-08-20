@@ -144,7 +144,7 @@ public:
 
     // Stops all channels and render threads. The renderer cannot be used after
     // stopped.
-    virtual void stop() = 0;
+    virtual void stop(bool wait) = 0;
 
     // Pauses all channels to prepare for snapshot saving.
     virtual void pauseAllPreSave() = 0;

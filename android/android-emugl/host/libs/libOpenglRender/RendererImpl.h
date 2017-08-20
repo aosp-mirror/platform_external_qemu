@@ -37,7 +37,7 @@ public:
     ~RendererImpl();
 
     bool initialize(int width, int height, bool useSubWindow, bool egl2egl);
-    void stop();
+    void stop(bool wait);
 
 public:
     RenderChannelPtr createRenderChannel(android::base::Stream* loadStream) final;
@@ -82,6 +82,7 @@ private:
     android::base::Lock mChannelsLock;
 
     std::vector<std::shared_ptr<RenderChannelImpl>> mChannels;
+    std::vector<std::shared_ptr<RenderChannelImpl>> mStoppedChannels;
     bool mStopped = false;
 
     class ProcessCleanupThread;
