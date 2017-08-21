@@ -61,7 +61,7 @@ public:
     };
     ProgramData(int glesMaj, int glesMin);
     ProgramData(android::base::Stream* stream);
-    virtual void onSave(android::base::Stream* stream) const override;
+    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
     virtual void postLoad(getObjDataPtr_t getObjDataPtr) override;
     // restore() in ProgramData must be executed after shaders
     virtual void restore(ObjectLocalName localName,
@@ -115,7 +115,6 @@ private:
     bool    IsInUse;
     bool    DeleteStatus;
     GLuint  ProgramName;
-    bool needRestore = false;
     std::unordered_map<GLuint, GLuint> mUniformBlockBinding;
     std::vector<std::string> mTransformFeedbacks;
     GLenum mTransformFeedbackBufferMode = 0;
