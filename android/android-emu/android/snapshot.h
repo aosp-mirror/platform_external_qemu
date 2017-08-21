@@ -25,4 +25,3 @@ void snapshot_print(const char *snapstorage);
 
 
 extern int android_snapshot_update_time;
-extern int android_snapshot_update_time_request;

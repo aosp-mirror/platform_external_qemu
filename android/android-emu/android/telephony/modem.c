@@ -274,6 +274,8 @@ typedef struct AModemRec_
     /* Legacy support */
     char          supportsNetworkDataType;
 
+    char          snapshotTimeUpdateRequested;
+
     /* Radio state */
     ARadioState   radio_state;
     int           area_code;
@@ -695,6 +697,8 @@ int amodem_state_load(AModem modem, SysFile* file)
       call->multi = sys_file_get_be32(file);
       sys_file_get_buffer(file, (uint8_t *)call->number, A_CALL_NUMBER_MAX_SIZE+1 );
     }
+
+    modem->snapshotTimeUpdateRequested = 1;
 
     return 0; // >=0 Happy
 }
@@ -2412,7 +2416,6 @@ handleAnswer( const char*  cmd, AModem  modem )
 }
 
 int android_snapshot_update_time = 1;
-int android_snapshot_update_time_request = 0;
 static time_t android_last_signal_time = 0;
 
 static bool wakeup_from_sleep() {
@@ -2436,10 +2439,10 @@ handleSignalStrength( const char*  cmd, AModem  modem )
      * Ideally, we'd be able to prod the guest into asking immediately on restore
      * from snapshot, but that'd require a driver.
      */
-    if ( android_snapshot_update_time && android_snapshot_update_time_request ) {
-      amodem_addTimeUpdate( modem );
-      android_snapshot_update_time_request = 0;
-    } else if (wakeup_from_sleep()){
+    if (android_snapshot_update_time && modem->snapshotTimeUpdateRequested) {
+      amodem_addTimeUpdate(modem);
+      modem->snapshotTimeUpdateRequested = 0;
+    } else if (wakeup_from_sleep()) {
         amodem_addTimeUpdate(modem);
     }
 
