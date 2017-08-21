@@ -27,29 +27,16 @@
 
 #include "ui_tools.h"
 
-#include <QDir>
-#include <QErrorMessage>
 #include <QFrame>
-#include <QFrame>
-#include <QGridLayout>
-#include <QHash>
 #include <QKeyEvent>
-#include <QMap>
-#include <QMessageBox>
-#include <QPair>
-#include <QProcess>
-#include <QQueue>
-#include <QToolButton>
-#include <QUrl>
+#include <QString>
+#include <QTimer>
+#include <QWidget>
 
 #include <memory>
 
-#define REMOTE_SCREENSHOT_FILE "/data/local/tmp/screen.png"
-
 class EmulatorQtWindow;
 class ExtendedWindow;
-
-typedef void (EmulatorQtWindow::*EmulatorQtWindowSlot)();
 
 class ToolWindow : public QFrame {
     Q_OBJECT
@@ -109,19 +96,14 @@ private:
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardKeyToEmulator(uint32_t keycode, bool down);
 
-    // Helper method, calls handleUICommand with
-    // down equal to true and down equal to false.
+    // Handle a full key press (down + up) in a single call.
     void handleUICommand(QtUICommand cmd) {
         handleUICommand(cmd, true);
         handleUICommand(cmd, false);
     }
 
-    QToolButton* addButton(QGridLayout* layout,
-                           int row,
-                           int col,
-                           const char* iconPath,
-                           QString tip,
-                           EmulatorQtWindowSlot slot);
+    void stopExtendedWindowCreation();
+
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
     virtual void closeEvent(QCloseEvent* ce) override;
@@ -172,5 +154,3 @@ private slots:
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();
 };
-
-typedef void (ToolWindow::*ToolWindowSlot)();
