@@ -46,6 +46,30 @@
       "revId": "73c1485910a5e779a74642dbf68409cb6c2bd64e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6450482b_018876ec",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLESbuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-21T20:45:49Z",
+      "side": 1,
+      "message": "That\u0027s a good idea, although it can generally be a messy process to pass the feature being enabled or not + actual achieved client version to the Translator\u0027s GLDispatch. I was thinking of another global variable, or a flag \"isMapBufferSupported\" to GLESbuffer::onSave.",
+      "parentUuid": "9f33de51_a0524e8d",
+      "range": {
+        "startLine": 76,
+        "startChar": 26,
+        "endLine": 76,
+        "endChar": 53
+      },
+      "revId": "73c1485910a5e779a74642dbf68409cb6c2bd64e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
