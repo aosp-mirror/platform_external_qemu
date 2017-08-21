@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0df30f87_bd3c073d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLESbuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-21T19:48:12Z",
+      "side": 1,
+      "message": "Need to check client version from GLEScontext (whether GLES3 is enabled) here, or the pointer can be non-null on OS X, but immediately give a 0x502 and not do anything.",
+      "range": {
+        "startLine": 76,
+        "startChar": 26,
+        "endLine": 76,
+        "endChar": 53
+      },
+      "revId": "73c1485910a5e779a74642dbf68409cb6c2bd64e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
