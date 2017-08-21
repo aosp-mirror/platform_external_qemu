@@ -22,10 +22,16 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+static GLESVersion s_maxGlesVersion = GLES_1_1;
+
+void GLEScmContext::setMaxGlesVersion(GLESVersion version) {
+    s_maxGlesVersion = version;
+}
+
 void GLEScmContext::init(EGLiface* eglIface) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_1_1, eglIface->eglGetGlLibrary());
+        s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
         GLEScontext::init(eglIface);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
