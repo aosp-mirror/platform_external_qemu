@@ -22,6 +22,30 @@
       "revId": "73c1485910a5e779a74642dbf68409cb6c2bd64e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9f33de51_a0524e8d",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLESbuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-21T20:10:20Z",
+      "side": 1,
+      "message": "can we clear the pointer to glMapBufferRange if we know the platform doesn\u0027t support it? This way one wouldn\u0027t need to know the magic rules of how to check for a specific feature: if it\u0027s !\u003dnull, it works",
+      "parentUuid": "0df30f87_bd3c073d",
+      "range": {
+        "startLine": 76,
+        "startChar": 26,
+        "endLine": 76,
+        "endChar": 53
+      },
+      "revId": "73c1485910a5e779a74642dbf68409cb6c2bd64e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
