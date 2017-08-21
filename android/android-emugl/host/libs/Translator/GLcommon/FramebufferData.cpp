@@ -34,8 +34,8 @@ RenderbufferData::RenderbufferData(android::base::Stream* stream) :
     hostInternalFormat = stream->getBe32();
 }
 
-void RenderbufferData::onSave(android::base::Stream* stream) const {
-    ObjectData::onSave(stream);
+void RenderbufferData::onSave(android::base::Stream* stream, unsigned int globalName) const {
+    ObjectData::onSave(stream, globalName);
     stream->putBe32(attachedFB);
     stream->putBe32(attachedPoint);
     // TODO: snapshot eglImageGlobalTexObject
@@ -51,6 +51,7 @@ void RenderbufferData::onSave(android::base::Stream* stream) const {
 
 void RenderbufferData::restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) {
+    ObjectData::restore(localName, getGlobalName);
     int globalName = getGlobalName(NamedObjectType::RENDERBUFFER,
             localName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
@@ -91,8 +92,8 @@ FramebufferData::~FramebufferData() {
     }
 }
 
-void FramebufferData::onSave(android::base::Stream* stream) const {
-    ObjectData::onSave(stream);
+void FramebufferData::onSave(android::base::Stream* stream, unsigned int globalName) const {
+    ObjectData::onSave(stream, globalName);
     stream->putBe32(m_fbName);
     stream->putBe32(MAX_ATTACH_POINTS);
     for (auto& attachPoint : m_attachPoints) {
@@ -132,6 +133,7 @@ void FramebufferData::postLoad(getObjDataPtr_t getObjDataPtr) {
 
 void FramebufferData::restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) {
+    ObjectData::restore(localName, getGlobalName);
     if (!hasBeenBoundAtLeastOnce()) return;
     int globalName = getGlobalName(NamedObjectType::FRAMEBUFFER,
             localName);

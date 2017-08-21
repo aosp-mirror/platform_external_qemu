@@ -67,6 +67,7 @@ public:
             GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
             GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) override;
     ~GLEScmContext();
+    static void setMaxGlesVersion(GLESVersion version);
 protected:
 
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);

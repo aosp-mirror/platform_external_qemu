@@ -37,8 +37,8 @@ SamplerData::SamplerData(android::base::Stream* stream)
     }
 }
 
-void SamplerData::onSave(android::base::Stream* stream) const {
-    ObjectData::onSave(stream);
+void SamplerData::onSave(android::base::Stream* stream, unsigned int globalName) const {
+    ObjectData::onSave(stream, globalName);
     android::base::saveCollection(stream, mParamis,
             [](android::base::Stream* stream,
                 const std::pair<const GLenum, GLuint>& item) {
@@ -55,6 +55,7 @@ void SamplerData::onSave(android::base::Stream* stream) const {
 
 void SamplerData::restore(ObjectLocalName localName,
         getGlobalName_t getGlobalName) {
+    ObjectData::restore(localName, getGlobalName);
     int globalName = getGlobalName(NamedObjectType::SAMPLER,
         localName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();

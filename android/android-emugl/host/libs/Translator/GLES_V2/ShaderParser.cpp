@@ -58,11 +58,11 @@ ShaderParser::ShaderParser(android::base::Stream* stream) : ObjectData(stream) {
     m_coreProfile = stream->getByte();
 }
 
-void ShaderParser::onSave(android::base::Stream* stream) const {
+void ShaderParser::onSave(android::base::Stream* stream, unsigned int globalName) const {
     // The first byte is used to distinguish between program and shader object.
     // It will be loaded outside of this class
     stream->putByte(LOAD_SHADER);
-    ObjectData::onSave(stream);
+    ObjectData::onSave(stream, globalName);
     stream->putString(m_originalSrc);
     stream->putString(m_src);
     stream->putString(m_parsedSrc);
@@ -82,6 +82,7 @@ void ShaderParser::onSave(android::base::Stream* stream) const {
 
 void ShaderParser::restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) {
+    ObjectData::restore(localName, getGlobalName);
     if (m_parsedSrc.empty()) return;
     int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
             localName);

@@ -88,11 +88,30 @@ static const GLint gles2ContextAttribsCoreGL[] =
      EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
      EGL_NONE };
 
-const GLint* getGles2ContextAttribs() {
+static const GLint gles3ContextAttribsESOrGLCompat[] =
+   { EGL_CONTEXT_CLIENT_VERSION, 3, EGL_NONE };
+
+static const GLint gles3ContextAttribsCoreGL[] =
+   { EGL_CONTEXT_CLIENT_VERSION, 3,
+     EGL_CONTEXT_OPENGL_PROFILE_MASK_KHR,
+     EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR,
+     EGL_NONE };
+
+const GLint* getGlesMaxContextAttribs() {
+    int glesMaj, glesMin;
+    emugl::getGlesVersion(&glesMaj, &glesMin);
     if (shouldEnableCoreProfile()) {
-        return gles2ContextAttribsCoreGL;
+        if (glesMaj == 2) {
+            return gles2ContextAttribsCoreGL;
+        } else {
+            return gles3ContextAttribsCoreGL;
+        }
     }
-    return gles2ContextAttribsESOrGLCompat;
+    if (glesMaj == 2) {
+        return gles2ContextAttribsESOrGLCompat;
+    } else {
+        return gles3ContextAttribsESOrGLCompat;
+    }
 }
 
 static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
@@ -119,7 +138,7 @@ static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
     }
 
     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
-                                            getGles2ContextAttribs());
+                                            getGlesMaxContextAttribs());
     if (ctx == EGL_NO_CONTEXT) {
         ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
         s_egl.eglDestroySurface(p_dpy, surface);
@@ -262,7 +281,14 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     GL_LOG("egl: %d %d", fb->m_caps.eglMajor, fb->m_caps.eglMinor);
     s_egl.eglBindAPI(EGL_OPENGL_ES_API);
 
-    FrameBuffer::setMaxGLESVersion(calcMaxVersionFromDispatch(fb->m_eglDisplay));
+    GLESDispatchMaxVersion dispatchMaxVersion =
+            calcMaxVersionFromDispatch(fb->m_eglDisplay);
+    FrameBuffer::setMaxGLESVersion(dispatchMaxVersion);
+    if (s_egl.eglSetMaxGLESVersion) {
+        // eglSetMaxGLESVersion must be called before any context binding
+        // because it changes how we initialize the dispatcher table.
+        s_egl.eglSetMaxGLESVersion(dispatchMaxVersion);
+    }
 
     int glesMaj, glesMin;
     emugl::getGlesVersion(&glesMaj, &glesMin);
@@ -331,7 +357,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     GL_LOG("attempting to create egl context");
     fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
-                                              EGL_NO_CONTEXT, getGles2ContextAttribs());
+                                              EGL_NO_CONTEXT, getGlesMaxContextAttribs());
     if (fb->m_eglContext == EGL_NO_CONTEXT) {
         ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
         return false;
@@ -348,7 +374,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     fb->m_pbufContext =
             s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
-                                   fb->m_eglContext, getGles2ContextAttribs());
+                                   fb->m_eglContext, getGlesMaxContextAttribs());
     if (fb->m_pbufContext == EGL_NO_CONTEXT) {
         ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
         return false;

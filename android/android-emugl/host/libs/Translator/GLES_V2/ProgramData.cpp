@@ -122,7 +122,6 @@ ProgramData::ProgramData(android::base::Stream* stream) :
     DeleteStatus = stream->getByte();
     mGlesMajorVersion = stream->getByte();
     mGlesMinorVersion = stream->getByte();
-    needRestore = true;
 }
 
 static void getUniformValue(GLuint pname, const GLchar *name, GLenum type,
@@ -274,13 +273,13 @@ static std::vector<std::string> collectTransformFeedbackInfo(GLuint pname) {
     return transformFeedbacks;
 }
 
-void ProgramData::onSave(android::base::Stream* stream) const {
+void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName) const {
     // The first byte is used to distinguish between program and shader object.
     // It will be loaded outside of this class
     // TODO: snapshot shader source in program object (in case shaders got
     // deleted while the program is still alive)
     stream->putByte(LOAD_PROGRAM);
-    ObjectData::onSave(stream);
+    ObjectData::onSave(stream, globalName);
     auto saveAttribLocs = [](android::base::Stream* stream,
             const std::pair<std::string, GLuint>& attribLoc) {
                 stream->putString(attribLoc.first);
@@ -306,7 +305,7 @@ void ProgramData::onSave(android::base::Stream* stream) const {
                 stream->putString(feedback);
             }
         };
-    if (needRestore) {
+    if (needRestore()) {
         saveCollection(stream, uniforms, saveUniform);
         saveCollection(stream, mUniformBlockBinding, saveUniformBlock);
         saveTransformFeedbacks(stream, mTransformFeedbacks);
@@ -355,6 +354,7 @@ void ProgramData::postLoad(getObjDataPtr_t getObjDataPtr) {
 
 void ProgramData::restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) {
+    ObjectData::restore(localName, getGlobalName);
     int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
             localName);
     assert(globalName);
@@ -567,7 +567,6 @@ void ProgramData::restore(ObjectLocalName localName,
         dispatcher.glBindAttribLocation(globalName, attribLocs.second,
                 attribLocs.first.c_str());
     }
-    needRestore = false;
 }
 
 GenNameInfo ProgramData::getGenNameInfo() const {

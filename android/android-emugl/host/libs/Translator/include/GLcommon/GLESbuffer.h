@@ -26,7 +26,7 @@ class GLESbuffer: public ObjectData {
 public:
    GLESbuffer():ObjectData(BUFFER_DATA) {}
    GLESbuffer(android::base::Stream* stream);
-   virtual void onSave(android::base::Stream* stream) const override;
+   virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
    virtual void restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) override;
    GLuint getSize(){return m_size;};
