@@ -116,12 +116,8 @@ private:
         handleUICommand(cmd, false);
     }
 
-    QToolButton* addButton(QGridLayout* layout,
-                           int row,
-                           int col,
-                           const char* iconPath,
-                           QString tip,
-                           EmulatorQtWindowSlot slot);
+    void stopExtendedWindowCreation();
+
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
     virtual void closeEvent(QCloseEvent* ce) override;

@@ -213,8 +213,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 }
 
 ToolWindow::~ToolWindow() {
-    mExtendedWindowCreateTimer.stop();
-    mExtendedWindowCreateTimer.disconnect();
+    stopExtendedWindowCreation();
 }
 
 void ToolWindow::raise() {
@@ -232,6 +231,11 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
     }
 }
 
+void ToolWindow::stopExtendedWindowCreation() {
+    mExtendedWindowCreateTimer.stop();
+    mExtendedWindowCreateTimer.disconnect();
+}
+
 void ToolWindow::hide() {
     QFrame::hide();
     if (mExtendedWindow.hasInstance()) {
@@ -243,6 +247,8 @@ void ToolWindow::closeEvent(QCloseEvent* ce) {
     // make sure only parent processes the event - otherwise some
     // siblings won't get it, e.g. main window
     ce->ignore();
+
+    stopExtendedWindowCreation();
 }
 
 void ToolWindow::mousePressEvent(QMouseEvent* event) {
