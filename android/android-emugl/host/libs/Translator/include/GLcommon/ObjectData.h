@@ -45,7 +45,7 @@ public:
     ObjectData(android::base::Stream* stream);
     ObjectDataType getDataType() { return m_dataType; };
     virtual ~ObjectData() = default;
-    virtual void onSave(android::base::Stream* stream) const = 0;
+    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const = 0;
     typedef std::function<ObjectDataPtr(NamedObjectType p_type,
             ObjectLocalName p_localName, android::base::Stream* stream)>
                 loadObject_t;
@@ -62,7 +62,9 @@ public:
     virtual void restore(ObjectLocalName localName,
             getGlobalName_t getGlobalName) = 0;
     virtual GenNameInfo getGenNameInfo() const;
+    bool needRestore() const;
 private:
     ObjectDataType m_dataType;
+    bool m_needRestore = false;
 };
 
