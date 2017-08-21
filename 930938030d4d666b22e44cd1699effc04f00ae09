@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "950e4a25_fafde930",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLDispatch.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-21T23:59:26Z",
+      "side": 1,
+      "message": "nit: both",
+      "range": {
+        "startLine": 110,
+        "startChar": 12,
+        "endLine": 110,
+        "endChar": 15
+      },
+      "revId": "930938030d4d666b22e44cd1699effc04f00ae09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
