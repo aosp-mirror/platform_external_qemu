@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "6eee65dd_95e0b565",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-08-21T21:48:25Z",
+      "side": 1,
+      "message": "Checked the code path. Looks like the FB is also using these values to initialize, so we should be okay.",
+      "parentUuid": "4aa53465_1e2fbed2",
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5940416f_0872f687",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 6
@@ -30,6 +48,30 @@
       "writtenOn": "2017-07-19T17:29:49Z",
       "side": 1,
       "message": "For debug macros, I think we just add #define DEBUG_**** 0 at the top and then if you want to debug, #define it to 1, instead of relying on //",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 23
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09613c8a_03edf08a",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-08-21T21:48:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5940416f_0872f687",
       "range": {
         "startLine": 63,
         "startChar": 0,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "982fa683_2d68c22d",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-08-21T21:48:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef5819e6_290bdba2",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 41,
+        "endChar": 17
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "12e2a1b0_b7c623e4",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 6
@@ -76,6 +142,30 @@
       "writtenOn": "2017-07-18T23:20:13Z",
       "side": 1,
       "message": "some name different from member IMO is better here",
+      "range": {
+        "startLine": 43,
+        "startChar": 36,
+        "endLine": 43,
+        "endChar": 42
+      },
+      "revId": "238c4274a37048a86d2d6c1ed1b9662762f846ce",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09db711f_1282bbb5",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-08-21T21:48:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "12e2a1b0_b7c623e4",
       "range": {
         "startLine": 43,
         "startChar": 36,
