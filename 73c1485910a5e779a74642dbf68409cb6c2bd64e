@@ -70,6 +70,30 @@
       "revId": "73c1485910a5e779a74642dbf68409cb6c2bd64e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07d7aa99_efad1e3c",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLESbuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-21T21:00:11Z",
+      "side": 1,
+      "message": "I talked with lfy@, and we got a solution that (1) in Framebuffer, create the contexts based on the desired maximum GLES version (2) implement a \"clear out gles3 dispatch function pointer\", and trigger it from Framebuffer if maximum GLES version\u003d2",
+      "parentUuid": "6450482b_018876ec",
+      "range": {
+        "startLine": 76,
+        "startChar": 26,
+        "endLine": 76,
+        "endChar": 53
+      },
+      "revId": "73c1485910a5e779a74642dbf68409cb6c2bd64e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
