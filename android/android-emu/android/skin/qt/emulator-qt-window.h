@@ -32,7 +32,6 @@
 #include "android/skin/surface.h"
 #include "android/skin/winsys.h"
 
-#include <QApplication>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFrame>
@@ -40,13 +39,9 @@
 #include <QImageReader>
 #include <QMessageBox>
 #include <QMouseEvent>
-#include <QMoveEvent>
-#include <QObject>
 #include <QPainter>
 #include <QProgressDialog>
-#include <QResizeEvent>
 #include <QWidget>
-#include <QtCore>
 
 #include <memory>
 #include <string>

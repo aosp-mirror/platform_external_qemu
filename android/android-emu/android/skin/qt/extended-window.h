@@ -27,14 +27,9 @@
 #include "android/utils/path.h"
 
 #include <QButtonGroup>
-#include <QFile>
 #include <QFrame>
 #include <QPushButton>
 #include <QString>
-#include <QTableWidget>
-#include <QThread>
-#include <QTimer>
-#include <QDoubleValidator>
 #include <QShowEvent>
 
 #include <map>
