@@ -27,7 +27,7 @@ class RenderbufferData : public ObjectData
 public:
     RenderbufferData() : ObjectData(RENDERBUFFER_DATA) {  };
     RenderbufferData(android::base::Stream* stream);
-    virtual void onSave(android::base::Stream* stream) const override;
+    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
     virtual void restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) override;
     GLuint attachedFB = 0;
@@ -47,7 +47,7 @@ public:
     explicit FramebufferData(GLuint name);
     FramebufferData(android::base::Stream* stream);
     ~FramebufferData();
-    virtual void onSave(android::base::Stream* stream) const override;
+    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
     virtual void postLoad(getObjDataPtr_t getObjDataPtr) override;
     virtual void restore(ObjectLocalName localName,
            getGlobalName_t getGlobalName) override;

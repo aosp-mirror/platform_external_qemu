@@ -20,11 +20,12 @@
 
 #include "android/base/files/Stream.h"
 #include "ThreadInfo.h"
-#include <GLcommon/GLEScontext.h>
-#include <GLcommon/TextureData.h>
-#include <GLcommon/TranslatorIfaces.h>
+#include "GLcommon/GLEScontext.h"
+#include "GLcommon/GLutils.h"
+#include "GLcommon/TextureData.h"
+#include "GLcommon/TranslatorIfaces.h"
 #include "emugl/common/shared_library.h"
-#include <OpenglCodecCommon/ErrorLog.h>
+#include "OpenglCodecCommon/ErrorLog.h"
 
 #include "EglWindowSurface.h"
 #include "EglPbufferSurface.h"
@@ -137,6 +138,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                const void* textureLoader);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
+EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
 }
 
 #define CURRENT_THREAD() do {} while (0);
@@ -1539,4 +1541,24 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
 
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable) {
     EglGlobalInfo::setEgl2Egl(enable);
+}
+
+EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
+    // The "version" here follows the convention of eglGetMaxGLESVesion
+    // 0: es2 1: es3.0 2: es3.1 3: es3.2
+    GLESVersion glesVersion = GLES_2_0;
+    switch (version) {
+    case 0:
+        glesVersion = GLES_2_0;
+        break;
+    case 1:
+        glesVersion = GLES_3_0;
+        break;
+    case 2:
+    case 3: // TODO: GLES 3.2 support?
+        glesVersion = GLES_3_1;
+        break;
+    }
+    g_eglInfo->getIface(GLES_1_1)->setMaxGlesVersion(glesVersion);
+    g_eglInfo->getIface(GLES_2_0)->setMaxGlesVersion(glesVersion);
 }

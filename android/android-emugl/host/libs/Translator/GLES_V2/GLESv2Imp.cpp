@@ -51,6 +51,7 @@ extern "C" {
 //decleration
 static void initGLESx(bool isGles2Gles);
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp);
+static void setMaxGlesVersion(GLESVersion version);
 static void deleteGLESContext(GLEScontext* ctx);
 static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(void);
@@ -73,6 +74,7 @@ static GLESiface s_glesIface = {
         .initGLESx = initGLESx,
         .createGLESContext = createGLESxContext,
         .initContext = initContext,
+        .setMaxGlesVersion = setMaxGlesVersion,
         .deleteGLESContext = deleteGLESContext,
         .flush = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
         .finish = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
@@ -92,6 +94,9 @@ static GLESiface s_glesIface = {
 
 extern "C" {
 
+static void setMaxGlesVersion(GLESVersion version) {
+    GLESv2Context::setMaxGlesVersion(version);
+}
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     setCoreProfile(ctx->isCoreProfile());

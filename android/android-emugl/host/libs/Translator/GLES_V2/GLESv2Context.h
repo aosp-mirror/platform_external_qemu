@@ -91,6 +91,7 @@ public:
     void initEmulatedBuffers();
     void initEmulatedVAO();
 
+    static void setMaxGlesVersion(GLESVersion version);
 protected:
     virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);

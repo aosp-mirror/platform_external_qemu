@@ -30,6 +30,8 @@ static const char kGLES30StringPart[] = "OpenGL ES 3.0";
 static const char kGLES31StringPart[] = "OpenGL ES 3.1";
 static const char kGLES32StringPart[] = "OpenGL ES 3.2";
 
+static GLESVersion s_maxGlesVersion = GLES_2_0;
+
 static const char* sPickVersionStringPart(int maj, int min) {
     switch (maj) {
         case 2:
@@ -51,10 +53,14 @@ static const char* sPickVersionStringPart(int maj, int min) {
     return nullptr;
 }
 
+void GLESv2Context::setMaxGlesVersion(GLESVersion version) {
+    s_maxGlesVersion = version;
+}
+
 void GLESv2Context::init(EGLiface* eglIface) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(GLES_2_0, eglIface->eglGetGlLibrary());
+        s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
         GLEScontext::init(eglIface);
         addVertexArrayObject(0);
         setVertexArrayObject(0);

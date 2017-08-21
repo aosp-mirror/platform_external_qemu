@@ -38,14 +38,26 @@ NamedObjectType ObjectDataType2NamedObjectType(ObjectDataType objDataType) {
 
 ObjectData::ObjectData(android::base::Stream* stream) {
     m_dataType = (ObjectDataType)stream->getBe32();
+    m_needRestore = true;
 }
 
-void ObjectData::onSave(android::base::Stream* stream) const {
+void ObjectData::onSave(android::base::Stream* stream, unsigned int globalName) const {
     stream->putBe32(m_dataType);
 }
 
 void ObjectData::postLoad(getObjDataPtr_t getObjDataPtr) {
     (void)getObjDataPtr;
+}
+
+void ObjectData::restore(ObjectLocalName localName,
+            getGlobalName_t getGlobalName) {
+    (void)localName;
+    (void)getGlobalName;
+    m_needRestore = false;
+}
+
+bool ObjectData::needRestore() const {
+    return m_needRestore;
 }
 
 GenNameInfo ObjectData::getGenNameInfo() const {
