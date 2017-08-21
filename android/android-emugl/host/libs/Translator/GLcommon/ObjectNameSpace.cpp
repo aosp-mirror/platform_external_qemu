@@ -129,7 +129,7 @@ void NameSpace::onSave(android::base::Stream* stream) {
     stream->putBe32(m_objectDataMap.size());
     for (const auto& obj : m_objectDataMap) {
         stream->putBe64(obj.first);
-        obj.second->onSave(stream);
+        obj.second->onSave(stream, getGlobalName(obj.first));
     }
 }
 
