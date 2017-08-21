@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9c11e54f_8b2925f3",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1562,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-21T23:59:26Z",
+      "side": 1,
+      "message": "Just confirming my reading comprehension: once we call eglSetMaxGLESVersion for the first time, we haven\u0027t dispatched to the desktop GL yet. But when we call setMaxGlesVersion from here, it\u0027s either before the GLES1/2/3 contexts have populated their desktop GL dispatch tables, or they have already been populated so it\u0027s a no-op.\n\nIf the former case, then the GLES1/2/3 contexts will avoid filling in the GLES3 entries if GLES3 is disabled.\n\nIf the latter case, then we assume that the first context to do any GL ops is a context that achieves the max GLES version wanted (c.f. the FrameBuffer.cpp changes) so we are still good.\n\nDoes this sound right?",
+      "range": {
+        "startLine": 1562,
+        "startChar": 0,
+        "endLine": 1562,
+        "endChar": 66
+      },
+      "revId": "930938030d4d666b22e44cd1699effc04f00ae09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "950e4a25_fafde930",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLDispatch.cpp",
         "patchSetId": 3
