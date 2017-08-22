@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d77f21d7_6d7984fc",
+        "filename": "android/android-emu/android/base/files/StreamSerializing.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T19:28:55Z",
+      "side": 1,
+      "message": "I\u0027m not sure this is a good idea. A single buffer of over 4 GB should never be saved/loaded using this function (and I doubt it should ever exits), so having size as 32 bits has to be enough for everyone (c)",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 1
+      },
+      "revId": "3d3b9c74f70f2c978fb125c4121b44814c5b74f9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
