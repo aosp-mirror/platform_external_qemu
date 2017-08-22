@@ -3326,7 +3326,7 @@ static bool android_reporting_setup(void)
         return false;
     }
 
-    android_check_for_updates();
+    /* android_check_for_updates(); */
 
     android_report_session_phase(ANDROID_SESSION_PHASE_RUNNING);
     return true;
