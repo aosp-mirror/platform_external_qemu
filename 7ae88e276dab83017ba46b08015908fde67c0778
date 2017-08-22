@@ -2,6 +2,213 @@
   "comments": [
     {
       "key": {
+        "uuid": "6e09a5c6_792fe68c",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "nit: std::min()",
+      "range": {
+        "startLine": 94,
+        "startChar": 21,
+        "endLine": 94,
+        "endChar": 65
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1e92e801_d2dc6db3",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "why is it |int| here when it was uint64 originally?",
+      "range": {
+        "startLine": 136,
+        "startChar": 0,
+        "endLine": 136,
+        "endChar": 3
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ae516dc_f670391f",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "sizeof(size)? and assert(mSendLengthBuffer.size() \u003d\u003d sizeof(size)) just in case?",
+      "range": {
+        "startLine": 138,
+        "startChar": 43,
+        "endLine": 138,
+        "endChar": 44
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea8225ef_bc2040b5",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "what if getSendPayloadSize() \u003d\u003d 0 (there\u0027s no message to send, e.g. it\u0027s some kind of event notification)?",
+      "range": {
+        "startLine": 150,
+        "startChar": 12,
+        "endLine": 150,
+        "endChar": 83
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d932ed32_f8e1ed04",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "static_assert",
+      "range": {
+        "startLine": 156,
+        "startChar": 16,
+        "endLine": 156,
+        "endChar": 22
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d8506a2c_a6f6ed2d",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "same question - if there\u0027s no response to send, |m_expected| \u003d\u003d 0\nHow should the pipe work?",
+      "range": {
+        "startLine": 167,
+        "startChar": 12,
+        "endLine": 167,
+        "endChar": 22
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4bb2eac3_06ff50af",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "please resize the buffer first.",
+      "range": {
+        "startLine": 173,
+        "startChar": 23,
+        "endLine": 173,
+        "endChar": 45
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16ecb8cf_2b19d6ea",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "a single byte is enough here",
+      "range": {
+        "startLine": 227,
+        "startChar": 12,
+        "endLine": 227,
+        "endChar": 19
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2998f064_3c00f3e3",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "64?",
+      "range": {
+        "startLine": 53,
+        "startChar": 35,
+        "endLine": 53,
+        "endChar": 36
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47d2831d_05809a3a",
         "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
         "patchSetId": 7
@@ -66,6 +273,29 @@
         "startChar": 9,
         "endLine": 97,
         "endChar": 27
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "966dc19f_2a1abd76",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T18:36:17Z",
+      "side": 1,
+      "message": "nit: this prefix\u0027s already a part of the type, let\u0027s drop it\nGuestWaitingState::SendMsgLength is pretty descriptive",
+      "range": {
+        "startLine": 132,
+        "startChar": 8,
+        "endLine": 132,
+        "endChar": 23
       },
       "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
