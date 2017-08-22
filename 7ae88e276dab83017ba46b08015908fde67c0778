@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "47d2831d_05809a3a",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-22T16:53:43Z",
+      "side": 1,
+      "message": "There are util methods in qemu/android/android-emu/android/base/files/StreamSerializing.h which do the same thing. You can use those?",
+      "range": {
+        "startLine": 97,
+        "startChar": 9,
+        "endLine": 97,
+        "endChar": 27
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
