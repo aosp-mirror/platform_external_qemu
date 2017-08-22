@@ -46,6 +46,30 @@
       "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0109567f_2c5afbef",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T17:55:19Z",
+      "side": 1,
+      "message": "on second thought, I can fix that",
+      "parentUuid": "1c14370f_c8e8820d",
+      "range": {
+        "startLine": 97,
+        "startChar": 9,
+        "endLine": 97,
+        "endChar": 27
+      },
+      "revId": "7ae88e276dab83017ba46b08015908fde67c0778",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
