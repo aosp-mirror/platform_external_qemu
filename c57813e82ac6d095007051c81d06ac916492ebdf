@@ -22,6 +22,30 @@
       "revId": "c57813e82ac6d095007051c81d06ac916492ebdf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bed1bc7_57f39918",
+        "filename": "android/android-emu/android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-22T22:32:17Z",
+      "side": 1,
+      "message": "The current plan is, before next emulator-rlease ( it will have the ability to launch chromeos since I\u0027ve merged all releated changes), we will provide custom emulator build to users. If user use our custom emulator to launch android avd, then they will see the warning, but there is no action item could be done for them since we really have no plan to rebase our current branch to the head of emu-2.4-release.   Do you think just disable this 2 check in vl.c/vl-android.c? should be fine?",
+      "parentUuid": "209f2a9c_9ed0349e",
+      "range": {
+        "startLine": 229,
+        "startChar": 4,
+        "endLine": 232,
+        "endChar": 23
+      },
+      "revId": "c57813e82ac6d095007051c81d06ac916492ebdf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
