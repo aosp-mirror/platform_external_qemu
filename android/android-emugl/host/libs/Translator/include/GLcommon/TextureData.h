@@ -67,7 +67,7 @@ public:
     GLenum target;
     // globalName is used for snapshot when reading data from GPU
     int globalName = 0;
-    virtual void onSave(android::base::Stream* stream) const override;
+    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
     virtual void restore(ObjectLocalName localName,
             getGlobalName_t getGlobalName) override;
     void setSaveableTexture(SaveableTexturePtr&& saveableTexture);

@@ -17,6 +17,7 @@
 #define TRANSLATOR_IFACES_H
 
 #include "android/base/containers/SmallVector.h"
+#include "GLcommon/GLutils.h"
 #include "GLcommon/ShareGroup.h"
 
 #include <EGL/egl.h>
@@ -67,6 +68,7 @@ typedef struct {
     void (*initGLESx)(bool isGles2Gles);
     GLEScontext*                                    (*createGLESContext)(int majorVersion, int minorVersion, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
     void                                            (*initContext)(GLEScontext*,ShareGroupPtr);
+    void                                            (*setMaxGlesVersion)(GLESVersion);
     void                                            (*deleteGLESContext)(GLEScontext*);
     void                                            (*flush)();
     void                                            (*finish)();

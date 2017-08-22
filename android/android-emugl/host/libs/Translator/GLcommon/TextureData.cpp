@@ -52,8 +52,8 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     });
 }
 
-void TextureData::onSave(android::base::Stream* stream) const {
-    ObjectData::onSave(stream);
+void TextureData::onSave(android::base::Stream* stream, unsigned int globalName) const {
+    ObjectData::onSave(stream, globalName);
     // The current TextureData structure is wrong when dealing with mipmaps.
     stream->putBe32(target);
     stream->putBe32(width);
@@ -80,6 +80,7 @@ void TextureData::onSave(android::base::Stream* stream) const {
 
 void TextureData::restore(ObjectLocalName localName,
             getGlobalName_t getGlobalName) {
+    ObjectData::restore(localName, getGlobalName);
 }
 
 void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {

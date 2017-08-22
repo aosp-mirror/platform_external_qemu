@@ -107,22 +107,26 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     LIST_GLES_COMMON_FUNCTIONS(LOAD_GL_FUNC)
     LIST_GLES_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
 
-    /* Loading OpenGL functions which are needed ONLY for implementing GLES 1.1*/
-    if(version == GLES_1_1){
-        LIST_GLES1_ONLY_FUNCTIONS(LOAD_GL_FUNC)
-        LIST_GLES1_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
-        LIST_GLES2_ONLY_FUNCTIONS(LOAD_GL_FUNC)
-        LIST_GLES2_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
-    } else if (version == GLES_2_0){
-        LIST_GLES2_ONLY_FUNCTIONS(LOAD_GL_FUNC)
-        LIST_GLES2_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
-    }
+    /* Load both GLES1 and GLES2. On core profile, GLES 1 implementation will
+     * require GLES 3 function supports and set version to GLES_3_0. Thus
+     * we cannot really tell if the dispatcher is used for GLES1 or GLES2, so
+     * let's just load both of them.
+     */
+    LIST_GLES1_ONLY_FUNCTIONS(LOAD_GL_FUNC)
+    LIST_GLES1_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
+    LIST_GLES2_ONLY_FUNCTIONS(LOAD_GL_FUNC)
+    LIST_GLES2_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
 
     /* Load OpenGL ES 3.x functions through 3.1. Not all are supported;
      * leave it up to EGL to determine support level. */
-    LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
-    LIST_GLES3_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
-    LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
+
+    if (version >= GLES_3_0) {
+        LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
+        LIST_GLES3_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
+    }
+    if (version >= GLES_3_1) {
+        LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
+    }
 
     m_isLoaded = true;
 }

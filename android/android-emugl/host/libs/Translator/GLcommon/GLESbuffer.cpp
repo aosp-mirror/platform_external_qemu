@@ -67,11 +67,35 @@ GLESbuffer::GLESbuffer(android::base::Stream* stream) : ObjectData(stream) {
     m_wasBound = stream->getByte();
 }
 
-void GLESbuffer::onSave(android::base::Stream* stream) const {
-    ObjectData::onSave(stream);
+void GLESbuffer::onSave(android::base::Stream* stream,
+        unsigned int globalName) const {
+    ObjectData::onSave(stream, globalName);
     stream->putBe32(m_size);
     stream->putBe32(m_usage);
-    stream->write(m_data, m_size);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    if (!needRestore() && dispatcher.glMapBufferRange && m_size != 0) {
+        // If glMapBufferRange is supported, m_data might be inconsistent
+        // with GPU memory (because we did not update m_data when glUnmapBuffer)
+        // Thus we directly load buffer data from GPU memory
+
+        // + We do not handle the situation when snapshot happens between
+        // a map and an unmap, because the way we implement GLES decoder
+        // prevents such behavior.
+        int prevBuffer = 0;
+        dispatcher.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &prevBuffer);
+        dispatcher.glBindBuffer(GL_ARRAY_BUFFER, globalName);
+        void * data = dispatcher.glMapBufferRange(GL_ARRAY_BUFFER, 0,
+                    m_size, GL_MAP_READ_BIT);
+        assert(data);
+        stream->write(data, m_size);
+        bool success = dispatcher.glUnmapBuffer(GL_ARRAY_BUFFER);
+        assert(success);
+        (void)success;
+        dispatcher.glBindBuffer(GL_ARRAY_BUFFER, prevBuffer);
+    } else {
+        stream->write(m_data, m_size);
+    }
+
     // TODO: m_conversionManager
     //
     // Treat it as a low priority issue for now because in GLES2 this is only
@@ -82,6 +106,7 @@ void GLESbuffer::onSave(android::base::Stream* stream) const {
 
 void GLESbuffer::restore(ObjectLocalName localName,
         getGlobalName_t getGlobalName) {
+    ObjectData::restore(localName, getGlobalName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     int globalName = getGlobalName(NamedObjectType::VERTEXBUFFER, localName);
     // We bind to GL_ARRAY_BUFFER just for uploading buffer data
