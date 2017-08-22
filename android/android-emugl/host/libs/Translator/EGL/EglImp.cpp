@@ -414,7 +414,8 @@ EGLAPI const char * EGLAPIENTRY eglQueryString(EGLDisplay display, EGLint name) 
     VALIDATE_DISPLAY(display);
     static const char* vendor     = "Google";
     static const char* version    = "1.4";
-    static const char* extensions = "EGL_KHR_image_base EGL_KHR_gl_texture_2D_image "
+    static const char* extensions = "EGL_KHR_image EGL_KHR_image_base "
+                                    "EGL_KHR_gl_texture_2D_image "
                                     "EGL_ANDROID_recordable ";
     if(!EglValidate::stringName(name)) {
         RETURN_ERROR(NULL,EGL_BAD_PARAMETER);
