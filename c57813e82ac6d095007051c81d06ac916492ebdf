@@ -46,6 +46,30 @@
       "revId": "c57813e82ac6d095007051c81d06ac916492ebdf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05136716_6ed83714",
+        "filename": "android/android-emu/android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T22:34:47Z",
+      "side": 1,
+      "message": "1. If you don\u0027t call it then yes, there won\u0027t be a warning as that\u0027s the only place that might print the \u0027please update\u0027 message\n2. On the other hand, emulator\u0027s \"about\" tab in the extended controls window also uses UpdateChecker to load the last available version and show it there - you might want to hide that thing as well",
+      "parentUuid": "6bed1bc7_57f39918",
+      "range": {
+        "startLine": 229,
+        "startChar": 4,
+        "endLine": 232,
+        "endChar": 23
+      },
+      "revId": "c57813e82ac6d095007051c81d06ac916492ebdf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
