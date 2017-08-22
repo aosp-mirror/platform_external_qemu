@@ -225,6 +225,7 @@ bool UpdateChecker::init() {
 }
 
 bool UpdateChecker::needsCheck() const {
+    return false;
     const time_t now = System::get()->getUnixTime();
     // Check only if the previous check was 4+ hours ago
     return now - mTimeStorage->getTime(mDataLoader->getUniqueDataKey()) >=
