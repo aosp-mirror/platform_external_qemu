@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f8450aea_1d1e9836",
+        "filename": "android/third_party/libkeymaster3/Keymaster3.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T23:48:05Z",
+      "side": 1,
+      "message": "I believe this code should be out of the third_party/ directory, maybe directly in android/emulation/",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 1
+      },
+      "revId": "85fc7b6a135e2f703edc2be0997ffbb7b28eb9d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e88f30a4_e1d7d465",
+        "filename": "android/third_party/libkeymaster3/sources.mk",
+        "patchSetId": 11
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T23:48:05Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 13,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 52
+      },
+      "revId": "85fc7b6a135e2f703edc2be0997ffbb7b28eb9d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c4ac29e_7b77a33e",
+        "filename": "android/third_party/libkeymaster3/sources.mk",
+        "patchSetId": 11
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T23:48:05Z",
+      "side": 1,
+      "message": "how much slower is emulator build now? is it worth prebuilding?",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 20
+      },
+      "revId": "85fc7b6a135e2f703edc2be0997ffbb7b28eb9d4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
