@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c89545d3_fb63001b",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1562,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-22T00:05:32Z",
+      "side": 1,
+      "message": "It is the former case, it should be called before any context creation / binding so that we avoid filling in GLES3 entries.\nActually let me add a comment in the code. Thanks for asking!",
+      "parentUuid": "9c11e54f_8b2925f3",
+      "range": {
+        "startLine": 1562,
+        "startChar": 0,
+        "endLine": 1562,
+        "endChar": 66
+      },
+      "revId": "930938030d4d666b22e44cd1699effc04f00ae09",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "950e4a25_fafde930",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLDispatch.cpp",
         "patchSetId": 3
