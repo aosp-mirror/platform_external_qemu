@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "209f2a9c_9ed0349e",
+        "filename": "android/android-emu/android/update-check/UpdateChecker.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 232,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-22T22:10:23Z",
+      "side": 1,
+      "message": "what about skipping the android_checkForUpdates() call in vl.c / vl-android.c when the AVD is for Chrome OS? This way you won\u0027t need to hack the existing code",
+      "range": {
+        "startLine": 229,
+        "startChar": 4,
+        "endLine": 232,
+        "endChar": 23
+      },
+      "revId": "c57813e82ac6d095007051c81d06ac916492ebdf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
