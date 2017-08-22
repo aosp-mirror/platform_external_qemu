@@ -120,6 +120,7 @@ int main(int argc, char **argv) {
     // Must be done after emulator_parseCommonCommandLineOptions,
     // since that calls createAVD which sets up critical info needed
     // by featurecontrol component itself.
+    feature_initialize();
     feature_update_from_server();
 
     // we know it's qemu1, and don't care what user wanted to trick us into
