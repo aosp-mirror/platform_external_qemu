@@ -21,12 +21,13 @@
 #include "android/hw-sensors.h"
 #include "android/network/globals.h"
 #include "android/opengles.h"
+#include "android/screen-recorder.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
-#include "android/utils/debug.h"
 #include "android/utils/bufprint.h"
+#include "android/utils/debug.h"
 #include "android/utils/looper.h"
 
 #include "android/telephony/modem_driver.h"
@@ -155,6 +156,14 @@ static void emulator_window_opengles_redraw_window(void) {
     }
 }
 
+bool emulator_window_start_recording(const char* filename) {
+    return screen_recorder_start(filename);
+}
+
+void emulator_window_stop_recording(void) {
+    screen_recorder_stop();
+}
+
 // Used as an emugl callback to get each frame of GPU display.
 static void _emulator_window_on_gpu_frame(void* context,
                                           int width,
@@ -268,6 +277,10 @@ emulator_window_setup( EmulatorWindow*  emulator )
                                     emulator,
                                     _emulator_window_on_gpu_frame);
     }
+
+    screen_recorder_init(!s_use_emugl_subwindow,
+                         android_hw->hw_lcd_width,
+                         android_hw->hw_lcd_height);
 
     skin_ui_reset_title(emulator->ui);
 }

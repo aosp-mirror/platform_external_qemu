@@ -167,7 +167,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
         }
-//        mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->recordScreen);
+        mExtendedUi->recordScreenPage->setRecordScreenAgent(agentPtr->record);
     }
     // The ADB port is known now. Show it on the UI Help page.
     mExtendedUi->helpPage->setAdbPort();

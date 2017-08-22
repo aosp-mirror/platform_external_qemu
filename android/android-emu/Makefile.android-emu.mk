@@ -773,7 +773,7 @@ EMULATOR_LIBUI_LDLIBS += $(QT_LDLIBS)
 # The skin support sources
 include $(_ANDROID_EMU_ROOT)/android/skin/sources.mk
 
-EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) emulator-zlib
+EMULATOR_LIBUI_STATIC_LIBRARIES += $(ANDROID_SKIN_STATIC_LIBRARIES) $(FFMPEG_STATIC_LIBRARIES) $(LIBX264_STATIC_LIBRARIES) $(LIBVPX_STATIC_LIBRARIES) emulator-zlib
 
 $(call start-emulator-library, emulator-libui)
 
@@ -790,6 +790,11 @@ LOCAL_CFLAGS += \
 # string literals which are being glued together
 LOCAL_CXXFLAGS += $(call if-target-clang,-Wno-reserved-user-defined-literal,-Wno-literal-suffix)
 
+# ffmpeg mac dependency
+ifeq ($(BUILD_TARGET_OS),darwin)
+    EMULATOR_LIBUI_LDLIBS += -lbz2
+endif
+
 LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_LIBUI_INCLUDES) \
@@ -804,6 +809,7 @@ LOCAL_SRC_FILES += \
     android/resource.c \
     android/ffmpeg-audio-capture.cpp \
     android/ffmpeg-muxer.cpp \
+    android/screen-recorder.cpp
 
 LOCAL_QT_MOC_SRC_FILES := $(ANDROID_SKIN_QT_MOC_SRC_FILES)
 LOCAL_QT_RESOURCES := $(ANDROID_SKIN_QT_RESOURCES)

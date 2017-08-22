@@ -27,6 +27,9 @@ bool directoryIsWritable(const QString& dirName);
 // Get the path to the folder where screenshots are saved.
 QString getScreenshotSaveDirectory();
 
+// Get the path to the folder where recordings are saved.
+QString getRecordingSaveDirectory();
+
 // Get the currently active UI theme.
 SettingsTheme getSelectedTheme();
 

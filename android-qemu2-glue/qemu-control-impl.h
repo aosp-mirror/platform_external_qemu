@@ -23,6 +23,7 @@
 #include "android/emulation/control/location_agent.h"
 #include "android/emulation/control/http_proxy_agent.h"
 #include "android/emulation/control/net_agent.h"
+#include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
@@ -53,6 +54,9 @@ extern const QAndroidLocationAgent* const gQAndroidLocationAgent;
 
 // Defined in android/qemu-http-proxy-agent-impl.c
 extern const QAndroidHttpProxyAgent* const gQAndroidHttpProxyAgent;
+
+// Defined in android/qemu-record-screen-agent.c
+extern const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent;
 
 // Defined in android/qemu-sensors-agent.c
 extern const QAndroidSensorsAgent* const gQAndroidSensorsAgent;

@@ -18,6 +18,7 @@
 #include "android/skin/keyboard.h"
 #include "android/skin/window.h"
 #include "android/utils/aconfig-file.h"
+#include "android/utils/stralloc.h"
 
 #include "android/skin/ui.h"
 #include "android/ui-emu-agent.h"
@@ -62,5 +63,11 @@ emulator_window_get_layout(EmulatorWindow* emulator);
 /* Rotates the screen clockwise by 90 degrees. Returns true on success, false
  * otherwise */
 bool emulator_window_rotate_90_clockwise(void);
+
+/* Start recording the screen. Returns false if recording is already
+ * running. */
+bool emulator_window_start_recording(const char* filename);
+/* Stop recording the screen. */
+void emulator_window_stop_recording(void);
 
 ANDROID_END_HEADER
