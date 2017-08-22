@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9923e1cb_b1b1b5c2",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "39da7f49_8b8a1110",
+      "range": {
+        "startLine": 47,
+        "startChar": 49,
+        "endLine": 47,
+        "endChar": 51
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1895daa_73d4c337",
         "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-08-18T19:53:47Z",
       "side": 1,
       "message": "nit: I hate to enforce it, but we may not use mutable references",
+      "range": {
+        "startLine": 88,
+        "startChar": 62,
+        "endLine": 88,
+        "endChar": 63
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dba7d46d_204353eb",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1895daa_73d4c337",
       "range": {
         "startLine": 88,
         "startChar": 62,
@@ -94,6 +142,30 @@
       "writtenOn": "2017-08-18T19:53:47Z",
       "side": 1,
       "message": "1. nit: constexpr\n2. use kConstantName instead please\n3. what is it for and why in header?",
+      "range": {
+        "startLine": 51,
+        "startChar": 21,
+        "endLine": 51,
+        "endChar": 47
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2671bf68_385ff518",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c632ff9_9c9bef2e",
       "range": {
         "startLine": 51,
         "startChar": 21,
@@ -175,6 +247,78 @@
     },
     {
       "key": {
+        "uuid": "82429e7f_2a5681c8",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "655cc585_86186516",
+      "range": {
+        "startLine": 53,
+        "startChar": 37,
+        "endLine": 53,
+        "endChar": 57
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92e29e3b_0467c893",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "213e1981_4bb3cdeb",
+      "range": {
+        "startLine": 53,
+        "startChar": 37,
+        "endLine": 53,
+        "endChar": 64
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "22172711_ace84ea4",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c65cb5a7_001f70a7",
+      "range": {
+        "startLine": 53,
+        "startChar": 4,
+        "endLine": 53,
+        "endChar": 97
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8990734e_37a3762c",
         "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
         "patchSetId": 2
@@ -221,6 +365,30 @@
     },
     {
       "key": {
+        "uuid": "d6741e07_45549acc",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ec52cba3_6608d6bd",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 6
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71d046e0_7625b12b",
         "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
         "patchSetId": 2
@@ -232,6 +400,30 @@
       "writtenOn": "2017-08-18T19:53:47Z",
       "side": 1,
       "message": "btw, SmallFixedVector\u003c\u003e could reduce the allocations dramatically here - especially for the length buffer",
+      "range": {
+        "startLine": 100,
+        "startChar": 4,
+        "endLine": 100,
+        "endChar": 24
+      },
+      "revId": "6ffa38a60bebe4a999b611240281bb9c380f2a99",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fa82ac9c_de87974b",
+        "filename": "android/android-emu/android/emulation/AndroidMessagePipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-22T16:38:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71d046e0_7625b12b",
       "range": {
         "startLine": 100,
         "startChar": 4,
