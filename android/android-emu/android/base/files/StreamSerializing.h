@@ -46,8 +46,22 @@ bool loadBuffer(Stream* stream, std::vector<T>* buffer) {
 }
 
 template <class T, class = enable_if<std::is_standard_layout<T>>>
+bool loadBuffer64(Stream* stream, std::vector<T>* buffer) {
+    auto len = stream->getBe64();
+    buffer->resize(len);
+    auto ret = stream->read(buffer->data(), len * sizeof(T));
+    return ret == len * sizeof(T);
+}
+
+template <class T, class = enable_if<std::is_standard_layout<T>>>
 void saveBuffer(Stream* stream, const SmallVector<T>& buffer) {
     stream->putBe32(buffer.size());
+    stream->write(buffer.data(), sizeof(T) * buffer.size());
+}
+
+template <class T, class = enable_if<std::is_standard_layout<T>>>
+void saveBuffer64(Stream* stream, const SmallVector<T>& buffer) {
+    stream->putBe64(buffer.size());
     stream->write(buffer.data(), sizeof(T) * buffer.size());
 }
 
