@@ -1,0 +1,9 @@
+Presubmit-Verified-1: Treehugger Robot <treehugger-gerrit@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Verified+1: Yahan Zhou <yahan@google.com>
+Autosubmit+1: Yahan Zhou <yahan@google.com>
+Submitted-by: Yahan Zhou <yahan@google.com>
+Submitted-at: Tue, 22 Aug 2017 16:49:41 +0000
+Reviewed-on: https://android-review.googlesource.com/463097
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
