@@ -93,6 +93,30 @@
       "revId": "356e24f55286f246afffdab7e6d668cb929055de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cadae40f_f7a066da",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-23T23:26:56Z",
+      "side": 1,
+      "message": "the wait fails and opengl error can be generated, but no deadlock/crash",
+      "parentUuid": "081707b7_c2da2da7",
+      "range": {
+        "startLine": 861,
+        "startChar": 0,
+        "endLine": 867,
+        "endChar": 56
+      },
+      "revId": "356e24f55286f246afffdab7e6d668cb929055de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
