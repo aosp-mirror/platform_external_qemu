@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "74ed6b5e_fe8df6d0",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-23T05:02:51Z",
+      "side": 1,
+      "message": "Done (same as clientwaitsynckhr)",
+      "parentUuid": "cc292ffd_22d1a902",
+      "range": {
+        "startLine": 840,
+        "startChar": 50,
+        "endLine": 840,
+        "endChar": 56
+      },
+      "revId": "a99fc74840958f9d7d66ea38094603864315480e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9db1dfe2_4d572f7d",
         "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
         "patchSetId": 6
@@ -36,6 +60,24 @@
       "writtenOn": "2017-08-22T21:50:27Z",
       "side": 1,
       "message": "unbind the trivial context on return?",
+      "revId": "a99fc74840958f9d7d66ea38094603864315480e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77e10f2a_2fb6bcf5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 855,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-23T05:02:51Z",
+      "side": 1,
+      "message": "it\u0027s ok to keep the trivial context around (same behavior as rcclientwaitsynckhr)",
+      "parentUuid": "9db1dfe2_4d572f7d",
       "revId": "a99fc74840958f9d7d66ea38094603864315480e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
