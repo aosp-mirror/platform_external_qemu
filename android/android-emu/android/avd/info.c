@@ -608,7 +608,7 @@ static const struct {
     { 23, "Marshmallow", "6.0 (Marshmallow) - API 23 (Rev 1)" },
     { 24, "Nougat", "7.0 (Nougat) - API 24" },
     { 25, "Nougat", "7.1 (Nougat) - API 25" },
-    { 26, "O Preview", "8.0 (O) - API 26" },
+    { 26, "Oreo", "8.0 (Oreo) - API 26" },
 };
 
 const char* avdInfo_getApiDessertName(int apiLevel) {
