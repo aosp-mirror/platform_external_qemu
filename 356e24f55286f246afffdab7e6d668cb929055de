@@ -69,6 +69,30 @@
       "revId": "356e24f55286f246afffdab7e6d668cb929055de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "081707b7_c2da2da7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/RenderControl.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 867,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-23T23:26:10Z",
+      "side": 1,
+      "message": "If it fails and there is no current context, the wait \n\nI checked this again for both rcClientWaitSync and rcWaitSync, and it seems like we pretty much never need to do this trivial context creation, at least on API 26.",
+      "parentUuid": "58079863_6a8f4775",
+      "range": {
+        "startLine": 861,
+        "startChar": 0,
+        "endLine": 867,
+        "endChar": 56
+      },
+      "revId": "356e24f55286f246afffdab7e6d668cb929055de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
