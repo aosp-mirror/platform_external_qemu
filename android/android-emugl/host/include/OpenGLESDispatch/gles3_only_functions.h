@@ -69,7 +69,6 @@
   X(void, glInvalidateFramebuffer, (GLenum target, GLsizei numAttachments, const GLenum * attachments), (target, numAttachments, attachments)) \
   X(void, glInvalidateSubFramebuffer, (GLenum target, GLsizei numAttachments, const GLenum * attachments, GLint x, GLint y, GLsizei width, GLsizei height), (target, numAttachments, attachments, x, y, width, height)) \
   X(void, glFramebufferTextureLayer, (GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer), (target, attachment, texture, level, layer)) \
-  X(void, glRenderbufferStorageMultisample, (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height), (target, samples, internalformat, width, height)) \
   X(void, glGetInternalformativ, (GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint * params), (target, internalformat, pname, bufSize, params)) \
   X(void, glTexStorage2D, (GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height), (target, levels, internalformat, width, height)) \
   X(void, glBeginTransformFeedback, (GLenum primitiveMode), (primitiveMode)) \
@@ -91,14 +90,14 @@
   X(void, glSamplerParameteriv, (GLuint sampler, GLenum pname, const GLint * params), (sampler, pname, params)) \
   X(void, glGetSamplerParameterfv, (GLuint sampler, GLenum pname, GLfloat * params), (sampler, pname, params)) \
   X(void, glGetSamplerParameteriv, (GLuint sampler, GLenum pname, GLint * params), (sampler, pname, params)) \
-  X(GLboolean, glIsSampler, (GLuint id), (id)) \
-  X(void, glGenQueries, (GLsizei n, GLuint * ids), (n, ids)) \
-  X(void, glDeleteQueries, (GLsizei n, const GLuint * ids), (n, ids)) \
-  X(void, glBeginQuery, (GLenum target, GLuint id), (target, id)) \
+  X(GLboolean, glIsSampler, (GLuint sampler), (sampler)) \
+  X(void, glGenQueries, (GLsizei n, GLuint * queries), (n, queries)) \
+  X(void, glDeleteQueries, (GLsizei n, const GLuint * queries), (n, queries)) \
+  X(void, glBeginQuery, (GLenum target, GLuint query), (target, query)) \
   X(void, glEndQuery, (GLenum target), (target)) \
   X(void, glGetQueryiv, (GLenum target, GLenum pname, GLint * params), (target, pname, params)) \
-  X(void, glGetQueryObjectuiv, (GLuint id, GLenum pname, GLuint * params), (id, pname, params)) \
-  X(GLboolean, glIsQuery, (GLuint id), (id)) \
+  X(void, glGetQueryObjectuiv, (GLuint query, GLenum pname, GLuint * params), (query, pname, params)) \
+  X(GLboolean, glIsQuery, (GLuint query), (query)) \
   X(void, glProgramParameteri, (GLuint program, GLenum pname, GLint value), (program, pname, value)) \
   X(void, glProgramBinary, (GLuint program, GLenum binaryFormat, const void * binary, GLsizei length), (program, binaryFormat, binary, length)) \
   X(void, glGetProgramBinary, (GLuint program, GLsizei bufsize, GLsizei * length, GLenum * binaryFormat, void * binary), (program, bufsize, length, binaryFormat, binary)) \

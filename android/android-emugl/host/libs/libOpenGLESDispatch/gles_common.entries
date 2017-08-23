@@ -60,6 +60,7 @@ void glLineWidth(GLfloat width);
 void glPolygonOffset(GLfloat factor, GLfloat units);
 void glPixelStorei(GLenum pname, GLint param);
 void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid *pixels);
+void glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height);
 void glSampleCoverage( GLclampf value, GLboolean invert );
 void glScissor(GLint x, GLint y, GLsizei width, GLsizei height);
 void glStencilFunc(GLenum func, GLint ref, GLuint mask);
