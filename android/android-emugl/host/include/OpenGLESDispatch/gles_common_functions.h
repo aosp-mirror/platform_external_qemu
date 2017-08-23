@@ -62,6 +62,7 @@ typedef const GLubyte* GLconstubyteptr;
   X(void, glPolygonOffset, (GLfloat factor, GLfloat units), (factor, units)) \
   X(void, glPixelStorei, (GLenum pname, GLint param), (pname, param)) \
   X(void, glReadPixels, (GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid * pixels), (x, y, width, height, format, type, pixels)) \
+  X(void, glRenderbufferStorageMultisample, (GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height), (target, samples, internalformat, width, height)) \
   X(void, glSampleCoverage, (GLclampf value, GLboolean invert), (value, invert)) \
   X(void, glScissor, (GLint x, GLint y, GLsizei width, GLsizei height), (x, y, width, height)) \
   X(void, glStencilFunc, (GLenum func, GLint ref, GLuint mask), (func, ref, mask)) \
