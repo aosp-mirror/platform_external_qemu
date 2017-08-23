@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d03cc6f7_e59cd82e",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3329,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-23T17:36:42Z",
+      "side": 1,
+      "message": "nit: it\u0027s OK to have it just commented out, as you\u0027re not planning to ever merge the branches together. But it\u0027s equally easy to make it conditional on \"is cros AVD\" here as commenting it out - and that would help us to deal with the potential merge (if it happens no matter what we thought now)\nJust an idea",
+      "range": {
+        "startLine": 3329,
+        "startChar": 0,
+        "endLine": 3329,
+        "endChar": 38
+      },
+      "revId": "0ceecb850af438c5112007724b2be16246e780d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
