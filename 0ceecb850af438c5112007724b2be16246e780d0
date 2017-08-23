@@ -22,6 +22,30 @@
       "revId": "0ceecb850af438c5112007724b2be16246e780d0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aed763f8_788b1c2a",
+        "filename": "vl.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 3329,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-08-23T17:40:53Z",
+      "side": 1,
+      "message": "The issue with the \"is cros AVD\" is:  user can use this binary to launch regular android avd also, then he will get update reminding. But at that point, he still has no way to update.... Let me just leave it as it is now.",
+      "parentUuid": "d03cc6f7_e59cd82e",
+      "range": {
+        "startLine": 3329,
+        "startChar": 0,
+        "endLine": 3329,
+        "endChar": 38
+      },
+      "revId": "0ceecb850af438c5112007724b2be16246e780d0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
