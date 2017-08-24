@@ -151,9 +151,11 @@ static const GLint rendererVersion = 1;
 // GLAsyncSwap version history:
 // "ANDROID_EMU_NATIVE_SYNC": original version
 // "ANDROIDEMU_native_sync_v2": +cleanup of sync objects
+// "ANDROIDEMU_native_sync_v3": EGL_KHR_wait_sync
 // (We need all the different strings to not be prefixes of any other
 // due to how they are checked for in the GL extensions on the guest)
-static constexpr android::base::StringView kAsyncSwapStr = "ANDROID_EMU_native_sync_v2";
+static constexpr android::base::StringView kAsyncSwapStrV2 = "ANDROID_EMU_native_sync_v2";
+static constexpr android::base::StringView kAsyncSwapStrV3 = "ANDROID_EMU_native_sync_v3";
 
 // DMA version history:
 // "ANDROID_EMU_dma_v1": add dma device and rcUpdateColorBufferDMA and do
@@ -328,8 +330,13 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     if (asyncSwapEnabled && name == GL_EXTENSIONS) {
-        glStr += kAsyncSwapStr;
-        glStr += " ";
+        glStr += kAsyncSwapStrV2;
+        glStr += " "; // for compatibility with older system images
+        // Only enable EGL_KHR_wait_sync for host gpu.
+        if (emugl::getRenderer() == SELECTED_RENDERER_HOST) {
+            glStr += kAsyncSwapStrV3;
+            glStr += " ";
+        }
     }
 
     if (dmaEnabled && name == GL_EXTENSIONS) {
@@ -839,6 +846,34 @@ static EGLint rcClientWaitSyncKHR(uint64_t handle,
     return fenceSync->wait(timeout);
 }
 
+static void rcWaitSyncKHR(uint64_t handle,
+                                  EGLint flags) {
+    RenderThreadInfo *tInfo = RenderThreadInfo::get();
+    FrameBuffer *fb = FrameBuffer::getFB();
+
+    EGLSYNC_DPRINT("handle=0x%lx flags=0x%x", handle, flags);
+
+    FenceSync* fenceSync = FenceSync::getFromHandle(handle);
+
+    if (!fenceSync) { return; }
+
+    // Sometimes a gralloc-buffer-only thread is doing stuff with sync.
+    // This happens all the time with YouTube videos in the browser.
+    // In this case, create a context on the host just for syncing.
+    if (!tInfo->currContext) {
+        uint32_t gralloc_sync_cxt, gralloc_sync_surf;
+        fb->createTrivialContext(0, // There is no context to share.
+                                 &gralloc_sync_cxt,
+                                 &gralloc_sync_surf);
+        fb->bindContext(gralloc_sync_cxt,
+                        gralloc_sync_surf,
+                        gralloc_sync_surf);
+        // This context is then cleaned up when the render thread exits.
+    }
+
+    fenceSync->waitAsync();
+}
+
 static int rcDestroySyncKHR(uint64_t handle) {
     FenceSync* fenceSync = FenceSync::getFromHandle(handle);
     if (!fenceSync) return 0;
@@ -889,4 +924,5 @@ void initRenderControlContext(renderControl_decoder_context_t *dec)
     dec->rcSetPuid = rcSetPuid;
     dec->rcUpdateColorBufferDMA = rcUpdateColorBufferDMA;
     dec->rcCreateColorBufferDMA = rcCreateColorBufferDMA;
+    dec->rcWaitSyncKHR = rcWaitSyncKHR;
 }
