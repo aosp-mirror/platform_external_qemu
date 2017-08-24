@@ -91,6 +91,7 @@ static void get_vm_config(VmConfiguration* out) {
 static const QAndroidVmOperations sQAndroidVmOperations = {
     .vmStop = qemu_vm_stop,
     .vmStart = qemu_vm_start,
+    .vmReset = qemu_system_reset_request,
     .vmIsRunning = qemu_vm_is_running,
     .snapshotList = qemu_snapshot_list,
     .snapshotLoad = qemu_snapshot_load,

@@ -77,6 +77,8 @@ typedef struct {
 typedef struct QAndroidVmOperations {
     bool (*vmStop)(void);
     bool (*vmStart)(void);
+    void (*vmReset)(void);
+
     bool (*vmIsRunning)(void);
 
     // Snapshot-related VM operations.

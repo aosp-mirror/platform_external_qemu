@@ -41,4 +41,12 @@ void androidSnapshot_delete(const char* name);
 // all internals are initialized etc.
 bool androidSnapshot_canSave();
 
+// These two functions implement a quickboot feature: load() tries to load from
+// the |name| snapshot (or default one if it is null or empty) and save() saves
+// the current state into it.
+// Return value is |true| if the feature is enabled,
+// and the function has at least tried to do something, |false| otherwise.
+bool androidSnapshot_quickbootLoad(const char* name);
+bool androidSnapshot_quickbootSave(const char* name);
+
 ANDROID_END_HEADER
