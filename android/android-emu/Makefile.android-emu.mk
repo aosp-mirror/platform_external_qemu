@@ -119,6 +119,7 @@ LOCAL_SRC_FILES := \
     android/base/misc/Utf8Utils.cpp \
     android/base/network/IpAddress.cpp \
     android/base/network/NetworkUtils.cpp \
+    android/base/Stopwatch.cpp \
     android/base/StringFormat.cpp \
     android/base/StringParse.cpp \
     android/base/StringView.cpp \
