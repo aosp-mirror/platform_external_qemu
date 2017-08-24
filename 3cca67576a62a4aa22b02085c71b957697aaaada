@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37e6d312_73243627",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1589,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-24T23:30:35Z",
+      "side": 1,
+      "message": "nit: isCoreProfile() is faster, so IMO it should be the first check to run",
+      "range": {
+        "startLine": 1585,
+        "startChar": 0,
+        "endLine": 1589,
+        "endChar": 24
+      },
+      "revId": "3cca67576a62a4aa22b02085c71b957697aaaada",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
