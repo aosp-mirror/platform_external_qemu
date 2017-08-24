@@ -185,8 +185,6 @@ int main(int argc, char **argv)
 
 #define QEMU_CORE_VERSION "qemu2 " QEMU_VERSION
 
-#define DEFAULT_BOOT_SNAPSHOT_NAME "default_boot"
-
 /////////////////////////////////////////////////////////////
 
 #define  LCD_DENSITY_LDPI      120
@@ -2191,50 +2189,8 @@ static bool main_loop_should_exit(void)
     }
     if (qemu_shutdown_requested()) {
 #ifdef CONFIG_ANDROID
-        if (feature_is_enabled(kFeature_FastSnapshotV1)) {
-            if (!android_cmdLineOptions->no_snapshot_save &&
-                emuglConfig_current_renderer_supports_snapshot()) {
-                const int kMinUptimeForSavingMs = 500;
-                const int64_t snapshotLoadUptimeMs =
-                        androidSnapshot_lastLoadUptimeMs();
-                const int64_t sessionUptimeMs =
-                        s_shutdown_request_uptime_ms - snapshotLoadUptimeMs;
-                if (sessionUptimeMs > kMinUptimeForSavingMs) {
-                    const bool loaded =
-                            snapshotLoadUptimeMs > s_reset_request_uptime_ms;
-                    if (loaded || androidSnapshot_canSave()) {
-                        dprint("Saving state on exit with session uptime %d ms",
-                               (int)sessionUptimeMs);
-                        androidSnapshot_save(DEFAULT_BOOT_SNAPSHOT_NAME);
-                    } else {
-                        // Get rid of whatever was saved as a boot snapshot as
-                        // the emulator ran for a while but we can't capture its
-                        // current state to resume later.
-                        dwarning(
-                                "Cleaning out the default boot snapshot to "
-                                "preserve changes made in the current "
-                                "session.");
-                        androidSnapshot_delete(DEFAULT_BOOT_SNAPSHOT_NAME);
-                    }
-                } else {
-                    dwarning(
-                            "Skipping state saving as emulator ran for just %d "
-                            "ms (<%d ms)",
-                            (int)sessionUptimeMs, kMinUptimeForSavingMs);
-                }
-            } else {
-                // Again, preserve the state changes - we've ran for a while now
-                // and the AVD state is different from what could be saved in
-                // the default boot snapshot.
-                dwarning(
-                        "Cleaning out the default boot snapshot to preserve "
-                        "the current session (command line option to not save "
-                        "snapshot).");
-                androidSnapshot_delete(DEFAULT_BOOT_SNAPSHOT_NAME);
-            }
-        }
+        androidSnapshot_quickbootSave(NULL);
 #endif
-
         qemu_kill_report();
         qapi_event_send_shutdown(&error_abort);
         if (no_shutdown) {
@@ -4670,29 +4626,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     androidHwConfig_init(android_hw, 0);
     androidHwConfig_read(android_hw, hw_ini);
 
-    bool attemptedDefaultBoot = false;
-    bool fastSnapshotEnabled = feature_is_enabled(kFeature_FastSnapshotV1);
-    if (!android_cmdLineOptions->no_snapshot_load) {
-        char* boot_snapshot_dir_full_path =
-                path_join(avdInfo_getContentPath(android_avdInfo),
-                          "snapshots" PATH_SEP DEFAULT_BOOT_SNAPSHOT_NAME);
-        if (!loadvm && fastSnapshotEnabled &&
-                emuglConfig_current_renderer_supports_snapshot() &&
-                path_exists(boot_snapshot_dir_full_path)) {
-            loadvm = DEFAULT_BOOT_SNAPSHOT_NAME;
-            attemptedDefaultBoot = true;
-        }
-        free(boot_snapshot_dir_full_path);
-    }
-
     /* If we're loading VM from a snapshot, make sure that the current HW config
      * matches the one with which the VM has been saved. */
-    if (loadvm && *loadvm && !fastSnapshotEnabled &&
+    if (loadvm && *loadvm && !feature_is_enabled(kFeature_FastSnapshotV1) &&
             !snaphost_match_configs(hw_ini, loadvm)) {
         error_report("HW config doesn't match the one in the snapshot");
-        if (!attemptedDefaultBoot) {
-            return 0;
-        }
+        return 0;
     }
 
     iniFile_free(hw_ini);
@@ -5524,26 +5463,28 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     replay_checkpoint(CHECKPOINT_RESET);
     qemu_system_reset(VMRESET_SILENT);
     register_global_state();
-    if (loadvm) {
-#if defined(CONFIG_ANDROID)
+
+    bool tryDefaultVmLoad = true;
+#ifdef CONFIG_ANDROID
+    // Initialize reporting right before starting the real VM work (load/boot
+    // and the main loop). We want to track performance of a running emulator,
+    // ignoring any too early exits as a result of incorrect setup.
+    if (!android_reporting_setup()) {
+        return 1;
+    }
+
 #if SNAPSHOT_PROFILE > 1
-        printf("Starting snapshot load with uptime %lld ms\n",
-               (long long)get_uptime_ms());
+    printf("Starting VM at uptime %lld ms\n", (long long)get_uptime_ms());
 #endif
-        const AndroidSnapshotStatus status = androidSnapshot_load(loadvm);
-        if (status != SNAPSHOT_STATUS_OK) {
-            if (status == SNAPSHOT_STATUS_ERROR_NOT_CHANGED) {
-                dwarning("Resuming with a clean boot");
-            } else {
-                derror("Resetting the system for a clean boot");
-                qemu_system_reset_request();
-            }
-        }
-#else
+
+    if (androidSnapshot_quickbootLoad(loadvm)) {
+        tryDefaultVmLoad = false;
+    }
+#endif
+    if (tryDefaultVmLoad && loadvm) {
         if (load_vmstate(loadvm) < 0) {
             autostart = 0;
         }
-#endif
     }
 
     qdev_prop_check_globals();
@@ -5565,15 +5506,6 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     }
 
     os_setup_post();
-
-#ifdef CONFIG_ANDROID
-    // Initialize reporting right before entering main loop.
-    // We want to track performance of a running emulator, ignoring any early
-    // exits as a result of incorrect setup.
-    if (!android_reporting_setup()) {
-        return 1;
-    }
-#endif  // CONFIG_ANDROID
 
     main_loop();
     replay_disable_events();

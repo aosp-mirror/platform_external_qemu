@@ -419,6 +419,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/Loader.cpp \
     android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
     android/snapshot/PathUtils.cpp \
+    android/snapshot/Quickboot.cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
     android/snapshot/Saver.cpp \

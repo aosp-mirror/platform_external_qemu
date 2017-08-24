@@ -14,6 +14,7 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/StudioConfig.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -262,9 +263,11 @@ void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations) {
     assert(android::snapshot::sSnapshotter == nullptr);
     android::snapshot::sSnapshotter =
             new android::snapshot::Snapshotter(*vmOperations);
+    android::snapshot::Quickboot::initialize(*vmOperations);
 }
 
 void androidSnapshot_finalize() {
     delete android::snapshot::sSnapshotter;
     android::snapshot::sSnapshotter = nullptr;
+    android::snapshot::Quickboot::finalize();
 }
