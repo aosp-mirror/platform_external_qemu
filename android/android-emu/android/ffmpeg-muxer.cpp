@@ -1245,6 +1245,7 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
     }
 
     // read all packets, decode, convert, then encode to gif format
+    int64_t last_pts = -1;
     int got_frame;
     AVPacket packet = {0};
     packet.data = NULL;
@@ -1277,7 +1278,6 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
                              ifmt_ctx->streams[stream_index]->codec->time_base);
         ret = avcodec_decode_video2(ifmt_ctx->streams[stream_index]->codec,
                                     frame, &got_frame, &packet);
-
         if (ret < 0) {
             av_frame_free(&frame);
             av_frame_free(&tmp_frame);
@@ -1285,8 +1285,13 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
             break;
         }
 
+        ret = 0;
         if (got_frame) {
             frame->pts = av_frame_get_best_effort_timestamp(frame);
+            // correct invalid pts in the rare cases
+            if (frame->pts <= last_pts)
+                frame->pts = last_pts + 1;
+            last_pts = frame->pts;
             if (sws_ctx != NULL)
                 sws_scale(sws_ctx, frame->data, frame->linesize, 0,
                           enc_ctx->height, tmp_frame->data,
@@ -1305,6 +1310,9 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
         }
     }
 
+    if (ret == AVERROR_EOF)
+        ret = 0;
+
     if (ret == 0) {
         // flush encoder
         flush_encoder(ofmt_ctx, video_stream_index);
@@ -1315,6 +1323,5 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
         sws_freeContext(sws_ctx);
 
     free_contxts(ifmt_ctx, ofmt_ctx, video_stream_index);
-
     return ret;
 }
