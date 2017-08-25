@@ -11,6 +11,7 @@
 
 #include "android/snapshot/Snapshotter.h"
 
+#include "android/base/memory/LazyInstance.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/StudioConfig.h"
@@ -19,13 +20,16 @@
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
-#include <assert.h>
+#include <cassert>
+#include <utility>
 
 extern "C" {
 #include <emmintrin.h>
 }
 
+using android::base::LazyInstance;
 using android::base::System;
+using android::crashreport::CrashReporter;
 
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
@@ -67,8 +71,21 @@ bool isBufferZeroed(const void* ptr, int32_t size) {
     return buffer_zero_sse2(ptr, size);
 }
 
-Snapshotter::Snapshotter(const QAndroidVmOperations& vmOperations)
-    : mVmOperations(vmOperations) {
+Snapshotter::Snapshotter() : mCallback([](Operation, Stage) {}) {}
+
+Snapshotter::~Snapshotter() {
+    if (mVmOperations.setSnapshotCallbacks) {
+        mVmOperations.setSnapshotCallbacks(nullptr, nullptr);
+    }
+}
+
+static LazyInstance<Snapshotter> sInstance = {};
+
+Snapshotter& Snapshotter::get() {
+    return sInstance.get();
+}
+
+void Snapshotter::initialize(const QAndroidVmOperations& vmOperations) {
     static const SnapshotCallbacks kCallbacks = {
             // ops
             {
@@ -137,17 +154,9 @@ Snapshotter::Snapshotter(const QAndroidVmOperations& vmOperations)
                  return snapshot->mSaver->ramSaver().hasError() ? -1 : 0;
              }}};
 
+    assert(vmOperations.setSnapshotCallbacks);
+    mVmOperations = vmOperations;
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
-}
-
-Snapshotter::~Snapshotter() {
-    mVmOperations.setSnapshotCallbacks(nullptr, nullptr);
-}
-
-static Snapshotter* sSnapshotter = nullptr;
-Snapshotter& Snapshotter::get() {
-    assert(sSnapshotter != nullptr);
-    return *sSnapshotter;
 }
 
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
@@ -183,7 +192,8 @@ void Snapshotter::deleteSnapshot(const char* name) {
 }
 
 bool Snapshotter::onStartSaving(const char* name) {
-    crashreport::CrashReporter::get()->hangDetector().pause(true);
+    CrashReporter::get()->hangDetector().pause(true);
+    mCallback(Operation::Save, Stage::Start);
     mLoader.clear();
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.emplace(name);
@@ -194,12 +204,14 @@ bool Snapshotter::onStartSaving(const char* name) {
 bool Snapshotter::onSavingComplete(const char* name, int res) {
     assert(mSaver && name == mSaver->snapshot().name());
     mSaver->complete(res == 0);
-    crashreport::CrashReporter::get()->hangDetector().pause(false);
+    CrashReporter::get()->hangDetector().pause(false);
+    mCallback(Operation::Save, Stage::End);
     return mSaver->status() != OperationStatus::Error;
 }
 
 bool Snapshotter::onStartLoading(const char* name) {
-    crashreport::CrashReporter::get()->hangDetector().pause(true);
+    CrashReporter::get()->hangDetector().pause(true);
+    mCallback(Operation::Load, Stage::Start);
     mSaver.clear();
     if (!mLoader || isComplete(*mLoader)) {
         mLoader.emplace(name);
@@ -211,14 +223,15 @@ bool Snapshotter::onStartLoading(const char* name) {
 bool Snapshotter::onLoadingComplete(const char* name, int res) {
     assert(mLoader && name == mLoader->snapshot().name());
     mLoader->complete(res == 0);
-    crashreport::CrashReporter::get()->hangDetector().pause(false);
+    CrashReporter::get()->hangDetector().pause(false);
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
+    mCallback(Operation::Load, Stage::End);
     return mLoader->status() != OperationStatus::Error;
 }
 
 bool Snapshotter::onStartDelete(const char*) {
-    crashreport::CrashReporter::get()->hangDetector().pause(true);
+    CrashReporter::get()->hangDetector().pause(true);
     return true;
 }
 
@@ -232,8 +245,12 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
         }
         path_delete_dir(Snapshot::dataDir(name).c_str());
     }
-    crashreport::CrashReporter::get()->hangDetector().pause(false);
+    CrashReporter::get()->hangDetector().pause(false);
     return true;
+}
+
+void Snapshotter::setOperationCallback(Callback&& cb) {
+    mCallback = bool(cb) ? std::move(cb) : [](Operation, Stage) {};
 }
 
 }  // namespace snapshot
@@ -260,14 +277,11 @@ void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations) {
         }
     }
 
-    assert(android::snapshot::sSnapshotter == nullptr);
-    android::snapshot::sSnapshotter =
-            new android::snapshot::Snapshotter(*vmOperations);
+    android::snapshot::sInstance->initialize(*vmOperations);
     android::snapshot::Quickboot::initialize(*vmOperations);
 }
 
 void androidSnapshot_finalize() {
-    delete android::snapshot::sSnapshotter;
-    android::snapshot::sSnapshotter = nullptr;
     android::snapshot::Quickboot::finalize();
+    android::snapshot::sInstance->~Snapshotter();
 }
