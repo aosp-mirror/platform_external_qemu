@@ -39,6 +39,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
+#include "android/snapshot/Snapshotter.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
@@ -524,6 +525,65 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
             (*mAdbInterface)->setCustomAdbPath(adbPath.toStdString());
         }
     }
+
+    mExitSavingTimer.setSingleShot(true);
+    connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
+        mExitSavingDialog->setWindowTitle(tr("Android Emulator"));
+        // Hide close/minimize/maximize buttons
+        mExitSavingDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
+                                          Qt::WindowTitleHint);
+        // Make sure the icon is the same as in the main window
+        mExitSavingDialog->setWindowIcon(QApplication::windowIcon());
+
+        auto label = new QLabel();
+        label->setAlignment(Qt::AlignCenter);
+        label->setText(tr("Saving state..."));
+        mExitSavingDialog->setLabel(label);
+        auto bar = new QProgressBar();
+        bar->setAlignment(Qt::AlignHCenter);
+        mExitSavingDialog->setBar(bar);
+        mExitSavingDialog->setRange(0, 0);            // Don't show % complete
+        mExitSavingDialog->setCancelButton(nullptr);  // None
+        mExitSavingDialog->setMinimumSize(
+                mExitSavingDialog->sizeHint());  // Recalculate size.
+        mExitSavingDialog->show();
+    });
+
+    using android::snapshot::Snapshotter;
+    Snapshotter::get().setOperationCallback(
+            [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
+                if (op != Snapshotter::Operation::Save) {
+                    return;
+                }
+                if (stage == Snapshotter::Stage::Start) {
+                    runOnUiThread(
+                            [](void* ptr) {
+                                auto& self =
+                                        *static_cast<EmulatorQtWindow*>(ptr);
+                                self.mExitSavingTimer.start(200);
+                                if (self.mToolWindow) {
+                                    self.mToolWindow->setEnabled(false);
+                                }
+                            },
+                            this, nullptr);
+                } else if (stage == Snapshotter::Stage::End) {
+                    runOnUiThread(
+                            [](void* ptr) {
+                                auto& self =
+                                        *static_cast<EmulatorQtWindow*>(ptr);
+                                self.mExitSavingTimer.stop();
+                                self.mExitSavingTimer.disconnect();
+                                if (self.mExitSavingDialog.hasInstance()) {
+                                    self.mExitSavingDialog->hide();
+                                    self.mExitSavingDialog.clear();
+                                }
+                                if (self.mToolWindow) {
+                                    self.mToolWindow->setEnabled(true);
+                                }
+                            },
+                            this, nullptr);
+                }
+            });
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
@@ -718,34 +778,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
                     android::featurecontrol::isEnabled(
                             android::featurecontrol::FastSnapshotV1) &&
                     emuglConfig_current_renderer_supports_snapshot();
-
             if (fastSnapshotV1) {
-                mExitSavingTimer.setSingleShot(true);
-                connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
-                    mExitSavingDialog->setWindowTitle(tr("Android Emulator"));
-                    // Hide close/minimize/maximize buttons
-                    mExitSavingDialog->setWindowFlags(Qt::Dialog |
-                                                      Qt::CustomizeWindowHint |
-                                                      Qt::WindowTitleHint);
-                    // Make sure the icon is the same as in the main window
-                    mExitSavingDialog->setWindowIcon(
-                            QApplication::windowIcon());
-
-                    auto label = new QLabel();
-                    label->setAlignment(Qt::AlignCenter);
-                    label->setText(tr("Saving state..."));
-                    mExitSavingDialog->setLabel(label);
-                    auto bar = new QProgressBar();
-                    bar->setAlignment(Qt::AlignHCenter);
-                    mExitSavingDialog->setBar(bar);
-                    mExitSavingDialog->setRange(0, 0);  // Don't show % complete
-                    mExitSavingDialog->setCancelButton(nullptr);    // None
-                    mExitSavingDialog->setMinimumSize(
-                            mExitSavingDialog->sizeHint()); // Recalculate size.
-                    mExitSavingDialog->show();
-                });
-                mExitSavingTimer.start(200);
-
                 // Tell the system that we are in saving; create a file lock.
                 if (!filelock_create(
                             avdInfo_getSnapshotLockFilePath(android_avdInfo))) {
