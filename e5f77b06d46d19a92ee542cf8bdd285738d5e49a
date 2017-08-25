@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a999113_5a9aca0f",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-25T18:44:56Z",
+      "side": 1,
+      "message": "maybe leave a comment here that it is only supposed to be used for UI and it overwrites existing callbacks?",
+      "range": {
+        "startLine": 59,
+        "startChar": 9,
+        "endLine": 59,
+        "endChar": 29
+      },
+      "revId": "e5f77b06d46d19a92ee542cf8bdd285738d5e49a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
