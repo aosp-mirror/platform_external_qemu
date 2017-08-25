@@ -32,10 +32,11 @@ class Snapshotter final {
     DISALLOW_COPY_AND_ASSIGN(Snapshotter);
 
 public:
-    Snapshotter(const QAndroidVmOperations& vmOperations);
+    Snapshotter();
     ~Snapshotter();
-
     static Snapshotter& get();
+
+    void initialize(const QAndroidVmOperations& vmOperations);
 
     OperationStatus prepareForLoading(const char* name);
     OperationStatus load(const char* name);
@@ -52,6 +53,16 @@ public:
 
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
 
+    // Set a callback that's called on the specific stages of the snapshot
+    // operations.
+    // Note: currently it only supports a single callback and it's used for
+    //  the UI snapshot handling. Change it to a set of callbacks if you need
+    //  more event listeners.
+    enum class Operation { Save, Load };
+    enum class Stage { Start, End };
+    using Callback = std::function<void(Operation, Stage)>;
+    void setOperationCallback(Callback&& cb);
+
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
@@ -63,6 +74,7 @@ private:
     QAndroidVmOperations mVmOperations;
     android::base::Optional<Saver> mSaver;
     android::base::Optional<Loader> mLoader;
+    Callback mCallback;
 
     base::System::Duration mLastLoadUptimeMs = 0;
 };
