@@ -1622,8 +1622,20 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
 
     /** SNAPSHOT STORAGE HANDLING */
     if (hw->fastboot_forceColdBoot) {
-        D("autoconfig: -no-snapstorage from AVD config.ini");
-        opts->no_snapstorage = 1;
+        D("autoconfig: -no-snapshot from AVD config.ini");
+        opts->no_snapshot = 1;
+    }
+
+    /* -no-snapshot is equivalent to using both -no-snapshot-load
+    * and -no-snapshot-save. You can still load/save snapshots dynamically
+    * from the console though.
+    */
+    if (opts->no_snapshot) {
+        opts->no_snapshot_load = 1;
+        opts->no_snapshot_save = 1;
+        if (opts->snapshot) {
+            dwarning("ignoring -snapshot option due to the use of -no-snapshot.");
+        }
     }
 
     /* Determine snapstorage path. -no-snapstorage disables all snapshotting
@@ -1641,9 +1653,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
             str_reset_null(&opts->snapstorage);
         }
 
-        // Treat 'no-snapstorage' as a complete snapshots kill switch.
-        opts->no_snapshot = 1;
-        opts->no_snapshot_save = 1;
+        // Android Studio used to pass 'no-snapstorage' when it actually meant
+        // 'no-snapshot-load' - so treat it that way.
         opts->no_snapshot_load = 1;
     } else {
         if (!opts->snapstorage && avdInfo_getSnapshotPresent(avd)) {
@@ -1663,23 +1674,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     /* If we have a valid snapshot storage path */
     if (opts->snapstorage) {
         if (is_qemu2) {
-            dwarning("QEMU2 does not support snapshots - option will be ignored.");
+            dwarning("QEMU2 does not support legacy snapshots - option will be ignored.");
         } else {
-            // QEMU2 does not support some of the flags below, and the emulator will
-            // fail to start if they are passed in, so for now, ignore them.
+            // QEMU2 does not support some of the flags below, and the emulator
+            // will fail to start if they are passed in, so for now, ignore them
             str_reset(&hw->disk_snapStorage_path, opts->snapstorage);
-
-            /* -no-snapshot is equivalent to using both -no-snapshot-load
-            * and -no-snapshot-save. You can still load/save snapshots dynamically
-            * from the console though.
-            */
-            if (opts->no_snapshot) {
-                opts->no_snapshot_load = 1;
-                opts->no_snapshot_save = 1;
-                if (opts->snapshot) {
-                    dwarning("ignoring -snapshot option due to the use of -no-snapshot.");
-                }
-            }
 
             if (!opts->no_snapshot_load || !opts->no_snapshot_save) {
                 if (opts->snapshot == NULL) {
