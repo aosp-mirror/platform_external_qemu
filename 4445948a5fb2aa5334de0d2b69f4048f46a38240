@@ -46,6 +46,30 @@
       "revId": "4445948a5fb2aa5334de0d2b69f4048f46a38240",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8329c277_799cd15f",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-25T02:24:09Z",
+      "side": 1,
+      "message": "I see, so it\u0027s all long 32 bit, awesome...",
+      "parentUuid": "46d385fd_7c28cf85",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 60
+      },
+      "revId": "4445948a5fb2aa5334de0d2b69f4048f46a38240",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
