@@ -931,6 +931,53 @@ message EmulatorMemoryUsage {
   optional uint64 total_page_file = 6;
 }
 
+enum EmulatorSnapshotFlags {
+  SNAPSHOT_FLAGS_NONE = 0;
+  SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT = 1;
+  SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT = 2;
+}
+
+message EmulatorSnapshot {
+  optional string name = 1;
+  // A combination of EmulatorSnapshotFlags describing the snapshot.
+  optional int32 flags = 2;
+  optional int64 size_bytes = 3;
+}
+
+message EmulatorQuickbootLoad {
+  enum EmulatorQuickbootLoadState {
+    EMULATOR_QUICKBOOT_LOAD_SUCCEEDED = 0;
+    EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT = 1;
+    EMULATOR_QUICKBOOT_LOAD_FAILED = 2;
+    EMULATOR_QUICKBOOT_LOAD_HUNG = 3;
+    EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE = 4;
+    EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE = 5;
+    EMULATOR_QUICKBOOT_LOAD_COLD_AVD = 6;
+    EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED = 7;
+    EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT = 8;
+  }
+  optional EmulatorQuickbootLoadState state = 1;
+  optional uint64 duration_ms = 2;
+  optional EmulatorSnapshot snapshot = 3;
+  optional bool on_demand_ram_enabled = 4;
+}
+
+message EmulatorQuickbootSave {
+  enum EmulatorQuickbootSaveState {
+    EMULATOR_QUICKBOOT_SAVE_SUCCEEDED = 0;
+    EMULATOR_QUICKBOOT_SAVE_FAILED = 1;
+    EMULATOR_QUICKBOOT_SAVE_DISABLED_FEATURE = 2;
+    EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE = 3;
+    EMULATOR_QUICKBOOT_SAVE_DISABLED_AVD = 4;
+    EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED = 5;
+    EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME = 6;
+  }
+  optional EmulatorQuickbootSaveState state = 1;
+  optional uint64 duration_ms = 2;
+  optional EmulatorSnapshot snapshot = 3;
+  optional uint64 sesion_uptime_ms = 4;
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -971,6 +1018,9 @@ message EmulatorDetails {
   optional EmulatorFeatureFlagState feature_flag_state = 19;
   // Hypervisor used in current session.
   optional EmulatorHypervisor hypervisor = 20;
+  // Information about quickboot status of the current session.
+  optional EmulatorQuickbootLoad quickboot_load = 21;
+  optional EmulatorQuickbootSave quickboot_save = 22;
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
