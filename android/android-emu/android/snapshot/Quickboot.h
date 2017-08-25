@@ -34,9 +34,15 @@ public:
     bool save(base::StringView name);
 
 private:
-    Quickboot(const QAndroidVmOperations& vmOps);
-    const QAndroidVmOperations mVmOps;
+    void reportSuccessfulLoad(base::StringView name,
+                              base::System::WallDuration startTimeMs);
+    void reportSuccessfulSave(base::StringView name,
+                              base::System::WallDuration durationMs,
+                              base::System::WallDuration sessionUptimeMs);
 
+    Quickboot(const QAndroidVmOperations& vmOps);
+
+    const QAndroidVmOperations mVmOps;
     base::System::WallDuration mLoadTimeMs = 0;
     OperationStatus mLoadStatus = OperationStatus::NotStarted;
 };
