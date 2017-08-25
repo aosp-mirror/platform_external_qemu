@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9f3706a4_620586ec",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-25T02:18:26Z",
+      "side": 1,
+      "message": "Is it that mac doesnt have ftello64, but has ftell and it is 64bit?",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 60
+      },
+      "revId": "4445948a5fb2aa5334de0d2b69f4048f46a38240",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
