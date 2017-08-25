@@ -39,7 +39,7 @@ void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
                         [texId](FileIndex::Texture& tex) {
                             return tex.texId == texId;
                         }));
-    mIndex.textures.push_back({texId, ftell(mStream.get())});
+    mIndex.textures.push_back({texId, ftello64(mStream.get())});
     saver(&mStream, &mBuffer);
 }
 
@@ -47,7 +47,7 @@ void TextureSaver::done() {
     if (mFinished) {
         return;
     }
-    mIndex.startPosInFile = ftell(mStream.get());
+    mIndex.startPosInFile = ftello64(mStream.get());
     writeIndex();
 #if SNAPSHOT_PROFILE > 1
     printf("Texture saving time: %.03f\n",
@@ -59,7 +59,7 @@ void TextureSaver::done() {
 
 void TextureSaver::writeIndex() {
 #if SNAPSHOT_PROFILE > 1
-    auto start = ftell(mStream.get());
+    auto start = ftello64(mStream.get());
 #endif
 
     mStream.putBe32(static_cast<uint32_t>(mIndex.version));
@@ -68,12 +68,13 @@ void TextureSaver::writeIndex() {
         mStream.putBe32(b.texId);
         mStream.putBe64(static_cast<uint64_t>(b.filePos));
     }
+    auto end = ftello64(mStream.get());
+    mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
-    auto end = ftell(mStream.get());
-    printf("texture: index size: %d\n", (int)(end - start));
+    printf("texture: index size: %d\n", int(end - start));
 #endif
 
-    fseek(mStream.get(), 0, SEEK_SET);
+    fseeko64(mStream.get(), 0, SEEK_SET);
     mStream.putBe64(static_cast<uint64_t>(mIndex.startPosInFile));
 }
 

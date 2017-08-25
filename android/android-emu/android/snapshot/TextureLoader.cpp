@@ -36,7 +36,7 @@ bool TextureLoader::start() {
 void TextureLoader::loadTexture(uint32_t texId, const loader_t& loader) {
     android::base::AutoLock scopedLock(mLock);
     assert(mIndex.count(texId));
-    fseek(mStream.get(), mIndex[texId], SEEK_SET);
+    fseeko64(mStream.get(), mIndex[texId], SEEK_SET);
     loader(&mStream);
     if (ferror(mStream.get())) {
         mHasError = true;
@@ -48,8 +48,12 @@ bool TextureLoader::readIndex() {
     auto start = android::base::System::get()->getHighResTimeUs();
 #endif
     assert(mIndex.size() == 0);
+    base::System::FileSize size;
+    if (base::System::get()->fileSize(fileno(mStream.get()), &size)) {
+        mDiskSize = size;
+    }
     auto indexPos = mStream.getBe64();
-    fseek(mStream.get(), static_cast<int64_t>(indexPos), SEEK_SET);
+    fseeko64(mStream.get(), static_cast<int64_t>(indexPos), SEEK_SET);
     auto version = mStream.getBe32();
     if (version != 1) {
         return false;

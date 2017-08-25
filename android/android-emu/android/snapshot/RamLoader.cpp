@@ -147,8 +147,12 @@ bool RamLoader::readIndex() {
     auto start = base::System::get()->getHighResTimeUs();
 #endif
     mStreamFd = fileno(mStream.get());
+    base::System::FileSize size;
+    if (base::System::get()->fileSize(mStreamFd, &size)) {
+        mDiskSize = size;
+    }
     uint64_t indexPos = mStream.getBe64();
-    fseek(mStream.get(), intptr_t(indexPos), SEEK_SET);
+    fseeko64(mStream.get(), intptr_t(indexPos), SEEK_SET);
 
     auto version = mStream.getBe32();
     if (version != 1) {

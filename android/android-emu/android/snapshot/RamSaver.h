@@ -46,6 +46,8 @@ public:
     void savePage(int64_t blockOffset, int64_t pageOffset, int32_t pageSize);
     void join();
     bool hasError() const { return mHasError; }
+    bool compressed() const { return mIndex.flags & int32_t(IndexFlags::CompressedPages); }
+    uint64_t diskSize() const { return mDiskSize; }
 
 private:
     struct QueuedPageInfo {
@@ -99,6 +101,7 @@ private:
     base::Optional<base::WorkerThread<QueuedPageInfo>> mSavingWorker;
 
     FileIndex mIndex;
+    uint64_t mDiskSize = 0;
 
 #if SNAPSHOT_PROFILE > 1
     base::System::WallDuration mStartTime =

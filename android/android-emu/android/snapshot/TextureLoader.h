@@ -39,6 +39,7 @@ public:
     void loadTexture(uint32_t texId, const loader_t& loader);
 
     bool hasError() const { return mHasError; }
+    uint64_t diskSize() const { return mDiskSize; }
 
     void acquireLoaderThread(LoaderThreadPtr thread) {
         mLoaderThread = std::move(thread);
@@ -59,6 +60,7 @@ private:
     android::base::Lock mLock;
     bool mStarted = false;
     bool mHasError = false;
+    uint64_t mDiskSize = 0;
 #if SNAPSHOT_PROFILE > 1
     android::base::System::WallDuration mStartTime;
 #endif

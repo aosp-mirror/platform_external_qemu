@@ -219,13 +219,18 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
     return true;
 }
 
-static bool writeSnapshotToDisk(const pb::Snapshot& snapshot,
-                                StringView dataDir) {
+bool Snapshot::writeSnapshotToDisk() {
     google::protobuf::io::FileOutputStream stream(
-            ::open(PathUtils::join(dataDir, "snapshot.pb").c_str(),
+            ::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
                    O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0755));
     stream.SetCloseOnDelete(true);
-    return snapshot.SerializeToZeroCopyStream(&stream);
+    if (mSnapshotPb.SerializeToZeroCopyStream(&stream)) {
+        mSize = uint64_t(stream.ByteCount());
+        return true;
+    } else {
+        mSize = 0;
+        return false;
+    }
 }
 
 struct {
@@ -287,7 +292,7 @@ bool Snapshot::save() {
 
     mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
 
-    return writeSnapshotToDisk(mSnapshotPb, mDataDir);
+    return writeSnapshotToDisk();
 }
 
 bool Snapshot::saveFailure(FailureReason reason) {
@@ -295,7 +300,7 @@ bool Snapshot::saveFailure(FailureReason reason) {
     if (!mSnapshotPb.has_version()) {
         mSnapshotPb.set_version(kVersion);
     }
-    return writeSnapshotToDisk(mSnapshotPb, mDataDir);
+    return writeSnapshotToDisk();
 }
 
 static bool isUnrecoverableReason(FailureReason reason) {
@@ -315,6 +320,7 @@ bool Snapshot::preload() {
         saveFailure(FailureReason::NoSnapshotPb);
         return false;
     }
+    mSize = size;
 
     const auto fileMap = makeCustomScopedPtr(
             mmap(nullptr, size, PROT_READ, MAP_PRIVATE, file.get(), 0),

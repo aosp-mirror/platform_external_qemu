@@ -194,6 +194,9 @@ ifeq ($(BUILD_TARGET_OS),darwin)
     # Clang annoys everyone with a warning about empty struct size being
     # different in C and C++.
     BUILD_TARGET_CFLAGS += -Wno-extern-c-compat
+
+    # Use regular fseek/ftell as those are 64-bit compatible.
+    BUILD_TARGET_CFLAGS += -Dftello64=ftell -Dfseeko64=fseek
 endif
 
 # NOTE: The following definitions are only used by the standalone build.

@@ -41,6 +41,9 @@ public:
     void join();
 
     bool hasError() const { return mHasError; }
+    bool onDemandEnabled() const { return mAccessWatch; }
+    bool compressed() const { return (mIndex.flags & IndexFlags::CompressedPages) != 0; }
+    uint64_t diskSize() const { return mDiskSize; }
 
 private:
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
@@ -95,6 +98,7 @@ private:
     base::Optional<base::ThreadPool<Page*>> mDecompressor;
 
     FileIndex mIndex;
+    uint64_t mDiskSize = 0;
 
 #if SNAPSHOT_PROFILE > 1
     base::System::WallDuration mStartTime;
