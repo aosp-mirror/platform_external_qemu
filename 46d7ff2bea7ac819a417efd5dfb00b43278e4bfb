@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cbadd14b_ace0aa85",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-25T02:28:49Z",
+      "side": 1,
+      "message": "oops, that\u0027s a bad copy-paste. Thanks",
+      "parentUuid": "773a5002_2c8c6a33",
+      "range": {
+        "startLine": 127,
+        "startChar": 33,
+        "endLine": 127,
+        "endChar": 69
+      },
+      "revId": "46d7ff2bea7ac819a417efd5dfb00b43278e4bfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5196ea39_d5ca45a6",
         "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
         "patchSetId": 2
