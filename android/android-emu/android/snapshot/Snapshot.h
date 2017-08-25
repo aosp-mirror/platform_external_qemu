@@ -32,6 +32,7 @@ public:
     bool saveFailure(FailureReason reason);
     bool preload();
     bool load();
+    uint64_t diskSize() const { return mSize; }
 
     base::Optional<FailureReason> failureReason() const;
 
@@ -40,10 +41,12 @@ public:
 private:
     bool verifyHost(const emulator_snapshot::Host& host);
     bool verifyConfig(const emulator_snapshot::Config& config);
+    bool writeSnapshotToDisk();
 
     std::string mName;
     std::string mDataDir;
     emulator_snapshot::Snapshot mSnapshotPb;
+    uint64_t mSize = 0;
 };
 
 inline bool operator==(const Snapshot& l, const Snapshot& r) {

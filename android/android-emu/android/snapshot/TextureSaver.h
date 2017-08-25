@@ -35,6 +35,7 @@ public:
     void done();
 
     bool hasError() const { return mHasError; }
+    uint64_t diskSize() const { return mDiskSize; }
 
 private:
     struct FileIndex {
@@ -51,10 +52,11 @@ private:
     void writeIndex();
 
     android::base::StdioStream mStream;
-    // mBuffer is a buffer for fetching data from GPU memory to RAM
+    // A buffer for fetching data from GPU memory to RAM.
     android::base::SmallFixedVector<unsigned char, 128> mBuffer;
 
     FileIndex mIndex;
+    uint64_t mDiskSize = 0;
     bool mFinished = false;
     bool mHasError = false;
 

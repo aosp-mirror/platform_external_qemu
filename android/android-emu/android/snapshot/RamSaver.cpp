@@ -106,7 +106,7 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
 bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     if (pi.blockIndex == kStopMarkerIndex) {
         mCompressor.clear();
-        mIndex.startPosInFile = ftell(mStream.get());
+        mIndex.startPosInFile = ftello64(mStream.get());
         writeIndex();
 
 #if SNAPSHOT_PROFILE > 1
@@ -187,12 +187,13 @@ void RamSaver::writeIndex() {
             }
         }
     }
+    auto end = ftello64(mStream.get());
+    mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
-    auto end = ftell(mStream.get());
-    printf("RAM: index size: %d bytes\n", (int)(end - start));
+    printf("RAM: index size: %d bytes\n", int(end - start));
 #endif
 
-    fseek(mStream.get(), 0, SEEK_SET);
+    fseeko64(mStream.get(), 0, SEEK_SET);
     mStream.putBe64(uint64_t(mIndex.startPosInFile));
 }
 
@@ -202,7 +203,7 @@ void RamSaver::writePage(const QueuedPageInfo& pi,
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     page.sizeOnDisk = dataSize;
-    page.filePos = int64_t(ftell(mStream.get()));
+    page.filePos = int64_t(ftello64(mStream.get()));
     mStream.write(dataPtr, size_t(dataSize));
 }
 
