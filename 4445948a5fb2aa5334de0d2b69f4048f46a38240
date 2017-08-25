@@ -22,6 +22,30 @@
       "revId": "4445948a5fb2aa5334de0d2b69f4048f46a38240",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46d385fd_7c28cf85",
+        "filename": "android/build/Makefile.top.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-25T02:21:15Z",
+      "side": 1,
+      "message": "yes, ftell/fseek use long which is 64-bit. Windows\u0027s long is always 32-bit - that\u0027s why they needed to create another set of functions (_fseeki64()). Then Linux came and realized that long for 32 bits is still 32-bit - they created other set of functions (fseeko32/64 with off_t / off64_t variable types).",
+      "parentUuid": "9f3706a4_620586ec",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 60
+      },
+      "revId": "4445948a5fb2aa5334de0d2b69f4048f46a38240",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
