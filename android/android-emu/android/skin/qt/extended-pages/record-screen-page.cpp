@@ -11,11 +11,12 @@
 
 #include "android/skin/qt/extended-pages/record-screen-page.h"
 
-#include "android/globals.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
-#include "android/skin/qt/extended-pages/common.h"
+#include "android/ffmpeg-muxer.h"
+#include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
+#include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
 
 #include <QDesktopServices>
@@ -28,21 +29,21 @@ using android::base::PathUtils;
 // static
 const char RecordScreenPage::kTmpMediaName[] = "tmp.webm";
 
-RecordScreenPage::RecordScreenPage(QWidget* parent) :
-    QWidget(parent),
-    mUi(new Ui::RecordScreenPage) {
+RecordScreenPage::RecordScreenPage(QWidget* parent)
+    : QWidget(parent), mUi(new Ui::RecordScreenPage) {
     mUi->setupUi(this);
     setRecordState(RecordState::Ready);
 
     mTmpFilePath = PathUtils::join(avdInfo_getContentPath(android_avdInfo),
-                              &kTmpMediaName[0]);
+                                   &kTmpMediaName[0]);
     QObject::connect(&mTimer, &QTimer::timeout, this,
                      &RecordScreenPage::updateElapsedTime);
 }
 
 RecordScreenPage::~RecordScreenPage() {}
 
-void RecordScreenPage::setRecordScreenAgent(const QAndroidRecordScreenAgent* agent) {
+void RecordScreenPage::setRecordScreenAgent(
+        const QAndroidRecordScreenAgent* agent) {
     mRecordScreenAgent = agent;
 }
 
@@ -86,9 +87,9 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_saveButton->show();
             mUi->rec_timeResLabel->setText(
                     QString("%1s / %2 x %3")
-                        .arg(mSec)
-                        .arg(android_hw->hw_lcd_width)
-                        .arg(android_hw->hw_lcd_height));
+                            .arg(mSec)
+                            .arg(android_hw->hw_lcd_width)
+                            .arg(android_hw->hw_lcd_height));
             mUi->rec_timeResLabel->show();
             mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
             break;
@@ -133,7 +134,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
             mRecordScreenAgent->stopRecording();
             newState = RecordState::Stopped;
             break;
-        case RecordState::Stopped: // we can combine this state into readystate
+        case RecordState::Stopped:  // we can combine this state into readystate
             if (mRecordScreenAgent->startRecording(mTmpFilePath.c_str())) {
                 newState = RecordState::Recording;
             } else {
@@ -152,23 +153,22 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
     QSettings settings;
 
     QString ext = mUi->rec_formatSwitch->currentText();
-    QString savePath =
-        QDir::toNativeSeparators(getRecordingSaveDirectory());
+    QString savePath = QDir::toNativeSeparators(getRecordingSaveDirectory());
     QString recordingName = QFileDialog::getSaveFileName(
             this, tr("Save Recording"),
             savePath + QString("/untitled.%1").arg(ext),
             tr("Multimedia (*.%1)").arg(ext));
 
-    if ( recordingName.isEmpty() ) return; // Operation was canceled
+    if (recordingName.isEmpty())
+        return;  // Operation was canceled
 
     QFileInfo fileInfo(recordingName);
     QString dirName = fileInfo.absolutePath();
 
     dirName = QDir::toNativeSeparators(dirName);
 
-    if ( !directoryIsWritable(dirName) ) {
-        QString errStr = tr("The path is not writable:<br>")
-                         + dirName;
+    if (!directoryIsWritable(dirName)) {
+        QString errStr = tr("The path is not writable:<br>") + dirName;
         showErrorDialog(errStr, tr("Save Recording"));
         return;
     }
@@ -179,9 +179,17 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
     // TODO: Copy the file to the save location since the user may want to save
     // in multiple formats. Since the initial encoding is webm, we need to do a
     // conversion if the user selects something else.
-    if (rename(mTmpFilePath.c_str(), recordingName.toStdString().c_str()) != 0) {
-        QString errStr = tr("Unknown error while saving<br>")
-                         + recordingName;
+    int rc;
+    if (ext == "gif") {
+        // TODO, use a separate thread, since this function may take long
+        rc = ffmpeg_convert_to_animated_gif(mTmpFilePath.c_str(),
+                                            recordingName.toStdString().c_str(),
+                                            64 * 1024);
+    } else {
+        rc = rename(mTmpFilePath.c_str(), recordingName.toStdString().c_str());
+    }
+    if (rc != 0) {
+        QString errStr = tr("Unknown error while saving<br>") + recordingName;
         showErrorDialog(errStr, tr("Save Recording"));
     }
 }
