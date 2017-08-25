@@ -46,6 +46,30 @@
       "revId": "46d7ff2bea7ac819a417efd5dfb00b43278e4bfb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8aba454f_6bc2b4e8",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-25T02:25:59Z",
+      "side": 1,
+      "message": "Ah, didn\u0027t see that at first glance, I was searching for that enum and couldn\u0027t find it. Would it then be a good idea to have EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE used somewhere?",
+      "parentUuid": "664f23ff_636da3d1",
+      "range": {
+        "startLine": 169,
+        "startChar": 0,
+        "endLine": 169,
+        "endChar": 89
+      },
+      "revId": "46d7ff2bea7ac819a417efd5dfb00b43278e4bfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
