@@ -1752,7 +1752,13 @@ bool configAndStartRenderer(
     char* api_arch = avdInfo_getTargetAbi(avd);
     bool isGoogle = avdInfo_isGoogleApis(avd);
 
-    if (!androidEmuglConfigInit(&config,
+    if (hw->hw_arc) {
+      memset(&config, 0, sizeof(config));
+      str_reset(&hw->hw_gpu_mode, "off");
+    }
+
+    if (!hw->hw_arc &&
+        !androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
                 api_level,
