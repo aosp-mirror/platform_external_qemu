@@ -22,6 +22,30 @@
       "revId": "46d7ff2bea7ac819a417efd5dfb00b43278e4bfb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "664f23ff_636da3d1",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-25T02:23:22Z",
+      "side": 1,
+      "message": "well, the very first line in this function makes sure the feature is enabled. Or I\u0027m getting the question wrong?",
+      "parentUuid": "5196ea39_d5ca45a6",
+      "range": {
+        "startLine": 169,
+        "startChar": 0,
+        "endLine": 169,
+        "endChar": 89
+      },
+      "revId": "46d7ff2bea7ac819a417efd5dfb00b43278e4bfb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
