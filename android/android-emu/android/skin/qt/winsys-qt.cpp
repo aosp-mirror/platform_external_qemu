@@ -477,10 +477,10 @@ void skin_winsys_run_ui_update(SkinGenericFunction f, void* data,
     }
     if (wait) {
         QSemaphore semaphore;
-        window->runOnUiThread(f, data, &semaphore);
+        window->runOnUiThread([f, data]() { f(data); }, &semaphore);
         semaphore.acquire();
     } else {
-        window->runOnUiThread(f, data, nullptr);
+        window->runOnUiThread([f, data]() { f(data); }, nullptr);
     }
 }
 extern void skin_winsys_error_dialog(const char* message, const char* title) {

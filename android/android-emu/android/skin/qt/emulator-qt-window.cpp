@@ -279,7 +279,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
       mStartupDialog([this] { return std::make_tuple(this); }),
-      mExitSavingDialog([this] { return std::make_tuple(this); }),
+      mSnapshotProgressDialog([this] { return std::make_tuple(this); }),
       mToolWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
@@ -359,9 +359,10 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       }),
       mStartedAdbStopProcess(false),
       mHaveBeenFrameless(false) {
-    qRegisterMetaType<QPainter::CompositionMode>("QPainter::CompositionMode");
-    qRegisterMetaType<SkinRotation>("SkinRotation");
+    qRegisterMetaType<QPainter::CompositionMode>();
+    qRegisterMetaType<SkinRotation>();
     qRegisterMetaType<SkinGenericFunction>();
+    qRegisterMetaType<RunOnUiThreadFunc>();
 
     android::base::ThreadLooper::setLooper(mLooper, true);
     CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
@@ -528,60 +529,42 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     mExitSavingTimer.setSingleShot(true);
     connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
-        mExitSavingDialog->setWindowTitle(tr("Android Emulator"));
-        // Hide close/minimize/maximize buttons
-        mExitSavingDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
-                                          Qt::WindowTitleHint);
-        // Make sure the icon is the same as in the main window
-        mExitSavingDialog->setWindowIcon(QApplication::windowIcon());
+        showSnapshotProgressDialog(tr("Saving state..."));
+    });
 
-        auto label = new QLabel();
-        label->setAlignment(Qt::AlignCenter);
-        label->setText(tr("Saving state..."));
-        mExitSavingDialog->setLabel(label);
-        auto bar = new QProgressBar();
-        bar->setAlignment(Qt::AlignHCenter);
-        mExitSavingDialog->setBar(bar);
-        mExitSavingDialog->setRange(0, 0);            // Don't show % complete
-        mExitSavingDialog->setCancelButton(nullptr);  // None
-        mExitSavingDialog->setMinimumSize(
-                mExitSavingDialog->sizeHint());  // Recalculate size.
-        mExitSavingDialog->show();
+    mLoadingTimer.setSingleShot(true);
+    connect(&mLoadingTimer, &QTimer::timeout, [this]() {
+        showSnapshotProgressDialog(tr("Loading state..."));
     });
 
     using android::snapshot::Snapshotter;
     Snapshotter::get().setOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
-                if (op != Snapshotter::Operation::Save) {
-                    return;
-                }
                 if (stage == Snapshotter::Stage::Start) {
-                    runOnUiThread(
-                            [](void* ptr) {
-                                auto& self =
-                                        *static_cast<EmulatorQtWindow*>(ptr);
-                                self.mExitSavingTimer.start(200);
-                                if (self.mToolWindow) {
-                                    self.mToolWindow->setEnabled(false);
-                                }
-                            },
-                            this, nullptr);
+                    runOnUiThread([this, op]() {
+                        auto& timer = op == Snapshotter::Operation::Save
+                                              ? mExitSavingTimer
+                                              : mLoadingTimer;
+                        timer.start(500);
+                        if (mToolWindow) {
+                            mToolWindow->setEnabled(false);
+                        }
+                    });
                 } else if (stage == Snapshotter::Stage::End) {
-                    runOnUiThread(
-                            [](void* ptr) {
-                                auto& self =
-                                        *static_cast<EmulatorQtWindow*>(ptr);
-                                self.mExitSavingTimer.stop();
-                                self.mExitSavingTimer.disconnect();
-                                if (self.mExitSavingDialog.hasInstance()) {
-                                    self.mExitSavingDialog->hide();
-                                    self.mExitSavingDialog.clear();
-                                }
-                                if (self.mToolWindow) {
-                                    self.mToolWindow->setEnabled(true);
-                                }
-                            },
-                            this, nullptr);
+                    runOnUiThread([this, op]() {
+                        auto& timer = op == Snapshotter::Operation::Save
+                                              ? mExitSavingTimer
+                                              : mLoadingTimer;
+                        timer.stop();
+                        timer.disconnect();
+                        if (mSnapshotProgressDialog.hasInstance()) {
+                            mSnapshotProgressDialog->hide();
+                            mSnapshotProgressDialog.clear();
+                        }
+                        if (mToolWindow) {
+                            mToolWindow->setEnabled(true);
+                        }
+                    });
                 }
             });
 }
@@ -614,9 +597,11 @@ EmulatorQtWindow::~EmulatorQtWindow() {
 
     mExitSavingTimer.stop();
     mExitSavingTimer.disconnect();
-    if (mExitSavingDialog.hasInstance()) {
-        mExitSavingDialog->hide();
-        mExitSavingDialog.clear();
+    mLoadingTimer.stop();
+    mLoadingTimer.disconnect();
+    if (mSnapshotProgressDialog.hasInstance()) {
+        mSnapshotProgressDialog->hide();
+        mSnapshotProgressDialog.clear();
     }
 
     delete mMainLoopThread;
@@ -796,9 +781,11 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     } else {
         mExitSavingTimer.stop();
         mExitSavingTimer.disconnect();
-        if (mExitSavingDialog.hasInstance()) {
-            mExitSavingDialog->hide();
-            mExitSavingDialog.clear();
+        mLoadingTimer.stop();
+        mLoadingTimer.disconnect();
+        if (mSnapshotProgressDialog.hasInstance()) {
+            mSnapshotProgressDialog->hide();
+            mSnapshotProgressDialog.clear();
         }
 
         if (mToolWindow) {
@@ -1937,10 +1924,9 @@ void EmulatorQtWindow::setForwardShortcutsToDevice(int index) {
     mForwardShortcutsToDevice = (index != 0);
 }
 
-void EmulatorQtWindow::slot_runOnUiThread(SkinGenericFunction f,
-                                          void* data,
+void EmulatorQtWindow::slot_runOnUiThread(RunOnUiThreadFunc f,
                                           QSemaphore* semaphore) {
-    (*f)(data);
+    f();
     if (semaphore)
         semaphore->release();
 }
@@ -2184,6 +2170,28 @@ void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
                 queueQuitEvent();
             },
             5000); // for qemu1, reboot -p will shutdown guest but hangs, allow 5s
+}
+
+void EmulatorQtWindow::showSnapshotProgressDialog(const QString& text) {
+    mSnapshotProgressDialog->setWindowTitle(tr("Android Emulator"));
+    // Hide close/minimize/maximize buttons
+    mSnapshotProgressDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
+                                            Qt::WindowTitleHint);
+    // Make sure the icon is the same as in the main window
+    mSnapshotProgressDialog->setWindowIcon(QApplication::windowIcon());
+
+    auto label = new QLabel();
+    label->setAlignment(Qt::AlignCenter);
+    label->setText(text);
+    mSnapshotProgressDialog->setLabel(label);
+    auto bar = new QProgressBar();
+    bar->setAlignment(Qt::AlignHCenter);
+    mSnapshotProgressDialog->setBar(bar);
+    mSnapshotProgressDialog->setRange(0, 0);            // Don't show % complete
+    mSnapshotProgressDialog->setCancelButton(nullptr);  // None
+    mSnapshotProgressDialog->setMinimumSize(
+                mSnapshotProgressDialog->sizeHint());  // Recalculate size.
+    mSnapshotProgressDialog->show();
 }
 
 void EmulatorQtWindow::rotateSkin(SkinRotation rot) {

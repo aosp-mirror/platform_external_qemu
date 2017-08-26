@@ -43,6 +43,7 @@
 #include <QProgressDialog>
 #include <QWidget>
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -54,7 +55,11 @@ class EmulatorWindow;
 typedef struct SkinSurface SkinSurface;
 class SkinSurfaceBitmap;
 
+using RunOnUiThreadFunc = std::function<void()>;
+Q_DECLARE_METATYPE(QPainter::CompositionMode);
+Q_DECLARE_METATYPE(RunOnUiThreadFunc);
 Q_DECLARE_METATYPE(SkinGenericFunction);
+Q_DECLARE_METATYPE(SkinRotation);
 
 class MainLoopThread : public QThread {
     Q_OBJECT
@@ -120,39 +125,28 @@ public:
     void wheelEvent(QWheelEvent* event) override;
     void startThread(StartFunction f, int argc, char** argv);
 
-    /*
-     In Qt, signals are normally events of interest that a class can emit, which
-     can be hooked up to arbitrary slots. Here
-     we use this mechanism for a different purpose: it's to allow the QEMU
-     thread
-     to request an operation be performed on
-     the Qt thread; Qt allows signals to be emitted from any thread. When used
-     in
-     this fashion, the signal is queued and
-     handled asyncrhonously. Since we sometimes will call these signals from
-     Qt's
-     thread as well, we can't use
-     BlockingQueuedConnections for these signals, since this connection type
-     will
-     deadlock if called from the same thread.
-     For that reason, we use a normal non-blocking connection type, and allow
-     all
-     of the signals to pass an optional semaphore
-     that will be released by the slot when it is done processing. If you want
-     to
-     block on the completion of the signal, simply
-     pass in the semaphore to the signal and acquire it after the call returns.
-     If
-     you're passing in pointers to data structures
-     that could change or go away, you will need to make sure you block to
-     maintain the integrity of the data while the signal runs.
+    // In Qt, signals are normally events of interest that a class can emit,
+    // which can be hooked up to arbitrary slots. Here we use this mechanism for
+    // a different purpose: it's to allow the QEMU thread to request an
+    // operation be performed on the Qt thread; Qt allows signals to be emitted
+    // from any thread. When used in this fashion, the signal is queued and
+    // handled asyncrhonously.
+    //
+    // Since we sometimes will call these signals from Qt's thread as well, we
+    // can't use BlockingQueuedConnections for these signals, since this
+    // connection type will deadlock if called from the same thread. For that
+    // reason, we use a normal non-blocking connection type, and allow all of
+    // the signals to pass an optional semaphore that will be released by the
+    // slot when it is done processing. If you want to block on the completion
+    // of the signal, simply pass in the semaphore to the signal and acquire it
+    // after the call returns. If you're passing in pointers to data structures
+    // that could change or go away, you will need to make sure you block to
+    // maintain the integrity of the data while the signal runs.
+    //
+    // TODO: allow nonblocking calls to these signals by having the signal take
+    // ownership of object pointers. This would allow QEMU to do things like
+    // update the screen without blocking, which would make it run faster.
 
-     TODO: allow nonblocking calls to these signals by having the signal take
-     ownership of object pointers. This would allow QEMU
-     to do things like update the screen without blocking, which would make it
-     run
-     faster.
-     */
 signals:
     void blit(SkinSurfaceBitmap* src,
               QRect srcRect,
@@ -182,15 +176,12 @@ signals:
                     QRect rect,
                     QSemaphore* semaphore = NULL);
 
-    void runOnUiThread(SkinGenericFunction f,
-                       void* data,
-                       QSemaphore* semaphore = NULL);
+    void runOnUiThread(RunOnUiThreadFunc f, QSemaphore* semaphore = NULL);
     void updateRotation(SkinRotation rotation);
     void layoutChanged(SkinRotation rot);
 
 public:
-    void pollEvent(SkinEvent* event,
-                   bool* hasEvent);
+    void pollEvent(SkinEvent* event, bool* hasEvent);
 
     WId getWindowId();
 
@@ -270,8 +261,7 @@ private slots:
     void slot_showWindow(SkinSurface* surface,
                          QRect rect,
                          QSemaphore* semaphore = NULL);
-    void slot_runOnUiThread(SkinGenericFunction f,
-                            void* data,
+    void slot_runOnUiThread(RunOnUiThreadFunc f,
                             QSemaphore* semaphore = NULL);
     void slot_updateRotation(SkinRotation rotation);
 
@@ -342,13 +332,16 @@ private:
 
     void runAdbShellPowerDownAndQuit();
 
+    void showSnapshotProgressDialog(const QString& text);
+
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
     bool mStartupDone = false;
 
     QTimer mExitSavingTimer;
-    android::base::MemberOnDemandT<QProgressDialog, QWidget*> mExitSavingDialog;
+    QTimer mLoadingTimer;
+    android::base::MemberOnDemandT<QProgressDialog, QWidget*> mSnapshotProgressDialog;
 
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
