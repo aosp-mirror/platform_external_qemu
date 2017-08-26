@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "62558fb7_a77ae25f",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2193,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-26T03:24:14Z",
+      "side": 1,
+      "message": "nit: line this // up with the ones above?",
+      "range": {
+        "startLine": 2193,
+        "startChar": 55,
+        "endLine": 2193,
+        "endChar": 58
+      },
+      "revId": "774381a578cb20da7f5be5e39d54377e2cb05b91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "226bd21c_955ab27c",
+        "filename": "android/android-emu/android/skin/qt/winsys-qt.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-08-26T03:24:14Z",
+      "side": 1,
+      "message": "Ah, that\u0027s where data went :)",
+      "range": {
+        "startLine": 480,
+        "startChar": 30,
+        "endLine": 480,
+        "endChar": 54
+      },
+      "revId": "774381a578cb20da7f5be5e39d54377e2cb05b91",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
