@@ -180,6 +180,9 @@ private:
                                   frame->width,
                                   frame->height,
                                   frame->pixels);
+                bridge->postRecordFrame(frame->width,
+                                        frame->height,
+                                        frame->pixels);
                 delete frame;
             }
         }
