@@ -44,6 +44,7 @@ private:
 
     const QAndroidVmOperations mVmOps;
     base::System::WallDuration mLoadTimeMs = 0;
+    bool mLoaded = false;
     OperationStatus mLoadStatus = OperationStatus::NotStarted;
 };
 
