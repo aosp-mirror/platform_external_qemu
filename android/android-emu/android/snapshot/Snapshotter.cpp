@@ -198,7 +198,11 @@ bool Snapshotter::onStartSaving(const char* name) {
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.emplace(name);
     }
-    return mSaver->status() != OperationStatus::Error;
+    if (mSaver->status() == OperationStatus::Error) {
+        onSavingComplete(name, -1);
+        return false;
+    }
+    return true;
 }
 
 bool Snapshotter::onSavingComplete(const char* name, int res) {
@@ -217,7 +221,11 @@ bool Snapshotter::onStartLoading(const char* name) {
         mLoader.emplace(name);
     }
     mLoader->start();
-    return mLoader->status() != OperationStatus::Error;
+    if (mLoader->status() == OperationStatus::Error) {
+        onLoadingComplete(name, -1);
+        return false;
+    }
+    return true;
 }
 
 bool Snapshotter::onLoadingComplete(const char* name, int res) {
