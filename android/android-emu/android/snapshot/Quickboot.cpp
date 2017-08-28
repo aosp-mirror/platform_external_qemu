@@ -144,9 +144,11 @@ bool Quickboot::load(StringView name) {
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
         auto res = snapshotter.load(name.c_str());
+        mLoaded = false;
         mLoadStatus = res;
         mLoadTimeMs = System::get()->getHighResTimeUs() / 1000;
         if (res == OperationStatus::Ok) {
+            mLoaded = true;
             reportSuccessfulLoad(name, startTimeMs);
         } else {
             // Check if the error is about something done before the real load
@@ -220,8 +222,7 @@ bool Quickboot::save(StringView name) {
         const auto nowMs = System::get()->getHighResTimeUs() / 1000;
         const auto sessionUptimeMs = nowMs - mLoadTimeMs;
         if (sessionUptimeMs > kMinUptimeForSavingMs) {
-            const bool loaded = mLoadTimeMs != 0;
-            if (loaded || androidSnapshot_canSave()) {
+            if (mLoaded || androidSnapshot_canSave()) {
                 dprint("Saving state on exit with session uptime %d ms",
                        int(sessionUptimeMs));
                 Stopwatch sw;
