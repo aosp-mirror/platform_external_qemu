@@ -61,6 +61,8 @@ private:
         IndexFlags flags;
         std::vector<Block> blocks;
         Pages pages;
+
+        void clear();
     };
 
     bool readIndex();

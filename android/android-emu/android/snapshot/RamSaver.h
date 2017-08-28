@@ -81,6 +81,8 @@ private:
         int32_t flags = int32_t(Flags::Empty);
         int32_t totalPages = 0;
         std::vector<Block> blocks;
+
+        void clear();
     };
 
     void passToSaveHandler(QueuedPageInfo&& pi);
