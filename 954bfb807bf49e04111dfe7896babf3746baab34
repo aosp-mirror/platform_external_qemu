@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "db143be0_1135f429",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4676,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-28T19:59:39Z",
+      "side": 1,
+      "message": "should we exit here, or print a warning and disable VNC instead?\nanother question: I remember that we observed quite a few crashes if emulator exits early but the host GL renderer was already started. Please double check on more platforms that this return won\u0027t cause a crash",
+      "range": {
+        "startLine": 4672,
+        "startChar": 0,
+        "endLine": 4676,
+        "endChar": 9
+      },
+      "revId": "954bfb807bf49e04111dfe7896babf3746baab34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
