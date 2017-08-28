@@ -62,11 +62,13 @@ bool androidEmuglConfigInit(EmuglConfig* config,
 
     const char* gpuChoice = gpuOption ? gpuOption : *hwGpuModePtr;
     // If the user has specified a renderer
-    // that is neither "auto" nor "host",
+    // that is neither "auto", "host" nor "on",
     // don't check the blacklist.
-    // Only check the blacklist for 'auto' or 'host' mode.
+    // Only check the blacklist for 'auto', 'host' or 'on' mode.
     if (gpuChoice && (!strcmp(gpuChoice, "auto") ||
-            !strcmp(gpuChoice, "host"))) {
+                      !strcmp(gpuChoice, "host") ||
+                      !strcmp(gpuChoice, "on"))) {
+
          onBlacklist = isHostGpuBlacklisted();
     }
 
