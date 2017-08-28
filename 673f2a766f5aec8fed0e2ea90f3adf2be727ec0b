@@ -16,6 +16,24 @@
       "revId": "673f2a766f5aec8fed0e2ea90f3adf2be727ec0b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76d9f933_ac194333",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLBackgroundLoader.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-08-28T20:58:03Z",
+      "side": 1,
+      "message": "well, there\u0027s no real lock here - weak_ptr\u003c\u003e.lock() just creates a shared_ptr\u003c\u003e for that object",
+      "parentUuid": "b87dc5e9_49364a61",
+      "revId": "673f2a766f5aec8fed0e2ea90f3adf2be727ec0b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
