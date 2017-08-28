@@ -2425,6 +2425,15 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
         return -EINVAL;
     }
 
+    if (s_snapshot_callbacks.loadvm.on_start) {
+        ret = s_snapshot_callbacks.loadvm.on_start(name);
+        if (ret) {
+            messages->err(messages->opaque, NULL,
+                         "Error %d from the snapshot callback", ret);
+            return -EINVAL;
+        }
+    }
+
     /* Flush all IO requests so they don't interfere with the new state.  */
     bdrv_drain_all();
 
@@ -2435,6 +2444,9 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
 
     ret = bdrv_all_goto_snapshot(name, &bs);
     if (ret < 0) {
+        if (s_snapshot_callbacks.loadvm.on_end) {
+            s_snapshot_callbacks.loadvm.on_end(name, ret);
+        }
         messages->err(messages->opaque, NULL,
                      "Error %d while activating snapshot '%s' on '%s'",
                      ret, name, bdrv_get_device_name(bs));
@@ -2445,15 +2457,6 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     int64_t gotoEndTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);
     printf("goto snapshot time %.03f ms\n", (gotoEndTime - gotoTime)/1000000.0);
 #endif
-
-    if (s_snapshot_callbacks.loadvm.on_start) {
-        ret = s_snapshot_callbacks.loadvm.on_start(name);
-        if (ret) {
-            messages->err(messages->opaque, NULL,
-                         "Error %d from the snapshot callback", ret);
-            return -EINVAL;
-        }
-    }
 
     /* restore the VM state */
     f = qemu_fopen_bdrv(bs_vm_state, 0);
