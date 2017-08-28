@@ -22,6 +22,30 @@
       "revId": "a5099c725bb18c2ba3c3c5eb6fd1310a24872f55",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f93fb77b_e4549e6e",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4674,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-08-28T20:43:16Z",
+      "side": 1,
+      "message": "no, it doesn\u0027t support swiftshader host mode.",
+      "parentUuid": "34acc20a_49a9cb63",
+      "range": {
+        "startLine": 4674,
+        "startChar": 61,
+        "endLine": 4674,
+        "endChar": 71
+      },
+      "revId": "a5099c725bb18c2ba3c3c5eb6fd1310a24872f55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

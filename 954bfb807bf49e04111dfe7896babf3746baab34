@@ -22,6 +22,30 @@
       "revId": "954bfb807bf49e04111dfe7896babf3746baab34",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f299ee6_16cc3d94",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 4676,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-08-28T20:43:16Z",
+      "side": 1,
+      "message": "Ok, I will do more tests. I tested on Linux, it works fine. VNC options are rather complex, -qemu -vnc :1, so if a user comes to here, most likely wants to run vnc mode, so print a error message is better.",
+      "parentUuid": "db143be0_1135f429",
+      "range": {
+        "startLine": 4672,
+        "startChar": 0,
+        "endLine": 4676,
+        "endChar": 9
+      },
+      "revId": "954bfb807bf49e04111dfe7896babf3746baab34",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
