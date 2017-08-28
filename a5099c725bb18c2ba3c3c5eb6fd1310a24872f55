@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34acc20a_49a9cb63",
+        "filename": "vl.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 4674,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-08-28T20:39:01Z",
+      "side": 1,
+      "message": "does it support -gpu swiftshader?",
+      "range": {
+        "startLine": 4674,
+        "startChar": 61,
+        "endLine": 4674,
+        "endChar": 71
+      },
+      "revId": "a5099c725bb18c2ba3c3c5eb6fd1310a24872f55",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
