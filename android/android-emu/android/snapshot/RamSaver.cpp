@@ -23,6 +23,11 @@ namespace snapshot {
 
 using android::base::System;
 
+
+void RamSaver::FileIndex::clear() {
+    decltype(blocks)().swap(blocks);
+}
+
 RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
     : mStream(std::move(stream)), mFlags(flags) {
     // Put a placeholder for the index offset right now.
@@ -92,7 +97,7 @@ void RamSaver::join() {
     passToSaveHandler({kStopMarkerIndex, 0});
     mSavingWorker.clear();
     mJoined = true;
-    mHasError = ferror(mStream.get()) != 0;
+    mIndex.clear();
 }
 
 void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
@@ -108,6 +113,9 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
         mCompressor.clear();
         mIndex.startPosInFile = ftello64(mStream.get());
         writeIndex();
+
+        mHasError = ferror(mStream.get()) != 0;
+        mIndex.clear();
 
 #if SNAPSHOT_PROFILE > 1
         printf("RAM saving time: %.03f\n",

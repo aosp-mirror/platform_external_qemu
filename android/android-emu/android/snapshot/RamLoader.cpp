@@ -52,6 +52,11 @@ struct RamLoader::Page {
     }
 };
 
+void RamLoader::FileIndex::clear() {
+    decltype(pages)().swap(pages);
+    decltype(blocks)().swap(blocks);
+}
+
 RamLoader::RamLoader(base::StdioStream&& stream)
     : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
@@ -300,6 +305,8 @@ void RamLoader::readerWorker() {
 
     mAccessWatch.clear();
 
+    mIndex.clear();
+
 #if SNAPSHOT_PROFILE > 1
     printf("Background loading complete in %.03f ms\n",
            (base::System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
@@ -529,6 +536,7 @@ bool RamLoader::readAllPages() {
     }
 
     mDecompressor.clear();
+    mIndex.clear();
     return true;
 }
 
