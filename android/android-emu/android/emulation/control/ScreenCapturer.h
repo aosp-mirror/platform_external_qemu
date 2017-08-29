@@ -52,14 +52,19 @@ public:
     // to which the screenshot will be written. |resultCallback| will
     // be invoked upon completion.
     void capture(android::base::StringView outputDirectoryPath,
-                 ResultCallback resultCallback);
+                 ResultCallback resultCallback,
+                 android::base::System::Duration screenCaptureTimeoutMs =
+                     kScreenCaptureTimeoutMs);
 
 private:
     void pullScreencap(ResultCallback resultCallback,
                        android::base::StringView outputDirectoryPath);
     static const android::base::System::Duration kPullTimeoutMs;
     static const char kRemoteScreenshotFilePath[];
-    static const android::base::System::Duration kScreenCaptureTimeoutMs;
+    // If you run screencap while using emulator over remote desktop, this can
+    // take... a while.
+    static const android::base::System::Duration kScreenCaptureTimeoutMs =
+        android::base::System::kInfinite;
 
     AdbInterface* mAdb;
     AdbCommandPtr mCaptureCommand;

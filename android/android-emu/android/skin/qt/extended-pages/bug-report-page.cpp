@@ -450,6 +450,9 @@ void BugreportPage::loadAvdDetails() {
 void BugreportPage::loadScreenshotImage() {
     static const int MIN_SCREENSHOT_API = 14;
     static const int DEFAULT_API_LEVEL = 1000;
+    // In case where the screencap doesn't work, bug reporting page should wait
+    // for no longer 10s.
+    static const int SCREEN_CAP_TIMEOUT_MS = 10000;
     mSavingStates.screenshotSucceed = false;
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     if (apiLevel == DEFAULT_API_LEVEL || apiLevel < MIN_SCREENSHOT_API) {
@@ -486,7 +489,8 @@ void BugreportPage::loadScreenshotImage() {
                             tr("There was an error while capturing the "
                                "screenshot."));
                 }
-            });
+            },
+            SCREEN_CAP_TIMEOUT_MS);
 }
 
 bool BugreportPage::eventFilter(QObject* object, QEvent* event) {

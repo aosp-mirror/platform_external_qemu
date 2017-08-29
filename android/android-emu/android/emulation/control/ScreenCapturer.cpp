@@ -33,10 +33,6 @@ using std::vector;
 const System::Duration ScreenCapturer::kPullTimeoutMs = 5000;
 const char ScreenCapturer::kRemoteScreenshotFilePath[] =
         "/data/local/tmp/screen.png";
-// If you run screencap while using emulator over remote desktop, this can
-// take... a while.
-const System::Duration ScreenCapturer::kScreenCaptureTimeoutMs =
-        System::kInfinite;
 
 ScreenCapturer::~ScreenCapturer() {
     if (mCaptureCommand) {
@@ -48,7 +44,8 @@ ScreenCapturer::~ScreenCapturer() {
 }
 
 void ScreenCapturer::capture(StringView outputDirectoryPath,
-                             ResultCallback resultCallback) {
+                             ResultCallback resultCallback,
+                             System::Duration screenCaptureTimeoutMs) {
     if (mCaptureCommand || mPullCommand) {
         resultCallback(Result::kOperationInProgress, nullptr);
         return;
@@ -65,8 +62,7 @@ void ScreenCapturer::capture(StringView outputDirectoryPath,
                 }
                 mCaptureCommand.reset();
             },
-            kScreenCaptureTimeoutMs,
-            false);
+            screenCaptureTimeoutMs, false);
 }
 
 void ScreenCapturer::pullScreencap(ResultCallback resultCallback,
