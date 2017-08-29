@@ -1569,6 +1569,8 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
         glesVersion = GLES_3_1;
         break;
     }
-    g_eglInfo->getIface(GLES_1_1)->setMaxGlesVersion(glesVersion);
+    if (g_eglInfo->getIface(GLES_1_1)) {
+        g_eglInfo->getIface(GLES_1_1)->setMaxGlesVersion(glesVersion);
+    }
     g_eglInfo->getIface(GLES_2_0)->setMaxGlesVersion(glesVersion);
 }
