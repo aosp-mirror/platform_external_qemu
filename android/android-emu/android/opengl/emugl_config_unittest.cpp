@@ -251,7 +251,7 @@ TEST(EmuglConfig, initFromUISetting) {
             EXPECT_STREQ("host", config.backend);
             break;
         case 1:
-            EXPECT_STREQ("angle", config.backend);
+            EXPECT_STREQ("angle_indirect", config.backend);
             break;
         case 2:
             EXPECT_STREQ("angle9", config.backend);
