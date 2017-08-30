@@ -9,6 +9,7 @@ include $(LOCAL_PATH)/android/third_party/mman-win32/libmman-win32.mk
 include $(LOCAL_PATH)/android/third_party/libsparse/sources.mk
 include $(LOCAL_PATH)/android/third_party/libselinux/sources.mk
 include $(LOCAL_PATH)/android/third_party/libwebp/sources.mk
+include $(LOCAL_PATH)/android/third_party/libkeymaster3/sources.mk
 include $(LOCAL_PATH)/android/third_party/ext4_utils/sources.mk
 include $(LOCAL_PATH)/android/third_party/libbreakpad.mk
 include $(LOCAL_PATH)/android/third_party/Qt5.mk

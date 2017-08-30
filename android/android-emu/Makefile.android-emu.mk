@@ -242,6 +242,7 @@ LOCAL_C_INCLUDES := \
     $(LIBJPEG_INCLUDES) \
     $(LIBXML2_INCLUDES) \
     $(LIBEXT4_UTILS_INCLUDES) \
+    $(LIBKEYMASTER3_INCLUDES) \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(LZ4_INCLUDES) \
@@ -314,6 +315,7 @@ LOCAL_SRC_FILES := \
     android/emulation/GoldfishSyncCommandQueue.cpp \
     android/emulation/goldfish_sync.cpp \
     android/emulation/LogcatPipe.cpp \
+    android/emulation/Keymaster3.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
@@ -501,6 +503,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     android-emu \
     $(ANDROID_EMU_BASE_STATIC_LIBRARIES) \
     $(LIBCURL_STATIC_LIBRARIES) \
+    $(LIBKEYMASTER3_STATIC_LIBRARIES) \
     $(LIBXML2_STATIC_LIBRARIES) \
     $(BREAKPAD_CLIENT_STATIC_LIBRARIES) \
     emulator-libext4_utils \
