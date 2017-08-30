@@ -22,6 +22,30 @@
       "revId": "74514f8cb443319a4102cba3bf6947881bb0b682",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3bbe6064_ec481ade",
+        "filename": "android/third_party/libkeymaster3/makefile",
+        "patchSetId": 14
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-08-30T16:23:13Z",
+      "side": 1,
+      "message": "removed\n\ngo/oag/2819687",
+      "parentUuid": "8a328220_b5df9a24",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 46
+      },
+      "revId": "74514f8cb443319a4102cba3bf6947881bb0b682",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
