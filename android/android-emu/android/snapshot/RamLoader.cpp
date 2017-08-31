@@ -62,16 +62,7 @@ RamLoader::RamLoader(base::StdioStream&& stream)
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace(
                 [this](void* ptr) {
-                    Page& page = this->page(ptr);
-                    uint8_t buf[4096];
-                    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
-                                                    ? buf
-                                                    : nullptr);
-                    fillPageData(&page);
-                    if (page.data != buf) {
-                        delete[] page.data;
-                    }
-                    page.data = nullptr;
+                    onRamAccess(ptr);
                 },
                 [this]() { return backgroundPageLoad(); });
         if (!mAccessWatch->valid()) {
@@ -88,6 +79,34 @@ RamLoader::~RamLoader() {
         mReaderThread.wait();
         assert(hasError() || !mAccessWatch);
     }
+}
+
+void RamLoader::onRamAccess(void* ptr) {
+    if (!mAccessWatch) return;
+
+    // It's possible for us to try to RAM load
+    // things that are not registered in the index
+    // (like from qemu_iovec_init_external).
+    // Make sure that it is in the index.
+    const auto blockIt = std::find_if(
+            mIndex.blocks.begin(), mIndex.blocks.end(),
+            [ptr](const FileIndex::Block& b) {
+                return ptr >= b.ramBlock.hostPtr &&
+                       ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
+            });
+
+    if (blockIt == mIndex.blocks.end()) return;
+
+    Page& page = this->page(ptr);
+    uint8_t buf[4096];
+    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
+            ? buf
+            : nullptr);
+    fillPageData(&page);
+    if (page.data != buf) {
+        delete[] page.data;
+    }
+    page.data = nullptr;
 }
 
 void RamLoader::registerBlock(const RamBlock& block) {
@@ -303,6 +322,7 @@ void RamLoader::readerWorker() {
         }
     }
 
+    fprintf(stderr, "%s: clear access watch\n", __func__);
     mAccessWatch.clear();
 
     mIndex.clear();
@@ -474,9 +494,9 @@ void RamLoader::fillPageData(Page* pagePtr) {
         return;
     }
 
-#if SNAPSHOT_PROFILE > 2
-    printf("%s: loading page %p\n", __func__, this->pagePtr(page));
-#endif
+// #if SNAPSHOT_PROFILE > 2
+    // printf("%s: loading page %p\n", __func__, this->pagePtr(page));
+// #endif
     if (mAccessWatch) {
         bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
                                           page.data);
