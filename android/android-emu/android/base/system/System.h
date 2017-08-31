@@ -351,6 +351,9 @@ public:
     // Sleep for |n| milliseconds
     virtual void sleepMs(unsigned n) const = 0;
 
+    // Sleep for |n| microseconds
+    virtual void sleepUs(unsigned n) const = 0;
+
     // Yield the remaining part of current thread's CPU time slice to another
     // thread that's ready to run.
     virtual void yield() const = 0;

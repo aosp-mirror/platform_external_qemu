@@ -11,6 +11,7 @@
 
 #include "android/snapshot/RamLoader.h"
 
+#include "android/avd/info.h"
 #include "android/base/ArraySize.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/preadwrite.h"
@@ -62,16 +63,7 @@ RamLoader::RamLoader(base::StdioStream&& stream)
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace(
                 [this](void* ptr) {
-                    Page& page = this->page(ptr);
-                    uint8_t buf[4096];
-                    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
-                                                    ? buf
-                                                    : nullptr);
-                    fillPageData(&page);
-                    if (page.data != buf) {
-                        delete[] page.data;
-                    }
-                    page.data = nullptr;
+                    loadRamPage(ptr);
                 },
                 [this]() { return backgroundPageLoad(); });
         if (!mAccessWatch->valid()) {
@@ -90,7 +82,20 @@ RamLoader::~RamLoader() {
     }
 }
 
+void RamLoader::loadRam(void* ptr, uint64_t size) {
+    android::base::AutoLock lock(mRamLoadLock);
+
+    if (onDemandLoadingComplete()) return;
+
+    uint32_t num_pages = (size + mPageSize - 1) / mPageSize;
+    char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
+    for (uint32_t i = 0; i < num_pages; i++) {
+        loadRamPage(pagePtr + i * mPageSize);
+    }
+}
+
 void RamLoader::registerBlock(const RamBlock& block) {
+    mPageSize = block.pageSize;
     mIndex.blocks.push_back({block, {}, {}});
 }
 
@@ -127,6 +132,7 @@ void RamLoader::join() {
 }
 
 void RamLoader::interruptReading() {
+    android::base::AutoLock lock(mRamLoadLock);
     mReadDataQueue.stop();
     mReadingQueue.stop();
 }
@@ -307,12 +313,14 @@ void RamLoader::readerWorker() {
     while (auto pagePtr = mReadingQueue.receive()) {
         Page* page = *pagePtr;
         if (!page) {
+            android::base::AutoLock lock(mRamLoadLock);
             mReadDataQueue.send(nullptr);
             mReadingQueue.stop();
             break;
         }
 
         if (readDataFromDisk(page)) {
+            android::base::AutoLock lock(mRamLoadLock);
             mReadDataQueue.send(page);
         }
     }
@@ -394,11 +402,38 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         return mJoining ? MemoryAccessWatch::IdleCallbackResult::RunAgain
                         : MemoryAccessWatch::IdleCallbackResult::Wait;
     } else {
+        android::base::AutoLock lock(mRamLoadLock);
         // null page == all pages were loaded, stop.
         mReadDataQueue.stop();
         mReadingQueue.stop();
         return MemoryAccessWatch::IdleCallbackResult::AllDone;
     }
+}
+
+void RamLoader::loadRamPage(void* ptr) {
+    // It's possible for us to try to RAM load
+    // things that are not registered in the index
+    // (like from qemu_iovec_init_external).
+    // Make sure that it is in the index.
+    const auto blockIt = std::find_if(
+            mIndex.blocks.begin(), mIndex.blocks.end(),
+            [ptr](const FileIndex::Block& b) {
+                return ptr >= b.ramBlock.hostPtr &&
+                       ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
+            });
+
+    if (blockIt == mIndex.blocks.end()) return;
+
+    Page& page = this->page(ptr);
+    uint8_t buf[4096];
+    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
+            ? buf
+            : nullptr);
+    fillPageData(&page);
+    if (page.data != buf) {
+        delete[] page.data;
+    }
+    page.data = nullptr;
 }
 
 bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
