@@ -1587,7 +1587,7 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
 }
 
 void FrameBuffer::onSave(Stream* stream,
-                         const android::snapshot::TextureSaverPtr& textureSaver) {
+                         const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
     //     m_eglSurface
     //     m_eglContext
@@ -1659,7 +1659,7 @@ void FrameBuffer::onSave(Stream* stream,
 }
 
 bool FrameBuffer::onLoad(Stream* stream,
-                         const android::snapshot::TextureLoaderPtr& textureLoader) {
+                         const android::snapshot::ITextureLoaderPtr& textureLoader) {
     AutoLock mutex(m_lock);
     // cleanups
     {

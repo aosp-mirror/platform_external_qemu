@@ -11,7 +11,6 @@
 */
 
 #include "android/opengles.h"
-#include "android/opengl-snapshot.h"
 
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/GoldfishDma.h"

@@ -102,11 +102,11 @@ public:
     GlobalNameSpace* getGlobalNameSpace() { return &m_globalNameSpace; }
 
     void onSaveAllImages(android::base::Stream* stream,
-                         const android::snapshot::TextureSaverPtr& textureSaver,
+                         const android::snapshot::ITextureSaverPtr& textureSaver,
                          SaveableTexture::saver_t saver,
                          SaveableTexture::restorer_t restorer);
     void onLoadAllImages(android::base::Stream* stream,
-                         const android::snapshot::TextureLoaderPtr& textureLoader,
+                         const android::snapshot::ITextureLoaderPtr& textureLoader,
                          SaveableTexture::creator_t creator);
     void postLoadAllImages(android::base::Stream* stream);
 

@@ -602,7 +602,7 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
 }
 
 void EglDisplay::onSaveAllImages(android::base::Stream* stream,
-                                 const android::snapshot::TextureSaverPtr& textureSaver,
+                                 const android::snapshot::ITextureSaverPtr& textureSaver,
                                  SaveableTexture::saver_t saver,
                                  SaveableTexture::restorer_t restorer) {
     // we could consider calling presave for all ShareGroups from here
@@ -629,7 +629,7 @@ void EglDisplay::onSaveAllImages(android::base::Stream* stream,
 }
 
 void EglDisplay::onLoadAllImages(android::base::Stream* stream,
-                                 const android::snapshot::TextureLoaderPtr& textureLoader,
+                                 const android::snapshot::ITextureLoaderPtr& textureLoader,
                                  SaveableTexture::creator_t creator) {
     if (!m_eglImages.empty()) {
         // Could be triggered by this bug:
