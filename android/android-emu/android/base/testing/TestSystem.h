@@ -394,6 +394,10 @@ public:
         Thread::yield();  // Add a small delay to mimic the intended behavior.
     }
 
+    virtual void sleepUs(unsigned n) const override {
+        sleepMs(n / 1000);
+    }
+
     virtual void yield() const override { Thread::yield(); }
 
 private:
