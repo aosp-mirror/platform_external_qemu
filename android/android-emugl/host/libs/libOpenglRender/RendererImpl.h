@@ -64,9 +64,9 @@ public:
     void resumeAll() final;
 
     void save(android::base::Stream* stream,
-              const android::snapshot::TextureSaverPtr& textureSaver) final;
+              const android::snapshot::ITextureSaverPtr& textureSaver) final;
     bool load(android::base::Stream* stream,
-              const android::snapshot::TextureLoaderPtr& textureLoader) final;
+              const android::snapshot::ITextureLoaderPtr& textureLoader) final;
 
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);

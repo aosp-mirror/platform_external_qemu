@@ -376,9 +376,9 @@ public:
     ~FrameBuffer();
 
     void onSave(android::base::Stream* stream,
-                const android::snapshot::TextureSaverPtr& textureSaver);
+                const android::snapshot::ITextureSaverPtr& textureSaver);
     bool onLoad(android::base::Stream* stream,
-                const android::snapshot::TextureLoaderPtr& textureLoader);
+                const android::snapshot::ITextureLoaderPtr& textureLoader);
 
     // lock and unlock handles (RenderContext, ColorBuffer, WindowSurface)
     void lock();

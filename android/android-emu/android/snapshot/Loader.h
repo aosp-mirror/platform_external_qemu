@@ -28,7 +28,7 @@ public:
     ~Loader();
 
     RamLoader& ramLoader() { return *mRamLoader; }
-    const TextureLoaderPtr& textureLoader() const { return mTextureLoader; }
+    ITextureLoaderPtr textureLoader() const;
 
     OperationStatus status() const { return mStatus; }
     const Snapshot& snapshot() const { return mSnapshot; }
@@ -41,7 +41,7 @@ private:
     OperationStatus mStatus;
     Snapshot mSnapshot;
     base::Optional<RamLoader> mRamLoader;
-    TextureLoaderPtr mTextureLoader;
+    std::shared_ptr<TextureLoader> mTextureLoader;
 };
 
 }  // namespace snapshot
