@@ -18,6 +18,7 @@
 #include "android/base/StringView.h"
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/snapshot/MemoryWatch.h"
 
 extern "C" {
 #include "qemu/osdep.h"
@@ -29,6 +30,7 @@ extern "C" {
 #include "qapi/qmp/qstring.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
+#include "sysemu/hvf.h"
 #include "exec/cpu-common.h"
 }
 
@@ -299,6 +301,10 @@ static void set_snapshot_callbacks(void* opaque,
         sSnapshotCallbacks = *callbacks;
         sSnapshotCallbacksOpaque = opaque;
         qemu_set_snapshot_callbacks(&sQemuSnapshotCallbacks);
+        qemu_set_ram_load_callback([](void* hostRam, uint64_t size) {
+                sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam, size);
+        });
+        set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
         migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
     }
 }

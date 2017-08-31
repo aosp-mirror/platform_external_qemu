@@ -11,32 +11,143 @@
 
 #include "android/snapshot/MemoryWatch.h"
 
+#include "android/base/synchronization/Lock.h"
+#include "android/base/system/System.h"
+#include "android/base/threads/FunctorThread.h"
+#include "android/emulation/CpuAccelerator.h"
+#include "android/snapshot/MacSegvHandler.h"
+
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/errno.h>
+#include <sys/mman.h>
+
+#include <Hypervisor/hv.h>
+
+using android::base::System;
+
 namespace android {
 namespace snapshot {
 
-class MemoryAccessWatch::Impl {};
+static MemoryAccessWatch* sWatch = nullptr;
 
+class MemoryAccessWatch::Impl {
+public:
+    Impl(MemoryAccessWatch::AccessCallback accessCallback,
+         MemoryAccessWatch::IdleCallback idleCallback) :
+        mAccel(GetCurrentCpuAccelerator()),
+        mAccessCallback(accessCallback),
+        mIdleCallback(idleCallback),
+        mSegvHandler(MacDoAccessCallback),
+        mBackgroundLoadingThread([this]() { bgLoaderWorker(); }) {
+    }
+
+    ~Impl() {
+        mBackgroundLoadingThread.wait();
+    }
+
+    static void MacDoAccessCallback(void* ptr) {
+        sWatch->mImpl->mAccessCallback(ptr);
+    }
+
+    static IdleCallbackResult MacIdlePageCallback() {
+        return sWatch->mImpl->mIdleCallback();
+    }
+
+    bool registerMemoryRange(void* start, size_t length) {
+        if (mAccel == CPU_ACCELERATOR_HVF) {
+            bool found = false;
+            uint64_t gpa = hva2gpa_call(start, &found);
+            if (found) {
+                hv_vm_protect(gpa, length, 0);
+            }
+        }
+        mprotect(start, length, PROT_NONE);
+        mSegvHandler.registerMemoryRange(start, length);
+        return true;
+    }
+
+    void doneRegistering() {
+        mBackgroundLoadingThread.start();
+    }
+
+    bool fillPage(void* start, size_t length, const void* data) {
+        android::base::AutoLock lock(mLock);
+        mprotect(start, length, PROT_READ | PROT_WRITE | PROT_EXEC);
+        if (!data) {
+            memset(start, 0x0, length);
+        } else {
+            memcpy(start, data, length);
+        }
+        if (mAccel == CPU_ACCELERATOR_HVF) {
+            bool found = false;
+            uint64_t gpa = hva2gpa_call(start, &found);
+            if (found) {
+                hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+            }
+        }
+        return true;
+    }
+
+    void bgLoaderWorker() {
+        System::Duration timeoutUs = 0;
+        for (;;) {
+            switch (mIdleCallback()) {
+                case IdleCallbackResult::RunAgain:
+                    timeoutUs = 0;
+                    break;
+                case IdleCallbackResult::Wait:
+                    timeoutUs = 500;
+                    break;
+                case IdleCallbackResult::AllDone:
+                    return;
+            }
+            System::get()->sleepUs(timeoutUs);
+        }
+    }
+
+    android::base::Lock mLock;
+    CpuAccelerator mAccel;
+    MemoryAccessWatch::AccessCallback mAccessCallback;
+    MemoryAccessWatch::IdleCallback mIdleCallback;
+    MacSegvHandler mSegvHandler;
+    base::FunctorThread mBackgroundLoadingThread;
+};
+
+// static
 bool MemoryAccessWatch::isSupported() {
-    return false;
+    // TODO: HAXM
+    return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
 }
 
-MemoryAccessWatch::MemoryAccessWatch(AccessCallback&&, IdleCallback&&)
-    : mImpl(/*new Impl()*/) {}
+MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
+                                     IdleCallback&& idleCallback) :
+    mImpl(isSupported() ? new Impl(std::move(accessCallback),
+                                   std::move(idleCallback)) : nullptr) {
+    if (isSupported()) {
+        sWatch = this;
+    }
+}
 
 MemoryAccessWatch::~MemoryAccessWatch() {}
 
 bool MemoryAccessWatch::valid() const {
+    if (mImpl) return true;
     return false;
 }
 
-bool MemoryAccessWatch::registerMemoryRange(void*, size_t) {
+bool MemoryAccessWatch::registerMemoryRange(void* start, size_t length) {
+    if (mImpl) return mImpl->registerMemoryRange(start, length);
     return false;
 }
 
-void MemoryAccessWatch::doneRegistering() {}
+void MemoryAccessWatch::doneRegistering() {
+    if (mImpl) mImpl->doneRegistering();
+}
 
-bool MemoryAccessWatch::fillPage(void* , size_t, const void*) {
-    return false;
+bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
+    if (!mImpl) return false;
+    return mImpl->fillPage(ptr, length, data);
 }
 
 }  // namespace snapshot

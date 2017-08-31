@@ -37,7 +37,6 @@ void hvf_disable(int disable);
 
 int hvf_sync_vcpus(void);
 
-#ifdef CONFIG_HVF
 int hvf_init_vcpu(CPUState *cpu);
 int hvf_vcpu_exec(CPUState *cpu);
 int hvf_smp_cpu_exec(CPUState *cpu);
@@ -49,6 +48,7 @@ int hvf_vcpu_destroy(CPUState *cpu);
 void hvf_raise_event(CPUState *cpu);
 // void hvf_reset_vcpu_state(void *opaque);
 
-#endif
+void* hvf_gpa2hva(uint64_t gpa, bool* found);
+uint64_t hvf_hva2gpa(void* hva, bool* found);
 
 #endif /* _HVF_H */
