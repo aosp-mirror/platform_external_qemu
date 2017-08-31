@@ -302,6 +302,7 @@ SaveableTexture::SaveableTexture(const EglImage& eglImage)
       m_internalFormat(eglImage.internalFormat),
       m_type(eglImage.type),
       m_border(eglImage.border),
+      m_texStorageLevels(eglImage.texStorageLevels),
       m_globalName(eglImage.globalTexObj->getGlobalName()) {}
 
 SaveableTexture::SaveableTexture(const TextureData& texture)
@@ -313,6 +314,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_internalFormat(texture.internalFormat),
       m_type(texture.type),
       m_border(texture.border),
+      m_texStorageLevels(texture.texStorageLevels),
       m_globalName(texture.globalName) {}
 
 SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
@@ -330,10 +332,11 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     m_internalFormat = stream->getBe32();
     m_type = stream->getBe32();
     m_border = stream->getBe32();
+    m_texStorageLevels = stream->getBe32();
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
-        unsigned int numLevels =
+        unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
         auto loadTex = [stream, numLevels](
                                std::unique_ptr<LevelImageData[]>& levelData,
@@ -384,6 +387,7 @@ void SaveableTexture::onSave(
     stream->putBe32(m_internalFormat);
     stream->putBe32(m_type);
     stream->putBe32(m_border);
+    stream->putBe32(m_texStorageLevels);
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
@@ -426,7 +430,7 @@ void SaveableTexture::onSave(
         }
         dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
-        unsigned int numLevels =
+        unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
         auto saveTex = [this, stream, numLevels, &dispatcher, buffer](
                                GLenum target, bool isDepth) {
@@ -573,8 +577,38 @@ void SaveableTexture::restore() {
         // Restore texture data
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
-        unsigned int numLevels =
+        unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
+        if (m_texStorageLevels) {
+            GLint resultInternalFormat = m_internalFormat;
+            GLenum resultFormat = m_format;
+            if (isCoreProfile()) {
+                GLEScontext::prepareCoreProfileEmulatedTexture(
+                        nullptr /* no TextureData */,
+                        false /* not 3D */,
+                        m_target, m_format, m_type,
+                        &resultInternalFormat,
+                        &resultFormat);
+            }
+            switch (m_target) {
+                case GL_TEXTURE_2D:
+                case GL_TEXTURE_CUBE_MAP:
+                    dispatcher.glTexStorage2D(m_target, m_texStorageLevels,
+                            m_internalFormat,
+                            m_levelData[0].get()[0].m_width,
+                            m_levelData[0].get()[0].m_height);
+                    break;
+                case GL_TEXTURE_3D:
+                case GL_TEXTURE_2D_ARRAY:
+                    dispatcher.glTexStorage3D(m_target, m_texStorageLevels,
+                            m_internalFormat,
+                            m_levelData[0].get()[0].m_width,
+                            m_levelData[0].get()[0].m_height,
+                            m_levelData[0].get()[0].m_depth);
+                    break;
+            }
+        }
+
         auto restoreTex2D =
                 [this, numLevels, &dispatcher](
                         GLenum target,
@@ -595,11 +629,19 @@ void SaveableTexture::restore() {
                                         &resultInternalFormat,
                                         &resultFormat);
                             }
-                            dispatcher.glTexImage2D(
-                                    target, level, resultInternalFormat,
-                                    levelData[level].m_width,
-                                    levelData[level].m_height, m_border,
-                                    resultFormat, m_type, pixels);
+                            if (m_texStorageLevels) {
+                                dispatcher.glTexSubImage2D(
+                                        target, level, 0, 0,
+                                        levelData[level].m_width,
+                                        levelData[level].m_height,
+                                        resultFormat, m_type, pixels);
+                            } else {
+                                dispatcher.glTexImage2D(
+                                        target, level, resultInternalFormat,
+                                        levelData[level].m_width,
+                                        levelData[level].m_height,
+                                        m_border, resultFormat, m_type, pixels);
+                            }
                         }
                     }
                     levelData.reset();
@@ -624,12 +666,21 @@ void SaveableTexture::restore() {
                                         &resultInternalFormat,
                                         &resultFormat);
                             }
-                            dispatcher.glTexImage3D(
-                                    target, level, m_internalFormat,
-                                    levelData[level].m_width,
-                                    levelData[level].m_height,
-                                    levelData[level].m_depth, m_border,
-                                    m_format, m_type, pixels);
+                            if (m_texStorageLevels) {
+                                dispatcher.glTexSubImage3D(
+                                        target, level, 0, 0, 0,
+                                        levelData[level].m_width,
+                                        levelData[level].m_height,
+                                        levelData[level].m_depth,
+                                        resultFormat, m_type, pixels);
+                            } else {
+                                dispatcher.glTexImage3D(
+                                        target, level, m_internalFormat,
+                                        levelData[level].m_width,
+                                        levelData[level].m_height,
+                                        levelData[level].m_depth, m_border,
+                                        resultFormat, m_type, pixels);
+                            }
                         }
                     }
                     levelData.reset();
@@ -689,4 +740,5 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->internalFormat = m_internalFormat;
     eglImage->type = m_type;
     eglImage->width = m_width;
+    eglImage->texStorageLevels = m_texStorageLevels;
 }
