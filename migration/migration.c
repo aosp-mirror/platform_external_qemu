@@ -1985,3 +1985,14 @@ PostcopyState postcopy_state_set(PostcopyState new_state)
     return atomic_xchg(&incoming_postcopy_state, new_state);
 }
 
+static QEMURamLoadCallback sQEMURamLoadCallback = 0;
+
+void qemu_set_ram_load_callback(QEMURamLoadCallback f) {
+    sQEMURamLoadCallback = f;
+}
+
+void qemu_ram_load(void* hostRam, uint64_t size) {
+    if (sQEMURamLoadCallback) {
+        sQEMURamLoadCallback(hostRam, size);
+    }
+}
