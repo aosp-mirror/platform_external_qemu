@@ -88,6 +88,10 @@ typedef struct {
 
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);
 
+typedef void (*QEMURamLoadPageCallback)(void*);
+
+void qemu_set_ram_load_page_callback(QEMURamLoadPageCallback f);
+
 /* A callback for regular and error message redirection */
 typedef struct {
     void* opaque;
@@ -98,6 +102,9 @@ typedef struct {
 int qemu_savevm(const char* name, const QEMUMessageCallback* messages);
 int qemu_loadvm(const char* name, const QEMUMessageCallback* messages);
 int qemu_delvm(const char* name, const QEMUMessageCallback* messages);
+
+// Callback for lazy loading of RAM for snapshots, at page granularity.
+void qemu_ram_load_page(void* hostRam);
 
 /* Populates the passed array of strings with the snapshot names.
  * If |names_count| is not NULL, it must be the size of |names| array.

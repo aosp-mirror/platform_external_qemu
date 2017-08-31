@@ -35,6 +35,7 @@ public:
     RamLoader(base::StdioStream&& stream);
     ~RamLoader();
 
+    void loadRamPage(void* ptr);
     void registerBlock(const RamBlock& block);
     bool start();
     bool wasStarted() const { return mWasStarted; }
