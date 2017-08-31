@@ -29,6 +29,8 @@
 #include "android/metrics/proto/studio_stats.pb.h"
 
 
+#include "picosha2.h"
+
 #include <stdio.h>
 #include <type_traits>
 
@@ -105,7 +107,7 @@ void MetricsReporter::start(const std::string& sessionId,
 
         // Run the asynchronous cleanup/reporting job now.
         base::async([] {
-            const auto sessions =
+            auto sessions =
                     FileMetricsWriter::finalizeAbandonedSessionFiles(
                             getSpoolDirectory());
             reportCrashMetrics(get(), sessions);
@@ -162,6 +164,15 @@ const std::string& MetricsReporter::sessionId() const {
     return mWriter->sessionId();
 }
 
+std::string MetricsReporter::anonymize(base::StringView s) {
+    picosha2::hash256_one_by_one hasher;
+    hasher.process(s.begin(), s.end());
+    const auto salt = this->salt();
+    hasher.process(salt.begin(), salt.end());
+    hasher.finish();
+    return picosha2::get_hash_hex_string(hasher);
+}
+
 void MetricsReporter::sendToWriter(
         android_studio::AndroidStudioEvent* event) {
     wireless_android_play_playlog::LogEvent logEvent;
@@ -197,6 +208,18 @@ void MetricsReporter::sendToWriter(
         event->set_studio_session_id(sessionId());
     }
     mWriter->write(*event, &logEvent);
+}
+
+std::string MetricsReporter::salt() {
+    const auto modTime =
+            base::System::get()->pathModificationTime(getSettingsFilePath());
+    base::AutoLock lock(mSaltLock);
+    if (mSalt.empty() || modTime.valueOr(0) != mSaltFileTime) {
+        auto salt = studio::getAnonymizationSalt();
+        mSaltFileTime = *modTime;
+        mSalt = std::move(salt);
+    }
+    return mSalt;
 }
 
 }  // namespace metrics

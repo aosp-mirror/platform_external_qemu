@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/metrics/metrics.h"
 #include "android/metrics/MetricsWriter.h"
@@ -83,6 +84,9 @@ public:
     // Returns a unique identifier of the current emulator run (or session in
     // Android Studio terms).
     const std::string& sessionId() const;
+    // Returns an anonymized copy of |s| string, using the Android Studio's
+    // salt value + some hashing algorithm.
+    std::string anonymize(base::StringView s);
 
 protected:
     MetricsReporter(bool enabled, MetricsWriter::Ptr writer,
@@ -92,12 +96,18 @@ protected:
     void sendToWriter(android_studio::AndroidStudioEvent* event);
 
 private:
+    std::string salt();
+
     const MetricsWriter::Ptr mWriter;
     const bool mEnabled = false;
     const base::System::Duration mStartTimeMs;
     const std::string mEmulatorVersion;
     const std::string mEmulatorFullVersion;
     const std::string mQemuVersion;
+
+    base::Lock mSaltLock;
+    base::System::Duration mSaltFileTime = 0;
+    std::string mSalt;
 };
 
 }  // namespace metrics
