@@ -1448,6 +1448,16 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
      */
     if (ret == 0 && i->configIni != NULL) {
         ret = androidHwConfig_read(hw, i->configIni);
+        /* We will set hw.arc in avd manager when creating new avd.
+         * Before new avd manager released, we check tag.id to see
+         * if it's a Chrome OS image.
+         */
+        if (ret == 0 && !hw->hw_arc) {
+            char *tag = iniFile_getString(i->configIni, TAG_ID, "default");
+            if (!strcmp(tag, TAG_ID_CHROMEOS)) {
+                hw->hw_arc = true;
+            }
+        }
     }
 
     /* Auto-disable keyboard emulation on sapphire platform builds */

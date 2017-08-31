@@ -21,6 +21,7 @@
 #include "android/utils/panic.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
+#include "android/utils/string.h"
 #include "android/utils/system.h"
 
 #include <assert.h>
@@ -361,7 +362,12 @@ path_getAvdTargetArch( const char* avdName )
 {
     char*  avdPath = path_getAvdContentPath(avdName);
     char*  avdArch = _getAvdConfigValue(avdPath, "hw.cpu.arch", "arm");
+    char*  avdTag = _getAvdConfigValue(avdPath, TAG_ID, "default");
     AFREE(avdPath);
+
+    /* Chrome OS images always are x86_64 arch even abi says it is x86.
+     * We run 32 bits android inside 64 bits Chrome OS now. */
+    if (!strcmp(avdArch, "x86") && !strcmp(avdTag, TAG_ID_CHROMEOS)) str_reset(&avdArch, "x86_64");
 
     return avdArch;
 }
