@@ -259,6 +259,11 @@ public:
         return pathCreationTimeInternal(toTempRoot(path));
     }
 
+    virtual Optional<Duration> pathModificationTime(
+            StringView path) const override {
+        return pathModificationTimeInternal(toTempRoot(path));
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const override {

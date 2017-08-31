@@ -268,6 +268,11 @@ public:
     // creation times (Linux) or if the operation failed.
     virtual Optional<Duration> pathCreationTime(StringView path) const = 0;
 
+    // Gets the file modification timestamp as a Unix epoch time with
+    // microsecond resolution. Returns an empty optional for systems that don't
+    // support modification times or if the operation failed.
+    virtual Optional<Duration> pathModificationTime(StringView path) const = 0;
+
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
     // result vector contains a full path.
@@ -386,6 +391,7 @@ protected:
     static bool pathFileSizeInternal(StringView path, FileSize* outFileSize);
     static bool fileSizeInternal(int fd, FileSize* outFileSize);
     static Optional<Duration> pathCreationTimeInternal(StringView path);
+    static Optional<Duration> pathModificationTimeInternal(StringView path);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
