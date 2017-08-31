@@ -14,6 +14,14 @@
 #include <functional>
 #include <memory>
 
+typedef void* (*gpa2hva_t)(uint64_t gpa, bool* found);
+typedef uint64_t (*hva2gpa_t)(void* hva, bool* found);
+
+extern hva2gpa_t hva2gpa_call;
+extern gpa2hva_t gpa2hva_call;
+
+void set_address_translation_funcs(hva2gpa_t hva2gpa, gpa2hva_t gpa2hva);
+
 namespace android {
 namespace snapshot {
 
