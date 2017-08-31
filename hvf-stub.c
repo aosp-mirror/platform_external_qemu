@@ -16,3 +16,14 @@ int hvf_enabled(void)
 {
    return 0;
 }
+
+void* hvf_gpa2hva(uint64_t gpa, bool* found) {
+    *found = false;
+    return 0;
+}
+
+uint64_t hvf_hva2gpa(void* hva, bool* found) {
+    *found = false;
+    return 0;
+}
+
