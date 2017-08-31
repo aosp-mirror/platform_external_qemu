@@ -22,6 +22,8 @@
 #include "qemu/sockets.h"
 #include "qemu/cutils.h"
 
+#include "sysemu/sysemu.h"
+
 size_t iov_from_buf_full(const struct iovec *iov, unsigned int iov_cnt,
                          size_t offset, const void *buf, size_t bytes)
 {
@@ -283,8 +285,14 @@ void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
     qiov->niov = niov;
     qiov->nalloc = -1;
     qiov->size = 0;
-    for (i = 0; i < niov; i++)
+
+    for (i = 0; i < niov; i++) {
+        // We need to load iovec's eagerly under lazy snapshot RAM loading
+        // with at least Hypervisor.Framework (likely with HAXM as well).
+        // Touch them here.
+        qemu_ram_load(qiov->iov[i].iov_base, iov[i].iov_len);
         qiov->size += iov[i].iov_len;
+    }
 }
 
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len)
