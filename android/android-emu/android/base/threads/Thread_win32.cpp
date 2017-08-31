@@ -145,6 +145,12 @@ void Thread::sleepMs(unsigned n) {
 }
 
 // static
+void Thread::sleepUs(unsigned n) {
+    // Hehe
+    ::Sleep(n / 1000);
+}
+
+// static
 void Thread::yield() {
     if (!::SwitchToThread()) {
         ::Sleep(0);
