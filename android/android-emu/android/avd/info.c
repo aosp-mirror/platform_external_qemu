@@ -1457,6 +1457,7 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
             if (!strcmp(tag, TAG_ID_CHROMEOS)) {
                 hw->hw_arc = true;
             }
+            AFREE(tag);
         }
     }
 
