@@ -1055,6 +1055,10 @@ public:
         Thread::sleepMs(n);
     }
 
+    void sleepUs(unsigned n) const override {
+        Thread::sleepUs(n);
+    }
+
     void yield() const override {
         Thread::yield();
     }

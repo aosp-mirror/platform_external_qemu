@@ -152,6 +152,17 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations) {
                  auto snapshot = static_cast<Snapshotter*>(opaque);
                  snapshot->mSaver->ramSaver().join();
                  return snapshot->mSaver->ramSaver().hasError() ? -1 : 0;
+             },
+             // loadRam
+             [](void* opaque, void* hostRamPtr, uint64_t size) {
+                 // fprintf(stderr, "loadRam callback %p\n", hostRamPtr);
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+                 if (snapshot->mLoader->status() == OperationStatus::Ok) {
+                 // fprintf(stderr, "a load was start, load the ram.\n");
+                 snapshot->mLoader->ramLoader().onRamAccess(hostRamPtr);
+                 } else {
+                 // fprintf(stderr, "nothing's happening, dont load ram\n");
+                 }
              }}};
 
     assert(vmOperations.setSnapshotCallbacks);
