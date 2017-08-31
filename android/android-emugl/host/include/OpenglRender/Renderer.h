@@ -153,9 +153,9 @@ public:
     virtual void resumeAll() = 0;
 
     virtual void save(android::base::Stream* stream,
-                      const android::snapshot::TextureSaverPtr& textureSaver) = 0;
+                      const android::snapshot::ITextureSaverPtr& textureSaver) = 0;
     virtual bool load(android::base::Stream* stream,
-                      const android::snapshot::TextureLoaderPtr& textureLoader) = 0;
+                      const android::snapshot::ITextureLoaderPtr& textureLoader) = 0;
 
 protected:
     ~Renderer() = default;

@@ -133,10 +133,10 @@ public:
     void preSaveAddEglImage(const EglImage* eglImage);
     void preSaveAddTex(const TextureData* texture);
     void onSave(android::base::Stream* stream,
-                const android::snapshot::TextureSaverPtr& textureSaver,
+                const android::snapshot::ITextureSaverPtr& textureSaver,
                 SaveableTexture::saver_t saver);
     void onLoad(android::base::Stream* stream,
-                const android::snapshot::TextureLoaderWPtr& textureLoaderWPtr,
+                const android::snapshot::ITextureLoaderWPtr& textureLoaderWPtr,
                 SaveableTexture::creator_t creator);
     void postLoad(android::base::Stream* stream);
     const SaveableTexturePtr& getSaveableTextureFromLoad(unsigned int oldGlobalName);

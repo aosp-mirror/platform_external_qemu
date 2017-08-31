@@ -21,11 +21,13 @@
 namespace android {
 namespace snapshot {
 
+class ITextureSaver;
 class TextureSaver;
+class ITextureLoader;
 class TextureLoader;
-using TextureSaverPtr = std::shared_ptr<TextureSaver>;
-using TextureLoaderPtr = std::shared_ptr<TextureLoader>;
-using TextureLoaderWPtr = std::weak_ptr<TextureLoader>;
+using ITextureSaverPtr = std::shared_ptr<ITextureSaver>;
+using ITextureLoaderPtr = std::shared_ptr<ITextureLoader>;
+using ITextureLoaderWPtr = std::weak_ptr<ITextureLoader>;
 
 using RamBlock = ::SnapshotRamBlock;
 

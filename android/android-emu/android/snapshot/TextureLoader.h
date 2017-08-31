@@ -25,23 +25,36 @@
 namespace android {
 namespace snapshot {
 
-class TextureLoader {
-    DISALLOW_COPY_AND_ASSIGN(TextureLoader);
+class ITextureLoader {
+    DISALLOW_COPY_AND_ASSIGN(ITextureLoader);
+
+protected:
+    ~ITextureLoader() = default;
 
 public:
-    using LoaderThreadPtr = std::shared_ptr<android::base::Thread>;
+    ITextureLoader() = default;
 
+    using LoaderThreadPtr = std::shared_ptr<android::base::Thread>;
+    using loader_t = std::function<void(android::base::Stream*)>;
+
+    virtual bool start() = 0;
+    // Move file position to texId and trigger loader
+    virtual void loadTexture(uint32_t texId, const loader_t& loader) = 0;
+    virtual void acquireLoaderThread(LoaderThreadPtr thread) = 0;
+    virtual bool hasError() const = 0;
+    virtual uint64_t diskSize() const = 0;
+};
+
+class TextureLoader final : public ITextureLoader {
+public:
     TextureLoader(android::base::StdioStream&& stream);
 
-    using loader_t = std::function<void(android::base::Stream*)>;
-    bool start();
-    // Move file position to texId and trigger loader
-    void loadTexture(uint32_t texId, const loader_t& loader);
+    bool start() override;
+    void loadTexture(uint32_t texId, const loader_t& loader) override;
+    bool hasError() const override { return mHasError; }
+    uint64_t diskSize() const override { return mDiskSize; }
 
-    bool hasError() const { return mHasError; }
-    uint64_t diskSize() const { return mDiskSize; }
-
-    void acquireLoaderThread(LoaderThreadPtr thread) {
+    void acquireLoaderThread(LoaderThreadPtr thread) override {
         mLoaderThread = std::move(thread);
     }
 

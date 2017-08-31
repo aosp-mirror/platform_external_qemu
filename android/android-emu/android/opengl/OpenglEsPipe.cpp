@@ -13,7 +13,6 @@
 #include "android/base/async/Looper.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/opengles.h"
-#include "android/opengl-snapshot.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/GLProcessPipe.h"
 #include "android/snapshot/Snapshotter.h"

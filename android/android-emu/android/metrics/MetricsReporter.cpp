@@ -107,7 +107,7 @@ void MetricsReporter::start(const std::string& sessionId,
 
         // Run the asynchronous cleanup/reporting job now.
         base::async([] {
-            auto sessions =
+            const auto sessions =
                     FileMetricsWriter::finalizeAbandonedSessionFiles(
                             getSpoolDirectory());
             reportCrashMetrics(get(), sessions);

@@ -25,7 +25,7 @@
 
 class GLBackgroundLoader : public emugl::Thread {
 public:
-    GLBackgroundLoader(const android::snapshot::TextureLoaderWPtr& textureLoaderWeak,
+    GLBackgroundLoader(const android::snapshot::ITextureLoaderWPtr& textureLoaderWeak,
                        const EGLiface& eglIface,
                        const GLESiface& glesIface,
                        SaveableTextureMap& textureMap) :
@@ -36,7 +36,7 @@ public:
 
     intptr_t main();
 
-    const android::snapshot::TextureLoaderWPtr m_textureLoaderWPtr;
+    const android::snapshot::ITextureLoaderWPtr m_textureLoaderWPtr;
     const EGLiface& m_eglIface;
     const GLESiface& m_glesIface;
 
