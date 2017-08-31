@@ -35,6 +35,7 @@ public:
     RamLoader(base::StdioStream&& stream);
     ~RamLoader();
 
+    void loadRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
     bool start();
     bool wasStarted() const { return mWasStarted; }
@@ -81,6 +82,7 @@ private:
     uint32_t pageSize(const Page& page) const;
     Page& page(void* ptr);
 
+    void loadRamPage(void* ptr);
     bool readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer = nullptr);
     void fillPageData(Page* pagePtr);
 
@@ -113,6 +115,10 @@ private:
 #if SNAPSHOT_PROFILE > 1
     base::System::WallDuration mStartTime;
 #endif
+
+    // Assumed to be a power of 2 for convenient
+    // rounding and aligning
+    uint64_t mPageSize = 4096;
 };
 
 }  // namespace snapshot
