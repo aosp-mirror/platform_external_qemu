@@ -101,6 +101,7 @@ const GLint* getGlesMaxContextAttribs() {
     int glesMaj, glesMin;
     emugl::getGlesVersion(&glesMaj, &glesMin);
     if (shouldEnableCoreProfile()) {
+        printf("core profile\n");
         if (glesMaj == 2) {
             return gles2ContextAttribsCoreGL;
         } else {

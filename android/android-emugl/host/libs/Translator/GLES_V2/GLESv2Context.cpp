@@ -589,6 +589,14 @@ void GLESv2Context::setBindSampler(GLuint unit, GLuint sampler) {
     m_bindSampler[unit] = sampler;
 }
 
+void GLESv2Context::unbindSampler(GLuint sampler) {
+    for (auto bindSampler : m_bindSampler) {
+        if (bindSampler.second == sampler) {
+            bindSampler.second = 0;
+        }
+    }
+}
+
 bool GLESv2Context::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
 
     bool usingVBO = p->getAttribType() == GLESpointer::BUFFER;

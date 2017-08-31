@@ -313,6 +313,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_internalFormat(texture.internalFormat),
       m_type(texture.type),
       m_border(texture.border),
+      m_numLevels(texture.numLevels),
       m_globalName(texture.globalName) {}
 
 SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
@@ -330,10 +331,11 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
     m_internalFormat = stream->getBe32();
     m_type = stream->getBe32();
     m_border = stream->getBe32();
+    m_numLevels = stream->getBe32();
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
-        unsigned int numLevels =
+        unsigned int numLevels = m_numLevels ? m_numLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
         auto loadTex = [stream, numLevels](
                                std::unique_ptr<LevelImageData[]>& levelData,
@@ -384,6 +386,7 @@ void SaveableTexture::onSave(
     stream->putBe32(m_internalFormat);
     stream->putBe32(m_type);
     stream->putBe32(m_border);
+    stream->putBe32(m_numLevels);
     // TODO: handle other texture targets
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
@@ -426,7 +429,7 @@ void SaveableTexture::onSave(
         }
         dispatcher.glBindTexture(m_target, m_globalName);
         // Get the number of mipmap levels.
-        unsigned int numLevels =
+        unsigned int numLevels = m_numLevels ? m_numLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
         auto saveTex = [this, stream, numLevels, &dispatcher, buffer](
                                GLenum target, bool isDepth) {
@@ -573,8 +576,25 @@ void SaveableTexture::restore() {
         // Restore texture data
         dispatcher.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
         // Get the number of mipmap levels.
-        unsigned int numLevels =
+        unsigned int numLevels = m_numLevels ? m_numLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
+        if (m_numLevels &&
+                (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP)) {
+            GLint resultInternalFormat = m_internalFormat;
+            GLenum resultFormat = m_format;
+            if (isCoreProfile()) {
+                GLEScontext::prepareCoreProfileEmulatedTexture(
+                        nullptr /* no TextureData */,
+                        false /* not 3D */,
+                        m_target, m_format, m_type,
+                        &resultInternalFormat,
+                        &resultFormat);
+            }
+            dispatcher.glTexStorage2D(m_target, m_numLevels, m_internalFormat,
+                    m_levelData[0].get()[0].m_width,
+                    m_levelData[0].get()[0].m_height);
+        }
+
         auto restoreTex2D =
                 [this, numLevels, &dispatcher](
                         GLenum target,
@@ -595,11 +615,19 @@ void SaveableTexture::restore() {
                                         &resultInternalFormat,
                                         &resultFormat);
                             }
-                            dispatcher.glTexImage2D(
-                                    target, level, resultInternalFormat,
-                                    levelData[level].m_width,
-                                    levelData[level].m_height, m_border,
-                                    resultFormat, m_type, pixels);
+                            if (m_numLevels) {
+                                dispatcher.glTexSubImage2D(
+                                        target, level, 0, 0,
+                                        levelData[level].m_width,
+                                        levelData[level].m_height,
+                                        resultFormat, m_type, pixels);
+                            } else {
+                                dispatcher.glTexImage2D(
+                                        target, level, resultInternalFormat,
+                                        levelData[level].m_width,
+                                        levelData[level].m_height, m_border,
+                                        resultFormat, m_type, pixels);
+                            }
                         }
                     }
                     levelData.reset();

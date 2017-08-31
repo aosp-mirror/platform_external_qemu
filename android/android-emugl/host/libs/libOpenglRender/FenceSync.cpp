@@ -106,6 +106,7 @@ static android::base::LazyInstance<StalePtrRegistry<FenceSync> >
 
 // static
 void FenceSync::addToRegistry() {
+    assert(!sFenceRegistry->getPtr((uint64_t)(uintptr_t)this));
     sFenceRegistry->addPtr(this);
 }
 

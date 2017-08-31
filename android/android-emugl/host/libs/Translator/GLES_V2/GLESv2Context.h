@@ -61,6 +61,7 @@ public:
     void setVertexAttribBindingIndex(GLuint attribindex, GLuint bindingindex);
     void setVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint reloffset, bool isInt = false);
     void setBindSampler(GLuint unit, GLuint sampler);
+    void unbindSampler(GLuint sampler);
     int  getMaxCombinedTexUnits() override;
     int  getMaxTexUnits() override;
 
