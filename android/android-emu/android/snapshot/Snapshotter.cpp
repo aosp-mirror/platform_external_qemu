@@ -153,6 +153,13 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                  auto snapshot = static_cast<Snapshotter*>(opaque);
                  snapshot->mSaver->ramSaver().join();
                  return snapshot->mSaver->ramSaver().hasError() ? -1 : 0;
+             },
+             // loadRamPage
+             [](void* opaque, void* hostRamPtr) {
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+                 if (snapshot->mLoader->status() == OperationStatus::Ok) {
+                     snapshot->mLoader->ramLoader().loadRamPage(hostRamPtr);
+                 }
              }}};
 
     assert(vmOperations.setSnapshotCallbacks);
