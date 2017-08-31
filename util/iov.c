@@ -22,6 +22,8 @@
 #include "qemu/sockets.h"
 #include "qemu/cutils.h"
 
+#include "sysemu/sysemu.h"
+
 size_t iov_from_buf_full(const struct iovec *iov, unsigned int iov_cnt,
                          size_t offset, const void *buf, size_t bytes)
 {
@@ -283,8 +285,15 @@ void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
     qiov->niov = niov;
     qiov->nalloc = -1;
     qiov->size = 0;
-    for (i = 0; i < niov; i++)
+    for (i = 0; i < niov; i++) {
+        int num_pages = (iov[i].iov_len + k_snapshot_ram_load_page_size - 1) /
+                        k_snapshot_ram_load_page_size;
+        for (uint32_t j = 0; j < num_pages; j++) {
+            qemu_ram_load_page((char*)(qiov->iov[i].iov_base) +
+                               j * k_snapshot_ram_load_page_size);
+        }
         qiov->size += iov[i].iov_len;
+    }
 }
 
 void qemu_iovec_add(QEMUIOVector *qiov, void *base, size_t len)
