@@ -367,8 +367,11 @@ path_getAvdTargetArch( const char* avdName )
 
     /* Chrome OS images always are x86_64 arch even abi says it is x86.
      * We run 32 bits android inside 64 bits Chrome OS now. */
-    if (!strcmp(avdArch, "x86") && !strcmp(avdTag, TAG_ID_CHROMEOS)) str_reset(&avdArch, "x86_64");
+    if (!strcmp(avdArch, "x86") && !strcmp(avdTag, TAG_ID_CHROMEOS)) {
+        str_reset(&avdArch, "x86_64");
+    }
 
+    AFREE(avdTag);
     return avdArch;
 }
 
