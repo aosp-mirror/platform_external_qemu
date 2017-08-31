@@ -52,6 +52,8 @@ typedef struct {
                      int64_t pageOffset,
                      int32_t size);
     int (*savingComplete)(void* opaque);
+    void (*loadRamPage)(void* opaque,
+                        void* hostRamPtr);
 } SnapshotRamCallbacks;
 
 typedef struct {

@@ -62,16 +62,7 @@ RamLoader::RamLoader(base::StdioStream&& stream)
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace(
                 [this](void* ptr) {
-                    Page& page = this->page(ptr);
-                    uint8_t buf[4096];
-                    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
-                                                    ? buf
-                                                    : nullptr);
-                    fillPageData(&page);
-                    if (page.data != buf) {
-                        delete[] page.data;
-                    }
-                    page.data = nullptr;
+                    loadRamPage(ptr);
                 },
                 [this]() { return backgroundPageLoad(); });
         if (!mAccessWatch->valid()) {
@@ -88,6 +79,34 @@ RamLoader::~RamLoader() {
         mReaderThread.wait();
         assert(hasError() || !mAccessWatch);
     }
+}
+
+void RamLoader::loadRamPage(void* ptr) {
+    if (!mAccessWatch) return;
+
+    // It's possible for us to try to RAM load
+    // things that are not registered in the index
+    // (like from qemu_iovec_init_external).
+    // Make sure that it is in the index.
+    const auto blockIt = std::find_if(
+            mIndex.blocks.begin(), mIndex.blocks.end(),
+            [ptr](const FileIndex::Block& b) {
+                return ptr >= b.ramBlock.hostPtr &&
+                       ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
+            });
+
+    if (blockIt == mIndex.blocks.end()) return;
+
+    Page& page = this->page(ptr);
+    uint8_t buf[4096];
+    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
+            ? buf
+            : nullptr);
+    fillPageData(&page);
+    if (page.data != buf) {
+        delete[] page.data;
+    }
+    page.data = nullptr;
 }
 
 void RamLoader::registerBlock(const RamBlock& block) {

@@ -15,6 +15,7 @@
 #include "android/base/Optional.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
@@ -35,6 +36,7 @@ public:
     RamLoader(base::StdioStream&& stream);
     ~RamLoader();
 
+    void loadRamPage(void* ptr);
     void registerBlock(const RamBlock& block);
     bool start();
     bool wasStarted() const { return mWasStarted; }
@@ -105,6 +107,8 @@ private:
 #if SNAPSHOT_PROFILE > 1
     base::System::WallDuration mStartTime;
 #endif
+
+    android::base::Lock mRamAccessLock;
 };
 
 }  // namespace snapshot
