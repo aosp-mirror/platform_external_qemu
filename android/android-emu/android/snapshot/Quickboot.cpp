@@ -87,7 +87,7 @@ void Quickboot::reportSuccessfulLoad(StringView name,
         load->set_duration_ms(durationMs);
         load->set_on_demand_ram_enabled(onDemandRamEnabled);
         auto snapshot = load->mutable_snapshot();
-        snapshot->set_name(name);
+        snapshot->set_name(MetricsReporter::get().anonymize(name));
         if (compressedRam) {
             snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
         }
@@ -111,7 +111,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
         save->set_duration_ms(durationMs);
         save->set_sesion_uptime_ms(sessionUptimeMs);
         auto snapshot = save->mutable_snapshot();
-        snapshot->set_name(name);
+        snapshot->set_name(MetricsReporter::get().anonymize(name));
         if (compressedRam) {
             snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
         }
