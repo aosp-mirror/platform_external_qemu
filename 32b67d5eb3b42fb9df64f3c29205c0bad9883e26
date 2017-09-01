@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b588ed8d_d77b3078",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-01T18:03:53Z",
+      "side": 1,
+      "message": "please don\u0027t comment out code, but delete it",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 2
+      },
+      "revId": "32b67d5eb3b42fb9df64f3c29205c0bad9883e26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c8bf181f_6ef9233f",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 904,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-01T18:03:53Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 904,
+        "startChar": 55,
+        "endLine": 904,
+        "endChar": 56
+      },
+      "revId": "32b67d5eb3b42fb9df64f3c29205c0bad9883e26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d39d808_174e7b37",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 913,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-01T18:03:53Z",
+      "side": 1,
+      "message": "please document if this is a UTC time or a local time",
+      "range": {
+        "startLine": 913,
+        "startChar": 36,
+        "endLine": 913,
+        "endChar": 42
+      },
+      "revId": "32b67d5eb3b42fb9df64f3c29205c0bad9883e26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebe41844_76d16416",
+        "filename": "android/android-emu/android/utils/timezone.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 934,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-01T18:03:53Z",
+      "side": 1,
+      "message": "you can use mktime() to convert a local-timed tm back to time_t. Or timegm (linux/mac) or _mkgmtime() on Windows to convert a UTC struct tm to a time_t. Then just call difftime() to get a difference in seconds. No logic, only libc calls",
+      "range": {
+        "startLine": 915,
+        "startChar": 0,
+        "endLine": 934,
+        "endChar": 35
+      },
+      "revId": "32b67d5eb3b42fb9df64f3c29205c0bad9883e26",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
