@@ -1,0 +1,10 @@
+Verified+1: Yahan Zhou <yahan@google.com>
+Code-Review+1: Yahan Zhou <yahan@google.com>
+Code-Review+2: Yurii Zubrytskyi <zyy@google.com>
+Code-Review+2: Lingfeng Yang <lfy@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Yahan Zhou <yahan@google.com>
+Submitted-at: Fri, 01 Sep 2017 22:02:15 +0000
+Reviewed-on: https://android-review.googlesource.com/474283
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
