@@ -65,6 +65,7 @@ public:
     unsigned int compressedFormat;
     int          crop_rect[4];
     GLenum target;
+    unsigned int texStorageLevels = 0;
     // globalName is used for snapshot when reading data from GPU
     int globalName = 0;
     virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;

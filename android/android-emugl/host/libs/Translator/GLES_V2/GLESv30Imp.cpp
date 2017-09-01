@@ -563,6 +563,8 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
     for (GLsizei i = 0; i < levels; i++)
         sPrepareTexImage2D(target, i, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
+    TextureData *texData = getTextureTargetData(target);
+    texData->texStorageLevels = levels;
     ctx->dispatcher().glTexStorage2D(target, levels, internalformat, width, height);
 }
 
@@ -859,6 +861,8 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
     for (int i = 0; i < levels; i++) {
         s_glInitTexImage3D(target, i, internalformat, width, height, depth, 0);
     }
+    TextureData *texData = getTextureTargetData(target);
+    texData->texStorageLevels = levels;
     ctx->dispatcher().glTexStorage3D(target, levels, internalformat, width, height, depth);
 }
 

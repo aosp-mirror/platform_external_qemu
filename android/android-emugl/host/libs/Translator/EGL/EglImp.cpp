@@ -1398,6 +1398,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->globalTexObj = globalTexObject;
             img->format = texData->format;
             img->type = texData->type;
+            img->texStorageLevels = texData->texStorageLevels;
             return dpy->addImageKHR(img);
         }
     }
