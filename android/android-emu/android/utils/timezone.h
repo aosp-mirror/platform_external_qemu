@@ -34,16 +34,11 @@ extern int  timezone_set( const char*  tzname );
  */
 extern char*  bufprint_zoneinfo_timezone( char*  buffer, char*  end );
 
-/* Return the timezone offset including day light saving in seconds with respect to
- * UTC in guest android OS
+/* Return the timezone offset including day light saving in seconds with respect
+ * to UTC in host OS
  * + positive if the timezone is east of GMT
  * - negative if the timezone is west of GMT
  */
-extern long android_tzoffset_in_seconds(time_t* time);
-
-/* Return local time based on android timezone NOT host OS.
- * the caller must dereference the returned parameter struct tm* before use.
- */
-extern struct tm* android_localtime(time_t* time);
+extern long android_tzoffset_in_seconds(time_t* utc_time);
 
 ANDROID_END_HEADER
