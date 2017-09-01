@@ -1295,11 +1295,11 @@ const char* const arm_device_id[] = {
 };
 
 const char* const mips_device_id[] = {
-    "1f010800",
-    "1f010600",
-    "1f010400",
-    "1f010200",
     "1f010000",
+    "1f010200",
+    "1f010400",
+    "1f010600",
+    "1f010800",
 };
 
 static
