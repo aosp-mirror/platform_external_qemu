@@ -681,7 +681,6 @@ LOCAL_SRC_FILES := \
   android/utils/Random_unittest.cpp \
   android/utils/string_unittest.cpp \
   android/utils/sockets_unittest.cpp \
-  android/utils/timezone_unittest.cpp \
   android/utils/x86_cpuid_unittest.cpp \
   android/wear-agent/PairUpWearPhone_unittest.cpp \
   android/wear-agent/testing/WearAgentTestUtils.cpp \

@@ -219,7 +219,7 @@ void
 sms_timestamp_now( SmsTimeStamp  stamp )
 {
     time_t     now_time = time(NULL);
-    struct tm  local    = *(android_localtime(&now_time));
+    struct tm  local    = *localtime(&now_time);
     int        tzdiff   = android_tzoffset_in_seconds(&now_time) / (15 * 60); /*tzdiff is in number of quater-hours*/
 
     stamp->data[0] = gsm_int_to_bcdi( local.tm_year % 100 );
