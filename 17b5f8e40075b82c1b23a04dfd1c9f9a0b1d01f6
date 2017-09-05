@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7d10a719_27d7c01c",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-09-05T19:24:33Z",
+      "side": 1,
+      "message": "mac?",
+      "revId": "17b5f8e40075b82c1b23a04dfd1c9f9a0b1d01f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9af08c91_a3f366b8",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 643,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-09-05T19:24:33Z",
+      "side": 1,
+      "message": "Add {} after \"if\"? Since our coding style says so...",
+      "revId": "17b5f8e40075b82c1b23a04dfd1c9f9a0b1d01f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
