@@ -138,6 +138,10 @@ bool Quickboot::load(StringView name) {
                         : pb::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
+        dwarning("Selected renderer '%s' (%d) doesn't support snapshots",
+                 emuglConfig_renderer_to_string(
+                         emuglConfig_get_current_renderer()),
+                 int(emuglConfig_get_current_renderer()));
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED);
     } else {
@@ -212,8 +216,11 @@ bool Quickboot::save(StringView name) {
         // the default boot snapshot.
         dwarning(
                 "Cleaning out the default boot snapshot to preserve the "
-                "current session (renderer type doesn't support "
-                "snapshotting).");
+                "current session (renderer type '%s' (%d) doesn't support "
+                "snapshotting).",
+                emuglConfig_renderer_to_string(
+                        emuglConfig_get_current_renderer()),
+                int(emuglConfig_get_current_renderer()));
         Snapshotter::get().deleteSnapshot(name.c_str());
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);

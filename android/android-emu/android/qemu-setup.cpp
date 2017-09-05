@@ -274,11 +274,11 @@ static bool setup_console_and_adb_ports(int console_port,
                                         bool legacy_adb,
                                         const AndroidConsoleAgents* agents) {
     bool register_adb_service = false;
-    // The guest IP that ADB listens to in legacy mode.
-    uint32_t guest_ip;
-    inet_strtoip("10.0.2.15", &guest_ip);
 
     if (legacy_adb) {
+        // The guest IP that ADB listens to in legacy mode.
+        uint32_t guest_ip;
+        inet_strtoip("10.0.2.15", &guest_ip);
         agents->net->slirpRedir(false, adb_port, guest_ip, 5555);
     } else {
         if (android_adb_server_init(adb_port) < 0) {

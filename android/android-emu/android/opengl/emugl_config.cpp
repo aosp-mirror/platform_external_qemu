@@ -119,6 +119,36 @@ SelectedRenderer emuglConfig_get_current_renderer() {
     return sCurrentRenderer;
 }
 
+const char* emuglConfig_renderer_to_string(SelectedRenderer renderer) {
+    switch (renderer) {
+        case SELECTED_RENDERER_UNKNOWN:
+            return "(Unknown)";
+        case SELECTED_RENDERER_HOST:
+            return "Host";
+        case SELECTED_RENDERER_OFF:
+            return "Off";
+        case SELECTED_RENDERER_GUEST:
+            return "Guest";
+        case SELECTED_RENDERER_MESA:
+            return "Mesa";
+        case SELECTED_RENDERER_SWIFTSHADER:
+            return "Swiftshader";
+        case SELECTED_RENDERER_ANGLE:
+            return "Angle";
+        case SELECTED_RENDERER_ANGLE9:
+            return "Angle9";
+        case SELECTED_RENDERER_SWIFTSHADER_INDIRECT:
+            return "Swiftshader Indirect";
+        case SELECTED_RENDERER_ANGLE_INDIRECT:
+            return "Angle Indirect";
+        case SELECTED_RENDERER_ANGLE9_INDIRECT:
+            return "Angle9 Indirect";
+        case SELECTED_RENDERER_ERROR:
+            return "(Error)";
+    }
+    return "(Bad value)";
+}
+
 bool emuglConfig_current_renderer_supports_snapshot() {
     return sCurrentRenderer == SELECTED_RENDERER_HOST ||
            sCurrentRenderer == SELECTED_RENDERER_OFF ||
