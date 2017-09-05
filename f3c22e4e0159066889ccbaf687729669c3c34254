@@ -22,6 +22,30 @@
       "revId": "f3c22e4e0159066889ccbaf687729669c3c34254",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5adf77d5_25ee5b03",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-09-05T22:59:01Z",
+      "side": 1,
+      "message": "Good point, done in latest patch set.",
+      "parentUuid": "92a37364_41bb6370",
+      "range": {
+        "startLine": 609,
+        "startChar": 7,
+        "endLine": 609,
+        "endChar": 46
+      },
+      "revId": "f3c22e4e0159066889ccbaf687729669c3c34254",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
