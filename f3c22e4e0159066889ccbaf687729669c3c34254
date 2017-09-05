@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "92a37364_41bb6370",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-05T22:42:32Z",
+      "side": 1,
+      "message": "I\u0027d prefer to have it more clear here, e.g.\nD(\"Trying emulator path \u0027%s\u0027\\n\", emulatorPath);\nif (path_exists(...)) {\n   D(\"Decided to use path \u0027%s\u0027\\n\", emulatorPath);\n   break;\n}\n\nif would also be nice to return early if we failed to find the working path here (resetting |emulatorPath| back to nullptr after each loop iteration and returning if it\u0027s nullptr after the loop with some error message.",
+      "range": {
+        "startLine": 609,
+        "startChar": 7,
+        "endLine": 609,
+        "endChar": 46
+      },
+      "revId": "f3c22e4e0159066889ccbaf687729669c3c34254",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
