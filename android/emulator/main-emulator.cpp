@@ -219,6 +219,58 @@ static bool checkOsVersion() {
 #endif  // _WIN32
 }
 
+// Get the full path of the current executable
+// the caller must free the returned string if not NULL
+static char* getCurrentExecutableFullPath(const char *argv0)
+{
+    char *p = NULL;
+    char buf[PATH_MAX];
+
+#if defined(__linux__)
+    {
+        int len;
+        len = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+        if (len > 0) {
+            buf[len] = 0;
+            p = buf;
+        }
+    }
+#elif defined(__FreeBSD__)
+    {
+        static int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1};
+        size_t len = sizeof(buf) - 1;
+
+        *buf = '\0';
+        if (!sysctl(mib, ARRAY_SIZE(mib), buf, &len, NULL, 0) &&
+            *buf) {
+            buf[sizeof(buf) - 1] = '\0';
+            p = buf;
+        }
+    }
+#elif _WIN32
+    DWORD retval = GetFullPathName(argv0, PATH_MAX, buf, NULL);
+    if (retval == 0) 
+    {
+        // Handle an error condition, ignore
+        derror("GetFullPathName failed (%d)\n", GetLastError());
+        return strdup(argv0);
+    }
+    p = buf;
+#endif
+
+    /* If we don't have any way of figuring out the actual executable
+       location then try argv[0].  */
+    if (!p) {
+        if (!argv0) {
+            return NULL;
+        }
+        
+        return strdup(argv0);
+    }
+
+    return strdup(p);
+}
+
 /* Main routine */
 int main(int argc, char** argv)
 {
@@ -587,9 +639,14 @@ int main(int argc, char** argv)
     }
 #endif
 
-    char* c_argv0_dir_name = path_dirname(argv[0]);
+    char* full_exe = getCurrentExecutableFullPath(argv[0]);
+    if (full_exe == NULL)
+        full_exe = argv[0];
+    char* c_argv0_dir_name = path_dirname(full_exe);
     std::string argv0DirName(c_argv0_dir_name);
     free(c_argv0_dir_name);
+    if (full_exe != argv[0])
+        free(full_exe);
 
     std::string emuDirName = emulator_dirname(argv0DirName);
 
