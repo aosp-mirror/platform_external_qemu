@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e5839c95_1823c19e",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-09-05T21:22:13Z",
+      "side": 1,
+      "message": "Looks like progDirSystem (from getProgramDirectory()) is already used for searching. I will examine why it still fails.",
+      "parentUuid": "d7fce254_242d6f80",
+      "range": {
+        "startLine": 224,
+        "startChar": 13,
+        "endLine": 224,
+        "endChar": 41
+      },
+      "revId": "17b5f8e40075b82c1b23a04dfd1c9f9a0b1d01f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7d10a719_27d7c01c",
         "filename": "android/emulator/main-emulator.cpp",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2017-09-05T19:24:33Z",
       "side": 1,
       "message": "mac?",
+      "revId": "17b5f8e40075b82c1b23a04dfd1c9f9a0b1d01f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "278a97f3_823fe763",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-09-05T21:22:13Z",
+      "side": 1,
+      "message": "Yahan, I am testing on Mac and Windows, too.",
+      "parentUuid": "7d10a719_27d7c01c",
       "revId": "17b5f8e40075b82c1b23a04dfd1c9f9a0b1d01f6",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
