@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf3b89c1_47a4d936",
+        "filename": "android/scripts/cros_files/package.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-05T23:14:31Z",
+      "side": 1,
+      "message": "Could you double check that the AVD Manager still recognises the image as one that supports Google APIs after changing the tag ID? I think the exact string is important",
+      "range": {
+        "startLine": 141,
+        "startChar": 243,
+        "endLine": 141,
+        "endChar": 251
+      },
+      "revId": "b8feceaca0c71a5518cd0cedf834fa2ff1c220e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
