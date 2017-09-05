@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "d7fce254_242d6f80",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-05T20:07:52Z",
+      "side": 1,
+      "message": "I believe you can reuse System::getProgramDirectory() for this function",
+      "range": {
+        "startLine": 224,
+        "startChar": 13,
+        "endLine": 224,
+        "endChar": 41
+      },
+      "revId": "17b5f8e40075b82c1b23a04dfd1c9f9a0b1d01f6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7d10a719_27d7c01c",
         "filename": "android/emulator/main-emulator.cpp",
         "patchSetId": 3
