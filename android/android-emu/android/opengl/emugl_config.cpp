@@ -241,6 +241,7 @@ bool emuglConfig_init(EmuglConfig* config,
         snprintf(config->backend, sizeof(config->backend), "%s", gpu_mode);
         snprintf(config->status, sizeof(config->status),
                  "GPU emulation is disabled");
+        setCurrentRenderer(gpu_mode);
         return true;
     }
 
