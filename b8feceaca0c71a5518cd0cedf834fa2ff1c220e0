@@ -22,6 +22,30 @@
       "revId": "b8feceaca0c71a5518cd0cedf834fa2ff1c220e0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c738417e_7a6f076f",
+        "filename": "android/scripts/cros_files/package.xml",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-06T01:16:53Z",
+      "side": 1,
+      "message": "We need another change to treat chrome os image as google api image. It\u0027s similar case with tv/wear image:\n\nhttps://cs.corp.google.com/android/tools/adt/idea/android/src/com/android/tools/idea/avdmanager/AvdWizardUtils.java?rcl\u003dc1ac934c128a4a1eeaedf69229c446cadfaf961e\u0026l\u003d132\n\nBefore that change, avd manager will show warning but I think  it\u0027s acceptable for beta users.",
+      "parentUuid": "cf3b89c1_47a4d936",
+      "range": {
+        "startLine": 141,
+        "startChar": 243,
+        "endLine": 141,
+        "endChar": 251
+      },
+      "revId": "b8feceaca0c71a5518cd0cedf834fa2ff1c220e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
