@@ -44,9 +44,7 @@ public:
                     requiresAutoMipmap(false),
                     compressed(false),
                     compressedFormat(0),
-                    target(0) {
-        memset(crop_rect,0,4*sizeof(int));
-    };
+                    target(0) {};
     TextureData(android::base::Stream* stream);
 
     unsigned int width;
@@ -63,14 +61,15 @@ public:
     bool requiresAutoMipmap;
     bool compressed;
     unsigned int compressedFormat;
-    int          crop_rect[4];
+    int32_t crop_rect[4] = {};
     GLenum target;
     unsigned int texStorageLevels = 0;
     // globalName is used for snapshot when reading data from GPU
     int globalName = 0;
-    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
-    virtual void restore(ObjectLocalName localName,
-            getGlobalName_t getGlobalName) override;
+    void onSave(android::base::Stream* stream,
+                unsigned int globalName) const override;
+    void restore(ObjectLocalName localName,
+                 const getGlobalName_t& getGlobalName) override;
     void setSaveableTexture(SaveableTexturePtr&& saveableTexture);
     SaveableTexturePtr releaseSaveableTexture();
     void setTexParam(GLenum pname, GLint param);
