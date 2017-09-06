@@ -5544,6 +5544,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     android_devices_teardown();
 #endif
 
+#ifdef __APPLE__
+#ifdef CONFIG_HAX
+    destroy_hax_vcpus();
+    haxm_vm_destroy();
+#endif /* CONFIG_HAX */
+#endif /* __APPLE__ */
     /* vhost-user must be cleaned up before chardevs.  */
     net_cleanup();
     audio_cleanup();

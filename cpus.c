@@ -81,6 +81,8 @@ int64_t max_advance;
 static QEMUTimer *throttle_timer;
 static unsigned int throttle_percentage;
 
+static bool vcpus_destroyed;
+
 #define CPU_THROTTLE_PCT_MIN 1
 #define CPU_THROTTLE_PCT_MAX 99
 #define CPU_THROTTLE_TIMESLICE_NS 10000000
@@ -1292,7 +1294,7 @@ static void *qemu_hax_cpu_thread_fn(void *arg)
 //     cpu->created = true;
 //     cpu->halted = 0;
     current_cpu = cpu;
-
+    vcpus_destroyed = false;
     hax_init_vcpu(cpu);
 
     /* signal CPU creation */
@@ -1622,7 +1624,25 @@ void pause_all_vcpus(void)
         }
     }
 }
-
+/* HAXM does not destroy the vCPUs when exiting on Darwin,
+ * this is called from vl.c when tearing down emulator */
+#ifdef CONFIG_HAX
+void destroy_hax_vcpus()
+{
+    if (vcpus_destroyed) {
+        fprintf(stderr, "vCPUs are already destroyed\n");
+        return;
+    }
+    pause_all_vcpus();
+    CPUState *cpu;
+    CPU_FOREACH(cpu) {
+        hax_vcpu_destroy(cpu);
+    }
+    /* If someone decides to call this function after the
+     * the vCPUs have been destroyed, we won't blow up */
+    vcpus_destroyed = true;
+}
+#endif
 void cpu_resume(CPUState *cpu)
 {
     cpu->stop = false;
