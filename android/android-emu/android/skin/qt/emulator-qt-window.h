@@ -291,7 +291,8 @@ public slots:
     void showMinimized();
     void wheelScrollTimeout();
 
-    void slot_screenChanged();
+    void onScreenConfigChanged();
+    void onScreenChanged(QScreen* newScreen);
 
 private:
     static const android::base::StringView kRemoteDownloadsDir;
@@ -434,6 +435,8 @@ private:
     bool         mFrameAlways;       // true = no floating emulator
     bool         mHaveBeenFrameless;
     SkinRotation mOrientation;       // Rotation of the main window
+
+    QScreen* mCurrentScreen = nullptr;
 
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
