@@ -65,6 +65,8 @@ int hax_stop_translate(CPUState *cpu);
 int hax_vcpu_destroy(CPUState *cpu);
 void hax_raise_event(CPUState *cpu);
 void hax_reset_vcpu_state(void *opaque);
+/* Used by vl.c */
+int hax_global_vm_destroy(void);
 // #include "target-i386/hax-interface.h"
 // #include "target-i386/hax-i386.h"
 
