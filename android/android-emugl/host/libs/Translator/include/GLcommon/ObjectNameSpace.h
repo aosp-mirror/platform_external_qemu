@@ -49,7 +49,8 @@ class NameSpace
 public:
 
     NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
-            android::base::Stream* stream, ObjectData::loadObject_t loadObject);
+              android::base::Stream* stream,
+              const ObjectData::loadObject_t& loadObject);
     ~NameSpace();
 
     //
@@ -102,8 +103,8 @@ public:
     const ObjectDataPtr& getObjectDataPtr(ObjectLocalName p_localName);
     void setObjectData(ObjectLocalName p_localName, ObjectDataPtr data);
     // snapshot functions
-    void postLoad(ObjectData::getObjDataPtr_t getObjDataPtr);
-    void postLoadRestore(ObjectData::getGlobalName_t getGlobalName);
+    void postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr);
+    void postLoadRestore(const ObjectData::getGlobalName_t& getGlobalName);
     void preSave(GlobalNameSpace *globalNameSpace);
     void onSave(android::base::Stream* stream);
 private:

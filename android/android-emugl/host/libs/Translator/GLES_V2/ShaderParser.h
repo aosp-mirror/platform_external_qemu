@@ -29,7 +29,7 @@ public:
     ShaderParser(android::base::Stream* stream);
     virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
     virtual void restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) override;
+                         const getGlobalName_t& getGlobalName) override;
     void           setSrc(int esslVersion,
                           GLsizei count,
                           const GLchar* const* strings,
