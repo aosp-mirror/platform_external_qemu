@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d964c23b_06d2b413",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-06T15:58:52Z",
+      "side": 1,
+      "message": "+1 there, as long as the cpu thread fn makes it past the loop the hax vcpu should be destroyed; we should investigate why the signal is not caught by the vCPU thread (adding Yu Ning from Intel for another look)",
+      "parentUuid": "fcb60c06_f471634a",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 40
+      },
+      "revId": "304357f9182d00a03f49cb6f2e558d1382ce07f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c58c326e_46581efd",
         "filename": "cpus.c",
         "patchSetId": 2
