@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44dbd33a_f656835f",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1396,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-09-06T22:13:02Z",
+      "side": 1,
+      "message": "I am unfamiliar with this part of the code. But since the function name is onConfigChanged, should we check the configs instead?",
+      "range": {
+        "startLine": 1396,
+        "startChar": 23,
+        "endLine": 1396,
+        "endChar": 44
+      },
+      "revId": "f1311b6be52fd1d285ce65fd1d7c149f17aff068",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
