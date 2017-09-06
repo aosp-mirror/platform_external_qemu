@@ -29,6 +29,7 @@ void qtest_clock_warp(int64_t dest);
 
 #ifndef CONFIG_USER_ONLY
 /* vl.c */
+void destroy_hax_vcpus();
 /* *-user doesn't have configurable SMP topology */
 extern int smp_cores;
 extern int smp_threads;
