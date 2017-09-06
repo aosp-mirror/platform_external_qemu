@@ -566,20 +566,63 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  float dpr,
                                  float zRot,
                                  bool deleteExisting) {
-    bool success = false;
-
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
             __FUNCTION__);
         return false;
     }
 
+    // Do a quick check before even taking the lock - maybe we don't need to
+    // do anything here.
+
+    const bool createSubWindow = !m_subWin || deleteExisting;
+
+    // On Mac, since window coordinates are Y-up and not Y-down, the
+    // subwindow may not change dimensions, but because the main window
+    // did, the subwindow technically needs to be re-positioned. This
+    // can happen on rotation, so a change in Z-rotation can be checked
+    // for this case. However, this *should not* be done on Windows/Linux,
+    // because the functions used to resize a native window on those hosts
+    // will block if the shape doesn't actually change, freezing the
+    // emulator.
+    const bool moveSubWindow =
+            !createSubWindow && !(m_x == wx && m_y == wy &&
+                                  m_windowWidth == ww && m_windowHeight == wh
+#if defined(__APPLE__)
+                                  && m_zRot == zRot
+#endif
+                                );
+
+    const bool redrawSubwindow =
+            createSubWindow || moveSubWindow || m_zRot != zRot || m_dpr != dpr;
+    if (!createSubWindow && !moveSubWindow && !redrawSubwindow) {
+        assert(sInitialized.load(std::memory_order_relaxed));
+#if SNAPSHOT_PROFILE > 1
+        printf("FrameBuffer::%s(): nothing to do at %lld ms\n", __func__,
+               (long long)System::get()->getProcessTimes().wallClockMs);
+#endif
+        return true;
+    }
+
+#if SNAPSHOT_PROFILE > 1
+    printf("FrameBuffer::%s(%s): start at %lld ms\n", __func__,
+           deleteExisting ? "deleteExisting" : "keepExisting",
+           (long long)System::get()->getProcessTimes().wallClockMs);
+#endif
+
     AutoLock mutex(m_lock);
+
+#if SNAPSHOT_PROFILE > 1
+    printf("FrameBuffer::%s(): got lock at %lld ms\n", __func__,
+           (long long)System::get()->getProcessTimes().wallClockMs);
+#endif
 
     if (deleteExisting) {
         // TODO: look into reusing the existing native window when possible.
         removeSubWindow_locked();
     }
+
+    bool success = false;
 
     // If the subwindow doesn't exist, create it with the appropriate dimensions
     if (!m_subWin) {
@@ -589,8 +632,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         m_windowWidth = ww;
         m_windowHeight = wh;
 
-        m_subWin = createSubWindow(p_window, m_x, m_y, m_windowWidth,
-                                   m_windowHeight, subWindowRepaint, this);
+        m_subWin = ::createSubWindow(p_window, m_x, m_y, m_windowWidth,
+                                     m_windowHeight, subWindowRepaint, this);
         if (m_subWin) {
             m_nativeWindow = p_window;
 
@@ -612,27 +655,17 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         }
     }
 
+
     // At this point, if the subwindow doesn't exist, it is because it either
     // couldn't be created
     // in the first place or the EGLSurface couldn't be created.
-    if (m_subWin && bindSubwin_locked()) {
-        // Only attempt to update window geometry if anything has actually
-        // changed.
-        bool updateSubWindow = !(m_x == wx && m_y == wy &&
-                                 m_windowWidth == ww && m_windowHeight == wh);
-
-// On Mac, since window coordinates are Y-up and not Y-down, the
-// subwindow may not change dimensions, but because the main window
-// did, the subwindow technically needs to be re-positioned. This
-// can happen on rotation, so a change in Z-rotation can be checked
-// for this case. However, this *should not* be done on Windows/Linux,
-// because the functions used to resize a native window on those hosts
-// will block if the shape doesn't actually change, freezing the
-// emulator.
-#if defined(__APPLE__)
-        updateSubWindow |= (m_zRot != zRot);
-#endif
-        if (updateSubWindow) {
+    if (m_subWin) {
+        if (!moveSubWindow) {
+            // Ensure that at least viewport parameters are properly updated.
+            success = true;
+        } else {
+            // Only attempt to update window geometry if anything has actually
+            // changed.
             m_x = wx;
             m_y = wy;
             m_windowWidth = ww;
@@ -640,31 +673,31 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
 
             success = ::moveSubWindow(m_nativeWindow, m_subWin, m_x, m_y,
                                       m_windowWidth, m_windowHeight);
-
-            // Otherwise, ensure that at least viewport parameters are properly
-            // updated.
-        } else {
-            success = true;
         }
 
-        if (success) {
-            // Subwin creation or movement was successful,
-            // update viewport and z rotation and draw
-            // the last posted color buffer.
-            s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
-            m_dpr = dpr;
-            m_zRot = zRot;
-            if (m_lastPostedColorBuffer) {
-                post(m_lastPostedColorBuffer, false);
+        if (success && redrawSubwindow) {
+            if (!bindSubwin_locked()) {
+                success = false;
             } else {
-                s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-                                GL_STENCIL_BUFFER_BIT);
-                s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+                // Subwin creation or movement was successful,
+                // update viewport and z rotation and draw
+                // the last posted color buffer.
+                s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
+                m_dpr = dpr;
+                m_zRot = zRot;
+                if (m_lastPostedColorBuffer) {
+                    post(m_lastPostedColorBuffer, false);
+                } else {
+                    s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+                                    GL_STENCIL_BUFFER_BIT);
+                    s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+                }
+                unbind_locked();
             }
         }
-        unbind_locked();
     }
-    if (success) {
+
+    if (success && redrawSubwindow) {
         bool bindSuccess = bind_locked();
         assert(bindSuccess);
         (void)bindSuccess;
@@ -680,6 +713,11 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     AutoLock lock(sGlobals->lock);
     sInitialized.store(true, std::memory_order_relaxed);
     sGlobals->condVar.broadcastAndUnlock(&lock);
+
+#if SNAPSHOT_PROFILE > 1
+    printf("FrameBuffer::%s(): end at %lld ms\n", __func__,
+           (long long)System::get()->getProcessTimes().wallClockMs);
+#endif
 
     return success;
 }
