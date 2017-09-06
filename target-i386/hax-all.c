@@ -389,6 +389,11 @@ struct hax_vm *hax_vm_create(struct hax_state *hax)
     return NULL;
 }
 
+int hax_global_vm_destroy(void)
+{
+   return hax_vm_destroy(hax_global.vm);
+}
+
 int hax_vm_destroy(struct hax_vm *vm)
 {
     int i;
