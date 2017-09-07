@@ -22,20 +22,35 @@
 namespace android {
 namespace snapshot {
 
-class TextureSaver {
+class ITextureSaver {
+    DISALLOW_COPY_AND_ASSIGN(ITextureSaver);
+
+protected:
+    ~ITextureSaver() = default;
+
+public:
+    ITextureSaver() = default;
+
+    using Buffer = android::base::SmallVector<unsigned char>;
+    using saver_t = std::function<void(android::base::Stream*, Buffer*)>;
+
+    // Save texture to a stream as well as update the index
+    virtual void saveTexture(uint32_t texId, const saver_t& saver) = 0;
+    virtual bool hasError() const = 0;
+    virtual uint64_t diskSize() const = 0;
+};
+
+class TextureSaver final : public ITextureSaver {
     DISALLOW_COPY_AND_ASSIGN(TextureSaver);
 
 public:
     TextureSaver(android::base::StdioStream&& stream);
     ~TextureSaver();
-    using Buffer = android::base::SmallVector<unsigned char>;
-    using saver_t = std::function<void(android::base::Stream*, Buffer*)>;
-    // Save texture to mStream as well as update the index
-    void saveTexture(uint32_t texId, const saver_t& saver);
+    void saveTexture(uint32_t texId, const saver_t& saver) override;
     void done();
 
-    bool hasError() const { return mHasError; }
-    uint64_t diskSize() const { return mDiskSize; }
+    bool hasError() const override { return mHasError; }
+    uint64_t diskSize() const override { return mDiskSize; }
 
 private:
     struct FileIndex {

@@ -28,7 +28,6 @@
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
 #include "android/hw-sensors.h"
-#include "android/keymaster/Keymaster_wrapper.h"
 #include "android/car.h"
 #include "android/logcat-pipe.h"
 #include "android/opengles-pipe.h"
@@ -275,11 +274,11 @@ static bool setup_console_and_adb_ports(int console_port,
                                         bool legacy_adb,
                                         const AndroidConsoleAgents* agents) {
     bool register_adb_service = false;
-    // The guest IP that ADB listens to in legacy mode.
-    uint32_t guest_ip;
-    inet_strtoip("10.0.2.15", &guest_ip);
 
     if (legacy_adb) {
+        // The guest IP that ADB listens to in legacy mode.
+        uint32_t guest_ip;
+        inet_strtoip("10.0.2.15", &guest_ip);
         agents->net->slirpRedir(false, adb_port, guest_ip, 5555);
     } else {
         if (android_adb_server_init(adb_port) < 0) {
@@ -317,7 +316,6 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_opengles_pipe();
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
-    android_init_keymaster_pipe();
     android_init_keymaster3();
 
     if (android_op_port && android_op_ports) {

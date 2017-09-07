@@ -61,13 +61,13 @@ EglContext::EglContext(EglDisplay *dpy,
     if (m_native) {
         // When loading from a snapshot, the first context within a share group
         // will load share group data.
-        ObjectData::loadObject_t func = [&glesCtx] (NamedObjectType type,
-                        long long unsigned int localName,
-                        android::base::Stream* stream) {
-                            return glesCtx->loadObject(type, localName, stream);
-                        };
-        m_shareGroup = mngr->attachOrCreateShareGroup(m_native.get(), shareGroupId,
-                stream, func);
+        m_shareGroup = mngr->attachOrCreateShareGroup(
+                m_native.get(), shareGroupId, stream,
+                [glesCtx](NamedObjectType type,
+                          ObjectLocalName localName,
+                          android::base::Stream* stream) {
+                    return glesCtx->loadObject(type, localName, stream);
+                });
         if (stream) {
             glesCtx->setShareGroup(m_shareGroup);
             glesCtx->postLoad();

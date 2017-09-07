@@ -60,10 +60,7 @@ public:
     ~EglContext();
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
-    // TODO: return an EglContext instead of simply reading back the data
-    static bool onLoad(android::base::Stream* stream,
-                       EGLint& configId,
-                       uint64_t& shareGroupId);
+
 private:
     static unsigned int s_nextContextHndl;
     EglDisplay* m_dpy = nullptr;

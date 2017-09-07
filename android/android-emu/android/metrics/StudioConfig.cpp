@@ -28,6 +28,7 @@
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
 #include "android/utils/path.h"
+#include "android/version.h"
 
 #include <libxml/tree.h>
 
@@ -424,6 +425,38 @@ bool getUserMetricsOptIn() {
                        return false;
                    })
             .valueOr(false);
+}
+
+std::string getAnonymizationSalt() {
+    return getStudioConfigJsonValue<std::string>(
+                   "saltValue",
+                   [](StringView linePart) -> std::string {
+                       if (linePart.empty()) {
+                           return {};
+                       }
+                       auto it = linePart.begin();
+                       if (*it == '\"') {
+                           // This is a quoted string.
+                           // BTW, it doesn't support escaping as there was no
+                           // need yet.
+                           ++it;
+                           auto itEnd = it;
+                           while (itEnd != linePart.end() && *itEnd != '\"') {
+                               ++itEnd;
+                           }
+                           return std::string(it, itEnd);
+                       } else {
+                           // No quotes, just parse till the end of the value.
+                           auto itEnd = it;
+                           while (itEnd != linePart.end() && !isspace(*itEnd) &&
+                                  *itEnd != ',') {
+                               ++itEnd;
+                           }
+                           return std::string(it, itEnd);
+                       }
+
+                   })
+            .valueOr(EMULATOR_FULL_VERSION_STRING "-" EMULATOR_CL_SHA1);
 }
 
 // Forward-declare a function to use here and in the unit test.

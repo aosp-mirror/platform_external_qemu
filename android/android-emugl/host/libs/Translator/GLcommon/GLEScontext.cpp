@@ -514,16 +514,16 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_needRestoreFromSnapshot = true;
         }
     }
-    auto loader = [this](NamedObjectType type,
-                    long long unsigned int localName,
-                    android::base::Stream* stream) {
-            return loadObject(type,localName, stream);
+    ObjectData::loadObject_t loader = [this](NamedObjectType type,
+                                             long long unsigned int localName,
+                                             android::base::Stream* stream) {
+        return loadObject(type, localName, stream);
     };
     m_fboNameSpace = new NameSpace(NamedObjectType::FRAMEBUFFER,
-        globalNameSpace, stream, loader);
+                                   globalNameSpace, stream, loader);
     // do not load m_vaoNameSpace
     m_vaoNameSpace = new NameSpace(NamedObjectType::VERTEX_ARRAY_OBJECT,
-        globalNameSpace, nullptr, loader);
+                                   globalNameSpace, nullptr, loader);
 }
 
 GLEScontext::~GLEScontext() {
@@ -557,7 +557,7 @@ GLEScontext::~GLEScontext() {
     m_defaultFBO = 0;
     m_defaultReadFBO = 0;
 
-    for (auto vao : m_vaoStateMap) {
+    for (auto&& vao : m_vaoStateMap) {
         ArraysMap* map = vao.second.arraysMap;
         if (map) {
             for (auto elem : *map) {

@@ -135,6 +135,11 @@ public:
                                HandleType hndl,
                                Helper* helper);
 
+    // Sometimes things happen and we need to reformat the GL texture
+    // used. This function replaces the format of the underlying texture
+    // with the internalformat / format / type combination specified.
+    void reformat(GLint internalformat, GLenum format, GLenum type);
+
     // Destructor.
     ~ColorBuffer();
 
@@ -217,6 +222,19 @@ private:
     GLuint m_height = 0;
     GLuint m_fbo = 0;
     GLenum m_internalFormat = 0;
+
+    // |m_format| and |m_type| are for reformatting purposes only
+    // to work around bugs in the guest. No need to snapshot those.
+    bool m_needFormatCheck = true;
+    GLenum m_format = 0; // TODO: Currently we treat m_internalFormat same as
+                         // m_format, but if underlying drivers can take it,
+                         // it may be a better idea to distinguish them, with
+                         // m_internalFormat as an explicitly sized format; then
+                         // guest can specify everything in terms of explicitly
+                         // sized internal formats and things will get less
+                         // ambiguous.
+    GLenum m_type = 0;
+
     EGLDisplay m_display = nullptr;
     Helper* m_helper = nullptr;
     TextureResize* m_resizer = nullptr;

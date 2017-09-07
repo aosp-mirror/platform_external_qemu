@@ -73,8 +73,6 @@ extern const QAndroidNetAgent* const gQAndroidNetAgent;
 // Defined in android-qemu2-glue/qemu-display-agent-impl.cpp
 extern const QAndroidDisplayAgent* const gQAndroidDisplayAgent;
 
-extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
-
 extern const QCarDataAgent* const gQCarDataAgent;
 
 // Called by hw/android/goldfish/events_device.c to initialize generic event

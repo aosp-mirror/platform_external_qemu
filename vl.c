@@ -4667,6 +4667,14 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         snprintf(tmp, sizeof(tmp), "%d",
                  rendererConfig.bootPropOpenglesVersion);
         boot_property_add("ro.opengles.version", tmp);
+
+#if defined(CONFIG_VNC)
+        if ((rendererConfig.glesMode == kAndroidGlesEmulationHost) &&
+            !QTAILQ_EMPTY(&(qemu_find_opts("vnc")->head))) {
+            error_report("VNC supports only guest GPU, add \"-gpu guest\" option");
+            return 1;
+        }
+#endif
     }
 
     /* Initialize camera */

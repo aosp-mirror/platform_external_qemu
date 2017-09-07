@@ -24,7 +24,7 @@
 
 #include <cassert>
 
-using android::base::findOrDefault;
+using android::base::find;
 
 TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     // The current TextureData structure is wrong when dealing with mipmaps.
@@ -43,12 +43,12 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     compressed = stream->getByte();
     compressedFormat = stream->getBe32();
     stream->read(crop_rect, sizeof(crop_rect));
+    texStorageLevels = stream->getBe32();
     globalName = stream->getBe32();
-    loadCollection(stream, &m_texParam,
-            [](android::base::Stream* stream) {
-                GLenum item = stream->getBe32();
-                GLint val = stream->getBe32();
-                return std::make_pair(item, val);
+    loadCollection(stream, &m_texParam, [](android::base::Stream* stream) {
+        GLenum item = stream->getBe32();
+        GLint val = stream->getBe32();
+        return std::make_pair(item, val);
     });
 }
 
@@ -70,16 +70,18 @@ void TextureData::onSave(android::base::Stream* stream, unsigned int globalName)
     stream->putByte(compressed);
     stream->putBe32(compressedFormat);
     stream->write(crop_rect, sizeof(crop_rect));
+    stream->putBe32(texStorageLevels);
     stream->putBe32(globalName);
-    saveCollection(stream, m_texParam, [](android::base::Stream* stream,
-                const std::pair<const GLenum, GLint>& texParam) {
-                    stream->putBe32(texParam.first);
-                    stream->putBe32(texParam.second);
-    });
+    saveCollection(stream, m_texParam,
+                   [](android::base::Stream* stream,
+                      const std::pair<const GLenum, GLint>& texParam) {
+                       stream->putBe32(texParam.first);
+                       stream->putBe32(texParam.second);
+                   });
 }
 
 void TextureData::restore(ObjectLocalName localName,
-            getGlobalName_t getGlobalName) {
+            const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
 }
 
@@ -97,24 +99,19 @@ void TextureData::setTexParam(GLenum pname, GLint param) {
 }
 
 GLenum TextureData::getSwizzle(GLenum component) const {
-    GLenum defaultComponent = GL_ZERO;
-
+    if (const auto res = find(m_texParam, component)) {
+        return *res;
+    };
     switch (component) {
-    case GL_TEXTURE_SWIZZLE_R:
-        defaultComponent = GL_RED;
-        break;
-    case GL_TEXTURE_SWIZZLE_G:
-        defaultComponent = GL_GREEN;
-        break;
-    case GL_TEXTURE_SWIZZLE_B:
-        defaultComponent = GL_BLUE;
-        break;
-    case GL_TEXTURE_SWIZZLE_A:
-        defaultComponent = GL_ALPHA;
-        break;
-    default:
-        break;
+        case GL_TEXTURE_SWIZZLE_R:
+            return GL_RED;
+        case GL_TEXTURE_SWIZZLE_G:
+            return GL_GREEN;
+        case GL_TEXTURE_SWIZZLE_B:
+            return GL_BLUE;
+        case GL_TEXTURE_SWIZZLE_A:
+            return GL_ALPHA;
+        default:
+            return GL_ZERO;
     }
-
-    return findOrDefault(m_texParam, component, defaultComponent);
 }

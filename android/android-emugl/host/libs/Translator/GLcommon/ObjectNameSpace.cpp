@@ -27,14 +27,14 @@
 
 #include <assert.h>
 
-using android::snapshot::TextureSaver;
-using android::snapshot::TextureLoader;
-using android::snapshot::TextureSaverPtr;
-using android::snapshot::TextureLoaderPtr;
-using android::snapshot::TextureLoaderWPtr;
+using android::snapshot::ITextureSaver;
+using android::snapshot::ITextureLoader;
+using android::snapshot::ITextureSaverPtr;
+using android::snapshot::ITextureLoaderPtr;
+using android::snapshot::ITextureLoaderWPtr;
 
 NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
-        android::base::Stream* stream, ObjectData::loadObject_t loadObject) :
+        android::base::Stream* stream, const ObjectData::loadObject_t& loadObject) :
     m_type(p_type),
     m_globalNameSpace(globalNameSpace) {
     if (!stream) return;
@@ -64,7 +64,7 @@ NameSpace::NameSpace(NamedObjectType p_type, GlobalNameSpace *globalNameSpace,
 NameSpace::~NameSpace() {
 }
 
-void NameSpace::postLoad(ObjectData::getObjDataPtr_t getObjDataPtr) {
+void NameSpace::postLoad(const ObjectData::getObjDataPtr_t& getObjDataPtr) {
     for (const auto& objData : m_objectDataMap) {
         objData.second->postLoad(getObjDataPtr);
     }
@@ -83,7 +83,7 @@ void NameSpace::touchTextures() {
     }
 }
 
-void NameSpace::postLoadRestore(ObjectData::getGlobalName_t getGlobalName) {
+void NameSpace::postLoadRestore(const ObjectData::getGlobalName_t& getGlobalName) {
     // Texture data are special, they got the global name from SaveableTexture
     // This is because texture data can be shared across multiple share groups
     if (m_type == NamedObjectType::TEXTURE) {
@@ -262,7 +262,7 @@ void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
 }
 
 void GlobalNameSpace::onSave(android::base::Stream* stream,
-                             const TextureSaverPtr& textureSaver,
+                             const ITextureSaverPtr& textureSaver,
                              SaveableTexture::saver_t saver) {
     saveCollection(
             stream, m_textureMap,
@@ -274,7 +274,7 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
                 textureSaver->saveTexture(
                         tex.first,
                         [saver, &tex](android::base::Stream* stream,
-                                      TextureSaver::Buffer* buffer) {
+                                      ITextureSaver::Buffer* buffer) {
                             saver(tex.second.get(), stream, buffer);
                         });
             });
@@ -282,9 +282,9 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
 }
 
 void GlobalNameSpace::onLoad(android::base::Stream* stream,
-                             const TextureLoaderWPtr& textureLoaderWPtr,
+                             const ITextureLoaderWPtr& textureLoaderWPtr,
                              SaveableTexture::creator_t creator) {
-    const TextureLoaderPtr textureLoader = textureLoaderWPtr.lock();
+    const ITextureLoaderPtr textureLoader = textureLoaderWPtr.lock();
     assert(m_textureMap.size() == 0);
     if (!textureLoader->start()) {
         fprintf(stderr,
@@ -303,8 +303,7 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
                 SaveableTexture* saveableTexture = creator(
                         this, [globalName, textureLoaderWPtr](
                                       SaveableTexture* saveableTexture) {
-                            TextureLoaderPtr textureLoader =
-                                textureLoaderWPtr.lock();
+                            auto textureLoader = textureLoaderWPtr.lock();
                             if (!textureLoader) return;
                             textureLoader->loadTexture(
                                     globalName,

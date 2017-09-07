@@ -105,7 +105,7 @@ void GLESbuffer::onSave(android::base::Stream* stream,
 }
 
 void GLESbuffer::restore(ObjectLocalName localName,
-        getGlobalName_t getGlobalName) {
+        const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     int globalName = getGlobalName(NamedObjectType::VERTEXBUFFER, localName);
