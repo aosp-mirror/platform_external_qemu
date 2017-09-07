@@ -147,6 +147,7 @@ const char*  avdInfo_getName( const AvdInfo*  i );
  * value (e.g. 1000) if this value cannot be properly
  * determined (e.g. you're using an AVD from a preview SDK)
  */
+static const int kUnknownApiLevel = 1000;
 int    avdInfo_getApiLevel( const AvdInfo*  i );
 
 /* Return the "dessert name" associated with the
