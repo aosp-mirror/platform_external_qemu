@@ -22,6 +22,30 @@
       "revId": "47385f9ba69ca47735a66899395137c29b478dd7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "44ea2221_23447841",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-07T17:24:28Z",
+      "side": 1,
+      "message": "I agree it\u0027s a risk broadly speaking, but there are some restrictions on when this will occur:\n\n1. The use case (and trigger for this happening) should be restricted to that version of the system image, with Youtube.\n\n2. Data doesn\u0027t get uploaded to the image unless rcUpdateColorBuffer (gralloc_unlock) is called, and reformat only happens on the first call to rcUpdateColorBuffer, so we are OK there, unless apps only update the subrectangle and rely on uninitialized texture data outside it.\n\n3. We also don\u0027t use anything other than level 0 for ColorBuffers.",
+      "parentUuid": "59b8bfd7_8da6ac14",
+      "range": {
+        "startLine": 278,
+        "startChar": 12,
+        "endLine": 278,
+        "endChar": 20
+      },
+      "revId": "47385f9ba69ca47735a66899395137c29b478dd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
