@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  * QEMU ARM CPU -- internal functions and types
  *
@@ -488,3 +489,5 @@ static inline void arm_call_el_change_hook(ARMCPU *cpu)
 }
 
 #endif
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

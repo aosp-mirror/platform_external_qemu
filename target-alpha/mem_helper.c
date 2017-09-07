@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  Helpers for loads and stores
  *
@@ -90,3 +91,5 @@ void tlb_fill(CPUState *cs, target_ulong addr, MMUAccessType access_type,
     }
 }
 #endif /* CONFIG_USER_ONLY */
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
