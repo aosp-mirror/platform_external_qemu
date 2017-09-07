@@ -29,6 +29,7 @@ extern "C" {
 #include "qapi/qmp/qstring.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
+#include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
 }
 
@@ -310,9 +311,12 @@ extern "C" int hvf_enabled(void);
 static void get_vm_config(VmConfiguration* out) {
     out->numberOfCpuCores = smp_cpus * smp_cores * smp_threads;
     out->ramSizeBytes = int64_t(ram_size);
+#ifdef CONFIG_HAX
     if (hax_enabled()) {
         out->hypervisorType = HV_HAXM;
-    } else if (hvf_enabled()) {
+    } else
+#endif
+      if (hvf_enabled()) {
         out->hypervisorType = HV_HVF;
     } else if (kvm_enabled()) {
         out->hypervisorType = HV_KVM;
