@@ -15,6 +15,7 @@
 #include "android/cmdline-option.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
@@ -206,30 +207,57 @@ bool Quickboot::save(StringView name) {
         name = kDefaultBootSnapshot;
     }
 
+    const int kMinUptimeForSavingMs = 1500;
+    const auto nowMs = System::get()->getHighResTimeUs() / 1000;
+    const auto sessionUptimeMs = nowMs - mLoadTimeMs;
+    const bool hasStateToSave = sessionUptimeMs > kMinUptimeForSavingMs;
+
+    // TODO: detect if emulator was restarted since loading.
+    const bool shouldTrySaving =
+            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted();
+
+    const int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+
     if (android_cmdLineOptions->no_snapshot_save) {
         dwarning("Discarding the changed state (command-line flag).");
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
-        // Preserve the state changes - we've ran for a while now
-        // and the AVD state is different from what could be saved in
-        // the default boot snapshot.
+        if (shouldTrySaving && hasStateToSave) {
+            // Preserve the state changes - we've ran for a while now
+            // and the AVD state is different from what could be saved in
+            // the default boot snapshot.
+            dwarning(
+                    "Cleaning out the default boot snapshot to preserve the "
+                    "current session (renderer type '%s' (%d) doesn't support "
+                    "snapshotting).",
+                    emuglConfig_renderer_to_string(
+                            emuglConfig_get_current_renderer()),
+                    int(emuglConfig_get_current_renderer()));
+            Snapshotter::get().deleteSnapshot(name.c_str());
+        } else {
+            dwarning(
+                    "Skipping boot snapshot saving (renderer type '%s' (%d) "
+                    "doesn't support snapshotting).",
+                    emuglConfig_renderer_to_string(
+                            emuglConfig_get_current_renderer()),
+                    int(emuglConfig_get_current_renderer()));
+        }
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
+    } else if (apiLevel == kUnknownApiLevel || apiLevel < 19) {
+        // Clean up the boot snapshot here as we don't expect the API level
+        // to change back to the old value where the saved snapshot was relevant
         dwarning(
                 "Cleaning out the default boot snapshot to preserve the "
-                "current session (renderer type '%s' (%d) doesn't support "
-                "snapshotting).",
-                emuglConfig_renderer_to_string(
-                        emuglConfig_get_current_renderer()),
-                int(emuglConfig_get_current_renderer()));
+                "current session (quick boot requires API level 19+, got %d).",
+                apiLevel);
         Snapshotter::get().deleteSnapshot(name.c_str());
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
     } else {
-        const int kMinUptimeForSavingMs = 1500;
-        const auto nowMs = System::get()->getHighResTimeUs() / 1000;
-        const auto sessionUptimeMs = nowMs - mLoadTimeMs;
-        if (sessionUptimeMs > kMinUptimeForSavingMs) {
-            if (mLoaded || androidSnapshot_canSave()) {
+        if (hasStateToSave) {
+            if (shouldTrySaving) {
                 dprint("Saving state on exit with session uptime %d ms",
                        int(sessionUptimeMs));
                 Stopwatch sw;
