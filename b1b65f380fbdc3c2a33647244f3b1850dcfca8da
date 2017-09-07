@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b112f462_51314d96",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "26a32c18_d26f90f6",
+      "range": {
+        "startLine": 60,
+        "startChar": 1,
+        "endLine": 61,
+        "endChar": 19
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "33b9fbee_5c85c138",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2017-09-07T18:19:00Z",
       "side": 1,
       "message": "Same, you shouldn\u0027t have to cleanup",
+      "range": {
+        "startLine": 64,
+        "startChar": 2,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9bec5531_2378edf7",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33b9fbee_5c85c138",
       "range": {
         "startLine": 64,
         "startChar": 2,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "981b4d7c_b936d50b",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "94dd6732_37079dcd",
+      "range": {
+        "startLine": 66,
+        "startChar": 2,
+        "endLine": 67,
+        "endChar": 85
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1c8ea86c_0f0c3795",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 8
@@ -82,6 +154,30 @@
       "writtenOn": "2017-09-07T18:19:00Z",
       "side": 1,
       "message": "It would be cleaner to build the packages in a temp directory created with \u0027mktemp -d\u0027 and only copy the final package files at the end to a more permanent location.",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 44
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "633dba22_f7eeb0e1",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "OK.Now I just keep permanent file here.",
+      "parentUuid": "1c8ea86c_0f0c3795",
       "range": {
         "startLine": 77,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "b57d8b31_191c585b",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0709943_9d4a525a",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 11
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b72a89a7_d39afb9e",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 8
@@ -128,6 +248,30 @@
       "writtenOn": "2017-09-07T18:19:00Z",
       "side": 1,
       "message": "It would be nice to print something there:\n\"Detected \u0027latest\u0027 emulator is version xxxx\"",
+      "range": {
+        "startLine": 81,
+        "startChar": 2,
+        "endLine": 81,
+        "endChar": 5
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "052ed085_c68f411c",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b72a89a7_d39afb9e",
       "range": {
         "startLine": 81,
         "startChar": 2,
@@ -157,6 +301,24 @@
     },
     {
       "key": {
+        "uuid": "73069ed0_644467c5",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "993fed7f_d090c16b",
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a0ff8a41_dcfc7b4f",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 8
@@ -180,6 +342,30 @@
     },
     {
       "key": {
+        "uuid": "b4eaf26f_8b087fa7",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Later this month, I will change to downloaded emulator from emu-2.5-release branch before emu-2.5-release get pushed to users. We still need to pull these xml files from our emu-2.4-arc branch since we won\u0027t check in them upstream.",
+      "parentUuid": "a0ff8a41_dcfc7b4f",
+      "range": {
+        "startLine": 111,
+        "startChar": 69,
+        "endLine": 111,
+        "endChar": 80
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ecedf4da_a8d47e93",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 8
@@ -191,6 +377,24 @@
       "writtenOn": "2017-09-07T18:19:00Z",
       "side": 1,
       "message": "Print \"Success\" at the end, and exit 0.",
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bd9896a_8aafa008",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T19:25:32Z",
+      "side": 1,
+      "message": "Add echo Sueccess. exit 0 is non-neccessary since by default it\u0027s 0.",
+      "parentUuid": "ecedf4da_a8d47e93",
       "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
