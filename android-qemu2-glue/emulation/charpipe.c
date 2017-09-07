@@ -70,7 +70,7 @@ bip_buffer_free( BipBuffer*  bip )
 
 /* this models each half of the charpipe */
 typedef struct CharPipeHalf {
-    CharDriverState*      cs;
+    Chardev*      cs;
     BipBuffer*            bip_first;
     BipBuffer*            bip_last;
     struct CharPipeHalf*  peer;         /* NULL if closed */
@@ -79,9 +79,9 @@ typedef struct CharPipeHalf {
 
 
 static void
-charpipehalf_free( CharDriverState*  cs )
+charpipehalf_free( Chardev*  cs )
 {
-    CharPipeHalf*  ph = cs->opaque;
+    CharPipeHalf*  ph = cs->be->opaque;
 
     while (ph->bip_first) {
         BipBuffer*  bip = ph->bip_first;
@@ -95,9 +95,9 @@ charpipehalf_free( CharDriverState*  cs )
 
 
 static int
-charpipehalf_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
+charpipehalf_write( Chardev*  cs, const uint8_t*  buf, int  len )
 {
-    CharPipeHalf*  ph   = cs->opaque;
+    CharPipeHalf*  ph   = cs->be->opaque;
     CharPipeHalf*  peer = ph->peer;
     BipBuffer*     bip  = ph->bip_last;
     int            ret  = 0;
@@ -205,18 +205,18 @@ charpipehalf_poll( CharPipeHalf*  ph )
 static void
 charpipehalf_init( CharPipeHalf*  ph, CharPipeHalf*  peer )
 {
-    ChardevCommon backend = {};
+    ChardevBackend backend = {};
     Error* error = NULL;
-    CharDriverState* cs = qemu_chr_alloc(&backend, &error);
+    Chardev* cs = qemu_chardev_new(NULL, "chardev-pipe", &backend, &error);
+    ChardevClass* be = CHARDEV_CLASS(cs);
 
     ph->bip_first   = NULL;
     ph->bip_last    = NULL;
     ph->peer        = peer;
 
-    cs->chr_write            = charpipehalf_write;
-    cs->chr_ioctl            = NULL;
-    cs->chr_free             = charpipehalf_free;
-    cs->opaque               = ph;
+    be->chr_write            = charpipehalf_write;
+    // be->chr_free             = charpipehalf_free;
+    cs->be->opaque               = ph;
 
     ph->cs = cs;
 }
@@ -234,7 +234,7 @@ typedef struct CharPipeState {
 static CharPipeState  _s_charpipes[ MAX_CHAR_PIPES ];
 
 int
-qemu_chr_open_charpipe( CharDriverState*  *pfirst, CharDriverState*  *psecond )
+qemu_chr_open_charpipe( Chardev*  *pfirst, Chardev*  *psecond )
 {
     CharPipeState*  cp     = _s_charpipes;
     CharPipeState*  cp_end = cp + MAX_CHAR_PIPES;
@@ -259,7 +259,7 @@ qemu_chr_open_charpipe( CharDriverState*  *pfirst, CharDriverState*  *psecond )
 }
 
 /** This models a charbuffer, an object used to buffer
- ** the data that is sent to a given endpoint CharDriverState
+ ** the data that is sent to a given endpoint Chardev
  ** object.
  **
  ** On the other hand, any can_read() / read() request performed
@@ -268,18 +268,18 @@ qemu_chr_open_charpipe( CharDriverState*  *pfirst, CharDriverState*  *psecond )
  **/
 
 typedef struct CharBuffer {
-    CharDriverState  cs[1];
+    Chardev  cs[1];
     BipBuffer*       bip_first;
     BipBuffer*       bip_last;
-    CharDriverState* endpoint;  /* NULL if closed */
+    Chardev* endpoint;  /* NULL if closed */
     char             closing;
 } CharBuffer;
 
 
 static void
-charbuffer_close( CharDriverState*  cs )
+charbuffer_close( Chardev*  cs )
 {
-    CharBuffer*  cbuf = cs->opaque;
+    CharBuffer*  cbuf = cs->be->opaque;
 
     while (cbuf->bip_first) {
         BipBuffer*  bip = cbuf->bip_first;
@@ -296,10 +296,10 @@ charbuffer_close( CharDriverState*  cs )
 }
 
 static int
-charbuffer_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
+charbuffer_write( Chardev*  cs, const uint8_t*  buf, int  len )
 {
-    CharBuffer*       cbuf = cs->opaque;
-    CharDriverState*  peer = cbuf->endpoint;
+    CharBuffer*       cbuf = cs->be->opaque;
+    Chardev*  peer = cbuf->endpoint;
     BipBuffer*        bip  = cbuf->bip_last;
     int               ret  = 0;
 
@@ -350,7 +350,7 @@ charbuffer_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
 static void
 charbuffer_poll( CharBuffer*  cbuf )
 {
-    CharDriverState*  peer = cbuf->endpoint;
+    Chardev*  peer = cbuf->endpoint;
 
     if (peer == NULL)
         return;
@@ -389,7 +389,7 @@ charbuffer_poll( CharBuffer*  cbuf )
 
 
 static void
-charbuffer_update_handlers( CharDriverState*  cs, GMainContext* context )
+charbuffer_update_handlers( Chardev*  cs, GMainContext* context )
 {
     CharBackend*  be = cs->be;
 
@@ -404,9 +404,11 @@ charbuffer_update_handlers( CharDriverState*  cs, GMainContext* context )
 
 
 static void
-charbuffer_init( CharBuffer*  cbuf, CharDriverState*  endpoint )
+charbuffer_init( CharBuffer*  cbuf, Chardev*  endpoint )
 {
-    CharDriverState*  cs = cbuf->cs;
+    Chardev*  cd     = cbuf->cs;
+    CharBackend* cb  = cd->be;
+    ChardevClass* cs = CHARDEV_GET_CLASS(cd);
 
     cbuf->bip_first   = NULL;
     cbuf->bip_last    = NULL;
@@ -414,17 +416,17 @@ charbuffer_init( CharBuffer*  cbuf, CharDriverState*  endpoint )
 
     cs->chr_write               = charbuffer_write;
     cs->chr_ioctl               = NULL;
-    cs->chr_free                = charbuffer_close;
+    // cs->chr_free                = charbuffer_close;
     cs->chr_update_read_handler = charbuffer_update_handlers;
-    cs->opaque                  = cbuf;
+    cb->opaque                  = cbuf;
 }
 
 #define MAX_CHAR_BUFFERS  8
 
 static CharBuffer  _s_charbuffers[ MAX_CHAR_BUFFERS ];
 
-CharDriverState*
-qemu_chr_open_buffer( CharDriverState*  endpoint )
+Chardev*
+qemu_chr_open_buffer( Chardev*  endpoint )
 {
     CharBuffer*  cbuf     = _s_charbuffers;
     CharBuffer*  cbuf_end = cbuf + MAX_CHAR_BUFFERS;

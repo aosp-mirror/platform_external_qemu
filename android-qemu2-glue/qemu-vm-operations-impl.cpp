@@ -29,6 +29,7 @@ extern "C" {
 #include "qapi/qmp/qstring.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/kvm.h"
+#include "sysemu/cpus.h"
 #include "exec/cpu-common.h"
 }
 

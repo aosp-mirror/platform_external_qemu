@@ -175,7 +175,58 @@ LOCAL_GENERATED_SOURCES += \
     $(QEMU2_AUTO_GENERATED_DIR)/qapi-visit.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qmp-introspect.c \
     $(QEMU2_AUTO_GENERATED_DIR)/qmp-marshal.c \
-    $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-tracers.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/trace/generated-tcg-tracers.h \
+	$(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers-wrappers.h \
+	$(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers.h \
+	$(QEMU2_AUTO_GENERATED_DIR)/trace-root.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/util/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/crypto/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/io/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/migration/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/block/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/backends/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/block/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/block/dataplane/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/char/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/intc/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/net/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/virtio/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/audio/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/misc/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/usb/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/scsi/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/nvram/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/display/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/input/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/timer/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/dma/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/sparc/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/sd/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/isa/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/mem/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/i386/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/i386/xen/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/9pfs/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/ppc/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/pci/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/s390x/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/vfio/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/acpi/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/arm/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/alpha/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/hw/xen/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/ui/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/audio/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/net/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/target/arm/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/target/i386/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/target/mips/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/target/sparc/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/target/s390x/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/target/ppc/trace.c \
+	$(QEMU2_AUTO_GENERATED_DIR)/qom/trace.c \
+	#
+	# $(QEMU2_AUTO_GENERATED_DIR)/trace/generated-helpers.c \
 
 # Stuff from libqemuutil, order follows util/Makefile.objs
 LOCAL_SRC_FILES += \
