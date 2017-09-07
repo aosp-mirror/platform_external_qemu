@@ -1,0 +1,199 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26a32c18_d26f90f6",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "\"${package_dir}\" has just been created, there shouldn\u0027t be a need to cleanup. Is it because of previous runs of the script?\nUsing temporary directories instead of always ${HOME}/chromeos_emulator should help.",
+      "range": {
+        "startLine": 60,
+        "startChar": 1,
+        "endLine": 61,
+        "endChar": 19
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "33b9fbee_5c85c138",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "Same, you shouldn\u0027t have to cleanup",
+      "range": {
+        "startLine": 64,
+        "startChar": 2,
+        "endLine": 64,
+        "endChar": 22
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94dd6732_37079dcd",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "Can you add a comment explaining that by default zip will dereference the symlink? I thought it was the opposite (same as tar) and was very confused.",
+      "range": {
+        "startLine": 66,
+        "startChar": 2,
+        "endLine": 67,
+        "endChar": 85
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1c8ea86c_0f0c3795",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "It would be cleaner to build the packages in a temp directory created with \u0027mktemp -d\u0027 and only copy the final package files at the end to a more permanent location.",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 44
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c0709943_9d4a525a",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "CROS_MAJOR_VERSION or CROS_MILESTONE would be a better name I think",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 11
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b72a89a7_d39afb9e",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "It would be nice to print something there:\n\"Detected \u0027latest\u0027 emulator is version xxxx\"",
+      "range": {
+        "startLine": 81,
+        "startChar": 2,
+        "endLine": 81,
+        "endChar": 5
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "993fed7f_d090c16b",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "Same, a message here describing the relevant parameters (various version numbers), both give by the user and auto-detected. It helps as a sanity check to show the user what the script is doing.\nSomething like\n\"Packaging emulator version xxx-yyy with Chrome OS version zzz-nnn for targets mac/win/linux)\"",
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0ff8a41_dcfc7b4f",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "\"${BRANCH}\" ?",
+      "range": {
+        "startLine": 111,
+        "startChar": 69,
+        "endLine": 111,
+        "endChar": 80
+      },
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ecedf4da_a8d47e93",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 8
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-07T18:19:00Z",
+      "side": 1,
+      "message": "Print \"Success\" at the end, and exit 0.",
+      "revId": "b1b65f380fbdc3c2a33647244f3b1850dcfca8da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
