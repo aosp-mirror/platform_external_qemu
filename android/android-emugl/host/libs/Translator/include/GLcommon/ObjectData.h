@@ -55,12 +55,12 @@ public:
             getGlobalName_t;
     // postLoad: setup references after loading all ObjectData from snapshot
     // in one share group
-    virtual void postLoad(getObjDataPtr_t getObjDataPtr);
+    virtual void postLoad(const getObjDataPtr_t& getObjDataPtr);
     // restore: restore object data back to hardware GPU.
     //          It must be called before restoring hardware context states,
     //          because it messes up context object bindings.
     virtual void restore(ObjectLocalName localName,
-            getGlobalName_t getGlobalName) = 0;
+                         const getGlobalName_t& getGlobalName) = 0;
     virtual GenNameInfo getGenNameInfo() const;
     bool needRestore() const;
 private:

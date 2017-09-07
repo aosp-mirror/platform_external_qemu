@@ -54,7 +54,6 @@ struct SkinUI {
     SkinImage*             onion;
     SkinRotation           onion_rotation;
     int                    onion_alpha;
-
 };
 
 static SkinLayout* skin_file_select_layout(SkinLayout* layouts,
@@ -243,6 +242,19 @@ void skin_ui_update_rotation(SkinUI* ui, SkinRotation rotation) {
     skin_window_update_rotation(ui->window, rotation);
 }
 
+bool skin_ui_rotate(SkinUI* ui, SkinRotation rotation) {
+    SkinLayout* l;
+    for (l = ui->layout_file->layouts;
+         l;
+         l = l->next) {
+        if (l->orientation == rotation) {
+            skin_ui_switch_to_layout(ui, l);
+            return true;
+        }
+    }
+    return false;
+}
+
 bool skin_ui_process_events(SkinUI* ui) {
     SkinEvent ev;
 
@@ -294,20 +306,9 @@ bool skin_ui_process_events(SkinUI* ui) {
             skin_window_process_event(ui->window, &ev);
             break;
         case kEventLayoutRotate:
-            {
-                DE("EVENT: kEventLayoutRotate orientation=%d\n",
-                   ev.u.layout_rotation.rotation);
-                SkinRotation rot = ev.u.layout_rotation.rotation;
-                SkinLayout* l;
-                for (l = ui->layout_file->layouts;
-                     l;
-                     l = l->next) {
-                    if (l->orientation == rot) {
-                        skin_ui_switch_to_layout(ui, l);
-                        break;
-                    }
-                }
-            }
+            DE("EVENT: kEventLayoutRotate orientation=%d\n",
+                ev.u.layout_rotation.rotation);
+            skin_ui_rotate(ui, ev.u.layout_rotation.rotation);
             break;
         case kEventMouseButtonDown:
         case kEventMouseButtonUp:

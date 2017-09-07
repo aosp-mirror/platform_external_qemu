@@ -76,6 +76,8 @@ Loader::~Loader() {
     }
 }
 
+ITextureLoaderPtr Loader::textureLoader() const { return mTextureLoader; }
+
 void Loader::complete(bool succeeded) {
     mStatus = OperationStatus::Error;
     if (!succeeded) {

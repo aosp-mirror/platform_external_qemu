@@ -81,7 +81,7 @@ void ShaderParser::onSave(android::base::Stream* stream, unsigned int globalName
 }
 
 void ShaderParser::restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) {
+           const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
     if (m_parsedSrc.empty()) return;
     int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,

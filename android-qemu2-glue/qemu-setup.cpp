@@ -121,7 +121,8 @@ bool qemu_android_emulation_early_setup() {
         return false;
     }
 
-    androidSnapshot_initialize(gQAndroidVmOperations);
+    androidSnapshot_initialize(gQAndroidVmOperations,
+                               gQAndroidEmulatorWindowAgent);
     qemu_snapshot_compression_setup();
 
     android::emulation::AudioCaptureEngine::set(

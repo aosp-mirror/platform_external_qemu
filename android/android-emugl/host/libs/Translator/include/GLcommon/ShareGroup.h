@@ -116,7 +116,7 @@ private:
     explicit ShareGroup(GlobalNameSpace *globalNameSpace,
                         uint64_t sharedGroupID,
                         android::base::Stream* stream,
-                        ObjectData::loadObject_t loadObject);
+                        const ObjectData::loadObject_t& loadObject);
 
     void lockObjectData();
     void unlockObjectData();
@@ -178,7 +178,7 @@ public:
     //                      new ID.
 
     ShareGroupPtr createShareGroup(void *p_groupName, uint64_t sharedGroupID,
-        android::base::Stream* stream, ObjectData::loadObject_t loadObject);
+        android::base::Stream* stream, const ObjectData::loadObject_t& loadObject);
 
     //
     // attachShareGroup - find the ShareGroup object attached to the ID
@@ -188,7 +188,7 @@ public:
     ShareGroupPtr attachShareGroup(void *p_groupName, void *p_existingGroupName);
     ShareGroupPtr attachOrCreateShareGroup(void *p_groupName,
         uint64_t p_existingGroupID, android::base::Stream* stream,
-        ObjectData::loadObject_t loadObject);
+        const ObjectData::loadObject_t& loadObject);
 
     //
     // getShareGroup - retreive a ShareGroup object based on its "name"

@@ -50,7 +50,7 @@ void RenderbufferData::onSave(android::base::Stream* stream, unsigned int global
 }
 
 void RenderbufferData::restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) {
+           const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
     int globalName = getGlobalName(NamedObjectType::RENDERBUFFER,
             localName);
@@ -115,7 +115,7 @@ void FramebufferData::onSave(android::base::Stream* stream, unsigned int globalN
     stream->putBe32(m_readBuffer);
 }
 
-void FramebufferData::postLoad(getObjDataPtr_t getObjDataPtr) {
+void FramebufferData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
     for (auto& attachPoint : m_attachPoints) {
         if (NamedObjectType::NULLTYPE != attachPoint.objType) {
             attachPoint.obj = getObjDataPtr(attachPoint.objType,
@@ -132,7 +132,7 @@ void FramebufferData::postLoad(getObjDataPtr_t getObjDataPtr) {
 }
 
 void FramebufferData::restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) {
+           const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
     if (!hasBeenBoundAtLeastOnce()) return;
     int globalName = getGlobalName(NamedObjectType::FRAMEBUFFER,

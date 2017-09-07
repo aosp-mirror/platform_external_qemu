@@ -193,7 +193,7 @@ public:
     virtual void init(EGLiface* eglIface);
     GLenum getGLerror();
     void setGLerror(GLenum err);
-    void setShareGroup(ShareGroupPtr grp){m_shareGroup = grp;};
+    void setShareGroup(ShareGroupPtr grp){m_shareGroup = std::move(grp);};
     const ShareGroupPtr& shareGroup() const { return m_shareGroup; }
     virtual void setActiveTexture(GLenum tex);
     unsigned int getBindedTexture(GLenum target);

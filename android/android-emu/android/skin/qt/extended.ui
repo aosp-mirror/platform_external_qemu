@@ -896,7 +896,7 @@ padding: 10px 0px 10px 16px;</string>
       <item>
        <widget class="QPushButton" name="recordScreenButton">
         <property name="visible">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="font">
          <font>

@@ -424,11 +424,10 @@ static void emulator_window_refresh(EmulatorWindow* emulator)
     * has changed */
     qframebuffer_check_updates();
 
-    if (emulator->ui) {
+    if (emulator->ui && !emulator->done) {
         if (skin_ui_process_events(emulator->ui)) {
             // Quit program.
-            skin_ui_free(emulator->ui);
-            emulator->ui = NULL;
+            emulator->done = true;
             qemu_system_shutdown_request();
         }
     }
@@ -471,4 +470,11 @@ bool emulator_window_rotate_90_clockwise(void) {
         return true;
     }
     return false;
+}
+
+bool emulator_window_rotate(SkinRotation rot) {
+    if (!qemulator->ui) {
+        return false;
+    }
+    return skin_ui_rotate(qemulator->ui, rot);
 }

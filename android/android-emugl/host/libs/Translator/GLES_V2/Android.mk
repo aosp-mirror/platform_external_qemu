@@ -22,6 +22,6 @@ LOCAL_SRC_FILES := $(host_common_SRC_FILES)
 # ANGLE shader translation is not supported on Windows yet.
 LOCAL_C_INCLUDES += $(ANGLE_TRANSLATION_INCLUDES)
 LOCAL_STATIC_LIBRARIES += $(ANGLE_TRANSLATION_STATIC_LIBRARIES) \
-    android-emu android-emu-base
+    android-emu-base
 
 $(call emugl-end-module)

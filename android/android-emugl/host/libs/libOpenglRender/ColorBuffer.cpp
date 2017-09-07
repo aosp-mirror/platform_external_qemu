@@ -80,9 +80,16 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     int bytesPerPixel = 3;
     switch (p_internalFormat) {
         case GL_RGB:
-        case GL_RGB565_OES:
             texInternalFormat = GL_RGB;
             bytesPerPixel = 3;
+            break;
+
+        case GL_RGB565_OES: // and GL_RGB565
+            // Still say "GL_RGB" for compatibility
+            // with older drivers
+            texInternalFormat = GL_RGB;
+            pixelType = GL_UNSIGNED_SHORT_5_6_5;
+            bytesPerPixel = 2;
             break;
 
         case GL_RGBA:
@@ -163,6 +170,8 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     cb->m_width = p_width;
     cb->m_height = p_height;
     cb->m_internalFormat = texInternalFormat;
+    cb->m_format = texInternalFormat;
+    cb->m_type = pixelType;
 
     cb->m_eglImage = s_egl.eglCreateImageKHR(
             p_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
@@ -239,6 +248,17 @@ void ColorBuffer::readPixels(int x,
     }
 }
 
+void ColorBuffer::reformat(GLint internalformat,
+                           GLenum format, GLenum type) {
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
+                         0, format, type, nullptr);
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    m_internalFormat = internalformat;
+    m_format = format;
+    m_type = type;
+}
+
 void ColorBuffer::subUpdate(int x,
                             int y,
                             int width,
@@ -252,6 +272,14 @@ void ColorBuffer::subUpdate(int x,
     }
 
     touch();
+
+    if (m_needFormatCheck) {
+        if (p_type != m_type || p_format != m_format) {
+            reformat((GLint)p_format, p_format, p_type);
+        }
+        m_needFormatCheck = false;
+    }
+
     if (m_frameworkFormat == FRAMEWORK_FORMAT_YV12 ||
         m_frameworkFormat == FRAMEWORK_FORMAT_YUV_420_888) {
         assert(m_yuv_converter.get());
@@ -267,6 +295,7 @@ void ColorBuffer::subUpdate(int x,
     } else {
         s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
         s_gles2.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format,
                                 p_type, pixels);
     }

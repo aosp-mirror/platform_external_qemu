@@ -177,7 +177,7 @@ GLESpointer::GLESpointer(android::base::Stream* stream) {
     m_normalize = stream->getByte();
     m_attribType = (GLESpointer::AttribType)stream->getByte();
     m_bufferName = stream->getBe32();
-    if (!m_bufferName) {
+    if (m_attribType == BUFFER) {
         m_dataSize = stream->getBe32();
         m_ownData.resize(m_dataSize);
         stream->read(m_ownData.data(), m_dataSize);
@@ -200,7 +200,7 @@ void GLESpointer::onSave(android::base::Stream* stream) const {
     stream->putByte(m_normalize);
     stream->putByte(m_attribType);
     stream->putBe32(m_bufferName);
-    if (!m_bufferName) {
+    if (m_attribType == BUFFER) {
         stream->putBe32(m_dataSize);
         stream->write(m_data, m_dataSize);
     }

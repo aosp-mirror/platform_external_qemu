@@ -240,7 +240,7 @@ void RendererImpl::resumeAll() {
 }
 
 void RendererImpl::save(android::base::Stream* stream,
-                        const android::snapshot::TextureSaverPtr& textureSaver) {
+                        const android::snapshot::ITextureSaverPtr& textureSaver) {
     stream->putByte(mStopped);
     if (mStopped) {
         return;
@@ -253,7 +253,7 @@ void RendererImpl::save(android::base::Stream* stream,
 }
 
 bool RendererImpl::load(android::base::Stream* stream,
-                        const android::snapshot::TextureLoaderPtr& textureLoader) {
+                        const android::snapshot::ITextureLoaderPtr& textureLoader) {
 #ifdef SNAPSHOT_PROFILE
     android::base::System::Duration startTime
             = android::base::System::get()->getUnixTimeUs();

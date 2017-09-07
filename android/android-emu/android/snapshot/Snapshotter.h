@@ -19,6 +19,7 @@
 #include "android/snapshot/common.h"
 
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 
 #include <functional>
 #include <string>
@@ -36,7 +37,8 @@ public:
     ~Snapshotter();
     static Snapshotter& get();
 
-    void initialize(const QAndroidVmOperations& vmOperations);
+    void initialize(const QAndroidVmOperations& vmOperations,
+                    const QAndroidEmulatorWindowAgent& windowAgent);
 
     OperationStatus prepareForLoading(const char* name);
     OperationStatus load(const char* name);
@@ -52,6 +54,7 @@ public:
     Loader& loader() { return *mLoader; }
 
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
+    const QAndroidEmulatorWindowAgent& windowAgent() const { return mWindowAgent; }
 
     // Set a callback that's called on the specific stages of the snapshot
     // operations.
@@ -72,6 +75,7 @@ private:
     bool onDeletingComplete(const char* name, int res);
 
     QAndroidVmOperations mVmOperations;
+    QAndroidEmulatorWindowAgent mWindowAgent;
     android::base::Optional<Saver> mSaver;
     android::base::Optional<Loader> mLoader;
     Callback mCallback;

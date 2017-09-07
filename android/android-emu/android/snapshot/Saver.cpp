@@ -74,6 +74,8 @@ Saver::~Saver() {
     }
 }
 
+ITextureSaverPtr Saver::textureSaver() const { return mTextureSaver; }
+
 void Saver::prepare() {
     // TODO: run asynchronous saving preparation here (e.g. screenshot,
     // hardware info collection etc).

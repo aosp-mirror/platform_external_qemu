@@ -27,9 +27,10 @@ class RenderbufferData : public ObjectData
 public:
     RenderbufferData() : ObjectData(RENDERBUFFER_DATA) {  };
     RenderbufferData(android::base::Stream* stream);
-    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
-    virtual void restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) override;
+    void onSave(android::base::Stream* stream,
+                unsigned int globalName) const override;
+    void restore(ObjectLocalName localName,
+                 const getGlobalName_t& getGlobalName) override;
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
@@ -47,10 +48,11 @@ public:
     explicit FramebufferData(GLuint name);
     FramebufferData(android::base::Stream* stream);
     ~FramebufferData();
-    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
-    virtual void postLoad(getObjDataPtr_t getObjDataPtr) override;
-    virtual void restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) override;
+    void onSave(android::base::Stream* stream,
+                unsigned int globalName) const override;
+    void postLoad(const getObjDataPtr_t& getObjDataPtr) override;
+    void restore(ObjectLocalName localName,
+                 const getGlobalName_t& getGlobalName) override;
 
     void setAttachment(GLenum attachment,
                        GLenum target,

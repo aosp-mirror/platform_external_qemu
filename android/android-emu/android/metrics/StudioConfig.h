@@ -57,6 +57,9 @@ UpdateChannel updateChannel();
 // Checks if the user has opted in for metrics reporting.
 bool getUserMetricsOptIn();
 
+// Returns the Android Studio-generated salt value for strings anonymization.
+std::string getAnonymizationSalt();
+
 // This function returns a string that describes the Android
 // Studio installation ID. If this installation ID cannot be
 // retrieved, a random string following the Android Studio

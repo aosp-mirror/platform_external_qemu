@@ -379,8 +379,6 @@ intptr_t RenderThread::main() {
         } while (progress);
     }
 
-    setFinished();
-
     if (dumpFP) {
         fclose(dumpFP);
     }
@@ -403,6 +401,7 @@ intptr_t RenderThread::main() {
         FrameBuffer::getFB()->drainRenderContext();
     }
 
+    setFinished();
     DBG("Exited a RenderThread @%p\n", this);
 
     return 0;

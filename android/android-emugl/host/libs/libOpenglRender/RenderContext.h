@@ -73,8 +73,6 @@ public:
     static RenderContext *onLoad(android::base::Stream* stream,
             EGLDisplay display);
 private:
-    RenderContext();
-
     RenderContext(EGLDisplay display,
                   EGLContext context,
                   HandleType hndl,

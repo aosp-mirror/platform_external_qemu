@@ -54,6 +54,7 @@ struct EglImage
     unsigned int border;
     unsigned int format;
     unsigned int type;
+    unsigned int texStorageLevels;
     SaveableTexturePtr saveableTexture;
 };
 

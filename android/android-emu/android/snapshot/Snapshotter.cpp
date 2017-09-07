@@ -85,7 +85,8 @@ Snapshotter& Snapshotter::get() {
     return sInstance.get();
 }
 
-void Snapshotter::initialize(const QAndroidVmOperations& vmOperations) {
+void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
+                             const QAndroidEmulatorWindowAgent& windowAgent) {
     static const SnapshotCallbacks kCallbacks = {
             // ops
             {
@@ -156,6 +157,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations) {
 
     assert(vmOperations.setSnapshotCallbacks);
     mVmOperations = vmOperations;
+    mWindowAgent = windowAgent;
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
 }
 
@@ -264,7 +266,9 @@ void Snapshotter::setOperationCallback(Callback&& cb) {
 }  // namespace snapshot
 }  // namespace android
 
-void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations) {
+void androidSnapshot_initialize(
+        const QAndroidVmOperations* vmOperations,
+        const QAndroidEmulatorWindowAgent* windowAgent) {
     using android::base::Version;
 
     static constexpr auto kMinStudioVersion = Version(3, 0, 0);
@@ -285,7 +289,7 @@ void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations) {
         }
     }
 
-    android::snapshot::sInstance->initialize(*vmOperations);
+    android::snapshot::sInstance->initialize(*vmOperations, *windowAgent);
     android::snapshot::Quickboot::initialize(*vmOperations);
 }
 

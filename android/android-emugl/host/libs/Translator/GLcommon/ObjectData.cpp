@@ -45,12 +45,12 @@ void ObjectData::onSave(android::base::Stream* stream, unsigned int globalName) 
     stream->putBe32(m_dataType);
 }
 
-void ObjectData::postLoad(getObjDataPtr_t getObjDataPtr) {
+void ObjectData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
     (void)getObjDataPtr;
 }
 
 void ObjectData::restore(ObjectLocalName localName,
-            getGlobalName_t getGlobalName) {
+            const getGlobalName_t& getGlobalName) {
     (void)localName;
     (void)getGlobalName;
     m_needRestore = false;

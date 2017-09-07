@@ -24,9 +24,10 @@ class SamplerData : public ObjectData {
 public:
     SamplerData() : ObjectData(SAMPLER_DATA) {}
     SamplerData(android::base::Stream* stream);
-    virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
-    virtual void restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) override;
+    void onSave(android::base::Stream* stream,
+                unsigned int globalName) const override;
+    void restore(ObjectLocalName localName,
+                 const getGlobalName_t& getGlobalName) override;
     void setParami(GLenum pname, GLint param);
     void setParamf(GLenum pname, GLfloat param);
 private:

@@ -343,7 +343,7 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
     stream->putByte(mGlesMinorVersion);
 }
 
-void ProgramData::postLoad(getObjDataPtr_t getObjDataPtr) {
+void ProgramData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
     for (auto& s : attachedShaders) {
         if (s.localName) {
             s.shader = (ShaderParser*)getObjDataPtr(
@@ -353,7 +353,7 @@ void ProgramData::postLoad(getObjDataPtr_t getObjDataPtr) {
 }
 
 void ProgramData::restore(ObjectLocalName localName,
-           getGlobalName_t getGlobalName) {
+           const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
     int globalName = getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
             localName);

@@ -28,7 +28,7 @@ public:
     ~Saver();
 
     RamSaver& ramSaver() { return *mRamSaver; }
-    const TextureSaverPtr& textureSaver() const { return mTextureSaver; }
+    ITextureSaverPtr textureSaver() const;
 
     OperationStatus status() const { return mStatus; }
     const Snapshot& snapshot() const { return mSnapshot; }
@@ -40,7 +40,7 @@ private:
     OperationStatus mStatus;
     Snapshot mSnapshot;
     base::Optional<RamSaver> mRamSaver;
-    TextureSaverPtr mTextureSaver;
+    std::shared_ptr<TextureSaver> mTextureSaver;
 };
 
 }  // namespace snapshot

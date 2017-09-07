@@ -54,7 +54,7 @@ void SamplerData::onSave(android::base::Stream* stream, unsigned int globalName)
 }
 
 void SamplerData::restore(ObjectLocalName localName,
-        getGlobalName_t getGlobalName) {
+        const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
     int globalName = getGlobalName(NamedObjectType::SAMPLER,
         localName);

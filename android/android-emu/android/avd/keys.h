@@ -86,6 +86,10 @@
  */
 #define TAG_ID "tag.id"
 
+/* AVD/config.ini value for tag id of Chrome OS.
+ */
+#define TAG_ID_CHROMEOS "chromeos"
+
 /* AVD/config.ini key name representing the tag display of the specific avd
  */
 #define TAG_DISPLAY "tag.display"

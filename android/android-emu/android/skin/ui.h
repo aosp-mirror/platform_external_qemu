@@ -139,6 +139,9 @@ bool skin_ui_is_trackball_active(SkinUI* ui);
 // Switches to the next skin layout.
 void skin_ui_select_next_layout();
 
+// Rotates to the specific orientation.
+bool skin_ui_rotate(SkinUI* ui, SkinRotation rotation);
+
 // Notifies the UI that the rotation has updated.
 void skin_ui_update_rotation(SkinUI* ui, SkinRotation rotation);
 
