@@ -2,7 +2,6 @@
 
 QEMU2_COMMON_SOURCES := \
     accel.c \
-    async.c \
     audio/audio.c \
     audio/mixeng.c \
     audio/noaudio.c \
