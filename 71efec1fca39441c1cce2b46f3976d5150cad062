@@ -93,6 +93,30 @@
       "revId": "71efec1fca39441c1cce2b46f3976d5150cad062",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cfaa4141_9d383dc8",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-07T21:12:53Z",
+      "side": 1,
+      "message": "I\u0027ve only realized it\u0027s environment and not command line\nAnyway, it would be nice to have some validation of the input variables and a --help option that prints out \"usage\" string",
+      "parentUuid": "31a2fd44_539a109e",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 18
+      },
+      "revId": "71efec1fca39441c1cce2b46f3976d5150cad062",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
