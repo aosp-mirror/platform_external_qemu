@@ -14,6 +14,7 @@
 #include "android/utils/compiler.h"
 
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/control/window_agent.h"
 
 ANDROID_BEGIN_HEADER
 
@@ -24,7 +25,8 @@ typedef enum {
     SNAPSHOT_STATUS_ERROR_NOT_CHANGED,
 } AndroidSnapshotStatus;
 
-void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations);
+void androidSnapshot_initialize(const QAndroidVmOperations* vmOperations,
+                                const QAndroidEmulatorWindowAgent* windowAgent);
 void androidSnapshot_finalize();
 
 AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name);
