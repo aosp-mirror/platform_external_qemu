@@ -12,10 +12,12 @@
 
 #pragma once
 
-#include "android/emulator-window.h"
+#include "android/skin/rect.h"
 #include "android/utils/compiler.h"
 
 ANDROID_BEGIN_HEADER
+
+typedef struct EmulatorWindow EmulatorWindow;
 
 typedef struct QAndroidEmulatorWindowAgent {
     // Get a pointer to the emulator window structure.
@@ -24,6 +26,15 @@ typedef struct QAndroidEmulatorWindowAgent {
     // Rotate the screen clockwise by 90 degrees.
     // Returns true on success, false otherwise.
     bool (*rotate90Clockwise)(void);
+
+    // Rotate to specific |rotation|
+    bool (*rotate)(SkinRotation rotation);
+
+    // Returns the current rotation.
+    SkinRotation (*getRotation)(void);
 } QAndroidEmulatorWindowAgent;
+
+// Defined in android/window-agent-impl.cpp
+extern const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent;
 
 ANDROID_END_HEADER

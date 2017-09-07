@@ -25,7 +25,7 @@
 
 ANDROID_BEGIN_HEADER
 
-typedef struct {
+typedef struct EmulatorWindow {
     const AConfig* aconfig;
     SkinFile*      layout_file;
     int            win_x;
@@ -34,6 +34,7 @@ typedef struct {
     SkinImage*     onion;
     SkinRotation   onion_rotation;
     int            onion_alpha;
+    bool           done;
 
     AndroidOptions opts[1];  /* copy of options */
     UiEmuAgent     uiEmuAgent[1];
@@ -63,6 +64,7 @@ emulator_window_get_layout(EmulatorWindow* emulator);
 /* Rotates the screen clockwise by 90 degrees. Returns true on success, false
  * otherwise */
 bool emulator_window_rotate_90_clockwise(void);
+bool emulator_window_rotate(SkinRotation rotation);
 
 /* Start recording the screen. Returns false if recording is already
  * running. */

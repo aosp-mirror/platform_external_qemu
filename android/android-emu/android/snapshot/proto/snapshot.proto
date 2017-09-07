@@ -79,4 +79,8 @@ message Snapshot {
     // We snapshot it here just in case someday we support snapshot during
     // booting.
     optional bool guest_data_partition_mounted = 8;
+
+    // Emulator rotation angle, in right angles (e.g. 1 is 90 degrees, 2 is 180
+    // etc).
+    optional int32 rotation = 9;
 }

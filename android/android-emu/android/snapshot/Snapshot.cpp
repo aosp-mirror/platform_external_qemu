@@ -291,6 +291,8 @@ bool Snapshot::save() {
     }
 
     mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
+    mSnapshotPb.set_rotation(
+            int(Snapshotter::get().windowAgent().getRotation()));
 
     return writeSnapshotToDisk();
 }
@@ -305,7 +307,7 @@ bool Snapshot::saveFailure(FailureReason reason) {
 
 static bool isUnrecoverableReason(FailureReason reason) {
     return reason != FailureReason::Empty &&
-                     reason < FailureReason::UnrecoverableErrorLimit;
+           reason < FailureReason::UnrecoverableErrorLimit;
 }
 
 bool Snapshot::preload() {
@@ -404,8 +406,9 @@ bool Snapshot::load() {
         return false;
     }
     IniFile expectedStripped;
-    androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&expectedConfig),
-                                  reinterpret_cast<CIniFile*>(&expectedStripped));
+    androidHwConfig_stripDefaults(
+            reinterpret_cast<CIniFile*>(&expectedConfig),
+            reinterpret_cast<CIniFile*>(&expectedStripped));
     IniFile actualStripped;
     androidHwConfig_stripDefaults(reinterpret_cast<CIniFile*>(&actualConfig),
                                   reinterpret_cast<CIniFile*>(&actualStripped));
@@ -414,7 +417,14 @@ bool Snapshot::load() {
         return false;
     }
     if (mSnapshotPb.has_guest_data_partition_mounted()) {
-        guest_data_partition_mounted = mSnapshotPb.guest_data_partition_mounted();
+        guest_data_partition_mounted =
+                mSnapshotPb.guest_data_partition_mounted();
+    }
+    if (mSnapshotPb.has_rotation() &&
+        Snapshotter::get().windowAgent().getRotation() !=
+                SkinRotation(mSnapshotPb.rotation())) {
+        Snapshotter::get().windowAgent().rotate(
+                SkinRotation(mSnapshotPb.rotation()));
     }
 
     return true;
