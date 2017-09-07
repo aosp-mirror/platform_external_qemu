@@ -13,8 +13,7 @@ struct QemuCond {
 };
 #else
 struct QemuMutex {
-    CRITICAL_SECTION lock;
-    LONG owner;
+    SRWLOCK lock;
 };
 
 struct QemuCond {
@@ -34,6 +33,9 @@ void qemu_rec_mutex_lock(QemuRecMutex *mutex);
 int qemu_rec_mutex_trylock(QemuRecMutex *mutex);
 void qemu_rec_mutex_unlock(QemuRecMutex *mutex);
 
+struct QemuCond {
+    CONDITION_VARIABLE var;
+};
 
 struct QemuSemaphore {
     HANDLE sema;
