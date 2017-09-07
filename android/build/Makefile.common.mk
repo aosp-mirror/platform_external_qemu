@@ -24,6 +24,7 @@ include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
 include $(LOCAL_PATH)/android/third_party/libx264.mk
 include $(LOCAL_PATH)/android/third_party/libvpx.mk
 include $(LOCAL_PATH)/android/third_party/libsdl2.mk
+include $(LOCAL_PATH)/android/third_party/picosha2/picosha2.mk
 
 # Bluez only works on linux
 ifeq ($(BUILD_TARGET_OS),linux)
@@ -80,6 +81,7 @@ EMULATOR_COMMON_INCLUDES := \
     $(BUILD_OBJS_DIR)/build \
     $(generated-proto-sources-dir) \
     $(LIBMMAN_WIN32_INCLUDES) \
+    $(PICOSHA2_INCLUDES) \
 
 EMUGL_SRCDIR := $(LOCAL_PATH)/android/android-emugl
 EMUGL_INCLUDES := $(EMUGL_SRCDIR)/host/include

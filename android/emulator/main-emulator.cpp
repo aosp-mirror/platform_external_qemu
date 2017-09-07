@@ -587,13 +587,11 @@ int main(int argc, char** argv)
     }
 #endif
 
-    char* c_argv0_dir_name = path_dirname(argv[0]);
-    std::string argv0DirName(c_argv0_dir_name);
-    free(c_argv0_dir_name);
+    std::string emuDirName = emulator_dirname(progDirSystem);
 
-    std::string emuDirName = emulator_dirname(argv0DirName);
+    D("emuDirName: '%s'\n", emuDirName.c_str());
 
-    const StringView candidates[] = {progDirSystem, argv0DirName, emuDirName};
+    const StringView candidates[] = {progDirSystem, emuDirName};
     char* emulatorPath = nullptr;
     StringView progDir;
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
@@ -608,10 +606,18 @@ int main(int argc, char** argv)
                                                   avdArch,
                                                   &wantedBitness);
         }
+        D("Trying emulator path '%s'\n", emulatorPath);
         if (path_exists(emulatorPath)) {
             break;
         }
+        emulatorPath = nullptr;
     }
+
+    if (emulatorPath == nullptr) {
+        derror("can't find the emulator executable.\n");
+        return -1;
+    }
+
     D("Found target-specific %d-bit emulator binary: %s\n", wantedBitness, emulatorPath);
 
     /* Replace it in our command-line */

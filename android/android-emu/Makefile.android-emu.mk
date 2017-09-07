@@ -356,8 +356,6 @@ LOCAL_SRC_FILES := \
     android/hw-sensors.c \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
-    android/keymaster/Keymaster.cpp \
-    android/keymaster/KeymasterPipe.cpp \
     android/loadpng.c \
     android/main-common.c \
     android/main-help.cpp \
@@ -811,6 +809,7 @@ LOCAL_SRC_FILES += \
     android/skin/LibuiAgent.cpp \
     android/gpu_frame.cpp \
     android/emulator-window.c \
+    android/window-agent-impl.cpp \
     android/main-common-ui.c \
     android/resource.c \
     android/ffmpeg-audio-capture.cpp \

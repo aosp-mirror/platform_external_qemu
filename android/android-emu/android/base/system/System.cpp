@@ -998,8 +998,12 @@ public:
         return fileSizeInternal(fd, outFileSize);
     }
 
-    virtual Optional<Duration> pathCreationTime(StringView path) const override {
+    Optional<Duration> pathCreationTime(StringView path) const override {
         return pathCreationTimeInternal(path);
+    }
+
+    Optional<Duration> pathModificationTime(StringView path) const override {
+        return pathModificationTimeInternal(path);
     }
 
     Times getProcessTimes() const override {
@@ -1773,6 +1777,22 @@ Optional<System::Duration> System::pathCreationTimeInternal(StringView path) {
             st.st_birthtimespec.tv_nsec / 1000;
 #endif  // WIN32 && APPLE
 #endif  // Linux
+}
+
+// static
+Optional<System::Duration> System::pathModificationTimeInternal(StringView path) {
+    PathStat st;
+    if (pathStat(path, &st)) {
+        return {};
+    }
+
+#ifdef _WIN32
+    return st.st_mtime * 1000000ll;
+#elif defined(__linux__)
+    return st.st_mtim.tv_sec * 1000000ll + st.st_mtim.tv_nsec / 1000;
+#else   // Darwin
+    return st.st_mtimespec.tv_sec * 1000000ll + st.st_mtimespec.tv_nsec / 1000;
+#endif
 }
 
 // static
