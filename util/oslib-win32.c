@@ -34,7 +34,7 @@
 #include "qapi/error.h"
 #include "sysemu/sysemu.h"
 #include "qemu/main-loop.h"
-#include "trace.h"
+#include "util/trace.h"
 #include "qemu/sockets.h"
 #include "qemu/cutils.h"
 
@@ -327,6 +327,7 @@ char *qemu_get_exec_dir(void)
     return g_strdup(exec_dir);
 }
 
+#if !GLIB_CHECK_VERSION(2, 50, 0)
 /*
  * The original implementation of g_poll from glib has a problem on Windows
  * when using timeouts < 10 ms.
@@ -530,6 +531,7 @@ gint g_poll(GPollFD *fds, guint nfds, gint timeout)
 
     return retval;
 }
+#endif
 
 int getpagesize(void)
 {
@@ -539,7 +541,8 @@ int getpagesize(void)
     return system_info.dwPageSize;
 }
 
-void os_mem_prealloc(int fd, char *area, size_t memory, Error **errp)
+void os_mem_prealloc(int fd, char *area, size_t memory, int smp_cpus,
+                     Error **errp)
 {
     int i;
     size_t pagesize = getpagesize();

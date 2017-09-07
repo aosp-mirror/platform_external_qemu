@@ -19,7 +19,7 @@
 #include "qapi/qmp/qerror.h"
 #include "qapi/visitor.h"
 #include "qapi/visitor-impl.h"
-#include "trace.h"
+#include "qapi/trace.h"
 
 void visit_complete(Visitor *v, void *opaque)
 {
@@ -88,6 +88,14 @@ GenericList *visit_next_list(Visitor *v, GenericList *tail, size_t size)
     assert(tail && size >= sizeof(GenericList));
     trace_visit_next_list(v, tail, size);
     return v->next_list(v, tail, size);
+}
+
+void visit_check_list(Visitor *v, Error **errp)
+{
+    trace_visit_check_list(v);
+    if (v->check_list) {
+        v->check_list(v, errp);
+    }
 }
 
 void visit_end_list(Visitor *v, void **obj)
@@ -374,6 +382,7 @@ void visit_type_enum(Visitor *v, const char *name, int *obj,
                      const char *const strings[], Error **errp)
 {
     assert(obj && strings);
+    trace_visit_type_enum(v, name, obj);
     switch (v->type) {
     case VISITOR_INPUT:
         input_type_enum(v, name, obj, strings, errp);
