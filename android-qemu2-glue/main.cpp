@@ -268,6 +268,7 @@ static int createUserData(AvdInfo* avd,
                           std::string dataPath,
                           AndroidHwConfig* hw) {
     ScopedCPtr<char> initDir(avdInfo_getDataInitDirPath(avd));
+    bool needCopyDataPartition = true;
     if (path_exists(initDir.get())) {
         path_copy_dir(dataPath.c_str(), initDir.get());
         std::string adbKeyPath = PathUtils::join(
@@ -288,7 +289,19 @@ static int createUserData(AvdInfo* avd,
                 hw->disk_dataPartition_path, dataPath.c_str(),
                 android_hw->disk_dataPartition_size, "data");
         // TODO: remove dataPath folder
-    } else if (path_exists(hw->disk_dataPartition_initPath)) {
+
+        // Creating data partition can fail because of insufficient disk space
+        // or non-ascii path on Windows. Fall back to default userdata.img if
+        // it fails.
+        System::FileSize diskSize;
+        if (System::get()->pathFileSize(hw->disk_dataPartition_path, &diskSize)
+                && diskSize > 0) {
+            // We do not need to copy userdata.img if partition creation
+            // succeeded.
+            needCopyDataPartition = false;
+        }
+    }
+    if (needCopyDataPartition && path_exists(hw->disk_dataPartition_initPath)) {
         D("Creating: %s\n", hw->disk_dataPartition_path);
 
         if (path_copy_file(hw->disk_dataPartition_path,
