@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  i386 CPUID helper functions
  *
@@ -3837,3 +3838,5 @@ static void x86_cpu_register_types(void)
 }
 
 type_init(x86_cpu_register_types)
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

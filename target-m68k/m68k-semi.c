@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  m68k/ColdFire Semihosting syscall interface
  *
@@ -460,3 +461,5 @@ void do_m68k_semihosting(CPUM68KState *env, int nr)
 failed:
     m68k_semi_return_u32(env, result, errno);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

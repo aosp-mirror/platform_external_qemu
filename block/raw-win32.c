@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  * Block driver for RAW files (win32)
  *
@@ -826,3 +827,5 @@ static void bdrv_file_init(void)
 }
 
 block_init(bdrv_file_init);
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

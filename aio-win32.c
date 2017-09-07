@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  * QEMU aio implementation
  *
@@ -420,3 +421,5 @@ bool aio_poll(AioContext *ctx, bool blocking)
 void aio_context_setup(AioContext *ctx)
 {
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
