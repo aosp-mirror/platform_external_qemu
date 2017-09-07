@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59b8bfd7_8da6ac14",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1084468
+      },
+      "writtenOn": "2017-09-07T17:18:51Z",
+      "side": 1,
+      "message": "It looks like this will erase the entire image, even when the updated rectangle isn\u0027t the full size of the image. So some of the pixel data provided by a prior glTexImage2D() call may be lost. Also, if not all of the mipmap levels get updated then the texture becomes incomplete.",
+      "range": {
+        "startLine": 278,
+        "startChar": 12,
+        "endLine": 278,
+        "endChar": 20
+      },
+      "revId": "47385f9ba69ca47735a66899395137c29b478dd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
