@@ -22,7 +22,7 @@
 #include "qemu-common.h"
 #include "migration/migration.h"
 #include "io/channel-command.h"
-#include "trace.h"
+#include "migration/trace.h"
 
 
 void exec_start_outgoing_migration(MigrationState *s, const char *command, Error **errp)

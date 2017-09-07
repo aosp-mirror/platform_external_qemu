@@ -2,7 +2,6 @@
 
 QEMU2_COMMON_SOURCES := \
     accel.c \
-    async.c \
     audio/audio.c \
     audio/mixeng.c \
     audio/noaudio.c \
@@ -17,6 +16,7 @@ QEMU2_COMMON_SOURCES := \
     backends/rng.c \
     backends/testdev.c \
     backends/tpm.c \
+    backends/wctablet.c \
     block.c \
     block/accounting.c \
     block/backup.c \
@@ -51,7 +51,7 @@ QEMU2_COMMON_SOURCES := \
     block/qed-table.c \
     block/qed.c \
     block/quorum.c \
-    block/raw_bsd.c \
+    block/raw-format.c \
     block/replication.c \
     block/sheepdog.c \
     block/snapshot.c \
@@ -70,6 +70,17 @@ QEMU2_COMMON_SOURCES := \
     blockjob.c \
     bt-host.c \
     bt-vhci.c \
+    chardev/char-file.c \
+    chardev/char-io.c \
+    chardev/char-mux.c \
+    chardev/char-null.c \
+    chardev/char-pipe.c \
+    chardev/char-ringbuf.c \
+    chardev/char-serial.c \
+    chardev/char-socket.c \
+    chardev/char-stdio.c \
+    chardev/char-udp.c \
+    chardev/char.c \
     cpus-common.c \
     crypto/aes.c \
     crypto/afsplit.c \
@@ -80,6 +91,8 @@ QEMU2_COMMON_SOURCES := \
     crypto/desrfb.c \
     crypto/hash-glib.c \
     crypto/hash.c \
+    crypto/hmac-glib.c \
+    crypto/hmac.c \
     crypto/init.c \
     crypto/ivgen-essiv.c \
     crypto/ivgen-plain.c \
@@ -128,12 +141,12 @@ QEMU2_COMMON_SOURCES := \
     hw/core/irq.c \
     hw/core/loader.c \
     hw/core/machine.c \
-    hw/core/null-machine.c \
     hw/core/or-irq.c \
     hw/core/qdev-properties-system.c \
     hw/core/qdev-properties.c \
     hw/core/qdev.c \
     hw/core/register.c \
+    hw/core/reset.c \
     hw/core/sysbus.c \
     hw/display/framebuffer.c \
     hw/display/goldfish_fb.c \
@@ -156,6 +169,7 @@ QEMU2_COMMON_SOURCES := \
     hw/ipack/tpci200.c \
     hw/isa/isa-bus.c \
     hw/misc/pci-testdev.c \
+    hw/misc/unimp.c \
     hw/net/eepro100.c \
     hw/net/ne2000.c \
     hw/net/net_rx_pkt.c \
@@ -173,7 +187,6 @@ QEMU2_COMMON_SOURCES := \
     hw/nvram/eeprom93xx.c \
     hw/nvram/fw_cfg.c \
     hw/pci-bridge/pci_bridge_dev.c \
-    hw/pci-bridge/pci_expander_bridge.c \
     hw/pci-host/pam.c \
     hw/pci/msi.c \
     hw/pci/msix.c \
@@ -237,10 +250,9 @@ QEMU2_COMMON_SOURCES := \
     io/channel-watch.c \
     io/channel-websock.c \
     io/channel.c \
+    io/dns-resolver.c \
     io/task.c \
-    iohandler.c \
     iothread.c \
-    main-loop.c \
     migration/block.c \
     migration/colo-comm.c \
     migration/colo-failover.c \
@@ -266,6 +278,7 @@ QEMU2_COMMON_SOURCES := \
     net/eth.c \
     net/filter-buffer.c \
     net/filter-mirror.c \
+    net/filter-replay.c \
     net/filter-rewriter.c \
     net/filter.c \
     net/hub.c \
@@ -276,19 +289,19 @@ QEMU2_COMMON_SOURCES := \
     net/util.c \
     page_cache.c \
     qdev-monitor.c \
-    qemu-char.c \
     qemu-io-cmds.c \
-    qemu-timer.c \
     qmp.c \
     qom/container.c \
     qom/cpu.c \
     qom/object.c \
     qom/object_interfaces.c \
     qom/qom-qobject.c \
+    replay/replay-audio.c \
     replay/replay-char.c \
     replay/replay-events.c \
     replay/replay-input.c \
     replay/replay-internal.c \
+    replay/replay-net.c \
     replay/replay-snapshot.c \
     replay/replay-time.c \
     replay/replay.c \
@@ -318,7 +331,6 @@ QEMU2_COMMON_SOURCES := \
     slirp/tftp.c \
     slirp/udp.c \
     slirp/udp6.c \
-    thread-pool.c \
     tpm.c \
     ui/console.c \
     ui/cursor.c \
@@ -339,13 +351,16 @@ QEMU2_COMMON_SOURCES := \
     ui/x_keymap.c \
 
 QEMU2_COMMON_SOURCES_darwin-x86_64 := \
-    aio-posix.c \
     audio/coreaudio.c \
     backends/rng-random.c \
-    block/raw-posix.c \
+    block/file-posix.c \
+    chardev/char-fd.c \
+    chardev/char-parallel.c \
+    chardev/char-pty.c \
     hw/usb/dev-mtp.c \
     hw/usb/host-legacy.c \
     hw/usb/host-libusb.c \
+    hw/virtio/vhost-stub.c \
     net/tap-bsd.c \
     net/tap.c \
     net/vhost-user.c \
@@ -353,14 +368,17 @@ QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     slirp/ip_icmp_ping.c \
 
 QEMU2_COMMON_SOURCES_linux-x86_64 := \
-    aio-posix.c \
     audio/audio_pt_int.c \
     audio/paaudio.c \
     backends/hostmem-file.c \
     backends/rng-random.c \
-    block/raw-posix.c \
+    block/file-posix.c \
+    chardev/char-fd.c \
+    chardev/char-parallel.c \
+    chardev/char-pty.c \
     fsdev/qemu-fsdev-dummy.c \
     fsdev/qemu-fsdev-opts.c \
+    fsdev/qemu-fsdev-throttle.c \
     hw/input/virtio-input-host.c \
     hw/tpm/tpm_passthrough.c \
     hw/tpm/tpm_util.c \
@@ -376,24 +394,30 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     ui/input-linux.c \
 
 QEMU2_COMMON_SOURCES_windows-x86 := \
-    aio-win32.c \
     audio/audio_win_int.c \
     audio/dsoundaudio.c \
     audio/winaudio.c \
-    block/raw-win32.c \
+    block/file-win32.c \
     block/win32-aio.c \
+    chardev/char-console.c \
+    chardev/char-win-stdio.c \
+    chardev/char-win.c \
     hw/usb/host-stub.c \
+    hw/virtio/vhost-stub.c \
     net/tap-win32.c \
     os-win32.c \
 
 QEMU2_COMMON_SOURCES_windows-x86_64 := \
-    aio-win32.c \
     audio/audio_win_int.c \
     audio/dsoundaudio.c \
     audio/winaudio.c \
-    block/raw-win32.c \
+    block/file-win32.c \
     block/win32-aio.c \
+    chardev/char-console.c \
+    chardev/char-win-stdio.c \
+    chardev/char-win.c \
     hw/usb/host-stub.c \
+    hw/virtio/vhost-stub.c \
     net/tap-win32.c \
     os-win32.c \
 
@@ -416,6 +440,7 @@ QEMU2_TARGET_SOURCES := \
     hw/char/virtio-serial-bus.c \
     hw/core/generic-loader.c \
     hw/core/nmi.c \
+    hw/core/null-machine.c \
     hw/cpu/core.c \
     hw/display/vga.c \
     hw/display/virtio-gpu-3d.c \
@@ -466,6 +491,8 @@ QEMU2_TARGET_aarch64_SOURCES := \
     disas/libvixl/vixl/a64/instructions-a64.cc \
     disas/libvixl/vixl/compiler-intrinsics.cc \
     disas/libvixl/vixl/utils.cc \
+    hw/acpi/acpi-stub.c \
+    hw/acpi/ipmi-stub.c \
     hw/adc/stm32f2xx_adc.c \
     hw/arm/allwinner-a10.c \
     hw/arm/armv7m.c \
@@ -561,6 +588,7 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/dma/soc_dma.c \
     hw/dma/xlnx-zynq-devcfg.c \
     hw/dma/xlnx_dpdma.c \
+    hw/gpio/bcm2835_gpio.c \
     hw/gpio/gpio_key.c \
     hw/gpio/imx_gpio.c \
     hw/gpio/max7310.c \
@@ -611,7 +639,9 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/misc/auxbus.c \
     hw/misc/bcm2835_mbox.c \
     hw/misc/bcm2835_property.c \
+    hw/misc/bcm2835_rng.c \
     hw/misc/cbus.c \
+    hw/misc/exynos4210_clk.c \
     hw/misc/exynos4210_pmu.c \
     hw/misc/imx25_ccm.c \
     hw/misc/imx31_ccm.c \
@@ -636,13 +666,16 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/net/smc91c111.c \
     hw/net/stellaris_enet.c \
     hw/net/xgmac.c \
+    hw/pci-bridge/gen_pcie_root_port.c \
     hw/pci-bridge/i82801b11.c \
     hw/pci-bridge/ioh3420.c \
+    hw/pci-bridge/pcie_root_port.c \
     hw/pci-bridge/xio3130_downstream.c \
     hw/pci-bridge/xio3130_upstream.c \
     hw/pci-host/gpex.c \
     hw/pci-host/versatile.c \
     hw/pcmcia/pxa2xx.c \
+    hw/sd/bcm2835_sdhost.c \
     hw/sd/omap_mmc.c \
     hw/sd/pl181.c \
     hw/sd/pxa2xx_mmci.c \
@@ -659,6 +692,7 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/timer/allwinner-a10-pit.c \
     hw/timer/arm_mptimer.c \
     hw/timer/arm_timer.c \
+    hw/timer/armv7m_systick.c \
     hw/timer/aspeed_timer.c \
     hw/timer/cadence_ttc.c \
     hw/timer/digic-timer.c \
@@ -677,26 +711,27 @@ QEMU2_TARGET_aarch64_SOURCES := \
     hw/usb/hcd-ehci-sysbus.c \
     hw/usb/hcd-musb.c \
     hw/usb/tusb6010.c \
+    hw/watchdog/wdt_aspeed.c \
     kvm-stub.c \
-    target-arm/arch_dump.c \
-    target-arm/arm-powerctl.c \
-    target-arm/arm-semi.c \
-    target-arm/cpu.c \
-    target-arm/cpu64.c \
-    target-arm/crypto_helper.c \
-    target-arm/gdbstub.c \
-    target-arm/gdbstub64.c \
-    target-arm/helper-a64.c \
-    target-arm/helper.c \
-    target-arm/iwmmxt_helper.c \
-    target-arm/kvm-stub.c \
-    target-arm/machine.c \
-    target-arm/monitor.c \
-    target-arm/neon_helper.c \
-    target-arm/op_helper.c \
-    target-arm/psci.c \
-    target-arm/translate-a64.c \
-    target-arm/translate.c \
+    target/arm/arch_dump.c \
+    target/arm/arm-powerctl.c \
+    target/arm/arm-semi.c \
+    target/arm/cpu.c \
+    target/arm/cpu64.c \
+    target/arm/crypto_helper.c \
+    target/arm/gdbstub.c \
+    target/arm/gdbstub64.c \
+    target/arm/helper-a64.c \
+    target/arm/helper.c \
+    target/arm/iwmmxt_helper.c \
+    target/arm/kvm-stub.c \
+    target/arm/machine.c \
+    target/arm/monitor.c \
+    target/arm/neon_helper.c \
+    target/arm/op_helper.c \
+    target/arm/psci.c \
+    target/arm/translate-a64.c \
+    target/arm/translate.c \
 
 QEMU2_TARGET_arm_SOURCES := \
     disas/arm-a64.cc \
@@ -706,6 +741,8 @@ QEMU2_TARGET_arm_SOURCES := \
     disas/libvixl/vixl/a64/instructions-a64.cc \
     disas/libvixl/vixl/compiler-intrinsics.cc \
     disas/libvixl/vixl/utils.cc \
+    hw/acpi/acpi-stub.c \
+    hw/acpi/ipmi-stub.c \
     hw/adc/stm32f2xx_adc.c \
     hw/arm/allwinner-a10.c \
     hw/arm/armv7m.c \
@@ -796,6 +833,7 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/dma/pxa2xx_dma.c \
     hw/dma/soc_dma.c \
     hw/dma/xlnx-zynq-devcfg.c \
+    hw/gpio/bcm2835_gpio.c \
     hw/gpio/gpio_key.c \
     hw/gpio/imx_gpio.c \
     hw/gpio/max7310.c \
@@ -844,7 +882,9 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/misc/aspeed_sdmc.c \
     hw/misc/bcm2835_mbox.c \
     hw/misc/bcm2835_property.c \
+    hw/misc/bcm2835_rng.c \
     hw/misc/cbus.c \
+    hw/misc/exynos4210_clk.c \
     hw/misc/exynos4210_pmu.c \
     hw/misc/imx25_ccm.c \
     hw/misc/imx31_ccm.c \
@@ -869,13 +909,16 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/net/smc91c111.c \
     hw/net/stellaris_enet.c \
     hw/net/xgmac.c \
+    hw/pci-bridge/gen_pcie_root_port.c \
     hw/pci-bridge/i82801b11.c \
     hw/pci-bridge/ioh3420.c \
+    hw/pci-bridge/pcie_root_port.c \
     hw/pci-bridge/xio3130_downstream.c \
     hw/pci-bridge/xio3130_upstream.c \
     hw/pci-host/gpex.c \
     hw/pci-host/versatile.c \
     hw/pcmcia/pxa2xx.c \
+    hw/sd/bcm2835_sdhost.c \
     hw/sd/omap_mmc.c \
     hw/sd/pl181.c \
     hw/sd/pxa2xx_mmci.c \
@@ -892,6 +935,7 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/timer/allwinner-a10-pit.c \
     hw/timer/arm_mptimer.c \
     hw/timer/arm_timer.c \
+    hw/timer/armv7m_systick.c \
     hw/timer/aspeed_timer.c \
     hw/timer/cadence_ttc.c \
     hw/timer/digic-timer.c \
@@ -910,22 +954,23 @@ QEMU2_TARGET_arm_SOURCES := \
     hw/usb/hcd-ehci-sysbus.c \
     hw/usb/hcd-musb.c \
     hw/usb/tusb6010.c \
+    hw/watchdog/wdt_aspeed.c \
     kvm-stub.c \
-    target-arm/arch_dump.c \
-    target-arm/arm-powerctl.c \
-    target-arm/arm-semi.c \
-    target-arm/cpu.c \
-    target-arm/crypto_helper.c \
-    target-arm/gdbstub.c \
-    target-arm/helper.c \
-    target-arm/iwmmxt_helper.c \
-    target-arm/kvm-stub.c \
-    target-arm/machine.c \
-    target-arm/monitor.c \
-    target-arm/neon_helper.c \
-    target-arm/op_helper.c \
-    target-arm/psci.c \
-    target-arm/translate.c \
+    target/arm/arch_dump.c \
+    target/arm/arm-powerctl.c \
+    target/arm/arm-semi.c \
+    target/arm/cpu.c \
+    target/arm/crypto_helper.c \
+    target/arm/gdbstub.c \
+    target/arm/helper.c \
+    target/arm/iwmmxt_helper.c \
+    target/arm/kvm-stub.c \
+    target/arm/machine.c \
+    target/arm/monitor.c \
+    target/arm/neon_helper.c \
+    target/arm/op_helper.c \
+    target/arm/psci.c \
+    target/arm/translate.c \
 
 QEMU2_TARGET_i386_SOURCES := \
     hw/acpi/core.c \
@@ -934,11 +979,11 @@ QEMU2_TARGET_i386_SOURCES := \
     hw/acpi/ich9.c \
     hw/acpi/ipmi.c \
     hw/acpi/memory_hotplug.c \
-    hw/acpi/memory_hotplug_acpi_table.c \
     hw/acpi/nvdimm.c \
     hw/acpi/pcihp.c \
     hw/acpi/piix4.c \
     hw/acpi/tco.c \
+    hw/acpi/vmgenid.c \
     hw/audio/adlib.c \
     hw/audio/cs4231a.c \
     hw/audio/fmopl.c \
@@ -992,8 +1037,11 @@ QEMU2_TARGET_i386_SOURCES := \
     hw/misc/sga.c \
     hw/misc/vmport.c \
     hw/net/ne2000-isa.c \
+    hw/pci-bridge/gen_pcie_root_port.c \
     hw/pci-bridge/i82801b11.c \
     hw/pci-bridge/ioh3420.c \
+    hw/pci-bridge/pci_expander_bridge.c \
+    hw/pci-bridge/pcie_root_port.c \
     hw/pci-bridge/xio3130_downstream.c \
     hw/pci-bridge/xio3130_upstream.c \
     hw/pci-host/piix.c \
@@ -1006,33 +1054,33 @@ QEMU2_TARGET_i386_SOURCES := \
     hw/timer/mc146818rtc.c \
     hw/tpm/tpm_tis.c \
     hw/watchdog/wdt_ib700.c \
-    target-i386/arch_dump.c \
-    target-i386/arch_memory_mapping.c \
-    target-i386/bpt_helper.c \
-    target-i386/cc_helper.c \
-    target-i386/cpu.c \
-    target-i386/excp_helper.c \
-    target-i386/fpu_helper.c \
-    target-i386/gdbstub.c \
-    target-i386/helper.c \
-    target-i386/int_helper.c \
-    target-i386/machine.c \
-    target-i386/mem_helper.c \
-    target-i386/misc_helper.c \
-    target-i386/monitor.c \
-    target-i386/mpx_helper.c \
-    target-i386/seg_helper.c \
-    target-i386/smm_helper.c \
-    target-i386/svm_helper.c \
-    target-i386/translate.c \
+    target/i386/arch_dump.c \
+    target/i386/arch_memory_mapping.c \
+    target/i386/bpt_helper.c \
+    target/i386/cc_helper.c \
+    target/i386/cpu.c \
+    target/i386/excp_helper.c \
+    target/i386/fpu_helper.c \
+    target/i386/gdbstub.c \
+    target/i386/helper.c \
+    target/i386/int_helper.c \
+    target/i386/machine.c \
+    target/i386/mem_helper.c \
+    target/i386/misc_helper.c \
+    target/i386/monitor.c \
+    target/i386/mpx_helper.c \
+    target/i386/seg_helper.c \
+    target/i386/smm_helper.c \
+    target/i386/svm_helper.c \
+    target/i386/translate.c \
 
 QEMU2_TARGET_mips64el_SOURCES := \
     disas/mips.c \
     hw/acpi/core.c \
     hw/acpi/cpu.c \
     hw/acpi/cpu_hotplug.c \
+    hw/acpi/ipmi-stub.c \
     hw/acpi/memory_hotplug.c \
-    hw/acpi/memory_hotplug_acpi_table.c \
     hw/acpi/nvdimm.c \
     hw/acpi/pcihp.c \
     hw/acpi/piix4.c \
@@ -1047,6 +1095,7 @@ QEMU2_TARGET_mips64el_SOURCES := \
     hw/block/fdc.c \
     hw/char/parallel.c \
     hw/core/empty_slot.c \
+    hw/core/loader-fit.c \
     hw/display/cirrus_vga.c \
     hw/display/g364fb.c \
     hw/display/jazz_led.c \
@@ -1068,6 +1117,7 @@ QEMU2_TARGET_mips64el_SOURCES := \
     hw/isa/piix4.c \
     hw/isa/vt82c686.c \
     hw/mips/addr.c \
+    hw/mips/boston.c \
     hw/mips/cps.c \
     hw/mips/cputimer.c \
     hw/mips/gt64xxx_pci.c \
@@ -1087,29 +1137,31 @@ QEMU2_TARGET_mips64el_SOURCES := \
     hw/net/ne2000-isa.c \
     hw/nvram/ds1225y.c \
     hw/pci-host/bonito.c \
+    hw/pci-host/xilinx-pcie.c \
+    hw/smbios/smbios-stub.c \
     hw/timer/i8254.c \
     hw/timer/i8254_common.c \
     hw/timer/mc146818rtc.c \
     hw/timer/mips_gictimer.c \
     kvm-stub.c \
-    target-mips/cpu.c \
-    target-mips/dsp_helper.c \
-    target-mips/gdbstub.c \
-    target-mips/helper.c \
-    target-mips/lmi_helper.c \
-    target-mips/machine.c \
-    target-mips/mips-semi.c \
-    target-mips/msa_helper.c \
-    target-mips/op_helper.c \
-    target-mips/translate.c \
+    target/mips/cpu.c \
+    target/mips/dsp_helper.c \
+    target/mips/gdbstub.c \
+    target/mips/helper.c \
+    target/mips/lmi_helper.c \
+    target/mips/machine.c \
+    target/mips/mips-semi.c \
+    target/mips/msa_helper.c \
+    target/mips/op_helper.c \
+    target/mips/translate.c \
 
 QEMU2_TARGET_mipsel_SOURCES := \
     disas/mips.c \
     hw/acpi/core.c \
     hw/acpi/cpu.c \
     hw/acpi/cpu_hotplug.c \
+    hw/acpi/ipmi-stub.c \
     hw/acpi/memory_hotplug.c \
-    hw/acpi/memory_hotplug_acpi_table.c \
     hw/acpi/nvdimm.c \
     hw/acpi/pcihp.c \
     hw/acpi/piix4.c \
@@ -1154,21 +1206,22 @@ QEMU2_TARGET_mipsel_SOURCES := \
     hw/misc/pc-testdev.c \
     hw/net/mipsnet.c \
     hw/net/ne2000-isa.c \
+    hw/smbios/smbios-stub.c \
     hw/timer/i8254.c \
     hw/timer/i8254_common.c \
     hw/timer/mc146818rtc.c \
     hw/timer/mips_gictimer.c \
     kvm-stub.c \
-    target-mips/cpu.c \
-    target-mips/dsp_helper.c \
-    target-mips/gdbstub.c \
-    target-mips/helper.c \
-    target-mips/lmi_helper.c \
-    target-mips/machine.c \
-    target-mips/mips-semi.c \
-    target-mips/msa_helper.c \
-    target-mips/op_helper.c \
-    target-mips/translate.c \
+    target/mips/cpu.c \
+    target/mips/dsp_helper.c \
+    target/mips/gdbstub.c \
+    target/mips/helper.c \
+    target/mips/lmi_helper.c \
+    target/mips/machine.c \
+    target/mips/mips-semi.c \
+    target/mips/msa_helper.c \
+    target/mips/op_helper.c \
+    target/mips/translate.c \
 
 QEMU2_TARGET_x86_64_SOURCES := \
     hw/acpi/core.c \
@@ -1177,11 +1230,11 @@ QEMU2_TARGET_x86_64_SOURCES := \
     hw/acpi/ich9.c \
     hw/acpi/ipmi.c \
     hw/acpi/memory_hotplug.c \
-    hw/acpi/memory_hotplug_acpi_table.c \
     hw/acpi/nvdimm.c \
     hw/acpi/pcihp.c \
     hw/acpi/piix4.c \
     hw/acpi/tco.c \
+    hw/acpi/vmgenid.c \
     hw/audio/adlib.c \
     hw/audio/cs4231a.c \
     hw/audio/fmopl.c \
@@ -1235,8 +1288,11 @@ QEMU2_TARGET_x86_64_SOURCES := \
     hw/misc/sga.c \
     hw/misc/vmport.c \
     hw/net/ne2000-isa.c \
+    hw/pci-bridge/gen_pcie_root_port.c \
     hw/pci-bridge/i82801b11.c \
     hw/pci-bridge/ioh3420.c \
+    hw/pci-bridge/pci_expander_bridge.c \
+    hw/pci-bridge/pcie_root_port.c \
     hw/pci-bridge/xio3130_downstream.c \
     hw/pci-bridge/xio3130_upstream.c \
     hw/pci-host/piix.c \
@@ -1249,25 +1305,25 @@ QEMU2_TARGET_x86_64_SOURCES := \
     hw/timer/mc146818rtc.c \
     hw/tpm/tpm_tis.c \
     hw/watchdog/wdt_ib700.c \
-    target-i386/arch_dump.c \
-    target-i386/arch_memory_mapping.c \
-    target-i386/bpt_helper.c \
-    target-i386/cc_helper.c \
-    target-i386/cpu.c \
-    target-i386/excp_helper.c \
-    target-i386/fpu_helper.c \
-    target-i386/gdbstub.c \
-    target-i386/helper.c \
-    target-i386/int_helper.c \
-    target-i386/machine.c \
-    target-i386/mem_helper.c \
-    target-i386/misc_helper.c \
-    target-i386/monitor.c \
-    target-i386/mpx_helper.c \
-    target-i386/seg_helper.c \
-    target-i386/smm_helper.c \
-    target-i386/svm_helper.c \
-    target-i386/translate.c \
+    target/i386/arch_dump.c \
+    target/i386/arch_memory_mapping.c \
+    target/i386/bpt_helper.c \
+    target/i386/cc_helper.c \
+    target/i386/cpu.c \
+    target/i386/excp_helper.c \
+    target/i386/fpu_helper.c \
+    target/i386/gdbstub.c \
+    target/i386/helper.c \
+    target/i386/int_helper.c \
+    target/i386/machine.c \
+    target/i386/mem_helper.c \
+    target/i386/misc_helper.c \
+    target/i386/monitor.c \
+    target/i386/mpx_helper.c \
+    target/i386/seg_helper.c \
+    target/i386/smm_helper.c \
+    target/i386/svm_helper.c \
+    target/i386/translate.c \
 
 QEMU2_TARGET_aarch64_SOURCES_darwin-x86_64 := \
 
@@ -1313,19 +1369,19 @@ QEMU2_TARGET_arm_SOURCES_windows-x86_64 := \
 
 QEMU2_TARGET_i386_SOURCES_darwin-x86_64 := \
     kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-darwin.c \
-    target-i386/hax-slot.c \
-    target-i386/hvf-all.c \
-    target-i386/hvf-utils/x86.c \
-    target-i386/hvf-utils/x86_cpuid.c \
-    target-i386/hvf-utils/x86_decode.c \
-    target-i386/hvf-utils/x86_descr.c \
-    target-i386/hvf-utils/x86_emu.c \
-    target-i386/hvf-utils/x86_flags.c \
-    target-i386/hvf-utils/x86_mmu.c \
-    target-i386/hvf-utils/x86hvf.c \
-    target-i386/kvm-stub.c \
+    target/i386/hax-all.c \
+    target/i386/hax-darwin.c \
+    target/i386/hax-mem.c \
+    target/i386/hvf-all.c \
+    target/i386/hvf-utils/x86.c \
+    target/i386/hvf-utils/x86_cpuid.c \
+    target/i386/hvf-utils/x86_decode.c \
+    target/i386/hvf-utils/x86_descr.c \
+    target/i386/hvf-utils/x86_emu.c \
+    target/i386/hvf-utils/x86_flags.c \
+    target/i386/hvf-utils/x86_mmu.c \
+    target/i386/hvf-utils/x86hvf.c \
+    target/i386/kvm-stub.c \
 
 QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hw/i386/kvm/apic.c \
@@ -1337,8 +1393,6 @@ QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hw/misc/hyperv_testdev.c \
     hw/misc/ivshmem.c \
     hw/scsi/vhost-scsi.c \
-    hw/vfio/amd-xgbe.c \
-    hw/vfio/calxeda-xgmac.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
@@ -1349,30 +1403,28 @@ QEMU2_TARGET_i386_SOURCES_linux-x86_64 := \
     hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
     kvm-all.c \
-    target-i386/hyperv.c \
-    target-i386/kvm.c \
+    target/i386/hyperv.c \
+    target/i386/kvm.c \
 
 QEMU2_TARGET_i386_SOURCES_windows-x86 := \
     kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-    target-i386/hax-windows.c \
-    target-i386/kvm-stub.c \
+    target/i386/hax-all.c \
+    target/i386/hax-mem.c \
+    target/i386/hax-windows.c \
+    target/i386/kvm-stub.c \
 
 QEMU2_TARGET_i386_SOURCES_windows-x86_64 := \
     kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-    target-i386/hax-windows.c \
-    target-i386/kvm-stub.c \
+    target/i386/hax-all.c \
+    target/i386/hax-mem.c \
+    target/i386/hax-windows.c \
+    target/i386/kvm-stub.c \
 
 QEMU2_TARGET_mips64el_SOURCES_darwin-x86_64 := \
 
 QEMU2_TARGET_mips64el_SOURCES_linux-x86_64 := \
     hw/misc/ivshmem.c \
     hw/scsi/vhost-scsi.c \
-    hw/vfio/amd-xgbe.c \
-    hw/vfio/calxeda-xgmac.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
@@ -1392,8 +1444,6 @@ QEMU2_TARGET_mipsel_SOURCES_darwin-x86_64 := \
 QEMU2_TARGET_mipsel_SOURCES_linux-x86_64 := \
     hw/misc/ivshmem.c \
     hw/scsi/vhost-scsi.c \
-    hw/vfio/amd-xgbe.c \
-    hw/vfio/calxeda-xgmac.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
@@ -1410,19 +1460,19 @@ QEMU2_TARGET_mipsel_SOURCES_windows-x86_64 := \
 
 QEMU2_TARGET_x86_64_SOURCES_darwin-x86_64 := \
     kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-darwin.c \
-    target-i386/hax-slot.c \
-    target-i386/hvf-all.c \
-    target-i386/hvf-utils/x86.c \
-    target-i386/hvf-utils/x86_cpuid.c \
-    target-i386/hvf-utils/x86_decode.c \
-    target-i386/hvf-utils/x86_descr.c \
-    target-i386/hvf-utils/x86_emu.c \
-    target-i386/hvf-utils/x86_flags.c \
-    target-i386/hvf-utils/x86_mmu.c \
-    target-i386/hvf-utils/x86hvf.c \
-    target-i386/kvm-stub.c \
+    target/i386/hax-all.c \
+    target/i386/hax-darwin.c \
+    target/i386/hax-mem.c \
+    target/i386/hvf-all.c \
+    target/i386/hvf-utils/x86.c \
+    target/i386/hvf-utils/x86_cpuid.c \
+    target/i386/hvf-utils/x86_decode.c \
+    target/i386/hvf-utils/x86_descr.c \
+    target/i386/hvf-utils/x86_emu.c \
+    target/i386/hvf-utils/x86_flags.c \
+    target/i386/hvf-utils/x86_mmu.c \
+    target/i386/hvf-utils/x86hvf.c \
+    target/i386/kvm-stub.c \
 
 QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
     hw/i386/kvm/apic.c \
@@ -1434,8 +1484,6 @@ QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
     hw/misc/hyperv_testdev.c \
     hw/misc/ivshmem.c \
     hw/scsi/vhost-scsi.c \
-    hw/vfio/amd-xgbe.c \
-    hw/vfio/calxeda-xgmac.c \
     hw/vfio/common.c \
     hw/vfio/pci-quirks.c \
     hw/vfio/pci.c \
@@ -1446,20 +1494,20 @@ QEMU2_TARGET_x86_64_SOURCES_linux-x86_64 := \
     hw/virtio/vhost-vsock.c \
     hw/virtio/vhost.c \
     kvm-all.c \
-    target-i386/hyperv.c \
-    target-i386/kvm.c \
+    target/i386/hyperv.c \
+    target/i386/kvm.c \
 
 QEMU2_TARGET_x86_64_SOURCES_windows-x86 := \
     kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-    target-i386/hax-windows.c \
-    target-i386/kvm-stub.c \
+    target/i386/hax-all.c \
+    target/i386/hax-mem.c \
+    target/i386/hax-windows.c \
+    target/i386/kvm-stub.c \
 
 QEMU2_TARGET_x86_64_SOURCES_windows-x86_64 := \
     kvm-stub.c \
-    target-i386/hax-all.c \
-    target-i386/hax-slot.c \
-    target-i386/hax-windows.c \
-    target-i386/kvm-stub.c \
+    target/i386/hax-all.c \
+    target/i386/hax-mem.c \
+    target/i386/hax-windows.c \
+    target/i386/kvm-stub.c \
 

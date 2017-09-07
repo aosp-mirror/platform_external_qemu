@@ -26,7 +26,7 @@
 #include "exec/memory.h"
 #include "qemu/queue.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/vfio/trace.h"
 #include "hw/platform-bus.h"
 #include "sysemu/kvm.h"
 
