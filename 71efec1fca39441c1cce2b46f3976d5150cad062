@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "221290e0_e1c9252d",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T20:55:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3b6d882_8bf22fe4",
+      "range": {
+        "startLine": 9,
+        "startChar": 2,
+        "endLine": 9,
+        "endChar": 8
+      },
+      "revId": "71efec1fca39441c1cce2b46f3976d5150cad062",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbdba5ba_34fa2155",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2017-09-07T20:52:14Z",
       "side": 1,
       "message": "please add some command line verification code - it will help you and others later :)",
+      "range": {
+        "startLine": 72,
+        "startChar": 0,
+        "endLine": 72,
+        "endChar": 18
+      },
+      "revId": "71efec1fca39441c1cce2b46f3976d5150cad062",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31a2fd44_539a109e",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 10
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-07T20:55:49Z",
+      "side": 1,
+      "message": "What do you mean by \"command line verification\"?",
+      "parentUuid": "fbdba5ba_34fa2155",
       "range": {
         "startLine": 72,
         "startChar": 0,
