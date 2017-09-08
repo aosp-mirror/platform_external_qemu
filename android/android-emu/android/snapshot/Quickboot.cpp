@@ -12,6 +12,7 @@
 #include "android/snapshot/Quickboot.h"
 
 #include "android/base/Stopwatch.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/cmdline-option.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
@@ -70,6 +71,11 @@ void Quickboot::finalize() {
     sInstance = nullptr;
 }
 
+Quickboot::~Quickboot() {
+    mLivenessTimer->stop();
+    mLivenessTimer.reset();
+}
+
 void Quickboot::reportSuccessfulLoad(StringView name,
                                      System::WallDuration startTimeMs) {
     auto& loader = Snapshotter::get().loader();
@@ -120,7 +126,47 @@ void Quickboot::reportSuccessfulSave(StringView name,
     });
 }
 
-Quickboot::Quickboot(const QAndroidVmOperations& vmOps) : mVmOps(vmOps) {}
+constexpr int kLivenessTimerTimeoutMs = 100;
+constexpr int kBootTimeoutMs = 5 * 1000;
+
+void Quickboot::startLivenessMonitor() {
+    mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+}
+
+void Quickboot::onLivenessTimer() {
+    if (metrics::AdbLivenessChecker::isEmulatorBooted()) {
+        VERBOSE_PRINT(snapshot, "Guest came online in %.3f sec after loading",
+                      (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
+                              1000.0);
+        // done here: snapshot loaded fine and emulator's working.
+        return;
+    }
+
+    const auto nowMs = System::get()->getHighResTimeUs() / 1000;
+    if (int64_t(nowMs - mLoadTimeMs) > kBootTimeoutMs) {
+        // The VM hasn't started for long enough since the end of snapshot
+        // loading, let's reset it.
+        dwarning(
+                "Guest hasn't come online in %d seconds, deleting the boot "
+                "snapshot and resetting the guest",
+                kBootTimeoutMs / 1000);
+        Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+        reportFailedLoad(
+                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
+        mVmOps.vmReset();
+        return;
+    }
+
+    mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+}
+
+Quickboot::Quickboot(const QAndroidVmOperations& vmOps)
+    : mVmOps(vmOps),
+      mLivenessTimer(base::ThreadLooper::get()->createTimer(
+              [](void* opaque, base::Looper::Timer*) {
+                  static_cast<Quickboot*>(opaque)->onLivenessTimer();
+              },
+              this)) {}
 
 bool Quickboot::load(StringView name) {
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
@@ -154,7 +200,9 @@ bool Quickboot::load(StringView name) {
         mLoadTimeMs = System::get()->getHighResTimeUs() / 1000;
         if (res == OperationStatus::Ok) {
             mLoaded = true;
+            mLoadedSnapshotName = name;
             reportSuccessfulLoad(name, startTimeMs);
+            startLivenessMonitor();
         } else {
             // Check if the error is about something done before the real load
             // (e.g. condition check) or we've started actually loading the VM
@@ -206,6 +254,8 @@ bool Quickboot::save(StringView name) {
     if (name.empty()) {
         name = kDefaultBootSnapshot;
     }
+
+    mLivenessTimer->stop();
 
     const int kMinUptimeForSavingMs = 1500;
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
