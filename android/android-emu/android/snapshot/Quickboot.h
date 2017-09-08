@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/base/async/Looper.h"
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
 #include "android/base/system/System.h"
@@ -28,6 +29,8 @@ public:
     static void initialize(const QAndroidVmOperations& vmOps);
     static void finalize();
 
+    ~Quickboot();
+
     static constexpr base::StringView kDefaultBootSnapshot = "default_boot";
 
     bool load(base::StringView name);
@@ -40,12 +43,18 @@ private:
                               base::System::WallDuration durationMs,
                               base::System::WallDuration sessionUptimeMs);
 
+    void startLivenessMonitor();
+    void onLivenessTimer();
+
     Quickboot(const QAndroidVmOperations& vmOps);
 
     const QAndroidVmOperations mVmOps;
     base::System::WallDuration mLoadTimeMs = 0;
     bool mLoaded = false;
+    std::string mLoadedSnapshotName;
     OperationStatus mLoadStatus = OperationStatus::NotStarted;
+
+    std::unique_ptr<base::Looper::Timer> mLivenessTimer;
 };
 
 }  // namespace snapshot
