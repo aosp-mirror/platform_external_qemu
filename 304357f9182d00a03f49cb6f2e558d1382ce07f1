@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "8be22f8e_8cbe566e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1057369
+      },
+      "writtenOn": "2017-09-08T10:10:19Z",
+      "side": 1,
+      "message": "Indeed, the hax_vcpu_destroy() call in qemu_hax_cpu_thread_fn() is somehow never executed, regardless of how the AVD is shut down (either normally via adb or forcibly using the X button). I agree that a proper fix should try to make the existing call work instead of adding another one.\n\nAnother problem is that hax_vm_destroy() is never called anywhere (except in hax_init(), which is irrelevant). So it makes sense to call it after all vCPUs are destroyed.\n\nFortunately there is no memory leak in the kernel, because Mac closes the vCPU and VM file descriptors opened by QEMU as the QEMU process is destroyed, so HAXM driver/kext can free up the resources allocated for the VM.",
+      "parentUuid": "d964c23b_06d2b413",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 40
+      },
+      "revId": "304357f9182d00a03f49cb6f2e558d1382ce07f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c58c326e_46581efd",
         "filename": "cpus.c",
         "patchSetId": 2
