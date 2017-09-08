@@ -144,7 +144,7 @@ void RamLoader::zeroOutPage(const Page& page) {
 static int64_t getDelta(base::Stream* stream) {
     auto num = stream->getPackedNum();
     auto sign = num & 1;
-    return sign ? -int32_t(num >> 1) : (num >> 1);
+    return sign ? -int64_t(num >> 1) : (num >> 1);
 }
 
 bool RamLoader::readIndex() {
@@ -182,39 +182,8 @@ bool RamLoader::readIndex() {
         if (blockIt == mIndex.blocks.end()) {
             return false;
         }
-        const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
-        FileIndex::Block& block = *blockIt;
-        block.pagesBegin = mIndex.pages.end();
-
-        uint32_t blockPagesCount = mStream.getBe32();
-        for (int i = 0; i < int(blockPagesCount); ++i) {
-            auto sizeOnDisk = mStream.getPackedNum();
-            if (sizeOnDisk == 0) {
-                // Empty page
-                mIndex.pages.emplace_back(State::Read);
-                Page& page = mIndex.pages.back();
-                page.blockIndex = uint16_t(blockIndex);
-                page.sizeOnDisk = 0;
-                page.filePos = 0;
-            } else {
-                mIndex.pages.emplace_back();
-                Page& page = mIndex.pages.back();
-                page.blockIndex = uint16_t(blockIndex);
-                page.sizeOnDisk = uint32_t(sizeOnDisk);
-                auto posDelta = getDelta(&mStream);
-                if (compressed) {
-                    posDelta += prevPageSizeOnDisk;
-                } else {
-                    page.sizeOnDisk *= uint32_t(block.ramBlock.pageSize);
-                    posDelta *= block.ramBlock.pageSize;
-                }
-                runningFilePos += posDelta;
-                page.filePos = uint64_t(runningFilePos);
-                prevPageSizeOnDisk = int32_t(page.sizeOnDisk);
-            }
-        }
-        block.pagesEnd = mIndex.pages.end();
-        assert(block.pagesEnd - block.pagesBegin == int(blockPagesCount));
+        readBlockPages(blockIt, compressed, &runningFilePos,
+                       &prevPageSizeOnDisk);
     }
 
 #if SNAPSHOT_PROFILE > 1
@@ -222,6 +191,51 @@ bool RamLoader::readIndex() {
            (base::System::get()->getHighResTimeUs() - start) / 1000.0);
 #endif
     return true;
+}
+
+void RamLoader::readBlockPages(FileIndex::Blocks::iterator blockIt,
+                               bool compressed,
+                               int64_t* runningFilePosPtr,
+                               int32_t* prevPageSizeOnDiskPtr) {
+    auto runningFilePos = *runningFilePosPtr;
+    auto prevPageSizeOnDisk = *prevPageSizeOnDiskPtr;
+
+    const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
+
+    const auto blockPagesCount = mStream.getBe32();
+    FileIndex::Block& block = *blockIt;
+    auto pageIt = mIndex.pages.end();
+    block.pagesBegin = pageIt;
+    mIndex.pages.resize(mIndex.pages.size() + blockPagesCount);
+    const auto endIt = mIndex.pages.end();
+    block.pagesEnd = endIt;
+
+    for (; pageIt != endIt; ++pageIt) {
+        Page& page = *pageIt;
+        page.blockIndex = uint16_t(blockIndex);
+        const auto sizeOnDisk = mStream.getPackedNum();
+        if (sizeOnDisk == 0) {
+            // Empty page
+            page.state.store(uint8_t(State::Read), std::memory_order_relaxed);
+            page.sizeOnDisk = 0;
+            page.filePos = 0;
+        } else {
+            page.blockIndex = uint16_t(blockIndex);
+            page.sizeOnDisk = uint32_t(sizeOnDisk);
+            auto posDelta = getDelta(&mStream);
+            if (compressed) {
+                posDelta += prevPageSizeOnDisk;
+                prevPageSizeOnDisk = int32_t(page.sizeOnDisk);
+            } else {
+                page.sizeOnDisk *= uint32_t(block.ramBlock.pageSize);
+                posDelta *= block.ramBlock.pageSize;
+            }
+            runningFilePos += posDelta;
+            page.filePos = uint64_t(runningFilePos);
+        }
+    }
+    *runningFilePosPtr = runningFilePos;
+    *prevPageSizeOnDiskPtr = prevPageSizeOnDisk;
 }
 
 bool RamLoader::registerPageWatches() {
