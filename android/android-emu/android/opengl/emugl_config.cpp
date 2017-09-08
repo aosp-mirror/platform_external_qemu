@@ -401,10 +401,8 @@ void emuglConfig_setupEnv(const EmuglConfig* config) {
 
     if (!strcmp(config->backend, "angle_indirect")
             || !strcmp(config->backend, "swiftshader_indirect")) {
-        if (!strcmp(config->backend, "angle_indirect")) {
-            system->envSet("ANDROID_GLESv1_LIB",
-                    sBackendList->getGLES12TranslatorLibName().c_str());
-        }
+        system->envSet("ANDROID_GLESv1_LIB",
+                sBackendList->getGLES12TranslatorLibName().c_str());
         system->envSet("ANDROID_EGL_ON_EGL", "1");
         return;
     }
