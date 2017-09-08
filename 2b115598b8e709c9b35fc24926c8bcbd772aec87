@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c84bea42_cdc54ff0",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-08T01:44:11Z",
+      "side": 1,
+      "message": "nit: make this and the 100 above/below named constants",
+      "range": {
+        "startLine": 143,
+        "startChar": 39,
+        "endLine": 143,
+        "endChar": 47
+      },
+      "revId": "2b115598b8e709c9b35fc24926c8bcbd772aec87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a1593e69_53ac943e",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-08T01:44:11Z",
+      "side": 1,
+      "message": "nit: String interpolate with %u to not have to change it separately in the future if we tweak",
+      "range": {
+        "startLine": 147,
+        "startChar": 45,
+        "endLine": 147,
+        "endChar": 54
+      },
+      "revId": "2b115598b8e709c9b35fc24926c8bcbd772aec87",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
