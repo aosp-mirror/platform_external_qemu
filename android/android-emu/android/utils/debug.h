@@ -64,6 +64,7 @@ ANDROID_BEGIN_HEADER
     _VERBOSE_TAG(memory, "Memory Usage Report")                                \
     _VERBOSE_TAG(car, "Emulated car data")                                     \
     _VERBOSE_TAG(record, "Screen recording")                                   \
+    _VERBOSE_TAG(snapshot, "Snapshots")                                        \
 
 #define  _VERBOSE_TAG(x,y)  VERBOSE_##x,
 typedef enum {
