@@ -1566,6 +1566,7 @@ help_feature(stralloc_t* out)
 #define  help_nojni        NULL
 #define  help_initdata     NULL
 #define  help_no_sim       NULL
+#define  help_lowram       NULL
 #define  help_no_window    NULL
 #define  help_version      NULL
 #define  help_memory       NULL

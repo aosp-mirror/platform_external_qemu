@@ -144,6 +144,7 @@ OPT_FLAG ( no_boot_anim, "disable animation for faster boot" )
 
 OPT_FLAG( no_window, "disable graphical window display" )
 OPT_FLAG( no_sim, "device has no SIM card" )
+OPT_FLAG( lowram, "device is a low ram device" )
 OPT_FLAG( version, "display emulator version number" )
 
 OPT_PARAM( report_console, "<socket>", "report console port to remote socket" )
