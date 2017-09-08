@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "5c4face7_c516d9cc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1135005
+      },
+      "writtenOn": "2017-09-08T19:27:34Z",
+      "side": 1,
+      "message": "I did observe that the cpu thread function does not make it past the loop and so it never calls hax_vcpu_destroy(). I will investigate further myself.",
+      "parentUuid": "fcb60c06_f471634a",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 40
+      },
+      "revId": "304357f9182d00a03f49cb6f2e558d1382ce07f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c58c326e_46581efd",
         "filename": "cpus.c",
         "patchSetId": 2
@@ -84,6 +108,30 @@
       "writtenOn": "2017-09-06T15:51:13Z",
       "side": 1,
       "message": "nit: should this variable also be under #ifdef CONFIG_HAX ?",
+      "range": {
+        "startLine": 84,
+        "startChar": 0,
+        "endLine": 84,
+        "endChar": 28
+      },
+      "revId": "304357f9182d00a03f49cb6f2e558d1382ce07f1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "057d3867_ac704d04",
+        "filename": "cpus.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1135005
+      },
+      "writtenOn": "2017-09-08T19:27:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c58c326e_46581efd",
       "range": {
         "startLine": 84,
         "startChar": 0,
