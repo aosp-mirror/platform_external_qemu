@@ -795,6 +795,7 @@ public:
         MEMORYSTATUSEX mem = {sizeof(mem)};
         if (::GlobalMemoryStatusEx(&mem)) {
             res.total_phys_memory = mem.ullTotalPhys;
+            res.avail_phys_memory = mem.ullAvailPhys;
             res.total_page_file = mem.ullTotalPageFile;
         }
 #elif defined (__linux__)
@@ -832,6 +833,9 @@ public:
             if (sscanf(line.c_str(), "MemTotal:%lu", &size) == 1) {
                 res.total_phys_memory = size * 1024;
             }
+            else if (sscanf(line.c_str(), "MemAvailable:%lu", &size) == 1) {
+                res.avail_phys_memory = size * 1024;
+            }
             else if (sscanf(line.c_str(), "SwapTotal:%lu", &size) == 1) {
                 res.total_page_file = size * 1024;
             }
@@ -839,15 +843,18 @@ public:
         fin.close();
 
 #elif defined(__APPLE__)
+        const auto host = mach_host_self();
         mach_task_basic_info info = {};
         mach_msg_type_number_t infoCount = MACH_TASK_BASIC_INFO_COUNT;
-        task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
+        task_info(host, MACH_TASK_BASIC_INFO,
                 reinterpret_cast<task_info_t>(&info), &infoCount);
 
-        int mib[2] = { CTL_HW, HW_MEMSIZE };
         uint64_t total_phys = 0;
-        size_t len = sizeof(uint64_t);
-        sysctl(mib, 2, &total_phys, &len, nullptr, 0);
+        {
+            int mib[2] = { CTL_HW, HW_MEMSIZE };
+            size_t len = sizeof(uint64_t);
+            sysctl(mib, 2, &total_phys, &len, nullptr, 0);
+        }
 
         res.resident = info.resident_size;
         res.resident_max = info.resident_size_max;
@@ -855,6 +862,18 @@ public:
         res.virt_max = 0; // Max virtual NYI for macOS
         res.total_phys_memory = total_phys; // Max virtual NYI for macOS
         res.total_page_file = 0; // Total page file NYI for macOS
+
+        // Available memory detection: taken from the vm_stat utility sources.
+        vm_size_t pageSize = 4096;
+        host_page_size(host, &pageSize);
+        vm_statistics64_data_t vm_stat;
+        unsigned int count = HOST_VM_INFO64_COUNT;
+        if (host_statistics64(host, HOST_VM_INFO64, (host_info64_t)&vm_stat,
+                              &count) == KERN_SUCCESS) {
+                res.avail_phys_memory =
+                        (vm_stat.free_count - vm_stat.speculative_count) *
+                        pageSize;
+            }
 #endif
         return res;
     }
@@ -864,12 +883,10 @@ public:
             bool fullPath = false) const {
         std::vector<std::string> result = scanDirInternal(dirPath);
         if (fullPath) {
-            // Pre-pend |dirPath| to each entry.
+            // Prepend |dirPath| to each entry.
             std::string prefix = PathUtils::addTrailingDirSeparator(dirPath);
-            for (size_t n = 0; n < result.size(); ++n) {
-                std::string path = prefix;
-                path.append(result[n]);
-                result[n] = path;
+            for (auto& entry : result) {
+                entry.insert(0, prefix);
             }
         }
         return result;

@@ -155,6 +155,7 @@ public:
         uint64_t virt;
         uint64_t virt_max;
         uint64_t total_phys_memory;
+        uint64_t avail_phys_memory;
         uint64_t total_page_file;
     };
     virtual MemUsage getMemUsage() = 0;
