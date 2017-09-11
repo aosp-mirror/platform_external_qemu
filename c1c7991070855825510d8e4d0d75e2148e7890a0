@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6cd6e7ce_f48be145",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-11T17:45:14Z",
+      "side": 1,
+      "message": "Nice",
+      "range": {
+        "startLine": 395,
+        "startChar": 0,
+        "endLine": 395,
+        "endChar": 38
+      },
+      "revId": "c1c7991070855825510d8e4d0d75e2148e7890a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "01b2b788_a1f97010",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-11T17:45:14Z",
+      "side": 1,
+      "message": "very nit: +1 space to line it up with the |const| above",
+      "range": {
+        "startLine": 444,
+        "startChar": 12,
+        "endLine": 444,
+        "endChar": 13
+      },
+      "revId": "c1c7991070855825510d8e4d0d75e2148e7890a0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
