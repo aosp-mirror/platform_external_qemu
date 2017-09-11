@@ -264,6 +264,13 @@ public:
         return pathModificationTimeInternal(toTempRoot(path));
     }
 
+    Optional<DiskKind> pathDiskKind(StringView path) override {
+        return diskKindInternal(toTempRoot(path));
+    }
+    Optional<DiskKind> diskKind(int fd) override {
+        return diskKindInternal(fd);
+    }
+
     virtual std::vector<std::string> scanDirEntries(
             StringView dirPath,
             bool fullPath = false) const override {
