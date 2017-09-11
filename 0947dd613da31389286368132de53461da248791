@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "a6a8ab84_ac5ac61e",
+        "filename": "android/android-emu/android/emulation/android_qemud.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-11T17:46:52Z",
+      "side": 1,
+      "message": "Awesome, this touches a lot of things, sensor, camera, adb...we should test it in depth over here though",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 163,
+        "endChar": 23
+      },
+      "revId": "0947dd613da31389286368132de53461da248791",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ab90a49_cc11dbdb",
         "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
         "patchSetId": 2
