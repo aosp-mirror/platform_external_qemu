@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ab90a49_cc11dbdb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/bug-report-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-11T16:37:27Z",
+      "side": 1,
+      "message": "this whole function is leaking like crazy. avdInfo_getSkinInfo(), avdInfo_getSdCardSize(), avdInfo_getSdCardPath() - they all allocate memory for the returned/out strings",
+      "range": {
+        "startLine": 391,
+        "startChar": 20,
+        "endLine": 391,
+        "endChar": 34
+      },
+      "revId": "0947dd613da31389286368132de53461da248791",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
