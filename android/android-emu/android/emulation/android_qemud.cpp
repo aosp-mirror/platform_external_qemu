@@ -159,6 +159,8 @@ _qemudPipe_closeFromGuest(void* opaque) {
     } else {
         D("%s: Unexpected NULL client", __FUNCTION__);
     }
+
+    android_free(pipe);
 }
 
 /* Called when the guest has sent some data to the client.

@@ -442,6 +442,9 @@ void BugreportPage::loadAvdDetails() {
                     mReportingFields.avdDetails.append(
                             StringFormat("%s: %s\n", key, value));
                 }
+
+                free(key);
+                free(value);
             }
         }
     }
