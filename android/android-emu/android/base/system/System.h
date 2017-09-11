@@ -263,6 +263,14 @@ public:
     // Fails if path is not a file or not readable, and in case of other errors.
     virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
     virtual bool fileSize(int fd, FileSize* outFileSize) const = 0;
+    Optional<FileSize> pathFileSize(StringView path) {
+        FileSize res;
+        return pathFileSize(path, &res) ? makeOptional(res) : kNullopt;
+    }
+    Optional<FileSize> fleSize(int fd) {
+        FileSize res;
+        return fileSize(fd, &res) ? makeOptional(res) : kNullopt;
+    }
 
     // Gets the file creation timestamp as a Unix epoch time with microsecond
     // resolution. Returns an empty optional for systems that don't support
@@ -273,6 +281,14 @@ public:
     // microsecond resolution. Returns an empty optional for systems that don't
     // support modification times or if the operation failed.
     virtual Optional<Duration> pathModificationTime(StringView path) const = 0;
+
+    // Known distinct kinds of disks.
+    enum class DiskKind {
+        Hdd,
+        Ssd
+    };
+    virtual Optional<DiskKind> pathDiskKind(StringView path) = 0;
+    virtual Optional<DiskKind> diskKind(int fd) = 0;
 
     // Scan directory |dirPath| for entries, and return them as a sorted
     // vector or entries. If |fullPath| is true, then each item of the
@@ -393,6 +409,8 @@ protected:
     static bool fileSizeInternal(int fd, FileSize* outFileSize);
     static Optional<Duration> pathCreationTimeInternal(StringView path);
     static Optional<Duration> pathModificationTimeInternal(StringView path);
+    static Optional<DiskKind> diskKindInternal(StringView path);
+    static Optional<DiskKind> diskKindInternal(int fd);
 
 private:
     DISALLOW_COPY_AND_ASSIGN(System);
