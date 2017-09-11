@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dd38d541_a12392a6",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 12
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-11T16:20:15Z",
+      "side": 1,
+      "message": "Can you add a confirmation request from the user?\n\"Is that correct? [y/N]\" or similar?",
+      "range": {
+        "startLine": 107,
+        "startChar": 5,
+        "endLine": 107,
+        "endChar": 91
+      },
+      "revId": "6d2a051bcc03fcc15d968d5b470f98d4496b1121",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

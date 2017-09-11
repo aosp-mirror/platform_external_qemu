@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "33dcba45_899abf0e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-11T16:20:15Z",
+      "side": 1,
+      "message": "Can you put more precise instructions in the commit message? For example the relevant environment variables? And where the package files will be created?",
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92884ed0_2bbbfd35",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 13
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-11T16:20:15Z",
+      "side": 1,
+      "message": "line length \u003e 80 chars",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 104
+      },
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "faba743e_77277a50",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 13
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-11T16:20:15Z",
+      "side": 1,
+      "message": "line length \u003e 80 chars",
+      "range": {
+        "startLine": 80,
+        "startChar": 2,
+        "endLine": 80,
+        "endChar": 109
+      },
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "01cdb9c8_30e533db",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 13
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-11T16:20:15Z",
+      "side": 1,
+      "message": "line length \u003e 80 chars",
+      "range": {
+        "startLine": 103,
+        "startChar": 2,
+        "endLine": 103,
+        "endChar": 108
+      },
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bdc1686d_854a00d6",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 13
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-11T16:20:15Z",
+      "side": 1,
+      "message": "Can you also print the paths to the package files just created?",
+      "range": {
+        "startLine": 164,
+        "startChar": 5,
+        "endLine": 164,
+        "endChar": 12
+      },
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
