@@ -195,6 +195,11 @@ LOCAL_SRC_FILES += \
 
 endif
 
+ifeq ($(BUILD_TARGET_OS),darwin)
+LOCAL_SRC_FILES += \
+    android/base/system/system-native-mac.mm
+endif
+
 $(call end-emulator-library)
 
 ####
