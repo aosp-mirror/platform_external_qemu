@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ac7bef05_d5e0ac6d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-11T21:26:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33dcba45_899abf0e",
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "92884ed0_2bbbfd35",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 13
@@ -30,6 +48,30 @@
       "writtenOn": "2017-09-11T16:20:15Z",
       "side": 1,
       "message": "line length \u003e 80 chars",
+      "range": {
+        "startLine": 43,
+        "startChar": 4,
+        "endLine": 43,
+        "endChar": 104
+      },
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "708d8c3d_f31ccb3e",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 13
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-11T21:26:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "92884ed0_2bbbfd35",
       "range": {
         "startLine": 43,
         "startChar": 4,
@@ -99,6 +141,30 @@
       "writtenOn": "2017-09-11T16:20:15Z",
       "side": 1,
       "message": "Can you also print the paths to the package files just created?",
+      "range": {
+        "startLine": 164,
+        "startChar": 5,
+        "endLine": 164,
+        "endChar": 12
+      },
+      "revId": "24dea53a7e55281429b61b10e5ef3d0b22b2b96f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e3fdbb2_393623b8",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 13
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-11T21:26:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bdc1686d_854a00d6",
       "range": {
         "startLine": 164,
         "startChar": 5,
