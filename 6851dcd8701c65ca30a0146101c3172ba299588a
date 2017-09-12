@@ -22,6 +22,30 @@
       "revId": "6851dcd8701c65ca30a0146101c3172ba299588a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e95ea885_28305179",
+        "filename": "android-qemu2-glue/main.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1043,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-12T22:52:41Z",
+      "side": 1,
+      "message": "Aha, in chrome os case, it seems we don\u0027t generate userdata.img.qcow2...",
+      "parentUuid": "6c3fb68d_c775b931",
+      "range": {
+        "startLine": 1043,
+        "startChar": 38,
+        "endLine": 1043,
+        "endChar": 50
+      },
+      "revId": "6851dcd8701c65ca30a0146101c3172ba299588a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
