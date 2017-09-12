@@ -67,7 +67,7 @@ RefDo parseRefDo(const android_emulator::RefDo& input) {
 
 ApduArDo parseApduArDo(const android_emulator::ArDo::Apdu& input) {
     if (input.has_general_access_rule()) {
-        return ApduArDo(input.general_access_rule());
+        return ApduArDo(static_cast<ApduArDo::Allow>(input.general_access_rule()));
     } else {
         std::vector<std::string> rules;
         for (auto& rule : input.specific_access_rules().rules()) {
@@ -87,11 +87,11 @@ ArDo parseArDo(const android_emulator::ArDo& input) {
         return ArDo(PermArDo(input.perm_ar_do()));
     } else if (input.has_apdu_ar_do() && input.has_ncf_ar_do()) {
         return ArDo(parseApduArDo(input.apdu_ar_do()),
-                    NfcArDo(input.ncf_ar_do()));
+                    NfcArDo(static_cast<NfcArDo::Allow>(input.ncf_ar_do())));
     } else if (input.has_apdu_ar_do()) {
         return ArDo(parseApduArDo(input.apdu_ar_do()));
     } else if (input.has_ncf_ar_do()) {
-        return ArDo(NfcArDo(input.ncf_ar_do()));
+        return ArDo(NfcArDo(static_cast<NfcArDo::Allow>(input.ncf_ar_do())));
     } else {
         dwarning("No ar_do found in proto, using default PermArDo.");
         return ArDo{PermArDo{"0000000000000000"}};

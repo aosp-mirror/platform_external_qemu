@@ -1038,15 +1038,10 @@ extern "C" int main(int argc, char** argv) {
         // hw->hw_arc: ChromeOS single disk image, use regular block device
         // instead of virtio block device
         args.add("-drive");
-        char* path_qemu_sys = avdInfo_getSystemImagePath(avd);
-        if (path_qemu_sys) {
-            args.addFormat("index=0,id=system,file=%s" PATH_SEP "system-qemu.img.qcow2",
-                    avdInfo_getContentPath(avd));
-            free(path_qemu_sys);
-        } else {
-            args.addFormat("index=0,id=system,file=%s" PATH_SEP "system.img.qcow2",
-                    avdInfo_getContentPath(avd));
-        }
+        const char* avd_dir = avdInfo_getContentPath(avd);
+        args.addFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP "system.img.qcow2|"
+                       "%s" PATH_SEP "userdata.img|"
+                       "%s" PATH_SEP "vendor.img.qcow2", avd_dir, avd_dir, avd_dir);
     }
 
     // Network

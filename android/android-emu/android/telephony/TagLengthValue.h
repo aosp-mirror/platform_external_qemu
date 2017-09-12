@@ -16,8 +16,6 @@
 #include <string.h>
 #include <vector>
 
-#include "android/telephony/proto/sim_access_rules.pb.h"
-
 // This file contains a set of Tag Length Values (TLV) that are stored on a UICC
 // (commonly called a SIM card). These classes are named after the specification
 // and their constructors are written such that they only allow sub TLVs that
@@ -100,8 +98,12 @@ public:
 class ApduArDo : public TagLengthValue {
     static const char kTag[];
 public:
+    enum class Allow {
+        Never = 0,
+        Always = 1,
+    };
     // Create an ApduArDo with a general access rule, allowing all or no APDUs
-    explicit ApduArDo(android_emulator::ArDo::Allow rule);
+    explicit ApduArDo(Allow rule);
 
     // Create an ApduArDo with a set of specific access rules for each APDU,
     // See the Secure Elements Access Control specification from
@@ -113,7 +115,11 @@ public:
 class NfcArDo : public TagLengthValue {
     static const char kTag[];
 public:
-    explicit NfcArDo(android_emulator::ArDo::Allow rule);
+    enum class Allow {
+        Never = 0,
+        Always = 1,
+    };
+    explicit NfcArDo(Allow rule);
 };
 
 // PERM-AR-DO, an 8 byte bitmask containing 64 seprate permissions, see

@@ -28,6 +28,7 @@
 
 #ifdef _WIN32
 #include "android/base/files/ScopedRegKey.h"
+#include "android/base/files/ScopedFileHandle.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
 #endif
@@ -36,7 +37,8 @@
 #include <shlobj.h>
 #include <windows.h>
 #include <psapi.h>
-#include <shlobj.h>
+#include <winioctl.h>
+#include <ntddscsi.h>
 #endif
 
 #ifdef __APPLE__
@@ -65,6 +67,7 @@ CF_EXPORT const CFStringRef _kCFSystemVersionProductVersionKey;
 #include <chrono>
 #include <memory>
 #include <vector>
+#include <unordered_set>
 
 #ifndef _WIN32
 #include <fcntl.h>
@@ -107,6 +110,11 @@ namespace base {
 using std::string;
 using std::unique_ptr;
 using std::vector;
+
+#ifdef __APPLE__
+// Defined in system-native-mac.mm
+Optional<System::DiskKind> nativeDiskKind(int st_dev);
+#endif
 
 namespace {
 
@@ -876,6 +884,13 @@ public:
             }
 #endif
         return res;
+    }
+
+    Optional<DiskKind> pathDiskKind(StringView path) override {
+        return diskKindInternal(path);
+    }
+    Optional<DiskKind> diskKind(int fd) override {
+        return diskKindInternal(fd);
     }
 
     virtual std::vector<std::string> scanDirEntries(
@@ -1810,6 +1825,200 @@ Optional<System::Duration> System::pathModificationTimeInternal(StringView path)
 #else   // Darwin
     return st.st_mtimespec.tv_sec * 1000000ll + st.st_mtimespec.tv_nsec / 1000;
 #endif
+}
+
+static Optional<System::DiskKind> diskKind(const PathStat& st) {
+#ifdef _WIN32
+
+    auto volumeName = StringFormat(R"(\\?\%c:)", 'A' + st.st_dev);
+    ScopedFileHandle volume(::CreateFileA(volumeName.c_str(), 0,
+                                          FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                          NULL, OPEN_EXISTING, 0, NULL));
+    if (!volume.valid()) {
+        return {};
+    }
+
+    VOLUME_DISK_EXTENTS volumeDiskExtents;
+    DWORD bytesReturned = 0;
+    if ((!::DeviceIoControl(volume.get(), IOCTL_VOLUME_GET_VOLUME_DISK_EXTENTS,
+                            NULL, 0, &volumeDiskExtents,
+                            sizeof(volumeDiskExtents), &bytesReturned, NULL) &&
+         ::GetLastError() != ERROR_MORE_DATA) ||
+        bytesReturned != sizeof(volumeDiskExtents)) {
+        return {};
+    }
+    if (volumeDiskExtents.NumberOfDiskExtents < 1) {
+        return {};
+    }
+
+    auto deviceName =
+            StringFormat(R"(\\?\PhysicalDrive%d)",
+                         int(volumeDiskExtents.Extents[0].DiskNumber));
+    ScopedFileHandle device(::CreateFileA(deviceName.c_str(), 0,
+                                          FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                          NULL, OPEN_EXISTING, 0, NULL));
+    if (!device.valid()) {
+        return {};
+    }
+
+    STORAGE_PROPERTY_QUERY spqTrim;
+    spqTrim.PropertyId = (STORAGE_PROPERTY_ID)StorageDeviceTrimProperty;
+    spqTrim.QueryType = PropertyStandardQuery;
+    DEVICE_TRIM_DESCRIPTOR dtd = {0};
+    if (::DeviceIoControl(device.get(), IOCTL_STORAGE_QUERY_PROPERTY, &spqTrim,
+                          sizeof(spqTrim), &dtd, sizeof(dtd), &bytesReturned,
+                          NULL) &&
+        bytesReturned == sizeof(dtd)) {
+        // Some SSDs don't support TRIM, so this can't be a sign of an HDD.
+        if (dtd.TrimEnabled) {
+            return System::DiskKind::Ssd;
+        }
+    }
+
+    bytesReturned = 0;
+    STORAGE_PROPERTY_QUERY spqSeekP;
+    spqSeekP.PropertyId = (STORAGE_PROPERTY_ID)StorageDeviceSeekPenaltyProperty;
+    spqSeekP.QueryType = PropertyStandardQuery;
+    DEVICE_SEEK_PENALTY_DESCRIPTOR dspd = {0};
+    if (::DeviceIoControl(device.get(), IOCTL_STORAGE_QUERY_PROPERTY, &spqSeekP,
+                          sizeof(spqSeekP), &dspd, sizeof(dspd), &bytesReturned,
+                          NULL) &&
+        bytesReturned == sizeof(dspd)) {
+        return dspd.IncursSeekPenalty ? System::DiskKind::Hdd
+                                      : System::DiskKind::Ssd;
+    }
+
+    // TODO: figure out how to issue this query when not admin and not opening
+    //  disk for write access.
+#if 0
+    bytesReturned = 0;
+
+    // This struct isn't in the MinGW distribution headers.
+    struct ATAIdentifyDeviceQuery {
+        ATA_PASS_THROUGH_EX header;
+        WORD data[256];
+    };
+    ATAIdentifyDeviceQuery id_query = {};
+    id_query.header.Length = sizeof(id_query.header);
+    id_query.header.AtaFlags = ATA_FLAGS_DATA_IN;
+    id_query.header.DataTransferLength = sizeof(id_query.data);
+    id_query.header.TimeOutValue = 5;  // Timeout in seconds
+    id_query.header.DataBufferOffset =
+            offsetof(ATAIdentifyDeviceQuery, data[0]);
+    id_query.header.CurrentTaskFile[6] = 0xec;  // ATA IDENTIFY DEVICE
+    if (::DeviceIoControl(device.get(), IOCTL_ATA_PASS_THROUGH, &id_query,
+                          sizeof(id_query), &id_query, sizeof(id_query),
+                          &bytesReturned, NULL) &&
+        bytesReturned == sizeof(id_query)) {
+        // Index of nominal media rotation rate
+        // SOURCE:
+        // http://www.t13.org/documents/UploadedDocuments/docs2009/d2015r1a-ATAATAPI_Command_Set_-_2_ACS-2.pdf
+        //          7.18.7.81 Word 217
+        // QUOTE: Word 217 indicates the nominal media rotation rate of the
+        // device and is defined in table:
+        //          Value           Description
+        //          --------------------------------
+        //          0000h           Rate not reported
+        //          0001h           Non-rotating media (e.g., solid state
+        //                          device)
+        //          0002h-0400h     Reserved
+        //          0401h-FFFEh     Nominal media rotation rate in rotations per
+        //                          minute (rpm) (e.g., 7 200 rpm = 1C20h)
+        //          FFFFh           Reserved
+        unsigned rate = id_query.data[217];
+        if (rate == 1) {
+            return System::DiskKind::Ssd;
+        } else if (rate >= 0x0401 && rate <= 0xFFFE) {
+            return System::DiskKind::Hdd;
+        }
+    }
+#endif
+
+#elif defined __linux__
+
+    // Parse /proc/partitions to find the corresponding device
+    std::ifstream in("/proc/partitions");
+    if (!in) {
+        return {};
+    }
+
+    const auto maj = major(st.st_dev);
+    const auto min = minor(st.st_dev);
+
+    std::string line;
+    std::string devName;
+
+    std::unordered_set<std::string> devices;
+
+    while (std::getline(in, line)) {
+        unsigned curMaj, curMin;
+        unsigned long blocks;
+        char name[1024];
+        if (sscanf(line.c_str(), "%u %u %lu %1023s", &curMaj, &curMin, &blocks,
+                   name) == 4) {
+            devices.insert(name);
+            if (curMaj == maj && curMin == min) {
+                devName = name;
+                break;
+            }
+        }
+    }
+    if (devName.empty()) {
+        return {};
+    }
+    in.close();
+
+    if (maj == 8) {
+        // get rid of the partition number for block devices.
+        while (!devName.empty() && isdigit(devName.back())) {
+            devName.pop_back();
+        }
+        if (devices.find(devName) == devices.end()) {
+            return {};
+        }
+    }
+
+    // Now, having a device name, let's parse
+    // /sys/block/%device%X/queue/rotational to get the result.
+    auto sysPath = StringFormat("/sys/block/%s/queue/rotational", devName);
+    in.open(sysPath.c_str());
+    if (!in) {
+        return {};
+    }
+    char isRotational = 0;
+    if (!(in >> isRotational)) {
+        return {};
+    }
+    if (isRotational == '0') {
+        return System::DiskKind::Ssd;
+    } else if (isRotational == '1') {
+        return System::DiskKind::Hdd;
+    }
+
+#else
+
+    return nativeDiskKind(st.st_dev);
+
+#endif
+
+    // Sill got no idea.
+    return {};
+}
+
+Optional<System::DiskKind> System::diskKindInternal(StringView path) {
+    PathStat stat;
+    if (pathStat(path, &stat)) {
+        return {};
+    }
+    return android::base::diskKind(stat);
+}
+
+Optional<System::DiskKind> System::diskKindInternal(int fd) {
+    PathStat stat;
+    if (fdStat(fd, &stat)) {
+        return {};
+    }
+    return android::base::diskKind(stat);
 }
 
 // static

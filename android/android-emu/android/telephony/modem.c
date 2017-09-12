@@ -2113,10 +2113,10 @@ amodem_addTimeUpdate( AModem  modem )
 
     utc   = *gmtime(&now);
     tzdiff = android_tzoffset_in_seconds(&now) / (15 * 60);  /* timezone offset is in number of quater-hours */
-    isdst = android_localtime(&now)->tm_isdst;
+    isdst = localtime(&now)->tm_isdst;
 
-   /* retrieve a zoneinfo-compatible name for the host timezone
-    */
+    /* retrieve a zoneinfo-compatible name for the host timezone
+     */
     {
         char*  end = tzname + sizeof(tzname);
         char*  p = bufprint_zoneinfo_timezone( tzname, end );
