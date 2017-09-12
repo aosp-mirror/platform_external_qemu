@@ -14,6 +14,9 @@
 #include <initializer_list>
 #include <string>
 #include <string.h>
+#include <vector>
+
+#include "android/telephony/proto/sim_access_rules.pb.h"
 
 // This file contains a set of Tag Length Values (TLV) that are stored on a UICC
 // (commonly called a SIM card). These classes are named after the specification
@@ -97,28 +100,20 @@ public:
 class ApduArDo : public TagLengthValue {
     static const char kTag[];
 public:
-    enum class Allow {
-        Never = 0,
-        Always = 1,
-    };
     // Create an ApduArDo with a general access rule, allowing all or no APDUs
-    explicit ApduArDo(Allow rule);
+    explicit ApduArDo(android_emulator::ArDo::Allow rule);
 
     // Create an ApduArDo with a set of specific access rules for each APDU,
     // See the Secure Elements Access Control specification from
     // globalplatform.org for details on the format.
-    explicit ApduArDo(std::initializer_list<std::string> rules);
+    explicit ApduArDo(const std::vector<std::string>& rules);
 };
 
 // NFC-AR-DO, indicates if NFC events are allowed for the device application
 class NfcArDo : public TagLengthValue {
     static const char kTag[];
 public:
-    enum class Allow {
-        Never = 0,
-        Always = 1,
-    };
-    explicit NfcArDo(Allow rule);
+    explicit NfcArDo(android_emulator::ArDo::Allow rule);
 };
 
 // PERM-AR-DO, an 8 byte bitmask containing 64 seprate permissions, see
@@ -152,6 +147,7 @@ class AllRefArDo : public TagLengthValue {
     static const char kTag[];
 public:
     explicit AllRefArDo(std::initializer_list<RefArDo> refArDos);
+    explicit AllRefArDo(const std::vector<RefArDo>& refArDos);
 };
 
 }  // namespace android
