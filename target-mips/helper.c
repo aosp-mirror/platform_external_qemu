@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  MIPS emulation helpers for qemu.
  *
@@ -1199,3 +1200,5 @@ void QEMU_NORETURN do_raise_exception_err(CPUMIPSState *env,
 
     cpu_loop_exit_restore(cs, pc);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

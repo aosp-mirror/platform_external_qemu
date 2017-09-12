@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 #include "qemu/osdep.h"
 #include "trace.h"
 #include "cpu.h"
@@ -9623,3 +9624,5 @@ uint32_t HELPER(crc32c)(uint32_t acc, uint32_t val, uint32_t bytes)
     /* Linux crc32c converts the output to one's complement.  */
     return crc32c(acc, buf, bytes) ^ 0xffffffff;
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

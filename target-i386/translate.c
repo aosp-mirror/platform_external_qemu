@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  i386 translation
  *
@@ -8516,3 +8517,5 @@ void restore_state_to_opc(CPUX86State *env, TranslationBlock *tb,
         env->cc_op = cc_op;
     }
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
