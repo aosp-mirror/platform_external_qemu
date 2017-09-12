@@ -263,6 +263,14 @@ public:
     // Fails if path is not a file or not readable, and in case of other errors.
     virtual bool pathFileSize(StringView path, FileSize* outFileSize) const = 0;
     virtual bool fileSize(int fd, FileSize* outFileSize) const = 0;
+    Optional<FileSize> pathFileSize(StringView path) {
+        FileSize res;
+        return pathFileSize(path, &res) ? makeOptional(res) : kNullopt;
+    }
+    Optional<FileSize> fleSize(int fd) {
+        FileSize res;
+        return fileSize(fd, &res) ? makeOptional(res) : kNullopt;
+    }
 
     // Gets the file creation timestamp as a Unix epoch time with microsecond
     // resolution. Returns an empty optional for systems that don't support
