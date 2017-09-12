@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "580cc148_e455e15a",
+        "filename": "migration/migration.c",
+        "patchSetId": 19
+      },
+      "lineNbr": 1990,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T18:58:42Z",
+      "side": 1,
+      "message": "for ARM page size is 1024, I believe",
+      "range": {
+        "startLine": 1990,
+        "startChar": 15,
+        "endLine": 1990,
+        "endChar": 44
+      },
+      "revId": "a3e3a70fffff752ce3398edbca74665ee6b4a9c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
