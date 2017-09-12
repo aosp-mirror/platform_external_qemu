@@ -1557,19 +1557,22 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring,"GL_ARB_matrix_palette ")!=NULL)
         s_glSupport.GL_ARB_MATRIX_PALETTE = true;
 
-    if (strstr(cstring,"GL_EXT_packed_depth_stencil ")!=NULL )
+    if (strstr(cstring,"GL_EXT_packed_depth_stencil ")!=NULL ||
+        strstr(cstring,"GL_OES_packed_depth_stencil ")!=NULL)
         s_glSupport.GL_EXT_PACKED_DEPTH_STENCIL = true;
 
     if (strstr(cstring,"GL_OES_read_format ")!=NULL)
         s_glSupport.GL_OES_READ_FORMAT = true;
 
-    if (strstr(cstring,"GL_ARB_half_float_pixel ")!=NULL)
+    if (strstr(cstring,"GL_ARB_half_float_pixel ")!=NULL ||
+        strstr(cstring,"GL_OES_texture_half_float ")!=NULL)
         s_glSupport.GL_ARB_HALF_FLOAT_PIXEL = true;
 
     if (strstr(cstring,"GL_NV_half_float ")!=NULL)
         s_glSupport.GL_NV_HALF_FLOAT = true;
 
-    if (strstr(cstring,"GL_ARB_half_float_vertex ")!=NULL)
+    if (strstr(cstring,"GL_ARB_half_float_vertex ")!=NULL ||
+        strstr(cstring,"GL_OES_vertex_half_float ")!=NULL)
         s_glSupport.GL_ARB_HALF_FLOAT_VERTEX = true;
 
     if (strstr(cstring,"GL_SGIS_generate_mipmap ")!=NULL)
@@ -1582,11 +1585,13 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
         s_glSupport.GL_OES_STANDARD_DERIVATIVES = true;
 
     if (isCoreProfile() ||
-        strstr(cstring,"GL_ARB_texture_non_power_of_two")!=NULL)
+        strstr(cstring,"GL_ARB_texture_non_power_of_two")!=NULL ||
+        strstr(cstring,"GL_OES_texture_npot")!=NULL)
         s_glSupport.GL_OES_TEXTURE_NPOT = true;
 
     if (isCoreProfile() ||
-        strstr(cstring,"GL_ARB_color_buffer_float")!=NULL)
+        strstr(cstring,"GL_ARB_color_buffer_float")!=NULL ||
+        strstr(cstring,"GL_EXT_color_buffer_float")!=NULL)
         s_glSupport.GL_EXT_color_buffer_float = true;
 
     if (!(Version((const char*)glVersion) < Version("3.0")) || strstr(cstring,"GL_OES_rgb8_rgba8")!=NULL)
