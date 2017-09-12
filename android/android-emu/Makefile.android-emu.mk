@@ -70,6 +70,11 @@ include $(_ANDROID_EMU_ROOT)/android/snapshot/proto/SnapshotProto.mk
 # Crash report protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 
+###############################################################################
+#
+# SIM access rules protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/telephony/proto/SimAccessRulesProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -523,6 +528,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(FEATURECONTROL_PROTO_STATIC_LIBRARIES) \
     $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
+    $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \
@@ -668,6 +674,7 @@ LOCAL_SRC_FILES := \
   android/telephony/gsm_unittest.cpp \
   android/telephony/modem_unittest.cpp \
   android/telephony/sms_unittest.cpp \
+  android/telephony/SimAccessRules_unittest.cpp \
   android/telephony/TagLengthValue_unittest.cpp \
   android/update-check/UpdateChecker_unittest.cpp \
   android/update-check/VersionExtractor_unittest.cpp \
