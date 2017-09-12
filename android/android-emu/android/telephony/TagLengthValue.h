@@ -14,6 +14,7 @@
 #include <initializer_list>
 #include <string>
 #include <string.h>
+#include <vector>
 
 // This file contains a set of Tag Length Values (TLV) that are stored on a UICC
 // (commonly called a SIM card). These classes are named after the specification
@@ -107,7 +108,7 @@ public:
     // Create an ApduArDo with a set of specific access rules for each APDU,
     // See the Secure Elements Access Control specification from
     // globalplatform.org for details on the format.
-    explicit ApduArDo(std::initializer_list<std::string> rules);
+    explicit ApduArDo(const std::vector<std::string>& rules);
 };
 
 // NFC-AR-DO, indicates if NFC events are allowed for the device application
@@ -152,6 +153,7 @@ class AllRefArDo : public TagLengthValue {
     static const char kTag[];
 public:
     explicit AllRefArDo(std::initializer_list<RefArDo> refArDos);
+    explicit AllRefArDo(const std::vector<RefArDo>& refArDos);
 };
 
 }  // namespace android
