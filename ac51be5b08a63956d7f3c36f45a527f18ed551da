@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "c15b7917_70eff6aa",
+        "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-12T23:15:16Z",
+      "side": 1,
+      "message": "Done. I the default git clang-format is what caused the 2 space indentation, I had to use \u0027clang-format -style\u003dfile\u0027 to get it to use the correct format.",
+      "parentUuid": "c4015b14_d3881dde",
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9806ad94_53c17d9e",
         "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2017-09-12T21:43:04Z",
       "side": 1,
       "message": "I think this would be easier to read with an additional parseRefArDo function. Especially if support for ApduArDo and NfcArDo is added as suggested in the proto file.",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 39
+      },
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d7e9e103_127e12b1",
+        "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-12T23:15:16Z",
+      "side": 1,
+      "message": "Done. I\u0027m assuming you mean a \u0027parseArDo\u0027 function? Or do you think I should add a \u0027parseRefArDo\u0027 as well?",
+      "parentUuid": "9806ad94_53c17d9e",
       "range": {
         "startLine": 68,
         "startChar": 4,
@@ -59,6 +101,24 @@
     },
     {
       "key": {
+        "uuid": "8cd6542d_f538fc9b",
+        "filename": "android/android-emu/android/telephony/proto/sim_access_rules.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-12T23:15:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "054ecafc_8287c9ee",
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f82c6d92_e1c29e60",
         "filename": "android/android-emu/android/telephony/proto/sim_access_rules.proto",
         "patchSetId": 2
@@ -70,6 +130,24 @@
       "writtenOn": "2017-09-12T21:43:04Z",
       "side": 1,
       "message": "For completeness sake I think this should also have ApduArDo and NfcArDo. Even though we don\u0027t use them right now it seems like it should be fairly simple and might add value to someone.",
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ab2dd42_eb59becd",
+        "filename": "android/android-emu/android/telephony/proto/sim_access_rules.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-12T23:15:16Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f82c6d92_e1c29e60",
       "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
