@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "84e85b1a_dee49792",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandlerUtils.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c1b7c4e_9901a53e",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 34
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a80e71cd_c562e2a4",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_common.cpp",
         "patchSetId": 24
@@ -36,6 +60,42 @@
       "writtenOn": "2017-09-12T20:41:44Z",
       "side": 1,
       "message": "nit: header",
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cdc4f13d_bb1fcf92",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_common.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a80e71cd_c562e2a4",
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc272f41_f0b93ee0",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_common.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a80e71cd_c562e2a4",
       "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +119,24 @@
     },
     {
       "key": {
+        "uuid": "587da039_c2557a70",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "76eadd9d_21f5bff2",
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c34a8176_3e64508d",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
         "patchSetId": 24
@@ -70,6 +148,30 @@
       "writtenOn": "2017-09-12T20:41:44Z",
       "side": 1,
       "message": "what is this for?",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 92,
+        "endChar": 23
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2c12b6e2_bf154a55",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Oops was for printing out every N iters",
+      "parentUuid": "c34a8176_3e64508d",
       "range": {
         "startLine": 92,
         "startChar": 0,
@@ -105,6 +207,30 @@
     },
     {
       "key": {
+        "uuid": "a58b4c5e_4a9a74fc",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Ah, I meant not to create mImpl if it wasn\u0027t support. Thanks for catching it.",
+      "parentUuid": "6795c27b_877c966b",
+      "range": {
+        "startLine": 134,
+        "startChar": 3,
+        "endLine": 136,
+        "endChar": 1
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "63728571_a8862d08",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
         "patchSetId": 24
@@ -116,6 +242,30 @@
       "writtenOn": "2017-09-12T20:41:44Z",
       "side": 1,
       "message": "looks like all these \"if (mImpl)\" aren\u0027t needed as mImpl is present all the time",
+      "range": {
+        "startLine": 139,
+        "startChar": 4,
+        "endLine": 139,
+        "endChar": 15
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5570eb62_33c4e939",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "63728571_a8862d08",
       "range": {
         "startLine": 139,
         "startChar": 4,
@@ -220,6 +370,30 @@
     },
     {
       "key": {
+        "uuid": "6e937d2f_47a4d0d7",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Yes, it\u0027s usually in a waiting state waiting to receive in mach_msg. When a protected access happens, mach_msg returns and we get the exception info.",
+      "parentUuid": "09619a49_e9ff1c21",
+      "range": {
+        "startLine": 288,
+        "startChar": 8,
+        "endLine": 288,
+        "endChar": 47
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "49461911_fa38e127",
         "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
         "patchSetId": 24
@@ -231,6 +405,30 @@
       "writtenOn": "2017-09-12T20:41:44Z",
       "side": 1,
       "message": "I\u0027d prefer to have android::base::Thread here, but it\u0027s ok if it works",
+      "range": {
+        "startLine": 359,
+        "startChar": 9,
+        "endLine": 359,
+        "endChar": 23
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c07065ee_14d44350",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T23:36:49Z",
+      "side": 1,
+      "message": "Looks like I can convert the whole thing to C++. Hold on",
+      "parentUuid": "49461911_fa38e127",
       "range": {
         "startLine": 359,
         "startChar": 9,
