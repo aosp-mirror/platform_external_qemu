@@ -1415,14 +1415,21 @@ EGLAPI EGLBoolean EGLAPIENTRY eglDestroyImageKHR(EGLDisplay display, EGLImageKHR
 
 
 EGLAPI EGLSyncKHR EGLAPIENTRY eglCreateSyncKHR(EGLDisplay dpy, EGLenum type, const EGLint* attrib_list) {
-
+    // swiftshader_indirect does not work with eglCreateSyncKHR
+    // Disable it before we figure out a proper fix in swiftshader
+    // BUG: 65587659
+    if (g_eglInfo->isEgl2Egl()) {
+        return (EGLSyncKHR)0x42;
+    }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     return (EGLSyncKHR)res;
 }
 
 EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags, EGLTimeKHR timeout) {
-
+    if (g_eglInfo->isEgl2Egl()) {
+        return EGL_CONDITION_SATISFIED_KHR;
+    }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     GLenum gl_wait_result =
         iface->clientWaitSync((GLsync)sync, GL_SYNC_FLUSH_COMMANDS_BIT, timeout);
@@ -1446,7 +1453,9 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, 
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay dpy, EGLSyncKHR sync) {
-
+    if (g_eglInfo->isEgl2Egl()) {
+        return EGL_TRUE;
+    }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->deleteSync((GLsync)sync);
     return EGL_TRUE;
@@ -1459,6 +1468,9 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
 }
 
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
+    if (g_eglInfo->isEgl2Egl()) {
+        return EGL_TRUE;
+    }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->waitSync((GLsync)sync, 0, -1);
     return EGL_TRUE;
