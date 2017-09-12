@@ -940,11 +940,12 @@ static int create_qcow2_images(void) {
     /* List of paths to all images for cros.*/
     const char* const image_paths_hw_arc[] = {
         android_hw->disk_systemPartition_initPath,
+        android_hw->disk_vendorPartition_initPath,
     };
     int count = ARRAY_SIZE(image_paths);
     const char* const * images = image_paths;
     if (android_hw->hw_arc) {
-        count = 1;
+        count = ARRAY_SIZE(image_paths_hw_arc);
         images = image_paths_hw_arc;
     }
     int p;

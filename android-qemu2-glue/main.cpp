@@ -903,6 +903,7 @@ extern "C" int main(int argc, char **argv) {
     // won't appreciate it.
     args[n++] = "-nodefaults";
 
+    std::string imgOpt;
     if (!hw->hw_arc) {
         /*
          * add partition parameters with the sequence
@@ -917,10 +918,15 @@ extern "C" int main(int argc, char **argv) {
             makePartitionCmd(args, &n, &drvIndex, hw,
                              kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
         }
-    } else { /* hw->hw_arc: ChromeOS single disk image */
-        int drvIndex = 0;
-        makePartitionCmd(args, &n, &drvIndex, hw, IMAGE_TYPE_CHROMEOS,
-                         true , apiLevel, avd);
+    } else {
+        // hw->hw_arc: ChromeOS single disk image, use regular block device
+        // instead of virtio block device
+        args[n++] = "-drive";
+        const char* avd_dir = avdInfo_getContentPath(avd);
+        imgOpt = StringFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP "system.img.qcow2|"
+                              "%s" PATH_SEP "userdata.img|"
+                              "%s" PATH_SEP "vendor.img.qcow2", avd_dir, avd_dir, avd_dir);
+        args[n++] = imgOpt.c_str();
     }
 
     // Network
