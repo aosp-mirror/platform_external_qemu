@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c4015b14_d3881dde",
+        "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-12T21:43:04Z",
+      "side": 1,
+      "message": "The emulator uses 4 spaces for indentation, this seems to be off in most places in this code. You should be able to run git clang-format to fix all of it in one go.",
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9806ad94_53c17d9e",
+        "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-12T21:43:04Z",
+      "side": 1,
+      "message": "I think this would be easier to read with an additional parseRefArDo function. Especially if support for ApduArDo and NfcArDo is added as suggested in the proto file.",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 39
+      },
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "054ecafc_8287c9ee",
+        "filename": "android/android-emu/android/telephony/proto/sim_access_rules.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-12T21:43:04Z",
+      "side": 1,
+      "message": "Could this be named AllRefArDo to be consistent with the class that it will be parsed into?",
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f82c6d92_e1c29e60",
+        "filename": "android/android-emu/android/telephony/proto/sim_access_rules.proto",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-12T21:43:04Z",
+      "side": 1,
+      "message": "For completeness sake I think this should also have ApduArDo and NfcArDo. Even though we don\u0027t use them right now it seems like it should be fairly simple and might add value to someone.",
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
