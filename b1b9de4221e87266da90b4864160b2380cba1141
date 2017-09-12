@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f1ae7d52_2c416142",
+        "filename": "android/android-emu/android/base/system/system-native-mac.mm",
+        "patchSetId": 3
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-12T16:57:15Z",
+      "side": 1,
+      "message": "Can |maxLevels| be more than 8? Suggest documenting the limits and what happens.",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 26
+      },
+      "revId": "b1b9de4221e87266da90b4864160b2380cba1141",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
