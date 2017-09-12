@@ -1,0 +1,314 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5c1b7c4e_9901a53e",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandlerUtils.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "LazyInstance\u003c\u003e?",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 34
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a80e71cd_c562e2a4",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_common.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "nit: header",
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "76eadd9d_21f5bff2",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "nit: please use \"android/...\" path style",
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c34a8176_3e64508d",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "what is this for?",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 92,
+        "endChar": 23
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6795c27b_877c966b",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "don\u0027t you create it unconditionally?",
+      "range": {
+        "startLine": 134,
+        "startChar": 3,
+        "endLine": 136,
+        "endChar": 1
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "63728571_a8862d08",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 24
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "looks like all these \"if (mImpl)\" aren\u0027t needed as mImpl is present all the time",
+      "range": {
+        "startLine": 139,
+        "startChar": 4,
+        "endLine": 139,
+        "endChar": 15
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4493f57_61aa07b8",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "nit: \"android/...\"",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 20,
+        "endChar": 32
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ffccb1d_f8f1c252",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "crash handler?",
+      "range": {
+        "startLine": 112,
+        "startChar": 12,
+        "endLine": 112,
+        "endChar": 16
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab86e097_90908b63",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 242,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "how will these messages help our users or us? Is there some better way of handling these (e.g. passing it over directly to the next handler in chain)?",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 242,
+        "endChar": 5
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09619a49_e9ff1c21",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "making sure this thread isn\u0027t spinning but is in a waiting state most of the time",
+      "range": {
+        "startLine": 288,
+        "startChar": 8,
+        "endLine": 288,
+        "endChar": 47
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "49461911_fa38e127",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "I\u0027d prefer to have android::base::Thread here, but it\u0027s ok if it works",
+      "range": {
+        "startLine": 359,
+        "startChar": 9,
+        "endLine": 359,
+        "endChar": 23
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ab274c7f_a4272abe",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "this is exactly what LazyInstance\u003c\u003e does :)",
+      "range": {
+        "startLine": 372,
+        "startChar": 0,
+        "endLine": 376,
+        "endChar": 75
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8798798b_ef357d08",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.h",
+        "patchSetId": 24
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "You\u0027ve added a whole bunch of callbacks in different places. It would be nice if each file had a general comment explaining what those callbacks do and what\u0027s the expectation on their implementation",
+      "range": {
+        "startLine": 20,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 38
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f634b8c1_ba70f827",
+        "filename": "util/iov.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 294,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-12T20:41:44Z",
+      "side": 1,
+      "message": "I feel like the callback should become less page-centric, e.g. qemu_on_ram_touch_range(beginPtr, endPtr) /or begin+size/\nthis way there\u0027s no extra calculations here if the callback is 0, and the actual handler that knows exactly what\u0027s the page size can deal with the request",
+      "range": {
+        "startLine": 289,
+        "startChar": 0,
+        "endLine": 294,
+        "endChar": 9
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
