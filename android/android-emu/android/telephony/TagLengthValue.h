@@ -14,6 +14,7 @@
 #include <initializer_list>
 #include <string>
 #include <string.h>
+#include <vector>
 
 // This file contains a set of Tag Length Values (TLV) that are stored on a UICC
 // (commonly called a SIM card). These classes are named after the specification
@@ -152,6 +153,7 @@ class AllRefArDo : public TagLengthValue {
     static const char kTag[];
 public:
     explicit AllRefArDo(std::initializer_list<RefArDo> refArDos);
+    explicit AllRefArDo(const std::vector<RefArDo>& refArDos);
 };
 
 }  // namespace android

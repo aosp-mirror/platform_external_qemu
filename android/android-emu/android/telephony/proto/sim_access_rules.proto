@@ -1,0 +1,24 @@
+syntax = "proto2";
+package android_emulator;
+
+message SimAccessRules {
+  map<string, ListRefArDo> sim_access_rules = 1;
+}
+
+message ListRefArDo {
+  repeated RefArDo ref_ar_dos = 1;
+}
+
+message RefArDo {
+  optional RefDo ref_do = 1;
+  optional ArDo ar_do = 2;
+}
+
+message RefDo {
+  optional string device_app_id_ref_do = 1;
+  optional string pkg_ref_do = 2;
+}
+
+message ArDo {
+  optional string perm_ar_do = 1;
+}
