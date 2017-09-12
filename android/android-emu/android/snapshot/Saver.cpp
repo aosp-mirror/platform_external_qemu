@@ -41,11 +41,43 @@ Saver::Saver(const Snapshot& snapshot)
                 System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
         if (compressEnvVar == "1" || compressEnvVar == "yes" ||
             compressEnvVar == "true") {
-            VERBOSE_PRINT(init,
+            VERBOSE_PRINT(snapshot,
                           "autoconfig: enabled snapshot RAM compression from "
                           "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
                           compressEnvVar.c_str());
             flags |= RamSaver::Flags::Compress;
+        } else {
+            // Check if it's faster to save RAM with compression. Currently
+            // the heuristics are as following:
+            // 1. Gather three variables: free RAM, number of CPU cores and
+            //    the disk kind.
+            // 2. Bad cases for uncompressed snapshots: little free RAM
+            //    and HDD disk.
+            // 3. If there's a bad case and we have enough CPU cores (3+), let's
+            //    enable compression.
+            const auto cpuCount = System::get()->getCpuCoreCount();
+            if (cpuCount > 2) {
+                const auto memUsage = System::get()->getMemUsage();
+                if (memUsage.avail_phys_memory < 1536 * 1024 * 1024) {
+                    flags |= RamSaver::Flags::Compress;
+                    VERBOSE_PRINT(
+                            snapshot,
+                            "Enabling RAM compression: only %u MB of free RAM",
+                            unsigned(memUsage.avail_phys_memory /
+                                     (1024 * 1024)));
+                } else {
+                    // Disk kind calculation is potentially the slowest: do it
+                    // last.
+                    const auto diskKind = System::get()->diskKind(fileno(ram));
+                    if (diskKind.valueOr(System::DiskKind::Ssd) ==
+                        System::DiskKind::Hdd) {
+                        flags |= RamSaver::Flags::Compress;
+                        VERBOSE_PRINT(
+                                snapshot,
+                                "Enabling RAM compression: snapshot is on HDD");
+                    }
+                }
+            }
         }
         mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
     }
