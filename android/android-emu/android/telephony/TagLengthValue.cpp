@@ -193,4 +193,12 @@ AllRefArDo::AllRefArDo(std::initializer_list<RefArDo> refArDos) {
     populateData(kTag, data.begin(), data.end());
 }
 
+AllRefArDo::AllRefArDo(const std::vector<RefArDo>& refArDos) {
+    std::vector<const RefArDo*> data;
+    for (const auto& object : refArDos) {
+        data.push_back(&object);
+    }
+    populateData(kTag, data.begin(), data.end());
+}
+
 }  // namespace android
