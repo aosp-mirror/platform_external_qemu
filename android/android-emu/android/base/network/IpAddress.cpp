@@ -22,6 +22,7 @@
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"
+#include <wincrypt.h>
 #include <iphlpapi.h>
 #include <ws2tcpip.h>
 #else
