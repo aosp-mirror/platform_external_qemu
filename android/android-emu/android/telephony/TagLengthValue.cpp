@@ -135,7 +135,7 @@ RefDo::RefDo(const DeviceAppIdRefDo& deviceAppIdRefDo,
     populateData(kTag, { &deviceAppIdRefDo, &pkgRefDo });
 }
 
-ApduArDo::ApduArDo(Allow rule) {
+ApduArDo::ApduArDo(android_emulator::ArDo::Allow rule) {
     // Allocate enough space for the data plus NULL, then resize down to 2 to
     // avoid modifying the terminating NULL (which is undefined behavior)
     std::string data(3, '0');
@@ -144,7 +144,7 @@ ApduArDo::ApduArDo(Allow rule) {
     populateData(kTag, { &data });
 }
 
-ApduArDo::ApduArDo(std::initializer_list<std::string> rules) {
+ApduArDo::ApduArDo(const std::vector<std::string>& rules) {
     std::vector<const std::string*> data;
     for(const auto& rule : rules) {
         data.push_back(&rule);
@@ -152,7 +152,7 @@ ApduArDo::ApduArDo(std::initializer_list<std::string> rules) {
     populateData(kTag, data.begin(), data.end());
 }
 
-NfcArDo::NfcArDo(Allow rule) {
+NfcArDo::NfcArDo(android_emulator::ArDo::Allow rule) {
     // Allocate enough space for the data plus NULL, then resize down to 2 to
     // avoid modifying the terminating NULL (which is undefined behavior)
     std::string data(3, '0');
@@ -186,6 +186,14 @@ RefArDo::RefArDo(const RefDo& refDo, const ArDo& arDo) {
 }
 
 AllRefArDo::AllRefArDo(std::initializer_list<RefArDo> refArDos) {
+    std::vector<const RefArDo*> data;
+    for (const auto& object : refArDos) {
+        data.push_back(&object);
+    }
+    populateData(kTag, data.begin(), data.end());
+}
+
+AllRefArDo::AllRefArDo(const std::vector<RefArDo>& refArDos) {
     std::vector<const RefArDo*> data;
     for (const auto& object : refArDos) {
         data.push_back(&object);

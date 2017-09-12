@@ -11,6 +11,7 @@
 */
 
 #include "android/telephony/TagLengthValue.h"
+#include "android/telephony/proto/sim_access_rules.pb.h"
 
 #include <gtest/gtest.h>
 
@@ -57,11 +58,11 @@ TEST(TagLengthValue, ConstructRefDoWithPkgRefDo) {
 }
 
 TEST(TagLengthValue, ConstructApduArDo) {
-    ApduArDo globalDenyRule(ApduArDo::Allow::Never);
+    ApduArDo globalDenyRule(android_emulator::ArDo::NEVER);
     ASSERT_STREQ(/*tag*/ "D0" /*length*/ "01" /*payload*/ "00",
                  globalDenyRule.c_str());
 
-    ApduArDo globalAllowRule(ApduArDo::Allow::Always);
+    ApduArDo globalAllowRule(android_emulator::ArDo::ALWAYS);
     ASSERT_STREQ(/*tag*/ "D0" /*length*/ "01" /*payload*/ "01",
                  globalAllowRule.c_str());
 
@@ -73,10 +74,10 @@ TEST(TagLengthValue, ConstructApduArDo) {
 }
 
 TEST(TagLengthValue, ConstructNfcArDo) {
-    NfcArDo never(NfcArDo::Allow::Never);
+    NfcArDo never(android_emulator::ArDo::NEVER);
     ASSERT_STREQ(/*tag*/ "D1" /*length*/ "01" /*payload*/ "00", never.c_str());
 
-    NfcArDo always(NfcArDo::Allow::Always);
+    NfcArDo always(android_emulator::ArDo::ALWAYS);
     ASSERT_STREQ(/*tag*/ "D1" /*length*/ "01" /*payload*/ "01", always.c_str());
 }
 
@@ -89,7 +90,7 @@ TEST(TagLengthValue, ConstructPermArDo) {
 
 TEST(TagLengthValue, ConstructArDo) {
     const ApduArDo apduArDo( {"C0FFEE", "BEEF"} );
-    const NfcArDo nfcArDo(NfcArDo::Allow::Always);
+    const NfcArDo nfcArDo(android_emulator::ArDo::ALWAYS);
     const PermArDo permArDo("DECADE");
 
     ArDo arDoWithApdu(apduArDo);
@@ -112,7 +113,7 @@ TEST(TagLengthValue, ConstructArDo) {
 
 TEST(TagLengthValue, ConstructRefArDo) {
     RefDo refDo(AidRefDo(), DeviceAppIdRefDo("C0FFEE"));
-    ArDo arDo{NfcArDo{NfcArDo::Allow::Always}};
+    ArDo arDo{NfcArDo{android_emulator::ArDo::ALWAYS}};
 
     RefArDo refArDo(refDo, arDo);
     ASSERT_STREQ(/*tag*/ "E2" /*length*/ "0c"
@@ -128,7 +129,7 @@ TEST(TagLengthValue, ConstructAllRefArDo) {
                 DeviceAppIdRefDo { "C0FFEE" }
             },
             ArDo {
-                ApduArDo { ApduArDo::Allow::Never }
+                ApduArDo { android_emulator::ArDo::NEVER }
             }
         },
         RefArDo {
@@ -137,8 +138,8 @@ TEST(TagLengthValue, ConstructAllRefArDo) {
                 DeviceAppIdRefDo { "BEEF" }
             },
             ArDo {
-                ApduArDo { ApduArDo::Allow::Always },
-                NfcArDo { NfcArDo::Allow::Never }
+                ApduArDo { android_emulator::ArDo::ALWAYS },
+                NfcArDo { android_emulator::ArDo::NEVER }
             }
         }
     };
