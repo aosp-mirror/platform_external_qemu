@@ -1842,6 +1842,17 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         }
     }
 
+    if (opts->phone_number_prefix) {
+        int prefix_length = strlen(opts->phone_number_prefix);
+        if (prefix_length < 7 || prefix_length > 11) {
+            dwarning(
+                    "phone_number_prefix '%s' length is %d, should be in\n"
+                    "[7,11]. Using default prefix.\n",
+                    opts->phone_number_prefix, prefix_length);
+            str_reset_null(&opts->phone_number_prefix);
+        }
+    }
+
     *exit_status = 0;
     return true;
 }
