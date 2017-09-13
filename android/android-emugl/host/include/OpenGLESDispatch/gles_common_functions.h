@@ -32,6 +32,7 @@ typedef const GLubyte* GLconstubyteptr;
   X(void, glDepthFunc, (GLenum func), (func)) \
   X(void, glDepthMask, (GLboolean flag), (flag)) \
   X(void, glDepthRange, (GLclampd zNear, GLclampd zFar), (zNear, zFar)) \
+  X(void, glDepthRangef, (GLclampf zNear, GLclampf zFar), (zNear, zFar)) \
   X(void, glDisable, (GLenum cap), (cap)) \
   X(void, glDrawArrays, (GLenum mode, GLint first, GLsizei count), (mode, first, count)) \
   X(void, glDrawElements, (GLenum mode, GLsizei count, GLenum type, const GLvoid * indices), (mode, count, type, indices)) \
