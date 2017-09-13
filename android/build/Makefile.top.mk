@@ -175,8 +175,8 @@ ifeq ($(BUILD_TARGET_OS),freebsd)
 endif
 
 ifeq ($(BUILD_TARGET_OS),windows)
-  # we need Win32 features that are available since Windows Vista (NT 6.0)
-  BUILD_TARGET_CFLAGS += -DWINVER=0x600 -D_WIN32_WINNT=0x600
+  # we need Win32 features that are available since Windows 7 (NT 6.1)
+  BUILD_TARGET_CFLAGS += -DWINVER=0x601 -D_WIN32_WINNT=0x601
   # LARGEADDRESSAWARE gives more address space to 32-bit process
   BUILD_TARGET_LDFLAGS32 += -Xlinker --large-address-aware
   # Reduce the default stack reserve size on 32-bit Windows as we don't have

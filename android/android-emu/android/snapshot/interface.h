@@ -39,10 +39,6 @@ AndroidSnapshotStatus androidSnapshot_save(const char* name);
 
 void androidSnapshot_delete(const char* name);
 
-// Makes sure the emulator is in a state when snapshot can be saved, e.g.
-// all internals are initialized etc.
-bool androidSnapshot_canSave();
-
 // These two functions implement a quickboot feature: load() tries to load from
 // the |name| snapshot (or default one if it is null or empty) and save() saves
 // the current state into it.

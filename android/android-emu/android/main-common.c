@@ -1164,6 +1164,13 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         minRam = 92;
     }
 
+    /* just remove any lower bound for low ram device:
+       Trust users know what they are doing with explicit -lowram option */
+    if (opts->lowram) {
+        D("Removing any lower bound of RAM size");
+        minRam = 0;
+    }
+
     if (hw->hw_ramSize < minRam) {
         D("Increasing RAM size to %iMB", minRam);
         hw->hw_ramSize = minRam;

@@ -71,7 +71,8 @@ LOCAL_GENERATED_CXX_SOURCES := \
 LOCAL_CXX_SOURCES := \
     $(filter $(LOCAL_CXX_EXTENSION_PATTERNS),\
         $(LOCAL_SRC_FILES))
-LOCAL_OBJC_SOURCES := $(filter %.m %.mm,$(LOCAL_SRC_FILES))
+LOCAL_OBJC_SOURCES := $(filter %.m,$(LOCAL_SRC_FILES))
+LOCAL_OBJCXX_SOURCES := $(filter %.mm,$(LOCAL_SRC_FILES))
 
 LOCAL_CFLAGS := $(strip $(patsubst %,-I%,$(LOCAL_C_INCLUDES)) $(LOCAL_CFLAGS))
 
@@ -123,6 +124,10 @@ $(foreach src,$(LOCAL_CXX_SOURCES), \
 
 $(foreach src,$(LOCAL_OBJC_SOURCES), \
     $(eval $(call compile-objc-source,$(src))) \
+)
+
+$(foreach src,$(LOCAL_OBJCXX_SOURCES), \
+    $(eval $(call compile-objcxx-source,$(src))) \
 )
 
 # Ensure that we build all generated sources before the objects

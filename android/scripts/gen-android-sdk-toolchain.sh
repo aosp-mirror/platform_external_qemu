@@ -421,8 +421,8 @@ prepare_build_for_host () {
             var_append common_FLAGS " -isysroot $OSX_SDK_ROOT"
             var_append common_FLAGS " -mmacosx-version-min=$OSX_DEPLOYMENT_TARGET"
             var_append common_FLAGS " -DMACOSX_DEPLOYMENT_TARGET=$OSX_DEPLOYMENT_TARGET"
-            EXTRA_CFLAGS="$common_FLAGS"
-            EXTRA_CXXFLAGS="$common_FLAGS"
+            EXTRA_CFLAGS="$common_FLAGS -B/usr/bin"
+            EXTRA_CXXFLAGS="$common_FLAGS -B/usr/bin"
             if [ "$OPT_CXX11" ]; then
                 var_append EXTRA_CXXFLAGS "-stdlib=libc++"
             fi

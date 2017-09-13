@@ -24,6 +24,7 @@
 #include "android/base/sockets/SocketErrors.h"
 #include "android/base/system/Win32UnicodeString.h"
 #include "android/base/system/Win32Utils.h"
+#include "wincrypt.h"
 #include "iphlpapi.h"
 #else
 #include <arpa/inet.h>

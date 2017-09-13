@@ -14,6 +14,7 @@
 #include "android/avd/keys.h"
 #include "android/base/StringFormat.h"
 #include "android/base/Uri.h"
+#include "android/base/files/IniFile.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/misc/StringUtils.h"
 #include "android/emulation/ComponentVersion.h"
@@ -27,6 +28,7 @@
 #include "android/update-check/VersionExtractor.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
+
 #include "ui_bug-report-page.h"
 
 #include <QDesktopServices>
@@ -36,16 +38,18 @@
 
 #include <algorithm>
 #include <fstream>
-#include <vector>
+
+using android::base::IniFile;
 using android::base::PathUtils;
+using android::base::StringAppendFormat;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
-using android::base::trim;
 using android::base::Uri;
 using android::base::Version;
-using android::emulation::AdbInterface;
+using android::base::trim;
 using android::emulation::AdbBugReportServices;
+using android::emulation::AdbInterface;
 using android::emulation::ScreenCapturer;
 
 static const char FILE_BUG_URL[] =
@@ -104,11 +108,10 @@ BugreportPage::BugreportPage(QWidget* parent)
     int apiLevel = avdInfo_getApiLevel(android_avdInfo);
     avdInfo_getFullApiName(apiLevel, versionString, 128);
     mUi->bug_androidVersionLabel->setText(QString(versionString));
-    mReportingFields.androidVer = std::string(versionString);
+    mReportingFields.androidVer = versionString;
 
     // Set AVD name
-    const char* deviceName = avdInfo_getName(android_avdInfo);
-    mReportingFields.deviceName = std::string(deviceName);
+    mReportingFields.deviceName = StringView(avdInfo_getName(android_avdInfo));
     QFontMetrics metrics(mUi->bug_deviceLabel->font());
     QString elidedText = metrics.elidedText(
             QString::fromStdString(mReportingFields.deviceName), Qt::ElideRight,
@@ -143,7 +146,8 @@ BugreportPage::BugreportPage(QWidget* parent)
     loadAvdDetails();
     mDeviceDetailsDialog = new QMessageBox(
             QMessageBox::NoIcon,
-            QString::fromStdString(StringFormat("Details for %s", deviceName)),
+            QString::fromStdString(StringFormat("Details for %s",
+                                                mReportingFields.deviceName)),
             "", QMessageBox::Close, this);
     mDeviceDetailsDialog->setModal(false);
     mDeviceDetailsDialog->setInformativeText(
@@ -389,59 +393,63 @@ void BugreportPage::loadAdbLogcat() {
 }
 
 void BugreportPage::loadAvdDetails() {
-    static std::vector<const char*> avdDetailsNoDisplayKeys{
+    static constexpr StringView kAvdDetailsNoDisplayKeys[] = {
             ABI_TYPE,    CPU_ARCH,    SKIN_NAME, SKIN_PATH,
             SDCARD_SIZE, SDCARD_PATH, IMAGES_2};
 
-    CIniFile* configIni = avdInfo_getConfigIni(android_avdInfo);
+    if (const auto configIni = reinterpret_cast<const IniFile*>(
+                avdInfo_getConfigIni(android_avdInfo))) {
+        StringAppendFormat(&mReportingFields.avdDetails, "Name: %s\n",
+                           mReportingFields.deviceName);
+        auto cpuArch = avdInfo_getTargetCpuArch(android_avdInfo);
+        StringAppendFormat(&mReportingFields.avdDetails, "CPU/ABI: %s\n",
+                           cpuArch);
+        free(cpuArch);
+        StringAppendFormat(&mReportingFields.avdDetails, "Path: %s\n",
+                           avdInfo_getContentPath(android_avdInfo));
+        auto tag = avdInfo_getTag(android_avdInfo);
+        StringAppendFormat(&mReportingFields.avdDetails,
+                           "Target: %s (API level %d)\n", tag,
+                           avdInfo_getApiLevel(android_avdInfo));
+        free((char*)tag);
 
-    if (configIni) {
-        mReportingFields.avdDetails.append(
-                StringFormat("Name: %s\n", mReportingFields.deviceName));
-        mReportingFields.avdDetails.append(StringFormat(
-                "CPU/ABI: %s\n", avdInfo_getTargetCpuArch(android_avdInfo)));
-        mReportingFields.avdDetails.append(StringFormat(
-                "Path: %s\n", avdInfo_getContentPath(android_avdInfo)));
-        mReportingFields.avdDetails.append(StringFormat(
-                "Target: %s (API level %d)\n", avdInfo_getTag(android_avdInfo),
-                avdInfo_getApiLevel(android_avdInfo)));
-        char* skinName;
-        char* skinDir;
+        char* skinName = nullptr;
+        char* skinDir = nullptr;
         avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-        if (skinName)
-            mReportingFields.avdDetails.append(
-                    StringFormat("Skin: %s\n", skinName));
+        if (skinName) {
+            StringAppendFormat(&mReportingFields.avdDetails, "Skin: %s\n",
+                               skinName);
+            free(skinName);
+        }
+        free(skinDir);
 
         const char* sdcard = avdInfo_getSdCardSize(android_avdInfo);
         if (!sdcard) {
             sdcard = avdInfo_getSdCardPath(android_avdInfo);
         }
-        mReportingFields.avdDetails.append(
-                StringFormat("SD Card: %s\n", sdcard));
+        if (!sdcard || !*sdcard) {
+            sdcard = android::base::strDup("<none>");
+        }
+        StringAppendFormat(&mReportingFields.avdDetails, "SD Card: %s\n",
+                           sdcard);
+        free((char*)sdcard);
 
-        if (iniFile_hasKey(configIni, SNAPSHOT_PRESENT)) {
-            mReportingFields.avdDetails.append(StringFormat(
-                    "Snapshot: %s", avdInfo_getSnapshotPresent(android_avdInfo)
-                                            ? "yes"
-                                            : "no"));
+        if (configIni->hasKey(SNAPSHOT_PRESENT)) {
+            StringAppendFormat(
+                    &mReportingFields.avdDetails, "Snapshot: %s",
+                    avdInfo_getSnapshotPresent(android_avdInfo) ? "yes" : "no");
         }
 
-        int totalEntry = iniFile_getPairCount(configIni);
-        for (int idx = 0; idx < totalEntry; idx++) {
-            char* key;
-            char* value;
-            if (!iniFile_getEntry(configIni, idx, &key, &value)) {
-                // check if the key is already displayed
-                auto end = avdDetailsNoDisplayKeys.end();
-                auto it = std::find_if(avdDetailsNoDisplayKeys.begin(), end,
-                                       [key](const char* no_display_key) {
-                                           return strcmp(key, no_display_key) ==
-                                                  0;
-                                       });
-                if (it == end) {
-                    mReportingFields.avdDetails.append(
-                            StringFormat("%s: %s\n", key, value));
-                }
+        for (const std::string& key : *configIni) {
+            const std::string& value = configIni->getString(key, "");
+            // check if the key is already displayed
+            if (std::find_if(std::begin(kAvdDetailsNoDisplayKeys),
+                             std::end(kAvdDetailsNoDisplayKeys),
+                             [&key](StringView noDisplayKey) {
+                                 return noDisplayKey == key;
+                             }) == std::end(kAvdDetailsNoDisplayKeys)) {
+                StringAppendFormat(&mReportingFields.avdDetails, "%s: %s\n",
+                                   key, value);
             }
         }
     }
@@ -508,11 +516,11 @@ BugReportFolderSavingTask::BugReportFolderSavingTask(
         std::string avdDetails,
         std::string reproSteps,
         bool openIssueTracker)
-    : mSavingPath(savingPath),
-      mAdbBugreportFilePath(adbBugreportFilePath),
-      mScreenshotFilePath(screenshotFilePath),
-      mAvdDetails(avdDetails),
-      mReproSteps(reproSteps),
+    : mSavingPath(std::move(savingPath)),
+      mAdbBugreportFilePath(std::move(adbBugreportFilePath)),
+      mScreenshotFilePath(std::move(screenshotFilePath)),
+      mAvdDetails(std::move(avdDetails)),
+      mReproSteps(std::move(reproSteps)),
       mOpenIssueTracker(openIssueTracker) {}
 
 void BugReportFolderSavingTask::run() {
@@ -528,7 +536,7 @@ void BugReportFolderSavingTask::run() {
     }
 
     if (!mAdbBugreportFilePath.empty()) {
-        std::string bugreportBaseName;
+        StringView bugreportBaseName;
         if (PathUtils::extension(mAdbBugreportFilePath) == ".zip") {
             bugreportBaseName = "bugreport.zip";
         } else {
@@ -539,7 +547,7 @@ void BugReportFolderSavingTask::run() {
     }
 
     if (!mScreenshotFilePath.empty()) {
-        std::string screenshotBaseName = "screenshot.png";
+        StringView screenshotBaseName = "screenshot.png";
         path_copy_file(PathUtils::join(mSavingPath, screenshotBaseName).c_str(),
                        mScreenshotFilePath.c_str());
     }
