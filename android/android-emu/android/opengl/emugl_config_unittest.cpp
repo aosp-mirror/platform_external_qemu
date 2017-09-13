@@ -348,7 +348,7 @@ TEST(EmuglConfig, initNxWithSwiftshader) {
                 &config, true, "auto", NULL, 0, false, false, false,
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO));
     EXPECT_TRUE(config.enabled);
-    EXPECT_STREQ("swiftshader", config.backend);
+    EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
 }
 
@@ -386,7 +386,7 @@ TEST(EmuglConfig, initChromeRemoteDesktopWithSwiftshader) {
                 &config, true, "auto", NULL, 0, false, false, false,
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO));
     EXPECT_TRUE(config.enabled);
-    EXPECT_STREQ("swiftshader", config.backend);
+    EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
 }
 
@@ -422,7 +422,7 @@ TEST(EmuglConfig, initNoWindowWithSwiftshader) {
                 &config, true, "auto", NULL, 0, true, false, false,
                 WINSYS_GLESBACKEND_PREFERENCE_AUTO));
     EXPECT_TRUE(config.enabled);
-    EXPECT_STREQ("swiftshader", config.backend);
+    EXPECT_STREQ("swiftshader_indirect", config.backend);
     EXPECT_STREQ("GPU emulation enabled using 'swiftshader' mode", config.status);
 }
 
