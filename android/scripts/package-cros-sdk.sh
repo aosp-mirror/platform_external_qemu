@@ -18,6 +18,33 @@ function validate_str() {
   echo "${warn}" && exit 1
 }
 
+# Split Chrome OS system images to 3: system.img, userdata.img, vendor.img
+# We just reuse names from Android system images. For Chrome OS:
+# system.img =  disk space before state partition
+# userdata.img =  state partition
+# vendor.img = disk space after state partition
+function split_image() {
+  if [[ -f system.img && -f userdata.img && -f vendor.img && \
+        -n "${CACHE_SYSTEM_IMG}" ]]; then
+    echo "Skip split images since they are already there."
+    return
+  fi
+  local input="$1"
+  local info="$(parted "${input}" unit B print|grep STATE)"
+  local offset="$(echo "${info}"|awk '{print $2}'|tr -d B)"
+  local length="$(echo "${info}"|awk '{print $4}'|tr -d B)"
+  local offsetb="$(( offset / 65536 ))"
+  local lengthb="$(( length / 65536 ))"
+  local endb="$(( offsetb + lengthb))"
+  dd if="${input}" of=system.img.tmp count="${offsetb}" bs=65536
+  dd if="${input}" of=userdata.img.tmp skip="${offsetb}" count="${lengthb}" bs=65536
+  dd if="${input}" of=vendor.img.tmp skip="${endb}" bs=65536
+  for img in system userdata vendor; do
+    qemu-img convert -O qcow2 "${img}.img.tmp" "${img}.img"
+    rm -f "${img}.img.tmp"
+  done
+}
+
 # extract one partition from whole disk image.
 function get_partition() {
   local input="$1"
@@ -120,7 +147,7 @@ if [[ "${answer}" != Y && "${answer}" != y ]]; then
     exit 1
 fi
 
-echo "Get system.img from build server."
+echo "Get raw image from build server."
 crosimg=ChromeOS-R"${CROS}"-novato.zip
 mkdir -p "${PACKAGE_ROOT_DIR}/${CROS_VERSION}/x86"
 cd "${PACKAGE_ROOT_DIR}"
@@ -129,23 +156,26 @@ if [[ -f "${crosimg}" ]]; then
 else
    gsutil cp "gs://chromeos-releases/${CHANNEL}-channel/novato/${CROS_VERSION}/${crosimg}" .
 fi
+RAW_IMG="${PACKAGE_ROOT_DIR}/${CROS_VERSION}/x86/chromiumos_qemu_image.bin"
 cd "${PACKAGE_ROOT_DIR}/${CROS_VERSION}/x86"
-if [[ ! -f system.img || -z "${CACHE_SYSTEM_IMG}" ]]; then
+if [[ ! -f "${RAW_IMG}" || -z "${CACHE_SYSTEM_IMG}" ]]; then
   unzip ../../"${crosimg}" chromiumos_qemu_image.bin
-  mv chromiumos_qemu_image.bin system.img
 else
-  echo "Reusing local copy of system.img in ${CROS_VERSION}/x86"
+  echo "Reusing local copy of chromiumos_qemu_image.img in ${CROS_VERSION}/x86"
 fi
+split_image "${RAW_IMG}"
 
 echo "Building directory structure of system image"
 TMP_SDK_DIR="$(mktemp -d /tmp/cros_sdk.XXXXXXX)"
 trap "{ rm -fr ${TMP_SDK_DIR}; }" EXIT
 mkdir "${TMP_SDK_DIR}/x86"
 cd "${TMP_SDK_DIR}/x86"
-ln "${PACKAGE_ROOT_DIR}/${CROS_VERSION}/x86/system.img" . -sf
+for img in system userdata vendor; do
+  ln "${PACKAGE_ROOT_DIR}/${CROS_VERSION}/x86/${img}.img" . -sf
+done
 
-echo "Extract arc version from system.img and then get build.prop from go/ab"
-get_partition system.img ROOT-A ../root.img
+echo "Extract arc version from raw image and then get build.prop from go/ab"
+get_partition "${RAW_IMG}" ROOT-A ../root.img
 ARC_VERSION="$(debugfs ../root.img -R "cat /etc/lsb-release" | \
 	           grep CHROMEOS_ARC_VERSION|cut -d= -f2)"
 # Fetch file outside x86 dir so there's no garbage file in it if fetch fails.
@@ -153,12 +183,9 @@ cd ..  && "${FETCH_ARTIFACT}" --bid "${ARC_VERSION}" \
      --target sdk_google_cheets_x86-userdebug build.prop
 cd x86 && mv ../build.prop .
 
-echo "Extract kernel from boot partition of system.img"
-get_partition system.img EFI-SYSTEM ../boot.img
+echo "Extract kernel from boot partition of raw image"
+get_partition "${RAW_IMG}" EFI-SYSTEM ../boot.img
 mcopy -i ../boot.img -n ::/syslinux/vmlinuz.a kernel-ranchu
-
-echo "Generate fake userdata.img"
-touch userdata.img
 
 echo "Add package.xml, devices.xml and source.properties"
 URLD=https://android.googlesource.com/platform/external/qemu/+/emu-2.4-arc/android/scripts/cros_files
