@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "c12a152c_cff5d22d",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2051fa9b_5143a174",
+      "range": {
+        "startLine": 224,
+        "startChar": 16,
+        "endLine": 224,
+        "endChar": 24
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e4caa65_abb133c1",
         "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
         "patchSetId": 29
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "ba95c3ee_c07d745e",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5e4caa65_abb133c1",
+      "range": {
+        "startLine": 41,
+        "startChar": 32,
+        "endLine": 41,
+        "endChar": 33
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "16e17e6f_fdd5d085",
         "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
         "patchSetId": 29
@@ -107,6 +155,30 @@
       "writtenOn": "2017-09-13T18:20:12Z",
       "side": 1,
       "message": "nit",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 4
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9df7a086_b75b6d5d",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "16e17e6f_fdd5d085",
       "range": {
         "startLine": 46,
         "startChar": 0,
@@ -190,6 +262,30 @@
     },
     {
       "key": {
+        "uuid": "c640e4e5_3c9f6e10",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "hmmmmmmm\n\n- put loadRam in a lock\n- the check for complete is to check mReadDataQueue.stop()\n- serialized all mReadDataQueue.stop() events against it",
+      "parentUuid": "5f5ea2e6_ea1f887c",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 30
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5dcf2a6f_ccb6f0e4",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 29
@@ -201,6 +297,30 @@
       "writtenOn": "2017-09-13T18:20:12Z",
       "side": 1,
       "message": "this is where we get the actual page size directly from the QEMU code (block.pageSize). There\u0027s no need to guestimate it prior to this call.",
+      "range": {
+        "startLine": 131,
+        "startChar": 16,
+        "endLine": 131,
+        "endChar": 29
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "affcc541_0b9d178e",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5dcf2a6f_ccb6f0e4",
       "range": {
         "startLine": 131,
         "startChar": 16,
@@ -236,6 +356,30 @@
     },
     {
       "key": {
+        "uuid": "2376b12d_024c3601",
+        "filename": "android/android-emu/android/snapshot/RamLoader.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "adca746d_4c3287e6",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 32
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b709cdc7_8bc0531c",
         "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
         "patchSetId": 29
@@ -247,6 +391,30 @@
       "writtenOn": "2017-09-13T18:54:10Z",
       "side": 1,
       "message": "|mLoader| gets reset when we begin a saving operation. Checking it here isn\u0027t safe if there\u0027s any chance this callback gets called after a save.\nthe current check good if you want to know if the synchronous part of loading is done. But mLoader-\u003eramLoader() could still be doing async load, or could complete it - and that won\u0027t change mLoader-\u003estatus()\n\ncorrect check IMO is (mLoader \u0026\u0026 status \u003d\u003d Ok \u0026\u0026 (!ramLoader-\u003eonDemandEnabled() || ramLoader-\u003e{new function to check if on demand completed})",
+      "range": {
+        "startLine": 160,
+        "startChar": 21,
+        "endLine": 160,
+        "endChar": 38
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af92a32c_3d379a18",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "Done (added loader and onDemandEnabled check, loadRam is now serialized with respect to RamLoader\u0027s mReadDataQueue being stopped)",
+      "parentUuid": "b709cdc7_8bc0531c",
       "range": {
         "startLine": 160,
         "startChar": 21,

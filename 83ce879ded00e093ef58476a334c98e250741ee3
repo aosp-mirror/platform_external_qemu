@@ -22,6 +22,30 @@
       "revId": "83ce879ded00e093ef58476a334c98e250741ee3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fbe4270c_92ae54c1",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 32
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:07:33Z",
+      "side": 1,
+      "message": "mReadDataQueue.isStopped() is the signal for whether on demand loading completed, this lock is to make it a consistent value across all loadRam calls from multiple threads and mReadDataQueue.stop() occurrences. or are we good without it? I could see the queue getting stopped in the middle of the below page calc for example.",
+      "parentUuid": "070e89c2_b154a5d0",
+      "range": {
+        "startLine": 86,
+        "startChar": 33,
+        "endLine": 86,
+        "endChar": 45
+      },
+      "revId": "83ce879ded00e093ef58476a334c98e250741ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
