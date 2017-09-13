@@ -898,10 +898,10 @@ void qemu_system_vmstop_request(RunState state)
 
 #ifdef CONFIG_ANDROID
 
-static bool read_file_to_buf(const char* file, uint8_t* buf, int size){
-    int fd = open(file, O_RDONLY | O_BINARY);
+static bool read_file_to_buf(const char* file, uint8_t* buf, size_t size){
+    int fd = TEMP_FAILURE_RETRY(open(file, O_RDONLY | O_BINARY));
     if (fd < 0) return false;
-    int ret = read(fd, buf, size);
+    ssize_t ret = TEMP_FAILURE_RETRY(read(fd, buf, size));
     close(fd);
     if (ret != size) return false;
     return true;
