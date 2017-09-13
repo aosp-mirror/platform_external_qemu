@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "2051fa9b_5143a174",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:45:02Z",
+      "side": 1,
+      "message": "What about creating a function that would do teardown + crash, and adding a comment there? So it\u0027s clear one has to do it that way in this file",
+      "parentUuid": "993bb5d9_65a3099e",
+      "range": {
+        "startLine": 224,
+        "startChar": 16,
+        "endLine": 224,
+        "endChar": 24
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e4caa65_abb133c1",
         "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
         "patchSetId": 29
