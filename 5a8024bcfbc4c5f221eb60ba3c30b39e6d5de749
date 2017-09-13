@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "916223a3_98d65e47",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:20:12Z",
+      "side": 1,
+      "message": "why do we call the teardown() here? Isn\u0027t it better to crash in exactly the current state to preserve it?\nOr setting up custom handlers causes crash to stop working?",
+      "range": {
+        "startLine": 224,
+        "startChar": 16,
+        "endLine": 224,
+        "endChar": 24
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e4caa65_abb133c1",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:20:12Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 41,
+        "startChar": 32,
+        "endLine": 41,
+        "endChar": 33
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "16e17e6f_fdd5d085",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:20:12Z",
+      "side": 1,
+      "message": "nit",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 4
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b31f417e_6f713c1c",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:20:12Z",
+      "side": 1,
+      "message": "why? I don\u0027t see where it needs the access watch object",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 30
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5dcf2a6f_ccb6f0e4",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:20:12Z",
+      "side": 1,
+      "message": "this is where we get the actual page size directly from the QEMU code (block.pageSize). There\u0027s no need to guestimate it prior to this call.",
+      "range": {
+        "startLine": 131,
+        "startChar": 16,
+        "endLine": 131,
+        "endChar": 29
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "adca746d_4c3287e6",
+        "filename": "android/android-emu/android/snapshot/RamLoader.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:20:12Z",
+      "side": 1,
+      "message": "move to private?",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 32
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
