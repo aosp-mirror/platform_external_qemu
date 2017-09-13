@@ -74,6 +74,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
 
 #define DEFINE_DUMMY_FUNCTION(return_type, func_name, signature, args) \
 static return_type dummy_##func_name signature { \
+    assert(0); \
     RETURN_(return_type); \
 }
 

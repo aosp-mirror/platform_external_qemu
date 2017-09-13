@@ -20,6 +20,7 @@ typedef const GLubyte* GLconstubyteptr;
   X(void, glClear, (GLbitfield mask), (mask)) \
   X(void, glClearColor, (GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha), (red, green, blue, alpha)) \
   X(void, glClearDepth, (GLclampd depth), (depth)) \
+  X(void, glClearDepthf, (GLclampf depth), (depth)) \
   X(void, glClearStencil, (GLint s), (s)) \
   X(void, glColorMask, (GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha), (red, green, blue, alpha)) \
   X(void, glCompressedTexImage2D, (GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid * data), (target, level, internalformat, width, height, border, imageSize, data)) \
