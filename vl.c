@@ -26,6 +26,7 @@
 #include "qemu/cutils.h"
 #include "qemu/help_option.h"
 #include "qemu/uuid.h"
+#include "block/block_int.h"
 #include "sysemu/ranchu.h"
 
 #ifdef CONFIG_SECCOMP
@@ -896,6 +897,16 @@ void qemu_system_vmstop_request(RunState state)
 }
 
 #ifdef CONFIG_ANDROID
+
+static bool read_file_to_buf(const char* file, uint8_t* buf, int size){
+    int fd = open(file, O_RDONLY | O_BINARY);
+    if (fd < 0) return false;
+    int ret = read(fd, buf, size);
+    close(fd);
+    if (ret != size) return false;
+    return true;
+}
+
 static int create_qcow2_images(void) {
     /* First, determine if any of the backing images have been altered.
      * QCoW2 images won't work in that case, and need to be recreated (this
@@ -991,11 +1002,19 @@ static int create_qcow2_images(void) {
         if (!path_exists(qcow2_image_path) ||
             android_op_wipe_data ||
             reset_version_number_cache) {
+            const char* fmt = "raw";
+            uint8_t buf[BLOCK_PROBE_BUF_SIZE];
+            BlockDriver *drv;
+            drv = bdrv_find_format("qcow2");
+            if (drv && read_file_to_buf(backing_image_path, buf, sizeof(buf)) &&
+                drv->bdrv_probe(buf, sizeof(buf), backing_image_path) >= 100) {
+                fmt = "qcow2";
+            }
             bdrv_img_create(
                 qcow2_image_path,
                 QCOW2_SUFFIX,
                 backing_image_path,
-                "raw",
+                fmt,
                 NULL,
                 -1,
                 0,
