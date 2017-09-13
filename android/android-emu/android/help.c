@@ -1554,6 +1554,16 @@ help_feature(stralloc_t* out)
     );
 }
 
+static void
+help_sim_access_rules_file(stralloc_t* out)
+{
+    PRINTF(
+    "  Textproto configuration file for overriding SIM access rules (see\n"
+    "  sim_access_rules.proto for structure). Used for granting Carrier\n"
+    "  Privileges: https://source.android.com/devices/tech/config/uicc\n\n"
+    );
+}
+
 #define  help_no_skin   NULL
 #define  help_netspeed  help_shaper
 #define  help_netdelay  help_shaper
@@ -1566,6 +1576,7 @@ help_feature(stralloc_t* out)
 #define  help_nojni        NULL
 #define  help_initdata     NULL
 #define  help_no_sim       NULL
+#define  help_lowram       NULL
 #define  help_no_window    NULL
 #define  help_version      NULL
 #define  help_memory       NULL

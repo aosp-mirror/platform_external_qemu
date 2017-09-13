@@ -43,7 +43,15 @@ EglContext::EglContext(EglDisplay *dpy,
         m_glesContext(glesCtx),
         m_version(ver),
         m_mngr(mngr),
-        m_profileMask(profileMask)
+        // If we already have set core profile flag
+        // (through the first context creation in Framebuffer initialization
+        // or what have you),
+        // set all follow contexts to use core as well.
+        // Otherwise, we can end up testing unreliable driver paths where
+        // core and non-core contexts need to interact with each other.
+        m_profileMask(isCoreProfile() ?
+                      (profileMask | EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR) :
+                      profileMask)
 {
     if (stream) {
         EGLint configId = EGLint(stream->getBe32());
