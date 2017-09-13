@@ -12,6 +12,7 @@
 #include "android/telephony/modem.h"
 
 #include "android/telephony/debug.h"
+#include "android/telephony/phone_number.h"
 #include "android/telephony/remote_call.h"
 #include "android/telephony/sim_access_rules.h"
 #include "android/telephony/sim_card.h"
@@ -1947,16 +1948,16 @@ handleSendSMSText( const char*  cmd, AModem  modem )
         temp[numlen] = 0;
 
         /* Converts 4, 7, and 10 digits number to 11 digits */
-        if (numlen == 10 && !strncmp(temp, PHONE_PREFIX+1, 6)) {
-            memcpy( number, PHONE_PREFIX, 1 );
+        if (numlen == 10 && !strncmp(temp, get_phone_number_prefix()+1, 6)) {
+            memcpy( number, get_phone_number_prefix(), 1 );
             memcpy( number+1, temp, numlen );
             number[numlen+1] = 0;
-        } else if (numlen == 7 && !strncmp(temp, PHONE_PREFIX+4, 3)) {
-            memcpy( number, PHONE_PREFIX, 4 );
+        } else if (numlen == 7 && !strncmp(temp, get_phone_number_prefix()+4, 3)) {
+            memcpy( number, get_phone_number_prefix(), 4 );
             memcpy( number+4, temp, numlen );
             number[numlen+4] = 0;
         } else if (numlen == 4) {
-            memcpy( number, PHONE_PREFIX, 7 );
+            memcpy( number, get_phone_number_prefix(), 7 );
             memcpy( number+7, temp, numlen );
             number[numlen+7] = 0;
         } else {
@@ -1989,7 +1990,7 @@ handleSendSMSText( const char*  cmd, AModem  modem )
             SmsPDU*        deliver;
             int            nn;
 
-            snprintf( temp, sizeof(temp), PHONE_PREFIX "%d", modem->base_port );
+            snprintf( temp, sizeof(temp), "%s%d", get_phone_number_prefix(), modem->base_port );
             sms_address_from_str( from, temp, strlen(temp) );
 
             deliver = sms_receiver_create_deliver( modem->sms_receiver, index, from );
@@ -2357,16 +2358,16 @@ handleDial( const char*  cmd, AModem  modem )
         len = sizeof(call->number)-1;
 
     /* Converts 4, 7, and 10 digits number to 11 digits */
-    if (len == 10 && !strncmp(cmd, PHONE_PREFIX+1, 6)) {
-        memcpy( call->number, PHONE_PREFIX, 1 );
+    if (len == 10 && !strncmp(cmd, get_phone_number_prefix()+1, 6)) {
+        memcpy( call->number, get_phone_number_prefix(), 1 );
         memcpy( call->number+1, cmd, len );
         call->number[len+1] = 0;
-    } else if (len == 7 && !strncmp(cmd, PHONE_PREFIX+4, 3)) {
-        memcpy( call->number, PHONE_PREFIX, 4 );
+    } else if (len == 7 && !strncmp(cmd, get_phone_number_prefix()+4, 3)) {
+        memcpy( call->number, get_phone_number_prefix(), 4 );
         memcpy( call->number+4, cmd, len );
         call->number[len+4] = 0;
     } else if (len == 4) {
-        memcpy( call->number, PHONE_PREFIX, 7 );
+        memcpy( call->number, get_phone_number_prefix(), 7 );
         memcpy( call->number+7, cmd, len );
         call->number[len+7] = 0;
     } else {

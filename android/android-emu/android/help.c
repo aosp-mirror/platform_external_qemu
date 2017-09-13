@@ -1574,6 +1574,8 @@ help_feature(stralloc_t* out)
 
 #define help_skip_adb_auth NULL
 
+#define help_phone_number_prefix NULL
+
 typedef struct {
     const char*  name;
     const char*  template;
