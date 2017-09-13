@@ -1251,6 +1251,20 @@ avdInfo_getSystemInitImagePath( const AvdInfo*  i )
 }
 
 char*
+avdInfo_getVendorImagePath( const AvdInfo*  i )
+{
+    const char* imageName = _imageFileNames[ AVD_IMAGE_USERVENDOR ];
+    return _avdInfo_getContentFilePath(i, imageName);
+}
+
+char*
+avdInfo_getVendorInitImagePath( const AvdInfo*  i )
+{
+    const char* imageName = _imageFileNames[ AVD_IMAGE_INITVENDOR ];
+    return _avdInfo_getContentOrSdkFilePath(i, imageName);
+}
+
+char*
 avdInfo_getDataImagePath( const AvdInfo*  i )
 {
     const char* imageName = _imageFileNames[ AVD_IMAGE_USERDATA ];

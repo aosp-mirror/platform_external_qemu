@@ -99,9 +99,11 @@ enum ImageType {
     IMAGE_TYPE_SD_CARD,
     IMAGE_TYPE_ENCRYPTION_KEY,
     IMAGE_TYPE_CHROMEOS,
+    IMAGE_TYPE_VENDOR,
+    IMAGE_TYPE_MAX
 };
 
-const int kMaxPartitions = 5;
+const int kMaxPartitions = IMAGE_TYPE_MAX;
 const int kMaxTargetQemuParams = 16;
 
 /*
@@ -119,7 +121,7 @@ const int kMaxTargetQemuParams = 16;
  * listed in command line is mounted first, i.e. to /dev/block/vda,
  * the next one to /dev/block/vdb, etc. However, for arm/mips, it's reversed;
  * the last one is mounted to /dev/block/vda. the 2nd last to /dev/block/vdb.
- * So far, we have 4(kMaxPartitions) types defined for system, cache, userdata
+ * So far, we have 6(kMaxPartitions) types defined for system, cache, userdata
  * and sdcard images.
  * |qemuExtraArgs| are the qemu parameters specific to the target platform.
  * this is a NULL-terminated list of string pointers of at most
@@ -145,7 +147,7 @@ const TargetInfo kTarget = {
     "ttyAMA",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_ARM)
     "arm",
@@ -154,7 +156,7 @@ const TargetInfo kTarget = {
     "ttyAMA",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_MIPS64)
     "mips64",
@@ -163,7 +165,7 @@ const TargetInfo kTarget = {
     "ttyGF",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_MIPS)
     "mips",
@@ -172,7 +174,7 @@ const TargetInfo kTarget = {
     "ttyGF",
     "virtio-blk-device",
     "virtio-net-device",
-    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
+    {IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_CACHE, IMAGE_TYPE_SYSTEM},
     {NULL},
 #elif defined(TARGET_X86_64)
     "x86_64",
@@ -181,7 +183,7 @@ const TargetInfo kTarget = {
     "ttyS",
     "virtio-blk-pci",
     "virtio-net-pci",
-    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_SD_CARD},
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_SD_CARD, IMAGE_TYPE_VENDOR},
     {"-vga", "none", NULL},
 #elif defined(TARGET_I386)  // Both i386 and x86_64 targets define this macro
     "x86",
@@ -190,7 +192,7 @@ const TargetInfo kTarget = {
     "ttyS",
     "virtio-blk-pci",
     "virtio-net-pci",
-    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_SD_CARD},
+    {IMAGE_TYPE_SYSTEM, IMAGE_TYPE_CACHE, IMAGE_TYPE_USER_DATA, IMAGE_TYPE_ENCRYPTION_KEY, IMAGE_TYPE_VENDOR, IMAGE_TYPE_SD_CARD},
     {"-vga", "none", NULL},
 #else
     #error No target platform is defined
@@ -251,6 +253,22 @@ static void makePartitionCmd(const char** args, int* argsPosition, int* driveInd
                     driveParam += ",read-only";
             }
             deviceParam = StringFormat("%s,drive=system",
+                                       kTarget.storageDeviceType);
+            break;
+        case IMAGE_TYPE_VENDOR:
+            if (!hw->disk_vendorPartition_path
+                    && !hw->disk_vendorPartition_initPath) {
+                // we do not have a vendor image to mount
+                return;
+            }
+            filePath = avdInfo_getContentPath(avd);
+            driveParam += StringFormat("index=%d,id=vendor,file=%s"
+                                       PATH_SEP "vendor.img.qcow2",
+                                        idx++, filePath);
+            // You can override this explicitly
+            // by passing -writable-system to emulator.
+            if (!writable) driveParam += ",read-only";
+            deviceParam = StringFormat("%s,drive=vendor",
                                        kTarget.storageDeviceType);
             break;
         case IMAGE_TYPE_CACHE:
@@ -893,7 +911,8 @@ extern "C" int main(int argc, char **argv) {
         int s;
         int drvIndex = 0;
         for (s = 0; s < kMaxPartitions; s++) {
-            bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM) ?
+            bool writable = (kTarget.imagePartitionTypes[s] == IMAGE_TYPE_SYSTEM
+                        || kTarget.imagePartitionTypes[s] == IMAGE_TYPE_VENDOR) ?
                         android_op_writable_system : true;
             makePartitionCmd(args, &n, &drvIndex, hw,
                              kTarget.imagePartitionTypes[s], writable, apiLevel, avd);
