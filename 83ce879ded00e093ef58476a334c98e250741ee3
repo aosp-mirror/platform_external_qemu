@@ -46,6 +46,30 @@
       "revId": "83ce879ded00e093ef58476a334c98e250741ee3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34aab449_bdb33cf4",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 32
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T23:13:06Z",
+      "side": 1,
+      "message": "Just limited mRamLoadLock to:\n\n1. loadRam\n2. mReadDataQueue.stop() in interruptReading\n3. mReadDataQueue.stop() when all pages are loaded",
+      "parentUuid": "fbe4270c_92ae54c1",
+      "range": {
+        "startLine": 86,
+        "startChar": 33,
+        "endLine": 86,
+        "endChar": 45
+      },
+      "revId": "83ce879ded00e093ef58476a334c98e250741ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
