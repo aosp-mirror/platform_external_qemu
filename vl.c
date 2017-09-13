@@ -163,6 +163,7 @@ int main(int argc, char **argv)
 #include "android/utils/async.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
+#include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
 #include "android/utils/ini.h"
 #include "android/utils/lineinput.h"
@@ -898,11 +899,11 @@ void qemu_system_vmstop_request(RunState state)
 
 #ifdef CONFIG_ANDROID
 
-static bool read_file_to_buf(const char* file, uint8_t* buf, int size){
-    int fd = open(file, O_RDONLY | O_BINARY);
+static bool read_file_to_buf(const char* file, uint8_t* buf, size_t size){
+    int fd = HANDLE_EINTR(open(file, O_RDONLY | O_BINARY));
     if (fd < 0) return false;
-    int ret = read(fd, buf, size);
-    close(fd);
+    ssize_t ret = HANDLE_EINTR(read(fd, buf, size));
+    IGNORE_EINTR(close(fd));
     if (ret != size) return false;
     return true;
 }
