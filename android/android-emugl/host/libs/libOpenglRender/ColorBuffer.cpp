@@ -253,6 +253,24 @@ void ColorBuffer::reformat(GLint internalformat,
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
                          0, format, type, nullptr);
+
+    s_gles2.glBindTexture(GL_TEXTURE_2D, m_blitTex);
+    s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, internalformat, m_width, m_height,
+                         0, format, type, nullptr);
+
+    // EGL images need to be recreated because the EGL_KHR_image_base spec
+    // states that respecifying an image (i.e. glTexImage2D) will generally
+    // result in orphaning of the EGL image.
+    s_egl.eglDestroyImageKHR(m_display, m_eglImage);
+    m_eglImage = s_egl.eglCreateImageKHR(
+            m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(m_tex), NULL);
+
+    s_egl.eglDestroyImageKHR(m_display, m_blitEGLImage);
+    m_blitEGLImage = s_egl.eglCreateImageKHR(
+            m_display, s_egl.eglGetCurrentContext(), EGL_GL_TEXTURE_2D_KHR,
+            (EGLClientBuffer)SafePointerFromUInt(m_blitTex), NULL);
+
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
     m_internalFormat = internalformat;
     m_format = format;

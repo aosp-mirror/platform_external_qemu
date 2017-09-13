@@ -858,7 +858,7 @@ static void _hwSensors_init(HwSensors* h) {
         h->sensors[ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED].enabled = true;
     }
 
-    if (android_hw->hw_sensors_magnetic_field_uncalibrated) {
+    if (android_hw->hw_sensors_gyroscope_uncalibrated) {
         h->sensors[ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED].enabled = true;
     }
 

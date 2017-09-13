@@ -17,6 +17,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <iptypes.h>
+#include <wincrypt.h>
 #include <iphlpapi.h>
 #ifdef CONFIG_QGA_NTDDSCSI
 #include <winioctl.h>

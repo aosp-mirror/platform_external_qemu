@@ -42,7 +42,9 @@ public:
 
     bool hasError() const { return mHasError; }
     bool onDemandEnabled() const { return mAccessWatch; }
-    bool compressed() const { return (mIndex.flags & IndexFlags::CompressedPages) != 0; }
+    bool compressed() const {
+        return (mIndex.flags & IndexFlags::CompressedPages) != 0;
+    }
     uint64_t diskSize() const { return mDiskSize; }
 
 private:
@@ -58,14 +60,20 @@ private:
             Pages::iterator pagesEnd;
         };
 
+        using Blocks = std::vector<Block>;
+
         IndexFlags flags;
-        std::vector<Block> blocks;
+        Blocks blocks;
         Pages pages;
 
         void clear();
     };
 
     bool readIndex();
+    void readBlockPages(FileIndex::Blocks::iterator blockIt,
+                        bool compressed,
+                        int64_t* runningFilePos,
+                        int32_t* prevPageSizeOnDisk);
     bool registerPageWatches();
 
     void zeroOutPage(const Page& page);
@@ -87,7 +95,7 @@ private:
     base::StdioStream mStream;
     int mStreamFd;  // An FD for the |mStream|'s underlying open file.
     bool mWasStarted = false;
-    std::atomic<bool> mHasError { false };
+    std::atomic<bool> mHasError{false};
 
     base::Optional<MemoryAccessWatch> mAccessWatch;
     base::FunctorThread mReaderThread;

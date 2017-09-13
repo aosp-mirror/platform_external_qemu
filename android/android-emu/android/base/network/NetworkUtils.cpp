@@ -34,6 +34,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/sockets/Winsock.h"
 #include "android/base/system/Win32UnicodeString.h"
+#include <wincrypt.h>
 #include <iphlpapi.h>
 #include <unordered_map>
 #include <string>

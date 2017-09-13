@@ -12,9 +12,11 @@
 #include "android/snapshot/Quickboot.h"
 
 #include "android/base/Stopwatch.h"
+#include "android/base/async/ThreadLooper.h"
 #include "android/cmdline-option.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
@@ -69,6 +71,11 @@ void Quickboot::finalize() {
     sInstance = nullptr;
 }
 
+Quickboot::~Quickboot() {
+    mLivenessTimer->stop();
+    mLivenessTimer.reset();
+}
+
 void Quickboot::reportSuccessfulLoad(StringView name,
                                      System::WallDuration startTimeMs) {
     auto& loader = Snapshotter::get().loader();
@@ -119,7 +126,47 @@ void Quickboot::reportSuccessfulSave(StringView name,
     });
 }
 
-Quickboot::Quickboot(const QAndroidVmOperations& vmOps) : mVmOps(vmOps) {}
+constexpr int kLivenessTimerTimeoutMs = 100;
+constexpr int kBootTimeoutMs = 5 * 1000;
+
+void Quickboot::startLivenessMonitor() {
+    mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+}
+
+void Quickboot::onLivenessTimer() {
+    if (metrics::AdbLivenessChecker::isEmulatorBooted()) {
+        VERBOSE_PRINT(snapshot, "Guest came online in %.3f sec after loading",
+                      (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
+                              1000.0);
+        // done here: snapshot loaded fine and emulator's working.
+        return;
+    }
+
+    const auto nowMs = System::get()->getHighResTimeUs() / 1000;
+    if (int64_t(nowMs - mLoadTimeMs) > kBootTimeoutMs) {
+        // The VM hasn't started for long enough since the end of snapshot
+        // loading, let's reset it.
+        dwarning(
+                "Guest hasn't come online in %d seconds, deleting the boot "
+                "snapshot and resetting the guest",
+                kBootTimeoutMs / 1000);
+        Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+        reportFailedLoad(
+                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
+        mVmOps.vmReset();
+        return;
+    }
+
+    mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
+}
+
+Quickboot::Quickboot(const QAndroidVmOperations& vmOps)
+    : mVmOps(vmOps),
+      mLivenessTimer(base::ThreadLooper::get()->createTimer(
+              [](void* opaque, base::Looper::Timer*) {
+                  static_cast<Quickboot*>(opaque)->onLivenessTimer();
+              },
+              this)) {}
 
 bool Quickboot::load(StringView name) {
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
@@ -153,7 +200,9 @@ bool Quickboot::load(StringView name) {
         mLoadTimeMs = System::get()->getHighResTimeUs() / 1000;
         if (res == OperationStatus::Ok) {
             mLoaded = true;
+            mLoadedSnapshotName = name;
             reportSuccessfulLoad(name, startTimeMs);
+            startLivenessMonitor();
         } else {
             // Check if the error is about something done before the real load
             // (e.g. condition check) or we've started actually loading the VM
@@ -206,30 +255,59 @@ bool Quickboot::save(StringView name) {
         name = kDefaultBootSnapshot;
     }
 
+    mLivenessTimer->stop();
+
+    const int kMinUptimeForSavingMs = 1500;
+    const auto nowMs = System::get()->getHighResTimeUs() / 1000;
+    const auto sessionUptimeMs = nowMs - mLoadTimeMs;
+    const bool hasStateToSave = sessionUptimeMs > kMinUptimeForSavingMs;
+
+    // TODO: detect if emulator was restarted since loading.
+    const bool shouldTrySaving =
+            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted();
+
+    const int apiLevel = avdInfo_getApiLevel(android_avdInfo);
+
     if (android_cmdLineOptions->no_snapshot_save) {
         dwarning("Discarding the changed state (command-line flag).");
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
-        // Preserve the state changes - we've ran for a while now
-        // and the AVD state is different from what could be saved in
-        // the default boot snapshot.
+        if (shouldTrySaving && hasStateToSave) {
+            // Preserve the state changes - we've ran for a while now
+            // and the AVD state is different from what could be saved in
+            // the default boot snapshot.
+            dwarning(
+                    "Cleaning out the default boot snapshot to preserve the "
+                    "current session (renderer type '%s' (%d) doesn't support "
+                    "snapshotting).",
+                    emuglConfig_renderer_to_string(
+                            emuglConfig_get_current_renderer()),
+                    int(emuglConfig_get_current_renderer()));
+            Snapshotter::get().deleteSnapshot(name.c_str());
+        } else {
+            dwarning(
+                    "Skipping boot snapshot saving (renderer type '%s' (%d) "
+                    "doesn't support snapshotting).",
+                    emuglConfig_renderer_to_string(
+                            emuglConfig_get_current_renderer()),
+                    int(emuglConfig_get_current_renderer()));
+        }
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
+    } else if (apiLevel == kUnknownApiLevel || apiLevel < 19) {
+        // Clean up the boot snapshot here as we don't expect the API level
+        // to change back to the old value where the saved snapshot was relevant
         dwarning(
                 "Cleaning out the default boot snapshot to preserve the "
-                "current session (renderer type '%s' (%d) doesn't support "
-                "snapshotting).",
-                emuglConfig_renderer_to_string(
-                        emuglConfig_get_current_renderer()),
-                int(emuglConfig_get_current_renderer()));
+                "current session (quick boot requires API level 19+, got %d).",
+                apiLevel);
         Snapshotter::get().deleteSnapshot(name.c_str());
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
     } else {
-        const int kMinUptimeForSavingMs = 1500;
-        const auto nowMs = System::get()->getHighResTimeUs() / 1000;
-        const auto sessionUptimeMs = nowMs - mLoadTimeMs;
-        if (sessionUptimeMs > kMinUptimeForSavingMs) {
-            if (mLoaded || androidSnapshot_canSave()) {
+        if (hasStateToSave) {
+            if (shouldTrySaving) {
                 dprint("Saving state on exit with session uptime %d ms",
                        int(sessionUptimeMs));
                 Stopwatch sw;

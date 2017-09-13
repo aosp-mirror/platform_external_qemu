@@ -144,6 +144,7 @@ OPT_FLAG ( no_boot_anim, "disable animation for faster boot" )
 
 OPT_FLAG( no_window, "disable graphical window display" )
 OPT_FLAG( no_sim, "device has no SIM card" )
+OPT_FLAG( lowram, "device is a low ram device" )
 OPT_FLAG( version, "display emulator version number" )
 
 OPT_PARAM( report_console, "<socket>", "report console port to remote socket" )
@@ -189,6 +190,8 @@ OPT_FLAG(metrics_to_console, "Enable usage metrics and print the messages to std
 OPT_PARAM(metrics_to_file, "<file>", "Enable usage metrics and write the messages into specified file")
 
 OPT_LIST(feature, "<name|-name>", "Force-enable or disable (-name) the features")
+
+OPT_PARAM(sim_access_rules_file, "<file>", "Use SIM access rules from specified file")
 
 #undef CFG_FLAG
 #undef CFG_PARAM

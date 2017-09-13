@@ -107,10 +107,8 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init(s_eglIface);
-        if (!isGles2Gles()) {
-            glBindTexture(GL_TEXTURE_2D,0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-        }
+        glBindTexture(GL_TEXTURE_2D,0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -1144,6 +1142,9 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
 static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
+    if (isGles2Gles()) {
+        return;
+    }
     if (ctx->getMajorVersion() < 3)
         ctx->drawValidate();
 
@@ -1164,6 +1165,9 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
 }
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
+    if (isGles2Gles()) {
+        return;
+    }
     if (mode == GL_POINTS) {
         ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         if (!isCoreProfile()) {
@@ -3002,7 +3006,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     bool isCompressedFormat =
         GLESv2Validate::isCompressedFormat(internalformat);
 
-    if (!isCompressedFormat && !isGles2Gles()) {
+    if (!isCompressedFormat) {
         VALIDATE(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
         VALIDATE(!GLESv2Validate::pixelFrmt(ctx, format), GL_INVALID_ENUM);

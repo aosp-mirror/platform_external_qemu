@@ -182,6 +182,26 @@ $$(OBJ): $$(LOCAL_PATH)/$$(SRC)
 	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
 endef
 
+# Compile an Objective-C source file
+#
+define  compile-objcxx-source
+SRC:=$(1)
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.mm=%.o))
+LOCAL_OBJECTS += $$(OBJ)
+_BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
+$$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) $$(LOCAL_CXXFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)
+$$(OBJ): PRIVATE_CC     := $$(LOCAL_CXX)
+$$(OBJ): PRIVATE_OBJ    := $$(OBJ)
+$$(OBJ): PRIVATE_MODULE := $$(LOCAL_MODULE)
+$$(OBJ): PRIVATE_SRC    := $$(LOCAL_PATH)/$$(SRC)
+$$(OBJ): PRIVATE_SRC0   := $$(SRC)
+$$(OBJ): $$(LOCAL_PATH)/$$(SRC)
+	@mkdir -p $$(dir $$(PRIVATE_OBJ))
+	@echo "Compile: $$(PRIVATE_MODULE) <= $$(PRIVATE_SRC0)"
+	$(hide) $$(PRIVATE_CC) $$(PRIVATE_CFLAGS) -c -o $$(PRIVATE_OBJ) -MMD -MP -MF $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_SRC)
+	$(hide) $$(_BUILD_CORE_DIR)/core/mkdeps.sh $$(PRIVATE_OBJ) $$(PRIVATE_OBJ).d.tmp $$(PRIVATE_OBJ).d
+endef
+
 # Compile a generated C source files#
 #
 define compile-generated-c-source

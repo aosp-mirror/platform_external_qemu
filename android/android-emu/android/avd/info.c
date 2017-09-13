@@ -495,7 +495,7 @@ _avdInfo_getApiLevel(AvdInfo* i, bool* isMarshmallowOrHigher)
 {
     char*       target;
     const char* p;
-    const int   defaultLevel = 1000;
+    const int   defaultLevel = kUnknownApiLevel;
     int         level        = defaultLevel;
 
 #    define ROOT_TARGET_KEY   "target"
@@ -645,7 +645,7 @@ int avdInfo_getApiLevelFromLetter(char letter) {
             return kApiLevelInfo[i].apiLevel;
         }
     }
-    return 1000;
+    return kUnknownApiLevel;
 }
 
 /* Look for a named file inside the AVD's content directory.

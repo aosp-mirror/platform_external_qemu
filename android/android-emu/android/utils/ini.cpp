@@ -12,6 +12,7 @@
 #include "android/utils/ini.h"
 
 #include "android/base/files/IniFile.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/base/Log.h"
 
 #include <errno.h>
@@ -20,10 +21,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <iterator>
 #include <string>
 
 typedef ::CIniFile CIniFile;
 typedef android::base::IniFile BaseIniFile;
+using android::base::strDup;
 
 static BaseIniFile* asBaseIniFile(CIniFile* i) {
     return reinterpret_cast<BaseIniFile*>(i);
@@ -72,12 +75,9 @@ int iniFile_getEntry(CIniFile* f, int index, char** key, char** value) {
         return -1;
     }
 
-    BaseIniFile::const_iterator cit = ini->begin();
-    for (; index > 0; --index) {
-        ++cit;
-    }
-    *key = strdup(cit->c_str());
-    *value = strdup(ini->getString(*cit, "").c_str());
+    const auto it = std::next(ini->begin(), index);
+    *key = strDup(*it);
+    *value = strDup(ini->getString(*it, ""));
     return 0;
 }
 
@@ -85,13 +85,13 @@ char* iniFile_getString(CIniFile* f,
                         const char* key,
                         const char* defaultValue) {
     if (defaultValue != NULL ) {
-        return strdup(asBaseIniFile(f)->getString(key, defaultValue).c_str());
+        return strDup(asBaseIniFile(f)->getString(key, defaultValue));
     }
     // |defaultValue| of NULL is not handled well by getString.
     if (!asBaseIniFile(f)->hasKey(key)) {
         return NULL;
     }
-    return strdup(asBaseIniFile(f)->getString(key, "").c_str());
+    return strDup(asBaseIniFile(f)->getString(key, ""));
 }
 
 int iniFile_getInteger(CIniFile* f, const char* key, int defaultValue) {

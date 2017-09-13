@@ -39,6 +39,7 @@ typedef char *caddr_t;
 # include <ws2tcpip.h>
 # include <windows.h>
 # include <sys/timeb.h>
+# include <wincrypt.h>
 # include <iphlpapi.h>
 #else
 # define O_BINARY 0
