@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0cc6eedd_d174ce58",
+        "filename": "android/android-emu/android/telephony/TagLengthValue.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-13T00:24:01Z",
+      "side": 1,
+      "message": "I feel very nitpicky saying this (sorry!) but I think it\u0027s better to keep the protobuff stuff out of this file and contained in the file reading logic. That way it\u0027s kept in a limited scope and anyone looking at this can look at in isolation. Hopefully it\u0027s not too much work to translate one enum into another.",
+      "revId": "11a5783ae6eec90074c545ce132e1e5340e71458",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

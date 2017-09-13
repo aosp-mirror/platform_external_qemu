@@ -84,6 +84,30 @@
     },
     {
       "key": {
+        "uuid": "b9a5f1d0_b5c3f6c9",
+        "filename": "android/android-emu/android/telephony/SimAccessRules.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-13T00:24:01Z",
+      "side": 1,
+      "message": "Initially I actually meant parseRefArDo but now I like this version better. A separate parseRefArDo seems like it wouldn\u0027t really add any value.",
+      "parentUuid": "d7e9e103_127e12b1",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 39
+      },
+      "revId": "ac51be5b08a63956d7f3c36f45a527f18ed551da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "054ecafc_8287c9ee",
         "filename": "android/android-emu/android/telephony/proto/sim_access_rules.proto",
         "patchSetId": 2
