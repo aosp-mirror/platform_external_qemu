@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "87e98039_004017c0",
+        "filename": "android/android-emu/android/base/FunctionView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T21:25:30Z",
+      "side": 1,
+      "message": "Is this to avoid a situation where we wrap a FunctionView in a FunctionView?",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 70
+      },
+      "revId": "bbdd8ba41ee5d9525e8c75e58261c5234b1d1e1e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
