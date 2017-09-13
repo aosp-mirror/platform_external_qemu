@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "993bb5d9_65a3099e",
+        "filename": "android/android-emu/android/snapshot/MacSegvHandler.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T18:31:00Z",
+      "side": 1,
+      "message": "Without teardown(), it\u0027s confusing since the crashhandler die happens in the same thread as the handler. I don\u0027t want to exercise that case. We\u0027d potentially have to run another iteration of exceptionCatchWorker (notices the next protected address is not registered, and then tears down for real, possibly hiding the error or even going out to the OS level).\n\nWith teardown, we go straight to the crash reporter.",
+      "parentUuid": "916223a3_98d65e47",
+      "range": {
+        "startLine": 224,
+        "startChar": 16,
+        "endLine": 224,
+        "endChar": 24
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5e4caa65_abb133c1",
         "filename": "android/android-emu/android/snapshot/MacSegvHandler.h",
         "patchSetId": 29
@@ -82,6 +106,30 @@
       "writtenOn": "2017-09-13T18:20:12Z",
       "side": 1,
       "message": "why? I don\u0027t see where it needs the access watch object",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 30
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c97589bf_5c383057",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T18:31:00Z",
+      "side": 1,
+      "message": "I have to try it again, but last time, without it, we could trigger a ram load from iov or hvf or whereever, after the access watch has been cleared already, resulting in a crash.\n\nPerhaps the loadRam callback impl in vm operations is not using the right condition to check that we are loading?",
+      "parentUuid": "b31f417e_6f713c1c",
       "range": {
         "startLine": 104,
         "startChar": 0,
