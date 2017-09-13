@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f6f41c2e_0ca72afc",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-13T22:08:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0037a6ce_e262cafe",
+      "range": {
+        "startLine": 29,
+        "startChar": 4,
+        "endLine": 29,
+        "endChar": 10
+      },
+      "revId": "75f465eb3399ea896d0752abe618f406c211c2f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "60b74e29_8fe0ef77",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "f12719ff_d928985b",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-13T22:08:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "60b74e29_8fe0ef77",
+      "range": {
+        "startLine": 41,
+        "startChar": 36,
+        "endLine": 41,
+        "endChar": 37
+      },
+      "revId": "75f465eb3399ea896d0752abe618f406c211c2f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f9627aab_ad0409de",
         "filename": "android/scripts/package-cros-sdk.sh",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2017-09-13T22:01:24Z",
       "side": 1,
       "message": "Please add quotes, and to the other occurrences too.",
+      "range": {
+        "startLine": 160,
+        "startChar": 11,
+        "endLine": 160,
+        "endChar": 21
+      },
+      "revId": "75f465eb3399ea896d0752abe618f406c211c2f3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4e1682a5_1e92e0fd",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 2
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-09-13T22:08:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f9627aab_ad0409de",
       "range": {
         "startLine": 160,
         "startChar": 11,
