@@ -107,10 +107,8 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     }
     if (!ctx->isInitialized()) {
         ctx->init(s_eglIface);
-        if (!isGles2Gles()) {
-            glBindTexture(GL_TEXTURE_2D,0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP,0);
-        }
+        glBindTexture(GL_TEXTURE_2D,0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
     if (ctx->needRestore()) {
         ctx->restore();
@@ -3008,7 +3006,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     bool isCompressedFormat =
         GLESv2Validate::isCompressedFormat(internalformat);
 
-    if (!isCompressedFormat && !isGles2Gles()) {
+    if (!isCompressedFormat) {
         VALIDATE(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
         VALIDATE(!GLESv2Validate::pixelFrmt(ctx, format), GL_INVALID_ENUM);
