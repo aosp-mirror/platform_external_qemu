@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cbfe2b72_f32063cb",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:39:26Z",
+      "side": 1,
+      "message": "this is super thread-unsafe. why is it better vs allocating a buffer on the stack at the call site, or just returning std::string?",
+      "range": {
+        "startLine": 115,
+        "startChar": 12,
+        "endLine": 115,
+        "endChar": 26
+      },
+      "revId": "da1564b234b9cacec0da94df34b8850ef38567de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "47c9dea9_a8be8179",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:39:26Z",
+      "side": 1,
+      "message": "do we have access to crashhandler from here?",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 16
+      },
+      "revId": "da1564b234b9cacec0da94df34b8850ef38567de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
