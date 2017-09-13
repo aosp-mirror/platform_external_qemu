@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d075c5a9_d6989dca",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T19:32:14Z",
+      "side": 1,
+      "message": "Done (with std::string)",
+      "parentUuid": "cbfe2b72_f32063cb",
+      "range": {
+        "startLine": 115,
+        "startChar": 12,
+        "endLine": 115,
+        "endChar": 26
+      },
+      "revId": "da1564b234b9cacec0da94df34b8850ef38567de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "47c9dea9_a8be8179",
         "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
         "patchSetId": 17
@@ -60,6 +84,30 @@
       "side": 1,
       "message": "btw, isn\u0027t it better to set gl error instead of killing the emulator here?",
       "parentUuid": "47c9dea9_a8be8179",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 16
+      },
+      "revId": "da1564b234b9cacec0da94df34b8850ef38567de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56396fd3_95c1f9c0",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T19:32:14Z",
+      "side": 1,
+      "message": "Well, this is a utility function for returning a shader that is for geometry drawing in gles1, and we know which shaders we are going to need up front without user input, so if the shadertype is wrong, then memory is corrupted and we should abort when we have the chance.\n\nDone (Put it on the crash handler)",
+      "parentUuid": "34496cbd_186abfe1",
       "range": {
         "startLine": 127,
         "startChar": 0,
