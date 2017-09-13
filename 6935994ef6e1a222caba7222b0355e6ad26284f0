@@ -441,6 +441,30 @@
     },
     {
       "key": {
+        "uuid": "74d3b90b_6c299c78",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T02:03:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c07065ee_14d44350",
+      "range": {
+        "startLine": 359,
+        "startChar": 9,
+        "endLine": 359,
+        "endChar": 23
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab274c7f_a4272abe",
         "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
         "patchSetId": 24
@@ -452,6 +476,30 @@
       "writtenOn": "2017-09-12T20:41:44Z",
       "side": 1,
       "message": "this is exactly what LazyInstance\u003c\u003e does :)",
+      "range": {
+        "startLine": 372,
+        "startChar": 0,
+        "endLine": 376,
+        "endChar": 75
+      },
+      "revId": "6935994ef6e1a222caba7222b0355e6ad26284f0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a4fb6345_7cb0e7a7",
+        "filename": "android/android-emu/android/snapshot/mac_segv_handler.c",
+        "patchSetId": 24
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-13T02:03:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab274c7f_a4272abe",
       "range": {
         "startLine": 372,
         "startChar": 0,
