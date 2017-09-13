@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "070e89c2_b154a5d0",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 32
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T23:03:06Z",
+      "side": 1,
+      "message": "what this lock is for? |mReadDataQueue| and |mReadingQueue| are both thread-safe",
+      "range": {
+        "startLine": 86,
+        "startChar": 33,
+        "endLine": 86,
+        "endChar": 45
+      },
+      "revId": "83ce879ded00e093ef58476a334c98e250741ee3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
