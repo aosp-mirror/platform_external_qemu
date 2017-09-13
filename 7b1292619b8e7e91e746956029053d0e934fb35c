@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d65aabd2_b9de5117",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1951,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-13T23:36:50Z",
+      "side": 1,
+      "message": "Make sure to check the length of the string returned by get_phone_number_prefix here. All of the conditionals will need those checks it seems.\n\nIf those conditionals are written correctly you can still use the memcpy with a fixed length too. Just make sure to check the length for both what the memcpy does and what the offset does.",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b4c1b54_41443b5a",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2361,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-13T23:36:50Z",
+      "side": 1,
+      "message": "Same here with the string length, offsets and memcpy",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51f09715_def71c1d",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-13T23:36:50Z",
+      "side": 1,
+      "message": "You don\u0027t need the static std::string here, you can just return android_cmdLineOptions-\u003ephone_number_prefix or DEFAULT_PHONE_PREFIX right away since they\u0027re guaranteed to be around for the duration of the program. This also avoids the thread safety issues with the empty check on the string.",
+      "range": {
+        "startLine": 24,
+        "startChar": 2,
+        "endLine": 29,
+        "endChar": 3
+      },
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c944d52_21e1bee3",
+        "filename": "android/android-emu/android/telephony/remote_call.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-13T23:36:50Z",
+      "side": 1,
+      "message": "This needs to be converted to a strncmp or it might read past the end of the string returned by get_phone_number_prefix if it\u0027s shorter than 7 bytes.",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
