@@ -14,6 +14,7 @@
 #include "android/console_auth.h"
 #include "android/telephony/debug.h"
 #include "android/telephony/gsm.h"
+#include "android/telephony/phone_number.h"
 #include "android/telephony/sysdeps.h"
 
 #include "android/utils/bufprint.h"
@@ -74,7 +75,7 @@ remote_number_string_to_port( const char*  number )
     len = strlen(number);
     if (len > 0 && number[len-1] == ';')
         len--;
-    if (len == 11 && !memcmp(number, PHONE_PREFIX, 7))
+    if (len == 11 && !strncmp(number, get_phone_number_prefix(), 7))
         temp += 7;
     num = strtol( temp, &end, 10 );
 
@@ -178,23 +179,23 @@ remote_call_alloc( RemoteCallType  type, int  to_port, int  from_port )
 
         switch (type) {
             case REMOTE_CALL_DIAL:
-                p = bufprint(p, end, "gsm call " PHONE_PREFIX "%d\n", from_num );
+                p = bufprint(p, end, "gsm call %s%d\n", get_phone_number_prefix(), from_num );
                 break;
 
             case REMOTE_CALL_BUSY:
-                p = bufprint(p, end, "gsm busy " PHONE_PREFIX "%d\n", from_num);
+                p = bufprint(p, end, "gsm busy %s%d\n", get_phone_number_prefix(), from_num);
                 break;
 
             case REMOTE_CALL_HOLD:
-                p = bufprint(p, end, "gsm hold " PHONE_PREFIX "%d\n", from_num);
+                p = bufprint(p, end, "gsm hold %s%d\n", get_phone_number_prefix(), from_num);
                 break;
 
             case REMOTE_CALL_ACCEPT:
-                p = bufprint(p, end, "gsm accept " PHONE_PREFIX "%d\n", from_num);
+                p = bufprint(p, end, "gsm accept %s%d\n", get_phone_number_prefix(), from_num);
                 break;
 
             case REMOTE_CALL_HANGUP:
-                p = bufprint(p, end, "gsm cancel " PHONE_PREFIX "%d\n", from_num );
+                p = bufprint(p, end, "gsm cancel %s%d\n", get_phone_number_prefix(), from_num );
                 break;
 
             default:
