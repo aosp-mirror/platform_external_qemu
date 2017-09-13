@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cfc4e1dc_0574a9ba",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 897,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-13T20:50:17Z",
+      "side": 1,
+      "message": "size_t",
+      "range": {
+        "startLine": 897,
+        "startChar": 61,
+        "endLine": 897,
+        "endChar": 64
+      },
+      "revId": "74c86677caeab0e5a64264b3e8499b70c1f6a3e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b24a4cae_930c0fd3",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 898,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-13T20:50:17Z",
+      "side": 1,
+      "message": "Can you wrap the open/read/close calls with TEMP_RETRY_FAILURE to handle interruptions?",
+      "range": {
+        "startLine": 898,
+        "startChar": 13,
+        "endLine": 898,
+        "endChar": 17
+      },
+      "revId": "74c86677caeab0e5a64264b3e8499b70c1f6a3e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ded78353_27629169",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 900,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-13T20:50:17Z",
+      "side": 1,
+      "message": "ssize_t",
+      "range": {
+        "startLine": 900,
+        "startChar": 4,
+        "endLine": 900,
+        "endChar": 7
+      },
+      "revId": "74c86677caeab0e5a64264b3e8499b70c1f6a3e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "225f8ac9_a2bfe40d",
+        "filename": "vl.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1009,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-09-13T20:50:17Z",
+      "side": 1,
+      "message": "Can you differentiate between an I/O failure (e.g backing image file doesn\u0027t exist, no permission to read, etc.) and the detection of raw/qcow2 format? If the file doesn\u0027t exist we should abort and log the error rather than assume \"raw\" and fail further down.",
+      "range": {
+        "startLine": 1008,
+        "startChar": 16,
+        "endLine": 1009,
+        "endChar": 76
+      },
+      "revId": "74c86677caeab0e5a64264b3e8499b70c1f6a3e9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
