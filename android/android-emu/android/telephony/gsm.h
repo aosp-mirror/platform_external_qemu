@@ -200,8 +200,6 @@ extern void      gsm_rope_add_c( GsmRope  rope, char  c );
 extern void      gsm_rope_add( GsmRope  rope, const void*  str, int  len );
 extern void*     gsm_rope_reserve( GsmRope  rope, int  len );
 
-#define  PHONE_PREFIX "1555521"
-
 #ifdef __cplusplus
 } // extern "C"
 #endif
