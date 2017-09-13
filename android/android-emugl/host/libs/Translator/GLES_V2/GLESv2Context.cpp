@@ -426,7 +426,7 @@ void GLESv2Context::drawWithEmulations(
         (cmd != DrawCallCmd::Arrays &&
          cmd != DrawCallCmd::ArraysInstanced) &&
         !isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER);
-    bool needPointEmulation = mode == GL_POINTS;
+    bool needPointEmulation = mode == GL_POINTS && !isGles2Gles();
 
 #ifdef __APPLE__
     if (primitiveRestartEnabled() && type) {
