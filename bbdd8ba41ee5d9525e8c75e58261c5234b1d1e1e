@@ -22,6 +22,30 @@
       "revId": "bbdd8ba41ee5d9525e8c75e58261c5234b1d1e1e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d74bec76_d6b6585b",
+        "filename": "android/android-emu/android/base/FunctionView.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T21:35:13Z",
+      "side": 1,
+      "message": "Yes, and do make sure we call a regular copy constructor instead",
+      "parentUuid": "87e98039_004017c0",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 70
+      },
+      "revId": "bbdd8ba41ee5d9525e8c75e58261c5234b1d1e1e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
