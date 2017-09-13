@@ -45,6 +45,30 @@
       "revId": "da1564b234b9cacec0da94df34b8850ef38567de",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "34496cbd_186abfe1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 17
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:40:16Z",
+      "side": 1,
+      "message": "btw, isn\u0027t it better to set gl error instead of killing the emulator here?",
+      "parentUuid": "47c9dea9_a8be8179",
+      "range": {
+        "startLine": 127,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 16
+      },
+      "revId": "da1564b234b9cacec0da94df34b8850ef38567de",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
