@@ -12,6 +12,7 @@
 #include "android/telephony/modem.h"
 
 #include "android/telephony/debug.h"
+#include "android/telephony/phone_number.h"
 #include "android/telephony/remote_call.h"
 #include "android/telephony/sim_access_rules.h"
 #include "android/telephony/sim_card.h"
@@ -1946,20 +1947,18 @@ handleSendSMSText( const char*  cmd, AModem  modem )
             break;
         temp[numlen] = 0;
 
-        /* Converts 4, 7, and 10 digits number to 11 digits */
-        if (numlen == 10 && !strncmp(temp, PHONE_PREFIX+1, 6)) {
-            memcpy( number, PHONE_PREFIX, 1 );
-            memcpy( number+1, temp, numlen );
-            number[numlen+1] = 0;
-        } else if (numlen == 7 && !strncmp(temp, PHONE_PREFIX+4, 3)) {
-            memcpy( number, PHONE_PREFIX, 4 );
-            memcpy( number+4, temp, numlen );
-            number[numlen+4] = 0;
-        } else if (numlen == 4) {
-            memcpy( number, PHONE_PREFIX, 7 );
-            memcpy( number+7, temp, numlen );
-            number[numlen+7] = 0;
-        } else {
+        /* Converts 4, 7, and 10 digits number to full number */
+        const char* phone_prefix = get_phone_number_prefix();
+        int prefix_len = strlen(phone_prefix);
+        assert(prefix_len >= 7 && prefix_len <= 11);
+
+        if ((numlen == 4 || numlen == 7 || numlen == 10) &&
+             !strncmp(temp, &phone_prefix[prefix_len-(numlen-4)], numlen-4)) {
+            int addr_prefix_len = prefix_len-(numlen-4);
+            memcpy( number, phone_prefix, addr_prefix_len );
+            memcpy( number+addr_prefix_len, temp, numlen );
+            number[numlen+addr_prefix_len] = 0;
+        }   else {
             memcpy( number, temp, numlen );
             number[numlen] = 0;
         }
@@ -1989,7 +1988,7 @@ handleSendSMSText( const char*  cmd, AModem  modem )
             SmsPDU*        deliver;
             int            nn;
 
-            snprintf( temp, sizeof(temp), PHONE_PREFIX "%d", modem->base_port );
+            snprintf( temp, sizeof(temp), "%s%d", get_phone_number_prefix(), modem->base_port );
             sms_address_from_str( from, temp, strlen(temp) );
 
             deliver = sms_receiver_create_deliver( modem->sms_receiver, index, from );
@@ -2356,20 +2355,18 @@ handleDial( const char*  cmd, AModem  modem )
     if (len >= sizeof(call->number))
         len = sizeof(call->number)-1;
 
-    /* Converts 4, 7, and 10 digits number to 11 digits */
-    if (len == 10 && !strncmp(cmd, PHONE_PREFIX+1, 6)) {
-        memcpy( call->number, PHONE_PREFIX, 1 );
-        memcpy( call->number+1, cmd, len );
-        call->number[len+1] = 0;
-    } else if (len == 7 && !strncmp(cmd, PHONE_PREFIX+4, 3)) {
-        memcpy( call->number, PHONE_PREFIX, 4 );
-        memcpy( call->number+4, cmd, len );
-        call->number[len+4] = 0;
-    } else if (len == 4) {
-        memcpy( call->number, PHONE_PREFIX, 7 );
-        memcpy( call->number+7, cmd, len );
-        call->number[len+7] = 0;
-    } else {
+    /* Converts short number to full number */
+    const char* phone_prefix = get_phone_number_prefix();
+    int prefix_len = strlen(phone_prefix);
+    assert(prefix_len >= 7 && prefix_len <= 11);
+
+    if((len == 4 || len == 7 || len == 10) &&
+     !strncmp(cmd, &phone_prefix[prefix_len-(len-4)], len-4)) {
+        int addr_prefix_len = prefix_len-(len-4);
+        memcpy( call->number, phone_prefix, addr_prefix_len );
+        memcpy( call->number+addr_prefix_len, cmd, len );
+        call->number[len+addr_prefix_len] = 0;
+    }   else {
         memcpy( call->number, cmd, len );
         call->number[len] = 0;
     }
