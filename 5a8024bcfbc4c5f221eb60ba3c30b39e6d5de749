@@ -166,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "5f5ea2e6_ea1f887c",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:54:10Z",
+      "side": 1,
+      "message": "well, that condition isn\u0027t about \"are we still loading\". It\u0027s about \"hasn\u0027t the loading failed yet\"\nI\u0027m not sure if |mAccessWatch| is cleared in thread-safe way, and even if it is, checking if it\u0027s not null could be not thread safe too. iovectors get processed in multiple threads at once, so this check isn\u0027t really correct enough.\n\n+ it should be in the loadRam() function, before doing any calculations.",
+      "parentUuid": "c97589bf_5c383057",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 30
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5dcf2a6f_ccb6f0e4",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 29
@@ -205,6 +229,29 @@
         "startChar": 0,
         "endLine": 39,
         "endChar": 32
+      },
+      "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b709cdc7_8bc0531c",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-13T18:54:10Z",
+      "side": 1,
+      "message": "|mLoader| gets reset when we begin a saving operation. Checking it here isn\u0027t safe if there\u0027s any chance this callback gets called after a save.\nthe current check good if you want to know if the synchronous part of loading is done. But mLoader-\u003eramLoader() could still be doing async load, or could complete it - and that won\u0027t change mLoader-\u003estatus()\n\ncorrect check IMO is (mLoader \u0026\u0026 status \u003d\u003d Ok \u0026\u0026 (!ramLoader-\u003eonDemandEnabled() || ramLoader-\u003e{new function to check if on demand completed})",
+      "range": {
+        "startLine": 160,
+        "startChar": 21,
+        "endLine": 160,
+        "endChar": 38
       },
       "revId": "5a8024bcfbc4c5f221eb60ba3c30b39e6d5de749",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
