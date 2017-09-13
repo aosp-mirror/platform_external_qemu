@@ -1144,6 +1144,9 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
 static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
+    if (isGles2Gles()) {
+        return;
+    }
     if (ctx->getMajorVersion() < 3)
         ctx->drawValidate();
 
@@ -1164,6 +1167,9 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
 }
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
+    if (isGles2Gles()) {
+        return;
+    }
     if (mode == GL_POINTS) {
         ctx->dispatcher().glDisable(GL_VERTEX_PROGRAM_POINT_SIZE);
         if (!isCoreProfile()) {
