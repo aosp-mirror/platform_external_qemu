@@ -16,6 +16,7 @@
 
 #include "android/emulation/control/battery_agent.h"
 #include "android/emulation/control/car_data_agent.h"
+#include "android/emulation/control/display_agent.h"
 #include "android/emulation/control/finger_agent.h"
 #include "android/emulation/control/libui_agent.h"
 #include "android/emulation/control/location_agent.h"
@@ -37,6 +38,7 @@ ANDROID_BEGIN_HEADER
 // AndroidConsoleAgents.
 #define ANDROID_CONSOLE_AGENTS_LIST(X)    \
     X(QAndroidBatteryAgent, battery)      \
+    X(QAndroidDisplayAgent, display)      \
     X(QAndroidEmulatorWindowAgent, emu)   \
     X(QAndroidFingerAgent, finger)        \
     X(QAndroidLocationAgent, location)    \

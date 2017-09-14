@@ -1117,6 +1117,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidBatteryAgent,
             gQAndroidCellularAgent,
             gQAndroidClipboardAgent,
+            gQAndroidDisplayAgent,
             gQAndroidEmulatorWindowAgent,
             gQAndroidFingerAgent,
             gQAndroidLocationAgent,
