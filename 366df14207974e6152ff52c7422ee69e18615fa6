@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "86940487_eb66c4a0",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-14T03:43:23Z",
+      "side": 1,
+      "message": "please move this check to loadRam()\nI\u0027d prefer it to be as early as possible (so we don\u0027t do any page count calculations), and also it\u0027s better to not have it at all in the |mAccessWatch| callback",
+      "range": {
+        "startLine": 406,
+        "startChar": 0,
+        "endLine": 406,
+        "endChar": 42
+      },
+      "revId": "366df14207974e6152ff52c7422ee69e18615fa6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
