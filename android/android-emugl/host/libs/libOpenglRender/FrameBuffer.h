@@ -17,12 +17,14 @@
 #define _LIBRENDER_FRAMEBUFFER_H
 
 #include "android/base/files/Stream.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/snapshot/common.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
+#include "ReadbackWorker.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
 #include "WindowSurface.h"
@@ -309,6 +311,10 @@ public:
     // contexts. It should be |false| only when called internally.
     bool post(HandleType p_colorbuffer, bool needLockAndBind = true);
 
+    // Runs the post callback with |pixels| (good for when the readback
+    // happens in a separate place)
+    void doPostCallback(void* pixels);
+
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
     // be re-displayed for any reason.
@@ -369,6 +375,12 @@ public:
     void createTrivialContext(HandleType shared,
                               HandleType* contextOut,
                               HandleType* surfOut);
+    // createAndBindTrivialSharedContext(), but with a m_pbufContext
+    // as shared, and not adding itself to the context map at all.
+    void createAndBindTrivialSharedContext(EGLContext* contextOut,
+                                           EGLSurface* surfOut);
+    void unbindAndDestroyTrivialSharedContext(EGLContext context,
+                                              EGLSurface surf);
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
@@ -481,5 +493,27 @@ private:
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
+
+    // Async readback
+    enum class ReadbackCmd {
+        Init = 0,
+        Readback = 1,
+        Exit = 2,
+    };
+    struct Readback {
+        ReadbackCmd cmd;
+        GLuint bufferId;
+        uint32_t bytes;
+    };
+    ReadbackWorker* m_readbackWorker = nullptr;
+    android::base::WorkerThread<Readback> m_readbackThread;
+    const uint32_t m_numReadbackBuffers = 2;
+    std::vector<GLuint> m_readbackBuffers;
+    uint32_t m_readbackCount = 0;
+    uint32_t m_readbackBufferSize = 0;
+    android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
+
+    bool m_enableAsyncReadback = true;
+
 };
 #endif

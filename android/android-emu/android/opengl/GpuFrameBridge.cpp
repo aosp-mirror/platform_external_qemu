@@ -129,7 +129,6 @@ public:
     virtual void postRecordFrame(int width, int height, const void* pixels) {
         {
             AutoLock lock(mRecLock);
-
             if (!mRecFrame) {
                 mRecFrame = new Frame(width, height, pixels);
             }

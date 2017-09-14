@@ -13,6 +13,8 @@
 
 #include "android/base/system/System.h"
 
+#include <stdio.h>
+
 namespace android {
 namespace base {
 
@@ -33,6 +35,12 @@ public:
 private:
     System::WallDuration mStartUs;
 };
+
+#define STOPWATCH_PRINT_SPLIT(sw) \
+    fprintf(stderr, "%s:%d %lu us\n", __func__, __LINE__, sw.restartUs());
+
+#define STOPWATCH_PRINT(sw) \
+    fprintf(stderr, "%s:%d %lu us total\n", __func__, __LINE__, sw.elapsedUs());
 
 }  // namespace base
 }  // namespace android
