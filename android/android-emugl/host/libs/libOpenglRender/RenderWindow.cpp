@@ -393,6 +393,12 @@ void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost, void*
     D("Exiting\n");
 }
 
+emugl::Renderer::ReadPixelsCallback RenderWindow::getReadPixelsCallback() {
+    D("Entering\n");
+    return FrameBuffer::getFB()->getReadPixelsCallback();
+    D("Exiting\n");
+}
+
 bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int wx,
                                   int wy,
