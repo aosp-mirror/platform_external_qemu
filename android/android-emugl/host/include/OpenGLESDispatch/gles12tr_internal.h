@@ -73,7 +73,7 @@ typedef const GLubyte* constGLubyte;
   X(void, glDeleteTextures, (GLsizei n, const GLuint* textures), (n, textures)) \
   X(void, glDepthFunc, (GLenum func), (func)) \
   X(void, glDepthMask, (GLboolean flag), (flag)) \
-  X(void, glDepthRangef, (GLfloat zNear, GLfloat zFar), (zNear, zFar)) \
+  X(void, glDepthRangef, (GLclampf zNear, GLclampf zFar), (zNear, zFar)) \
   X(void, glDepthRangefOES, (GLclampf zNear, GLclampf zFar), (zNear, zFar)) \
   X(void, glDepthRangex, (GLclampx zNear, GLclampx zFar), (zNear, zFar)) \
   X(void, glDepthRangexOES, (GLclampx zNear, GLclampx zFar), (zNear, zFar)) \

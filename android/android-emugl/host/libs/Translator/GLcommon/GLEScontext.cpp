@@ -786,7 +786,6 @@ void GLEScontext::postLoadRestoreCtx() {
     dispatcher.glFrontFace(m_frontFace);
     dispatcher.glDepthFunc(m_depthFunc);
     dispatcher.glDepthMask(m_depthMask);
-    dispatcher.glDepthRange(m_zNear, m_zFar);
 
     dispatcher.glLineWidth(m_lineWidth);
 
@@ -804,7 +803,13 @@ void GLEScontext::postLoadRestoreCtx() {
 
     dispatcher.glClearColor(m_clearColorR, m_clearColorG, m_clearColorB,
             m_clearColorA);
-    dispatcher.glClearDepth(m_clearDepth);
+    if (isGles2Gles()) {
+        dispatcher.glClearDepthf(m_clearDepth);
+        dispatcher.glDepthRangef(m_zNear, m_zFar);
+    } else {
+        dispatcher.glClearDepth(m_clearDepth);
+        dispatcher.glDepthRange(m_zNear, m_zFar);
+    }
     dispatcher.glClearStencil(m_clearStencil);
     dispatcher.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB,
             m_colorMaskA);
@@ -2259,6 +2264,7 @@ void GLEScontext::copyTexImageWithEmulation(
     }
 }
 
+// static
 GLuint GLEScontext::compileAndValidateCoreShader(GLenum shaderType, const char* src) {
     GLDispatch& gl = dispatcher();
 
@@ -2280,6 +2286,7 @@ GLuint GLEScontext::compileAndValidateCoreShader(GLenum shaderType, const char* 
     return shader;
 }
 
+// static
 GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
     GLDispatch& gl = dispatcher();
 

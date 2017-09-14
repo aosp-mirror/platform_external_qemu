@@ -3,7 +3,7 @@
 #include "android/base/testing/TestTempDir.h"
 #include "android/cmdline-option.h"
 #include "android/telephony/proto/sim_access_rules.pb.h"
-#include "android/telephony/sim_access_rules.h"
+#include "android/telephony/SimAccessRules.h"
 
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/text_format.h"
@@ -22,8 +22,9 @@ static const char kAraAid[] = "A00000015141434C00";
 TEST(SimAccessRulesTest, defaultAccessRules) {
     AndroidOptions options = {};
     android_cmdLineOptions = &options;
+    SimAccessRules rules;
     ASSERT_STREQ(
-            sim_get_access_rules(kAraAid),
+            rules.getRule(kAraAid),
             "FF403eE23cE12eC11461ed377e85d386a8dfee6b864bd85b0bfaa5af81CA16616e"
             "64726f69642e636172726965726170692e637473E30aDB080000000000000000");
 }
@@ -53,8 +54,9 @@ TEST(SimAccessRulesTest, customAccessRules) {
     options.sim_access_rules_file = const_cast<char*>(config_file_path.c_str());
     android_cmdLineOptions = &options;
 
+    SimAccessRules rules;
     ASSERT_STREQ(
-            sim_get_access_rules(kAraAid),
+            rules.getRule(kAraAid),
             "FF4026E224E116C11461ed377e85d386a8dfee6b864bd85b0bfaa5af81E30aDB08"
             "0000000000000000");
 }
