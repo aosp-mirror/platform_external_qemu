@@ -88,6 +88,30 @@
     },
     {
       "key": {
+        "uuid": "17b6be32_a0e67088",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-09-14T17:27:54Z",
+      "side": 1,
+      "message": "also to check if we can call displayAgent from arbitrary thread.",
+      "parentUuid": "824b85e7_01c61646",
+      "range": {
+        "startLine": 171,
+        "startChar": 35,
+        "endLine": 171,
+        "endChar": 49
+      },
+      "revId": "15d23f8122e7990f5217f59a0c70da5531dc6e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d728e53a_1ed02553",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 1
@@ -99,6 +123,30 @@
       "writtenOn": "2017-09-14T17:12:33Z",
       "side": 1,
       "message": "sleep is very non-deterministic, especially on Windows\nit only wakes up in the system timer resolution increments, which is usually 16 ms, and if the system is loaded with work it tends to sleep way longer than requested.\nPlease make sure you test it well and measure the actual recorded capture rate\nit might be that you need to either have a busy wait here or wait with a loop of sleep(0) until the expected time, or wait for some longer amount first and then add busy wait until the exact time.\n\nAnother option would be to keep a sliding window of last N times of getFrameBuffer() calls and calculate real FPS from that, so we can apply some correction to sleep times and get fps closer to the requested value",
+      "range": {
+        "startLine": 184,
+        "startChar": 46,
+        "endLine": 184,
+        "endChar": 53
+      },
+      "revId": "15d23f8122e7990f5217f59a0c70da5531dc6e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "be1df11e_34dd2af4",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-09-14T17:27:54Z",
+      "side": 1,
+      "message": "Use a timer to capture is usually what video encoder does.\nHere, most likely, we won\u0027t need to wait at all, the guest frames might be slower than the fps we usually record (such as 30 fps). Josh, can you print some logs to verify if this is the indeed the cast?",
+      "parentUuid": "d728e53a_1ed02553",
       "range": {
         "startLine": 184,
         "startChar": 46,
