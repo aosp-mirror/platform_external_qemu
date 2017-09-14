@@ -81,6 +81,9 @@ public:
     // output.
     void setPostCallback(emugl::Renderer::OnPostCallback onPost, void* onPostContext);
 
+    bool asyncReadbackSupported();
+    emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
+
     // Start displaying the emulated framebuffer using a sub-window of a
     // parent |window| id. |wx|, |wy|, |ww| and |wh| are the position
     // and dimension of the sub-window, relative to its parent.

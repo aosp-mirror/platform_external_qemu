@@ -59,20 +59,27 @@ public:
     // Destructor
     virtual ~GpuFrameBridge() {}
 
-    // Post a new frame from the EmuGL thread.
+    // Post a new frame from the EmuGL thread (synchronous).
     virtual void postFrame(int width, int height, const void* pixels) = 0;
 
-    // Post callback specifically for recording purposes. The intention is to
-    // either use this one or postFrame() as the callback and not both, because
-    // the speed to allocate + copy the pixel data in the postFrame() method is
-    // much too slow for recording.
+    // Post callback (synchronous) specifically for recording purposes.
+    // The intention is to either use this one or postFrame() as the callback
+    // and not both, because the speed to allocate + copy the pixel data in
+    // the postFrame() method is much too slow for recording.
     virtual void postRecordFrame(int width, int height, const void* pixels) = 0;
+
+    // Async version of postRecordFrame for use with async readback.
+    // Does not read the frame immediately.
+    virtual void postRecordFrameAsync(int width, int height, const void* pixels) = 0;
 
     // Returns the currently displayed frame. This method is designed only for
     // recording. Returns null if there is no frame available. Make sure to
     // attach the postFrameRecording() as the callback or you will not get a
     // valid frame.
     virtual void* getRecordFrame() = 0;
+
+    // Async version of getRecordFrame.
+    virtual void* getRecordFrameAsync() = 0;
 
 protected:
     GpuFrameBridge() {}

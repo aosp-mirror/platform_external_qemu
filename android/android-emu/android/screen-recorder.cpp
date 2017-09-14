@@ -35,7 +35,7 @@ constexpr int kIntraSpacing = 12;
 // The maximum number of frames we will buffer
 constexpr int kMaxFrames = 16;
 // The FPS we are recording at.
-constexpr int kFPS = 20;
+constexpr int kFPS = 24;
 // The video bitrate
 constexpr int kVideoBitrate = 1 * 1024 * 1024;
 // The audio bitrate
