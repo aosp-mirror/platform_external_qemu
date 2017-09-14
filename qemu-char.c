@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  * QEMU System Emulator
  *
@@ -4973,3 +4974,5 @@ static void register_types(void)
 }
 
 type_init(register_types);
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

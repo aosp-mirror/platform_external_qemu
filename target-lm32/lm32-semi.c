@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  Lattice Mico32 semihosting syscall interface
  *
@@ -210,3 +211,5 @@ bool lm32_cpu_do_semihosting(CPUState *cs)
     env->regs[R_R1] = ret;
     return true;
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
