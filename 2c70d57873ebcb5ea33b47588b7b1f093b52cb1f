@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9070f107_d9895827",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1955,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-14T18:38:09Z",
+      "side": 1,
+      "message": "Given that the previous code required that the temp number matched the prefix in everything but the last 4 digits I think this can be simplified quite a bit. Assuming we verified that prefix length is \u003e\u003d 7 how about:\n\nif (numlen \u003d\u003d 4 || numlen \u003d\u003d 7 || numlen \u003d\u003d 10) {\n  // Concatenate prefix and incoming number\n  int prefix_len \u003d 11 - numlen;\n  memcpy(number, prefix, prefix_len);\n  strncpy(number + prefix_len, temp, numlen)\n  if (memcmp(number, prefix, 7) !\u003d 0) {\n    // The concatenated value does not share country, area and prefix with the prefix number, don\u0027t use the prefix number at all.\n    memcpy(number, temp, numlen);\n  }\n} else {\n  memcpy(number, temp, numlen);\n}\n\nI think this is a little easier to follow and it also preserves the behavior that this only happens for specific lengths. I\u0027m worried that if we change the behavior it might break test automation that relies on their provided number being preserved without any changes.",
+      "revId": "2c70d57873ebcb5ea33b47588b7b1f093b52cb1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6f2cf0a6_6e728e32",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-14T18:38:09Z",
+      "side": 1,
+      "message": "Is there any situation where any digits beyond 7 would be used? In the code you wrote and the code I suggested it seems that it will only ever use 7, right?",
+      "revId": "2c70d57873ebcb5ea33b47588b7b1f093b52cb1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8fea423b_36cdac4c",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-14T18:38:09Z",
+      "side": 1,
+      "message": "I\u0027m wondering if we should have this warning once on startup maybe. This way it will be displayed every time the user sends a text or makes a call and it might not be as easy to spot. I don\u0027t really feel strongly about this though, what do you think?",
+      "revId": "2c70d57873ebcb5ea33b47588b7b1f093b52cb1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "d1d50e8e_79dd8e4d",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1951,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-14T18:38:09Z",
+      "side": 1,
+      "message": "No, the tests don\u0027t cover this. Our unit test coverage is pretty bad for our C code I\u0027m afraid.\n\nThe code seems to be about completing the number to a full number IFF everything but the last 4 digits matches the prefix. And it only does this check if the temp number contains area-prefix-line, prefix-line, or line numbers. You probably already figured that out, just writing it out for my own benefit.\n\nSince the temp number is provided by the user it can probably be anything so you\u0027re right that we\u0027ll have to guarantee that the user provided prefix on the command line is at least 7 digits.",
+      "parentUuid": "448c2aae_62fdd47d",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b4c1b54_41443b5a",
         "filename": "android/android-emu/android/telephony/modem.c",
         "patchSetId": 1
@@ -148,6 +166,24 @@
       "side": 1,
       "message": "I don\u0027t think it\u0027s possible to create a valid phone number if you don\u0027t have a least 7 digits in the prefix, but it\u0027s still safer with the strncmp.",
       "parentUuid": "8c944d52_21e1bee3",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "798ccf7c_ba45d67a",
+        "filename": "android/android-emu/android/telephony/remote_call.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-14T18:38:09Z",
+      "side": 1,
+      "message": "If we do verify that the command line parameter prefix is at least 7 digits I think we can leave it the way it is. We should probably have a comment documenting that get_phone_number_prefix will always return at least 7 digits in case anyone goes looking and thinking that this seems broken.",
+      "parentUuid": "4956e141_7bd1b42a",
       "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
