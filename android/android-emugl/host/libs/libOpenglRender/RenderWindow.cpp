@@ -411,6 +411,16 @@ void RenderWindow::setPostCallback(emugl::Renderer::OnPostCallback onPost, void*
     D("Exiting\n");
 }
 
+bool RenderWindow::asyncReadbackSupported() {
+    D("Entering\n");
+    return FrameBuffer::getFB()->asyncReadbackSupported();
+}
+
+emugl::Renderer::ReadPixelsCallback RenderWindow::getReadPixelsCallback() {
+    D("Entering\n");
+    return FrameBuffer::getFB()->getReadPixelsCallback();
+}
+
 bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int wx,
                                   int wy,

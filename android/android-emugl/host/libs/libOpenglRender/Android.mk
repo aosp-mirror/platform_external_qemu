@@ -26,6 +26,7 @@ host_common_SRC_FILES := \
     FenceSync.cpp \
     FrameBuffer.cpp \
     GLESVersionDetector.cpp \
+    ReadbackWorker.cpp \
     ReadBuffer.cpp \
     RenderChannelImpl.cpp \
     RenderContext.cpp \

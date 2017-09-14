@@ -303,6 +303,17 @@ void RendererImpl::setPostCallback(RendererImpl::OnPostCallback onPost,
     mRenderWindow->setPostCallback(onPost, context);
 }
 
+bool RendererImpl::asyncReadbackSupported() {
+    assert(mRenderWindow);
+    return mRenderWindow->asyncReadbackSupported();
+}
+
+RendererImpl::ReadPixelsCallback
+RendererImpl::getReadPixelsCallback() {
+    assert(mRenderWindow);
+    return mRenderWindow->getReadPixelsCallback();
+}
+
 bool RendererImpl::showOpenGLSubwindow(FBNativeWindowType window,
                                        int wx,
                                        int wy,

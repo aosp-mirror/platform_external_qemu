@@ -181,11 +181,29 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     return 0;
 }
 
+bool
+android_asyncReadbackSupported() {
+    if (sRenderer) {
+        return sRenderer->asyncReadbackSupported();
+    } else {
+        crashhandler_die("tried to query async readback support "
+                         "before renderer initialized!");
+    }
+}
+
 void
 android_setPostCallback(OnPostFunc onPost, void* onPostContext)
 {
     if (sRenderer) {
         sRenderer->setPostCallback(onPost, onPostContext);
+    }
+}
+
+ReadPixelsFunc android_getReadPixelsFunc() {
+    if (sRenderer) {
+        return sRenderer->getReadPixelsCallback();
+    } else {
+        return nullptr;
     }
 }
 

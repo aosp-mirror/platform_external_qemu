@@ -42,6 +42,7 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Stream;
 using android::base::System;
+using android::base::WorkerProcessingResult;
 
 namespace {
 
@@ -240,6 +241,8 @@ void FrameBuffer::finalize() {
         }
         m_eglDisplay = EGL_NO_DISPLAY;
     }
+
+    m_readbackThread.enqueue({ReadbackCmd::Exit});
 }
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
@@ -296,6 +299,15 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     DBG("gles version: %d %d\n", glesMaj, glesMin);
     GL_LOG("gles version: %d %d\n", glesMaj, glesMin);
+
+    fb->m_asyncReadbackSupported = glesMaj > 2;
+    if (fb->m_asyncReadbackSupported) {
+        DBG("Async readback supported");
+        GL_LOG("Async readback supported");
+    } else {
+        DBG("Async readback not supported");
+        GL_LOG("Async readback not supported");
+    }
 
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
@@ -525,7 +537,11 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_windowHeight(p_height),
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
-      m_colorBufferHelper(new ColorBufferHelper(this)) {}
+      m_colorBufferHelper(new ColorBufferHelper(this)),
+      m_readbackThread(
+          [this](FrameBuffer::Readback&& readback) {
+              return sendReadbackWorkerCmd(readback);
+          }) {}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -536,14 +552,31 @@ FrameBuffer::~FrameBuffer() {
     free(m_fbImage);
 }
 
-void FrameBuffer::setPostCallback(emugl::Renderer::OnPostCallback onPost,
-                                  void* onPostContext) {
+WorkerProcessingResult
+FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
+    switch (readback.cmd) {
+    case ReadbackCmd::Init:
+        m_readbackWorker->initGL();
+        return WorkerProcessingResult::Continue;
+    case ReadbackCmd::GetPixels:
+        m_readbackWorker->getPixels(readback.pixelsOut, readback.bytes);
+        return WorkerProcessingResult::Continue;
+    case ReadbackCmd::Exit:
+        m_readbackWorker.reset();
+        return WorkerProcessingResult::Stop;
+    }
+    return WorkerProcessingResult::Stop;
+}
+
+void FrameBuffer::setPostCallback(
+        emugl::Renderer::OnPostCallback onPost,
+        void* onPostContext) {
     AutoLock mutex(m_lock);
     m_onPost = onPost;
     m_onPostContext = onPostContext;
     if (m_onPost && !m_fbImage) {
         m_fbImage = (unsigned char*)malloc(4 * m_framebufferWidth *
-                                           m_framebufferHeight);
+                m_framebufferHeight);
         if (!m_fbImage) {
             ERR("out of memory, cancelling OnPost callback");
             m_onPost = NULL;
@@ -1508,6 +1541,41 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     *surfOut = createWindowSurface(0, 1, 1);
 }
 
+void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
+                                                    EGLSurface* surfOut) {
+    assert(contextOut);
+    assert(surfOut);
+
+    const FbConfig* config = getConfigs()->get(0 /* p_config */);
+    if (!config) return;
+
+    int maj, min;
+    emugl::getGlesVersion(&maj, &min);
+
+    const EGLint contextAttribs[] = {
+        EGL_CONTEXT_MAJOR_VERSION_KHR, maj,
+        EGL_CONTEXT_MINOR_VERSION_KHR, min,
+        EGL_NONE };
+
+    *contextOut = s_egl.eglCreateContext(
+            m_eglDisplay, config->getEglConfig(), m_pbufContext, contextAttribs);
+
+    const EGLint pbufAttribs[] = {
+        EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+
+    *surfOut = s_egl.eglCreatePbufferSurface(m_eglDisplay, config->getEglConfig(), pbufAttribs);
+
+    s_egl.eglMakeCurrent(m_eglDisplay, *surfOut, *surfOut, *contextOut);
+}
+
+void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
+                                                       EGLSurface surface) {
+    s_egl.eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    s_egl.eglDestroyContext(m_eglDisplay, context);
+    s_egl.eglDestroySurface(m_eglDisplay, surface);
+}
+
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
@@ -1591,9 +1659,24 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     // Send framebuffer (without FPS overlay) to callback
     //
     if (m_onPost) {
-        (*c).second.cb->readback(m_fbImage);
-        m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1,
-                 GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
+        if (m_asyncReadbackSupported) {
+            auto cb = (*c).second.cb;
+            if (!m_readbackWorker) {
+                if (!m_readbackThread.isStarted()) {
+                    m_readbackWorker.reset(new ReadbackWorker(cb->getWidth(), cb->getHeight()));
+                    m_readbackThread.start();
+                    m_readbackThread.enqueue({ReadbackCmd::Init});
+                    m_readbackThread.waitQueuedItems();
+                }
+                // do post callback just once to initialize things
+                doPostCallback(m_fbImage);
+            } else {
+                m_readbackWorker->doNextReadback(cb.get(), m_fbImage);
+            }
+        } else {
+            (*c).second.cb->readback(m_fbImage);
+            doPostCallback(m_fbImage);
+        }
     }
 
 EXIT:
@@ -1601,6 +1684,30 @@ EXIT:
         m_lock.unlock();
     }
     return ret;
+}
+
+void FrameBuffer::doPostCallback(void* pixels) {
+    m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1, GL_RGBA, GL_UNSIGNED_BYTE,
+             (unsigned char*)pixels);
+}
+
+void FrameBuffer::getPixels(void* pixels, uint32_t bytes) {
+    m_readbackThread.enqueue({ ReadbackCmd::GetPixels, 0, pixels, bytes });
+    m_readbackThread.waitQueuedItems();
+}
+
+static void sFrameBuffer_ReadPixelsCallback(
+    void* pixels, uint32_t bytes) {
+    FrameBuffer::getFB()->getPixels(pixels, bytes);
+}
+
+bool FrameBuffer::asyncReadbackSupported() {
+    return m_asyncReadbackSupported;
+}
+
+emugl::Renderer::ReadPixelsCallback
+FrameBuffer::getReadPixelsCallback() {
+    return sFrameBuffer_ReadPixelsCallback;
 }
 
 bool FrameBuffer::repost(bool needLockAndBind) {
