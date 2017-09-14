@@ -181,12 +181,25 @@ android_startOpenglesRenderer(int width, int height, bool guestPhoneApi, int gue
     return 0;
 }
 
+bool
+android_asyncReadbackSupported() {
+    if (sRenderer) {
+        return sRenderer->asyncReadbackSupported();
+    } else {
+        abort();
+    }
+}
+
 void
 android_setPostCallback(OnPostFunc onPost, void* onPostContext)
 {
     if (sRenderer) {
         sRenderer->setPostCallback(onPost, onPostContext);
     }
+}
+
+ReadPixelsFunc android_getReadPixelsFunc() {
+    return sRenderer->getReadPixelsCallback();
 }
 
 static char* strdupBaseString(const char* src) {
