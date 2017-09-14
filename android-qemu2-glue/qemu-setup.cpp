@@ -141,12 +141,13 @@ bool qemu_android_emulation_setup() {
 
     // Initialize UI/console agents.
     static const AndroidConsoleAgents consoleAgents = {
-            gQAndroidBatteryAgent,   gQAndroidEmulatorWindowAgent,
-            gQAndroidFingerAgent,    gQAndroidLocationAgent,
-            gQAndroidHttpProxyAgent, gQAndroidRecordScreenAgent,
-            gQAndroidTelephonyAgent, gQAndroidUserEventAgent,
-            gQAndroidVmOperations,   gQAndroidNetAgent,
-            gQAndroidLibuiAgent,     gQCarDataAgent,
+            gQAndroidBatteryAgent,        gQAndroidDisplayAgent,
+            gQAndroidEmulatorWindowAgent, gQAndroidFingerAgent,
+            gQAndroidLocationAgent,       gQAndroidHttpProxyAgent,
+            gQAndroidRecordScreenAgent,   gQAndroidTelephonyAgent,
+            gQAndroidUserEventAgent,      gQAndroidVmOperations,
+            gQAndroidNetAgent,            gQAndroidLibuiAgent,
+            gQCarDataAgent,
     };
 
     if (!qemu_android_setup_http_proxy(op_http_proxy)) {

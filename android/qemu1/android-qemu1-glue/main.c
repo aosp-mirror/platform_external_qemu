@@ -241,6 +241,7 @@ int main(int argc, char **argv) {
     static UiEmuAgent uiEmuAgent;
     uiEmuAgent.battery = gQAndroidBatteryAgent;
     uiEmuAgent.cellular = gQAndroidCellularAgent;
+    uiEmuAgent.display = gQAndroidDisplayAgent;
     uiEmuAgent.finger = gQAndroidFingerAgent;
     uiEmuAgent.location = gQAndroidLocationAgent;
     uiEmuAgent.proxy = gQAndroidHttpProxyAgent;
