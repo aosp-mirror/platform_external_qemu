@@ -28,6 +28,7 @@
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Stopwatch.h"
 #include "android/base/system/System.h"
 
 #include "emugl/common/feature_control.h"
@@ -39,8 +40,10 @@
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
+using android::base::Stopwatch;
 using android::base::Stream;
 using android::base::System;
+using android::base::WorkerProcessingResult;
 
 namespace {
 
@@ -523,7 +526,11 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_windowHeight(p_height),
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
-      m_colorBufferHelper(new ColorBufferHelper(this)) {}
+      m_colorBufferHelper(new ColorBufferHelper(this)),
+      m_readbackThread(
+          [this](FrameBuffer::Readback&& readback) {
+              return sendReadbackWorkerCmd(readback);
+          }) {}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -534,14 +541,35 @@ FrameBuffer::~FrameBuffer() {
     free(m_fbImage);
 }
 
-void FrameBuffer::setPostCallback(emugl::Renderer::OnPostCallback onPost,
-                                  void* onPostContext) {
+WorkerProcessingResult
+FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
+    switch (readback.cmd) {
+    case ReadbackCmd::Init:
+        m_readbackWorker = new ReadbackWorker(m_readbackBuffers);
+        return WorkerProcessingResult::Continue;
+    case ReadbackCmd::SetLastBuffer:
+        m_readbackWorker->setLastBuffer(readback.bufferId);
+        return WorkerProcessingResult::Continue;
+    case ReadbackCmd::GetPixels:
+        m_readbackWorker->getPixels(readback.pixelsOut, readback.bytes);
+        return WorkerProcessingResult::Continue;
+    case ReadbackCmd::Exit:
+        delete m_readbackWorker;
+        m_readbackWorker = nullptr;
+        return WorkerProcessingResult::Stop;
+    }
+    return WorkerProcessingResult::Stop;
+}
+
+void FrameBuffer::setPostCallback(
+        emugl::Renderer::OnPostCallback onPost,
+        void* onPostContext) {
     AutoLock mutex(m_lock);
     m_onPost = onPost;
     m_onPostContext = onPostContext;
     if (m_onPost && !m_fbImage) {
         m_fbImage = (unsigned char*)malloc(4 * m_framebufferWidth *
-                                           m_framebufferHeight);
+                m_framebufferHeight);
         if (!m_fbImage) {
             ERR("out of memory, cancelling OnPost callback");
             m_onPost = NULL;
@@ -1490,10 +1518,45 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     assert(contextOut);
     assert(surfOut);
 
-    *contextOut = createRenderContext(0, shared, GLESApi_2);
+    *contextOut = createRenderContext(0, shared, GLESApi_3_0);
     // Zero size is formally allowed here, but SwiftShader doesn't like it and
     // fails.
     *surfOut = createWindowSurface(0, 1, 1);
+}
+
+void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
+                                                    EGLSurface* surfOut) {
+    assert(contextOut);
+    assert(surfOut);
+
+    const FbConfig* config = getConfigs()->get(0 /* p_config */);
+    if (!config) return;
+
+    int maj, min;
+    emugl::getGlesVersion(&maj, &min);
+
+    const EGLint contextAttribs[] = {
+        EGL_CONTEXT_MAJOR_VERSION_KHR, maj,
+        EGL_CONTEXT_MINOR_VERSION_KHR, min,
+        EGL_NONE };
+
+    *contextOut = s_egl.eglCreateContext(
+            m_eglDisplay, config->getEglConfig(), m_pbufContext, contextAttribs);
+                                                  
+    const EGLint pbufAttribs[] = {
+        EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+
+    *surfOut = s_egl.eglCreatePbufferSurface(m_eglDisplay, config->getEglConfig(), pbufAttribs);
+
+    s_egl.eglMakeCurrent(m_eglDisplay, *surfOut, *surfOut, *contextOut);
+}
+
+void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
+                                                       EGLSurface surface) {
+    s_egl.eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    s_egl.eglDestroyContext(m_eglDisplay, context);
+    s_egl.eglDestroySurface(m_eglDisplay, surface);
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
@@ -1573,9 +1636,37 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     // Send framebuffer (without FPS overlay) to callback
     //
     if (m_onPost) {
-        (*c).second.cb->readback(m_fbImage);
-        m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1,
-                 GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
+        if (m_enableAsyncReadback) {
+            auto cb = (*c).second.cb;
+            if (m_readbackBuffers.empty()) {
+                m_readbackBuffers.resize(m_numReadbackBuffers);
+            }
+            if (!m_readbackWorker && !m_readbackBuffers[0]) {
+                bind_locked();
+                s_gles2.glGenBuffers(m_numReadbackBuffers, &m_readbackBuffers[0]);
+                for (uint32_t i = 0; i < m_numReadbackBuffers; i++) {
+                    s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, m_readbackBuffers[i]);
+                    // 4: RGBA
+                    m_readbackBufferSize = 4 * cb->getWidth() * cb->getHeight();
+                    s_gles2.glBufferData(GL_PIXEL_PACK_BUFFER, m_readbackBufferSize, nullptr, GL_STREAM_READ);
+                    s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+                }
+                unbind_locked();
+                if (!m_readbackThread.isStarted()) {
+                    m_readbackThread.start();
+                    m_readbackThread.enqueue({ReadbackCmd::Init});
+                }
+            } else {
+                uint32_t bufIndex = m_readbackCount % m_numReadbackBuffers;
+                cb->readbackAsync(m_readbackBuffers[bufIndex]);
+                m_readbackThread.enqueue({ReadbackCmd::SetLastBuffer, bufIndex});
+                doPostCallback(m_fbImage);
+                m_readbackCount++;
+            }
+        } else {
+            (*c).second.cb->readback(m_fbImage);
+            doPostCallback(m_fbImage);
+        }
     }
 
 EXIT:
@@ -1583,6 +1674,26 @@ EXIT:
         m_lock.unlock();
     }
     return ret;
+}
+
+void FrameBuffer::doPostCallback(void* pixels) {
+    m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1, GL_RGBA, GL_UNSIGNED_BYTE,
+             (unsigned char*)pixels);
+}
+
+void FrameBuffer::getPixels(void* pixels, uint32_t bytes) {
+    m_readbackThread.enqueue({ ReadbackCmd::GetPixels, 0, pixels, bytes });
+    m_readbackThread.finish();
+}
+
+static void sFrameBuffer_ReadPixelsCallback(
+    void* pixels, uint32_t bytes) {
+    FrameBuffer::getFB()->getPixels(pixels, bytes);
+}
+
+emugl::Renderer::ReadPixelsCallback
+FrameBuffer::getReadPixelsCallback() {
+    return sFrameBuffer_ReadPixelsCallback;
 }
 
 bool FrameBuffer::repost() {

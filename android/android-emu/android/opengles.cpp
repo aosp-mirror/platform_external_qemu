@@ -189,6 +189,12 @@ android_setPostCallback(OnPostFunc onPost, void* onPostContext)
     }
 }
 
+ReadPixelsFunc android_getReadPixelsFunc() {
+    if (sRenderer) {
+        return sRenderer->getReadPixelsCallback();
+    }
+}
+
 static char* strdupBaseString(const char* src) {
     const char* begin = strchr(src, '(');
     if (!begin) {
