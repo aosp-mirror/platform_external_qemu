@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "448c2aae_62fdd47d",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1951,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-14T01:27:08Z",
+      "side": 1,
+      "message": "It looks like the purpose of this code block is to flesh out a short phone# by prepending the appropriate amount of digits from the phone prefix to it. With that in mind, I think it might make more sense to generalize the logic here a bit. I\u0027ll add asserts to make sure that the phone number prefix is within valid limits (it shouldn\u0027t be possible for get_phone_number_prefix to return strings that violate this anyways).\n\nDo you know if modem\u0027s current tests exercise this code path at all?",
+      "parentUuid": "d65aabd2_b9de5117",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6b4c1b54_41443b5a",
         "filename": "android/android-emu/android/telephony/modem.c",
         "patchSetId": 1
@@ -30,6 +48,24 @@
       "writtenOn": "2017-09-13T23:36:50Z",
       "side": 1,
       "message": "Same here with the string length, offsets and memcpy",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d937f7bd_78c51325",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2361,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-14T01:27:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6b4c1b54_41443b5a",
       "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "0a39c1e4_ce742869",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-14T01:27:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51f09715_def71c1d",
+      "range": {
+        "startLine": 24,
+        "startChar": 2,
+        "endLine": 29,
+        "endChar": 3
+      },
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c944d52_21e1bee3",
         "filename": "android/android-emu/android/telephony/remote_call.c",
         "patchSetId": 1
@@ -70,6 +130,24 @@
       "writtenOn": "2017-09-13T23:36:50Z",
       "side": 1,
       "message": "This needs to be converted to a strncmp or it might read past the end of the string returned by get_phone_number_prefix if it\u0027s shorter than 7 bytes.",
+      "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4956e141_7bd1b42a",
+        "filename": "android/android-emu/android/telephony/remote_call.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-14T01:27:08Z",
+      "side": 1,
+      "message": "I don\u0027t think it\u0027s possible to create a valid phone number if you don\u0027t have a least 7 digits in the prefix, but it\u0027s still safer with the strncmp.",
+      "parentUuid": "8c944d52_21e1bee3",
       "revId": "7b1292619b8e7e91e746956029053d0e934fb35c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
