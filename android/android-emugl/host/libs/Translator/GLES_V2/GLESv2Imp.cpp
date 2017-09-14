@@ -2762,6 +2762,7 @@ GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsiz
 
     if (ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER) &&
         ctx->getDefaultFBOMultisamples()) {
+        fprintf(stderr, "%s: slow path\n", __func__);
 
         GLint prev_bound_rbo;
         GLint prev_bound_draw_fbo;
