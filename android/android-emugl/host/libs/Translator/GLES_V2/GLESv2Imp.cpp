@@ -595,7 +595,11 @@ GL_APICALL void  GL_APIENTRY glClearColor(GLclampf red, GLclampf green, GLclampf
 GL_APICALL void  GL_APIENTRY glClearDepthf(GLclampf depth){
     GET_CTX();
     ctx->setClearDepth(depth);
-    ctx->dispatcher().glClearDepth(depth);
+    if (isGles2Gles()) {
+        ctx->dispatcher().glClearDepthf(depth);
+    } else {
+        ctx->dispatcher().glClearDepth(depth);
+    }
 }
 GL_APICALL void  GL_APIENTRY glClearStencil(GLint s){
     GET_CTX();
@@ -1083,7 +1087,11 @@ GL_APICALL void  GL_APIENTRY glDepthMask(GLboolean flag){
 GL_APICALL void  GL_APIENTRY glDepthRangef(GLclampf zNear, GLclampf zFar){
     GET_CTX();
     ctx->setDepthRangef(zNear, zFar);
-    ctx->dispatcher().glDepthRange(zNear,zFar);
+    if (isGles2Gles()) {
+        ctx->dispatcher().glDepthRangef(zNear,zFar);
+    } else {
+        ctx->dispatcher().glDepthRange(zNear,zFar);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glDetachShader(GLuint program, GLuint shader){

@@ -1,9 +1,10 @@
 LOCAL_PATH := $(call my-dir)
 
-host_common_SRC_FILES := \
-     GLEScmImp.cpp       \
-     GLEScmUtils.cpp     \
-     GLEScmContext.cpp   \
+host_common_SRC_FILES :=   \
+     CoreProfileEngine.cpp \
+     GLEScmImp.cpp         \
+     GLEScmUtils.cpp       \
+     GLEScmContext.cpp     \
      GLEScmValidate.cpp
 
 
