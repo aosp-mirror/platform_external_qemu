@@ -275,7 +275,7 @@ bool emuglConfig_init(EmuglConfig* config,
                 return true;
             }
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
-            gpu_mode = "swiftshader";
+            gpu_mode = "swiftshader_indirect";
         }
         else if (!host_set_in_hwconfig && !no_window && !hasUiPreference &&
                    async_query_host_gpu_AngleWhitelisted()) {
@@ -287,7 +287,7 @@ bool emuglConfig_init(EmuglConfig* config,
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
                   ", using Swiftshader backend\n",
                   __FUNCTION__);
-                gpu_mode = "swiftshader";
+                gpu_mode = "swiftshader_indirect";
             } else if (!has_guest_renderer) {
                 D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
                   " without Swiftshader, forcing '-gpu off'\n",
