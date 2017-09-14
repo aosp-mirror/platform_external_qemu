@@ -72,6 +72,7 @@ public:
     void onSave(android::base::Stream* stream);
     static RenderContext *onLoad(android::base::Stream* stream,
             EGLDisplay display);
+
 private:
     RenderContext(EGLDisplay display,
                   EGLContext context,
