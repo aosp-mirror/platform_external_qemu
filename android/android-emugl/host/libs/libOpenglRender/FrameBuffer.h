@@ -17,12 +17,14 @@
 #define _LIBRENDER_FRAMEBUFFER_H
 
 #include "android/base/files/Stream.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/snapshot/common.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
+#include "ReadbackWorker.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
 #include "WindowSurface.h"
@@ -32,6 +34,7 @@
 
 #include <EGL/egl.h>
 
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -174,6 +177,9 @@ public:
     // |version| specifies the GLES version as a GLESApi enum.
     // Return a new handle value, which will be 0 in case of error.
     HandleType createRenderContext(int p_config, HandleType p_share, 
+        GLESApi version = GLESApi_CM);
+    // Same as createRenderContext, but sharing a raw EGL context.
+    HandleType createRenderContext(int p_config, EGLContext sharedContext, 
         GLESApi version = GLESApi_CM);
 
     // Create a new WindowSurface instance from this display instance.
@@ -369,6 +375,10 @@ public:
     void createTrivialContext(HandleType shared,
                               HandleType* contextOut,
                               HandleType* surfOut);
+    // createTrivialContext(), but with a m_pbufContext
+    // as shared.
+    void createTrivialSharedContext(HandleType* contextOut,
+                                    HandleType* surfOut);
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
@@ -391,6 +401,8 @@ private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
 
+    HandleType createRenderContext_locked(int p_config, EGLContext sharedContext,
+            GLESApi version = GLESApi_CM);
     bool bindSubwin_locked();
     bool removeSubWindow_locked();
     void cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
@@ -481,5 +493,29 @@ private:
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
+
+    // Async readback
+    enum class ReadbackCmd {
+        Init = 0,
+        Readback = 1,
+        Exit = 2,
+    };
+    struct Readback {
+        ReadbackCmd cmd;
+        GLuint bufferId;
+        uint32_t bytes;
+        void* pixels;
+        std::function<void()> callback;
+    };
+    ReadbackWorker* m_readbackWorker = nullptr;
+    android::base::WorkerThread<Readback> m_readbackThread;
+    const uint32_t m_numReadbackBuffers = 2;
+    std::vector<GLuint> m_readbackBuffers;
+    uint32_t m_readbackCount = 0;
+    uint32_t m_readbackBufferSize = 0;
+    android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
+
+    bool m_enableAsyncReadback = true;
+
 };
 #endif

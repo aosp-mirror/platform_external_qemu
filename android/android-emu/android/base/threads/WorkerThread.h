@@ -77,7 +77,8 @@ public:
     ~WorkerThread() { join(); }
 
     // Starts the worker thread.
-    void start() { mThread.start(); }
+    void start() { mThread.start(); mStarted = true; }
+    bool isStarted() const { return mStarted; }
     // Waits for worker thread to complete.
     void join() { mThread.wait(); }
 
@@ -118,6 +119,8 @@ private:
     std::vector<Item> mQueue;
     base::Lock mLock;
     base::ConditionVariable mCv;
+
+    bool mStarted = false;
 };
 
 }  // namespace base

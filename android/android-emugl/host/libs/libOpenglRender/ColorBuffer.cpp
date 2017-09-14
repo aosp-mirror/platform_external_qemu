@@ -16,6 +16,8 @@
 #include "ColorBuffer.h"
 
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Stopwatch.h"
+#include "android/base/synchronization/Lock.h"
 
 #include "DispatchTables.h"
 #include "GLcommon/GLutils.h"
@@ -28,6 +30,8 @@
 
 #include <stdio.h>
 #include <string.h>
+
+using android::base::Stopwatch;
 
 namespace {
 
@@ -470,8 +474,45 @@ void ColorBuffer::readback(unsigned char* img) {
     }
     touch();
     if (bindFbo(&m_fbo, m_tex)) {
-        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE,
-                             img);
+        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, img);
+        unbindFbo();
+    }
+}
+
+#define GL_UNSIGNED_INT_8_8_8_8           0x8035
+#define GL_UNSIGNED_INT_8_8_8_8_REV       0x8367
+void ColorBuffer::readbackAsync(GLuint buffer) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+    touch();
+    if (bindFbo(&m_fbo, m_tex)) {
+        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
+        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
+        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+        unbindFbo();
+    }
+}
+
+void ColorBuffer::readbackAsync2(GLuint buffer1, GLuint buffer2, unsigned char* img) {
+    RecursiveScopedHelperContext context(m_helper);
+    if (!context.isOk()) {
+        return;
+    }
+    touch();
+    if (bindFbo(&m_fbo, m_tex)) {
+        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer1);
+        s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
+        s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
+
+        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, buffer2);
+        uint32_t bytes = 4 * m_width * m_height;
+        void* toCopy = s_gles2.glMapBufferRange(GL_COPY_READ_BUFFER, 0, bytes, GL_MAP_READ_BIT);
+        memcpy(img, toCopy, bytes);
+        s_gles2.glUnmapBuffer(GL_COPY_READ_BUFFER);
+        s_gles2.glBindBuffer(GL_COPY_READ_BUFFER, 0);
+
         unbindFbo();
     }
 }
