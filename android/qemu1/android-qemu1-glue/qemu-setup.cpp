@@ -30,12 +30,13 @@ using android::VmLock;
 
 bool qemu_android_emulation_setup() {
   static const AndroidConsoleAgents consoleAgents = {
-      gQAndroidBatteryAgent,   gQAndroidEmulatorWindowAgent,
-      gQAndroidFingerAgent,    gQAndroidLocationAgent,
-      gQAndroidHttpProxyAgent, gQAndroidRecordScreenAgent,
-      gQAndroidTelephonyAgent, gQAndroidUserEventAgent,
-      gQAndroidVmOperations,   gQAndroidNetAgent,
-      gQAndroidLibuiAgent,     gQCarDataAgent,
+      gQAndroidBatteryAgent,        gQAndroidDisplayAgent,
+      gQAndroidEmulatorWindowAgent, gQAndroidFingerAgent,
+      gQAndroidLocationAgent,       gQAndroidHttpProxyAgent,
+      gQAndroidRecordScreenAgent,   gQAndroidTelephonyAgent,
+      gQAndroidUserEventAgent,      gQAndroidVmOperations,
+      gQAndroidNetAgent,            gQAndroidLibuiAgent,
+      gQCarDataAgent,
   };
 
   VmLock* vmLock = new qemu::VmLock();
