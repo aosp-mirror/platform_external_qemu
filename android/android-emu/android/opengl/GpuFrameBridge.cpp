@@ -136,7 +136,8 @@ public:
             if (!mRecTmpFrame) {
                 mRecTmpFrame = new Frame(width, height, pixels);
             } else {
-                memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
+                // Only memcpy the pixels we need
+                mRecTmpFrame->pixels = (void*)pixels;
             }
         }
 
