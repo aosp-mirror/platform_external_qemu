@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "952a434c_d021cf24",
+        "filename": "android/android-emu/android/telephony/modem.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 1955,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-14T20:02:19Z",
+      "side": 1,
+      "message": "I did some testing and it looks like this only works when the prefix length is exactly 7 (see: http://cpp.sh/4p5bk).\n\nI can add an additional check to ensure the code only runs on 4,7, and 10, to preserve the original condition.",
+      "parentUuid": "9070f107_d9895827",
+      "revId": "2c70d57873ebcb5ea33b47588b7b1f093b52cb1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6f2cf0a6_6e728e32",
         "filename": "android/android-emu/android/telephony/phone_number.cpp",
         "patchSetId": 4
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "a4d75402_5caad8ab",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-14T20:02:19Z",
+      "side": 1,
+      "message": "According to E.164, an MSISDN can be up to 15 digits (which would have an 11 length prefix). Also, some apps rely on the phone number starting with a \u0027+\u0027 / appropriate international dialing prefix.",
+      "parentUuid": "6f2cf0a6_6e728e32",
+      "revId": "2c70d57873ebcb5ea33b47588b7b1f093b52cb1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8fea423b_36cdac4c",
         "filename": "android/android-emu/android/telephony/phone_number.cpp",
         "patchSetId": 4
@@ -47,6 +83,24 @@
       "writtenOn": "2017-09-14T18:38:09Z",
       "side": 1,
       "message": "I\u0027m wondering if we should have this warning once on startup maybe. This way it will be displayed every time the user sends a text or makes a call and it might not be as easy to spot. I don\u0027t really feel strongly about this though, what do you think?",
+      "revId": "2c70d57873ebcb5ea33b47588b7b1f093b52cb1f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a2a40345_535f91a3",
+        "filename": "android/android-emu/android/telephony/phone_number.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1127384
+      },
+      "writtenOn": "2017-09-14T20:02:19Z",
+      "side": 1,
+      "message": "Makes sense to me. I\u0027ll have the command line parser unset the flag if it\u0027s invalid, so phone_number.cpp doesn\u0027t have to worry about that.",
+      "parentUuid": "8fea423b_36cdac4c",
       "revId": "2c70d57873ebcb5ea33b47588b7b1f093b52cb1f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
