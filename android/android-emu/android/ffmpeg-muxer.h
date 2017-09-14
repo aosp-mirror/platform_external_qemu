@@ -115,10 +115,13 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
 //    recorder - the recorder instance
-//    rgb_pixels - the byte array for the pixel in RGBA format, each pixel take
-//    4 byte
-//    size - the rgb_pixels array size, it should be exactly as 4 * width *
+//    rgb_pixels - the byte array for the pixel. We only support RGBA8888 and
+//    RGB565 format
+//    size - the rgb_pixels array size, it should be exactly as |bpp| * width *
 //    height
+//    ptUs - the presentation time (in microseconds) of the frame.
+//    bpp - number of bytes per pixel. Defaults to 4 if not supplied
+//
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -126,7 +129,9 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
                               const uint8_t* rgb_pixels,
-                              int size);
+                              int size,
+                              uint64_t ptUs,
+                              int bpp = 4);
 
 // convert a mp4 or webm video into animated gif
 // params:
