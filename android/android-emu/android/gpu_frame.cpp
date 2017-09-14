@@ -20,6 +20,8 @@
 #include "android/opengl/GpuFrameBridge.h"
 #include "android/opengles.h"
 
+#include <functional>
+
 // Standard values from Khronos.
 #define GL_RGBA 0x1908
 #define GL_UNSIGNED_BYTE 0x1401
@@ -33,22 +35,55 @@ static bool sIsGuestMode = false;
 
 // Called from an EmuGL thread to transfer a new frame of the GPU display
 // to the main loop.
-static void onNewGpuFrame(void* opaque,
-                          int width,
-                          int height,
-                          int ydir,
-                          int format,
-                          int type,
-                          unsigned char* pixels) {
+
+typedef void (*on_new_gpu_frame_t)(void* opaque, int width, int height,
+                                   int ydir, int format, int type,
+                                   unsigned char* pixels);
+// Guest mode:
+static void onNewGpuFrame_guest(void* opaque, int width, int height,
+                                int ydir, int format, int type,
+                                unsigned char* pixels) {
     DCHECK(ydir == -1);
     DCHECK(format == GL_RGBA);
     DCHECK(type == GL_UNSIGNED_BYTE);
 
     GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
+    bridge->postFrame(width, height, pixels);
+}
+
+// Recording (synchronous):
+static void onNewGpuFrame_record(void* opaque, int width, int height,
+                                int ydir, int format, int type,
+                                unsigned char* pixels) {
+    DCHECK(ydir == -1);
+    DCHECK(format == GL_RGBA);
+    DCHECK(type == GL_UNSIGNED_BYTE);
+
+    GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
+    bridge->postRecordFrame(width, height, pixels);
+}
+
+// Recording (asynchronous):
+static void onNewGpuFrame_recordAsync(void* opaque, int width, int height,
+                                      int ydir, int format, int type,
+                                      unsigned char* pixels) {
+    DCHECK(ydir == -1);
+    DCHECK(format == GL_RGBA);
+    DCHECK(type == GL_UNSIGNED_BYTE);
+
+    GpuFrameBridge* bridge = reinterpret_cast<GpuFrameBridge*>(opaque);
+    bridge->postRecordFrameAsync(width, height, pixels);
+}
+
+static on_new_gpu_frame_t choose_on_new_gpu_frame() {
     if (sIsGuestMode) {
-        bridge->postFrame(width, height, pixels);
+        return onNewGpuFrame_guest;
     } else {
-        bridge->postRecordFrame(width, height, pixels);
+        if (android_asyncReadbackSupported()) {
+            return onNewGpuFrame_recordAsync;
+        } else {
+            return onNewGpuFrame_record;
+        }
     }
 }
 
@@ -56,7 +91,7 @@ static void gpu_frame_set_post(bool on) {
     CHECK(sBridge);
 
     if (on) {
-        android_setPostCallback(onNewGpuFrame, sBridge);
+        android_setPostCallback(choose_on_new_gpu_frame(), sBridge);
     } else {
         android_setPostCallback(nullptr, nullptr);
     }
@@ -65,7 +100,7 @@ static void gpu_frame_set_post(bool on) {
 void gpu_frame_set_post_callback(
         Looper* looper,
         void* context,
-        void (*callback)(void*, int, int, const void*)) {
+        on_post_callback_t callback) {
     DCHECK(!sBridge);
 
     sBridge = android::opengl::GpuFrameBridge::create(
@@ -74,7 +109,7 @@ void gpu_frame_set_post_callback(
             context);
     CHECK(sBridge);
 
-    android_setPostCallback(onNewGpuFrame, sBridge);
+    android_setPostCallback(choose_on_new_gpu_frame(), sBridge);
     sIsGuestMode = true;
 }
 
@@ -96,5 +131,9 @@ bool gpu_frame_set_record_mode(bool on) {
 
 void* gpu_frame_get_record_frame() {
     CHECK(sBridge);
-    return sBridge->getRecordFrame();
+    if (android_asyncReadbackSupported()) {
+        return sBridge->getRecordFrameAsync();
+    } else {
+        return sBridge->getRecordFrame();
+    }
 }
