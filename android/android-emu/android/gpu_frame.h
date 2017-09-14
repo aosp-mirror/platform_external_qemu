@@ -19,6 +19,8 @@
 
 ANDROID_BEGIN_HEADER
 
+typedef void (*on_post_callback_t)(void*, int, int, const void*);
+
 // Initialize state to ensure that new GPU frame data is passed to the caller
 // in the appropriate thread. |looper| is a Looper instance, |context| is an
 // opaque handle passed to |callback| at runtime, which is a function called
@@ -26,10 +28,7 @@ ANDROID_BEGIN_HEADER
 void gpu_frame_set_post_callback(
         Looper* looper,
         void* context,
-        void (*callback)(void* context,
-                         int width,
-                         int height,
-                         const void* pixels));
+        on_post_callback_t callback);
 
 // Recording mode can only be enabled in host gpu mode. Any other configuration
 // will not work. Turning record mode on will initialize the gpu frame state for
