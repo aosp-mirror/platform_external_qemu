@@ -49,10 +49,10 @@ static void registerUpdateListener(AndroidDisplayUpdateCallback callback,
     register_displayupdatelistener(ds, listener);
 }
 
-
 static const QAndroidDisplayAgent displayAgent = {
         .getFrameBuffer = &getFrameBuffer,
-        .registerUpdateListener = &registerUpdateListener
+        .registerUpdateListener = &registerUpdateListener,
+        .attachRecordUpdateListener = &registerUpdateListener
 };
 
 const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;
