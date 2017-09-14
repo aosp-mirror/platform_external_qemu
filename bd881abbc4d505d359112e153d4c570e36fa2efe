@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "de225a1c_7c0be1ec",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-14T01:22:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "62c9d6ad_7ac16d40",
+      "range": {
+        "startLine": 66,
+        "startChar": 18,
+        "endLine": 66,
+        "endChar": 44
+      },
+      "revId": "bd881abbc4d505d359112e153d4c570e36fa2efe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00649266_028733f3",
         "filename": "android/android-emu/android/snapshot/RamLoader.h",
         "patchSetId": 35
@@ -36,6 +60,30 @@
       "writtenOn": "2017-09-13T23:42:37Z",
       "side": 1,
       "message": "what about adding an std::atomic\u003cbool\u003e flag here and setting it when the load has finished? This way there won\u0027t be any new locks, and the flag operations could be relaxed - so they won\u0027t add any synchronization penalties either.\nCurrently you\u0027re loading _all_ pages under a lock that prevents on demand load handling to happen too. that could be dangerously slow",
+      "range": {
+        "startLine": 48,
+        "startChar": 2,
+        "endLine": 48,
+        "endChar": 42
+      },
+      "revId": "bd881abbc4d505d359112e153d4c570e36fa2efe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e87f3b81_13f413df",
+        "filename": "android/android-emu/android/snapshot/RamLoader.h",
+        "patchSetId": 35
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-14T01:22:32Z",
+      "side": 1,
+      "message": "That seems to work (Done)",
+      "parentUuid": "00649266_028733f3",
       "range": {
         "startLine": 48,
         "startChar": 2,
