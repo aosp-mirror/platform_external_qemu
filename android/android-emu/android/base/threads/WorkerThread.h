@@ -66,6 +66,26 @@ class WorkerThread {
     DISALLOW_COPY_AND_ASSIGN(WorkerThread);
 
 public:
+    struct SyncPt {
+        SyncPt() : signaled(false) { }
+        bool signaled;
+        base::ConditionVariable cv;
+    };
+    enum class CommandType {
+        SyncPt = 0,
+        WorkItem = 1,
+    };
+    struct Command {
+        Command(Item&& it) :
+            type(CommandType::WorkItem),
+            workItem(std::move(it)) { }
+        Command(SyncPt* it) :
+            type(CommandType::SyncPt),
+            syncPt(it) { }
+        CommandType type;
+        SyncPt* syncPt;
+        Item workItem;
+    };
     using Result = WorkerProcessingResult;
     // A function that's called for each enqueued item in a separate thread.
     using Processor = std::function<Result(Item&& item)>;
@@ -77,7 +97,27 @@ public:
     ~WorkerThread() { join(); }
 
     // Starts the worker thread.
-    void start() { mThread.start(); }
+    void start() { mThread.start(); mStarted = true; }
+    bool isStarted() const { return mStarted; }
+    // Waits for all enqueue()'d items to finish.
+    void finish() {
+        SyncPt sync;
+        {
+            base::AutoLock lock(mLock);
+            bool signal = mQueue.empty();
+            mQueue.emplace_back(std::move(Command(&sync)));
+            if (signal) {
+                mCv.signalAndUnlock(&lock);
+            }
+        }
+
+        {
+            base::AutoLock lock(mSyncLock);
+            while (!sync.signaled) {
+                sync.cv.wait(&lock);
+            }
+        }
+    }
     // Waits for worker thread to complete.
     void join() { mThread.wait(); }
 
@@ -85,7 +125,7 @@ public:
     void enqueue(Item&& item) {
         base::AutoLock lock(mLock);
         bool signal = mQueue.empty();
-        mQueue.emplace_back(std::move(item));
+        mQueue.emplace_back(std::move(Command(std::move(item))));
         if (signal) {
             mCv.signalAndUnlock(&lock);
         }
@@ -93,7 +133,7 @@ public:
 
 private:
     void worker() {
-        std::vector<Item> todo;
+        std::vector<Command> todo;
         todo.reserve(10);
         for (;;) {
             {
@@ -104,20 +144,35 @@ private:
                 todo.swap(mQueue);
             }
 
-            for (Item& item : todo) {
-                if (mProcessor(std::move(item)) == Result::Stop) {
-                    return;
+            for (Command& item : todo) {
+                switch (item.type) {
+                    case CommandType::SyncPt: {
+                        base::AutoLock lock(mSyncLock);
+                        item.syncPt->signaled = true;
+                        item.syncPt->cv.signal();
+                        break;
+                    }
+                    case CommandType::WorkItem:
+                        if (mProcessor(std::move(item.workItem)) == Result::Stop) {
+                            return;
+                        }
+                        break;
                 }
             }
+
             todo.clear();
         }
     }
 
     Processor mProcessor;
     base::FunctorThread mThread;
-    std::vector<Item> mQueue;
+    std::vector<Command> mQueue;
     base::Lock mLock;
+    base::Lock mSyncLock;
     base::ConditionVariable mCv;
+    base::ConditionVariable mFinishCv;
+
+    bool mStarted = false;
 };
 
 }  // namespace base
