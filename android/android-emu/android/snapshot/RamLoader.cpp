@@ -432,7 +432,9 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     Page& page = *pagePtr;
     if (page.sizeOnDisk == 0) {
         assert(page.state.load(std::memory_order_relaxed) ==
-               uint8_t(State::Read));
+                       uint8_t(State::Read) ||
+               page.state.load(std::memory_order_relaxed) ==
+                       uint8_t(State::Filled));
         page.data = nullptr;
         return true;
     }
