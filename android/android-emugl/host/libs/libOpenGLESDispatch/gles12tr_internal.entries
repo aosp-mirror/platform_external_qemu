@@ -71,7 +71,7 @@ void glDeleteShader( GLuint shader);
 void glDeleteTextures( GLsizei n, const GLuint* textures);
 void glDepthFunc( GLenum func);
 void glDepthMask( GLboolean flag);
-void glDepthRangef( GLfloat zNear, GLfloat zFar);
+void glDepthRangef( GLclampf zNear, GLclampf zFar);
 void glDepthRangefOES( GLclampf zNear, GLclampf zFar);
 void glDepthRangex( GLclampx zNear, GLclampx zFar);
 void glDepthRangexOES( GLclampx zNear, GLclampx zFar);

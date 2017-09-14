@@ -18,6 +18,7 @@ void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvo
 void glClear(GLbitfield mask);
 void glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 void glClearDepth(GLclampd depth);
+void glClearDepthf(GLclampf depth);
 void glClearStencil(GLint s);
 void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
 void glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data );
@@ -30,6 +31,7 @@ void glDeleteTextures(GLsizei n, const GLuint *textures);
 void glDepthFunc(GLenum func);
 void glDepthMask(GLboolean flag);
 void glDepthRange(GLclampd zNear, GLclampd zFar);
+void glDepthRangef(GLclampf zNear, GLclampf zFar);
 void glDisable(GLenum cap);
 void glDrawArrays(GLenum mode, GLint first, GLsizei count);
 void glDrawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid *indices);

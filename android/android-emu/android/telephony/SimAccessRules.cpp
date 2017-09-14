@@ -14,6 +14,7 @@
 #include "android/base/containers/Lookup.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/cmdline-option.h"
+#include "android/telephony/SimAccessRules.h"
 #include "android/telephony/TagLengthValue.h"
 #include "android/telephony/proto/sim_access_rules.pb.h"
 #include "android/utils/debug.h"
@@ -29,27 +30,6 @@ using ::google::protobuf::TextFormat;
 using ::google::protobuf::io::IstreamInputStream;
 
 namespace android {
-
-struct SimAccessRules {
-    // Map DF name (also known as Application ID, AID) to a set of access rules
-    const std::unordered_map<std::string, AllRefArDo> kDefaultAccessRules = {
-            {"A00000015141434C00",
-
-             // This is the hash of the certificate used to sign the CTS test
-             // app for this feature. The PermArDo is a set of permission bits
-             // that are currently ignored. The specification at
-             // https://source.android.com/devices/tech/config/uicc.html
-             // mentions that the field is required but doesn't mention what it
-             // should contain. The platform code (as of this writing) reads the
-             // value but doesn't do anything with it.
-             AllRefArDo{RefArDo{
-                     RefDo{DeviceAppIdRefDo{
-                                   "61ed377e85d386a8dfee6b864bd85b0bfaa5af81"},
-                           PkgRefDo{"android.carrierapi.cts"}},
-                     ArDo{PermArDo{"0000000000000000"}}}}}};
-};
-
-static android::base::LazyInstance<SimAccessRules> sGlobals = {};
 
 RefDo parseRefDo(const android_emulator::RefDo& input) {
     if (!input.has_device_app_id_ref_do()) {
@@ -118,11 +98,7 @@ std::unordered_map<std::string, AllRefArDo> parseSimAccessRules(
     return simAccessRules;
 }
 
-}  // namespace android
-
-extern "C" const char* sim_get_access_rules(const char* name) {
-    std::unordered_map<std::string, android::AllRefArDo> simAccessRules;
-
+SimAccessRules::SimAccessRules() : mHasCustomRules(false) {
     if (android_cmdLineOptions &&
         android_cmdLineOptions->sim_access_rules_file != nullptr) {
         std::ifstream file(android_cmdLineOptions->sim_access_rules_file);
@@ -130,16 +106,25 @@ extern "C" const char* sim_get_access_rules(const char* name) {
             IstreamInputStream istream(&file);
             android_emulator::SimAccessRules sim_access_rules_proto;
             TextFormat::Parse(&istream, &sim_access_rules_proto);
-            simAccessRules =
-                    android::parseSimAccessRules(sim_access_rules_proto);
+            mCustomRules = android::parseSimAccessRules(sim_access_rules_proto);
+            mHasCustomRules = true;
         } else {
             dwarning("Failed to open file '%s', using default SIM access rules",
                      android_cmdLineOptions->sim_access_rules_file);
-            simAccessRules = android::sGlobals->kDefaultAccessRules;
         }
-    } else {
-        simAccessRules = android::sGlobals->kDefaultAccessRules;
     }
-    const auto rule = android::base::find(simAccessRules, name);
+}
+
+const char* SimAccessRules::getRule(const char* name) const {
+    auto& rules = mHasCustomRules ? mCustomRules : kDefaultAccessRules;
+    const auto rule = android::base::find(rules, name);
     return rule ? rule->c_str() : nullptr;
+}
+
+static android::base::LazyInstance<SimAccessRules> sSimAccessRules = {};
+
+}  // namespace android
+
+extern "C" const char* sim_get_access_rules(const char* name) {
+    return android::sSimAccessRules->getRule(name);
 }

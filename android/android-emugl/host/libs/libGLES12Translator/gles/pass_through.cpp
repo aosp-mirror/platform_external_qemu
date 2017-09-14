@@ -478,7 +478,7 @@ void DepthRangefCall(const GlesContext* c, GLclampf zNear, GLclampf zFar) {
   const ANGLE_GLES2* _api =
       static_cast<const ANGLE_GLES2*>(angle_apis->angle);
   DPRINT("DepthRangefCall(%p, %f, %f)", c, zNear, zFar);
-  return _api->glDepthRange((GLclampd)zNear, (GLclampd)zFar);
+  return _api->glDepthRangef(zNear, zFar);
 }
 
 
