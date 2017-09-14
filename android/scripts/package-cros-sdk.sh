@@ -125,7 +125,7 @@ for sys in ${HOST}; do
   validate_str "${sys}" "^windows|linux|macos$" "${sys} isn't a valid host"
 done
 
-BRANCH=emu-2.4-arc
+BRANCH=emu-2.5-release
 AB_BRANCH="aosp-${BRANCH}"
 ARTIFACT_HANDLER=/google/data/ro/projects/android/apiary_artifact_handler.par
 FETCH_ARTIFACT=/google/data/ro/projects/android/fetch_artifact.par
