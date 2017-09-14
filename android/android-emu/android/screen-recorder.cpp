@@ -48,10 +48,12 @@ constexpr int kAudioSampleRate = 48000;
 struct Frame {
     int width;
     int height;
+    uint64_t pt_us;  // presentation time in microseconds
+    int bpp;
     std::unique_ptr<char[]> pixels;
 
-    Frame(int w, int h, const void* px) :
-            width(w), height(h) {
+    Frame(int w, int h, uint64_t pt, int b, const void* px)
+        : width(w), height(h), pt_us(pt), bpp(b) {
         if (px) {
             pixels.reset(new char[w * 4 *h]);
             ::memcpy(static_cast<void*>(pixels.get()), px, w * 4 * h);
@@ -67,8 +69,10 @@ struct Globals {
     ffmpeg_recorder* recorder = nullptr;
     Thread* frameSenderThread = nullptr;
     Thread* encodingThread = nullptr;
+    QAndroidDisplayAgent displayAgent;
     int fbWidth = 0;
     int fbHeight = 0;
+    int fbBpp = 0;
     bool isGuestMode = false;
     std::atomic<bool> is_recording{false};
     ::android::base::MessageChannel<Frame*, kMaxFrames> channel;
@@ -84,21 +88,33 @@ android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 class FrameSenderThread : public Thread {
 public:
     FrameSenderThread(int fps) : Thread(), mFPS(fps) {}
-    intptr_t main() {
+    intptr_t main() override final {
         unsigned char* px;
         long long timeDeltaMs = 1000 / mFPS;
         long long currTimeMs, newTimeMs;
+        int w = sGlobals->fbWidth;
+        int h = sGlobals->fbHeight;
+        int bpp = sGlobals->fbBpp;
         int i = 0;
+        int ls;
 
         // The assumption here when starting is that sGlobals->frame contains a
         // valid frame when is_recording is true.
         while (sGlobals->is_recording) {
             currTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
-            px = (unsigned char*)gpu_frame_get_record_frame();
-            if (px) {
-                Frame* f = new Frame(sGlobals->fbWidth, sGlobals->fbHeight, px);
+
+            if (!sGlobals->isGuestMode) {
+                px = (unsigned char*)gpu_frame_get_record_frame();
+            } else {
+                sGlobals->displayAgent.getFrameBuffer(&w, &h, &ls, &bpp, &px);
+            }
+
+            if (px && w > 0 && h > 0) {
+                Frame* f = new Frame(
+                        w, h, android::base::System::get()->getHighResTimeUs(),
+                        bpp, px);
                 D("sending frame %d\n", i++);
-                if (!sGlobals->channel.send(f)) {
+                if (!sGlobals->channel.trySend(f)) {
                     derror("Frame queue full. Frame dropped\n");
                     delete f;
                 }
@@ -113,7 +129,7 @@ public:
         }
 
         // Send frame with null data to stop encoding thread.
-        Frame* f = new Frame(0, 0, nullptr);
+        Frame* f = new Frame(0, 0, 0, 0, nullptr);
         sGlobals->channel.send(f);
         D("Finished sending frames\n");
         return 0;
@@ -126,7 +142,7 @@ private:
 // Thread to encode the frames
 class EncodingThread: public Thread {
 public:
-    intptr_t main() {
+    intptr_t main() override final {
         Frame* f;
         int i = 0;
 
@@ -142,9 +158,9 @@ public:
                 break;
             }
             D("Received frame %d\n", i++);
-            ffmpeg_encode_video_frame(sGlobals->recorder,
-                                      (const uint8_t*)f->pixels.get(),
-                                      f->width * f->height * 4);
+            ffmpeg_encode_video_frame(
+                    sGlobals->recorder, (const uint8_t*)f->pixels.get(),
+                    f->width * f->height * f->bpp, f->pt_us, f->bpp);
             delete f;
         }
 
@@ -154,18 +170,22 @@ public:
 };
 }  // namespace
 
-void screen_recorder_init(bool isGuestMode, int w, int h) {
+void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
     sGlobals->fbWidth = w;
     sGlobals->fbHeight = h;
-    sGlobals->isGuestMode = isGuestMode;
+    if (dpy_agent) {
+        sGlobals->displayAgent = *dpy_agent;
+        sGlobals->isGuestMode = true;
+    } else {
+        // The host framebuffer is always in a 4 bytes-per-pixel format.
+        // In guest mode, the bpp is set when calling the getFrameBuffer()
+        // method, so just use whatever bpp it gives us.
+        sGlobals->fbBpp = 4;
+    }
+    D("%s(w=%d, h=%d, isGuestMode=%d)\n", __func__, w, h, sGlobals->isGuestMode);
 }
 
 bool screen_recorder_start(const char* filename) {
-    if (sGlobals->isGuestMode) {
-        derror("Recording is only supported in host gpu configuration\n");
-        return false;
-    }
-
     if (sGlobals->recorder) {
         derror("Recorder already started\n");
         return false;
@@ -187,6 +207,7 @@ bool screen_recorder_start(const char* filename) {
                            kIntraSpacing);
     ffmpeg_add_audio_track(sGlobals->recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks\n");
+
     // Start the two threads that will fetch and encode the frames
     sGlobals->frameSenderThread = new FrameSenderThread(kFPS);
     sGlobals->encodingThread = new EncodingThread();
