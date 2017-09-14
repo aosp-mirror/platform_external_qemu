@@ -62,7 +62,9 @@ namespace {
 
 struct AndroidDisplayChangeListener : public DisplayChangeListener {
     AndroidDisplayChangeListener(AndroidDisplayUpdateCallback callback,
-                                 void* opaque) {
+                                 void* opaque)
+        : mCallback2(nullptr),
+          mOpaque2(nullptr) {
         memset(this, 0, sizeof(*this));
         mCallback = callback;
         mOpaque = opaque;
@@ -75,12 +77,23 @@ struct AndroidDisplayChangeListener : public DisplayChangeListener {
     }
 
     AndroidDisplayUpdateCallback mCallback;
+    AndroidDisplayUpdateCallback mCallback2;
     void* mOpaque;
+    void* mOpaque2;
+
+    void attachSecondCallback(AndroidDisplayUpdateCallback callback,
+                              void* opaque) {
+        mCallback2 = callback;
+        mOpaque2 = opaque;
+    }
 
     static void onDisplayUpdate(DisplayChangeListener* dcl,
                                 int x, int y, int w, int h) {
         auto adcl = reinterpret_cast<AndroidDisplayChangeListener*>(dcl);
         adcl->mCallback(adcl->mOpaque, x, y, w, h);
+        if (adcl->mCallback2) {
+            adcl->mCallback2(adcl->mOpaque2, x, y, w, h);
+        }
     }
 
     static const DisplayChangeListenerOps kOps;
@@ -103,9 +116,16 @@ static void registerUpdateListener(AndroidDisplayUpdateCallback callback,
     s_listener = new AndroidDisplayChangeListener(callback, opaque);
 }
 
+static void attachRecordUpdateListener(AndroidDisplayUpdateCallback cb,
+                                       void* opaque) {
+    assert(s_listener);
+    s_listener->attachSecondCallback(cb, opaque);
+}
+
 static const QAndroidDisplayAgent displayAgent = {
     .getFrameBuffer = &getFrameBuffer,
-    .registerUpdateListener = &registerUpdateListener
+    .registerUpdateListener = &registerUpdateListener,
+    .attachRecordUpdateListener = &attachRecordUpdateListener
 };
 
 const QAndroidDisplayAgent* const gQAndroidDisplayAgent = &displayAgent;

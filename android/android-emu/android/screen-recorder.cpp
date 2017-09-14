@@ -14,6 +14,7 @@
 
 #include "android/screen-recorder.h"
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
@@ -28,6 +29,7 @@
 
 namespace {
 
+using android::base::AutoLock;
 using android::base::Thread;
 
 // Spacing between intra frames
@@ -48,13 +50,15 @@ constexpr int kAudioSampleRate = 48000;
 struct Frame {
     int width;
     int height;
+    uint64_t pt_us;  // presentation time in microseconds
+    int bpp;
     std::unique_ptr<char[]> pixels;
 
-    Frame(int w, int h, const void* px) :
-            width(w), height(h) {
+    Frame(int w, int h, uint64_t pt, int b, const void* px)
+        : width(w), height(h), pt_us(pt), bpp(b) {
         if (px) {
-            pixels.reset(new char[w * 4 *h]);
-            ::memcpy(static_cast<void*>(pixels.get()), px, w * 4 * h);
+            pixels.reset(new char[w * bpp * h]);
+            ::memcpy(static_cast<void*>(pixels.get()), px, w * bpp * h);
         }
     }
 
@@ -67,9 +71,13 @@ struct Globals {
     ffmpeg_recorder* recorder = nullptr;
     Thread* frameSenderThread = nullptr;
     Thread* encodingThread = nullptr;
+    QAndroidDisplayAgent displayAgent;
     int fbWidth = 0;
     int fbHeight = 0;
+    int fbBpp = 0;
     bool isGuestMode = false;
+    ::android::base::Lock guestFBLock;
+    Frame* guestFrame = nullptr;
     std::atomic<bool> is_recording{false};
     ::android::base::MessageChannel<Frame*, kMaxFrames> channel;
 };
@@ -84,28 +92,48 @@ android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 class FrameSenderThread : public Thread {
 public:
     FrameSenderThread(int fps) : Thread(), mFPS(fps) {}
-    intptr_t main() {
-        unsigned char* px;
-        long long timeDeltaMs = 1000 / mFPS;
-        long long currTimeMs, newTimeMs;
+    intptr_t main() override final {
         int i = 0;
 
         // The assumption here when starting is that sGlobals->frame contains a
         // valid frame when is_recording is true.
         while (sGlobals->is_recording) {
-            currTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
-            px = (unsigned char*)gpu_frame_get_record_frame();
-            if (px) {
-                Frame* f = new Frame(sGlobals->fbWidth, sGlobals->fbHeight, px);
+            long long currTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
+
+            Frame* f = nullptr;
+            if (!sGlobals->isGuestMode) {
+                auto px = (unsigned char*)gpu_frame_get_record_frame();
+                if (px) {
+                    f = new Frame(
+                            sGlobals->fbWidth,
+                            sGlobals->fbHeight,
+                            android::base::System::get()->getHighResTimeUs(),
+                            sGlobals->fbBpp,
+                            px);
+                }
+            } else {
+                AutoLock lock(sGlobals->guestFBLock);
+                if (sGlobals->guestFrame) {
+                    f = new Frame(
+                            sGlobals->guestFrame->width,
+                            sGlobals->guestFrame->height,
+                            android::base::System::get()->getHighResTimeUs(),
+                            sGlobals->guestFrame->bpp,
+                            sGlobals->guestFrame->pixels.get());
+                }
+            }
+
+            if (f) {
                 D("sending frame %d\n", i++);
-                if (!sGlobals->channel.send(f)) {
+                if (!sGlobals->channel.trySend(f)) {
                     derror("Frame queue full. Frame dropped\n");
                     delete f;
                 }
             }
             // Need to do some calculation here so we are calling
             // gpu_frame_get_record_frame() at mFPS.
-            newTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
+            long long newTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
+            long long timeDeltaMs = 1000 / mFPS;
             if (newTimeMs - currTimeMs < timeDeltaMs) {
                 android::base::System::get()->sleepMs(
                         timeDeltaMs - newTimeMs + currTimeMs);
@@ -113,7 +141,7 @@ public:
         }
 
         // Send frame with null data to stop encoding thread.
-        Frame* f = new Frame(0, 0, nullptr);
+        Frame* f = new Frame(0, 0, 0, 0, nullptr);
         sGlobals->channel.send(f);
         D("Finished sending frames\n");
         return 0;
@@ -126,7 +154,7 @@ private:
 // Thread to encode the frames
 class EncodingThread: public Thread {
 public:
-    intptr_t main() {
+    intptr_t main() override final {
         Frame* f;
         int i = 0;
 
@@ -142,9 +170,9 @@ public:
                 break;
             }
             D("Received frame %d\n", i++);
-            ffmpeg_encode_video_frame(sGlobals->recorder,
-                                      (const uint8_t*)f->pixels.get(),
-                                      f->width * f->height * 4);
+            ffmpeg_encode_video_frame(
+                    sGlobals->recorder, (const uint8_t*)f->pixels.get(),
+                    f->width * f->height * f->bpp, f->pt_us, f->bpp);
             delete f;
         }
 
@@ -154,18 +182,51 @@ public:
 };
 }  // namespace
 
-void screen_recorder_init(bool isGuestMode, int w, int h) {
+void _screen_recorder_fb_update(void* opaque, int x, int y, int width, int height) {
+    static int i = 0;
+
+    printf("[%d][%s] Got fb update!(x=%d, y=%d, w=%d, h=%d)\n", i++, __func__, x, y, width, height);
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    int w = 0, h = 0, bpp = 0;
+    unsigned char* px = nullptr;
+    sGlobals->displayAgent.getFrameBuffer(&w, &h, nullptr, &bpp, &px);
+    if (!px || w <= 0 || h <= 0) {
+        return;
+    }
+
+    AutoLock lock(sGlobals->guestFBLock);
+
+    if (!sGlobals->guestFrame) {
+        sGlobals->guestFrame = new Frame(
+                w, h, android::base::System::get()->getHighResTimeUs(),
+                bpp, px);
+    } else if (w == sGlobals->guestFrame->width &&
+               h == sGlobals->guestFrame->height) {
+        memcpy(static_cast<void*>(sGlobals->guestFrame->pixels.get()),
+               px, w * h * bpp);
+    }
+}
+
+void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
     sGlobals->fbWidth = w;
     sGlobals->fbHeight = h;
-    sGlobals->isGuestMode = isGuestMode;
+    if (dpy_agent) {
+        sGlobals->displayAgent = *dpy_agent;
+        sGlobals->displayAgent.attachRecordUpdateListener(&_screen_recorder_fb_update, nullptr);
+        sGlobals->isGuestMode = true;
+    } else {
+        // The host framebuffer is always in a 4 bytes-per-pixel format.
+        // In guest mode, the bpp is set when calling the getFrameBuffer()
+        // method, so just use whatever bpp it gives us.
+        sGlobals->fbBpp = 4;
+    }
+    D("%s(w=%d, h=%d, isGuestMode=%d)\n", __func__, w, h, sGlobals->isGuestMode);
 }
 
 bool screen_recorder_start(const char* filename) {
-    if (sGlobals->isGuestMode) {
-        derror("Recording is only supported in host gpu configuration\n");
-        return false;
-    }
-
     if (sGlobals->recorder) {
         derror("Recorder already started\n");
         return false;
@@ -187,6 +248,7 @@ bool screen_recorder_start(const char* filename) {
                            kIntraSpacing);
     ffmpeg_add_audio_track(sGlobals->recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks\n");
+
     // Start the two threads that will fetch and encode the frames
     sGlobals->frameSenderThread = new FrameSenderThread(kFPS);
     sGlobals->encodingThread = new EncodingThread();
