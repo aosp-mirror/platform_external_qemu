@@ -98,6 +98,9 @@ public:
     // Sleep for |n| milliseconds
     static void sleepMs(unsigned n);
 
+    // Sleep for |n| microseconds
+    static void sleepUs(unsigned n);
+
     // Yield the remaining part of current thread's CPU time slice to another
     // thread that's ready to run.
     static void yield();
