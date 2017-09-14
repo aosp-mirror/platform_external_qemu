@@ -48,7 +48,11 @@ static void onNewGpuFrame(void* opaque,
     if (sIsGuestMode) {
         bridge->postFrame(width, height, pixels);
     } else {
-        bridge->postRecordFrame(width, height, pixels);
+        if (android_asyncReadbackSupported()) {
+            bridge->postRecordFrameAsync(width, height, pixels);
+        } else {
+            bridge->postRecordFrame(width, height, pixels);
+        }
     }
 }
 
@@ -96,5 +100,19 @@ bool gpu_frame_set_record_mode(bool on) {
 
 void* gpu_frame_get_record_frame() {
     CHECK(sBridge);
-    return sBridge->getRecordFrame();
+    if (android_asyncReadbackSupported()) {
+        return sBridge->getRecordFrameAsync();
+    } else {
+        return sBridge->getRecordFrame();
+    }
 }
+
+void gpu_frame_get_record_frame2(void* out) {
+    CHECK(sBridge);
+    if (android_asyncReadbackSupported()) {
+        sBridge->getRecordFrameAsync2(out);
+    } else {
+        abort();
+    }
+}
+

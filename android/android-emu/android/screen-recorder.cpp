@@ -35,7 +35,7 @@ constexpr int kIntraSpacing = 12;
 // The maximum number of frames we will buffer
 constexpr int kMaxFrames = 16;
 // The FPS we are recording at.
-constexpr int kFPS = 20;
+constexpr int kFPS = 24;
 // The video bitrate
 constexpr int kVideoBitrate = 1 * 1024 * 1024;
 // The audio bitrate
@@ -85,24 +85,29 @@ class FrameSenderThread : public Thread {
 public:
     FrameSenderThread(int fps) : Thread(), mFPS(fps) {}
     intptr_t main() {
-        unsigned char* px;
+        // unsigned char* px;
         long long timeDeltaMs = 1000 / mFPS;
         long long currTimeMs, newTimeMs;
         int i = 0;
 
+        Frame* f = nullptr;
         // The assumption here when starting is that sGlobals->frame contains a
         // valid frame when is_recording is true.
         while (sGlobals->is_recording) {
             currTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
-            px = (unsigned char*)gpu_frame_get_record_frame();
-            if (px) {
-                Frame* f = new Frame(sGlobals->fbWidth, sGlobals->fbHeight, px);
+            // Single allocation at the beginning
+            if (!f) {
+                f = new Frame(sGlobals->fbWidth, sGlobals->fbHeight, new char[4 * sGlobals->fbWidth * sGlobals->fbHeight]);
+            }
+            gpu_frame_get_record_frame2(f->pixels.get());
+            // if (px) {
                 D("sending frame %d\n", i++);
                 if (!sGlobals->channel.send(f)) {
-                    derror("Frame queue full. Frame dropped\n");
-                    delete f;
+                    fprintf(stderr, "Frame queue full. Frame dropped\n");
+                    // derror("Frame queue full. Frame dropped\n");
+                    // delete f;
                 }
-            }
+            // }
             // Need to do some calculation here so we are calling
             // gpu_frame_get_record_frame() at mFPS.
             newTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
@@ -113,8 +118,8 @@ public:
         }
 
         // Send frame with null data to stop encoding thread.
-        Frame* f = new Frame(0, 0, nullptr);
-        sGlobals->channel.send(f);
+        Frame* fEnd = new Frame(0, 0, nullptr);
+        sGlobals->channel.send(fEnd);
         D("Finished sending frames\n");
         return 0;
     }
@@ -145,7 +150,7 @@ public:
             ffmpeg_encode_video_frame(sGlobals->recorder,
                                       (const uint8_t*)f->pixels.get(),
                                       f->width * f->height * 4);
-            delete f;
+            // delete f;
         }
 
         D("Finished encoding\n");
