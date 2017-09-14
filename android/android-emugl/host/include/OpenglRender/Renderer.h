@@ -85,6 +85,13 @@ public:
                                     unsigned char* pixels);
     virtual void setPostCallback(OnPostCallback onPost, void* context) = 0;
 
+    // Async readback API
+    virtual bool asyncReadbackSupported() = 0;
+
+    // Separate callback to get RGBA Pixels in async readback mode.
+    using ReadPixelsCallback = void (*)(void* pixels, uint32_t bytes);
+    virtual ReadPixelsCallback getReadPixelsCallback() = 0;
+
     // showOpenGLSubwindow -
     //     Create or modify a native subwindow which is a child of 'window'
     //     to be used for framebuffer display. If a subwindow already exists,
