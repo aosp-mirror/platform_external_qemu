@@ -893,10 +893,10 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
 //    recorder - the recorder instance
-//    rgb_pixels - the byte array for the pixel in RGBA format, each pixel take
-//    4 byte
-//    size - the rgb_pixels array size, it should be exactly as 4 * width *
-//    height
+//    rgb_pixels - the byte array for the pixel. We only support RGBA8888 and RGB565 format
+//    size - the rgb_pixels array size, it should be exactly as |bpp| * width * height
+//    bpp - number of bytes per pixel. Defaults to 4 if not supplied.
+//
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -904,7 +904,8 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
                               const uint8_t* rgb_pixels,
-                              int size) {
+                              int size,
+                              int bytesPerPixel) {
     if (recorder == NULL)
         return -1;
 
@@ -920,7 +921,8 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     AVCodecContext* c = ost->st->codec;
 
     if (ost->sws_ctx == NULL) {
-        ost->sws_ctx = sws_getContext(c->width, c->height, AV_PIX_FMT_RGBA,
+        ost->sws_ctx = sws_getContext(c->width, c->height,
+                                      bytesPerPixel == 2 ? AV_PIX_FMT_RGB565 : AV_PIX_FMT_RGBA,
                                       c->width, c->height, c->pix_fmt,
                                       SCALE_FLAGS, NULL, NULL, NULL);
         if (ost->sws_ctx == NULL) {
@@ -929,7 +931,7 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
         }
     }
 
-    const int linesize[1] = {4 * c->width};
+    const int linesize[1] = {bytesPerPixel * c->width};
     sws_scale(ost->sws_ctx, (const uint8_t* const*)&rgb_pixels, linesize, 0,
               c->height, ost->frame->data, ost->frame->linesize);
 

@@ -67,6 +67,7 @@ struct Globals {
     ffmpeg_recorder* recorder = nullptr;
     Thread* frameSenderThread = nullptr;
     Thread* encodingThread = nullptr;
+    QAndroidDisplayAgent displayAgent;
     int fbWidth = 0;
     int fbHeight = 0;
     bool isGuestMode = false;
@@ -152,20 +153,59 @@ public:
         return 0;
     }
 };
+
+// Thread to encode the frames (guest mode)
+class GuestEncodingThread: public Thread {
+public:
+    GuestEncodingThread(int fps) : Thread(), mFPS(fps) {}
+    intptr_t main() {
+        D("Starting GuestEncodingThread\n");
+        long long timeDeltaMs = 1000 / mFPS;
+        long long currTimeMs, newTimeMs;
+        int w, h, i = 0;
+        int ls, bpp;
+        uint8_t* px = nullptr;
+
+        while (sGlobals->is_recording) {
+            currTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
+            sGlobals->displayAgent.getFrameBuffer(&w, &h, &ls, &bpp, &px);
+            if (px && w > 0 && h > 0) {
+                D("Received frame %d (w=%d h=%d ls=%d bpp=%d)\n", i++, w, h, ls, bpp);
+                ffmpeg_encode_video_frame(sGlobals->recorder,
+                                          px,
+                                          w * h * bpp,
+                                          bpp);
+            }
+
+            // Need to do some calculation here so we are calling
+            // gpu_frame_get_record_frame() at mFPS.
+            newTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
+            if (newTimeMs - currTimeMs < timeDeltaMs) {
+                android::base::System::get()->sleepMs(
+                        timeDeltaMs - newTimeMs + currTimeMs);
+            }
+        }
+
+        D("Finished encoding\n");
+        return 0;
+    }
+
+private:
+    int mFPS;
+};
 }  // namespace
 
-void screen_recorder_init(bool isGuestMode, int w, int h) {
+void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
     sGlobals->fbWidth = w;
     sGlobals->fbHeight = h;
-    sGlobals->isGuestMode = isGuestMode;
+    if (dpy_agent) {
+        sGlobals->displayAgent = *dpy_agent;
+        sGlobals->isGuestMode = true;
+    }
+    D("%s(w=%d, h=%d, isGuestMode=%d)\n", __func__, w, h, sGlobals->isGuestMode);
 }
 
 bool screen_recorder_start(const char* filename) {
-    if (sGlobals->isGuestMode) {
-        derror("Recording is only supported in host gpu configuration\n");
-        return false;
-    }
-
     if (sGlobals->recorder) {
         derror("Recorder already started\n");
         return false;
@@ -187,16 +227,23 @@ bool screen_recorder_start(const char* filename) {
                            kIntraSpacing);
     ffmpeg_add_audio_track(sGlobals->recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks\n");
-    // Start the two threads that will fetch and encode the frames
-    sGlobals->frameSenderThread = new FrameSenderThread(kFPS);
-    sGlobals->encodingThread = new EncodingThread();
+
+    if (sGlobals->isGuestMode) {
+        sGlobals->encodingThread = new GuestEncodingThread(kFPS);
+    } else { // host mode
+        // Start the two threads that will fetch and encode the frames
+        sGlobals->frameSenderThread = new FrameSenderThread(kFPS);
+        sGlobals->encodingThread = new EncodingThread();
+    }
 
     sGlobals->is_recording = true;
     gpu_frame_set_record_mode(true);
     android_redrawOpenglesWindow();
 
     sGlobals->encodingThread->start();
-    sGlobals->frameSenderThread->start();
+    if (!sGlobals->isGuestMode) {
+        sGlobals->frameSenderThread->start();
+    }
 
     return true;
 }
