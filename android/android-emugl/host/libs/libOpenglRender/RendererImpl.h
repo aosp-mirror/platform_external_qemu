@@ -44,6 +44,8 @@ public:
     HardwareStrings getHardwareStrings() final;
     void setPostCallback(OnPostCallback onPost,
                                  void* context) final;
+    bool asyncReadbackSupported() final;
+    ReadPixelsCallback getReadPixelsCallback() final;
     bool showOpenGLSubwindow(FBNativeWindowType window,
                              int wx,
                              int wy,
