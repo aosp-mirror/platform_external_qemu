@@ -469,15 +469,22 @@ static int write_video_frame(ffmpeg_recorder* recorder,
         av_init_packet(&pkt);
 
         // encode the frame
-        D_V("Encoding video frame %d\n", ost->frame_count++);
+        D_V("Encoding video frame %ld\n", ost->frame_count++);
+#if DEBUG_VIDEO
+        auto startUs = android::base::System::get()->getHighResTimeUs();
+#endif
         ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
+        D_V("Time to avcodec_encode_video2: [%lld ms]\n",
+            (long long)(android::base::System::get()->getHighResTimeUs() -
+                        startUs) /
+                    1000);
         if (ret < 0) {
             derror("Error encoding video frame: %s\n", avErr2Str(ret).c_str());
             return ret;
         }
 
         if (got_packet) {
-            D_V("%sWriting frame %d\n",
+            D_V("%sWriting frame %ld\n",
                 (pkt.flags & AV_PKT_FLAG_KEY) ? "(KEY) " : "",
                 ost->write_frame_count++);
 #if DEBUG_VIDEO
@@ -584,7 +591,7 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
                                         NULL, &got_packet);
         if (ret < 0 || !got_packet)
             break;
-        D_V("%s: Writing frame %d\n", __func__,
+        D_V("%s: Writing frame %ld\n", __func__,
             recorder->video_st.write_frame_count++);
         write_frame(recorder, recorder->oc,
                     &recorder->video_st.st->codec->time_base,
@@ -899,10 +906,11 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
 //    recorder - the recorder instance
-//    rgb_pixels - the byte array for the pixel in RGBA format, each pixel take
-//    4 byte
-//    size - the rgb_pixels array size, it should be exactly as 4 * width *
-//    height
+//    rgb_pixels - the byte array for the pixel. We only support RGBA8888 and
+//    RGB565 format size - the rgb_pixels array size, it should be exactly as
+//    |bpp| * width * height ptUs - The presentation time (in microseconds) of
+//    the frame. bpp - number of bytes per pixel. Defaults to 4 if not supplied.
+//
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -910,7 +918,9 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
                               const uint8_t* rgb_pixels,
-                              int size) {
+                              int size,
+                              uint64_t pt_us,
+                              int bytesPerPixel) {
     if (recorder == NULL)
         return -1;
 
@@ -936,12 +946,18 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
         }
     }
 
-    const int linesize[1] = {4 * c->width};
+    const int linesize[1] = {bytesPerPixel * c->width};
+#if DEBUG_VIDEO
+    auto startUs = android::base::System::get()->getHighResTimeUs();
+#endif
     sws_scale(ost->sws_ctx, (const uint8_t* const*)&rgb_pixels, linesize, 0,
               c->height, ost->frame->data, ost->frame->linesize);
+    D_V("Time to sws_scale: [%lld ms]\n",
+        (long long)(android::base::System::get()->getHighResTimeUs() -
+                    startUs) /
+                1000);
 
-    uint64_t elapsedUS = android::base::System::get()->getHighResTimeUs() -
-                         recorder->start_time;
+    uint64_t elapsedUS = pt_us - recorder->start_time;
     ost->frame->pts = (int64_t)(((double)elapsedUS * ost->st->time_base.den) /
                                 1000000.00);
     rc = write_video_frame(recorder, recorder->oc, ost, ost->frame);
