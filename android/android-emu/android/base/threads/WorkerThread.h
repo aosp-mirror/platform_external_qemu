@@ -77,7 +77,15 @@ public:
     ~WorkerThread() { join(); }
 
     // Starts the worker thread.
-    void start() { mThread.start(); }
+    void start() { mThread.start(); mStarted = true; }
+    bool isStarted() const { return mStarted; }
+    // Waits for all enqueue()'d items to finish.
+    void finish() {
+        base::AutoLock lock(mLock);
+        while (!mQueue.empty() || mProcessing) {
+            mFinishCv.wait(&lock);
+        }
+    }
     // Waits for worker thread to complete.
     void join() { mThread.wait(); }
 
@@ -101,6 +109,7 @@ private:
                 while (mQueue.empty()) {
                     mCv.wait(&lock);
                 }
+                mProcessing = true;
                 todo.swap(mQueue);
             }
 
@@ -108,6 +117,11 @@ private:
                 if (mProcessor(std::move(item)) == Result::Stop) {
                     return;
                 }
+            }
+            {
+                base::AutoLock lock(mLock);
+                mProcessing = false;
+                mFinishCv.signal();
             }
             todo.clear();
         }
@@ -118,6 +132,10 @@ private:
     std::vector<Item> mQueue;
     base::Lock mLock;
     base::ConditionVariable mCv;
+    base::ConditionVariable mFinishCv;
+
+    bool mProcessing = false;
+    bool mStarted = false;
 };
 
 }  // namespace base
