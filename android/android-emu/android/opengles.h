@@ -46,6 +46,9 @@ typedef void (*OnPostFunc)(void* context, int width, int height, int ydir,
                            int format, int type, unsigned char* pixels);
 void android_setPostCallback(OnPostFunc onPost, void* onPostContext);
 
+typedef void (*ReadPixelsFunc)(void* pixels, uint32_t bytes);
+ReadPixelsFunc android_getReadPixelsFunc();
+
 /* Retrieve the Vendor/Renderer/Version strings describing the underlying GL
  * implementation. The call only works while the renderer is started.
  *
