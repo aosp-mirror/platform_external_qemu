@@ -22,6 +22,7 @@
 #include "android/base/files/Stream.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
+#include "ReadbackWorker.h"
 #include "RenderContext.h"
 
 #include <memory>
@@ -199,6 +200,10 @@ public:
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
     void readback(unsigned char* img);
+    // readback() but async (to the specified |buffer|)
+    void readbackAsync(GLuint buffer);
+    // readbackAsync() but in one thread (specify the two buffers involved in r/w)
+    void readbackAsync2(GLuint buffer1, GLuint buffer2, unsigned char* img);
 
     void onSave(android::base::Stream* stream);
     static ColorBuffer* onLoad(android::base::Stream* stream,
@@ -241,6 +246,7 @@ private:
     FrameworkFormat m_frameworkFormat;
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     std::unique_ptr<YUVConverter> m_yuv_converter;
+
     HandleType mHndl;
 };
 
