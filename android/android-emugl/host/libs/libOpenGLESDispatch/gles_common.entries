@@ -18,6 +18,7 @@ void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const GLvo
 void glClear(GLbitfield mask);
 void glClearColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha);
 void glClearDepth(GLclampd depth);
+void glClearDepthf(GLclampf depth);
 void glClearStencil(GLint s);
 void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha);
 void glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data );
