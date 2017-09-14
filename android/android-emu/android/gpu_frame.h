@@ -42,5 +42,6 @@ bool gpu_frame_set_record_mode(bool on);
 // gpu_frame_set_record_mode() before using this. May return NULL if no data is
 // available.
 void* gpu_frame_get_record_frame();
+void gpu_frame_get_record_frame2(void* out);
 
 ANDROID_END_HEADER
