@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "475e2d4f_e03321de",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-15T17:56:52Z",
+      "side": 1,
+      "message": "This is unsafe and can result in seams in the picture, but I think we can get away with it if we make sure that postRecordFrame is called on a |pixels| that is not being mapped at the moment",
+      "range": {
+        "startLine": 139,
+        "startChar": 0,
+        "endLine": 140,
+        "endChar": 53
+      },
+      "revId": "dddff6badea97c6c1392c2a78738f1edf84a5847",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2bd3037f_d12824e2",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 8
