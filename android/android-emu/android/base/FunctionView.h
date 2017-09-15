@@ -93,11 +93,11 @@ public:
                   [](const FunctionView* self, Args... args) -> Ret {
                       // Generate a lambda that remembers the type of the passed
                       // |Callable|.
-                      return (*static_cast<
+                      return (*reinterpret_cast<
                               typename std::remove_reference<Callable>::type*>(
                               self->mCallable))(std::forward<Args>(args)...);
                   }),
-          mCallable(&c) {}
+          mCallable(reinterpret_cast<intptr_t>(&c)) {}
 
     Ret operator()(Args... args) const {
         return mTypeErasedFunction(this, std::forward<Args>(args)...);
@@ -109,7 +109,7 @@ public:
 private:
     using TypeErasedFunc = Ret(const FunctionView*, Args...);
     TypeErasedFunc* mTypeErasedFunction;
-    void* mCallable;
+    intptr_t mCallable;
 };
 
 }  // namespace base
