@@ -321,7 +321,6 @@ libssh2=""
 numa=""
 tcmalloc="no"
 jemalloc="no"
-winvista="no"
 replication="yes"
 
 # parse CC options first
@@ -1172,10 +1171,6 @@ for opt do
   ;;
   --enable-jemalloc) jemalloc="yes"
   ;;
-  --disable-winvista) winvista="no"
-  ;;
-  --enable-winvista) winvista="yes"
-  ;;
   --disable-replication) replication="no"
   ;;
   --enable-replication) replication="yes"
@@ -1189,11 +1184,7 @@ for opt do
 done
 
 if test "$mingw32" == "yes" ; then
-    if test "$winvista" = "yes" ; then
-      WINVER=0x0600
-    else
-      WINVER=0x0501
-    fi
+    WINVER=0x0600
     QEMU_CFLAGS="-DWINVER=$WINVER -D_WIN32_WINNT=$WINVER $QEMU_CFLAGS"
 fi
 
@@ -1422,7 +1413,6 @@ disabled with --disable-FEATURE, default is enabled if available:
   numa            libnuma support
   tcmalloc        tcmalloc support
   jemalloc        jemalloc support
-  winvista        use of Windows APIs available on Vista+ versions
   replication     replication support
 
 NOTE: The object files are built at the place where configure is launched
@@ -5151,7 +5141,6 @@ echo "NUMA host support $numa"
 echo "tcmalloc support  $tcmalloc"
 echo "jemalloc support  $jemalloc"
 echo "avx2 optimization $avx2_opt"
-echo "Win Vista+ APIs   $winvista"
 echo "replication support $replication"
 
 if test "$sdl_too_old" = "yes"; then
