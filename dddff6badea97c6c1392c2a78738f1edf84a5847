@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2bd3037f_d12824e2",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 551,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-15T17:28:33Z",
+      "side": 1,
+      "message": "Conversion of readback.callback to a FunctionView doesn\u0027t build here.",
+      "range": {
+        "startLine": 551,
+        "startChar": 0,
+        "endLine": 551,
+        "endChar": 89
+      },
+      "revId": "dddff6badea97c6c1392c2a78738f1edf84a5847",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
