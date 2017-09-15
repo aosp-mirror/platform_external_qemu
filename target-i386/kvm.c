@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  * QEMU KVM support
  *
@@ -3534,3 +3535,5 @@ int kvm_arch_msi_data_to_gsi(uint32_t data)
 {
     abort();
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

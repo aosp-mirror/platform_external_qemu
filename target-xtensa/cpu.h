@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  * Copyright (c) 2011, Max Filippov, Open Source and Linux Lab.
  * All rights reserved.
@@ -586,3 +587,5 @@ static inline void cpu_get_tb_cpu_state(CPUXtensaState *env, target_ulong *pc,
 #include "exec/cpu-all.h"
 
 #endif
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
