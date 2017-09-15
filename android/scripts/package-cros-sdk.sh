@@ -190,7 +190,8 @@ mcopy -i ../boot.img -n ::/syslinux/vmlinuz.a kernel-ranchu
 echo "Add package.xml, devices.xml and source.properties"
 URLD=https://android.googlesource.com/platform/external/qemu/+/emu-2.4-arc/android/scripts/cros_files
 wget -qO - "${URLD}"/package.xml?format=TEXT|base64 -d | \
-	sed -e "s/chromeos-m60/chromeos-m${CROS_MILESTONE}/g" > package.xml
+    sed -e "s/Chrome OS m60/Chrome OS m${CROS_MILESTONE}/g" | \
+    sed -e "s/chromeos-m60/chromeos-m${CROS_MILESTONE}/g" > package.xml
 wget -qO - "${URLD}"/source.properties?format=TEXT|base64 -d > source.properties
 
 echo "Put devices.xml in extras"
