@@ -101,6 +101,11 @@ GLEScmContext::~GLEScmContext(){
         m_texCoords = NULL;
     }
     m_currVaoState[GL_TEXTURE_COORD_ARRAY] = NULL;
+
+    if (m_coreProfileEngine) {
+        delete m_coreProfileEngine;
+        m_coreProfileEngine = NULL;
+    }
 }
 
 
