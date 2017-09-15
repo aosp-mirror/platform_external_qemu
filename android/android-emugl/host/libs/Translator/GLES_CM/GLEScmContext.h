@@ -131,7 +131,7 @@ private:
     unsigned int          m_clientActiveTexture = 0;
 
     // Core profile stuff
-    CoreProfileEngine*    m_coreProfileEngine;
+    CoreProfileEngine*    m_coreProfileEngine = nullptr;
 };
 
 #endif
