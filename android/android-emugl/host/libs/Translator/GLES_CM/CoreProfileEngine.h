@@ -31,6 +31,7 @@ class GLESpointer;
 class CoreProfileEngine {
 public:
     explicit CoreProfileEngine(GLEScmContext* ctx);
+    ~CoreProfileEngine();
 
     struct GeometryDrawState {
         GLuint vshader;
@@ -73,6 +74,7 @@ public:
     };
 
     const DrawTexOESCoreState& getDrawTexOESCoreState();
+    void teardown();
     const GeometryDrawState& getGeometryDrawState();
 
     GLint getAndClearLastError() {
