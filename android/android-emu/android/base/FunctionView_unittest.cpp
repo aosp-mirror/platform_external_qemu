@@ -40,10 +40,14 @@ TEST(FunctionView, Ctor) {
     EmptyFunc f4(std::function<void()>([f1, f2, f3]{}));
     EXPECT_TRUE(f4);
 
+    const std::function<void()> func = []{};
+    EmptyFunc f5(func);
+
     static_assert(sizeof(f1) <= 2 * sizeof(void*), "Too big FunctionView");
     static_assert(sizeof(f2) <= 2 * sizeof(void*), "Too big FunctionView");
     static_assert(sizeof(f3) <= 2 * sizeof(void*), "Too big FunctionView");
     static_assert(sizeof(f4) <= 2 * sizeof(void*), "Too big FunctionView");
+    static_assert(sizeof(f5) <= 2 * sizeof(void*), "Too big FunctionView");
 }
 
 TEST(FunctionView, Call) {
