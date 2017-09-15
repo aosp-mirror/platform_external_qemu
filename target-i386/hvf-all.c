@@ -145,10 +145,50 @@ struct mac_slot {
     uint64_t size;
     uint64_t gpa_start;
     uint64_t gva;
+    void* hva;
 };
 
-struct mac_slot mac_slots[32];
+#define MAC_SLOTS_COUNT 32
+struct mac_slot mac_slots[MAC_SLOTS_COUNT];
+
 #define ALIGN(x, y)  (((x)+(y)-1) & ~((y)-1))
+
+void* hvf_gpa2hva(uint64_t gpa, bool* found) {
+    struct mac_slot *mslot;
+    *found = false;
+
+    for (uint32_t i = 0; i < MAC_SLOTS_COUNT; i++) {
+        mslot = &mac_slots[i];
+        if (!mslot->present) continue;
+        if (gpa >= mslot->gpa_start &&
+            gpa < mslot->gpa_start + mslot->size) {
+            *found = true;
+            return (void*)((char*)(mslot->hva) + (gpa - mslot->gpa_start));
+        }
+    }
+
+    return 0;
+}
+
+uint64_t hvf_hva2gpa(void* hva, bool* found) {
+    struct mac_slot *mslot;
+    *found = false;
+
+    for (uint32_t i = 0; i < MAC_SLOTS_COUNT; i++) {
+        mslot = &mac_slots[i];
+        if (!mslot->present) continue;
+
+        uintptr_t hva_start_num = (uintptr_t)mslot->hva;
+        uintptr_t hva_num = (uintptr_t)hva;
+        if (hva_num >= hva_start_num &&
+            hva_num < hva_start_num + mslot->size) {
+            *found = true;
+            return mslot->gpa_start + (hva_num - hva_start_num);
+        }
+    }
+
+    return 0;
+}
 
 int __hvf_set_memory(hvf_slot *slot) {
     struct mac_slot *macslot;
@@ -178,6 +218,7 @@ int __hvf_set_memory(hvf_slot *slot) {
     macslot->present = 1;
     macslot->gpa_start = slot->start;
     macslot->size = slot->size;
+    macslot->hva = slot->mem;
     DPRINTF("%s: hv_vm_map for hva 0x%llx gpa [0x%llx 0x%llx]\n", __func__,
             (unsigned long long)(slot->mem),
             (unsigned long long)macslot->gpa_start,
@@ -851,22 +892,19 @@ again:
                     store_regs(cpu);
                     break;
                 }
-#ifdef DIRTY_VGA_TRACKING
-                if (slot) {
-                    bool read = exit_qual & EPT_VIOLATION_DATA_READ ? 1 : 0;
-                    bool write = exit_qual & EPT_VIOLATION_DATA_WRITE ? 1 : 0;
-                    if (!read && !write)
-                        break;
-                    int flags = HV_MEMORY_READ | HV_MEMORY_EXEC;
-                    if (write) flags |= HV_MEMORY_WRITE;
 
+#ifdef DIRTY_VGA_TRACKING // Don't try to build HVF with dirty vga tracking for now.
+#error
+#endif
+                if (slot) {
                     pthread_rwlock_wrlock(&mem_lock);
-                    if (write)
-                        mark_slot_page_dirty(slot, gpa);
-                    hv_vm_protect(gpa & ~0xfff, 4096, flags);
+                    bool found = false;
+                    void* hva = hvf_gpa2hva(gpa & ~0xfff, &found);
+                    if (found) {
+                        qemu_ram_load(hva, 4096);
+                    }
                     pthread_rwlock_unlock(&mem_lock);
                 }
-#endif
                 break;
             }
             case EXIT_REASON_INOUT:

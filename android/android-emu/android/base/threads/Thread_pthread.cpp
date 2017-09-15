@@ -179,6 +179,11 @@ void Thread::sleepMs(unsigned n) {
 }
 
 // static
+void Thread::sleepUs(unsigned n) {
+    usleep(n);
+}
+
+// static
 void Thread::yield() {
     sched_yield();
 }
