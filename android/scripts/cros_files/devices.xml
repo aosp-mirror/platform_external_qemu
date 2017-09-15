@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <d:devices xmlns:d="http://schemas.android.com/sdk/devices/3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <d:device>
-    <d:name>Chromebook Pixel 2015</d:name>
+    <d:name>Chromebook Pixel 2015 (beta)</d:name>
     <d:manufacturer>Google</d:manufacturer>
     <d:meta/>
     <d:hardware>
