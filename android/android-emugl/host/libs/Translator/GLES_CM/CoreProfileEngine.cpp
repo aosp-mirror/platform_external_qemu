@@ -48,6 +48,9 @@ CoreProfileEngine::CoreProfileEngine(GLEScmContext* ctx) : mCtx(ctx) {
     }
 }
 
+CoreProfileEngine::~CoreProfileEngine() {
+    teardown();
+}
 
 static const uint32_t sDrawTexIbo[] = {
     0, 1, 2, 0, 2, 3,
@@ -92,6 +95,69 @@ const CoreProfileEngine::DrawTexOESCoreState& CoreProfileEngine::getDrawTexOESCo
     }
 
     return m_drawTexOESCoreState;
+}
+
+void CoreProfileEngine::teardown() {
+    GLDispatch& gl = GLEScontext::dispatcher();
+
+    if (m_drawTexOESCoreState.program) {
+        gl.glDeleteProgram(m_drawTexOESCoreState.program);
+        m_drawTexOESCoreState.program = 0;
+    }
+
+    if (m_drawTexOESCoreState.vao) {
+        gl.glBindVertexArray(0);
+        gl.glDeleteVertexArrays(1, &m_drawTexOESCoreState.vao);
+        gl.glDeleteBuffers(1, &m_drawTexOESCoreState.ibo);
+        gl.glDeleteBuffers(1, &m_drawTexOESCoreState.vbo);
+        m_drawTexOESCoreState.vao = 0;
+        m_drawTexOESCoreState.vbo = 0;
+        m_drawTexOESCoreState.ibo = 0;
+    }
+
+    if (m_geometryDrawState.program) {
+        gl.glDeleteProgram(m_geometryDrawState.program);
+        m_geometryDrawState.program = 0;
+    }
+
+    if (m_geometryDrawState.programFlat) {
+        gl.glDeleteProgram(m_geometryDrawState.programFlat);
+        m_geometryDrawState.programFlat = 0;
+    }
+
+    if (m_geometryDrawState.vao) {
+        gl.glDeleteVertexArrays(1, &m_geometryDrawState.vao);
+        m_geometryDrawState.vao = 0;
+    }
+    if (m_geometryDrawState.posVbo) {
+        gl.glDeleteBuffers(1, &m_geometryDrawState.posVbo);
+        m_geometryDrawState.posVbo = 0;
+    }
+
+    if (m_geometryDrawState.normalVbo) {
+        gl.glDeleteBuffers(1, &m_geometryDrawState.normalVbo);
+        m_geometryDrawState.normalVbo = 0;
+    }
+
+    if (m_geometryDrawState.colorVbo) {
+        gl.glDeleteBuffers(1, &m_geometryDrawState.colorVbo);
+        m_geometryDrawState.colorVbo = 0;
+    }
+
+    if (m_geometryDrawState.pointsizeVbo) {
+        gl.glDeleteBuffers(1, &m_geometryDrawState.pointsizeVbo);
+        m_geometryDrawState.pointsizeVbo = 0;
+    }
+
+    if (m_geometryDrawState.texcoordVbo) {
+        gl.glDeleteBuffers(1, &m_geometryDrawState.texcoordVbo);
+        m_geometryDrawState.texcoordVbo = 0;
+    }
+
+    if (m_geometryDrawState.ibo) {
+        gl.glDeleteBuffers(1, &m_geometryDrawState.ibo);
+        m_geometryDrawState.ibo = 0;
+    }
 }
 
 // Match attribute locations in the shader below.
