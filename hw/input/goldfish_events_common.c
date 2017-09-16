@@ -58,6 +58,7 @@ static unsigned dequeue_event(GoldfishEvDevState *s)
     s->first = (s->first + 1) & (MAX_EVENTS - 1);
 
     if (s->first == s->last) {
+        fprintf(stderr, "##KBD: lower keyevent irq here %d\n", __LINE__);
         qemu_irq_lower(s->irq);
     }
 #ifdef TARGET_I386
@@ -74,7 +75,9 @@ static unsigned dequeue_event(GoldfishEvDevState *s)
     else if (((s->first + 2) & (MAX_EVENTS - 1)) < s->last ||
                (s->first & (MAX_EVENTS - 1)) > s->last) {
         /* if there still is an event */
+        fprintf(stderr, "##KBD: lower keyevent irq here %d\n", __LINE__);
         qemu_irq_lower(s->irq);
+        fprintf(stderr, "##KBD: raise keyevent irq here %d\n", __LINE__);
         qemu_irq_raise(s->irq);
     }
 #endif
@@ -85,6 +88,7 @@ void goldfish_enqueue_event(GoldfishEvDevState *s,
                    unsigned int type, unsigned int code, int value)
 {
     int  enqueued = s->last - s->first;
+    fprintf(stderr, "calling %s here %d there are %d events in the queue\n", __func__, __LINE__, enqueued);
 
     if (enqueued < 0) {
         enqueued += MAX_EVENTS;
@@ -95,8 +99,17 @@ void goldfish_enqueue_event(GoldfishEvDevState *s,
         return;
     }
 
+    if (s->state == STATE_INIT) {
+        fprintf(stderr, "calling %s here %d it is init state\n", __func__, __LINE__);
+        qemu_irq_lower(s->irq);
+        qemu_irq_raise(s->irq);
+        s->state = STATE_LIVE;
+    }
+
     if (s->first == s->last) {
         if (s->state == STATE_LIVE) {
+            qemu_irq_lower(s->irq);
+            fprintf(stderr, "##KBD: raise keyevent irq here %d\n", __LINE__);
             qemu_irq_raise(s->irq);
         } else {
             s->state = STATE_BUFFERED;
@@ -116,6 +129,7 @@ uint64_t goldfish_events_read(void *opaque, hwaddr offset, unsigned size)
 {
     GoldfishEvDevState *s = (GoldfishEvDevState *)opaque;
 
+    fprintf(stderr, "calling %s here %d\n", __func__, __LINE__);
     /* This gross hack below is used to ensure that we
      * only raise the IRQ when the kernel driver is
      * properly ready! If done before this, the driver
@@ -124,6 +138,7 @@ uint64_t goldfish_events_read(void *opaque, hwaddr offset, unsigned size)
      */
     if (offset == REG_LEN && s->page == PAGE_ABSDATA) {
         if (s->state == STATE_BUFFERED) {
+            fprintf(stderr, "##KBD: raise keyevent irq here %d\n", __LINE__);
             qemu_irq_raise(s->irq);
         }
         s->state = STATE_LIVE;

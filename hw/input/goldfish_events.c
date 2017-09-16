@@ -887,10 +887,13 @@ static void goldfish_evdev_reset(DeviceState *dev)
 {
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev, TYPE_GOLDFISHEVDEV);
 
+    fprintf(stderr, "##KBD: %s is called here at line %d\n", __func__, __LINE__);
+
     s->state = STATE_INIT;
     s->first = 0;
     s->last = 0;
     s->state = 0;
+    qemu_irq_lower(s->irq);
 }
 
 static Property goldfish_evdev_props[] = {

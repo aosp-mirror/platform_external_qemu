@@ -41,7 +41,7 @@ int goldfish_rotary_send_rotate(int value)
 {
     GoldfishEvDevState *dev = s_evdev;
 
-    if (dev) {
+    if (0) {
         goldfish_enqueue_event(dev, EV_REL, REL_WHEEL, value);
         goldfish_enqueue_event(dev, 0, 0, value);
     }
