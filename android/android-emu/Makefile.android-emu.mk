@@ -303,6 +303,7 @@ LOCAL_SRC_FILES := \
     android/emulation/AndroidPipe.cpp \
     android/emulation/android_pipe_host.cpp \
     android/emulation/AudioCaptureEngine.cpp \
+    android/emulation/AudioOutputEngine.cpp \
     android/emulation/android_pipe_pingpong.c \
     android/emulation/android_pipe_throttle.c \
     android/emulation/android_pipe_unix.cpp \
