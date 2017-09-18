@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "125e53c5_9dfe9917",
+        "filename": "android-qemu2-glue/audio-output.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-09-18T22:52:58Z",
+      "side": 1,
+      "message": "I can completely remove this .h file",
+      "parentUuid": "e667444f_81bf3717",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 35
+      },
+      "revId": "f386aa6edba961223488b4947bd5e72a5eea8fe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "85039946_ab473311",
         "filename": "android-qemu2-glue/audio-output.h",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-09-18T22:30:49Z",
       "side": 1,
       "message": "is there a way to move these into .cpp?",
+      "range": {
+        "startLine": 17,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 1
+      },
+      "revId": "f386aa6edba961223488b4947bd5e72a5eea8fe2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b72ddab_2cc3c0aa",
+        "filename": "android-qemu2-glue/audio-output.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-09-18T22:52:58Z",
+      "side": 1,
+      "message": "due to use of the struct QEMUSoundCard, instead of pointer reference, not easy to move",
+      "parentUuid": "85039946_ab473311",
       "range": {
         "startLine": 17,
         "startChar": 0,
