@@ -94,6 +94,30 @@
     },
     {
       "key": {
+        "uuid": "253a4492_9f68ef96",
+        "filename": "android-qemu2-glue/emulation/charpipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 387,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-09-18T20:55:49Z",
+      "side": 1,
+      "message": "We heavily rely on the comments above to be true. I will add an assert in the charpipe_half_poll with additional comments to make sure this is still the case.",
+      "parentUuid": "bd82135c_51715de0",
+      "range": {
+        "startLine": 386,
+        "startChar": 0,
+        "endLine": 387,
+        "endChar": 34
+      },
+      "revId": "0a8ee558c26a7d698df35d7792e3c4fff67dc19f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "32172d8d_1a1f20bf",
         "filename": "android-qemu2-glue/emulation/charpipe.c",
         "patchSetId": 1
@@ -105,6 +129,30 @@
       "writtenOn": "2017-09-18T20:40:47Z",
       "side": 1,
       "message": "should we add an assert(0) or even crashhandler_die() here to back the comment in qemu_charpipe_poll()?",
+      "range": {
+        "startLine": 397,
+        "startChar": 1,
+        "endLine": 399,
+        "endChar": 2
+      },
+      "revId": "0a8ee558c26a7d698df35d7792e3c4fff67dc19f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9fb10b9b_fd4ae66f",
+        "filename": "android-qemu2-glue/emulation/charpipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-09-18T20:55:49Z",
+      "side": 1,
+      "message": "Yes, that\u0027s a good idea.",
+      "parentUuid": "32172d8d_1a1f20bf",
       "range": {
         "startLine": 397,
         "startChar": 1,
@@ -140,6 +188,30 @@
     },
     {
       "key": {
+        "uuid": "129af83c_d0ea4c7c",
+        "filename": "android-qemu2-glue/emulation/charpipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-09-18T20:55:49Z",
+      "side": 1,
+      "message": "Will add.",
+      "parentUuid": "0f65e0df_d199d61f",
+      "range": {
+        "startLine": 432,
+        "startChar": 0,
+        "endLine": 432,
+        "endChar": 27
+      },
+      "revId": "0a8ee558c26a7d698df35d7792e3c4fff67dc19f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1668300e_9c6a0dea",
         "filename": "android-qemu2-glue/emulation/charpipe.c",
         "patchSetId": 1
@@ -151,6 +223,30 @@
       "writtenOn": "2017-09-18T20:40:47Z",
       "side": 1,
       "message": "please make sure this .o file gets linked into the final library - ld will throw it away if there are no functions called from the outside and the only side effect is static ctor.\nLooks like it will be ok as there\u0027s qemu_charpipe_poll() here for now, but it\u0027s safer to put a comment, or even make qemu2 a linked as a whole library",
+      "range": {
+        "startLine": 463,
+        "startChar": 0,
+        "endLine": 463,
+        "endChar": 26
+      },
+      "revId": "0a8ee558c26a7d698df35d7792e3c4fff67dc19f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a12206e_67a8ed78",
+        "filename": "android-qemu2-glue/emulation/charpipe.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 463,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-09-18T20:55:49Z",
+      "side": 1,
+      "message": "Will look into it.",
+      "parentUuid": "1668300e_9c6a0dea",
       "range": {
         "startLine": 463,
         "startChar": 0,
