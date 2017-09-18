@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "82a816fd_b2dfea89",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 22
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-18T20:50:52Z",
+      "side": 1,
+      "message": "I also tried creating just one Frame and getting rid of another memcpy (with a new method |gpu_frame_get_record_frame2| that just takes the pointer where the data is expected), and it doesn\u0027t seem to say the frame queue is full (!)",
+      "range": {
+        "startLine": 93,
+        "startChar": 0,
+        "endLine": 110,
+        "endChar": 16
+      },
+      "revId": "23ef5122fca5cf67085ffd14d5f72b0425fced6c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
