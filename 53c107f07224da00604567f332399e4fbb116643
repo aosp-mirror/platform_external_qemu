@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4f97db6d_923d739c",
+        "filename": "util/qemu-thread-win32.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-09-18T20:12:08Z",
+      "side": 1,
+      "message": "Unclear to me why we need the THREAD_SET_CONTEXT privilege.",
+      "revId": "53c107f07224da00604567f332399e4fbb116643",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
