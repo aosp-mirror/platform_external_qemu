@@ -292,6 +292,167 @@
       "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bb961a15_cb695a74",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T22:40:11Z",
+      "side": 1,
+      "message": "it could be easier to pass it as a constructor argument",
+      "range": {
+        "startLine": 14,
+        "startChar": 8,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1f1abd85_d0cf0e56",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T22:40:11Z",
+      "side": 1,
+      "message": "nit: for (auto buffer : mBuffers)\n?",
+      "range": {
+        "startLine": 22,
+        "startChar": 4,
+        "endLine": 22,
+        "endChar": 52
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e42e14c8_dfcdc3a1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T22:40:11Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 54,
+        "startChar": 7,
+        "endLine": 54,
+        "endChar": 10
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e1235f4b_d95191f8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T22:40:11Z",
+      "side": 1,
+      "message": "it could be much simpler to implement it with a single mutex, and only change it to atomics if performance it bad. relaxed atomic operations are very hard, and they most probably don\u0027t work correctly here (and almost everywhere else)",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 21
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1239cf5c_fb3f96b1",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T22:40:11Z",
+      "side": 1,
+      "message": "please explain what this class is supposed to do",
+      "range": {
+        "startLine": 14,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 20
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8760568a_5b6e20d7",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T22:40:11Z",
+      "side": 1,
+      "message": "this comment looks obsolete",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 28
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42eefebf_73ee4020",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T22:40:11Z",
+      "side": 1,
+      "message": "should you add DISALLOW_COPY_AND_ASSIGN()?",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 2
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
