@@ -16,7 +16,7 @@
 #include "qemu/bitops.h"
 #include "qemu/timer.h"
 #include "qemu/log.h"
-#include "trace.h"
+#include "hw/timer/trace.h"
 
 #define TIMER_NR_REGS 4
 

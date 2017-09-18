@@ -23,7 +23,7 @@
 #include "crypto/tlscredspriv.h"
 #include "qapi/error.h"
 #include "qom/object_interfaces.h"
-#include "trace.h"
+#include "crypto/trace.h"
 
 
 #ifdef CONFIG_GNUTLS

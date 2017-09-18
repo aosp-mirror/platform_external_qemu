@@ -28,7 +28,7 @@
 #include "hw/ptimer.h"
 #include "qemu/main-loop.h"
 
-#include "trace.h"
+#include "hw/timer/trace.h"
 
 #define UNIT_REG_SIZE    16     /* Size of memory mapped regs for the unit */
 #define GPTIMER_REG_SIZE 16     /* Size of memory mapped regs for a GPTimer */

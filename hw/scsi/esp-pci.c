@@ -27,7 +27,7 @@
 #include "hw/pci/pci.h"
 #include "hw/nvram/eeprom93xx.h"
 #include "hw/scsi/esp.h"
-#include "trace.h"
+#include "hw/scsi/trace.h"
 #include "qapi/error.h"
 #include "qemu/log.h"
 
@@ -367,9 +367,6 @@ static void esp_pci_scsi_realize(PCIDevice *dev, Error **errp)
     s->irq = pci_allocate_irq(dev);
 
     scsi_bus_new(&s->bus, sizeof(s->bus), d, &esp_pci_scsi_info, NULL);
-    if (!d->hotplugged) {
-        scsi_bus_legacy_handle_cmdline(&s->bus, errp);
-    }
 }
 
 static void esp_pci_scsi_uninit(PCIDevice *d)

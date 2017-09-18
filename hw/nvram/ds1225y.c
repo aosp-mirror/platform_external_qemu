@@ -24,7 +24,7 @@
 
 #include "qemu/osdep.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/nvram/trace.h"
 
 typedef struct {
     MemoryRegion iomem;

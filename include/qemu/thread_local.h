@@ -28,7 +28,7 @@
 
 #define QEMU_THREAD_LOCAL_EXTERN(type, name) extern __thread type name;
 #define QEMU_THREAD_LOCAL_DECLARE(type, name) __thread type name;
-#define QEMU_THREAD_LOCAL_DECLARE_INIT(type, name) __thread type name = (init);
+#define QEMU_THREAD_LOCAL_DECLARE_INIT(type, name, init) __thread type name = (init);
 
 #define QEMU_THREAD_LOCAL_GET(name) (name)
 #define QEMU_THREAD_LOCAL_GET_PTR(name) (&(name))
