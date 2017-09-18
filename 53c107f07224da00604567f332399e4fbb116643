@@ -16,6 +16,24 @@
       "revId": "53c107f07224da00604567f332399e4fbb116643",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fc620731_1bd3b853",
+        "filename": "util/qemu-thread-win32.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T20:48:12Z",
+      "side": 1,
+      "message": "QEMU used to have a SetThreadContext() call for Win32 thread interruption (to inject a work item into a CPU thread or just emulate a hardware interrupt on HAXM). We\u0027ve removed that call in our version, but maybe the upstream merged in an older version where it was needed",
+      "parentUuid": "4f97db6d_923d739c",
+      "revId": "53c107f07224da00604567f332399e4fbb116643",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
