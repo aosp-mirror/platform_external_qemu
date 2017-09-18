@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (a229c2 Merge "[base] Allow FunctionView construction from const obj)
 // Copyright 2008 IBM Corporation
 //           2008 Red Hat, Inc.
 // Copyright 2011 Intel Corporation
@@ -1161,3 +1162,5 @@ static void hvf_type_init(void)
 
 type_init(hvf_type_init);
 
+=======
+>>>>>>> BRANCH (53c107 Merge tag 'v2.9.0' into merge-2.9.0)

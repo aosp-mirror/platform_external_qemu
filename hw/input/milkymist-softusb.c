@@ -25,7 +25,7 @@
 #include "qapi/error.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/input/trace.h"
 #include "ui/console.h"
 #include "hw/input/hid.h"
 #include "qemu/error-report.h"

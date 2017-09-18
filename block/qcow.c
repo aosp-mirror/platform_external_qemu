@@ -104,6 +104,13 @@ static int qcow_open(BlockDriverState *bs, QDict *options, int flags,
     unsigned int len, i, shift;
     int ret;
     QCowHeader header;
+    Error *local_err = NULL;
+
+    bs->file = bdrv_open_child(NULL, options, "file", bs, &child_file,
+                               false, errp);
+    if (!bs->file) {
+        return -EINVAL;
+    }
 
     ret = bdrv_pread(bs->file, 0, &header, sizeof(header));
     if (ret < 0) {
@@ -252,7 +259,12 @@ static int qcow_open(BlockDriverState *bs, QDict *options, int flags,
     error_setg(&s->migration_blocker, "The qcow format used by node '%s' "
                "does not support live migration",
                bdrv_get_device_or_node_name(bs));
-    migrate_add_blocker(s->migration_blocker);
+    ret = migrate_add_blocker(s->migration_blocker, &local_err);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        error_free(s->migration_blocker);
+        goto fail;
+    }
 
     qemu_co_mutex_init(&s->lock);
     return 0;
@@ -461,7 +473,7 @@ static uint64_t get_cluster_offset(BlockDriverState *bs,
                 /* round to cluster size */
                 cluster_offset = (cluster_offset + s->cluster_size - 1) &
                     ~(s->cluster_size - 1);
-                bdrv_truncate(bs->file->bs, cluster_offset + s->cluster_size);
+                bdrv_truncate(bs->file, cluster_offset + s->cluster_size);
                 /* if encrypted, we must initialize the cluster
                    content which won't be written */
                 if (bs->encrypted &&
@@ -811,7 +823,8 @@ static int qcow_create(const char *filename, QemuOpts *opts, Error **errp)
     }
 
     qcow_blk = blk_new_open(filename, NULL, NULL,
-                            BDRV_O_RDWR | BDRV_O_PROTOCOL, &local_err);
+                            BDRV_O_RDWR | BDRV_O_RESIZE | BDRV_O_PROTOCOL,
+                            &local_err);
     if (qcow_blk == NULL) {
         error_propagate(errp, local_err);
         ret = -EIO;
@@ -903,7 +916,7 @@ static int qcow_make_empty(BlockDriverState *bs)
     if (bdrv_pwrite_sync(bs->file, s->l1_table_offset, s->l1_table,
             l1_length) < 0)
         return -1;
-    ret = bdrv_truncate(bs->file->bs, s->l1_table_offset + l1_length);
+    ret = bdrv_truncate(bs->file, s->l1_table_offset + l1_length);
     if (ret < 0)
         return ret;
 
@@ -1040,6 +1053,7 @@ static BlockDriver bdrv_qcow = {
     .bdrv_probe		= qcow_probe,
     .bdrv_open		= qcow_open,
     .bdrv_close		= qcow_close,
+    .bdrv_child_perm        = bdrv_format_default_perms,
     .bdrv_reopen_prepare    = qcow_reopen_prepare,
     .bdrv_create            = qcow_create,
     .bdrv_has_zero_init     = bdrv_has_zero_init_1,

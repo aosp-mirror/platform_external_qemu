@@ -34,7 +34,7 @@
 #include "qemu/timer.h"
 #include "qemu/iov.h"
 #include "sysemu/dma.h"
-#include "trace.h"
+#include "hw/usb/trace.h"
 #include "qemu/main-loop.h"
 
 #define FRAME_TIMER_FREQ 1000
