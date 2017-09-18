@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8e87347c_85dc6f4b",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2-target.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T20:30:38Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "range": {
+        "startLine": 101,
+        "startChar": 0,
+        "endLine": 101,
+        "endChar": 2
+      },
+      "revId": "b9b88b620e693c5a7b8ee909510fc24e82ba2735",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "69dabaec_c64acc73",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-18T20:30:38Z",
+      "side": 1,
+      "message": "nit: tabs",
+      "revId": "b9b88b620e693c5a7b8ee909510fc24e82ba2735",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
