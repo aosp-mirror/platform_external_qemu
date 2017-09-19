@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13800c46_beea6828",
+        "filename": "android/android-emu/android/base/Stopwatch.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "nit: sw -\u003e (sw)",
+      "range": {
+        "startLine": 40,
+        "startChar": 60,
+        "endLine": 40,
+        "endChar": 62
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aeb16a99_9da228f1",
+        "filename": "android/android-emu/android/base/Stopwatch.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 43,
+        "startChar": 66,
+        "endLine": 43,
+        "endChar": 68
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74eb340a_dc16ba11",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "this file changes look big enough to me to be in a separate CL",
+      "range": {
+        "startLine": 65,
+        "startChar": 6,
+        "endLine": 65,
+        "endChar": 18
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2be0a8e0_5a67ea64",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "nit: SyncPoint? words are cheap",
+      "range": {
+        "startLine": 69,
+        "startChar": 11,
+        "endLine": 69,
+        "endChar": 17
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0d8d047_3e78adc2",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "use default initializers?",
+      "range": {
+        "startLine": 70,
+        "startChar": 7,
+        "endLine": 71,
+        "endChar": 22
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6ff3b1b4_e0a2a9c1",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "set it to nullptr?",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 23
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d65819a6_36eb726e",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "you don\u0027t actually need command type here: if syncPt !\u003d nullptr then it\u0027s sync, otherwise it\u0027s a regular work item",
+      "range": {
+        "startLine": 86,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 22
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94ab5365_73fbebb8",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "what about the name?",
+      "range": {
+        "startLine": 103,
+        "startChar": 9,
+        "endLine": 103,
+        "endChar": 15
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3a435fa4_e24ab40a",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "please put an assert that the worker thread is still running, otherwise it\u0027s easy to hang forever in this call",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 9
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "39358302_3587ff51",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "Command(...) is already a temporary, no move() needed",
+      "range": {
+        "startLine": 108,
+        "startChar": 31,
+        "endLine": 108,
+        "endChar": 41
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc3fc75c_f827d78f",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "nit: signalAndUnlock",
+      "range": {
+        "startLine": 152,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 49
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e48f8d1d_7185ef95",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
+        "patchSetId": 25
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:53:22Z",
+      "side": 1,
+      "message": "nit: not needed anymore",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 17
+      },
+      "revId": "ba5b585c4bdaed5b41708c452ebf6d41ff21b2db",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
