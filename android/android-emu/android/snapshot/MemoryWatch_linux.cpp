@@ -195,7 +195,8 @@ void MemoryAccessWatch::doneRegistering() {
     }
 }
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
+bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
+                                 bool isQuickboot) {
     if (data) {
         uffdio_copy copyStruct = {uintptr_t(ptr), uintptr_t(data), length};
         if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_COPY, &copyStruct)) {

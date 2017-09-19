@@ -138,7 +138,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
              // startLoading
              [](void* opaque) {
                  auto snapshot = static_cast<Snapshotter*>(opaque);
-                 snapshot->mLoader->ramLoader().start();
+                 snapshot->mLoader->ramLoader().start(snapshot->isQuickboot());
                  return snapshot->mLoader->ramLoader().hasError() ? -1 : 0;
              },
              // savePage
@@ -185,6 +185,7 @@ OperationStatus Snapshotter::prepareForLoading(const char* name) {
 
 OperationStatus Snapshotter::load(const char* name) {
     mVmOperations.snapshotLoad(name, this, nullptr);
+    mIsQuickboot = false;
     return mLoader->status();
 }
 
