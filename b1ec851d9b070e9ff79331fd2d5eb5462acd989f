@@ -507,6 +507,30 @@
     },
     {
       "key": {
+        "uuid": "2cb8c767_aa63a845",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 1652,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-19T16:23:36Z",
+      "side": 1,
+      "message": "don\u0027t we always call glReadPixels in a worker thread? So it gets serialized naturally",
+      "parentUuid": "537fa521_2192634f",
+      "range": {
+        "startLine": 1652,
+        "startChar": 0,
+        "endLine": 1652,
+        "endChar": 46
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6493e97_883ed8e7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 23
