@@ -96,6 +96,7 @@ public:
     // Constructor sets up the handler thread
     MachExceptionHandler() : mHandlerThread([this]() { exceptionCatchWorker(); }) {
         D("call");
+
         kern_return_t kr;
         mach_port_t port;
 
@@ -123,6 +124,22 @@ public:
                 "%s: Error 0x%llx in mach_port_insert_right", __func__,
                 (uint64_t)kr);
         }
+
+        install();
+
+        /* Launch the exception handling thread.  We use pthread_create because
+           it's much simpler than setting up a thread from scratch using Mach,
+           and that's basically what it does.  See [Libc]
+           <http://www.opensource.apple.com/source/Libc/Libc-825.26/pthreads/pthread.c> */
+        mHandlerThread.start();
+    }
+
+    bool isInstalled() const {
+        return mInstalled;
+    }
+
+    void install() {
+        kern_return_t kr;
 
         /* Ask to receive EXC_BAD_ACCESS exceptions on our port, complete
            with thread state and identity information in the message.
@@ -161,12 +178,7 @@ public:
         } else {
             D("exception port successfuly setup");
         }
-
-        /* Launch the exception handling thread.  We use pthread_create because
-           it's much simpler than setting up a thread from scratch using Mach,
-           and that's basically what it does.  See [Libc]
-           <http://www.opensource.apple.com/source/Libc/Libc-825.26/pthreads/pthread.c> */
-        mHandlerThread.start();
+        mInstalled = true;
     }
 
     // Function to detect whether there was an old handler installed.
@@ -179,6 +191,7 @@ public:
     // }
     void teardown() {
         android::base::AutoLock lock(mLock);
+        mInstalled = false;
         D("used to have %llu handlers", (uint64_t)oldSettings.count);
         for (uint32_t i = 0; i < oldSettings.count; i++) {
             D("mask %d 0x%llx", i, oldSettings.masks[i]);
@@ -294,6 +307,8 @@ public:
     // Lock concurrent access
     android::base::Lock mLock;
 
+    // Whether or not the custom exception handler is active.
+    bool mInstalled = false;
 };
 
 static android::base::LazyInstance<MachExceptionHandler> sMachExcHandler =
@@ -316,13 +331,18 @@ static void must_send(mach_msg_header_t *head) {
 }
 
 MacSegvHandler::MacSegvHandler(BadAccessCallback f) {
+    fprintf(stderr, "%s: setup\n", __func__);
     // Also constructs and initializes our MachExceptionHandler instance,
     // and starts the exception handling thread.
     sMachExcHandler->macHandler = this;
     sMachExcHandler->accessCallback = f;
+    if (!sMachExcHandler->isInstalled()) {
+        sMachExcHandler->install();
+    }
 }
 
 MacSegvHandler::~MacSegvHandler() {
+    fprintf(stderr, "%s: teardown\n", __func__);
     clearRegistered();
     sMachExcHandler->teardown(); // Also gets rid of this
 }
