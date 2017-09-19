@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2fb634b4_06e7feb1",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 31
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T21:34:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0ecc4c8_bd828feb",
+      "range": {
+        "startLine": 899,
+        "startChar": 15,
+        "endLine": 899,
+        "endChar": 19
+      },
+      "revId": "7911df5a6a99967fd98224235495aa2846c54819",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "250e8af3_e8a0fa84",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 31
@@ -36,6 +60,24 @@
       "writtenOn": "2017-09-19T20:39:50Z",
       "side": 1,
       "message": "\"not\"?",
+      "revId": "7911df5a6a99967fd98224235495aa2846c54819",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc1b4265_e1d00f75",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 31
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T21:34:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "250e8af3_e8a0fa84",
       "revId": "7911df5a6a99967fd98224235495aa2846c54819",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
