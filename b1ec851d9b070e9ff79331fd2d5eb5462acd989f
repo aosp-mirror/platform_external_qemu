@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b915a5ca_04cd16ec",
+        "filename": "android/android-emu/android/base/Stopwatch.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "51473377_4a195334",
+      "range": {
+        "startLine": 40,
+        "startChar": 27,
+        "endLine": 40,
+        "endChar": 30
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "557f42c4_3334bbda",
         "filename": "android/android-emu/android/base/threads/WorkerThread.h",
         "patchSetId": 23
@@ -36,6 +60,30 @@
       "writtenOn": "2017-09-18T21:32:47Z",
       "side": 1,
       "message": "finish() doesn\u0027t look like it\u0027s waiting for pending items to complete (to me), it seems to be a command to finish work. Should it be a longer name, like \"waitForQueuedItems()\"?\n\nOverall, this is a dangerous API as it doesn\u0027t specify if we\u0027re waiting for items queued until the call to complete, or all of them, and what happens if there\u0027s another thread that keeps sending work.\n\nIMO it\u0027s safer for a specific user to queue some item that would implement a \"synchronization point\" when executed",
+      "range": {
+        "startLine": 83,
+        "startChar": 9,
+        "endLine": 83,
+        "endChar": 15
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9575ddfe_f8a16f2c",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Good point on the multiple threads, haven\u0027t accounted for it. Done (sync pts)",
+      "parentUuid": "557f42c4_3334bbda",
       "range": {
         "startLine": 83,
         "startChar": 9,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9246fa1e_b3def864",
+        "filename": "android/android-emu/android/gpu_frame.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Good point. I\u0027ll change it to vary the callback---it\u0027s simpler and fitting with android_setPostCallback interface.",
+      "parentUuid": "16064790_a3c0a4fa",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 59
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "94e3ee26_c403ed57",
         "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
         "patchSetId": 23
@@ -82,6 +154,30 @@
       "writtenOn": "2017-09-18T21:32:47Z",
       "side": 1,
       "message": "release. You\u0027ve changed some variables here and they will be needed in other threads, so you need to do a release",
+      "range": {
+        "startLine": 147,
+        "startChar": 56,
+        "endLine": 147,
+        "endChar": 62
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2bd8bdc8_9620a371",
+        "filename": "android/android-emu/android/opengl/GpuFrameBridge.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "94e3ee26_c403ed57",
       "range": {
         "startLine": 147,
         "startChar": 56,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "c2858458_45408a27",
+        "filename": "android/android-emu/android/opengles.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "861690bf_40038060",
+      "range": {
+        "startLine": 189,
+        "startChar": 8,
+        "endLine": 189,
+        "endChar": 13
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7208608_a779a6fe",
         "filename": "android/android-emu/android/skin/qt/extended.ui",
         "patchSetId": 23
@@ -128,6 +248,30 @@
       "writtenOn": "2017-09-18T21:32:47Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 899,
+        "startChar": 15,
+        "endLine": 899,
+        "endChar": 19
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "75160875_1dc16386",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 23
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "re-enables screen recording UI",
+      "parentUuid": "a7208608_a779a6fe",
       "range": {
         "startLine": 899,
         "startChar": 15,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "0cac8f85_4c280f63",
+        "filename": "android/android-emugl/host/include/OpenglRender/Renderer.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "I\u0027d make it a std::function, but this ends up touching C code at some point (android_*** functions) that expects a regular function pointer and the conversion fails.\n\nCurrently this seems to be designed around existing singletons (FrameBuffer, Renderer, RenderWindow) so I think it\u0027s OK to leave it like this for now.",
+      "parentUuid": "bce84208_0fdcf847",
+      "range": {
+        "startLine": 92,
+        "startChar": 0,
+        "endLine": 93,
+        "endChar": 55
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ef8fd3d4_23e1efa5",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
         "patchSetId": 23
@@ -180,6 +348,24 @@
     },
     {
       "key": {
+        "uuid": "d25c9f7e_3b09985e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ef8fd3d4_23e1efa5",
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "327767f8_a8341af4",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 23
@@ -191,6 +377,30 @@
       "writtenOn": "2017-09-18T21:32:47Z",
       "side": 1,
       "message": "are we sure this is always available?",
+      "range": {
+        "startLine": 1527,
+        "startChar": 57,
+        "endLine": 1527,
+        "endChar": 60
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3b663628_a0a6b71d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 1527,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Reverted (not needed in this CL)",
+      "parentUuid": "327767f8_a8341af4",
       "range": {
         "startLine": 1527,
         "startChar": 57,
@@ -226,6 +436,30 @@
     },
     {
       "key": {
+        "uuid": "fb6d0bc5_1d971dce",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 1551,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3662feb8_1b8f9654",
+      "range": {
+        "startLine": 1551,
+        "startChar": 0,
+        "endLine": 1551,
+        "endChar": 50
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5190aba8_0f0b6f99",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 23
@@ -237,6 +471,30 @@
       "writtenOn": "2017-09-18T21:32:47Z",
       "side": 1,
       "message": "why is this important?",
+      "range": {
+        "startLine": 1652,
+        "startChar": 0,
+        "endLine": 1652,
+        "endChar": 46
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "537fa521_2192634f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 1652,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "we need to wait on the readback worker to have done its GL initialization, or we could be calling glReadPixels on a GL buffer that has not enough data allocated, which can result in segfault.",
+      "parentUuid": "5190aba8_0f0b6f99",
       "range": {
         "startLine": 1652,
         "startChar": 0,
@@ -272,6 +530,30 @@
     },
     {
       "key": {
+        "uuid": "8c7acf3d_2578e5b6",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 1679,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "It\u0027s because this will be used from app threads like video encoders; it needs to have a OpenGL context, which is not guaranteed to be available or setup the right way from any other thread. Also opengl with its thread specificness :D",
+      "parentUuid": "f6493e97_883ed8e7",
+      "range": {
+        "startLine": 1679,
+        "startChar": 0,
+        "endLine": 1679,
+        "endChar": 30
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "627d0768_b510983a",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
         "patchSetId": 23
@@ -283,6 +565,30 @@
       "writtenOn": "2017-09-18T21:32:47Z",
       "side": 1,
       "message": "unique_ptr\u003c\u003e?",
+      "range": {
+        "startLine": 515,
+        "startChar": 4,
+        "endLine": 515,
+        "endChar": 18
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9f539cbe_6bc30592",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 515,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "627d0768_b510983a",
       "range": {
         "startLine": 515,
         "startChar": 4,
@@ -318,6 +624,30 @@
     },
     {
       "key": {
+        "uuid": "887d3abb_ef147bca",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "It seems easier to use getFB(), as FrameBuffer is a global singleton anyway. I\u0027d also like to keep the access of it consistent throughout (we hardly see any FrameBuffer refs being passed raw, it\u0027s usually just getFB())",
+      "parentUuid": "bb961a15_cb695a74",
+      "range": {
+        "startLine": 14,
+        "startChar": 8,
+        "endLine": 14,
+        "endChar": 28
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1f1abd85_d0cf0e56",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
         "patchSetId": 23
@@ -329,6 +659,30 @@
       "writtenOn": "2017-09-18T22:40:11Z",
       "side": 1,
       "message": "nit: for (auto buffer : mBuffers)\n?",
+      "range": {
+        "startLine": 22,
+        "startChar": 4,
+        "endLine": 22,
+        "endChar": 52
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "abbecfb5_1436421e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f1abd85_d0cf0e56",
       "range": {
         "startLine": 22,
         "startChar": 4,
@@ -364,6 +718,30 @@
     },
     {
       "key": {
+        "uuid": "e1150f06_6abf1b4e",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e42e14c8_dfcdc3a1",
+      "range": {
+        "startLine": 54,
+        "startChar": 7,
+        "endLine": 54,
+        "endChar": 10
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e1235f4b_d95191f8",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
         "patchSetId": 23
@@ -375,6 +753,30 @@
       "writtenOn": "2017-09-18T22:40:11Z",
       "side": 1,
       "message": "it could be much simpler to implement it with a single mutex, and only change it to atomics if performance it bad. relaxed atomic operations are very hard, and they most probably don\u0027t work correctly here (and almost everywhere else)",
+      "range": {
+        "startLine": 83,
+        "startChar": 8,
+        "endLine": 83,
+        "endChar": 21
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc0e9052_c5c9adb5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e1235f4b_d95191f8",
       "range": {
         "startLine": 83,
         "startChar": 8,
@@ -410,6 +812,30 @@
     },
     {
       "key": {
+        "uuid": "a976bd9b_b4b2b026",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1239cf5c_fb3f96b1",
+      "range": {
+        "startLine": 14,
+        "startChar": 6,
+        "endLine": 14,
+        "endChar": 20
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8760568a_5b6e20d7",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
         "patchSetId": 23
@@ -433,6 +859,30 @@
     },
     {
       "key": {
+        "uuid": "9035879c_2a4cd5ae",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8760568a_5b6e20d7",
+      "range": {
+        "startLine": 26,
+        "startChar": 7,
+        "endLine": 26,
+        "endChar": 28
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "42eefebf_73ee4020",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
         "patchSetId": 23
@@ -444,6 +894,30 @@
       "writtenOn": "2017-09-18T22:40:11Z",
       "side": 1,
       "message": "should you add DISALLOW_COPY_AND_ASSIGN()?",
+      "range": {
+        "startLine": 44,
+        "startChar": 0,
+        "endLine": 45,
+        "endChar": 2
+      },
+      "revId": "b1ec851d9b070e9ff79331fd2d5eb5462acd989f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb8ba7af_38dcdd39",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ReadbackWorker.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T16:20:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "42eefebf_73ee4020",
       "range": {
         "startLine": 44,
         "startChar": 0,
