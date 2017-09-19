@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e335713_92b748f0",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 1848,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-19T18:10:50Z",
+      "side": 1,
+      "message": "I think this should be an error and return false. If the user specified an incorrect prefix they would probably want to know right away. A warning might go by unnoticed which could cause a lot of confusion and wasted time debugging.",
+      "revId": "993a8fe5785b88567b48b2f95e019d435cca996f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
