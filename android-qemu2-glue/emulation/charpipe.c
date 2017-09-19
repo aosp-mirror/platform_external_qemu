@@ -16,8 +16,11 @@
 
 #define DEBUG 0
 
+#define CPR(ptr) if (!(ptr)) goto Error;
+
 #if DEBUG
 #  include <stdio.h>
+#  include "android/utils/misc.h"
 #  define  D(...)   ( fprintf( stderr, __VA_ARGS__ ), fprintf(stderr, "\n") )
 #else
 #  define  D(...)   ((void)0)
@@ -32,7 +35,6 @@
  * must be called by the main event loop after its call to select()
  *
  */
-
 #define  BIP_BUFFER_SIZE  512
 
 typedef struct BipBuffer {
@@ -42,6 +44,7 @@ typedef struct BipBuffer {
 } BipBuffer;
 
 static BipBuffer*  _free_bip_buffers;
+
 
 static BipBuffer*
 bip_buffer_alloc( void )
@@ -68,50 +71,58 @@ bip_buffer_free( BipBuffer*  bip )
     _free_bip_buffers = bip;
 }
 
+
 /* this models each half of the charpipe */
-typedef struct CharPipeHalf {
-    CharDriverState*      cs;
+typedef struct PipeChardev {
+    Chardev               parent;
     BipBuffer*            bip_first;
     BipBuffer*            bip_last;
-    struct CharPipeHalf*  peer;         /* NULL if closed */
-} CharPipeHalf;
+    struct PipeChardev*   peer;         /* NULL if closed */
+    QLIST_ENTRY(PipeChardev) entry;
+} PipeChardev;
 
+/** This models a charbuffer, an object used to buffer
+ ** the data that is sent to a given endpoint Chardev
+ ** object.
+ **
+ ** On the other hand, any can_read() / read() request performed
+ ** by the endpoint will be passed to the BufferChardev's corresponding
+ ** handlers.
+ **/
+typedef struct BufferChardev {
+    Chardev          parent;
+    BipBuffer*       bip_first;
+    BipBuffer*       bip_last;
+    Chardev*         endpoint;  /* NULL if closed */
+    QLIST_ENTRY(BufferChardev) entry;
+} BufferChardev;
 
+#define TYPE_CHARDEV_BUFFER "chardev-buffer"
+#define BUFFER_CHARDEV(obj)                                      \
+    OBJECT_CHECK(BufferChardev, (obj), TYPE_CHARDEV_BUFFER)
 
-static void
-charpipehalf_free( CharDriverState*  cs )
-{
-    CharPipeHalf*  ph = cs->opaque;
-
-    while (ph->bip_first) {
-        BipBuffer*  bip = ph->bip_first;
-        ph->bip_first = bip->next;
-        bip_buffer_free(bip);
-    }
-    ph->bip_last    = NULL;
-    ph->peer        = NULL;
-    ph->cs          = NULL;
-}
-
+#define TYPE_CHARDEV_ANDROID_PIPE "chardev-android-pipe"
+#define ANDROID_PIPE_CHARDEV(obj)                                      \
+    OBJECT_CHECK(PipeChardev, (obj), TYPE_CHARDEV_ANDROID_PIPE)
 
 static int
-charpipehalf_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
+charpipehalf_write( Chardev*  cs, const uint8_t*  buf, int  len )
 {
-    CharPipeHalf*  ph   = cs->opaque;
-    CharPipeHalf*  peer = ph->peer;
-    BipBuffer*     bip  = ph->bip_last;
-    int            ret  = 0;
+    PipeChardev*  ph   = ANDROID_PIPE_CHARDEV(cs);
+    PipeChardev*  peer = ph->peer;
+    BipBuffer*    bip  = ph->bip_last;
+    int           ret  = 0;
 
     D("%s: writing %d bytes to %p: '%s'", __FUNCTION__,
-      len, ph, quote_bytes( buf, len ));
+      len, ph, quote_bytes( (const char*) buf, len ));
 
-    if (bip == NULL && peer != NULL && peer->cs->be->chr_read != NULL) {
+    if (bip == NULL && peer != NULL && peer->parent.be->chr_read != NULL) {
         /* no buffered data, try to write directly to the peer */
         while (len > 0) {
             int  size;
 
-            if (peer->cs->be->chr_can_read) {
-                size = qemu_chr_be_can_write( peer->cs );
+            if (peer->parent.be->chr_can_read) {
+                size = qemu_chr_be_can_write( &peer->parent );
                 if (size == 0)
                     break;
 
@@ -120,7 +131,7 @@ charpipehalf_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
             } else
                 size = len;
 
-            qemu_chr_be_write( peer->cs, (uint8_t*)buf, size );
+            qemu_chr_be_write( &peer->parent, (uint8_t*)buf, size );
             buf += size;
             len -= size;
             ret += size;
@@ -153,14 +164,14 @@ charpipehalf_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
     return  ret;
 }
 
-
 static void
-charpipehalf_poll( CharPipeHalf*  ph )
+charpipehalf_poll( PipeChardev*  ph )
 {
-    CharPipeHalf*   peer = ph->peer;
-    int             size;
+    assert(ph);
+    PipeChardev*   peer = ph->peer;
+    int            size;
 
-    if (peer == NULL || peer->cs->be->chr_read == NULL)
+    if (peer == NULL || peer->parent.be->chr_read == NULL)
         return;
 
     while (1) {
@@ -180,8 +191,8 @@ charpipehalf_poll( CharPipeHalf*  ph )
             continue;
         }
 
-        if (ph->cs->be->chr_can_read) {
-            int  size2 = qemu_chr_be_can_write(peer->cs);
+        if (ph->parent.be->chr_can_read) {
+            int  size2 = qemu_chr_be_can_write(&peer->parent);
 
             if (size2 == 0)
                 break;
@@ -194,117 +205,68 @@ charpipehalf_poll( CharPipeHalf*  ph )
         if (avail > size)
             avail = size;
         D("%s: sending %d bytes from %p: '%s'", __FUNCTION__,
-            avail, ph, quote_bytes( base, avail ));
+            avail, ph, quote_bytes( (const char*) base, avail ));
 
-        qemu_chr_be_write( peer->cs, base, avail );
+        qemu_chr_be_write( &peer->parent, base, avail );
         cbuffer_read_step( bip->cb, avail );
     }
 }
 
-
-static void
-charpipehalf_init( CharPipeHalf*  ph, CharPipeHalf*  peer )
-{
-    ChardevCommon backend = {};
-    Error* error = NULL;
-    CharDriverState* cs = qemu_chr_alloc(&backend, &error);
-
-    ph->bip_first   = NULL;
-    ph->bip_last    = NULL;
-    ph->peer        = peer;
-
-    cs->chr_write            = charpipehalf_write;
-    cs->chr_ioctl            = NULL;
-    cs->chr_free             = charpipehalf_free;
-    cs->opaque               = ph;
-
-    ph->cs = cs;
-}
-
-
-typedef struct CharPipeState {
-    CharPipeHalf  a[1];
-    CharPipeHalf  b[1];
-} CharPipeState;
-
-
-
-#define   MAX_CHAR_PIPES   8
-
-static CharPipeState  _s_charpipes[ MAX_CHAR_PIPES ];
+static QLIST_HEAD(, PipeChardev) s_pipes = QLIST_HEAD_INITIALIZER(s_pipes);
+static bool s_pipe_poll = false;
 
 int
-qemu_chr_open_charpipe( CharDriverState*  *pfirst, CharDriverState*  *psecond )
+qemu_chr_open_charpipe( Chardev*  *pfirst, Chardev*  *psecond )
 {
-    CharPipeState*  cp     = _s_charpipes;
-    CharPipeState*  cp_end = cp + MAX_CHAR_PIPES;
+    Error* ignored_error = NULL;
+    *pfirst  = NULL;
+    *psecond = NULL;
+    Chardev* first = NULL;
+    Chardev* second = NULL;
+    PipeChardev* a = NULL;
+    PipeChardev* b = NULL;
 
-    for ( ; cp < cp_end; cp++ ) {
-        if ( cp->a->peer == NULL && cp->b->peer == NULL )
-            break;
-    }
 
-    if (cp == cp_end) {  /* can't allocate one */
-        *pfirst  = NULL;
-        *psecond = NULL;
-        return -1;
-    }
+    first = qemu_chardev_new(NULL, TYPE_CHARDEV_ANDROID_PIPE, NULL, &ignored_error);
+    CPR(first);
 
-    charpipehalf_init( cp->a, cp->b );
-    charpipehalf_init( cp->b, cp->a );
+    second = qemu_chardev_new(NULL, TYPE_CHARDEV_ANDROID_PIPE, NULL, &ignored_error);
+    CPR(second);
 
-    *pfirst  = cp->a->cs;
-    *psecond = cp->b->cs;
+    // Link and register the chardevs.
+    a = ANDROID_PIPE_CHARDEV(first);
+    b = ANDROID_PIPE_CHARDEV(second);
+
+    a->peer = b;
+    b->peer = a;
+
+
+    // Note that only the entry of a will be set and
+    // will occur in the list, b will not occur in this list
+    QLIST_INSERT_HEAD(&s_pipes, a, entry);
+
+    *pfirst  = first;
+    *psecond = second;
+
+    D("%s: created pipe between %p <--> %p", __FUNCTION__, *pfirst, *psecond);
     return 0;
-}
 
-/** This models a charbuffer, an object used to buffer
- ** the data that is sent to a given endpoint CharDriverState
- ** object.
- **
- ** On the other hand, any can_read() / read() request performed
- ** by the endpoint will be passed to the CharBuffer's corresponding
- ** handlers.
- **/
-
-typedef struct CharBuffer {
-    CharDriverState  cs[1];
-    BipBuffer*       bip_first;
-    BipBuffer*       bip_last;
-    CharDriverState* endpoint;  /* NULL if closed */
-    char             closing;
-} CharBuffer;
-
-
-static void
-charbuffer_close( CharDriverState*  cs )
-{
-    CharBuffer*  cbuf = cs->opaque;
-
-    while (cbuf->bip_first) {
-        BipBuffer*  bip = cbuf->bip_first;
-        cbuf->bip_first = bip->next;
-        bip_buffer_free(bip);
-    }
-    cbuf->bip_last = NULL;
-    cbuf->endpoint = NULL;
-
-    if (cbuf->endpoint != NULL) {
-        qemu_chr_delete(cbuf->endpoint);
-        cbuf->endpoint = NULL;
-    }
+Error:
+    object_unref(OBJECT(first));
+    object_unref(OBJECT(second));
+    return -1;
 }
 
 static int
-charbuffer_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
+charbuffer_write( Chardev*  cs, const uint8_t*  buf, int  len )
 {
-    CharBuffer*       cbuf = cs->opaque;
-    CharDriverState*  peer = cbuf->endpoint;
+    BufferChardev*    cbuf = BUFFER_CHARDEV(cs);
+    Chardev*          peer = cbuf->endpoint;
     BipBuffer*        bip  = cbuf->bip_last;
     int               ret  = 0;
 
-    D("%s: writing %d bytes to %p: '%s'", __FUNCTION__,
-      len, cbuf, quote_bytes( buf, len ));
+    D("%s: writing %d bytes from %p to %p: '%s'", __FUNCTION__,
+      len, cs, peer, quote_bytes( (const char*) buf, len ));
 
     if (bip == NULL && peer != NULL) {
         /* no buffered data, try to write directly to the peer */
@@ -348,9 +310,9 @@ charbuffer_write( CharDriverState*  cs, const uint8_t*  buf, int  len )
 
 
 static void
-charbuffer_poll( CharBuffer*  cbuf )
+charbuffer_poll( BufferChardev*  cbuf )
 {
-    CharDriverState*  peer = cbuf->endpoint;
+    Chardev*  peer = cbuf->endpoint;
 
     if (peer == NULL)
         return;
@@ -387,89 +349,148 @@ charbuffer_poll( CharBuffer*  cbuf )
     }
 }
 
+static QLIST_HEAD(, BufferChardev) s_charbuffers = QLIST_HEAD_INITIALIZER(s_charbuffers);
 
-static void
-charbuffer_update_handlers( CharDriverState*  cs, GMainContext* context )
+Chardev*
+qemu_chr_open_buffer( Chardev*  endpoint )
 {
-    CharBackend*  be = cs->be;
-
-    qemu_chr_fe_set_handlers( be,
-                              be->chr_can_read,
-                              be->chr_read,
-                              be->chr_event,
-                              be->opaque,
-                              context,
-                              false);
-}
-
-
-static void
-charbuffer_init( CharBuffer*  cbuf, CharDriverState*  endpoint )
-{
-    CharDriverState*  cs = cbuf->cs;
-
-    cbuf->bip_first   = NULL;
-    cbuf->bip_last    = NULL;
-    cbuf->endpoint    = endpoint;
-
-    cs->chr_write               = charbuffer_write;
-    cs->chr_ioctl               = NULL;
-    cs->chr_free                = charbuffer_close;
-    cs->chr_update_read_handler = charbuffer_update_handlers;
-    cs->opaque                  = cbuf;
-}
-
-#define MAX_CHAR_BUFFERS  8
-
-static CharBuffer  _s_charbuffers[ MAX_CHAR_BUFFERS ];
-
-CharDriverState*
-qemu_chr_open_buffer( CharDriverState*  endpoint )
-{
-    CharBuffer*  cbuf     = _s_charbuffers;
-    CharBuffer*  cbuf_end = cbuf + MAX_CHAR_BUFFERS;
-
-    if (endpoint == NULL)
+    Error* error = NULL;
+    Chardev* cs = qemu_chardev_new(NULL, TYPE_CHARDEV_BUFFER, NULL, &error);
+    if (!cs) {
         return NULL;
-
-    for ( ; cbuf < cbuf_end; cbuf++ ) {
-        if (cbuf->endpoint == NULL)
-            break;
     }
 
-    if (cbuf == cbuf_end)
-        return NULL;
+    BufferChardev *buffer = BUFFER_CHARDEV(cs);
+    buffer->endpoint = endpoint;
 
-    charbuffer_init(cbuf, endpoint);
-    return cbuf->cs;
+    QLIST_INSERT_HEAD(&s_charbuffers, buffer, entry);
+
+    D("%s: created buffered chardev %p with endpoint: %p", __FUNCTION__, cs, buffer->endpoint);
+    return cs;
 }
 
 
 void
 qemu_charpipe_poll( void )
 {
-    CharPipeState*  cp     = _s_charpipes;
-    CharPipeState*  cp_end = cp + MAX_CHAR_PIPES;
+    /**
+     * Look ma! No locks.
+     *
+     * There are 2 cases where locking is needed:
+     *
+     * - We are introducing new devices when this loop is active
+     *   - This does not happen in the case of android emulator.
+     *     All the devices are constructed before the execution of
+     *     qemu main_loop. So new elements will not be added to
+     *     any of the lists that we iterate over.
+     *
+     * - We are removing devices when this loop is active:
+     *   - QEMU does not decrease the refcount of any of its created devices
+     *     (yet). Because of this finalize is never called on any of the
+     *     objects, and hence we will never decrease the refcount to the point
+     *     where we will have to remove a device while this loops is active.
+     */
+    PipeChardev *cps;
+    BufferChardev *bc;
 
-    CharBuffer*     cb     = _s_charbuffers;
-    CharBuffer*     cb_end = cb + MAX_CHAR_BUFFERS;
+    // Polling loop has been activated. If you need support for dynamically
+    // adding/removing of devices you will need to turn this into a mutex.
+    s_pipe_poll = true;
 
     /* poll the charpipes */
-    for ( ; cp < cp_end; cp++ ) {
-        CharPipeHalf*  half;
-
-        half = cp->a;
-        if (half->peer != NULL)
-            charpipehalf_poll(half);
-
-        half = cp->b;
-        if (half->peer != NULL)
-            charpipehalf_poll(half);
+    QLIST_FOREACH(cps, &s_pipes, entry) {
+        charpipehalf_poll(cps);
+        charpipehalf_poll(cps->peer);
     }
 
-    /* poll the charbuffers */
-    for ( ; cb < cb_end; cb++ ) {
-        if (cb->endpoint != NULL)
-            charbuffer_poll(cb);
+    /* poll the buffers */
+    QLIST_FOREACH(bc, &s_charbuffers, entry) {
+        charbuffer_poll(bc);
     }
 }
+
+static void charbuffer_finalize(Object *obj)
+{
+    // We don't support deletion of devices once we started
+    // the polling loop, as we don't have locks around our list
+    // access
+    assert(!s_pipe_poll);
+    BufferChardev *cbuf = BUFFER_CHARDEV(obj);
+    while (cbuf->bip_first) {
+        BipBuffer*  bip = cbuf->bip_first;
+        cbuf->bip_first = bip->next;
+        bip_buffer_free(bip);
+    }
+    cbuf->bip_last = NULL;
+    cbuf->endpoint = NULL;
+
+    if (cbuf->endpoint != NULL) {
+        qemu_chr_delete(cbuf->endpoint);
+        cbuf->endpoint = NULL;
+    }
+
+    QLIST_REMOVE(cbuf, entry);
+}
+
+static void charbuffer_class_init(ObjectClass *oc, void *data)
+{
+    ChardevClass *cc = CHARDEV_CLASS(oc);
+    cc->chr_write = charbuffer_write;
+}
+
+static const TypeInfo charbuffer_type_info = {
+    .name = TYPE_CHARDEV_BUFFER,
+    .parent = TYPE_CHARDEV,
+    .instance_size = sizeof(BufferChardev),
+    .instance_finalize = charbuffer_finalize,
+    .class_init = charbuffer_class_init,
+};
+
+static void charpipe_finalize(Object *obj)
+{
+    // We don't support deletion of devices once we started
+    // the polling loop, as we don't have locks around our list
+    // access
+    assert(!s_pipe_poll);
+
+    PipeChardev *ph = ANDROID_PIPE_CHARDEV(obj);
+    while (ph->bip_first) {
+        BipBuffer*  bip = ph->bip_first;
+        ph->bip_first = bip->next;
+        bip_buffer_free(bip);
+    }
+    ph->bip_last    = NULL;
+    ph->peer        = NULL;
+
+    QLIST_REMOVE(ph, entry);
+}
+
+static void charpipe_class_init(ObjectClass *oc, void *data)
+{
+    ChardevClass *cc = CHARDEV_CLASS(oc);
+    cc->chr_write    = charpipehalf_write;
+}
+
+static const TypeInfo charpipe_type_info = {
+    .name = TYPE_CHARDEV_ANDROID_PIPE,
+    .parent = TYPE_CHARDEV,
+    .instance_size = sizeof(PipeChardev),
+    .instance_finalize = charpipe_finalize,
+    .class_init = charpipe_class_init,
+};
+
+static void register_types(void)
+{
+    type_register_static(&charbuffer_type_info);
+    type_register_static(&charpipe_type_info);
+}
+
+// Note that this is a static constructor that gets called upon
+// loading of this library. This only works if one function in this
+// file gets actually linked into the final executable. Two cases:
+// 1. This does not get linked in:
+//   -- This is fine as the devices registered are only referenced
+//      in this file.
+// 2. This does get linked in:
+//   -- The qemu types will be registered and therefore available.
+type_init(register_types);
