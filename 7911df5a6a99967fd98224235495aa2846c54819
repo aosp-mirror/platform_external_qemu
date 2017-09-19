@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0ecc4c8_bd828feb",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 31
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-09-19T20:39:50Z",
+      "side": 1,
+      "message": "Please disable the recording ui before submitting. There are still some critical functionalities missing.",
+      "range": {
+        "startLine": 899,
+        "startChar": 15,
+        "endLine": 899,
+        "endChar": 19
+      },
+      "revId": "7911df5a6a99967fd98224235495aa2846c54819",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "250e8af3_e8a0fa84",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 31
+      },
+      "lineNbr": 307,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-09-19T20:39:50Z",
+      "side": 1,
+      "message": "\"not\"?",
+      "revId": "7911df5a6a99967fd98224235495aa2846c54819",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
