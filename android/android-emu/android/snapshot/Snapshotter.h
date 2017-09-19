@@ -66,6 +66,13 @@ public:
     using Callback = std::function<void(Operation, Stage)>;
     void setOperationCallback(Callback&& cb);
 
+    void setQuickboot() {
+        mIsQuickboot = true;
+    }
+    bool isQuickboot() const {
+        return mIsQuickboot;
+    }
+
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
@@ -81,6 +88,8 @@ private:
     Callback mCallback;
 
     base::System::Duration mLastLoadUptimeMs = 0;
+
+    bool mIsQuickboot = false;
 };
 
 }  // namespace snapshot
