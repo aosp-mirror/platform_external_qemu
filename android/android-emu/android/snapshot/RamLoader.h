@@ -37,7 +37,7 @@ public:
 
     void loadRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
-    bool start();
+    bool start(bool isQuickboot);
     bool wasStarted() const { return mWasStarted; }
     void join();
 
@@ -125,6 +125,10 @@ private:
     // Flag to stop lazy RAM loading if loading has
     // completed.
     std::atomic<bool> mLoadingCompleted{false};
+
+    // Whether or not this ram load is part of
+    // quickboot load.
+    bool mIsQuickboot = false;
 };
 
 }  // namespace snapshot
