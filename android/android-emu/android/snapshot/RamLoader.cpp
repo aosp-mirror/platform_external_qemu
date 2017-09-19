@@ -95,11 +95,12 @@ void RamLoader::registerBlock(const RamBlock& block) {
     mIndex.blocks.push_back({block, {}, {}});
 }
 
-bool RamLoader::start() {
+bool RamLoader::start(bool isQuickboot) {
     if (mWasStarted) {
         return !mHasError;
     }
 
+    mIsQuickboot = isQuickboot;
 #if SNAPSHOT_PROFILE > 1
     mStartTime = base::System::get()->getHighResTimeUs();
 #endif
@@ -522,7 +523,7 @@ void RamLoader::fillPageData(Page* pagePtr) {
 #endif
     if (mAccessWatch) {
         bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data);
+                                          page.data, mIsQuickboot);
         if (!res) {
             mHasError = true;
         }
@@ -551,7 +552,7 @@ bool RamLoader::readAllPages() {
     for (Page& page : mIndex.pages) {
         if (page.sizeOnDisk) {
             sortedPages.emplace_back(&page);
-        } else {
+        } else if (!mIsQuickboot) {
             zeroOutPage(page);
         }
     }

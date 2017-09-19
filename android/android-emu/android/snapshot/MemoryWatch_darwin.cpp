@@ -14,6 +14,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/snapshot/MacSegvHandler.h"
 
@@ -71,11 +72,24 @@ public:
         mBackgroundLoadingThread.start();
     }
 
-    bool fillPage(void* start, size_t length, const void* data) {
+    bool fillPage(void* start, size_t length, const void* data,
+                  bool isQuickboot) {
         android::base::AutoLock lock(mLock);
         mprotect(start, length, PROT_READ | PROT_WRITE | PROT_EXEC);
+        bool remapNeeded = false;
         if (!data) {
-            memset(start, 0x0, length);
+            // Remapping:
+            // Is zero data, so try to use an existing zero page in the OS
+            // instead of memset which might cause more memory to be resident.
+            if (!isQuickboot &&
+                (MAP_FAILED == mmap(start, length,
+                                   PROT_READ | PROT_WRITE | PROT_EXEC,
+                                   MAP_FIXED | MAP_PRIVATE | MAP_ANON, -1, 0))) {
+                memset(start, 0x0, length);
+                remapNeeded = false;
+            } else {
+                remapNeeded = true;
+            }
         } else {
             memcpy(start, data, length);
         }
@@ -83,7 +97,13 @@ public:
             bool found = false;
             uint64_t gpa = hva2gpa_call(start, &found);
             if (found) {
-                hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                // Restore the mapping because we might have re-mapped above.
+                if (remapNeeded) {
+                    hv_vm_unmap(gpa, length);
+                    hv_vm_map(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                } else {
+                    hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                }
             }
         }
         return true;
@@ -145,9 +165,10 @@ void MemoryAccessWatch::doneRegistering() {
     if (mImpl) mImpl->doneRegistering();
 }
 
-bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data) {
+bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
+                                 bool isQuickboot) {
     if (!mImpl) return false;
-    return mImpl->fillPage(ptr, length, data);
+    return mImpl->fillPage(ptr, length, data, isQuickboot);
 }
 
 }  // namespace snapshot
