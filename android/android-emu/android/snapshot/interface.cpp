@@ -28,7 +28,7 @@ AndroidSnapshotStatus androidSnapshot_prepareForLoading(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_load(const char* name) {
-    auto res = Snapshotter::get().load(name);
+    auto res = Snapshotter::get().load(false /* is not Quickboot */, name);
     if (res != OperationStatus::Ok) {
         // Check if the error is about something done as just a check or
         // we've started actually loading the VM data

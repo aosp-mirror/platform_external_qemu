@@ -44,7 +44,8 @@ public:
     bool valid() const;
     bool registerMemoryRange(void* start, size_t length);
     void doneRegistering();
-    bool fillPage(void* ptr, size_t length, const void* data);
+    bool fillPage(void* ptr, size_t length, const void* data,
+                  bool isQuickboot);
 
 private:
     class Impl;
