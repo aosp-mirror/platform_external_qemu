@@ -1016,15 +1016,10 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
     }
 
     /** ENCRYPTION KEY PARTITION */
-    if (!opts->encryption_key) {
-      str_reset_nocopy(&opts->encryption_key, avdInfo_getEncryptionKeyImagePath(avd));
-      if (opts->encryption_key) {
-        D("autoconfig: -encryption-key %s", opts->encryption_key);
-      }
-    }
-
     if (opts->encryption_key) {
-      str_reset(&hw->disk_encryptionKeyPartition_path, opts->encryption_key);
+        str_reset(&hw->disk_encryptionKeyPartition_path, opts->encryption_key);
+    } else {
+        str_reset_nocopy(&hw->disk_encryptionKeyPartition_path, avdInfo_getEncryptionKeyImagePath(avd));
     }
 
     /** SD CARD PARTITION */
