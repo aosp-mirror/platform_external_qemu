@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7b4257f7_e1f7bf90",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T19:16:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6072d068_bf76bb8c",
+      "range": {
+        "startLine": 87,
+        "startChar": 19,
+        "endLine": 87,
+        "endChar": 31
+      },
+      "revId": "7c1ae5d1c447700f21e7fa5ca2c20a96e46e4d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b710877e_e2230e28",
         "filename": "android/android-emu/android/base/threads/WorkerThread.h",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5623c7a8_14416d25",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T19:16:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b710877e_e2230e28",
+      "range": {
+        "startLine": 101,
+        "startChar": 20,
+        "endLine": 101,
+        "endChar": 24
+      },
+      "revId": "7c1ae5d1c447700f21e7fa5ca2c20a96e46e4d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ba6a9f04_1c55ec88",
         "filename": "android/android-emu/android/base/threads/WorkerThread.h",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2017-09-19T18:52:45Z",
       "side": 1,
       "message": "functions implemented inplace are inline by default",
+      "range": {
+        "startLine": 119,
+        "startChar": 4,
+        "endLine": 119,
+        "endChar": 10
+      },
+      "revId": "7c1ae5d1c447700f21e7fa5ca2c20a96e46e4d8f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eeeff0fa_c7b2c4b0",
+        "filename": "android/android-emu/android/base/threads/WorkerThread.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-19T19:16:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ba6a9f04_1c55ec88",
       "range": {
         "startLine": 119,
         "startChar": 4,
