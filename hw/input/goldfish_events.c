@@ -880,6 +880,7 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
 
     /* Register global variable. */
     assert(s_evdev == NULL);
+    assert(s->state == 0);
     s_evdev = s;
 }
 
@@ -887,10 +888,8 @@ static void goldfish_evdev_reset(DeviceState *dev)
 {
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev, TYPE_GOLDFISHEVDEV);
 
-    s->state = STATE_INIT;
     s->first = 0;
     s->last = 0;
-    s->state = 0;
 }
 
 static Property goldfish_evdev_props[] = {

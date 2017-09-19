@@ -92,6 +92,7 @@ static void rotary_evdev_realize(DeviceState *dev, Error **errp)
 
     /* Register global variable. */
     assert(s_evdev == NULL);
+    assert(s->state == 0);
     s_evdev = s;
 }
 
@@ -99,10 +100,8 @@ static void rotary_evdev_reset(DeviceState *dev)
 {
     GoldfishEvDevState *s = GOLDFISHEVDEV(dev, TYPE_ROTARYEVDEV);
 
-    s->state = STATE_INIT;
     s->first = 0;
     s->last = 0;
-    s->state = 0;
 }
 
 static void rotary_evdev_class_init(ObjectClass *klass, void *data)
