@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "931a9fcc_3e9ed982",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-20T15:12:05Z",
+      "side": 1,
+      "message": "Does this mean at some point we should have a stylesheet just for the overlay?",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 72
+      },
+      "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f0880c47_93b766e1",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-20T15:12:05Z",
+      "side": 1,
+      "message": "nit: the whole window opacity seems to affect the \"Saving state...\" text as well making it translucent, which can be more difficult to read. Any way to make the text completely opaque as well, like if there\u0027s a way to set opacity of the window background alone?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 36
+      },
+      "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
