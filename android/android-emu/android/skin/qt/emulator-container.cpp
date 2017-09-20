@@ -11,16 +11,17 @@
 
 #include "android/skin/qt/emulator-container.h"
 
+#include "android/skin/qt/ModalOverlay.h"
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
 
-#include <QtCore>
 #include <QApplication>
 #include <QObject>
 #include <QScrollBar>
 #include <QStyle>
 #include <QStyleFactory>
+#include <QtCore>
 
 #include <algorithm>
 
@@ -70,11 +71,17 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 #endif  // __APPLE__
 
     mResizeTimer.setSingleShot(true);
-    QObject::connect(&mResizeTimer, SIGNAL(timeout()), this,
-                     SLOT(slot_resizeDone()));
+    connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
+
+    connect(this, SIGNAL(showModalOverlay(QString)), this,
+            SLOT(slot_showModalOverlay(QString)));
+    connect(this, SIGNAL(hideModalOverlay()), this,
+            SLOT(slot_hideModalOverlay()));
 }
 
 EmulatorContainer::~EmulatorContainer() {
+    slot_hideModalOverlay();
+
     // This object is owned directly by |window|.  Avoid circular
     // destructor calls by explicitly unsetting the widget.
     takeWidget();
@@ -146,22 +153,32 @@ void EmulatorContainer::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
         if (windowState() & Qt::WindowMaximized) {
             showNormal();
+            if (mModalOverlay) {
+                mModalOverlay->showNormal();
+            }
         } else if (windowState() & Qt::WindowMinimized) {
             // In case the window was minimized without pressing the toolbar's
             // minimize button (which is possible on some window managers),
             // remember to hide the toolbar (which will also hide the extended
             // window, if it exists).
             mEmulatorWindow->toolWindow()->hide();
+            if (mModalOverlay) {
+                mModalOverlay->hide();
+            }
         }
     }
 }
 
 void EmulatorContainer::closeEvent(QCloseEvent* event) {
+    slot_hideModalOverlay();
     mEmulatorWindow->closeEvent(event);
 }
 
 void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     mEmulatorWindow->toolWindow()->raise();
+    if (mModalOverlay) {
+        mModalOverlay->raise();
+    }
     if (mEmulatorWindow->isInZoomMode()) {
         mEmulatorWindow->showZoomIfNotUserHidden();
     }
@@ -179,12 +196,14 @@ void EmulatorContainer::moveEvent(QMoveEvent* event) {
     QScrollArea::moveEvent(event);
     mEmulatorWindow->simulateWindowMoved(event->pos());
     mEmulatorWindow->toolWindow()->dockMainWindow();
+    adjustModalOverlayGeometry();
 }
 
 void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     QScrollArea::resizeEvent(event);
     mEmulatorWindow->toolWindow()->dockMainWindow();
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
+    adjustModalOverlayGeometry();
 
     if (mRotating) {
         // Rotation event also generate a resize, but it shouldn't recalculate
@@ -194,8 +213,8 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
         mRotating = false;
     } else {
         // To solve some resizing edge cases on OSX/Windows/KDE, start a short
-        // timer that will attempt to trigger a resize in case the user's mouse has
-        // not entered the window again.
+        // timer that will attempt to trigger a resize in case the user's mouse
+        // has not entered the window again.
         startResizeTimer();
     }
 }
@@ -214,17 +233,18 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     // AFTER the user has finished dragging the window. This means that the
     // toolbar window will stay in its place as the user drags the main window,
     // and will snap back to it after the drag operation finishes.
-    // The behavior we actually want is for the toolbar to follow the main window
-    // as it is being dragged (i.e. same as on Win and Linux).
-    // The only way to achieve this on OS X is apparently to make the tool window
-    // a "child" of the main window (using OS X's native API).
+    // The behavior we actually want is for the toolbar to follow the main
+    // window as it is being dragged (i.e. same as on Win and Linux). The only
+    // way to achieve this on OS X is apparently to make the tool window a
+    // "child" of the main window (using OS X's native API).
     Q_ASSERT(mEmulatorWindow->toolWindow());
-    mEmulatorWindow->toolWindow()->showNormal(); // force creation of native window id
+    mEmulatorWindow->toolWindow()
+            ->showNormal();  // force creation of native window id
     WId tool_wid = mEmulatorWindow->toolWindow()->effectiveWinId();
     Q_ASSERT(tool_wid && wid);
     tool_wid = (WId)getNSWindow((void*)tool_wid);
     nsWindowAdopt((void*)wid, (void*)tool_wid);
-#endif // __APPLE__
+#endif  // __APPLE__
 
     // showEvent() gets called when the emulator is minimized because we are
     // calling showMinimized(), which *technically* is a show event. We only
@@ -250,9 +270,12 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
             event->type = kEventForceRedraw;
             mEmulatorWindow->queueSkinEvent(event);
         }
-#endif // __linux__
+#endif  // __linux__
         mEmulatorWindow->toolWindow()->show();
         mEmulatorWindow->toolWindow()->dockMainWindow();
+        if (mModalOverlay) {
+            mModalOverlay->showNormal();
+        }
     }
 }
 
@@ -263,7 +286,7 @@ void EmulatorContainer::showMinimized() {
 // and then remove the button when it gets reshown.
 #ifdef __linux__
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint);
-#endif // __linux__
+#endif  // __linux__
     QScrollArea::showMinimized();
 }
 
@@ -318,6 +341,23 @@ void EmulatorContainer::slot_resizeDone() {
     }
 }
 
+void EmulatorContainer::slot_showModalOverlay(QString text) {
+    slot_hideModalOverlay();
+    mModalOverlay = new Ui::ModalOverlay(text, this);
+    adjustModalOverlayGeometry();
+    mModalOverlay->show();
+    if (windowState() & Qt::WindowMinimized) {
+        mModalOverlay->hide();
+    }
+}
+
+void EmulatorContainer::slot_hideModalOverlay() {
+    if (mModalOverlay) {
+        mModalOverlay->hide([](Ui::ModalOverlay* mo) { mo->deleteLater(); });
+        mModalOverlay = nullptr;
+    }
+}
+
 void EmulatorContainer::startResizeTimer() {
     // We use a longer timer on Linux because it is not needed on non-KDE
     // systems, so we want it to be less noticeable.
@@ -326,4 +366,16 @@ void EmulatorContainer::startResizeTimer() {
 #else
     mResizeTimer.start(500);
 #endif
+}
+
+void EmulatorContainer::adjustModalOverlayGeometry() {
+    if (!mModalOverlay) {
+        return;
+    }
+
+    auto overlaySize = QSize(std::min(300, width()), std::min(300, height()));
+    mModalOverlay->resize(overlaySize, size());
+    mModalOverlay->move(
+            mapToGlobal({(width() - mModalOverlay->width()) / 2,
+                         (height() - mModalOverlay->height()) / 2}));
 }
