@@ -122,7 +122,7 @@ public:
     }
 
     void scheduleCallback(BaseLooper::TaskCallback&& callback) override {
-        (new TaskImpl(this, std::move(callback)))->schedule();
+        (new TaskImpl(this, std::move(callback), true))->schedule();
     }
 
     //
