@@ -11,13 +11,16 @@
 
 #pragma once
 
-#include <QtCore>
 #include <QObject>
 #include <QScrollArea>
 #include <QTimer>
 #include <QWidget>
+#include <QtCore>
 
 class EmulatorQtWindow;
+namespace Ui {
+class ModalOverlay;
+}
 
 class EmulatorContainer : public QScrollArea {
     Q_OBJECT
@@ -43,13 +46,21 @@ public:
 
     void prepareForRotation() { mRotating = true; }
 
+signals:
+    void showModalOverlay(QString text);
+    void hideModalOverlay();
+
 private slots:
     void slot_resizeDone();
+    void slot_showModalOverlay(QString text);
+    void slot_hideModalOverlay();
 
 private:
     void startResizeTimer();
+    void adjustModalOverlayGeometry();
 
     EmulatorQtWindow* mEmulatorWindow;
+    Ui::ModalOverlay* mModalOverlay = nullptr;
     QList<QEvent::Type> mEventBuffer;
     QTimer mResizeTimer;
     bool mRotating = false;
