@@ -117,6 +117,30 @@
       "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9edf7ca8_4f7d20cc",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-20T23:31:06Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "03f6b495_7061bc67",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 36
+      },
+      "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
