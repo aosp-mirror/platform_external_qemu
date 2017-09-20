@@ -69,6 +69,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
+    android/skin/qt/ModalOverlay.cpp \
     android/skin/qt/size-tweaker.cpp \
     android/skin/qt/QtLooper.cpp \
     android/skin/qt/qt-ui-commands.cpp \
@@ -108,6 +109,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.h \
     android/skin/qt/extended-window.h \
     android/skin/qt/raised-material-button.h \
+    android/skin/qt/ModalOverlay.h \
     android/skin/qt/size-tweaker.h \
     android/skin/qt/QtLooperImpl.h \
     android/skin/qt/tool-window.h \

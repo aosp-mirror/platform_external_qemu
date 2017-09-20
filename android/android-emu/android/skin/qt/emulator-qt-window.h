@@ -333,8 +333,6 @@ private:
 
     void runAdbShellPowerDownAndQuit();
 
-    void showSnapshotProgressDialog(const QString& text);
-
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
@@ -342,7 +340,6 @@ private:
 
     QTimer mExitSavingTimer;
     QTimer mLoadingTimer;
-    android::base::MemberOnDemandT<QProgressDialog, QWidget*> mSnapshotProgressDialog;
 
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
