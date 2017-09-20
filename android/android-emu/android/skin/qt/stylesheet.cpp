@@ -366,4 +366,8 @@ const QString& stylesheetFontSize(FontSize size) {
     }
 }
 
+const char* stylesheetHugeFontSize() {
+    return "15pt";
+}
+
 }  // namespace Ui
