@@ -279,7 +279,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
       mStartupDialog([this] { return std::make_tuple(this); }),
-      mSnapshotProgressDialog([this] { return std::make_tuple(this); }),
       mToolWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
@@ -529,12 +528,12 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     mExitSavingTimer.setSingleShot(true);
     connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
-        showSnapshotProgressDialog(tr("Saving state..."));
+        mContainer.showModalOverlay(tr("Saving state..."));
     });
 
     mLoadingTimer.setSingleShot(true);
     connect(&mLoadingTimer, &QTimer::timeout, [this]() {
-        showSnapshotProgressDialog(tr("Loading state..."));
+        mContainer.showModalOverlay(tr("Loading state..."));
     });
 
     using android::snapshot::Snapshotter;
@@ -557,10 +556,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                               : mLoadingTimer;
                         timer.stop();
                         timer.disconnect();
-                        if (mSnapshotProgressDialog.hasInstance()) {
-                            mSnapshotProgressDialog->hide();
-                            mSnapshotProgressDialog.clear();
-                        }
+                        mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
                         }
@@ -599,10 +595,7 @@ EmulatorQtWindow::~EmulatorQtWindow() {
     mExitSavingTimer.disconnect();
     mLoadingTimer.stop();
     mLoadingTimer.disconnect();
-    if (mSnapshotProgressDialog.hasInstance()) {
-        mSnapshotProgressDialog->hide();
-        mSnapshotProgressDialog.clear();
-    }
+    mContainer.hideModalOverlay();
 
     delete mMainLoopThread;
 }
@@ -783,10 +776,7 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         mExitSavingTimer.disconnect();
         mLoadingTimer.stop();
         mLoadingTimer.disconnect();
-        if (mSnapshotProgressDialog.hasInstance()) {
-            mSnapshotProgressDialog->hide();
-            mSnapshotProgressDialog.clear();
-        }
+        mContainer.hideModalOverlay();
 
         if (mToolWindow) {
             mToolWindow->hide();
@@ -2181,28 +2171,6 @@ void EmulatorQtWindow::runAdbShellPowerDownAndQuit() {
                 queueQuitEvent();
             },
             5000); // for qemu1, reboot -p will shutdown guest but hangs, allow 5s
-}
-
-void EmulatorQtWindow::showSnapshotProgressDialog(const QString& text) {
-    mSnapshotProgressDialog->setWindowTitle(tr("Android Emulator"));
-    // Hide close/minimize/maximize buttons
-    mSnapshotProgressDialog->setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint |
-                                            Qt::WindowTitleHint);
-    // Make sure the icon is the same as in the main window
-    mSnapshotProgressDialog->setWindowIcon(QApplication::windowIcon());
-
-    auto label = new QLabel();
-    label->setAlignment(Qt::AlignCenter);
-    label->setText(text);
-    mSnapshotProgressDialog->setLabel(label);
-    auto bar = new QProgressBar();
-    bar->setAlignment(Qt::AlignHCenter);
-    mSnapshotProgressDialog->setBar(bar);
-    mSnapshotProgressDialog->setRange(0, 0);            // Don't show % complete
-    mSnapshotProgressDialog->setCancelButton(nullptr);  // None
-    mSnapshotProgressDialog->setMinimumSize(
-                mSnapshotProgressDialog->sizeHint());  // Recalculate size.
-    mSnapshotProgressDialog->show();
 }
 
 void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
