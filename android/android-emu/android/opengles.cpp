@@ -186,8 +186,9 @@ android_asyncReadbackSupported() {
     if (sRenderer) {
         return sRenderer->asyncReadbackSupported();
     } else {
-        crashhandler_die("tried to query async readback support "
-                         "before renderer initialized!");
+        D("tried to query async readback support "
+          "before renderer initialized. Likely guest rendering");
+        return false;
     }
 }
 
