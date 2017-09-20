@@ -355,4 +355,8 @@ const QString& stylesheetFontSize(bool large) {
             ->fontMap[large ? kFontLargeName : kFontMediumName];
 }
 
+const char* stylesheetHugeFontSize() {
+    return "15pt";
+}
+
 }  // namespace Ui

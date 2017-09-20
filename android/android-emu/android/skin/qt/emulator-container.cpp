@@ -12,6 +12,7 @@
 #include "android/skin/qt/emulator-container.h"
 
 #include "android/skin/qt/emulator-qt-window.h"
+#include "android/skin/qt/ModalOverlay.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
 
@@ -70,11 +71,17 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 #endif  // __APPLE__
 
     mResizeTimer.setSingleShot(true);
-    QObject::connect(&mResizeTimer, SIGNAL(timeout()), this,
-                     SLOT(slot_resizeDone()));
+    connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
+
+    connect(this, SIGNAL(showModalOverlay(QString)), this,
+            SLOT(slot_showModalOverlay(QString)));
+    connect(this, SIGNAL(hideModalOverlay()), this,
+            SLOT(slot_hideModalOverlay()));
 }
 
 EmulatorContainer::~EmulatorContainer() {
+    slot_hideModalOverlay();
+
     // This object is owned directly by |window|.  Avoid circular
     // destructor calls by explicitly unsetting the widget.
     takeWidget();
@@ -146,22 +153,32 @@ void EmulatorContainer::changeEvent(QEvent* event) {
     if (event->type() == QEvent::WindowStateChange) {
         if (windowState() & Qt::WindowMaximized) {
             showNormal();
+            if (mModalOverlay) {
+                mModalOverlay->showNormal();
+            }
         } else if (windowState() & Qt::WindowMinimized) {
             // In case the window was minimized without pressing the toolbar's
             // minimize button (which is possible on some window managers),
             // remember to hide the toolbar (which will also hide the extended
             // window, if it exists).
             mEmulatorWindow->toolWindow()->hide();
+            if (mModalOverlay) {
+                mModalOverlay->hide();
+            }
         }
     }
 }
 
 void EmulatorContainer::closeEvent(QCloseEvent* event) {
+    slot_hideModalOverlay();
     mEmulatorWindow->closeEvent(event);
 }
 
 void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     mEmulatorWindow->toolWindow()->raise();
+    if (mModalOverlay) {
+        mModalOverlay->raise();
+    }
     if (mEmulatorWindow->isInZoomMode()) {
         mEmulatorWindow->showZoomIfNotUserHidden();
     }
@@ -179,12 +196,18 @@ void EmulatorContainer::moveEvent(QMoveEvent* event) {
     QScrollArea::moveEvent(event);
     mEmulatorWindow->simulateWindowMoved(event->pos());
     mEmulatorWindow->toolWindow()->dockMainWindow();
+    if (mModalOverlay) {
+        mModalOverlay->move(event->pos());
+    }
 }
 
 void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     QScrollArea::resizeEvent(event);
     mEmulatorWindow->toolWindow()->dockMainWindow();
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
+    if (mModalOverlay) {
+        mModalOverlay->resize(event->size());
+    }
 
     if (mRotating) {
         // Rotation event also generate a resize, but it shouldn't recalculate
@@ -253,6 +276,9 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
 #endif // __linux__
         mEmulatorWindow->toolWindow()->show();
         mEmulatorWindow->toolWindow()->dockMainWindow();
+        if (mModalOverlay) {
+            mModalOverlay->showNormal();
+        }
     }
 }
 
@@ -315,6 +341,22 @@ void EmulatorContainer::slot_resizeDone() {
         mEmulatorWindow->doResize(this->size());
     } else {
         startResizeTimer();
+    }
+}
+
+void EmulatorContainer::slot_showModalOverlay(QString text) {
+    slot_hideModalOverlay();
+    mModalOverlay = new Ui::ModalOverlay(text, this);
+    mModalOverlay->move(mapToGlobal({}));
+    mModalOverlay->resize(size());
+    mModalOverlay->show();
+}
+
+void EmulatorContainer::slot_hideModalOverlay() {
+    if (mModalOverlay) {
+        mModalOverlay->hide(
+                [](Ui::ModalOverlay* mo) { mo->deleteLater(); });
+        mModalOverlay = nullptr;
     }
 }
 
