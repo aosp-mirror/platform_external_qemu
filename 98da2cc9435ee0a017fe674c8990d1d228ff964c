@@ -93,6 +93,30 @@
       "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03f6b495_7061bc67",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-20T23:30:10Z",
+      "side": 1,
+      "message": "looks like to work really well it needs way more code, and some changes to the animation. Let\u0027s leave it as it is for now",
+      "parentUuid": "5fce69dc_294d2c45",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 36
+      },
+      "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
