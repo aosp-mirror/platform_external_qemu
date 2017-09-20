@@ -302,10 +302,10 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     fb->m_asyncReadbackSupported = glesMaj > 2;
     if (fb->m_asyncReadbackSupported) {
-        DBG("Async readback supported");
+        DBG("Async readback supported\n");
         GL_LOG("Async readback supported");
     } else {
-        DBG("Async readback not supported");
+        DBG("Async readback not supported\n");
         GL_LOG("Async readback not supported");
     }
 
