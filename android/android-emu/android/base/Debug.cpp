@@ -62,7 +62,7 @@ bool IsDebuggerAttached() {
 #elif defined(__APPLE__)
     int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid() };
     struct kinfo_proc procInfo = {};
-    size_t infoSize;
+    size_t infoSize = sizeof(procInfo);
     const int res =
             sysctl(mib, arraySize(mib), &procInfo, &infoSize, nullptr, 0);
     if (res) {
