@@ -36,7 +36,8 @@
 static constexpr int kEventBufferSize = 8;
 
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
-    : mEmulatorWindow(window) {
+    : mEmulatorWindow(window),
+      mMessages([this] { return std::make_tuple(this); }) {
     mEventBuffer.reserve(kEventBufferSize);
     setFrameShape(QFrame::NoFrame);
     setWidget(window);
@@ -403,6 +404,5 @@ void EmulatorContainer::adjustMessagesOverlayGeometry() {
     auto w = std::min(width() - 2 * 15, std::max(300, (width() - 2 * 150)));
     mMessages->setFixedWidth(w);
     mMessages->adjustSize();
-    mMessages->move(mapToGlobal({}) +=
-                    {(width() - mMessages->width()) / 2, 0});
+    mMessages->move(mapToGlobal({}) += {(width() - mMessages->width()) / 2, 0});
 }
