@@ -1,4 +1,4 @@
-<!--Copyright (C) 2015 The Android Open Source Project
+<!--Copyright (C) 2015-2017 The Android Open Source Project
 
     This software is licensed under the terms of the GNU General Public
     License version 2, as published by the Free Software Foundation, and
@@ -243,5 +243,10 @@
         <file alias="diffuse-map.png">phone-model/model-diffuse-map.png</file>
         <file alias="frag.glsl">phone-model/frag.glsl</file>
         <file alias="vert.glsl">phone-model/vert.glsl</file>
+    </qresource>
+    <qresource prefix="/all">
+        <file alias="error">images/all/error.png</file>
+        <file alias="info">images/all/info.png</file>
+        <file alias="warning">images/all/warning.png</file>
     </qresource>
 </RCC>
