@@ -15,8 +15,13 @@
 // host-side sync service implementation.
 
 #include "android/base/Log.h"
+#include "android/crashreport/crash-handler.h"
 #include "android/emulation/GoldfishSyncCommandQueue.h"
 #include "android/emulation/goldfish_sync.h"
+#include "android/utils/stream.h"
+#include "android-qemu2-glue/base/files/QemuFileStream.h"
+
+using android::qemu::QemuFileStream;
 
 extern "C" {
 #include "hw/misc/goldfish_sync.h"
@@ -44,8 +49,18 @@ static const GoldfishSyncServiceOps kSyncServiceOps = {
                             uint64_t timeline) {
         if (sTriggerWaitFn) {
             sTriggerWaitFn(glsync_ptr, thread_ptr, timeline);
+        } else {
+            crashhandler_die("Error: no trigger wait registered!");
         }
-    }
+    },
+    .save = [](QEMUFile* file) {
+        QemuFileStream stream(file);
+        android::GoldfishSyncCommandQueue::save(&stream);
+    },
+    .load = [](QEMUFile* file) {
+        QemuFileStream stream(file);
+        android::GoldfishSyncCommandQueue::load(&stream);
+    },
 };
 
 bool qemu_android_sync_init(android::VmLock* vmLock) {

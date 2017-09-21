@@ -43,6 +43,9 @@ typedef struct {
     void (*trigger_host_wait)(uint64_t glsync_ptr,
                               uint64_t thread_ptr,
                               uint64_t timeline);
+    /* Save/Load hooks for pending sync operations. */
+    void (*save)(QEMUFile* file);
+    void (*load)(QEMUFile* file);
 } GoldfishSyncServiceOps;
 
 /* Register the host-side sync service callbacks with the device. This
