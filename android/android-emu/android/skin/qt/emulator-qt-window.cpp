@@ -442,6 +442,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     // Our paintEvent() always fills the whole window.
     setAttribute(Qt::WA_OpaquePaintEvent);
+    setAttribute(Qt::WA_NoSystemBackground);
 
     bool shortcutBool =
             settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false)
@@ -981,7 +982,9 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
             mBackingBitmapChanged = false;
         }
         if (!mScaledBackingImage.isNull()) {
-            mScaledBackingImage.setDevicePixelRatio(devicePixelRatio());
+            if (mScaledBackingImage.devicePixelRatio() != devicePixelRatioF()) {
+                mScaledBackingImage.setDevicePixelRatio(devicePixelRatioF());
+            }
             painter.drawPixmap(r, mScaledBackingImage);
         }
     }

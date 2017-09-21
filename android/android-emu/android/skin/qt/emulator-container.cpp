@@ -36,7 +36,8 @@
 static constexpr int kEventBufferSize = 8;
 
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
-    : mEmulatorWindow(window) {
+    : mEmulatorWindow(window),
+      mMessages([this] { return std::make_tuple(this); }) {
     mEventBuffer.reserve(kEventBufferSize);
     setFrameShape(QFrame::NoFrame);
     setWidget(window);
@@ -85,6 +86,9 @@ EmulatorContainer::~EmulatorContainer() {
     // This object is owned directly by |window|.  Avoid circular
     // destructor calls by explicitly unsetting the widget.
     takeWidget();
+
+    // Same thing with the parent here.
+    mMessages->setParent(nullptr);
 }
 
 bool EmulatorContainer::event(QEvent* e) {
@@ -156,6 +160,7 @@ void EmulatorContainer::changeEvent(QEvent* event) {
             if (mModalOverlay) {
                 mModalOverlay->showNormal();
             }
+            mMessages->showNormal();
         } else if (windowState() & Qt::WindowMinimized) {
             // In case the window was minimized without pressing the toolbar's
             // minimize button (which is possible on some window managers),
@@ -165,6 +170,7 @@ void EmulatorContainer::changeEvent(QEvent* event) {
             if (mModalOverlay) {
                 mModalOverlay->hide();
             }
+            mMessages->hide();
         }
     }
 }
@@ -179,6 +185,7 @@ void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     if (mModalOverlay) {
         mModalOverlay->raise();
     }
+    mMessages->raise();
     if (mEmulatorWindow->isInZoomMode()) {
         mEmulatorWindow->showZoomIfNotUserHidden();
     }
@@ -197,6 +204,7 @@ void EmulatorContainer::moveEvent(QMoveEvent* event) {
     mEmulatorWindow->simulateWindowMoved(event->pos());
     mEmulatorWindow->toolWindow()->dockMainWindow();
     adjustModalOverlayGeometry();
+    adjustMessagesOverlayGeometry();
 }
 
 void EmulatorContainer::resizeEvent(QResizeEvent* event) {
@@ -204,6 +212,7 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     mEmulatorWindow->toolWindow()->dockMainWindow();
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
     adjustModalOverlayGeometry();
+    adjustMessagesOverlayGeometry();
 
     if (mRotating) {
         // Rotation event also generate a resize, but it shouldn't recalculate
@@ -276,6 +285,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
         if (mModalOverlay) {
             mModalOverlay->showNormal();
         }
+        mMessages->showNormal();
     }
 }
 
@@ -306,6 +316,12 @@ QSize EmulatorContainer::viewportSize() const {
                      (horizontal->isVisible() ? horizontal->height() : 0));
 
     return output;
+}
+
+Ui::OverlayMessageCenter& EmulatorContainer::messageCenter() {
+    connect(mMessages.ptr(), SIGNAL(resized()), this,
+            SLOT(slot_messagesResized()), Qt::UniqueConnection);
+    return mMessages.get();
 }
 
 #ifdef __linux__
@@ -358,6 +374,10 @@ void EmulatorContainer::slot_hideModalOverlay() {
     }
 }
 
+void EmulatorContainer::slot_messagesResized() {
+    adjustMessagesOverlayGeometry();
+}
+
 void EmulatorContainer::startResizeTimer() {
     // We use a longer timer on Linux because it is not needed on non-KDE
     // systems, so we want it to be less noticeable.
@@ -378,4 +398,11 @@ void EmulatorContainer::adjustModalOverlayGeometry() {
     mModalOverlay->move(
             mapToGlobal({(width() - mModalOverlay->width()) / 2,
                          (height() - mModalOverlay->height()) / 2}));
+}
+
+void EmulatorContainer::adjustMessagesOverlayGeometry() {
+    auto w = std::min(width() - 2 * 15, std::max(300, (width() - 2 * 150)));
+    mMessages->setFixedWidth(w);
+    mMessages->adjustSize();
+    mMessages->move(mapToGlobal({}) += {(width() - mMessages->width()) / 2, 0});
 }
