@@ -18,6 +18,8 @@
 
 namespace android {
 
+using base::Stream;
+
 base::LazyInstance<GoldfishSyncCommandQueue>
 GoldfishSyncCommandQueue::sCommandQueue = LAZY_INSTANCE_INIT;
 
@@ -47,6 +49,33 @@ void GoldfishSyncCommandQueue::hostSignal(uint32_t cmd,
     sync_data.hostcmd_handle = hostcmd_handle;
 
     queue->queueDeviceOperation(sync_data);
+}
+
+// static
+void GoldfishSyncCommandQueue::save(Stream* stream) {
+    GoldfishSyncCommandQueue* queue = sCommandQueue.ptr();
+    stream->putBe32(queue->numPending());
+    queue->forEachPendingOperation([stream](const GoldfishSyncWakeInfo& wakeInfo) {
+            stream->putBe64(wakeInfo.handle);
+            stream->putBe64(wakeInfo.hostcmd_handle);
+            stream->putBe32(wakeInfo.cmd);
+            stream->putBe32(wakeInfo.time_arg);
+    });
+}
+
+// static
+void GoldfishSyncCommandQueue::load(Stream* stream) {
+    GoldfishSyncCommandQueue* queue = sCommandQueue.ptr();
+    uint32_t pending = stream->getBe32();
+    for (uint32_t i = 0; i < pending; i++) {
+        GoldfishSyncWakeInfo cmd = {
+            stream->getBe64(), // handle
+            stream->getBe64(), // hostcmd_handle
+            stream->getBe32(), // cmd
+            stream->getBe32(), // time_arg
+        };
+        queue->queueDeviceOperation(cmd);
+    }
 }
 
 void GoldfishSyncCommandQueue::performDeviceOperation

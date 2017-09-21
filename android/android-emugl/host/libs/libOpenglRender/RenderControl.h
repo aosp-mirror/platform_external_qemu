@@ -19,5 +19,6 @@
 #include "renderControl_dec.h"
 
 void initRenderControlContext(renderControl_decoder_context_t *dec);
+void registerTriggerWait();
 
 #endif
