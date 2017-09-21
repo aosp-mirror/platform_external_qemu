@@ -407,6 +407,40 @@ static const MemoryRegionOps goldfish_sync_iomem_ops = {
     .impl.max_access_size = 4
 };
 
+static void
+save_pending_cmds(QEMUFile* file,
+                  struct goldfish_sync_pending_cmd* cmd) {
+    qemu_put_byte(file, cmd != 0);
+    if (!cmd) return;
+
+    qemu_put_be64(file, cmd->handle);
+    qemu_put_be64(file, cmd->hostcmd_handle);
+    qemu_put_be64(file, cmd->cmd);
+    qemu_put_be64(file, cmd->time_arg);
+    qemu_put_byte(file, cmd->next != 0);
+
+    if (cmd->next) {
+        save_pending_cmds(file, cmd->next);
+    }
+}
+
+static struct goldfish_sync_pending_cmd*
+load_pending_cmds(QEMUFile* file) {
+    struct goldfish_sync_pending_cmd* res;
+
+    if (!qemu_get_byte(file)) {
+        return NULL;
+    }
+
+    res = goldfish_sync_new_cmd();
+    res->handle = qemu_get_be64(file);
+    res->hostcmd_handle = qemu_get_be64(file);
+    res->cmd = qemu_get_be64(file);
+    res->time_arg = qemu_get_be64(file);
+    res->next = load_pending_cmds(file);
+    return res;
+}
+
 // Save/load order:
 // 1. Pipe
 // 2. Sync
@@ -414,14 +448,27 @@ static const MemoryRegionOps goldfish_sync_iomem_ops = {
 // in IRQ seq?)
 static void goldfish_sync_save(QEMUFile* file, void* opaque) {
     struct goldfish_sync_state* s = opaque;
+
     qemu_put_be64(file, s->batch_cmd_addr);
     qemu_put_be64(file, s->batch_guestcmd_addr);
+
+    save_pending_cmds(file, s->pending);
+
+    service_ops->save(file);
 }
 
 static int goldfish_sync_load(QEMUFile* file, void* opaque, int version_id) {
     struct goldfish_sync_state* s = opaque;
     s->batch_cmd_addr = qemu_get_be64(file);
     s->batch_guestcmd_addr = qemu_get_be64(file);
+
+    s->pending = load_pending_cmds(file);
+    s->first_pending_cmd = s->pending;
+
+    // Do pending cmds after we restored the ones already
+    // in the state struct.
+    service_ops->load(file);
+
     return 0;
 }
 
