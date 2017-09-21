@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/skin/qt/OverlayMessageCenter.h"
+
 #include <QObject>
 #include <QScrollArea>
 #include <QTimer>
@@ -46,6 +48,8 @@ public:
 
     void prepareForRotation() { mRotating = true; }
 
+    Ui::OverlayMessageCenter& messageCenter() { return mMessages; }
+
 signals:
     void showModalOverlay(QString text);
     void hideModalOverlay();
@@ -54,12 +58,15 @@ private slots:
     void slot_resizeDone();
     void slot_showModalOverlay(QString text);
     void slot_hideModalOverlay();
+    void slot_messagesResized();
 
 private:
     void startResizeTimer();
+    void adjustMessagesOverlayGeometry();
 
     EmulatorQtWindow* mEmulatorWindow;
     Ui::ModalOverlay* mModalOverlay = nullptr;
+    Ui::OverlayMessageCenter mMessages;
     QList<QEvent::Type> mEventBuffer;
     QTimer mResizeTimer;
     bool mRotating = false;
