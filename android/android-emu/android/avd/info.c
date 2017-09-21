@@ -1328,6 +1328,16 @@ bool has_vendor(const AvdInfo* i) {
 }
 
 static
+bool has_system_qemu(const AvdInfo *i) {
+    char *path = avdInfo_getSystemImagePath(i);
+    if (path) {
+        free(path);
+        return true;
+    }
+    return false;
+}
+
+static
 bool has_encryption(const AvdInfo* i) {
     char* path = avdInfo_getEncryptionKeyImagePath(i);
     if (path) {
@@ -1395,6 +1405,10 @@ avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
 char*
 avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i )
 {
+    if (!has_system_qemu(i)) {
+        return NULL;
+    }
+
     if (is_x86ish(i)) {
         return strdup("/dev/block/pci/pci0000:00/0000:00:03.0/by-name/system");
     } else {
