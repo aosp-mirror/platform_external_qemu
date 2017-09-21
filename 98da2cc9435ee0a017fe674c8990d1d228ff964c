@@ -49,6 +49,29 @@
     },
     {
       "key": {
+        "uuid": "d8364c4c_d9c25862",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1136049
+      },
+      "writtenOn": "2017-09-21T16:23:24Z",
+      "side": 1,
+      "message": "I don\u0027t think we should use this version of the spinner.  I created this GIF for Weilun for Bug Report but the background was different so this could look really bad in other contexts.\n\nI currently have an animated SVG version of the spinner that I think is the ideal asset we want to use.  However, Weilun didn\u0027t have time to investigate how to properly render one in Qt.  I think we should do this now because this will not be the last time this spinner will be used.",
+      "range": {
+        "startLine": 42,
+        "startChar": 24,
+        "endLine": 42,
+        "endChar": 41
+      },
+      "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0880c47_93b766e1",
         "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
         "patchSetId": 1
