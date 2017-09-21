@@ -171,9 +171,13 @@ static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
 
+void registerTriggerWait() {
+    emugl_sync_register_trigger_wait(rcTriggerWait);
+}
+
 static GLint rcGetRendererVersion()
 {
-    emugl_sync_register_trigger_wait(rcTriggerWait);
+    registerTriggerWait();
 
     sGrallocSync.ptr();
     return rendererVersion;

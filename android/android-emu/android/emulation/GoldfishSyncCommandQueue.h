@@ -16,6 +16,7 @@
 #include "android/emulation/DeviceContextRunner.h"
 #include "android/emulation/goldfish_sync.h"
 #include "android/emulation/VmLock.h"
+#include "android/utils/stream.h"
 
 #include <vector>
 
@@ -79,7 +80,12 @@ public:
                            uint32_t time_arg,
                            uint64_t hostcmd_handle);
 
+    // Save/load pending operations.
+    static void save(android::base::Stream* stream);
+    static void load(android::base::Stream* stream);
+
 private:
+
     static base::LazyInstance<GoldfishSyncCommandQueue> sCommandQueue;
     virtual void performDeviceOperation(const GoldfishSyncWakeInfo& cmd) override;
 
