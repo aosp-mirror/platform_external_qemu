@@ -442,6 +442,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     // Our paintEvent() always fills the whole window.
     setAttribute(Qt::WA_OpaquePaintEvent);
+    setAttribute(Qt::WA_NoSystemBackground);
 
     bool shortcutBool =
             settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false)
@@ -880,6 +881,29 @@ void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
                      event->pos());
+
+    static Ui::OverlayMessageCenter::Icon icon = Ui::OverlayMessageCenter::Icon::None;
+    static int timeout = 5000;
+
+    mContainer.messageCenter().addMessage("Test message", icon, timeout);
+
+    switch (timeout) {
+    case Ui::OverlayMessageCenter::kDefaultTimeoutMs:
+        timeout = 5000;
+        break;
+    case Ui::OverlayMessageCenter::kInfiniteTimeout:
+        timeout = Ui::OverlayMessageCenter::kDefaultTimeoutMs;
+        break;
+    default:
+        timeout = Ui::OverlayMessageCenter::kInfiniteTimeout;
+        break;
+    }
+
+    if (icon == Ui::OverlayMessageCenter::Icon::Error) {
+        icon = Ui::OverlayMessageCenter::Icon::None;
+    } else {
+        icon = static_cast<Ui::OverlayMessageCenter::Icon>(int(icon) + 1);
+    }
 }
 
 // Set the window flags based on whether we should
@@ -981,7 +1005,9 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
             mBackingBitmapChanged = false;
         }
         if (!mScaledBackingImage.isNull()) {
-            mScaledBackingImage.setDevicePixelRatio(devicePixelRatio());
+            if (mScaledBackingImage.devicePixelRatio() != devicePixelRatioF()) {
+                mScaledBackingImage.setDevicePixelRatio(devicePixelRatioF());
+            }
             painter.drawPixmap(r, mScaledBackingImage);
         }
     }

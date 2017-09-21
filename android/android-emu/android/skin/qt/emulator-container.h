@@ -11,6 +11,9 @@
 
 #pragma once
 
+#include "android/base/memory/OnDemand.h"
+#include "android/skin/qt/OverlayMessageCenter.h"
+
 #include <QObject>
 #include <QScrollArea>
 #include <QTimer>
@@ -46,6 +49,8 @@ public:
 
     void prepareForRotation() { mRotating = true; }
 
+    Ui::OverlayMessageCenter& messageCenter();
+
 signals:
     void showModalOverlay(QString text);
     void hideModalOverlay();
@@ -54,12 +59,16 @@ private slots:
     void slot_resizeDone();
     void slot_showModalOverlay(QString text);
     void slot_hideModalOverlay();
+    void slot_messagesResized();
 
 private:
     void startResizeTimer();
+    void adjustMessagesOverlayGeometry(bool resized);
 
     EmulatorQtWindow* mEmulatorWindow;
     Ui::ModalOverlay* mModalOverlay = nullptr;
+    android::base::MemberOnDemandT<Ui::OverlayMessageCenter, QWidget*>
+            mMessages;
     QList<QEvent::Type> mEventBuffer;
     QTimer mResizeTimer;
     bool mRotating = false;
