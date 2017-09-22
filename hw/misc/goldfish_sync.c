@@ -410,34 +410,49 @@ static const MemoryRegionOps goldfish_sync_iomem_ops = {
 static void
 save_pending_cmds(QEMUFile* file,
                   struct goldfish_sync_pending_cmd* cmd) {
-    qemu_put_byte(file, cmd != 0);
-    if (!cmd) return;
+    struct goldfish_sync_pending_cmd* curr = cmd;
 
-    qemu_put_be64(file, cmd->handle);
-    qemu_put_be64(file, cmd->hostcmd_handle);
-    qemu_put_be64(file, cmd->cmd);
-    qemu_put_be64(file, cmd->time_arg);
-    qemu_put_byte(file, cmd->next != 0);
+    qemu_put_byte(file, curr != 0);
 
-    if (cmd->next) {
-        save_pending_cmds(file, cmd->next);
+    while (curr) {
+        qemu_put_be64(file, curr->handle);
+        qemu_put_be64(file, curr->hostcmd_handle);
+        qemu_put_be64(file, curr->cmd);
+        qemu_put_be64(file, curr->time_arg);
+        curr = curr->next;
+        qemu_put_byte(file, curr != 0);
     }
 }
 
+// Returns the head of the list.
 static struct goldfish_sync_pending_cmd*
 load_pending_cmds(QEMUFile* file) {
-    struct goldfish_sync_pending_cmd* res;
+    struct goldfish_sync_pending_cmd* res = 0;
+    struct goldfish_sync_pending_cmd* curr;
 
-    if (!qemu_get_byte(file)) {
-        return NULL;
+    bool exists = qemu_get_byte(file);
+
+    if (!exists) {
+        return res;
     }
 
     res = goldfish_sync_new_cmd();
-    res->handle = qemu_get_be64(file);
-    res->hostcmd_handle = qemu_get_be64(file);
-    res->cmd = qemu_get_be64(file);
-    res->time_arg = qemu_get_be64(file);
-    res->next = load_pending_cmds(file);
+    curr = res;
+
+    while (exists) {
+        curr->handle = qemu_get_be64(file);
+        curr->hostcmd_handle = qemu_get_be64(file);
+        curr->cmd = qemu_get_be64(file);
+        curr->time_arg = qemu_get_be64(file);
+        exists = qemu_get_byte(file);
+        if (exists) {
+            curr->next = goldfish_sync_new_cmd();
+            curr = curr->next;
+        } else {
+            curr->next = 0;
+        }
+    }
+
     return res;
 }
 
@@ -459,6 +474,8 @@ static void goldfish_sync_save(QEMUFile* file, void* opaque) {
 
 static int goldfish_sync_load(QEMUFile* file, void* opaque, int version_id) {
     struct goldfish_sync_state* s = opaque;
+    goldfish_sync_reset_device(s);
+
     s->batch_cmd_addr = qemu_get_be64(file);
     s->batch_guestcmd_addr = qemu_get_be64(file);
 
@@ -468,6 +485,10 @@ static int goldfish_sync_load(QEMUFile* file, void* opaque, int version_id) {
     // Do pending cmds after we restored the ones already
     // in the state struct.
     service_ops->load(file);
+
+    if (s->pending) {
+        qemu_set_irq(s->irq, 1);
+    }
 
     return 0;
 }
