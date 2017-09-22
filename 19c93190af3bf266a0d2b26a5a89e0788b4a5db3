@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1de4ac55_b410b5d5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T17:47:26Z",
+      "side": 1,
+      "message": "nit: remove",
+      "revId": "19c93190af3bf266a0d2b26a5a89e0788b4a5db3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
