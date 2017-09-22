@@ -71,6 +71,30 @@
     },
     {
       "key": {
+        "uuid": "6b2196e2_26dbb1b8",
+        "filename": "android/android-emu/android/emulation/AudioOutputEngine.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T18:13:26Z",
+      "side": 1,
+      "message": "(I mean, just make the callback not an argument to this function)",
+      "parentUuid": "5c1839d6_f2e34712",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 94
+      },
+      "revId": "2848b8dc905c9177eac0768c9df575d99ff993be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e26eecbc_35174bc4",
         "filename": "android/android-emu/android/emulation/AudioOutputEngine.h",
         "patchSetId": 6
