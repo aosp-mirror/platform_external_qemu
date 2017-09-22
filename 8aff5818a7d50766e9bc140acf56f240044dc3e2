@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce4022f3_2c0b7546",
+        "filename": "android/android-emu/android/emulation/GoldfishSyncCommandQueue.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-22T03:12:17Z",
+      "side": 1,
+      "message": "should we clean it up before loading?",
+      "range": {
+        "startLine": 67,
+        "startChar": 5,
+        "endLine": 67,
+        "endChar": 29
+      },
+      "revId": "8aff5818a7d50766e9bc140acf56f240044dc3e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "978bdb15_f0e50de8",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-22T03:12:17Z",
+      "side": 1,
+      "message": "this thing is written twice per each command, but only read once.",
+      "range": {
+        "startLine": 420,
+        "startChar": 4,
+        "endLine": 420,
+        "endChar": 40
+      },
+      "revId": "8aff5818a7d50766e9bc140acf56f240044dc3e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a966eb7d_1cdbbfe9",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-22T03:12:17Z",
+      "side": 1,
+      "message": "this is a direct path to stack overflow in case of many commands. loop is much safer here",
+      "range": {
+        "startLine": 421,
+        "startChar": 0,
+        "endLine": 424,
+        "endChar": 5
+      },
+      "revId": "8aff5818a7d50766e9bc140acf56f240044dc3e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88a2f1b2_42109422",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 440,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-22T03:12:17Z",
+      "side": 1,
+      "message": "same about recursion-\u003eiteration",
+      "range": {
+        "startLine": 440,
+        "startChar": 16,
+        "endLine": 440,
+        "endChar": 33
+      },
+      "revId": "8aff5818a7d50766e9bc140acf56f240044dc3e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df2c49f_f9bfbc57",
+        "filename": "hw/misc/goldfish_sync.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-22T03:12:17Z",
+      "side": 1,
+      "message": "is there some cleanup you need to do to pending commands to free memory etc?",
+      "range": {
+        "startLine": 466,
+        "startChar": 2,
+        "endLine": 466,
+        "endChar": 38
+      },
+      "revId": "8aff5818a7d50766e9bc140acf56f240044dc3e2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
