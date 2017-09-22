@@ -623,8 +623,8 @@ struct CameraClient
     int                 width;
     /* Frame height. */
     int                 height;
-    /* Number of pixels in a frame buffer. */
-    int                 pixel_num;
+    /* HalVersion.  */
+    int                 hal_version;
     /* Status of video and preview frame cache. */
     int                 frames_cached;
     /* Queries being sent from the guest can be interrupted, resulting in the camera receiving
@@ -750,11 +750,26 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
 static void
 _camera_client_query_connect(CameraClient* cc, QemudClient* qc, const char* param)
 {
+    char hal[4];
     if (cc->camera != NULL) {
         /* Already connected. */
         W("%s: Camera '%s' is already connected", __FUNCTION__, cc->device_name);
         _qemu_client_reply_ok(qc, "Camera is already connected");
         return;
+    }
+    /* Pull required 'halVersion' parameter. */
+    if (param == NULL) {
+        /* Compatible with old system image */
+        D("work with old system image supporting only RGB32 preview");
+        cc->hal_version = 1;
+    }
+    else if (get_token_value(param, "hal", hal, sizeof(hal))) {
+        E("%s: Invalid or missing 'hal' parameter in '%s'", __FUNCTION__, param);
+            _qemu_client_reply_ko(qc, "Invalid or missing 'hal' parameter");
+        return;
+    }
+    else {
+        cc->hal_version = strtoi(hal, NULL, 10);
     }
 
     /* Open camera device. */
@@ -765,7 +780,8 @@ _camera_client_query_connect(CameraClient* cc, QemudClient* qc, const char* para
         return;
     }
 
-    D("%s: Camera device '%s' is now connected", __FUNCTION__, cc->device_name);
+    D("%s: Camera device '%s' is now connected (hal_version %d)", __FUNCTION__, cc->device_name,
+        cc->hal_version);
 
     _qemu_client_reply_ok(qc, NULL);
 }
@@ -806,7 +822,7 @@ _camera_client_query_disconnect(CameraClient* cc,
     _qemu_client_reply_ok(qc, NULL);
 }
 
-static bool calculate_video_frame_size(uint32_t format,
+static bool calculate_frame_size(uint32_t format,
                                        int width,
                                        int height,
                                        size_t* frame_size) {
@@ -822,6 +838,12 @@ static bool calculate_video_frame_size(uint32_t format,
         case V4L2_PIX_FMT_NV12:
         case V4L2_PIX_FMT_NV21:
             *frame_size = (width * height * 12) / 8;
+            return true;
+        case V4L2_PIX_FMT_RGB32:
+            *frame_size = width * height * 4;
+            return true;
+        case V4L2_PIX_FMT_RGB24:
+            *frame_size = width * height *3;
             return true;
         default:
             return false;
@@ -924,20 +946,36 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
     cc->pixel_format = pix_format;
     cc->width = width;
     cc->height = height;
-    cc->pixel_num = cc->width * cc->height;
     cc->frames_cached = 0;
 
-    /* Make sure that pixel format is known, and calculate video framebuffer
-     * size along the lines. */
-    if (!calculate_video_frame_size(cc->pixel_format, cc->width,
-                                    cc->height, &cc->video_frame_size)) {
+    /* Make sure that pixel format is known, and calculate video/preview
+     * framebuffer size along the lines. */
+    if (!calculate_frame_size(cc->pixel_format, cc->width,
+                              cc->height, &cc->video_frame_size)) {
         E("%s: Unknown pixel format %.4s",
-          __FUNCTION__, (char*)&cc->pixel_format);
-        _qemu_client_reply_ko(qc, "Pixel format is unknown");
+           __FUNCTION__, (char*)&cc->pixel_format);
+         _qemu_client_reply_ko(qc, "Pixel format is unknown");
         return;
     }
 
-    /* Make sure that we have a converters between the original camera pixel
+    if (cc->hal_version == 3) {
+        if (!calculate_frame_size(cc->pixel_format, cc->width,
+            cc->height, &cc->preview_frame_size)) {
+            E("%s: Unknown pixel format %.4s",
+                __FUNCTION__, (char*)&cc->pixel_format);
+            _qemu_client_reply_ko(qc, "Pixel format is unknown");
+            return;
+        }
+    }
+    else {
+        /* TODO: At the moment camera framework in the emulator requires RGB32 pixel
+         * format for preview window. So, we need to keep two framebuffers here: one
+         * for the video, and another for the preview window. Watch out when this
+         * changes (if changes). */
+        cc->preview_frame_size = cc->width * cc->height * 4;
+    }
+
+     /* Make sure that we have a converters between the original camera pixel
      * format and the one that the client expects. Also a converter must exist
      * for the preview window pixel format (RGB32) */
     if (!has_converter(cc->camera_info->pixel_format, cc->pixel_format) ||
@@ -947,12 +985,6 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
         _qemu_client_reply_ko(qc, "No conversion exist for the requested pixel format");
         return;
     }
-
-    /* TODO: At the moment camera framework in the emulator requires RGB32 pixel
-     * format for preview window. So, we need to keep two framebuffers here: one
-     * for the video, and another for the preview window. Watch out when this
-     * changes (if changes). */
-    cc->preview_frame_size = cc->pixel_num * 4;
 
     /* Allocate buffer large enough to contain both, video and preview
      * framebuffers. */
@@ -1101,8 +1133,13 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
         fbs_num++;
     }
     if (preview_size) {
-        /* TODO: Watch out for preview format changes! */
-        fbs[fbs_num].pixel_format = V4L2_PIX_FMT_RGB32;
+        if (cc->hal_version == 3) {
+            fbs[fbs_num].pixel_format = cc->pixel_format;
+        }
+        else {
+            /* TODO: Watch out for preview format changes! */
+            fbs[fbs_num].pixel_format = V4L2_PIX_FMT_RGB32;
+        }
         fbs[fbs_num].framebuffer = cc->preview_frame;
         fbs_num++;
     }
