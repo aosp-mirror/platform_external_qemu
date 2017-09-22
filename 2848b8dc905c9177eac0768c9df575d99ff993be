@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ac6c624_264db82b",
+        "filename": "android-qemu2-glue/audio-output.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T18:11:58Z",
+      "side": 1,
+      "message": "Clarify: How do we configure the callback?",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 34
+      },
+      "revId": "2848b8dc905c9177eac0768c9df575d99ff993be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d60dc8da_f00ec409",
+        "filename": "android/android-emu/android/emulation/AudioOutputEngine.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T18:11:58Z",
+      "side": 1,
+      "message": "nit: clarify which parts will be doing the buffer filling (qemu audio backend I guess?)",
+      "range": {
+        "startLine": 32,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 18
+      },
+      "revId": "2848b8dc905c9177eac0768c9df575d99ff993be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5c1839d6_f2e34712",
+        "filename": "android/android-emu/android/emulation/AudioOutputEngine.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T18:11:58Z",
+      "side": 1,
+      "message": "I\u0027m having trouble understanding how to use this.\n\nIf the callback is going to call write() for sure, should we just make open() not an argument to this function, and automatically constructed based on some other function pointer instead?",
+      "range": {
+        "startLine": 61,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 94
+      },
+      "revId": "2848b8dc905c9177eac0768c9df575d99ff993be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e26eecbc_35174bc4",
+        "filename": "android/android-emu/android/emulation/AudioOutputEngine.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T18:11:58Z",
+      "side": 1,
+      "message": "If this is used only from inside the callback, we should probably make this a private function.",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 52
+      },
+      "revId": "2848b8dc905c9177eac0768c9df575d99ff993be",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
