@@ -145,6 +145,11 @@ void VirtualSensorsPage::onSkinLayoutChange(SkinRotation rot) {
 
 void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
         SkinRotation orientation) {
+
+    if (mCoarseOrientation == orientation) {
+        return;
+    }
+
     float rot = 0.0;
 
     // NOTE: the "incorrect" angle values
@@ -390,6 +395,7 @@ void VirtualSensorsPage::updateSensorValues() {
                    device_magnetic_vector.x(),
                    device_magnetic_vector.y(),
                    device_magnetic_vector.z());
+
 
     // Update the "rotation" label according to the simulated gravity vector.
     QVector3D normalized_gravity = device_gravity_vector.normalized();
