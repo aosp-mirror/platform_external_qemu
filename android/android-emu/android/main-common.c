@@ -1842,6 +1842,17 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         }
     }
 
+    if (opts->phone_number_prefix) {
+        int prefix_length = strlen(opts->phone_number_prefix);
+        if (prefix_length < 7 || prefix_length > 11) {
+            derror(
+                    "Invalid phone_number_prefix '%s' length is %d. Valid\n"
+                    "values should be in [7,11].\n",
+                    opts->phone_number_prefix, prefix_length);
+            return false;
+        }
+    }
+
     *exit_status = 0;
     return true;
 }

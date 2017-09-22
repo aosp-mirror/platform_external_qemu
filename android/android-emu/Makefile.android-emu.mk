@@ -444,6 +444,7 @@ LOCAL_SRC_FILES := \
     android/telephony/modem.c \
     android/telephony/modem_driver.c \
     android/telephony/remote_call.c \
+    android/telephony/phone_number.cpp \
     android/telephony/SimAccessRules.cpp \
     android/telephony/sim_card.c \
     android/telephony/sms.c \
