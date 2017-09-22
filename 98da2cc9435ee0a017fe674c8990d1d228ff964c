@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "517201b2_f2384a8e",
+        "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-22T00:03:08Z",
+      "side": 1,
+      "message": "Could you please link the .svg version?",
+      "parentUuid": "d8364c4c_d9c25862",
+      "range": {
+        "startLine": 42,
+        "startChar": 24,
+        "endLine": 42,
+        "endChar": 41
+      },
+      "revId": "98da2cc9435ee0a017fe674c8990d1d228ff964c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f0880c47_93b766e1",
         "filename": "android/android-emu/android/skin/qt/ModalOverlay.cpp",
         "patchSetId": 1
