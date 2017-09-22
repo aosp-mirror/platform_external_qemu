@@ -19,6 +19,7 @@
 #include "DispatchTables.h"
 #include "GLESVersionDetector.h"
 #include "NativeSubWindow.h"
+#include "RenderControl.h"
 #include "RenderThreadInfo.h"
 #include "gles2_dec.h"
 
@@ -1797,6 +1798,8 @@ bool FrameBuffer::onLoad(Stream* stream,
     if (s_egl.eglPostLoadAllImages) {
         s_egl.eglPostLoadAllImages(m_eglDisplay, stream);
     }
+
+    registerTriggerWait();
     return true;
     // TODO: restore memory management
 }
