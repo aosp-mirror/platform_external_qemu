@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6d705a42_000c8027",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T21:39:48Z",
+      "side": 1,
+      "message": "Good point! Done",
+      "parentUuid": "0c722965_de384189",
+      "range": {
+        "startLine": 86,
+        "startChar": 16,
+        "endLine": 86,
+        "endChar": 76
+      },
+      "revId": "4e5d109a4924b4d931e7d57f9db283bc80c4cafb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a7983abd_ee6991df",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "1dcf9769_412215bd",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T21:39:48Z",
+      "side": 1,
+      "message": "Didn\u0027t seem to make a difference...on my machine, and who knows what it will do to physical mem mappings underneath, so let\u0027s try to preserve the contiguous mappings we have. Done",
+      "parentUuid": "a7983abd_ee6991df",
+      "range": {
+        "startLine": 95,
+        "startChar": 50,
+        "endLine": 95,
+        "endChar": 61
+      },
+      "revId": "4e5d109a4924b4d931e7d57f9db283bc80c4cafb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "628f0ca7_48fc3734",
         "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2017-09-22T21:17:21Z",
       "side": 1,
       "message": "should it be a parameter of load() call? otherwise it\u0027s easy to forget to unset it",
+      "range": {
+        "startLine": 197,
+        "startChar": 0,
+        "endLine": 197,
+        "endChar": 35
+      },
+      "revId": "4e5d109a4924b4d931e7d57f9db283bc80c4cafb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b3d39088_c5ad5249",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T21:39:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "628f0ca7_48fc3734",
       "range": {
         "startLine": 197,
         "startChar": 0,
