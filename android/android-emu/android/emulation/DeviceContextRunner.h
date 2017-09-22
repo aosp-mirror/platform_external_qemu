@@ -150,6 +150,12 @@ protected:
         for (const auto& p : mPending) { op(p); }
     }
 
+protected:
+    size_t numPending() const {
+        AutoLock lock(mLock);
+        return mPending.size();
+    }
+
 private:
     void onTimerEvent() {
         AutoLock lock(mLock);
