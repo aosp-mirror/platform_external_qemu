@@ -66,6 +66,8 @@ void GoldfishSyncCommandQueue::save(Stream* stream) {
 // static
 void GoldfishSyncCommandQueue::load(Stream* stream) {
     GoldfishSyncCommandQueue* queue = sCommandQueue.ptr();
+    queue->removeAllPendingOperations(
+        [](const GoldfishSyncWakeInfo&) { return true; });
     uint32_t pending = stream->getBe32();
     for (uint32_t i = 0; i < pending; i++) {
         GoldfishSyncWakeInfo cmd = {
