@@ -134,6 +134,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (isQemu2 &&
             android::featurecontrol::isEnabled(android::featurecontrol::Wifi)) {
         params.add("qemu.wifi=1");
+        // Enable multiple channels so the kernel can scan on one channel while
+        // communicating the other. This speeds up scanning significantly.
+        params.add("mac80211_hwsim.channels=2");
     }
 
     if (isQemu2 && isX86ish) {
