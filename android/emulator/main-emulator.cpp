@@ -587,11 +587,18 @@ int main(int argc, char** argv)
     }
 #endif
 
+    // in some cases, progDirSystem is incorrect, so we have to
+    // search from the folder from the command line
+    // more info can be found at b/65257562
+    char* c_argv0_dir_name = path_dirname(argv[0]);
+    std::string argv0DirName(c_argv0_dir_name);
+    free(c_argv0_dir_name);
+
     std::string emuDirName = emulator_dirname(progDirSystem);
 
     D("emuDirName: '%s'\n", emuDirName.c_str());
 
-    const StringView candidates[] = {progDirSystem, emuDirName};
+    const StringView candidates[] = {progDirSystem, emuDirName, argv0DirName};
     char* emulatorPath = nullptr;
     StringView progDir;
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
