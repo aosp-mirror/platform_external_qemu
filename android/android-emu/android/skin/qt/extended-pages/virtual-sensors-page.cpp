@@ -145,6 +145,11 @@ void VirtualSensorsPage::onSkinLayoutChange(SkinRotation rot) {
 
 void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
         SkinRotation orientation) {
+
+    if (mCoarseOrientation == orientation) {
+        return;
+    }
+
     float rot = 0.0;
 
     // NOTE: the "incorrect" angle values
