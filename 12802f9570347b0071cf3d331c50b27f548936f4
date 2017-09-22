@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d522e582_e8ce2b74",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-09-22T21:43:47Z",
+      "side": 1,
+      "message": "I remember there is a place in the host that could set camera hal version. Should you check that as well?",
+      "range": {
+        "startLine": 761,
+        "startChar": 8,
+        "endLine": 761,
+        "endChar": 23
+      },
+      "revId": "12802f9570347b0071cf3d331c50b27f548936f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
