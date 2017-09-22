@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "244c3ae2_94922001",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T19:51:01Z",
+      "side": 1,
+      "message": "this could be common to both the fade in and slide in path",
+      "range": {
+        "startLine": 235,
+        "startChar": 0,
+        "endLine": 235,
+        "endChar": 55
+      },
+      "revId": "ead2728845155d84a7fc6167e0ac18207a16adeb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21c3e854_d63723cf",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T19:51:01Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 245,
+        "startChar": 0,
+        "endLine": 245,
+        "endChar": 64
+      },
+      "revId": "ead2728845155d84a7fc6167e0ac18207a16adeb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7637aaa_c5919e55",
+        "filename": "android/android-emu/android/skin/qt/OverlayMessageCenter.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-22T19:51:01Z",
+      "side": 1,
+      "message": "nit: remove or put a comment describing why it\u0027s commented out",
+      "range": {
+        "startLine": 282,
+        "startChar": 0,
+        "endLine": 287,
+        "endChar": 3
+      },
+      "revId": "ead2728845155d84a7fc6167e0ac18207a16adeb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
