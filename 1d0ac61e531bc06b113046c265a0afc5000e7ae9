@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "50a1d0c3_b41be795",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-09-23T12:56:02Z",
+      "side": 1,
+      "message": "Hello Miodrag,\n\nsome explanation from me is due here:\n\nFor android oreo, we still ship system.img and vendor.img with partition table added, there are no system-qemu.img or vendor-qemu.img in SDK system-images/android-26/ subfolders, just to \nkeep consistency.\n\nso the check only works on build environment\n\nI added you to the bug (did not know I have to do that, since\nthat is supposed to be publicly visible to anyone), \nlet me know if you still cannot accessit. in that bug, I just\npulled some patches from aosp (which is working just fine)\n\n IMHO, fixing the image is the right thing to do.",
+      "range": {
+        "startLine": 7,
+        "startChar": 47,
+        "endLine": 7,
+        "endChar": 62
+      },
+      "revId": "1d0ac61e531bc06b113046c265a0afc5000e7ae9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
