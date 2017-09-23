@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d105352_28eb7136",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-23T00:20:37Z",
+      "side": 1,
+      "message": "What\u0027s the TODO here, do we need to do anything more than this?",
+      "revId": "965b77a9368b7bc34a83a1906f2d794198ba5633",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e9c7e63e_0434902f",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 961,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-23T00:20:37Z",
+      "side": 1,
+      "message": "This answers my question in the system image CL :)",
+      "revId": "965b77a9368b7bc34a83a1906f2d794198ba5633",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88ad84fe_1159c8f8",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 975,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-23T00:20:37Z",
+      "side": 1,
+      "message": "Won\u0027t the pixel format for HAL version 1 be RGB32 here so that this could use calculate_frame_size too?",
+      "revId": "965b77a9368b7bc34a83a1906f2d794198ba5633",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
