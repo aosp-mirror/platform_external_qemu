@@ -205,29 +205,29 @@ void AndroidMessagePipe::switchGuestWaitingState() {
     }
 }
 
-int AndroidMessagePipe::getOffset() const {
-    int myoffset = 0;
+uint32_t AndroidMessagePipe::getOffset() const {
+    uintptr_t myoffset = 0;
     switch (mGuestWaitingState) {
         case GuestWaitingState::SendMesgLength:
-            myoffset = m_curPos -
-                       reinterpret_cast<const uint8_t*>(mSendLengthBuffer);
+            myoffset = (uintptr_t)m_curPos -
+                       (uintptr_t)&mSendLengthBuffer;
             break;
         case GuestWaitingState::SendMesgPayload:
-            myoffset = m_curPos - &mSendPayloadBuffer[0];
+            myoffset = (uintptr_t)m_curPos - (uintptr_t)&mSendPayloadBuffer[0];
             break;
         case GuestWaitingState::RecvMesgLength:
-            myoffset = m_curPos - reinterpret_cast<uint8_t*>(mRecvLengthBuffer);
+            myoffset = (uintptr_t)m_curPos - (uintptr_t)&mRecvLengthBuffer;
             break;
         case GuestWaitingState::RecvMesgPayload:
-            myoffset = m_curPos - &mRecvPayloadBuffer[0];
+            myoffset = (uintptr_t)m_curPos - (uintptr_t)&mRecvPayloadBuffer[0];
             break;
         default:
             break;
     }
-    return myoffset;
+    return (uint32_t)myoffset;
 }
 
-void AndroidMessagePipe::setOffset(int myoffset) {
+void AndroidMessagePipe::setOffset(uint32_t myoffset) {
     switch (mGuestWaitingState) {
         case GuestWaitingState::SendMesgLength:
             m_curPos =
@@ -259,10 +259,16 @@ void AndroidMessagePipe::onSave(base::Stream* stream) {
 }
 
 void AndroidMessagePipe::loadFromStream(base::Stream* stream) {
+    resetToInitState();
+
     mSendLengthBuffer = stream->getBe32();
+    mSendPayloadBuffer.resize(mSendLengthBuffer);
     loadBuffer(stream, &mSendPayloadBuffer);
+
     mRecvLengthBuffer = stream->getBe32();
+    mRecvPayloadBuffer.resize(mRecvLengthBuffer);
     loadBuffer(stream, &mRecvPayloadBuffer);
+
     mGuestWaitingState = (GuestWaitingState)(stream->getByte());
     m_expected = stream->getBe32();
     setOffset(stream->getBe32());
