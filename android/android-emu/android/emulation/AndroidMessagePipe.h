@@ -114,9 +114,9 @@ private:
 
     bool readyForGuestToSend() const;
 
-    void setOffset(int myoffset);
+    void setOffset(uint32_t myoffset);
 
-    int getOffset() const;
+    uint32_t getOffset() const;
 
     enum class GuestWaitingState {
         SendMesgLength,
