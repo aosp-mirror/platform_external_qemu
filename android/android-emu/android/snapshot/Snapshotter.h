@@ -41,7 +41,7 @@ public:
                     const QAndroidEmulatorWindowAgent& windowAgent);
 
     OperationStatus prepareForLoading(const char* name);
-    OperationStatus load(const char* name);
+    OperationStatus load(bool isQuickboot, const char* name);
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(const char* name);
     void deleteSnapshot(const char* name);
@@ -66,6 +66,10 @@ public:
     using Callback = std::function<void(Operation, Stage)>;
     void setOperationCallback(Callback&& cb);
 
+    bool isQuickboot() const {
+        return mIsQuickboot;
+    }
+
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
@@ -81,6 +85,8 @@ private:
     Callback mCallback;
 
     base::System::Duration mLastLoadUptimeMs = 0;
+
+    bool mIsQuickboot = false;
 };
 
 }  // namespace snapshot
