@@ -194,7 +194,7 @@ bool Quickboot::load(StringView name) {
     } else {
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
-        auto res = snapshotter.load(name.c_str());
+        auto res = snapshotter.load(true /* isQuickboot */, name.c_str());
         mLoaded = false;
         mLoadStatus = res;
         mLoadTimeMs = System::get()->getHighResTimeUs() / 1000;
