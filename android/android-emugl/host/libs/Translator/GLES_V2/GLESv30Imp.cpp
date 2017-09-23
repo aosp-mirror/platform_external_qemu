@@ -243,22 +243,22 @@ GL_APICALL void GL_APIENTRY glGetActiveUniformsiv(GLuint program, GLsizei unifor
 
 GL_APICALL void GL_APIENTRY glVertexAttribI4i(GLuint index, GLint v0, GLint v1, GLint v2, GLint v3) {
     GET_CTX_V2();
-    ctx->dispatcher().glVertexAttribI4i(index, v0, v1, v2, v3);
+    //ctx->dispatcher().glVertexAttribI4i(index, v0, v1, v2, v3);
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribI4ui(GLuint index, GLuint v0, GLuint v1, GLuint v2, GLuint v3) {
     GET_CTX_V2();
-    ctx->dispatcher().glVertexAttribI4ui(index, v0, v1, v2, v3);
+    //ctx->dispatcher().glVertexAttribI4ui(index, v0, v1, v2, v3);
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribI4iv(GLuint index, const GLint * v) {
     GET_CTX_V2();
-    ctx->dispatcher().glVertexAttribI4iv(index, v);
+    //ctx->dispatcher().glVertexAttribI4iv(index, v);
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribI4uiv(GLuint index, const GLuint * v) {
     GET_CTX_V2();
-    ctx->dispatcher().glVertexAttribI4uiv(index, v);
+    //ctx->dispatcher().glVertexAttribI4uiv(index, v);
 }
 
 GL_APICALL void  GL_APIENTRY glVertexAttribIPointerWithDataSize(GLuint index, GLint size, GLenum type, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
@@ -440,7 +440,7 @@ GL_APICALL void GL_APIENTRY glReadBuffer(GLenum src) {
 
 GL_APICALL void GL_APIENTRY glBlitFramebuffer(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) {
     GET_CTX_V2();
-    ctx->dispatcher().glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
+    //ctx->dispatcher().glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, mask, filter);
 }
 
 static std::vector<GLenum> sGetEmulatedAttachmentList(GLESv2Context* ctx, GLenum target,
@@ -514,7 +514,7 @@ GL_APICALL void GL_APIENTRY glInvalidateSubFramebuffer(GLenum target, GLsizei nu
 
 GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level, GLint layer) {
     GET_CTX_V2();
-
+/*
     GLenum textarget = GL_TEXTURE_2D_ARRAY;
     SET_ERROR_IF(!(GLESv2Validate::framebufferTarget(ctx, target) &&
                    GLESv2Validate::framebufferAttachment(ctx, attachment)), GL_INVALID_ENUM);
@@ -537,16 +537,16 @@ GL_APICALL void GL_APIENTRY glFramebufferTextureLayer(GLenum target, GLenum atta
         fbObj->setAttachment(attachment, textarget,
                               texture, ObjectDataPtr());
     }
-
+*/
 }
 
 GL_APICALL void GL_APIENTRY glRenderbufferStorageMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height) {
     GET_CTX_V2();
 
     GLint err = GL_NO_ERROR;
-    internalformat = sPrepareRenderbufferStorage(internalformat, width, height, &err);
+    //internalformat = sPrepareRenderbufferStorage(internalformat, width, height, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
-    ctx->dispatcher().glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
+    //ctx->dispatcher().glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
 }
 
 GL_APICALL void GL_APIENTRY glGetInternalformativ(GLenum target, GLenum internalformat, GLenum pname, GLsizei bufSize, GLint * params) {
@@ -664,7 +664,7 @@ GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
 
 GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param) {
     GET_CTX_V2();
-    if (ctx->shareGroup().get()) {
+    /*if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SAMPLER, sampler);
         SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
@@ -672,12 +672,12 @@ GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GL
                 NamedObjectType::SAMPLER, sampler);
         samplerData->setParamf(pname, param);
         ctx->dispatcher().glSamplerParameterf(globalSampler, pname, param);
-    }
+    }*/
 }
 
 GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GLint param) {
     GET_CTX_V2();
-    if (ctx->shareGroup().get()) {
+    /*if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
         NamedObjectType::SAMPLER, sampler);
         SET_ERROR_IF(!globalSampler, GL_INVALID_OPERATION);
@@ -685,22 +685,22 @@ GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GL
                 NamedObjectType::SAMPLER, sampler);
         samplerData->setParami(pname, param);
         ctx->dispatcher().glSamplerParameteri(globalSampler, pname, param);
-    }
+    }*/
 }
 
 GL_APICALL void GL_APIENTRY glSamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat * params) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
-        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
-        ctx->dispatcher().glSamplerParameterfv(globalSampler, pname, params);
+        //const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
+        //ctx->dispatcher().glSamplerParameterfv(globalSampler, pname, params);
     }
 }
 
 GL_APICALL void GL_APIENTRY glSamplerParameteriv(GLuint sampler, GLenum pname, const GLint * params) {
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
-        const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
-        ctx->dispatcher().glSamplerParameteriv(globalSampler, pname, params);
+        //const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
+        //ctx->dispatcher().glSamplerParameteriv(globalSampler, pname, params);
     }
 }
 
@@ -843,7 +843,8 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
                  !GLESv2Validate::pixelSizedFrmt(ctx, internalFormat, format, type),
                  GL_INVALID_OPERATION);
 
-    s_glInitTexImage3D(target, level, internalFormat, width, height, depth, border);
+    s_glInitTexImage3D(target, level, internalFormat, width, height, depth,
+            border, &format, &type);
 
     if (isCoreProfile()) {
         GLEScontext::prepareCoreProfileEmulatedTexture(
@@ -859,7 +860,8 @@ GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum
     GET_CTX_V2();
 
     for (int i = 0; i < levels; i++) {
-        s_glInitTexImage3D(target, i, internalformat, width, height, depth, 0);
+        s_glInitTexImage3D(target, i, internalformat, width, height, depth, 0,
+                nullptr, nullptr);
     }
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
