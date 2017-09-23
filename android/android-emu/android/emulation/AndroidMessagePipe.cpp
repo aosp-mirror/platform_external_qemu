@@ -209,17 +209,17 @@ int AndroidMessagePipe::getOffset() const {
     int myoffset = 0;
     switch (mGuestWaitingState) {
         case GuestWaitingState::SendMesgLength:
-            myoffset = m_curPos -
-                       reinterpret_cast<const uint8_t*>(mSendLengthBuffer);
+            myoffset = (uintptr_t)m_curPos -
+                       (uintptr_t)(&mSendLengthBuffer);
             break;
         case GuestWaitingState::SendMesgPayload:
-            myoffset = m_curPos - &mSendPayloadBuffer[0];
+            myoffset = (uintptr_t)m_curPos - (uintptr_t)&mSendPayloadBuffer[0];
             break;
         case GuestWaitingState::RecvMesgLength:
-            myoffset = m_curPos - reinterpret_cast<uint8_t*>(mRecvLengthBuffer);
+            myoffset = (uintptr_t)m_curPos - (uintptr_t)(&mRecvLengthBuffer);
             break;
         case GuestWaitingState::RecvMesgPayload:
-            myoffset = m_curPos - &mRecvPayloadBuffer[0];
+            myoffset = (uintptr_t)m_curPos - (uintptr_t)&mRecvPayloadBuffer[0];
             break;
         default:
             break;
@@ -259,12 +259,19 @@ void AndroidMessagePipe::onSave(base::Stream* stream) {
 }
 
 void AndroidMessagePipe::loadFromStream(base::Stream* stream) {
+    resetToInitState();
+
     mSendLengthBuffer = stream->getBe32();
+    mSendPayloadBuffer.resize(mSendLengthBuffer);
     loadBuffer(stream, &mSendPayloadBuffer);
+
     mRecvLengthBuffer = stream->getBe32();
+    mRecvPayloadBuffer.resize(mRecvLengthBuffer);
     loadBuffer(stream, &mRecvPayloadBuffer);
+
     mGuestWaitingState = (GuestWaitingState)(stream->getByte());
     m_expected = stream->getBe32();
+    m_curPos = reinterpret_cast<uint8_t*>(&mSendLengthBuffer);
     setOffset(stream->getBe32());
 }
 
