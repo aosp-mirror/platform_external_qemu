@@ -22,6 +22,30 @@
       "revId": "1d0ac61e531bc06b113046c265a0afc5000e7ae9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4608a500_b6fe7fe0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1050647
+      },
+      "writtenOn": "2017-09-25T10:24:37Z",
+      "side": 1,
+      "message": "Thank you Bo, I can access the buganizer page now. I just posted a fix for ril-daemon crash.\n\nThank you for the explanation, I will abandon this patch then.",
+      "parentUuid": "50a1d0c3_b41be795",
+      "range": {
+        "startLine": 7,
+        "startChar": 47,
+        "endLine": 7,
+        "endChar": 62
+      },
+      "revId": "1d0ac61e531bc06b113046c265a0afc5000e7ae9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
