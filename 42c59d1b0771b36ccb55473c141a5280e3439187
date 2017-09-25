@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1b1bc42_88ce91b4",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-09-25T20:32:46Z",
+      "side": 1,
+      "message": "should we also enable mutliple channels here for a single-core guests? Or does it matter at all?",
+      "revId": "42c59d1b0771b36ccb55473c141a5280e3439187",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
