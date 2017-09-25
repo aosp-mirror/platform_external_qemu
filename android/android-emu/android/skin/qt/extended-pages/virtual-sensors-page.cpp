@@ -338,17 +338,15 @@ void VirtualSensorsPage::updateSensorValues() {
     // Gravity and magnetic vector in the device's frame of
     // reference.
     QVector3D gravity_vector(0.0, 9.81, 0.0);
-    QVector3D magnetic_vector(
-            mUi->magNorthWidget->value(),
-            mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value());
+    //QVector3D magnetic_vector( mUi->magNorthWidget->value(), mUi->magEastWidget->value(), mUi->magVerticalWidget->value());
+    QVector3D magnetic_vector(22,2,43);
 
     QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
     QQuaternion rotationDelta =
         mUi->accelWidget->rotationDelta();
     float dx, dy, dz;
     rotationDelta.getEulerAngles(&dx, &dy, &dz);
-
+    dx=0;dy=0;dz=0;
     // Gravity and magnetic vectors as observed by the device.
     // Note how we're applying the *inverse* of the transformation
     // represented by device_rotation_quat to the "absolute" coordinates
@@ -357,7 +355,7 @@ void VirtualSensorsPage::updateSensorValues() {
         device_rotation_quat.conjugate().rotatedVector(gravity_vector);
     QVector3D device_magnetic_vector =
         device_rotation_quat.conjugate().rotatedVector(magnetic_vector);
-    QVector3D acceleration = device_gravity_vector - mLinearAcceleration;
+    QVector3D acceleration = device_gravity_vector;// - mLinearAcceleration;
 
     float gyroUpdateRate = mUi->accelWidget->rotationUpdateIntervalSecs();
 
@@ -411,7 +409,7 @@ void VirtualSensorsPage::updateSensorValues() {
 
     if (coarse_orientation != mCoarseOrientation) {
       mCoarseOrientation = coarse_orientation;
-      emit(coarseOrientationChanged(mCoarseOrientation));
+      //emit(coarseOrientationChanged(mCoarseOrientation));
     }
 
     // Emit a signal to update the UI. We cannot just update
