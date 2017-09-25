@@ -404,6 +404,7 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     int64_t delay_ms = cl->delay_ms;
     const uint32_t mask = cl->enabledMask;
 
+    //static int mycount=0;
     // Grab the guest time before sending any sensor data:
     // the android.hardware CTS requires sync times to be no greater than the
     // time of the sensor event arrival. Since the CTS enforces this property,
@@ -422,6 +423,7 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
         }
         _hwSensorClient_send(cl, (uint8_t*)sensor->serialized.value,
                              sensor->serialized.length);
+        //fprintf(stdout, "%d sending %s\n", mycount++, sensor->serialized.value);
     }
 
     char buffer[64];
@@ -596,6 +598,10 @@ static void _hwSensors_setSensorValue(HwSensors* h,
                                       float c) {
     Sensor* s = &h->sensors[sensor_id];
 
+    static int mycount=0;
+    if (sensor_id == 0) {
+        fprintf(stdout, "%d getting ACCELERATION %g %g %g\n", mycount++, a, b, c);
+    }
     if (s->u.value.a != a || s->u.value.b != b || s->u.value.c != c) {
         s->u.value.a = a;
         s->u.value.b = b;

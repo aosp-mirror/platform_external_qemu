@@ -390,9 +390,11 @@ class PartitionParameters {
                 }
                 vendorImagePath = std::string(avdInfo_getVendorImagePath(m_avd) ?:
                     avdInfo_getVendorInitImagePath(m_avd));
+                    qCow2Format = false;
                 if (writable) {
                     const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
+                    //filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
+                    filePath = strdup(vendorImagePath.c_str());
                     driveParam += StringFormat("index=%d,id=vendor,file=%s",
                                            m_driveIndex++, filePath);
                     allocatedPath.reset(filePath.c_str());
