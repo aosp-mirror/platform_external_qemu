@@ -16,6 +16,24 @@
       "revId": "42c59d1b0771b36ccb55473c141a5280e3439187",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "334a3af3_900b0f5a",
+        "filename": "android/android-emu/android/main-kernel-parameters.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-09-25T21:33:35Z",
+      "side": 1,
+      "message": "I don\u0027t think that matters. It doesn\u0027t necessarily do this in parallel, it\u0027s just that with two channels it doesn\u0027t have to switch one channel between two frequencies. One for scanning and one for sending and receiving data. So even if there is no data to send or receive the scanning will be interrupted to switch that single channel to the other frequency because it can\u0027t tell if there is data or not.",
+      "parentUuid": "a1b1bc42_88ce91b4",
+      "revId": "42c59d1b0771b36ccb55473c141a5280e3439187",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
