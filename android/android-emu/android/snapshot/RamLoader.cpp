@@ -61,11 +61,8 @@ void RamLoader::FileIndex::clear() {
 RamLoader::RamLoader(base::StdioStream&& stream)
     : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
-        mAccessWatch.emplace(
-                [this](void* ptr) {
-                    loadRamPage(ptr);
-                },
-                [this]() { return backgroundPageLoad(); });
+        mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
+                             [this]() { return backgroundPageLoad(); });
         if (!mAccessWatch->valid()) {
             derror("Failed to initialize memory access watcher, falling back "
                    "to synchronous RAM loading");
@@ -415,13 +412,13 @@ void RamLoader::loadRamPage(void* ptr) {
                        ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
             });
 
-    if (blockIt == mIndex.blocks.end()) return;
+    if (blockIt == mIndex.blocks.end()) {
+        return;
+    }
 
     Page& page = this->page(ptr);
     uint8_t buf[4096];
-    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page)
-            ? buf
-            : nullptr);
+    readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page) ? buf : nullptr);
     fillPageData(&page);
     if (page.data != buf) {
         delete[] page.data;
@@ -432,10 +429,8 @@ void RamLoader::loadRamPage(void* ptr) {
 bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     Page& page = *pagePtr;
     if (page.sizeOnDisk == 0) {
-        assert(page.state.load(std::memory_order_relaxed) ==
-                       uint8_t(State::Read) ||
-               page.state.load(std::memory_order_relaxed) ==
-                       uint8_t(State::Filled));
+        assert(page.state.load(std::memory_order_relaxed) >=
+               uint8_t(State::Read));
         page.data = nullptr;
         return true;
     }
@@ -445,6 +440,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
                                             std::memory_order_acquire)) {
         // Spin until the reading thread finishes.
         while (state < uint8_t(State::Read)) {
+            base::System::get()->yield();
             state = uint8_t(page.state.load(std::memory_order_acquire));
         }
         return false;
@@ -513,7 +509,10 @@ void RamLoader::fillPageData(Page* pagePtr) {
         if (state == uint8_t(State::Read) && !page.data) {
             page.state.store(uint8_t(State::Filled), std::memory_order_relaxed);
         } else {
-            assert(state == uint8_t(State::Filled));
+            while (state < uint8_t(State::Filled)) {
+                base::System::get()->yield();
+                state = page.state.load(std::memory_order_relaxed);
+            }
         }
         return;
     }
