@@ -62,6 +62,8 @@ const char TAB_SELECTED_COLOR_VAR[] = "TAB_SELECTED_COLOR";
 // to defaults.
 static const char kFontMediumName[] = "FONT_MEDIUM";
 static const char kFontLargeName[] = "FONT_LARGE";
+static const char kFontLargerName[] = "FONT_LARGER";
+static const char kFontHugeName[] = "FONT_HUGE";
 
 struct FontSizeMapLoader {
     FontSizeMapLoader() {
@@ -91,6 +93,9 @@ struct FontSizeMapLoader {
                 {kFontLargeName, "10pt"},
             };
         }
+
+        fontMap[kFontLargerName] = "11pt";
+        fontMap[kFontHugeName] = "15pt";
     }
 
     QHash<QString, QString> fontMap;
@@ -350,9 +355,15 @@ const QHash<QString, QString>& stylesheetValues(SettingsTheme theme) {
             ? sStylesheetValues->lightValues : sStylesheetValues->darkValues;
 }
 
-const QString& stylesheetFontSize(bool large) {
-    return sFontSizeMapLoader
-            ->fontMap[large ? kFontLargeName : kFontMediumName];
+const QString& stylesheetFontSize(FontSize size) {
+    auto& map = sFontSizeMapLoader->fontMap;
+    switch (size) {
+        default:
+        case FontSize::Medium: return map[kFontMediumName];
+        case FontSize::Large: return map[kFontLargeName];
+        case FontSize::Larger: return map[kFontLargerName];
+        case FontSize::Huge: return map[kFontHugeName];
+    }
 }
 
 }  // namespace Ui
