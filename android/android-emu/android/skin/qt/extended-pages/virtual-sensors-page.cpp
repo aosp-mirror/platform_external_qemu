@@ -453,7 +453,7 @@ void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
     table_html_stream
         << "<table border=\"0\""
         << "       cellpadding=\"3\" style=\"font-size:" <<
-           Ui::stylesheetFontSize(false) << "\">"
+           Ui::stylesheetFontSize(Ui::FontSize::Medium) << "\">"
         << "<tr>"
         << "<td>" << tr("Accelerometer (m/s<sup>2</sup>)") << ":</td>"
         << "<td align=left>" << acceleration.x() << "</td>"

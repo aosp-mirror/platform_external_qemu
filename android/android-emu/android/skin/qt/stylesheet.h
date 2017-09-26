@@ -26,7 +26,10 @@ const QString& stylesheetForTheme(SettingsTheme theme);
 const QString& fontStylesheet(bool hi_density);
 
 // Returns a string representing font size value in a style sheet.
-const QString& stylesheetFontSize(bool large);
+enum class FontSize {
+    Medium, Large, Larger, Huge
+};
+const QString& stylesheetFontSize(FontSize size);
 
 // Returns a mapping of stylesheet template variable names to their
 // values in a given theme.
