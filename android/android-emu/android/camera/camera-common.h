@@ -104,7 +104,7 @@ ANDROID_BEGIN_HEADER
 #endif /* V4L2_PIX_FMT_ARGB32 */
 
 /* Describes framebuffer, used by the client of camera capturing API.
- * This descritptor is used in camera_device_read_frame call.
+ * This descriptor is used in camera_device_read_frame call.
  */
 typedef struct ClientFrameBuffer {
     /* Pixel format used in the client framebuffer. */
@@ -122,6 +122,15 @@ typedef struct CameraFrameDim {
     int     height;
 } CameraFrameDim;
 
+/* Defines the camera source type, which determines what generates frames on
+ * the host. */
+typedef enum CameraSourceType {
+    /* A webcam camera device enumerated on the host. */
+    kWebcam,
+    /* A virtual scene camera, renders a virtual environment on the host. */
+    kVirtualScene
+} CameraSourceType;
+
 /* Camera information descriptor, containing properties of a camera connected
  * to the host.
  *
@@ -135,6 +144,8 @@ typedef struct CameraInfo {
     char*               display_name;
     /* Device name for the camera. */
     char*               device_name;
+    /* The source of the frames for the camera. */
+    CameraSourceType camera_source;
     /* Input channel for the camera. */
     int                 inp_channel;
     /* Pixel format chosen for the camera. */
