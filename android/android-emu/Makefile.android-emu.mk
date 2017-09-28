@@ -327,6 +327,7 @@ LOCAL_SRC_FILES := \
     android/emulation/goldfish_sync.cpp \
     android/emulation/LogcatPipe.cpp \
     android/emulation/Keymaster3.cpp \
+    android/emulation/FakeCameraSensor.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
