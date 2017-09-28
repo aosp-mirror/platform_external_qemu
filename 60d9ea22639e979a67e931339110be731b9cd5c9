@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f0c4777_7a0e6a56",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-28T00:55:20Z",
+      "side": 1,
+      "message": "Please document the threading expectations: whether the rendering can be migrated between threads, or expects for all opengl rendering to take place on a dedicated thread.",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbe0463a_1b27b05c",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-28T00:55:20Z",
+      "side": 1,
+      "message": "Are these used somewhere yet? If not, recommend removing them or moving to the class that does use them.",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 31
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ba0c5239_af458cdf",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-28T00:55:20Z",
+      "side": 1,
+      "message": "How should we deal with failure to match preferred format on guest/host?",
+      "range": {
+        "startLine": 292,
+        "startChar": 0,
+        "endLine": 292,
+        "endChar": 37
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e06c5340_a0b39a5c",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-28T00:55:20Z",
+      "side": 1,
+      "message": "For readability, I recommend factoring out the logic for creating a shader / creating a program into common functions createShader / createProgram that are static procedures in this file. Later on, we can get more ambitious and decide if it\u0027s worth having a common createShader / createProgram / link for all host-side OpenGL rendering.",
+      "range": {
+        "startLine": 97,
+        "startChar": 8,
+        "endLine": 115,
+        "endChar": 9
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b81342d2_23cecdc4",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-09-28T00:55:20Z",
+      "side": 1,
+      "message": "In the androidemu codebase, the convention is to use android::base::Lock and android::base::AutoLock:\n\n#include \"android/base/synchronization/Lock.h\"\n\nandroid::base::Lock _lock;\n\n{\nandroid::base::AutoLock lock(_lock);\n// stuff requiring protection\n}\n\nSo, I suggest the convention should be followed.\n\nIt\u0027s wroth thinking about whether to switch to lock_guard globally though.",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 44
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
