@@ -388,6 +388,16 @@ void VirtualSensorsPage::updateSensorValues() {
                    device_magnetic_vector.x(),
                    device_magnetic_vector.y(),
                    device_magnetic_vector.z());
+    
+    {
+    float ox, oy, oz;
+    ox = mUi->yawSlider->getValue();
+    oy = mUi->pitchSlider->getValue();
+    oz = mUi->rollSlider->getValue();
+    setSensorValue(mSensorsAgent,
+                   ANDROID_SENSOR_ORIENTATION,
+                   ox, oy, oz);
+    }
 
     // Update the "rotation" label according to the simulated gravity vector.
     QVector3D normalized_gravity = device_gravity_vector.normalized();
