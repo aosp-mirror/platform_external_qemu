@@ -1070,6 +1070,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
                 fprintf(stderr, "### WARNING: SD Card files must be at least 9MB, ignoring '%s'\n", opts->sdcard);
             } else {
                 str_reset(&hw->hw_sdCard_path, opts->sdcard);
+                avdInfo_setImageFile(avd, AVD_IMAGE_SDCARD, opts->sdcard);
             }
         } else {
             dwarning("no SD Card image at '%s'", opts->sdcard);
