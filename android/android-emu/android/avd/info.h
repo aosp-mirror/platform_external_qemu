@@ -292,7 +292,7 @@ int          avdInfo_isImageReadOnly( const AvdInfo*  i, AvdImageType  imageType
 int          avdInfo_lockImageFile( const AvdInfo*  i, AvdImageType  imageType, int  abortOnError);
 
 /* Manually set the path of a given image file. */
-void         avdInfo_setImageFile( const AvdInfo*  i, AvdImageType  imageType, const char*  imagePath );
+void         avdInfo_setImageFile( AvdInfo*  i, AvdImageType  imageType, const char*  imagePath );
 
 /* Returns the content path of the virtual device */
 const char*  avdInfo_getContentPath( const AvdInfo*  i );

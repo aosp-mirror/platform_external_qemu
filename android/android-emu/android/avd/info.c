@@ -26,6 +26,7 @@
 #include "android/utils/string.h"
 #include "android/utils/tempfile.h"
 
+#include <assert.h>
 #include <ctype.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -1205,6 +1206,15 @@ char*  avdInfo_getSdCardPath( const AvdInfo* i )
         }
     }
 
+    if (i->imagePath[ AVD_IMAGE_SDCARD ] != NULL) {
+        path = ASTRDUP(i->imagePath[ AVD_IMAGE_SDCARD ]);
+        if (path_exists(path))
+            return path;
+
+        dwarning("Ignoring invalid SDCard path: %s", path);
+        AFREE(path);
+    }
+
     /* Otherwise, simply look into the content directory */
     return _avdInfo_getContentFilePath(i, imageName);
 }
@@ -1488,6 +1498,15 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
     }
 
     return ret;
+}
+
+void
+avdInfo_setImageFile( AvdInfo*  i, AvdImageType  imageType,
+                      const char*  imagePath )
+{
+    assert(i != NULL && (unsigned)imageType < AVD_IMAGE_MAX);
+
+    i->imagePath[imageType] = ASTRDUP(imagePath);
 }
 
 const char*
