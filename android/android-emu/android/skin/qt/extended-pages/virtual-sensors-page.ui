@@ -438,12 +438,12 @@
       <rect>
        <x>324</x>
        <y>30</y>
-       <width>120</width>
+       <width>220</width>
        <height>15</height>
       </rect>
      </property>
      <property name="text">
-      <string>Magnetic field (μT)</string>
+      <string>Magnetic field (North-East-Up μT)</string>
      </property>
     </widget>
     <widget class="QWidget" name="horizontalLayoutWidget">
@@ -590,7 +590,7 @@
     <widget class="QPushButton" name="helpMagneticField">
      <property name="geometry">
       <rect>
-       <x>430</x>
+       <x>510</x>
        <y>30</y>
        <width>15</width>
        <height>15</height>

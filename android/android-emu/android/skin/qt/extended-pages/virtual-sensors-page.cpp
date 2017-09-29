@@ -344,9 +344,9 @@ void VirtualSensorsPage::updateSensorValues() {
     // reference.
     QVector3D gravity_vector(0.0, 9.81, 0.0);
     QVector3D magnetic_vector(
-            mUi->magNorthWidget->value(),
             mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value());
+            mUi->magVerticalWidget->value(),
+            -mUi->magNorthWidget->value());
 
     QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
     QQuaternion rotationDelta =
