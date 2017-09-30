@@ -221,7 +221,7 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="page">
-      <widget class="EditableSliderWidget" name="yawSlider" native="true">
+      <widget class="EditableSliderWidget" name="zRotSlider" native="true">
        <property name="geometry">
         <rect>
          <x>50</x>
@@ -231,7 +231,7 @@
         </rect>
        </property>
       </widget>
-      <widget class="EditableSliderWidget" name="pitchSlider" native="true">
+      <widget class="EditableSliderWidget" name="xRotSlider" native="true">
        <property name="geometry">
         <rect>
          <x>50</x>
@@ -241,7 +241,7 @@
         </rect>
        </property>
       </widget>
-      <widget class="EditableSliderWidget" name="rollSlider" native="true">
+      <widget class="EditableSliderWidget" name="yRotSlider" native="true">
        <property name="geometry">
         <rect>
          <x>50</x>
@@ -256,12 +256,12 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>30</width>
+         <width>40</width>
          <height>15</height>
         </rect>
        </property>
        <property name="text">
-        <string>Yaw</string>
+        <string>Z-Rot</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_2">
@@ -269,12 +269,12 @@
         <rect>
          <x>10</x>
          <y>80</y>
-         <width>30</width>
+         <width>40</width>
          <height>15</height>
         </rect>
        </property>
        <property name="text">
-        <string>Pitch</string>
+        <string>X-Rot</string>
        </property>
       </widget>
       <widget class="QLabel" name="label_3">
@@ -282,12 +282,12 @@
         <rect>
          <x>10</x>
          <y>140</y>
-         <width>30</width>
+         <width>40</width>
          <height>15</height>
         </rect>
        </property>
        <property name="text">
-        <string>Roll</string>
+        <string>Y-Rot</string>
        </property>
       </widget>
      </widget>
