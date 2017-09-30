@@ -292,6 +292,19 @@
       </widget>
      </widget>
      <widget class="QWidget" name="page_2">
+      <widget class="QLabel" name="label_14">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>30</width>
+         <height>15</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>Z</string>
+       </property>
+      </widget>
       <widget class="QLabel" name="label_12">
        <property name="geometry">
         <rect>
@@ -316,6 +329,16 @@
        </property>
        <property name="text">
         <string>X</string>
+       </property>
+      </widget>
+      <widget class="EditableSliderWidget" name="positionZSlider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>130</y>
+         <width>231</width>
+         <height>50</height>
+        </rect>
        </property>
       </widget>
       <widget class="EditableSliderWidget" name="positionYSlider" native="true">

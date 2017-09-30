@@ -69,6 +69,11 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     connect(mUi->positionYSlider, SIGNAL(sliderReleased()),
             this, SLOT(onDragStopped()));
 
+    connect(mUi->positionZSlider, SIGNAL(sliderPressed()),
+            this, SLOT(onDragStarted()));
+    connect(mUi->positionZSlider, SIGNAL(sliderReleased()),
+            this, SLOT(onDragStopped()));
+
     connect(mUi->zRotSlider, SIGNAL(sliderPressed()),
             this, SLOT(onDragStarted()));
     connect(mUi->zRotSlider, SIGNAL(sliderReleased()),
@@ -99,6 +104,8 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
                                    Accelerometer3DWidget::MaxX);
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
                                    Accelerometer3DWidget::MaxY);
+    mUi->positionZSlider->setRange(0,
+                                   3000);
     // Historically, the AVD starts up with the screen mostly
     // vertical, but tilted back 4.75 degrees. Retain that
     // initial orientation.
@@ -310,7 +317,7 @@ void VirtualSensorsPage::on_yRotSlider_valueChanged(double) {
 void VirtualSensorsPage::setPhonePositionFromSliders() {
     mCurrentPosition = QVector3D(mUi->positionXSlider->getValue(),
                                  mUi->positionYSlider->getValue(),
-                                 0.0);
+                                 mUi->positionZSlider->getValue());
     mUi->accelWidget->setPosition(mCurrentPosition.toVector2D());
     mUi->accelWidget->update();
 }
@@ -320,6 +327,10 @@ void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
 }
 
 void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
+    setPhonePositionFromSliders();
+}
+
+void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
     setPhonePositionFromSliders();
 }
 
@@ -470,7 +481,7 @@ void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
 
 void VirtualSensorsPage::onPhonePositionChanged() {
     const QVector2D& pos = mUi->accelWidget->position();
-    mCurrentPosition = QVector3D(pos.x(), pos.y(), 0.0);
+    mCurrentPosition = QVector3D(pos.x(), pos.y(), mUi->positionZSlider->getValue());
     mUi->positionXSlider->setValue(pos.x(), false);
     mUi->positionYSlider->setValue(pos.y(), false);
 }
