@@ -81,6 +81,7 @@ private slots:
     void on_yRotSlider_valueChanged(double);
     void on_positionXSlider_valueChanged(double);
     void on_positionYSlider_valueChanged(double);
+    void on_positionZSlider_valueChanged(double);
 
     void updateResultingValues(QVector3D acceleration,
                                QVector3D gyroscope,
