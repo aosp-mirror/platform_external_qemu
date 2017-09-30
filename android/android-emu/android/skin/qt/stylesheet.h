@@ -31,6 +31,9 @@ enum class FontSize {
 };
 const QString& stylesheetFontSize(FontSize size);
 
+// Returns a string representing huge font size value.
+const char* stylesheetHugeFontSize();
+
 // Returns a mapping of stylesheet template variable names to their
 // values in a given theme.
 const QHash<QString, QString>& stylesheetValues(SettingsTheme theme);
