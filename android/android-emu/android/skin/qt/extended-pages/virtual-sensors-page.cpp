@@ -117,6 +117,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->accelWidget->setRotation(initialQuat);
     onPhoneRotationChanged();
 
+    // initial world rotation quat
+    mWorldRotationQuat = QQuaternion::fromEulerAngles(0.0, 0.0, 0.0);
+
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
             60 * 10 * 1000,  // reporting period
@@ -334,6 +337,37 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
     setPhonePositionFromSliders();
 }
 
+void VirtualSensorsPage::on_change_world_coord_button_pressed() {
+}
+
+void VirtualSensorsPage::on_change_world_coord_button_released() {
+    float x, y, z;
+    x = mUi->xRotSlider->getValue();
+    y = mUi->yRotSlider->getValue();
+    z = mUi->zRotSlider->getValue();
+    mWorldRotationQuat = QQuaternion::fromEulerAngles(x, y, z);
+
+    // reset to 0, as we have changed the world coord
+    mUi->xRotSlider->setValue(0);
+    mUi->yRotSlider->setValue(0);
+    mUi->zRotSlider->setValue(0);
+}
+
+void VirtualSensorsPage::on_reset_world_coord_button_pressed() {
+}
+
+void VirtualSensorsPage::on_reset_world_coord_button_released() {
+    mWorldRotationQuat = QQuaternion::fromEulerAngles(0, 0, 0);
+
+    mUi->xRotSlider->setValue(0);
+    mUi->yRotSlider->setValue(0);
+    mUi->zRotSlider->setValue(0);
+}
+
+QVector3D VirtualSensorsPage::rotate_by_world_coord(const QVector3D& v) {
+    return mWorldRotationQuat.conjugate().rotatedVector(v);
+}
+
 void VirtualSensorsPage::updateSensorValues() {
     if (!mFirstShow) mVirtualSensorsUsed = true;
     // Gravity and magnetic vector in the device's frame of
@@ -343,6 +377,9 @@ void VirtualSensorsPage::updateSensorValues() {
             mUi->magEastWidget->value(),
             mUi->magVerticalWidget->value(),
             -mUi->magNorthWidget->value());
+
+    gravity_vector = rotate_by_world_coord(gravity_vector);
+    magnetic_vector = rotate_by_world_coord(magnetic_vector);
 
     QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
     QQuaternion rotationDelta =
@@ -372,7 +409,7 @@ void VirtualSensorsPage::updateSensorValues() {
     // to device-space rotation in radians per second.
     QVector3D gyroscope =
         device_rotation_quat.conjugate().rotatedVector(
-            QVector3D(dx, dy, dz)) * M_PI / 180.0 / gyroUpdateRate;
+            rotate_by_world_coord(QVector3D(dx, dy, dz))) * M_PI / 180.0 / gyroUpdateRate;
 
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_ACCELERATION,
@@ -409,9 +446,10 @@ void VirtualSensorsPage::updateSensorValues() {
 
     QString rotation_label;
     SkinRotation coarse_orientation = mCoarseOrientation;
-    for (const auto& v : directions) {
-      if (fabs(QVector3D::dotProduct(normalized_gravity, v.first) - 1.0) < 0.1) {
-        coarse_orientation = v.second;
+    for (const auto& v0 : directions) {
+      QVector3D v = v0.first; //rotate_by_world_coord(v0.first);
+      if (fabs(QVector3D::dotProduct(normalized_gravity, v) - 1.0) < 0.1) {
+        coarse_orientation = v0.second;
         break;
       }
     }

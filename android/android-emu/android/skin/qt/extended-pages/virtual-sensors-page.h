@@ -87,8 +87,15 @@ private slots:
                                QVector3D gyroscope,
                                QVector3D device_magnetic_vector);
 
+private slots:
+    void on_change_world_coord_button_pressed();
+    void on_change_world_coord_button_released();
+    void on_reset_world_coord_button_pressed();
+    void on_reset_world_coord_button_released();
+
 private:
     void showEvent(QShowEvent*) override;
+    QVector3D rotate_by_world_coord(const QVector3D& v);
 
     void resetAccelerometerRotation(const QQuaternion&);
     void resetAccelerometerRotationFromSkinLayout(SkinRotation orientation);
@@ -108,4 +115,5 @@ private:
     SkinRotation mCoarseOrientation;
     bool mVirtualSensorsUsed = false;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+    QQuaternion mWorldRotationQuat;
 };
