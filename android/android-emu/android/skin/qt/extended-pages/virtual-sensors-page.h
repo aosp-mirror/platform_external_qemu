@@ -54,6 +54,7 @@ private slots:
     }
     void onDragStopped() {
         mLinearAcceleration = QVector3D(0, 0, 0);
+        mUi->accelWidget->resetRotationDelta();
         updateSensorValues();
         mAccelerationTimer.stop();
     }
