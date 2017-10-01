@@ -214,7 +214,7 @@
        <x>10</x>
        <y>350</y>
        <width>300</width>
-       <height>170</height>
+       <height>270</height>
       </rect>
      </property>
      <property name="currentIndex">
@@ -290,6 +290,67 @@
         <string>Y-Rot</string>
        </property>
       </widget>
+
+   <widget class="RaisedMaterialButton" name="change_world_coord_button">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>170</y>
+     <width>60</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Change</string>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Button</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+
+   <widget class="RaisedMaterialButton" name="reset_world_coord_button">
+   <property name="geometry">
+    <rect>
+     <x>80</x>
+     <y>170</y>
+     <width>60</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>Reset</string>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Button</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+
      </widget>
      <widget class="QWidget" name="page_2">
       <widget class="QLabel" name="label_14">
