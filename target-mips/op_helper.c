@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  MIPS emulation helpers for qemu.
  *
@@ -4197,3 +4198,5 @@ void helper_cache(CPUMIPSState *env, target_ulong addr, uint32_t op)
     }
 #endif
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

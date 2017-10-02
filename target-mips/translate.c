@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  MIPS32 emulation for qemu: main translation routines.
  *
@@ -21182,3 +21183,5 @@ void restore_state_to_opc(CPUMIPSState *env, TranslationBlock *tb,
         break;
     }
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

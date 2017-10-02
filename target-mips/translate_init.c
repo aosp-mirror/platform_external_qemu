@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (bca78c Merge "Print an error message and exit if vnc runs with host)
 /*
  *  MIPS emulation for qemu: CPU initialisation routines.
  *
@@ -943,3 +944,5 @@ static void msa_reset(CPUMIPSState *env)
     /* set proper signanling bit meaning ("1" means "quiet") */
     set_snan_bit_is_one(0, &env->active_tc.msa_fp_status);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
