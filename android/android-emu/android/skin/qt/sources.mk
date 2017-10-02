@@ -70,9 +70,10 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
     android/skin/qt/ModalOverlay.cpp \
-    android/skin/qt/size-tweaker.cpp \
-    android/skin/qt/QtLooper.cpp \
+    android/skin/qt/OverlayMessageCenter.cpp \
     android/skin/qt/qt-ui-commands.cpp \
+    android/skin/qt/QtLooper.cpp \
+    android/skin/qt/size-tweaker.cpp \
     android/skin/qt/stylesheet.cpp \
     android/skin/qt/tool-window.cpp \
     android/skin/qt/ui-event-recorder.cpp \
@@ -110,8 +111,9 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-window.h \
     android/skin/qt/raised-material-button.h \
     android/skin/qt/ModalOverlay.h \
-    android/skin/qt/size-tweaker.h \
+    android/skin/qt/OverlayMessageCenter.h \
     android/skin/qt/QtLooperImpl.h \
+    android/skin/qt/size-tweaker.h \
     android/skin/qt/tool-window.h \
     android/skin/qt/user-actions-counter.h
 
