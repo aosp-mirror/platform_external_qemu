@@ -377,17 +377,14 @@ class PartitionParameters {
                 if (apiLevel <= 15) {
                     writable = true;
                 }
+                qCow2Format = false;
                 sysImagePath = std::string(avdInfo_getSystemImagePath(m_avd) ?:
                 avdInfo_getSystemInitImagePath(m_avd));
+                filePath = sysImagePath.c_str();
                 if (writable) {
-                    const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(systemDir, get_qcow2_image_basename(sysImagePath).c_str());
                     driveParam += StringFormat("index=%d,id=system,file=%s",
                                            m_driveIndex++, filePath);
-                    allocatedPath.reset(filePath.c_str());
                 } else {
-                    qCow2Format = false;
-                    filePath = sysImagePath.c_str();
                     driveParam += StringFormat("index=%d,id=system,file=%s"
                                            ",read-only",
                                            m_driveIndex++, filePath);
@@ -401,17 +398,14 @@ class PartitionParameters {
                     // we do not have a vendor image to mount
                     return {};
                 }
+                qCow2Format = false;
                 vendorImagePath = std::string(avdInfo_getVendorImagePath(m_avd) ?:
                     avdInfo_getVendorInitImagePath(m_avd));
+                filePath = vendorImagePath.c_str();
                 if (writable) {
-                    const char* systemDir = avdInfo_getContentPath(m_avd);
-                    filePath = path_join(systemDir, get_qcow2_image_basename(vendorImagePath).c_str());
                     driveParam += StringFormat("index=%d,id=vendor,file=%s",
                                            m_driveIndex++, filePath);
-                    allocatedPath.reset(filePath.c_str());
                 } else {
-                    qCow2Format = false;
-                    filePath = vendorImagePath.c_str();
                     driveParam += StringFormat("index=%d,id=vendor,file=%s"
                                            ",read-only",
                                            m_driveIndex++, filePath);
