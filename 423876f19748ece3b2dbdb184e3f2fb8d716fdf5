@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "854514a3_eeb5113c",
+        "filename": "android/android-emu/android/emulation/FakeCameraSensor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-02T18:20:56Z",
+      "side": 1,
+      "message": "1. could you please give a bit more descriptive name to this struct? \"MyXXX\" isn\u0027t very useful in general, and AcclMag is too short to give any understanding what\u0027s there.\n2. What about creating a struct with three dimentions x,y,z, and having three of those with better names?\nstruct Vector3D { float x,y,z; };\nstruct XXX { Vector3D acceleration, magneticField, orientation; };",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 2
+      },
+      "revId": "423876f19748ece3b2dbdb184e3f2fb8d716fdf5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de5b7274_2c0e9b21",
+        "filename": "android/android-emu/android/emulation/FakeCameraSensor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-02T18:20:56Z",
+      "side": 1,
+      "message": "this comment is incomplete",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 34
+      },
+      "revId": "423876f19748ece3b2dbdb184e3f2fb8d716fdf5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a54eaeb_33c122d9",
+        "filename": "android/android-emu/android/emulation/FakeCameraSensor.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-02T18:20:56Z",
+      "side": 1,
+      "message": "this is dangerous - any alignment change or endianness or anything would break the code. Please at least use explicit alignment specifiers on the structs",
+      "range": {
+        "startLine": 60,
+        "startChar": 18,
+        "endLine": 60,
+        "endChar": 27
+      },
+      "revId": "423876f19748ece3b2dbdb184e3f2fb8d716fdf5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b07d81ed_6ba28634",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 437,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-02T18:20:56Z",
+      "side": 1,
+      "message": "nit: spaces\n+ align it please",
+      "range": {
+        "startLine": 437,
+        "startChar": 0,
+        "endLine": 437,
+        "endChar": 4
+      },
+      "revId": "423876f19748ece3b2dbdb184e3f2fb8d716fdf5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
