@@ -77,9 +77,9 @@ private slots:
     void on_helpAmbientTemp_clicked();
     void on_helpProximity_clicked();
     void on_helpHumidity_clicked();
-    void on_yawSlider_valueChanged(double);
-    void on_pitchSlider_valueChanged(double);
-    void on_rollSlider_valueChanged(double);
+    void on_zRotSlider_valueChanged(double);
+    void on_xRotSlider_valueChanged(double);
+    void on_yRotSlider_valueChanged(double);
     void on_positionXSlider_valueChanged(double);
     void on_positionYSlider_valueChanged(double);
 

@@ -69,19 +69,19 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     connect(mUi->positionYSlider, SIGNAL(sliderReleased()),
             this, SLOT(onDragStopped()));
 
-    connect(mUi->yawSlider, SIGNAL(sliderPressed()),
+    connect(mUi->zRotSlider, SIGNAL(sliderPressed()),
             this, SLOT(onDragStarted()));
-    connect(mUi->yawSlider, SIGNAL(sliderReleased()),
+    connect(mUi->zRotSlider, SIGNAL(sliderReleased()),
             this, SLOT(onDragStopped()));
 
-    connect(mUi->pitchSlider, SIGNAL(sliderPressed()),
+    connect(mUi->xRotSlider, SIGNAL(sliderPressed()),
             this, SLOT(onDragStarted()));
-    connect(mUi->pitchSlider, SIGNAL(sliderReleased()),
+    connect(mUi->xRotSlider, SIGNAL(sliderReleased()),
             this, SLOT(onDragStopped()));
 
-    connect(mUi->rollSlider, SIGNAL(sliderPressed()),
+    connect(mUi->yRotSlider, SIGNAL(sliderPressed()),
             this, SLOT(onDragStarted()));
-    connect(mUi->rollSlider, SIGNAL(sliderReleased()),
+    connect(mUi->yRotSlider, SIGNAL(sliderReleased()),
             this, SLOT(onDragStopped()));
 
     connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
@@ -92,9 +92,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mAccelerationTimer.setInterval(100);
     mAccelerationTimer.stop();
 
-    mUi->yawSlider->setRange(-180.0, 180.0);
-    mUi->pitchSlider->setRange(-180.0, 180.0);
-    mUi->rollSlider->setRange(-180.0, 180.0);
+    mUi->zRotSlider->setRange(-180.0, 180.0);
+    mUi->xRotSlider->setRange(-180.0, 180.0);
+    mUi->yRotSlider->setRange(-180.0, 180.0);
     mUi->positionXSlider->setRange(Accelerometer3DWidget::MinX,
                                    Accelerometer3DWidget::MaxX);
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
@@ -276,49 +276,34 @@ void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
 
 void VirtualSensorsPage::onPhoneRotationChanged() {
     const QQuaternion& rotation = mUi->accelWidget->rotation();
-    // CAVEAT: There is some inconsistency related to the terms "yaw",
-    // "pitch" and "roll" between the QQuaternion docs and how
-    // these terms are defined in the Android docs.
-    // According to android docs:
-    // When the device lies flat, screen-up, the Z
-    // axis comes out of the screen, the Y axis comes
-    // out of the top and the X axis comes out of the right side
-    // of the device. The same coordinate system is used by the
-    // accelerometer control widget.
-    // Android docs define "roll" as the rotation around the Y axis.
-    // However, QQuaternion defines "roll" as the rotation around
-    // the Z axis. Essentially, "yaw" and "roll" are switched.
-    // For consistency, we stick with Android definitions of
-    // yaw, pitch and roll.
+
     float x, y, z;
     rotation.getEulerAngles(&x, &y, &z);
-    mUi->yawSlider->setValue(z, false);
-    mUi->pitchSlider->setValue(x, false);
-    mUi->rollSlider->setValue(y, false);
+    mUi->xRotSlider->setValue(x, false);
+    mUi->yRotSlider->setValue(y, false);
+    mUi->zRotSlider->setValue(z, false);
     updateSensorValues();
 }
 
 void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
-    // WARNING: read the comment in VirtualSensorsPage::onPhoneRotationChanged
-    // before changing the order of these arguments!!
     mUi->accelWidget->setRotation(
         QQuaternion::fromEulerAngles(
-            mUi->pitchSlider->getValue(),
-            mUi->rollSlider->getValue(),
-            mUi->yawSlider->getValue()));
+            mUi->xRotSlider->getValue(),
+            mUi->yRotSlider->getValue(),
+            mUi->zRotSlider->getValue()));
     updateSensorValues();
     mUi->accelWidget->update();
 }
 
-void VirtualSensorsPage::on_yawSlider_valueChanged(double) {
+void VirtualSensorsPage::on_zRotSlider_valueChanged(double) {
     setAccelerometerRotationFromSliders();
 }
 
-void VirtualSensorsPage::on_pitchSlider_valueChanged(double) {
+void VirtualSensorsPage::on_xRotSlider_valueChanged(double) {
     setAccelerometerRotationFromSliders();
 }
 
-void VirtualSensorsPage::on_rollSlider_valueChanged(double) {
+void VirtualSensorsPage::on_yRotSlider_valueChanged(double) {
     setAccelerometerRotationFromSliders();
 }
 
@@ -344,9 +329,9 @@ void VirtualSensorsPage::updateSensorValues() {
     // reference.
     QVector3D gravity_vector(0.0, 9.81, 0.0);
     QVector3D magnetic_vector(
-            mUi->magNorthWidget->value(),
             mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value());
+            mUi->magVerticalWidget->value(),
+            -mUi->magNorthWidget->value());
 
     QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
     QQuaternion rotationDelta =
@@ -354,6 +339,12 @@ void VirtualSensorsPage::updateSensorValues() {
     float dx, dy, dz;
     rotationDelta.getEulerAngles(&dx, &dy, &dz);
 
+    //Implementation Note:
+    //Qt's rotation is around fixed axis, in the following
+    //order: z first, x second and y last
+    //refs:
+    //http://doc.qt.io/qt-5/qquaternion.html#fromEulerAngles
+    //
     // Gravity and magnetic vectors as observed by the device.
     // Note how we're applying the *inverse* of the transformation
     // represented by device_rotation_quat to the "absolute" coordinates
@@ -497,9 +488,9 @@ void VirtualSensorsPage::updateAccelerations() {
 
     mUi->accelWidget->setRotation(
         QQuaternion::fromEulerAngles(
-            mUi->pitchSlider->getValue(),
-            mUi->rollSlider->getValue(),
-            mUi->yawSlider->getValue()));
+            mUi->xRotSlider->getValue(),
+            mUi->yRotSlider->getValue(),
+            mUi->zRotSlider->getValue()));
     updateSensorValues();
 
     mUi->accelWidget->resetRotationDelta();
