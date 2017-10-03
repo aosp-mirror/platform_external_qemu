@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3794cf16_fa6f97a2",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-03T02:53:15Z",
+      "side": 1,
+      "message": "Done, I added a bunch of comments detailing the threading expectations, throughout.  I also changed this method to return an RAII \"ScopedEglContext\" object that will automatically unset the context and reduce the possibility of misuse.\n\nThis can be called on any thread, but unset must be called on the same thread, and callers must be resilient to having their EGL state reset on that thread-- either by not performing other GL rendering or by setting it back.",
+      "parentUuid": "2f0c4777_7a0e6a56",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dbe0463a_1b27b05c",
         "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-09-28T00:55:20Z",
       "side": 1,
       "message": "Are these used somewhere yet? If not, recommend removing them or moving to the class that does use them.",
+      "range": {
+        "startLine": 75,
+        "startChar": 0,
+        "endLine": 76,
+        "endChar": 31
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "56d7af58_1f7d9efb",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-03T02:53:15Z",
+      "side": 1,
+      "message": "Not used, they are leftovers from an earlier prototype. I\u0027ll remove.",
+      "parentUuid": "dbe0463a_1b27b05c",
       "range": {
         "startLine": 75,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a4403233_cc2fb8a6",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-03T02:53:15Z",
+      "side": 1,
+      "message": "Now that you mention it, we don\u0027t need to match-- convert_frame will do the conversion for us.  I\u0027ll remove the error for mismatch in start_capturing.\n\nIt\u0027s still better to get the matching format, and based on the error in start_capturing the guest honors that in my testing.",
+      "parentUuid": "ba0c5239_af458cdf",
+      "range": {
+        "startLine": 292,
+        "startChar": 0,
+        "endLine": 292,
+        "endChar": 37
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e06c5340_a0b39a5c",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "4cdc1ca7_d0f7fc7c",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-03T02:53:15Z",
+      "side": 1,
+      "message": "Good idea! I\u0027ll make the change.",
+      "parentUuid": "e06c5340_a0b39a5c",
+      "range": {
+        "startLine": 97,
+        "startChar": 8,
+        "endLine": 115,
+        "endChar": 9
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b81342d2_23cecdc4",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
         "patchSetId": 1
@@ -105,6 +201,30 @@
       "writtenOn": "2017-09-28T00:55:20Z",
       "side": 1,
       "message": "In the androidemu codebase, the convention is to use android::base::Lock and android::base::AutoLock:\n\n#include \"android/base/synchronization/Lock.h\"\n\nandroid::base::Lock _lock;\n\n{\nandroid::base::AutoLock lock(_lock);\n// stuff requiring protection\n}\n\nSo, I suggest the convention should be followed.\n\nIt\u0027s wroth thinking about whether to switch to lock_guard globally though.",
+      "range": {
+        "startLine": 217,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 44
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "523d82ca_2716fd67",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-03T02:53:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b81342d2_23cecdc4",
       "range": {
         "startLine": 217,
         "startChar": 0,
