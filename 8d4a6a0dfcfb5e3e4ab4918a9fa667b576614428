@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "73892b75_a0b97f0e",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-10-03T16:25:59Z",
+      "side": 1,
+      "message": "I used glm math for the inertial model so that it wouldn\u0027t be dependent on QT (which would force it to be in the QT library, etc...), so I\u0027m not sure if it makes sense to move all of the UI code away from QVec/QQuat to glm, but I\u0027ll investigate and see what makes sense.",
+      "parentUuid": "b3b47fcb_9040410d",
+      "range": {
+        "startLine": 373,
+        "startChar": 0,
+        "endLine": 373,
+        "endChar": 46
+      },
+      "revId": "8d4a6a0dfcfb5e3e4ab4918a9fa667b576614428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f35f55cf_37caa28d",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "499ec89e_cdbf5b91",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-10-03T16:25:59Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f35f55cf_37caa28d",
+      "range": {
+        "startLine": 419,
+        "startChar": 0,
+        "endLine": 419,
+        "endChar": 8
+      },
+      "revId": "8d4a6a0dfcfb5e3e4ab4918a9fa667b576614428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "865f2a92_ccaebb08",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 2
@@ -59,6 +107,30 @@
       "writtenOn": "2017-10-03T16:09:40Z",
       "side": 1,
       "message": "Just wondering, since we should already emit updateResultingValues() (which updates the displayed numbers in the UI) in syncUIAndUpdateModel() called below, what is the TODO here involve?",
+      "range": {
+        "startLine": 479,
+        "startChar": 0,
+        "endLine": 480,
+        "endChar": 45
+      },
+      "revId": "8d4a6a0dfcfb5e3e4ab4918a9fa667b576614428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80e04eb1_236bf888",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-10-03T16:25:59Z",
+      "side": 1,
+      "message": "Done. - stale TODO - already fixed but not removed.",
+      "parentUuid": "865f2a92_ccaebb08",
       "range": {
         "startLine": 479,
         "startChar": 0,
