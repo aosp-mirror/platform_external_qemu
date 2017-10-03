@@ -15,6 +15,7 @@
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/file.h"
 #include "android/skin/rect.h"
+#include "android/inertialmodel/InertialModel.h"
 
 #include <QDoubleValidator>
 #include <QTimer>
@@ -47,16 +48,9 @@ private slots:
     void on_magVerticalWidget_valueChanged(double value);
 
     void updateAccelerations();
-    void onPhoneRotationChanged();
-    void onPhonePositionChanged();
-    void onDragStarted() {
-        mAccelerationTimer.start();
-    }
-    void onDragStopped() {
-        mLinearAcceleration = QVector3D(0, 0, 0);
-        updateSensorValues();
-        mAccelerationTimer.stop();
-    }
+    void syncUIAndUpdateModel();
+    void onDragStarted();
+    void onDragStopped();
     void onSkinLayoutChange(SkinRotation rot);
 
 signals:
@@ -93,18 +87,16 @@ private:
     void resetAccelerometerRotationFromSkinLayout(SkinRotation orientation);
     void setAccelerometerRotationFromSliders();
     void setPhonePositionFromSliders();
-    void updateSensorValues();
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
     const QAndroidSensorsAgent* mSensorsAgent;
-    QVector3D mLinearAcceleration;
-    QVector3D mPrevPosition;
-    QVector3D mCurrentPosition;
     QTimer mAccelerationTimer;
     QTimer mAccelWidgetRotationUpdateTimer;
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation;
     bool mVirtualSensorsUsed = false;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+
+    std::unique_ptr<InertialModel> mInertialModel;
 };
