@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3b47fcb_9040410d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-03T16:09:40Z",
+      "side": 1,
+      "message": "Looks like we switched to glm matrix math. Can we then switch from using QVector3D / QQuaternion to glm exclusively?",
+      "range": {
+        "startLine": 373,
+        "startChar": 0,
+        "endLine": 373,
+        "endChar": 46
+      },
+      "revId": "8d4a6a0dfcfb5e3e4ab4918a9fa667b576614428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f35f55cf_37caa28d",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 419,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-03T16:09:40Z",
+      "side": 1,
+      "message": "nit: remove trailing whitespace here (and in other files)",
+      "range": {
+        "startLine": 419,
+        "startChar": 0,
+        "endLine": 419,
+        "endChar": 8
+      },
+      "revId": "8d4a6a0dfcfb5e3e4ab4918a9fa667b576614428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "865f2a92_ccaebb08",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-03T16:09:40Z",
+      "side": 1,
+      "message": "Just wondering, since we should already emit updateResultingValues() (which updates the displayed numbers in the UI) in syncUIAndUpdateModel() called below, what is the TODO here involve?",
+      "range": {
+        "startLine": 479,
+        "startChar": 0,
+        "endLine": 480,
+        "endChar": 45
+      },
+      "revId": "8d4a6a0dfcfb5e3e4ab4918a9fa667b576614428",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
