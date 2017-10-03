@@ -22,13 +22,17 @@
 #include <QDesktopServices>
 #include <QQuaternion>
 
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
+
 #include <array>
 #include <cassert>
 
 VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     QWidget(parent),
     mUi(new Ui::VirtualSensorsPage()),
-    mSensorsAgent(nullptr)
+    mSensorsAgent(nullptr),
+    mInertialModel(new InertialModel())
 {
     mUi->setupUi(this);
     // The initial values are set here to match the initial
@@ -47,12 +51,12 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->magEastWidget->setLocale(QLocale::c());
     mUi->magVerticalWidget->setLocale(QLocale::c());
 
-    updateSensorValues();
+    syncUIAndUpdateModel();
 
     connect(mUi->accelWidget, SIGNAL(rotationChanged()),
-            this, SLOT(onPhoneRotationChanged()));
+            this, SLOT(syncUIAndUpdateModel()));
     connect(mUi->accelWidget, SIGNAL(positionChanged()),
-            this, SLOT(onPhonePositionChanged()));
+            this, SLOT(syncUIAndUpdateModel()));
 
     connect(mUi->accelWidget, SIGNAL(dragStopped()),
             this, SLOT(onDragStopped()));
@@ -108,7 +112,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     static const QQuaternion initialQuat =
             QQuaternion::fromEulerAngles(-4.75, 0.00, 0.00);
     mUi->accelWidget->setRotation(initialQuat);
-    onPhoneRotationChanged();
+    syncUIAndUpdateModel();
 
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
@@ -188,10 +192,8 @@ void VirtualSensorsPage::resetAccelerometerRotation(const QQuaternion& rotation)
     if (!mFirstShow) mVirtualSensorsUsed = true;
     mUi->accelWidget->setPosition(QVector2D(0.0, 0.0));
     mUi->accelWidget->setRotation(rotation);
-    mUi->accelWidget->resetRotationDelta();
     mUi->accelWidget->update();
-    onPhoneRotationChanged();
-    onPhonePositionChanged();
+    syncUIAndUpdateModel();
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
@@ -216,8 +218,7 @@ void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 
-    // Update the agent with current values.
-    updateSensorValues();
+    mInertialModel->setSensorsAgent(agent);
 }
 
 // Helper function
@@ -265,33 +266,28 @@ void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
-    updateSensorValues();
+    syncUIAndUpdateModel();
 }
+
 void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
-    updateSensorValues();
+    syncUIAndUpdateModel();
 }
+
 void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
-    updateSensorValues();
-}
-
-void VirtualSensorsPage::onPhoneRotationChanged() {
-    const QQuaternion& rotation = mUi->accelWidget->rotation();
-
-    float x, y, z;
-    rotation.getEulerAngles(&x, &y, &z);
-    mUi->xRotSlider->setValue(x, false);
-    mUi->yRotSlider->setValue(y, false);
-    mUi->zRotSlider->setValue(z, false);
-    updateSensorValues();
+    syncUIAndUpdateModel();
 }
 
 void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
-    mUi->accelWidget->setRotation(
-        QQuaternion::fromEulerAngles(
+    const QQuaternion &rotation = QQuaternion::fromEulerAngles(
             mUi->xRotSlider->getValue(),
             mUi->yRotSlider->getValue(),
-            mUi->zRotSlider->getValue()));
-    updateSensorValues();
+            mUi->zRotSlider->getValue());
+    glm::quat glRotation(rotation.scalar(),
+                         rotation.x(),
+                         rotation.y(),
+                         rotation.z());
+    mInertialModel->setTargetRotation(glRotation);
+    mUi->accelWidget->setRotation(rotation);
     mUi->accelWidget->update();
 }
 
@@ -308,10 +304,12 @@ void VirtualSensorsPage::on_yRotSlider_valueChanged(double) {
 }
 
 void VirtualSensorsPage::setPhonePositionFromSliders() {
-    mCurrentPosition = QVector3D(mUi->positionXSlider->getValue(),
-                                 mUi->positionYSlider->getValue(),
-                                 0.0);
-    mUi->accelWidget->setPosition(mCurrentPosition.toVector2D());
+    QVector3D position(mUi->positionXSlider->getValue(),
+                       mUi->positionYSlider->getValue(),
+                       0.f);
+    glm::vec3 glPosition(position.x(), position.y(), position.z());
+    mInertialModel->setTargetPosition(glPosition);
+    mUi->accelWidget->setPosition(position.toVector2D());
     mUi->accelWidget->update();
 }
 
@@ -321,106 +319,6 @@ void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
 
 void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
     setPhonePositionFromSliders();
-}
-
-void VirtualSensorsPage::updateSensorValues() {
-    if (!mFirstShow) mVirtualSensorsUsed = true;
-    // Gravity and magnetic vector in the device's frame of
-    // reference.
-    QVector3D gravity_vector(0.0, 9.81, 0.0);
-    QVector3D magnetic_vector(
-            mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value(),
-            -mUi->magNorthWidget->value());
-
-    QQuaternion device_rotation_quat = mUi->accelWidget->rotation();
-    QQuaternion rotationDelta =
-        mUi->accelWidget->rotationDelta();
-    float dx, dy, dz;
-    rotationDelta.getEulerAngles(&dx, &dy, &dz);
-
-    //Implementation Note:
-    //Qt's rotation is around fixed axis, in the following
-    //order: z first, x second and y last
-    //refs:
-    //http://doc.qt.io/qt-5/qquaternion.html#fromEulerAngles
-    //
-    // Gravity and magnetic vectors as observed by the device.
-    // Note how we're applying the *inverse* of the transformation
-    // represented by device_rotation_quat to the "absolute" coordinates
-    // of the vectors.
-    QVector3D device_gravity_vector =
-        device_rotation_quat.conjugate().rotatedVector(gravity_vector);
-    QVector3D device_magnetic_vector =
-        device_rotation_quat.conjugate().rotatedVector(magnetic_vector);
-    QVector3D acceleration = device_gravity_vector - mLinearAcceleration;
-
-    float gyroUpdateRate = mUi->accelWidget->rotationUpdateIntervalSecs();
-
-    // Convert raw UI pitch/roll/yaw delta
-    // to device-space rotation in radians per second.
-    QVector3D gyroscope =
-        device_rotation_quat.conjugate().rotatedVector(
-            QVector3D(dx, dy, dz)) * M_PI / 180.0 / gyroUpdateRate;
-
-    setSensorValue(mSensorsAgent,
-                   ANDROID_SENSOR_ACCELERATION,
-                   acceleration.x(),
-                   acceleration.y(),
-                   acceleration.z());
-
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_GYROSCOPE,
-                   gyroscope.x(), gyroscope.y(), gyroscope.z());
-
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED,
-                   gyroscope.x(), gyroscope.y(), gyroscope.z());
-
-    setSensorValue(mSensorsAgent,
-                   ANDROID_SENSOR_MAGNETIC_FIELD,
-                   device_magnetic_vector.x(),
-                   device_magnetic_vector.y(),
-                   device_magnetic_vector.z());
-
-    setSensorValue(mSensorsAgent,
-                   ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED,
-                   device_magnetic_vector.x(),
-                   device_magnetic_vector.y(),
-                   device_magnetic_vector.z());
-
-    // Update the "rotation" label according to the simulated gravity vector.
-    QVector3D normalized_gravity = device_gravity_vector.normalized();
-    static const std::array<std::pair<QVector3D, SkinRotation>, 4> directions {
-      std::make_pair(QVector3D(0, 1, 0), SKIN_ROTATION_0),
-      std::make_pair(QVector3D(-1, 0, 0), SKIN_ROTATION_90),
-      std::make_pair(QVector3D(0, -1, 0), SKIN_ROTATION_180),
-      std::make_pair(QVector3D(1, 0, 0), SKIN_ROTATION_270)
-    };
-
-    QString rotation_label;
-    SkinRotation coarse_orientation = mCoarseOrientation;
-    for (const auto& v : directions) {
-      if (fabs(QVector3D::dotProduct(normalized_gravity, v.first) - 1.0) < 0.1) {
-        coarse_orientation = v.second;
-        break;
-      }
-    }
-
-    if (coarse_orientation != mCoarseOrientation) {
-      mCoarseOrientation = coarse_orientation;
-      emit(coarseOrientationChanged(mCoarseOrientation));
-    }
-
-    // Emit a signal to update the UI. We cannot just update
-    // the UI here because the current function is sometimes
-    // called from a non-Qt thread.
-    // We only block signals for this widget if it's running on the Qt thread,
-    // so it's Ok to call the connected function directly.
-    if (signalsBlocked()) {
-        updateResultingValues(acceleration, gyroscope, device_magnetic_vector);
-    } else {
-        emit updateResultingValuesRequired(
-                acceleration, gyroscope, device_magnetic_vector);
-    }
 }
 
 void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
@@ -468,32 +366,106 @@ void VirtualSensorsPage::updateResultingValues(QVector3D acceleration,
     mUi->resultingAccelerometerValues->setText(table_html);
 }
 
-void VirtualSensorsPage::onPhonePositionChanged() {
+void VirtualSensorsPage::syncUIAndUpdateModel() {
     const QVector2D& pos = mUi->accelWidget->position();
-    mCurrentPosition = QVector3D(pos.x(), pos.y(), 0.0);
+    glm::vec3 position(pos.x(), pos.y(), 0.0);
+    const QQuaternion& rotation = mUi->accelWidget->rotation();
+    glm::quat glRotation(rotation.scalar(),
+                         rotation.x(),
+                         rotation.y(),
+                         rotation.z());
+
+    mInertialModel->setTargetPosition(position);
+    mInertialModel->setTargetRotation(glRotation);
+    mInertialModel->setMagneticValue(
+            mUi->magEastWidget->value(),
+            mUi->magVerticalWidget->value(),
+            -mUi->magNorthWidget->value());
+
+    float x, y, z;
+    rotation.getEulerAngles(&x, &y, &z);
+    mUi->xRotSlider->setValue(x, false);
+    mUi->yRotSlider->setValue(y, false);
+    mUi->zRotSlider->setValue(z, false);
+
     mUi->positionXSlider->setValue(pos.x(), false);
     mUi->positionYSlider->setValue(pos.y(), false);
+
+    QVector3D gravity_vector(0.0, 9.81, 0.0);
+    glm::quat gl_device_rotation = mInertialModel->getRotation();
+    QQuaternion device_rotation_quat(
+        gl_device_rotation.w,
+        gl_device_rotation.x,
+        gl_device_rotation.y,
+        gl_device_rotation.z);
+    QVector3D device_gravity_vector =
+        device_rotation_quat.conjugate().rotatedVector(gravity_vector);
+
+    // Update the "rotation" label according to the simulated gravity vector.
+    QVector3D normalized_gravity = device_gravity_vector.normalized();
+    static const std::array<std::pair<QVector3D, SkinRotation>, 4> directions {
+      std::make_pair(QVector3D(0, 1, 0), SKIN_ROTATION_0),
+      std::make_pair(QVector3D(-1, 0, 0), SKIN_ROTATION_90),
+      std::make_pair(QVector3D(0, -1, 0), SKIN_ROTATION_180),
+      std::make_pair(QVector3D(1, 0, 0), SKIN_ROTATION_270)
+    };
+    QString rotation_label;
+    SkinRotation coarse_orientation = mCoarseOrientation;
+    for (const auto& v : directions) {
+      if (fabs(QVector3D::dotProduct(normalized_gravity, v.first) - 1.0) < 0.1) {
+        coarse_orientation = v.second;
+        break;
+      }
+    }
+    if (coarse_orientation != mCoarseOrientation) {
+      mCoarseOrientation = coarse_orientation;
+      emit(coarseOrientationChanged(mCoarseOrientation));
+    }
+
+    const glm::vec3& gl_acceleration = mInertialModel->getAcceleration();
+    const glm::vec3& gl_magnetic_vector =
+            mInertialModel->getMagneticVector();
+    const glm::vec3& gl_gyroscope =
+            mInertialModel->getGyroscope();
+    QVector3D acceleration(gl_acceleration.x,
+                           gl_acceleration.y,
+                           gl_acceleration.z);
+    QVector3D device_magnetic_vector(gl_magnetic_vector.x,
+                                     gl_magnetic_vector.y,
+                                     gl_magnetic_vector.z);
+    QVector3D gyroscope(gl_gyroscope.x,
+                        gl_gyroscope.y,
+                        gl_gyroscope.z);
+    // Emit a signal to update the UI. We cannot just update
+    // the UI here because the current function is sometimes
+    // called from a non-Qt thread.
+    // We only block signals for this widget if it's running on the Qt thread,
+    // so it's Ok to call the connected function directly.
+    if (signalsBlocked()) {
+        updateResultingValues(acceleration, gyroscope, device_magnetic_vector);
+    } else {
+        emit updateResultingValuesRequired(
+                acceleration, gyroscope, device_magnetic_vector);
+    }
+}
+
+void VirtualSensorsPage::onDragStarted() {
+    mAccelerationTimer.start();
+}
+
+void VirtualSensorsPage::onDragStopped() {
+    // call position changed one last time to zero accelerations.
+    syncUIAndUpdateModel();
+    mAccelerationTimer.stop();
 }
 
 void VirtualSensorsPage::updateAccelerations() {
-    static const float k = 100.0;
-    static const float mass = 1.0;
-    static const float meters_per_unit = 0.0254;
-
-    QVector3D delta =
-        mUi->accelWidget->rotation().conjugate().rotatedVector(
-            meters_per_unit * (mCurrentPosition - mPrevPosition));
-    mLinearAcceleration = delta * k / mass;
-    mPrevPosition = mCurrentPosition;
-
     mUi->accelWidget->setRotation(
         QQuaternion::fromEulerAngles(
             mUi->xRotSlider->getValue(),
             mUi->yRotSlider->getValue(),
             mUi->zRotSlider->getValue()));
-    updateSensorValues();
-
-    mUi->accelWidget->resetRotationDelta();
+    syncUIAndUpdateModel();
 }
 
 void VirtualSensorsPage::on_accelModeRotate_toggled() {
