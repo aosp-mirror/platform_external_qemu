@@ -104,6 +104,10 @@ private:
 
     void stopExtendedWindowCreation();
 
+    bool isExiting() const {
+        return mIsExiting;
+    }
+
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
     virtual void closeEvent(QCloseEvent* ce) override;
@@ -125,6 +129,7 @@ private:
     UserActionsCounterPtr mUserActionsCounter;
     SizeTweaker mSizeTweaker;
     bool mTopSwitched = false;
+    bool mIsExiting = false;
 
 public slots:
     void raise();

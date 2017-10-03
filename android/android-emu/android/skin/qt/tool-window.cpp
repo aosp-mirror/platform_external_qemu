@@ -198,8 +198,12 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     }
 
     // Make sure we create the extended window even if user didn't open it.
-    QObject::connect(&mExtendedWindowCreateTimer, &QTimer::timeout,
-                     [this] { mExtendedWindow.get(); });
+    auto self = QPointer<ToolWindow>(this);
+    QObject::connect(
+        &mExtendedWindowCreateTimer, &QTimer::timeout,
+        [self] {
+            if (self && !self->isExiting()) self->mExtendedWindow.get();
+        });
     mExtendedWindowCreateTimer.setSingleShot(true);
     mExtendedWindowCreateTimer.start(10 * 1000);
 
@@ -244,6 +248,7 @@ void ToolWindow::hide() {
 }
 
 void ToolWindow::closeEvent(QCloseEvent* ce) {
+    mIsExiting = true;
     // make sure only parent processes the event - otherwise some
     // siblings won't get it, e.g. main window
     ce->ignore();
