@@ -13,9 +13,11 @@
 #include "android/skin/qt/gl-widget.h"
 #include "GLES2/gl2.h"
 
-#include <QMatrix4x4>
 #include <QMouseEvent>
-#include <QVector3D>
+
+#include <glm/vec2.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #include <array>
 #include <string>
@@ -27,8 +29,8 @@
 // gyroscope, and magnetometer.
 class Accelerometer3DWidget : public GLWidget {
     Q_OBJECT
-    Q_PROPERTY(QQuaternion rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
-    Q_PROPERTY(QVector2D position READ position WRITE setPosition NOTIFY positionChanged USER true);
+    Q_PROPERTY(glm::quat rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
+    Q_PROPERTY(glm::vec2 position READ position WRITE setPosition NOTIFY positionChanged USER true);
 public:
     enum class OperationMode {
         Rotate,
@@ -53,16 +55,12 @@ signals:
 
 public slots:
     // Sets the rotation quaternion.
-    void setRotation(const QQuaternion& quat) {
-        mDQuat = QQuaternion();
-
-        mDQuat = quat * mQuat.conjugate();
-        recalcRotationUpdateInterval();
+    void setRotation(const glm::quat& quat) {
         mQuat = quat;
     }
 
     // Sets the X and Y coordinates of the model's origin;
-    void setPosition(const QVector2D& pos) { mTranslation = pos; }
+    void setPosition(const glm::vec2& pos) { mTranslation = pos; }
 
     // Sets the widget's operation mode which determines how it reacts
     // to mose dragging. It may either rotate the model or move it around.
@@ -70,23 +68,18 @@ public slots:
 
 public:
     // Getters for the rotation quaternion and delta.
-    const QQuaternion& rotation() const { return mQuat; }
-    const QQuaternion& rotationDelta() const { return mDQuat; }
-    void resetRotationDelta() { mDQuat = QQuaternion(); }
-
-    // Returns milliseconds since last rotation update.
-    float rotationUpdateIntervalSecs() const {
-        if (mUpdateIntervalMs < 16) return 0.016; // 16 ms
-        return mUpdateIntervalMs / 1000.0f;
-    }
+    const glm::quat& rotation() const { return mQuat; }
 
     // Returns the X and Y coordinates of the model's origin.
-    const QVector2D& position() const { return mTranslation; }
+    const glm::vec2& position() const { return mTranslation; }
 
-    static constexpr float MaxX = 7.0;
-    static constexpr float MinX = -7.0;
-    static constexpr float MaxY = 4.0;
-    static constexpr float MinY = -4.0;
+    static constexpr float MaxX = 7.0f;
+    static constexpr float MinX = -7.0f;
+    static constexpr float MaxY = 4.0f;
+    static constexpr float MinY = -4.0f;
+    static constexpr float CameraDistance = 8.5f;
+    static constexpr float NearClip = 1.0f;
+    static constexpr float FarClip = 100.0f;
 
 protected:
     // This is called once, after the GL context is created, to do some one-off
@@ -111,25 +104,13 @@ private:
 
     // Returns the world coordinates of a point on the XY plane
     // that corresponds to the given point on the screen.
-    QVector2D screenToXYPlane(int x, int y) const;
+    glm::vec2 screenToXYPlane(int x, int y) const;
 
-    QQuaternion mQuat;
+    glm::quat mQuat;
 
-    // Tracking and timing rates of rotation change
-    // (for gyroscope)
-    QQuaternion mDQuat;
-    uint64_t mUpdateIntervalMs = 0;
-    uint64_t mLastRotationUpdateMs = 0;
-    static const uint64_t ROTATION_UPDATE_RESET_TIME_MS = 100;
-    static const size_t ROTATION_UPDATE_TIME_WINDOW_SIZE = 8;
-    std::array<uint64_t, ROTATION_UPDATE_TIME_WINDOW_SIZE>
-        mLastUpdateIntervals = {};
-    size_t mRotationUpdateTimeWindowElt = 0;
-    void recalcRotationUpdateInterval();
-
-    QVector2D mTranslation;
-    QMatrix4x4 mPerspective;
-    QMatrix4x4 mCameraTransform;
+    glm::vec2 mTranslation;
+    glm::mat4 mPerspective;
+    glm::mat4 mCameraTransform;
 
     GLuint mProgram;
     GLuint mVertexDataBuffer;
@@ -146,9 +127,8 @@ private:
 
     int mPrevMouseX;
     int mPrevMouseY;
-    QVector2D mPrevDragOrigin;
+    glm::vec2 mPrevDragOrigin;
     bool mTracking;
     bool mDragging;
-    double mXYPlaneDepth;
     OperationMode mOperationMode;
 };

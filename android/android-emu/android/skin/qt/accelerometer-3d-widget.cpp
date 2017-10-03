@@ -14,6 +14,14 @@
 #include "android/skin/qt/wavefront-obj-parser.h"
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+#include "android/utils/debug.h"
+
 Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent) :
     GLWidget(parent),
     mTracking(false),
@@ -121,11 +129,10 @@ bool Accelerometer3DWidget::initGL() {
     mGLES2->glClearColor(0.5, 0.5, 0.5  , 1.0);
 
     // Set up the camera transformation.
-    mCameraTransform.setToIdentity();
-    mCameraTransform.lookAt(
-        QVector3D(0.0, 0.0, 8.5), // Camera position
-        QVector3D(0, 0, 0), // Point at which the camera is looking
-        QVector3D(0, 1, 0)); // "up" vector
+    mCameraTransform = glm::lookAt(
+        glm::vec3(0.0f, 0.0f, CameraDistance), // Camera position
+        glm::vec3(0.0f, 0.0f, 0.0f), // Point at which the camera is looking
+        glm::vec3(0.0f, 1.0f, 0.0f)); // "up" vector
 
     if (!initProgram() ||
         !initModel() ||
@@ -251,16 +258,23 @@ void Accelerometer3DWidget::resizeGL(int w, int h) {
     // Adjust for new viewport
     mGLES2->glViewport(0, 0, w, h);
 
-    // Recompute the perspective projection transform.
-    mPerspective.setToIdentity();
-    mPerspective.perspective(
-            45.0, // FOV
-            static_cast<double>(w) / static_cast<double>(h), // Aspect ratio
-            0.5, 100.0); // near and far clipping planes
+    float aspect_ratio = static_cast<float>(w) / static_cast<float>(h);
+    float min_move_aspect_ratio = (MaxX - MinX) / (MaxY - MinY);
+    float plane_width = aspect_ratio > min_move_aspect_ratio ?
+            (MaxY - MinY) * aspect_ratio :
+            MaxX - MinY;
+    float plane_height = aspect_ratio > min_move_aspect_ratio ?
+            MaxY - MinY :
+            (MaxX - MinX) / min_move_aspect_ratio;
 
-    // Calculate the depth of the world's XY plane.
-    QVector3D vec = mPerspective * mCameraTransform * QVector3D(0.0f, 0.0f, 0.0f);
-    mXYPlaneDepth = vec.z();
+    // Recompute the perspective projection transform.
+    mPerspective = glm::frustum(
+            -plane_width * NearClip / (2.0f * CameraDistance),
+            plane_width * NearClip / (2.0f * CameraDistance),
+            -plane_height * NearClip / (2.0f * CameraDistance),
+            plane_height * NearClip / (2.0f * CameraDistance),
+            NearClip,
+            FarClip);
 }
 
 void Accelerometer3DWidget::repaintGL() {
@@ -270,30 +284,28 @@ void Accelerometer3DWidget::repaintGL() {
 
     // Handle repaint event.
     // Recompute the model transformation matrix using the given rotations.
-    QMatrix4x4 model_view_transform;
-    model_view_transform.setToIdentity();
-    model_view_transform.translate(mTranslation.x(), mTranslation.y());
-    model_view_transform.rotate(mQuat);
+    glm::mat4 model_view_transform = glm::mat4_cast(mQuat);
+    model_view_transform = glm::translate(glm::mat4(), glm::vec3(mTranslation, 0.0f)) * model_view_transform;
     model_view_transform = mCameraTransform * model_view_transform;
 
     // Normals need to be transformed using the inverse transpose of modelview matrix.
-    QMatrix4x4 normal_transform = model_view_transform.inverted().transposed();
+    glm::mat4 normal_transform = glm::transpose(glm::inverse(model_view_transform));
 
     // Recompute the model-view-projection matrix using the new model transform.
-    QMatrix4x4 model_view_projection = mPerspective * model_view_transform;
+    glm::mat4 model_view_projection = mPerspective * model_view_transform;
 
     // Give the new MVP matrix to the shader.
     mGLES2->glUseProgram(mProgram);
 
     // Upload matrices.
     GLuint mv_matrix_uniform = mGLES2->glGetUniformLocation(mProgram, "model_view");
-    mGLES2->glUniformMatrix4fv(mv_matrix_uniform, 1, GL_FALSE, model_view_transform.constData());
+    mGLES2->glUniformMatrix4fv(mv_matrix_uniform, 1, GL_FALSE, &model_view_transform[0][0]);
 
     GLuint mvit_matrix_uniform = mGLES2->glGetUniformLocation(mProgram, "model_view_inverse_transpose");
-    mGLES2->glUniformMatrix4fv(mvit_matrix_uniform, 1, GL_FALSE, normal_transform.constData());
+    mGLES2->glUniformMatrix4fv(mvit_matrix_uniform, 1, GL_FALSE, &normal_transform[0][0]);
 
     GLuint mvp_matrix_uniform = mGLES2->glGetUniformLocation(mProgram, "model_view_projection");
-    mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE, model_view_projection.constData());
+    mGLES2->glUniformMatrix4fv(mvp_matrix_uniform, 1, GL_FALSE, &model_view_projection[0][0]);
 
     // Set textures.
     mGLES2->glActiveTexture(GL_TEXTURE0);
@@ -348,81 +360,40 @@ static float clamp(float a, float b, float x) {
     return std::max(a, std::min(b, x));
 }
 
-void Accelerometer3DWidget::recalcRotationUpdateInterval() {
-    uint64_t currTimeMs =
-        (uint64_t)android::base::System::get()->getHighResTimeUs() / 1000;
-
-    if (currTimeMs - mLastRotationUpdateMs > ROTATION_UPDATE_RESET_TIME_MS) {
-        std::fill(mLastUpdateIntervals.begin(),
-                  mLastUpdateIntervals.end(), 0);
-    }
-
-    mLastUpdateIntervals[mRotationUpdateTimeWindowElt] =
-        (currTimeMs - mLastRotationUpdateMs);
-    mRotationUpdateTimeWindowElt++;
-
-    if (mRotationUpdateTimeWindowElt >= ROTATION_UPDATE_TIME_WINDOW_SIZE) {
-        mRotationUpdateTimeWindowElt = 0;
-    }
-
-    mUpdateIntervalMs = 0;
-
-    // Filter out window entries where the update interval is
-    // still calculated as 0 due to not being initialized yet.
-    uint64_t nontrivialUpdateIntervals = 0;
-    for (const auto& elt: mLastUpdateIntervals) {
-        mUpdateIntervalMs += elt;
-        if (elt) nontrivialUpdateIntervals++;
-    }
-
-    if (nontrivialUpdateIntervals)
-        mUpdateIntervalMs /= nontrivialUpdateIntervals;
-
-    mLastRotationUpdateMs = currTimeMs;
-}
-
 void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
-    mDQuat = QQuaternion();
-
     if (mTracking && mOperationMode == OperationMode::Rotate) {
-        int diff_x = event->x() - mPrevMouseX,
-            diff_y = event->y() - mPrevMouseY;
-        QQuaternion q = QQuaternion::fromAxisAndAngle(1.0, 0.0, 0.0, diff_y) *
-                        QQuaternion::fromAxisAndAngle(0.0, 1.0, 0.0, diff_x);
-        mDQuat = q;
-
-        recalcRotationUpdateInterval();
-
+        float diff_x = event->x() - mPrevMouseX,
+              diff_y = event->y() - mPrevMouseY;
+        glm::quat q = glm::angleAxis(glm::radians(diff_y),
+                                     glm::vec3(1.0f, 0.0f, 0.0f)) *
+                      glm::angleAxis(glm::radians(diff_x),
+                                     glm::vec3(0.0f, 1.0f, 0.0f));
         mQuat = q * mQuat;
         renderFrame();
         emit(rotationChanged());
         mPrevMouseX = event->x();
         mPrevMouseY = event->y();
     } else if (mTracking && mOperationMode == OperationMode::Move) {
-        QVector2D vec = screenToXYPlane(event->x(), event->y());
+        glm::vec2 vec = screenToXYPlane(event->x(), event->y());
         mTranslation += vec - mPrevDragOrigin;
-        mTranslation.setX(clamp(MinX, MaxX, mTranslation.x()));
-        mTranslation.setY(clamp(MinY, MaxY, mTranslation.y()));
+        mTranslation.x = clamp(MinX, MaxX, mTranslation.x);
+        mTranslation.y = clamp(MinY, MaxY, mTranslation.y);
         renderFrame();
         emit(positionChanged());
         mPrevDragOrigin = vec;
     }
 }
 
-QVector2D Accelerometer3DWidget::screenToXYPlane(int x, int y) const {
-    QVector3D vec; // Normalized device coordinates of the point.
-
-    // Convert x and y from Qt coordinate system into NDC
-    vec.setX(2.0 * x / static_cast<float>(width()) - 1.0);
-    vec.setY(1.0 - 2.0 * y / static_cast<float>(height()));
-
-    // Make sure the point lies on the world's XY plane.
-    vec.setZ(mXYPlaneDepth);
+glm::vec2 Accelerometer3DWidget::screenToXYPlane(int x, int y) const {
+    glm::vec4 vec((2.0f * x / static_cast<float>(width())) - 1.0f,
+                  1.0f - (2.0f * y / static_cast<float>(height())),
+                  0.0f,
+                  1.0f);
 
     // Now, by applying the inverse perspective and camera transform,
     // turn vec into world coordinates.
-    vec = (mPerspective * mCameraTransform).inverted() * vec;
-    return QVector2D(vec.x(), vec.y());
+    vec = glm::inverse(mPerspective * mCameraTransform) * vec;
+    return glm::vec2(vec * (CameraDistance / NearClip));
 }
 
 void Accelerometer3DWidget::mousePressEvent(QMouseEvent *event) {
@@ -442,6 +413,5 @@ void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
         mDragging = false;
         emit(dragStopped());
     }
-    resetRotationDelta();
     emit(rotationChanged());
 }
