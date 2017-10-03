@@ -15,12 +15,16 @@
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/file.h"
 #include "android/skin/rect.h"
+#include "android/inertialmodel/InertialModel.h"
 
 #include <QDoubleValidator>
 #include <QTimer>
 #include <QWidget>
 
 #include <memory>
+
+#include <glm/vec3.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 struct QAndroidSensorsAgent;
 class VirtualSensorsPage : public QWidget
@@ -47,24 +51,16 @@ private slots:
     void on_magVerticalWidget_valueChanged(double value);
 
     void updateAccelerations();
-    void onPhoneRotationChanged();
-    void onPhonePositionChanged();
-    void onDragStarted() {
-        mAccelerationTimer.start();
-    }
-    void onDragStopped() {
-        mLinearAcceleration = QVector3D(0, 0, 0);
-        mUi->accelWidget->resetRotationDelta();
-        updateSensorValues();
-        mAccelerationTimer.stop();
-    }
+    void syncUIAndUpdateModel();
+    void onDragStarted();
+    void onDragStopped();
     void onSkinLayoutChange(SkinRotation rot);
 
 signals:
     void coarseOrientationChanged(SkinRotation);
-    void updateResultingValuesRequired(QVector3D acceleration,
-                                       QVector3D gyroscope,
-                                       QVector3D device_magnetic_vector);
+    void updateResultingValuesRequired(glm::vec3 acceleration,
+                                       glm::vec3 gyroscope,
+                                       glm::vec3 device_magnetic_vector);
 
 private slots:
     void on_rotateToPortrait_clicked();
@@ -83,29 +79,26 @@ private slots:
     void on_positionXSlider_valueChanged(double);
     void on_positionYSlider_valueChanged(double);
 
-    void updateResultingValues(QVector3D acceleration,
-                               QVector3D gyroscope,
-                               QVector3D device_magnetic_vector);
+    void updateResultingValues(glm::vec3 acceleration,
+                               glm::vec3 gyroscope,
+                               glm::vec3 device_magnetic_vector);
 
 private:
     void showEvent(QShowEvent*) override;
 
-    void resetAccelerometerRotation(const QQuaternion&);
+    void resetAccelerometerRotation(const glm::quat&);
     void resetAccelerometerRotationFromSkinLayout(SkinRotation orientation);
     void setAccelerometerRotationFromSliders();
     void setPhonePositionFromSliders();
-    void updateSensorValues();
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
     const QAndroidSensorsAgent* mSensorsAgent;
-    QVector3D mLinearAcceleration;
-    QVector3D mPrevPosition;
-    QVector3D mCurrentPosition;
     QTimer mAccelerationTimer;
     QTimer mAccelWidgetRotationUpdateTimer;
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation;
     bool mVirtualSensorsUsed = false;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+    InertialModel mInertialModel;
 };
