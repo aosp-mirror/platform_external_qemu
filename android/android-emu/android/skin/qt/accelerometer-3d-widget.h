@@ -54,10 +54,6 @@ signals:
 public slots:
     // Sets the rotation quaternion.
     void setRotation(const QQuaternion& quat) {
-        mDQuat = QQuaternion();
-
-        mDQuat = quat * mQuat.conjugate();
-        recalcRotationUpdateInterval();
         mQuat = quat;
     }
 
@@ -71,14 +67,6 @@ public slots:
 public:
     // Getters for the rotation quaternion and delta.
     const QQuaternion& rotation() const { return mQuat; }
-    const QQuaternion& rotationDelta() const { return mDQuat; }
-    void resetRotationDelta() { mDQuat = QQuaternion(); }
-
-    // Returns milliseconds since last rotation update.
-    float rotationUpdateIntervalSecs() const {
-        if (mUpdateIntervalMs < 16) return 0.016; // 16 ms
-        return mUpdateIntervalMs / 1000.0f;
-    }
 
     // Returns the X and Y coordinates of the model's origin.
     const QVector2D& position() const { return mTranslation; }
@@ -114,18 +102,6 @@ private:
     QVector2D screenToXYPlane(int x, int y) const;
 
     QQuaternion mQuat;
-
-    // Tracking and timing rates of rotation change
-    // (for gyroscope)
-    QQuaternion mDQuat;
-    uint64_t mUpdateIntervalMs = 0;
-    uint64_t mLastRotationUpdateMs = 0;
-    static const uint64_t ROTATION_UPDATE_RESET_TIME_MS = 100;
-    static const size_t ROTATION_UPDATE_TIME_WINDOW_SIZE = 8;
-    std::array<uint64_t, ROTATION_UPDATE_TIME_WINDOW_SIZE>
-        mLastUpdateIntervals = {};
-    size_t mRotationUpdateTimeWindowElt = 0;
-    void recalcRotationUpdateInterval();
 
     QVector2D mTranslation;
     QMatrix4x4 mPerspective;
