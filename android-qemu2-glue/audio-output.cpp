@@ -65,6 +65,7 @@ void QemuAudioOutputEngine::close()
 {
     if (mVoice != nullptr) {
         AUD_close_out(&mCard, mVoice);
+        mVoice = nullptr;
     }
 
     AUD_remove_card(&mCard);
