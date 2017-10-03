@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "35b7fd28_1a16a4c0",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-03T15:53:38Z",
+      "side": 1,
+      "message": "Awesome!",
+      "parentUuid": "3794cf16_fa6f97a2",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 27
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dbe0463a_1b27b05c",
         "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
         "patchSetId": 1
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "Now that you mention it, we don\u0027t need to match-- convert_frame will do the conversion for us.  I\u0027ll remove the error for mismatch in start_capturing.\n\nIt\u0027s still better to get the matching format, and based on the error in start_capturing the guest honors that in my testing.",
       "parentUuid": "ba0c5239_af458cdf",
+      "range": {
+        "startLine": 292,
+        "startChar": 0,
+        "endLine": 292,
+        "endChar": 37
+      },
+      "revId": "60d9ea22639e979a67e931339110be731b9cd5c9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0986e8bc_2b218f50",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-03T15:53:38Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "a4403233_cc2fb8a6",
       "range": {
         "startLine": 292,
         "startChar": 0,
