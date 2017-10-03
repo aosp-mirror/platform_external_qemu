@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20095bf9_a97cdf50",
+        "filename": "android/scripts/package-cros-sdk.sh",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-10-03T14:46:15Z",
+      "side": 1,
+      "message": "The construction is a bit awkward, with the loop inside the function and the 2 calls to echo outside of it.\nWould it make more sense to do:\nfinalize_xml_files() {\nsha1sum\u003d....\nfor file in addon2-1.xml sys-img2-1.xml do\nfinalize_file $file $sha1sum\necho \"$file updated\"\ndone\n}",
+      "range": {
+        "startLine": 239,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 49
+      },
+      "revId": "47826caef13512661bdf62f07a8a00143deaa3a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
