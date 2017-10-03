@@ -554,7 +554,7 @@ August 15, 2011</license>
 			<api-level>25</api-level>
 			<tag>
 				<id>chromeos</id>
-				<display>Chrome OS</display>
+                                <display>Chrome OS {CROS_MILESTONE}</display>
 			</tag>
 			<abi>x86</abi>
 		</type-details>
