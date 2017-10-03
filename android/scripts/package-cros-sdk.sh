@@ -39,9 +39,10 @@ function split_image() {
   dd if="${input}" of=system.img.tmp count="${offsetb}" bs=65536
   dd if="${input}" of=userdata.img.tmp skip="${offsetb}" count="${lengthb}" bs=65536
   dd if="${input}" of=vendor.img.tmp skip="${endb}" bs=65536
-  for img in system userdata vendor; do
-    qemu-img convert -O qcow2 "${img}.img.tmp" "${img}.img"
-    rm -f "${img}.img.tmp"
+  qemu-img convert -O qcow2 userdata.img.tmp userdata.img
+  rm -f userdata.img.tmp
+  for img in system vendor; do
+    mv  "${img}.img.tmp" "${img}.img"
   done
 }
 
@@ -76,7 +77,7 @@ function fetch_artifact() {
   fi
 }
 
-function pack_for_os() {
+function get_emulator_for_os() {
   local platform="$1"
 
   case "${platform}" in
@@ -99,18 +100,47 @@ function pack_for_os() {
   cd "${PACKAGE_ROOT_DIR}"
   local emulator="sdk-repo-${OS}-emulator-${EMU}.zip"
   fetch_artifact "${AB_BRANCH}" "${TARGET}" "${EMU}" "${emulator}"
-  cd "${package_dir}"
-  unzip -q "${PACKAGE_ROOT_DIR}/${emulator}" -d emulator
-  mv emulator/emulator emulator/chromeos
-  local img_dir=system-images/chromeos-m"${CROS_MILESTONE}"/chromeos
-  mkdir -p "${img_dir}"
-  ln "${TMP_SDK_DIR}/x86" "${img_dir}" -sf
-  ln "${TMP_SDK_DIR}/extras" . -sf
-  local zipf="${PACKAGE_ROOT_DIR}/cros_sdk_for_${platform}_${VERSION}.zip"
-  # By default, zip dereferences symlink.
-  zip -qr - emulator system-images extras > "${zipf}.tmp"
+  echo "${emulator} fetched."
+}
+
+function pack_image_device() {
+  local zipf="${PACKAGE_ROOT_DIR}/sysimg_${CROS}.zip"
+  cd "${TMP_SDK_DIR}"
+  zip -qr - x86 > "${zipf}.tmp"
   mv "${zipf}.tmp" "${zipf}"
   echo "${zipf} generated."
+  cd "${TMP_SDK_DIR}/extras"
+  zipf="${PACKAGE_ROOT_DIR}/cros_extra.zip"
+  zip -qr - chromeos > "${zipf}.tmp"
+  mv "${zipf}.tmp" "${zipf}"
+  echo "${zipf} generated."
+}
+
+function finalize_xml_file() {
+  cd "${PACKAGE_ROOT_DIR}"
+  local files=(sdk-repo-windows-emulator-"${EMU}".zip
+               sdk-repo-linux-emulator-"${EMU}".zip
+               sdk-repo-darwin-emulator-"${EMU}".zip
+               sysimg_"${CROS}".zip
+               cros_extra.zip)
+  declare -A sizes
+  declare -A sha1s
+  for zip in "${files[@]}"; do
+    local size="$(stat -c %s "${zip}")"
+    local sha1="$(sha1sum "${zip}"|awk '{print $1}')"
+    sizes["${zip}"]="${size}"
+    sha1s["${zip}"]="${sha1}"
+  done
+  for xml in "${@}"; do
+    sed -i "s/{EMU}/${EMU}/g" "${xml}"
+    sed -i "s/{CROS}/${CROS}/g" "${xml}"
+    sed -i "s/{CROS_MILESTONE}/${CROS_MILESTONE}/g" "${xml}"
+    for zip in "${files[@]}"; do
+      sed -i "s/__SIZE__ ${zip}/${sizes[${zip}]}/" "${xml}"
+      sed -i "s/__SHA1__ ${zip}/${sha1s[${zip}]}/" "${xml}"
+    done
+    echo "${PACKAGE_ROOT_DIR}/${xml} generated"
+  done
 }
 
 set -e
@@ -187,11 +217,8 @@ echo "Extract kernel from boot partition of raw image"
 get_partition "${RAW_IMG}" EFI-SYSTEM ../boot.img
 mcopy -i ../boot.img -n ::/syslinux/vmlinuz.a kernel-ranchu
 
-echo "Add package.xml, devices.xml and source.properties"
+echo "Add source.properties"
 URLD=https://android.googlesource.com/platform/external/qemu/+/emu-2.4-arc/android/scripts/cros_files
-wget -qO - "${URLD}"/package.xml?format=TEXT|base64 -d | \
-    sed -e "s/Chrome OS m60/Chrome OS m${CROS_MILESTONE}/g" | \
-    sed -e "s/chromeos-m60/chromeos-m${CROS_MILESTONE}/g" > package.xml
 wget -qO - "${URLD}"/source.properties?format=TEXT|base64 -d > source.properties
 
 echo "Put devices.xml in extras"
@@ -201,9 +228,19 @@ cd "${DEVD}"
 wget -qO - "${URLD}"/devices.xml?format=TEXT|base64 -d > devices.xml
 echo Extra.Path=DeviceProfiles > source.properties
 
-echo "Now package for all systems"
+echo "Now package device and system images"
+pack_image_device
+
+echo "Now get emulator for all systems"
 for sys in ${HOST}; do
-  echo "Packaging for ${sys}..."
-  pack_for_os "${sys}"
+  echo "Get emulator for ${sys}..."
+  get_emulator_for_os "${sys}"
 done
+
+echo "Now generate repository xml files"
+for f in sys-img2-1 addon2-1; do
+    wget -qO - "${URLD}/${f}_tpl.xml?format=TEXT"|base64 -d > "${PACKAGE_ROOT_DIR}/${f}.xml"
+done
+finalize_xml_file addon2-1.xml sys-img2-1.xml
+
 echo Success
