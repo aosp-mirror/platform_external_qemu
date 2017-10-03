@@ -102,7 +102,11 @@ SharedLibrary::SharedLibrary(HandleType lib) : mLib(lib) {}
 
 SharedLibrary::~SharedLibrary() {
     if (mLib) {
-        FreeLibrary(mLib);
+        // BUG: 66013149
+        // In windows it sometimes hang on exit when destroying s_libraryMap.
+        // Let's skip freeing the library, since pretty much the only situation
+        // we need to do it, is on exit.
+        //FreeLibrary(mLib);
     }
 }
 
