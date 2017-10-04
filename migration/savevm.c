@@ -2182,6 +2182,9 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     AioContext *aio_context;
 
     if (!bdrv_all_can_snapshot(&bs)) {
+        if (s_snapshot_callbacks.savevm.on_quick_fail) {
+            s_snapshot_callbacks.savevm.on_quick_fail(name, -ENOTSUP);
+        }
         messages->out(messages->opaque, "Device '%s' is writable but does not "
                        "support snapshots.\n", bdrv_get_device_name(bs));
         return -1;
@@ -2189,6 +2192,9 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 
     /* Delete old snapshots of the same name */
     if (name && bdrv_all_delete_snapshot(name, &bs1, &local_err) < 0) {
+        if (s_snapshot_callbacks.savevm.on_quick_fail) {
+            s_snapshot_callbacks.savevm.on_quick_fail(name, -EFAULT);
+        }
         messages->err(messages->opaque, local_err,
                      "Error while deleting snapshot on device '%s': ",
                      bdrv_get_device_name(bs1));
@@ -2197,6 +2203,9 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 
     bs = bdrv_all_find_vmstate_bs();
     if (bs == NULL) {
+        if (s_snapshot_callbacks.savevm.on_quick_fail) {
+            s_snapshot_callbacks.savevm.on_quick_fail(name, -ENOTSUP);
+        }
         messages->out(messages->opaque, "No block device can accept snapshots\n");
         return -1;
     }
@@ -2206,6 +2215,9 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 
     ret = global_state_store();
     if (ret) {
+        if (s_snapshot_callbacks.savevm.on_quick_fail) {
+            s_snapshot_callbacks.savevm.on_quick_fail(name, -EFAULT);
+        }
         messages->out(messages->opaque, "Error saving global state\n");
         return ret;
     }
@@ -2391,6 +2403,9 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     AioContext *aio_context;
 
     if (!bdrv_all_can_snapshot(&bs)) {
+        if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+            s_snapshot_callbacks.loadvm.on_quick_fail(name, -ENOTSUP);
+        }
         messages->err(messages->opaque, NULL,
                      "Device '%s' is writable but does not support snapshots.",
                      bdrv_get_device_name(bs));
@@ -2398,6 +2413,9 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     }
     ret = bdrv_all_find_snapshot(name, &bs);
     if (ret < 0) {
+        if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+            s_snapshot_callbacks.loadvm.on_quick_fail(name, ret);
+        }
         messages->err(messages->opaque, NULL,
                      "Device '%s' does not have the requested snapshot '%s'",
                      bdrv_get_device_name(bs), name);
@@ -2406,6 +2424,9 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
 
     bs_vm_state = bdrv_all_find_vmstate_bs();
     if (!bs_vm_state) {
+        if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+            s_snapshot_callbacks.loadvm.on_quick_fail(name, -ENOTSUP);
+        }
         messages->err(messages->opaque, NULL,
                      "No block device supports snapshots");
         return -ENOTSUP;
@@ -2417,8 +2438,14 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     ret = bdrv_snapshot_find(bs_vm_state, &sn, name);
     aio_context_release(aio_context);
     if (ret < 0) {
+        if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+            s_snapshot_callbacks.loadvm.on_quick_fail(name, ret);
+        }
         return ret;
     } else if (sn.vm_state_size == 0) {
+        if (s_snapshot_callbacks.loadvm.on_quick_fail) {
+            s_snapshot_callbacks.loadvm.on_quick_fail(name, -EINVAL);
+        }
         messages->err(messages->opaque, NULL,
                      "This is a disk-only snapshot. Revert to it offline "
                      "using qemu-img.");
@@ -2461,6 +2488,9 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     /* restore the VM state */
     f = qemu_fopen_bdrv(bs_vm_state, 0);
     if (!f) {
+        if (s_snapshot_callbacks.loadvm.on_end) {
+            s_snapshot_callbacks.loadvm.on_end(name, -EINVAL);
+        }
         messages->err(messages->opaque, NULL, "Could not open VM state file");
         return -EINVAL;
     }

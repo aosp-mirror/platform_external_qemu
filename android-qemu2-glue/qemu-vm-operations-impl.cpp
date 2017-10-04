@@ -23,15 +23,15 @@
 extern "C" {
 #include "qemu/osdep.h"
 
+#include "exec/cpu-common.h"
 #include "migration/migration.h"
 #include "migration/qemu-file.h"
 #include "qapi/error.h"
 #include "qapi/qmp/qobject.h"
 #include "qapi/qmp/qstring.h"
-#include "sysemu/sysemu.h"
-#include "sysemu/kvm.h"
 #include "sysemu/hvf.h"
-#include "exec/cpu-common.h"
+#include "sysemu/kvm.h"
+#include "sysemu/sysemu.h"
 }
 
 #include <string>
@@ -136,8 +136,8 @@ static bool qemu_snapshot_list(void* opaque,
 static bool qemu_snapshot_save(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
-    return qemu_savevm(name,
-                       MessageCallback(opaque, nullptr, errConsumer)) == 0;
+    return qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer)) ==
+           0;
 }
 
 static bool qemu_snapshot_load(const char* name,
@@ -145,8 +145,7 @@ static bool qemu_snapshot_load(const char* name,
                                LineConsumerCallback errConsumer) {
     bool wasVmRunning = runstate_is_running() != 0;
     vm_stop(RUN_STATE_RESTORE_VM);
-    if (qemu_loadvm(name,
-                    MessageCallback(opaque, nullptr, errConsumer)) != 0) {
+    if (qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer)) != 0) {
         return false;
     }
     if (wasVmRunning) {
@@ -158,8 +157,7 @@ static bool qemu_snapshot_load(const char* name,
 static bool qemu_snapshot_delete(const char* name,
                                  void* opaque,
                                  LineConsumerCallback errConsumer) {
-    return qemu_delvm(name,
-                      MessageCallback(opaque, nullptr, errConsumer)) == 0;
+    return qemu_delvm(name, MessageCallback(opaque, nullptr, errConsumer)) == 0;
 }
 
 static SnapshotCallbacks sSnapshotCallbacks = {};
@@ -175,6 +173,11 @@ static void onSaveVmEnd(const char* name, int res) {
                                                 res);
 }
 
+static void onSaveVmQuickFail(const char* name, int res) {
+    sSnapshotCallbacks.ops[SNAPSHOT_SAVE].onQuickFail(sSnapshotCallbacksOpaque,
+                                                      name, res);
+}
+
 static int onLoadVmStart(const char* name) {
     return sSnapshotCallbacks.ops[SNAPSHOT_LOAD].onStart(
             sSnapshotCallbacksOpaque, name);
@@ -183,6 +186,11 @@ static int onLoadVmStart(const char* name) {
 static void onLoadVmEnd(const char* name, int res) {
     sSnapshotCallbacks.ops[SNAPSHOT_LOAD].onEnd(sSnapshotCallbacksOpaque, name,
                                                 res);
+}
+
+static void onLoadVmQuickFail(const char* name, int res) {
+    sSnapshotCallbacks.ops[SNAPSHOT_LOAD].onQuickFail(sSnapshotCallbacksOpaque,
+                                                      name, res);
 }
 
 static int onDelVmStart(const char* name) {
@@ -195,10 +203,15 @@ static void onDelVmEnd(const char* name, int res) {
                                                res);
 }
 
+static void onDelVmQuickFail(const char* name, int res) {
+    sSnapshotCallbacks.ops[SNAPSHOT_DEL].onQuickFail(sSnapshotCallbacksOpaque,
+                                                     name, res);
+}
+
 static const QEMUSnapshotCallbacks sQemuSnapshotCallbacks = {
-        .savevm = {onSaveVmStart, onSaveVmEnd},
-        .loadvm = {onLoadVmStart, onLoadVmEnd},
-        .delvm = {onDelVmStart, onDelVmEnd}};
+        .savevm = {onSaveVmStart, onSaveVmEnd, onSaveVmQuickFail},
+        .loadvm = {onLoadVmStart, onLoadVmEnd, onLoadVmQuickFail},
+        .delvm = {onDelVmStart, onDelVmEnd, onDelVmQuickFail}};
 
 static const QEMUFileHooks sSaveHooks = {
         // before_ram_iterate
@@ -304,7 +317,8 @@ static void set_snapshot_callbacks(void* opaque,
         sSnapshotCallbacksOpaque = opaque;
         qemu_set_snapshot_callbacks(&sQemuSnapshotCallbacks);
         qemu_set_ram_load_callback([](void* hostRam, uint64_t size) {
-                sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam, size);
+            sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam,
+                                              size);
         });
         set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
         migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);

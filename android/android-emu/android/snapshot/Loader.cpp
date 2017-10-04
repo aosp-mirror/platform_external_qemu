@@ -22,8 +22,28 @@ using android::base::StdioStream;
 namespace android {
 namespace snapshot {
 
-Loader::Loader(const Snapshot& snapshot)
+static FailureReason errnoToFailure(int error) {
+    switch (error) {
+        default:
+        case 0:
+        case 1:
+            return FailureReason::InternalError;
+        case EINVAL:
+            return FailureReason::CorruptedData;
+        case ENOENT:
+            return FailureReason::NoSnapshotInImage;
+        case ENOTSUP:
+            return FailureReason::EmulationEngineFailed;
+    }
+}
+
+Loader::Loader(const Snapshot& snapshot, int error)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
+    if (error) {
+        mSnapshot.saveFailure(errnoToFailure(error));
+        return;
+    }
+
     if (!path_is_dir(mSnapshot.dataDir().c_str())) {
         return;
     }
@@ -76,7 +96,9 @@ Loader::~Loader() {
     }
 }
 
-ITextureLoaderPtr Loader::textureLoader() const { return mTextureLoader; }
+ITextureLoaderPtr Loader::textureLoader() const {
+    return mTextureLoader;
+}
 
 void Loader::complete(bool succeeded) {
     mStatus = OperationStatus::Error;

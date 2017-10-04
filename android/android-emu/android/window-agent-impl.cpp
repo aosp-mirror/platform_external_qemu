@@ -13,16 +13,47 @@
 // limitations under the License.
 
 #include "android/emulation/control/window_agent.h"
+
 #include "android/emulator-window.h"
+#include "android/skin/qt/emulator-container.h"
+#include "android/skin/qt/emulator-qt-window.h"
+#include "android/utils/debug.h"
+
+static_assert(WINDOW_MESSAGE_GENERIC == int(Ui::OverlayMessageIcon::None),
+              "Bad message type enum value (None)");
+static_assert(WINDOW_MESSAGE_INFO == int(Ui::OverlayMessageIcon::Info),
+              "Bad message type enum value (Info)");
+static_assert(WINDOW_MESSAGE_WARNING == int(Ui::OverlayMessageIcon::Warning),
+              "Bad message type enum value (Warning)");
+static_assert(WINDOW_MESSAGE_ERROR == int(Ui::OverlayMessageIcon::Error),
+              "Bad message type enum value (Error)");
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
         .rotate90Clockwise = emulator_window_rotate_90_clockwise,
         .rotate = emulator_window_rotate,
-        .getRotation = [] {
-            return emulator_window_get_layout(emulator_window_get())
-                    ->orientation;
-        }};
+        .getRotation =
+                [] {
+                    return emulator_window_get_layout(emulator_window_get())
+                            ->orientation;
+                },
+        .showMessage =
+                [](const char* message, WindowMessageType type, int timeoutMs) {
+                    if (const auto win = EmulatorQtWindow::getInstance()) {
+                        win->showMessage(
+                                QString::fromUtf8(message),
+                                static_cast<Ui::OverlayMessageIcon>(type),
+                                timeoutMs);
+                    } else {
+                        const auto printer =
+                                (type == WINDOW_MESSAGE_ERROR)
+                                        ? &derror
+                                        : (type == WINDOW_MESSAGE_WARNING)
+                                                  ? &dwarning
+                                                  : &dprint;
+                        printer("%s", message);
+                    }
+                }};
 
 const QAndroidEmulatorWindowAgent* const gQAndroidEmulatorWindowAgent =
         &sQAndroidEmulatorWindowAgent;

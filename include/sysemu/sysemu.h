@@ -78,12 +78,13 @@ void qemu_remove_machine_init_done_notifier(Notifier *notify);
 typedef struct {
     int (*on_start)(const char* name);
     void (*on_end)(const char* name, int res);
-} QEMUCallbackPair;
+    void (*on_quick_fail)(const char* name, int res);
+} QEMUCallbackSet;
 
 typedef struct {
-    QEMUCallbackPair savevm;
-    QEMUCallbackPair loadvm;
-    QEMUCallbackPair delvm;
+    QEMUCallbackSet savevm;
+    QEMUCallbackSet loadvm;
+    QEMUCallbackSet delvm;
 } QEMUSnapshotCallbacks;
 
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);

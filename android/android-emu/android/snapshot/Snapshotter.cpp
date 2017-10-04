@@ -100,6 +100,11 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onSavingComplete(name, res);
+                     },
+                     // quick fail
+                     [](void* opaque, const char* name, int res) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         snapshot->onSavingFailed(name, res);
                      }},
                     // load
                     {// start
@@ -111,6 +116,10 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onLoadingComplete(name, res);
+                     },  // quick fail
+                     [](void* opaque, const char* name, int res) {
+                         auto snapshot = static_cast<Snapshotter*>(opaque);
+                         snapshot->onLoadingFailed(name, res);
                      }},
                     // del
                     {// start
@@ -122,7 +131,9 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                      [](void* opaque, const char* name, int res) {
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onDeletingComplete(name, res);
-                     }},
+                     },
+                     // quick fail
+                     [](void*, const char*, int) {}},
             },
             // ramOps
             {// registerBlock
@@ -172,7 +183,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
     mVmOperations = vmOperations;
     mWindowAgent = windowAgent;
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
-}
+}  // namespace snapshot
 
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {
@@ -230,6 +241,10 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     return mSaver->status() != OperationStatus::Error;
 }
 
+void Snapshotter::onSavingFailed(const char* name, int res) {
+    // Well, we haven't started anything and it failed already - nothing to do.
+}
+
 bool Snapshotter::onStartLoading(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     mCallback(Operation::Load, Stage::Start);
@@ -253,6 +268,13 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     mCallback(Operation::Load, Stage::End);
     return mLoader->status() != OperationStatus::Error;
+}
+
+void Snapshotter::onLoadingFailed(const char* name, int res) {
+    assert(res < 0);
+    mSaver.clear();
+    mLoader.emplace(name, -res);
+    mLoader->complete(false);
 }
 
 bool Snapshotter::onStartDelete(const char*) {
@@ -305,7 +327,7 @@ void androidSnapshot_initialize(
     }
 
     android::snapshot::sInstance->initialize(*vmOperations, *windowAgent);
-    android::snapshot::Quickboot::initialize(*vmOperations);
+    android::snapshot::Quickboot::initialize(*vmOperations, *windowAgent);
 }
 
 void androidSnapshot_finalize() {
