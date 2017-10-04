@@ -63,6 +63,8 @@ private:
     // Timeout between hang checks.
     static constexpr base::System::Duration kHangCheckTimeoutMs = 15 * 1000;
 
+    static base::System::Duration hangTimeoutMs();
+
     // A class that watches a single looper.
     class LooperWatcher;
 
