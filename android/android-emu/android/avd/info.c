@@ -1520,6 +1520,11 @@ avdInfo_getTargetAbi( const AvdInfo* i )
     return ASTRDUP(i->targetAbi);
 }
 
+bool avdInfo_is_x86ish(const AvdInfo* i)
+{
+    return is_x86ish(i);
+}
+
 char*
 avdInfo_getCodeProfilePath( const AvdInfo*  i, const char*  profileName )
 {
