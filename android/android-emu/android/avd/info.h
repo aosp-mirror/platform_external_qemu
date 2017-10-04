@@ -331,6 +331,9 @@ char*        avdInfo_getTargetCpuArch(const AvdInfo* i);
  */
 char*        avdInfo_getTargetAbi( const AvdInfo*  i );
 
+/* A helper to quickly find out if this is a x86-compatible AVD */
+bool         avdInfo_is_x86ish(const AvdInfo* i);
+
 /* Reads the AVD's hardware configuration into 'hw'. returns -1 on error, 0 otherwise */
 int          avdInfo_initHwConfig(const AvdInfo* i,
                                   AndroidHwConfig* hw,
