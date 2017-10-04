@@ -220,6 +220,9 @@ void GLESv2Context::postLoadRestoreCtx() {
                     const GLuint globalBufferName = shareGroup()
                             ->getGlobalName(NamedObjectType::VERTEXBUFFER,
                                             glesPointer->getBufferName());
+                    if (!globalBufferName) {
+                        continue;
+                    }
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
                     dispatcher.glVertexAttribPointer(glesPointerIte.first,
