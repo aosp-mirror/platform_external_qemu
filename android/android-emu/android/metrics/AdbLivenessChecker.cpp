@@ -14,11 +14,12 @@
 
 #include "android/metrics/AdbLivenessChecker.h"
 
-#include "android/base/system/System.h"
-#include "android/base/files/PathUtils.h"
 #include "android/base/Log.h"
+#include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/base/threads/ParallelTask.h"
 #include "android/emulation/ConfigDirs.h"
+#include "android/globals.h"
 
 #include "android/metrics/proto/studio_stats.pb.h"
 
@@ -27,9 +28,9 @@
 namespace android {
 namespace metrics {
 
+using android::ConfigDirs;
 using android::base::PathUtils;
 using android::base::System;
-using android::ConfigDirs;
 using std::shared_ptr;
 
 static const int kMaxAttempts = 3;
@@ -64,6 +65,14 @@ bool AdbLivenessChecker::isEmulatorBooted() {
     return sLivenessStatus.bootComplete;
 }
 
+static long bootCheckTaskTimeoutMs(
+        android::base::Looper::Duration adbTimeoutMs) {
+    if (avdInfo_is_x86ish(android_avdInfo)) {
+        return std::max<long>(adbTimeoutMs / 100, 250);
+    }
+    return std::max<long>(adbTimeoutMs / 10, 5000);
+}
+
 AdbLivenessChecker::AdbLivenessChecker(
         android::emulation::AdbInterface* adb,
         android::base::Looper* looper,
@@ -83,7 +92,7 @@ AdbLivenessChecker::AdbLivenessChecker(
                      mCheckIntervalMs),
       mBootCheckTask(looper,
                      [this]() { return runBootCheck(); },
-                     std::max<int>(mCheckIntervalMs / 100, 250)),
+                     bootCheckTaskTimeoutMs(mCheckIntervalMs)),
       mRemainingAttempts(kMaxAttempts) {
     // Don't call start() here: start() launches a parallel task that calls
     // shared_from_this(), which needs at least one shared pointer owning
@@ -195,8 +204,8 @@ void AdbLivenessChecker::runCheckBlocking(CheckResult* outResult) const {
         return;
     }
 
-    const std::vector<std::string> emulatorAliveCmd = {
-            adbPath, "-s", serial, "shell", "exit"};
+    const std::vector<std::string> emulatorAliveCmd = {adbPath, "-s", serial,
+                                                       "shell", "exit"};
     if (!System::get()->runCommand(
                 emulatorAliveCmd,
                 System::RunOptions::WaitForCompletion |
@@ -216,8 +225,7 @@ void AdbLivenessChecker::runCheckNonBlocking() {
         return;
     }
 
-    mDevicesCommand =
-        mAdb->runAdbCommand(
+    mDevicesCommand = mAdb->runAdbCommand(
             {"devices"},
             [this](const android::emulation::OptionalAdbCommandResult& result) {
                 if (!result || result->exit_code) {
@@ -229,30 +237,30 @@ void AdbLivenessChecker::runCheckNonBlocking() {
                     }
                 } else {
                     mShellExitCommand = mAdb->runAdbCommand(
-                        {"shell", "exit"},
-                        [this](const android::emulation::OptionalAdbCommandResult& result2) {
-                            if (!result2 || result2->exit_code) {
-                                reportCheckResult(CheckResult::kFailureEmulatorDead);
-                                sLivenessStatus.online = false;
-                                sLivenessStatus.bootComplete = false;
-                                if (!mBootCheckTask.inFlight()) {
-                                    mBootCheckTask.start(true);
+                            {"shell", "exit"},
+                            [this](const android::emulation::
+                                           OptionalAdbCommandResult& result2) {
+                                if (!result2 || result2->exit_code) {
+                                    reportCheckResult(
+                                            CheckResult::kFailureEmulatorDead);
+                                    sLivenessStatus.online = false;
+                                    sLivenessStatus.bootComplete = false;
+                                    if (!mBootCheckTask.inFlight()) {
+                                        mBootCheckTask.start(true);
+                                    }
+                                } else {
+                                    reportCheckResult(CheckResult::kOnline);
+                                    sLivenessStatus.online = true;
                                 }
-                            } else {
-                                reportCheckResult(CheckResult::kOnline);
-                                sLivenessStatus.online = true;
-                            }
 
-                            mShellExitCommand.reset();
-                        },
-                        mCheckIntervalMs / 3,
-                        false);
+                                mShellExitCommand.reset();
+                            },
+                            mCheckIntervalMs / 3, false);
                 }
 
                 mDevicesCommand.reset();
             },
-            mCheckIntervalMs / 3,
-            false);
+            mCheckIntervalMs / 3, false);
 }
 
 void AdbLivenessChecker::reportCheckResult(const CheckResult& result) {

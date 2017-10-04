@@ -16,6 +16,7 @@
 
 #include "android/base/Optional.h"
 #include "android/base/StringFormat.h"
+#include "android/globals.h"
 #include "android/utils/debug.h"
 
 #include <utility>
@@ -46,6 +47,7 @@ private:
     bool mIsTaskRunning = false;
 
     base::Optional<base::System::Duration> mLastCheckTimeUs;
+    base::System::Duration mTimeoutMs = HangDetector::hangTimeoutMs();
 
     std::unique_ptr<base::Lock> mLock{new base::Lock()};
 };
@@ -78,7 +80,7 @@ void HangDetector::LooperWatcher::process(const HangCallback& hangCallback) {
 
     const auto now = base::System::get()->getUnixTimeUs();
     if (mIsTaskRunning) {
-        if (now > *mLastCheckTimeUs + kTaskProcessingTimeoutMs * 1000) {
+        if (now > *mLastCheckTimeUs + mTimeoutMs * 1000) {
             const auto message = base::StringFormat(
                     "detected a hanging thread '%s'. No response for %d ms",
                     mLooper->name(), (int)((now - *mLastCheckTimeUs) / 1000));
@@ -151,7 +153,7 @@ void HangDetector::stop() {
 void HangDetector::workerThread() {
     auto nextDeadline = []() {
         return base::System::get()->getUnixTimeUs() +
-        kHangLoopIterationTimeoutMs * 1000;
+               kHangLoopIterationTimeoutMs * 1000;
     };
     base::AutoLock lock(mLock);
     for (;;) {
@@ -175,6 +177,16 @@ void HangDetector::workerThread() {
             lw->process(mHangCallback);
         }
     }
+}
+
+base::System::Duration HangDetector::hangTimeoutMs() {
+    // x86 and x64 run pretty fast, but other types of images could be really
+    // slow - so let's have a longer timeout for those.
+    if (avdInfo_is_x86ish(android_avdInfo)) {
+        return kTaskProcessingTimeoutMs;
+    }
+    // something around 100 seconds should be fine.
+    return kTaskProcessingTimeoutMs * 7;
 }
 
 }  // namespace crashreport
