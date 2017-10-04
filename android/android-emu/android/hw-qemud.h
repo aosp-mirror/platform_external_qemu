@@ -46,5 +46,6 @@ extern int android_qemud_set_channel(const char* name, CSerialLine* peer_sl);
 #define  ANDROID_QEMUD_GPS      "gps"
 #define  ANDROID_QEMUD_CONTROL  "control"
 #define  ANDROID_QEMUD_SENSORS  "sensors"
+#define  ANDROID_QEMUD_CROS     "cros"
 
 ANDROID_END_HEADER
