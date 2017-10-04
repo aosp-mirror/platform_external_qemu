@@ -47,8 +47,11 @@ static QemudClient* cros_connect(void*  opaque,
                                  const char* client_param) {
     sClient = qemud_client_new(service, channel, client_param,
                                opaque, NULL, cros_close, NULL, NULL);
-    if (sClient)
+    if (sClient) {
         qemud_client_set_framing(sClient, 1);
+        if (android_hw->hw_arc_autologin)
+            cros_send_message("autologin=1");
+    }
     return sClient;
 }
 
