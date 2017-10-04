@@ -327,7 +327,7 @@ void androidSnapshot_initialize(
     }
 
     android::snapshot::sInstance->initialize(*vmOperations, *windowAgent);
-    android::snapshot::Quickboot::initialize(*vmOperations);
+    android::snapshot::Quickboot::initialize(*vmOperations, *windowAgent);
 }
 
 void androidSnapshot_finalize() {

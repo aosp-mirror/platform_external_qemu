@@ -61,9 +61,10 @@ Quickboot& Quickboot::get() {
     return *sInstance;
 }
 
-void Quickboot::initialize(const QAndroidVmOperations& vmOps) {
+void Quickboot::initialize(const QAndroidVmOperations& vmOps,
+                           const QAndroidEmulatorWindowAgent& window) {
     assert(!sInstance);
-    sInstance = new Quickboot(vmOps);
+    sInstance = new Quickboot(vmOps, window);
 }
 
 void Quickboot::finalize() {
@@ -167,8 +168,10 @@ void Quickboot::onLivenessTimer() {
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
 }
 
-Quickboot::Quickboot(const QAndroidVmOperations& vmOps)
+Quickboot::Quickboot(const QAndroidVmOperations& vmOps,
+                     const QAndroidEmulatorWindowAgent& window)
     : mVmOps(vmOps),
+      mWindow(window),
       mLivenessTimer(base::ThreadLooper::get()->createTimer(
               [](void* opaque, base::Looper::Timer*) {
                   static_cast<Quickboot*>(opaque)->onLivenessTimer();

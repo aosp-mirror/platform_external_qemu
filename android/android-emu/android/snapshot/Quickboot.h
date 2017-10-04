@@ -26,7 +26,8 @@ class Quickboot {
 
 public:
     static Quickboot& get();
-    static void initialize(const QAndroidVmOperations& vmOps);
+    static void initialize(const QAndroidVmOperations& vmOps,
+                           const QAndroidEmulatorWindowAgent& window);
     static void finalize();
 
     ~Quickboot();
@@ -46,9 +47,12 @@ private:
     void startLivenessMonitor();
     void onLivenessTimer();
 
-    Quickboot(const QAndroidVmOperations& vmOps);
+    Quickboot(const QAndroidVmOperations& vmOps,
+              const QAndroidEmulatorWindowAgent& window);
 
     const QAndroidVmOperations mVmOps;
+    const QAndroidEmulatorWindowAgent mWindow;
+
     base::System::WallDuration mLoadTimeMs = 0;
     bool mLoaded = false;
     std::string mLoadedSnapshotName;
