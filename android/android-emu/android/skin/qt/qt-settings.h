@@ -36,6 +36,7 @@ constexpr char FORWARD_SHORTCUTS_TO_DEVICE[] = "set/forwardShortcutsToDevice";
 constexpr char FRAME_ALWAYS[] = "set/frameAlways";
 constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
+constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";
 
 constexpr char CELLULAR_NETWORK_TYPE[]    = "cell/network_type";
 constexpr char CELLULAR_SIGNAL_STRENGTH[] = "cell/signal_strength";
