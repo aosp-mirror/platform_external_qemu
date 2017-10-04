@@ -212,6 +212,8 @@ static const QEMUFileHooks sSaveHooks = {
                             SnapshotRamBlock block = {
                                     block_name, (int64_t)offset,
                                     (uint8_t*)host_addr, (int64_t)length};
+                            block.pageSize = (int32_t)qemu_ram_pagesize(
+                                    qemu_ram_block_by_name(block_name));
                             sSnapshotCallbacks.ramOps.registerBlock(
                                     sSnapshotCallbacksOpaque, SNAPSHOT_SAVE,
                                     &block);
