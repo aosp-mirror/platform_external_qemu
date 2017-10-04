@@ -137,6 +137,7 @@ int main(int argc, char **argv)
 #include "android/android.h"
 #include "android/boot-properties.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/cros.h"
 #include "android/emulation/bufprint_config_dirs.h"
 #include "android/error-messages.h"
 #include "android/featurecontrol/feature_control.h"
@@ -4739,6 +4740,13 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
         if (android_qemud_get_channel(ANDROID_QEMUD_GPS,
                                       &android_gps_serial_line) < 0) {
             error_report("could not initialize qemud 'gps' channel");
+            return 1;
+        }
+    }
+
+    if (android_hw->hw_arc) {
+        if (cros_pipe_init() < 0) {
+            error_report("could not initialize qemud 'cros' channel");
             return 1;
         }
     }
