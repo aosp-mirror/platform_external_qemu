@@ -22,6 +22,30 @@
       "revId": "12802f9570347b0071cf3d331c50b27f548936f4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd774c38_20b483e9",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 761,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-10-04T20:56:15Z",
+      "side": 1,
+      "message": "The param was set based on the hal version property. They are always equal.",
+      "parentUuid": "d522e582_e8ce2b74",
+      "range": {
+        "startLine": 761,
+        "startChar": 8,
+        "endLine": 761,
+        "endChar": 23
+      },
+      "revId": "12802f9570347b0071cf3d331c50b27f548936f4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

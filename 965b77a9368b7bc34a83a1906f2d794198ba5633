@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "56d8ca1e_89ac4356",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 762,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-10-04T20:56:15Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "0d105352_28eb7136",
+      "revId": "965b77a9368b7bc34a83a1906f2d794198ba5633",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e9c7e63e_0434902f",
         "filename": "android/android-emu/android/camera/camera-service.c",
         "patchSetId": 3
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "60aa8278_69f06814",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 961,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-10-04T20:56:15Z",
+      "side": 1,
+      "message": ":)",
+      "parentUuid": "e9c7e63e_0434902f",
+      "revId": "965b77a9368b7bc34a83a1906f2d794198ba5633",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88ad84fe_1159c8f8",
         "filename": "android/android-emu/android/camera/camera-service.c",
         "patchSetId": 3
@@ -47,6 +83,24 @@
       "writtenOn": "2017-09-23T00:20:37Z",
       "side": 1,
       "message": "Won\u0027t the pixel format for HAL version 1 be RGB32 here so that this could use calculate_frame_size too?",
+      "revId": "965b77a9368b7bc34a83a1906f2d794198ba5633",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d47f3268_05e25ec5",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 975,
+      "author": {
+        "id": 1129273
+      },
+      "writtenOn": "2017-10-04T20:56:15Z",
+      "side": 1,
+      "message": "Agree. Either way works. HAL1 just hard coded the format. So it is safe also to do the calculation here.",
+      "parentUuid": "88ad84fe_1159c8f8",
       "revId": "965b77a9368b7bc34a83a1906f2d794198ba5633",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
