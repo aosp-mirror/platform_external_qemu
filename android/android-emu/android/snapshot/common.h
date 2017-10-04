@@ -51,6 +51,8 @@ enum class FailureReason {
     IncompatibleVersion,
     NoRamFile,
     NoTexturesFile,
+    NoSnapshotInImage,
+    SnapshotsNotSupported,
 
     UnrecoverableErrorLimit = 10000,
 
