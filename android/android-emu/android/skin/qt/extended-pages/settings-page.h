@@ -40,6 +40,7 @@ signals:
     void onTopChanged(bool isOnTop);
     void themeChanged(SettingsTheme new_theme);
     void enableClipboardSharingChanged(bool enabled);
+    void disableMouseWheelChanged(bool disabled);
 
 private slots:
     void on_set_forwardShortcutsToDevice_currentIndexChanged(int index);
@@ -69,6 +70,7 @@ private slots:
     void on_set_useStudio_toggled(bool checked);
 
     void on_set_clipboardSharing_toggled(bool checked);
+    void on_set_disableMouseWheel_toggled(bool checked);
 
 private:
     bool eventFilter(QObject* object, QEvent* event) override;

@@ -209,6 +209,11 @@ SettingsPage::SettingsPage(QWidget* parent)
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
     mUi->set_clipboardSharing->setChecked(enableClipboardSharing);
     on_set_clipboardSharing_toggled(enableClipboardSharing);
+
+    const auto disableMouseWheel =
+        settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
+    mUi->set_disableMouseWheel->setChecked(disableMouseWheel);
+    on_set_disableMouseWheel_toggled(disableMouseWheel);
 }
 
 SettingsPage::~SettingsPage() {
@@ -460,4 +465,10 @@ void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
     }
 
     emit enableClipboardSharingChanged(checked);
+}
+
+void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
+    QSettings settings;
+    settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
+    emit disableMouseWheelChanged(checked);
 }

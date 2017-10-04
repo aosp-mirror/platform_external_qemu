@@ -65,6 +65,7 @@ private slots:
     void switchFrameAlways(bool showFrame);
     void switchOnTop(bool isOntop);
     void switchToTheme(SettingsTheme theme);
+    void disableMouseWheel(bool disabled);
 
     // Master tabs
     void on_batteryButton_clicked();

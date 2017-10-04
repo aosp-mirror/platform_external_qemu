@@ -235,7 +235,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>258</y>
+       <y>334</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -313,7 +313,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>238</y>
+       <y>314</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -439,7 +439,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>258</y>
+       <y>334</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -464,7 +464,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>238</y>
+       <y>314</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -531,6 +531,55 @@
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="set_DisableMouseWheelTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>238</y>
+       <width>211</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Disable mouse wheel</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="set_disableMouseWheel">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>258</y>
+       <width>211</width>
+       <height>24</height>
+      </rect>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>24</width>
+       <height>24</height>
+      </size>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Toggle</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
      </property>
     </widget>
    </widget>
