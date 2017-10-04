@@ -127,7 +127,14 @@ void Quickboot::reportSuccessfulSave(StringView name,
 }
 
 constexpr int kLivenessTimerTimeoutMs = 100;
-constexpr int kBootTimeoutMs = 5 * 1000;
+constexpr int kBootTimeoutMs = 7 * 1000;
+
+static int bootTimeoutMs() {
+    if (avdInfo_is_x86ish(android_avdInfo)) {
+        return kBootTimeoutMs;
+    }
+    return kBootTimeoutMs * 5;
+}
 
 void Quickboot::startLivenessMonitor() {
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
@@ -143,13 +150,13 @@ void Quickboot::onLivenessTimer() {
     }
 
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
-    if (int64_t(nowMs - mLoadTimeMs) > kBootTimeoutMs) {
+    if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
         // The VM hasn't started for long enough since the end of snapshot
         // loading, let's reset it.
         dwarning(
                 "Guest hasn't come online in %d seconds, deleting the boot "
                 "snapshot and resetting the guest",
-                kBootTimeoutMs / 1000);
+                bootTimeoutMs() / 1000);
         Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
         reportFailedLoad(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
