@@ -519,6 +519,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     connect(&mWheelScrollTimer, SIGNAL(timeout()), this,
             SLOT(wheelScrollTimeout()));
 
+    mIgnoreWheelEvent =
+        settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
+
     // set custom ADB path if saved
     bool autoFindAdb =
             settings.value(Ui::Settings::AUTO_FIND_ADB, true).toBool();
@@ -1031,6 +1034,10 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways)
     if (mStartupDone) {
         mContainer.show();
     }
+}
+
+void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
+    mIgnoreWheelEvent = ignore;
 }
 
 void EmulatorQtWindow::showMinimized() {
@@ -2116,14 +2123,18 @@ bool EmulatorQtWindow::mouseInside() {
 }
 
 void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
-    if (!mWheelScrollTimer.isActive()) {
+    if (mIgnoreWheelEvent) {
+      event->ignore();
+    } else {
+      if (!mWheelScrollTimer.isActive()) {
         handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos());
         mWheelScrollPos = event->pos();
-    }
+      }
 
-    mWheelScrollTimer.start();
-    mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-    handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos);
+      mWheelScrollTimer.start();
+      mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
+      handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos);
+    }
 }
 
 void EmulatorQtWindow::wheelScrollTimeout() {

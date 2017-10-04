@@ -64,7 +64,7 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
     mExtendedUi->bugreportPage->initialize(mEmulatorWindow);
 
-     connect(
+    connect(
         mExtendedUi->settingsPage, SIGNAL(frameAlwaysChanged(bool)),
         this, SLOT(switchFrameAlways(bool)));
 
@@ -79,6 +79,9 @@ ExtendedWindow::ExtendedWindow(
     connect(
         mExtendedUi->settingsPage, SIGNAL(themeChanged(SettingsTheme)),
         this, SLOT(switchToTheme(SettingsTheme)));
+
+    connect(mExtendedUi->settingsPage, SIGNAL(disableMouseWheelChanged(bool)),
+        this, SLOT(disableMouseWheel(bool)));
 
     connect(
         mExtendedUi->settingsPage, SIGNAL(enableClipboardSharingChanged(bool)),
@@ -298,6 +301,10 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
 
     // Make the Settings pane active (still)
     adjustTabs(PANE_IDX_SETTINGS);
+}
+
+void ExtendedWindow::disableMouseWheel(bool disabled) {
+    mEmulatorWindow->setIgnoreWheelEvent(disabled);
 }
 
 void ExtendedWindow::showEvent(QShowEvent* e) {
