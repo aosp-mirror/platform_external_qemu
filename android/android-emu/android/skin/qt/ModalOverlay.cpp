@@ -73,6 +73,9 @@ ModalOverlay::ModalOverlay(QString message, QWidget* parent) : QWidget(parent) {
         text->setStyleSheet(
                 QString("font-size: %1;")
                         .arg(Ui::stylesheetFontSize(Ui::FontSize::Huge)));
+        if (movie->isValid()) {
+            innerLayout->addSpacing(20);
+        }
         innerLayout->addWidget(text);
     }
     innerLayout->addStretch();
