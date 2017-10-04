@@ -758,7 +758,9 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
 
 }
 
-void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border){
+void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
+        GLsizei width, GLsizei height, GLsizei depth, GLint border,
+        GLenum format, GLenum type){
     GET_CTX();
 
     if (ctx->shareGroup().get()){
@@ -775,6 +777,8 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat, GLsize
             texData->border = border;
             texData->internalFormat = internalformat;
             texData->target = target;
+            texData->format = format;
+            texData->type = type;
         }
     }
 }

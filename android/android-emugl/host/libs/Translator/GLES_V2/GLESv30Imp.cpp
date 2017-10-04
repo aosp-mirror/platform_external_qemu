@@ -843,7 +843,8 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
                  !GLESv2Validate::pixelSizedFrmt(ctx, internalFormat, format, type),
                  GL_INVALID_OPERATION);
 
-    s_glInitTexImage3D(target, level, internalFormat, width, height, depth, border);
+    s_glInitTexImage3D(target, level, internalFormat, width, height, depth,
+            border, format, type);
 
     if (isCoreProfile()) {
         GLEScontext::prepareCoreProfileEmulatedTexture(
@@ -857,9 +858,12 @@ GL_APICALL void GL_APIENTRY glTexImage3D(GLenum target, GLint level, GLint inter
 
 GL_APICALL void GL_APIENTRY glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth) {
     GET_CTX_V2();
+    GLenum format, type;
+    GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
 
     for (int i = 0; i < levels; i++) {
-        s_glInitTexImage3D(target, i, internalformat, width, height, depth, 0);
+        s_glInitTexImage3D(target, i, internalformat, width, height, depth, 0,
+                format, type);
     }
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
