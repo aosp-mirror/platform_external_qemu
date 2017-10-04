@@ -57,7 +57,7 @@ void RamSaver::registerBlock(const RamBlock& block) {
 
 void RamSaver::savePage(int64_t blockOffset,
                         int64_t /*pageOffset*/,
-                        int32_t pageSize) {
+                        int32_t /*pageSize*/) {
     assert(!mIndex.blocks.empty());
     assert(mLastBlockIndex >= 0 && mLastBlockIndex < int(mIndex.blocks.size()));
     if (blockOffset !=
@@ -72,19 +72,16 @@ void RamSaver::savePage(int64_t blockOffset,
         assert(mLastBlockIndex < int(mIndex.blocks.size()));
     }
 
-    RamBlock& block = mIndex.blocks[size_t(mLastBlockIndex)].ramBlock;
-    if (block.pageSize == 0) {
-        block.pageSize = pageSize;
+    auto& block = mIndex.blocks[size_t(mLastBlockIndex)];
+    if (block.pages.empty()) {
         // First time we see a page for this block - save all its pages now.
-        assert(block.totalSize % block.pageSize == 0);
-        auto numPages = int32_t(block.totalSize / block.pageSize);
-        mIndex.blocks[size_t(mLastBlockIndex)].pages.resize(numPages);
+        auto& ramBlock = block.ramBlock;
+        assert(ramBlock.totalSize % ramBlock.pageSize == 0);
+        auto numPages = int32_t(ramBlock.totalSize / ramBlock.pageSize);
+        mIndex.blocks[size_t(mLastBlockIndex)].pages.resize(size_t(numPages));
         for (int32_t i = 0; i != numPages; ++i) {
             passToSaveHandler({mLastBlockIndex, i});
         }
-    } else {
-        // We don't support different page sizes.
-        assert(pageSize == block.pageSize);
     }
 }
 
