@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/snapshot/Loader.h"
+#include <errno.h>
 
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
