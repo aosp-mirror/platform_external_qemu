@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "de5de64f_688b5fd8",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-04T17:54:38Z",
+      "side": 1,
+      "message": "could you please add a short comment explaining the purpose of this class and how to use it?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 21
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c811c0f9_289ccc96",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-04T17:54:38Z",
+      "side": 1,
+      "message": "is it possible to make |agent| a parameter of the ctor? So there\u0027s no time when class is in constructed but invalid state",
+      "range": {
+        "startLine": 39,
+        "startChar": 4,
+        "endLine": 39,
+        "endChar": 60
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "79e17af1_a696848c",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-04T17:54:38Z",
+      "side": 1,
+      "message": "it\u0027s usually safer to hold these by value",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 46
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "750a4914_2ce1f2cb",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-04T17:54:38Z",
+      "side": 1,
+      "message": "why not by value?",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 50
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
