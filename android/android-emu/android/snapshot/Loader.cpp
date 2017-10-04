@@ -34,7 +34,7 @@ static FailureReason errnoToFailure(int error) {
         case ENOENT:
             return FailureReason::NoSnapshotInImage;
         case ENOTSUP:
-            return FailureReason::EmulationEngineFailed;
+            return FailureReason::SnapshotsNotSupported;
     }
 }
 
