@@ -17,6 +17,16 @@
 
 ANDROID_BEGIN_HEADER
 
+// Window agent's possible message types
+typedef enum {
+    WINDOW_MESSAGE_GENERIC,
+    WINDOW_MESSAGE_INFO,
+    WINDOW_MESSAGE_WARNING,
+    WINDOW_MESSAGE_ERROR,
+} WindowMessageType;
+
+static const int kWindowMessageTimeoutInfinite = -1;
+
 typedef struct EmulatorWindow EmulatorWindow;
 
 typedef struct QAndroidEmulatorWindowAgent {
@@ -32,6 +42,11 @@ typedef struct QAndroidEmulatorWindowAgent {
 
     // Returns the current rotation.
     SkinRotation (*getRotation)(void);
+
+    // Shows a message to the user.
+    void (*showMessage)(const char* message,
+                        WindowMessageType type,
+                        int timeoutMs);
 } QAndroidEmulatorWindowAgent;
 
 // Defined in android/window-agent-impl.cpp
