@@ -362,6 +362,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<SkinRotation>();
     qRegisterMetaType<SkinGenericFunction>();
     qRegisterMetaType<RunOnUiThreadFunc>();
+    qRegisterMetaType<Ui::OverlayMessageIcon>();
 
     android::base::ThreadLooper::setLooper(mLooper, true);
     CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
@@ -422,6 +423,8 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_updateRotation);
     QObject::connect(this, &EmulatorQtWindow::runOnUiThread, this,
                      &EmulatorQtWindow::slot_runOnUiThread);
+    QObject::connect(this, &EmulatorQtWindow::showMessage, this,
+                     &EmulatorQtWindow::slot_showMessage);
     QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit,
                      this, &EmulatorQtWindow::slot_clearInstance);
 
@@ -1567,6 +1570,12 @@ void EmulatorQtWindow::runAdbPush(const QList<QUrl>& urls) {
 
 void EmulatorQtWindow::slot_adbPushCanceled() {
     mFilePusher->cancel();
+}
+
+void EmulatorQtWindow::slot_showMessage(QString text,
+                                        Ui::OverlayMessageIcon icon,
+                                        int timeoutMs) {
+    mContainer.messageCenter().addMessage(text, icon, timeoutMs);
 }
 
 void EmulatorQtWindow::adbPushProgress(double progress, bool done) {
