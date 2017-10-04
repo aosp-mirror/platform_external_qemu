@@ -64,14 +64,12 @@ public:
     static constexpr int kDefaultTimeoutMs = 0;
     static constexpr int kInfiniteTimeout = -1;
 
-signals:
     void addMessage(QString message,
-                    Icon icon,
+                    OverlayMessageIcon icon,
                     int timeoutMs = kDefaultTimeoutMs);
-    void resized();
 
-private slots:
-    void slot_addMessage(QString message, Icon icon, int timeoutMs);
+signals:
+    void resized();
 
 private:
     void showEvent(QShowEvent*) override;
@@ -82,5 +80,3 @@ private:
 };
 
 }  // namespace Ui
-
-Q_DECLARE_METATYPE(Ui::OverlayMessageIcon);

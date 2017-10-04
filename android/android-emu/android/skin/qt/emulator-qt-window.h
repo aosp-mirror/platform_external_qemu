@@ -60,6 +60,7 @@ Q_DECLARE_METATYPE(QPainter::CompositionMode);
 Q_DECLARE_METATYPE(RunOnUiThreadFunc);
 Q_DECLARE_METATYPE(SkinGenericFunction);
 Q_DECLARE_METATYPE(SkinRotation);
+Q_DECLARE_METATYPE(Ui::OverlayMessageIcon);
 
 class MainLoopThread : public QThread {
     Q_OBJECT
@@ -180,6 +181,8 @@ signals:
     void updateRotation(SkinRotation rotation);
     void layoutChanged(SkinRotation rot);
 
+    void showMessage(QString text, Ui::OverlayMessageIcon icon, int timeoutMs);
+
 public:
     void pollEvent(SkinEvent* event, bool* hasEvent);
 
@@ -278,13 +281,13 @@ private slots:
     void slot_installCanceled();
     void slot_adbPushCanceled();
 
-    /*
-     Here are conventional slots that perform interesting high-level functions
-     in
-     the emulator. These can be hooked up to signals
-     from UI elements or called independently.
-     */
+    void slot_showMessage(QString text, Ui::OverlayMessageIcon icon,
+                          int timeoutMs);
+
 public slots:
+    // Here are conventional slots that perform interesting high-level functions
+    // in the emulator. These can be hooked up to signals from UI elements or
+    // called independently.
     void raise();
     void setForwardShortcutsToDevice(int index);
     void show();

@@ -130,7 +130,6 @@ void OverlayChildWidget::updateDisplayedText() {
 }
 
 OverlayMessageCenter::OverlayMessageCenter(QWidget* parent) : QWidget(parent) {
-    qRegisterMetaType<Ui::OverlayMessageIcon>();
 #ifdef __APPLE__
     Qt::WindowFlags flag = Qt::Dialog;
 #else
@@ -146,9 +145,6 @@ OverlayMessageCenter::OverlayMessageCenter(QWidget* parent) : QWidget(parent) {
     setStyleSheet(Ui::stylesheetForTheme(SETTINGS_THEME_DARK));
     setAutoFillBackground(false);
     setMinimumHeight(0);
-
-    connect(this, &OverlayMessageCenter::addMessage, this,
-            &OverlayMessageCenter::slot_addMessage);
 }
 
 void OverlayMessageCenter::adjustSize() {
@@ -271,9 +267,9 @@ void OverlayMessageCenter::dismissMessage(OverlayChildWidget* messageWidget) {
                            [messageWidget] { messageWidget->deleteLater(); });
 }
 
-void OverlayMessageCenter::slot_addMessage(QString message,
-                                           Icon icon,
-                                           int timeoutMs) {
+void OverlayMessageCenter::addMessage(QString message,
+                                      Icon icon,
+                                      int timeoutMs) {
     // Don't add too many items at once.
     const auto children =
             findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
@@ -314,10 +310,14 @@ void OverlayMessageCenter::slot_addMessage(QString message,
     showAnimation->setStartValue(0.0);
     showAnimation->setEndValue(1.0);
     showAnimation->setDuration(500);
+    auto effectPtr = QPointer<QGraphicsOpacityEffect>(effect);
     showAnimation->connect(showAnimation, &QVariantAnimation::valueChanged,
-                           [this, effect](const QVariant& value) {
-                               auto oldOpacity = effect->opacity();
-                               effect->setOpacity(value.toReal());
+                           [this, effectPtr](const QVariant& value) {
+                               if (!effectPtr) {
+                                   return;
+                               }
+                               auto oldOpacity = effectPtr->opacity();
+                               effectPtr->setOpacity(value.toReal());
                                if (oldOpacity == 0.0) {
                                    emit resized();
                                }
