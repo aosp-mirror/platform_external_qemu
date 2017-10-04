@@ -1709,8 +1709,9 @@ handleOperatorSelection( const char*  cmd, AModem  modem )
 
         if ( !amodem_has_network( modem ) )
         {
-            return amodem_printf( modem, "+CME ERROR: %d",
-                                  kCmeErrorNoNetworkService);
+            // No network. Give a canned response rather than signaling an error.
+            // (VTS tests don't allow an error. See b/62137708.)
+            return amodem_printf(modem, "+COPS: 0,0,0");
         }
 
         oper = &modem->operators[ modem->oper_index ];
