@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8545b871_80ef64be",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-10-04T19:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de5de64f_688b5fd8",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 21
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c811c0f9_289ccc96",
         "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-04T17:54:38Z",
       "side": 1,
       "message": "is it possible to make |agent| a parameter of the ctor? So there\u0027s no time when class is in constructed but invalid state",
+      "range": {
+        "startLine": 39,
+        "startChar": 4,
+        "endLine": 39,
+        "endChar": 60
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd0cdd9d_eb41863d",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-10-04T19:04:22Z",
+      "side": 1,
+      "message": "The virtual sensors page does not have the agent at construction, so having the agent set in the constructor would force the inertial model to have a different lifetime than the sensors page (and not be a member value) and would add complication there.  Testing the agent for null before sending off sensor data is the same method that the virtual sensors page uses.",
+      "parentUuid": "c811c0f9_289ccc96",
       "range": {
         "startLine": 39,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "fba72085_596bb161",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-10-04T19:04:22Z",
+      "side": 1,
+      "message": "It looks like the convention is that QAndroidXXXXXAgents are stored as const pointers almost everywhere in current qemu codebase - the only exception is the Snapshotter which stores it as a const ref, but everything else (looks like 50+ places) use const pointer.",
+      "parentUuid": "79e17af1_a696848c",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 46
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "750a4914_2ce1f2cb",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.h",
         "patchSetId": 7
@@ -82,6 +154,30 @@
       "writtenOn": "2017-10-04T17:54:38Z",
       "side": 1,
       "message": "why not by value?",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 104,
+        "endChar": 50
+      },
+      "revId": "ef0fa2028cca53cc217d1b9481e5b2b53cb8edab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "773b1fe9_bfa4de8f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 104,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-10-04T19:04:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "750a4914_2ce1f2cb",
       "range": {
         "startLine": 104,
         "startChar": 0,
