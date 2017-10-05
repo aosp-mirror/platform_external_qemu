@@ -11,6 +11,7 @@
 
 #include "android/snapshot/TextureSaver.h"
 
+#include "android/base/files/CompressingStream.h"
 #include "android/base/system/System.h"
 
 #include <algorithm>
@@ -18,6 +19,7 @@
 #include <iterator>
 #include <utility>
 
+using android::base::CompressingStream;
 using android::base::System;
 
 namespace android {
@@ -40,7 +42,9 @@ void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
                             return tex.texId == texId;
                         }));
     mIndex.textures.push_back({texId, ftello64(mStream.get())});
-    saver(&mStream, &mBuffer);
+
+    CompressingStream stream(mStream);
+    saver(&stream, &mBuffer);
 }
 
 void TextureSaver::done() {
