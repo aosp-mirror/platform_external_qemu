@@ -73,8 +73,10 @@ public:
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
+    void onSavingFailed(const char* name, int res);
     bool onStartLoading(const char* name);
     bool onLoadingComplete(const char* name, int res);
+    void onLoadingFailed(const char* name, int res);
     bool onStartDelete(const char* name);
     bool onDeletingComplete(const char* name, int res);
 

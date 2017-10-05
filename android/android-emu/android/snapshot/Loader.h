@@ -24,7 +24,7 @@ class Loader {
     DISALLOW_COPY_AND_ASSIGN(Loader);
 
 public:
-    Loader(const Snapshot& snapshot);
+    Loader(const Snapshot& snapshot, int error = 0);
     ~Loader();
 
     RamLoader& ramLoader() { return *mRamLoader; }

@@ -25,7 +25,8 @@ ANDROID_BEGIN_HEADER
 typedef struct {
     int (*onStart)(void* opaque, const char* name);
     void (*onEnd)(void* opaque, const char* name, int res);
-} SnapshotCallbackPair;
+    void (*onQuickFail)(void* opaque, const char* name, int res);
+} SnapshotCallbackSet;
 
 typedef enum {
     SNAPSHOT_SAVE,
@@ -58,7 +59,7 @@ typedef struct {
 } SnapshotRamCallbacks;
 
 typedef struct {
-    SnapshotCallbackPair ops[SNAPSHOT_OPS_COUNT];
+    SnapshotCallbackSet ops[SNAPSHOT_OPS_COUNT];
     SnapshotRamCallbacks ramOps;
 } SnapshotCallbacks;
 
