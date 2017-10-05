@@ -18,11 +18,13 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 
 #include <QDesktopServices>
 #include <QFileDialog>
+#include <QMovie>
 #include <QSettings>
-//#include "android/emulation/control/record-screen_agent.h"
+#include <QThread>
 
 using android::base::PathUtils;
 
@@ -49,7 +51,6 @@ void RecordScreenPage::setRecordScreenAgent(
 
 void RecordScreenPage::setRecordState(RecordState newState) {
     mState = newState;
-
     switch (mState) {
         case RecordState::Ready:
             mUi->rec_recordOverlayWidget->show();
@@ -59,8 +60,10 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_saveButton->hide();
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(QString("START RECORDING"));
+            mUi->rec_recordButton->show();
             break;
         case RecordState::Recording:
+            mUi->rec_recordDotLabel->setPixmap(QPixmap(QString::fromUtf8(":/light/recordCircle")));
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedLabel->setText("0s Recording...");
             mUi->rec_timeElapsedWidget->show();
@@ -69,6 +72,7 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_saveButton->hide();
             mUi->rec_timeResLabel->hide();
             mUi->rec_recordButton->setText(QString("STOP RECORDING"));
+            mUi->rec_recordButton->show();
 
             // Update every second
             mSec = 0;
@@ -76,8 +80,22 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             // SLOT(updateElapsedTime()));
             mTimer.start(1000);
             break;
-        case RecordState::Stopped:
+        case RecordState::Stopping:
+        {
             mTimer.stop();
+            SettingsTheme theme = getSelectedTheme();
+            QMovie* movie = new QMovie(this);
+            movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                               "/circular_spinner");
+            if (movie->isValid()) {
+                movie->start();
+                mUi->rec_recordDotLabel->setMovie(movie);
+            }
+            mUi->rec_timeElapsedLabel->setText("Finishing encoding");
+            mUi->rec_recordButton->hide();
+            break;
+        }
+        case RecordState::Stopped:
             // TODO: Need to only show this when hovering over the video
             // widget, which we don't have yet.
             mUi->rec_recordOverlayWidget->show();
@@ -92,6 +110,7 @@ void RecordScreenPage::setRecordState(RecordState newState) {
                             .arg(android_hw->hw_lcd_height));
             mUi->rec_timeResLabel->show();
             mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
+            mUi->rec_recordButton->show();
             break;
         default:;
     }
@@ -128,12 +147,19 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
             }
             break;
         case RecordState::Recording:
-            // TODO: Make this call async because the recorder may take a while
-            // to encode all the frames. We'll need something to poll to let us
-            // know when the encoder is done.
-            mRecordScreenAgent->stopRecording();
-            newState = RecordState::Stopped;
-            break;
+        {
+            auto thread = new QThread();
+            auto task = new StopRecordingTask(mRecordScreenAgent);
+            task->moveToThread(thread);
+            connect(thread, SIGNAL(started()), task, SLOT(run()));
+            connect(task, SIGNAL(started()), this, SLOT(stopRecordingStarted()));
+            connect(task, SIGNAL(finished(bool)), this, SLOT(stopRecordingFinished(bool)));
+            connect(task, SIGNAL(finished(bool)), thread, SLOT(quit()));
+            connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
+            connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+            thread->start();
+            return;
+        }
         case RecordState::Stopped:  // we can combine this state into readystate
             if (mRecordScreenAgent->startRecording(mTmpFilePath.c_str())) {
                 newState = RecordState::Recording;
@@ -192,4 +218,45 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
         QString errStr = tr("Unknown error while saving<br>") + recordingName;
         showErrorDialog(errStr, tr("Save Recording"));
     }
+}
+
+void RecordScreenPage::updateTheme() {
+    if (mState != RecordState::Stopping) {
+        return;
+    }
+
+    SettingsTheme theme = getSelectedTheme();
+    QMovie* movie = new QMovie(this);
+    movie->setFileName(":/" + Ui::stylesheetValues(theme)[Ui::THEME_PATH_VAR] +
+                       "/circular_spinner");
+    if (movie->isValid()) {
+        movie->start();
+        mUi->rec_recordDotLabel->setMovie(movie);
+    }
+}
+
+void RecordScreenPage::stopRecordingStarted() {
+    setRecordState(RecordState::Stopping);
+}
+
+void RecordScreenPage::stopRecordingFinished(bool success) {
+    if (!success) {
+        QString errStr = tr("An error occurred while recording.");
+        showErrorDialog(errStr, tr("Save Recording"));
+    }
+
+    setRecordState(RecordState::Stopped);
+}
+
+StopRecordingTask::StopRecordingTask(const QAndroidRecordScreenAgent* agent)
+    : mRecordScreenAgent(agent) {}
+
+void StopRecordingTask::run() {
+    emit started();
+    if (!mRecordScreenAgent) {
+        emit(finished(false));
+    }
+    // The encoder may take some time to finish encoding whatever remaining frames it still has.
+    mRecordScreenAgent->stopRecording();
+    emit(finished(true));
 }
