@@ -60,7 +60,7 @@ private:
         };
 
         int64_t startPosInFile;
-        int32_t version = 1;
+        int32_t version = 2;
         std::vector<Texture> textures;
     };
 

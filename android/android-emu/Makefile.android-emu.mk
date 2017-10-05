@@ -107,9 +107,12 @@ LOCAL_C_INCLUDES := \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(LIBUUID_INCLUDES) \
+    $(LZ4_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/base/Debug.cpp \
+    android/base/files/CompressingStream.cpp \
+    android/base/files/DecompressingStream.cpp \
     android/base/files/Fd.cpp \
     android/base/files/IniFile.cpp \
     android/base/files/InplaceStream.cpp \
@@ -494,6 +497,7 @@ $(call end-emulator-library)
 ANDROID_EMU_BASE_STATIC_LIBRARIES := \
     android-emu-base \
     $(LIBUUID_STATIC_LIBRARIES) \
+    emulator-lz4 \
 
 ANDROID_EMU_BASE_LDLIBS := \
     $(LIBUUID_LDLIBS) \
@@ -528,7 +532,6 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libpng \
     emulator-libwebp \
     emulator-zlib \
-    emulator-lz4 \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
     $(VEHICLE_PROTO_STATIC_LIBRARIES) \
