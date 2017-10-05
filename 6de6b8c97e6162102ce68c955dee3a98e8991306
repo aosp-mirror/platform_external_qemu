@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "28700e29_44eb209a",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel_unittest.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-10-05T14:41:02Z",
+      "side": 1,
+      "message": "rotation",
+      "range": {
+        "startLine": 120,
+        "startChar": 61,
+        "endLine": 120,
+        "endChar": 69
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ba344bf_612d23b5",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 432,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-10-05T14:41:02Z",
+      "side": 1,
+      "message": "Update",
+      "range": {
+        "startLine": 432,
+        "startChar": 7,
+        "endLine": 432,
+        "endChar": 28
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
