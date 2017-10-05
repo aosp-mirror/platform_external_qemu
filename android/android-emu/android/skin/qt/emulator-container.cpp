@@ -185,7 +185,9 @@ void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     if (mModalOverlay) {
         mModalOverlay->raise();
     }
-    mMessages->raise();
+    if (mMessages.hasInstance()) {
+        mMessages->raise();
+    }
     if (mEmulatorWindow->isInZoomMode()) {
         mEmulatorWindow->showZoomIfNotUserHidden();
     }
@@ -285,7 +287,9 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
         if (mModalOverlay) {
             mModalOverlay->showNormal();
         }
-        mMessages->showNormal();
+        if (mMessages.hasInstance()) {
+            mMessages->showNormal();
+        }
     }
 }
 
@@ -401,6 +405,10 @@ void EmulatorContainer::adjustModalOverlayGeometry() {
 }
 
 void EmulatorContainer::adjustMessagesOverlayGeometry() {
+    if (!mMessages.hasInstance()) {
+        return;
+    }
+
     auto w = std::min(width() - 2 * 15, std::max(300, (width() - 2 * 150)));
     mMessages->setFixedWidth(w);
     mMessages->adjustSize();
