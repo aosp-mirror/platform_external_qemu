@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1764cf49_06b61ac3",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-05T00:39:50Z",
+      "side": 1,
+      "message": "nit: please format this function",
+      "range": {
+        "startLine": 2117,
+        "startChar": 0,
+        "endLine": 2128,
+        "endChar": 5
+      },
+      "revId": "b6adc17e777729e2db38d02fedb9b4862696b463",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
