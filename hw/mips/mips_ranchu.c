@@ -36,7 +36,6 @@ do {                                                                    \
 } while (0)
 
 #define MIPS_CPU_SAVE_VERSION 1
-#define MIPS_CPU_IRQ_BASE     8
 
 #define HIGHMEM_OFFSET    0x20000000
 #define GOLDFISH_IO_SPACE 0x1f000000
@@ -74,6 +73,7 @@ typedef struct {
 #define MAX_RAM_SIZE_MB 4079UL
 
 enum {
+    RANCHU_MIPS_CPU_INTC,
     RANCHU_GOLDFISH_PIC,
     RANCHU_GOLDFISH_TTY,
     RANCHU_GOLDFISH_RTC,
@@ -103,11 +103,16 @@ typedef struct DevMapEntry {
     const char *dt_name;
     const char *dt_compatible;
     int dt_num_compatible;
+    int dt_phandle;
 } DevMapEntry;
 
 static DevMapEntry devmap[] = {
+    [RANCHU_MIPS_CPU_INTC] = {
+        0, 0, -1, "cpuintc", "cpuintc",
+          "mti,cpu-interrupt-controller", 1
+        },
     [RANCHU_GOLDFISH_PIC] = {
-        GOLDFISH_IO_SPACE, 0x1000, -1,
+        GOLDFISH_IO_SPACE, 0x1000, 2,
           "goldfish_pic", "goldfish_pic",
           "google,goldfish-pic\0generic,goldfish-pic", 2
         },
@@ -648,7 +653,7 @@ static const MemoryRegionOps goldfish_reset_io_ops = {
  *
  * @fdt - Place where DT nodes will be stored
  * @dev - Device information (base, irq, name)
- * @pic - Interrupt controller parent. If NULL, 'intc' node assumed.
+ * @pic - Interrupt controller parent.
  * @num_devices - If you want to allocate multiple continuous device mappings
  * @is_virtio - Virtio devices should be added in revers order
  * @to_attach - Controls whether we should try to attach this device to a sysbus
@@ -668,35 +673,76 @@ static void create_device(void *fdt, DevMapEntry *dev, qemu_irq *pic,
         for (j = 0; j < dev->dt_num_compatible; j++) {
             dt_compat_sz += strlen(dev->dt_compatible + dt_compat_sz) + 1;
         }
-        qemu_fdt_setprop(fdt, nodename, "compatible",
-                         dev->dt_compatible, dt_compat_sz);
+        qemu_fdt_setprop(fdt, nodename, "compatible", dev->dt_compatible,
+                         dt_compat_sz);
         qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, base, 2,
                                      dev->size);
+        qemu_fdt_setprop_cells(fdt, nodename, "interrupts",
+                               dev->irq + i);
+        qemu_fdt_setprop_cell(fdt, nodename, "interrupt-parent",
+                              devmap[RANCHU_GOLDFISH_PIC].dt_phandle);
 
-        if (pic == NULL) {
-            qemu_fdt_setprop(fdt, nodename, "interrupt-controller", NULL, 0);
-            qemu_fdt_setprop_cell(fdt, nodename, "phandle", dev->irq);
-            qemu_fdt_setprop_cell(fdt, nodename, "#interrupt-cells", 0x1);
-        } else {
-            qemu_fdt_setprop_cells(fdt, nodename, "interrupts",
-                                   dev->irq + i + MIPS_CPU_IRQ_BASE);
-            if (is_virtio) {
-                /* Note that we have to create the transports in forwards order
-                 * so that command line devices are inserted lowest address
-                 * first, and then add dtb nodes in reverse order so that they
-                 * appear in the finished device tree lowest address first.
-                 */
-                if (to_attach) {
-                    sysbus_create_simple(dev->qemu_name,
-                        dev->base + (num_devices - i - 1) * dev->size,
-                        pic[dev->irq + num_devices - i - 1]);
-                }
-            } else if (to_attach) {
-                sysbus_create_simple(dev->qemu_name, base, pic[dev->irq + i]);
+        if (is_virtio) {
+            /* Note that we have to create the transports in forwards order
+             * so that command line devices are inserted lowest address
+             * first, and then add dtb nodes in reverse order so that they
+             * appear in the finished device tree lowest address first.
+             */
+            if (to_attach) {
+                sysbus_create_simple(dev->qemu_name,
+                    dev->base + (num_devices - i - 1) * dev->size,
+                    pic[dev->irq + num_devices - i - 1]);
             }
+        } else if (to_attach) {
+            sysbus_create_simple(dev->qemu_name, base, pic[dev->irq + i]);
         }
         g_free(nodename);
     }
+}
+
+/* create_intc_device(void *fdt, DevMapEntry *dev, DevMapEntry *parent)
+ *
+ * Create interrupt device DT node
+ *
+ * @fdt - Place where DT node will be stored
+ * @dev - Interrupt Device information (base, irq, name)
+ * @parent - If not NULL, it represents a parent Interrupt controller
+ */
+static void create_intc_device(void *fdt, DevMapEntry *dev,
+                               DevMapEntry *parent)
+{
+    int i, dt_compat_sz = 0;
+    char *nodename;
+
+    if (dev->base != 0) {
+        nodename = g_strdup_printf("/%s@%" PRIx64, dev->dt_name, dev->base);
+        qemu_fdt_add_subnode(fdt, nodename);
+        qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, dev->base, 2,
+                                     dev->size);
+    } else {
+        nodename = g_strdup_printf("/%s", dev->dt_name);
+        qemu_fdt_add_subnode(fdt, nodename);
+    }
+
+    qemu_fdt_setprop(fdt, nodename, "interrupt-controller", NULL, 0);
+    qemu_fdt_setprop_cell(fdt, nodename, "#interrupt-cells", 0x1);
+
+    dev->dt_phandle = qemu_fdt_alloc_phandle(fdt);
+    qemu_fdt_setprop_cell(fdt, nodename, "phandle", dev->dt_phandle);
+    for (i = 0; i < dev->dt_num_compatible; i++) {
+        dt_compat_sz += strlen(dev->dt_compatible + dt_compat_sz) + 1;
+    }
+    qemu_fdt_setprop(fdt, nodename, "compatible",
+                     dev->dt_compatible, dt_compat_sz);
+    if (parent) {
+        qemu_fdt_setprop_cell(fdt, nodename, "interrupt-parent",
+                              parent->dt_phandle);
+    }
+    if (dev->irq > 0) {
+        qemu_fdt_setprop_cells(fdt, nodename, "interrupts", dev->irq);
+    }
+
+    g_free(nodename);
 }
 
 /* create_pm_device(void* fdt, DevMapEntry* dev)
@@ -836,10 +882,8 @@ static void mips_ranchu_init(MachineState *machine)
     boot_protocol_detect(rp, rp->bootinfo.kernel_filename);
 
     /* Initialize Goldfish PIC */
-    s->gfpic = goldfish_interrupt_init(devmap[RANCHU_GOLDFISH_PIC].base,
-                                       env->irq[2], env->irq[3]);
-    /* Alocate dt handle (label) for interrupt-parent */
-    devmap[RANCHU_GOLDFISH_PIC].irq = qemu_fdt_alloc_phandle(fdt);
+    s->gfpic = goldfish_pic_init(devmap[RANCHU_GOLDFISH_PIC].base,
+                                 env->irq[2]);
 
     qemu_fdt_setprop_string(fdt, "/", "model", "ranchu");
     if (!rp->bootinfo.use_uhi) {
@@ -849,8 +893,6 @@ static void mips_ranchu_init(MachineState *machine)
     }
     qemu_fdt_setprop_cell(fdt, "/", "#address-cells", 0x1);
     qemu_fdt_setprop_cell(fdt, "/", "#size-cells", 0x2);
-    qemu_fdt_setprop_cell(fdt, "/", "interrupt-parent",
-                          devmap[RANCHU_GOLDFISH_PIC].irq);
 
     /* Firmware node */
     qemu_fdt_add_subnode(fdt, "/firmware");
@@ -878,8 +920,11 @@ static void mips_ranchu_init(MachineState *machine)
         qemu_fdt_setprop_sized_cells(fdt, "/memory", "reg", 1, 0, 2, ram_size);
     }
 
+    /* Create CPU Interrupt controller node in dt */
+    create_intc_device(fdt, &devmap[RANCHU_MIPS_CPU_INTC], NULL);
     /* Create goldfish_pic controller node in dt */
-    create_device(fdt, &devmap[RANCHU_GOLDFISH_PIC], NULL, 1, false, true);
+    create_intc_device(fdt, &devmap[RANCHU_GOLDFISH_PIC],
+                            &devmap[RANCHU_MIPS_CPU_INTC]);
 
     /* Make sure the first 3 serial ports are associated with a device. */
     for (i = 0; i < 3; i++) {

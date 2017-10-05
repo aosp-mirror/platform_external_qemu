@@ -14,13 +14,13 @@
 
 #ifdef TARGET_I386
 /* Maximum IRQ number available for a device on x86. */
-#define GFD_MAX_IRQ      16
+#define GFD_MAX_IRQ     16
 #else
-/* Maximum IRQ number available for a device on ARM. */
+/* Maximum IRQ number available for a device on (ARM/MIPS) */
 #define GFD_MAX_IRQ     32
 #endif
 
-// device init functions:
-qemu_irq *goldfish_interrupt_init(uint32_t base, qemu_irq parent_irq, qemu_irq parent_fiq);
+/* device init functions */
+qemu_irq *goldfish_pic_init(uint32_t base, qemu_irq parent_irq);
 
-#endif  /* GOLDFISH_DEVICE_H */
+#endif  /* GOLDFISH_PIC_H */
