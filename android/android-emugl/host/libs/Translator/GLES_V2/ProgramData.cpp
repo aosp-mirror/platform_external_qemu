@@ -392,6 +392,11 @@ void ProgramData::restore(ObjectLocalName localName,
             dispatcher.glAttachShader(globalName, tmpShaders[i]);
         }
         for (const auto& attribLocs : linkedAttribLocs) {
+            // Prefix "gl_" is reserved, we should skip those.
+            // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glBindAttribLocation.xhtml
+            if  (strncmp(attribLocs.first.c_str(), "gl_", 3) == 0) {
+                continue;
+            }
             dispatcher.glBindAttribLocation(globalName, attribLocs.second,
                     attribLocs.first.c_str());
         }
@@ -408,6 +413,12 @@ void ProgramData::restore(ObjectLocalName localName,
         }
         dispatcher.glLinkProgram(globalName);
         dispatcher.glUseProgram(globalName);
+#ifdef DEBUG
+        for (const auto& attribLocs : linkedAttribLocs) {
+            assert(dispatcher.glGetAttribLocation(globalName,
+                attribLocs.first.c_str()) == attribLocs.second);
+        }
+#endif // DEBUG
         for (const auto& uniformEntry : uniforms) {
             const auto& uniform = uniformEntry.second;
             GLint location = dispatcher.glGetUniformLocation(globalName,
