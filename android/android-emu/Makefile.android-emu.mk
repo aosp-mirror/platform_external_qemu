@@ -365,6 +365,7 @@ LOCAL_SRC_FILES := \
     android/hw-lcd.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
+    android/inertialmodel/InertialModel.cpp \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
@@ -567,6 +568,7 @@ LOCAL_C_INCLUDES += \
     $(EMULATOR_COMMON_INCLUDES) \
     $(EMULATOR_GTEST_INCLUDES) \
     $(LIBXML2_INCLUDES) \
+    $(EMUGL_INCLUDES) \
 
 LOCAL_LDLIBS += \
     $(ANDROID_EMU_LDLIBS) \
@@ -667,6 +669,7 @@ LOCAL_SRC_FILES := \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
   android/hw-lcd_unittest.cpp \
+  android/inertialmodel/InertialModel_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
