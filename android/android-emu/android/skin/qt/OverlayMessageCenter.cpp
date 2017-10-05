@@ -80,6 +80,7 @@ OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
                     .arg(dismissLink)
                     .arg(tr("DISMISS")));
     layout()->addWidget(mDismissButton);
+    show();
 }
 
 QHBoxLayout* OverlayChildWidget::layout() const {
@@ -151,8 +152,8 @@ void OverlayMessageCenter::adjustSize() {
     const auto children =
             findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly);
     if (children.empty()) {
-        setFixedHeight(0);
         reattachToParent();
+        setFixedHeight(0);
         return;
     }
 
@@ -326,7 +327,6 @@ void OverlayMessageCenter::addMessage(QString message,
                     [widget] { widget->setGraphicsEffect(nullptr); });
     showAnimation->start(QAbstractAnimation::DeleteWhenStopped);
     widget->show();
-    show();
     emit resized();
 }
 
@@ -345,8 +345,9 @@ void OverlayMessageCenter::reattachToParent() {
 }
 
 void OverlayMessageCenter::showEvent(QShowEvent* event) {
-    reattachToParent();
     QWidget::showEvent(event);
+    reattachToParent();
+    emit resized();
 }
 
 }  // namespace Ui
