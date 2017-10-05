@@ -293,6 +293,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     mToolWindow->setStyleSheet(styleString);
     mExtendedUi->rotaryInputPage->updateTheme();
     mExtendedUi->bugreportPage->updateTheme();
+    mExtendedUi->recordScreenPage->updateTheme();
 
     // Force a re-draw to make the new style take effect
     this->style()->unpolish(mExtendedUi->stackedWidget);
