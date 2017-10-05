@@ -11,7 +11,11 @@
 
 #include "android/snapshot/TextureLoader.h"
 
+#include "android/base/files/DecompressingStream.h"
+
 #include <assert.h>
+
+using android::base::DecompressingStream;
 
 namespace android {
 namespace snapshot {
@@ -37,7 +41,15 @@ void TextureLoader::loadTexture(uint32_t texId, const loader_t& loader) {
     android::base::AutoLock scopedLock(mLock);
     assert(mIndex.count(texId));
     fseeko64(mStream.get(), mIndex[texId], SEEK_SET);
-    loader(&mStream);
+    switch (mVersion) {
+        case 1:
+            loader(&mStream);
+            break;
+        case 2: {
+            DecompressingStream stream(mStream);
+            loader(&stream);
+        }
+    }
     if (ferror(mStream.get())) {
         mHasError = true;
     }
@@ -54,8 +66,8 @@ bool TextureLoader::readIndex() {
     }
     auto indexPos = mStream.getBe64();
     fseeko64(mStream.get(), static_cast<int64_t>(indexPos), SEEK_SET);
-    auto version = mStream.getBe32();
-    if (version != 1) {
+    mVersion = mStream.getBe32();
+    if (mVersion < 1 || mVersion > 2) {
         return false;
     }
     uint32_t texCount = mStream.getBe32();
