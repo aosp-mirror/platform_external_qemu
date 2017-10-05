@@ -1658,6 +1658,14 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
         }
     }
 
+    // TODO: Emulate swizzles
+    if (isCoreProfile()) {
+        GLEScontext::prepareCoreProfileEmulatedTexture(
+            getTextureTargetData(target),
+            false, target, format, type,
+            &internalformat, &format);
+    }
+
     ctx->dispatcher().glTexImage2D(target,level,
                                    internalformat,width,height,
                                    border,format,type,pixels);
