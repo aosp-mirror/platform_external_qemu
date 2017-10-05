@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "525a74bd_d5d725a0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-05T21:35:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b6b59324_304e9b5b",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 60
+      },
+      "revId": "5a11c66fee33670d444eff92b454e9afda2ec983",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09756a54_dfdfc790",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "31e0dfb0_7c7c966c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-05T21:35:54Z",
+      "side": 1,
+      "message": "No overload for string argument. I just copied this from the generated file for the corresponding ui file.",
+      "parentUuid": "09756a54_dfdfc790",
+      "range": {
+        "startLine": 66,
+        "startChar": 47,
+        "endLine": 66,
+        "endChar": 72
+      },
+      "revId": "5a11c66fee33670d444eff92b454e9afda2ec983",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "33b87d9f_767b465a",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.h",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2017-10-05T21:19:27Z",
       "side": 1,
       "message": "nit: please only include it in the .cpp",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 18
+      },
+      "revId": "5a11c66fee33670d444eff92b454e9afda2ec983",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7ea8e0c_58663641",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-05T21:35:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33b87d9f_767b465a",
       "range": {
         "startLine": 15,
         "startChar": 0,
