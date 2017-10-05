@@ -11,9 +11,9 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
 #include "android/base/Compiler.h"
 #include "android/base/StringView.h"
+#include "android/base/async/Looper.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/snapshot/common.h"
@@ -54,6 +54,8 @@ private:
     const QAndroidEmulatorWindowAgent mWindow;
 
     base::System::WallDuration mLoadTimeMs = 0;
+    base::System::WallDuration mStartTimeMs =
+            base::System::get()->getHighResTimeUs() / 1000;
     bool mLoaded = false;
     std::string mLoadedSnapshotName;
     OperationStatus mLoadStatus = OperationStatus::NotStarted;
