@@ -18,11 +18,14 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
-#include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/MemoryWatch.h"
+#include "android/snapshot/PageMap.h"
 
 #include <atomic>
 #include <cstdint>
+#include <map>
+#include <unordered_map>
 #include <vector>
 
 namespace android {
@@ -35,7 +38,13 @@ public:
     RamLoader(base::StdioStream&& stream);
     ~RamLoader();
 
+    bool isPageDirty(void* ptr) {
+        if (!mDirtyTracking) return true;
+        return block(ptr)->dirtyMap.lookup(ptr);
+    }
+
     void loadRam(void* ptr, uint64_t size);
+    void dirtyRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
     bool start(bool isQuickboot);
     bool wasStarted() const { return mWasStarted; }
@@ -62,6 +71,7 @@ private:
             RamBlock ramBlock;
             Pages::iterator pagesBegin;
             Pages::iterator pagesEnd;
+            PageMap dirtyMap;
         };
 
         using Blocks = std::vector<Block>;
@@ -84,6 +94,7 @@ private:
     void zeroOutPage(const Page& page);
     uint8_t* pagePtr(const Page& page) const;
     uint32_t pageSize(const Page& page) const;
+    FileIndex::Blocks::iterator block(void* ptr);
     Page& page(void* ptr);
 
     void loadRamPage(void* ptr);
@@ -130,6 +141,11 @@ private:
     // Whether or not this ram load is part of
     // quickboot load.
     bool mIsQuickboot = false;
+
+    // Information about dirty page tracking:
+    // whether we are doing so, and bitmaps holding
+    // the data.
+    bool mDirtyTracking = false;
 };
 
 }  // namespace snapshot

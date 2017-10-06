@@ -70,9 +70,11 @@ static bool checkUserfaultFdCaps(int ufd) {
 class MemoryAccessWatch::Impl {
 public:
     Impl(MemoryAccessWatch::AccessCallback&& accessCallback,
-         MemoryAccessWatch::IdleCallback&& idleCallback)
+         MemoryAccessWatch::IdleCallback&& idleCallback,
+         MemoryAccessWatch::DirtyCallback&& dirtyCallback)
         : mAccessCallback(std::move(accessCallback)),
           mIdleCallback(std::move(idleCallback)),
+          mDirtyCallback(std::move(dirtyCallback)),
           mPagefaultThread([this]() { pagefaultWorker(); }) {
         mUserfaultFd = base::ScopedFd(
                 int(syscall(__NR_userfaultfd, O_CLOEXEC | O_NONBLOCK)));
@@ -111,6 +113,7 @@ public:
                    msg.event);
             return nullptr; /* It's not a page fault, shouldn't happen */
         }
+
         return reinterpret_cast<void*>(uintptr_t(msg.arg.pagefault.address));
     }
 
@@ -152,6 +155,7 @@ public:
 
     MemoryAccessWatch::AccessCallback mAccessCallback;
     MemoryAccessWatch::IdleCallback mIdleCallback;
+    MemoryAccessWatch::DirtyCallback mDirtyCallback;
 
     base::ScopedFd mUserfaultFd;
     base::ScopedFd mExitFd;
@@ -164,9 +168,16 @@ bool MemoryAccessWatch::isSupported() {
     return checkUserfaultFdCaps(ufd.get());
 }
 
+bool MemoryAccessWatch::dirtyTrackingSupported() {
+    // TODO: userfaultfd-WP
+    return false;
+}
+
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
-                                     IdleCallback&& idleCallback)
-    : mImpl(new Impl(std::move(accessCallback), std::move(idleCallback))) {}
+                                     IdleCallback&& idleCallback,
+                                     DirtyCallback&& dirtyCallback)
+    : mImpl(new Impl(std::move(accessCallback), std::move(idleCallback),
+                     std::move(dirtyCallback))) {}
 
 MemoryAccessWatch::~MemoryAccessWatch() {
     mImpl->stop();

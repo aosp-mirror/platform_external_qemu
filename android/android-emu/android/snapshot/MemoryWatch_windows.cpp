@@ -20,7 +20,11 @@ bool MemoryAccessWatch::isSupported() {
     return false;
 }
 
-MemoryAccessWatch::MemoryAccessWatch(AccessCallback&&, IdleCallback&&)
+bool MemoryAccessWatch::dirtyTrackingSupported() {
+    return false;
+}
+
+MemoryAccessWatch::MemoryAccessWatch(AccessCallback&&, IdleCallback&&, DirtyCallback&&)
     : mImpl(/*new Impl()*/) {}
 
 MemoryAccessWatch::~MemoryAccessWatch() {}

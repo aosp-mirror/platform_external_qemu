@@ -65,12 +65,17 @@ RamLoader::RamLoader(base::StdioStream&& stream)
     : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
-                             [this]() { return backgroundPageLoad(); });
+                             [this]() { return backgroundPageLoad(); },
+                             [this](void* ptr) { dirtyRam(ptr, mPageSize); } );
         if (!mAccessWatch->valid()) {
             derror("Failed to initialize memory access watcher, falling back "
                    "to synchronous RAM loading");
             mAccessWatch.clear();
         }
+    }
+
+    if (MemoryAccessWatch::dirtyTrackingSupported()) {
+        mDirtyTracking = true;
     }
 }
 
@@ -90,9 +95,19 @@ void RamLoader::loadRam(void* ptr, uint64_t size) {
     }
 }
 
+void RamLoader::dirtyRam(void* ptr, uint64_t size) {
+    if (mDirtyTracking) {
+        block(ptr)->dirtyMap.set(ptr, true);
+    }
+}
+
 void RamLoader::registerBlock(const RamBlock& block) {
     mPageSize = block.pageSize;
-    mIndex.blocks.push_back({block, {}, {}});
+    mIndex.blocks.push_back(
+        {block, {}, {},
+         mDirtyTracking ?
+             PageMap(block.hostPtr, (uint64_t)block.totalSize, block.pageSize) :
+             PageMap() });
 }
 
 bool RamLoader::start(bool isQuickboot) {
@@ -130,6 +145,16 @@ void RamLoader::join() {
 }
 
 void RamLoader::interruptReading() {
+#if SNAPSHOT_PROFILE > 1
+    uint64_t totalDirty = 0;
+    for (const auto& b : mIndex.blocks) {
+        totalDirty += b.dirtyMap.count();
+    }
+    printf("%s: dirty page count %llu (%f mb)\n", __func__,
+           (unsigned long long)totalDirty,
+           (float)(totalDirty * mPageSize) /
+           (float)(1024 * 1024));
+#endif
     mLoadingCompleted.store(true, std::memory_order_relaxed);
     mReadDataQueue.stop();
     mReadingQueue.stop();
@@ -273,6 +298,7 @@ bool RamLoader::registerPageWatches() {
             return false;
         }
     }
+
     return true;
 }
 
@@ -291,13 +317,18 @@ static bool isPowerOf2(Num num) {
     return !(num & (num - 1));
 }
 
-RamLoader::Page& RamLoader::page(void* ptr) {
-    const auto blockIt = std::find_if(
+RamLoader::FileIndex::Blocks::iterator RamLoader::block(void* ptr) {
+    auto blockIt = std::find_if(
             mIndex.blocks.begin(), mIndex.blocks.end(),
             [ptr](const FileIndex::Block& b) {
                 return ptr >= b.ramBlock.hostPtr &&
                        ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
             });
+    return blockIt;
+}
+
+RamLoader::Page& RamLoader::page(void* ptr) {
+    const auto blockIt = block(ptr);
     assert(blockIt != mIndex.blocks.end());
     assert(ptr >= blockIt->ramBlock.hostPtr);
     assert(ptr < blockIt->ramBlock.hostPtr + blockIt->ramBlock.totalSize);
