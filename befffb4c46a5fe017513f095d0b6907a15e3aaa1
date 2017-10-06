@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "d5368a93_9edfc822",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-06T19:13:32Z",
+      "side": 1,
+      "message": "I also don\u0027t get why we can\u0027t assume a size on bind. even if the buffer size changes, it\u0027s only going to use the size of the bound buffer at the time the binding is used per the first paragraph.",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 34
+      },
+      "revId": "befffb4c46a5fe017513f095d0b6907a15e3aaa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "599bb563_39692799",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 1
