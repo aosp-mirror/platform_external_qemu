@@ -15,6 +15,7 @@
 #include "android/base/ArraySize.h"
 #include "android/base/EintrWrapper.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/files/MemStream.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/utils/debug.h"
 
@@ -22,6 +23,8 @@
 #include <atomic>
 #include <cassert>
 #include <memory>
+
+using android::base::MemStream;
 
 namespace android {
 namespace snapshot {
@@ -153,27 +156,34 @@ bool RamLoader::readIndex() {
 #endif
     mStreamFd = fileno(mStream.get());
     base::System::FileSize size;
-    if (base::System::get()->fileSize(mStreamFd, &size)) {
-        mDiskSize = size;
+    if (!base::System::get()->fileSize(mStreamFd, &size)) {
+        return false;
     }
+    mDiskSize = size;
     uint64_t indexPos = mStream.getBe64();
-    fseeko64(mStream.get(), intptr_t(indexPos), SEEK_SET);
 
-    auto version = mStream.getBe32();
+    MemStream::Buffer buffer(size - indexPos);
+    if (base::pread(mStreamFd, buffer.data(), buffer.size(), indexPos) != buffer.size()) {
+        return false;
+    }
+
+    MemStream stream(std::move(buffer));
+
+    auto version = stream.getBe32();
     if (version != 1) {
         return false;
     }
-    mIndex.flags = IndexFlags(mStream.getBe32());
+    mIndex.flags = IndexFlags(stream.getBe32());
     const bool compressed = nonzero(mIndex.flags & IndexFlags::CompressedPages);
-    auto pageCount = mStream.getBe32();
+    auto pageCount = stream.getBe32();
     mIndex.pages.reserve(pageCount);
     int64_t runningFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
     for (size_t loadedBlockCount = 0; loadedBlockCount < mIndex.blocks.size();
          ++loadedBlockCount) {
-        const auto nameLength = mStream.getByte();
+        const auto nameLength = stream.getByte();
         char name[256];
-        mStream.read(name, nameLength);
+        stream.read(name, nameLength);
         name[nameLength] = 0;
         auto blockIt = std::find_if(mIndex.blocks.begin(), mIndex.blocks.end(),
                                     [&name](const FileIndex::Block& b) {
@@ -182,7 +192,7 @@ bool RamLoader::readIndex() {
         if (blockIt == mIndex.blocks.end()) {
             return false;
         }
-        readBlockPages(blockIt, compressed, &runningFilePos,
+        readBlockPages(&stream, blockIt, compressed, &runningFilePos,
                        &prevPageSizeOnDisk);
     }
 
@@ -193,7 +203,8 @@ bool RamLoader::readIndex() {
     return true;
 }
 
-void RamLoader::readBlockPages(FileIndex::Blocks::iterator blockIt,
+void RamLoader::readBlockPages(base::Stream* stream,
+                               FileIndex::Blocks::iterator blockIt,
                                bool compressed,
                                int64_t* runningFilePosPtr,
                                int32_t* prevPageSizeOnDiskPtr) {
@@ -202,7 +213,7 @@ void RamLoader::readBlockPages(FileIndex::Blocks::iterator blockIt,
 
     const auto blockIndex = std::distance(mIndex.blocks.begin(), blockIt);
 
-    const auto blockPagesCount = mStream.getBe32();
+    const auto blockPagesCount = stream->getBe32();
     FileIndex::Block& block = *blockIt;
     auto pageIt = mIndex.pages.end();
     block.pagesBegin = pageIt;
@@ -213,7 +224,7 @@ void RamLoader::readBlockPages(FileIndex::Blocks::iterator blockIt,
     for (; pageIt != endIt; ++pageIt) {
         Page& page = *pageIt;
         page.blockIndex = uint16_t(blockIndex);
-        const auto sizeOnDisk = mStream.getPackedNum();
+        const auto sizeOnDisk = stream->getPackedNum();
         if (sizeOnDisk == 0) {
             // Empty page
             page.state.store(uint8_t(State::Read), std::memory_order_relaxed);
@@ -222,7 +233,7 @@ void RamLoader::readBlockPages(FileIndex::Blocks::iterator blockIt,
         } else {
             page.blockIndex = uint16_t(blockIndex);
             page.sizeOnDisk = uint32_t(sizeOnDisk);
-            auto posDelta = getDelta(&mStream);
+            auto posDelta = getDelta(stream);
             if (compressed) {
                 posDelta += prevPageSizeOnDisk;
                 prevPageSizeOnDisk = int32_t(page.sizeOnDisk);

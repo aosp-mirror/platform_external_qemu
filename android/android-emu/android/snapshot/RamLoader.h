@@ -74,7 +74,8 @@ private:
     };
 
     bool readIndex();
-    void readBlockPages(FileIndex::Blocks::iterator blockIt,
+    void readBlockPages(base::Stream* stream,
+                        FileIndex::Blocks::iterator blockIt,
                         bool compressed,
                         int64_t* runningFilePos,
                         int32_t* prevPageSizeOnDisk);

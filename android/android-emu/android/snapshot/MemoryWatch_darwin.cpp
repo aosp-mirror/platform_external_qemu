@@ -122,7 +122,9 @@ public:
                 case IdleCallbackResult::AllDone:
                     return;
             }
-            System::get()->sleepUs(timeoutUs);
+            if (timeoutUs) {
+                System::get()->sleepUs(timeoutUs);
+            }
         }
     }
 
