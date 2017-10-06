@@ -327,6 +327,7 @@ void OverlayMessageCenter::addMessage(QString message,
                     [widget] { widget->setGraphicsEffect(nullptr); });
     showAnimation->start(QAbstractAnimation::DeleteWhenStopped);
     widget->show();
+    show();
     emit resized();
 }
 
