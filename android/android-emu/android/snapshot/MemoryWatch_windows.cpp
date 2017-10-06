@@ -20,7 +20,11 @@ bool MemoryAccessWatch::isSupported() {
     return false;
 }
 
-MemoryAccessWatch::MemoryAccessWatch(AccessCallback&&, IdleCallback&&)
+bool MemoryAccessWatch::dirtyTrackingSupported() {
+    return false;
+}
+
+MemoryAccessWatch::MemoryAccessWatch(AccessCallback&&, IdleCallback&&, DirtyCallback&&)
     : mImpl(/*new Impl()*/) {}
 
 MemoryAccessWatch::~MemoryAccessWatch() {}
@@ -35,7 +39,10 @@ bool MemoryAccessWatch::registerMemoryRange(void*, size_t) {
 
 void MemoryAccessWatch::doneRegistering() {}
 
-bool MemoryAccessWatch::fillPage(void*, size_t, const void*, bool isQuickboot) {
+bool MemoryAccessWatch::fillPage(
+        bool,
+        MemoryAccessWatch::AccessType,
+        void*, size_t, const void*, bool isQuickboot) {
     return false;
 }
 
