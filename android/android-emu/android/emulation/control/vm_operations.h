@@ -56,6 +56,9 @@ typedef struct {
     void (*loadRam)(void* opaque,
                     void* hostRamPtr,
                     uint64_t size);
+    void (*dirtyRam)(void* opaque,
+                     void* hostRamPtr,
+                     uint64_t size);
 } SnapshotRamCallbacks;
 
 typedef struct {

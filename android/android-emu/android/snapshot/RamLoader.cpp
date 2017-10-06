@@ -65,7 +65,8 @@ RamLoader::RamLoader(base::StdioStream&& stream)
     : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
-                             [this]() { return backgroundPageLoad(); });
+                             [this]() { return backgroundPageLoad(); },
+                             [this](void* ptr) { dirtyRam(ptr, mPageSize); } );
         if (!mAccessWatch->valid()) {
             derror("Failed to initialize memory access watcher, falling back "
                    "to synchronous RAM loading");
@@ -87,6 +88,15 @@ void RamLoader::loadRam(void* ptr, uint64_t size) {
     char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
     for (uint32_t i = 0; i < num_pages; i++) {
         loadRamPage(pagePtr + i * mPageSize);
+    }
+}
+
+void RamLoader::dirtyRam(void* ptr, uint64_t size) {
+    mIsDirtyTracking = true;
+    for (auto& it: mPageMaps) {
+        if (it.has(ptr)) {
+            it.set(ptr, true);
+        }
     }
 }
 
@@ -130,6 +140,16 @@ void RamLoader::join() {
 }
 
 void RamLoader::interruptReading() {
+#if SNAPSHOT_PROFILE > 1
+    uint64_t totalDirty = 0;
+    for (const auto& m : mPageMaps) {
+        totalDirty += m.count();
+    }
+    printf("%s: dirty page count %llu (%f mb)\n", __func__,
+           (unsigned long long)totalDirty,
+           (float)(totalDirty * mPageSize) /
+           (float)(1024 * 1024));
+#endif
     mLoadingCompleted.store(true, std::memory_order_relaxed);
     mReadDataQueue.stop();
     mReadingQueue.stop();
@@ -251,6 +271,9 @@ void RamLoader::readBlockPages(base::Stream* stream,
 }
 
 bool RamLoader::registerPageWatches() {
+    // Construct page maps from the longest contiguous ranges.
+    std::map<uintptr_t, uint64_t> registeredRanges;
+
     uint8_t* startPtr = nullptr;
     uint64_t curSize = 0;
     for (const Page& page : mIndex.pages) {
@@ -263,6 +286,7 @@ bool RamLoader::registerPageWatches() {
                 if (!mAccessWatch->registerMemoryRange(startPtr, curSize)) {
                     return false;
                 }
+                registeredRanges[(uintptr_t)startPtr] = curSize;
             }
             startPtr = ptr;
             curSize = size;
@@ -272,7 +296,35 @@ bool RamLoader::registerPageWatches() {
         if (!mAccessWatch->registerMemoryRange(startPtr, curSize)) {
             return false;
         }
+        registeredRanges[(uintptr_t)startPtr] = curSize;
     }
+
+    // Find contiguous page ranges
+    std::vector<uintptr_t> contiguousStarts;
+    std::vector<uintptr_t> contiguousSizes;
+    // Iterate in sorted order over the ordered map
+    for (const auto& it : registeredRanges) {
+        if (contiguousStarts.empty()) {
+            contiguousStarts.push_back(it.first);
+            contiguousSizes.push_back(it.second);
+        } else {
+            uintptr_t needed =
+                contiguousStarts.back() +
+                contiguousSizes.back();
+            if (it.first == needed) {
+                contiguousSizes.back() += it.second;
+            } else {
+                contiguousStarts.push_back(it.first);
+                contiguousSizes.push_back(it.second);
+            }
+        }
+    }
+
+    // Create page maps from the contiguous ranges.
+    for (size_t i = 0; i < contiguousStarts.size(); i++) {
+        mPageMaps.emplace_back((void*)contiguousStarts[i], contiguousSizes[i], mPageSize);
+    }
+
     return true;
 }
 
