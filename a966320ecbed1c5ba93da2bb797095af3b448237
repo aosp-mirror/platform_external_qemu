@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "0a1c8ab4_99202f0b",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b5fd219_e81a6109",
+      "range": {
+        "startLine": 289,
+        "startChar": 32,
+        "endLine": 289,
+        "endChar": 45
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ee05c82d_203de80e",
         "filename": "android/android-emu/android/camera/camera-service.c",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "nit: this could be a single comment saying that the following formats are required in the camera framework",
+      "range": {
+        "startLine": 291,
+        "startChar": 13,
+        "endLine": 291,
+        "endChar": 68
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0025aa94_78f18e09",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ee05c82d_203de80e",
       "range": {
         "startLine": 291,
         "startChar": 13,
@@ -65,6 +113,24 @@
     },
     {
       "key": {
+        "uuid": "15aaa4e1_e3bbdfbf",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d2c1f1ae_49059e50",
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4bdc397_2cf9f656",
         "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
         "patchSetId": 2
@@ -76,6 +142,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "nit: also \"disallow copy and assign\"?",
+      "range": {
+        "startLine": 86,
+        "startChar": 6,
+        "endLine": 86,
+        "endChar": 30
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c865f8f7_93feee89",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4bdc397_2cf9f656",
       "range": {
         "startLine": 86,
         "startChar": 6,
@@ -111,6 +201,30 @@
     },
     {
       "key": {
+        "uuid": "9c750e01_2ca5722a",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2455838b_76ad41fe",
+      "range": {
+        "startLine": 328,
+        "startChar": 0,
+        "endLine": 328,
+        "endChar": 33
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f08d8dab_21d65044",
         "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
         "patchSetId": 2
@@ -122,6 +236,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "nit: this looks like a good helper function to me",
+      "range": {
+        "startLine": 341,
+        "startChar": 0,
+        "endLine": 342,
+        "endChar": 69
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cea225e4_0641c696",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Sounds good, I abstracted it out and combined it with the sanity checks.",
+      "parentUuid": "f08d8dab_21d65044",
       "range": {
         "startLine": 341,
         "startChar": 0,
@@ -157,6 +295,30 @@
     },
     {
       "key": {
+        "uuid": "7e5118cc_ed708558",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eff02149_8f573d83",
+      "range": {
+        "startLine": 360,
+        "startChar": 0,
+        "endLine": 360,
+        "endChar": 10
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c3ada74_3c826c30",
         "filename": "android/android-emu/android/camera/camera-virtualscene.h",
         "patchSetId": 2
@@ -168,6 +330,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "nit: 2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e81b907_92d9ec5f",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c3ada74_3c826c30",
       "range": {
         "startLine": 2,
         "startChar": 17,
@@ -203,6 +389,30 @@
     },
     {
       "key": {
+        "uuid": "1a66ba64_74cd10ef",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e20d3c8_4bd1dbaf",
+      "range": {
+        "startLine": 24,
+        "startChar": 9,
+        "endLine": 24,
+        "endChar": 26
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9eb76765_c5721431",
         "filename": "android/android-emu/android/camera/camera-virtualscene.h",
         "patchSetId": 2
@@ -214,6 +424,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "include \u003cstdint.h\u003e for this type",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 8
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b98a609_49037adf",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9eb76765_c5721431",
       "range": {
         "startLine": 35,
         "startChar": 0,
@@ -249,6 +483,30 @@
     },
     {
       "key": {
+        "uuid": "bd0c9bcb_80dfb265",
+        "filename": "android/android-emu/android/camera/camera-virtualscene.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e990db25_f30197c6",
+      "range": {
+        "startLine": 90,
+        "startChar": 2,
+        "endLine": 90,
+        "endChar": 7
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6c7a724d_953083b9",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
         "patchSetId": 2
@@ -260,6 +518,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "nit: consexpr (for all constants)",
+      "range": {
+        "startLine": 33,
+        "startChar": 7,
+        "endLine": 33,
+        "endChar": 12
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6272dc7d_2f52dbd6",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6c7a724d_953083b9",
       "range": {
         "startLine": 33,
         "startChar": 7,
@@ -295,6 +577,53 @@
     },
     {
       "key": {
+        "uuid": "2560b441_cf406fc0",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a47e686_8172b820",
+      "range": {
+        "startLine": 61,
+        "startChar": 6,
+        "endLine": 61,
+        "endChar": 30
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f49aa8c_26183097",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "I missed the mGles2-\u003e prefix here, will fix.",
+      "range": {
+        "startLine": 76,
+        "startChar": 8,
+        "endLine": 77,
+        "endChar": 35
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d469105c_3d5a30fe",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
         "patchSetId": 2
@@ -306,6 +635,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "this variable requires a runtime destructor - please use LazyInstance\u003c\u003e instead",
+      "range": {
+        "startLine": 224,
+        "startChar": 0,
+        "endLine": 224,
+        "endChar": 48
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e2a44a8b_d3f4c93e",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d469105c_3d5a30fe",
       "range": {
         "startLine": 224,
         "startChar": 0,
@@ -341,6 +694,30 @@
     },
     {
       "key": {
+        "uuid": "678cbf90_cecc2ff6",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 235,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Good catch, I\u0027ll fix.",
+      "parentUuid": "92562e4e_75d24377",
+      "range": {
+        "startLine": 235,
+        "startChar": 3,
+        "endLine": 235,
+        "endChar": 31
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a4769245_c23e381d",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.h",
         "patchSetId": 2
@@ -352,6 +729,30 @@
       "writtenOn": "2017-10-03T16:30:48Z",
       "side": 1,
       "message": "nit: 2017",
+      "range": {
+        "startLine": 2,
+        "startChar": 17,
+        "endLine": 2,
+        "endChar": 21
+      },
+      "revId": "a966320ecbed1c5ba93da2bb797095af3b448237",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "08b9dbd8_bd238eb6",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 2,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-06T23:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4769245_c23e381d",
       "range": {
         "startLine": 2,
         "startChar": 17,
