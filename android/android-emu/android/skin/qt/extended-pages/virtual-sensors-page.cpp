@@ -1,4 +1,4 @@
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2step The Android Open Source Project
 //
 // This software is licensed under the terms of the GNU General Public
 // License version 2, as published by the Free Software Foundation, and
@@ -97,7 +97,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mAccelerationTimer.setInterval(100);
     mAccelerationTimer.stop();
 
-    mUi->zRotSlider->setRange(-180.0, 180.0);
+    mUi->zRotSlider->setRange(-540.0, 540.0);
     mUi->xRotSlider->setRange(-180.0, 180.0);
     mUi->yRotSlider->setRange(-180.0, 180.0);
     mUi->positionXSlider->setRange(Accelerometer3DWidget::MinX,
@@ -340,6 +340,75 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
 void VirtualSensorsPage::on_change_world_coord_button_pressed() {
 }
 
+void VirtualSensorsPage::writeSingleValueToFile(FILE* fp, float x, float y, float z) {
+    QVector3D gravity_vector(0.0, 9.81, 0.0);
+    QVector3D magnetic_vector(
+            mUi->magEastWidget->value(),
+            mUi->magVerticalWidget->value(),
+            -mUi->magNorthWidget->value());
+
+    gravity_vector = rotate_by_world_coord(gravity_vector);
+    magnetic_vector = rotate_by_world_coord(magnetic_vector);
+    
+    QQuaternion myrotation = QQuaternion::fromEulerAngles(x, y, z);
+    QVector3D device_gravity_vector =
+        myrotation.conjugate().rotatedVector(gravity_vector);
+    QVector3D device_magnetic_vector =
+        myrotation.conjugate().rotatedVector(magnetic_vector);
+
+    fprintf(fp, "sleep mytime\n");
+    fprintf(fp, "adb emu sensor set acceleration %g:%g:%g\n",
+    device_gravity_vector.x(),
+    device_gravity_vector.y(),
+    device_gravity_vector.z());
+
+    fprintf(fp, "adb emu sensor set magnetic-field %g:%g:%g\n",
+    device_magnetic_vector.x(),
+    device_magnetic_vector.y(),
+    device_magnetic_vector.z());
+
+    fprintf(fp, "adb emu sensor set orientation %g:%g:%g\n",
+    x,
+    y,
+    z);
+}
+
+void VirtualSensorsPage::writeRotationDataToFile() {
+    FILE* fp = fopen("mysensordata.txt", "w");
+    if (fp == NULL) return;
+
+    float x=0;
+    float y=0;
+    float z=0;
+    float step=1.0;
+    //first, change x angle 0->45->0->-45->0
+    for (float i=0; i <=52; i=i+step) {
+        writeSingleValueToFile(fp, x+i, y, z);
+    }
+    for (float i=52; i >= -52; i=i-step) {
+        writeSingleValueToFile(fp, x+i, y, z);
+    }
+    for (float i=-52; i <=0; i=i+step) {
+        writeSingleValueToFile(fp, x+i, y, z);
+    }
+    //second,change y angle 0->52->0->-52->0
+    for (float i=0; i >=-52; i=i-step) {
+        writeSingleValueToFile(fp, x, y+i, z);
+    }
+    for (float i=-52; i <= 52; i=i+step) {
+        writeSingleValueToFile(fp, x, y+i, z);
+    }
+    for (float i=52; i >=0; i=i-step) {
+        writeSingleValueToFile(fp, x, y+i, z);
+    }
+    //third,change z angle 0->450->0
+    for (int i=0; i <=450; ++i) {
+        writeSingleValueToFile(fp, x, y, z+i);
+    }
+
+    fclose(fp);
+}
+
 void VirtualSensorsPage::on_change_world_coord_button_released() {
     float x, y, z;
     x = mUi->xRotSlider->getValue();
@@ -351,6 +420,10 @@ void VirtualSensorsPage::on_change_world_coord_button_released() {
     mUi->xRotSlider->setValue(0);
     mUi->yRotSlider->setValue(0);
     mUi->zRotSlider->setValue(0);
+
+    mUi->accelWidget->resetRotationDelta();
+
+    writeRotationDataToFile();
 }
 
 void VirtualSensorsPage::on_reset_world_coord_button_pressed() {
@@ -409,7 +482,7 @@ void VirtualSensorsPage::updateSensorValues() {
     // to device-space rotation in radians per second.
     QVector3D gyroscope =
         device_rotation_quat.conjugate().rotatedVector(
-            rotate_by_world_coord(QVector3D(dx, dy, dz))) * M_PI / 180.0 / gyroUpdateRate;
+            rotate_by_world_coord(QVector3D(0, 0, 0))) * M_PI / 180.0 / gyroUpdateRate;
 
     setSensorValue(mSensorsAgent,
                    ANDROID_SENSOR_ACCELERATION,
