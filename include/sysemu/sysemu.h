@@ -92,9 +92,11 @@ typedef struct {
 
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks);
 
-typedef void (*QEMURamLoadCallback)(void*, uint64_t);
+typedef void (*QEMURamLoadCallback)(int, void*, uint64_t);
+typedef void (*QEMURamDirtyCallback)(void*, uint64_t);
 
 void qemu_set_ram_load_callback(QEMURamLoadCallback f);
+void qemu_set_ram_dirty_callback(QEMURamDirtyCallback f);
 
 /* A callback for regular and error message redirection */
 typedef struct {
@@ -108,7 +110,10 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages);
 int qemu_delvm(const char* name, const QEMUMessageCallback* messages);
 
 // Callback for lazy loading of RAM for snapshots.
-void qemu_ram_load(void* hostRam, uint64_t size);
+void qemu_ram_load(int accessType, void* hostRam, uint64_t size);
+// Says it's been written by the guest or host, so
+// mark it dirty.
+void qemu_ram_dirty(void* hostRam, uint64_t size);
 
 /* Populates the passed array of strings with the snapshot names.
  * If |names_count| is not NULL, it must be the size of |names| array.

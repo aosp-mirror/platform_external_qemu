@@ -2118,13 +2118,24 @@ PostcopyState postcopy_state_set(PostcopyState new_state)
 }
 
 static QEMURamLoadCallback sQEMURamLoadCallback = 0;
+static QEMURamDirtyCallback sQEMURamDirtyCallback = 0;
 
 void qemu_set_ram_load_callback(QEMURamLoadCallback f) {
     sQEMURamLoadCallback = f;
 }
 
-void qemu_ram_load(void* hostRam, uint64_t size) {
+void qemu_ram_load(int accessType, void* hostRam, uint64_t size) {
     if (sQEMURamLoadCallback) {
-        sQEMURamLoadCallback(hostRam, size);
+        sQEMURamLoadCallback(accessType, hostRam, size);
+    }
+}
+
+void qemu_set_ram_dirty_callback(QEMURamDirtyCallback f) {
+    sQEMURamDirtyCallback = f;
+}
+
+void qemu_ram_dirty(void* hostRam, uint64_t size) {
+    if (sQEMURamDirtyCallback) {
+        sQEMURamDirtyCallback(hostRam, size);
     }
 }

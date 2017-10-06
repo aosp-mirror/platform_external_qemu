@@ -44,7 +44,7 @@ RamSaver::RamSaver(const std::string& fileName,
                    Flags preferredFlags,
                    RamLoader* loader,
                    bool isOnExit)
-    : mStream(nullptr) {
+    : mStream(nullptr), mOnExit(isOnExit) {
     bool incremental = false;
     if (loader) {
         // check if we're ok to proceed with incremental saving
@@ -372,6 +372,69 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
 
     assert(pi.blockIndex != kStopMarkerIndex);
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
+    // FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
+
+    // auto ptr = block.ramBlock.hostPtr +
+    //            int64_t(pi.pageIndex) * block.ramBlock.pageSize;
+    // auto isZeroed = base::makeOnDemand<bool>([&] {
+    //     return std::make_tuple(mIncStats.measure(StatTime::ZeroCheck, [&] {
+    //         return isBufferZeroed(ptr, block.ramBlock.pageSize);
+    //     }));
+    // });
+    // page.filePos = 0;
+    // page.same = false;
+    // page.hashFilled = false;
+    // const RamLoader::Page* loaderPage = nullptr;
+    // if (mLoader) {
+    //     loaderPage = mLoader->findPage(pi.blockIndex, block.ramBlock.id,
+    //                                    pi.pageIndex);
+    //     assert(loaderPage);
+    //     if (loaderPage->zeroed()) {
+    //         if (mLoader->isPageDirty(ptr)) {
+    //             if (*isZeroed) {
+    //                 mIncStats.count(StatAction::StillZeroPage);
+    //                 page.same = true;
+    //                 page.sizeOnDisk = 0;
+    //             }
+    //         } else {
+    //             mIncStats.count(StatAction::SameNotDirty);
+    //             page.same = true;
+    //             page.sizeOnDisk = 0;
+    //         }
+    //     } else if (mLoader->version() >= 2) {
+    //         if (mLoader->isPageDirty(ptr)) {
+    //             calcHash(page, block, ptr);
+    //             if (page.hash == loaderPage->hash) {
+    //                 mIncStats.count(StatAction::SameHashPage);
+    //                 page.same = true;
+    //                 page.filePos = loaderPage->filePos;
+    //                 page.sizeOnDisk = loaderPage->sizeOnDisk;
+    //             }
+    //         } else {
+    //             mIncStats.count(StatAction::SameNotDirty);
+    //             memcpy(page.hash.data(), loaderPage->hash.data(), 16);
+    //             page.same = true;
+    //             page.filePos = loaderPage->filePos;
+    //             page.sizeOnDisk = loaderPage->sizeOnDisk;
+    //         }
+    //     }
+    // }
+    // if (page.same) {
+    //     mIncStats.count(StatAction::SamePage);
+    // } else {
+    //     mIncStats.count(StatAction::ChangedPage);
+    //     if (*isZeroed) {
+    //         mIncStats.count(StatAction::NewZeroPage);
+    //         page.sizeOnDisk = 0;
+    //         if (loaderPage) {
+    //             mIncStats.measure(StatTime::GapTrackingWorker, [&] {
+    //                 mGaps->add(loaderPage->filePos, loaderPage->sizeOnDisk);
+    //             });
+    //         }
+    //     } else {
+    //         if (!page.hashFilled) {
+    //             calcHash(page, block, ptr);
+    //         }
 
 
     WriteInfo wi = {pi.blockIndex, pi.nonzeroChangedIndexStart,
@@ -493,6 +556,11 @@ void RamSaver::writeIndex() {
             "RAM: index %d, total %lld bytes, wasted %d (compressed: %s)\n",
             int(end - start), (long long)mDiskSize, int(bytesWasted),
             compressed ? "yes" : "no");
+
+    if (!mOnExit) {
+        fprintf(stderr, "%s: restarting dirty tracking\n", __func__);
+         mLoader->restartDirtyTracking();
+    }
 }
 
 void RamSaver::writePage(WriteInfo&& wi) {

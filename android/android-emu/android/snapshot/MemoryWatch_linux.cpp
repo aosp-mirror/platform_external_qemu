@@ -70,9 +70,11 @@ static bool checkUserfaultFdCaps(int ufd) {
 class MemoryAccessWatch::Impl {
 public:
     Impl(MemoryAccessWatch::AccessCallback&& accessCallback,
-         MemoryAccessWatch::IdleCallback&& idleCallback)
+         MemoryAccessWatch::IdleCallback&& idleCallback,
+         MemoryAccessWatch::DirtyCallback&& dirtyCallback)
         : mAccessCallback(std::move(accessCallback)),
           mIdleCallback(std::move(idleCallback)),
+          mDirtyCallback(std::move(dirtyCallback)),
           mPagefaultThread([this]() { pagefaultWorker(); }) {
         mUserfaultFd = base::ScopedFd(
                 int(syscall(__NR_userfaultfd, O_CLOEXEC | O_NONBLOCK)));
@@ -113,6 +115,7 @@ public:
                    msg.event);
             return nullptr; /* It's not a page fault, shouldn't happen */
         }
+
         return reinterpret_cast<void*>(uintptr_t(msg.arg.pagefault.address));
     }
 
@@ -133,7 +136,7 @@ public:
             }
             if (pfd[1].revents) {
                 while (auto ptr = readNextPagefaultAddr()) {
-                    mAccessCallback(ptr);
+                    mAccessCallback(MemoryAccessWatch::AccessType::HostOnceOnly, ptr);
                 }
                 timeoutNs = 0;
             }
@@ -180,6 +183,7 @@ public:
 
     MemoryAccessWatch::AccessCallback mAccessCallback;
     MemoryAccessWatch::IdleCallback mIdleCallback;
+    MemoryAccessWatch::DirtyCallback mDirtyCallback;
 
     base::ScopedFd mUserfaultFd;
     base::ScopedFd mExitFd;
@@ -194,9 +198,16 @@ bool MemoryAccessWatch::isSupported() {
     return checkUserfaultFdCaps(ufd.get());
 }
 
+bool MemoryAccessWatch::dirtyTrackingSupported() {
+    // TODO: userfaultfd-WP
+    return false;
+}
+
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
-                                     IdleCallback&& idleCallback)
-    : mImpl(new Impl(std::move(accessCallback), std::move(idleCallback))) {}
+                                     IdleCallback&& idleCallback,
+                                     DirtyCallback&& dirtyCallback)
+    : mImpl(new Impl(std::move(accessCallback), std::move(idleCallback),
+                     std::move(dirtyCallback))) {}
 
 MemoryAccessWatch::~MemoryAccessWatch() {
     mImpl->stop();
@@ -227,10 +238,12 @@ void MemoryAccessWatch::doneRegistering() {
     }
 }
 
-bool MemoryAccessWatch::fillPage(void* ptr,
-                                 size_t length,
-                                 const void* data,
+bool MemoryAccessWatch::fillPage(bool loadedAlready,
+                                 MemoryAccessWatch::AccessType accessType,
+                                 void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
+    if (loadedAlready) return true;
+
     if (data) {
         uffdio_copy copyStruct = {uintptr_t(ptr), uintptr_t(data), length};
         if (ioctl(mImpl->mUserfaultFd.get(), UFFDIO_COPY, &copyStruct)) {

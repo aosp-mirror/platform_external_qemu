@@ -21,6 +21,8 @@
 #include "android/snapshot/GapTracker.h"
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/MemoryWatch.h"
+#include "android/snapshot/PageMap.h"
 
 #include <array>
 #include <atomic>
@@ -46,6 +48,7 @@ public:
             RamBlock ramBlock;
             Pages::iterator pagesBegin;
             Pages::iterator pagesEnd;
+            PageMap dirtyMap;
         };
 
         using Blocks = std::vector<Block>;
@@ -71,7 +74,16 @@ public:
     RamBlockStructure getRamBlockStructure() const;
     void applyRamBlockStructure(const RamBlockStructure& blockStructure);
 
-    void loadRam(void* ptr, uint64_t size);
+    void loadRam(MemoryAccessWatch::AccessType accessType,
+                 void* ptr, uint64_t size);
+    void dirtyRam(void* ptr, uint64_t size);
+
+    bool isPageDirty(void* ptr);
+
+    void restartDirtyTracking();
+    void startDirtyTracking() { mDirtyTracking = true; }
+    bool isDirtyTracking() const { return mDirtyTracking; }
+
     void registerBlock(const RamBlock& block);
     bool start(bool isQuickboot);
     bool wasStarted() const { return mWasStarted; }
@@ -121,11 +133,15 @@ private:
     void zeroOutPage(const Page& page);
     uint8_t* pagePtr(const Page& page) const;
     uint32_t pageSize(const Page& page) const;
+    FileIndex::Blocks::const_iterator block(void* ptr) const;
+    FileIndex::Blocks::iterator blockMutable(void* ptr);
+    size_t pageIndex(const FileIndex::Block& block,
+                     const void* ptr, bool* found = nullptr) const;
     Page& page(void* ptr);
 
-    void loadRamPage(void* ptr);
+    void loadRamPage(MemoryAccessWatch::AccessType accessType, void* ptr);
     bool readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer = nullptr);
-    void fillPageData(Page* pagePtr);
+    void fillPageData(MemoryAccessWatch::AccessType accessType, Page* pagePtr);
 
     void readerWorker();
     MemoryAccessWatch::IdleCallbackResult backgroundPageLoad();
@@ -173,6 +189,12 @@ private:
 
     // Whether or not we just want to reload the index.
     bool mIndexOnly = false;
+
+    // Information about dirty page tracking:
+    // whether we are doing so, and bitmaps holding
+    // the data.
+    bool mDirtyTrackingSupported = false;
+    bool mDirtyTracking = false;
 };
 
 struct RamLoader::Page {

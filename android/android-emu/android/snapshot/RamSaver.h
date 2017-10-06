@@ -183,6 +183,8 @@ private:
     base::System::Duration mEndTime = 0;
 
     IncrementalStats mIncStats;
+
+    bool mOnExit = false;
 };
 
 }  // namespace snapshot

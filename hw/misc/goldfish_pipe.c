@@ -39,6 +39,8 @@
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
 
+#include "sysemu/sysemu.h"
+
 #include <assert.h>
 #include <glib.h>
 
@@ -672,6 +674,8 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
             break;
         }
         buffer.size = dev->size;
+        /* Load */
+        qemu_ram_load(1 /* eager dirty */, buffer.data, buffer.size);
         dev->status = service_ops->guest_recv(pipe->host_pipe, &buffer, 1);
         DD("%s: CMD_READ channel=0x%llx address=0x%16llx size=%d > status=%d",
            __func__, (unsigned long long)dev->channel,
@@ -691,6 +695,7 @@ static void pipeDevice_doCommand_v1(PipeDevice* dev, uint32_t command) {
             break;
         }
         buffer.size = dev->size;
+        qemu_ram_load(1 /* eager dirty */, buffer.data, buffer.size);
         dev->status = service_ops->guest_send(pipe->host_pipe, &buffer, 1);
         DD("%s: CMD_WRITE_BUFFER channel=0x%llx address=0x%16llx size=%d > "
            "status=%d", __func__, (unsigned long long)dev->channel,
@@ -902,6 +907,7 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 buffers[i].size = rwSizes[i];
                 assert(buffers[i].data != NULL);
                 assert(buffers[i].size != 0);
+                qemu_ram_load(1 /* eager dirty */, buffers[i].data, buffers[i].size);
             }
 
 #ifndef NDEBUG
@@ -1545,6 +1551,9 @@ static int goldfish_pipe_load_v2(QEMUFile* file, PipeDevice* dev) {
         pipe->command_buffer_addr = qemu_get_be64(file);
         pipe->command_buffer = (PipeCommand*)map_guest_buffer(
                 pipe->command_buffer_addr, COMMAND_BUFFER_SIZE, /*is_write*/1);
+        qemu_ram_load(
+           1 /* eager dirty */,
+           pipe->command_buffer, COMMAND_BUFFER_SIZE);
         if (!pipe->command_buffer) {
             hwpipe_free(pipe, GOLDFISH_PIPE_CLOSE_ERROR);
             goto done;

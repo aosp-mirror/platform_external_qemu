@@ -150,7 +150,7 @@ static void dma_blk_cb(void *opaque, int ret)
         // We need to load mem eagerly under lazy snapshot RAM loading
         // with at least Hypervisor.Framework (likely with HAXM as well).
         // Touch them here.
-        qemu_ram_load(mem, cur_len);
+        qemu_ram_load(1 /* eager load */, mem, cur_len);
         qemu_iovec_add(&dbs->iov, mem, cur_len);
         dbs->sg_cur_byte += cur_len;
         if (dbs->sg_cur_byte == dbs->sg->sg[dbs->sg_cur_index].len) {
