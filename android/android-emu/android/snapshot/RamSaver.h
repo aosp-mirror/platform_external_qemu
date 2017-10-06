@@ -20,6 +20,7 @@
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/common.h"
 
+#include <atomic>
 #include <cstdint>
 #include <vector>
 
@@ -94,10 +95,12 @@ private:
                    int32_t dataSize);
 
     base::StdioStream mStream;
+    int mStreamFd;
     Flags mFlags;
     bool mJoined = false;
     bool mHasError = false;
     int mLastBlockIndex = 0;
+    std::atomic<int64_t> mCurrentStreamPos {8};
 
     base::Optional<Compressor<QueuedPageInfo>> mCompressor;
     base::Optional<base::WorkerThread<QueuedPageInfo>> mSavingWorker;

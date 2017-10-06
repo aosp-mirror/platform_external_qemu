@@ -39,6 +39,8 @@ public:
     void save(Stream* stream) const;
     void load(Stream* stream);
 
+    const Buffer& buffer() const { return mData; }
+
 private:
     DISALLOW_COPY_AND_ASSIGN(MemStream);
 
