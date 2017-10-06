@@ -15,6 +15,7 @@
 #include "android/base/EnumFlags.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/snapshot/Compressor.h"
@@ -23,6 +24,8 @@
 #include <atomic>
 #include <cstdint>
 #include <vector>
+
+#include <sys/uio.h>
 
 namespace android {
 namespace snapshot {
@@ -112,6 +115,22 @@ private:
     base::System::WallDuration mStartTime =
             base::System::get()->getHighResTimeUs();
 #endif
+
+    android::base::Lock mLock;
+
+    void writeToBuffer(const void* dataPtr, int32_t dataSize, uint64_t filePos);
+    void flushWriteBuffer();
+
+    uint64_t mWriteBufSize = 8 * 1024 * 1024;
+    uint64_t mWriteBufCurrPos = 0;
+    uint64_t mWriteBufCurrSize = 0;
+    unsigned char* mWriteBuf = nullptr;
+    unsigned char* mWriteBufCurr = nullptr;
+
+    void writeToIovec(const void* dataPtr, int32_t dataSize);
+    void flushIovecs();
+
+    std::vector<struct iovec> mIovecs = {};
 };
 
 }  // namespace snapshot
