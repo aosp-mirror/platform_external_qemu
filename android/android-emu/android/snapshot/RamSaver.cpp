@@ -15,14 +15,19 @@
 #include "android/base/files/preadwrite.h"
 #include "android/base/system/System.h"
 
+#include "android/base/Stopwatch.h"
+#include "android/base/files/MemStream.h"
+
 #include <algorithm>
 #include <cassert>
 #include <iterator>
+#include <map>
 #include <utility>
 
 namespace android {
 namespace snapshot {
 
+using android::base::Stopwatch;
 using android::base::MemStream;
 using android::base::System;
 
@@ -30,18 +35,30 @@ void RamSaver::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
+uint32_t pwriteCount = 0;
+uint64_t pwriteTime = 0;
+uint64_t pageWriteTime = 0;
+
+std::map<uint64_t, uint64_t> writePosSizes = {};
+
 RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
     : mStream(std::move(stream)),
       mStreamFd(fileno(mStream.get())),
       mFlags(flags) {
+    mWriteBuf = new unsigned char[mWriteBufSize];
+    mWriteBufCurr = mWriteBuf;
+
     // Put a placeholder for the index offset right now.
     mStream.putBe64(0);
     if (nonzero(mFlags & Flags::Compress)) {
+        fprintf(stderr, "%s: compressed pages\n", __func__);
         mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
         mCompressor.emplace(
                 [this](QueuedPageInfo&& pi, const uint8_t* data, int32_t size) {
                     writePage(pi, data, size);
                 });
+    } else {
+        fprintf(stderr, "%s: noncompressed pages\n", __func__);
     }
     if (nonzero(mFlags & Flags::Async)) {
         mSavingWorker.emplace([this](QueuedPageInfo&& pi) {
@@ -53,6 +70,10 @@ RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
 
 RamSaver::~RamSaver() {
     join();
+    // flushIovecs();
+    flushWriteBuffer();
+    fprintf(stderr, "%s: # pwrite calls: %u\n", __func__, pwriteCount);
+    fprintf(stderr, "%s: pwrite time: %f ms\n", __func__, ((float)pwriteTime) / 1000.0f);
 }
 
 void RamSaver::registerBlock(const RamBlock& block) {
@@ -116,8 +137,11 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 mCurrentStreamPos.load(std::memory_order_relaxed);
         fseeko64(mStream.get(), mIndex.startPosInFile, SEEK_SET);
         writeIndex();
+        STOPWATCH_PRINT(sw);
 
+        Stopwatch sw2;
         mHasError = ferror(mStream.get()) != 0;
+        STOPWATCH_PRINT(sw2);
         mIndex.clear();
 
 #if SNAPSHOT_PROFILE > 1
@@ -208,8 +232,10 @@ void RamSaver::writeIndex() {
 
     mStream.write(stream.buffer().data(), stream.buffer().size());
     fseeko64(mStream.get(), 0, SEEK_SET);
+    STOPWATCH_PRINT(sw);
     mStream.putBe64(uint64_t(mIndex.startPosInFile));
 }
+
 
 void RamSaver::writePage(const QueuedPageInfo& pi,
                          const void* dataPtr,
@@ -217,9 +243,52 @@ void RamSaver::writePage(const QueuedPageInfo& pi,
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     page.sizeOnDisk = dataSize;
-    page.filePos =
-            mCurrentStreamPos.fetch_add(dataSize, std::memory_order_relaxed);
-    base::pwrite(mStreamFd, dataPtr, size_t(dataSize), page.filePos);
+    page.filePos = mCurPos.fetch_add(dataSize, std::memory_order_relaxed);
+
+    // writeToIovec(dataPtr, dataSize);
+    writeToBuffer(dataPtr, dataSize, page.filePos);
+}
+
+void RamSaver::flushWriteBuffer() {
+    if (mWriteBufCurrSize) {
+      pwriteCount++;
+      writePosSizes[mWriteBufCurrPos] = mWriteBufCurrSize;
+      Stopwatch sw;
+      base::pwrite(mStreamFd, mWriteBuf, mWriteBufCurrSize, mWriteBufCurrPos);
+      pwriteTime += sw.elapsedUs();
+      mWriteBufCurrPos = 0;
+      mWriteBufCurrSize = 0;
+      mWriteBufCurr = mWriteBuf;
+    }
+}
+
+void RamSaver::writeToBuffer(const void* dataPtr, int32_t dataSize, uint64_t filePos) {
+tryAgain:
+    if (mWriteBufCurrPos == 0) {
+        mWriteBufCurrPos = filePos;
+    }
+
+    if (mWriteBufCurrSize + dataSize <= mWriteBufSize) {
+        memcpy(mWriteBufCurr, dataPtr, dataSize);
+        mWriteBufCurr += dataSize;
+        mWriteBufCurrSize += dataSize;
+    } else {
+        flushWriteBuffer();
+        goto tryAgain;
+    }
+}
+
+void RamSaver::flushIovecs() {
+    Stopwatch sw;
+    writev(mStreamFd, &mIovecs[0], mIovecs.size());
+    STOPWATCH_PRINT(sw);
+}
+
+void RamSaver::writeToIovec(const void* dataPtr, int32_t dataSize) {
+    struct iovec v;
+    v.iov_base = (void*)dataPtr;
+    v.iov_len = dataSize;
+    mIovecs.push_back(v);
 }
 
 }  // namespace snapshot
