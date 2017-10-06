@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "cc69a53c_75caa2be",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-06T19:55:31Z",
+      "side": 1,
+      "message": "It says \"when binding is used\" not \"when binding is established\". My understanding is that buffer size can change after glBindBufferBase call (and it does happen in 3Dmark), and we should always use the updated size.",
+      "parentUuid": "d5368a93_9edfc822",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 34
+      },
+      "revId": "befffb4c46a5fe017513f095d0b6907a15e3aaa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "599bb563_39692799",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-06T19:10:50Z",
       "side": 1,
       "message": "Wouldn\u0027t this get broken then? Please rerun dEQP-GLES3",
+      "range": {
+        "startLine": 1145,
+        "startChar": 0,
+        "endLine": 1145,
+        "endChar": 30
+      },
+      "revId": "befffb4c46a5fe017513f095d0b6907a15e3aaa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff98cc67_a5f4d8f8",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-06T19:55:31Z",
+      "side": 1,
+      "message": "is this used in any places other than snapshot?",
+      "parentUuid": "599bb563_39692799",
       "range": {
         "startLine": 1145,
         "startChar": 0,
