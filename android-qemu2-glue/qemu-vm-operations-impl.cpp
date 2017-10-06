@@ -152,6 +152,7 @@ static bool qemu_snapshot_save(const char* name,
     int res = qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer));
 
     if (wasVmRunning) {
+        fprintf(stderr, "%s: restarting from sav\n", __func__);
         vm_start();
     }
 
@@ -373,9 +374,13 @@ static void set_snapshot_callbacks(void* opaque,
         sSnapshotCallbacks = *callbacks;
         sSnapshotCallbacksOpaque = opaque;
         qemu_set_snapshot_callbacks(&sQemuSnapshotCallbacks);
-        qemu_set_ram_load_callback([](void* hostRam, uint64_t size) {
-            sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam,
-                                              size);
+        qemu_set_ram_load_callback([](int src, void* hostRam, uint64_t size) {
+            sSnapshotCallbacks.ramOps.loadRam(
+                sSnapshotCallbacksOpaque, src, hostRam, size);
+        });
+        qemu_set_ram_dirty_callback([](void* hostRam, uint64_t size) {
+            sSnapshotCallbacks.ramOps.dirtyRam(
+                sSnapshotCallbacksOpaque, hostRam, size);
         });
 
         if (android::GetCurrentCpuAccelerator() ==

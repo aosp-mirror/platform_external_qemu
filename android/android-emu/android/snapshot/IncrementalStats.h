@@ -42,6 +42,7 @@ public:
         NotLoadedPage,
         StillZeroPage,
         SameHashPage,
+        SameNotDirty,
         ChangedPage,
         ReusedPos,
         NewZeroPage,
@@ -53,7 +54,7 @@ public:
     static constexpr char kActionFormat[] =
             "\tPages: total %llu\n"
             "\t\tsame %llu [not loaded %llu; still empty %llu; "
-            "same hash %llu]\n"
+            "same hash %llu, same not dirty %llu]\n"
             "\t\tnew  %llu [reused %llu, empty %llu, appended %llu]\n";
 
     enum class Time : int {

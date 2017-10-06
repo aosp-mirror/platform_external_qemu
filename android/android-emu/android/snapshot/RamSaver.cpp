@@ -270,15 +270,29 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                                        pi.pageIndex);
         assert(loaderPage);
         if (loaderPage->zeroed()) {
-            if (*isZeroed) {
-                mIncStats.count(StatAction::StillZeroPage);
+            if (mLoader->isPageDirty(ptr)) {
+                if (*isZeroed) {
+                    mIncStats.count(StatAction::StillZeroPage);
+                    page.same = true;
+                    page.sizeOnDisk = 0;
+                }
+            } else {
+                mIncStats.count(StatAction::SameNotDirty);
                 page.same = true;
                 page.sizeOnDisk = 0;
             }
         } else if (mLoader->version() >= 2) {
-            calcHash(page, block, ptr);
-            if (page.hash == loaderPage->hash) {
-                mIncStats.count(StatAction::SameHashPage);
+            if (mLoader->isPageDirty(ptr)) {
+                calcHash(page, block, ptr);
+                if (page.hash == loaderPage->hash) {
+                    mIncStats.count(StatAction::SameHashPage);
+                    page.same = true;
+                    page.filePos = loaderPage->filePos;
+                    page.sizeOnDisk = loaderPage->sizeOnDisk;
+                }
+            } else {
+                mIncStats.count(StatAction::SameNotDirty);
+                memcpy(page.hash.data(), loaderPage->hash.data(), 16);
                 page.same = true;
                 page.filePos = loaderPage->filePos;
                 page.sizeOnDisk = loaderPage->sizeOnDisk;
@@ -408,6 +422,11 @@ void RamSaver::writeIndex() {
             "RAM: index %d, total %lld bytes, wasted %d (compressed: %s)\n",
             int(end - start), (long long)mDiskSize, int(bytesWasted),
             compressed ? "yes" : "no");
+
+    if (!mOnExit) {
+        fprintf(stderr, "%s: restarting dirty tracking\n", __func__);
+         mLoader->restartDirtyTracking();
+    }
 }
 
 void RamSaver::writePage(WriteInfo&& wi) {
