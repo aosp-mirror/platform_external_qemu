@@ -87,6 +87,10 @@ void RamLoader::loadRam(void* ptr, uint64_t size) {
     }
 }
 
+void RamLoader::dirtyRam(void* ptr, uint64_t size) {
+    mDirtyPages[(uintptr_t)ptr] = 1;
+}
+
 void RamLoader::registerBlock(const RamBlock& block) {
     mPageSize = block.pageSize;
     mIndex.blocks.push_back({block, {}, {}});
@@ -126,6 +130,9 @@ void RamLoader::join() {
 }
 
 void RamLoader::interruptReading() {
+    fprintf(stderr, "%s: dirty page count %zu (%f mb)\n", __func__,
+            mDirtyPages.size(),
+            (float)(mDirtyPages.size()) * 4096.0 / 1048576.0);
     mLoadingCompleted.store(true, std::memory_order_relaxed);
     mReadDataQueue.stop();
     mReadingQueue.stop();

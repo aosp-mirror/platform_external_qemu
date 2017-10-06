@@ -100,9 +100,9 @@ public:
                 // Restore the mapping because we might have re-mapped above.
                 if (remapNeeded) {
                     hv_vm_unmap(gpa, length);
-                    hv_vm_map(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                    hv_vm_map(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_EXEC);
                 } else {
-                    hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                    hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_EXEC);
                 }
             }
         }

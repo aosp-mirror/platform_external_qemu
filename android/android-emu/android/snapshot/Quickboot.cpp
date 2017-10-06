@@ -199,22 +199,22 @@ void Quickboot::onLivenessTimer() {
         return;
     }
 
-    const auto nowMs = System::get()->getHighResTimeUs() / 1000;
-    if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
-        // The VM hasn't started for long enough since the end of snapshot
-        // loading, let's reset it.
-        mWindow.showMessage(
-                StringFormat("Guest hasn't come online in %d seconds, "
-                             "resetting it and deleting the boot snapshot",
-                             bootTimeoutMs() / 1000)
-                        .c_str(),
-                WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
-        Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
-        reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
-        mVmOps.vmReset();
-        return;
-    }
+    // const auto nowMs = System::get()->getHighResTimeUs() / 1000;
+    // if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
+    //     // The VM hasn't started for long enough since the end of snapshot
+    //     // loading, let's reset it.
+    //     mWindow.showMessage(
+    //             StringFormat("Guest hasn't come online in %d seconds, "
+    //                          "resetting it and deleting the boot snapshot",
+    //                          bootTimeoutMs() / 1000)
+    //                     .c_str(),
+    //             WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+    //     Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+    //     reportFailedLoad(
+    //             pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
+    //     mVmOps.vmReset();
+    //     return;
+    // }
 
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
 }

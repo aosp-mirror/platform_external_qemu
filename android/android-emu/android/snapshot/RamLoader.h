@@ -23,6 +23,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <map>
 #include <vector>
 
 namespace android {
@@ -36,6 +37,7 @@ public:
     ~RamLoader();
 
     void loadRam(void* ptr, uint64_t size);
+    void dirtyRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
     bool start(bool isQuickboot);
     bool wasStarted() const { return mWasStarted; }
@@ -129,6 +131,8 @@ private:
     // Whether or not this ram load is part of
     // quickboot load.
     bool mIsQuickboot = false;
+
+    std::map<uintptr_t, int> mDirtyPages = {};
 };
 
 }  // namespace snapshot
