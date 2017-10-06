@@ -23,6 +23,7 @@
 
 #include <atomic>
 #include <cstdint>
+#include <unordered_map>
 #include <vector>
 
 namespace android {
@@ -35,7 +36,14 @@ public:
     RamLoader(base::StdioStream&& stream);
     ~RamLoader();
 
+    using DirtyPageMap = std::unordered_map<void*, uint64_t>;
+
+    DirtyPageMap getDirtyPages() const {
+        return mDirtyPages;
+    }
+
     void loadRam(void* ptr, uint64_t size);
+    void dirtyRam(void* ptr, uint64_t size);
     void registerBlock(const RamBlock& block);
     bool start(bool isQuickboot);
     bool wasStarted() const { return mWasStarted; }
@@ -130,6 +138,8 @@ private:
     // Whether or not this ram load is part of
     // quickboot load.
     bool mIsQuickboot = false;
+
+    DirtyPageMap mDirtyPages = {};
 };
 
 }  // namespace snapshot

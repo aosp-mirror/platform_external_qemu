@@ -165,7 +165,8 @@ bool MemoryAccessWatch::isSupported() {
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
-                                     IdleCallback&& idleCallback)
+                                     IdleCallback&& idleCallback,
+                                     DirtyCallback&& dirtyCallback)
     : mImpl(new Impl(std::move(accessCallback), std::move(idleCallback))) {}
 
 MemoryAccessWatch::~MemoryAccessWatch() {

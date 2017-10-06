@@ -65,7 +65,8 @@ RamLoader::RamLoader(base::StdioStream&& stream)
     : mStream(std::move(stream)), mReaderThread([this]() { readerWorker(); }) {
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
-                             [this]() { return backgroundPageLoad(); });
+                             [this]() { return backgroundPageLoad(); },
+                             [this](void* ptr) { dirtyRam(ptr, mPageSize); } );
         if (!mAccessWatch->valid()) {
             derror("Failed to initialize memory access watcher, falling back "
                    "to synchronous RAM loading");
@@ -88,6 +89,10 @@ void RamLoader::loadRam(void* ptr, uint64_t size) {
     for (uint32_t i = 0; i < num_pages; i++) {
         loadRamPage(pagePtr + i * mPageSize);
     }
+}
+
+void RamLoader::dirtyRam(void* ptr, uint64_t size) {
+    mDirtyPages[ptr] = size;
 }
 
 void RamLoader::registerBlock(const RamBlock& block) {
@@ -130,6 +135,9 @@ void RamLoader::join() {
 }
 
 void RamLoader::interruptReading() {
+    fprintf(stderr, "%s: dirty page count %zu (%f mb)\n", __func__,
+            mDirtyPages.size(),
+            (float)(mDirtyPages.size()) * 4096.0 / 1048576.0);
     mLoadingCompleted.store(true, std::memory_order_relaxed);
     mReadDataQueue.stop();
     mReadingQueue.stop();
