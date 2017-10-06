@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "599bb563_39692799",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-06T19:10:50Z",
+      "side": 1,
+      "message": "Wouldn\u0027t this get broken then? Please rerun dEQP-GLES3",
+      "range": {
+        "startLine": 1145,
+        "startChar": 0,
+        "endLine": 1145,
+        "endChar": 30
+      },
+      "revId": "befffb4c46a5fe017513f095d0b6907a15e3aaa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
