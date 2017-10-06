@@ -177,7 +177,18 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                      !ramLoader.onDemandLoadingComplete()) {
                      ramLoader.loadRam(hostRamPtr, size);
                  }
-             }}};
+             },
+             // dirtyRam
+             [](void* opaque, void* hostRamPtr, uint64_t size) {
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+
+                 auto& loader = snapshot->mLoader;
+                 if (!loader || loader->status() != OperationStatus::Ok) return;
+
+                 auto& ramLoader = loader->ramLoader();
+                 ramLoader.dirtyRam(hostRamPtr, size);
+             }
+            }};
 
     assert(vmOperations.setSnapshotCallbacks);
     mVmOperations = vmOperations;
