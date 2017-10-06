@@ -1147,9 +1147,7 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, 
 }
 
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) {
-    GLint sz;
-    getBufferSizeById(buffer, &sz);
-    bindIndexedBuffer(target, index, buffer, 0, sz);
+    bindIndexedBuffer(target, index, buffer, 0, BufferBinding::kNoRange);
 }
 
 static void sClearIndexedBufferBinding(GLuint id, std::vector<BufferBinding>& bindings) {

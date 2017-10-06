@@ -105,6 +105,7 @@ struct ArrayData {
 };
 
 struct BufferBinding {
+    static const GLsizeiptr kNoRange = 0;
     GLuint buffer = 0;
     GLintptr offset = 0;
     GLsizeiptr size = 0;
