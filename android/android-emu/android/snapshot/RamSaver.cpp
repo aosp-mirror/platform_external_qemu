@@ -35,6 +35,8 @@ static int samehash = 0;
 static int appended = 0;
 static int reused = 0;
 static int new_zero = 0;
+static int maybe_dirty = 0;
+static int not_dirty = 0;
 
 using android::base::MemStream;
 using android::base::System;
@@ -221,18 +223,35 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 page.hashFilled = true;
             }
         } else if (loaderPage->sizeOnDisk == 0) {
-            isZeroed = isBufferZeroed(ptr, block.ramBlock.pageSize);
-            if (*isZeroed) {
-                ++still0;
+            if (mLoader->isPageDirty(ptr)) {
+                isZeroed = isBufferZeroed(ptr, block.ramBlock.pageSize);
+                if (*isZeroed) {
+                    ++still0;
+                    page.same = true;
+                    page.filePos = page.sizeOnDisk = 0;
+                }
+                ++maybe_dirty;
+            } else {
+                ++not_dirty;
                 page.same = true;
                 page.filePos = page.sizeOnDisk = 0;
             }
         } else if (mLoader->version() >= 2) {
-            MurmurHash3_x64_128(ptr, block.ramBlock.pageSize, 0,
-                                page.hash.data());
-            page.hashFilled = true;
-            if (page.hash == loaderPage->hash) {
-                ++samehash;
+            if (mLoader->isPageDirty(ptr)) {
+                MurmurHash3_x64_128(ptr, block.ramBlock.pageSize, 0,
+                                    page.hash.data());
+                page.hashFilled = true;
+                if (page.hash == loaderPage->hash) {
+                    ++samehash;
+                    page.same = true;
+                    page.filePos = loaderPage->filePos;
+                    page.sizeOnDisk = loaderPage->sizeOnDisk;
+                }
+                ++maybe_dirty;
+            } else {
+                ++not_dirty;
+                page.hashFilled = true;
+                page.hash = loaderPage->hash;
                 page.same = true;
                 page.filePos = loaderPage->filePos;
                 page.sizeOnDisk = loaderPage->sizeOnDisk;
@@ -328,11 +347,14 @@ void RamSaver::writeIndex() {
     auto bytes_wasted = mGaps.wastedSpace();
     printf("RAM: index %d bytes (%d pages, %d empty):\n"
            "\t%d same:\n"
-           "\t\t[not loaded %d; still empty %d; same hash %d]\n"
+           "\t\t[not loaded %d; still empty %d; same hash %d, not dirty %d]\n"
            "\t%d new:\n"
-           "\t\t[reused %d, empty %d, appended %d, %d bytes wasted]\n",
-           int(end - start), total, zeroPages, same, notyet, still0, samehash,
-           total - same, reused, new_zero, appended, int(bytes_wasted));
+           "\t\t[reused %d, empty %d, appended %d, %d bytes wasted, maybe dirty %d]\n",
+           int(end - start), total, zeroPages,
+           same,
+           notyet, still0, samehash, not_dirty,
+           total - same,
+           reused, new_zero, appended, int(bytes_wasted), maybe_dirty);
 #endif
 
     mStream.write(stream.buffer().data(), stream.buffer().size());
