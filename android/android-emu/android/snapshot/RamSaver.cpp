@@ -11,6 +11,8 @@
 
 #include "android/snapshot/RamSaver.h"
 
+#include "android/base/files/MemStream.h"
+#include "android/base/files/preadwrite.h"
 #include "android/base/system/System.h"
 
 #include <algorithm>
@@ -21,15 +23,17 @@
 namespace android {
 namespace snapshot {
 
+using android::base::MemStream;
 using android::base::System;
-
 
 void RamSaver::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
 RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
-    : mStream(std::move(stream)), mFlags(flags) {
+    : mStream(std::move(stream)),
+      mStreamFd(fileno(mStream.get())),
+      mFlags(flags) {
     // Put a placeholder for the index offset right now.
     mStream.putBe64(0);
     if (nonzero(mFlags & Flags::Compress)) {
@@ -108,7 +112,9 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
 bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     if (pi.blockIndex == kStopMarkerIndex) {
         mCompressor.clear();
-        mIndex.startPosInFile = ftello64(mStream.get());
+        mIndex.startPosInFile =
+                mCurrentStreamPos.load(std::memory_order_relaxed);
+        fseeko64(mStream.get(), mIndex.startPosInFile, SEEK_SET);
         writeIndex();
 
         mHasError = ferror(mStream.get()) != 0;
@@ -125,7 +131,8 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     ++mIndex.totalPages;
 
-    auto ptr = block.ramBlock.hostPtr + int64_t(pi.pageIndex) * block.ramBlock.pageSize;
+    auto ptr = block.ramBlock.hostPtr +
+               int64_t(pi.pageIndex) * block.ramBlock.pageSize;
     if (isBufferZeroed(ptr, block.ramBlock.pageSize)) {
         page.sizeOnDisk = 0;
     } else {
@@ -163,19 +170,20 @@ void RamSaver::writeIndex() {
     auto start = mIndex.startPosInFile;
 #endif
 
+    MemStream stream(512 + 2 * mIndex.totalPages);
     bool compressed = (mIndex.flags & int(IndexFlags::CompressedPages)) != 0;
-    mStream.putBe32(uint32_t(mIndex.version));
-    mStream.putBe32(uint32_t(mIndex.flags));
-    mStream.putBe32(uint32_t(mIndex.totalPages));
+    stream.putBe32(uint32_t(mIndex.version));
+    stream.putBe32(uint32_t(mIndex.flags));
+    stream.putBe32(uint32_t(mIndex.totalPages));
     int64_t prevFilePos = 8;
     int32_t prevPageSizeOnDisk = 0;
     for (const FileIndex::Block& b : mIndex.blocks) {
         auto id = base::StringView(b.ramBlock.id);
-        mStream.putByte(uint8_t(id.size()));
-        mStream.write(id.data(), id.size());
-        mStream.putBe32(uint32_t(b.pages.size()));
+        stream.putByte(uint8_t(id.size()));
+        stream.write(id.data(), id.size());
+        stream.putBe32(uint32_t(b.pages.size()));
         for (const FileIndex::Block::Page& page : b.pages) {
-            mStream.putPackedNum(uint64_t(
+            stream.putPackedNum(uint64_t(
                     compressed ? page.sizeOnDisk
                                : (page.sizeOnDisk / b.ramBlock.pageSize)));
             if (page.sizeOnDisk) {
@@ -186,18 +194,19 @@ void RamSaver::writeIndex() {
                     assert(deltaPos % b.ramBlock.pageSize == 0);
                     deltaPos /= b.ramBlock.pageSize;
                 }
-                putDelta(&mStream, deltaPos);
+                putDelta(&stream, deltaPos);
                 prevFilePos = page.filePos;
                 prevPageSizeOnDisk = page.sizeOnDisk;
             }
         }
     }
-    auto end = ftello64(mStream.get());
+    auto end = ftello64(mStream.get()) + stream.writtenSize();
     mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
     printf("RAM: index size: %d bytes\n", int(end - start));
 #endif
 
+    mStream.write(stream.buffer().data(), stream.buffer().size());
     fseeko64(mStream.get(), 0, SEEK_SET);
     mStream.putBe64(uint64_t(mIndex.startPosInFile));
 }
@@ -208,8 +217,9 @@ void RamSaver::writePage(const QueuedPageInfo& pi,
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     page.sizeOnDisk = dataSize;
-    page.filePos = int64_t(ftello64(mStream.get()));
-    mStream.write(dataPtr, size_t(dataSize));
+    page.filePos =
+            mCurrentStreamPos.fetch_add(dataSize, std::memory_order_relaxed);
+    base::pwrite(mStreamFd, dataPtr, size_t(dataSize), page.filePos);
 }
 
 }  // namespace snapshot
