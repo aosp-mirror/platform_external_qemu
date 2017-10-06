@@ -750,39 +750,8 @@ glm::mat4 CoreProfileEngine::getModelviewMatrix() const {
     return mModelviewMatrices.back();
 }
 
-void CoreProfileEngine::drawArrays(GLenum type, GLint first, GLsizei count) {
+void CoreProfileEngine::preDrawTextureUnitEmulation() {
     auto& gl = GLEScontext::dispatcher();
-
-    glm::mat4 currProjMatrix = getProjMatrix();
-    glm::mat4 currModelviewMatrix = getModelviewMatrix();
-
-    gl.glBindVertexArray(m_geometryDrawState.vao);
-    gl.glUseProgram(m_geometryDrawState.program);
-    gl.glUniformMatrix4fv(m_geometryDrawState.projMatrixLoc, 1, GL_FALSE, glm::value_ptr(currProjMatrix));
-    gl.glUniformMatrix4fv(m_geometryDrawState.modelviewMatrixLoc, 1, GL_FALSE, glm::value_ptr(currModelviewMatrix));
-
-    gl.glUniform1i(m_geometryDrawState.enableTextureLoc,
-                   isEnabled(GL_TEXTURE_2D) &&
-                   mCtx->isArrEnabled(GL_TEXTURE_COORD_ARRAY));
-    gl.glUniform1i(m_geometryDrawState.textureSamplerLoc, 0);
-
-    gl.glDrawArrays(type, first, count);
-
-    gl.glBindVertexArray(0);
-}
-
-void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
-    auto& gl = GLEScontext::dispatcher();
-
-    glm::mat4 currProjMatrix = getProjMatrix();
-    glm::mat4 currModelviewMatrix = getModelviewMatrix();
-
-    gl.glBindVertexArray(m_geometryDrawState.vao);
-    gl.glUseProgram(mShadeModel == GL_FLAT ?
-                    m_geometryDrawState.programFlat :
-                    m_geometryDrawState.program);
-    gl.glUniformMatrix4fv(m_geometryDrawState.projMatrixLoc, 1, GL_FALSE, glm::value_ptr(currProjMatrix));
-    gl.glUniformMatrix4fv(m_geometryDrawState.modelviewMatrixLoc, 1, GL_FALSE, glm::value_ptr(currModelviewMatrix));
 
     gl.glUniform1i(m_geometryDrawState.enableTextureLoc,
                    isEnabled(GL_TEXTURE_2D) &&
@@ -790,12 +759,9 @@ void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, co
     gl.glUniform1i(m_geometryDrawState.textureSamplerLoc, mCurrTextureUnit * 2);
     gl.glUniform1i(m_geometryDrawState.textureCubeSamplerLoc, mCurrTextureUnit * 2 + 1);
 
-    bool cubeMapTexUnitEmulation = false;
-    GLuint cubeMapTexId = 0;
     if (auto cubeMapTex = android::base::find(mCubeMapBoundTextures, mCurrTextureUnit)) {
         if (*cubeMapTex) {
-            cubeMapTexId = *cubeMapTex;
-            cubeMapTexUnitEmulation = true;
+            GLuint cubeMapTexId = *cubeMapTex;
             gl.glActiveTexture(GL_TEXTURE0 + mCurrTextureUnit * 2);
             gl.glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
             gl.glActiveTexture(GL_TEXTURE0 + mCurrTextureUnit * 2 + 1);
@@ -812,16 +778,66 @@ void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, co
     }
 
     gl.glUniform1i(m_geometryDrawState.textureEnvModeLoc, currTextureEnvMode());
+}
 
-    gl.glDrawElements(mode, count, type, (GLvoid*)0);
+void CoreProfileEngine::postDrawTextureUnitEmulation() {
+    auto& gl = GLEScontext::dispatcher();
 
-    gl.glBindVertexArray(0);
+    GLuint cubeMapTexId = 0;
 
-    if (cubeMapTexUnitEmulation) {
+    if (auto cubeMapTex = android::base::find(mCubeMapBoundTextures, mCurrTextureUnit)) {
+        cubeMapTexId = *cubeMapTex;
+    }
+
+    if (cubeMapTexId) {
         gl.glActiveTexture(GL_TEXTURE0 + mCurrTextureUnit * 2);
         gl.glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexId);
         gl.glActiveTexture(GL_TEXTURE0 + mCurrTextureUnit * 2 + 1);
         gl.glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         gl.glActiveTexture(GL_TEXTURE0 + mCurrTextureUnit * 2);
     }
+}
+
+void CoreProfileEngine::preDrawVertexSetup() {
+    auto& gl = GLEScontext::dispatcher();
+
+    glm::mat4 currProjMatrix = getProjMatrix();
+    glm::mat4 currModelviewMatrix = getModelviewMatrix();
+
+    gl.glBindVertexArray(m_geometryDrawState.vao);
+    gl.glUseProgram(mShadeModel == GL_FLAT ?
+                    m_geometryDrawState.programFlat :
+                    m_geometryDrawState.program);
+    gl.glUniformMatrix4fv(m_geometryDrawState.projMatrixLoc, 1, GL_FALSE, glm::value_ptr(currProjMatrix));
+    gl.glUniformMatrix4fv(m_geometryDrawState.modelviewMatrixLoc, 1, GL_FALSE, glm::value_ptr(currModelviewMatrix));
+}
+
+void CoreProfileEngine::postDrawVertexSetup() {
+    auto& gl = GLEScontext::dispatcher();
+
+    gl.glBindVertexArray(0);
+}
+
+void CoreProfileEngine::drawArrays(GLenum type, GLint first, GLsizei count) {
+    auto& gl = GLEScontext::dispatcher();
+
+    preDrawVertexSetup();
+    preDrawTextureUnitEmulation();
+
+    gl.glDrawArrays(type, first, count);
+
+    postDrawVertexSetup();
+    postDrawTextureUnitEmulation();
+}
+
+void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
+    auto& gl = GLEScontext::dispatcher();
+
+    preDrawVertexSetup();
+    preDrawTextureUnitEmulation();
+
+    gl.glDrawElements(mode, count, type, (GLvoid*)0);
+
+    postDrawVertexSetup();
+    postDrawTextureUnitEmulation();
 }

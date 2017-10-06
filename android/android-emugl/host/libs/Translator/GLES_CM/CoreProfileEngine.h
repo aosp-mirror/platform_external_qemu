@@ -87,6 +87,12 @@ public:
     void setupArrayForDraw(GLenum arrayType, GLESpointer* p, GLint first, GLsizei count, bool isIndexed, GLenum indicesType, const GLvoid* indices);
     void bindTextureWithTextureUnitEmulation(GLenum target, GLuint texture, GLuint globalTexName);
 
+    void preDrawTextureUnitEmulation();
+    void postDrawTextureUnitEmulation();
+
+    void preDrawVertexSetup();
+    void postDrawVertexSetup();
+
     // GLES 1 API (deprecated + incompatible with core only)
 
     void enable(GLenum cap);
