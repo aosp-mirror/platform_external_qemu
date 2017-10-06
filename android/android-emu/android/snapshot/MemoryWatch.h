@@ -35,9 +35,11 @@ public:
 
     using AccessCallback = std::function<void(void*)>;
     using IdleCallback = std::function<IdleCallbackResult()>;
+    using DirtyCallback = std::function<void(void*)>;
 
     MemoryAccessWatch(AccessCallback&& accessCallback,
-                      IdleCallback&& idleCallback);
+                      IdleCallback&& idleCallback,
+                      DirtyCallback&& dirtyCallback);
 
     ~MemoryAccessWatch();
 

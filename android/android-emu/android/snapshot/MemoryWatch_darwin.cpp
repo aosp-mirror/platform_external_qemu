@@ -37,10 +37,12 @@ static MemoryAccessWatch* sWatch = nullptr;
 class MemoryAccessWatch::Impl {
 public:
     Impl(MemoryAccessWatch::AccessCallback accessCallback,
-         MemoryAccessWatch::IdleCallback idleCallback) :
+         MemoryAccessWatch::IdleCallback idleCallback,
+         MemoryAccessWatch::DirtyCallback dirtyCallback) :
         mAccel(GetCurrentCpuAccelerator()),
         mAccessCallback(accessCallback),
         mIdleCallback(idleCallback),
+        mDirtyCallback(dirtyCallback),
         mSegvHandler(MacDoAccessCallback),
         mBackgroundLoadingThread([this]() { bgLoaderWorker(); }) {
     }
@@ -50,7 +52,9 @@ public:
     }
 
     static void MacDoAccessCallback(void* ptr) {
+        // Assume all host->guest RAM accesses are dirtying.
         sWatch->mImpl->mAccessCallback(ptr);
+        sWatch->mImpl->mDirtyCallback(ptr);
     }
 
     static IdleCallbackResult MacIdlePageCallback() {
@@ -107,9 +111,9 @@ public:
                 // Restore the mapping because we might have re-mapped above.
                 if (remapNeeded) {
                     hv_vm_unmap(gpa, length);
-                    hv_vm_map(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                    hv_vm_map(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_EXEC);
                 } else {
-                    hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                    hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_EXEC);
                 }
             }
         }
@@ -152,6 +156,7 @@ public:
     CpuAccelerator mAccel;
     MemoryAccessWatch::AccessCallback mAccessCallback;
     MemoryAccessWatch::IdleCallback mIdleCallback;
+    MemoryAccessWatch::DirtyCallback mDirtyCallback;
     MacSegvHandler mSegvHandler;
     base::FunctorThread mBackgroundLoadingThread;
 
@@ -167,9 +172,11 @@ bool MemoryAccessWatch::isSupported() {
 }
 
 MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
-                                     IdleCallback&& idleCallback) :
+                                     IdleCallback&& idleCallback,
+                                     DirtyCallback&& dirtyCallback) :
     mImpl(isSupported() ? new Impl(std::move(accessCallback),
-                                   std::move(idleCallback)) : nullptr) {
+                                   std::move(idleCallback),
+                                   std::move(dirtyCallback)) : nullptr) {
     if (isSupported()) {
         sWatch = this;
     }
