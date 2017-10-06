@@ -269,12 +269,16 @@ void GLESv2Context::postLoadRestoreCtx() {
                     const std::vector<BufferBinding>& bufferBindings) {
                     for (unsigned int i = 0; i < bufferBindings.size(); i++) {
                         const BufferBinding& bd = bufferBindings[i];
-                        if (!bd.size) return; // avoid GL_INVALID_VALUE
                         GLuint globalName = this->shareGroup()->getGlobalName(
                                 NamedObjectType::VERTEXBUFFER,
                                 bd.buffer);
-                        this->dispatcher().glBindBufferRange(target,
-                                i, globalName, bd.offset, bd.size);
+                        if (bd.isBindBase) {
+                            this->dispatcher().glBindBufferBase(target,
+                                    i, globalName);
+                        } else {
+                            this->dispatcher().glBindBufferRange(target,
+                                    i, globalName, bd.offset, bd.size);
+                        }
                     }
                 };
         bindBufferRangeFunc(GL_TRANSFORM_FEEDBACK_BUFFER,

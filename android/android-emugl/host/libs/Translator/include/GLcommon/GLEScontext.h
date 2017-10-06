@@ -110,6 +110,7 @@ struct BufferBinding {
     GLsizeiptr size = 0;
     GLintptr stride = 0;
     GLuint divisor = 0;
+    bool isBindBase = false;
     void onLoad(android::base::Stream* stream);
     void onSave(android::base::Stream* stream) const;
 };
@@ -225,7 +226,8 @@ public:
                                                   GLint* internalformat_out, GLenum* format_out);
 
     void bindBuffer(GLenum target,GLuint buffer);
-    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride = 0);
+    void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
+        GLintptr offset, GLsizeiptr size, GLintptr stride = 0, bool isBindBase = false);
     void bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer);
     void unbindBuffer(GLuint buffer);
     bool isBuffer(GLuint buffer);
