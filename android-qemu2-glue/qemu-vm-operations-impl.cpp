@@ -317,8 +317,12 @@ static void set_snapshot_callbacks(void* opaque,
         sSnapshotCallbacksOpaque = opaque;
         qemu_set_snapshot_callbacks(&sQemuSnapshotCallbacks);
         qemu_set_ram_load_callback([](void* hostRam, uint64_t size) {
-            sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam,
-                                              size);
+            sSnapshotCallbacks.ramOps.loadRam(
+                sSnapshotCallbacksOpaque, hostRam, size);
+        });
+        qemu_set_ram_dirty_callback([](void* hostRam, uint64_t size) {
+            sSnapshotCallbacks.ramOps.dirtyRam(
+                sSnapshotCallbacksOpaque, hostRam, size);
         });
         set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
         migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
