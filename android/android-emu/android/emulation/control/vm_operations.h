@@ -55,8 +55,12 @@ typedef struct {
                      int32_t size);
     int (*savingComplete)(void* opaque);
     void (*loadRam)(void* opaque,
+                    int accessType,
                     void* hostRamPtr,
                     uint64_t size);
+    void (*dirtyRam)(void* opaque,
+                     void* hostRamPtr,
+                     uint64_t size);
 } SnapshotRamCallbacks;
 
 typedef struct {

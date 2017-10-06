@@ -457,6 +457,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/Loader.cpp \
     android/snapshot/MemoryWatch_common.cpp \
     android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
+    android/snapshot/PageMap.cpp \
     android/snapshot/PathUtils.cpp \
     android/snapshot/Hierarchy.cpp \
     android/snapshot/Quickboot.cpp \
@@ -765,6 +766,7 @@ LOCAL_SRC_FILES := \
   android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \
   android/qt/qt_setup_unittest.cpp \
+  android/snapshot/PageMap_unittest.cpp \
   android/telephony/gsm_unittest.cpp \
   android/telephony/modem_unittest.cpp \
   android/telephony/sms_unittest.cpp \

@@ -393,9 +393,13 @@ static void set_snapshot_callbacks(void* opaque,
         sSnapshotCallbacks = *callbacks;
         sSnapshotCallbacksOpaque = opaque;
         qemu_set_snapshot_callbacks(&sQemuSnapshotCallbacks);
-        qemu_set_ram_load_callback([](void* hostRam, uint64_t size) {
-            sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam,
-                                              size);
+        qemu_set_ram_load_callback([](int src, void* hostRam, uint64_t size) {
+            sSnapshotCallbacks.ramOps.loadRam(
+                sSnapshotCallbacksOpaque, src, hostRam, size);
+        });
+        qemu_set_ram_dirty_callback([](void* hostRam, uint64_t size) {
+            sSnapshotCallbacks.ramOps.dirtyRam(
+                sSnapshotCallbacksOpaque, hostRam, size);
         });
 
         if (android::GetCurrentCpuAccelerator() ==

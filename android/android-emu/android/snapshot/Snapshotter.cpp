@@ -205,7 +205,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                  return snapshot->mSaver->ramSaver().hasError() ? -1 : 0;
              },
              // loadRam
-             [](void* opaque, void* hostRamPtr, uint64_t size) {
+             [](void* opaque, int accessType, void* hostRamPtr, uint64_t size) {
                  auto snapshot = static_cast<Snapshotter*>(opaque);
 
                  auto& loader = snapshot->mLoader;
@@ -215,10 +215,24 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
 
                  auto& ramLoader = loader->ramLoader();
                  if (ramLoader.onDemandEnabled() &&
-                     !ramLoader.onDemandLoadingComplete()) {
-                     ramLoader.loadRam(hostRamPtr, size);
+                     (ramLoader.isDirtyTracking() ||
+                      !ramLoader.onDemandLoadingComplete())) {
+                     ramLoader.loadRam(
+                         (MemoryAccessWatch::AccessType)accessType,
+                         hostRamPtr, size);
                  }
-             }}};
+             },
+             // dirtyRam
+             [](void* opaque, void* hostRamPtr, uint64_t size) {
+                 auto snapshot = static_cast<Snapshotter*>(opaque);
+
+                 auto& loader = snapshot->mLoader;
+                 if (!loader || loader->status() != OperationStatus::Ok) return;
+
+                 auto& ramLoader = loader->ramLoader();
+                 ramLoader.dirtyRam(hostRamPtr, size);
+             }
+            }};
 
     assert(vmOperations.setSnapshotCallbacks);
     mVmOperations = vmOperations;

@@ -259,7 +259,6 @@ public:
 
             // Only unprotect / callback for registered ranges
             if (macHandler->isRegistered(faultpage)) {
-                mprotect(faultpage, 4096, PROT_READ | PROT_WRITE | PROT_EXEC);
                 accessCallback(faultpage);
                 build_reply(&current_reply, &current_request, KERN_SUCCESS);
                 must_send(&current_reply.Head);

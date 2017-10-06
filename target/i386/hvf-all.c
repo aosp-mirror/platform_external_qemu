@@ -958,12 +958,18 @@ again:
 #error
 #endif
                 if (slot) {
+                    bool read = exit_qual & EPT_VIOLATION_DATA_READ;
+                    bool write = exit_qual & EPT_VIOLATION_DATA_WRITE;
                     pthread_rwlock_wrlock(&mem_lock);
                     bool found = false;
                     void* hva = hvf_gpa2hva(gpa & ~0xfff, &found);
                     pthread_rwlock_unlock(&mem_lock);
                     if (found) {
-                        qemu_ram_load(hva, 4096);
+                        qemu_ram_load(0 /* guest */, hva, 4096);
+                        if (write) {
+                            qemu_ram_dirty(hva, 4096);
+                            hv_vm_protect(gpa & ~0xfff, 4096, HV_MEMORY_WRITE | HV_MEMORY_READ | HV_MEMORY_EXEC);
+                        }
                     }
                 }
                 break;

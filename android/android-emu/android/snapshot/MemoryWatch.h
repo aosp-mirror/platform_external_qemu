@@ -42,24 +42,37 @@ namespace snapshot {
 
 class MemoryAccessWatch {
 public:
+    // The source and policy of the access, which can be important
+    // for dirty page tracking on non-Linux systems:
+    enum class AccessType {
+        Guest = 0, // directly from hypervisor
+        HostOnceOnly = 1, // from host, and unsafe to
+                          // delay any more for dirty tracking
+                          // (immediately dirty)
+        Host = 2, // from host, safe to delay for dirty tracking
+    };
     static bool isSupported();
+    static bool dirtyTrackingSupported();
 
     enum class IdleCallbackResult {
         RunAgain, Wait, AllDone
     };
 
-    using AccessCallback = std::function<void(void*)>;
+    using AccessCallback = std::function<void(AccessType, void*)>;
     using IdleCallback = std::function<IdleCallbackResult()>;
+    using DirtyCallback = std::function<void(void*)>;
 
     MemoryAccessWatch(AccessCallback&& accessCallback,
-                      IdleCallback&& idleCallback);
+                      IdleCallback&& idleCallback,
+                      DirtyCallback&& dirtyCallback);
 
     ~MemoryAccessWatch();
 
     bool valid() const;
     bool registerMemoryRange(void* start, size_t length);
     void doneRegistering();
-    bool fillPage(void* ptr, size_t length, const void* data,
+    bool fillPage(bool loadedAlready,
+                  AccessType accessType, void* ptr, size_t length, const void* data,
                   bool isQuickboot);
 
     void join();

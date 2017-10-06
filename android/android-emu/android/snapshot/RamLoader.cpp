@@ -50,15 +50,23 @@ RamLoader::RamLoader(base::StdioStream&& stream,
     }
 
     if (MemoryAccessWatch::isSupported()) {
-        mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
-                             [this]() { return backgroundPageLoad(); });
-        if (mAccessWatch->valid()) {
-            mOnDemandEnabled = true;
-        } else {
+        mAccessWatch.emplace(
+            [this](MemoryAccessWatch::AccessType accessType, void* ptr)
+                { loadRamPage(accessType, ptr); },
+            [this]() { return backgroundPageLoad(); },
+            [this](void* ptr) { dirtyRam(ptr, mPageSize); });
+         if (mAccessWatch->valid()) {
+             mOnDemandEnabled = true;
+         } else {
             derror("Failed to initialize memory access watcher, falling back "
                    "to synchronous RAM loading");
             mAccessWatch.clear();
         }
+    }
+
+    if (MemoryAccessWatch::dirtyTrackingSupported()) {
+        mDirtyTrackingSupported = true;
+        startDirtyTracking();
     }
 }
 
@@ -98,17 +106,51 @@ void RamLoader::applyRamBlockStructure(const RamBlockStructure& blockStructure) 
     }
 }
 
-void RamLoader::loadRam(void* ptr, uint64_t size) {
+void RamLoader::loadRam(MemoryAccessWatch::AccessType accessType, void* ptr, uint64_t size) {
     uint32_t num_pages = (size + mPageSize - 1) / mPageSize;
     char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
     for (uint32_t i = 0; i < num_pages; i++) {
-        loadRamPage(pagePtr + i * mPageSize);
+        loadRamPage(accessType, pagePtr + i * mPageSize);
+    }
+}
+
+void RamLoader::dirtyRam(void* ptr, uint64_t size) {
+    if (mDirtyTracking) {
+        uint32_t num_pages = (size + mPageSize - 1) / mPageSize;
+        char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
+        for (uint32_t i = 0; i < num_pages; i++) {
+            auto it = blockMutable(ptr);
+            if (it != mIndex.blocks.end()) {
+                it->dirtyMap.setByIndex(
+                    pageIndex(*it, pagePtr + i * mPageSize), true);
+            }
+        }
+    }
+}
+
+bool RamLoader::isPageDirty(void* ptr) {
+    if (!mDirtyTrackingSupported) return true;
+    auto it = block(ptr);
+    auto index = pageIndex(*it, ptr);
+    return it->dirtyMap.lookupByIndex(index);
+}
+
+void RamLoader::restartDirtyTracking() {
+    if (!mDirtyTrackingSupported) return;
+
+    for (auto& block : mIndex.blocks) {
+        block.dirtyMap.reset();
     }
 }
 
 void RamLoader::registerBlock(const RamBlock& block) {
     mPageSize = block.pageSize;
-    mIndex.blocks.push_back({block, {}, {}});
+    mIndex.blocks.push_back(
+        { block, {}, {},
+          // dirtyMap
+          mDirtyTrackingSupported ?
+              PageMap(block.hostPtr, (uint64_t)block.totalSize, block.pageSize) :
+              PageMap() });
 }
 
 bool RamLoader::start(bool isQuickboot) {
@@ -181,6 +223,16 @@ const RamLoader::Page* RamLoader::findPage(int blockIndex,
 }
 
 void RamLoader::interruptReading() {
+#if SNAPSHOT_PROFILE > 1
+    uint64_t totalDirty = 0;
+    for (const auto& b : mIndex.blocks) {
+        totalDirty += b.dirtyMap.count();
+    }
+    printf("%s: dirty page count %llu (%f mb)\n", __func__,
+           (unsigned long long)totalDirty,
+           (float)(totalDirty * mPageSize) /
+           (float)(1024 * 1024));
+#endif
     mLoadingCompleted.store(true, std::memory_order_relaxed);
     mReadDataQueue.stop();
     mReadingQueue.stop();
@@ -329,6 +381,7 @@ bool RamLoader::registerPageWatches() {
             return false;
         }
     }
+
     return true;
 }
 
@@ -347,24 +400,50 @@ static bool isPowerOf2(Num num) {
     return !(num & (num - 1));
 }
 
-RamLoader::Page& RamLoader::page(void* ptr) {
-    const auto blockIt = std::find_if(
+RamLoader::FileIndex::Blocks::const_iterator RamLoader::block(void* ptr) const {
+    auto blockIt = std::find_if(
             mIndex.blocks.begin(), mIndex.blocks.end(),
             [ptr](const FileIndex::Block& b) {
                 return ptr >= b.ramBlock.hostPtr &&
                        ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
             });
-    assert(blockIt != mIndex.blocks.end());
-    assert(ptr >= blockIt->ramBlock.hostPtr);
-    assert(ptr < blockIt->ramBlock.hostPtr + blockIt->ramBlock.totalSize);
-    assert(blockIt->pagesBegin != blockIt->pagesEnd);
+    return blockIt;
+}
 
-    assert(isPowerOf2(blockIt->ramBlock.pageSize));
+RamLoader::FileIndex::Blocks::iterator RamLoader::blockMutable(void* ptr) {
+    auto blockIt = std::find_if(
+            mIndex.blocks.begin(), mIndex.blocks.end(),
+            [ptr](const FileIndex::Block& b) {
+                return ptr >= b.ramBlock.hostPtr &&
+                       ptr < b.ramBlock.hostPtr + b.ramBlock.totalSize;
+            });
+    return blockIt;
+}
+
+size_t RamLoader::pageIndex(const FileIndex::Block& block,
+                            const void* ptr, bool* found) const {
+    assert(ptr >= block.ramBlock.hostPtr);
+    assert(ptr < block.ramBlock.hostPtr + block.ramBlock.totalSize);
+    assert(block.pagesBegin != block.pagesEnd);
+
+    assert(isPowerOf2(block.ramBlock.pageSize));
     auto pageStart = reinterpret_cast<uint8_t*>(
-            (uintptr_t(ptr)) & uintptr_t(~(blockIt->ramBlock.pageSize - 1)));
-    auto pageIndex = (pageStart - blockIt->ramBlock.hostPtr) /
-                     blockIt->ramBlock.pageSize;
-    auto pageIt = blockIt->pagesBegin + pageIndex;
+            (uintptr_t(ptr)) & uintptr_t(~(block.ramBlock.pageSize - 1)));
+    auto pageIndex = (pageStart - block.ramBlock.hostPtr) /
+                     block.ramBlock.pageSize;
+    if (found) *found = true;
+    return pageIndex;
+}
+
+RamLoader::Page& RamLoader::page(void* ptr) {
+    const auto blockIt = block(ptr);
+    assert(blockIt != mIndex.blocks.end());
+
+    bool found = false;
+    auto index = pageIndex(*blockIt, ptr, &found);
+    assert(found);
+
+    auto pageIt = blockIt->pagesBegin + index;
     assert(pageIt != blockIt->pagesEnd);
     assert(ptr >= pagePtr(*pageIt));
     assert(ptr < pagePtr(*pageIt) + pageSize(*pageIt));
@@ -450,7 +529,9 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::backgroundPageLoad() {
 MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
         RamLoader::Page* page) {
     if (page) {
-        fillPageData(page);
+        fillPageData(MemoryAccessWatch::AccessType::Host, page);
+        // dont dirty!
+
         delete[] page->data;
         page->data = nullptr;
         // If we've loaded a page then this function took quite a while
@@ -465,7 +546,7 @@ MemoryAccessWatch::IdleCallbackResult RamLoader::fillPageInBackground(
     }
 }
 
-void RamLoader::loadRamPage(void* ptr) {
+void RamLoader::loadRamPage(MemoryAccessWatch::AccessType accessType, void* ptr) {
     // It's possible for us to try to RAM load
     // things that are not registered in the index
     // (like from qemu_iovec_init_external).
@@ -484,7 +565,7 @@ void RamLoader::loadRamPage(void* ptr) {
     Page& page = this->page(ptr);
     uint8_t buf[kDefaultPageSize];
     readDataFromDisk(&page, ARRAY_SIZE(buf) >= pageSize(page) ? buf : nullptr);
-    fillPageData(&page);
+    fillPageData(accessType, &page);
     if (page.data != buf) {
         delete[] page.data;
     }
@@ -574,7 +655,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
     return true;
 }
 
-void RamLoader::fillPageData(Page* pagePtr) {
+void RamLoader::fillPageData(MemoryAccessWatch::AccessType accessType, Page* pagePtr) {
     Page& page = *pagePtr;
     auto state = uint8_t(State::Read);
     if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling),
@@ -583,6 +664,12 @@ void RamLoader::fillPageData(Page* pagePtr) {
             base::System::get()->yield();
             state = page.state.load(std::memory_order_relaxed);
         }
+        if (mAccessWatch) {
+            mAccessWatch->fillPage(
+                true /* page must be filled already */,
+                accessType, this->pagePtr(page), pageSize(page),
+                page.data, mIsQuickboot);
+        }
         return;
     }
 
@@ -590,8 +677,10 @@ void RamLoader::fillPageData(Page* pagePtr) {
     printf("%s: loading page %p\n", __func__, this->pagePtr(page));
 #endif
     if (mAccessWatch) {
-        bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
-                                          page.data, mIsQuickboot);
+        bool res = mAccessWatch->fillPage(
+                       false /* page cannot be filled yet */,
+                       accessType, this->pagePtr(page), pageSize(page),
+                       page.data, mIsQuickboot);
         if (!res) {
             mHasError = true;
         }
