@@ -429,7 +429,7 @@ void VirtualSensorsPage::onDragStarted() {
 }
 
 void VirtualSensorsPage::onDragStopped() {
-    // call position changed one last time to zero accelerations.
+    // update the model one last time to zero accelerations.
     syncUIAndUpdateModel();
     mAccelerationTimer.stop();
 }

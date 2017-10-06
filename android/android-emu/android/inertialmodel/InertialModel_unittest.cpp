@@ -117,7 +117,7 @@ TEST(InertialModel, ConvergeToRotation) {
     InertialModel inertialModel;
     glm::quat targetRotation(glm::vec3(90.f, 90.f, 90.f));
     inertialModel.setTargetRotation(targetRotation);
-    // After 1 second, check that we are close to the target position.
+    // After 1 second, check that we are close to the target rotation.
     mTestSystem.setUnixTime(1);
     glm::quat currentRotation(inertialModel.getRotation());
     EXPECT_NEAR(targetRotation.w, currentRotation.w, 0.01f);
