@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "0ba5e0df_96def4b4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-06T20:21:24Z",
+      "side": 1,
+      "message": "I see, thanks for the clarification!\n\nIt seems worth it then to also keep the size in sync with glBufferData calls, because the spec language on glBindBufferRange also talks about when the binding is used:\n\n\"Regardless of the size specified with BindBufferRange, the GL will never read\nor write beyond the end of a bound buffer. In some cases this constraint may result\nin visibly different behavior when a buffer overflow would otherwise result\"\n\nSo the snapshot should not save the full size of the buffer, rather min(binding size, current buffer size).",
+      "parentUuid": "cc69a53c_75caa2be",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 19,
+        "endChar": 34
+      },
+      "revId": "befffb4c46a5fe017513f095d0b6907a15e3aaa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "599bb563_39692799",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 1
@@ -107,6 +131,30 @@
       "writtenOn": "2017-10-06T19:59:51Z",
       "side": 1,
       "message": "will do a CTS-dEQP",
+      "parentUuid": "ff98cc67_a5f4d8f8",
+      "range": {
+        "startLine": 1145,
+        "startChar": 0,
+        "endLine": 1145,
+        "endChar": 30
+      },
+      "revId": "befffb4c46a5fe017513f095d0b6907a15e3aaa1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3de56704_2b48103c",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1145,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-06T20:21:24Z",
+      "side": 1,
+      "message": "Currently it\u0027s not, but it makes sense to me that bufferBinding.size should mean the size of the buffer binding, and not have size 0 collide with a \"base\" binding.\n\nHow about we just have a new field for whether or not it was a base or range bind?",
       "parentUuid": "ff98cc67_a5f4d8f8",
       "range": {
         "startLine": 1145,
