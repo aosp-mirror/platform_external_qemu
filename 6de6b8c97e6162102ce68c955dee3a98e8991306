@@ -2,6 +2,144 @@
   "comments": [
     {
       "key": {
+        "uuid": "ad3ec325_b810f3b2",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-07T02:59:51Z",
+      "side": 1,
+      "message": "Move these to member-initialization in header file.  Specifically for the mCurrentPosition case, there is a simpler constructor you can use: mCurrentPosition(0.0f)",
+      "range": {
+        "startLine": 24,
+        "startChar": 6,
+        "endLine": 25,
+        "endChar": 40
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3f3ac06e_cdfa878b",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-07T02:59:51Z",
+      "side": 1,
+      "message": "const (or constexpr if possible).  I recommend putting const on any variable that doesn\u0027t get overwritten.",
+      "range": {
+        "startLine": 76,
+        "startChar": 4,
+        "endLine": 76,
+        "endChar": 13
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a1a98c48_15288287",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-07T02:59:51Z",
+      "side": 1,
+      "message": "Change to C++-style cast",
+      "range": {
+        "startLine": 149,
+        "startChar": 8,
+        "endLine": 149,
+        "endChar": 18
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "baab45b1_a04ff393",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-07T02:59:51Z",
+      "side": 1,
+      "message": "Put this into a namespace",
+      "range": {
+        "startLine": 39,
+        "startChar": 6,
+        "endLine": 39,
+        "endChar": 19
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3b477bc_0a7610e3",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-07T02:59:51Z",
+      "side": 1,
+      "message": "It looks like default-constructed glm type are uninitialized, can you add member initialization to zero out all of these on construction, and maybe a test to verify the initial state?",
+      "range": {
+        "startLine": 78,
+        "startChar": 4,
+        "endLine": 86,
+        "endChar": 25
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa405521_73395480",
+        "filename": "android/android-emu/android/inertialmodel/InertialModel.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-07T02:59:51Z",
+      "side": 1,
+      "message": "Nit: Initialize this to nullptr using member initialization, remove from compiler initializer list (the one I saw just sets it to nullptr anyway)",
+      "range": {
+        "startLine": 88,
+        "startChar": 32,
+        "endLine": 88,
+        "endChar": 45
+      },
+      "revId": "6de6b8c97e6162102ce68c955dee3a98e8991306",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "28700e29_44eb209a",
         "filename": "android/android-emu/android/inertialmodel/InertialModel_unittest.cpp",
         "patchSetId": 9
