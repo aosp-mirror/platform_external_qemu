@@ -22,6 +22,30 @@
       "revId": "f3e515bfb161597803029a1fa65facdd2c273a4d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c87a8fbf_1278c64a",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 1123,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-07T00:19:16Z",
+      "side": 1,
+      "message": "Yes, it is already doing that (glBindBufferBase calls the overload of bindIndexedBuffer which sets this value to true.)",
+      "parentUuid": "f00b3298_e18d00e1",
+      "range": {
+        "startLine": 1123,
+        "startChar": 57,
+        "endLine": 1123,
+        "endChar": 74
+      },
+      "revId": "f3e515bfb161597803029a1fa65facdd2c273a4d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
