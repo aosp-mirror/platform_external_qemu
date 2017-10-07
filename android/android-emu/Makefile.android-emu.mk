@@ -247,6 +247,8 @@ LOCAL_CFLAGS := \
     $(ANDROID_EMU_CFLAGS) \
 
 LOCAL_C_INCLUDES := \
+    $(EMUGL_INCLUDES) \
+    $(EMUGL_SRCDIR)/shared \
     $(EMULATOR_COMMON_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(EMUGL_INCLUDES) \
@@ -283,9 +285,10 @@ LOCAL_SRC_FILES := \
     android/base/threads/internal/ParallelTaskBase.cpp \
     android/boot-properties.c \
     android/camera/camera-common.cpp \
+    android/camera/camera-format-converters.c \
     android/camera/camera-list.cpp \
     android/camera/camera-service.c \
-    android/camera/camera-format-converters.c \
+    android/camera/camera-virtualscene.cpp \
     android/car.cpp \
     android/cmdline-option.cpp \
     android/CommonReportedInfo.cpp \
@@ -464,6 +467,7 @@ LOCAL_SRC_FILES := \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/looper.cpp \
+    android/virtualscene/VirtualSceneRenderer.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \

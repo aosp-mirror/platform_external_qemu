@@ -1742,9 +1742,11 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         /* Validate parameter. */
         if (memcmp(opts->camera_back, "webcam", 6) &&
             strcmp(opts->camera_back, "emulated") &&
+            strcmp(opts->camera_back, "virtualscene") &&
             strcmp(opts->camera_back, "none")) {
             derror("Invalid value for -camera-back <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>', or 'none'\n",
+                   "Valid values are: 'emulated', 'webcam<N>', 'virtualscene', "
+                   "or 'none'\n",
                    opts->camera_back);
             return false;
         }

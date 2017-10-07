@@ -22,6 +22,7 @@
 
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
+#include "android/camera/camera-virtualscene.h"
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/boot-properties.h"
@@ -278,6 +279,44 @@ _camera_info_get_by_device_name(const char* device_name, CameraInfo* arr, int nu
  * CameraServiceDesc API
  *******************************************************************************/
 
+/* Initialize virtual scene camera record in camera service descriptor.
+ * Param:
+ *  csd - Camera service descriptor to initialize a record in.
+ */
+static void _virtualscenecamera_setup(CameraServiceDesc* csd) {
+    /* Array containing emulated camera frame dimensions
+     * expected by framework. */
+    static const CameraFrameDim kEmulateDims[] = {
+            {640, 480},
+            /* The following dimensions are required by the camera framework. */
+            {352, 288},
+            {320, 240},
+            {176, 144}};
+
+    csd->camera_info[csd->camera_count].frame_sizes =
+            (CameraFrameDim*)malloc(sizeof(kEmulateDims));
+    if (csd->camera_info[csd->camera_count].frame_sizes != NULL) {
+        csd->camera_info[csd->camera_count].frame_sizes_num =
+                sizeof(kEmulateDims) / sizeof(*kEmulateDims);
+        memcpy(csd->camera_info[csd->camera_count].frame_sizes, kEmulateDims,
+               sizeof(kEmulateDims));
+
+        csd->camera_info[csd->camera_count].display_name =
+                ASTRDUP("virtualscene");
+        csd->camera_info[csd->camera_count].device_name =
+                ASTRDUP("virtualscene");
+        csd->camera_info[csd->camera_count].camera_source = kVirtualScene;
+        csd->camera_info[csd->camera_count].inp_channel = 0;
+
+        csd->camera_info[csd->camera_count].pixel_format =
+                camera_virtualscene_preferred_format();
+        csd->camera_info[csd->camera_count].direction = ASTRDUP("back");
+        csd->camera_info[csd->camera_count].in_use = 0;
+    }
+
+    csd->camera_count++;
+}
+
 /* Initialized webcam emulation record in camera service descriptor.
  * Param:
  *  csd - Camera service descriptor to initialize a record in.
@@ -286,13 +325,11 @@ _camera_info_get_by_device_name(const char* device_name, CameraInfo* arr, int nu
  *  ci, ci_cnt - Array of webcam information for enumerated web cameras connected
  *      to the host.
  */
-static void
-_wecam_setup(CameraServiceDesc* csd,
-             const char* disp_name,
-             const char* dir,
-             CameraInfo* ci,
-             int ci_cnt)
-{
+static void _webcam_setup(CameraServiceDesc* csd,
+                          const char* disp_name,
+                          const char* dir,
+                          CameraInfo* ci,
+                          int ci_cnt) {
     /* Find webcam record in the list of enumerated web cameras. */
     CameraInfo* found = _camera_info_get_by_display_name(disp_name, ci, ci_cnt);
     if (found == NULL) {
@@ -304,6 +341,7 @@ _wecam_setup(CameraServiceDesc* csd,
 
     /* Save to the camera info array that will be used by the service. */
     camera_info_copy(&csd->camera_info[csd->camera_count], found);
+    csd->camera_info[csd->camera_count].camera_source = kWebcam;
     /* This camera is taken. */
     found->in_use = 1;
     /* Update direction parameter. */
@@ -325,40 +363,44 @@ _wecam_setup(CameraServiceDesc* csd,
 static void
 _camera_service_init(CameraServiceDesc* csd)
 {
-    CameraInfo ci[MAX_CAMERA] = {};
-    int connected_cnt;
-
     /* Enumerate camera devices connected to the host. */
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
 
-    /* Lets see if HW config uses web cameras. */
-    if (strncmp(android_hw->hw_camera_back, "webcam", 6) &&
-        strncmp(android_hw->hw_camera_front, "webcam", 6)) {
-        /* Web camera emulation is disabled. Skip enumeration of webcameras. */
-        return;
+    if (!strcmp(android_hw->hw_camera_back, "virtualscene")) {
+        /* Set up virtual scene camera emulation. */
+        _virtualscenecamera_setup(csd);
     }
 
-    /* Enumerate web cameras connected to the host. */
-    connected_cnt = camera_enumerate_devices(ci, MAX_CAMERA);
-    if (connected_cnt <= 0) {
-        /* Nothing is connected - nothing to emulate. */
-        return;
-    }
+    /* Lets see if HW config uses emulated cameras. */
+    if (!strncmp(android_hw->hw_camera_back, "webcam", 6) ||
+        !strncmp(android_hw->hw_camera_front, "webcam", 6)) {
+        int connected_cnt = 0;
+        CameraInfo ci[MAX_CAMERA] = {};
 
-    /* Set up back camera emulation. */
-    if (!strncmp(android_hw->hw_camera_back, "webcam", 6)) {
-        _wecam_setup(csd, android_hw->hw_camera_back, "back", ci, connected_cnt);
-    }
+        /* Enumerate web cameras connected to the host. */
+        connected_cnt = camera_enumerate_devices(ci, MAX_CAMERA);
+        if (connected_cnt <= 0) {
+            /* Nothing is connected - nothing to emulate. */
+            return;
+        }
 
-    /* Set up front camera emulation. */
-    if (!strncmp(android_hw->hw_camera_front, "webcam", 6)) {
-        _wecam_setup(csd, android_hw->hw_camera_front, "front", ci, connected_cnt);
-    }
+        /* Set up back camera emulation. */
+        if (!strncmp(android_hw->hw_camera_back, "webcam", 6)) {
+            _webcam_setup(csd, android_hw->hw_camera_back, "back", ci,
+                          connected_cnt);
+        }
 
-    int i;
-    for (i = 0; i < connected_cnt; ++i) {
-        camera_info_done(&ci[i]);
+        /* Set up front camera emulation. */
+        if (!strncmp(android_hw->hw_camera_front, "webcam", 6)) {
+            _webcam_setup(csd, android_hw->hw_camera_front, "front", ci,
+                          connected_cnt);
+        }
+
+        int i;
+        for (i = 0; i < connected_cnt; ++i) {
+            camera_info_done(&ci[i]);
+        }
     }
 }
 
@@ -606,6 +648,22 @@ struct CameraClient
     const CameraInfo*   camera_info;
     /* Emulated camera device descriptor. */
     CameraDevice*       camera;
+
+    CameraDevice* (*open)(const char* name, int inp_channel);
+    int (*start_capturing)(CameraDevice* cd,
+                           uint32_t pixel_format,
+                           int frame_width,
+                           int frame_height);
+    int (*stop_capturing)(CameraDevice* cd);
+    int (*read_frame)(CameraDevice* cd,
+                      ClientFrameBuffer* framebuffers,
+                      int fbs_num,
+                      float r_scale,
+                      float g_scale,
+                      float b_scale,
+                      float exp_comp);
+    void (*close)(CameraDevice* cd);
+
     /* Buffer allocated for video frames.
      * Note that memory allocated for this buffer
      * also contains preview framebuffer. */
@@ -647,7 +705,7 @@ _camera_client_free(CameraClient* cc)
         ((CameraInfo*)cc->camera_info)->in_use = 0;
     }
     if (cc->camera != NULL) {
-        camera_device_close(cc->camera);
+        cc->close(cc->camera);
     }
     if (cc->video_frame != NULL) {
         free(cc->video_frame);
@@ -731,6 +789,20 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
     ci->in_use = 1;
     cc->camera_info = ci;
 
+    if (ci->camera_source == kVirtualScene) {
+        cc->open = camera_virtualscene_open;
+        cc->start_capturing = camera_virtualscene_start_capturing;
+        cc->stop_capturing = camera_virtualscene_stop_capturing;
+        cc->read_frame = camera_virtualscene_read_frame;
+        cc->close = camera_virtualscene_close;
+    } else {
+        cc->open = camera_device_open;
+        cc->start_capturing = camera_device_start_capturing;
+        cc->stop_capturing = camera_device_stop_capturing;
+        cc->read_frame = camera_device_read_frame;
+        cc->close = camera_device_close;
+    }
+
     D("%s: Camera service is created for device '%s' using input channel %d",
       __FUNCTION__, cc->device_name, cc->inp_channel);
 
@@ -773,7 +845,8 @@ _camera_client_query_connect(CameraClient* cc, QemudClient* qc, const char* para
     }
 
     /* Open camera device. */
-    cc->camera = camera_device_open(cc->device_name, cc->inp_channel);
+    cc->camera = cc->open(cc->device_name, cc->inp_channel);
+
     if (cc->camera == NULL) {
         E("%s: Unable to open camera device '%s'", __FUNCTION__, cc->device_name);
         _qemu_client_reply_ko(qc, "Unable to open camera device.");
@@ -814,7 +887,7 @@ _camera_client_query_disconnect(CameraClient* cc,
     }
 
     /* Close camera device. */
-    camera_device_close(cc->camera);
+    cc->close(cc->camera);
     cc->camera = NULL;
 
     D("Camera device '%s' is now disconnected", cc->device_name);
@@ -1001,8 +1074,8 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
     cc->preview_frame = (uint16_t*)(cc->video_frame + cc->video_frame_size);
 
     /* Start the camera. */
-    if (camera_device_start_capturing(cc->camera, cc->camera_info->pixel_format,
-                                      cc->width, cc->height)) {
+    if (cc->start_capturing(cc->camera, cc->camera_info->pixel_format,
+                            cc->width, cc->height)) {
         E("%s: Cannot start camera '%s' for %.4s[%dx%d]: %s",
           __FUNCTION__, cc->device_name, (const char*)&cc->pixel_format,
           cc->width, cc->height, strerror(errno));
@@ -1036,7 +1109,7 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
     }
 
     /* Stop the camera. */
-    if (camera_device_stop_capturing(cc->camera)) {
+    if (cc->stop_capturing(cc->camera)) {
         E("%s: Cannot stop camera device '%s': %s",
           __FUNCTION__, cc->device_name, strerror(errno));
         _qemu_client_reply_ko(qc, "Cannot stop camera device");
@@ -1146,8 +1219,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* Capture new frame. */
     tick = _get_timestamp();
-    repeat = camera_device_read_frame(cc->camera, fbs, fbs_num,
-                                      r_scale, g_scale, b_scale, exp_comp);
+    repeat = cc->read_frame(cc->camera, fbs, fbs_num, r_scale, g_scale, b_scale,
+                            exp_comp);
 
     /* Note that there is no (known) way how to wait on next frame being
      * available, so we could dequeue frame buffer from the device only when we
@@ -1164,8 +1237,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
            (_get_timestamp() - tick) < 2000000LL) {
         /* Sleep for 10 millisec before repeating the attempt. */
         _camera_sleep(10);
-        repeat = camera_device_read_frame(cc->camera, fbs, fbs_num,
-                                          r_scale, g_scale, b_scale, exp_comp);
+        repeat = cc->read_frame(cc->camera, fbs, fbs_num, r_scale, g_scale,
+                                b_scale, exp_comp);
     }
     if (repeat == 1 && !cc->frames_cached) {
         /* Waited too long for the first frame. */
@@ -1346,8 +1419,8 @@ _camera_service_connect(void*          opaque,
     QemudClient*  client = NULL;
     CameraServiceDesc* csd = (CameraServiceDesc*)opaque;
 
-    D("%s: Connecting camera client '%s'",
-      __FUNCTION__, client_param ? client_param : "Factory");
+    D("%s: Connecting camera client '%s'", __FUNCTION__,
+      client_param ? client_param : "Factory");
     if (client_param == NULL || *client_param == '\0') {
         /* This is an emulated camera factory client. */
         client = qemud_client_new(serv, channel, client_param, csd,
@@ -1374,7 +1447,6 @@ void android_camera_service_init(void) {
     static int _inited = 0;
 
     if (!_inited) {
-
 #ifdef _WIN32
         // For Windows, initialize a separate camera thread.
         windows_camera_thread_init();
