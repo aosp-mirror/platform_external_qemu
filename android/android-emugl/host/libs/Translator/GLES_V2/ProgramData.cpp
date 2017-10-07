@@ -316,8 +316,8 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
         std::unordered_map<GLuint, GLuint> uniformBlocks;
         std::vector<std::string> transformFeedbacks;
         if (mGlesMajorVersion >= 3) {
-            collectUniformBlockInfo(ProgramName);
-            collectTransformFeedbackInfo(ProgramName);
+            uniformBlocks = collectUniformBlockInfo(ProgramName);
+            transformFeedbacks = collectTransformFeedbackInfo(ProgramName);
             GLEScontext::dispatcher().glGetProgramiv(ProgramName,
                     GL_TRANSFORM_FEEDBACK_BUFFER_MODE,
                     (GLint*)&mTransformFeedbackBufferMode);
