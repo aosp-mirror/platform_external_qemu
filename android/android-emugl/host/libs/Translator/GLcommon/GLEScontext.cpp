@@ -51,6 +51,7 @@ void BufferBinding::onLoad(android::base::Stream* stream) {
     size = stream->getBe32();
     stride = stream->getBe32();
     divisor = stream->getBe32();
+    isBindBase = stream->getByte();
 }
 
 void BufferBinding::onSave(android::base::Stream* stream) const {
@@ -59,6 +60,7 @@ void BufferBinding::onSave(android::base::Stream* stream) const {
     stream->putBe32(size);
     stream->putBe32(stride);
     stream->putBe32(divisor);
+    stream->putByte(isBindBase);
 }
 
 VAOState::VAOState(android::base::Stream* stream) {
@@ -1117,7 +1119,8 @@ void GLEScontext::bindBuffer(GLenum target,GLuint buffer) {
     }
 }
 
-void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size, GLintptr stride) {
+void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer,
+        GLintptr offset, GLsizeiptr size, GLintptr stride, bool isBindBase) {
     VertexAttribBindingVector* bindings = nullptr;
     switch (target) {
     case GL_TRANSFORM_FEEDBACK_BUFFER:
@@ -1144,12 +1147,13 @@ void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer, 
     bufferBinding.offset = offset;
     bufferBinding.size = size;
     bufferBinding.stride = stride;
+    bufferBinding.isBindBase = isBindBase;
 }
 
 void GLEScontext::bindIndexedBuffer(GLenum target, GLuint index, GLuint buffer) {
     GLint sz;
     getBufferSizeById(buffer, &sz);
-    bindIndexedBuffer(target, index, buffer, 0, sz);
+    bindIndexedBuffer(target, index, buffer, 0, sz, 0, true);
 }
 
 static void sClearIndexedBufferBinding(GLuint id, std::vector<BufferBinding>& bindings) {
@@ -1160,6 +1164,7 @@ static void sClearIndexedBufferBinding(GLuint id, std::vector<BufferBinding>& bi
             bindings[i].stride = 0;
             bindings[i].buffer = 0;
             bindings[i].divisor = 0;
+            bindings[i].isBindBase = false;
         }
     }
 }
