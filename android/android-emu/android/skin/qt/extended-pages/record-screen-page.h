@@ -12,6 +12,7 @@
 
 #include "ui_record-screen-page.h"
 #include <QTimer>
+#include <QThread>
 #include <QWidget>
 #include <memory>
 
@@ -19,12 +20,13 @@ struct QAndroidRecordScreenAgent;
 class RecordScreenPage : public QWidget {
     Q_OBJECT
 public:
-    enum class RecordState { Ready, Recording, Stopped };
+    enum class RecordState { Ready, Recording, Stopping, Stopped };
 
     explicit RecordScreenPage(QWidget* parent = 0);
     ~RecordScreenPage();
 
     void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
+    void updateTheme();
 
 signals:
 
@@ -33,6 +35,8 @@ private slots:
     void on_rec_recordButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
+    void stopRecordingStarted();
+    void stopRecordingFinished(bool success);
 
 public slots:
 
@@ -47,4 +51,20 @@ private:
     RecordState mState;
     QTimer mTimer;
     int mSec;  // number of elapsed seconds
+};
+
+class StopRecordingTask : public QObject {
+    Q_OBJECT
+public:
+    StopRecordingTask(const QAndroidRecordScreenAgent* agent);
+
+public slots:
+    void run();
+
+signals:
+    void started();
+    void finished(bool success);
+
+private:
+    const QAndroidRecordScreenAgent* mRecordScreenAgent;
 };
