@@ -197,6 +197,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
 }  // namespace snapshot
 
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
+    fprintf(stderr, "%s: call\n", __func__);
     if (mSaver && mSaver->snapshot().name() == name) {
         mSaver.clear();
     }
@@ -233,9 +234,20 @@ void Snapshotter::deleteSnapshot(const char* name) {
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     mCallback(Operation::Save, Stage::Start);
+    fprintf(stderr, "%s: clear loader\n", __func__);
+    if (mLoader) {
+        fprintf(stderr, "%s: create a differ\n", __func__);
+        mLoader.join();
+        mDiffer.emplace(name);
+        mDiffer->getDiffs(&(*mLoader));
+    }
     mLoader.clear();
     if (!mSaver || isComplete(*mSaver)) {
-        mSaver.emplace(name);
+        if (mDiffer) {
+            mSaver.emplace(name);
+        } else {
+            mSaver.emplace(name, *mDiffer);
+        }
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);
@@ -249,6 +261,7 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     mSaver->complete(res == 0);
     CrashReporter::get()->hangDetector().pause(false);
     mCallback(Operation::Save, Stage::End);
+    if (mDiffer) mDiffer.clear();
     return mSaver->status() != OperationStatus::Error;
 }
 
@@ -278,6 +291,7 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     mCallback(Operation::Load, Stage::End);
+    fprintf(stderr, "%s: call\n", __func__);
     return mLoader->status() != OperationStatus::Error;
 }
 

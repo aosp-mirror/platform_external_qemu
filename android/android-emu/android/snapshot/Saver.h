@@ -14,6 +14,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/Differ.h"
 #include "android/snapshot/RamSaver.h"
 #include "android/snapshot/Snapshot.h"
 
@@ -24,7 +25,8 @@ class Saver {
     DISALLOW_COPY_AND_ASSIGN(Saver);
 
 public:
-    Saver(const Snapshot& snapshot);
+    Saver(const Snapshot& snapshot,
+          const Differ& differ = {});
     ~Saver();
 
     RamSaver& ramSaver() { return *mRamSaver; }
@@ -39,6 +41,7 @@ public:
 private:
     OperationStatus mStatus;
     Snapshot mSnapshot;
+    Differ mDiffer = nullptr;
     base::Optional<RamSaver> mRamSaver;
     std::shared_ptr<TextureSaver> mTextureSaver;
 };

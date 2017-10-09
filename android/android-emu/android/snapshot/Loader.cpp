@@ -88,6 +88,10 @@ void Loader::start() {
 }
 
 Loader::~Loader() {
+    join();
+}
+
+void Loader::join() {
     // Wait for textureLoader to finish loading textures
     if (mRamLoader && !mRamLoader->hasError()) {
         mRamLoader->join();

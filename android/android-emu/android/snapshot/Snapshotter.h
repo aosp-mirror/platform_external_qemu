@@ -14,6 +14,7 @@
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/Differ.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/Saver.h"
 #include "android/snapshot/common.h"
@@ -84,6 +85,7 @@ private:
     QAndroidEmulatorWindowAgent mWindowAgent;
     android::base::Optional<Saver> mSaver;
     android::base::Optional<Loader> mLoader;
+    android::base::Optional<Differ> mDiffer;
     Callback mCallback;
 
     base::System::Duration mLastLoadUptimeMs = 0;

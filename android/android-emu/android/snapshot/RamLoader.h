@@ -18,8 +18,9 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
-#include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/MemoryWatch.h"
+#include "android/snapshot/RamDiff.h"
 
 #include <atomic>
 #include <cstdint>
@@ -35,6 +36,8 @@ class RamLoader {
 public:
     RamLoader(base::StdioStream&& stream);
     ~RamLoader();
+
+    RamDiff getDiff() const;
 
     void loadRam(void* ptr, uint64_t size);
     void dirtyRam(void* ptr, uint64_t size);
@@ -134,6 +137,8 @@ private:
     bool mIsQuickboot = false;
 
     std::map<uintptr_t, int> mDirtyPages = {};
+
+    uint64_t mIndexFilePos = 0;
 };
 
 }  // namespace snapshot

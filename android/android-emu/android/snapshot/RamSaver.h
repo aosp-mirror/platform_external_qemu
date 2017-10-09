@@ -14,12 +14,14 @@
 #include "android/base/Compiler.h"
 #include "android/base/EnumFlags.h"
 #include "android/base/files/StdioStream.h"
+#include "android/base/Optional.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/RamDiff.h"
 
 #include <atomic>
 #include <cstdint>
@@ -43,7 +45,10 @@ public:
         Compress = 0x4,
     };
 
-    RamSaver(base::StdioStream&& stream, Flags flags);
+    RamSaver(
+            base::StdioStream&& stream,
+            const RamDiff& diff,
+            Flags flags);
     ~RamSaver();
 
     void registerBlock(const RamBlock& block);
@@ -131,6 +136,8 @@ private:
     void flushIovecs();
 
     std::vector<struct iovec> mIovecs = {};
+
+    RamDiff mRamDiff;
 };
 
 }  // namespace snapshot

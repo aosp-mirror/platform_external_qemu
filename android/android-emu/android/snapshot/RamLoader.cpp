@@ -82,6 +82,11 @@ RamLoader::~RamLoader() {
     }
 }
 
+RamDiff RamLoader::getDiff() const {
+    assert(mJoining == true);
+    return {};
+}
+
 void RamLoader::loadRam(void* ptr, uint64_t size) {
     uint32_t num_pages = (size + mPageSize - 1) / mPageSize;
     char* pagePtr = (char*)((uintptr_t)ptr & ~(mPageSize - 1));
@@ -169,6 +174,7 @@ bool RamLoader::readIndex() {
     }
     mDiskSize = size;
     uint64_t indexPos = mStream.getBe64();
+    mIndexFilePos = indexPos;
 
     MemStream::Buffer buffer(size - indexPos);
     if (base::pread(mStreamFd, buffer.data(), buffer.size(), indexPos) != buffer.size()) {

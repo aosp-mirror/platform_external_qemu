@@ -41,8 +41,11 @@ uint64_t pageWriteTime = 0;
 
 std::map<uint64_t, uint64_t> writePosSizes = {};
 
-RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
+RamSaver::RamSaver(base::StdioStream&& stream,
+                   const RamDiff& diff,
+                   Flags flags)
     : mStream(std::move(stream)),
+      mRamDiff(diff),
       mStreamFd(fileno(mStream.get())),
       mFlags(flags) {
     mWriteBuf = new unsigned char[mWriteBufSize];

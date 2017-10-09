@@ -27,6 +27,8 @@ public:
     Loader(const Snapshot& snapshot, int error = 0);
     ~Loader();
 
+    void join();
+
     RamLoader& ramLoader() { return *mRamLoader; }
     ITextureLoaderPtr textureLoader() const;
 

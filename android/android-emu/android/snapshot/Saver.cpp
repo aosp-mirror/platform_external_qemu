@@ -25,11 +25,15 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-Saver::Saver(const Snapshot& snapshot)
-    : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
+Saver::Saver(const Snapshot& snapshot,
+             const Differ& differ)
+    : mStatus(OperationStatus::Error),
+      mSnapshot(snapshot),
+      mDiffer(differ) {
     if (path_mkdir_if_needed(mSnapshot.dataDir().c_str(), 0777) != 0) {
         return;
     }
+
     {
         const auto ram = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "wb");
@@ -82,7 +86,10 @@ Saver::Saver(const Snapshot& snapshot)
                 }
             }
         }
-        mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
+        mRamSaver.emplace(
+                StdioStream(ram, StdioStream::kOwner),
+                mDiffer->ramDiff(),
+                flags);
     }
     {
         const auto textures = fopen(

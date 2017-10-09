@@ -17,6 +17,7 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/Thread.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/TextureDiff.h"
 
 #include <functional>
 #include <memory>
@@ -43,6 +44,8 @@ public:
     virtual void acquireLoaderThread(LoaderThreadPtr thread) = 0;
     virtual bool hasError() const = 0;
     virtual uint64_t diskSize() const = 0;
+
+    virtual TextureDiff getDiff() const;
 };
 
 class TextureLoader final : public ITextureLoader {
@@ -63,6 +66,10 @@ public:
             mLoaderThread->wait();
             mLoaderThread.reset();
         }
+    }
+
+    TextureDiff getDiff() {
+        return {};
     }
 
 private:

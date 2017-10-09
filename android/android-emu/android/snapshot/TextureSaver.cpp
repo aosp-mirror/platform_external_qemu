@@ -25,8 +25,10 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-TextureSaver::TextureSaver(android::base::StdioStream&& stream)
-    : mStream(std::move(stream)) {
+TextureSaver::TextureSaver(android::base::StdioStream&& stream,
+                           const TextureDiff& diff)
+    : mStream(std::move(stream)),
+      mTextureDiff(diff) {
     // Put a placeholder for the index offset right now.
     mStream.putBe64(0);
 }

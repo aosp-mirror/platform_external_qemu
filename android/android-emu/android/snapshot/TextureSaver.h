@@ -15,6 +15,7 @@
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/common.h"
+#include "android/snapshot/TextureDiff.h"
 
 #include <functional>
 #include <vector>
@@ -44,7 +45,8 @@ class TextureSaver final : public ITextureSaver {
     DISALLOW_COPY_AND_ASSIGN(TextureSaver);
 
 public:
-    TextureSaver(android::base::StdioStream&& stream);
+    TextureSaver(android::base::StdioStream&& stream,
+                 const TextureDiff& diff);
     ~TextureSaver();
     void saveTexture(uint32_t texId, const saver_t& saver) override;
     void done();
@@ -79,6 +81,8 @@ private:
     android::base::System::WallDuration mStartTime =
             android::base::System::get()->getHighResTimeUs();
 #endif
+
+    TextureDiff mTextureDiff;
 };
 
 }  // namespace snapshot
