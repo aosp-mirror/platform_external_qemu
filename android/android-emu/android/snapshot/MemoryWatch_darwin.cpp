@@ -18,6 +18,8 @@
 #include "android/emulation/CpuAccelerator.h"
 #include "android/snapshot/MacSegvHandler.h"
 
+#include <map>
+
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/errno.h>
@@ -61,10 +63,12 @@ public:
             uint64_t gpa = hva2gpa_call(start, &found);
             if (found) {
                 hv_vm_protect(gpa, length, 0);
+                mRegisteredGpas[gpa] = length;
             }
         }
         mprotect(start, length, PROT_NONE);
         mSegvHandler.registerMemoryRange(start, length);
+        mRegisteredHvas[start] = length;
         return true;
     }
 
@@ -75,7 +79,10 @@ public:
     bool fillPage(void* start, size_t length, const void* data,
                   bool isQuickboot) {
         android::base::AutoLock lock(mLock);
-        mprotect(start, length, PROT_READ | PROT_WRITE | PROT_EXEC);
+
+        if (!mJoining) {
+            mprotect(start, length, PROT_READ | PROT_WRITE | PROT_EXEC);
+        }
         bool remapNeeded = false;
         if (!data) {
             // Remapping:
@@ -96,7 +103,7 @@ public:
         if (mAccel == CPU_ACCELERATOR_HVF) {
             bool found = false;
             uint64_t gpa = hva2gpa_call(start, &found);
-            if (found) {
+            if (found && !mJoining) {
                 // Restore the mapping because we might have re-mapped above.
                 if (remapNeeded) {
                     hv_vm_unmap(gpa, length);
@@ -128,12 +135,29 @@ public:
         }
     }
 
+    void onJoin() {
+        android::base::AutoLock lock(mLock);
+        mJoining = true;
+        for (const auto& it : mRegisteredGpas) {
+            hv_vm_protect(it.first, it.second, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+        }
+        for (const auto& it : mRegisteredHvas) {
+            mprotect(it.first, it.second, PROT_READ | PROT_WRITE | PROT_EXEC);
+        }
+        mRegisteredHvas.clear();
+        mRegisteredGpas.clear();
+    }
+
     android::base::Lock mLock;
     CpuAccelerator mAccel;
     MemoryAccessWatch::AccessCallback mAccessCallback;
     MemoryAccessWatch::IdleCallback mIdleCallback;
     MacSegvHandler mSegvHandler;
     base::FunctorThread mBackgroundLoadingThread;
+
+    bool mJoining = false;
+    std::map<void*, uint64_t> mRegisteredHvas;
+    std::map<uint64_t, uint64_t> mRegisteredGpas;
 };
 
 // static
@@ -171,6 +195,10 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
     if (!mImpl) return false;
     return mImpl->fillPage(ptr, length, data, isQuickboot);
+}
+
+void MemoryAccessWatch::onJoin() {
+    if (mImpl) mImpl->onJoin();
 }
 
 }  // namespace snapshot
