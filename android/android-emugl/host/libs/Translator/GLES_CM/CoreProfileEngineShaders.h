@@ -82,9 +82,11 @@ in vec4 texcoord_varying;
 
 out vec4 frag_color;
 
-#define GL_MODULATE 0x2100
-#define GL_COMBINE 0x8570
-#define GL_REPLACE 0x1E01
+// GL_MODULATE/COMBINE/REPLACE can result in
+// syntax errors on some GPUs.
+#define kModulate 0x2100
+#define kCombine 0x8570
+#define kReplace 0x1E01
 
 void main() {
     if (enable_textures) {
@@ -95,11 +97,11 @@ void main() {
         } else {
             textureColor = texture(tex_sampler, texcoord_varying.xy);
             switch (texture_env_mode) {
-            case GL_REPLACE:
+            case kReplace:
                 frag_color = textureColor;
                 break;
-            case GL_COMBINE:
-            case GL_MODULATE:
+            case kCombine:
+            case kModulate:
             default:
                 frag_color = color_varying * textureColor;
                 break;
