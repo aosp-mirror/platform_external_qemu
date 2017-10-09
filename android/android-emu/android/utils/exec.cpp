@@ -38,13 +38,29 @@ static BOOL WINAPI ctrlHandler(DWORD type)
         return FALSE;
     }
 
-    // Windows 7 kills application when the function returns.
-    // Sleep here to give QEMU engine a chance for closing.
-    // Windows also kills the program after 10 seconds anyway.
-    if (::WaitForSingleObject(sChildProcessHandle, 9000) != WAIT_OBJECT_0) {
-        ::TerminateProcess(sChildProcessHandle, 100);
+    // There are two major ways this handler can be invoked:
+    // 1. Ctrl-C in console.
+    // 2. Pressing 'x' on the console window.
+    // If #2 (press 'x'), the emulator will close in 5 seconds
+    // unless we FreeConsole() and ExitThread(0) below.
+    // Too-early process termination can abort pending snapshot saves.
+    // This is definitely a hack that can break in future Windows versions.
+    //
+    // Note: There is another ctrl handler |ctrlHandler| in
+    // qemu/os-win32.c that needs to be in sync with this one, so if the
+    // end result on editing this function isn't what is expected, try changing
+    // that one too.
+    if (type == CTRL_CLOSE_EVENT) {
+        FreeConsole();
+        ExitThread(0);
+    } else {
+        // Windows 7 kills application when the function returns.
+        // Sleep here to give QEMU engine a chance for closing (90 seconds)
+        if (::WaitForSingleObject(sChildProcessHandle, 90000) != WAIT_OBJECT_0) {
+            ::TerminateProcess(sChildProcessHandle, 100);
+        }
+        exit(1);
     }
-    exit(1);
 
     return TRUE;
 }

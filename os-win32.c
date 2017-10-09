@@ -69,14 +69,31 @@ static BOOL WINAPI qemu_ctrl_handler(DWORD type)
     fflush(stdout);
     fflush(stderr);
 
-    /* Windows 7 kills application when the function returns.
-       Sleep here to give QEMU a try for closing.
-       Sleep period is 10000ms because Windows kills the program
-       after 10 seconds anyway. */
-    Sleep(10000);
+    // There are two major ways this handler can be invoked:
+    // 1. Ctrl-C in console.
+    // 2. Pressing 'x' on the console window.
+    // If #2 (press 'x'), the emulator will close in 5 seconds
+    // unless we FreeConsole() and ExitThread(0) below.
+    // Too-early process termination can abort pending snapshot saves.
+    // This is definitely a hack that can break in future Windows versions.
+    //
+    // Note: There is another ctrl handler |ctrlHandler| in
+    // android/utils/exec.cpp that needs to be in sync with this one, so if the
+    // end result on editing this function isn't what is expected, try changing
+    // that one too.
+    if (type == CTRL_CLOSE_EVENT) {
+        FreeConsole();
+        ExitThread(0);
+    } else {
+         /* Windows 7 kills application when the function returns.
+            Sleep here to give QEMU a try for closing.
+            Sleep period is 90s */
+        Sleep(90000);
+    }
 
-    /* Sometimes Windows doesn't actually kill QEMU after 10 seconds.
-     * Return FALSE so the default handler finished the process anyway */
+    /* On timeout, return FALSE so the default handler
+     * finished the process anyway */
+
     return FALSE;
 }
 
