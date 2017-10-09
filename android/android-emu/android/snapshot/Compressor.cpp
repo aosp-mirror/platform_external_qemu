@@ -22,8 +22,7 @@ namespace android {
 namespace snapshot {
 
 int CompressorBase::workerCount() {
-    return std::max(2,
-                    std::min(16, base::System::get()->getCpuCoreCount() - 1));
+    return std::max(2, std::min(4, base::System::get()->getCpuCoreCount() - 1));
 }
 
 std::pair<uint8_t*, int32_t> CompressorBase::compress(const uint8_t* data,
