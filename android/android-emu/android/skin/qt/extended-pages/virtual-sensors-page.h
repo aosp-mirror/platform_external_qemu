@@ -52,6 +52,10 @@ private slots:
 
     void updateAccelerations();
     void syncUIAndUpdateModel();
+    void syncUIAndUpdateModelInstant();
+    void syncUI();
+    void updateSensorValuesInUI();
+    void updateModel(bool instantaneous);
     void onDragStarted();
     void onDragStopped();
     void onSkinLayoutChange(SkinRotation rot);
@@ -95,7 +99,7 @@ private:
     QDoubleValidator mMagFieldValidator;
     const QAndroidSensorsAgent* mSensorsAgent;
     QTimer mAccelerationTimer;
-    QTimer mAccelWidgetRotationUpdateTimer;
+    bool mIsDragging = false;
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation;
     bool mVirtualSensorsUsed = false;

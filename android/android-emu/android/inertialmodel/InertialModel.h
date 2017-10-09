@@ -43,18 +43,19 @@ public:
     /*
      * Sets the position that the modeled object should move toward.
      */
-    void setTargetPosition(glm::vec3 position);
+    void setTargetPosition(glm::vec3 position, bool instantaneous);
 
     /*
      * Sets the rotation that the modeled object should move toward.
      */
-    void setTargetRotation(glm::quat rotation);
+    void setTargetRotation(glm::quat rotation, bool instantaneous);
 
     /*
      * Sets the strength of the magnetic field in which the modeled object
      * is moving, in order to simulate a magnetic vector.
      */
-    void setMagneticValue(float north, float east, float vertical);
+    void setMagneticValue(
+        float north, float east, float vertical, bool instantaneous);
 
     /*
      * Gets current simulated state and sensor values of the modeled object.
