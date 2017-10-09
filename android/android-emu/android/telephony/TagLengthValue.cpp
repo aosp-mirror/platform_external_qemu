@@ -144,7 +144,7 @@ ApduArDo::ApduArDo(Allow rule) {
     populateData(kTag, { &data });
 }
 
-ApduArDo::ApduArDo(std::initializer_list<std::string> rules) {
+ApduArDo::ApduArDo(const std::vector<std::string>& rules) {
     std::vector<const std::string*> data;
     for(const auto& rule : rules) {
         data.push_back(&rule);
@@ -186,6 +186,14 @@ RefArDo::RefArDo(const RefDo& refDo, const ArDo& arDo) {
 }
 
 AllRefArDo::AllRefArDo(std::initializer_list<RefArDo> refArDos) {
+    std::vector<const RefArDo*> data;
+    for (const auto& object : refArDos) {
+        data.push_back(&object);
+    }
+    populateData(kTag, data.begin(), data.end());
+}
+
+AllRefArDo::AllRefArDo(const std::vector<RefArDo>& refArDos) {
     std::vector<const RefArDo*> data;
     for (const auto& object : refArDos) {
         data.push_back(&object);
