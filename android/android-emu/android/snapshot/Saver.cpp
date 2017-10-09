@@ -46,6 +46,9 @@ Saver::Saver(const Snapshot& snapshot)
                           "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
                           compressEnvVar.c_str());
             flags |= RamSaver::Flags::Compress;
+        } else if (compressEnvVar == "0" || compressEnvVar == "no" ||
+                   compressEnvVar == "false") {
+            // don't enable compression
         } else {
             // Check if it's faster to save RAM with compression. Currently
             // the heuristics are as following:
