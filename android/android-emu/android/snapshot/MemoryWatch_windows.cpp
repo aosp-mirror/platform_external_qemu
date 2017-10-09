@@ -39,5 +39,7 @@ bool MemoryAccessWatch::fillPage(void*, size_t, const void*, bool isQuickboot) {
     return false;
 }
 
+void MemoryAccessWatch::onJoin() {}
+
 }  // namespace snapshot
 }  // namespace android

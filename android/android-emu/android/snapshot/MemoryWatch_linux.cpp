@@ -225,5 +225,7 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
     return true;
 }
 
+void MemoryAccessWatch::onJoin() {}
+
 }  // namespace snapshot
 }  // namespace android
