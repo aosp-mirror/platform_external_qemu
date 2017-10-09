@@ -26,21 +26,28 @@ InertialModel::InertialModel()
       mSensorsAgent(nullptr) {
 }
 
-void InertialModel::setTargetPosition(glm::vec3 position) {
+void InertialModel::setTargetPosition(glm::vec3 position, bool instantaneous) {
+    if (instantaneous) {
+        mPreviousPosition = position;
+    }
     mCurrentPosition = position;
     updateAccelerations();
     updateSensorValues();
 }
 
-void InertialModel::setTargetRotation(glm::quat rotation) {
-    mPreviousRotation = mCurrentRotation;
+void InertialModel::setTargetRotation(glm::quat rotation, bool instantaneous) {
+    if (instantaneous) {
+        mPreviousRotation = rotation;
+    } else {
+        mPreviousRotation = mCurrentRotation;
+    }
     mCurrentRotation = rotation;
     recalcRotationUpdateInterval();
     updateSensorValues();
 }
 
 void InertialModel::setMagneticValue(
-        float north, float east, float vertical) {
+        float north, float east, float vertical, bool instantanous) {
     mMagneticVector = glm::vec3(north, east, vertical);
     updateSensorValues();
 }
