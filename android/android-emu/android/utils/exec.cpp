@@ -38,13 +38,17 @@ static BOOL WINAPI ctrlHandler(DWORD type)
         return FALSE;
     }
 
-    // Windows 7 kills application when the function returns.
-    // Sleep here to give QEMU engine a chance for closing.
-    // Windows also kills the program after 10 seconds anyway.
-    if (::WaitForSingleObject(sChildProcessHandle, 9000) != WAIT_OBJECT_0) {
-        ::TerminateProcess(sChildProcessHandle, 100);
+    if (type == CTRL_CLOSE_EVENT) {
+        FreeConsole();
+        ExitThread(0);
+    } else {
+        // Windows 7 kills application when the function returns.
+        // Sleep here to give QEMU engine a chance for closing (90 seconds)
+        if (::WaitForSingleObject(sChildProcessHandle, 90000) != WAIT_OBJECT_0) {
+            ::TerminateProcess(sChildProcessHandle, 100);
+        }
+        exit(1);
     }
-    exit(1);
 
     return TRUE;
 }

@@ -69,14 +69,20 @@ static BOOL WINAPI qemu_ctrl_handler(DWORD type)
     fflush(stdout);
     fflush(stderr);
 
-    /* Windows 7 kills application when the function returns.
-       Sleep here to give QEMU a try for closing.
-       Sleep period is 10000ms because Windows kills the program
-       after 10 seconds anyway. */
-    Sleep(10000);
 
-    /* Sometimes Windows doesn't actually kill QEMU after 10 seconds.
-     * Return FALSE so the default handler finished the process anyway */
+    if (type == CTRL_CLOSE_EVENT) {
+        FreeConsole();
+        ExitThread(0);
+    } else {
+         /* Windows 7 kills application when the function returns.
+            Sleep here to give QEMU a try for closing.
+            Sleep period is 90s */
+        Sleep(90000);
+    }
+
+    /* On timeout, return FALSE so the default handler
+     * finished the process anyway */
+
     return FALSE;
 }
 
