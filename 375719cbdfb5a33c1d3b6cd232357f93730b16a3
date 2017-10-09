@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5519d788_fb4b55ac",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-09T16:24:27Z",
+      "side": 1,
+      "message": "please make it an empty function for other two platforms",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 18
+      },
+      "revId": "375719cbdfb5a33c1d3b6cd232357f93730b16a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "25a78845_6914c300",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-09T16:24:27Z",
+      "side": 1,
+      "message": "1. map is strictly slower than unordered_map\n2. you could try combining the ranges, or even calling mprotect/vm_protect once for the whole RAM range (base, base + size)",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 49
+      },
+      "revId": "375719cbdfb5a33c1d3b6cd232357f93730b16a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
