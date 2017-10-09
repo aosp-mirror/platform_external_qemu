@@ -52,6 +52,9 @@ private slots:
 
     void updateAccelerations();
     void syncUIAndUpdateModel();
+    void syncUI();
+    void updateSensorValuesInUI();
+    void updateModel();
     void onDragStarted();
     void onDragStopped();
     void onSkinLayoutChange(SkinRotation rot);
