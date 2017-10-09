@@ -212,6 +212,7 @@ public:
     void screenshot();
     void setFrameAlways(bool showFrame);
     void setOnTop(bool onTop);
+    void setIgnoreWheelEvent(bool ignore);
     void simulateKeyPress(int keyCode, int modifiers);
     void simulateScrollBarChanged(int x, int y);
     void simulateSetScale(double scale);
@@ -428,6 +429,7 @@ private:
     OnDemandProgressDialog mInstallDialog;
     OnDemandProgressDialog mPushDialog;
 
+    bool mIgnoreWheelEvent = false;
     QTimer mWheelScrollTimer;
     QPoint mWheelScrollPos;
     bool mStartedAdbStopProcess;
