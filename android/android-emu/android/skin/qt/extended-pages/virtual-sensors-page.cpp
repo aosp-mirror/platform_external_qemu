@@ -211,6 +211,11 @@ void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 
+    auto layout = skin_ui_get_current_layout(emulator_window_get()->ui);
+    if (layout) {
+        resetAccelerometerRotationFromSkinLayout(layout->orientation);
+    }
+
     // Update the agent with current values.
     updateSensorValues();
 }
