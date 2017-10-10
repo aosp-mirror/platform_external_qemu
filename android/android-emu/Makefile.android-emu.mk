@@ -262,6 +262,7 @@ LOCAL_C_INCLUDES := \
     $(LIBPNG_INCLUDES) \
     $(ZLIB_INCLUDES) \
     $(LZ4_INCLUDES) \
+    $(MURMURHASH_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -538,6 +539,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libpng \
     emulator-libyuv \
     emulator-libwebp \
+    emulator-murmurhash \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \
