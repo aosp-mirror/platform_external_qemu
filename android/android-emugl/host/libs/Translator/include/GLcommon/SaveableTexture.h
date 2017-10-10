@@ -99,10 +99,7 @@ private:
         android::base::SmallFixedVector<unsigned char, 16> m_data;
     };
     std::unique_ptr<LevelImageData[]> m_levelData[6] = {};
-    GLint mTexMagFilter;
-    GLint mTexMinFilter;
-    GLint mTexWrapS;
-    GLint mTexWrapT;
+    std::unordered_map<GLenum, GLint> m_texParam;
     loader_t m_loader;
     GlobalNameSpace* m_globalNamespace = nullptr;
 };

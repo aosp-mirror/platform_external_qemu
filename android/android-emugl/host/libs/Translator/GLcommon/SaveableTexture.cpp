@@ -25,6 +25,27 @@
 
 #include <algorithm>
 
+static const GLenum kTexParam[] = {
+    GL_TEXTURE_MIN_FILTER,
+    GL_TEXTURE_MAG_FILTER,
+    GL_TEXTURE_WRAP_S,
+    GL_TEXTURE_WRAP_T,
+};
+
+static const GLenum kTexParamGles3[] = {
+    GL_TEXTURE_BASE_LEVEL,
+    GL_TEXTURE_COMPARE_FUNC,
+    GL_TEXTURE_COMPARE_MODE,
+    GL_TEXTURE_MIN_LOD,
+    GL_TEXTURE_MAX_LOD,
+    GL_TEXTURE_MAX_LEVEL,
+    GL_TEXTURE_SWIZZLE_R,
+    GL_TEXTURE_SWIZZLE_G,
+    GL_TEXTURE_SWIZZLE_B,
+    GL_TEXTURE_SWIZZLE_A,
+    GL_TEXTURE_WRAP_R,
+};
+
 static uint32_t s_texAlign(uint32_t v, uint32_t align) {
     uint32_t rem = v % align;
     return rem ? (v + (align - rem)) : v;
@@ -368,10 +389,13 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                 break;
         }
         // Load tex param
-        mTexMagFilter = stream->getBe32();
-        mTexMinFilter = stream->getBe32();
-        mTexWrapS = stream->getBe32();
-        mTexWrapT = stream->getBe32();
+        loadCollection(stream, &m_texParam,
+                [](android::base::Stream* stream)
+                    -> std::unordered_map<GLenum, GLint>::value_type {
+                    GLenum pname = stream->getBe32();
+                    GLint value = stream->getBe32();
+                    return std::make_pair(pname, value);
+                });
     } else {
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
@@ -494,16 +518,27 @@ void SaveableTexture::onSave(
                 break;
         }
         // Snapshot texture param
-        auto saveParam = [this, stream, &dispatcher](GLenum pname) {
+        std::unordered_map<GLenum, GLint> texParam;
+        auto saveParam = [this, &texParam, stream, &dispatcher](
+                const GLenum* plist, size_t plistSize) {
             GLint param;
 
-            dispatcher.glGetTexParameteriv(m_target, pname, &param);
-            stream->putBe32(param);
+            for (size_t i = 0; i < plistSize; i++) {
+                dispatcher.glGetTexParameteriv(m_target, plist[i], &param);
+                texParam.emplace(plist[i], param);
+            }
         };
-        saveParam(GL_TEXTURE_MAG_FILTER);
-        saveParam(GL_TEXTURE_MIN_FILTER);
-        saveParam(GL_TEXTURE_WRAP_S);
-        saveParam(GL_TEXTURE_WRAP_T);
+        saveParam(kTexParam, sizeof(kTexParam) / sizeof(kTexParam[0]));
+        if (dispatcher.getGLESVersion() >= GLES_3_0) {
+            saveParam(kTexParamGles3,
+                    sizeof(kTexParamGles3) / sizeof(kTexParamGles3[0]));
+        }
+        saveCollection(stream, texParam,
+                [](android::base::Stream* s,
+                    const std::unordered_map<GLenum, GLint>::value_type& pair) {
+                    s->putBe32(pair.first);
+                    s->putBe32(pair.second);
+                });
         // Restore environment
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
             if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
@@ -705,12 +740,10 @@ void SaveableTexture::restore() {
                 break;
         }
         // Restore tex param
-        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MAG_FILTER,
-                                   mTexMagFilter);
-        dispatcher.glTexParameteri(m_target, GL_TEXTURE_MIN_FILTER,
-                                   mTexMinFilter);
-        dispatcher.glTexParameteri(m_target, GL_TEXTURE_WRAP_S, mTexWrapS);
-        dispatcher.glTexParameteri(m_target, GL_TEXTURE_WRAP_T, mTexWrapT);
+        for (const auto& param : m_texParam) {
+            dispatcher.glTexParameteri(m_target, param.first, param.second);
+        }
+        m_texParam.clear();
         // Restore environment
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
             if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
