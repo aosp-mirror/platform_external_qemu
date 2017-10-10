@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "008c4049_42fd16b1",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-10T18:11:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5519d788_fb4b55ac",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 18
+      },
+      "revId": "375719cbdfb5a33c1d3b6cd232357f93730b16a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "25a78845_6914c300",
         "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-09T16:24:27Z",
       "side": 1,
       "message": "1. map is strictly slower than unordered_map\n2. you could try combining the ranges, or even calling mprotect/vm_protect once for the whole RAM range (base, base + size)",
+      "range": {
+        "startLine": 159,
+        "startChar": 0,
+        "endLine": 160,
+        "endChar": 49
+      },
+      "revId": "375719cbdfb5a33c1d3b6cd232357f93730b16a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57961e22_4031d977",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-10T18:11:19Z",
+      "side": 1,
+      "message": "Done (there are only a few ram ranges currently, so it doesnt seem worth it currently to do the coalescing)",
+      "parentUuid": "25a78845_6914c300",
       "range": {
         "startLine": 159,
         "startChar": 0,
