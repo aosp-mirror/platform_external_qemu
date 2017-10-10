@@ -30,7 +30,11 @@ DecompressingStream::~DecompressingStream() {
 }
 
 ssize_t DecompressingStream::read(void* buffer, size_t size) {
-    assert(mBufferPos < mBuffer.size());
+    assert(mBufferPos < mBuffer.size() ||
+           (mBufferPos == mBuffer.size() && size == 0));
+    if (!size) {
+        return 0;
+    }
     const int read = LZ4_decompress_fast_continue(
             (LZ4_streamDecode_t*)mLzStream, mBuffer.data() + mBufferPos,
             (char*)buffer, size);

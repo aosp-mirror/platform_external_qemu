@@ -32,6 +32,9 @@ ssize_t CompressingStream::read(void*, size_t) {
 }
 
 ssize_t CompressingStream::write(const void* buffer, size_t size) {
+    if (!size) {
+        return 0;
+    }
     const auto outSize = LZ4_compressBound(size);
     auto oldSize = mBuffer.size();
     mBuffer.resize_noinit(mBuffer.size() + outSize);
