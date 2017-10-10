@@ -14,6 +14,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/RamLoader.h"
 #include "android/snapshot/TextureSaver.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -25,62 +26,69 @@ using android::base::System;
 namespace android {
 namespace snapshot {
 
-Saver::Saver(const Snapshot& snapshot)
+Saver::Saver(const Snapshot& snapshot, RamLoader* loader)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (path_mkdir_if_needed(mSnapshot.dataDir().c_str(), 0777) != 0) {
         return;
     }
     {
-        const auto ram = fopen(
-                PathUtils::join(mSnapshot.dataDir(), "ram.bin").c_str(), "wb");
-        if (!ram) {
-            return;
-        }
-        auto flags = RamSaver::Flags::None;
-        const auto compressEnvVar =
-                System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
-        if (compressEnvVar == "1" || compressEnvVar == "yes" ||
-            compressEnvVar == "true") {
-            VERBOSE_PRINT(snapshot,
-                          "autoconfig: enabled snapshot RAM compression from "
-                          "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
-                          compressEnvVar.c_str());
-            flags |= RamSaver::Flags::Compress;
-        } else {
-            // Check if it's faster to save RAM with compression. Currently
-            // the heuristics are as following:
-            // 1. Gather three variables: free RAM, number of CPU cores and
-            //    the disk kind.
-            // 2. Bad cases for uncompressed snapshots: little free RAM
-            //    and HDD disk.
-            // 3. If there's a bad case and we have enough CPU cores (3+), let's
-            //    enable compression.
-            const auto cpuCount = System::get()->getCpuCoreCount();
-            if (cpuCount > 2) {
-                const auto memUsage = System::get()->getMemUsage();
-                if (memUsage.avail_phys_memory < 1536 * 1024 * 1024) {
-                    flags |= RamSaver::Flags::Compress;
-                    VERBOSE_PRINT(
-                            snapshot,
-                            "Enabling RAM compression: only %u MB of free RAM",
-                            unsigned(memUsage.avail_phys_memory /
-                                     (1024 * 1024)));
-                } else {
-                    // Disk kind calculation is potentially the slowest: do it
-                    // last.
-                    const auto diskKind = System::get()->diskKind(fileno(ram));
-                    if (diskKind.valueOr(System::DiskKind::Ssd) ==
-                        System::DiskKind::Hdd) {
+        const auto ramFile = PathUtils::join(mSnapshot.dataDir(), "ram.bin");
+        if (!loader || loader->hasError()) {
+            const auto ram = fopen(ramFile.c_str(), "wb");
+            if (!ram) {
+                return;
+            }
+
+            auto flags = RamSaver::Flags::None;
+            const auto compressEnvVar =
+                    System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
+            if (compressEnvVar == "1" || compressEnvVar == "yes" ||
+                compressEnvVar == "true") {
+                VERBOSE_PRINT(snapshot,
+                              "autoconfig: enabled snapshot RAM compression from "
+                              "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
+                              compressEnvVar.c_str());
+                flags |= RamSaver::Flags::Compress;
+            } else {
+                // Check if it's faster to save RAM with compression. Currently
+                // the heuristics are as following:
+                // 1. Gather three variables: free RAM, number of CPU cores and
+                //    the disk kind.
+                // 2. Bad cases for uncompressed snapshots: little free RAM
+                //    and HDD disk.
+                // 3. If there's a bad case and we have enough CPU cores (3+), let's
+                //    enable compression.
+                const auto cpuCount = System::get()->getCpuCoreCount();
+                if (cpuCount > 2) {
+                    const auto memUsage = System::get()->getMemUsage();
+                    if (memUsage.avail_phys_memory < 1536 * 1024 * 1024) {
                         flags |= RamSaver::Flags::Compress;
                         VERBOSE_PRINT(
                                 snapshot,
-                                "Enabling RAM compression: snapshot is on HDD");
+                                "Enabling RAM compression: only %u MB of free RAM",
+                                unsigned(memUsage.avail_phys_memory /
+                                         (1024 * 1024)));
+                    } else {
+                        // Disk kind calculation is potentially the slowest: do it
+                        // last.
+                        const auto diskKind = System::get()->diskKind(fileno(ram));
+                        if (diskKind.valueOr(System::DiskKind::Ssd) ==
+                            System::DiskKind::Hdd) {
+                            flags |= RamSaver::Flags::Compress;
+                            VERBOSE_PRINT(
+                                    snapshot,
+                                    "Enabling RAM compression: snapshot is on HDD");
+                        }
                     }
                 }
+                mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
             }
+        } else {
+            loader->interrupt();
+            mRamSaver.emplace(*loader, ramFile);
         }
-        mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
     }
+
     {
         const auto textures = fopen(
                 PathUtils::join(mSnapshot.dataDir(), "textures.bin").c_str(),

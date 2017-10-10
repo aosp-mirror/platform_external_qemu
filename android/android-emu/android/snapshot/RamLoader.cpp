@@ -14,8 +14,8 @@
 #include "android/avd/info.h"
 #include "android/base/ArraySize.h"
 #include "android/base/EintrWrapper.h"
-#include "android/base/files/preadwrite.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/files/preadwrite.h"
 #include "android/snapshot/Decompressor.h"
 #include "android/utils/debug.h"
 
@@ -29,33 +29,6 @@ using android::base::MemStream;
 namespace android {
 namespace snapshot {
 
-struct RamLoader::Page {
-    std::atomic<uint8_t> state{uint8_t(State::Empty)};
-    uint16_t blockIndex;
-    uint32_t sizeOnDisk;
-    uint64_t filePos;
-    uint8_t* data;
-
-    Page() = default;
-    Page(RamLoader::State state) : state(uint8_t(state)) {}
-    Page(Page&& other)
-        : state(other.state.load(std::memory_order_relaxed)),
-          blockIndex(other.blockIndex),
-          sizeOnDisk(other.sizeOnDisk),
-          filePos(other.filePos),
-          data(other.data) {}
-
-    Page& operator=(Page&& other) {
-        state.store(other.state.load(std::memory_order_relaxed),
-                    std::memory_order_relaxed);
-        blockIndex = other.blockIndex;
-        sizeOnDisk = other.sizeOnDisk;
-        filePos = other.filePos;
-        data = other.data;
-        return *this;
-    }
-};
-
 void RamLoader::FileIndex::clear() {
     decltype(pages)().swap(pages);
     decltype(blocks)().swap(blocks);
@@ -66,7 +39,9 @@ RamLoader::RamLoader(base::StdioStream&& stream)
     if (MemoryAccessWatch::isSupported()) {
         mAccessWatch.emplace([this](void* ptr) { loadRamPage(ptr); },
                              [this]() { return backgroundPageLoad(); });
-        if (!mAccessWatch->valid()) {
+        if (mAccessWatch->valid()) {
+            mOnDemandEnabled = true;
+        } else {
             derror("Failed to initialize memory access watcher, falling back "
                    "to synchronous RAM loading");
             mAccessWatch.clear();
@@ -128,6 +103,28 @@ void RamLoader::join() {
     mReaderThread.wait();
 }
 
+void RamLoader::interrupt() {
+    mReadDataQueue.stop();
+    mReadingQueue.stop();
+    mReaderThread.wait();
+    mStream.close();
+    mAccessWatch.clear();
+}
+
+const RamLoader::Page* RamLoader::findPage(int blockIndex,
+                                           const char* id,
+                                           int pageIndex) const {
+    if (blockIndex < 0 || blockIndex >= mIndex.blocks.size()) {
+        return nullptr;
+    }
+    const auto& block = mIndex.blocks[blockIndex];
+    assert(block.ramBlock.id == base::StringView(id));
+    if (pageIndex < 0 || pageIndex > block.pagesEnd - block.pagesBegin) {
+        return nullptr;
+    }
+    return &*(block.pagesBegin + pageIndex);
+}
+
 void RamLoader::interruptReading() {
     mLoadingCompleted.store(true, std::memory_order_relaxed);
     mReadDataQueue.stop();
@@ -160,17 +157,18 @@ bool RamLoader::readIndex() {
         return false;
     }
     mDiskSize = size;
-    uint64_t indexPos = mStream.getBe64();
+    mIndexPos = mStream.getBe64();
 
-    MemStream::Buffer buffer(size - indexPos);
-    if (base::pread(mStreamFd, buffer.data(), buffer.size(), indexPos) != buffer.size()) {
+    MemStream::Buffer buffer(size - mIndexPos);
+    if (base::pread(mStreamFd, buffer.data(), buffer.size(), mIndexPos) !=
+        buffer.size()) {
         return false;
     }
 
     MemStream stream(std::move(buffer));
 
-    auto version = stream.getBe32();
-    if (version != 1) {
+    mVersion = stream.getBe32();
+    if (mVersion < 1 || mVersion > 2) {
         return false;
     }
     mIndex.flags = IndexFlags(stream.getBe32());
@@ -240,6 +238,9 @@ void RamLoader::readBlockPages(base::Stream* stream,
             } else {
                 page.sizeOnDisk *= uint32_t(block.ramBlock.pageSize);
                 posDelta *= block.ramBlock.pageSize;
+            }
+            if (mVersion == 2) {
+                stream->read(page.hash.data(), page.hash.size());
             }
             runningFilePos += posDelta;
             page.filePos = uint64_t(runningFilePos);
@@ -329,8 +330,6 @@ void RamLoader::readerWorker() {
     }
 
     mAccessWatch.clear();
-
-    mIndex.clear();
 
 #if SNAPSHOT_PROFILE > 1
     printf("Background loading complete in %.03f ms\n",
@@ -590,7 +589,6 @@ bool RamLoader::readAllPages() {
     }
 
     mDecompressor.clear();
-    mIndex.clear();
     return true;
 }
 
