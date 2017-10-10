@@ -132,11 +132,12 @@ void Quickboot::reportSuccessfulLoad(StringView name,
     const auto durationMs = mLoadTimeMs - startTimeMs;
     const auto onDemandRamEnabled = loader.ramLoader().onDemandEnabled();
     const auto compressedRam = loader.ramLoader().compressed();
+    const auto compressedTextures = loader.textureLoader()->compressed();
     const auto size = loader.snapshot().diskSize() +
                       loader.ramLoader().diskSize() +
                       loader.textureLoader()->diskSize();
     MetricsReporter::get().report([onDemandRamEnabled, compressedRam,
-                                   durationMs, name,
+                                   compressedTextures, durationMs, name,
                                    size](pb::AndroidStudioEvent* event) {
         auto load = event->mutable_emulator_details()->mutable_quickboot_load();
         load->set_state(
@@ -148,6 +149,9 @@ void Quickboot::reportSuccessfulLoad(StringView name,
         if (compressedRam) {
             snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
         }
+        if (compressedTextures) {
+            snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
+        }
         snapshot->set_size_bytes(int64_t(size));
     });
 }
@@ -157,11 +161,13 @@ void Quickboot::reportSuccessfulSave(StringView name,
                                      System::WallDuration sessionUptimeMs) {
     auto& saver = Snapshotter::get().saver();
     const auto compressedRam = saver.ramSaver().compressed();
+    const auto compressedTextures = saver.textureSaver()->compressed();
     const auto size = saver.snapshot().diskSize() +
                       saver.ramSaver().diskSize() +
                       saver.textureSaver()->diskSize();
-    MetricsReporter::get().report([compressedRam, durationMs, sessionUptimeMs,
-                                   name, size](pb::AndroidStudioEvent* event) {
+    MetricsReporter::get().report([compressedRam, compressedTextures,
+                                   durationMs, sessionUptimeMs, name,
+                                   size](pb::AndroidStudioEvent* event) {
         auto save = event->mutable_emulator_details()->mutable_quickboot_save();
         save->set_state(
                 pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
@@ -171,6 +177,9 @@ void Quickboot::reportSuccessfulSave(StringView name,
         snapshot->set_name(MetricsReporter::get().anonymize(name));
         if (compressedRam) {
             snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
+        }
+        if (compressedTextures) {
+            snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
         }
         snapshot->set_size_bytes(int64_t(size));
     });
