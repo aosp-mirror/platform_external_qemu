@@ -38,6 +38,7 @@ public:
     virtual void saveTexture(uint32_t texId, const saver_t& saver) = 0;
     virtual bool hasError() const = 0;
     virtual uint64_t diskSize() const = 0;
+    virtual bool compressed() const = 0;
 };
 
 class TextureSaver final : public ITextureSaver {
@@ -51,6 +52,7 @@ public:
 
     bool hasError() const override { return mHasError; }
     uint64_t diskSize() const override { return mDiskSize; }
+    bool compressed() const override { return mIndex.version > 1; }
 
 private:
     struct FileIndex {
