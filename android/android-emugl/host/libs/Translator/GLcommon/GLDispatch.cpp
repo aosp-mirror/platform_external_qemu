@@ -99,6 +99,10 @@ bool GLDispatch::isInitialized() const {
     return m_isLoaded;
 }
 
+GLESVersion GLDispatch::getGLESVersion() const {
+    return m_version;
+}
+
 void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(m_isLoaded)
@@ -130,4 +134,5 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
     }
 
     m_isLoaded = true;
+    m_version = version;
 }
