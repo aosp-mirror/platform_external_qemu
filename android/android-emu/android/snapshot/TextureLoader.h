@@ -43,6 +43,7 @@ public:
     virtual void acquireLoaderThread(LoaderThreadPtr thread) = 0;
     virtual bool hasError() const = 0;
     virtual uint64_t diskSize() const = 0;
+    virtual bool compressed() const = 0;
 };
 
 class TextureLoader final : public ITextureLoader {
@@ -53,6 +54,7 @@ public:
     void loadTexture(uint32_t texId, const loader_t& loader) override;
     bool hasError() const override { return mHasError; }
     uint64_t diskSize() const override { return mDiskSize; }
+    bool compressed() const override { return mVersion > 1; }
 
     void acquireLoaderThread(LoaderThreadPtr thread) override {
         mLoaderThread = std::move(thread);
