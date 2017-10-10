@@ -46,11 +46,13 @@ public:
 
     bool isInitialized() const;
     void dispatchFuncs(GLESVersion version, GlLibrary* glLib);
+    GLESVersion getGLESVersion() const;
 
     LIST_GLES_FUNCTIONS(GLES_DECLARE_METHOD, GLES_DECLARE_METHOD)
 
 private:
     bool                  m_isLoaded;
+    GLESVersion           m_version;
     static emugl::Mutex   s_lock;
 };
 
