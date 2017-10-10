@@ -13,6 +13,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/EnumFlags.h"
+#include "android/base/containers/SmallVector.h"
 #include "android/base/files/StdioStream.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
@@ -20,6 +21,7 @@
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/common.h"
 
+#include <array>
 #include <atomic>
 #include <cstdint>
 #include <vector>
@@ -28,6 +30,8 @@ namespace android {
 namespace snapshot {
 
 using namespace ::android::base::EnumFlags;
+
+class RamLoader;
 
 class RamSaver {
     DISALLOW_COPY_AND_ASSIGN(RamSaver);
@@ -41,13 +45,16 @@ public:
     };
 
     RamSaver(base::StdioStream&& stream, Flags flags);
+    RamSaver(RamLoader& loader, const std::string& fileName);
     ~RamSaver();
 
     void registerBlock(const RamBlock& block);
     void savePage(int64_t blockOffset, int64_t pageOffset, int32_t pageSize);
     void join();
     bool hasError() const { return mHasError; }
-    bool compressed() const { return mIndex.flags & int32_t(IndexFlags::CompressedPages); }
+    bool compressed() const {
+        return mIndex.flags & int32_t(IndexFlags::CompressedPages);
+    }
     uint64_t diskSize() const { return mDiskSize; }
 
 private:
@@ -65,12 +72,17 @@ private:
     // indexOffset: struct FileIndex
     // EOF
 
+    using Hash = std::array<char, 16>;
+
     struct FileIndex {
         struct Block {
             RamBlock ramBlock;
             struct Page {
-                int32_t sizeOnDisk; // 0 -> page is all zeroes
+                int32_t sizeOnDisk;  // 0 -> page is all zeroes
+                bool same;
+                bool hashFilled;
                 int64_t filePos;
+                Hash hash;
             };
             std::vector<Page> pages;
         };
@@ -78,7 +90,7 @@ private:
         using Flags = IndexFlags;
 
         int64_t startPosInFile;
-        int32_t version = 1;
+        int32_t version = 2;
         int32_t flags = int32_t(Flags::Empty);
         int32_t totalPages = 0;
         std::vector<Block> blocks;
@@ -94,13 +106,15 @@ private:
                    const void* dataPtr,
                    int32_t dataSize);
 
+    RamLoader* mLoader = nullptr;
     base::StdioStream mStream;
     int mStreamFd;
     Flags mFlags;
     bool mJoined = false;
     bool mHasError = false;
+    bool mLoaderOnDemand = false;
     int mLastBlockIndex = 0;
-    std::atomic<int64_t> mCurrentStreamPos {8};
+    std::atomic<int64_t> mCurrentStreamPos{8};
 
     base::Optional<Compressor<QueuedPageInfo>> mCompressor;
     base::Optional<base::WorkerThread<QueuedPageInfo>> mSavingWorker;
