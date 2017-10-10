@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ef7eaff_968df381",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-10-10T18:58:10Z",
+      "side": 1,
+      "message": "Since ConvertingTask is totally used internally, can move it to the .cpp file.\n\nAnother way is to use a subclass of QThread, implement run() method, instead of using a Task and move it to the QThread.\n\nclass ConvertingTask : : public QThread {\n    Q_OBJECT\n \n     void VideoPlayer::run() {\n          ....\n    }\n\n    ....\n};\n\nnew ConvertingTask() -\u003e start();",
+      "revId": "a0044539ed72e1c7f2e6c939f11e2608195e26fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
