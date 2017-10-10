@@ -34,6 +34,24 @@
       "revId": "a0044539ed72e1c7f2e6c939f11e2608195e26fe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d91a824_03f33584",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-10T21:57:23Z",
+      "side": 1,
+      "message": "I have to run moc on the cpp file if I put this there. I\u0027ll just put this stuff in another header file that should only be used by record-screen-page.cpp.",
+      "parentUuid": "9a114aa4_9002d4b7",
+      "revId": "a0044539ed72e1c7f2e6c939f11e2608195e26fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
