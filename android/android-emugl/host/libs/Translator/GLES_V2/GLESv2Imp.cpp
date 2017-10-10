@@ -92,6 +92,7 @@ static GLESiface s_glesIface = {
 };
 
 #include <GLcommon/GLESmacros.h>
+#include <memory>
 
 extern "C" {
 
@@ -399,15 +400,20 @@ static void sUpdateFboEmulation(GLESv2Context* ctx) {
 
         // Enable GL_FRAMEBUFFER_SRGB when any framebuffer has SRGB color attachment.
         if (sHasAttachmentWithFormat(ctx, fbObj,
-                    colorAttachments, {GL_SRGB8_ALPHA8}))
+                    colorAttachments, {GL_SRGB8_ALPHA8})) {
             enableSRGB = true;
+            assert(0);
+                    }
 
         // Enable GL_DEPTH_CLAMP when any fbo's
         // GL_DEPTH_ATTACHMENT or GL_DEPTH_STENCIL_ATTACHMENT is of internal format
         // GL_DEPTH_COMPONENT32F or GL_DEPTH32F_STENCIL8.
         if (sHasAttachmentWithFormat(ctx, fbObj,
                     depthAttachments, {GL_DEPTH_COMPONENT32F, GL_DEPTH32F_STENCIL8}))
+                    {
             enableDepth32fClamp = true;
+            assert(0);
+                    }
     }
 
     // TODO: GLES3: snapshot those enable value as well?
@@ -519,20 +525,20 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
 
 GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha){
     GET_CTX();
-    ctx->dispatcher().glBlendColor(red,green,blue,alpha);
+    //ctx->dispatcher().glBlendColor(red,green,blue,alpha);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendEquation( GLenum mode ){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::blendEquationMode(ctx, mode), GL_INVALID_ENUM);
-    ctx->dispatcher().glBlendEquation(mode);
+    //ctx->dispatcher().glBlendEquation(mode);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::blendEquationMode(ctx, modeRGB) &&
                    GLESv2Validate::blendEquationMode(ctx, modeAlpha)), GL_INVALID_ENUM);
-    ctx->dispatcher().glBlendEquationSeparate(modeRGB,modeAlpha);
+    //ctx->dispatcher().glBlendEquationSeparate(modeRGB,modeAlpha);
 }
 
 GL_APICALL void  GL_APIENTRY glBlendFunc(GLenum sfactor, GLenum dfactor){
@@ -652,6 +658,7 @@ GL_APICALL void  GL_APIENTRY glCompileShader(GLuint shader){
 
 GL_APICALL void  GL_APIENTRY glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid* data)
 {
+    printf("glCompressedTexImage2D\n");
     GET_CTX();
     SET_ERROR_IF(!GLESv2Validate::textureTargetEx(ctx, target),GL_INVALID_ENUM);
     SET_ERROR_IF(level < 0 || imageSize < 0, GL_INVALID_VALUE);
@@ -688,7 +695,7 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
                 SET_ERROR_IF(xoffset % 4, GL_INVALID_OPERATION);
                 SET_ERROR_IF(yoffset % 4, GL_INVALID_OPERATION);
             }
-            SET_ERROR_IF(format != texData->compressedFormat, GL_INVALID_OPERATION);
+            //SET_ERROR_IF(format != texData->compressedFormat, GL_INVALID_OPERATION);
         }
         SET_ERROR_IF(ctx->getMajorVersion() < 3 && !data, GL_INVALID_OPERATION);
         doCompressedTexImage2D(ctx, target, level, format,
@@ -717,7 +724,8 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
 
         if (texData && level == 0) {
             assert(texData->target == GL_TEXTURE_2D ||
-                    texData->target == GL_TEXTURE_CUBE_MAP);
+                    texData->target == GL_TEXTURE_CUBE_MAP ||
+                    texData->target == GL_TEXTURE_2D_MULTISAMPLE);
             if (GLESv2Validate::isCompressedFormat(internalformat)) {
                 texData->compressed = true;
                 texData->compressedFormat = internalformat;
@@ -733,6 +741,8 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             texData->width = width;
             texData->height = height;
             texData->border = border;
+            assert(format);
+            assert(type);
             if (format) texData->format = *format;
             if (type) texData->type = *type;
 
@@ -1188,11 +1198,40 @@ static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
     }
 }
 
+static void s_checkTex() {
+    return;
+    GET_CTX_V2();
+    GLuint programGlobal = ctx->shareGroup()->getGlobalName(
+            NamedObjectType::SHADER_OR_PROGRAM, ctx->getUseProgramName());
+    GLint texLocation = ctx->dispatcher().glGetUniformLocation(programGlobal, "_LightTexture0");
+    if (!ctx->dispatcher().glGetError() &&
+            texLocation >= 0) {
+        int x;
+        if (texLocation == 5) {
+            x = 0;
+        } else if (texLocation == 9) {
+            x = 4;
+        } else {
+            assert(0);
+        }
+        unsigned int tex = ctx->getBindedTexture(x + GL_TEXTURE0, GL_TEXTURE_2D);
+        TextureData* texData = (TextureData*)ctx->shareGroup()->getObjectData(
+                NamedObjectType::TEXTURE,
+                tex);
+        assert(texData);
+        printf("tex ID %d, internal format 0x%x, format 0x%x, type 0x%x "
+                "width %d height %d isCompressed %d\n",
+                (int)tex, texData->internalFormat, texData->format,
+                texData->type, (int)texData->width, (int)texData->height,
+                texData->compressed);
+    }
+}
+
 GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei count){
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
-
+    s_checkTex();
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
         ctx->dispatcher().glDrawArrays(mode,first,count);
@@ -1209,7 +1248,7 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
-
+    s_checkTex();
     if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
         ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode, type);
@@ -2938,6 +2977,10 @@ static int sDetectShaderESSLVersion(GLESv2Context* ctx, const GLchar* const* str
 GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length){
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE);
+    /*printf("Shader %d\n", shader);
+    for (int i = 0; i < (int)count; i++) {
+        printf("%s\n", string[i]);
+    }*/
     if(ctx->shareGroup().get()){
         const GLuint globalShaderName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::SHADER_OR_PROGRAM, shader);
@@ -3107,7 +3150,8 @@ GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloa
         texData->setTexParam(pname, (GLint)param);
     }
 
-    if (sShouldEmulateSwizzles(texData, target, pname)) {
+    if (0) {
+    //if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, (GLint)param);
     } else {
         ctx->dispatcher().glTexParameterf(target,pname,param);
@@ -3125,7 +3169,8 @@ GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const
         texData->setTexParam(pname, (GLint)params[0]);
     }
 
-    if (sShouldEmulateSwizzles(texData, target, pname)) {
+    if (0) {
+    //if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, (GLint)params[0]);
     } else {
         ctx->dispatcher().glTexParameterfv(target,pname,params);
@@ -3142,7 +3187,8 @@ GL_APICALL void  GL_APIENTRY glTexParameteri(GLenum target, GLenum pname, GLint 
         texData->setTexParam(pname, param);
     }
 
-    if (sShouldEmulateSwizzles(texData, target, pname)) {
+    if (0) {
+    //if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, param);
     } else {
         ctx->dispatcher().glTexParameteri(target,pname,param);
@@ -3160,7 +3206,8 @@ GL_APICALL void  GL_APIENTRY glTexParameteriv(GLenum target, GLenum pname, const
     }
 
 
-    if (sShouldEmulateSwizzles(texData, target, pname)) {
+    if (0) {
+    //if (sShouldEmulateSwizzles(texData, target, pname)) {
         sEmulateUserTextureSwizzle(texData, target, pname, params[0]);
     } else {
         ctx->dispatcher().glTexParameteriv(target,pname,params);
@@ -3210,7 +3257,23 @@ GL_APICALL void  GL_APIENTRY glUniform1fv(GLint location, GLsizei count, const G
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1i(GLint location, GLint x){
-    GET_CTX();
+    GET_CTX_V2();
+    GLuint programGlobal = ctx->shareGroup()->getGlobalName(
+            NamedObjectType::SHADER_OR_PROGRAM, ctx->getUseProgramName());
+    GLint texLocation = ctx->dispatcher().glGetUniformLocation(programGlobal, "_LightTexture0");
+    if (!ctx->dispatcher().glGetError() &&
+            texLocation >= 0 && texLocation == location) {
+        printf("location %d tex id %d\n", location, x);
+        /*unsigned int tex = ctx->getBindedTexture(x + GL_TEXTURE0, GL_TEXTURE_2D);
+        NamedObjectPtr objData = ctx->shareGroup()->getNamedObject(NamedObjectType::TEXTURE,
+                tex);
+        assert(objData);
+        TextureData* texData = (TextureData*)objData.get();
+        printf("tex ID %d, internal format 0x%x, format 0x%x, type 0x%x "
+                "isCompressed %d\n",
+                (int)tex, texData->internalFormat, texData->format,
+                texData->type, texData->compressed);*/
+    }
     ctx->dispatcher().glUniform1i(location,x);
 }
 

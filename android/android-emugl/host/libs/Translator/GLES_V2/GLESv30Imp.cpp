@@ -302,14 +302,17 @@ GL_APICALL void GL_APIENTRY glVertexAttribDivisor(GLuint index, GLuint divisor) 
 
 GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count, GLsizei primcount) {
     GET_CTX_V2();
-
+    //return;
+    //printf("drawarraysinstanced\n");
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode)),GL_INVALID_ENUM);
     if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
+        //printf("drawarraysinstanced0\n");
         ctx->dispatcher().glDrawArraysInstanced(mode, first, count, primcount);
         s_glDrawPost(ctx, mode);
     } else {
+        //printf("drawarraysinstanced1\n");
         ctx->drawWithEmulations(
                 GLESv2Context::DrawCallCmd::ArraysInstanced,
                 mode, first, count,
@@ -319,7 +322,8 @@ GL_APICALL void GL_APIENTRY glDrawArraysInstanced(GLenum mode, GLint first, GLsi
 
 GL_APICALL void GL_APIENTRY glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type, const void * indices, GLsizei primcount) {
     GET_CTX_V2();
-
+    //return;
+    //printf("glDrawElementsInstanced\n");
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
 
@@ -559,7 +563,24 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
 
     GLint err = GL_NO_ERROR;
     GLenum format, type;
+    if (internalformat == GL_COMPRESSED_RGB8_ETC2) {
+        internalformat = GL_RGB8;
+    }
+    if (internalformat == GL_COMPRESSED_RGBA8_ETC2_EAC) {
+        internalformat = GL_RGBA8;
+    }
+    /*if (internalformat == GL_COMPRESSED_SRGB8_ETC2) {
+        internalformat = GL_SRGB8;
+    }
+    if (internalformat == GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC) {
+        internalformat = GL_SRGB8_ALPHA8;
+    }*/
+    if (GLESv2Validate::isCompressedFormat(internalformat)) {
+        printf("compressed tex format 0x%x\n", internalformat);
+    }
+    
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
+    //printf("internal format 0x%x\n", internalformat);
     sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     TextureData *texData = getTextureTargetData(target);
@@ -591,6 +612,7 @@ GL_APICALL void GL_APIENTRY glDeleteTransformFeedbacks(GLsizei n, const GLuint *
 
 GL_APICALL void GL_APIENTRY glBindTransformFeedback(GLenum target, GLuint id) {
     GET_CTX_V2();
+    assert(id == 0);
     ctx->dispatcher().glBindTransformFeedback(target, id);
 }
 
@@ -652,6 +674,7 @@ GL_APICALL void GL_APIENTRY glDeleteSamplers(GLsizei n, const GLuint * samplers)
 }
 
 GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
+    return;
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
@@ -662,6 +685,7 @@ GL_APICALL void GL_APIENTRY glBindSampler(GLuint unit, GLuint sampler) {
 }
 
 GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GLfloat param) {
+    return;
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
@@ -675,6 +699,7 @@ GL_APICALL void GL_APIENTRY glSamplerParameterf(GLuint sampler, GLenum pname, GL
 }
 
 GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GLint param) {
+    return;
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(
@@ -688,6 +713,7 @@ GL_APICALL void GL_APIENTRY glSamplerParameteri(GLuint sampler, GLenum pname, GL
 }
 
 GL_APICALL void GL_APIENTRY glSamplerParameterfv(GLuint sampler, GLenum pname, const GLfloat * params) {
+    return;
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);
@@ -696,6 +722,7 @@ GL_APICALL void GL_APIENTRY glSamplerParameterfv(GLuint sampler, GLenum pname, c
 }
 
 GL_APICALL void GL_APIENTRY glSamplerParameteriv(GLuint sampler, GLenum pname, const GLint * params) {
+    return;
     GET_CTX_V2();
     if (ctx->shareGroup().get()) {
         const GLuint globalSampler = ctx->shareGroup()->getGlobalName(NamedObjectType::SAMPLER, sampler);

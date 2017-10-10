@@ -25,6 +25,61 @@
 
 #include <algorithm>
 
+static void write_bmp(int w, int h, int c, const unsigned char* data,
+        const char* filename) {
+    int filesize = 54 + 3 * w * h;  //w is your image width, h is image height, both int
+
+    unsigned char* img = (unsigned char *)malloc(3*w*h);
+
+    for(int i=0; i<w; i++)
+    {
+        for(int j=0; j<h; j++)
+        {
+            unsigned r, g, b;
+            int x=i;
+            int y=(h-1)-j;
+            if (c == 3) {
+                r = data[(i + j * w) * 3];
+                g = data[(i + j * w) * 3 + 1];
+                b = data[(i + j * w) * 3 + 2];
+            } else {
+                assert(c == 1);
+                r = g = b = data[i + j * w];
+            }
+            img[(x+y*w)*3+2] = r;
+            img[(x+y*w)*3+1] = g;
+            img[(x+y*w)*3+0] = b;
+        }
+    }
+
+    unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
+    unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
+    unsigned char bmppad[3] = {0,0,0};
+
+    bmpfileheader[ 2] = (unsigned char)(filesize    );
+    bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
+    bmpfileheader[ 4] = (unsigned char)(filesize>>16);
+    bmpfileheader[ 5] = (unsigned char)(filesize>>24);
+
+    bmpinfoheader[ 4] = (unsigned char)(       w    );
+    bmpinfoheader[ 5] = (unsigned char)(       w>> 8);
+    bmpinfoheader[ 6] = (unsigned char)(       w>>16);
+    bmpinfoheader[ 7] = (unsigned char)(       w>>24);
+    bmpinfoheader[ 8] = (unsigned char)(       h    );
+    bmpinfoheader[ 9] = (unsigned char)(       h>> 8);
+    bmpinfoheader[10] = (unsigned char)(       h>>16);
+    bmpinfoheader[11] = (unsigned char)(       h>>24);
+
+    FILE* f = fopen(filename,"wb");
+    fwrite(bmpfileheader,1,14,f);
+    fwrite(bmpinfoheader,1,40,f);
+    for(int i=0; i<h; i++)
+    {
+        fwrite(img+(w*(h-i-1)*3),3,w,f);
+        fwrite(bmppad,1,(4-(w*3)%4)%4,f);
+    }
+}
+
 static uint32_t s_texAlign(uint32_t v, uint32_t align) {
     uint32_t rem = v % align;
     return rem ? (v + (align - rem)) : v;
@@ -465,6 +520,13 @@ void SaveableTexture::onSave(
                     dispatcher.glGetTexImage(target, level, neededBufferFormat, m_type,
                                              buffer->data());
                 }
+                if (depth == 1 && level == 0 && m_format == GL_RED
+                        && m_type == GL_UNSIGNED_BYTE) {
+                    char nameBuffer[1000];
+                    int len = sprintf(nameBuffer, "tex/tex%d.bmp", m_globalName);
+                    assert(len < 1000);
+                    write_bmp(width, height, 1, buffer->data(), nameBuffer);
+                }
                 saveBuffer(stream, *buffer);
                 if (isGles2Gles()) {
                     width = std::max(width/2, 1);
@@ -516,6 +578,7 @@ void SaveableTexture::onSave(
             }
         }
         dispatcher.glBindTexture(m_target, prevTex);
+        assert(!dispatcher.glGetError());
     } else {
         fprintf(stderr, "Warning: texture target 0x%x not supported\n",
                 m_target);
@@ -641,6 +704,17 @@ void SaveableTexture::restore() {
                                         levelData[level].m_width,
                                         levelData[level].m_height,
                                         m_border, resultFormat, m_type, pixels);
+                            }
+                            if (level == 0 && m_format == GL_RED
+                                    && m_type == GL_UNSIGNED_BYTE) {
+                                assert(m_format == resultFormat);
+                                assert(resultInternalFormat == m_internalFormat);
+                                char nameBuffer[1000];
+                                int len = sprintf(nameBuffer, "tex/tex%db.bmp", m_globalName);
+                                assert(len < 1000);
+                                write_bmp(levelData[level].m_width,
+                                        levelData[level].m_height, 1,
+                                        (const unsigned char*)pixels, nameBuffer);
                             }
                         }
                     }
