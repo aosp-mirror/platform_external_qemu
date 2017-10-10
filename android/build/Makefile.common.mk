@@ -6,6 +6,7 @@ include $(LOCAL_PATH)/android/third_party/libcurl.mk
 include $(LOCAL_PATH)/android/third_party/libuuid.mk
 include $(LOCAL_PATH)/android/third_party/libxml2.mk
 include $(LOCAL_PATH)/android/third_party/mman-win32/libmman-win32.mk
+include $(LOCAL_PATH)/android/third_party/murmurhash/libmurmurhash.mk
 include $(LOCAL_PATH)/android/third_party/libsparse/sources.mk
 include $(LOCAL_PATH)/android/third_party/libselinux/sources.mk
 include $(LOCAL_PATH)/android/third_party/libwebp/sources.mk
