@@ -20,7 +20,7 @@ struct QAndroidRecordScreenAgent;
 class RecordScreenPage : public QWidget {
     Q_OBJECT
 public:
-    enum class RecordState { Ready, Recording, Stopping, Stopped };
+    enum class RecordState { Ready, Recording, Stopping, Stopped, Converting };
 
     explicit RecordScreenPage(QWidget* parent = 0);
     ~RecordScreenPage();
@@ -37,6 +37,8 @@ private slots:
     void updateElapsedTime();
     void stopRecordingStarted();
     void stopRecordingFinished(bool success);
+    void convertingStarted();
+    void convertingFinished(bool success);
 
 public slots:
 
@@ -67,4 +69,22 @@ signals:
 
 private:
     const QAndroidRecordScreenAgent* mRecordScreenAgent;
+};
+
+class ConvertingTask : public QObject {
+    Q_OBJECT
+public:
+    ConvertingTask(const std::string& startFilename,
+                   const std::string& endFilename);
+
+public slots:
+    void run();
+
+signals:
+    void started();
+    void finished(bool success);
+
+private:
+    std::string mStartFilename;
+    std::string mEndFilename;
 };
