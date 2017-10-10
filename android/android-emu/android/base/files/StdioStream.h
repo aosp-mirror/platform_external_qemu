@@ -35,9 +35,9 @@ public:
     virtual ssize_t write(const void* buffer, size_t size) override;
 
     FILE* get() const { return mFile; }
+    void close();
 
 private:
-    void close();
 
     DISALLOW_COPY_AND_ASSIGN(StdioStream);
 
