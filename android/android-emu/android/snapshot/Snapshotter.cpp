@@ -176,7 +176,9 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                  auto snapshot = static_cast<Snapshotter*>(opaque);
 
                  auto& loader = snapshot->mLoader;
-                 if (!loader || loader->status() != OperationStatus::Ok) return;
+                 if (!loader || loader->status() != OperationStatus::Ok) {
+                     return;
+                 }
 
                  auto& ramLoader = loader->ramLoader();
                  if (ramLoader.onDemandEnabled() &&
@@ -215,10 +217,13 @@ void Snapshotter::callCallbacks(Operation op, Stage stage) {
 }
 
 OperationStatus Snapshotter::prepareForSaving(const char* name) {
-    if (mLoader && mLoader->snapshot().name() == name) {
+    if (mLoader && mLoader->snapshot().name() != name) {
         mLoader.clear();
     }
-    mSaver.emplace(name);
+    mSaver.emplace(name,
+                   (mLoader && mLoader->status() != OperationStatus::Error)
+                           ? &mLoader->ramLoader()
+                           : nullptr);
     mSaver->prepare();
     return mSaver->status();
 }
@@ -248,9 +253,14 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Save, Stage::Start);
-    mLoader.clear();
+    if (mLoader && mLoader->snapshot().name() != name) {
+        mLoader.clear();
+    }
     if (!mSaver || isComplete(*mSaver)) {
-        mSaver.emplace(name);
+        mSaver.emplace(name,
+                       (mLoader && mLoader->status() != OperationStatus::Error)
+                               ? &mLoader->ramLoader()
+                               : nullptr);
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);

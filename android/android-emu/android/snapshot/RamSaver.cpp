@@ -14,6 +14,9 @@
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/RamLoader.h"
+
+#include "MurmurHash3.h"
 
 #include <algorithm>
 #include <cassert>
@@ -22,6 +25,12 @@
 
 namespace android {
 namespace snapshot {
+
+static int total = 0;
+static int same = 0;
+static int notyet = 0;
+static int still0 = 0;
+static int samehash = 0;
 
 using android::base::MemStream;
 using android::base::System;
@@ -49,6 +58,38 @@ RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
         });
         mSavingWorker->start();
     }
+}
+
+static RamLoader* prepareLoader(RamLoader& loader) {
+    loader.interrupt();
+    return &loader;
+}
+
+static RamSaver::Flags loaderFlags(const RamLoader& loader) {
+    if (loader.compressed()) {
+        return RamSaver::Flags::Compress;
+    } else {
+        return RamSaver::Flags::None;
+    }
+}
+
+RamSaver::RamSaver(RamLoader& loader, const std::string& fileName)
+    : mLoader(prepareLoader(loader)),
+      mStream(fopen(fileName.c_str(), "rb+")),
+      mStreamFd(fileno(mStream.get())),
+      mFlags(loaderFlags(loader)),
+      mLoaderOnDemand(mLoader->onDemandEnabled()) {
+    if (nonzero(mFlags & Flags::Compress)) {
+        mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
+        mCompressor.emplace(
+                [this](QueuedPageInfo&& pi, const uint8_t* data, int32_t size) {
+                    writePage(pi, data, size);
+                });
+    }
+
+    // Seek to the old index position and start overwriting from there.
+    fseeko64(mStream.get(), loader.indexOffset(), SEEK_SET);
+    mCurrentStreamPos.store(loader.indexOffset(), std::memory_order_relaxed);
 }
 
 RamSaver::~RamSaver() {
@@ -131,15 +172,74 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     ++mIndex.totalPages;
 
+    ++total;
+
     auto ptr = block.ramBlock.hostPtr +
                int64_t(pi.pageIndex) * block.ramBlock.pageSize;
-    if (isBufferZeroed(ptr, block.ramBlock.pageSize)) {
-        page.sizeOnDisk = 0;
+    base::Optional<bool> isZeroed;
+    page.same = false;
+    if (const RamLoader::Page* loaderPage =
+                (mLoader ? mLoader->findPage(pi.blockIndex, block.ramBlock.id,
+                                             pi.pageIndex)
+                         : nullptr)) {
+        if (mLoaderOnDemand &&
+            loaderPage->state.load(std::memory_order_relaxed) <
+                    int(RamLoader::State::Filled)) {
+            // not loaded yet: definitely not changed
+            ++notyet;
+            page.same = true;
+            page.filePos = loaderPage->filePos;
+            page.sizeOnDisk = loaderPage->sizeOnDisk;
+            if (page.sizeOnDisk) {
+                if (mLoader->version() >= 2) {
+                    page.hash = loaderPage->hash;
+                } else {
+                    MurmurHash3_x64_128(ptr, block.ramBlock.pageSize, 0,
+                                        page.hash.data());
+                }
+                page.hashFilled = true;
+            }
+        } else if (loaderPage->sizeOnDisk == 0) {
+            isZeroed = isBufferZeroed(ptr, block.ramBlock.pageSize);
+            if (*isZeroed) {
+                ++still0;
+                page.same = true;
+                page.filePos = page.sizeOnDisk = 0;
+            }
+        } else if (mLoader->version() >= 2) {
+            MurmurHash3_x64_128(ptr, block.ramBlock.pageSize, 0,
+                                page.hash.data());
+            page.hashFilled = true;
+            if (page.hash == loaderPage->hash) {
+                ++samehash;
+                page.same = true;
+                page.filePos = loaderPage->filePos;
+                page.sizeOnDisk = loaderPage->sizeOnDisk;
+            }
+        }
+    } else if (mLoader) {
+        printf("Failed to find page %d/%d\n", pi.blockIndex, pi.pageIndex);
+    }
+    if (page.same) {
+        ++same;
     } else {
-        if (mCompressor) {
-            mCompressor->enqueue(std::move(pi), ptr, block.ramBlock.pageSize);
+        if (!isZeroed) {
+            isZeroed = isBufferZeroed(ptr, block.ramBlock.pageSize);
+        }
+        if (*isZeroed) {
+            page.sizeOnDisk = 0;
         } else {
-            writePage(pi, ptr, block.ramBlock.pageSize);
+            if (!page.hashFilled) {
+                MurmurHash3_x64_128(ptr, block.ramBlock.pageSize, 0,
+                                    page.hash.data());
+                page.hashFilled = true;
+            }
+            if (mCompressor) {
+                mCompressor->enqueue(std::move(pi), ptr,
+                                     block.ramBlock.pageSize);
+            } else {
+                writePage(pi, ptr, block.ramBlock.pageSize);
+            }
         }
     }
 
@@ -195,15 +295,21 @@ void RamSaver::writeIndex() {
                     deltaPos /= b.ramBlock.pageSize;
                 }
                 putDelta(&stream, deltaPos);
+                assert(page.hashFilled);
+                stream.write(page.hash.data(), page.hash.size());
                 prevFilePos = page.filePos;
                 prevPageSizeOnDisk = page.sizeOnDisk;
             }
         }
     }
+
     auto end = ftello64(mStream.get()) + stream.writtenSize();
     mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
-    printf("RAM: index size: %d bytes\n", int(end - start));
+    printf("RAM: index size: %d bytes (%d pages, %d same [not loaded %d; still "
+           "empty %d; same hash %d], %d new)\n",
+           int(end - start), total, same, notyet, still0, samehash,
+           total - same);
 #endif
 
     mStream.write(stream.buffer().data(), stream.buffer().size());
