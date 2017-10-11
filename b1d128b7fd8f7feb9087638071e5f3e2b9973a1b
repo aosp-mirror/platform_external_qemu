@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0da02ca1_8a84b042",
+        "filename": "android/android-emu/android/emulation/FakeRotatingCameraSensor.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-11T21:34:22Z",
+      "side": 1,
+      "message": "nit: please remove the commented code",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 27
+      },
+      "revId": "b1d128b7fd8f7feb9087638071e5f3e2b9973a1b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
