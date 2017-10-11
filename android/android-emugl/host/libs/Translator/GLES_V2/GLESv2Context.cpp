@@ -225,11 +225,19 @@ void GLESv2Context::postLoadRestoreCtx() {
                     }
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
-                    dispatcher.glVertexAttribPointer(glesPointerIte.first,
-                            glesPointer->getSize(),
-                            glesPointer->getType(), glesPointer->isNormalize(),
-                            glesPointer->getStride(),
-                            (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                    if (glesPointer->isIntPointer()) {
+                        dispatcher.glVertexAttribIPointer(glesPointerIte.first,
+                                glesPointer->getSize(),
+                                glesPointer->getType(),
+                                glesPointer->getStride(),
+                                (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                    } else {
+                        dispatcher.glVertexAttribPointer(glesPointerIte.first,
+                                glesPointer->getSize(),
+                                glesPointer->getType(), glesPointer->isNormalize(),
+                                glesPointer->getStride(),
+                                (GLvoid*)(size_t)glesPointer->getBufferOffset());
+                    }
                     break;
                 }
                 case GLESpointer::VALUE:
