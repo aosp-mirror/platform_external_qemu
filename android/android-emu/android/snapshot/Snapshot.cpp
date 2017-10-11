@@ -94,10 +94,6 @@ static bool verifyImageInfo(pb::Image::Type type,
         if (!in.has_size() || in.size() != st.st_size) {
             return false;
         }
-        if (!in.has_modification_time() ||
-            in.modification_time() != st.st_mtime) {
-            return false;
-        }
     }
 
     return true;
@@ -168,6 +164,10 @@ bool Snapshot::verifyHost(const pb::Host& host) {
     if (host.has_hypervisor() && host.hypervisor() != vmConfig.hypervisorType) {
         saveFailure(FailureReason::ConfigMismatchHostHypervisor);
         return false;
+    }
+    // Do not worry about backend if in swiftshader_indirect
+    if (emuglConfig_get_current_renderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT) {
+        return true;
     }
     if (auto gpuString = currentGpuDriverString()) {
         if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
