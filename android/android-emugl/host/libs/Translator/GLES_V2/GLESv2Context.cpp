@@ -261,6 +261,12 @@ void GLESv2Context::postLoadRestoreCtx() {
                 dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
             }
         }
+        for (size_t i = 0; i < vaoIte.second.bindingState.size(); i++) {
+            const BufferBinding& bufferBinding = vaoIte.second.bindingState[i];
+            if (bufferBinding.divisor) {
+                dispatcher.glVertexAttribDivisor(i, bufferBinding.divisor);
+            }
+        }
     }
     if (m_glesMajorVersion >= 3) {
         dispatcher.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
