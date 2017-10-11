@@ -24,6 +24,7 @@
 #include "android/emulation/android_pipe_throttle.h"
 #include "android/emulation/android_pipe_unix.h"
 #include "android/emulation/android_pipe_zero.h"
+#include "android/emulation/FakeRotatingCameraSensor.h"
 #include "android/emulation/Keymaster3.h"
 #include "android/globals.h"
 #include "android/hw-fingerprint.h"
@@ -317,6 +318,7 @@ bool android_emulation_setup(const AndroidConsoleAgents* agents, bool isQemu2) {
     android_init_clipboard_pipe();
     android_init_logcat_pipe();
     android_init_keymaster3();
+    android_init_fake_camera_sensor();
 
     if (android_op_port && android_op_ports) {
         derror("options -port and -ports cannot be used together.");
