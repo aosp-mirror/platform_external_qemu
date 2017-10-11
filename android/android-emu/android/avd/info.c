@@ -1466,6 +1466,7 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
             char *tag = iniFile_getString(i->configIni, TAG_ID, "default");
             if (!strcmp(tag, TAG_ID_CHROMEOS)) {
                 hw->hw_arc = true;
+                str_reset(&hw->hw_cpu_arch, "x86_64");
             }
             AFREE(tag);
         }
