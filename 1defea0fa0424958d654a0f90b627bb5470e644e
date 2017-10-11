@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fa7cd794_8d3e3f74",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-11T17:36:26Z",
+      "side": 1,
+      "message": "break out of the loop here?",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 98,
+        "endChar": 30
+      },
+      "revId": "1defea0fa0424958d654a0f90b627bb5470e644e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da0f9ef5_bf972c5a",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-11T17:36:26Z",
+      "side": 1,
+      "message": "what about using an std::vector\u003cbool\u003e for all pages in each block? vector\u003cbool\u003e is space-optimized and uses a single bit per element, so we need just 128 KB per 4 GB of guest RAM that can be indexed into by page index - that\u0027 much faster and simpler in the code",
+      "range": {
+        "startLine": 300,
+        "startChar": 0,
+        "endLine": 326,
+        "endChar": 5
+      },
+      "revId": "1defea0fa0424958d654a0f90b627bb5470e644e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6889b357_f911b2c3",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 901,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-11T17:36:26Z",
+      "side": 1,
+      "message": "nit: !\u003d 0",
+      "range": {
+        "startLine": 901,
+        "startChar": 69,
+        "endLine": 901,
+        "endChar": 77
+      },
+      "revId": "1defea0fa0424958d654a0f90b627bb5470e644e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
