@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fddc91d0_0bb9e29f",
+        "filename": "android/android-emu/android/snapshot/PageMap.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-12T00:29:00Z",
+      "side": 1,
+      "message": "what about passing a page index here directly? mBitmap[i] \u003d val is simpler, and page index calculation is already a part of RamLoader",
+      "range": {
+        "startLine": 41,
+        "startChar": 18,
+        "endLine": 41,
+        "endChar": 27
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "28ab69ff_765248d3",
+        "filename": "android/android-emu/android/snapshot/PageMap.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-12T00:29:00Z",
+      "side": 1,
+      "message": "this is really sad - we would perform a heavy lock operation for each callback.",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 2
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "429c5986_ebdac7f8",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-12T00:29:00Z",
+      "side": 1,
+      "message": "nit: mDirtyTracking \u003d MemoryAccessWatch::dirtyTrackingSupported();",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 1
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c484be4_f3b2637b",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-12T00:29:00Z",
+      "side": 1,
+      "message": "do we require this address to be on the page start? you could trim it to the page boundary just to make the caller not care",
+      "range": {
+        "startLine": 100,
+        "startChar": 33,
+        "endLine": 100,
+        "endChar": 36
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
