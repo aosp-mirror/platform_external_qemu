@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "a979a0e1_f5a0f29c",
+        "filename": "android/android-emu/android/snapshot/PageMap.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-12T00:41:13Z",
+      "side": 1,
+      "message": "im really tempted to change this to a vector of bytes so there\u0027s no need for locking even though it will take 8x the ram",
+      "parentUuid": "28ab69ff_765248d3",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 2
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "429c5986_ebdac7f8",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 8
@@ -82,6 +106,30 @@
       "writtenOn": "2017-10-12T00:29:00Z",
       "side": 1,
       "message": "do we require this address to be on the page start? you could trim it to the page boundary just to make the caller not care",
+      "range": {
+        "startLine": 100,
+        "startChar": 33,
+        "endLine": 100,
+        "endChar": 36
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "19223cf2_80da81e4",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-12T00:41:13Z",
+      "side": 1,
+      "message": "That\u0027s not required, but at some point someone needs to \u003e\u003e pageShift.",
+      "parentUuid": "8c484be4_f3b2637b",
       "range": {
         "startLine": 100,
         "startChar": 33,

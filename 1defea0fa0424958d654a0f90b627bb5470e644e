@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "8dda068f_c7663946",
+        "filename": "android/android-emu/android/snapshot/MemoryWatch_darwin.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-12T00:41:13Z",
+      "side": 1,
+      "message": "It should be doing that already; if fillPage was called because of a write from the guest, then what happens is read is unprotected here, then when going back to hvf-all.c, write is also unprotected, all done in the same handling of ept fault.",
+      "parentUuid": "91b1a0c6_f429cd79",
+      "range": {
+        "startLine": 83,
+        "startChar": 1,
+        "endLine": 120,
+        "endChar": 13
+      },
+      "revId": "1defea0fa0424958d654a0f90b627bb5470e644e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fa7cd794_8d3e3f74",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-11T17:36:26Z",
       "side": 1,
       "message": "break out of the loop here?",
+      "range": {
+        "startLine": 98,
+        "startChar": 12,
+        "endLine": 98,
+        "endChar": 30
+      },
+      "revId": "1defea0fa0424958d654a0f90b627bb5470e644e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1d1b6571_d8bd8870",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-12T00:41:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fa7cd794_8d3e3f74",
       "range": {
         "startLine": 98,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e784bed8_c0c244de",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 326,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-12T00:41:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da0f9ef5_bf972c5a",
+      "range": {
+        "startLine": 300,
+        "startChar": 0,
+        "endLine": 326,
+        "endChar": 5
+      },
+      "revId": "1defea0fa0424958d654a0f90b627bb5470e644e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6889b357_f911b2c3",
         "filename": "target-i386/hvf-all.c",
         "patchSetId": 6
@@ -82,6 +154,30 @@
       "writtenOn": "2017-10-11T17:36:26Z",
       "side": 1,
       "message": "nit: !\u003d 0",
+      "range": {
+        "startLine": 901,
+        "startChar": 69,
+        "endLine": 901,
+        "endChar": 77
+      },
+      "revId": "1defea0fa0424958d654a0f90b627bb5470e644e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51bac7b7_ecf7c1bf",
+        "filename": "target-i386/hvf-all.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 901,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-12T00:41:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6889b357_f911b2c3",
       "range": {
         "startLine": 901,
         "startChar": 69,
