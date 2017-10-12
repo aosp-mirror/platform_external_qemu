@@ -171,12 +171,12 @@ bool Snapshot::verifyHost(const pb::Host& host) {
     }
     if (auto gpuString = currentGpuDriverString()) {
         if (!host.has_gpu_driver() || host.gpu_driver() != *gpuString) {
-            saveFailure(FailureReason::ConfigMismatchHostGpu);
-            return false;
+            fprintf(stderr, "WARNING: change of GPU driver detected. "
+                "Snapshot might be incompatible. Try to load it anyways.\n");
         }
     } else if (host.has_gpu_driver()) {
-        saveFailure(FailureReason::ConfigMismatchHostGpu);
-        return false;
+        fprintf(stderr, "WARNING: change of GPU driver detected. "
+            "Snapshot might be incompatible. Try to load it anyways.\n");
     }
     return true;
 }
