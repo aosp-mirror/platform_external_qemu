@@ -22,6 +22,30 @@
       "revId": "e362abbfe86641bd90009cbc2b97a8e1284807a1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6f8a9c0_d8ea7a93",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-12T00:30:18Z",
+      "side": 0,
+      "message": "We could add a check for system image build number. But depending on use cases we might want to pack system image into avd folder. Let\u0027s talk about it in the migration brainstorm.",
+      "parentUuid": "0b120ae2_d6c4c74d",
+      "range": {
+        "startLine": 97,
+        "startChar": 2,
+        "endLine": 100,
+        "endChar": 9
+      },
+      "revId": "e362abbfe86641bd90009cbc2b97a8e1284807a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
