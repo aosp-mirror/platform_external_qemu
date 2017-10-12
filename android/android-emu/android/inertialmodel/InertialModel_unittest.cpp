@@ -36,7 +36,7 @@ TEST(InertialModel, ConvergeToPosition) {
     mTestSystem.setUnixTime(0);
     InertialModel inertialModel;
     glm::vec3 targetPosition(2.0f, 3.0f, 4.0f);
-    inertialModel.setTargetPosition(targetPosition);
+    inertialModel.setTargetPosition(targetPosition, false);
     // After 1 second, check that we are close to the target position.
     mTestSystem.setUnixTime(1);
     glm::vec3 currentPosition(inertialModel.getPosition());
@@ -77,10 +77,10 @@ TEST(InertialModel, GravityAcceleration) {
         InertialModel inertialModel;
         inertialModel.setTargetRotation(
                 glm::quat(testCase.target_rotation *
-                          (static_cast<float>(M_PI) / 180.0f)));
-        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+                          (static_cast<float>(M_PI) / 180.0f)), false);
+        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
         mTestSystem.setUnixTime(2);
-        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
         EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getPosition());
         glm::vec3 acceleration(inertialModel.getAcceleration());
         EXPECT_NEAR(testCase.expected_acceleration.x,
@@ -99,10 +99,10 @@ TEST(InertialModel, ZeroAcceleration) {
     InertialModel inertialModel;
     glm::vec3 targetPosition(2.0f, 3.0f, 4.0f);
     // at 1 second we move the target to (2, 3, 4)
-    inertialModel.setTargetPosition(targetPosition);
+    inertialModel.setTargetPosition(targetPosition, false);
     mTestSystem.setUnixTime(2);
     // at 2 seconds the target is still at (2, 3, 4);
-    inertialModel.setTargetPosition(targetPosition);
+    inertialModel.setTargetPosition(targetPosition, false);
     // the acceleration is expected to be close to zero at this point.
     glm::vec3 currentPosition(inertialModel.getPosition());
     EXPECT_NEAR(targetPosition.x, currentPosition.x, 0.01f);
@@ -116,7 +116,7 @@ TEST(InertialModel, ConvergeToRotation) {
     mTestSystem.setUnixTime(0);
     InertialModel inertialModel;
     glm::quat targetRotation(glm::vec3(90.f, 90.f, 90.f));
-    inertialModel.setTargetRotation(targetRotation);
+    inertialModel.setTargetRotation(targetRotation, false);
     // After 1 second, check that we are close to the target rotation.
     mTestSystem.setUnixTime(1);
     glm::quat currentRotation(inertialModel.getRotation());
@@ -124,4 +124,36 @@ TEST(InertialModel, ConvergeToRotation) {
     EXPECT_NEAR(targetRotation.x, currentRotation.x, 0.01f);
     EXPECT_NEAR(targetRotation.y, currentRotation.y, 0.01f);
     EXPECT_NEAR(targetRotation.z, currentRotation.z, 0.01f);
+}
+
+TEST(InertialModel, NonInstantaneousRotation) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(0);
+    InertialModel inertialModel;
+    glm::quat startRotation(glm::vec3(0.f, 0.f, 0.f));
+    inertialModel.setTargetRotation(startRotation, true);
+    mTestSystem.setUnixTime(1);
+    glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
+    inertialModel.setTargetRotation(newRotation, false);
+    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    EXPECT_LE(currentGyro.x, -0.01f);
+    EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
+    EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
+}
+
+TEST(InertialModel, InstantaneousRotation) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(0);
+    InertialModel inertialModel;
+    glm::quat startRotation(glm::vec3(0.f, 0.f, 0.f));
+    inertialModel.setTargetRotation(startRotation, true);
+    mTestSystem.setUnixTime(1);
+    glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
+    inertialModel.setTargetRotation(newRotation, true);
+    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    EXPECT_NEAR(currentGyro.x, 0.0, 0.000001f);
+    EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
+    EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
 }
