@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "81e48858_12734114",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 317,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-12T03:52:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4cf8886e_45e9acf8",
+      "range": {
+        "startLine": 317,
+        "startChar": 26,
+        "endLine": 317,
+        "endChar": 41
+      },
+      "revId": "ce77a14aa70547ce4417796dfade6a7e64266916",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7b38f9db_811cebdc",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page_p.h",
         "patchSetId": 2
@@ -42,6 +66,24 @@
     },
     {
       "key": {
+        "uuid": "33d62561_5e1dd7ab",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page_p.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-12T03:52:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b38f9db_811cebdc",
+      "revId": "ce77a14aa70547ce4417796dfade6a7e64266916",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5b927e37_f5ce51a7",
         "filename": "android/android-emu/android/skin/qt/sources.mk",
         "patchSetId": 2
@@ -53,6 +95,30 @@
       "writtenOn": "2017-10-11T23:04:07Z",
       "side": 1,
       "message": "nit: tab",
+      "range": {
+        "startLine": 105,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 1
+      },
+      "revId": "ce77a14aa70547ce4417796dfade6a7e64266916",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "676d0b21_567d5c18",
+        "filename": "android/android-emu/android/skin/qt/sources.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-12T03:52:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5b927e37_f5ce51a7",
       "range": {
         "startLine": 105,
         "startChar": 0,
