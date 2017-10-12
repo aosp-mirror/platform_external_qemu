@@ -24,7 +24,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu-common.h"
-#include "trace.h"
+#include "hw/usb/trace.h"
 #include "hw/usb.h"
 #include "hw/usb/desc.h"
 #include "qemu/error-report.h"
@@ -497,7 +497,7 @@ static void usb_hub_handle_data(USBDevice *dev, USBPacket *p)
     }
 }
 
-static void usb_hub_handle_destroy(USBDevice *dev)
+static void usb_hub_unrealize(USBDevice *dev, Error **errp)
 {
     USBHubState *s = (USBHubState *)dev;
     int i;
@@ -575,7 +575,7 @@ static void usb_hub_class_initfn(ObjectClass *klass, void *data)
     uc->handle_reset   = usb_hub_handle_reset;
     uc->handle_control = usb_hub_handle_control;
     uc->handle_data    = usb_hub_handle_data;
-    uc->handle_destroy = usb_hub_handle_destroy;
+    uc->unrealize      = usb_hub_unrealize;
     set_bit(DEVICE_CATEGORY_BRIDGE, dc->categories);
     dc->fw_name = "hub";
     dc->vmsd = &vmstate_usb_hub;
