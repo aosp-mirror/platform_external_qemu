@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (7034e8 Merge "[record] Move gif conversion to separate thread." int)
 // Copyright 2008 IBM Corporation
 //           2008 Red Hat, Inc.
 // Copyright 2011 Intel Corporation
@@ -1161,3 +1162,5 @@ static void hvf_type_init(void)
 
 type_init(hvf_type_init);
 
+=======
+>>>>>>> BRANCH (ed44cd Merge tag 'v2.9.0' into merge-2.9.0)

@@ -31,7 +31,12 @@ extern "C" {
 #include "qapi/qmp/qstring.h"
 #include "sysemu/hvf.h"
 #include "sysemu/kvm.h"
+<<<<<<< HEAD   (7034e8 Merge "[record] Move gif conversion to separate thread." int)
 #include "sysemu/sysemu.h"
+=======
+#include "sysemu/cpus.h"
+#include "exec/cpu-common.h"
+>>>>>>> BRANCH (ed44cd Merge tag 'v2.9.0' into merge-2.9.0)
 }
 
 #include <string>
@@ -326,7 +331,14 @@ static void set_snapshot_callbacks(void* opaque,
 }
 
 // These are QEMU's functions to check for each specific hypervisor status.
-extern "C" int hax_enabled(void);
+#ifdef CONFIG_HAX
+  extern "C" int hax_enabled(void);
+#else
+  // Under configurations where CONFIG_HAX is not defined we will not
+  // have hax_enabled() defined during link time.
+  #define hax_enabled() (0)
+#endif
+
 extern "C" int hvf_enabled(void);
 
 static void get_vm_config(VmConfiguration* out) {
