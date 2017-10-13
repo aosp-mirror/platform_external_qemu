@@ -15,15 +15,21 @@
 #include "android/base/EnumFlags.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StdioStream.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/snapshot/Compressor.h"
+#include "android/snapshot/GapTracker.h"
+#include "android/snapshot/RamLoader.h"
 #include "android/snapshot/common.h"
 
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <map>
+#include <memory>
+#include <set>
 #include <vector>
 
 namespace android {
@@ -37,15 +43,16 @@ class RamSaver {
     DISALLOW_COPY_AND_ASSIGN(RamSaver);
 
 public:
-    enum class Flags {
+    enum class Flags : uint8_t {
         None = 0,
         Async = 0x1,
         // TODO: add "CopyOnWrite = 0x3  // implies |Async|"
         Compress = 0x4,
     };
 
-    RamSaver(base::StdioStream&& stream, Flags flags);
-    RamSaver(RamLoader& loader, const std::string& fileName);
+    RamSaver(const std::string& fileName,
+             Flags preferredFlags,
+             RamLoader* loader);
     ~RamSaver();
 
     void registerBlock(const RamBlock& block);
@@ -118,6 +125,8 @@ private:
 
     base::Optional<Compressor<QueuedPageInfo>> mCompressor;
     base::Optional<base::WorkerThread<QueuedPageInfo>> mSavingWorker;
+
+    GapTracker mGaps;
 
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
