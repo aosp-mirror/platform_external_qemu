@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "dda2f08e_0794d550",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-13T17:00:13Z",
+      "side": 1,
+      "message": "I didn\u0027t notice any differences in the CPU time when maintaining the map, but overall IO seems faster. Map tries to give away the pages starting from the beginning of the file, so it doesn\u0027t introduce a lot of random IO",
+      "parentUuid": "4b385375_ec97999b",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 45
+      },
+      "revId": "f797ae5ee2a98c489e7b2e16976606e4dee17262",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "95869cc0_1f86eda9",
         "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-13T16:46:18Z",
       "side": 1,
       "message": "Is there going to be another page that can fit in the wasted space? Could we efficiently do some kind of fixed point iteration where we try to minimize the number of gaps, run into a local minimum and call it?",
+      "range": {
+        "startLine": 365,
+        "startChar": 0,
+        "endLine": 365,
+        "endChar": 53
+      },
+      "revId": "f797ae5ee2a98c489e7b2e16976606e4dee17262",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "93c17e67_75f843b2",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-13T17:00:13Z",
+      "side": 1,
+      "message": "this CL adds a very simple gap tracking, to test if it\u0027s worth trying at all. A better solution would be to keep gaps in some kind of interval tree with additional index by size, and merge / split interval on each operation. But the code would be much more complicated",
+      "parentUuid": "95869cc0_1f86eda9",
       "range": {
         "startLine": 365,
         "startChar": 0,
