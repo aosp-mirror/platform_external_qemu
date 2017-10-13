@@ -13,6 +13,7 @@
 
 #include "android/base/TypeTraits.h"
 
+#include <cassert>
 #include <initializer_list>
 #include <type_traits>
 #include <utility>
@@ -345,8 +346,14 @@ public:
     using base_flag::operator bool;
     using base_flag::hasValue;
 
-    T& value() { return get(); }
-    constexpr const T& value() const { return get(); }
+    T& value() {
+        assert(this->constructed());
+        return get();
+    }
+    constexpr const T& value() const {
+        assert(this->constructed());
+        return get();
+    }
 
     // Value getter with fallback
     template <class U = T,
@@ -356,11 +363,23 @@ public:
     }
 
     // Pointer-like operators
-    T& operator*() { return get(); }
-    constexpr const T& operator*() const { return get(); }
+    T& operator*() {
+        assert(this->constructed());
+        return get();
+    }
+    constexpr const T& operator*() const {
+        assert(this->constructed());
+        return get();
+    }
 
-    T* operator->() { return &get(); }
-    constexpr const T* operator->() const { return &get(); }
+    T* operator->() {
+        assert(this->constructed());
+        return &get();
+    }
+    constexpr const T* operator->() const {
+        assert(this->constructed());
+        return &get();
+    }
 
     ~Optional() {
         if (this->constructed()) {
