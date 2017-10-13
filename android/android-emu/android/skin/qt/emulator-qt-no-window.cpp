@@ -14,9 +14,11 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/async/ThreadLooper.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/metrics/metrics.h"
 #include "android/skin/qt/QtLooper.h"
+#include "android/utils/filelock.h"
 
 #include <QObject>
 #include <QThread>
@@ -30,6 +32,8 @@
 #else
 #define D(...) ((void)0)
 #endif
+
+#define derror(msg) do { fprintf(stderr, (msg)); } while (0)
 
 static android::base::LazyInstance<EmulatorQtNoWindow::Ptr> sNoWindowInstance =
         LAZY_INSTANCE_INIT;
@@ -92,7 +96,22 @@ extern "C" void qemu_system_shutdown_request(void);
 void EmulatorQtNoWindow::slot_requestClose() {
     if (mRunning) {
         mRunning = false;
-        if (savevm_on_exit) {
+
+        // we dont want to restore to a state where the
+        // framework is shut down by 'adb reboot -p'
+        // so skip that step when saving vm on exit
+        const bool fastSnapshotV1 =
+            android::featurecontrol::isEnabled(
+                    android::featurecontrol::FastSnapshotV1);
+        if (fastSnapshotV1) {
+            // Tell the system that we are in saving; create a file lock.
+            if (!filelock_create(
+                        avdInfo_getSnapshotLockFilePath(android_avdInfo))) {
+                derror("unable to lock snapshot save on exit!\n");
+            }
+        }
+
+        if (fastSnapshotV1 || savevm_on_exit) {
             qemu_system_shutdown_request();
         } else {
             mAdbInterface->runAdbCommand(

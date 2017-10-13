@@ -34,8 +34,11 @@ static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .rotate = emulator_window_rotate,
         .getRotation =
                 [] {
-                    return emulator_window_get_layout(emulator_window_get())
-                            ->orientation;
+                    EmulatorWindow* window = emulator_window_get();
+                    if (!window) return SKIN_ROTATION_0;
+                    SkinLayout* layout = emulator_window_get_layout(window);
+                    if (!layout) return SKIN_ROTATION_0;
+                    return layout->orientation;
                 },
         .showMessage =
                 [](const char* message, WindowMessageType type, int timeoutMs) {
