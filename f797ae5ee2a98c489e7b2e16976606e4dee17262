@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b385375_ec97999b",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-13T16:46:18Z",
+      "side": 1,
+      "message": "Does this impact I/O performance much? Is it also worth it to find small edits to data in the previous file so that we can get bigger gaps?",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 45
+      },
+      "revId": "f797ae5ee2a98c489e7b2e16976606e4dee17262",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "95869cc0_1f86eda9",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 365,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-13T16:46:18Z",
+      "side": 1,
+      "message": "Is there going to be another page that can fit in the wasted space? Could we efficiently do some kind of fixed point iteration where we try to minimize the number of gaps, run into a local minimum and call it?",
+      "range": {
+        "startLine": 365,
+        "startChar": 0,
+        "endLine": 365,
+        "endChar": 53
+      },
+      "revId": "f797ae5ee2a98c489e7b2e16976606e4dee17262",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
