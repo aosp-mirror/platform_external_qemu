@@ -33,62 +33,62 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader)
     }
     {
         const auto ramFile = PathUtils::join(mSnapshot.dataDir(), "ram.bin");
-        if (!loader || loader->hasError()) {
-            const auto ram = fopen(ramFile.c_str(), "wb");
-            if (!ram) {
-                return;
-            }
-
-            auto flags = RamSaver::Flags::None;
-            const auto compressEnvVar =
-                    System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
-            if (compressEnvVar == "1" || compressEnvVar == "yes" ||
-                compressEnvVar == "true") {
-                VERBOSE_PRINT(snapshot,
-                              "autoconfig: enabled snapshot RAM compression from "
-                              "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
-                              compressEnvVar.c_str());
-                flags |= RamSaver::Flags::Compress;
-            } else if (compressEnvVar == "0" || compressEnvVar == "no" ||
-                compressEnvVar == "false") {
-                // don't enable compression
-            } else {
-                // Check if it's faster to save RAM with compression. Currently
-                // the heuristics are as following:
-                // 1. Gather three variables: free RAM, number of CPU cores and
-                //    the disk kind.
-                // 2. Bad cases for uncompressed snapshots: little free RAM
-                //    and HDD disk.
-                // 3. If there's a bad case and we have enough CPU cores (3+), let's
-                //    enable compression.
-                const auto cpuCount = System::get()->getCpuCoreCount();
-                if (cpuCount > 2) {
-                    const auto memUsage = System::get()->getMemUsage();
-                    if (memUsage.avail_phys_memory < 1536 * 1024 * 1024) {
+        auto flags = RamSaver::Flags::None;
+        const auto compressEnvVar =
+                System::get()->envGet("ANDROID_SNAPSHOT_COMPRESS");
+        if (compressEnvVar == "1" || compressEnvVar == "yes" ||
+            compressEnvVar == "true") {
+            VERBOSE_PRINT(snapshot,
+                          "autoconfig: enabled snapshot RAM compression from "
+                          "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
+                          compressEnvVar.c_str());
+            flags |= RamSaver::Flags::Compress;
+        } else if (compressEnvVar == "0" || compressEnvVar == "no" ||
+                   compressEnvVar == "false") {
+            // don't enable compression
+            VERBOSE_PRINT(snapshot,
+                          "autoconfig: forced no snapshot RAM compression from "
+                          "environment [ANDROID_SNAPSHOT_COMPRESS=%s]",
+                          compressEnvVar.c_str());
+        } else {
+            // Check if it's faster to save RAM with compression. Currently
+            // the heuristics are as following:
+            // 1. Gather three variables: free RAM, number of CPU cores and
+            //    the disk kind.
+            // 2. Bad cases for uncompressed snapshots: little free RAM
+            //    and HDD disk.
+            // 3. If there's a bad case and we have enough CPU cores (3+), let's
+            //    enable compression.
+            const auto cpuCount = System::get()->getCpuCoreCount();
+            if (cpuCount > 2) {
+                const auto memUsage = System::get()->getMemUsage();
+                if (memUsage.avail_phys_memory < 1536 * 1024 * 1024) {
+                    flags |= RamSaver::Flags::Compress;
+                    VERBOSE_PRINT(
+                            snapshot,
+                            "Enabling RAM compression: only %u MB of free RAM",
+                            unsigned(memUsage.avail_phys_memory /
+                                     (1024 * 1024)));
+                } else {
+                    // Disk kind calculation is potentially the slowest: do it
+                    // last.
+                    const auto diskKind =
+                            System::get()->pathDiskKind(mSnapshot.dataDir());
+                    if (diskKind.valueOr(System::DiskKind::Ssd) ==
+                        System::DiskKind::Hdd) {
                         flags |= RamSaver::Flags::Compress;
                         VERBOSE_PRINT(
                                 snapshot,
-                                "Enabling RAM compression: only %u MB of free RAM",
-                                unsigned(memUsage.avail_phys_memory /
-                                         (1024 * 1024)));
-                    } else {
-                        // Disk kind calculation is potentially the slowest: do it
-                        // last.
-                        const auto diskKind = System::get()->diskKind(fileno(ram));
-                        if (diskKind.valueOr(System::DiskKind::Ssd) ==
-                            System::DiskKind::Hdd) {
-                            flags |= RamSaver::Flags::Compress;
-                            VERBOSE_PRINT(
-                                    snapshot,
-                                    "Enabling RAM compression: snapshot is on HDD");
-                        }
+                                "Enabling RAM compression: snapshot is on HDD");
                     }
                 }
-                mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
             }
-        } else {
-            loader->interrupt();
-            mRamSaver.emplace(*loader, ramFile);
+        }
+        const bool tryIncremental = loader && !loader->hasError();
+        mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr);
+        if (mRamSaver->hasError()) {
+            mRamSaver.clear();
+            return;
         }
     }
 
@@ -108,8 +108,8 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader)
 }
 
 Saver::~Saver() {
-    const bool deleteDirectory = mStatus != OperationStatus::Ok &&
-                                 (mRamSaver || mTextureSaver);
+    const bool deleteDirectory =
+            mStatus != OperationStatus::Ok && (mRamSaver || mTextureSaver);
     mRamSaver.clear();
     mTextureSaver.reset();
     if (deleteDirectory) {
@@ -117,7 +117,9 @@ Saver::~Saver() {
     }
 }
 
-ITextureSaverPtr Saver::textureSaver() const { return mTextureSaver; }
+ITextureSaverPtr Saver::textureSaver() const {
+    return mTextureSaver;
+}
 
 void Saver::prepare() {
     // TODO: run asynchronous saving preparation here (e.g. screenshot,
