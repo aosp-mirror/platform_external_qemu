@@ -139,14 +139,6 @@ void RamLoader::zeroOutPage(const Page& page) {
     }
 }
 
-// Read a (usually) small delta using the same algorithm as in RamSaver's
-// putDelta() function.
-static int64_t getDelta(base::Stream* stream) {
-    auto num = stream->getPackedNum();
-    auto sign = num & 1;
-    return sign ? -int64_t(num >> 1) : (num >> 1);
-}
-
 bool RamLoader::readIndex() {
 #if SNAPSHOT_PROFILE > 1
     auto start = base::System::get()->getHighResTimeUs();
@@ -194,6 +186,10 @@ bool RamLoader::readIndex() {
                        &prevPageSizeOnDisk);
     }
 
+    if (mVersion > 1) {
+        mGaps.load(stream);
+    }
+
 #if SNAPSHOT_PROFILE > 1
     printf("readIndex() time: %.03f\n",
            (base::System::get()->getHighResTimeUs() - start) / 1000.0);
@@ -231,7 +227,7 @@ void RamLoader::readBlockPages(base::Stream* stream,
         } else {
             page.blockIndex = uint16_t(blockIndex);
             page.sizeOnDisk = uint32_t(sizeOnDisk);
-            auto posDelta = getDelta(stream);
+            auto posDelta = stream->getPackedSignedNum();
             if (compressed) {
                 posDelta += prevPageSizeOnDisk;
                 prevPageSizeOnDisk = int32_t(page.sizeOnDisk);
@@ -516,13 +512,9 @@ void RamLoader::fillPageData(Page* pagePtr) {
     auto state = uint8_t(State::Read);
     if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling),
                                             std::memory_order_acquire)) {
-        if (state == uint8_t(State::Read) && !page.data) {
-            page.state.store(uint8_t(State::Filled), std::memory_order_relaxed);
-        } else {
-            while (state < uint8_t(State::Filled)) {
-                base::System::get()->yield();
-                state = page.state.load(std::memory_order_relaxed);
-            }
+        while (state < uint8_t(State::Filled)) {
+            base::System::get()->yield();
+            state = page.state.load(std::memory_order_relaxed);
         }
         return;
     }

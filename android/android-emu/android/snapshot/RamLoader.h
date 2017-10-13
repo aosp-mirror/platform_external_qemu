@@ -18,11 +18,13 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
+#include "android/snapshot/GapTracker.h"
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/common.h"
 
 #include <atomic>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 namespace android {
@@ -58,6 +60,8 @@ public:
     uint64_t indexOffset() const { return mIndexPos; }
 
     const Page* findPage(int blockIndex, const char* id, int pageIndex) const;
+
+    GapTracker releaseGapTracker() { return std::move(mGaps); }
 
 private:
     using Pages = std::vector<Page>;
@@ -120,6 +124,7 @@ private:
     base::Optional<base::ThreadPool<Page*>> mDecompressor;
 
     FileIndex mIndex;
+    GapTracker mGaps;
     uint64_t mDiskSize = 0;
     uint64_t mIndexPos = 0;
     int mVersion = 0;
