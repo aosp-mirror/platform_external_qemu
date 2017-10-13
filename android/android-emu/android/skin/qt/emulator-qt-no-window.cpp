@@ -15,6 +15,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/globals.h"
+#include "android/metrics/metrics.h"
 #include "android/skin/qt/QtLooper.h"
 
 #include <QObject>
@@ -56,7 +57,7 @@ EmulatorQtNoWindow::EmulatorQtNoWindow(QObject* parent)
                      &EmulatorQtNoWindow::slot_clearInstance);
     QObject::connect(this, &EmulatorQtNoWindow::requestClose, this,
                      &EmulatorQtNoWindow::slot_requestClose);
-
+    android_metrics_start_adb_liveness_checker(mAdbInterface.get());
 }
 
 EmulatorQtNoWindow::Ptr EmulatorQtNoWindow::getInstancePtr() {
