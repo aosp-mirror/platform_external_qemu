@@ -78,8 +78,7 @@ private:
     bool mHasError = false;
 
 #if SNAPSHOT_PROFILE > 1
-    android::base::System::WallDuration mStartTime =
-            android::base::System::get()->getHighResTimeUs();
+    android::base::System::WallDuration mStartTime = 0;
 #endif
 };
 
