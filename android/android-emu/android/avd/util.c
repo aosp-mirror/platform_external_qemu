@@ -236,7 +236,7 @@ AvdFlavor propertyFile_getAvdFlavor(const FileData* data) {
 }
 
 bool propertyFile_isGoogleApis(const FileData* data) {
-    const char* google_names[] = {"sdk_google", "google_sdk"};
+    const char* google_names[] = {"sdk_google", "google_sdk", "sdk_gphone"};
     return propertyFile_findProductName(
             data, google_names, ARRAY_SIZE(google_names), false /*prefix*/);
 }
