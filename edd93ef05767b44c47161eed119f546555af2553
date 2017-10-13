@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9e87780_32106b16",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-13T21:36:17Z",
+      "side": 1,
+      "message": "Need to figure out how to force an update call when starting to record so we are not slowing down guest rendering by always having this callback attached.",
+      "range": {
+        "startLine": 185,
+        "startChar": 5,
+        "endLine": 185,
+        "endChar": 31
+      },
+      "revId": "edd93ef05767b44c47161eed119f546555af2553",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af1c3518_905c0f5f",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-13T21:36:17Z",
+      "side": 1,
+      "message": "Need to clean this up on exit.",
+      "range": {
+        "startLine": 203,
+        "startChar": 8,
+        "endLine": 205,
+        "endChar": 25
+      },
+      "revId": "edd93ef05767b44c47161eed119f546555af2553",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
