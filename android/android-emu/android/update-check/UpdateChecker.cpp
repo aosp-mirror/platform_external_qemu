@@ -89,6 +89,26 @@ static size_t curlWriteCallback(char* contents,
     return total;
 }
 
+static size_t curlWriteCallback2(char* contents,
+                                size_t size,
+                                size_t nmemb,
+                                void* userp) {
+    auto& xml = *static_cast<std::string*>(userp);
+    const size_t total = size * nmemb;
+
+    //write to a file
+    FILE* fp = fopen("myimg.zip", "a");
+    if (fp) {
+        fwrite(contents, 1, total, fp);
+        fclose(fp);
+        fp = NULL;
+    } else {
+        fprintf(stderr, "cannot open myimg.zip");
+    }
+    return total;
+}
+
+
 static StringView toOsArchString(int bitness) {
     switch (bitness) {
     case 32:
@@ -100,6 +120,8 @@ static StringView toOsArchString(int bitness) {
         return "unknown";
     }
 }
+
+static bool already_started = false;
 
 class DataLoader final : public IDataLoader {
 public:
@@ -124,6 +146,23 @@ public:
             dwarning("UpdateCheck: Failure: %s", error);
             ::free(error);
         }
+        std::string url2("http://dl.google.com/android/repository//sys-img/google_apis/sysimg_x86-23_r08.zip");
+        std::string xml2;
+        //http://dl.google.com/android/repository//sys-img/google_apis/sysimg_x86-23_r08.zip
+        char* error2 = nullptr;
+        if (already_started == false) {
+            already_started=true;
+            fopen("myimg.zip", "w");
+        fprintf(stderr, "try to download zip file %s\n", url2.c_str());
+        if (!curl_download(url2.c_str(), nullptr, &curlWriteCallback2, &xml2,
+                           &error2)) {
+            dwarning("fail to download %s: Failure: %s\n", url2.c_str(), error2);
+            ::free(error2);
+        } else {
+            fprintf(stderr, "downloaded zip file\n");
+        }
+        }
+
         return xml;
     }
 
@@ -225,6 +264,8 @@ bool UpdateChecker::init() {
 }
 
 bool UpdateChecker::needsCheck() const {
+    return true;
+
     const time_t now = System::get()->getUnixTime();
     // Check only if the previous check was 4+ hours ago
     return now - mTimeStorage->getTime(mDataLoader->getUniqueDataKey()) >=
