@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d155a61c_eabf2706",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-13T21:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c48e5353_68073366",
+      "revId": "15d23f8122e7990f5217f59a0c70da5531dc6e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "21e89e57_b0015cbf",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 1
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "3ca59eda_4eacbf80",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-13T21:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "21e89e57_b0015cbf",
+      "range": {
+        "startLine": 161,
+        "startChar": 19,
+        "endLine": 161,
+        "endChar": 20
+      },
+      "revId": "15d23f8122e7990f5217f59a0c70da5531dc6e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c58e1e9_dad44470",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 1
@@ -53,6 +95,30 @@
       "writtenOn": "2017-09-14T17:12:33Z",
       "side": 1,
       "message": "nit: please declare the variables when you need them, and, preferrably, together with initialization",
+      "range": {
+        "startLine": 163,
+        "startChar": 7,
+        "endLine": 166,
+        "endChar": 20
+      },
+      "revId": "15d23f8122e7990f5217f59a0c70da5531dc6e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8181cdf_48a099fc",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-13T21:33:03Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c58e1e9_dad44470",
       "range": {
         "startLine": 163,
         "startChar": 7,
@@ -112,6 +178,30 @@
     },
     {
       "key": {
+        "uuid": "c3cb7b2f_896edd28",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-13T21:33:03Z",
+      "side": 1,
+      "message": "Need to use the AndroidDisplayUpdateCallback to make sure the frame is not being written to while reading.",
+      "parentUuid": "17b6be32_a0e67088",
+      "range": {
+        "startLine": 171,
+        "startChar": 35,
+        "endLine": 171,
+        "endChar": 49
+      },
+      "revId": "15d23f8122e7990f5217f59a0c70da5531dc6e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d728e53a_1ed02553",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 1
@@ -146,6 +236,30 @@
       "writtenOn": "2017-09-14T17:27:54Z",
       "side": 1,
       "message": "Use a timer to capture is usually what video encoder does.\nHere, most likely, we won\u0027t need to wait at all, the guest frames might be slower than the fps we usually record (such as 30 fps). Josh, can you print some logs to verify if this is the indeed the cast?",
+      "parentUuid": "d728e53a_1ed02553",
+      "range": {
+        "startLine": 184,
+        "startChar": 46,
+        "endLine": 184,
+        "endChar": 53
+      },
+      "revId": "15d23f8122e7990f5217f59a0c70da5531dc6e89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4e74da3e_f23a0476",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-10-13T21:33:03Z",
+      "side": 1,
+      "message": "I\u0027ve changed it to be the same implementation as when recording in host mode, so the encoding time will not effect the sending speed.",
       "parentUuid": "d728e53a_1ed02553",
       "range": {
         "startLine": 184,
