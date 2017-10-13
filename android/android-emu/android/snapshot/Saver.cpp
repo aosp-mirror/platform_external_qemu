@@ -84,8 +84,8 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader)
                         }
                     }
                 }
-                mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
             }
+            mRamSaver.emplace(StdioStream(ram, StdioStream::kOwner), flags);
         } else {
             loader->interrupt();
             mRamSaver.emplace(*loader, ramFile);

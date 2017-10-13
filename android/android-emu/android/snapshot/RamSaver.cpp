@@ -31,6 +31,9 @@ static int same = 0;
 static int notyet = 0;
 static int still0 = 0;
 static int samehash = 0;
+static int appended = 0;
+static int reused = 0;
+static int bytes_wasted = 0;
 
 using android::base::MemStream;
 using android::base::System;
@@ -86,6 +89,8 @@ RamSaver::RamSaver(RamLoader& loader, const std::string& fileName)
                     writePage(pi, data, size);
                 });
     }
+
+    mGapsMap = loader.gapsMap();
 
     // Seek to the old index position and start overwriting from there.
     fseeko64(mStream.get(), loader.indexOffset(), SEEK_SET);
@@ -177,7 +182,9 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     auto ptr = block.ramBlock.hostPtr +
                int64_t(pi.pageIndex) * block.ramBlock.pageSize;
     base::Optional<bool> isZeroed;
+    page.filePos = 0;
     page.same = false;
+    page.hashFilled = false;
     if (const RamLoader::Page* loaderPage =
                 (mLoader ? mLoader->findPage(pi.blockIndex, block.ramBlock.id,
                                              pi.pageIndex)
@@ -216,6 +223,11 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 page.filePos = loaderPage->filePos;
                 page.sizeOnDisk = loaderPage->sizeOnDisk;
             }
+        }
+        if (!page.same && loaderPage->sizeOnDisk != 0) {
+            // Save the old position to reuse it later.
+            base::AutoLock lock(mGapsMapLock);
+            mGapsMap[loaderPage->sizeOnDisk].push_back(loaderPage->filePos);
         }
     } else if (mLoader) {
         printf("Failed to find page %d/%d\n", pi.blockIndex, pi.pageIndex);
@@ -270,7 +282,7 @@ void RamSaver::writeIndex() {
     auto start = mIndex.startPosInFile;
 #endif
 
-    MemStream stream(512 + 2 * mIndex.totalPages);
+    MemStream stream(512 + 16 * mIndex.totalPages + 16 * mGapsMap.size());
     bool compressed = (mIndex.flags & int(IndexFlags::CompressedPages)) != 0;
     stream.putBe32(uint32_t(mIndex.version));
     stream.putBe32(uint32_t(mIndex.flags));
@@ -303,13 +315,30 @@ void RamSaver::writeIndex() {
         }
     }
 
+    stream.putBe32(mGapsMap.size());
+    for (auto&& pair : mGapsMap) {
+        stream.putPackedNum(pair.first);
+        stream.putPackedNum(pair.second.size());
+        int64_t pos = pair.second.front();
+        stream.putBe64(pos);
+        for (auto it = std::next(pair.second.begin()); it != pair.second.end();
+             ++it) {
+            putDelta(&stream, *it - pos);
+            pos = *it;
+        }
+    }
+
     auto end = ftello64(mStream.get()) + stream.writtenSize();
     mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
+    for (auto&& pair : mGapsMap) {
+        bytes_wasted += pair.first * pair.second.size();
+    }
     printf("RAM: index size: %d bytes (%d pages, %d same [not loaded %d; still "
-           "empty %d; same hash %d], %d new)\n",
+           "empty %d; same hash %d], %d new [%d reused, %d bytes wasted, %d "
+           "appended])\n",
            int(end - start), total, same, notyet, still0, samehash,
-           total - same);
+           total - same, reused, bytes_wasted, appended);
 #endif
 
     mStream.write(stream.buffer().data(), stream.buffer().size());
@@ -323,8 +352,33 @@ void RamSaver::writePage(const QueuedPageInfo& pi,
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     page.sizeOnDisk = dataSize;
-    page.filePos =
-            mCurrentStreamPos.fetch_add(dataSize, std::memory_order_relaxed);
+
+    // Try to find a matching gap in the file
+    {
+        base::AutoLock lock(mGapsMapLock);
+        auto sizeIt = mGapsMap.upper_bound(dataSize);
+        if (sizeIt != mGapsMap.begin() &&
+            std::prev(sizeIt)->first == dataSize) {
+            --sizeIt;
+        }
+        if (sizeIt != mGapsMap.end()) {
+            bytes_wasted += sizeIt->first - dataSize;
+            ++reused;
+
+            assert(!sizeIt->second.empty());
+            page.filePos = sizeIt->second.front();
+            sizeIt->second.pop_front();
+            if (sizeIt->second.empty()) {
+                mGapsMap.erase(sizeIt);
+            }
+        }
+    }
+
+    if (page.filePos == 0) {
+        page.filePos = mCurrentStreamPos.fetch_add(dataSize,
+                                                   std::memory_order_relaxed);
+        ++appended;
+    }
     base::pwrite(mStreamFd, dataPtr, size_t(dataSize), page.filePos);
 }
 

@@ -194,6 +194,24 @@ bool RamLoader::readIndex() {
                        &prevPageSizeOnDisk);
     }
 
+    if (mVersion > 1) {
+        auto gapsCount = stream.getBe32();
+        for (int i = 0; i < gapsCount; ++i) {
+            auto size = stream.getPackedNum();
+            assert(size != 0);
+            auto posCount = stream.getPackedNum();
+            assert(posCount != 0);
+            auto& positions = mIndex.gaps[size];
+            auto pos = stream.getBe64();
+            positions.push_back(pos);
+            for (int j = 1; j < posCount; ++j) {
+                auto delta = getDelta(&stream);
+                pos += delta;
+                positions.push_back(pos);
+            }
+        }
+    }
+
 #if SNAPSHOT_PROFILE > 1
     printf("readIndex() time: %.03f\n",
            (base::System::get()->getHighResTimeUs() - start) / 1000.0);
@@ -516,13 +534,9 @@ void RamLoader::fillPageData(Page* pagePtr) {
     auto state = uint8_t(State::Read);
     if (!page.state.compare_exchange_strong(state, uint8_t(State::Filling),
                                             std::memory_order_acquire)) {
-        if (state == uint8_t(State::Read) && !page.data) {
-            page.state.store(uint8_t(State::Filled), std::memory_order_relaxed);
-        } else {
-            while (state < uint8_t(State::Filled)) {
-                base::System::get()->yield();
-                state = page.state.load(std::memory_order_relaxed);
-            }
+        while (state < uint8_t(State::Filled)) {
+            base::System::get()->yield();
+            state = page.state.load(std::memory_order_relaxed);
         }
         return;
     }

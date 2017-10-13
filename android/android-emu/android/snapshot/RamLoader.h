@@ -23,6 +23,8 @@
 
 #include <atomic>
 #include <cstdint>
+#include <deque>
+#include <map>
 #include <vector>
 
 namespace android {
@@ -59,6 +61,9 @@ public:
 
     const Page* findPage(int blockIndex, const char* id, int pageIndex) const;
 
+    using GapsMap = std::map<uint32_t, std::deque<uint64_t>>;
+    const GapsMap& gapsMap() const { return mIndex.gaps; }
+
 private:
     using Pages = std::vector<Page>;
 
@@ -74,6 +79,7 @@ private:
         IndexFlags flags;
         Blocks blocks;
         Pages pages;
+        GapsMap gaps;
 
         void clear();
     };

@@ -15,15 +15,19 @@
 #include "android/base/EnumFlags.h"
 #include "android/base/containers/SmallVector.h"
 #include "android/base/files/StdioStream.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/snapshot/Compressor.h"
+#include "android/snapshot/RamLoader.h"
 #include "android/snapshot/common.h"
 
 #include <array>
 #include <atomic>
 #include <cstdint>
+#include <map>
+#include <set>
 #include <vector>
 
 namespace android {
@@ -118,6 +122,9 @@ private:
 
     base::Optional<Compressor<QueuedPageInfo>> mCompressor;
     base::Optional<base::WorkerThread<QueuedPageInfo>> mSavingWorker;
+
+    RamLoader::GapsMap mGapsMap;
+    base::Lock mGapsMapLock;
 
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
