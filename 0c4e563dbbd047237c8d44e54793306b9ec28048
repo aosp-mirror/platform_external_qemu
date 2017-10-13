@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ddf2f51f_ef1e79ec",
+        "filename": "android/android-emu/android/snapshot/PageMap.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-13T16:25:16Z",
+      "side": 1,
+      "message": "Done (added utility functions to query block and page index in RamLoader as well)",
+      "parentUuid": "fddc91d0_0bb9e29f",
+      "range": {
+        "startLine": 41,
+        "startChar": 18,
+        "endLine": 41,
+        "endChar": 27
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "28ab69ff_765248d3",
         "filename": "android/android-emu/android/snapshot/PageMap.h",
         "patchSetId": 8
@@ -83,6 +107,30 @@
       "writtenOn": "2017-10-12T00:29:00Z",
       "side": 1,
       "message": "nit: mDirtyTracking \u003d MemoryAccessWatch::dirtyTrackingSupported();",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 80,
+        "endChar": 1
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "efda00fd_8e9378e3",
+        "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 80,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-13T16:25:16Z",
+      "side": 1,
+      "message": "Done (distinguished whether tracking is supported versus actually tracking, so the if statement makes more sense here)",
+      "parentUuid": "429c5986_ebdac7f8",
       "range": {
         "startLine": 77,
         "startChar": 0,
