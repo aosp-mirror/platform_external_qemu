@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "4dbaf09f_d41c72de",
+        "filename": "android/android-emu/android/snapshot/PageMap.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-13T16:28:11Z",
+      "side": 1,
+      "message": "Some things about changing to a vector of bytes:\n\n1. Just checking: possible to cause the same problem as with bits? is there some x86 policy of only allowing word aligned accesses to be coherent?\n2. We could more easily add info like \"this page is discardable / load this page first\" etc",
+      "parentUuid": "a979a0e1_f5a0f29c",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 2
+      },
+      "revId": "0c4e563dbbd047237c8d44e54793306b9ec28048",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "429c5986_ebdac7f8",
         "filename": "android/android-emu/android/snapshot/RamLoader.cpp",
         "patchSetId": 8
