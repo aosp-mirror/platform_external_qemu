@@ -87,7 +87,6 @@ struct ConfigInfo {
     EGLint blue_size;
     EGLint alpha_size;
     EGLenum caveat;
-    EGLint config_id;
     EGLint depth_size;
     EGLint frame_buffer_level;
     EGLint max_pbuffer_width;
