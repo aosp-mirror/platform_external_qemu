@@ -283,9 +283,9 @@ bool emuglConfig_init(EmuglConfig* config,
                 D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
         }
         else if (no_window || (blacklisted && !hasUiPreference)) {
-            if (stringVectorContains(sBackendList->names(), "swiftshader")) {
-                D("%s: Headless (-no-window) mode (or blacklisted GPU driver)"
-                  ", using Swiftshader backend\n",
+            if (!no_window &&
+                stringVectorContains(sBackendList->names(), "swiftshader")) {
+                D("%s: Blacklisted GPU driver, using Swiftshader backend\n",
                   __FUNCTION__);
                 gpu_mode = "swiftshader_indirect";
             } else if (!has_guest_renderer) {
