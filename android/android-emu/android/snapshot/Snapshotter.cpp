@@ -210,6 +210,17 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     return mLoader->status();
 }
 
+void Snapshotter::prepareLoaderForSaving(const char* name) {
+    if (!mLoader) {
+        return;
+    }
+    if (mLoader->snapshot().name() != name) {
+        mLoader.clear();
+    } else if (auto texLoader = mLoader->textureLoader()) {
+        texLoader->join();
+    }
+}
+
 void Snapshotter::callCallbacks(Operation op, Stage stage) {
     for (auto&& cb : mCallbacks) {
         cb(op, stage);
@@ -217,9 +228,7 @@ void Snapshotter::callCallbacks(Operation op, Stage stage) {
 }
 
 OperationStatus Snapshotter::prepareForSaving(const char* name) {
-    if (mLoader && mLoader->snapshot().name() != name) {
-        mLoader.clear();
-    }
+    prepareLoaderForSaving(name);
     mSaver.emplace(name,
                    (mLoader && mLoader->status() != OperationStatus::Error)
                            ? &mLoader->ramLoader()
@@ -234,7 +243,7 @@ OperationStatus Snapshotter::save(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
-    if (!strcmp(name, mLoadedSnapshotFile.c_str())) {
+    if (name == mLoadedSnapshotFile) {
         // We're deleting the "loaded" snapshot
         mLoadedSnapshotFile.clear();
     }
@@ -253,9 +262,7 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Save, Stage::Start);
-    if (mLoader && mLoader->snapshot().name() != name) {
-        mLoader.clear();
-    }
+    prepareLoaderForSaving(name);
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.emplace(name,
                        (mLoader && mLoader->status() != OperationStatus::Error)

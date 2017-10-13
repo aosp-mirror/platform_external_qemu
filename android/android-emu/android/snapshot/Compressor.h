@@ -38,6 +38,7 @@ protected:
     // Calculate the preferred number of compress workers.
     static int workerCount();
 
+public:
     // Compress |data| into a newly allocated buffer.
     static std::pair<uint8_t*, int32_t> compress(const uint8_t* data,
                                                  int32_t size);
