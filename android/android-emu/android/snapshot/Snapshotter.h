@@ -80,6 +80,8 @@ private:
     bool onStartDelete(const char* name);
     bool onDeletingComplete(const char* name, int res);
 
+    void prepareLoaderForSaving(const char* name);
+
     QAndroidVmOperations mVmOperations;
     QAndroidEmulatorWindowAgent mWindowAgent;
     android::base::Optional<Saver> mSaver;

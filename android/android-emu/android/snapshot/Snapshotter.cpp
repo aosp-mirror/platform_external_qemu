@@ -16,6 +16,7 @@
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/StudioConfig.h"
 #include "android/snapshot/Quickboot.h"
+#include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -203,10 +204,19 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     return mLoader->status();
 }
 
-OperationStatus Snapshotter::prepareForSaving(const char* name) {
-    if (mLoader && mLoader->snapshot().name() != name) {
-        mLoader.clear();
+void Snapshotter::prepareLoaderForSaving(const char* name) {
+    if (!mLoader) {
+        return;
     }
+    if (mLoader->snapshot().name() != name) {
+        mLoader.clear();
+    } else if (auto texLoader = mLoader->textureLoader()) {
+        texLoader->join();
+    }
+}
+
+OperationStatus Snapshotter::prepareForSaving(const char* name) {
+    prepareLoaderForSaving(name);
     mSaver.emplace(name,
                    (mLoader && mLoader->status() != OperationStatus::Error)
                            ? &mLoader->ramLoader()
@@ -227,9 +237,7 @@ void Snapshotter::deleteSnapshot(const char* name) {
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     mCallback(Operation::Save, Stage::Start);
-    if (mLoader && mLoader->snapshot().name() != name) {
-        mLoader.clear();
-    }
+    prepareLoaderForSaving(name);
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.emplace(name,
                        (mLoader && mLoader->status() != OperationStatus::Error)

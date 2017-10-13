@@ -15,6 +15,7 @@
 #include "android/base/files/preadwrite.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/RamLoader.h"
+#include "android/utils/debug.h"
 
 #include "MurmurHash3.h"
 
@@ -31,6 +32,9 @@ static int same = 0;
 static int notyet = 0;
 static int still0 = 0;
 static int samehash = 0;
+static int appended = 0;
+static int reused = 0;
+static int new_zero = 0;
 
 using android::base::MemStream;
 using android::base::System;
@@ -39,12 +43,59 @@ void RamSaver::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
-    : mStream(std::move(stream)),
-      mStreamFd(fileno(mStream.get())),
-      mFlags(flags) {
-    // Put a placeholder for the index offset right now.
-    mStream.putBe64(0);
+RamSaver::RamSaver(const std::string& fileName,
+                   Flags preferredFlags,
+                   RamLoader* loader)
+    : mStream(nullptr) {
+    bool incremental = false;
+    if (loader) {
+        // check if we're ok to proceed with incremental saving
+        auto currentGaps = loader->releaseGapTracker();
+        const auto wastedSpace = currentGaps.wastedSpace();
+        if (wastedSpace <= loader->diskSize() * 0.30) {
+            incremental = true;
+            mGaps = std::move(currentGaps);
+        }
+        VERBOSE_PRINT(snapshot,
+                      "%s incremental RAM saving (currently wasting %llu"
+                      " bytes of %llu bytes (%.2f%%)",
+                      incremental ? "Enabled" : "Disabled",
+                      (unsigned long long)wastedSpace,
+                      (unsigned long long)loader->diskSize(),
+                      wastedSpace * 100.0 / loader->diskSize());
+    }
+
+    if (incremental) {
+        loader->interrupt();
+        mFlags = loader->compressed() ? RamSaver::Flags::Compress
+                                      : RamSaver::Flags::None;
+        mLoader = loader;
+        mLoaderOnDemand = loader->onDemandEnabled();
+        mStream = base::StdioStream(fopen(fileName.c_str(), "rb+"),
+                                    base::StdioStream::kOwner);
+        if (mStream.get()) {
+            // Seek to the old index position and start overwriting from there.
+            fseeko64(mStream.get(), loader->indexOffset(), SEEK_SET);
+            mCurrentStreamPos.store(loader->indexOffset(),
+                                    std::memory_order_relaxed);
+        }
+    } else {
+        mFlags = preferredFlags;
+        mStream = base::StdioStream(fopen(fileName.c_str(), "wb+"),
+                                    base::StdioStream::kOwner);
+        if (mStream.get()) {
+            // Put a placeholder for the index offset right now.
+            mStream.putBe64(0);
+        }
+    }
+
+    if (!mStream.get()) {
+        mHasError = true;
+        return;
+    }
+
+    mStreamFd = fileno(mStream.get());
+
     if (nonzero(mFlags & Flags::Compress)) {
         mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
         mCompressor.emplace(
@@ -58,38 +109,6 @@ RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
         });
         mSavingWorker->start();
     }
-}
-
-static RamLoader* prepareLoader(RamLoader& loader) {
-    loader.interrupt();
-    return &loader;
-}
-
-static RamSaver::Flags loaderFlags(const RamLoader& loader) {
-    if (loader.compressed()) {
-        return RamSaver::Flags::Compress;
-    } else {
-        return RamSaver::Flags::None;
-    }
-}
-
-RamSaver::RamSaver(RamLoader& loader, const std::string& fileName)
-    : mLoader(prepareLoader(loader)),
-      mStream(fopen(fileName.c_str(), "rb+")),
-      mStreamFd(fileno(mStream.get())),
-      mFlags(loaderFlags(loader)),
-      mLoaderOnDemand(mLoader->onDemandEnabled()) {
-    if (nonzero(mFlags & Flags::Compress)) {
-        mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
-        mCompressor.emplace(
-                [this](QueuedPageInfo&& pi, const uint8_t* data, int32_t size) {
-                    writePage(pi, data, size);
-                });
-    }
-
-    // Seek to the old index position and start overwriting from there.
-    fseeko64(mStream.get(), loader.indexOffset(), SEEK_SET);
-    mCurrentStreamPos.store(loader.indexOffset(), std::memory_order_relaxed);
 }
 
 RamSaver::~RamSaver() {
@@ -177,7 +196,9 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
     auto ptr = block.ramBlock.hostPtr +
                int64_t(pi.pageIndex) * block.ramBlock.pageSize;
     base::Optional<bool> isZeroed;
+    page.filePos = 0;
     page.same = false;
+    page.hashFilled = false;
     if (const RamLoader::Page* loaderPage =
                 (mLoader ? mLoader->findPage(pi.blockIndex, block.ramBlock.id,
                                              pi.pageIndex)
@@ -217,6 +238,9 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 page.sizeOnDisk = loaderPage->sizeOnDisk;
             }
         }
+        if (!page.same && loaderPage->sizeOnDisk != 0) {
+            mGaps.add(loaderPage->filePos, loaderPage->sizeOnDisk);
+        }
     } else if (mLoader) {
         printf("Failed to find page %d/%d\n", pi.blockIndex, pi.pageIndex);
     }
@@ -227,6 +251,7 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
             isZeroed = isBufferZeroed(ptr, block.ramBlock.pageSize);
         }
         if (*isZeroed) {
+            ++new_zero;
             page.sizeOnDisk = 0;
         } else {
             if (!page.hashFilled) {
@@ -253,24 +278,14 @@ base::WorkerProcessingResult RamSaver::savePageInWorker(QueuedPageInfo&& pi) {
     return base::WorkerProcessingResult::Stop;
 }
 
-// Write a (usually) small delta between two numbers to the |stream|. Use the
-// lowest bit as a marker for a negative number.
-static void putDelta(base::Stream* stream, int64_t delta) {
-    if (delta >= 0) {
-        assert((uint64_t(delta) & (1ULL << 63)) == 0);
-        stream->putPackedNum(uint64_t(delta) << 1);
-    } else {
-        assert((uint64_t(-delta) & (1ULL << 63)) == 0);
-        stream->putPackedNum((uint64_t(-delta) << 1) | 1);
-    }
-}
-
 void RamSaver::writeIndex() {
 #if SNAPSHOT_PROFILE > 1
     auto start = mIndex.startPosInFile;
 #endif
 
-    MemStream stream(512 + 2 * mIndex.totalPages);
+    int zeroPages = 0;
+
+    MemStream stream(512 + 16 * mIndex.totalPages);
     bool compressed = (mIndex.flags & int(IndexFlags::CompressedPages)) != 0;
     stream.putBe32(uint32_t(mIndex.version));
     stream.putBe32(uint32_t(mIndex.flags));
@@ -294,25 +309,34 @@ void RamSaver::writeIndex() {
                     assert(deltaPos % b.ramBlock.pageSize == 0);
                     deltaPos /= b.ramBlock.pageSize;
                 }
-                putDelta(&stream, deltaPos);
+                stream.putPackedSignedNum(deltaPos);
                 assert(page.hashFilled);
                 stream.write(page.hash.data(), page.hash.size());
                 prevFilePos = page.filePos;
                 prevPageSizeOnDisk = page.sizeOnDisk;
+            } else {
+                ++zeroPages;
             }
         }
     }
 
+    mGaps.save(stream);
+
     auto end = ftello64(mStream.get()) + stream.writtenSize();
     mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
-    printf("RAM: index size: %d bytes (%d pages, %d same [not loaded %d; still "
-           "empty %d; same hash %d], %d new)\n",
-           int(end - start), total, same, notyet, still0, samehash,
-           total - same);
+    auto bytes_wasted = mGaps.wastedSpace();
+    printf("RAM: index %d bytes (%d pages, %d empty):\n"
+           "\t%d same:\n"
+           "\t\t[not loaded %d; still empty %d; same hash %d]\n"
+           "\t%d new:\n"
+           "\t\t[reused %d, empty %d, appended %d, %d bytes wasted]\n",
+           int(end - start), total, zeroPages, same, notyet, still0, samehash,
+           total - same, reused, new_zero, appended, int(bytes_wasted));
 #endif
 
     mStream.write(stream.buffer().data(), stream.buffer().size());
+    ftruncate(mStreamFd, mDiskSize);
     fseeko64(mStream.get(), 0, SEEK_SET);
     mStream.putBe64(uint64_t(mIndex.startPosInFile));
 }
@@ -323,8 +347,14 @@ void RamSaver::writePage(const QueuedPageInfo& pi,
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
     page.sizeOnDisk = dataSize;
-    page.filePos =
-            mCurrentStreamPos.fetch_add(dataSize, std::memory_order_relaxed);
+    if (auto gapPos = mGaps.allocate(dataSize)) {
+        page.filePos = *gapPos;
+        ++reused;
+    } else {
+        page.filePos = mCurrentStreamPos.fetch_add(dataSize,
+                                                   std::memory_order_relaxed);
+        ++appended;
+    }
     base::pwrite(mStreamFd, dataPtr, size_t(dataSize), page.filePos);
 }
 
