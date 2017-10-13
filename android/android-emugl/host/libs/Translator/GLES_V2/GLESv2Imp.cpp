@@ -2681,7 +2681,17 @@ GL_APICALL GLboolean    GL_APIENTRY glIsShader(GLuint shader){
 GL_APICALL void  GL_APIENTRY glLineWidth(GLfloat width){
     GET_CTX();
     ctx->setLineWidth(width);
+#ifdef __APPLE__
+    // There is no line width setting on Mac core profile.
+    // Line width emulation can be done (replace user's
+    // vertex buffer with thick triangles of our own),
+    // but just have thin lines on Mac for now.
+    if (!ctx->isCoreProfile()) {
+        ctx->dispatcher().glLineWidth(width);
+    }
+#else
     ctx->dispatcher().glLineWidth(width);
+#endif
 }
 
 GL_APICALL void  GL_APIENTRY glLinkProgram(GLuint program){
