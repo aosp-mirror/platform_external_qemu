@@ -36,6 +36,11 @@ TextureSaver::~TextureSaver() {
 }
 
 void TextureSaver::saveTexture(uint32_t texId, const saver_t& saver) {
+#if SNAPSHOT_PROFILE > 1
+    if (!mStartTime) {
+        mStartTime = System::get()->getHighResTimeUs();
+    }
+#endif
     assert(mIndex.textures.end() ==
            std::find_if(mIndex.textures.begin(), mIndex.textures.end(),
                         [texId](FileIndex::Texture& tex) {

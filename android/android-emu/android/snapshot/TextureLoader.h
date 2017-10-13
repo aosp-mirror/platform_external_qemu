@@ -77,9 +77,6 @@ private:
     bool mHasError = false;
     int mVersion = 0;
     uint64_t mDiskSize = 0;
-#if SNAPSHOT_PROFILE > 1
-    android::base::System::WallDuration mStartTime;
-#endif
     LoaderThreadPtr mLoaderThread;
 };
 
