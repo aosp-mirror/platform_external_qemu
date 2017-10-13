@@ -207,7 +207,7 @@ public:
 
 }
 
-void EglDisplay::addSimplePixelFormat(int red_size,
+EglConfig* EglDisplay::addSimplePixelFormat(int red_size,
                                       int green_size,
                                       int blue_size,
                                       int alpha_size) {
@@ -219,7 +219,6 @@ void EglDisplay::addSimplePixelFormat(int red_size,
                     green_size,
                     blue_size,
                     alpha_size,  // RGB_565
-                    EGL_DONT_CARE,
                     EGL_DONT_CARE,
                     16, // Depth
                     EGL_DONT_CARE,
@@ -242,43 +241,44 @@ void EglDisplay::addSimplePixelFormat(int red_size,
 
     if(!doChooseConfigs(dummy, &match, 1))
     {
-        return;
+        return nullptr;
     }
 
-    const EglConfig* config = (EglConfig*)match;
+    EglConfig* config = (EglConfig*)match;
 
     int bSize;
     config->getConfAttrib(EGL_BUFFER_SIZE,&bSize);
 
     if(bSize == 16)
     {
-        return;
-    }
-
-    int max_config_id = 0;
-
-    for(ConfigsList::iterator it = m_configs.begin(); it != m_configs.end() ;++it) {
-        EGLint id;
-        (*it)->getConfAttrib(EGL_CONFIG_ID, &id);
-        if(id > max_config_id)
-            max_config_id = id;
+        return config;
     }
 
     std::unique_ptr<EglConfig> newConfig(
-         new EglConfig(*config,max_config_id+1,
+         new EglConfig(*config,
                        red_size, green_size, blue_size,
                        alpha_size));
 
     if (m_uniqueConfigs.insert(*newConfig).second) {
-        m_configs.emplace_back(newConfig.release());
+        config = newConfig.release();
+        m_configs.emplace_back(config);
     }
+    return config;
 }
 
-void EglDisplay::addMissingConfigs() {
-    addSimplePixelFormat(5, 6, 5, 0); // RGB_565
-    addSimplePixelFormat(8, 8, 8, 0); // RGB_888
-    // (Host GPUs that are newer may not list RGB_888
-    // out of the box.)
+void EglDisplay::addReservedConfigs() {
+    EglConfig* cfg = nullptr;
+    cfg = addSimplePixelFormat(5, 6, 5, 0); // RGB_565
+    assert(cfg);
+    cfg->setId(1);
+
+    cfg = addSimplePixelFormat(8, 8, 8, 0); // RGB_888
+    assert(cfg);
+    cfg->setId(2);
+
+    cfg = addSimplePixelFormat(8, 8, 8, 8); // RGBA_8888
+    assert(cfg);
+    cfg->setId(3);
 }
 
 void EglDisplay::initConfigurations(int renderableType) {
@@ -287,7 +287,13 @@ void EglDisplay::initConfigurations(int renderableType) {
     }
     m_idpy->queryConfigs(renderableType, addConfig, this);
 
-    addMissingConfigs();
+    const int kReservedIdNum = 3;
+    for (size_t i = 0; i < m_configs.size(); i++) {
+        // ID starts with 1
+        m_configs[i]->setId(static_cast<EGLint>(i + 1 + kReservedIdNum));
+    }
+    addReservedConfigs();
+    // It is ok if config id is not continual.
     std::sort(m_configs.begin(), m_configs.end(), CompareEglConfigs::StaticCompare());
 
 #if EMUGL_DEBUG
@@ -392,6 +398,10 @@ EglConfig* EglDisplay::getConfig(EGLint id) const {
         }
     }
     return NULL;
+}
+
+EglConfig* EglDisplay::getDefaultConfig() const {
+    return getConfig(3); // rgba8888
 }
 
 int EglDisplay::getConfigs(EGLConfig* configs,int config_size) const {
@@ -576,7 +586,6 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
          info->blue_size,
          info->alpha_size,
          info->caveat,
-         info->config_id,
          info->depth_size,
          info->frame_buffer_level,
          info->max_pbuffer_width,

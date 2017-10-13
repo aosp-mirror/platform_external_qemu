@@ -173,7 +173,6 @@ void pixelFormatToConfig(int index,
     colorSize = (GLint)getPixelFormatAttrib(index, MAC_COLOR_SIZE);
     info.red_size = info.green_size = info.blue_size = (colorSize / 4);
 
-    info.config_id = (EGLint) index;
     info.frmt = new MacPixelFormat(
             index, info.red_size, info.green_size, info.blue_size);
 

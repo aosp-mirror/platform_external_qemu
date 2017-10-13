@@ -24,7 +24,6 @@ EglConfig::EglConfig(EGLint     red_size,
                      EGLint     alpha_size,
                      EGLenum    caveat,
                      EGLint     conformant,
-                     EGLint     config_id,
                      EGLint     depth_size,
                      EGLint     frame_buffer_level,
                      EGLint     max_pbuffer_width,
@@ -55,8 +54,6 @@ EglConfig::EglConfig(EGLint     red_size,
         m_bind_to_tex_rgb(EGL_FALSE), //not supported for now
         m_bind_to_tex_rgba(EGL_FALSE), //not supported for now
         m_caveat(caveat),
-        m_config_id(config_id),
-        m_native_config_id(config_id),
         m_frame_buffer_level(frame_buffer_level),
         m_depth_size(depth_size),
         m_max_pbuffer_width(max_pbuffer_width),
@@ -92,7 +89,6 @@ EglConfig::EglConfig(EGLint     red_size,
                      EGLint     blue_size,
                      EGLint     alpha_size,
                      EGLenum    caveat,
-                     EGLint     config_id,
                      EGLint     depth_size,
                      EGLint     frame_buffer_level,
                      EGLint     max_pbuffer_width,
@@ -119,8 +115,6 @@ EglConfig::EglConfig(EGLint     red_size,
         m_bind_to_tex_rgb(EGL_FALSE), //not supported for now
         m_bind_to_tex_rgba(EGL_FALSE), //not supported for now
         m_caveat(caveat),
-        m_config_id(config_id),
-        m_native_config_id(config_id),
         m_frame_buffer_level(frame_buffer_level),
         m_depth_size(depth_size),
         m_max_pbuffer_width(max_pbuffer_width),
@@ -161,7 +155,6 @@ EglConfig::EglConfig(const EglConfig& conf) :
         m_bind_to_tex_rgba(conf.m_bind_to_tex_rgba),
         m_caveat(conf.m_caveat),
         m_config_id(conf.m_config_id),
-        m_native_config_id(conf.m_native_config_id),
         m_frame_buffer_level(conf.m_frame_buffer_level),
         m_depth_size(conf.m_depth_size),
         m_max_pbuffer_width(conf.m_max_pbuffer_width),
@@ -191,7 +184,6 @@ EglConfig::EglConfig(const EglConfig& conf) :
 
 
 EglConfig::EglConfig(const EglConfig& conf,
-                     EGLint config_id,
                      EGLint red_size,
                      EGLint green_size,
                      EGLint blue_size,
@@ -204,8 +196,6 @@ EglConfig::EglConfig(const EglConfig& conf,
         m_bind_to_tex_rgb(conf.m_bind_to_tex_rgb),
         m_bind_to_tex_rgba(conf.m_bind_to_tex_rgba),
         m_caveat(conf.m_caveat),
-        m_config_id(config_id),
-        m_native_config_id(conf.m_native_config_id),
         m_frame_buffer_level(conf.m_frame_buffer_level),
         m_depth_size(conf.m_depth_size),
         m_max_pbuffer_width(conf.m_max_pbuffer_width),
@@ -629,7 +619,7 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
 
    EGLint renderableType = dummy.m_renderable_type;
    // HACK: ANGLE does not support gles1
-   if (EglGlobalInfo::isEgl2Egl()) {
+   if (EglGlobalInfo::isEgl2Egl() && renderableType != EGL_DONT_CARE) {
        renderableType &= ~(EGLint)EGL_OPENGL_ES_BIT;
    }
    if (renderableType != EGL_DONT_CARE &&

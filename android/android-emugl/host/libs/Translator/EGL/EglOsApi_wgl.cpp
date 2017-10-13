@@ -819,7 +819,6 @@ void pixelFormatToConfig(WinGlobals* globals,
     info.depth_size = frmt->cDepthBits;
     info.stencil_size = frmt->cStencilBits;
 
-    info.config_id = (EGLint) index;
     info.frmt = new WinPixelFormat(frmt, index);
 
     if (!globals->getDefaultNontrivialDC() &&

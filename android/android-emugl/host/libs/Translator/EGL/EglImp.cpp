@@ -756,7 +756,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
             }
         }
     }
-    EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,conformant,config_id,depth_size,
+    EglConfig dummy(red_size,green_size,blue_size,alpha_size,caveat,conformant,depth_size,
                     frame_buffer_level,0,0,0,native_renderable,renderable_type,0,native_visual_type,
                     sample_buffers_num, samples_per_pixel,stencil_size,luminance_size,wanted_buffer_size,
                     surface_type,transparent_type,trans_red_val,trans_green_val,trans_blue_val,recordable_android, framebuffer_target_android,
