@@ -71,12 +71,7 @@ public:
 
     // Return the EGL_CONFIG_ID value.
     EGLint id() const { return m_config_id; }
-
-    // Return the native configuration id. By default, this is the same as id()
-    // Except if the EglConfig was created with the overriding copy-constructor
-    // below. In which case nativeId() is the id() value of the source
-    // EglConfig, while id() will return the overriden value.
-    EGLint nativeId() const { return m_native_config_id; }
+    void setId(EGLint configId) { m_config_id = configId; }
 
     // Return the native pixel format for this config.
     EglOS::PixelFormat* nativeFormat() const { return m_nativeFormat; }
@@ -87,7 +82,6 @@ public:
               EGLint alpha_size,
               EGLenum  caveat,
               EGLint  conformant,
-              EGLint config_id,
               EGLint depth_size,
               EGLint frame_buffer_level,
               EGLint max_pbuffer_width,
@@ -117,7 +111,6 @@ public:
               EGLint blue_size,
               EGLint alpha_size,
               EGLenum  caveat,
-              EGLint config_id,
               EGLint depth_size,
               EGLint frame_buffer_level,
               EGLint max_pbuffer_width,
@@ -145,7 +138,6 @@ public:
     // an EglConfig instance where nativeId() and id() return different
     // values (see comment for nativeId()).
     EglConfig(const EglConfig& conf,
-              EGLint config_id,
               EGLint red_size,
               EGLint green_size,
               EGLint blue_size,
@@ -177,8 +169,7 @@ private:
     const EGLBoolean  m_bind_to_tex_rgb;
     const EGLBoolean  m_bind_to_tex_rgba;
     const EGLenum     m_caveat;
-    const EGLint      m_config_id;
-    const EGLint      m_native_config_id;
+    EGLint            m_config_id = EGL_DONT_CARE;
     const EGLint      m_frame_buffer_level;
     const EGLint      m_depth_size;
     const EGLint      m_max_pbuffer_width;

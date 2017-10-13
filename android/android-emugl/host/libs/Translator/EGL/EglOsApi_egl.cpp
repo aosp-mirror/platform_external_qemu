@@ -273,7 +273,6 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
     for (int i = 0; i < numConfigs; i++) {
         const EGLConfig cfg = configs.get()[i];
         ConfigInfo configInfo;
-        configInfo.config_id = i;
         // We do not have recordable_android
         configInfo.recordable_android = 0;
         EGLint _renderableType;
