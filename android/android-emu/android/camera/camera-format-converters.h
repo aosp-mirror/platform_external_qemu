@@ -32,42 +32,72 @@ ANDROID_BEGIN_HEADER
 
 /* Checks if conversion between two pixel formats is available.
  * Param:
- *  from - Pixel format to convert from.
- *  to - Pixel format to convert to.
+ *  |from| - Pixel format to convert from.
+ *  |to| - Pixel format to convert to.
  * Return:
  *  boolean: 1 if converter is available, or 0 if no conversion exists.
  */
 extern int has_converter(uint32_t from, uint32_t to);
 
-/* Converts a frame into multiple framebuffers.
- * When camera service replies to a framebuffer request from the client, it
- * usualy sends two framebuffers in the reply: one for video, and another for
- * preview window. Since these two framebuffers have different pixel formats
- * (most of the time), we need to do two conversions for each frame received from
- * the camera. This is the main intention behind this routine: to have a one call
- * that produces as many conversions as needed.
+/* Converts a frame into multiple framebuffers using a slow-but-robust method
+ * that supports a larger list of formats.  If convert_frame is unable to
+ * perform a conversion, it falls back to this function.
+ *
  * Param:
- *  frame - Frame to convert.
- *  pixel_format - Defines pixel format for the converting framebuffer.
- *  framebuffer_size, width, height - Converting framebuffer byte size, width,
- *      and height.
- *  framebuffers - Array of framebuffers where to convert the frame. Size of this
- *      array is defined by the 'fbs_num' parameter. Note that the caller must
- *      make sure that buffers are large enough to contain entire frame captured
- *      from the device.
- *  fbs_num - Number of entries in the 'framebuffers' array.
- *  r_scale, g_scale, b_scale - White balance scale.
- *  exp_comp - Expsoure compensation.
+ *  |src_frame| - Frame to convert.
+ *  |pixel_format| - Defines pixel format for the converting framebuffer.
+ *  |framebuffer_size|, |width|, |height| - Converting framebuffer byte size,
+ *                                          width, and height.
+ *  |framebuffers| - Array of framebuffers where to convert the frame. Size
+ *                   of this array is defined by the 'fbs_num' parameter.
+ *                   Note that the caller must make sure that buffers are
+ *                   large enough to contain entire frame captured from the
+ *                   device.
+ *  |fbs_num| - Number of entries in the 'framebuffers' array.
+ *  |r_scale|, |g_scale|, |_scale| - White balance scale.
+ *  |exp_comp| - Exposure compensation.
  * Return:
  *  0 on success, or non-zero value on failure.
 */
-extern int convert_frame(const void* frame,
+extern int convert_frame_slow(const void* src_frame,
+                              uint32_t pixel_format,
+                              size_t framebuffer_size,
+                              int width,
+                              int height,
+                              ClientFrameBuffer* framebuffers,
+                              int fbs_num,
+                              float r_scale,
+                              float g_scale,
+                              float b_scale,
+                              float exp_comp);
+
+/* Converts a frame into multiple framebuffers.
+ *
+ * When camera service replies to a framebuffer request from the client, it
+ * usualy sends two framebuffers in the reply: one for video, and another for
+ * preview window. Since these two framebuffers have different pixel formats
+ * (most of the time), we need to do two conversions for each frame received
+ * from the camera. This is the main intention behind this routine: to have a
+ * one call that produces as many conversions as needed.
+ *
+ * Param:
+ *  |src_frame| - Frame to convert.
+ *  |pixel_format| - Defines pixel format for the converting framebuffer.
+ *  |framebuffer_size|, |width|, |height| - Converting framebuffer byte size,
+ *                                          width, and height.
+ *  |result_frame| - ClientFrame struct containing an array of framebuffers
+ *                   where to convert the frame.
+ *  |r_scale|, |g_scale|, |_scale| - White balance scale.
+ *  |exp_comp| - Exposure compensation.
+ * Return:
+ *  0 on success, or non-zero value on failure.
+*/
+extern int convert_frame(const void* src_frame,
                          uint32_t pixel_format,
                          size_t framebuffer_size,
                          int width,
                          int height,
-                         ClientFrameBuffer* framebuffers,
-                         int fbs_num,
+                         ClientFrame* result_frame,
                          float r_scale,
                          float g_scale,
                          float b_scale,

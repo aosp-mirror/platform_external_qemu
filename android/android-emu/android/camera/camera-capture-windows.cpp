@@ -578,15 +578,12 @@ cmd_camera_device_stop_capturing(CameraDevice* cd)
 /* Capture frame using frame callback.
  * Parameters and return value for this routine matches _camera_device_read_frame
  */
-static int
-_camera_device_read_frame_callback(WndCameraDevice* wcd,
-                                   ClientFrameBuffer* framebuffers,
-                                   int fbs_num,
-                                   float r_scale,
-                                   float g_scale,
-                                   float b_scale,
-                                   float exp_comp)
-{
+static int _camera_device_read_frame_callback(WndCameraDevice* wcd,
+                                              ClientFrame* result_frame,
+                                              float r_scale,
+                                              float g_scale,
+                                              float b_scale,
+                                              float exp_comp) {
     /* Grab the frame. Note that this call will cause frame callback to be
      * invoked before capGrabFrameNoStop returns. */
     if (!capGrabFrameNoStop(wcd->cap_window) || wcd->last_frame == NULL) {
@@ -596,27 +593,22 @@ _camera_device_read_frame_callback(WndCameraDevice* wcd,
     }
 
     /* Convert framebuffer. */
-    return convert_frame(wcd->last_frame,
-                         wcd->pixel_format,
+    return convert_frame(wcd->last_frame, wcd->pixel_format,
                          wcd->frame_bitmap->bmiHeader.biSizeImage,
                          wcd->frame_bitmap->bmiHeader.biWidth,
-                         wcd->frame_bitmap->bmiHeader.biHeight,
-                         framebuffers, fbs_num,
+                         wcd->frame_bitmap->bmiHeader.biHeight, result_frame,
                          r_scale, g_scale, b_scale, exp_comp);
 }
 
 /* Capture frame using clipboard.
  * Parameters and return value for this routine matches _camera_device_read_frame
  */
-static int
-_camera_device_read_frame_clipboard(WndCameraDevice* wcd,
-                                    ClientFrameBuffer* framebuffers,
-                                    int fbs_num,
-                                    float r_scale,
-                                    float g_scale,
-                                    float b_scale,
-                                    float exp_comp)
-{
+static int _camera_device_read_frame_clipboard(WndCameraDevice* wcd,
+                                               ClientFrame* result_frame,
+                                               float r_scale,
+                                               float g_scale,
+                                               float b_scale,
+                                               float exp_comp) {
     HBITMAP bm_handle;
 
     /* Grab a frame, and post it to the clipboard. Not very effective, but this
@@ -662,24 +654,19 @@ _camera_device_read_frame_clipboard(WndCameraDevice* wcd,
     CloseClipboard();
 
     /* Convert framebuffer. */
-    return convert_frame(wcd->framebuffer,
-                         wcd->pixel_format,
+    return convert_frame(wcd->framebuffer, wcd->pixel_format,
                          wcd->gdi_bitmap->bmiHeader.biSizeImage,
                          wcd->frame_bitmap->bmiHeader.biWidth,
-                         wcd->frame_bitmap->bmiHeader.biHeight,
-                         framebuffers, fbs_num,
+                         wcd->frame_bitmap->bmiHeader.biHeight, result_frame,
                          r_scale, g_scale, b_scale, exp_comp);
 }
 
-static int
-cmd_camera_device_read_frame(CameraDevice* cd,
-                         ClientFrameBuffer* framebuffers,
-                         int fbs_num,
-                         float r_scale,
-                         float g_scale,
-                         float b_scale,
-                         float exp_comp)
-{
+static int cmd_camera_device_read_frame(CameraDevice* cd,
+                                        ClientFrame* result_frame,
+                                        float r_scale,
+                                        float g_scale,
+                                        float b_scale,
+                                        float exp_comp) {
     WndCameraDevice* wcd;
 
     /* Sanity checks. */
@@ -696,11 +683,13 @@ cmd_camera_device_read_frame(CameraDevice* cd,
 
     /* Dispatch the call to an appropriate routine: grabbing a frame using
      * clipboard, or using a frame callback. */
-    return wcd->use_clipboard ?
-        _camera_device_read_frame_clipboard(wcd, framebuffers, fbs_num, r_scale,
-                                            g_scale, b_scale, exp_comp) :
-        _camera_device_read_frame_callback(wcd, framebuffers, fbs_num, r_scale,
-                                           g_scale, b_scale, exp_comp);
+    return wcd->use_clipboard
+                   ? _camera_device_read_frame_clipboard(wcd, result_frame,
+                                                         r_scale, g_scale,
+                                                         b_scale, exp_comp)
+                   : _camera_device_read_frame_callback(wcd, result_frame,
+                                                        r_scale, g_scale,
+                                                        b_scale, exp_comp);
 }
 
 static void
@@ -819,8 +808,7 @@ struct CameraCommand {
         // CAMERA_CMD_READ_FRAME
         struct {
             CameraDevice* device;
-            ClientFrameBuffer* framebuffers;
-            int fbs_num;
+            ClientFrame* result_frame;
             float r_scale;
             float g_scale;
             float b_scale;
@@ -867,10 +855,9 @@ struct CameraCommand {
 
             case CAMERA_CMD_READ_FRAME:
                 result = cmd_camera_device_read_frame(
-                        cmd.read_frame.device, cmd.read_frame.framebuffers,
-                        cmd.read_frame.fbs_num, cmd.read_frame.r_scale,
-                        cmd.read_frame.g_scale, cmd.read_frame.b_scale,
-                        cmd.read_frame.exp_comp);
+                        cmd.read_frame.device, cmd.read_frame.result_frame,
+                        cmd.read_frame.r_scale, cmd.read_frame.g_scale,
+                        cmd.read_frame.b_scale, cmd.read_frame.exp_comp);
                 break;
 
             case CAMERA_CMD_CLOSE:
@@ -971,8 +958,7 @@ int camera_device_stop_capturing(CameraDevice* cd) {
 }
 
 int camera_device_read_frame(CameraDevice* cd,
-                             ClientFrameBuffer* framebuffers,
-                             int fbs_num,
+                             ClientFrame* result_frame,
                              float r_scale,
                              float g_scale,
                              float b_scale,
@@ -980,8 +966,7 @@ int camera_device_read_frame(CameraDevice* cd,
     CameraCommand cmd = {};
     cmd.cmd = CAMERA_CMD_READ_FRAME;
     cmd.read_frame.device = cd;
-    cmd.read_frame.framebuffers = framebuffers;
-    cmd.read_frame.fbs_num = fbs_num;
+    cmd.read_frame.result_frame = result_frame;
     cmd.read_frame.r_scale = r_scale;
     cmd.read_frame.g_scale = g_scale;
     cmd.read_frame.b_scale = b_scale;

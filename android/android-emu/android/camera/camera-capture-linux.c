@@ -977,15 +977,12 @@ camera_device_stop_capturing(CameraDevice* ccd)
     return 0;
 }
 
-int
-camera_device_read_frame(CameraDevice* ccd,
-                         ClientFrameBuffer* framebuffers,
-                         int fbs_num,
-                         float r_scale,
-                         float g_scale,
-                         float b_scale,
-                         float exp_comp)
-{
+int camera_device_read_frame(CameraDevice* ccd,
+                             ClientFrame* result_frame,
+                             float r_scale,
+                             float g_scale,
+                             float b_scale,
+                             float exp_comp) {
     LinuxCameraDevice* cd;
 
     /* Sanity checks. */
@@ -1025,8 +1022,7 @@ camera_device_read_frame(CameraDevice* ccd,
         return convert_frame(buff, cd->actual_pixel_format.pixelformat,
                              cd->actual_pixel_format.sizeimage,
                              cd->actual_pixel_format.width,
-                             cd->actual_pixel_format.height,
-                             framebuffers, fbs_num,
+                             cd->actual_pixel_format.height, result_frame,
                              r_scale, g_scale, b_scale, exp_comp);
     } else {
         /* Dequeue next buffer from the device. */
@@ -1054,8 +1050,7 @@ camera_device_read_frame(CameraDevice* ccd,
                             cd->actual_pixel_format.pixelformat,
                             cd->actual_pixel_format.sizeimage,
                             cd->actual_pixel_format.width,
-                            cd->actual_pixel_format.height,
-                            framebuffers, fbs_num,
+                            cd->actual_pixel_format.height, result_frame,
                             r_scale, g_scale, b_scale, exp_comp);
 
         /* Requeue the buffer back to the device. */

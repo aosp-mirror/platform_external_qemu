@@ -96,8 +96,7 @@ public:
     int startCapturing(uint32_t pixelFormat, int frameWidth, int frameHeight);
     void stopCapturing();
 
-    int readFrame(ClientFrameBuffer* framebuffers,
-                  int fbsNum,
+    int readFrame(ClientFrame* resultFrame,
                   float rScale,
                   float gScale,
                   float bScale,
@@ -193,14 +192,14 @@ void VirtualSceneCameraDevice::stopCapturing() {
     }
 
     mFramebufferData.clear();
+    mFramebufferData.shrink_to_fit();
     mFramebufferWidth = 0;
     mFramebufferHeight = 0;
 
     mEglInitialized = false;
 }
 
-int VirtualSceneCameraDevice::readFrame(ClientFrameBuffer* framebuffers,
-                                        int fbsNum,
+int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
                                         float rScale,
                                         float gScale,
                                         float bScale,
@@ -220,8 +219,8 @@ int VirtualSceneCameraDevice::readFrame(ClientFrameBuffer* framebuffers,
     // Convert frame to the receiving buffers.
     return convert_frame(mFramebufferData.data(), VIRTUALSCENE_PIXEL_FORMAT,
                          mFramebufferData.size(), mFramebufferWidth,
-                         mFramebufferHeight, framebuffers, fbsNum, rScale,
-                         gScale, bScale, expComp);
+                         mFramebufferHeight, resultFrame, rScale, gScale,
+                         bScale, expComp);
 }
 
 bool VirtualSceneCameraDevice::initializeEgl() {
@@ -369,8 +368,7 @@ int camera_virtualscene_stop_capturing(CameraDevice* ccd) {
 }
 
 int camera_virtualscene_read_frame(CameraDevice* ccd,
-                                   ClientFrameBuffer* framebuffers,
-                                   int fbs_num,
+                                   ClientFrame* result_frame,
                                    float r_scale,
                                    float g_scale,
                                    float b_scale,
@@ -381,8 +379,7 @@ int camera_virtualscene_read_frame(CameraDevice* ccd,
         return -1;
     }
 
-    return cd->readFrame(framebuffers, fbs_num, r_scale, g_scale, b_scale,
-                         exp_comp);
+    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp);
 }
 
 void camera_virtualscene_close(CameraDevice* ccd) {

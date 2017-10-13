@@ -113,6 +113,17 @@ typedef struct ClientFrameBuffer {
     void*       framebuffer;
 } ClientFrameBuffer;
 
+/* Defines an array of framebuffers, used to convert the frame into the required
+ * formats. */
+typedef struct ClientFrame {
+    /* Number of entries in the framebuffers array. */
+    uint32_t framebuffers_count;
+    /* Array of framebuffers, the size of this array is defined by
+     * framebuffers_count. Note that the caller must make sure that the buffers
+     * are large enough to contain the entire frame captured from the device. */
+    ClientFrameBuffer* framebuffers;
+} ClientFrame;
+
 /* Describes frame dimensions.
  */
 typedef struct CameraFrameDim {
@@ -179,31 +190,5 @@ typedef struct CameraDevice {
     /* Opaque pointer used by the camera capturing API. */
     void*       opaque;
 } CameraDevice;
-
-/* Returns current time in microseconds. */
-static __inline__ uint64_t
-_get_timestamp(void)
-{
-    struct timeval t;
-    t.tv_sec = t.tv_usec = 0;
-    gettimeofday(&t, NULL);
-    return (uint64_t)t.tv_sec * 1000000LL + t.tv_usec;
-}
-
-/* Sleeps for the given amount of milliseconds */
-static __inline__ void
-_camera_sleep(int millisec)
-{
-    struct timeval t;
-    const uint64_t wake_at = _get_timestamp() + (uint64_t)millisec * 1000;
-    do {
-        const uint64_t stamp = _get_timestamp();
-        if ((stamp / 1000) >= (wake_at / 1000)) {
-            break;
-        }
-        t.tv_sec = (wake_at - stamp) / 1000000;
-        t.tv_usec = (wake_at - stamp) - (uint64_t)t.tv_sec * 1000000;
-    } while (select(0, NULL, NULL, NULL, &t) < 0 && errno == EINTR);
-}
 
 ANDROID_END_HEADER
