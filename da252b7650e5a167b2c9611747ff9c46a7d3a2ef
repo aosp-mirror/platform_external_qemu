@@ -22,6 +22,30 @@
       "revId": "da252b7650e5a167b2c9611747ff9c46a7d3a2ef",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ae16d35d_6cfcead7",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-13T20:47:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "26178260_774fb1e7",
+      "range": {
+        "startLine": 288,
+        "startChar": 23,
+        "endLine": 289,
+        "endChar": 48
+      },
+      "revId": "da252b7650e5a167b2c9611747ff9c46a7d3a2ef",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
