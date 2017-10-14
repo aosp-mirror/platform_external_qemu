@@ -664,16 +664,20 @@ struct CameraClient
     void (*close)(CameraDevice* cd);
 
     /* Buffer allocated for video frames.
-     * Note that memory allocated for this buffer
-     * also contains preview framebuffer. */
+     * Note that memory allocated for this buffer also contains preview
+     * framebuffer and i420 staging framebuffer. */
     uint8_t*            video_frame;
     /* Preview frame buffer.
      * This address points inside the 'video_frame' buffer. */
-    uint16_t*           preview_frame;
+    uint8_t*            preview_frame;
     /* Byte size of the videoframe buffer. */
     size_t              video_frame_size;
     /* Byte size of the preview frame buffer. */
     size_t              preview_frame_size;
+    /* I420 staging frame buffer, used as an intermediate buffer for libyuv. */
+    uint8_t*            i420_staging_frame;
+    /* I420 staging frame buffer size. */
+    size_t              i420_staging_frame_size;
     /* Pixel format required by the guest. */
     uint32_t            pixel_format;
     /* Frame width. */
@@ -1069,6 +1073,13 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
         cc->preview_frame_size = cc->width * cc->height * 4;
     }
 
+    if (!calculate_frame_size(V4L2_PIX_FMT_YUV420, cc->width, cc->height,
+                              &cc->i420_staging_frame_size)) {
+        E("%s: Failed to calculate I420 staging frame size", __FUNCTION__);
+        _qemu_client_reply_ko(qc, "Pixel format is unknown");
+        return;
+    }
+
      /* Make sure that we have a converters between the original camera pixel
      * format and the one that the client expects. Also a converter must exist
      * for the preview window pixel format (RGB32) */
@@ -1083,16 +1094,20 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
     /* Allocate buffer large enough to contain both, video and preview
      * framebuffers. */
     cc->video_frame =
-        (uint8_t*)malloc(cc->video_frame_size + cc->preview_frame_size);
+            (uint8_t*)malloc(cc->video_frame_size + cc->preview_frame_size +
+                             cc->i420_staging_frame_size);
     if (cc->video_frame == NULL) {
-        E("%s: Not enough memory for framebuffers %d + %d",
-          __FUNCTION__, cc->video_frame_size, cc->preview_frame_size);
+        E("%s: Not enough memory for framebuffers %d + %d + %d", __FUNCTION__,
+          cc->video_frame_size, cc->preview_frame_size,
+          cc->i420_staging_frame_size);
         _qemu_client_reply_ko(qc, "Out of memory");
         return;
     }
 
     /* Set framebuffer pointers. */
-    cc->preview_frame = (uint16_t*)(cc->video_frame + cc->video_frame_size);
+    cc->preview_frame = cc->video_frame + cc->video_frame_size;
+    cc->i420_staging_frame =
+            cc->video_frame + cc->video_frame_size + cc->preview_frame_size;
 
     /* Start the camera. */
     if (cc->start_capturing(cc->camera, cc->camera_info->pixel_format,
@@ -1244,6 +1259,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     frame.framebuffers_count = fbs_num;
     frame.framebuffers = fbs;
+    frame.i420_staging_frame = cc->i420_staging_frame;
 
     repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
                             exp_comp);
@@ -1310,7 +1326,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* After that send preview frame (if requested). */
     if (preview_size) {
-        qemud_client_send(qc, (const uint8_t*)cc->preview_frame, preview_size);
+        qemud_client_send(qc, cc->preview_frame, preview_size);
     }
 }
 
