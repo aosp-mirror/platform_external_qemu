@@ -129,18 +129,20 @@ FourCCToInternal(uint32_t cm_pix_format)
 
 /* Captures a frame from the camera device.
  * Param:
- *  framebuffers - Array of framebuffers where to read the frame. Size of this
- *      array is defined by the 'fbs_num' parameter. Note that the caller must
- *      make sure that buffers are large enough to contain entire frame captured
- *      from the device.
- *  fbs_num - Number of entries in the 'framebuffers' array.
+ *  result_frame - ClientFrame struct containing an array of framebuffers where
+ *                 to convert the frame.
  * Return:
  *  0 on success, or non-zero value on failure. There is a special vaule 1
  *  returned from this routine which indicates that frames are not yet available
  *  in the device. The client should respond to this value by repeating the
  *  read, rather than reporting an error.
  */
-- (int)read_frame:(ClientFrameBuffer*)framebuffers:(int)fbs_num:(float)r_scale:(float)g_scale:(float)b_scale:(float)exp_comp;
+- (int)read_frame:(ClientFrame*)
+     result_frame:(int)
+          fbs_num:(float)
+          r_scale:(float)
+          g_scale:(float)
+          b_scale:(float)exp_comp;
 
 @end
 
@@ -301,8 +303,11 @@ FourCCToInternal(uint32_t cm_pix_format)
     }
 }
 
-- (int)read_frame:(ClientFrameBuffer*)framebuffers:(int)fbs_num:(float)r_scale:(float)g_scale:(float)b_scale:(float)exp_comp
-{
+- (int)read_frame:(ClientFrame*)
+     result_frame:(float)
+          r_scale:(float)
+          g_scale:(float)
+          b_scale:(float)exp_comp {
     int res = -1;
 
 
@@ -400,13 +405,10 @@ FourCCToInternal(uint32_t cm_pix_format)
 
     if (pixels != nil) {
         /* Convert framebuffer. */
-        res = convert_frame(
-                scale_output.data,
-                pixel_format,
-                scale_output.rowBytes * scale_output.height,
-                desired_width, desired_height,
-                framebuffers, fbs_num,
-                r_scale, g_scale, b_scale, exp_comp);
+        res = convert_frame(scale_output.data, pixel_format,
+                            scale_output.rowBytes * scale_output.height,
+                            desired_width, desired_height, result_frame,
+                            r_scale, g_scale, b_scale, exp_comp);
     } else if (current_frame != nil) {
         E("%s: Unable to obtain framebuffer", __func__);
         res = -1;
@@ -555,15 +557,12 @@ camera_device_stop_capturing(CameraDevice* cd)
     return 0;
 }
 
-int
-camera_device_read_frame(CameraDevice* cd,
-                         ClientFrameBuffer* framebuffers,
-                         int fbs_num,
-                         float r_scale,
-                         float g_scale,
-                         float b_scale,
-                         float exp_comp)
-{
+int camera_device_read_frame(CameraDevice* cd,
+                             ClientFrame* result_frame,
+                             float r_scale,
+                             float g_scale,
+                             float b_scale,
+                             float exp_comp) {
     MacCameraDevice* mcd;
 
     /* Sanity checks. */
@@ -582,7 +581,11 @@ camera_device_read_frame(CameraDevice* cd,
         if (result) return -1;
         mcd->started = 1;
     }
-    return [mcd->device read_frame:framebuffers:fbs_num:r_scale:g_scale:b_scale:exp_comp];
+    return [mcd->device read_frame:
+                      result_frame:
+                           r_scale:
+                           g_scale:
+                           b_scale:exp_comp];
 }
 
 void

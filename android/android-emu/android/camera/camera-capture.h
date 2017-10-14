@@ -97,23 +97,19 @@ extern int camera_device_stop_capturing(CameraDevice* cd);
  * Param:
  *  cd - Camera descriptor representing a camera device opened in
  *    camera_device_open routine.
- *  framebuffers - Array of framebuffers where to read the frame. Size of this
- *      array is defined by the 'fbs_num' parameter. Note that the caller must
- *      make sure that buffers are large enough to contain entire frame captured
- *      from the device.
- *  fbs_num - Number of entries in the 'framebuffers' array.
+ *  result_frame - ClientFrame struct containing an array of framebuffers
+ *                 where to convert the frame.
  *  r_scale, g_scale, b_scale - White balance scale.
- *  exp_comp - Expsoure compensation.
+ *  exp_comp - Exposure compensation.
  * Return:
- *  0 on success, or non-zero value on failure. There is a special vaule 1
+ *  0 on success, or non-zero value on failure. There is a special value 1
  *  returned from this routine which indicates that frames were not available in
  *  the device. This value is returned on Linux implementation when frame ioctl
  *  has returned EAGAIN error. The client should respond to this value by
  *  repeating the read, rather than reporting an error.
  */
 extern int camera_device_read_frame(CameraDevice* cd,
-                                    ClientFrameBuffer* framebuffers,
-                                    int fbs_num,
+                                    ClientFrame* result_frame,
                                     float r_scale,
                                     float g_scale,
                                     float b_scale,

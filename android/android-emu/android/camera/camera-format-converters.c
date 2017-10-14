@@ -1664,29 +1664,26 @@ _get_pixel_format_descriptor(uint32_t pixel_format)
  * Public API
  *******************************************************************************/
 
-int
-has_converter(uint32_t from, uint32_t to)
-{
+int has_converter(uint32_t from, uint32_t to) {
     if (from == to) {
-        /* Same format: converter esists. */
+        /* Same format: converter exists. */
         return 1;
     }
     return _get_pixel_format_descriptor(from) != NULL &&
            _get_pixel_format_descriptor(to) != NULL;
 }
 
-int
-convert_frame(const void* frame,
-              uint32_t pixel_format,
-              size_t framebuffer_size,
-              int width,
-              int height,
-              ClientFrameBuffer* framebuffers,
-              int fbs_num,
-              float r_scale,
-              float g_scale,
-              float b_scale,
-              float exp_comp)
+int convert_frame_slow(const void* src_frame,
+                       uint32_t pixel_format,
+                       size_t framebuffer_size,
+                       int width,
+                       int height,
+                       ClientFrameBuffer* framebuffers,
+                       int fbs_num,
+                       float r_scale,
+                       float g_scale,
+                       float b_scale,
+                       float exp_comp)
 {
     int n;
     const PIXFormat* src_desc = _get_pixel_format_descriptor(pixel_format);
@@ -1712,12 +1709,12 @@ convert_frame(const void* frame,
             case PIX_FMT_RGB:
                 if (dst_desc->format_sel == PIX_FMT_RGB) {
                     RGBToRGB(src_desc->desc.rgb_desc, dst_desc->desc.rgb_desc,
-                             frame, framebuffers[n].framebuffer, width, height,
-                             r_scale, g_scale, b_scale, exp_comp);
+                             src_frame, framebuffers[n].framebuffer, width,
+                             height, r_scale, g_scale, b_scale, exp_comp);
                 } else if (dst_desc->format_sel == PIX_FMT_YUV) {
                     RGBToYUV(src_desc->desc.rgb_desc, dst_desc->desc.yuv_desc,
-                             frame, framebuffers[n].framebuffer, width, height,
-                             r_scale, g_scale, b_scale, exp_comp);
+                             src_frame, framebuffers[n].framebuffer, width,
+                             height, r_scale, g_scale, b_scale, exp_comp);
                 } else {
                     E("%s: Unexpected destination pixel format %d",
                       __FUNCTION__, dst_desc->format_sel);
@@ -1727,12 +1724,12 @@ convert_frame(const void* frame,
             case PIX_FMT_YUV:
                 if (dst_desc->format_sel == PIX_FMT_RGB) {
                     YUVToRGB(src_desc->desc.yuv_desc, dst_desc->desc.rgb_desc,
-                             frame, framebuffers[n].framebuffer, width, height,
-                             r_scale, g_scale, b_scale, exp_comp);
+                             src_frame, framebuffers[n].framebuffer, width,
+                             height, r_scale, g_scale, b_scale, exp_comp);
                 } else if (dst_desc->format_sel == PIX_FMT_YUV) {
                     YUVToYUV(src_desc->desc.yuv_desc, dst_desc->desc.yuv_desc,
-                             frame, framebuffers[n].framebuffer, width, height,
-                             r_scale, g_scale, b_scale, exp_comp);
+                             src_frame, framebuffers[n].framebuffer, width,
+                             height, r_scale, g_scale, b_scale, exp_comp);
                 } else {
                     E("%s: Unexpected destination pixel format %d",
                       __FUNCTION__, dst_desc->format_sel);
@@ -1741,12 +1738,14 @@ convert_frame(const void* frame,
                 break;
             case PIX_FMT_BAYER:
                 if (dst_desc->format_sel == PIX_FMT_RGB) {
-                    BAYERToRGB(src_desc->desc.bayer_desc, dst_desc->desc.rgb_desc,
-                              frame, framebuffers[n].framebuffer, width, height,
-                              r_scale, g_scale, b_scale, exp_comp);
+                    BAYERToRGB(src_desc->desc.bayer_desc,
+                               dst_desc->desc.rgb_desc, src_frame,
+                               framebuffers[n].framebuffer, width, height,
+                               r_scale, g_scale, b_scale, exp_comp);
                 } else if (dst_desc->format_sel == PIX_FMT_YUV) {
-                    BAYERToYUV(src_desc->desc.bayer_desc, dst_desc->desc.yuv_desc,
-                               frame, framebuffers[n].framebuffer, width, height,
+                    BAYERToYUV(src_desc->desc.bayer_desc,
+                               dst_desc->desc.yuv_desc, src_frame,
+                               framebuffers[n].framebuffer, width, height,
                                r_scale, g_scale, b_scale, exp_comp);
                 } else {
                     E("%s: Unexpected destination pixel format %d",
@@ -1762,4 +1761,21 @@ convert_frame(const void* frame,
     }
 
     return 0;
+}
+
+int convert_frame(const void* src_frame,
+                  uint32_t pixel_format,
+                  size_t framebuffer_size,
+                  int width,
+                  int height,
+                  ClientFrame* result_frame,
+                  float r_scale,
+                  float g_scale,
+                  float b_scale,
+                  float exp_comp) {
+    // TODO: Add libyuv fast-path.
+    return convert_frame_slow(src_frame, pixel_format, framebuffer_size, width,
+                              height, result_frame->framebuffers,
+                              result_frame->framebuffers_count, r_scale,
+                              g_scale, b_scale, exp_comp);
 }

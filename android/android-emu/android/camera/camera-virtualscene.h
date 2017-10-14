@@ -86,18 +86,14 @@ int camera_virtualscene_stop_capturing(CameraDevice* cd);
 //
 // |cd| - Camera descriptor representing a camera device, must have been opened
 //        with the camera_virtualscene_open API.
-// |framebuffers| - Array of framebuffers where to copy the read frame. The size
-//                  of this array is defined by the |fbs_num| parameter. Note
-//                  that the caller must make sure that the buffers are large
-//                  enough to contain the entire frame captured from the device.
-// |fbs_num| - The number of entries in the |framebuffers| array.
+// |result_frame| - ClientFrame struct containing an array of framebuffers
+//                  where to convert the frame.
 // |r_scale|, |g_scale|, |b_scale| - White balance scale.
 // |exp_comp| - Exposure compensation.
 //
 // Returns 0 on success, or non-zero on failure.
 int camera_virtualscene_read_frame(CameraDevice* cd,
-                                   ClientFrameBuffer* framebuffers,
-                                   int fbs_num,
+                                   ClientFrame* result_frame,
                                    float r_scale,
                                    float g_scale,
                                    float b_scale,

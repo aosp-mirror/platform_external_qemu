@@ -656,8 +656,7 @@ struct CameraClient
                            int frame_height);
     int (*stop_capturing)(CameraDevice* cd);
     int (*read_frame)(CameraDevice* cd,
-                      ClientFrameBuffer* framebuffers,
-                      int fbs_num,
+                      ClientFrame* frame,
                       float r_scale,
                       float g_scale,
                       float b_scale,
@@ -813,6 +812,28 @@ _camera_client_create(CameraServiceDesc* csd, const char* param)
  * Camera client queries
  *******************************************************************************/
 
+/* Returns current time in microseconds. */
+static __inline__ uint64_t _get_timestamp(void) {
+    struct timeval t;
+    t.tv_sec = t.tv_usec = 0;
+    gettimeofday(&t, NULL);
+    return (uint64_t)t.tv_sec * 1000000LL + t.tv_usec;
+}
+
+/* Sleeps for the given amount of milliseconds */
+static __inline__ void _camera_sleep(int millisec) {
+    struct timeval t;
+    const uint64_t wake_at = _get_timestamp() + (uint64_t)millisec * 1000;
+    do {
+        const uint64_t stamp = _get_timestamp();
+        if ((stamp / 1000) >= (wake_at / 1000)) {
+            break;
+        }
+        t.tv_sec = (wake_at - stamp) / 1000000;
+        t.tv_usec = (wake_at - stamp) - (uint64_t)t.tv_sec * 1000000;
+    } while (select(0, NULL, NULL, NULL, &t) < 0 && errno == EINTR);
+}
+
 /* Client has queried conection to the camera.
  * Param:
  *  cc - Queried camera client descriptor.
@@ -896,9 +917,9 @@ _camera_client_query_disconnect(CameraClient* cc,
 }
 
 static bool calculate_frame_size(uint32_t format,
-                                       int width,
-                                       int height,
-                                       size_t* frame_size) {
+                                 int width,
+                                 int height,
+                                 size_t* frame_size) {
     int yStride = 0;
     int uvStride = 0;
     switch (format) {
@@ -916,7 +937,7 @@ static bool calculate_frame_size(uint32_t format,
             *frame_size = width * height * 4;
             return true;
         case V4L2_PIX_FMT_RGB24:
-            *frame_size = width * height *3;
+            *frame_size = width * height * 3;
             return true;
         default:
             return false;
@@ -1149,6 +1170,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     uint64_t tick;
     float r_scale = 1.0f, g_scale = 1.0f, b_scale = 1.0f, exp_comp = 1.0f;
     char tmp[256];
+    ClientFrame frame = {};
 
     /* Sanity check. */
     if (cc->video_frame == NULL) {
@@ -1219,7 +1241,11 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* Capture new frame. */
     tick = _get_timestamp();
-    repeat = cc->read_frame(cc->camera, fbs, fbs_num, r_scale, g_scale, b_scale,
+
+    frame.framebuffers_count = fbs_num;
+    frame.framebuffers = fbs;
+
+    repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
                             exp_comp);
 
     /* Note that there is no (known) way how to wait on next frame being
@@ -1237,8 +1263,8 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
            (_get_timestamp() - tick) < 2000000LL) {
         /* Sleep for 10 millisec before repeating the attempt. */
         _camera_sleep(10);
-        repeat = cc->read_frame(cc->camera, fbs, fbs_num, r_scale, g_scale,
-                                b_scale, exp_comp);
+        repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
+                                exp_comp);
     }
     if (repeat == 1 && !cc->frames_cached) {
         /* Waited too long for the first frame. */
@@ -1402,13 +1428,13 @@ _camera_client_close(void* opaque)
 
 /* Connects a client to the camera service.
  * There are two classes of the client that can connect to the service:
- *  - Camera factory that is insterested only in listing camera devices attached
+ *  - Camera factory that is interested only in listing camera devices attached
  *    to the host.
  *  - Camera device emulators that attach to the actual camera devices.
  * The distinction between these two classes is made by looking at extra
- * parameters passed in client_param variable. If it's NULL, or empty, the client
- * connects to a camera factory. Otherwise, parameters describe the camera device
- * the client wants to connect to.
+ * parameters passed in client_param variable. If it's NULL, or empty, the
+ * client connects to a camera factory. Otherwise, parameters describe the
+ * camera device the client wants to connect to.
  */
 static QemudClient*
 _camera_service_connect(void*          opaque,
