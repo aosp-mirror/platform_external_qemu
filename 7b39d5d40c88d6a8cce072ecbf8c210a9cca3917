@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "013f12cb_235a6606",
+        "filename": "android/android-emu/android/camera/camera-common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-14T01:01:01Z",
+      "side": 0,
+      "message": "These functions weren\u0027t used outside of camera-service.c, and _get_timestamp had a super generic name, so I moved them into camera-service.c",
+      "range": {
+        "startLine": 183,
+        "startChar": 0,
+        "endLine": 207,
+        "endChar": 1
+      },
+      "revId": "7b39d5d40c88d6a8cce072ecbf8c210a9cca3917",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
