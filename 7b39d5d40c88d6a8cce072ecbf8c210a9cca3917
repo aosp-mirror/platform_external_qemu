@@ -22,6 +22,30 @@
       "revId": "7b39d5d40c88d6a8cce072ecbf8c210a9cca3917",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e143ca65_9a9d4e3c",
+        "filename": "android/android-emu/android/camera/camera-common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 207,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-14T01:14:08Z",
+      "side": 0,
+      "message": "Nice catch!",
+      "parentUuid": "013f12cb_235a6606",
+      "range": {
+        "startLine": 183,
+        "startChar": 0,
+        "endLine": 207,
+        "endChar": 1
+      },
+      "revId": "7b39d5d40c88d6a8cce072ecbf8c210a9cca3917",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
