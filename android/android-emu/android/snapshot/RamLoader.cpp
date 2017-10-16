@@ -128,6 +128,14 @@ void RamLoader::join() {
     mReaderThread.wait();
 }
 
+void RamLoader::interrupt() {
+    mReadDataQueue.stop();
+    mReadingQueue.stop();
+    mReaderThread.wait();
+    mStream.close();
+    mAccessWatch.clear();
+}
+
 void RamLoader::interruptReading() {
     mLoadingCompleted.store(true, std::memory_order_relaxed);
     mReadDataQueue.stop();

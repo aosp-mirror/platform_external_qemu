@@ -97,6 +97,12 @@ Loader::~Loader() {
     }
 }
 
+void Loader::interrupt() {
+    if (mRamLoader && !mRamLoader->hasError()) {
+        mRamLoader->interrupt();
+    }
+}
+
 ITextureLoaderPtr Loader::textureLoader() const {
     return mTextureLoader;
 }
