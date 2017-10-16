@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "92053862_bcabe2a3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-16T16:02:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e5a9bc0_03c86a9c",
+      "range": {
+        "startLine": 12,
+        "startChar": 15,
+        "endLine": 12,
+        "endChar": 19
+      },
+      "revId": "e727e063f45d12ad791011ce8e71c51086a61c5b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8011a99b_024e61de",
         "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-16T15:56:24Z",
       "side": 1,
       "message": "is this running in single thread ?",
+      "range": {
+        "startLine": 421,
+        "startChar": 4,
+        "endLine": 421,
+        "endChar": 12
+      },
+      "revId": "e727e063f45d12ad791011ce8e71c51086a61c5b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "59d644f4_891ed77a",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-16T16:02:45Z",
+      "side": 1,
+      "message": "Yes, the pipes are all sent from disk in a serial sequence.\n\nIn https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/hw/misc/goldfish_pipe.c#1522 , the pipe virtual device\u0027s load function eventually calls loadPipeFromStreamCommon, but in a loop.",
+      "parentUuid": "8011a99b_024e61de",
       "range": {
         "startLine": 421,
         "startChar": 4,
