@@ -9,7 +9,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/inertialmodel/InertialModel.h"
+#include "android/physics/InertialModel.h"
 
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
@@ -20,6 +20,7 @@
 
 using android::base::TestSystem;
 using android::base::System;
+using android::physics::InertialModel;
 
 TEST(InertialModel, DefaultPosition) {
     TestSystem mTestSystem("/", System::kProgramBitness);
@@ -27,7 +28,17 @@ TEST(InertialModel, DefaultPosition) {
     mTestSystem.setUnixTime(1);
     InertialModel inertialModel;
     EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getPosition());
-    EXPECT_EQ(glm::quat(), inertialModel.getRotation());
+    EXPECT_EQ(glm::quat(1.f, 0.f, 0.f, 0.f), inertialModel.getRotation());
+}
+
+TEST(InertialModel, DefaultSensorValues) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(1);
+    InertialModel inertialModel;
+    EXPECT_EQ(glm::vec3(0.f, 9.81f, 0.f), inertialModel.getAcceleration());
+    EXPECT_EQ(glm::vec3(1.f, 0.f, 0.f), inertialModel.getMagneticVector());
+    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getGyroscope());
 }
 
 TEST(InertialModel, ConvergeToPosition) {

@@ -15,7 +15,7 @@
 #include "android/metrics/PeriodicReporter.h"
 #include "android/skin/file.h"
 #include "android/skin/rect.h"
-#include "android/inertialmodel/InertialModel.h"
+#include "android/physics/InertialModel.h"
 
 #include <QDoubleValidator>
 #include <QTimer>
@@ -104,5 +104,5 @@ private:
     SkinRotation mCoarseOrientation;
     bool mVirtualSensorsUsed = false;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
-    InertialModel mInertialModel;
+    android::physics::InertialModel mInertialModel;
 };
