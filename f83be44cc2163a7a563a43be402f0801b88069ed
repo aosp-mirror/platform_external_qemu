@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6b47cf9b_fd46534f",
+        "filename": "android/android-emu/android/camera/camera-common.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-16T18:26:42Z",
+      "side": 1,
+      "message": "Suggest documenting the use case a bit more here, like \"To avoid allocating every frame, convert_frame uses |staging_frame| internally to store intermediate results.\" (or along these lines generally)",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 56
+      },
+      "revId": "f83be44cc2163a7a563a43be402f0801b88069ed",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
