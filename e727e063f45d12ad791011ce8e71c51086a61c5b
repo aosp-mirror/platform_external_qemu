@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0e5a9bc0_03c86a9c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-16T15:56:24Z",
+      "side": 1,
+      "message": "s/leve/level",
+      "range": {
+        "startLine": 12,
+        "startChar": 15,
+        "endLine": 12,
+        "endChar": 19
+      },
+      "revId": "e727e063f45d12ad791011ce8e71c51086a61c5b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8011a99b_024e61de",
+        "filename": "android/android-emu/android/emulation/AndroidPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-16T15:56:24Z",
+      "side": 1,
+      "message": "is this running in single thread ?",
+      "range": {
+        "startLine": 421,
+        "startChar": 4,
+        "endLine": 421,
+        "endChar": 12
+      },
+      "revId": "e727e063f45d12ad791011ce8e71c51086a61c5b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
