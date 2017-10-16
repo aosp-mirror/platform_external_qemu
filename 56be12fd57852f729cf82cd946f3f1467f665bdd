@@ -16,6 +16,24 @@
       "revId": "56be12fd57852f729cf82cd946f3f1467f665bdd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af0ec7b0_10501695",
+        "filename": "android/android-emu/android/emulation/DmaMap.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-16T18:27:40Z",
+      "side": 1,
+      "message": "When I get the stack it just says hwpipe is null, so it\u0027s not quite getting at the root cause, but it did inspire that line.",
+      "parentUuid": "7ea544a3_e98d3ae2",
+      "revId": "56be12fd57852f729cf82cd946f3f1467f665bdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
