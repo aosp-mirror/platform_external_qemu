@@ -250,6 +250,7 @@ LOCAL_C_INCLUDES := \
     $(EMUGL_INCLUDES) \
     $(EMUGL_SRCDIR)/shared \
     $(EMULATOR_COMMON_INCLUDES) \
+    $(EMULATOR_LIBYUV_INCLUDES) \
     $(ANDROID_EMU_INCLUDES) \
     $(EMUGL_INCLUDES) \
     $(BREAKPAD_CLIENT_INCLUDES) \
@@ -535,6 +536,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libselinux \
     emulator-libjpeg \
     emulator-libpng \
+    emulator-libyuv \
     emulator-libwebp \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
