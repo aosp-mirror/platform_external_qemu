@@ -250,6 +250,9 @@ bool Snapshotter::onStartLoading(const char* name) {
     mCallback(Operation::Load, Stage::Start);
     mSaver.clear();
     if (!mLoader || isComplete(*mLoader)) {
+        if (mLoader) {
+            mLoader->interrupt();
+        }
         mLoader.emplace(name);
     }
     mLoader->start();
