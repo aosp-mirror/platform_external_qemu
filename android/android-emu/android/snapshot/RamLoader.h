@@ -39,7 +39,9 @@ public:
     void registerBlock(const RamBlock& block);
     bool start(bool isQuickboot);
     bool wasStarted() const { return mWasStarted; }
-    void join();
+
+    void join(); // Finishes the current load.
+    void interrupt();  // Cancels the current load.
 
     bool hasError() const { return mHasError; }
     bool onDemandEnabled() const { return mAccessWatch; }
