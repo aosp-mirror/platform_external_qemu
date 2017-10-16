@@ -336,6 +336,11 @@ public:
             return cmd.hwPipe == hwPipe;
         });
     }
+    void abortAllPending() {
+        removeAllPendingOperations([](const PipeWakeCommand& cmd) {
+            return true;
+        });
+    }
 
     int getPendingFlags(void* hwPipe) const {
         int flags = 0;
@@ -412,6 +417,8 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
                                       void* hwPipe,
                                       Service* service,
                                       char* pForceClose) {
+    sGlobals->pipeWaker.abortAllPending();
+
     *pForceClose = 0;
 
     OptionalString args = readOptionalString(stream);
