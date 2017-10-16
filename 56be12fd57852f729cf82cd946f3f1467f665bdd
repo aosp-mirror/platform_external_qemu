@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ea544a3_e98d3ae2",
+        "filename": "android/android-emu/android/emulation/DmaMap.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-16T18:22:34Z",
+      "side": 1,
+      "message": "Do you need to do anything in the loading code as well? Also, have you tried to get the stack from here? It might tell us something.",
+      "revId": "56be12fd57852f729cf82cd946f3f1467f665bdd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
