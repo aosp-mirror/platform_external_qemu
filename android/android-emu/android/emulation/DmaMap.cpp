@@ -153,6 +153,9 @@ void DmaMap::save(android::base::Stream* stream) const {
     saveCollection(stream, mDmaBuffers,
                    [](android::base::Stream* stream,
                       const DmaBufferMap::value_type& v) {
+
+        if (!v.second.hwpipe) return;
+
         stream->putBe64(v.first); // guest paddr
         stream->putBe32(android_pipe_get_id(v.second.hwpipe));
         stream->putBe64(v.second.guestAddr); // guest addr

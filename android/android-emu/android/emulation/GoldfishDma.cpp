@@ -27,6 +27,9 @@ static void android_goldfish_dma_invalidate_host_mappings() {
 
 static void android_goldfish_dma_unlock(uint64_t guest_paddr) {
     void* hwpipe = android::DmaMap::get()->getPipeInstance(guest_paddr);
+    // It's possible the DMA mapping was destroyed, or pending
+    // destruction.
+    if (!hwpipe) return;
     android_pipe_host_signal_wake(hwpipe, PIPE_WAKE_UNLOCK_DMA);
 }
 
