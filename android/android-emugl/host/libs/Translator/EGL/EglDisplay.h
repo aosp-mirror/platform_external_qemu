@@ -80,6 +80,8 @@ public:
     // EGL_CONFIG_ID value |id|.
     EglConfig* getConfig(EGLint id) const;
 
+    EglConfig* getDefaultConfig() const;
+
     EGLSurface addSurface(SurfacePtr s );
     SurfacePtr getSurface(EGLSurface surface) const;
     bool removeSurface(EGLSurface s);
@@ -114,8 +116,8 @@ private:
     static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 
     int doChooseConfigs(const EglConfig& dummy,EGLConfig* configs,int config_size) const;
-    void addSimplePixelFormat(int red_size, int green_size, int blue_size, int alpha_size);
-    void addMissingConfigs(void);
+    EglConfig* addSimplePixelFormat(int red_size, int green_size, int blue_size, int alpha_size, int sample_per_pixel);
+    void addReservedConfigs(void);
     void initConfigurations(int renderableType);
 
     EGLNativeDisplayType    m_dpy = {};
