@@ -19,6 +19,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "ANGLEShaderParser.h"
 #include "GLcommon/GLutils.h"
 
 #include <GLcommon/ShareGroup.h>
@@ -322,6 +323,11 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
                     GL_TRANSFORM_FEEDBACK_BUFFER_MODE,
                     (GLint*)&mTransformFeedbackBufferMode);
         }
+        if (!isGles2Gles()) {
+            for (auto& uniform : uniformsOnSave) {
+                uniform.second.mName = getDetranslatedName(uniform.second.mName);
+            }
+        }
 
         saveCollection(stream, uniformsOnSave, saveUniform);
         saveCollection(stream, uniformBlocks, saveUniformBlock);
@@ -332,6 +338,8 @@ void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName)
     for (const auto& s : attachedShaders) {
         stream->putBe32(s.localName);
         stream->putString(s.linkedSource);
+        // s.linkedInfo will be regenerated on restore
+        // This is for compatibility over different rendering backends
     }
     stream->putString(validationInfoLog);
     stream->putString(infoLog.get());
@@ -387,6 +395,18 @@ void ProgramData::restore(ObjectLocalName localName,
             }
             tmpShaders[i] = dispatcher.glCreateShader(type);
             const GLchar* src = (const GLchar *)s.linkedSource.c_str();
+            std::string parsedSrc;
+            if (!isGles2Gles()) {
+                std::string infoLog;
+                ANGLEShaderParser::translate(
+                            isCoreProfile(),
+                            src,
+                            type,
+                            &infoLog,
+                            &parsedSrc,
+                            &s.linkInfo);
+                src = parsedSrc.c_str();
+            }
             dispatcher.glShaderSource(tmpShaders[i], 1, &src, NULL);
             dispatcher.glCompileShader(tmpShaders[i]);
             dispatcher.glAttachShader(globalName, tmpShaders[i]);
@@ -422,32 +442,34 @@ void ProgramData::restore(ObjectLocalName localName,
         for (const auto& uniformEntry : uniforms) {
             const auto& uniform = uniformEntry.second;
             GLint location = dispatcher.glGetUniformLocation(globalName,
-                    uniform.mName.c_str());
+                    getTranslatedName(uniform.mName).c_str());
             if (location != (GLint)uniformEntry.first) {
                 // Location changed after loading from a snapshot.
                 // likely a driver bug
                 fprintf(stderr,
-                        "%llu ERR: uniform location changed (%s: %d->%d)\n",
+                        "WARNING: %llu: uniform location changed (%s: %d->%d)\n",
                         localName, uniform.mName.c_str(),
                         (GLint)uniformEntry.first, location);
-                continue;
+                if (location == -1) {
+                    continue;
+                }
             }
 
             switch (uniform.mType) {
                 case GL_FLOAT:
-                    dispatcher.glUniform1fv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform1fv(location, uniform.mCount,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_VEC2:
-                    dispatcher.glUniform2fv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform2fv(location, uniform.mCount,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_VEC3:
-                    dispatcher.glUniform3fv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform3fv(location, uniform.mCount,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_VEC4:
-                    dispatcher.glUniform4fv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform4fv(location, uniform.mCount,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_BOOL:
@@ -467,82 +489,82 @@ void ProgramData::restore(ObjectLocalName localName,
                 case GL_UNSIGNED_INT_SAMPLER_3D:
                 case GL_UNSIGNED_INT_SAMPLER_CUBE:
                 case GL_UNSIGNED_INT_SAMPLER_2D_ARRAY:
-                    dispatcher.glUniform1iv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform1iv(location, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
                 case GL_BOOL_VEC2:
                 case GL_INT_VEC2:
-                    dispatcher.glUniform2iv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform2iv(location, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
                 case GL_BOOL_VEC3:
                 case GL_INT_VEC3:
-                    dispatcher.glUniform3iv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform3iv(location, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
                 case GL_BOOL_VEC4:
                 case GL_INT_VEC4:
-                    dispatcher.glUniform4iv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform4iv(location, uniform.mCount,
                             (const GLint*)uniform.mVal.data());
                     break;
                 case GL_UNSIGNED_INT:
-                    dispatcher.glUniform1uiv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform1uiv(location, uniform.mCount,
                             (const GLuint*)uniform.mVal.data());
                     break;
                 case GL_UNSIGNED_INT_VEC2:
-                    dispatcher.glUniform2uiv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform2uiv(location, uniform.mCount,
                             (const GLuint*)uniform.mVal.data());
                     break;
                 case GL_UNSIGNED_INT_VEC3:
-                    dispatcher.glUniform3uiv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform3uiv(location, uniform.mCount,
                             (const GLuint*)uniform.mVal.data());
                     break;
                 case GL_UNSIGNED_INT_VEC4:
-                    dispatcher.glUniform4uiv(uniformEntry.first, uniform.mCount,
+                    dispatcher.glUniform4uiv(location, uniform.mCount,
                             (const GLuint*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT2:
-                    dispatcher.glUniformMatrix2fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix2fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT3:
-                    dispatcher.glUniformMatrix3fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix3fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT4:
-                    dispatcher.glUniformMatrix4fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix4fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT2x3:
-                    dispatcher.glUniformMatrix2x3fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix2x3fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT2x4:
-                    dispatcher.glUniformMatrix2x4fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix2x4fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT3x2:
-                    dispatcher.glUniformMatrix3x2fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix3x2fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT3x4:
-                    dispatcher.glUniformMatrix3x4fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix3x4fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT4x2:
-                    dispatcher.glUniformMatrix4x2fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix4x2fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
                 case GL_FLOAT_MAT4x3:
-                    dispatcher.glUniformMatrix4x3fv(uniformEntry.first,
+                    dispatcher.glUniformMatrix4x3fv(location,
                             uniform.mCount, uniform.mTranspose,
                             (const GLfloat*)uniform.mVal.data());
                     break;
@@ -616,14 +638,13 @@ GLuint ProgramData::getAttachedShader(GLenum type) const {
 
 StringView
 ProgramData::getTranslatedName(StringView userVarName) const {
+    if (isGles2Gles()) {
+        return userVarName;
+    }
+    // TODO: translate uniform array names
     for (int i = 0; i < NUM_SHADER_TYPE; i++) {
-        ShaderParser* sp = attachedShaders[i].shader;
-        if (!sp) continue;
-        const ANGLEShaderParser::ShaderLinkInfo& linkInfo =
-            sp->getShaderLinkInfo();
-
-        if (const auto name = android::base::find(linkInfo.nameMap,
-                                                  userVarName)) {
+        if (const auto name = android::base::find(
+                attachedShaders[i].linkInfo.nameMap, userVarName)) {
             return *name;
         }
     }
@@ -632,14 +653,13 @@ ProgramData::getTranslatedName(StringView userVarName) const {
 
 StringView
 ProgramData::getDetranslatedName(StringView driverName) const {
+    if (isGles2Gles()) {
+        return driverName;
+    }
+    // TODO: detranslate uniform array names
     for (int i = 0; i < NUM_SHADER_TYPE; i++) {
-        ShaderParser* sp = attachedShaders[i].shader;
-        if (!sp) continue;
-        const ANGLEShaderParser::ShaderLinkInfo& linkInfo =
-            sp->getShaderLinkInfo();
-
-        if (const auto name = android::base::find(linkInfo.nameMapReverse,
-                                                  driverName)) {
+        if (const auto name = android::base::find(
+                attachedShaders[i].linkInfo.nameMapReverse, driverName)) {
             return *name;
         }
     }
@@ -719,11 +739,8 @@ void ProgramData::setLinkStatus(GLint status) {
         for (auto& s : attachedShaders) {
             if (s.localName) {
                 assert(s.shader);
-                if (isGles2Gles()) {
-                    s.linkedSource = s.shader->getOriginalSrc();
-                } else {
-                    s.linkedSource = s.shader->getCompiledSrc();
-                }
+                s.linkedSource = s.shader->getOriginalSrc();
+                s.linkInfo = s.shader->getShaderLinkInfo();
             }
         }
         for (const auto &attribLoc : boundAttribLocs) {
@@ -733,6 +750,7 @@ void ProgramData::setLinkStatus(GLint status) {
     } else {
         for (auto& s : attachedShaders) {
             s.linkedSource.clear();
+            s.linkInfo = {};
         }
     }
 }
