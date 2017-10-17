@@ -189,6 +189,30 @@
       "revId": "cc684622bdc73bb9dcb974e10b9c4f87e1f8cca9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8548060b_bfd8b888",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-17T23:45:36Z",
+      "side": 1,
+      "message": "Yes, it\u0027s possible to for them to be different based on host configs.\n\nOk, for now, we can just go with the mGuestName idea. I will look into the separate names later.",
+      "parentUuid": "1381ca45_4d2749d0",
+      "range": {
+        "startLine": 326,
+        "startChar": 0,
+        "endLine": 330,
+        "endChar": 9
+      },
+      "revId": "cc684622bdc73bb9dcb974e10b9c4f87e1f8cca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
