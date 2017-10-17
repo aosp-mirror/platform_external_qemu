@@ -38,7 +38,7 @@ struct GLUniformDesc {
     GLenum mType = (GLenum)0;
     std::vector<unsigned char> mVal;
 
-    std::string mName = {};
+    std::string mGuestName = {};
 
     void onSave(android::base::Stream* stream) const;
 };
@@ -49,6 +49,7 @@ struct AttachedShader {
     // linkedSource is only updated when glLinkProgram
     // This is the "real" source the hardware is using for the compiled program.
     std::string linkedSource = {};
+    ANGLEShaderParser::ShaderLinkInfo linkInfo = {};
 };
 
 class ProgramData:public ObjectData{
@@ -121,5 +122,8 @@ private:
 
     int mGlesMajorVersion = 2;
     int mGlesMinorVersion = 0;
+    std::unordered_map<GLuint, GLUniformDesc> collectUniformInfo() const;
+    void getUniformValue(const GLchar *name, GLenum type,
+            std::unordered_map<GLuint, GLUniformDesc> &uniformsOnSave) const;
 };
 #endif

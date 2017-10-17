@@ -104,13 +104,12 @@ static const char kAlwaysInvalidShader[] =
     "This shader is meant to make the underlying GL agree that the shader is"
     "indeed invalid when translation fails.";
 
-void ShaderParser::convertESSLToGLSL(int esslVersion) {
+void ShaderParser::convertESSLToGLSL() {
     std::string infolog;
     std::string parsedSource;
     m_valid =
         ANGLEShaderParser::translate(
             m_coreProfile,
-            esslVersion,
             m_originalSrc.c_str(),
             m_type,
             &infolog,
@@ -125,7 +124,7 @@ void ShaderParser::convertESSLToGLSL(int esslVersion) {
     }
 }
 
-void ShaderParser::setSrc(int esslVersion, GLsizei count, const GLchar* const* strings, const GLint* length){
+void ShaderParser::setSrc(GLsizei count, const GLchar* const* strings, const GLint* length){
     m_src.clear();
     for(int i = 0;i<count;i++){
         const size_t strLen =
@@ -137,7 +136,7 @@ void ShaderParser::setSrc(int esslVersion, GLsizei count, const GLchar* const* s
     //  std::string in GCC's STL - we need a deep copy here.
     m_originalSrc.assign(m_src.c_str(), m_src.size());
 
-    convertESSLToGLSL(esslVersion);
+    convertESSLToGLSL();
 }
 
 const GLchar** ShaderParser::parsedLines() {

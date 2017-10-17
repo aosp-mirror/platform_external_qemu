@@ -38,6 +38,8 @@
 
 #include <algorithm>
 
+//#define ALLOW_CHANGE_RENDERER
+
 using android::base::IniFile;
 using android::base::Optional;
 using android::base::PathUtils;
@@ -113,12 +115,21 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
+#ifdef ALLOW_CHANGE_RENDERER
+        if (!actual.hasKey(key) || actual.getString(key, "$$$")
+                != expected.getString(key, "$$$")) {
+            if (key != "hw.gpu.mode") {
+                return false;
+            }
+        }
+#else // ALLOW_CHANGE_RENDERER
         if (!actual.hasKey(key)) {
             return false;
         }
         if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             return false;
         }
+#endif // ALLOW_CHANGE_RENDERER
     }
 
     for (auto&& key : actual) {
@@ -129,12 +140,21 @@ bool areHwConfigsEqual(const IniFile& expected, const IniFile& actual) {
             continue;  // these contain absolute paths and will be checked
                        // separately.
         }
+#ifdef ALLOW_CHANGE_RENDERER
+        if (!expected.hasKey(key) || actual.getString(key, "$$$")
+                != expected.getString(key, "$$$")) {
+            if (key != "hw.gpu.mode") {
+                return false;
+            }
+        }
+#else // ALLOW_CHANGE_RENDERER
         if (!expected.hasKey(key)) {
             return false;
         }
         if (actual.getString(key, "$$$") != expected.getString(key, "$$$")) {
             return false;
         }
+#endif // ALLOW_CHANGE_RENDERER
     }
 
     return numPathActual == numPathExpected;
@@ -201,8 +221,12 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
     }
     if (config.has_selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
+#ifdef ALLOW_CHANGE_RENDERER
+        fprintf(stderr, "WARNING: change of renderer detected.\n");
+#else // ALLOW_CHANGE_RENDERER
         saveFailure(FailureReason::ConfigMismatchRenderer);
         return false;
+#endif // ALLOW_CHANGE_RENDERER
     }
 
     const auto enabledFeatures = android::featurecontrol::getEnabled();
