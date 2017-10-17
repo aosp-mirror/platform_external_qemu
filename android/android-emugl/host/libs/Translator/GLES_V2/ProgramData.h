@@ -49,6 +49,7 @@ struct AttachedShader {
     // linkedSource is only updated when glLinkProgram
     // This is the "real" source the hardware is using for the compiled program.
     std::string linkedSource = {};
+    ANGLEShaderParser::ShaderLinkInfo linkInfo = {};
 };
 
 class ProgramData:public ObjectData{
