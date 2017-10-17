@@ -93,6 +93,30 @@
       "revId": "cc684622bdc73bb9dcb974e10b9c4f87e1f8cca9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b4cc8762_fc8df007",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 330,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-17T21:26:44Z",
+      "side": 1,
+      "message": "I mean for simplicity (including maintainability), not efficiency. You\u0027re quite familiar with the code right now and we both see how it works currently, but in the future, we\u0027ll need to check isGles2Gles + do a translate/detranslate for every time we need to retrieve the uniform name to do something.",
+      "parentUuid": "98f05013_e775d61f",
+      "range": {
+        "startLine": 326,
+        "startChar": 0,
+        "endLine": 330,
+        "endChar": 9
+      },
+      "revId": "cc684622bdc73bb9dcb974e10b9c4f87e1f8cca9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
