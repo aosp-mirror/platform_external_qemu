@@ -2982,22 +2982,6 @@ GL_APICALL void  GL_APIENTRY glShaderBinary(GLsizei n, const GLuint* shaders, GL
     }
 }
 
-static int sDetectShaderESSLVersion(GLESv2Context* ctx, const GLchar* const* strings) {
-    // Just look at the first line of the first string for now
-    const char* pos = ((const char* const*)strings)[0];
-    const char* linePos = strstr(pos, "\n");
-    const char* versionPos = strstr(pos, "#version");
-    if (!linePos || !versionPos) {
-        // default to ESSL 100
-        return 100;
-    }
-
-    const char* version_end = versionPos + strlen("#version");
-    int wantedESSLVersion;
-    sscanf(version_end, " %d", &wantedESSLVersion);
-    return wantedESSLVersion;
-}
-
 GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length){
     GET_CTX_V2();
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE);
@@ -3011,8 +2995,7 @@ GL_APICALL void  GL_APIENTRY glShaderSource(GLuint shader, GLsizei count, const 
         SET_ERROR_IF(objData->getDataType() != SHADER_DATA,
                      GL_INVALID_OPERATION);
         ShaderParser* sp = (ShaderParser*)objData;
-        int esslVersion = sDetectShaderESSLVersion(ctx, string);
-        sp->setSrc(esslVersion, count, string, length);
+        sp->setSrc(count, string, length);
         if (isGles2Gles()) {
             ctx->dispatcher().glShaderSource(globalShaderName, count, string,
                                          length);
