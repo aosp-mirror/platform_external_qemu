@@ -373,7 +373,6 @@ LOCAL_SRC_FILES := \
     android/hw-lcd.c \
     android/hw-qemud.cpp \
     android/hw-sensors.c \
-    android/inertialmodel/InertialModel.cpp \
     android/jpeg-compress.c \
     android/kernel/kernel_utils.cpp \
     android/loadpng.c \
@@ -414,6 +413,7 @@ LOCAL_SRC_FILES := \
     android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
+    android/physics/InertialModel.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
     android/protobuf/ProtobufLogging.cpp \
@@ -679,7 +679,6 @@ LOCAL_SRC_FILES := \
   android/gps/KmlParser_unittest.cpp \
   android/kernel/kernel_utils_unittest.cpp \
   android/hw-lcd_unittest.cpp \
-  android/inertialmodel/InertialModel_unittest.cpp \
   android/network/control_unittest.cpp \
   android/network/constants_unittest.cpp \
   android/opengl/EmuglBackendList_unittest.cpp \
@@ -687,6 +686,7 @@ LOCAL_SRC_FILES := \
   android/opengl/emugl_config_unittest.cpp \
   android/opengl/GpuFrameBridge_unittest.cpp \
   android/opengl/gpuinfo_unittest.cpp \
+  android/physics/InertialModel_unittest.cpp \
   android/proxy/proxy_common_unittest.cpp \
   android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \

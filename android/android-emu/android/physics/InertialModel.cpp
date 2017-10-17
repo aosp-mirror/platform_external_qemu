@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 
-#include "android/inertialmodel/InertialModel.h"
+#include "android/physics/InertialModel.h"
 
 #include "android/base/system/System.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 
-InertialModel::InertialModel()
-    : mCurrentPosition(0.f, 0.f, 0.f),
-      mMagneticVector(1.0f, 0.0f, 0.0f),
-      mSensorsAgent(nullptr) {
-}
+namespace android {
+namespace physics {
 
 void InertialModel::setTargetPosition(glm::vec3 position, bool instantaneous) {
     if (instantaneous) {
@@ -80,12 +77,12 @@ void InertialModel::setSensorsAgent(const QAndroidSensorsAgent* agent) {
 void InertialModel::updateSensorValues() {
     // Gravity and magnetic vector in the device's frame of
     // reference.
-    glm::vec3 gravityVector(0.0, 9.81, 0.0);
+    constexpr glm::vec3 gravityVector(0.f, 9.81f, 0.f);
 
-    glm::quat deviceRotationQuat = mCurrentRotation;
-    glm::quat rotationDelta =
+    const glm::quat deviceRotationQuat = mCurrentRotation;
+    const glm::quat rotationDelta =
             mCurrentRotation * glm::conjugate(mPreviousRotation);
-    glm::vec3 eulerAngles = glm::eulerAngles(rotationDelta);
+    const glm::vec3 eulerAngles = glm::eulerAngles(rotationDelta);
 
     //Implementation Note:
     //Qt's rotation is around fixed axis, in the following
@@ -97,13 +94,13 @@ void InertialModel::updateSensorValues() {
     // Note how we're applying the *inverse* of the transformation
     // represented by device_rotation_quat to the "absolute" coordinates
     // of the vectors.
-    glm::vec3 deviceGravityVector =
+    const glm::vec3 deviceGravityVector =
         glm::conjugate(deviceRotationQuat) * gravityVector;
     mMagneticVector =
         glm::conjugate(deviceRotationQuat) * mMagneticVector;
     mAcceleration = deviceGravityVector - mLinearAcceleration;
 
-    float gyroUpdateRate = mUpdateIntervalMs < 16 ? 0.016f :
+    const float gyroUpdateRate = mUpdateIntervalMs < 16 ? 0.016f :
             mUpdateIntervalMs / 1000.0f;
 
     // Convert raw UI pitch/roll/yaw delta
@@ -139,11 +136,11 @@ void InertialModel::updateSensorValues() {
 }
 
 void InertialModel::updateAccelerations() {
-    static const float k = 100.0;
-    static const float mass = 1.0;
-    static const float meters_per_unit = 0.0254;
+    constexpr float k = 100.f;
+    constexpr float mass = 1.f;
+    constexpr float meters_per_unit = 0.0254f;
 
-    glm::vec3 delta = glm::conjugate(mCurrentRotation) *
+    const glm::vec3 delta = glm::conjugate(mCurrentRotation) *
             (meters_per_unit * (mCurrentPosition - mPreviousPosition));
     mLinearAcceleration = delta * k / mass;
     mPreviousPosition = mCurrentPosition;
@@ -152,8 +149,8 @@ void InertialModel::updateAccelerations() {
 }
 
 void InertialModel::recalcRotationUpdateInterval() {
-    uint64_t currTimeMs =
-        (uint64_t)android::base::System::get()->getHighResTimeUs() / 1000;
+    const uint64_t currTimeMs = static_cast<uint64_t>(
+        android::base::System::get()->getHighResTimeUs() / 1000);
 
     if (currTimeMs - mLastRotationUpdateMs > ROTATION_UPDATE_RESET_TIME_MS) {
         std::fill(mLastUpdateIntervals.begin(),
@@ -183,3 +180,6 @@ void InertialModel::recalcRotationUpdateInterval() {
 
     mLastRotationUpdateMs = currTimeMs;
 }
+
+}  // namespace physics
+}  // namespace android
