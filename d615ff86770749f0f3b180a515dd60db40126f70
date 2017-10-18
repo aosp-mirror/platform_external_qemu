@@ -22,6 +22,30 @@
       "revId": "d615ff86770749f0f3b180a515dd60db40126f70",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7c6a8cf2_ac80538c",
+        "filename": "audio/paaudio.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-10-18T03:14:09Z",
+      "side": 1,
+      "message": "That wait function is for waiting for audio input, after disable voice, there is no more audio input, then it get blocked.",
+      "parentUuid": "bab1af50_b0564b97",
+      "range": {
+        "startLine": 823,
+        "startChar": 12,
+        "endLine": 823,
+        "endChar": 39
+      },
+      "revId": "d615ff86770749f0f3b180a515dd60db40126f70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
