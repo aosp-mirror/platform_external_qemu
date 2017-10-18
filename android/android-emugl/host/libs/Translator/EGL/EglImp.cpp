@@ -1100,6 +1100,8 @@ static void sGetPbufferSurfaceGLProperties(
     // EGL configs from host display to only these ones.
 }
 
+#define _DEBUG_PRINT printf("%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
+
 EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                                              EGLSurface draw,
                                              EGLSurface read,
@@ -1108,6 +1110,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
     bool releaseContext = EglValidate::releaseContext(context, read, draw);
     if(!releaseContext && EglValidate::badContextMatch(context, read, draw)) {
+        _DEBUG_PRINT
         RETURN_ERROR(EGL_FALSE, EGL_BAD_MATCH);
     }
 
@@ -1118,6 +1121,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
        if(prevCtx.get()) {
            g_eglInfo->getIface(prevCtx->version())->flush();
            if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
+               _DEBUG_PRINT
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
            }
            thread->updateInfo(ContextPtr(),dpy,NULL,ShareGroupPtr(),dpy->getManager(prevCtx->version()));
@@ -1148,6 +1152,11 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         //surfaces compatibility check
         if(!((*ctx->getConfig()).compatibleWith((*newDrawPtr->getConfig()))) ||
            !((*ctx->getConfig()).compatibleWith((*newReadPtr->getConfig())))) {
+            printf("ctx cfg id %d, surface cfg id %d %d\n",
+                    ctx->getConfig()->id(),
+                    newDrawPtr->getConfig()->id(),
+                    newReadPtr->getConfig()->id());
+            _DEBUG_PRINT
             RETURN_ERROR(EGL_FALSE,EGL_BAD_MATCH);
         }
 
@@ -1157,10 +1166,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         //checking native window validity
         if(newReadPtr->type() == EglSurface::WINDOW &&
                 !nativeDisplay->isValidNativeWin(nativeRead)) {
+            _DEBUG_PRINT
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_WINDOW);
         }
         if(newDrawPtr->type() == EglSurface::WINDOW &&
                 !nativeDisplay->isValidNativeWin(nativeDraw)) {
+            _DEBUG_PRINT
             RETURN_ERROR(EGL_FALSE,EGL_BAD_NATIVE_WINDOW);
         }
 
@@ -1171,6 +1182,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                 newReadPtr->native(),
                 newDrawPtr->native(),
                 newCtx->nativeType())) {
+            _DEBUG_PRINT
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
         }
         //TODO: handle the following errors
