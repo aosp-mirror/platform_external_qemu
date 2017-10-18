@@ -817,6 +817,10 @@ static int qpa_ctl_in (HWVoiceIn *hw, int cmd, ...)
         {
             pa_threaded_mainloop_lock (g->mainloop);
             pa_stream_cork(pa->stream, 1, NULL, NULL);
+            /* Try to wake up possible blocking qpa_simple_read, otherwise
+             * it could hang on pa_threaded_mainloop_wait forever.
+             */
+            pa_threaded_mainloop_signal (g->mainloop, 0);
             pa_threaded_mainloop_unlock (g->mainloop);
             break;
         }
