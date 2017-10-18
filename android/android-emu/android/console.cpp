@@ -25,15 +25,18 @@
 #include "android/console_internal.h"
 
 #include "android/android.h"
+#include "android/base/StringView.h"
+#include "android/base/misc/StringUtils.h"
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
-#include "android/network/control.h"
 #include "android/network/constants.h"
+#include "android/network/control.h"
 #include "android/network/globals.h"
+#include "android/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
@@ -49,9 +52,12 @@
 
 #include "config-host.h"
 
+#include <atomic>
+
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -74,6 +80,8 @@
 #endif
 
 #define DINIT(...) do {  if (VERBOSE_CHECK(init)) dprint(__VA_ARGS__); } while (0)
+
+enum class RecordState { Ready, Recording, Stopping };
 
 typedef struct ControlGlobalRec_*  ControlGlobal;
 
@@ -124,6 +132,7 @@ typedef struct ControlGlobalRec_
     int       num_redirs;
     int       max_redirs;
 
+    std::atomic<RecordState> record_state{RecordState::Ready};
 } ControlGlobalRec;
 
 static inline const QAndroidVmOperations* vmopers(ControlClient client) {
@@ -2719,6 +2728,240 @@ static const CommandDefRec fingerprint_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                   S C R E E N R E C O R D  C O M M A N D S                      ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+/*
+ * Parses a string of the form "1280x720".
+ *
+ * Returns true on success.
+ */
+static bool parseWidthHeight(const char* widthHeight,
+                             uint32_t* pWidth,
+                             uint32_t* pHeight) {
+    int count = 0;
+
+    sscanf(widthHeight, "%" SCNu32 "x%" SCNu32 "%n", pWidth, pHeight, &count);
+    return widthHeight[count] == '\0';
+}
+
+/*
+ * Accepts a string with a bare number ("4000000") or with a single-character
+ * unit ("4m").
+ *
+ * Returns false if parsing fails.
+ */
+static bool parseValueWithUnit(const char* str, uint32_t* pValue) {
+    long value;
+    char* endptr;
+
+    value = strtol(str, &endptr, 10);
+    if (*endptr == '\0') {
+        // bare number
+        *pValue = value;
+        return true;
+    } else if (toupper(*endptr) == 'M' && *(endptr + 1) == '\0') {
+        *pValue = value * 1000000;  // check for overflow?
+        return true;
+    } else {
+        D(("Unrecognized value: %s\n", str));
+        return false;
+    }
+}
+
+static void on_screenrecord_stop(void* opaque, RecordStopStatus status) {
+    if (status != RECORD_STOP_INITIATED) {
+        // Recording is finished (failure or success)
+        D(("Finished recording!\n"));
+        auto global = (ControlGlobal)opaque;
+        if (global) {
+            global->record_state = RecordState::Ready;
+        }
+    }
+}
+
+static int do_screenrecord_start(ControlClient client, char* args) {
+    // kMaxArgs is max number of arguments that we have to process (options +
+    // parameters, if any, and the filename)
+    static constexpr int kMaxArgs = 3 * 2 + 1;
+    static const struct option longOptions[] = {
+            {"size", required_argument, NULL, 's'},
+            {"bit-rate", required_argument, NULL, 'b'},
+            {"time-limit", required_argument, NULL, 't'},
+            {NULL, 0, NULL, 0}};
+
+    if (client->global->record_state != RecordState::Ready) {
+        control_write(client, "KO: Recording has already started\r\n");
+        return -1;
+    }
+
+    if (!args) {
+        control_write(client, "KO: Must provide an output filename\r\n");
+        return -1;
+    }
+
+    // Count number of arguments
+    // Need to get it into a format for getopt_long().
+    std::vector<std::string> splitArgs;
+    splitArgs.push_back("screenrecord");
+    android::base::split(args, " ", [&splitArgs](android::base::StringView s) {
+        if (!s.empty() && splitArgs.size() < kMaxArgs + 1)
+            splitArgs.push_back(s);
+    });
+
+    // Need char** for getopt()
+    std::vector<char*> sarray;
+    for (auto& arg : splitArgs) {
+        sarray.push_back(&arg[0]);
+    }
+    // last argument needs to be NULL for getopt().
+    sarray.push_back(nullptr);
+
+    RecordingInfo info = {};
+    // Setting optind to 1 does not completely reset the internal state for
+    // getopt() on gcc, despite what the documentation says. Setting it to 0
+    // does however, and this setting does not cause any issues on mingw and
+    // clang.
+    optind = 0;
+
+    while (true) {
+        int optionIndex = 0;
+        int ic = getopt_long(sarray.size() - 1, sarray.data(), "", longOptions,
+                             &optionIndex);
+        if (ic == -1) {
+            D(("Got ic=-1\n"));
+            break;
+        }
+
+        switch (ic) {
+            case 's':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                if (!parseWidthHeight(optarg, &info.width, &info.height)) {
+                    control_write(
+                            client,
+                            "KO: Invalid size '%s', must be width x height\r\n",
+                            optarg);
+                    return -1;
+                }
+                if (info.width == 0 || info.height == 0) {
+                    control_write(client,
+                                  "KO: Invalid size %ux%u, width and height "
+                                  "may not be zero\r\n",
+                                  info.width, info.height);
+                    return -1;
+                }
+                break;
+            case 'b':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                if (!parseValueWithUnit(optarg, &info.videoBitrate)) {
+                    return -1;
+                }
+                if (info.videoBitrate < kMinVideoBitrate ||
+                    info.videoBitrate > kMaxVideoBitrate) {
+                    control_write(client,
+                                  "KO: Bit rate %dbps outside acceptable range "
+                                  "[%d,%d]\r\n",
+                                  info.videoBitrate, kMinVideoBitrate,
+                                  kMaxVideoBitrate);
+                    return -1;
+                }
+                break;
+            case 't':
+                D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+                info.timeLimit = atoi(optarg);
+                if (info.timeLimit == 0 || info.timeLimit > kMaxTimeLimit) {
+                    control_write(
+                            client,
+                            "Time limit %ds outside acceptable range [1,%d]\n",
+                            info.timeLimit, kMaxTimeLimit);
+                    return -1;
+                }
+                break;
+            default:
+                D(("getopt_long returned %d\n", ic));
+                control_write(client,
+                              "KO: Invalid arguments (see help screenrecord "
+                              "start).\r\n");
+                return -1;
+        }
+    }
+
+    if (optind != splitArgs.size() - 1) {
+        control_write(client,
+                      "KO: Must specify output file (see help screenrecord "
+                      "start).\r\n");
+        return -1;
+    }
+
+    info.fileName = sarray[optind];
+    info.cb = &on_screenrecord_stop;
+    info.opaque = client->global;
+
+    bool success = client->global->record_agent->startRecording(&info);
+    if (!success) {
+        control_write(client, "KO: Error while trying to start recording\r\n");
+        return -1;
+    }
+
+    D(("Recording started\n"));
+    client->global->record_state = RecordState::Recording;
+
+    return 0;
+}
+
+static int do_screenrecord_stop(ControlClient client, char* args) {
+    if (client->global->record_state == RecordState::Ready) {
+        control_write(client, "KO: No recording has been started.\r\n");
+        return -1;
+    }
+
+    if (client->global->record_state == RecordState::Stopping) {
+        control_write(client,
+                      "KO: Recording already in process of stopping.\r\n");
+        return -1;
+    }
+
+    D(("Stopping the recording ...\n"));
+    client->global->record_state = RecordState::Stopping;
+    client->global->record_agent->stopRecording();
+
+    return 0;
+}
+
+static const CommandDefRec screenrecord_commands[] = {
+        {"start", "start screen recording",
+         "'screenrecord start [options] <filename>'\r\n"
+         "\r\nRecords the emulator's display to a .webm file.\r\n"
+         "\r\nOptions:\r\n"
+         "  --size WIDTHxHEIGHT\r\n"
+         "    Set the video size, e.g. \"1280x720\". Default is the device's "
+         "main\r\n"
+         "    display resolution.\r\n"
+         "  --bit-rate RATE\r\n"
+         "    Set the video bit rate, in bits per second. Value may be "
+         "specified as\r\n"
+         "    bits or megabits, e.g. '4000000' is equivalent to '4M'. Default "
+         "4Mbps.\r\n"
+         "  --time-limit TIME\r\n"
+         "    Set the maximum recording time, in seconds. Default/maximum is "
+         "180.\r\n"
+         "\r\nThe recording will stop with 'screenrecord stop' or when the "
+         "time limit\r\n"
+         "is reached\r\n",
+         NULL, do_screenrecord_start, NULL},
+
+        {"stop", "stop screen recording",
+         "'screenrecord stop' stops the recording if one has already "
+         "started.\r\n",
+         NULL, do_screenrecord_stop, NULL},
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2852,8 +3095,7 @@ extern const CommandDefRec main_commands[] = {
         {"crash", "crash the emulator instance", NULL, NULL, do_crash, NULL},
 
         {"crash-on-exit", "simulate crash on exit for the emulator instance",
-         NULL, NULL,
-         do_crash_on_exit},
+         NULL, NULL, do_crash_on_exit},
 
         {"kill", "kill the emulator instance", NULL, NULL, do_kill, NULL},
 
@@ -2902,6 +3144,9 @@ extern const CommandDefRec main_commands[] = {
 
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
+
+        {"screenrecord", "Records the emulator's display to a .webm file", NULL,
+         NULL, NULL, screenrecord_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
