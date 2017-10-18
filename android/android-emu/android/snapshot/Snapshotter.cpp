@@ -15,8 +15,9 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/StudioConfig.h"
-#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/interface.h"
+#include "android/snapshot/Quickboot.h"
+#include "android/snapshot/Provenance.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
@@ -87,6 +88,7 @@ Snapshotter& Snapshotter::get() {
 
 void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                              const QAndroidEmulatorWindowAgent& windowAgent) {
+    fprintf(stderr, "%s: call\n", __func__);
     static const SnapshotCallbacks kCallbacks = {
             // ops
             {
@@ -114,6 +116,7 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                      },
                      // end
                      [](void* opaque, const char* name, int res) {
+                         fprintf(stderr, "%s: end\n", __func__);
                          auto snapshot = static_cast<Snapshotter*>(opaque);
                          snapshot->onLoadingComplete(name, res);
                      },  // quick fail
@@ -195,9 +198,9 @@ OperationStatus Snapshotter::prepareForLoading(const char* name) {
 }
 
 OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
+    fprintf(stderr, "%s: %d %s\n", __func__, isQuickboot, name);
     mIsQuickboot = isQuickboot;
     mVmOperations.snapshotLoad(name, this, nullptr);
-    mIsQuickboot = false;
     return mLoader->status();
 }
 
@@ -238,7 +241,11 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     mSaver->complete(res == 0);
     CrashReporter::get()->hangDetector().pause(false);
     mCallback(Operation::Save, Stage::End);
-    return mSaver->status() != OperationStatus::Error;
+    bool good = mSaver->status() != OperationStatus::Error;
+    if (good) {
+        Provenance::get()->updateAndGetDependencies();
+    }
+    return good;
 }
 
 void Snapshotter::onSavingFailed(const char* name, int res) {
@@ -264,13 +271,20 @@ bool Snapshotter::onStartLoading(const char* name) {
 }
 
 bool Snapshotter::onLoadingComplete(const char* name, int res) {
+    fprintf(stderr, "%s: completely laoded %s\n", __func__, name);
     assert(mLoader && name == mLoader->snapshot().name());
     mLoader->complete(res == 0);
     CrashReporter::get()->hangDetector().pause(false);
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     mCallback(Operation::Load, Stage::End);
-    return mLoader->status() != OperationStatus::Error;
+    bool good = mLoader->status() != OperationStatus::Error;
+    if (good) {
+        fprintf(stderr, "%s: setting %s as loaded\n", __func__, name);
+        mLoadedSnapshotName.emplace(name);
+    }
+    Provenance::get()->updateAndGetDependencies();
+    return good;
 }
 
 void Snapshotter::onLoadingFailed(const char* name, int res) {
