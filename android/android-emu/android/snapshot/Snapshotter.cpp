@@ -15,8 +15,9 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/StudioConfig.h"
-#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/interface.h"
+#include "android/snapshot/Quickboot.h"
+#include "android/snapshot/Hierarchy.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
 
@@ -254,7 +255,11 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     mSaver->complete(res == 0);
     CrashReporter::get()->hangDetector().pause(false);
     mCallback(Operation::Save, Stage::End);
-    return mSaver->status() != OperationStatus::Error;
+    bool good = mSaver->status() != OperationStatus::Error;
+    if (good) {
+        Hierarchy::get()->currentInfo();
+    }
+    return good;
 }
 
 void Snapshotter::onSavingFailed(const char* name, int res) {
@@ -291,6 +296,7 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
         return false;
     }
     mLoadedSnapshotFile = name;
+    Hierarchy::get()->currentInfo();
     return true;
 }
 
