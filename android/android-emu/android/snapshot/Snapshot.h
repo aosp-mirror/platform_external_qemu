@@ -17,6 +17,7 @@
 #include "android/snapshot/proto/snapshot.pb.h"
 
 #include <string>
+#include <vector>
 
 namespace android {
 namespace snapshot {
@@ -24,6 +25,8 @@ namespace snapshot {
 class Snapshot final {
 public:
     Snapshot(const char* name);
+
+    static std::vector<Snapshot> getExistingSnapshots();
 
     base::StringView name() const { return mName; }
     base::StringView dataDir() const { return mDataDir; }
@@ -38,6 +41,10 @@ public:
 
     static base::StringView dataDir(const char* name);
 
+    base::Optional<std::string> parent() const {
+        return mParentName;
+    }
+
 private:
     bool verifyHost(const emulator_snapshot::Host& host);
     bool verifyConfig(const emulator_snapshot::Config& config);
@@ -47,6 +54,8 @@ private:
     std::string mDataDir;
     emulator_snapshot::Snapshot mSnapshotPb;
     uint64_t mSize = 0;
+
+    base::Optional<std::string> mParentName;
 };
 
 inline bool operator==(const Snapshot& l, const Snapshot& r) {
