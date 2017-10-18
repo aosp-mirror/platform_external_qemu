@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "45c88ede_6ff58cf5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-18T04:23:50Z",
+      "side": 1,
+      "message": "agree: a tree seems a natural fit for the snapshots.",
+      "range": {
+        "startLine": 15,
+        "startChar": 12,
+        "endLine": 15,
+        "endChar": 31
+      },
+      "revId": "1279e0298d0799c34ce2c304143cc2ac0694bde2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
