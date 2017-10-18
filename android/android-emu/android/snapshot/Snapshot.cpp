@@ -260,6 +260,18 @@ base::StringView Snapshot::dataDir(const char* name) {
 Snapshot::Snapshot(const char* name)
     : mName(name), mDataDir(getSnapshotDir(name)) {}
 
+// static
+std::vector<Snapshot> Snapshot::getExistingSnapshots() {
+    std::vector<Snapshot> res = {};
+    auto snapshotFiles = getSnapshotDirEntries();
+    for (const auto& filename : snapshotFiles) {
+        Snapshot s(filename.c_str());
+        if (s.load()) {
+            res.push_back(s);
+        }
+    }
+    return res;
+}
 bool Snapshot::save() {
     auto targetHwIni = PathUtils::join(mDataDir, "hardware.ini");
     if (path_copy_file(targetHwIni.c_str(),
@@ -293,6 +305,25 @@ bool Snapshot::save() {
     mSnapshotPb.set_guest_data_partition_mounted(guest_data_partition_mounted);
     mSnapshotPb.set_rotation(
             int(Snapshotter::get().windowAgent().getRotation()));
+
+    auto parentSnapshot = Snapshotter::get().loadedSnapshotName();
+    if (parentSnapshot) {
+        fprintf(stderr, "%s: parent snapshot: %s\n", __func__, parentSnapshot->c_str());
+        // Overwrote the current snapshot.
+        // TODO: Delete all children
+        if (mName == *parentSnapshot) {
+            fprintf(stderr, "%s: need to support overwriting and invalidation. current %s parent: %s mParentName %s\n", __func__,
+                    mName.c_str(),
+                    parentSnapshot->c_str(),
+                    mParentName->c_str());
+            abort();
+            // if (mParentName) {
+            //     mSnapshotPb.set_parent(*mParentName);
+            // }
+        } else {
+            mSnapshotPb.set_parent(*parentSnapshot);
+        }
+    }
 
     return writeSnapshotToDisk();
 }
@@ -425,6 +456,11 @@ bool Snapshot::load() {
                 SkinRotation(mSnapshotPb.rotation())) {
         Snapshotter::get().windowAgent().rotate(
                 SkinRotation(mSnapshotPb.rotation()));
+    }
+
+    if (mSnapshotPb.has_parent()) {
+        mParentName.emplace(mSnapshotPb.parent());
+        fprintf(stderr, "%s: has parent. name: %s\n", __func__, mParentName->c_str());
     }
 
     return true;

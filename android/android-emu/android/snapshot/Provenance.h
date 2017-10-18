@@ -11,14 +11,33 @@
 
 #pragma once
 
-#include <string>
+#include "android/base/Compiler.h"
+
+#include <functional>
+#include <map>
 #include <vector>
 
 namespace android {
 namespace snapshot {
 
-std::string getSnapshotDir(const char* snapshotName);
-std::vector<std::string> getSnapshotDirEntries();
+class Provenance {
+public:
+
+    Provenance();
+
+    static Provenance* get();
+
+    struct DependencyInfo {
+        std::vector<std::string> roots;
+        std::map<std::string,
+                 std::vector<std::string> > deps;
+    };
+
+    const DependencyInfo& updateAndGetDependencies() const;
+
+    DISALLOW_COPY_AND_ASSIGN(Provenance);
+};
 
 }  // namespace snapshot
 }  // namespace android
+
