@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bb947a0f_a4ca3fcc",
+        "filename": "android/android-emu/android/snapshot/Hierarchy.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-18T21:06:43Z",
+      "side": 1,
+      "message": "I think if the grandparent is valid, we should just ignore invalid parent and assume it is absolved by valid grandparent and the\ngrand parent is taking all the orphaned grandchildren as children",
+      "range": {
+        "startLine": 52,
+        "startChar": 36,
+        "endLine": 52,
+        "endChar": 42
+      },
+      "revId": "162181f7568f728f4cef0947e9111cbdfdf4c6fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
