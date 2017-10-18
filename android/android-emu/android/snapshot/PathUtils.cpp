@@ -13,15 +13,37 @@
 
 #include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
+#include "android/base/system/System.h"
 #include "android/globals.h"
+
+using android::base::System;
 
 namespace android {
 namespace snapshot {
 
-std::string getSnapshotDir(const char* snapshotName) {
+std::string getSnapshotsDir() {
     auto dir = avdInfo_getContentPath(android_avdInfo);
-    auto path = base::PathUtils::join(dir, "snapshots", snapshotName);
-    return path;
+    return base::PathUtils::join(dir, "snapshots");
+}
+
+std::string getSnapshotDepsFileName() {
+    return base::PathUtils::join(getSnapshotsDir(), "snapshot_deps.pb");
+}
+
+std::string getSnapshotDir(const char* snapshotName) {
+    return base::PathUtils::join(getSnapshotsDir(), snapshotName);
+}
+
+std::vector<std::string> getSnapshotDirEntries() {
+    std::vector<std::string> dirs =
+        System::get()->scanDirEntries(getSnapshotsDir());
+
+    fprintf(stderr, "%s: %zu\n", __func__, dirs.size());
+    for (const auto& elt : dirs) {
+        fprintf(stderr, "%s: %s\n", __func__, elt.c_str());
+    }
+
+    return dirs;
 }
 
 }  // namespace snapshot

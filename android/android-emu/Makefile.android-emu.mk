@@ -416,6 +416,7 @@ LOCAL_SRC_FILES := \
     android/physics/InertialModel.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
+    android/protobuf/LoadSave.cpp \
     android/protobuf/ProtobufLogging.cpp \
     android/proxy/proxy_common.c \
     android/proxy/proxy_http.c \
@@ -441,6 +442,7 @@ LOCAL_SRC_FILES := \
     android/snapshot/MemoryWatch_common.cpp \
     android/snapshot/MemoryWatch_$(BUILD_TARGET_OS).cpp \
     android/snapshot/PathUtils.cpp \
+    android/snapshot/Hierarchy.cpp \
     android/snapshot/Quickboot.cpp \
     android/snapshot/RamLoader.cpp \
     android/snapshot/RamSaver.cpp \
