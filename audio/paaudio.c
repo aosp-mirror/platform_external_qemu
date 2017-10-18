@@ -809,14 +809,20 @@ static int qpa_ctl_in (HWVoiceIn *hw, int cmd, ...)
             pa->read_data = NULL;
             pa->read_length = 0;
             pa->read_index = 0;
-            pa_stream_cork(pa->stream, 0, NULL, NULL);
+            op = pa_stream_cork(pa->stream, 0, NULL, NULL);
+            if (op) {
+                pa_operation_unref(op);
+            }
             pa_threaded_mainloop_unlock (g->mainloop);
             break;
         }
     case VOICE_DISABLE:
         {
             pa_threaded_mainloop_lock (g->mainloop);
-            pa_stream_cork(pa->stream, 1, NULL, NULL);
+            op = pa_stream_cork(pa->stream, 1, NULL, NULL);
+            if (op) {
+                pa_operation_unref(op);
+            }
             /* Try to wake up possible blocking qpa_simple_read, otherwise
              * it could hang on pa_threaded_mainloop_wait forever.
              */
