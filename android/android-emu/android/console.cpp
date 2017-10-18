@@ -34,6 +34,7 @@
 #include "android/network/control.h"
 #include "android/network/constants.h"
 #include "android/network/globals.h"
+#include "android/screen-recorder-constants.h"
 #include "android/shaper.h"
 #include "android/tcpdump.h"
 #include "android/telephony/modem_driver.h"
@@ -49,9 +50,12 @@
 
 #include "config-host.h"
 
+#include <atomic>
+
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
+#include <getopt.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -124,6 +128,7 @@ typedef struct ControlGlobalRec_
     int       num_redirs;
     int       max_redirs;
 
+    std::atomic<bool> is_recording{false};
 } ControlGlobalRec;
 
 static inline const QAndroidVmOperations* vmopers(ControlClient client) {
@@ -2718,6 +2723,224 @@ static const CommandDefRec fingerprint_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                   S C R E E N R E C O R D  C O M M A N D S                      ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+/*
+ * Parses a string of the form "1280x720".
+ *
+ * Returns true on success.
+ */
+static bool _parseWidthHeight(const char* widthHeight, uint32_t* pWidth,
+                              uint32_t* pHeight) {
+    long width, height;
+    char* end;
+
+    // Must specify base 10, or "0x0" gets parsed differently.
+    width = strtol(widthHeight, &end, 10);
+    if (end == widthHeight || *end != 'x' || *(end + 1) == '\0') {
+        // invalid chars in width, or missing 'x', or missing height
+        return false;
+    }
+    height = strtol(end + 1, &end, 10);
+    if (*end != '\0') {
+        // invalid chars in height
+        return false;
+    }
+
+    *pWidth = width;
+    *pHeight = height;
+    return true;
+}
+
+/*
+ * Accepts a string with a bare number ("4000000") or with a single-character
+ * unit ("4m").
+ *
+ * Returns false if parsing fails.
+ */
+static bool _parseValueWithUnit(const char* str, uint32_t* pValue) {
+    long value;
+    char* endptr;
+
+    value = strtol(str, &endptr, 10);
+    if (*endptr == '\0') {
+        // bare number
+        *pValue = value;
+        return true;
+    } else if (toupper(*endptr) == 'M' && *(endptr + 1) == '\0') {
+        *pValue = value * 1000000; // check for overflow?
+        return true;
+    } else {
+        D(("Unrecognized value: %s\n", str));
+        return false;
+    }
+}
+
+
+
+static int do_screenrecord_start(ControlClient client, char* args) {
+    static const struct option longOptions[] = {
+        { "size",        required_argument,  NULL, 's' },
+        { "bit-rate",    required_argument,  NULL, 'b' },
+        { "time-limit",  required_argument,  NULL, 't' },
+        { NULL,          0,                  NULL, 0 }
+    };
+    uint32_t width = 0, height = 0, bitrate = 0, timelimit = 0;
+
+    if (client->global->is_recording) {
+        control_write(client, "KO: Recording has already started\r\n");
+        return -1;
+    }
+
+    if (!args) {
+        control_write(client, "KO: Must provide an output filename\r\n");
+        return -1;
+    }
+
+    // Count number of arguments
+    // Need to skip first arg for getopt() to work correctly.
+    char s[8][2048] = {"screenrecord"};
+    int argc = sscanf(args, "%2048s %2048s %2048s %2048s %2048s %2048s %2048s ",
+                      s[1], s[2], s[3], s[4], s[5], s[6], s[7]) + 1; // +1 for first argument
+    D(("argc=%d\n", argc));
+    for (int i = 0; i < argc; ++i) {
+        D(("s[%d]=[%s]\n", i, s[i]));
+    }
+
+    // char*[] to char** for getopt()
+    char* sarray[9];
+    memset(sarray, 0, 9 * sizeof(char*));
+    for (int i = 0; i < argc; ++i) {
+        sarray[i] = &(s[i][0]);
+    }
+
+    // Something weird happening when doing the following:
+    // > screenrecord start --size
+    // > screenrecord start --bit-rate
+    // The error is: unrecognized option '--rate'
+    for (int i = 0; i < 9; ++i) {
+        D(("sarray[%d]=%p\n", i, sarray[i]));
+    }
+
+    // set optind to 1 to reset the state for getopt() to process a new argument
+    // vector.
+    optind = 1;
+    optopt = 0;
+    D(("optind=%d, opterr=%d, optopt=%d\n", optind, opterr, optopt));
+
+    while (true) {
+        int optionIndex = 0;
+        int ic = getopt_long(argc, sarray, "", longOptions, &optionIndex);
+        if (ic == -1) {
+            D(("Got ic=-1\n"));
+            break;
+        }
+
+        switch (ic) {
+        case 's':
+            D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+            if (!_parseWidthHeight(optarg, &width, &height)) {
+                control_write(client, "KO: Invalid size '%s', must be width x height\r\n",
+                              optarg);
+                return -1;
+            }
+            if (width == 0 || height == 0) {
+                control_write(client, "KO: Invalid size %ux%u, width and height may not be zero\r\n",
+                              width, height);
+                return -1;
+            }
+            break;
+        case 'b':
+            D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+            if (!_parseValueWithUnit(optarg, &bitrate)) {
+                return -1;
+            }
+            if (bitrate < MIN_BITRATE || bitrate > MAX_BITRATE) {
+                control_write(client, "KO: Bit rate %dbps outside acceptable range [%d,%d]\r\n", bitrate, MIN_BITRATE, MAX_BITRATE);
+                return -1;
+            }
+            break;
+        case 't':
+            D(("Got --%s=[%s]\n", longOptions[optionIndex].name, optarg));
+            timelimit = atoi(optarg);
+            if (timelimit == 0 || timelimit > MAX_TIMELIMIT) {
+                control_write(client, "Time limit %ds outside acceptable range [1,%d]\n", timelimit, MAX_TIMELIMIT);
+                return -1;
+            }
+            break;
+        default:
+            D(("getopt_long returned %d\n", ic));
+            control_write(client, "KO: Invalid arguments (see help screenrecord start).\r\n");
+            return -1;
+        }
+    }
+
+
+    if (optind != argc - 1) {
+        control_write(client, "KO: Must specify output file (see help screenrecord start).\r\n");
+        return -1;
+    }
+
+    const char* filename = sarray[optind];
+
+    bool success = client->global->record_agent->startRecording(filename);
+    if (!success) {
+        control_write(client, "KO: Error while trying to start recording\r\n");
+        return -1;
+    }
+
+    D(("Recording started\n"));
+    client->global->is_recording = true;
+
+    return 0;
+}
+
+static int do_screenrecord_stop(ControlClient client, char* args) {
+    if (!client->global->is_recording) {
+        control_write(client, "KO: No recording has started.\r\n");
+        return -1;
+    }
+
+    D(("Stopping the recording ...\n"));
+    client->global->record_agent->stopRecording();
+    D(("Finished recording!\n"));
+    client->global->is_recording = false;
+
+    return 0;
+}
+
+static const CommandDefRec  screenrecord_commands[] =
+{
+    { "start", "start screen recording",
+       "'screenrecord start [options] <filename>'\r\n"
+       "\r\nRecords the emulator's display to a .webm file.\r\n"
+       "\r\nOptions:\r\n"
+       "  --size WIDTHxHEIGHT\r\n"
+       "    Set the video size, e.g. \"1280x720\". Default is the device's main\r\n"
+       "    display resolution.\r\n"
+       "  --bit-rate RATE\r\n"
+       "    Set the video bit rate, in bits per second. Value may be specified as\r\n"
+       "    bits or megabits, e.g. '4000000' is equivalent to '4M'. Default 4Mbps.\r\n"
+       "  --time-limit TIME\r\n"
+       "    Set the maximum recording time, in seconds. Default/maximum is 180.\r\n"
+       "\r\nThe recording will stop with 'screenrecord stop' or when the time limit\r\n"
+       "is reached\r\n",
+      NULL,
+       do_screenrecord_start, NULL },
+
+    { "stop", "stop screen recording",
+      "'screenrecord stop' stops the recording if one has already started.\r\n", NULL,
+      do_screenrecord_stop, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2901,6 +3124,11 @@ extern const CommandDefRec main_commands[] = {
 
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
+
+        {"screenrecord", "Records the emulator's display to a .webm file",
+         NULL,
+         NULL,
+         NULL, screenrecord_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
