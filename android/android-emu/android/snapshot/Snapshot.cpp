@@ -25,13 +25,13 @@
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/protobuf/LoadSave.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/fd.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
-
-#include "google/protobuf/io/zero_copy_stream_impl.h"
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -50,6 +50,11 @@ using android::base::StringView;
 using android::base::System;
 using android::base::endsWith;
 using android::base::makeCustomScopedPtr;
+
+using android::protobuf::loadProtobuf;
+using android::protobuf::ProtobufLoadResult;
+using android::protobuf::saveProtobuf;
+using android::protobuf::ProtobufSaveResult;
 
 namespace pb = emulator_snapshot;
 
@@ -244,17 +249,12 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
-    google::protobuf::io::FileOutputStream stream(
-            ::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
-                   O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0755));
-    stream.SetCloseOnDelete(true);
-    if (mSnapshotPb.SerializeToZeroCopyStream(&stream)) {
-        mSize = uint64_t(stream.ByteCount());
-        return true;
-    } else {
-        mSize = 0;
-        return false;
-    }
+    auto res =
+        saveProtobuf(
+            PathUtils::join(mDataDir, "snapshot.pb"),
+            mSnapshotPb,
+            &mSize);
+    return res == ProtobufSaveResult::Success;
 }
 
 struct {
@@ -281,9 +281,29 @@ base::StringView Snapshot::dataDir(const char* name) {
     return getSnapshotDir(name);
 }
 
+base::Optional<std::string> Snapshot::parent() {
+    auto info = getGeneralInfo();
+    if (!info->has_parent()) return base::kNullopt;
+    auto parentName = info->parent();
+    if (parentName == "") return base::kNullopt;
+    return parentName;
+}
+
 Snapshot::Snapshot(const char* name)
     : mName(name), mDataDir(getSnapshotDir(name)) {}
 
+// static
+std::vector<Snapshot> Snapshot::getExistingSnapshots() {
+    std::vector<Snapshot> res = {};
+    auto snapshotFiles = getSnapshotDirEntries();
+    for (const auto& filename : snapshotFiles) {
+        Snapshot s(filename.c_str());
+        if (s.load()) {
+            res.push_back(s);
+        }
+    }
+    return res;
+}
 bool Snapshot::save() {
     // In saving, we assume the state is different,
     // so we reset the invalid/successful counters.
@@ -324,6 +344,18 @@ bool Snapshot::save() {
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
 
+    auto parentSnapshot = Snapshotter::get().loadedSnapshotFile();
+    // We want to maintain the default_boot snapshot as outside
+    // the hierarchy. For that reason, don't set parent if default
+    // boot is involved either as the current snapshot or the parent snapshot.
+    if (mName != Quickboot::kDefaultBootSnapshot &&
+        parentSnapshot != "" &&
+        parentSnapshot != Quickboot::kDefaultBootSnapshot) {
+        if (mName != parentSnapshot) {
+            mSnapshotPb.set_parent(parentSnapshot);
+        }
+    }
+
     return writeSnapshotToDisk();
 }
 
@@ -356,6 +388,10 @@ static bool isUnrecoverableReason(FailureReason reason) {
            reason < FailureReason::UnrecoverableErrorLimit;
 }
 
+// preload(): Obtain the protobuf metadata. Logic for deciding
+// whether or not to load based on it, plus initialization
+// of properties like skin rotation, is done afterward in load().
+// Checks whether or not the version of the protobuf is compatible.
 bool Snapshot::preload() {
     loadProtobufOnce();
 
@@ -412,6 +448,8 @@ void Snapshot::loadProtobufOnce() {
     // Success
 }
 
+// load(): Loads all snapshot metadata and checks it against other files
+// for integrity.
 bool Snapshot::load() {
     if (!preload()) {
         return false;
