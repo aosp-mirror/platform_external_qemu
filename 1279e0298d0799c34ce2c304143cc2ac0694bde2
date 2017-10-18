@@ -91,6 +91,30 @@
       "revId": "1279e0298d0799c34ce2c304143cc2ac0694bde2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ff2fb3d1_e7b33720",
+        "filename": "android/android-emu/android/snapshot/Provenance.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-18T04:29:35Z",
+      "side": 1,
+      "message": "I\u0027ll send over a more detailed description soon",
+      "parentUuid": "f5d0f490_827fcbcf",
+      "range": {
+        "startLine": 23,
+        "startChar": 6,
+        "endLine": 23,
+        "endChar": 16
+      },
+      "revId": "1279e0298d0799c34ce2c304143cc2ac0694bde2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
