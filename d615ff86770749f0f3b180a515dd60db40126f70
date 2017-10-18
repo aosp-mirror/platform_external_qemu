@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bab1af50_b0564b97",
+        "filename": "audio/paaudio.c",
+        "patchSetId": 4
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-18T03:09:25Z",
+      "side": 1,
+      "message": "why the signal is only needed here ? how about enable and volume etc ?",
+      "range": {
+        "startLine": 823,
+        "startChar": 12,
+        "endLine": 823,
+        "endChar": 39
+      },
+      "revId": "d615ff86770749f0f3b180a515dd60db40126f70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
