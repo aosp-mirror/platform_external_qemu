@@ -17,6 +17,7 @@
 #include "android/snapshot/proto/snapshot.pb.h"
 
 #include <string>
+#include <vector>
 
 namespace android {
 namespace snapshot {
@@ -24,6 +25,8 @@ namespace snapshot {
 class Snapshot final {
 public:
     Snapshot(const char* name);
+
+    static std::vector<Snapshot> getExistingSnapshots();
 
     base::StringView name() const { return mName; }
     base::StringView dataDir() const { return mDataDir; }
@@ -46,6 +49,8 @@ public:
     base::Optional<FailureReason> failureReason() const;
 
     static base::StringView dataDir(const char* name);
+
+    base::Optional<std::string> parent();
 
 private:
     void loadProtobufOnce();
