@@ -38,7 +38,7 @@
 
 #include <algorithm>
 
-//#define ALLOW_CHANGE_RENDERER
+#define ALLOW_CHANGE_RENDERER
 
 using android::base::IniFile;
 using android::base::Optional;
