@@ -49,6 +49,8 @@
 
 #include "config-host.h"
 
+#include <atomic>
+
 #include <assert.h>
 #include <ctype.h>
 #include <fcntl.h>
@@ -124,6 +126,7 @@ typedef struct ControlGlobalRec_
     int       num_redirs;
     int       max_redirs;
 
+    std::atomic<bool> is_recording{false};
 } ControlGlobalRec;
 
 static inline const QAndroidVmOperations* vmopers(ControlClient client) {
@@ -2718,6 +2721,77 @@ static const CommandDefRec fingerprint_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                   S C R E E N R E C O R D  C O M M A N D S                      ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int do_screenrecord_start(ControlClient client, char* args) {
+    if (client->global->is_recording) {
+        control_write(client, "KO: Recording has already started\r\n");
+        return -1;
+    }
+
+    if (!args) {
+        control_write(client, "KO: Must provide an output filename\r\n");
+        return -1;
+    }
+
+    bool success = client->global->record_agent->startRecording("untitled.webm");
+    if (!success) {
+        control_write(client, "KO: Error while trying to start recording\r\n");
+        return -1;
+    }
+
+    D(("Recording started\n"));
+    client->global->is_recording = true;
+
+    return 0;
+}
+
+static int do_screenrecord_stop(ControlClient client, char* args) {
+    if (!client->global->is_recording) {
+        control_write(client, "KO: No recording has started.\r\n");
+        return -1;
+    }
+
+    D(("Stopping the recording ...\n"));
+    client->global->record_agent->stopRecording();
+    D(("Finished recording!\n"));
+    client->global->is_recording = false;
+
+    return 0;
+}
+
+static const CommandDefRec  screenrecord_commands[] =
+{
+    { "start", "start screen recording",
+       "'screenrecord start [options] <filename>'\r\n"
+       "\r\nRecords the emulator's display to a .webm file.\r\n"
+       "\r\nOptions:\r\n"
+       "  --size WIDTHxHEIGHT\r\n"
+       "    Set the video size, e.g. \"1280x720\". Default is the device's main\r\n"
+       "    display resolution.\r\n"
+       "  --bit-rate RATE\r\n"
+       "    Set the video bit rate, in bits per second. Value may be specified as\r\n"
+       "    bits or megabits, e.g. '4000000' is equivalent to '4M'. Default 4Mbps.\r\n"
+       "  --time-limit TIME\r\n"
+       "    Set the maximum recording time, in seconds. Default/maximum is 180.\r\n"
+       "\r\nThe recording will stop with 'screenrecord stop' or when the time limit\r\n"
+       "is reached\r\n",
+      NULL,
+       do_screenrecord_start, NULL },
+
+    { "stop", "stop screen recording",
+      "'screenrecord stop' stops the recording if one has already started.\r\n", NULL,
+      do_screenrecord_stop, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -2901,6 +2975,11 @@ extern const CommandDefRec main_commands[] = {
 
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
+
+        {"screenrecord", "Records the emulator's display to a .webm file",
+         NULL,
+         NULL,
+         NULL, screenrecord_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
