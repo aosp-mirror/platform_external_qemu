@@ -102,6 +102,8 @@ typedef struct ControlClientRec_
     char                       buff[ 4096 ];
     int                        buff_len;
     CommandDef                 commands;
+    // There can only be one client recording at one time.
+    bool                       is_recording;
 } ControlClientRec;
 
 
@@ -124,6 +126,8 @@ typedef struct ControlGlobalRec_
     int       num_redirs;
     int       max_redirs;
 
+    /* Only one client can be recording at a time */
+    std::atomic<bool> is_recording{false};
 } ControlGlobalRec;
 
 static inline const QAndroidVmOperations* vmopers(ControlClient client) {
@@ -210,6 +214,8 @@ control_client_detach( ControlClient  client )
     return result;
 }
 
+static void _stop_recording(ControlClient client);
+
 static void
 control_client_destroy( ControlClient  client )
 {
@@ -235,6 +241,10 @@ control_client_destroy( ControlClient  client )
         pnode = &node->next;
     }
 
+    // If the client was recording, stop it.
+    if (global->is_recording && client->is_recording) {
+        _stop_recording(client);
+    }
     delete client;
 }
 
@@ -363,6 +373,7 @@ control_client_create( Socket         socket,
 
         loopIo_wantRead(client->loopIo);
         loopIo_dontWantWrite(client->loopIo);
+        client->is_recording = false;
     }
     return client;
 }
@@ -634,8 +645,24 @@ static void control_client_read(void* opaque, int fd, unsigned events) {
         D(( "received %d bytes: %s\n", size, temp ));
 #  endif
 #else
-        D(( "received %.*s\n", size, buf ));
+        D(( "received %d bytes [%.*s]\n", size, size, buf ));
 #endif
+//        if (gIsRecording && !strncmp((char*)buf, "\xff\xf4\xff\xfd\x06", 5)) {
+        if (client->global->is_recording &&
+            client->is_recording) {
+            // If the client is in recording state,
+            // block it from doing anything until it stops
+            // the recording by hitting ^C.
+            if (!strncmp((char*)buf, "\xff\xf4\xff\xfd\x06", 5)) {
+                D(("Got ^C\n"));
+                // Need to respond to the IAC DO TIMING-MARK to continue displaying
+                // output on the client side. Send a IAC WILL TIMING-MARK.
+                control_write(client, "\xff\xfc\x06");
+                _stop_recording(client);
+            }
+            return;
+        }
+
         for (nn = 0; nn < size; nn++) {
             control_client_read_byte( client, buf[nn] );
             if (client->finished) {
@@ -2816,6 +2843,53 @@ static int do_rotate_90_clockwise(ControlClient client, char* args) {
     return (int)client->global->emu_agent->rotate90Clockwise();
 }
 
+static int do_screen_record(ControlClient client, char* args) {
+
+    if (client->global->is_recording) {
+        if (client->is_recording) {
+            control_write(client, "Recording has already started\r\n");
+        } else {
+            control_write(client, "Another client is recording. Only one client can record at a time\r\n");
+        }
+        return -1;
+    }
+
+    if (!args) {
+        control_write(client, "Must provide an output filename\r\n");
+        return -1;
+    }
+
+    bool success = client->global->record_agent->startRecording("untitled.webm");
+    if (!success) {
+        control_write(client, "Error while trying to start recording\r\n");
+        return -1;
+    }
+
+    client->global->is_recording = true;
+    client->is_recording = true;
+    control_write(client, "Press Ctrl-C to stop recording.\r\n");
+
+    return 0;
+}
+
+static void _stop_recording(ControlClient client) {
+    if (!client->global->is_recording) {
+        control_write(client, "No recording has started.\r\n");
+        return;
+    } else if (!client->global->is_recording) {
+        control_write(client, "Recording cannot be stopped from a different client from which the recording started.\r\n");
+        return;
+    }
+
+    control_write(client, "\r\nFinishing encoding...\r\n");
+    D(("Stopping the recording ...\n"));
+    client->global->record_agent->stopRecording();
+    control_write(client, "Finished recording!\r\n");
+    D(("Finished recording!\n"));
+    client->global->is_recording = false;
+    client->is_recording = false;
+}
+
 /* NOTE: The names of all commands are listed when the 'help' command
  *       is received.
  *       Android Studio uses the 'help' command and requires that the
@@ -2901,6 +2975,22 @@ extern const CommandDefRec main_commands[] = {
 
         {"rotate", "rotate the screen clockwise by 90 degrees", NULL, NULL,
          do_rotate_90_clockwise, NULL},
+
+        {"screenrecord", "Records the emulator's display to a .webm file",
+         "'screenrecord [options] <filename>'\r\n"
+         "\r\nRecords the emulator's display to a .webm file.\r\n"
+         "\r\nOptions:\r\n"
+         "  --size WIDTHxHEIGHT\r\n"
+         "    Set the video size, e.g. \"1280x720\". Default is the device's main\r\n"
+         "    display resolution.\r\n"
+         "  --bit-rate RATE\r\n"
+         "    Set the video bit rate, in bits per second. Value may be specified as\r\n"
+         "    bits or megabits, e.g. '4000000' is equivalent to '4M'. Default 4Mbps.\r\n"
+         "  --time-limit TIME\r\n"
+         "    Set the maximum recording time, in seconds. Default/maximum is 180.\r\n"
+         "\r\nRecording continues until Ctrl-C is hit or the time limit is reached\r\n",
+         NULL,
+         do_screen_record, NULL},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
