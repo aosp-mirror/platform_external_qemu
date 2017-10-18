@@ -1559,8 +1559,9 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
 
         ProgramData* pData = (ProgramData*)objData;
+        int hostIdx = pData->getHostUniformLocation(index);
         s_getActiveAttribOrUniform(true, ctx, pData,
-                                   globalProgramName, index, bufsize, length,
+                                   globalProgramName, hostIdx, bufsize, length,
                                    size, type, name);
     }
 }
@@ -2536,12 +2537,7 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
-
-        // On core profile, it's possible to have renamed
-        // a bunch of variables to avoid ES -> core name collisions.
-        // Sort it out here.
-        return ctx->dispatcher().glGetUniformLocation(
-            globalProgramName, pData->getTranslatedName(name).c_str());
+        return  pData->getGuestUniformLocation(name);
     }
     return -1;
 }
@@ -3244,105 +3240,172 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
+static int s_getHostLocOrSetError(GLint location) {
+    GET_CTX_V2_RET(-1);
+    ProgramData* pData = ctx->getUseProgram();
+    RET_AND_SET_ERROR_IF(!pData, GL_INVALID_OPERATION, -1);
+    int hostLoc = pData->getHostUniformLocation(location);
+    RET_AND_SET_ERROR_IF(hostLoc == -1 && location != -1,
+            GL_INVALID_OPERATION, -1);
+    return hostLoc;
+}
+
 GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){
-    GET_CTX();
-    ctx->dispatcher().glUniform1f(location,x);
+    GET_CTX_V2();
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform1f(hostLoc,x);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    ctx->dispatcher().glUniform1fv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform1fv(hostLoc,count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1i(GLint location, GLint x){
     GET_CTX();
-    ctx->dispatcher().glUniform1i(location,x);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform1i(hostLoc, x);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    ctx->dispatcher().glUniform1iv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform1iv(hostLoc, count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2f(GLint location, GLfloat x, GLfloat y){
     GET_CTX();
-    ctx->dispatcher().glUniform2f(location,x,y);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform2f(hostLoc, x, y);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    ctx->dispatcher().glUniform2fv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform2fv(hostLoc,count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2i(GLint location, GLint x, GLint y){
     GET_CTX();
-    ctx->dispatcher().glUniform2i(location,x,y);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform2i(hostLoc, x, y);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform2iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    ctx->dispatcher().glUniform2iv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform2iv(hostLoc,count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3f(GLint location, GLfloat x, GLfloat y, GLfloat z){
     GET_CTX();
-    ctx->dispatcher().glUniform3f(location,x,y,z);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform3f(hostLoc,x,y,z);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    ctx->dispatcher().glUniform3fv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform3fv(hostLoc,count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3i(GLint location, GLint x, GLint y, GLint z){
     GET_CTX();
-    ctx->dispatcher().glUniform3i(location,x,y,z);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform3i(hostLoc,x,y,z);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform3iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    ctx->dispatcher().glUniform3iv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform3iv(hostLoc,count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4f(GLint location, GLfloat x, GLfloat y, GLfloat z, GLfloat w){
     GET_CTX();
-    ctx->dispatcher().glUniform4f(location,x,y,z,w);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform4f(hostLoc,x,y,z,w);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4fv(GLint location, GLsizei count, const GLfloat* v){
     GET_CTX();
-    ctx->dispatcher().glUniform4fv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform4fv(hostLoc,count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4i(GLint location, GLint x, GLint y, GLint z, GLint w){
     GET_CTX();
-    ctx->dispatcher().glUniform4i(location,x,y,z,w);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform4i(hostLoc,x,y,z,w);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniform4iv(GLint location, GLsizei count, const GLint* v){
     GET_CTX();
-    ctx->dispatcher().glUniform4iv(location,count,v);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniform4iv(hostLoc,count,v);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix2fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
     GET_CTX_V2();
     SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
                  transpose != GL_FALSE,GL_INVALID_VALUE);
-    ctx->dispatcher().glUniformMatrix2fv(location,count,transpose,value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniformMatrix2fv(hostLoc,count,transpose,value);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix3fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
     GET_CTX_V2();
     SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
                  transpose != GL_FALSE,GL_INVALID_VALUE);
-    ctx->dispatcher().glUniformMatrix3fv(location,count,transpose,value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniformMatrix3fv(hostLoc,count,transpose,value);
+    }
 }
 
 GL_APICALL void  GL_APIENTRY glUniformMatrix4fv(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value){
     GET_CTX_V2();
     SET_ERROR_IF(ctx->getMajorVersion() < 3 &&
                  transpose != GL_FALSE,GL_INVALID_VALUE);
-    ctx->dispatcher().glUniformMatrix4fv(location,count,transpose,value);
+    int hostLoc = s_getHostLocOrSetError(location);
+    if (hostLoc >= 0) {
+        ctx->dispatcher().glUniformMatrix4fv(hostLoc,count,transpose,value);
+    }
 }
 
 static void s_unUseCurrentProgram() {
