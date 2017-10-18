@@ -1,0 +1,12 @@
+syntax = "proto2";
+
+package emulator_snapshot;
+
+message SnapshotDependency {
+    optional string name = 1;
+    optional string parent = 2;
+}
+
+message SnapshotDependencies {
+    repeated SnapshotDependency dependencies = 1;
+}

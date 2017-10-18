@@ -83,4 +83,7 @@ message Snapshot {
     // Emulator rotation angle, in right angles (e.g. 1 is 90 degrees, 2 is 180
     // etc).
     optional int32 rotation = 9;
+
+    // Name of snapshot loaded while saving this one, if any.
+    optional string parent = 10;
 }

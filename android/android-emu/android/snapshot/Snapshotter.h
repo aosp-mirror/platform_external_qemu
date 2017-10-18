@@ -70,6 +70,10 @@ public:
         return mIsQuickboot;
     }
 
+    android::base::Optional<std::string> loadedSnapshotName() const {
+        return mLoadedSnapshotName;
+    }
+
 private:
     bool onStartSaving(const char* name);
     bool onSavingComplete(const char* name, int res);
@@ -89,6 +93,8 @@ private:
     base::System::Duration mLastLoadUptimeMs = 0;
 
     bool mIsQuickboot = false;
+
+    android::base::Optional<std::string> mLoadedSnapshotName;
 };
 
 }  // namespace snapshot

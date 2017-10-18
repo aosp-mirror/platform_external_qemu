@@ -25,13 +25,13 @@
 #include "android/globals.h"
 #include "android/opengl/emugl_config.h"
 #include "android/opengl/gpuinfo.h"
+#include "android/protobuf/LoadSave.h"
 #include "android/snapshot/PathUtils.h"
+#include "android/snapshot/Quickboot.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/utils/fd.h"
 #include "android/utils/file_io.h"
 #include "android/utils/path.h"
-
-#include "google/protobuf/io/zero_copy_stream_impl.h"
 
 #include <fcntl.h>
 #include <sys/mman.h>
@@ -48,6 +48,11 @@ using android::base::StringView;
 using android::base::System;
 using android::base::endsWith;
 using android::base::makeCustomScopedPtr;
+
+using android::protobuf::loadProtobuf;
+using android::protobuf::ProtobufLoadResult;
+using android::protobuf::saveProtobuf;
+using android::protobuf::ProtobufSaveResult;
 
 namespace pb = emulator_snapshot;
 
@@ -220,17 +225,12 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
 }
 
 bool Snapshot::writeSnapshotToDisk() {
-    google::protobuf::io::FileOutputStream stream(
-            ::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
-                   O_WRONLY | O_BINARY | O_CREAT | O_TRUNC | O_CLOEXEC, 0755));
-    stream.SetCloseOnDelete(true);
-    if (mSnapshotPb.SerializeToZeroCopyStream(&stream)) {
-        mSize = uint64_t(stream.ByteCount());
-        return true;
-    } else {
-        mSize = 0;
-        return false;
-    }
+    auto res =
+        saveProtobuf(
+            PathUtils::join(mDataDir, "snapshot.pb"),
+            mSnapshotPb,
+            &mSize);
+    return res == ProtobufSaveResult::Success;
 }
 
 struct {
@@ -260,6 +260,18 @@ base::StringView Snapshot::dataDir(const char* name) {
 Snapshot::Snapshot(const char* name)
     : mName(name), mDataDir(getSnapshotDir(name)) {}
 
+// static
+std::vector<Snapshot> Snapshot::getExistingSnapshots() {
+    std::vector<Snapshot> res = {};
+    auto snapshotFiles = getSnapshotDirEntries();
+    for (const auto& filename : snapshotFiles) {
+        Snapshot s(filename.c_str());
+        if (s.load()) {
+            res.push_back(s);
+        }
+    }
+    return res;
+}
 bool Snapshot::save() {
     auto targetHwIni = PathUtils::join(mDataDir, "hardware.ini");
     if (path_copy_file(targetHwIni.c_str(),
@@ -294,6 +306,27 @@ bool Snapshot::save() {
     mSnapshotPb.set_rotation(
             int(Snapshotter::get().windowAgent().getRotation()));
 
+    auto parentSnapshot = Snapshotter::get().loadedSnapshotName();
+    if (mName != Quickboot::kDefaultBootSnapshot &&
+        parentSnapshot &&
+        *parentSnapshot != Quickboot::kDefaultBootSnapshot) {
+        fprintf(stderr, "%s: parent snapshot: %s\n", __func__, parentSnapshot->c_str());
+        // Overwrote the current snapshot.
+        // TODO: Delete all children, or repair the hierarchy
+        if (mName == *parentSnapshot) {
+            fprintf(stderr, "%s: need to support overwriting and invalidation. current %s parent: %s mParentName %s\n", __func__,
+                    mName.c_str(),
+                    parentSnapshot->c_str(),
+                    mParentName->c_str());
+            abort();
+            // if (mParentName) {
+            //     mSnapshotPb.set_parent(*mParentName);
+            // }
+        } else {
+            mSnapshotPb.set_parent(*parentSnapshot);
+        }
+    }
+
     return writeSnapshotToDisk();
 }
 
@@ -314,41 +347,34 @@ bool Snapshot::preload() {
     if (mSnapshotPb.has_version()) {
         return true;
     }
-    const auto file =
-            ScopedFd(::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
-                            O_RDONLY | O_BINARY | O_CLOEXEC, 0755));
-    System::FileSize size;
-    if (!System::get()->fileSize(file.get(), &size)) {
+
+    auto loadRes =
+        loadProtobuf(
+            PathUtils::join(mDataDir, "snapshot.pb"),
+            mSnapshotPb,
+            &mSize);
+
+    switch (loadRes) {
+    case ProtobufLoadResult::FileNotFound:
         saveFailure(FailureReason::NoSnapshotPb);
         return false;
-    }
-    mSize = size;
-
-    const auto fileMap = makeCustomScopedPtr(
-            mmap(nullptr, size, PROT_READ, MAP_PRIVATE, file.get(), 0),
-            [size](void* ptr) {
-                if (ptr != MAP_FAILED) {
-                    munmap(ptr, size);
-                }
-            });
-    if (!fileMap || fileMap.get() == MAP_FAILED) {
+    case ProtobufLoadResult::FileMapFailed:
+    case ProtobufLoadResult::ProtobufParseFailed:
         saveFailure(FailureReason::BadSnapshotPb);
         return false;
+    case ProtobufLoadResult::Success:
+        if (mSnapshotPb.has_failed_to_load_reason_code() &&
+            isUnrecoverableReason(
+                    FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+            return false;
+        }
+        if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
+            saveFailure(FailureReason::IncompatibleVersion);
+            return false;
+        }
+        break;
     }
-    if (!mSnapshotPb.ParseFromArray(fileMap.get(), size)) {
-        saveFailure(FailureReason::BadSnapshotPb);
-        return false;
-    }
-    if (mSnapshotPb.has_failed_to_load_reason_code() &&
-        isUnrecoverableReason(
-                FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        return false;
-    }
-    if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
-        saveFailure(FailureReason::IncompatibleVersion);
-        return false;
-    }
-
+    
     return true;
 }
 
@@ -425,6 +451,11 @@ bool Snapshot::load() {
                 SkinRotation(mSnapshotPb.rotation())) {
         Snapshotter::get().windowAgent().rotate(
                 SkinRotation(mSnapshotPb.rotation()));
+    }
+
+    if (mSnapshotPb.has_parent()) {
+        mParentName.emplace(mSnapshotPb.parent());
+        fprintf(stderr, "%s: has parent. name: %s\n", __func__, mParentName->c_str());
     }
 
     return true;
