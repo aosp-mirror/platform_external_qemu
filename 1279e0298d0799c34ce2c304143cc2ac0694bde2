@@ -115,6 +115,30 @@
       "revId": "1279e0298d0799c34ce2c304143cc2ac0694bde2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55192cf8_9fbc9f66",
+        "filename": "android/android-emu/android/snapshot/Provenance.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-18T04:47:39Z",
+      "side": 1,
+      "message": "Updated commit message with the general idea. Will add a detailed comment to this later once more things are worked out.",
+      "parentUuid": "ff2fb3d1_e7b33720",
+      "range": {
+        "startLine": 23,
+        "startChar": 6,
+        "endLine": 23,
+        "endChar": 16
+      },
+      "revId": "1279e0298d0799c34ce2c304143cc2ac0694bde2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
