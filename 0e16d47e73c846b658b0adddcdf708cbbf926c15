@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1d16ec0e_5abf07e0",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/ProgramData.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-19T00:25:14Z",
+      "side": 1,
+      "message": "unordered_map could work better as uniform setting is on the hot path and rather performance intensive.",
+      "range": {
+        "startLine": 134,
+        "startChar": 0,
+        "endLine": 135,
+        "endChar": 42
+      },
+      "revId": "0e16d47e73c846b658b0adddcdf708cbbf926c15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
