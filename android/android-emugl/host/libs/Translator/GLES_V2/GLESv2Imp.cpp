@@ -170,7 +170,7 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
 
 static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
                         SaveableTexture::Buffer* buffer) {
-    texture->onSave(stream, buffer);
+    texture->onSave(stream);
 }
 
 static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
@@ -753,6 +753,8 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
                 texData->sourceEGLImage = 0;
                 texData->globalName = globalTextureName;
             }
+            texData->resetSaveableTexture();
+            texData->makeDirty();
         }
     }
 
@@ -779,6 +781,8 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
             texData->target = target;
             texData->format = format;
             texData->type = type;
+            texData->resetSaveableTexture();
+            texData->makeDirty();
         }
     }
 }
@@ -819,6 +823,9 @@ GL_APICALL void  GL_APIENTRY glCopyTexSubImage2D(GLenum target, GLint level, GLi
     SET_ERROR_IF(!(GLESv2Validate::textureTarget(ctx, target) ||
                    GLESv2Validate::textureTargetEx(ctx, target)), GL_INVALID_ENUM);
     TextureData* texData = getTextureTargetData(target);
+    if (texData) {
+        texData->makeDirty();
+    }
     if (texData && isCoreProfile() &&
         isCoreProfileEmulatedFormat(texData->format)) {
         ctx->copyTexImageWithEmulation(
@@ -1327,16 +1334,20 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
     SET_ERROR_IF(ctx->getMajorVersion() < 3 && level != 0, GL_INVALID_VALUE);
     SET_ERROR_IF(!ctx->shareGroup().get(), GL_INVALID_OPERATION);
     SET_ERROR_IF(ctx->isDefaultFBOBound(target), GL_INVALID_OPERATION);
+    SET_ERROR_IF(texture &&
+            !ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture),
+            GL_INVALID_OPERATION);
 
     GLuint globalTextureName = 0;
 
     if(texture) {
-        if (!ctx->shareGroup()->isObject(NamedObjectType::TEXTURE, texture)) {
-            ctx->shareGroup()->genName(NamedObjectType::TEXTURE, texture);
-        }
         ObjectLocalName texname = ctx->getTextureLocalName(textarget,texture);
         globalTextureName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::TEXTURE, texname);
+        TextureData* texData = getTextureTargetData(target);
+        if (texData) {
+            texData->makeDirty();
+        }
     }
 
     ctx->dispatcher().glFramebufferTexture2D(target,attachment,textarget,globalTextureName,level);
@@ -3187,13 +3198,11 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
     // set an error if level < 0 or level > log 2 max
     SET_ERROR_IF(level < 0 || 1<<level > ctx->getMaxTexSize(), GL_INVALID_VALUE);
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
-    if (ctx->shareGroup().get()) {
-        TextureData *texData = getTextureTargetData(target);
-        if (texData) {
-            SET_ERROR_IF(xoffset + width > (GLint)texData->width ||
-                     yoffset + height > (GLint)texData->height,
-                     GL_INVALID_VALUE);
-        }
+    TextureData *texData = getTextureTargetData(target);
+    if (texData) {
+        SET_ERROR_IF(xoffset + width > (GLint)texData->width ||
+                 yoffset + height > (GLint)texData->height,
+                 GL_INVALID_VALUE);
     }
     SET_ERROR_IF(!(GLESv2Validate::pixelFrmt(ctx,format) &&
                    GLESv2Validate::pixelType(ctx,type)),GL_INVALID_ENUM);
@@ -3206,6 +3215,7 @@ GL_APICALL void  GL_APIENTRY glTexSubImage2D(GLenum target, GLint level, GLint x
         isCoreProfileEmulatedFormat(format)) {
         format = getCoreProfileEmulatedFormat(format);
     }
+    texData->makeDirty();
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,format,type,pixels);
 }
 
@@ -3524,7 +3534,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->texStorageLevels = img->texStorageLevels;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
-            // TODO: set up texData->type
+            texData->setSaveableTexture(
+                    SaveableTexturePtr(img->saveableTexture));
             if (!imagehndl) {
                 fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
             }
@@ -3554,6 +3565,8 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     // acquire the texture in the renderbufferData that it is an eglImage target
     //
     rbData->eglImageGlobalTexObject = img->globalTexObj;
+    img->isDirty = true;
+    img->saveableTexture->makeDirty();
 
     //
     // if the renderbuffer is attached to a framebuffer
