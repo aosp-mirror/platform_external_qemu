@@ -39,6 +39,19 @@ ANDROID_BEGIN_HEADER
  */
 extern int has_converter(uint32_t from, uint32_t to);
 
+/* Calculates the framebuffer size for a given pixel format, width, and height.
+ * Param:
+ *  |pixel_format| - Pixel format.
+ *  |width|, |height| - Framebuffer width and height.
+ *  |frame_size| - Out parameter returning the frame size.
+ * Return:
+ *  True if the framebuffer size could be calculated.
+ */
+extern bool calculate_framebuffer_size(uint32_t pixel_format,
+                                       int width,
+                                       int height,
+                                       size_t* frame_size);
+
 /* Converts a frame into multiple framebuffers using a slow-but-robust method
  * that supports a larger list of formats.  If convert_frame is unable to
  * perform a conversion, it falls back to this function.
