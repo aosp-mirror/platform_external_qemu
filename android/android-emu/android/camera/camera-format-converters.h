@@ -84,10 +84,32 @@ extern int convert_frame_slow(const void* src_frame,
                               float b_scale,
                               float exp_comp);
 
+/* Converts a frame into multiple framebuffers using the fast path. If the frame
+ * cannot be converted with the fast path, this function may return failure.
+ *
+ * Param:
+ *  |src_frame| - Frame to convert.
+ *  |pixel_format| - Defines pixel format for the converting framebuffer.
+ *  |framebuffer_size|, |width|, |height| - Converting framebuffer byte size,
+ *                                          width, and height.
+ *  |result_frame| - ClientFrame struct containing an array of framebuffers
+ *                   where to convert the frame.
+ *  |exp_comp| - Exposure compensation.
+ * Return:
+ *  0 on success, or non-zero value on failure.
+*/
+extern int convert_frame_fast(const void* src_frame,
+                              uint32_t pixel_format,
+                              size_t framebuffer_size,
+                              int width,
+                              int height,
+                              ClientFrame* result_frame,
+                              float exp_comp);
+
 /* Converts a frame into multiple framebuffers.
  *
  * When camera service replies to a framebuffer request from the client, it
- * usualy sends two framebuffers in the reply: one for video, and another for
+ * ussualy sends two framebuffers in the reply: one for video, and another for
  * preview window. Since these two framebuffers have different pixel formats
  * (most of the time), we need to do two conversions for each frame received
  * from the camera. This is the main intention behind this routine: to have a
