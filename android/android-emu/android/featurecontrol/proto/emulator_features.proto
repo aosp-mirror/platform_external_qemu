@@ -35,5 +35,7 @@ enum Feature {
 
     FastSnapshotV1 = 18;
 
-    ProtoNumFeatures = 19;
+    ScreenRecording = 19;
+
+    ProtoNumFeatures = 20;
 }
