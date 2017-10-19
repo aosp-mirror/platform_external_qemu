@@ -72,7 +72,7 @@ public:
     // precondition: a context must be properly bound
     void fillEglImage(EglImage* eglImage);
     void loadFromStream(android::base::Stream* stream);
-
+    void makeDirty();
 public:
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up
@@ -102,6 +102,7 @@ private:
     std::unordered_map<GLenum, GLint> m_texParam;
     loader_t m_loader;
     GlobalNameSpace* m_globalNamespace = nullptr;
+    bool m_isDirty = true;
 };
 
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;

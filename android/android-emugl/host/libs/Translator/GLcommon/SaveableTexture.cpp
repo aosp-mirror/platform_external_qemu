@@ -324,7 +324,8 @@ SaveableTexture::SaveableTexture(const EglImage& eglImage)
       m_type(eglImage.type),
       m_border(eglImage.border),
       m_texStorageLevels(eglImage.texStorageLevels),
-      m_globalName(eglImage.globalTexObj->getGlobalName()) {}
+      m_globalName(eglImage.globalTexObj->getGlobalName()),
+      m_isDirty(eglImage.isDirty) {}
 
 SaveableTexture::SaveableTexture(const TextureData& texture)
     : m_target(texture.target),
@@ -336,11 +337,14 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_type(texture.type),
       m_border(texture.border),
       m_texStorageLevels(texture.texStorageLevels),
-      m_globalName(texture.globalName) {}
+      m_globalName(texture.globalName),
+      m_isDirty(texture.isDirty()) {}
 
 SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
                                  loader_t&& loader)
-    : m_loader(std::move(loader)), m_globalNamespace(globalNameSpace) {
+    : m_loader(std::move(loader)),
+      m_globalNamespace(globalNameSpace),
+      m_isDirty(false) {
     mNeedRestore = true;
 }
 
@@ -774,4 +778,9 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->type = m_type;
     eglImage->width = m_width;
     eglImage->texStorageLevels = m_texStorageLevels;
+    eglImage->isDirty = true;
+}
+
+void SaveableTexture::makeDirty() {
+    m_isDirty = true;
 }

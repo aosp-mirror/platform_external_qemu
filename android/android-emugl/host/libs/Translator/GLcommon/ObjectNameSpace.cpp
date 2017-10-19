@@ -74,7 +74,7 @@ void NameSpace::touchTextures() {
     assert(m_type == NamedObjectType::TEXTURE);
     for (const auto& obj : m_objectDataMap) {
         TextureData* texData = (TextureData*)obj.second.get();
-        SaveableTexturePtr saveableTexture(texData->releaseSaveableTexture());
+        SaveableTexturePtr saveableTexture(texData->getSaveableTexture());
         if (saveableTexture) {
             NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
             setGlobalObject(obj.first, texNamedObj);
@@ -251,14 +251,30 @@ void NameSpace::setObjectData(ObjectLocalName p_localName,
 void GlobalNameSpace::preSaveAddEglImage(const EglImage* eglImage) {
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
     emugl::Mutex::AutoLock lock(m_lock);
-    m_textureMap.emplace(globalName,
-            SaveableTexturePtr(new SaveableTexture(*eglImage)));
+    const auto& saveableTexIt = m_textureMap.find(globalName);
+    if (saveableTexIt == m_textureMap.end()) {
+        SaveableTexturePtr saveableTex = eglImage->saveableTexture;
+        if (!saveableTex) {
+            saveableTex.reset(new SaveableTexture(*eglImage));
+        }
+        m_textureMap.emplace(globalName, std::move(saveableTex));
+    } else if (eglImage->isDirty) {
+        saveableTexIt->second->makeDirty();
+    }
 }
 
 void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
-    m_textureMap.emplace(texture->globalName,
-            SaveableTexturePtr(new SaveableTexture(*texture)));
+    const auto& saveableTexIt = m_textureMap.find(texture->globalName);
+    if (saveableTexIt == m_textureMap.end()) {
+        SaveableTexturePtr saveableTex = texture->getSaveableTexture();
+        if (!saveableTex) {
+            saveableTex.reset(new SaveableTexture(*texture));
+        }
+        m_textureMap.emplace(texture->globalName, std::move(saveableTex));
+    } else if (texture->isDirty()) {
+        saveableTexIt->second->makeDirty();
+    }
 }
 
 void GlobalNameSpace::onSave(android::base::Stream* stream,
