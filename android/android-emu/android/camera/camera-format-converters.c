@@ -502,6 +502,9 @@ struct YUVDesc {
     /* Controls location of the first V value in YUV framebuffer.
      * See comments to U_offset for more info. */
     int             V_offset;
+    /* For aligned YUV, defines the stride alignment in bytes, otherwise this
+     * should be 0. */
+    int             alignment;
     /* Routine that calculates an offset of the first Y value for the given line
      * in a YUV framebuffer. */
     yuv_offset_func y_offset;
@@ -678,7 +681,7 @@ _save_BRG16(void* rgb, uint8_t r, uint8_t g, uint8_t b)
 /* Y offset in an aligned format such as YV12 */
 static int YOffAlignedYUV(const YUVDesc* desc, int line, int width, int height)
 {
-    int stride = align(width, 16);
+    int stride = align(width, desc->alignment);
     // As the name implies the Y_next_pair value skips a pair of values. Since
     // this is counting values, not pairs, per line we divide by two.
     return line * stride * (desc->Y_next_pair / 2) + desc->Y_offset;
@@ -751,8 +754,8 @@ _UOffSepAlignedYUV(const YUVDesc* desc, int line, int width, int height)
      *
      * for the second pane.
      */
-    const int y_stride = align(width, 16);
-    const int uv_stride = align(y_stride / 2, 16);
+    const int y_stride = align(width, desc->alignment);
+    const int uv_stride = align(y_stride / 2, desc->alignment);
     const int y_pane_size = height * y_stride;
     if (desc->U_offset) {
         /* U pane comes right after the Y pane. */
@@ -768,8 +771,8 @@ static int
 _VOffSepAlignedYUV(const YUVDesc* desc, int line, int width, int height)
 {
     /* See comment for _UOffSepYUV. */
-    const int y_stride = align(width, 16);
-    const int uv_stride = align(y_stride / 2, 16);
+    const int y_stride = align(width, desc->alignment);
+    const int uv_stride = align(y_stride / 2, desc->alignment);
     const int y_pane_size = height * y_stride;
     if (desc->V_offset) {
         /* V pane comes right after the Y pane. */
@@ -1428,6 +1431,7 @@ static const YUVDesc _YV12 =
     .UV_inc         = 1,
     .U_offset       = 0,
     .V_offset       = 1,
+    .alignment      = 16,
     .y_offset       = &YOffAlignedYUV,
     .u_offset       = &_UOffSepAlignedYUV,
     .v_offset       = &_VOffSepAlignedYUV
@@ -1442,6 +1446,7 @@ static const YUVDesc _YU12 =
     .UV_inc         = 1,
     .U_offset       = 1,
     .V_offset       = 0,
+    .alignment      = 16,
     .y_offset       = &YOffAlignedYUV,
     .u_offset       = &_UOffSepAlignedYUV,
     .v_offset       = &_VOffSepAlignedYUV
@@ -1584,6 +1589,8 @@ typedef struct PIXFormat {
     uint32_t        fourcc_type;
     /* RGB/YUV/BAYER format selector */
     PIXFormatSel    format_sel;
+    /* Bits per pixel */
+    size_t bits_per_pixel;
     union {
         /* References RGB format descriptor for that format. */
         const RGBDesc*      rgb_desc;
@@ -1594,48 +1601,51 @@ typedef struct PIXFormat {
     } desc;
 } PIXFormat;
 
-/* Array of supported pixel format descriptors. */
+/* Array of supported pixel format descriptors, if changed consider updating
+ * CameraFormatConverters_unittest.cpp. */
 static const PIXFormat _PIXFormats[] = {
-    /* RGB/BRG formats. */
-    { V4L2_PIX_FMT_ARGB32,  PIX_FMT_RGB,    .desc.rgb_desc = &_ARGB32  },
-    { V4L2_PIX_FMT_RGB32,   PIX_FMT_RGB,    .desc.rgb_desc = &_RGB32  },
-    { V4L2_PIX_FMT_BGR32,   PIX_FMT_RGB,    .desc.rgb_desc = &_BRG32  },
-    { V4L2_PIX_FMT_RGB565,  PIX_FMT_RGB,    .desc.rgb_desc = &_RGB16  },
-    { V4L2_PIX_FMT_RGB24,   PIX_FMT_RGB,    .desc.rgb_desc = &_RGB24  },
-    { V4L2_PIX_FMT_BGR24,   PIX_FMT_RGB,    .desc.rgb_desc = &_BRG24  },
+        /* RGB/BRG formats. */
+        {V4L2_PIX_FMT_ARGB32, PIX_FMT_RGB, 32, .desc.rgb_desc = &_ARGB32},
+        {V4L2_PIX_FMT_RGB32, PIX_FMT_RGB, 32, .desc.rgb_desc = &_RGB32},
+        {V4L2_PIX_FMT_BGR32, PIX_FMT_RGB, 32, .desc.rgb_desc = &_BRG32},
+        {V4L2_PIX_FMT_RGB565, PIX_FMT_RGB, 16, .desc.rgb_desc = &_RGB16},
+        {V4L2_PIX_FMT_RGB24, PIX_FMT_RGB, 24, .desc.rgb_desc = &_RGB24},
+        {V4L2_PIX_FMT_BGR24, PIX_FMT_RGB, 24, .desc.rgb_desc = &_BRG24},
 
-    /* YUV 4:2:0 formats. */
-    { V4L2_PIX_FMT_YVU420,  PIX_FMT_YUV,    .desc.yuv_desc = &_YV12   },
-    { V4L2_PIX_FMT_YUV420,  PIX_FMT_YUV,    .desc.yuv_desc = &_YU12   },
-    { V4L2_PIX_FMT_NV12,    PIX_FMT_YUV,    .desc.yuv_desc = &_NV12   },
-    { V4L2_PIX_FMT_NV21,    PIX_FMT_YUV,    .desc.yuv_desc = &_NV21   },
+        /* YUV 4:2:0 formats. */
+        {V4L2_PIX_FMT_YVU420, PIX_FMT_YUV, 12, .desc.yuv_desc = &_YV12},
+        {V4L2_PIX_FMT_YUV420, PIX_FMT_YUV, 12, .desc.yuv_desc = &_YU12},
+        {V4L2_PIX_FMT_NV12, PIX_FMT_YUV, 12, .desc.yuv_desc = &_NV12},
+        {V4L2_PIX_FMT_NV21, PIX_FMT_YUV, 12, .desc.yuv_desc = &_NV21},
 
-    /* YUV 4:2:2 formats. */
-    { V4L2_PIX_FMT_YUYV,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
-    { V4L2_PIX_FMT_YYUV,    PIX_FMT_YUV,    .desc.yuv_desc = &_YYUV   },
-    { V4L2_PIX_FMT_YVYU,    PIX_FMT_YUV,    .desc.yuv_desc = &_YVYU   },
-    { V4L2_PIX_FMT_UYVY,    PIX_FMT_YUV,    .desc.yuv_desc = &_UYVY   },
-    { V4L2_PIX_FMT_VYUY,    PIX_FMT_YUV,    .desc.yuv_desc = &_VYUY   },
-    { V4L2_PIX_FMT_YVYU,    PIX_FMT_YUV,    .desc.yuv_desc = &_YVYU   },
-    { V4L2_PIX_FMT_VYUY,    PIX_FMT_YUV,    .desc.yuv_desc = &_VYUY   },
-    { V4L2_PIX_FMT_YYVU,    PIX_FMT_YUV,    .desc.yuv_desc = &_YYVU   },
-    { V4L2_PIX_FMT_YUY2,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
-    { V4L2_PIX_FMT_YUNV,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
-    { V4L2_PIX_FMT_V422,    PIX_FMT_YUV,    .desc.yuv_desc = &_YUYV   },
+        /* YUV 4:2:2 formats. */
+        {V4L2_PIX_FMT_YUYV, PIX_FMT_YUV, 16, .desc.yuv_desc = &_YUYV},
+        {V4L2_PIX_FMT_YYUV, PIX_FMT_YUV, 16, .desc.yuv_desc = &_YYUV},
+        // TODO: V4L2_PIX_FMT_YVYU is curious, it only exists in this codebase.
+        {V4L2_PIX_FMT_YVYU, PIX_FMT_YUV, 16, .desc.yuv_desc = &_YVYU},
+        {V4L2_PIX_FMT_UYVY, PIX_FMT_YUV, 16, .desc.yuv_desc = &_UYVY},
+        {V4L2_PIX_FMT_VYUY, PIX_FMT_YUV, 16, .desc.yuv_desc = &_VYUY},
+        // TODO: V4L2_PIX_FMT_YYVU is curious, it only exists in this codebase.
+        {V4L2_PIX_FMT_YYVU, PIX_FMT_YUV, 16, .desc.yuv_desc = &_YYVU},
+        // Aliases for V4L2_PIX_FMT_YUYV.
+        {V4L2_PIX_FMT_YUY2, PIX_FMT_YUV, 16, .desc.yuv_desc = &_YUYV},
+        {V4L2_PIX_FMT_YUNV, PIX_FMT_YUV, 16, .desc.yuv_desc = &_YUYV},
+        {V4L2_PIX_FMT_V422, PIX_FMT_YUV, 16, .desc.yuv_desc = &_YUYV},
 
-    /* BAYER formats. */
-    { V4L2_PIX_FMT_SBGGR8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_BG8  },
-    { V4L2_PIX_FMT_SGBRG8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_GB8  },
-    { V4L2_PIX_FMT_SGRBG8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_GR8  },
-    { V4L2_PIX_FMT_SRGGB8,  PIX_FMT_BAYER,  .desc.bayer_desc = &_RG8  },
-    { V4L2_PIX_FMT_SBGGR10, PIX_FMT_BAYER,  .desc.bayer_desc = &_BG10 },
-    { V4L2_PIX_FMT_SGBRG10, PIX_FMT_BAYER,  .desc.bayer_desc = &_GB10 },
-    { V4L2_PIX_FMT_SGRBG10, PIX_FMT_BAYER,  .desc.bayer_desc = &_GR10 },
-    { V4L2_PIX_FMT_SRGGB10, PIX_FMT_BAYER,  .desc.bayer_desc = &_RG10 },
-    { V4L2_PIX_FMT_SBGGR12, PIX_FMT_BAYER,  .desc.bayer_desc = &_BG12 },
-    { V4L2_PIX_FMT_SGBRG12, PIX_FMT_BAYER,  .desc.bayer_desc = &_GB12 },
-    { V4L2_PIX_FMT_SGRBG12, PIX_FMT_BAYER,  .desc.bayer_desc = &_GR12 },
-    { V4L2_PIX_FMT_SRGGB12, PIX_FMT_BAYER,  .desc.bayer_desc = &_RG12 },
+        /* BAYER formats. */
+        {V4L2_PIX_FMT_SBGGR8, PIX_FMT_BAYER, 8, .desc.bayer_desc = &_BG8},
+        {V4L2_PIX_FMT_SGBRG8, PIX_FMT_BAYER, 8, .desc.bayer_desc = &_GB8},
+        {V4L2_PIX_FMT_SGRBG8, PIX_FMT_BAYER, 8, .desc.bayer_desc = &_GR8},
+        {V4L2_PIX_FMT_SRGGB8, PIX_FMT_BAYER, 8, .desc.bayer_desc = &_RG8},
+        // 10-bit and 12-bit bayer formats are unpacked to 16-bits.
+        {V4L2_PIX_FMT_SBGGR10, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_BG10},
+        {V4L2_PIX_FMT_SGBRG10, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_GB10},
+        {V4L2_PIX_FMT_SGRBG10, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_GR10},
+        {V4L2_PIX_FMT_SRGGB10, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_RG10},
+        {V4L2_PIX_FMT_SBGGR12, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_BG12},
+        {V4L2_PIX_FMT_SGBRG12, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_GB12},
+        {V4L2_PIX_FMT_SGRBG12, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_GR12},
+        {V4L2_PIX_FMT_SRGGB12, PIX_FMT_BAYER, 16, .desc.bayer_desc = &_RG12},
 };
 static const int _PIXFormats_num = sizeof(_PIXFormats) / sizeof(*_PIXFormats);
 
@@ -1671,6 +1681,38 @@ int has_converter(uint32_t from, uint32_t to) {
     }
     return _get_pixel_format_descriptor(from) != NULL &&
            _get_pixel_format_descriptor(to) != NULL;
+}
+
+bool calculate_framebuffer_size(uint32_t pixel_format,
+                                int width,
+                                int height,
+                                size_t* frame_size) {
+    const PIXFormat* desc = _get_pixel_format_descriptor(pixel_format);
+    if (desc == NULL) {
+        E("%s: Source pixel format %.4s is unknown", __FUNCTION__,
+          (const char*)&pixel_format);
+        return false;
+    }
+
+    if (width <= 0 || height <= 0) {
+        E("%s: width and height must be positive and non-zero: %d x %d",
+          __FUNCTION__, width, height);
+        return false;
+    }
+
+    if (desc->format_sel == PIX_FMT_YUV && desc->desc.yuv_desc->alignment) {
+        // For aligned YUV, the size must include padding for aligned rows.
+        const int alignment = desc->desc.yuv_desc->alignment;
+        const int y_stride = align(width, alignment);
+        const int u_or_v_stride = align(y_stride / 2, alignment);
+
+        *frame_size =
+                y_stride * height + 2 * u_or_v_stride * ((height + 1) / 2);
+    } else {
+        *frame_size = align(width, 2) * height * desc->bits_per_pixel / 8;
+    }
+
+    return true;
 }
 
 int convert_frame_slow(const void* src_frame,
