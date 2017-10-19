@@ -56,6 +56,7 @@ struct EglImage
     unsigned int type;
     unsigned int texStorageLevels;
     SaveableTexturePtr saveableTexture;
+    bool isDirty;
 };
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
