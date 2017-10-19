@@ -517,10 +517,10 @@ EGLImageKHR EglDisplay::addImageKHR(ImagePtr img) {
 
 static void touchEglImage(EglImage* eglImage,
         SaveableTexture::restorer_t restorer) {
-    if (eglImage->saveableTexture) {
+    if (eglImage->needRestore) {
         restorer(eglImage->saveableTexture.get());
         eglImage->saveableTexture->fillEglImage(eglImage);
-        eglImage->saveableTexture.reset();
+        eglImage->needRestore = false;
     }
 }
 
@@ -681,6 +681,7 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
         eglImg->imageId = hndl;
         eglImg->saveableTexture =
                 m_globalNameSpace.getSaveableTextureFromLoad(globalName);
+        eglImg->needRestore = true;
         return std::make_pair(hndl, std::move(eglImg));
     });
 }

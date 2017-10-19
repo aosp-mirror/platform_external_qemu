@@ -74,12 +74,14 @@ void NameSpace::touchTextures() {
     assert(m_type == NamedObjectType::TEXTURE);
     for (const auto& obj : m_objectDataMap) {
         TextureData* texData = (TextureData*)obj.second.get();
-        SaveableTexturePtr saveableTexture(texData->releaseSaveableTexture());
-        if (saveableTexture) {
-            NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
-            setGlobalObject(obj.first, texNamedObj);
-            texData->globalName = texNamedObj->getGlobalName();
+        if (!texData->needRestore()) {
+            continue;
         }
+        const SaveableTexturePtr& saveableTexture = texData->getSaveableTexture();
+        NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
+        setGlobalObject(obj.first, texNamedObj);
+        texData->globalName = texNamedObj->getGlobalName();
+        texData->restore(0, nullptr);
     }
 }
 
@@ -121,7 +123,7 @@ void NameSpace::preSave(GlobalNameSpace *globalNameSpace) {
     // snapshot
     touchTextures();
     for (const auto& obj : m_objectDataMap) {
-        globalNameSpace->preSaveAddTex((const TextureData*)obj.second.get());
+        globalNameSpace->preSaveAddTex((TextureData*)obj.second.get());
     }
 }
 
@@ -248,17 +250,46 @@ void NameSpace::setObjectData(ObjectLocalName p_localName,
     m_objectDataMap.emplace(p_localName, std::move(data));
 }
 
-void GlobalNameSpace::preSaveAddEglImage(const EglImage* eglImage) {
+void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
     unsigned int globalName = eglImage->globalTexObj->getGlobalName();
     emugl::Mutex::AutoLock lock(m_lock);
-    m_textureMap.emplace(globalName,
-            SaveableTexturePtr(new SaveableTexture(*eglImage)));
+    const auto& saveableTexIt = m_textureMap.find(globalName);
+    if (saveableTexIt == m_textureMap.end()) {
+        if (!eglImage->saveableTexture) {
+            eglImage->saveableTexture.reset(new SaveableTexture(*eglImage));
+        }
+        m_textureMap.emplace(globalName, eglImage->saveableTexture);
+    } else {
+        if (eglImage->isDirty) {
+           saveableTexIt->second->makeDirty();
+        }
+        if (!eglImage->saveableTexture) {
+            eglImage->saveableTexture = saveableTexIt->second;
+        }
+    }
+    eglImage->isDirty = false;
 }
 
-void GlobalNameSpace::preSaveAddTex(const TextureData* texture) {
+void GlobalNameSpace::preSaveAddTex(TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
-    m_textureMap.emplace(texture->globalName,
-            SaveableTexturePtr(new SaveableTexture(*texture)));
+    const auto& saveableTexIt = m_textureMap.find(texture->globalName);
+    if (saveableTexIt == m_textureMap.end()) {
+        if (!texture->getSaveableTexture()) {
+            texture->setSaveableTexture(SaveableTexturePtr(
+                new SaveableTexture(*texture)));
+        }
+        m_textureMap.emplace(texture->globalName,
+                texture->getSaveableTexture());
+    } else {
+        if (texture->isDirty()) {
+            saveableTexIt->second->makeDirty();
+        }
+        if (!texture->getSaveableTexture()) {
+            texture->setSaveableTexture(SaveableTexturePtr(
+                saveableTexIt->second));
+        }
+    }
+    texture->makeClean();
 }
 
 void GlobalNameSpace::onSave(android::base::Stream* stream,

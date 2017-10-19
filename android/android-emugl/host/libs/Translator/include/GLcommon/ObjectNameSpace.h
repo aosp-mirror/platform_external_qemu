@@ -131,8 +131,8 @@ public:
     friend class NamedObject;
 
     // The following are used for snapshot
-    void preSaveAddEglImage(const EglImage* eglImage);
-    void preSaveAddTex(const TextureData* texture);
+    void preSaveAddEglImage(EglImage* eglImage);
+    void preSaveAddTex(TextureData* texture);
     void onSave(android::base::Stream* stream,
                 const android::snapshot::ITextureSaverPtr& textureSaver,
                 SaveableTexture::saver_t saver);
