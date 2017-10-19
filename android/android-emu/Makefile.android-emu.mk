@@ -639,6 +639,7 @@ LOCAL_SRC_FILES := \
   android/base/Uri_unittest.cpp \
   android/base/Uuid_unittest.cpp \
   android/base/Version_unittest.cpp \
+  android/camera/CameraFormatConverters_unittest.cpp \
   android/cmdline-option_unittest.cpp \
   android/CommonReportedInfo_unittest.cpp \
   android/console_auth_unittest.cpp \
