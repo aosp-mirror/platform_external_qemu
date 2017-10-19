@@ -182,6 +182,39 @@ TEST_P(ConvertWithSize, SlowPathIdentity) {
     }
 }
 
+TEST_P(ConvertWithSize, FastPathIdentity) {
+    const int widthOrHeight = GetParam();
+    std::vector<uint8_t> stagingFramebuffer(
+            bufferSize(V4L2_PIX_FMT_YUV420, widthOrHeight, widthOrHeight));
+
+    for (uint32_t format : kSupportedDestinationFormats) {
+        std::vector<uint8_t> src = generateFramebuffer(
+                format, widthOrHeight, widthOrHeight, 0xFF, 0x00, 0x66, 0xCC);
+        const size_t destSize =
+                bufferSize(format, widthOrHeight, widthOrHeight);
+        std::vector<uint8_t> dest(destSize);
+
+        ClientFrameBuffer framebuffer = {};
+        framebuffer.pixel_format = format;
+        framebuffer.framebuffer = dest.data();
+
+        ClientFrame resultFrame = {};
+        resultFrame.framebuffers = &framebuffer;
+        resultFrame.framebuffers_count = 1;
+        resultFrame.staging_framebuffer = stagingFramebuffer.data();
+        resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+
+        EXPECT_EQ(0, convert_frame_fast(src.data(), format, src.size(),
+                                        widthOrHeight, widthOrHeight,
+                                        &resultFrame, 1.0f))
+                << "convert_frame_fast, source=" << fourccToString(format)
+                << " dest=" << fourccToString(format);
+
+        EXPECT_TRUE(vectorNearMatch(src, dest)) << "format="
+                                                << fourccToString(format);
+    }
+}
+
 // Validate conversions from all source formats to all dest formats.
 TEST_P(ConvertWithSize, SourceToDest) {
     const int widthOrHeight = GetParam();

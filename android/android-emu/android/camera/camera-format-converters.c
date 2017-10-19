@@ -21,6 +21,8 @@
 #include <linux/videodev2.h>
 #endif
 
+#include <libyuv.h>
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,6 +31,15 @@
 #define  W(...)    dwarning(__VA_ARGS__)
 #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
 #define  D_ACTIVE  VERBOSE_CHECK(camera)
+
+/* the T(...) macro is used to dump traffic */
+#define T_ACTIVE 0
+
+#if T_ACTIVE
+#define T(...) VERBOSE_PRINT(camera, __VA_ARGS__)
+#else
+#define T(...) ((void)0)
+#endif
 
  /*
  * NOTE: RGB and big/little endian considerations. Wherewer in this code RGB
@@ -1334,7 +1345,7 @@ static const RGBDesc _BRG16 =
  * YUV 4:2:2 format descriptors.
  */
 
-/* YUYV: 4:2:2, YUV are interleaved. */
+/* YUYV  (also YUY2, YUNV, V422): 4:2:2, YUV are interleaved. */
 static const YUVDesc _YUYV =
 {
     .Y_offset       = 0,
@@ -1390,7 +1401,7 @@ static const YUVDesc _VYUY =
     .v_offset       = &_VOffIntrlYUV
 };
 
-/* YYUV (also YUY2, YUNV, V422) : 4:2:2, YUV are interleaved. */
+/* YYUV: 4:2:2, YUV are interleaved. */
 static const YUVDesc _YYUV =
 {
     .Y_offset       = 0,
@@ -1670,6 +1681,52 @@ _get_pixel_format_descriptor(uint32_t pixel_format)
     return NULL;
 }
 
+static bool _valid_libyuv_pixformat(const PIXFormat* desc) {
+    // Bayer formats are not supported, and RGB656 has the opposite byte order,
+    // so libyuv cannot be used to convert it.
+    return (desc->format_sel != PIX_FMT_BAYER &&
+            desc->fourcc_type != V4L2_PIX_FMT_RGB565);
+}
+
+static bool _libyuv_supported(const PIXFormat* src_desc,
+                              ClientFrame* result_frame) {
+    // Use libyuv if all of the formats are valid, and if at least one format
+    // is yuv.
+    bool valid_format = _valid_libyuv_pixformat(src_desc);
+    bool has_yuv = (src_desc->format_sel == PIX_FMT_YUV);
+
+    int i;
+    for (i = 0; i < result_frame->framebuffers_count; ++i) {
+        const PIXFormat* desc = _get_pixel_format_descriptor(
+                result_frame->framebuffers[i].pixel_format);
+        valid_format = valid_format && _valid_libyuv_pixformat(desc);
+        has_yuv = has_yuv || (desc->format_sel == PIX_FMT_YUV);
+    }
+
+    return valid_format && has_yuv;
+}
+
+static uint32_t _pixel_format_to_libyuv(uint32_t pixel_format) {
+    // Libyuv's fourcc is mostly compatible with V4L2 pixel formats, with some
+    // exceptions which need to be explicitly mapped.  Convert those here.
+
+    switch (pixel_format) {
+        case V4L2_PIX_FMT_RGB32:
+            return FOURCC_ABGR;
+        case V4L2_PIX_FMT_ARGB32:
+            return FOURCC_BGRA;
+        case V4L2_PIX_FMT_BGR32:
+            return FOURCC_ARGB;
+        // Aliases for V4L2_PIX_FMT_YUYV.
+        case V4L2_PIX_FMT_YUY2:
+        case V4L2_PIX_FMT_YUNV:
+        case V4L2_PIX_FMT_V422:
+            return V4L2_PIX_FMT_YUYV;
+    }
+
+    return pixel_format;
+}
+
 /********************************************************************************
  * Public API
  *******************************************************************************/
@@ -1805,6 +1862,160 @@ int convert_frame_slow(const void* src_frame,
     return 0;
 }
 
+int convert_frame_fast(const void* src_frame,
+                       uint32_t pixel_format,
+                       size_t framebuffer_size,
+                       int width,
+                       int height,
+                       ClientFrame* result_frame,
+                       float exp_comp) {
+    // Convert to I420, the intermediate format required for libyuv.
+    const size_t y_stride = align(width, 16);
+    const size_t u_or_v_stride = align(y_stride / 2, 16);
+
+    const size_t y_size = y_stride * height;
+    const size_t u_or_v_size = u_or_v_stride * ((height + 1) / 2);
+
+    const size_t required_framebuffer_size = y_size + 2 * u_or_v_size;
+    if (result_frame->staging_framebuffer_size < required_framebuffer_size) {
+        W("%s: Staging framebuffer too small, %d bytes required, %d provided",
+          __FUNCTION__, required_framebuffer_size,
+          result_frame->staging_framebuffer_size);
+        return -1;
+    }
+
+    uint8_t* y_staging = result_frame->staging_framebuffer;
+    uint8_t* u_staging = y_staging + y_size;
+    uint8_t* v_staging = u_staging + u_or_v_size;
+
+    int result = 0;
+    if (pixel_format == V4L2_PIX_FMT_YUV420) {
+        memcpy(y_staging, src_frame, framebuffer_size);
+    } else if (pixel_format == V4L2_PIX_FMT_YVU420) {
+        // YVU420 is 16-byte aligned, but there is no way to specify alignment
+        // with ConvertToI420; manually convert it to YUV420 (swapping U and V)
+        // with libyuv's I420Copy.
+        const uint8_t* src_y = src_frame;
+        const uint8_t* src_v = src_y + y_size;
+        const uint8_t* src_u = src_v + u_or_v_size;
+
+        result = I420Copy(src_y,          // src_y
+                          y_stride,       // src_stride_y
+                          src_u,          // src_u
+                          u_or_v_stride,  // src_stride_u
+                          src_v,          // src_v
+                          u_or_v_stride,  // src_stride_v
+                          y_staging,      // dst_y
+                          y_stride,       // dst_stride_y
+                          u_staging,      // dst_u
+                          u_or_v_stride,  // dst_stride_u
+                          v_staging,      // dst_v
+                          u_or_v_stride,  // dst_stride_v
+                          width,          // width
+                          height);        // height
+    } else {
+        const uint32_t src_format = _pixel_format_to_libyuv(pixel_format);
+
+        result = ConvertToI420(src_frame,         // src_frame
+                               framebuffer_size,  // src_size
+                               y_staging,         // dst_y
+                               y_stride,          // dst_stride_y
+                               u_staging,         // dst_u
+                               u_or_v_stride,     // dst_stride_u
+                               v_staging,         // dst_v
+                               u_or_v_stride,     // dst_stride_v
+                               0,                 // crop_x
+                               0,                 // crop_y
+                               width,             // src_width
+                               height,            // src_height
+                               width,             // crop_width
+                               height,            // crop_height
+                               kRotate0,          // rotation
+                               src_format);       // format
+    }
+    if (result != 0) {
+        T("%s: Could not convert to %.4s to I420, error %d", __FUNCTION__,
+          (const char*)(&pixel_format), result);
+        return -1;
+    }
+
+    // Apply exposure compensation.
+    if (exp_comp != 1.0f) {
+        int x, row;
+        for (row = 0; row < height; ++row) {
+            uint8_t* y_row = y_staging + row * y_stride;
+            for (x = 0; x < width; ++x) {
+                y_row[x] = _change_exposure(y_row[x], exp_comp);
+            }
+        }
+    }
+
+    // Convert to the target framebuffer formats.
+    int n;
+    for (n = 0; n < result_frame->framebuffers_count; ++n) {
+        void* dest = result_frame->framebuffers[n].framebuffer;
+        const uint32_t dest_format = _pixel_format_to_libyuv(
+                result_frame->framebuffers[n].pixel_format);
+
+        if (dest_format == V4L2_PIX_FMT_YUV420) {
+            memcpy(dest, y_staging, required_framebuffer_size);
+        } else if (dest_format == V4L2_PIX_FMT_YVU420) {
+            // YVU420 is 16-byte aligned, but there is no way to specify u and v
+            // with ConvertFromI420; manually convert it to YUV420 (swapping U
+            // and V) with libyuv's I420Copy.
+            uint8_t* dest_y = dest;
+            uint8_t* dest_v = dest_y + y_size;
+            uint8_t* dest_u = dest_v + u_or_v_size;
+
+            result = I420Copy(y_staging,      // src_y
+                              y_stride,       // src_stride_y
+                              u_staging,      // src_u
+                              u_or_v_stride,  // src_stride_u
+                              v_staging,      // src_v
+                              u_or_v_stride,  // src_stride_v
+                              dest_y,         // dst_y
+                              y_stride,       // dst_stride_y
+                              dest_u,         // dst_u
+                              u_or_v_stride,  // dst_stride_u
+                              dest_v,         // dst_v
+                              u_or_v_stride,  // dst_stride_v
+                              width,          // width
+                              height);        // height
+        } else {
+            result = ConvertFromI420(y_staging,      // y
+                                     y_stride,       // y_stride
+                                     u_staging,      // u
+                                     u_or_v_stride,  // u_stride
+                                     v_staging,      // v
+                                     u_or_v_stride,  // v_stride
+                                     dest,           // dst_sample
+                                     0,              // dst_sample_stride
+                                     width,          // width
+                                     height,         // height
+                                     dest_format);   // format
+        }
+
+        if (result != 0) {
+            // Failed to convert with libyuv, fallback to original method for
+            // this one frame.
+            W("%s: Could not convert frame with fast path to %.4s, "
+              "falling back to slow path",
+              __FUNCTION__, (const char*)(&dest_format));
+
+            result = convert_frame_slow(src_frame, pixel_format,
+                                        framebuffer_size, width, height,
+                                        &result_frame->framebuffers[n], 1, 1.0f,
+                                        1.0f, 1.0f, exp_comp);
+
+            if (result != 0) {
+                return result;
+            }
+        }
+    }
+
+    return 0;
+}
+
 int convert_frame(const void* src_frame,
                   uint32_t pixel_format,
                   size_t framebuffer_size,
@@ -1815,9 +2026,32 @@ int convert_frame(const void* src_frame,
                   float g_scale,
                   float b_scale,
                   float exp_comp) {
-    // TODO: Add libyuv fast-path.
-    return convert_frame_slow(src_frame, pixel_format, framebuffer_size, width,
-                              height, result_frame->framebuffers,
-                              result_frame->framebuffers_count, r_scale,
-                              g_scale, b_scale, exp_comp);
+    bool converted = false;
+    int result = 0;
+
+    const PIXFormat* src_desc = _get_pixel_format_descriptor(pixel_format);
+    if (src_desc == NULL) {
+        E("%s: Source pixel format %.4s is unknown", __FUNCTION__,
+          (const char*)&pixel_format);
+        return -1;
+    }
+
+    // Enable a fast-path with libyuv if the white-balance no-ops.
+    if (r_scale == 1.0f && g_scale == 1.0f && b_scale == 1.0f &&
+        _libyuv_supported(src_desc, result_frame)) {
+        result = convert_frame_fast(src_frame, pixel_format, framebuffer_size,
+                                    width, height, result_frame, exp_comp);
+        if (result == 0) {
+            converted = true;
+        }
+    }
+
+    if (!converted) {
+        result = convert_frame_slow(src_frame, pixel_format, framebuffer_size,
+                                    width, height, result_frame->framebuffers,
+                                    result_frame->framebuffers_count, r_scale,
+                                    g_scale, b_scale, exp_comp);
+    }
+
+    return result;
 }
