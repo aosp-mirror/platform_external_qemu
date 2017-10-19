@@ -122,6 +122,13 @@ typedef struct ClientFrame {
      * framebuffers_count. Note that the caller must make sure that the buffers
      * are large enough to contain the entire frame captured from the device. */
     ClientFrameBuffer* framebuffers;
+
+    /* Staging buffer, used internally by convert_frame. To avoid allocating
+     * every frame, convert_frame uses |staging_framebuffer| internally to store
+     * intermediate results. */
+    uint8_t* staging_framebuffer;
+    /* Size of the staging_framebuffer, in bytes. */
+    size_t staging_framebuffer_size;
 } ClientFrame;
 
 /* Describes frame dimensions.
