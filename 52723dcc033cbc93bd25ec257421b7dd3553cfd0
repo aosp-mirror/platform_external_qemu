@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "17a773d7_3065a583",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1707,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-20T22:27:20Z",
+      "side": 1,
+      "message": "I think there are some sizes in some representations where this alignment has to be align(y_stride / 2, alignment) or it will fail. Unfortunately I can\u0027t remember exactly when it seemed to happen so maybe I\u0027m wrong. If you know for a fact that this is safe then feel free to ignore this.",
+      "revId": "52723dcc033cbc93bd25ec257421b7dd3553cfd0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
