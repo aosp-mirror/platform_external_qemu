@@ -73,6 +73,7 @@ void GLESbuffer::onSave(android::base::Stream* stream,
     stream->putBe32(m_size);
     stream->putBe32(m_usage);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
+    bool mapSuccess = false;
     if (!needRestore() && dispatcher.glMapBufferRange && m_size != 0) {
         // If glMapBufferRange is supported, m_data might be inconsistent
         // with GPU memory (because we did not update m_data when glUnmapBuffer)
@@ -87,12 +88,18 @@ void GLESbuffer::onSave(android::base::Stream* stream,
         void * data = dispatcher.glMapBufferRange(GL_ARRAY_BUFFER, 0,
                     m_size, GL_MAP_READ_BIT);
         assert(data);
-        stream->write(data, m_size);
-        bool success = dispatcher.glUnmapBuffer(GL_ARRAY_BUFFER);
-        assert(success);
-        (void)success;
-        dispatcher.glBindBuffer(GL_ARRAY_BUFFER, prevBuffer);
-    } else {
+        // BUG: 68051848
+        // We do not know why it happens, but we do receive such bug reports
+        if (data) {
+            stream->write(data, m_size);
+            bool success = dispatcher.glUnmapBuffer(GL_ARRAY_BUFFER);
+            assert(success);
+            (void)success;
+            dispatcher.glBindBuffer(GL_ARRAY_BUFFER, prevBuffer);
+            mapSuccess = true;
+        }
+    }
+    if (!mapSuccess) {
         stream->write(m_data, m_size);
     }
 
