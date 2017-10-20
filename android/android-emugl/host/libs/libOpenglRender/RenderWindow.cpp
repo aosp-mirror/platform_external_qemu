@@ -119,7 +119,6 @@ struct RenderWindowMessage {
         bool result = false;
         switch (msg.cmd) {
             case CMD_INITIALIZE:
-                D("CMD_INITIALIZE w=%d h=%d\n", msg.init.width, msg.init.height);
                 GL_LOG("RenderWindow: CMD_INITIALIZE w=%d h=%d",
                        msg.init.width, msg.init.height);
                 result = FrameBuffer::initialize(msg.init.width,
@@ -129,6 +128,7 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_FINALIZE:
+                GL_LOG("CMD_FINALIZE");
                 D("CMD_FINALIZE\n");
                 // this command may be issued even when frame buffer is not
                 // yet created (e.g. if CMD_INITIALIZE failed),
@@ -140,6 +140,7 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_SET_POST_CALLBACK:
+                GL_LOG("CMD_SET_POST_CALLBACK");
                 D("CMD_SET_POST_CALLBACK\n");
                 fb = FrameBuffer::getFB();
                 fb->setPostCallback(msg.set_post_callback.on_post,
@@ -148,6 +149,16 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_SETUP_SUBWINDOW:
+                GL_LOG("CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d dpr=%f rotation=%f",
+                       (void*)(intptr_t)msg.subwindow.parent,
+                       msg.subwindow.wx,
+                       msg.subwindow.wy,
+                       msg.subwindow.ww,
+                       msg.subwindow.wh,
+                       msg.subwindow.fbw,
+                       msg.subwindow.fbh,
+                       msg.subwindow.dpr,
+                       msg.subwindow.rotation);
                 D("CMD_SETUP_SUBWINDOW: parent=%p wx=%d wy=%d ww=%d wh=%d fbw=%d fbh=%d dpr=%f rotation=%f\n",
                     (void*)(intptr_t)msg.subwindow.parent,
                     msg.subwindow.wx,
@@ -172,11 +183,13 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_REMOVE_SUBWINDOW:
+                GL_LOG("CMD_REMOVE_SUBWINDOW");
                 D("CMD_REMOVE_SUBWINDOW\n");
                 result = FrameBuffer::getFB()->removeSubWindow();
                 break;
 
             case CMD_SET_ROTATION:
+                GL_LOG("CMD_SET_ROTATION rotation=%f", msg.rotation);
                 D("CMD_SET_ROTATION rotation=%f\n", msg.rotation);
                 fb = FrameBuffer::getFB();
                 if (fb) {
@@ -186,6 +199,7 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_SET_TRANSLATION:
+                GL_LOG("CMD_SET_TRANSLATION translation=%f,%f", msg.trans.px, msg.trans.py);
                 D("CMD_SET_TRANSLATION translation=%f,%f\n", msg.trans.px, msg.trans.py);
                 fb = FrameBuffer::getFB();
                 if (fb) {
@@ -195,11 +209,14 @@ struct RenderWindowMessage {
                 break;
 
             case CMD_REPAINT:
+                GL_LOG("CMD_REPAINT");
                 D("CMD_REPAINT\n");
                 fb = FrameBuffer::getFB();
                 if (fb) {
                     fb->repost();
                     result = true;
+                } else {
+                    GL_LOG("CMD_REPAINT: no repost, no FrameBuffer");
                 }
                 break;
 
@@ -326,6 +343,7 @@ RenderWindow::RenderWindow(int width,
               if (*cmd == RepostCommand::Sync) {
                   continue;
               } else if (*cmd == RepostCommand::Repost) {
+                  GL_LOG("Reposting thread dequeueing a CMD_REPAINT");
                   RenderWindowMessage msg = {CMD_REPAINT};
                   (void)msg.process();
               }
@@ -471,8 +489,12 @@ void RenderWindow::repaint() {
 
 bool RenderWindow::processMessage(const RenderWindowMessage& msg) {
     if (useThread()) {
+        if (msg.cmd == CMD_REPAINT) {
+            GL_LOG("Sending CMD_REPAINT to render window channel");
+        }
         return mChannel->sendMessageAndGetResult(msg);
     } else if (msg.cmd == CMD_REPAINT) {
+        GL_LOG("Sending CMD_REPAINT to reposting thread");
         mRepostCommands.send(RepostCommand::Repost);
         return true;
     } else {
