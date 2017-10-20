@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "587cbff0_a8826a8d",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-20T22:50:27Z",
+      "side": 1,
+      "message": "nit: sService, sClient",
+      "range": {
+        "startLine": 22,
+        "startChar": 21,
+        "endLine": 22,
+        "endChar": 28
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "40df774f_5c735653",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-20T22:50:27Z",
+      "side": 1,
+      "message": "please check if it\u0027s not null here",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 40
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5378f11b_d8f3f381",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-20T22:50:27Z",
+      "side": 1,
+      "message": "if (service) return 0;\n?",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 13
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
