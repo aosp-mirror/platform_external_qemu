@@ -9,6 +9,7 @@
 #include "hw/loader.h"
 #include "hw/mips/bios.h"
 #include "hw/mips/cpudevs.h"
+#include "hw/mips/cps.h"
 #include "hw/mips/mips.h"
 #include "hw/sysbus.h"
 #include "monitor/monitor.h"
@@ -64,16 +65,41 @@ do {                                                                    \
 #define MIPS_RANCHU(obj) OBJECT_CHECK(RanchuState, (obj), TYPE_MIPS_RANCHU)
 #define MIPS_RANCHU_REV "1"
 
+struct mips_boot_info {
+    const char *kernel_filename;
+    const char *kernel_cmdline;
+    const char *initrd_filename;
+    uint64_t ram_size;
+    uint64_t highmem_size;
+    bool use_uhi;
+};
+
+typedef struct machine_params {
+    struct mips_boot_info bootinfo;
+    MIPSCPU *cpu;
+    int fdt_size;
+    void *fdt;
+    hwaddr fdt_addr;
+} ranchu_params;
+
 typedef struct {
     SysBusDevice parent_obj;
 
+    MIPSCPSState *cps;
     qemu_irq *gfpic;
+    ranchu_params *rp;
 } RanchuState;
+
+typedef qemu_irq (*get_qemu_irq_cb)(RanchuState *s, int irq);
+
+get_qemu_irq_cb get_irq;
 
 #define MAX_RAM_SIZE_MB 4079UL
 
 enum {
     RANCHU_MIPS_CPU_INTC,
+    RANCHU_MIPS_GIC,
+    RANCHU_MIPS_CPC,
     RANCHU_GOLDFISH_PIC,
     RANCHU_GOLDFISH_TTY,
     RANCHU_GOLDFISH_RTC,
@@ -116,6 +142,16 @@ static DevMapEntry devmap[] = {
           "goldfish_pic", "goldfish_pic",
           "google,goldfish-pic\0generic,goldfish-pic", 2
         },
+    [RANCHU_MIPS_GIC] = {
+        GOLDFISH_IO_SPACE, 0x20000, -1,
+        "gic", "gic", "mti,gic", 1
+        },
+    /* The following region of 64K is reserved for Goldfish pstore device */
+    [RANCHU_GOLDFISH_PSTORE] = {
+        GOLDFISH_IO_SPACE + 0x20000, 0x10000, -1,
+          "goldfish_pstore", "goldfish_pstore",
+          "google,goldfish-pstore\0generic,goldfish-pstore", 2
+        },
     /* ttyGF0 base address remains hardcoded in the kernel.
      * Early printing (prom_putchar()) relies on finding device
      * mapped on this address. DT can not be used at that early stage
@@ -123,7 +159,7 @@ static DevMapEntry devmap[] = {
      * Repeats for a total of MAX_GF_TTYS
      */
     [RANCHU_GOLDFISH_TTY] = {
-        GOLDFISH_IO_SPACE + 0x02000, 0x1000, 2,
+        GOLDFISH_IO_SPACE + 0x30000, 0x1000, 2,
           "goldfish_tty", "goldfish_tty",
           "google,goldfish-tty\0generic,goldfish-tty", 2
         },
@@ -133,60 +169,58 @@ static DevMapEntry devmap[] = {
      * This should be removed once we officially switch to v4.4.
      */
     [RANCHU_GOLDFISH_TIMER] = {
-        GOLDFISH_IO_SPACE + 0x05000, 0x1000, 5,
+        GOLDFISH_IO_SPACE + 0x33000, 0x1000, 5,
           "goldfish_timer", "goldfish_timer",
           "google,goldfish-timer\0generic,goldfish-timer", 2
         },
     [RANCHU_GOLDFISH_RTC] = {
-        GOLDFISH_IO_SPACE + 0x05000, 0x1000, 5,
+        GOLDFISH_IO_SPACE + 0x33000, 0x1000, 5,
           "goldfish_rtc", "goldfish_rtc",
           "google,goldfish-rtc\0generic,goldfish-rtc", 2
         },
     [RANCHU_GOLDFISH_BATTERY] = {
-        GOLDFISH_IO_SPACE + 0x06000, 0x1000, 6,
+        GOLDFISH_IO_SPACE + 0x34000, 0x1000, 6,
           "goldfish_battery", "goldfish_battery",
           "google,goldfish-battery\0generic,goldfish-battery", 2
         },
     [RANCHU_GOLDFISH_FB] = {
-        GOLDFISH_IO_SPACE + 0x07000, 0x0100, 7,
+        GOLDFISH_IO_SPACE + 0x35000, 0x0100, 7,
           "goldfish_fb", "goldfish_fb",
           "google,goldfish-fb\0generic,goldfish-fb", 2
         },
     [RANCHU_GOLDFISH_EVDEV] = {
-        GOLDFISH_IO_SPACE + 0x08000, 0x1000, 8,
+        GOLDFISH_IO_SPACE + 0x36000, 0x1000, 8,
           "goldfish-events", "goldfish_events",
           "google,goldfish-events-keypad\0generic,goldfish-events-keypad", 2
         },
     [RANCHU_GOLDFISH_PIPE] = {
-        GOLDFISH_IO_SPACE + 0x09000, 0x2000, 9,
+        GOLDFISH_IO_SPACE + 0x37000, 0x2000, 9,
           "goldfish_pipe", "android_pipe",
           "google,android-pipe\0generic,android-pipe", 2
         },
     [RANCHU_GOLDFISH_AUDIO] = {
-        GOLDFISH_IO_SPACE + 0x0B000, 0x0100, 10,
+        GOLDFISH_IO_SPACE + 0x39000, 0x0100, 10,
           "goldfish_audio", "goldfish_audio",
           "google,goldfish-audio\0generic,goldfish-audio", 2
         },
     [RANCHU_GOLDFISH_SYNC] = {
-        GOLDFISH_IO_SPACE + 0x0C000, 0x2000, 11,
+        GOLDFISH_IO_SPACE + 0x3A000, 0x2000, 11,
           "goldfish_sync", "goldfish_sync",
           "google,goldfish-sync\0generic,goldfish-sync", 2
         },
     [RANCHU_GOLDFISH_RESET] = {
-        GOLDFISH_IO_SPACE + 0x0E000, 0x0100, -1,
+        GOLDFISH_IO_SPACE + 0x3C000, 0x0100, -1,
           "goldfish_reset", "goldfish_reset",
           "google,goldfish-reset\0generic,goldfish-reset\0syscon\0simple-mfd", 4
         },
-    /* The following region of 64K is reserved for Goldfish pstore device */
-    [RANCHU_GOLDFISH_PSTORE] = {
-        GOLDFISH_IO_SPACE + 0x20000, 0x10000, -1,
-          "goldfish_pstore", "goldfish_pstore",
-          "google,goldfish-pstore\0generic,goldfish-pstore", 2
-        },
     /* ...repeating for a total of VIRTIO_TRANSPORTS, each of that size */
     [RANCHU_MMIO] = {
-        GOLDFISH_IO_SPACE + 0x10000, 0x0200, 16,
+        GOLDFISH_IO_SPACE + 0x3D000, 0x0200, 16,
         "virtio-mmio", "virtio_mmio", "virtio,mmio", 1
+        },
+    [RANCHU_MIPS_CPC] = {
+        GOLDFISH_IO_SPACE + 0x40000, 0x8000, -1,
+        "cpc", "cpc", "mti,mips-cpc", 1
         },
 };
 
@@ -232,23 +266,6 @@ void qemu_device_tree_setup_callback(QemuDeviceTreeSetupFunc setup_func)
 {
     device_tree_setup_func = setup_func;
 }
-
-struct mips_boot_info {
-    const char *kernel_filename;
-    const char *kernel_cmdline;
-    const char *initrd_filename;
-    uint64_t ram_size;
-    uint64_t highmem_size;
-    bool use_uhi;
-};
-
-typedef struct machine_params {
-    struct mips_boot_info bootinfo;
-    MIPSCPU *cpu;
-    int fdt_size;
-    void *fdt;
-    hwaddr fdt_addr;
-} ranchu_params;
 
 typedef enum {
     KERNEL_VERSION_4_4_0 = 0x040400,
@@ -392,14 +409,103 @@ static void boot_protocol_detect(ranchu_params *rp, const char *kernelFilePath)
     }
 }
 
-static void main_cpu_reset(void *opaque1)
+static void ranchu_mips_config(MIPSCPU *cpu)
 {
-    struct machine_params *opaque = (struct machine_params *)opaque1;
-    MIPSCPU *cpu = opaque->cpu;
+    CPUMIPSState *env = &cpu->env;
+    CPUState *cs = CPU(cpu);
 
-    cpu_reset(CPU(cpu));
+    env->mvp->CP0_MVPConf0 |= ((smp_cpus - 1) << CP0MVPC0_PVPE) |
+                         ((smp_cpus * cs->nr_threads - 1) << CP0MVPC0_PTC);
 }
 
+static void main_cpu_reset(void *opaque)
+{
+    MIPSCPU *cpu = opaque;
+
+    cpu_reset(CPU(cpu));
+
+    ranchu_mips_config(cpu);
+}
+
+static qemu_irq gfpic_get_irq(RanchuState *s, int irq)
+{
+    return s->gfpic[irq];
+}
+
+static qemu_irq gic_get_irq(RanchuState *s, int irq)
+{
+    return get_cps_irq(s->cps, irq);
+}
+
+static void create_cpu_without_cps(const char *cpu_model,
+                                   qemu_irq *gfpic_irq)
+{
+    CPUMIPSState *env;
+    MIPSCPU *cpu;
+    int i;
+
+    for (i = 0; i < smp_cpus; i++) {
+        cpu = cpu_mips_init(cpu_model);
+        if (cpu == NULL) {
+            FATAL("Unable to find CPU definition\n");
+        }
+
+        /* Init internal devices */
+        cpu_mips_irq_init_cpu(cpu);
+        cpu_mips_clock_init(cpu);
+        qemu_register_reset(main_cpu_reset, cpu);
+    }
+
+    cpu = MIPS_CPU(first_cpu);
+    env = &cpu->env;
+    *gfpic_irq = env->irq[2];
+}
+
+static void create_cps(RanchuState *s, const char *cpu_model)
+{
+    Error *err = NULL;
+    s->cps = g_new0(MIPSCPSState, 1);
+
+    object_initialize(s->cps, sizeof(MIPSCPSState), TYPE_MIPS_CPS);
+    qdev_set_parent_bus(DEVICE(s->cps), sysbus_get_default());
+
+    object_property_set_str(OBJECT(s->cps), cpu_model, "cpu-model", &err);
+    object_property_set_int(OBJECT(s->cps), smp_cpus, "num-vp", &err);
+    object_property_set_bool(OBJECT(s->cps), true, "realized", &err);
+
+    if (err != NULL) {
+        error_report("%s", error_get_pretty(err));
+        exit(1);
+    }
+
+    sysbus_mmio_map_overlap(SYS_BUS_DEVICE(s->cps), 0, 0, 1);
+}
+
+static void create_cpu(RanchuState *s, const char *cpu_model)
+{
+    qemu_irq gfpic_out_irq;
+
+    if (cpu_model == NULL) {
+#ifdef TARGET_MIPS64
+        cpu_model = "MIPS64R6-generic";
+#else
+        cpu_model = "74Kf";
+#endif
+    }
+
+    if (s->rp->bootinfo.use_uhi && cpu_supports_cps_smp(cpu_model)) {
+        create_cps(s, cpu_model);
+        get_irq = &gic_get_irq;
+        s->gfpic = NULL;
+    } else {
+        create_cpu_without_cps(cpu_model, &gfpic_out_irq);
+        /* Initialize Goldfish PIC */
+        s->gfpic = goldfish_pic_init(devmap[RANCHU_GOLDFISH_PIC].base,
+                                     gfpic_out_irq);
+        get_irq = &gfpic_get_irq;
+        s->cps = NULL;
+    }
+}
 
 /*
  * write_bootloader() - Writes a small boot loader into ROM
@@ -489,6 +595,7 @@ static void GCC_FMT_ATTR(3, 4) prom_set(uint32_t *prom_buf, int index,
 }
 
 #define KERNEL_CMD_MAX_LEN 1024
+#define STDOUT_PATH_MAX_LEN  64
 
 static int64_t android_load_kernel(ranchu_params *rp)
 {
@@ -497,8 +604,9 @@ static int64_t android_load_kernel(ranchu_params *rp)
     uint64_t kernel_entry, kernel_low, kernel_high;
     uint32_t *prom_buf;
     long prom_size;
-    int prom_index = 0;
     GString *kernel_cmd;
+    char stdout_path[STDOUT_PATH_MAX_LEN];
+    int rc, prom_index = 0;
 
     /* Load the kernel.  */
     if (!rp->bootinfo.kernel_filename) {
@@ -539,22 +647,25 @@ static int64_t android_load_kernel(ranchu_params *rp)
         }
     }
 
+    snprintf(stdout_path, STDOUT_PATH_MAX_LEN, "/%s@%" HWADDR_PRIx,
+             devmap[RANCHU_GOLDFISH_TTY].qemu_name,
+             devmap[RANCHU_GOLDFISH_TTY].base +
+             devmap[RANCHU_GOLDFISH_TTY].size *
+             (MAX_GF_TTYS - 1));
+
+    qemu_fdt_add_subnode(rp->fdt, "/chosen");
+    rc = qemu_fdt_setprop_string(rp->fdt, "/chosen", "stdout-path",
+                                 stdout_path);
+    if (rc < 0) {
+        FATAL("couldn't set /chosen/stdout-path\n");
+    }
+
     kernel_cmd = g_string_new(rp->bootinfo.kernel_cmdline);
     g_string_append(kernel_cmd, " ieee754=relaxed");
 
     if (rp->bootinfo.use_uhi) {
-        char stdout_path[64];
-        int rc;
-
-        sprintf(stdout_path, "/%s@%" HWADDR_PRIx,
-                devmap[RANCHU_GOLDFISH_TTY].qemu_name,
-                devmap[RANCHU_GOLDFISH_TTY].base +
-                devmap[RANCHU_GOLDFISH_TTY].size *
-                (MAX_GF_TTYS - 1));
-
         g_string_append(kernel_cmd, " mipsr2emu");
 
-        qemu_fdt_add_subnode(rp->fdt, "/chosen");
         rc = qemu_fdt_setprop_string(rp->fdt, "/chosen", "bootargs",
                                      kernel_cmd->str);
         if (rc < 0) {
@@ -569,11 +680,6 @@ static int64_t android_load_kernel(ranchu_params *rp)
                                    initrd_offset + (long int)initrd_size);
         if (rc < 0) {
             FATAL("couldn't set /chosen/linux,initrd-end\n");
-        }
-        rc = qemu_fdt_setprop_string(rp->fdt, "/chosen", "stdout-path",
-                                     stdout_path);
-        if (rc < 0) {
-            FATAL("couldn't set /chosen/stdout-path\n");
         }
     } else {
         g_string_append(kernel_cmd, " earlycon");
@@ -651,14 +757,14 @@ static const MemoryRegionOps goldfish_reset_io_ops = {
  * In case of interrupt controller dev->irq stores
  * dt handle previously referenced as interrupt-parent
  *
+ * @s   - RanchuState pointer
  * @fdt - Place where DT nodes will be stored
  * @dev - Device information (base, irq, name)
- * @pic - Interrupt controller parent.
  * @num_devices - If you want to allocate multiple continuous device mappings
  * @is_virtio - Virtio devices should be added in revers order
  * @to_attach - Controls whether we should try to attach this device to a sysbus
  */
-static void create_device(void *fdt, DevMapEntry *dev, qemu_irq *pic,
+static void create_device(RanchuState *s, void *fdt, DevMapEntry *dev,
                           int num_devices, bool is_virtio, bool to_attach)
 {
     int i, j;
@@ -677,10 +783,22 @@ static void create_device(void *fdt, DevMapEntry *dev, qemu_irq *pic,
                          dt_compat_sz);
         qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1, base, 2,
                                      dev->size);
-        qemu_fdt_setprop_cells(fdt, nodename, "interrupts",
-                               dev->irq + i);
-        qemu_fdt_setprop_cell(fdt, nodename, "interrupt-parent",
-                              devmap[RANCHU_GOLDFISH_PIC].dt_phandle);
+        if (dev->irq > 0) {
+            if (s->cps == NULL) {
+                qemu_fdt_setprop_cells(fdt, nodename, "interrupts",
+                                       dev->irq + i);
+            } else {
+                qemu_fdt_setprop_cells(fdt, nodename, "interrupts", 0,
+                                       dev->irq + i, 4);
+            }
+            if (s->cps == NULL) {
+                qemu_fdt_setprop_cell(fdt, nodename, "interrupt-parent",
+                                      devmap[RANCHU_GOLDFISH_PIC].dt_phandle);
+            } else {
+                qemu_fdt_setprop_cell(fdt, nodename, "interrupt-parent",
+                                      devmap[RANCHU_MIPS_GIC].dt_phandle);
+            }
+        }
 
         if (is_virtio) {
             /* Note that we have to create the transports in forwards order
@@ -691,10 +809,11 @@ static void create_device(void *fdt, DevMapEntry *dev, qemu_irq *pic,
             if (to_attach) {
                 sysbus_create_simple(dev->qemu_name,
                     dev->base + (num_devices - i - 1) * dev->size,
-                    pic[dev->irq + num_devices - i - 1]);
+                    get_irq(s, dev->irq + num_devices - i - 1));
             }
         } else if (to_attach) {
-            sysbus_create_simple(dev->qemu_name, base, pic[dev->irq + i]);
+            sysbus_create_simple(dev->qemu_name, base,
+                get_irq(s, dev->irq + i));
         }
         g_free(nodename);
     }
@@ -741,6 +860,48 @@ static void create_intc_device(void *fdt, DevMapEntry *dev,
     if (dev->irq > 0) {
         qemu_fdt_setprop_cells(fdt, nodename, "interrupts", dev->irq);
     }
+
+    g_free(nodename);
+}
+
+/* create_gic_device(void *fdt, DevMapEntry *dev)
+ *
+ * Create GIC device DT node
+ *
+ * @fdt - Place where DT node will be stored
+ * @dev - Interrupt Device information (base, irq, name)
+ */
+static void create_gic_device(void *fdt, DevMapEntry *dev)
+{
+    int i, dt_compat_sz = 0;
+    char *nodename;
+
+    nodename = g_strdup_printf("/%s@%" PRIx64, dev->dt_name, dev->base);
+    qemu_fdt_add_subnode(fdt, nodename);
+    qemu_fdt_setprop_sized_cells(fdt, nodename, "reg", 1,
+                                 dev->base, 2, dev->size);
+
+    qemu_fdt_setprop(fdt, nodename, "interrupt-controller", NULL, 0);
+    qemu_fdt_setprop_cell(fdt, nodename, "#interrupt-cells", 0x3);
+
+    dev->dt_phandle = qemu_fdt_alloc_phandle(fdt);
+    qemu_fdt_setprop_cell(fdt, nodename, "phandle", dev->dt_phandle);
+    for (i = 0; i < dev->dt_num_compatible; i++) {
+        dt_compat_sz += strlen(dev->dt_compatible + dt_compat_sz) + 1;
+    }
+    qemu_fdt_setprop(fdt, nodename, "compatible",
+                     dev->dt_compatible, dt_compat_sz);
+
+    g_free(nodename);
+
+    /* GIC Timer node */
+    nodename = g_strdup_printf("/%s@%" PRIx64 "/timer",
+                               dev->dt_name, dev->base);
+    qemu_fdt_add_subnode(fdt, nodename);
+    qemu_fdt_setprop(fdt, nodename, "compatible",
+                     "mti,gic-timer", strlen("mti,gic-timer") + 1);
+    qemu_fdt_setprop_cells(fdt, nodename, "interrupts", 1, 1, 0);
+    qemu_fdt_setprop_cells(fdt, nodename, "clock-frequency", 100000000);
 
     g_free(nodename);
 }
@@ -793,38 +954,34 @@ static void create_pm_device(void *fdt, DevMapEntry *dev)
 
 static void mips_ranchu_init(MachineState *machine)
 {
-    MIPSCPU *cpu;
-    CPUMIPSState *env;
     int i, fdt_size;
     void *fdt;
-    ranchu_params *rp;
     int64_t kernel_entry;
     char *nodename;
 
     DeviceState *dev = qdev_create(NULL, TYPE_MIPS_RANCHU);
     RanchuState *s = MIPS_RANCHU(dev);
+    ranchu_params *rp = NULL;
 
     MemoryRegion *ram_lo = g_new(MemoryRegion, 1);
     MemoryRegion *ram_hi = g_new(MemoryRegion, 1);
     MemoryRegion *iomem = g_new(MemoryRegion, 1);
     MemoryRegion *bios = g_new(MemoryRegion, 1);
 
-    /* init CPUs */
-    if (machine->cpu_model == NULL) {
-#ifdef TARGET_MIPS64
-        machine->cpu_model = "MIPS64R6-generic";
-#else
-        machine->cpu_model = "74Kf";
-#endif
-    }
-    cpu = cpu_mips_init(machine->cpu_model);
-    if (cpu == NULL) {
-        FATAL("Unable to find CPU definition\n");
-    }
-
     rp = g_new0(ranchu_params, 1);
-    env = &cpu->env;
-    qemu_register_reset(main_cpu_reset, rp);
+    s->rp = rp;
+
+    rp->bootinfo.kernel_filename = strdup(machine->kernel_filename);
+    rp->bootinfo.kernel_cmdline = strdup(machine->kernel_cmdline);
+    rp->bootinfo.initrd_filename = strdup(machine->initrd_filename);
+
+    /* Are we using UHI or legacy boot protocol? */
+    boot_protocol_detect(rp, rp->bootinfo.kernel_filename);
+
+    /* init CPUs */
+    create_cpu(s, machine->cpu_model);
+
+    rp->cpu = MIPS_CPU(first_cpu);
 
 #if !defined(TARGET_MIPS64)
     if (ram_size > (MAX_RAM_SIZE_MB << 20)) {
@@ -839,6 +996,9 @@ static void mips_ranchu_init(MachineState *machine)
     if (!fdt) {
         FATAL("create_device_tree() failed");
     }
+
+    rp->fdt = fdt;
+    rp->fdt_size = fdt_size;
 
     memory_region_init_ram(ram_lo, NULL, "ranchu_low.ram",
                            MIN(ram_size, GOLDFISH_IO_SPACE), &error_abort);
@@ -867,23 +1027,7 @@ static void mips_ranchu_init(MachineState *machine)
         rp->bootinfo.highmem_size = ram_size - GOLDFISH_IO_SPACE;
     }
 
-    rp->bootinfo.kernel_filename = strdup(machine->kernel_filename);
-    rp->bootinfo.kernel_cmdline = strdup(machine->kernel_cmdline);
-    rp->bootinfo.initrd_filename = strdup(machine->initrd_filename);
     rp->bootinfo.ram_size = MIN(ram_size, GOLDFISH_IO_SPACE);
-    rp->fdt = fdt;
-    rp->fdt_size = fdt_size;
-    rp->cpu = cpu;
-
-    cpu_mips_irq_init_cpu(cpu);
-    cpu_mips_clock_init(cpu);
-
-    /* Are we using UHI or legacy boot protocol? */
-    boot_protocol_detect(rp, rp->bootinfo.kernel_filename);
-
-    /* Initialize Goldfish PIC */
-    s->gfpic = goldfish_pic_init(devmap[RANCHU_GOLDFISH_PIC].base,
-                                 env->irq[2]);
 
     qemu_fdt_setprop_string(fdt, "/", "model", "ranchu");
     if (!rp->bootinfo.use_uhi) {
@@ -920,11 +1064,18 @@ static void mips_ranchu_init(MachineState *machine)
         qemu_fdt_setprop_sized_cells(fdt, "/memory", "reg", 1, 0, 2, ram_size);
     }
 
-    /* Create CPU Interrupt controller node in dt */
-    create_intc_device(fdt, &devmap[RANCHU_MIPS_CPU_INTC], NULL);
-    /* Create goldfish_pic controller node in dt */
-    create_intc_device(fdt, &devmap[RANCHU_GOLDFISH_PIC],
-                            &devmap[RANCHU_MIPS_CPU_INTC]);
+    if (s->gfpic) {
+        /* Create CPU Interrupt controller node in dt */
+        create_intc_device(fdt, &devmap[RANCHU_MIPS_CPU_INTC], NULL);
+        /* Create goldfish_pic controller node in dt */
+        create_intc_device(fdt, &devmap[RANCHU_GOLDFISH_PIC],
+                                &devmap[RANCHU_MIPS_CPU_INTC]);
+    } else {
+        /* Create MIPS Global Interrupt Controller node in dt */
+        create_gic_device(fdt, &devmap[RANCHU_MIPS_GIC]);
+        /* Create CPC node in DT */
+        create_device(s, fdt, &devmap[RANCHU_MIPS_CPC], 1, true, false);
+    }
 
     /* Make sure the first 3 serial ports are associated with a device. */
     for (i = 0; i < 3; i++) {
@@ -936,26 +1087,24 @@ static void mips_ranchu_init(MachineState *machine)
     }
 
     /* Create 3 Goldfish TTYs */
-    create_device(fdt, &devmap[RANCHU_GOLDFISH_TTY], s->gfpic, MAX_GF_TTYS,
+    create_device(s, fdt, &devmap[RANCHU_GOLDFISH_TTY], MAX_GF_TTYS,
                   true, true);
 
     /* Other Goldfish Platform devices */
     for (i = RANCHU_GOLDFISH_SYNC; i >= RANCHU_GOLDFISH_RTC ; i--) {
-        create_device(fdt, &devmap[i], s->gfpic, 1, 0, 0);
+        create_device(s, fdt, &devmap[i], 1, false, true);
     }
 
     create_pm_device(fdt, &devmap[RANCHU_GOLDFISH_RESET]);
 
     /* Virtio MMIO devices */
-    create_device(fdt, &devmap[RANCHU_MMIO], s->gfpic, VIRTIO_TRANSPORTS,
-                  true, true);
+    create_device(s, fdt, &devmap[RANCHU_MMIO], VIRTIO_TRANSPORTS, true, true);
 
     if (!rp->bootinfo.use_uhi) {
         /* Create a fake Goldfish Timer node
          * This is required for kernels < v4.4
          */
-        create_device(fdt, &devmap[RANCHU_GOLDFISH_TIMER], s->gfpic, 1,
-                      true, false);
+        create_device(s, fdt, &devmap[RANCHU_GOLDFISH_TIMER], 1, true, false);
     }
 
     kernel_entry = android_load_kernel(rp);
