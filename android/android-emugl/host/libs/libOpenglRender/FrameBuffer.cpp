@@ -507,6 +507,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     s_theFrameBuffer = fb.release();
     if (!useSubWindow) {
+        GL_LOG("Not using subwindow");
         // Nothing else to do - we're ready to rock!
         AutoLock lock(sGlobals->lock);
         sInitialized.store(true, std::memory_order_release);
@@ -586,6 +587,7 @@ void FrameBuffer::setPostCallback(
 }
 
 static void subWindowRepaint(void* param) {
+    GL_LOG("call repost from subWindowRepaint callback");
     auto fb = static_cast<FrameBuffer*>(param);
     fb->repost();
 }
@@ -600,6 +602,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  float dpr,
                                  float zRot,
                                  bool deleteExisting) {
+    GL_LOG("Begin setupSubWindow");
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
             __FUNCTION__);
@@ -631,6 +634,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             createSubWindow || moveSubWindow || m_zRot != zRot || m_dpr != dpr;
     if (!createSubWindow && !moveSubWindow && !redrawSubwindow) {
         assert(sInitialized.load(std::memory_order_relaxed));
+        GL_LOG("Exit setupSubWindow (nothing to do)");
 #if SNAPSHOT_PROFILE > 1
         printf("FrameBuffer::%s(): nothing to do at %lld ms\n", __func__,
                (long long)System::get()->getProcessTimes().wallClockMs);
@@ -720,7 +724,9 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 m_dpr = dpr;
                 m_zRot = zRot;
                 if (m_lastPostedColorBuffer) {
+                    GL_LOG("setupSubwindow: draw last posted cb");
                     post(m_lastPostedColorBuffer, false);
+                    GL_LOG("setupSubwindow: successfully draw last posted cb");
                 } else {
                     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                                     GL_STENCIL_BUFFER_BIT);
@@ -753,6 +759,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
            (long long)System::get()->getProcessTimes().wallClockMs);
 #endif
 
+    GL_LOG("Exit setupSubWindow (successful setup)");
     return success;
 }
 
@@ -1694,8 +1701,16 @@ FrameBuffer::getReadPixelsCallback() {
 }
 
 bool FrameBuffer::repost() {
-    if (m_lastPostedColorBuffer) {
+    GL_LOG("Reposting framebuffer.");
+    if (m_lastPostedColorBuffer &&
+        sInitialized.load(std::memory_order_relaxed)) {
+        GL_LOG("Has last posted colorbuffer and is initialized; post.");
         return post(m_lastPostedColorBuffer);
+    } else {
+        GL_LOG("No repost: no last posted color buffer");
+        if (!sInitialized.load(std::memory_order_relaxed)) {
+            GL_LOG("No repost: initialization is not finished.");
+        }
     }
     return false;
 }
@@ -1888,6 +1903,7 @@ bool FrameBuffer::onLoad(Stream* stream,
         return { handle, { std::move(cb), refCount, opened, closedTs } };
     });
     m_lastPostedColorBuffer = static_cast<HandleType>(stream->getBe32());
+    GL_LOG("Got lasted posted color buffer from snapshot");
 
     loadCollection(stream, &m_windows,
                    [this](Stream* stream) -> WindowSurfaceMap::value_type {
