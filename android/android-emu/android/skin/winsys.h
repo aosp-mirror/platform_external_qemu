@@ -14,6 +14,7 @@
 
 // Window system related definitions.
 #include "android/skin/rect.h"
+#include "android/ui-emu-agent.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -119,6 +120,8 @@ void skin_winsys_run_ui_update(SkinGenericFunction f, void* data, bool wait);
 
 // Show a blocking error dialog running on the UI thread.
 void skin_winsys_error_dialog(const char* message, const char* title);
+
+void skin_winsys_set_ui_agent(const UiEmuAgent* agent);
 
 #ifdef __cplusplus
 }
