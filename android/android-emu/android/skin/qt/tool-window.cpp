@@ -43,14 +43,6 @@
 #include <cassert>
 #include <string>
 
-static ToolWindow* twInstance = NULL;
-
-extern "C" void setUiEmuAgent(const UiEmuAgent* agentPtr) {
-    if (twInstance) {
-        twInstance->setToolEmuAgent(agentPtr);
-    }
-}
-
 ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
     : mWindow(new ExtendedWindow(tw->mEmulatorWindow,
                                  tw,
@@ -91,15 +83,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mUIEventRecorder(event_recorder),
       mUserActionsCounter(user_actions_counter),
       mSizeTweaker(this) {
-    twInstance = this;
-
 // "Tool" type windows live in another layer on top of everything in OSX, which
-// is undesirable
-// because it means the extended window must be on top of the emulator window.
-// However, on
-// Windows and Linux, "Tool" type windows are the only way to make a window that
-// does not have
-// its own taskbar item.
+// is undesirable because it means the extended window must be on top of the
+// emulator window. However, on Windows and Linux, "Tool" type windows are the
+// only way to make a window that does not have its own taskbar item.
 #ifdef __APPLE__
     Qt::WindowFlags flag = Qt::Dialog;
 #else
@@ -496,16 +483,17 @@ void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     }
 
     if (agPtr->clipboard) {
-        connect(this, SIGNAL(guestClipboardChanged(QString)),
-                this, SLOT(onGuestClipboardChanged(QString)),
-                Qt::QueuedConnection);
+        connect(this, SIGNAL(guestClipboardChanged(QString)), this,
+                SLOT(onGuestClipboardChanged(QString)), Qt::QueuedConnection);
         agPtr->clipboard->setGuestClipboardCallback(
-                [](const uint8_t* data, size_t size) {
-                    emit twInstance->guestClipboardChanged(
+                [](void* context, const uint8_t* data, size_t size) {
+                    auto self = static_cast<ToolWindow*>(context);
+                    emit self->guestClipboardChanged(
                             QString::fromUtf8((const char*)data, size));
-                });
-        connect(QApplication::clipboard(), SIGNAL(dataChanged()),
-                this, SLOT(onHostClipboardChanged()));
+                },
+                this);
+        connect(QApplication::clipboard(), SIGNAL(dataChanged()), this,
+                SLOT(onHostClipboardChanged()));
     }
 
     emit haveClipboardSharingKnown(agPtr->clipboard != nullptr);

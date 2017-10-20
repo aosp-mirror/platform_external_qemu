@@ -18,7 +18,6 @@
 #include "android/skin/qt/extended-window-styles.h"
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/qt-ui-commands.h"
-#include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/ui-event-recorder.h"

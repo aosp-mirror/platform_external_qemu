@@ -23,7 +23,6 @@
 #include "android/opengles.h"
 #include "android/screen-recorder.h"
 #include "android/skin/keycode.h"
-#include "android/skin/qt/set-ui-emu-agent.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/bufprint.h"
@@ -269,7 +268,7 @@ emulator_window_setup( EmulatorWindow*  emulator )
                           emulator->onion_alpha);
     }
 
-    setUiEmuAgent(emulator->uiEmuAgent);
+    skin_winsys_set_ui_agent(emulator->uiEmuAgent);
 
     // Determine whether to use an EmuGL sub-window or not.
     if (!s_use_emugl_subwindow) {

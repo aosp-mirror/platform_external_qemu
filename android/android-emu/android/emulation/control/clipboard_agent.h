@@ -26,7 +26,7 @@ typedef struct QAndroidClipboardAgent {
     // as a result of an action inside the guest.
     // |cb| is the pointer to the function
     void (*setGuestClipboardCallback)(
-        void(*cb)(const uint8_t*, size_t));
+        void(*cb)(void*, const uint8_t*, size_t), void* context);
 
     // Sets the contents of the guest clipboard.
     // |buf| is the content to pass, len is the number of bytes in |buf|.

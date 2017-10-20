@@ -505,6 +505,14 @@ extern void skin_winsys_error_dialog(const char* message, const char* title) {
     skin_winsys_run_ui_update(showDialog, &params, true);
 }
 
+void skin_winsys_set_ui_agent(const UiEmuAgent* agent) {
+    if (const auto window = EmulatorQtWindow::getInstance()) {
+        window->runOnUiThread([agent, window] {
+            window->toolWindow()->setToolEmuAgent(agent);
+        });
+    }
+}
+
 #ifdef _WIN32
 extern "C" int qt_main(int, char**);
 

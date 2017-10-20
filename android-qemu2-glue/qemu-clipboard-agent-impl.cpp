@@ -15,9 +15,14 @@
 
 using android::emulation::ClipboardPipe;
 
-static void set_guest_clipboard_callback(
-        void(*cb)(const uint8_t*, size_t)) {
-    ClipboardPipe::setGuestClipboardCallback(cb);
+static void set_guest_clipboard_callback(void (*cb)(void*,
+                                                    const uint8_t*,
+                                                    size_t),
+                                         void* context) {
+    ClipboardPipe::setGuestClipboardCallback(
+            [cb, context](const uint8_t* data, size_t size) {
+                cb(context, data, size);
+            });
 }
 
 static void set_guest_clipboard_contents(const uint8_t* buf, size_t len) {
@@ -28,11 +33,9 @@ static void set_guest_clipboard_contents(const uint8_t* buf, size_t len) {
 }
 
 static const QAndroidClipboardAgent clipboardAgent = {
-    .setEnabled = &ClipboardPipe::setEnabled,
-    .setGuestClipboardCallback = set_guest_clipboard_callback,
-    .setGuestClipboardContents = set_guest_clipboard_contents
-};
+        .setEnabled = &ClipboardPipe::setEnabled,
+        .setGuestClipboardCallback = set_guest_clipboard_callback,
+        .setGuestClipboardContents = set_guest_clipboard_contents};
 
 extern "C" const QAndroidClipboardAgent* const gQAndroidClipboardAgent =
-    &clipboardAgent;
-
+        &clipboardAgent;
