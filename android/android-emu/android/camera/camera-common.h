@@ -76,16 +76,16 @@ ANDROID_BEGIN_HEADER
 #define V4L2_PIX_FMT_SRGGB8  v4l2_fourcc('R', 'G', 'G', 'B')
 #endif  /* V4L2_PIX_FMT_SRGGB8 */
 #ifndef V4L2_PIX_FMT_SBGGR10
-#define V4L2_PIX_FMT_SBGGR10 v4l2_fourcc('B', 'G', '1', '\0')
+#define V4L2_PIX_FMT_SBGGR10 v4l2_fourcc('B', 'G', '1', '0')
 #endif  /* V4L2_PIX_FMT_SBGGR10 */
 #ifndef V4L2_PIX_FMT_SGBRG10
-#define V4L2_PIX_FMT_SGBRG10 v4l2_fourcc('G', 'B', '1', '\0')
+#define V4L2_PIX_FMT_SGBRG10 v4l2_fourcc('G', 'B', '1', '0')
 #endif  /* V4L2_PIX_FMT_SGBRG10 */
 #ifndef V4L2_PIX_FMT_SGRBG10
-#define V4L2_PIX_FMT_SGRBG10 v4l2_fourcc('B', 'A', '1', '\0')
+#define V4L2_PIX_FMT_SGRBG10 v4l2_fourcc('B', 'A', '1', '0')
 #endif  /* V4L2_PIX_FMT_SGRBG10 */
 #ifndef V4L2_PIX_FMT_SRGGB10
-#define V4L2_PIX_FMT_SRGGB10 v4l2_fourcc('R', 'G', '1', '\0')
+#define V4L2_PIX_FMT_SRGGB10 v4l2_fourcc('R', 'G', '1', '0')
 #endif  /* V4L2_PIX_FMT_SRGGB10 */
 #ifndef V4L2_PIX_FMT_SBGGR12
 #define V4L2_PIX_FMT_SBGGR12 v4l2_fourcc('B', 'G', '1', '2')
@@ -100,7 +100,7 @@ ANDROID_BEGIN_HEADER
 #define V4L2_PIX_FMT_SRGGB12 v4l2_fourcc('R', 'G', '1', '2')
 #endif  /* V4L2_PIX_FMT_SRGGB12 */
 #ifndef V4L2_PIX_FMT_ARGB32
-#define V4L2_PIX_FMT_ARGB32  v4l2_fourcc('A','R','G','B')
+#define V4L2_PIX_FMT_ARGB32 v4l2_fourcc('B', 'A', '2', '4')
 #endif /* V4L2_PIX_FMT_ARGB32 */
 
 /* Describes framebuffer, used by the client of camera capturing API.
