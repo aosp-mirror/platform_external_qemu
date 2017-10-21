@@ -292,8 +292,13 @@ GLuint TextureResize::update(GLuint texture) {
         i++, w /= 2, h /= 2, factor *= 2) {
     }
 
-    // No resizing needed.
-    if (factor == 1) {
+    // No resizing needed if factor == 1, or if
+    // the guest has not posted a frame yet. We wait for the guest
+    // to post a frame because on snapshot load with NVIDIA GPU's,
+    // we get a crash in the subsequent glDrawArrays in resize()
+    // unless we wait for more initialization to have taken place.
+    if (factor == 1 ||
+        !FrameBuffer::getFB()->hasGuestPostedAFrame()) {
         return texture;
     }
 
