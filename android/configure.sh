@@ -245,6 +245,7 @@ OPTION_SYMBOLS=no
 OPTION_BENCHMARKS=no
 OPTION_LTO=
 OPTION_SNAPSHOT_PROFILE=no
+OPTION_MIN_BUILD=no
 ANDROID_SDK_TOOLS_REVISION=
 ANDROID_SDK_TOOLS_BUILD_NUMBER=
 
@@ -345,6 +346,8 @@ for opt do
   ;;
   --snapshot-profile-level=*) OPTION_SNAPSHOT_PROFILE=$optarg
   ;;
+  -min|--min-build) OPTION_MIN_BUILD=yes
+  ;;
   *)
     echo "unknown option '$opt', use --help"
     exit 1
@@ -382,6 +385,7 @@ EOF
     echo "  --benchmarks                Build benchmark programs."
     echo "  --lto                       Force link-time optimization."
     echo "  --snapshot-profile[-level=X] Enable snapshot profiling via debug prints."
+    echo "  --min[-build]               Only build the qemu2 x64 host x86 target binaries."
     echo ""
     exit 1
 fi
@@ -1095,6 +1099,9 @@ if [ "$OPTION_LTO" = "true" ]; then
     echo "BUILD_ENABLE_LTO      := true" >> $config_mk
 fi
 
+if [ "$OPTION_MIN_BUILD" = "yes" ]; then
+    echo "CONFIG_MIN_BUILD  := true" >> $config_mk
+fi
 echo "CONFIG_COREAUDIO  := $PROBE_COREAUDIO" >> $config_mk
 echo "CONFIG_WINAUDIO   := $PROBE_WINAUDIO" >> $config_mk
 echo "CONFIG_ESD        := $PROBE_ESD" >> $config_mk
