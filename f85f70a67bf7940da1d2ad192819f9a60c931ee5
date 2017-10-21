@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e947afa_efc92228",
+        "filename": "android-qemu2-glue/build/Makefile.qemu2.mk",
+        "patchSetId": 2
+      },
+      "lineNbr": 299,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-21T17:58:20Z",
+      "side": 0,
+      "message": "also disable building the upstream version of the binaries - that\u0027ll save quite some time too",
+      "range": {
+        "startLine": 299,
+        "startChar": 0,
+        "endLine": 299,
+        "endChar": 71
+      },
+      "revId": "f85f70a67bf7940da1d2ad192819f9a60c931ee5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
