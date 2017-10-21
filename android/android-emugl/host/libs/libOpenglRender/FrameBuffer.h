@@ -310,6 +310,8 @@ public:
     // acquiring/releasing the FrameBuffer instance's lock and binding the
     // contexts. It should be |false| only when called internally.
     bool post(HandleType p_colorbuffer, bool needLockAndBind = true);
+    void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
+    bool hasGuestPostedAFrame() { return m_guestPostedAFrame; }
 
     // Runs the post callback with |pixels| (good for when the readback
     // happens in a separate place)
@@ -517,5 +519,6 @@ private:
     android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
 
     bool m_asyncReadbackSupported = true;
+    bool m_guestPostedAFrame = false;
 };
 #endif
