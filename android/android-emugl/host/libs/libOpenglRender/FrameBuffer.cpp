@@ -725,7 +725,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 m_zRot = zRot;
                 if (m_lastPostedColorBuffer) {
                     GL_LOG("setupSubwindow: draw last posted cb");
-                    post(m_lastPostedColorBuffer, false);
+                    repost(false /* not locking */);
                     GL_LOG("setupSubwindow: successfully draw last posted cb");
                 } else {
                     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
@@ -1573,6 +1573,12 @@ void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
 }
 
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
+    bool res = postImpl(p_colorbuffer, needLockAndBind);
+    if (res) setGuestPostedAFrame();
+    return res;
+}
+
+bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
     }
@@ -1590,7 +1596,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
         GLuint tex = c->second.cb->scale();
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
-            ERR("FrameBuffer::post(): eglMakeCurrent failed\n");
+            ERR("FrameBuffer::postImpl(): eglMakeCurrent failed\n");
             goto EXIT;
         }
 
@@ -1700,12 +1706,12 @@ FrameBuffer::getReadPixelsCallback() {
     return sFrameBuffer_ReadPixelsCallback;
 }
 
-bool FrameBuffer::repost() {
+bool FrameBuffer::repost(bool needLockAndBind) {
     GL_LOG("Reposting framebuffer.");
     if (m_lastPostedColorBuffer &&
         sInitialized.load(std::memory_order_relaxed)) {
         GL_LOG("Has last posted colorbuffer and is initialized; post.");
-        return post(m_lastPostedColorBuffer);
+        return postImpl(m_lastPostedColorBuffer, needLockAndBind);
     } else {
         GL_LOG("No repost: no last posted color buffer");
         if (!sInitialized.load(std::memory_order_relaxed)) {
