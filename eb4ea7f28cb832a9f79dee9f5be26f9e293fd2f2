@@ -140,6 +140,30 @@
       "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a52eda55_26de396f",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-21T18:56:56Z",
+      "side": 1,
+      "message": "I just want to make sure we won\u0027t try to create the service twice, as I\u0027m not sure how QEMUD would react - so prefer to guard against double initialization here. Feel free to return -1 there, making second call an error too",
+      "parentUuid": "585ccc6f_2de60c77",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 13
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
