@@ -69,6 +69,30 @@
       "revId": "50fc70191f7a2bce74e8576b6c4ddcba89326939",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bdf77954_df2bc449",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 314,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-21T18:19:28Z",
+      "side": 1,
+      "message": "I\u0027d actually like to introduce a distinction between guest and host causing framebuffer posts here, so maybe hasGuestPostedAFrame?",
+      "parentUuid": "59063b17_66169ec4",
+      "range": {
+        "startLine": 314,
+        "startChar": 9,
+        "endLine": 314,
+        "endChar": 23
+      },
+      "revId": "50fc70191f7a2bce74e8576b6c4ddcba89326939",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
