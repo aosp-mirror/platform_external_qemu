@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3b08fd18_f2d0a64d",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1577,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-21T21:06:45Z",
+      "side": 1,
+      "message": "nit: this function isn\u0027t really useful anymore IMO, just do m_postedAFrame |\u003d res;",
+      "range": {
+        "startLine": 1577,
+        "startChar": 13,
+        "endLine": 1577,
+        "endChar": 33
+      },
+      "revId": "ba02bc6299e8db9e6cea84f8841ee5b12f2ff262",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
