@@ -308,6 +308,8 @@ public:
     // acquiring/releasing the FrameBuffer instance's lock and binding the
     // contexts. It should be |false| only when called internally.
     bool post(HandleType p_colorbuffer, bool needLockAndBind = true);
+    void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
+    bool hasGuestPostedAFrame() { return m_guestPostedAFrame; }
 
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
@@ -481,5 +483,8 @@ private:
 
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
+
+    bool m_asyncReadbackSupported = true;
+    bool m_guestPostedAFrame = false;
 };
 #endif
