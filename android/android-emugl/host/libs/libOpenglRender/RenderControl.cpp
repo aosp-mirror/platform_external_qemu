@@ -632,6 +632,7 @@ static void rcFBPost(uint32_t colorBuffer)
     }
 
     fb->post(colorBuffer);
+    fb->setGuestPosted();
 }
 
 static void rcFBSetSwapInterval(EGLint interval)
