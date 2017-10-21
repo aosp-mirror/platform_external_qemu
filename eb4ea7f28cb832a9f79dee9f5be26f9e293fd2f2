@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1827017e_45a1996c",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-10-21T01:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "587cbff0_a8826a8d",
+      "range": {
+        "startLine": 22,
+        "startChar": 21,
+        "endLine": 22,
+        "endChar": 28
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "40df774f_5c735653",
         "filename": "android/android-emu/android/cros.c",
         "patchSetId": 6
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0bb467b8_a4cc8616",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-10-21T01:01:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40df774f_5c735653",
+      "range": {
+        "startLine": 51,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 40
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5378f11b_d8f3f381",
         "filename": "android/android-emu/android/cros.c",
         "patchSetId": 6
@@ -59,6 +107,30 @@
       "writtenOn": "2017-10-20T22:50:27Z",
       "side": 1,
       "message": "if (service) return 0;\n?",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 13
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "585ccc6f_2de60c77",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-10-21T01:01:56Z",
+      "side": 1,
+      "message": "Do you mean change to this:\n  if(service) return 0;\n  return -1;\n\nThen later if I need to add some other code to init some other stuff, it\u0027s no convenient. I feel it\u0027s more common to return early when some error happens.",
+      "parentUuid": "5378f11b_d8f3f381",
       "range": {
         "startLine": 56,
         "startChar": 0,
