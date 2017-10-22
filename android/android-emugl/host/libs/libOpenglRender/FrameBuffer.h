@@ -308,13 +308,12 @@ public:
     // acquiring/releasing the FrameBuffer instance's lock and binding the
     // contexts. It should be |false| only when called internally.
     bool post(HandleType p_colorbuffer, bool needLockAndBind = true);
-    void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
     bool hasGuestPostedAFrame() { return m_guestPostedAFrame; }
 
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
     // be re-displayed for any reason.
-    bool repost();
+    bool repost(bool needLockAndBind = false);
 
     // Return the host EGLDisplay used by this instance.
     EGLDisplay getDisplay() const { return m_eglDisplay; }
@@ -402,6 +401,9 @@ private:
     void performDelayedColorBufferCloseLocked();
     void eraseDelayedCloseColorBufferLocked(
             HandleType cb, android::base::System::Duration ts);
+
+    bool postImpl(HandleType p_colorbuffer, bool needLockAndBind = true);
+    void setGuestPostedAFrame() { m_guestPostedAFrame = true; }
 
 private:
     static FrameBuffer *s_theFrameBuffer;
