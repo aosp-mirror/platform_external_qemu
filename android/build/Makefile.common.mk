@@ -153,19 +153,21 @@ endif  # BUILD_TARGET_OS == windows
 include $(LOCAL_PATH)/android/android-emu/Makefile.android-emu.mk
 include $(LOCAL_PATH)/android/android-emu/Makefile.crash-service.mk
 
-include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-common.mk
+ifeq (,$(CONFIG_MIN_BUILD))
+    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-common.mk
 
-# We want to build all variants of the emulator binaries. This makes
-# it easier to catch target-specific regressions during emulator development.
-EMULATOR_TARGET_ARCH := arm
-include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+    # We want to build all variants of the emulator binaries. This makes
+    # it easier to catch target-specific regressions during emulator development.
+    EMULATOR_TARGET_ARCH := arm
+    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
 
-# Note: the same binary handles x86 and x86_64
-EMULATOR_TARGET_ARCH := x86
-include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+    # Note: the same binary handles x86 and x86_64
+    EMULATOR_TARGET_ARCH := x86
+    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
 
-EMULATOR_TARGET_ARCH := mips
-include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+    EMULATOR_TARGET_ARCH := mips
+    include $(LOCAL_PATH)/android/qemu1/Makefile.qemu1-target.mk
+endif   # !CONFIG_MIN_BUILD
 
 ##############################################################################
 ##############################################################################
