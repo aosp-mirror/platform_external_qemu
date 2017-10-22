@@ -164,6 +164,30 @@
       "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "11d6e5f9_1dfda8e2",
+        "filename": "android/android-emu/android/cros.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-10-22T01:26:14Z",
+      "side": 1,
+      "message": "Thanks. Good point. Fixed.",
+      "parentUuid": "a52eda55_26de396f",
+      "range": {
+        "startLine": 56,
+        "startChar": 0,
+        "endLine": 60,
+        "endChar": 13
+      },
+      "revId": "eb4ea7f28cb832a9f79dee9f5be26f9e293fd2f2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
