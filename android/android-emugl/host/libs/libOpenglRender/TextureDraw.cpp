@@ -176,6 +176,13 @@ TextureDraw::TextureDraw() :
                          sizeof(kIndices),
                          kIndices,
                          GL_STATIC_DRAW);
+
+    // Reset state.
+    s_gles2.glUseProgram(0);
+    s_gles2.glDisableVertexAttribArray(mPositionSlot);
+    s_gles2.glDisableVertexAttribArray(mInCoordSlot);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
@@ -282,6 +289,13 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
 #endif
 
     // TODO(digit): Restore previous program state.
+    // For now, reset back to zero and assume other users will
+    // follow the same protocol.
+    s_gles2.glUseProgram(0);
+    s_gles2.glDisableVertexAttribArray(mPositionSlot);
+    s_gles2.glDisableVertexAttribArray(mInCoordSlot);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    s_gles2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     return true;
 }
