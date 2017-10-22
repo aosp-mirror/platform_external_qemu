@@ -256,6 +256,10 @@ TextureResize::TextureResize(GLuint width, GLuint height) :
     s_gles2.glGenBuffers(1, &mVertexBuffer);
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
     s_gles2.glBufferData(GL_ARRAY_BUFFER, sizeof(kVertexData), kVertexData, GL_STATIC_DRAW);
+
+    // Clear bindings.
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 TextureResize::~TextureResize() {
@@ -292,13 +296,8 @@ GLuint TextureResize::update(GLuint texture) {
         i++, w /= 2, h /= 2, factor *= 2) {
     }
 
-    // No resizing needed if factor == 1, or if
-    // the guest has not posted a frame yet. We wait for the guest
-    // to post a frame because on snapshot load with NVIDIA GPU's,
-    // we get a crash in the subsequent glDrawArrays in resize()
-    // unless we wait for more initialization to have taken place.
-    if (factor == 1 ||
-        !FrameBuffer::getFB()->hasGuestPostedAFrame()) {
+    // No resizing needed if factor == 1
+    if (factor == 1) {
         return texture;
     }
 
@@ -354,6 +353,9 @@ void TextureResize::setupFramebuffers(unsigned int factor) {
     attachShaders(&mFBHeight, factorDefineStr.c_str(), "#define VERTICAL\n", mWidth, mHeight);
 
     mFactor = factor;
+
+    s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void TextureResize::resize(GLuint texture) {
@@ -391,8 +393,10 @@ void TextureResize::resize(GLuint texture) {
     s_gles2.glUniform1i(mFBHeight.uTexture, 0);
     s_gles2.glDrawArrays(GL_TRIANGLES, 0, sizeof(kVertexData) / (2 * sizeof(float)));
 
-    // Clear the bindings.
+    // Clear the bindings. (Viewport restored outside)
     s_gles2.glBindBuffer(GL_ARRAY_BUFFER, 0);
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, 0);
     s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    s_gles2.glDisableVertexAttribArray(mFBWidth.aPosition);
+    s_gles2.glDisableVertexAttribArray(mFBHeight.aPosition);
 }
