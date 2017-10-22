@@ -1593,12 +1593,16 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
 
     if (m_subWin) {
         markOpened(&c->second);
-        GLuint tex = c->second.cb->scale();
+        // Load the color buffer if it hasn't been loaded already.
+        c->second.cb->touch();
+
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
             ERR("FrameBuffer::postImpl(): eglMakeCurrent failed\n");
             goto EXIT;
         }
+
+        GLuint tex = c->second.cb->scale();
 
         // get the viewport
         GLint vp[4];
