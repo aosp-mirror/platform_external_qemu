@@ -16,6 +16,24 @@
       "revId": "52723dcc033cbc93bd25ec257421b7dd3553cfd0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1a15ee2a_4bf6e2d7",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 1707,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-23T19:31:52Z",
+      "side": 1,
+      "message": "Good catch and thanks for making me think about this, yes this should be y_stride based on the conversion code in _VOffSepAlignedYUV above.\n\nI also discovered in my tests for this edge case (which I\u0027ll be sending out for review in my next change), that the existing conversion code assumes that the width is two-byte aligned, and may crash if it is not.",
+      "parentUuid": "17a773d7_3065a583",
+      "revId": "52723dcc033cbc93bd25ec257421b7dd3553cfd0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
