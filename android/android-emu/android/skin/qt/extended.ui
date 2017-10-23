@@ -72,6 +72,7 @@ font-family: &quot;Roboto&quot;</string>
    <widget class="MicrophonePage" name="microphonePage"/>
    <widget class="FingerPage" name="finger_page"/>
    <widget class="VirtualSensorsPage" name="virtualSensorsPage"/>
+   <widget class="SnapshotPage" name="snapshotPage"/>
    <widget class="BugreportPage" name="bugreportPage"/>
    <widget class="RecordScreenPage" name="recordScreenPage"/>
    <widget class="GooglePlayPage" name="googlePlayPage"/>
@@ -334,7 +335,7 @@ font-family: &quot;Roboto&quot;</string>
      <number>0</number>
     </property>
     <item>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
       <property name="spacing">
        <number>0</number>
       </property>
@@ -761,6 +762,52 @@ padding: 10px 0px 10px 16px;</string>
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="snapshotButton">
+        <property name="font">
+         <font>
+          <family>Roboto</family>
+         </font>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">/* overridden by stylesheet_template.css */
+border: none;
+text-align: left;
+padding: 10px 0px 10px 16px;</string>
+        </property>
+        <property name="text">
+         <string>  Snapshots</string>
+        </property>
+        <property name="icon">
+         <iconset resource="resources.qrc">
+          <normaloff>:/light/snapshot</normaloff>:/light/snapshot</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>20</width>
+          <height>20</height>
+         </size>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+        <property name="themeIconName" stdset="0">
+         <string>snapshot</string>
+        </property>
+        <property name="ColorGroup" stdset="0">
+         <string>MajorTab</string>
+        </property>
+        <property name="report_metrics" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="bugreportButton">
         <property name="font">
          <font>
@@ -811,8 +858,8 @@ padding: 10px 0px 10px 16px;</string>
       <item>
        <widget class="QPushButton" name="carDataButton">
         <property name="font">
-          <font>
-           <family>Roboto</family>
+         <font>
+          <family>Roboto</family>
          </font>
         </property>
         <!-- Default invisible, will change to visible programmatically when running Android Auto
@@ -895,13 +942,13 @@ padding: 10px 0px 10px 16px;</string>
       </item>
       <item>
        <widget class="QPushButton" name="recordScreenButton">
-        <property name="visible">
-         <bool>false</bool>
-        </property>
         <property name="font">
          <font>
           <family>Roboto</family>
          </font>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
@@ -944,13 +991,13 @@ padding: 10px 0px 10px 16px;</string>
       </item>
       <item>
        <widget class="QPushButton" name="googlePlayButton">
-        <property name="visible">
-         <bool>false</bool>
-        </property>
         <property name="font">
          <font>
           <family>Roboto</family>
          </font>
+        </property>
+        <property name="visible">
+         <bool>false</bool>
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
@@ -1192,6 +1239,12 @@ padding: 10px 0px 10px 16px;</string>
    <header>android/skin/qt/extended-pages/car-data-page.h</header>
    <container>1</container>
   </customwidget>
+  <customwidget>
+   <class>SnapshotPage</class>
+   <extends>QWidget</extends>
+   <header>android/skin/qt/extended-pages/snapshot-page.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>locationButton</tabstop>
@@ -1205,6 +1258,7 @@ padding: 10px 0px 10px 16px;</string>
   <tabstop>virtSensorsButton</tabstop>
   <!-- TODO(joshuaduong): Enable once gplay is ready. -->
   <!-- <tabstop>googlePlayButton</tabstop> -->
+  <tabstop>snapshotButton</tabstop>
   <tabstop>bugreportButton</tabstop>
   <tabstop>carDataButton</tabstop>
   <tabstop>settingsButton</tabstop>
