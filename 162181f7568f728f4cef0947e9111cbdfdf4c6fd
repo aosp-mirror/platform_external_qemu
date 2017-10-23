@@ -22,6 +22,30 @@
       "revId": "162181f7568f728f4cef0947e9111cbdfdf4c6fd",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7bd817e3_4942f009",
+        "filename": "android/android-emu/android/snapshot/Hierarchy.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-23T17:56:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb947a0f_a4ca3fcc",
+      "range": {
+        "startLine": 52,
+        "startChar": 36,
+        "endLine": 52,
+        "endChar": 42
+      },
+      "revId": "162181f7568f728f4cef0947e9111cbdfdf4c6fd",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
