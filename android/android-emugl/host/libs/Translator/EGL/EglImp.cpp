@@ -783,6 +783,8 @@ EGLAPI EGLBoolean EGLAPIENTRY eglGetConfigAttrib(EGLDisplay display, EGLConfig c
 EGLAPI EGLSurface EGLAPIENTRY eglCreateWindowSurface(EGLDisplay display, EGLConfig config,
                   EGLNativeWindowType win,
                   const EGLint *attrib_list) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+
     VALIDATE_DISPLAY_RETURN(display,EGL_NO_SURFACE);
     VALIDATE_CONFIG_RETURN(config,EGL_NO_SURFACE);
 
@@ -815,6 +817,8 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
         EGLDisplay display,
         EGLConfig config,
         const EGLint *attrib_list) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+
     VALIDATE_DISPLAY_RETURN(display,EGL_NO_SURFACE);
     VALIDATE_CONFIG_RETURN(config,EGL_NO_SURFACE);
     if(!(cfg->surfaceType() & EGL_PBUFFER_BIT)) {
@@ -873,6 +877,8 @@ EGLAPI EGLSurface EGLAPIENTRY eglCreatePbufferSurface(
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySurface(EGLDisplay display, EGLSurface surface) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+
     VALIDATE_DISPLAY(display);
     SurfacePtr srfc = dpy->getSurface(surface);
     if(!srfc.get()) {
@@ -912,6 +918,8 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                 EGLContext share_context,
                 const EGLint *attrib_list,
                 android::base::Stream *stream) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+
     assert(share_context == EGL_NO_CONTEXT || stream == nullptr);
     VALIDATE_DISPLAY_RETURN(display,EGL_NO_CONTEXT);
 
@@ -1050,6 +1058,8 @@ EGLAPI EGLContext EGLAPIENTRY eglLoadContext(EGLDisplay display, const EGLint *a
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroyContext(EGLDisplay display, EGLContext context) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
+
     VALIDATE_DISPLAY(display);
     VALIDATE_CONTEXT(context);
 
@@ -1104,6 +1114,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                                              EGLSurface draw,
                                              EGLSurface read,
                                              EGLContext context) {
+    emugl::Mutex::AutoLock mutex(s_eglLock);
     VALIDATE_DISPLAY(display);
 
     bool releaseContext = EglValidate::releaseContext(context, read, draw);
