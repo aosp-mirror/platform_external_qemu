@@ -255,10 +255,10 @@ bool TextureDraw::draw(GLuint texture, float rotation, float dx, float dy) {
     GLint validState = 0;
     s_gles2.glGetProgramiv(mProgram, GL_VALIDATE_STATUS, &validState);
     if (validState == GL_FALSE) {
-        GLchar messages[256];
+        GLchar messages[256] = {};
         s_gles2.glGetProgramInfoLog(
                 mProgram, sizeof(messages), 0, &messages[0]);
-        ERR("%s: Could not run program: %s\n", __FUNCTION__, messages);
+        ERR("%s: Could not run program: '%s'\n", __FUNCTION__, messages);
         return false;
     }
 #endif

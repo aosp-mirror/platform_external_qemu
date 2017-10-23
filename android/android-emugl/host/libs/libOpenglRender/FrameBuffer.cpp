@@ -690,11 +690,15 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
                 m_dpr = dpr;
                 m_zRot = zRot;
+                bool posted = false;
                 if (m_lastPostedColorBuffer) {
                     GL_LOG("setupSubwindow: draw last posted cb");
-                    repost(false /* not locking */);
-                    GL_LOG("setupSubwindow: successfully draw last posted cb");
-                } else {
+                    posted = postImpl(m_lastPostedColorBuffer,
+                                      false /* not locking */);
+                    GL_LOG("setupSubwindow: draw last posted cb %s",
+                           posted ? "succeeded" : "failed");
+                }
+                if (!posted) {
                     s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
                                     GL_STENCIL_BUFFER_BIT);
                     s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
