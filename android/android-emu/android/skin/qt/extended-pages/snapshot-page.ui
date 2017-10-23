@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SnapshotPage</class>
+ <widget class="QWidget" name="SnapshotPage">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>622</width>
+    <height>580</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QTreeWidget" name="snapshotDisplay">
+   <property name="geometry">
+    <rect>
+     <x>30</x>
+     <y>30</y>
+     <width>261</width>
+     <height>471</height>
+    </rect>
+   </property>
+   <property name="maximumSize">
+    <size>
+     <width>261</width>
+     <height>16777215</height>
+    </size>
+   </property>
+   <property name="columnCount">
+    <number>2</number>
+   </property>
+   <attribute name="headerVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="headerShowSortIndicator" stdset="0">
+    <bool>true</bool>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>Name</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string/>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTextEdit" name="selectionInfo">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>399</y>
+     <width>291</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="RaisedMaterialButton" name="takeSnapshotButton">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>520</y>
+     <width>132</width>
+     <height>36</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Roboto</family>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="text">
+    <string>TAKE SNAPSHOT</string>
+   </property>
+   <property name="flat">
+    <bool>true</bool>
+   </property>
+   <property name="ColorGroup" stdset="0">
+    <string notr="true">Button</string>
+   </property>
+   <property name="report_metrics" stdset="0">
+    <bool>false</bool>
+   </property>
+  </widget>
+  <widget class="QGraphicsView" name="preview">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>30</y>
+     <width>291</width>
+     <height>361</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="noneAvailableLabel">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>70</x>
+     <y>150</y>
+     <width>181</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>No snapshots available</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>RaisedMaterialButton</class>
+   <extends>QPushButton</extends>
+   <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="../resources.qrc"/>
+ </resources>
+ <connections/>
+</ui>
