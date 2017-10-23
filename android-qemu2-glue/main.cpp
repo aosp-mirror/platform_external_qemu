@@ -1123,6 +1123,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidHttpProxyAgent,
             gQAndroidRecordScreenAgent,
             gQAndroidSensorsAgent,
+            gQAndroidSnapshotAgent,
             gQAndroidTelephonyAgent,
             gQAndroidUserEventAgent,
             gQCarDataAgent,

@@ -249,6 +249,7 @@ int main(int argc, char **argv) {
     uiEmuAgent.telephony = gQAndroidTelephonyAgent;
     uiEmuAgent.userEvents = gQAndroidUserEventAgent;
     uiEmuAgent.window = gQAndroidEmulatorWindowAgent;
+    uiEmuAgent.snapshot = gQAndroidSnapshotAgent;
     uiEmuAgent.car = gQCarDataAgent;
 
     // for now there's no uses of SettingsAgent, so we don't set it

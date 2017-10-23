@@ -145,7 +145,8 @@ bool qemu_android_emulation_setup() {
             gQAndroidHttpProxyAgent, gQAndroidRecordScreenAgent,
             gQAndroidTelephonyAgent, gQAndroidUserEventAgent,
             gQAndroidVmOperations,   gQAndroidNetAgent,
-            gQAndroidLibuiAgent,     gQCarDataAgent,
+            gQAndroidLibuiAgent,     gQAndroidSnapshotAgent,
+            gQCarDataAgent,
     };
 
     if (!qemu_android_setup_http_proxy(op_http_proxy)) {

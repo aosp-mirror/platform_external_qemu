@@ -24,6 +24,7 @@
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/emulation/control/sensors_agent.h"
+#include "android/emulation/control/snapshot_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
@@ -54,6 +55,9 @@ extern const QAndroidRecordScreenAgent* const gQAndroidRecordScreenAgent;
 
 // Defined in android/qemu-sensors-agent.c
 extern const QAndroidSensorsAgent* const gQAndroidSensorsAgent;
+
+// Defined in android/qemu-snapshot-agent.c
+extern const QAndroidSnapshotAgent* const gQAndroidSnapshotAgent;
 
 // Defined in android/qemu-telephony-agent.c
 extern const QAndroidTelephonyAgent* const gQAndroidTelephonyAgent;

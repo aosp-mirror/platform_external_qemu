@@ -69,6 +69,7 @@ LOCAL_C_INCLUDES += \
 LOCAL_SRC_FILES += \
     android-qemu1-glue/main.c \
     android-qemu1-glue/qemu-battery-agent-impl.c \
+    android-qemu1-glue/qemu-snapshot-agent-impl.c \
     android-qemu1-glue/qemu-user-event-agent-impl.c \
     android-qemu1-glue/qemu-vm-operations-impl.c \
     android-qemu1-glue/skin_qt.cpp \

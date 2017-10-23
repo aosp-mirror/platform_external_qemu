@@ -35,7 +35,8 @@ bool qemu_android_emulation_setup() {
       gQAndroidHttpProxyAgent, gQAndroidRecordScreenAgent,
       gQAndroidTelephonyAgent, gQAndroidUserEventAgent,
       gQAndroidVmOperations,   gQAndroidNetAgent,
-      gQAndroidLibuiAgent,     gQCarDataAgent,
+      gQAndroidLibuiAgent,     gQAndroidSnapshotAgent,
+      gQCarDataAgent,
   };
 
   VmLock* vmLock = new qemu::VmLock();

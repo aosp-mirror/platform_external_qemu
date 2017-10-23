@@ -35,6 +35,7 @@
         <file alias="screen_rotation_left">images/light/Rotate_Left_678.svg</file>
         <file alias="screen_rotation_right">images/light/Rotate_Right_678.svg</file>
         <file alias="screen_shot">images/light/ic_photo_camera_678_48dp.svg</file>
+        <file alias="snapshot">images/light/ic_restore_black_24dp.svg</file>
         <file alias="volume_down">images/light/ic_volume_down_678_48px.svg</file>
         <file alias="volume_up">images/light/ic_volume_up_678_48px.svg</file>
         <file alias="zoom">images/light/ic_zoom_in_678_48dp.svg</file>
@@ -138,6 +139,7 @@
         <file alias="screen_rotation_left">images/dark/Rotate_Left_white.svg</file>
         <file alias="screen_rotation_right">images/dark/Rotate_Right_white.svg</file>
         <file alias="screen_shot">images/dark/ic_photo_camera_white_48dp.svg</file>
+        <file alias="snapshot">images/dark/ic_restore_black_24dp.svg</file>
         <file alias="volume_down">images/dark/ic_volume_down_48px.svg</file>
         <file alias="volume_up">images/dark/ic_volume_up_48px.svg</file>
         <file alias="zoom">images/dark/ic_zoom_in_white_48dp.svg</file>

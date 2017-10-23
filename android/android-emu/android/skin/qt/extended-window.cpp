@@ -101,6 +101,7 @@ ExtendedWindow::ExtendedWindow(
         {PANE_IDX_MICROPHONE,    mExtendedUi->microphoneButton},
         {PANE_IDX_FINGER,        mExtendedUi->fingerButton},
         {PANE_IDX_VIRT_SENSORS,  mExtendedUi->virtSensorsButton},
+        {PANE_IDX_SNAPSHOT,      mExtendedUi->snapshotButton},
         {PANE_IDX_BUGREPORT,     mExtendedUi->bugreportButton},
         {PANE_IDX_SETTINGS,      mExtendedUi->settingsButton},
         {PANE_IDX_HELP,          mExtendedUi->helpButton},
@@ -123,6 +124,7 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->microphoneButton);
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
+    mSidebarButtons.addButton(mExtendedUi->snapshotButton);
     mSidebarButtons.addButton(mExtendedUi->bugreportButton);
     mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
@@ -167,6 +169,7 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
+        mExtendedUi->snapshotPage->setSnapshotAgent(agentPtr->snapshot);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
             mExtendedUi->carDataPage->setCarDataAgent(agentPtr->car);
         }
@@ -246,9 +249,10 @@ void ExtendedWindow::on_microphoneButton_clicked()   { adjustTabs(PANE_IDX_MICRO
 void ExtendedWindow::on_settingsButton_clicked()     { adjustTabs(PANE_IDX_SETTINGS); }
 void ExtendedWindow::on_telephoneButton_clicked()    { adjustTabs(PANE_IDX_TELEPHONE); }
 void ExtendedWindow::on_virtSensorsButton_clicked()  { adjustTabs(PANE_IDX_VIRT_SENSORS); }
+void ExtendedWindow::on_snapshotButton_clicked()     { adjustTabs(PANE_IDX_SNAPSHOT); }
 void ExtendedWindow::on_recordScreenButton_clicked() { adjustTabs(PANE_IDX_RECORD_SCREEN); }
-void ExtendedWindow::on_googlePlayButton_clicked() { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
-void ExtendedWindow::on_carDataButton_clicked()        { adjustTabs(PANE_IDX_CAR); }
+void ExtendedWindow::on_googlePlayButton_clicked()   { adjustTabs(PANE_IDX_GOOGLE_PLAY); }
+void ExtendedWindow::on_carDataButton_clicked()      { adjustTabs(PANE_IDX_CAR); }
 
 void ExtendedWindow::adjustTabs(ExtendedWindowPane thisIndex) {
     auto it = mPaneButtonMap.find(thisIndex);

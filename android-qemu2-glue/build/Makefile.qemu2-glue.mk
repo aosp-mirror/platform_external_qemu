@@ -41,6 +41,7 @@ LOCAL_SRC_FILES := \
     qemu-car-data-agent-impl.cpp \
     qemu-record-screen-agent-impl.c \
     qemu-sensors-agent-impl.c \
+    qemu-snapshot-agent-impl.c \
     qemu-setup.cpp \
     qemu-setup-dns-servers.cpp \
     qemu-telephony-agent-impl.c \

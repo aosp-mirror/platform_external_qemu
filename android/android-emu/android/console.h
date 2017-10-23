@@ -22,6 +22,7 @@
 #include "android/emulation/control/http_proxy_agent.h"
 #include "android/emulation/control/net_agent.h"
 #include "android/emulation/control/record_screen_agent.h"
+#include "android/emulation/control/snapshot_agent.h"
 #include "android/emulation/control/telephony_agent.h"
 #include "android/emulation/control/user_event_agent.h"
 #include "android/emulation/control/vm_operations.h"
@@ -47,6 +48,7 @@ ANDROID_BEGIN_HEADER
     X(QAndroidVmOperations, vm)           \
     X(QAndroidNetAgent, net)              \
     X(QAndroidLibuiAgent, libui)          \
+    X(QAndroidSnapshotAgent, snapshot)    \
     X(QCarDataAgent, car)
 
 // A structure used to group pointers to all agent interfaces used by the
