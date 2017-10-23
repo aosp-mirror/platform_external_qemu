@@ -417,8 +417,6 @@ AndroidPipe* loadPipeFromStreamCommon(BaseStream* stream,
                                       void* hwPipe,
                                       Service* service,
                                       char* pForceClose) {
-    sGlobals->pipeWaker.abortAllPending();
-
     *pForceClose = 0;
 
     OptionalString args = readOptionalString(stream);
@@ -633,6 +631,7 @@ static void forEachServiceFromStream(CStream* stream, Func&& func) {
 void android_pipe_guest_pre_load(CStream* stream) {
     CHECK_VM_STATE_LOCK();
     // We may not call qemu_set_irq() until the snapshot is loaded.
+    android::sGlobals->pipeWaker.abortAllPending();
     android::sGlobals->pipeWaker.setContextRunMode(
                 android::ContextRunMode::DeferAlways);
     forEachServiceFromStream(stream, [](Service* service, BaseStream* bs) {
