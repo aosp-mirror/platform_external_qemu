@@ -324,7 +324,7 @@ public:
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
     // be re-displayed for any reason.
-    bool repost(bool needLockAndBind = false);
+    bool repost(bool needLockAndBind = true);
 
     // Return the host EGLDisplay used by this instance.
     EGLDisplay getDisplay() const { return m_eglDisplay; }
