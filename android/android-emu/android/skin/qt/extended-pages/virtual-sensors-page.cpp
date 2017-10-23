@@ -340,7 +340,10 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
 void VirtualSensorsPage::on_change_world_coord_button_pressed() {
 }
 
-void VirtualSensorsPage::writeSingleValueToFile(FILE* fp, float x, float y, float z) {
+#define SLEEP_SEC 0.01
+
+void VirtualSensorsPage::writeSingleValueToFile(FILE* fp, float x, float y, float z,
+        float gx, float gy, float gz) {
     QVector3D gravity_vector(0.0, 9.81, 0.0);
     QVector3D magnetic_vector(
             mUi->magEastWidget->value(),
@@ -356,7 +359,7 @@ void VirtualSensorsPage::writeSingleValueToFile(FILE* fp, float x, float y, floa
     QVector3D device_magnetic_vector =
         myrotation.conjugate().rotatedVector(magnetic_vector);
 
-    fprintf(fp, "sleep mytime\n");
+    fprintf(fp, "sleep %g\n", SLEEP_SEC);
     fprintf(fp, "adb emu sensor set acceleration %g:%g:%g\n",
     device_gravity_vector.x(),
     device_gravity_vector.y(),
@@ -367,43 +370,55 @@ void VirtualSensorsPage::writeSingleValueToFile(FILE* fp, float x, float y, floa
     device_magnetic_vector.y(),
     device_magnetic_vector.z());
 
-    fprintf(fp, "adb emu sensor set orientation %g:%g:%g\n",
-    x,
-    y,
-    z);
+    fprintf(fp, "adb emu sensor set orientation %g:%g:%g\n", x, y, z);
+    
+    fprintf(fp, "adb emu sensor set gyroscope %g:%g:%g\n", gx, gy, gz);
 }
 
 void VirtualSensorsPage::writeRotationDataToFile() {
-    FILE* fp = fopen("mysensordata.txt", "w");
-    if (fp == NULL) return;
+    //FILE* fp = fopen("mysensordata.txt", "w");
+    //if (fp == NULL) return;
 
     float x=0;
     float y=0;
     float z=0;
-    float step=1.0;
-    //first, change x angle 0->45->0->-45->0
-    for (float i=0; i <=52; i=i+step) {
-        writeSingleValueToFile(fp, x+i, y, z);
+    float step=2.0;
+    float gyro = 3.14*step/180.0/(SLEEP_SEC)/5.0/1.1;
+    //first, change x angle 0->720
+    FILE* fp = fopen("mysensordata-p-x.txt", "w");
+    fprintf(fp, "#now positive x-axis\n\n");
+    for (float i=0; i <=720; i=i+step) {
+        writeSingleValueToFile(fp, x+i, y, z, gyro,0,0);
     }
-    for (float i=52; i >= -52; i=i-step) {
-        writeSingleValueToFile(fp, x+i, y, z);
+    fclose(fp);
+    fp = fopen("mysensordata-n-x.txt", "w");
+    fprintf(fp, "#now negative x-axis\n\n");
+    for (float i=0; i <=720; i=i+step) {
+        writeSingleValueToFile(fp, x-i, y, z, -gyro,0,0);
     }
-    for (float i=-52; i <=0; i=i+step) {
-        writeSingleValueToFile(fp, x+i, y, z);
+    fclose(fp);
+    fp = fopen("mysensordata-p-y.txt", "w");
+    fprintf(fp, "#now positive y-axis\n\n");
+    for (float i=0; i <=720; i=i+step) {
+        writeSingleValueToFile(fp, x, y+i, z, 0,gyro,0);
     }
-    //second,change y angle 0->52->0->-52->0
-    for (float i=0; i >=-52; i=i-step) {
-        writeSingleValueToFile(fp, x, y+i, z);
+    fclose(fp);
+    fp = fopen("mysensordata-n-y.txt", "w");
+    fprintf(fp, "#now negative y-axis\n\n");
+    for (float i=0; i <=720; i=i+step) {
+        writeSingleValueToFile(fp, x, y-i, z, 0, -gyro, 0);
     }
-    for (float i=-52; i <= 52; i=i+step) {
-        writeSingleValueToFile(fp, x, y+i, z);
+    fclose(fp);
+    fp = fopen("mysensordata-p-z.txt", "w");
+    fprintf(fp, "#now positive z-axis\n\n");
+    for (int i=0; i <=720; i=i+step) {
+        writeSingleValueToFile(fp, x, y, z+i, 0, 0, gyro);
     }
-    for (float i=52; i >=0; i=i-step) {
-        writeSingleValueToFile(fp, x, y+i, z);
-    }
-    //third,change z angle 0->450->0
-    for (int i=0; i <=450; ++i) {
-        writeSingleValueToFile(fp, x, y, z+i);
+    fclose(fp);
+    fp = fopen("mysensordata-n-z.txt", "w");
+    fprintf(fp, "#now negative z-axis\n\n");
+    for (int i=0; i <=720; i=i+step) {
+        writeSingleValueToFile(fp, x, y, z-i, 0, 0, -gyro);
     }
 
     fclose(fp);

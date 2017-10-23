@@ -98,7 +98,7 @@ private:
     void showEvent(QShowEvent*) override;
     QVector3D rotate_by_world_coord(const QVector3D& v);
 
-    void writeSingleValueToFile(FILE* fp, float x, float y, float z);
+    void writeSingleValueToFile(FILE* fp, float x, float y, float z, float gx, float gy, float gz);
     void writeRotationDataToFile();
 
     void resetAccelerometerRotation(const QQuaternion&);
