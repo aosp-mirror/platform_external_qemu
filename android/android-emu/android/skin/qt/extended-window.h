@@ -83,6 +83,7 @@ private slots:
     void on_recordScreenButton_clicked();
     void on_rotaryInputButton_clicked();
     void on_settingsButton_clicked();
+    void on_snapshotButton_clicked();
     void on_telephoneButton_clicked();
     void on_virtSensorsButton_clicked();
 
