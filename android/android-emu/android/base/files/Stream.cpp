@@ -164,5 +164,21 @@ uint64_t Stream::getPackedNum() {
     return res;
 }
 
+void Stream::putPackedSignedNum(int64_t num) {
+    if (num >= 0) {
+        assert((uint64_t(num) & (1ULL << 63)) == 0);
+        putPackedNum(uint64_t(num) << 1);
+    } else {
+        assert((uint64_t(-num) & (1ULL << 63)) == 0);
+        putPackedNum((uint64_t(-num) << 1) | 1);
+    }
+}
+
+int64_t Stream::getPackedSignedNum() {
+    auto num = getPackedNum();
+    auto sign = num & 1;
+    return sign ? -int64_t(num >> 1) : (num >> 1);
+}
+
 }  // namespace base
 }  // namespace android

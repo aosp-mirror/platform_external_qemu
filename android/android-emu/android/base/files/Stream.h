@@ -98,6 +98,11 @@ public:
     // int32 (268M) or 56 bits for int64 (still a lot).
     void putPackedNum(uint64_t num);
     uint64_t getPackedNum();
+
+    // Same thing, but encode negative numbers efficiently as well (single sign
+    // bit + packed unsigned representation)
+    void putPackedSignedNum(int64_t num);
+    int64_t getPackedSignedNum();
 };
 
 }  // namespace base
