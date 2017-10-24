@@ -109,9 +109,11 @@ void _qemud_pipe_send(QemudClient* client, const uint8_t* msg, int msglen) {
         TRACE("%s: '%.*s'", __func__, avail, msg);
 
         _qemud_pipe_append_msg(client, pipe_msg);
-        android_pipe_host_signal_wake(
-                client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
-                PIPE_WAKE_READ);
+        if (client->ProtocolSelector.Pipe.qemud_pipe) {
+            android_pipe_host_signal_wake(
+                    client->ProtocolSelector.Pipe.qemud_pipe->hwpipe,
+                    PIPE_WAKE_READ);
+        }
         msg += avail;
         len -= avail;
     }
