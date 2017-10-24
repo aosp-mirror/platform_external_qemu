@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "2a41577c_30c8ad41",
+        "filename": "android/android-emu/android/camera/CameraFormatConverters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 192,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-24T17:46:39Z",
+      "side": 1,
+      "message": "please label the names of arguments as /* */ comments when they are passed as literals (also the |1.0f| below)",
+      "range": {
+        "startLine": 192,
+        "startChar": 54,
+        "endLine": 192,
+        "endChar": 76
+      },
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8bd2375c_ada2d82b",
         "filename": "android/android-emu/android/camera/camera-format-converters.c",
         "patchSetId": 1
@@ -19,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "89f7739a_c94a6d66",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1684,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-24T17:46:39Z",
+      "side": 1,
+      "message": "We have a convention for these static internal functions - sFuncName in C++. Since this is c, I vote for just having func_name without the underscore.",
+      "parentUuid": "8bd2375c_ada2d82b",
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d54c8386_acc3b73d",
         "filename": "android/android-emu/android/camera/camera-format-converters.c",
         "patchSetId": 1
@@ -30,6 +71,29 @@
       "writtenOn": "2017-10-24T16:49:52Z",
       "side": 1,
       "message": "Can this ever be null?",
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "507638e9_eaf6e57d",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1961,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-24T17:46:39Z",
+      "side": 1,
+      "message": "Faster to avoid a memcpy and do the image processingon the dest framebuffer? Or is it better to memcpy and not need to synchronize dest framebuffer?",
+      "range": {
+        "startLine": 1960,
+        "startChar": 0,
+        "endLine": 1961,
+        "endChar": 63
+      },
       "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
