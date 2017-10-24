@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "88698829_2a4ea644",
+        "filename": "android/android-emu/Makefile.android-emu.mk",
+        "patchSetId": 1
+      },
+      "lineNbr": 596,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-24T16:37:17Z",
+      "side": 1,
+      "message": "This should be alphabetically sorted, the camera directory should be right after the base directory.",
+      "revId": "0b4a6bc4a39301bcd0695dcc551f08de5d66cf43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4ec44993_2808646a",
+        "filename": "android/android-emu/android/camera/CameraFormatConverters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-24T16:37:17Z",
+      "side": 1,
+      "message": "Does this mean that if we ever encounter a bayer format we\u0027ll fall back to the slow path?",
+      "revId": "0b4a6bc4a39301bcd0695dcc551f08de5d66cf43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ddb5cc0e_21c2413e",
+        "filename": "android/android-emu/android/camera/CameraFormatConverters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-24T16:37:17Z",
+      "side": 1,
+      "message": "Just out of curiosity, how was the number 2 chosen here?",
+      "revId": "0b4a6bc4a39301bcd0695dcc551f08de5d66cf43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0508ef79_9210bcb6",
+        "filename": "android/android-emu/android/camera/CameraFormatConverters_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-24T16:37:17Z",
+      "side": 1,
+      "message": "Could we tests that are more lenient with boundary pixels instead? I\u0027m not sure it\u0027s a big deal if it\u0027s too much work, odd dimensions should be very rare.",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 240,
+        "endChar": 41
+      },
+      "revId": "0b4a6bc4a39301bcd0695dcc551f08de5d66cf43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
