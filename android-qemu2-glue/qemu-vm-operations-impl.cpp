@@ -18,6 +18,7 @@
 #include "android/base/StringView.h"
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/VmLock.h"
 #include "android/snapshot/MemoryWatch.h"
 
 extern "C" {
@@ -129,6 +130,7 @@ private:
 static bool qemu_snapshot_list(void* opaque,
                                LineConsumerCallback outConsumer,
                                LineConsumerCallback errConsumer) {
+    android::RecursiveScopedVmLock vmlock;
     return qemu_listvms(nullptr, nullptr,
                         MessageCallback(opaque, outConsumer, errConsumer)) == 0;
 }
@@ -136,6 +138,7 @@ static bool qemu_snapshot_list(void* opaque,
 static bool qemu_snapshot_save(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
+    android::RecursiveScopedVmLock vmlock;
     return qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer)) ==
            0;
 }
@@ -143,6 +146,7 @@ static bool qemu_snapshot_save(const char* name,
 static bool qemu_snapshot_load(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
+    android::RecursiveScopedVmLock vmlock;
     bool wasVmRunning = runstate_is_running() != 0;
     vm_stop(RUN_STATE_RESTORE_VM);
     if (qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer)) != 0) {
@@ -157,6 +161,7 @@ static bool qemu_snapshot_load(const char* name,
 static bool qemu_snapshot_delete(const char* name,
                                  void* opaque,
                                  LineConsumerCallback errConsumer) {
+    android::RecursiveScopedVmLock vmlock;
     return qemu_delvm(name, MessageCallback(opaque, nullptr, errConsumer)) == 0;
 }
 
