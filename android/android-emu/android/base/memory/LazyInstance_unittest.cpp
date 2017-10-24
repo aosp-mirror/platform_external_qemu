@@ -46,6 +46,11 @@ public:
         return mCounter;
     }
 
+    static void reset() {
+        AutoLock lock(mLock);
+        mCounter = 0;
+    }
+
 private:
     static Lock mLock;
     static int mCounter;
@@ -116,6 +121,8 @@ static void* threadFunc(void* param) {
 }  // namespace
 
 TEST(LazyInstance, MultipleThreads) {
+    StaticCounter::reset();
+
     LazyInstance<StaticCounter> counter_instance = LAZY_INSTANCE_INIT;
     MultiState state(&counter_instance);
     const size_t kNumThreads = MultiState::kMaxThreads;

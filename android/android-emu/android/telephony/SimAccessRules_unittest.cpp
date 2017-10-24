@@ -1,5 +1,6 @@
 #include <string>
 
+#include "android/base/memory/ScopedPtr.h"
 #include "android/base/testing/TestTempDir.h"
 #include "android/cmdline-option.h"
 #include "android/telephony/proto/sim_access_rules.pb.h"
@@ -22,6 +23,10 @@ static const char kAraAid[] = "A00000015141434C00";
 TEST(SimAccessRulesTest, defaultAccessRules) {
     AndroidOptions options = {};
     android_cmdLineOptions = &options;
+    auto undoCommandLine = makeCustomScopedPtr(
+            &android_cmdLineOptions,
+            [](const AndroidOptions** opts) { *opts = nullptr; });
+
     SimAccessRules rules;
     ASSERT_STREQ(
             rules.getRule(kAraAid),
@@ -53,6 +58,9 @@ TEST(SimAccessRulesTest, customAccessRules) {
     AndroidOptions options = {};
     options.sim_access_rules_file = const_cast<char*>(config_file_path.c_str());
     android_cmdLineOptions = &options;
+    auto undoCommandLine = makeCustomScopedPtr(
+            &android_cmdLineOptions,
+            [](const AndroidOptions** opts) { *opts = nullptr; });
 
     SimAccessRules rules;
     ASSERT_STREQ(
