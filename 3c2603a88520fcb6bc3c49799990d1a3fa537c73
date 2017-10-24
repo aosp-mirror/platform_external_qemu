@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8bd2375c_ada2d82b",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1684,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-24T16:49:52Z",
+      "side": 1,
+      "message": "Avoid prepending with underscores as these kind of names are reserved by the compiler and standard library. It\u0027s OK to have _ followed by lower case letter in a local scope but not in a file scope so these names are invalid.\n\nI think we probably already have these kind of names throughout our code but we\u0027d like to avoid more of that.",
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d54c8386_acc3b73d",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1700,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-24T16:49:52Z",
+      "side": 1,
+      "message": "Can this ever be null?",
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
