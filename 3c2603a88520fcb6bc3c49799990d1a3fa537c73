@@ -139,6 +139,30 @@
       "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e787d7d_361e8923",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1961,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-24T21:58:45Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "e414b714_b1cf10a9",
+      "range": {
+        "startLine": 1960,
+        "startChar": 0,
+        "endLine": 1961,
+        "endChar": 63
+      },
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
