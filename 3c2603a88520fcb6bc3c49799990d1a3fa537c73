@@ -77,6 +77,24 @@
     },
     {
       "key": {
+        "uuid": "eba2dedb_a6bad89a",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1700,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-24T20:06:07Z",
+      "side": 1,
+      "message": "Good catch, yes it can.",
+      "parentUuid": "d54c8386_acc3b73d",
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "507638e9_eaf6e57d",
         "filename": "android/android-emu/android/camera/camera-format-converters.c",
         "patchSetId": 1
@@ -88,6 +106,30 @@
       "writtenOn": "2017-10-24T17:46:39Z",
       "side": 1,
       "message": "Faster to avoid a memcpy and do the image processingon the dest framebuffer? Or is it better to memcpy and not need to synchronize dest framebuffer?",
+      "range": {
+        "startLine": 1960,
+        "startChar": 0,
+        "endLine": 1961,
+        "endChar": 63
+      },
+      "revId": "3c2603a88520fcb6bc3c49799990d1a3fa537c73",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e414b714_b1cf10a9",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1961,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-24T20:06:07Z",
+      "side": 1,
+      "message": "Without benchmarks, it\u0027s hard to say.  This is mainly here to simplify the code-- without it we\u0027d have to special-case the conversion like we do for V4L2_PIX_FMT_YVU420.  Until we have benchmarks that indicate that this is a bottleneck, I think this should be kept as simple as possible.",
+      "parentUuid": "507638e9_eaf6e57d",
       "range": {
         "startLine": 1960,
         "startChar": 0,
