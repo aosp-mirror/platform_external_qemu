@@ -104,6 +104,8 @@ static void onJoined(const int& outResult) {
 }
 
 TEST(ParallelTaskFunctionTest, basic) {
+    parJoined = false;
+
     TestLooper looper;
     EXPECT_TRUE(android::base::runParallelTask<int>(&looper, &setPar, &onJoined, 10));
     EXPECT_FALSE(parJoined);
