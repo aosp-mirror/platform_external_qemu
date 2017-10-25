@@ -1,0 +1,7 @@
+Code-Review+2: Bjoern Johansson <bjoernj@google.com>
+Verified+1: Jeff McGlynn <jwmcglynn@google.com>
+Submitted-by: Jeff McGlynn <jwmcglynn@google.com>
+Submitted-at: Wed, 25 Oct 2017 22:07:23 +0000
+Reviewed-on: https://android-review.googlesource.com/518637
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
