@@ -124,7 +124,6 @@ ExtendedWindow::ExtendedWindow(
     mSidebarButtons.addButton(mExtendedUi->fingerButton);
     mSidebarButtons.addButton(mExtendedUi->virtSensorsButton);
     mSidebarButtons.addButton(mExtendedUi->bugreportButton);
-    mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
     mSidebarButtons.addButton(mExtendedUi->settingsButton);
     mSidebarButtons.addButton(mExtendedUi->helpButton);
 
@@ -135,6 +134,11 @@ ExtendedWindow::ExtendedWindow(
         mExtendedUi->googlePlayPage->initialize(
                 mEmulatorWindow->getAdbInterface());
         mExtendedUi->googlePlayButton->setVisible(true);
+    }
+
+    if (android::featurecontrol::isEnabled(android::featurecontrol::ScreenRecording)) {
+        mSidebarButtons.addButton(mExtendedUi->recordScreenButton);
+        mExtendedUi->recordScreenButton->setVisible(true);
     }
 
     if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
