@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2794278c_b9af0f35",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 804,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-25T18:32:22Z",
+      "side": 1,
+      "message": "The line above (s_glInitTexImage2D) should have set it already :)\nBut you remind me another issue that s_glInitTexImage2D only sets it if mipmap level 0 is changed.. will fix",
+      "parentUuid": "11619f6d_1653bec4",
+      "range": {
+        "startLine": 804,
+        "startChar": 0,
+        "endLine": 804,
+        "endChar": 56
+      },
+      "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "811dc4dd_1a143add",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 4
@@ -36,6 +60,30 @@
       "writtenOn": "2017-10-25T18:17:13Z",
       "side": 1,
       "message": "how does this work? is it going to be ok in all cases to transfer ownership here?",
+      "range": {
+        "startLine": 3537,
+        "startChar": 0,
+        "endLine": 3538,
+        "endChar": 62
+      },
+      "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea815f49_6ec512f7",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 3538,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-25T18:32:22Z",
+      "side": 1,
+      "message": "Not sure if I understand your concern. It shares ownership between EGLImage and a texture. The only reason I put \"SaveableTexturePtr\" here is that setSaveableTexture takes rvalue, so I would need to manually clone the shared_ptr or it would become transferring ownership.",
+      "parentUuid": "811dc4dd_1a143add",
       "range": {
         "startLine": 3537,
         "startChar": 0,
