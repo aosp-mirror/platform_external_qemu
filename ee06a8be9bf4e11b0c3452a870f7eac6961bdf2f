@@ -93,6 +93,30 @@
       "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c190d8d8_6e156add",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 3538,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-25T18:34:14Z",
+      "side": 1,
+      "message": "Ah I see :) Then, what\u0027s the original reason of sharing the ownership here vs without dirty texture tracking?",
+      "parentUuid": "ea815f49_6ec512f7",
+      "range": {
+        "startLine": 3537,
+        "startChar": 0,
+        "endLine": 3538,
+        "endChar": 62
+      },
+      "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
