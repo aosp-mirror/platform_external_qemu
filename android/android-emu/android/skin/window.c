@@ -790,12 +790,20 @@ button_redraw(Button* button, SkinRect* rect, SkinSurface* surface)
 }
 
 
+typedef enum {
+    CORNER_TOP_LEFT,
+    CORNER_TOP_RIGHT,
+    CORNER_BOTTOM_RIGHT,
+    CORNER_BOTTOM_LEFT
+} WhichCorner;
+
 typedef struct {
-    char       tracking;
-    char       inside;
-    char       at_corner;
-    SkinPos    pos;
-    ADisplay*  display;
+    char        tracking;
+    char        inside;
+    char        at_corner;
+    WhichCorner which_corner;
+    SkinPos     pos;
+    ADisplay*   display;
 } FingerState;
 
 static void
@@ -1040,9 +1048,9 @@ struct SkinWindow {
     int           y_pos;
     double        scale;
 
-    // For dragging the window
-    int           drag_x_pos;
-    int           drag_y_pos;
+    // For dragging and resizing the window
+    int           drag_x_start;    // Relative to the top left of the emulator window
+    int           drag_y_start;
 
     // Zoom-related parameters
     double        zoom;
@@ -1084,12 +1092,25 @@ skin_window_find_finger( SkinWindow*  window,
             finger->pos.y    = y - disp->origin.y;
 
             skin_pos_rotate( &finger->pos, &finger->pos, disp->rotation );
+            skin_winsys_set_window_cursor_normal();
             break;
         }
         if (   (x < disp->rect.pos.x || x >= disp->rect.pos.x + disp->rect.size.w)
-            && (y < disp->rect.pos.y || x >= disp->rect.pos.y + disp->rect.size.h) )
+            && (y < disp->rect.pos.y || y >= disp->rect.pos.y + disp->rect.size.h)
+            && !skin_winsys_window_has_frame()                                     )
         {
             finger->at_corner = 1;
+            // Which corner are we at?
+            if (x < disp->rect.pos.x) {
+                finger->which_corner = (y < disp->rect.pos.y) ? CORNER_TOP_LEFT : CORNER_BOTTOM_LEFT;
+            } else {
+                finger->which_corner = (y < disp->rect.pos.y) ? CORNER_TOP_RIGHT : CORNER_BOTTOM_RIGHT;
+            }
+            skin_winsys_set_window_cursor_resize(finger->which_corner == CORNER_BOTTOM_LEFT ||
+                                                 finger->which_corner == CORNER_TOP_RIGHT     );
+            break;
+        } else {
+            skin_winsys_set_window_cursor_normal();
             break;
         }
     LAYOUT_LOOP_END_DISPLAYS
@@ -1398,8 +1419,8 @@ SkinWindow* skin_window_create(SkinLayout* slayout,
     window->y_pos = y;
     window->scroll_h = 0;
 
-    window->drag_x_pos = 0;
-    window->drag_y_pos = 0;
+    window->drag_x_start = 0;
+    window->drag_y_start = 0;
 
     SkinRect  monitor;
     int       win_w = slayout->size.w;
@@ -1897,29 +1918,80 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
                              finger->pos.y,
                              button_state);
         } else if (!multitouch_should_skip_sync(button_state) &&
-                   !multitouch_is_second_finger(button_state)    ) {
+                   !multitouch_is_second_finger(button_state) &&
+                   !skin_winsys_window_has_frame()               )
+        {
             // This is a single click outside the touch screen.
-            // Drag or resize the device window.
-            window->drag_x_pos = ev->u.mouse.x;
-            window->drag_y_pos = ev->u.mouse.y;
-
-            window->button.pressed = NULL;
-            button = window->button.hover;
-            if(button) {
-                button->down += 1;
-                skin_window_redraw( window, &button->rect );
-                window->button.pressed = button;
-                if(button->keycode) {
-                    window->win_funcs->key_event(button->keycode, 1);
-                }
+            // Drag or resize the device window (because we're frameless).
+            window->drag_x_start = ev->u.mouse.x;
+            window->drag_y_start = ev->u.mouse.y;
+            if (finger->at_corner) {
+                skin_winsys_set_window_overlay_for_resize(finger->which_corner);
             }
         }
         break;
 
     case kEventMouseButtonUp:
 
-        window->drag_x_pos = 0;
-        window->drag_y_pos = 0;
+        if (window->drag_x_start != 0  &&  window->drag_y_start != 0) {
+            if (!finger->at_corner) {
+                // Finished moving the window. If updates got backed up,
+                // the motion could have been erratic. Ensure the window
+                // is visible.
+                if (skin_winsys_is_window_off_screen()) {
+                    skin_winsys_set_window_pos(0, 0);
+                }
+                window->drag_x_start = 0;
+                window->drag_y_start = 0;
+                return;
+            }
+            // Finished resizing
+            finger->at_corner = 0;
+            skin_winsys_clear_window_overlay();
+            int window_pos_x, window_pos_y;
+            int window_width, window_height;
+            skin_winsys_get_frame_pos(&window_pos_x, &window_pos_y);
+            skin_winsys_get_window_size(&window_width, &window_height);
+
+            int delta_x = ev->u.mouse.x - window->drag_x_start;
+            int delta_y = ev->u.mouse.y - window->drag_y_start;
+
+            window->drag_x_start = 0;
+            window->drag_y_start = 0;
+
+            switch (finger->which_corner) {
+                case CORNER_BOTTOM_RIGHT:
+                    // Just resize the window, don't move it.
+                    window_width  += delta_x;
+                    window_height += delta_y;
+                    break;
+                case CORNER_TOP_RIGHT:
+                    // Resize. Move the window's Y.
+                    window_pos_y  += delta_y;
+                    window_width  += delta_x;
+                    window_height -= delta_y;
+                    break;
+                case CORNER_BOTTOM_LEFT:
+                    // Resize. Move the window's X.
+                    window_pos_x  += delta_x;
+                    window_width  -= delta_x;
+                    window_height += delta_y;
+                    break;
+                case CORNER_TOP_LEFT:
+                    // Resize. Move the window's top and left.
+                    window_pos_x  += delta_x;
+                    window_pos_y  += delta_y;
+                    window_width  -= delta_x;
+                    window_height -= delta_y;
+                    break;
+            }
+            skin_winsys_set_window_pos(window_pos_x, window_pos_y);
+            skin_winsys_set_window_size(window_width, window_height);
+            skin_winsys_set_window_cursor_normal();
+            return;
+        }
+        window->drag_x_start = 0;
+        window->drag_y_start = 0;
 
         if ( window->ball.tracking ) {
             skin_window_trackball_press( window, 0 );
@@ -1953,19 +2025,28 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
 
     case kEventMouseMotion:
 
-        if (window->drag_x_pos != 0  &&  window->drag_y_pos != 0) {
-            // Drag
+        mx = ev->u.mouse.x;
+        my = ev->u.mouse.y;
+        skin_window_map_to_scale( window, &mx, &my );
+        skin_window_move_mouse( window, finger, mx, my );
+
+        if (window->drag_x_start == 0  &&  window->drag_y_start == 0) {
+            // Button is not pressed. Check the position and set the cursor.
+            skin_window_find_finger( window, finger, mx, my);
+        } else {
+            if (finger->at_corner) {
+                // Resize: just update the overlay until the mouse button is released
+                skin_winsys_paint_overlay_for_resize(mx, my);
+                break;
+            }
             // The user is dragging the window
-            // TODO: if (finger->at_corner), need to resize rather than drag
-            // TODO: Try to handle the drag and resize events more directly
-            //       in Qt, rather than passing them back and forth.
             int posX, posY;
             skin_winsys_get_frame_pos(&posX, &posY);
-            posX += ev->u.mouse.x - window->drag_x_pos;
-            posY += ev->u.mouse.y - window->drag_y_pos;
+            posX += ev->u.mouse.x - window->drag_x_start;
+            posY += ev->u.mouse.y - window->drag_y_start;
             skin_winsys_set_window_pos(posX, posY);
+            break;
         }
-
         if ( window->ball.tracking ) {
             skin_window_trackball_move(window,
                                        ev->u.mouse.xrel,
