@@ -351,3 +351,66 @@ INSTANTIATE_TEST_CASE_P(
                 FramebufferSizeParam(7, 7, FramebufferCompare::IgnoreEdges),
                 FramebufferSizeParam(15, 15, FramebufferCompare::IgnoreEdges),
                 FramebufferSizeParam(17, 17, FramebufferCompare::IgnoreEdges)));
+
+class FrameModifiers : public testing::TestWithParam<float> {};
+
+TEST_P(FrameModifiers, ExpComp) {
+    constexpr int kWidth = 4;
+    constexpr int kHeight = 4;
+
+    const float expComp = GetParam();
+
+    const size_t stagingSize = bufferSize(V4L2_PIX_FMT_YUV420, kWidth, kHeight);
+    std::vector<uint8_t> stagingFramebuffer(stagingSize);
+
+    for (uint32_t src_format : kSupportedSourceFormats) {
+        std::vector<uint8_t> src = generateFramebuffer(
+                src_format, kWidth, kHeight, kAlpha, kRed, kGreen, kBlue);
+
+        for (uint32_t dest_format : kSupportedDestinationFormats) {
+            SCOPED_TRACE(testing::Message()
+                         << "source=" << fourccToString(src_format)
+                         << " dest=" << fourccToString(dest_format));
+
+            const size_t destSize = bufferSize(dest_format, kWidth, kHeight);
+            std::vector<uint8_t> dest(destSize);
+
+            ClientFrameBuffer framebuffer = {};
+            framebuffer.pixel_format = dest_format;
+            framebuffer.framebuffer = dest.data();
+
+            ClientFrame resultFrame = {};
+            resultFrame.framebuffers = &framebuffer;
+            resultFrame.framebuffers_count = 1;
+            resultFrame.staging_framebuffer = stagingFramebuffer.data();
+            resultFrame.staging_framebuffer_size = stagingFramebuffer.size();
+
+            EXPECT_EQ(0, convert_frame(src.data(), src_format, src.size(),
+                                       kWidth, kHeight, &resultFrame,
+                                       kDefaultColorScale, kDefaultColorScale,
+                                       kDefaultColorScale, expComp));
+
+            std::vector<uint8_t> destBaseline(destSize);
+            ClientFrameBuffer baselineFramebuffer = {};
+            baselineFramebuffer.pixel_format = dest_format;
+            baselineFramebuffer.framebuffer = destBaseline.data();
+
+            EXPECT_EQ(0, convert_frame_slow(
+                                 src.data(), src_format, src.size(), kWidth,
+                                 kHeight, &baselineFramebuffer, 1,
+                                 kDefaultColorScale, kDefaultColorScale,
+                                 kDefaultColorScale, expComp));
+
+            compareSumOfSquaredDifferences(destBaseline, dest,
+                                           kLenientDifferenceSq);
+
+            if (HasFatalFailure()) {
+                return;
+            }
+        }
+    }
+}
+
+INSTANTIATE_TEST_CASE_P(CameraFormatConverters,
+                        FrameModifiers,
+                        testing::Values(1.0f, 0.0f, 0.5f, -1.0f, 2.0f));
