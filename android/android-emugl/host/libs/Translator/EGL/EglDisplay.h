@@ -103,6 +103,10 @@ public:
     EglOS::Context* getGlobalSharedContext() const;
     GlobalNameSpace* getGlobalNameSpace() { return &m_globalNameSpace; }
 
+    void preLoadCleanupStart(int preserve_surfaces_num,
+            EGLSurface* surfaces);
+    void preLoadCleanupEnd();
+    bool isPreloadCleanup() const;
     void onSaveAllImages(android::base::Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver,
                          SaveableTexture::saver_t saver,
@@ -111,7 +115,6 @@ public:
                          const android::snapshot::ITextureLoaderPtr& textureLoader,
                          SaveableTexture::creator_t creator);
     void postLoadAllImages(android::base::Stream* stream);
-
 private:
     static void addConfig(void* opaque, const EglOS::ConfigInfo* configInfo);
 
@@ -134,6 +137,7 @@ private:
     unsigned int            m_nextEglImageId = 0;
     mutable emugl::SmartPtr<EglOS::Context> m_globalSharedContext;
     ConfigSet               m_uniqueConfigs;
+    bool                    m_isPreLoadCleanup;
 };
 
 #endif

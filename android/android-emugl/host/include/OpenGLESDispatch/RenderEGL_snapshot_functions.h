@@ -5,6 +5,8 @@
 #define RENDER_EGL_SNAPSHOT_FUNCTIONS_H
 
 #define LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(X) \
+  X(EGLBoolean, eglPreLoadCleanupStart, (EGLDisplay display, EGLint preserve_surfaces_num, EGLSurface* surfaces)) \
+  X(EGLBoolean, eglPreLoadCleanupEnd, (EGLDisplay display)) \
   X(EGLConfig, eglLoadConfig, (EGLDisplay display, EGLStream stream)) \
   X(EGLContext, eglLoadContext, (EGLDisplay display, const EGLint * attrib_list, EGLStream stream)) \
   X(EGLBoolean, eglLoadAllImages, (EGLDisplay display, EGLStream stream, const void* textureLoader)) \
@@ -15,7 +17,7 @@
   X(EGLBoolean, eglPostLoadAllImages, (EGLDisplay display, EGLStream stream)) \
   X(EGLBoolean, eglPostSaveContext, (EGLDisplay display, EGLConfig config, EGLStream stream)) \
   X(void, eglUseOsEglApi, (EGLBoolean enable)) \
-  X(void, eglSetMaxGLESVersion, (EGLint version)) \
+  X(void, eglSetMaxGLESVersion, (EGLint glesVersion)) \
 
 
 #endif  // RENDER_EGL_SNAPSHOT_FUNCTIONS_H

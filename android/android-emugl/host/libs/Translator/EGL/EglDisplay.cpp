@@ -17,6 +17,7 @@
 
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/threads/Async.h"
 #include "EglConfig.h"
 #include "EglGlobalInfo.h"
 #include "EglOsApi.h"
@@ -370,6 +371,9 @@ ContextPtr EglDisplay::getContext(EGLContext ctx) const {
 
 bool EglDisplay::removeSurface(EGLSurface s) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    if (m_isPreLoadCleanup) {
+        return true;
+    }
     /* s is "key" in map<unsigned int, SurfacePtr>. */
     unsigned int hndl = SafeUIntFromPointer(s);
     SurfacesHndlMap::iterator it = m_surfaces.find(hndl);
@@ -382,6 +386,9 @@ bool EglDisplay::removeSurface(EGLSurface s) {
 
 bool EglDisplay::removeContext(EGLContext ctx) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    if (m_isPreLoadCleanup) {
+        return true;
+    }
     /* ctx is "key" in map<unsigned int, ContextPtr>. */
     unsigned int hndl = SafeUIntFromPointer(ctx);
     ContextsHndlMap::iterator it = m_contexts.find(hndl);
@@ -394,7 +401,9 @@ bool EglDisplay::removeContext(EGLContext ctx) {
 
 bool EglDisplay::removeContext(ContextPtr ctx) {
     emugl::Mutex::AutoLock mutex(m_lock);
-
+    if (m_isPreLoadCleanup) {
+        return true;
+    }
     ContextsHndlMap::iterator it;
     for(it = m_contexts.begin(); it != m_contexts.end();++it) {
         if((*it).second.get() == ctx.get()){
@@ -539,6 +548,9 @@ ImagePtr EglDisplay::getImage(EGLImageKHR img,
 
 bool EglDisplay:: destroyImageKHR(EGLImageKHR img) {
     emugl::Mutex::AutoLock mutex(m_lock);
+    if (m_isPreLoadCleanup) {
+        return true;
+    }
     /* img is "key" in map<unsigned int, ImagePtr>. */
     unsigned int hndl = SafeUIntFromPointer(img);
     ImagesHndlMap::iterator i( m_eglImages.find(hndl) );
@@ -687,4 +699,64 @@ void EglDisplay::onLoadAllImages(android::base::Stream* stream,
 
 void EglDisplay::postLoadAllImages(android::base::Stream* stream) {
     m_globalNameSpace.postLoad(stream);
+}
+
+namespace {
+    struct EglDisplayStale {
+        ContextsHndlMap         m_contexts;
+        SurfacesHndlMap         m_surfaces;
+        ObjectNameManager*      m_manager[MAX_GLES_VERSION];
+        ImagesHndlMap           m_eglImages;
+        EglDisplayStale(ContextsHndlMap&& contexts, SurfacesHndlMap&& surfaces,
+            ImagesHndlMap &&eglImages, ObjectNameManager** managers) :
+            m_contexts(contexts),
+            m_surfaces(surfaces),
+            m_eglImages(eglImages) {
+            m_manager[GLES_1_1] = managers[GLES_1_1];
+            m_manager[GLES_2_0] = managers[GLES_2_0];
+            for (int i = 0; i < MAX_GLES_VERSION; i++) {
+                managers[i] = nullptr;
+            }
+        }
+    };
+}
+
+void EglDisplay::preLoadCleanupStart(int preserve_surfaces_num,
+        EGLSurface* surfaces) {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    m_isPreLoadCleanup = true;
+    EglDisplayStale* staleDisplay = new EglDisplayStale(std::move(m_contexts),
+            std::move(m_surfaces), std::move(m_eglImages), m_manager);
+    for (int i = 0; i < preserve_surfaces_num; i++) {
+        unsigned int hndl = SafeUIntFromPointer(surfaces[i]);
+        if (!hndl) continue;
+        const auto& it = staleDisplay->m_surfaces.find(hndl);
+        if (it != staleDisplay->m_surfaces.end()) {
+            m_surfaces.emplace(hndl, it->second);
+            staleDisplay->m_surfaces.erase(it);
+        }
+    }
+    m_manager[GLES_1_1] = new ObjectNameManager(&m_globalNameSpace);
+    m_manager[GLES_2_0] = new ObjectNameManager(&m_globalNameSpace);
+    m_manager[GLES_3_0] = m_manager[GLES_2_0];
+    m_manager[GLES_3_1] = m_manager[GLES_2_0];
+    auto releaseFunc = std::bind([](EglDisplayStale* staleDisplay) -> intptr_t {
+        staleDisplay->m_eglImages.clear();
+        staleDisplay->m_contexts.clear();
+        staleDisplay->m_surfaces.clear();
+        delete staleDisplay->m_manager[GLES_1_1];
+        delete staleDisplay->m_manager[GLES_2_0];
+        delete staleDisplay;
+        return 0;
+    }, std::move(staleDisplay));
+    android::base::async(releaseFunc);
+}
+
+void EglDisplay::preLoadCleanupEnd() {
+    emugl::Mutex::AutoLock mutex(m_lock);
+    m_isPreLoadCleanup = false;
+}
+
+bool EglDisplay::isPreloadCleanup() const {
+    return m_isPreLoadCleanup;
 }

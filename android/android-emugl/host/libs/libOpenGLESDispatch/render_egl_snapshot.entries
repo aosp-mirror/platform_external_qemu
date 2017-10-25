@@ -2,6 +2,9 @@
 
 !Render_EGL_snapshot
 
+EGLBoolean eglPreLoadCleanupStart(EGLDisplay display, EGLint preserve_surfaces_num, EGLSurface* surfaces);
+EGLBoolean eglPreLoadCleanupEnd(EGLDisplay display);
+
 EGLConfig eglLoadConfig(EGLDisplay display, EGLStream stream);
 EGLContext eglLoadContext(EGLDisplay display, const EGLint *attrib_list, EGLStream stream);
 EGLBoolean eglLoadAllImages(EGLDisplay display, EGLStream stream, const void* textureLoader);

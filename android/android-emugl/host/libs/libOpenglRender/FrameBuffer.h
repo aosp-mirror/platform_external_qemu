@@ -101,6 +101,7 @@ public:
     // Returns true on success, false otherwise.
     static bool initialize(int width, int height, bool useSubWindow,
             bool egl2egl);
+    bool initContexts();
 
     // Setup a sub-window to display the content of the emulated GPU
     // on-top of an existing UI window. |p_window| is the platform-specific
@@ -484,6 +485,8 @@ private:
     float      m_zRot = 0;
     float      m_px = 0;
     float      m_py = 0;
+    int m_viewportW = 0;
+    int m_viewportH = 0;
 
     emugl::Renderer::OnPostCallback m_onPost = nullptr;
     void* m_onPostContext = nullptr;

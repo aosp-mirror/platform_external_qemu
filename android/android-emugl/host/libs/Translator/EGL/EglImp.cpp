@@ -140,6 +140,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
                                                EGLStream stream,
                                                const void* textureLoader);
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
+EGLAPI EGLBoolean EGLAPIENTRY eglPreLoadCleanupStart(EGLDisplay display,
+        EGLint preserve_surfaces_num, EGLSurface* surfaces);
+EGLAPI EGLBoolean EGLAPIENTRY eglPreLoadCleanupEnd(EGLDisplay display);
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
 }
@@ -1559,6 +1562,22 @@ EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     dpy->postLoadAllImages(stm);
+    return true;
+}
+
+// eglPreLoadCleanupStart marks everything for deletion and spawn another thread
+// to actually delete them, except for the list in surfaces.
+
+EGLAPI EGLBoolean EGLAPIENTRY eglPreLoadCleanupStart(EGLDisplay display,
+        EGLint preserve_surfaces_num, EGLSurface* surfaces) {
+    VALIDATE_DISPLAY(display);
+    dpy->preLoadCleanupStart(preserve_surfaces_num, surfaces);
+    return true;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglPreLoadCleanupEnd(EGLDisplay display) {
+    VALIDATE_DISPLAY(display);
+    dpy->preLoadCleanupEnd();
     return true;
 }
 

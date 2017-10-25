@@ -368,43 +368,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     fb->m_eglConfig = all_configs[exact_match_index];
 
-    GL_LOG("attempting to create egl context");
-    fb->m_eglContext = s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
-                                              EGL_NO_CONTEXT, getGlesMaxContextAttribs());
-    if (fb->m_eglContext == EGL_NO_CONTEXT) {
-        ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
-        return false;
-    }
-
-    GL_LOG("attempting to create egl pbuffer context");
-    //
-    // Create another context which shares with the eglContext to be used
-    // when we bind the pbuffer. That prevent switching drawable binding
-    // back and forth on framebuffer context.
-    // The main purpose of it is to solve a "blanking" behaviour we see on
-    // on Mac platform when switching binded drawable for a context however
-    // it is more efficient on other platforms as well.
-    //
-    fb->m_pbufContext =
-            s_egl.eglCreateContext(fb->m_eglDisplay, fb->m_eglConfig,
-                                   fb->m_eglContext, getGlesMaxContextAttribs());
-    if (fb->m_pbufContext == EGL_NO_CONTEXT) {
-        ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
-        return false;
-    }
-
-    GL_LOG("context creation successful");
-    //
-    // create a 1x1 pbuffer surface which will be used for binding
-    // the FB context.
-    // The FB output will go to a subwindow, if one exist.
-    //
-    static const EGLint pbufAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-
-    fb->m_pbufSurface = s_egl.eglCreatePbufferSurface(
-            fb->m_eglDisplay, fb->m_eglConfig, pbufAttribs);
-    if (fb->m_pbufSurface == EGL_NO_SURFACE) {
-        ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
+    if (!fb->initContexts()) {
         return false;
     }
 
@@ -518,6 +482,48 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     return true;
 }
 
+bool FrameBuffer::initContexts() {
+    GL_LOG("attempting to create egl context");
+    m_eglContext = s_egl.eglCreateContext(m_eglDisplay, m_eglConfig,
+                                              EGL_NO_CONTEXT, getGlesMaxContextAttribs());
+    if (m_eglContext == EGL_NO_CONTEXT) {
+        ERR("Failed to create context 0x%x\n", s_egl.eglGetError());
+        return false;
+    }
+
+    GL_LOG("attempting to create egl pbuffer context");
+    //
+    // Create another context which shares with the eglContext to be used
+    // when we bind the pbuffer. That prevent switching drawable binding
+    // back and forth on framebuffer context.
+    // The main purpose of it is to solve a "blanking" behaviour we see on
+    // on Mac platform when switching binded drawable for a context however
+    // it is more efficient on other platforms as well.
+    //
+    m_pbufContext =
+            s_egl.eglCreateContext(m_eglDisplay, m_eglConfig,
+                                   m_eglContext, getGlesMaxContextAttribs());
+    if (m_pbufContext == EGL_NO_CONTEXT) {
+        ERR("Failed to create Pbuffer Context 0x%x\n", s_egl.eglGetError());
+        return false;
+    }
+
+    GL_LOG("context creation successful");
+    //
+    // create a 1x1 pbuffer surface which will be used for binding
+    // the FB context.
+    // The FB output will go to a subwindow, if one exist.
+    //
+    static const EGLint pbufAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
+
+    m_pbufSurface = s_egl.eglCreatePbufferSurface(
+            m_eglDisplay, m_eglConfig, pbufAttribs);
+    if (m_pbufSurface == EGL_NO_SURFACE) {
+        ERR("Failed to create pbuf surface for FB 0x%x\n", s_egl.eglGetError());
+        return false;
+    }
+    return true;
+}
 
 static GLESDispatchMaxVersion sMaxGLESVersion = GLES_DISPATCH_MAX_VERSION_2;
 
@@ -692,6 +698,8 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             }
         }
     }
+    m_viewportW = fbw * dpr;
+    m_viewportH = fbh * dpr;
 
 
     // At this point, if the subwindow doesn't exist, it is because it either
@@ -1832,52 +1840,101 @@ void FrameBuffer::onSave(Stream* stream,
 bool FrameBuffer::onLoad(Stream* stream,
                          const android::snapshot::ITextureLoaderPtr& textureLoader) {
     AutoLock mutex(m_lock);
-    // cleanups
-    {
-        ScopedBind scopedBind(m_colorBufferHelper);
-        if (m_procOwnedWindowSurfaces.empty() &&
-            m_procOwnedColorBuffers.empty() && m_procOwnedEGLImages.empty() &&
-            m_procOwnedRenderContext.empty() &&
-            (!m_contexts.empty() || !m_windows.empty() ||
-             m_colorbuffers.size() > m_colorBufferDelayedCloseList.size())) {
-            // we are likely on a legacy system image, which does not have
-            // process owned objects. We need to force cleanup everything
-            m_contexts.clear();
-            m_windows.clear();
-            m_colorbuffers.clear();
-        } else {
-            while (m_procOwnedWindowSurfaces.size()) {
-                cleanupProcGLObjects_locked(
-                        m_procOwnedWindowSurfaces.begin()->first, true);
-            }
-            while (m_procOwnedColorBuffers.size()) {
-                cleanupProcGLObjects_locked(
-                        m_procOwnedColorBuffers.begin()->first, true);
-            }
-            while (m_procOwnedEGLImages.size()) {
-                cleanupProcGLObjects_locked(
-                        m_procOwnedEGLImages.begin()->first, true);
-            }
-            while (m_procOwnedRenderContext.size()) {
-                cleanupProcGLObjects_locked(
-                        m_procOwnedRenderContext.begin()->first, true);
-            }
-        }
-        m_colorBufferDelayedCloseList.clear();
-        assert(m_contexts.empty());
-        assert(m_windows.empty());
-        assert(m_colorbuffers.empty());
 #ifdef SNAPSHOT_PROFILE
-        System::Duration texTime = System::get()->getUnixTimeUs();
+    System::Duration cleanupTime = System::get()->getUnixTimeUs();
 #endif
-        if (s_egl.eglLoadAllImages) {
-            s_egl.eglLoadAllImages(m_eglDisplay, stream, &textureLoader);
+    assert(m_prevContext == EGL_NO_CONTEXT);
+    assert(m_prevReadSurf == EGL_NO_SURFACE);
+    assert(m_prevDrawSurf == EGL_NO_SURFACE);
+    bool hasAsyncCleanup = s_egl.eglPreLoadCleanupStart &&
+            s_egl.eglPreLoadCleanupEnd;
+    hasAsyncCleanup = false;
+    if (hasAsyncCleanup) {
+        {
+            ScopedBind bind(m_colorBufferHelper);
+            if (!bind.isOk()) {
+                ERR("Failed to make current\n");
+                return false;
+            }
+            delete m_textureDraw;
+            m_textureDraw = nullptr;
         }
-#ifdef SNAPSHOT_PROFILE
-        printf("Texture load time: %lld ms\n",
-               (long long)(System::get()->getUnixTimeUs() - texTime) / 1000);
-#endif
+        // We throw away everything from the previous session, except for
+        // m_eglSurface. This is because the window system does not like
+        // us to create multiple window surfaces for the same sub window.
+        // If we do that, we got an EGL_BAD_ALLOC.
+        s_egl.eglPreLoadCleanupStart(m_eglDisplay, 1, &m_eglSurface);
     }
+    if (m_procOwnedWindowSurfaces.empty() &&
+        m_procOwnedColorBuffers.empty() && m_procOwnedEGLImages.empty() &&
+        m_procOwnedRenderContext.empty() &&
+        (!m_contexts.empty() || !m_windows.empty() ||
+         m_colorbuffers.size() > m_colorBufferDelayedCloseList.size())) {
+        // we are likely on a legacy system image, which does not have
+        // process owned objects. We need to force cleanup everything
+        m_contexts.clear();
+        m_windows.clear();
+        m_colorbuffers.clear();
+    } else {
+        while (m_procOwnedWindowSurfaces.size()) {
+            cleanupProcGLObjects_locked(
+                    m_procOwnedWindowSurfaces.begin()->first, true);
+        }
+        while (m_procOwnedColorBuffers.size()) {
+            cleanupProcGLObjects_locked(
+                    m_procOwnedColorBuffers.begin()->first, true);
+        }
+        while (m_procOwnedEGLImages.size()) {
+            cleanupProcGLObjects_locked(
+                    m_procOwnedEGLImages.begin()->first, true);
+        }
+        while (m_procOwnedRenderContext.size()) {
+            cleanupProcGLObjects_locked(
+                    m_procOwnedRenderContext.begin()->first, true);
+        }
+    }
+    m_colorBufferDelayedCloseList.clear();
+    assert(m_contexts.empty());
+    assert(m_windows.empty());
+    assert(m_colorbuffers.empty());
+    if (hasAsyncCleanup) {
+        s_egl.eglPreLoadCleanupEnd(m_eglDisplay);
+        // Re-initialize contexts and surfaces that are used by the host
+        if  (!initContexts()) {
+            return false;
+        }
+        {
+            ScopedBind bind(m_colorBufferHelper);
+            if (!bind.isOk()) {
+                ERR("Failed to make current\n");
+                return false;
+            }
+            s_gles2.glViewport(0, 0, m_viewportW, m_viewportH);
+            m_textureDraw = new TextureDraw();
+        }
+        if (m_subWin) {
+            if (!bindSubwin_locked()) {
+                ERR("failed to bind subwindow on cleanup\n");
+                return false;
+            }
+            s_gles2.glViewport(0, 0, m_viewportW, m_viewportH);
+            unbind_locked();
+        }
+    }
+#ifdef SNAPSHOT_PROFILE
+    printf("Cleanup time: %lld ms\n",
+           (long long)(System::get()->getUnixTimeUs() - cleanupTime) / 1000);
+#endif
+#ifdef SNAPSHOT_PROFILE
+    System::Duration texTime = System::get()->getUnixTimeUs();
+#endif
+    if (s_egl.eglLoadAllImages) {
+        s_egl.eglLoadAllImages(m_eglDisplay, stream, &textureLoader);
+    }
+#ifdef SNAPSHOT_PROFILE
+    printf("Texture load time: %lld ms\n",
+           (long long)(System::get()->getUnixTimeUs() - texTime) / 1000);
+#endif
     // See comment about subwindow position in onSave().
     m_framebufferWidth = stream->getBe32();
     m_framebufferHeight = stream->getBe32();
@@ -1934,7 +1991,6 @@ bool FrameBuffer::onLoad(Stream* stream,
 
     registerTriggerWait();
     return true;
-    // TODO: restore memory management
 }
 
 void FrameBuffer::lock() {
