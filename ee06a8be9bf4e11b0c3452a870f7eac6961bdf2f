@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "11619f6d_1653bec4",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 804,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-25T18:17:13Z",
+      "side": 1,
+      "message": "I think it\u0027s good to set the dirty flag for this TextureData too",
+      "range": {
+        "startLine": 804,
+        "startChar": 0,
+        "endLine": 804,
+        "endChar": 56
+      },
+      "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "811dc4dd_1a143add",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 3538,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-25T18:17:13Z",
+      "side": 1,
+      "message": "how does this work? is it going to be ok in all cases to transfer ownership here?",
+      "range": {
+        "startLine": 3537,
+        "startChar": 0,
+        "endLine": 3538,
+        "endChar": 62
+      },
+      "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
