@@ -873,6 +873,7 @@ GL_APICALL void GL_APIENTRY glTexSubImage3D(GLenum target, GLint level, GLint xo
         isCoreProfileEmulatedFormat(format)) {
         format = getCoreProfileEmulatedFormat(format);
     }
+    getTextureTargetData(target)->makeDirty();
     ctx->dispatcher().glTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, data);
 }
 
@@ -886,17 +887,26 @@ GL_APICALL void GL_APIENTRY glCompressedTexImage3D(GLenum target, GLint level, G
             texData->hasStorage = true;
             texData->compressed = true;
             texData->compressedFormat = internalformat;
+            texData->makeDirty();
         }
     }
 }
 
 GL_APICALL void GL_APIENTRY glCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLsizei imageSize, const GLvoid * data) {
     GET_CTX_V2();
+    TextureData* texData = getTextureTargetData(target);
+    if (texData) {
+        texData->makeDirty();
+    }
     ctx->dispatcher().glCompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, imageSize, data);
 }
 
 GL_APICALL void GL_APIENTRY glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x, GLint y, GLsizei width, GLsizei height) {
     GET_CTX_V2();
+    TextureData* texData = getTextureTargetData(target);
+    if (texData) {
+        texData->makeDirty();
+    }
     ctx->dispatcher().glCopyTexSubImage3D(target, level, xoffset, yoffset, zoffset, x, y, width, height);
 }
 
