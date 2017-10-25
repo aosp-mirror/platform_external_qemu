@@ -117,6 +117,30 @@
       "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a22c8056_41997cce",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 3538,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-25T19:01:59Z",
+      "side": 1,
+      "message": "Ack (from offline conversation)",
+      "parentUuid": "c190d8d8_6e156add",
+      "range": {
+        "startLine": 3537,
+        "startChar": 0,
+        "endLine": 3538,
+        "endChar": 62
+      },
+      "revId": "ee06a8be9bf4e11b0c3452a870f7eac6961bdf2f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
