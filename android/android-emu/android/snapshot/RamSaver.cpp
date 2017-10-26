@@ -238,8 +238,11 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
             }
         } else if (mLoader->version() >= 2) {
             if (mLoader->isPageDirty(ptr)) {
+                std::string hashbuf(17, 0);
                 MurmurHash3_x64_128(ptr, block.ramBlock.pageSize, 0,
                                     page.hash.data());
+                memcpy(&hashbuf[0], page.hash.data(), 16);
+                memCounts[hashbuf]++;
                 page.hashFilled = true;
                 if (page.hash == loaderPage->hash) {
                     ++samehash;
@@ -345,6 +348,7 @@ void RamSaver::writeIndex() {
     mDiskSize = uint64_t(end);
 #if SNAPSHOT_PROFILE > 1
     auto bytes_wasted = mGaps.wastedSpace();
+    printf("# unique RAM: %zu\n", memCounts.size());
     printf("RAM: index %d bytes (%d pages, %d empty):\n"
            "\t%d same:\n"
            "\t\t[not loaded %d; still empty %d; same hash %d, not dirty %d]\n"

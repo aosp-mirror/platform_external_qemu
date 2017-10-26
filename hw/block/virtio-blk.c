@@ -86,6 +86,9 @@ static int virtio_blk_handle_rw_error(VirtIOBlockReq *req, int error,
     return action != BLOCK_ERROR_ACTION_IGNORE;
 }
 
+uint32_t virtio_blk_rw_bytes = 0;
+uint32_t virtio_blk_rw_count = 0;
+
 static void virtio_blk_rw_complete(void *opaque, int ret)
 {
     VirtIOBlockReq *next = opaque;
@@ -95,6 +98,11 @@ static void virtio_blk_rw_complete(void *opaque, int ret)
         next = req->mr_next;
         trace_virtio_blk_rw_complete(req, ret);
 
+        if (virtio_blk_rw_count % 1000 == 0) {
+            fprintf(stderr, "%s: virtio blk rw %u mb count %u\n", __func__, virtio_blk_rw_bytes / 1048576, virtio_blk_rw_count);
+        }
+        virtio_blk_rw_bytes += req->qiov.size;
+        virtio_blk_rw_count++;
         if (req->qiov.nalloc != -1) {
             /* If nalloc is != 1 req->qiov is a local copy of the original
              * external iovec. It was allocated in submit_merged_requests
@@ -319,6 +327,12 @@ static void virtio_blk_handle_scsi(VirtIOBlockReq *req)
     }
 }
 
+uint32_t virtio_blk_submit_write_bytes = 0;
+uint32_t virtio_blk_submit_write_count = 0;
+
+uint32_t virtio_blk_submit_read_bytes = 0;
+uint32_t virtio_blk_submit_read_count = 0;
+
 static inline void submit_requests(BlockBackend *blk, MultiReqBuffer *mrb,
                                    int start, int num_reqs, int niov)
 {
@@ -352,12 +366,50 @@ static inline void submit_requests(BlockBackend *blk, MultiReqBuffer *mrb,
         block_acct_merge_done(blk_get_stats(blk),
                               is_write ? BLOCK_ACCT_WRITE : BLOCK_ACCT_READ,
                               num_reqs - 1);
+
     }
 
     if (is_write) {
+
+        if (virtio_blk_submit_write_count % 100 == 0) {
+            fprintf(stderr, "%s: blk writes: %u mb %u count\n", __func__,
+                    virtio_blk_submit_write_bytes / 1048576,
+                    virtio_blk_submit_write_count);
+        }
+        virtio_blk_submit_write_bytes += qiov->size;
+        virtio_blk_submit_write_count++;
+        for (int i = 0; i < qiov->niov; i++) {
+            qemu_ram_load(
+                    1 /* Access type:
+                         From host, only allow one access and dirty it immediately.
+                         Because we aren't necessarily in control of further signals
+                         that the block device can emit at lower levels, especially
+                         on Mac where it's hard to get kernel-level faults. */,
+                    qiov->iov[i].iov_base, qiov->iov[i].iov_len);
+        }
+
         blk_aio_pwritev(blk, sector_num << BDRV_SECTOR_BITS, qiov, 0,
                         virtio_blk_rw_complete, mrb->reqs[start]);
     } else {
+        if (virtio_blk_submit_read_count % 100 == 0) {
+            fprintf(stderr, "%s: blk reads: %u mb %u count\n", __func__,
+                    virtio_blk_submit_read_bytes / 1048576,
+                    virtio_blk_submit_read_count);
+        }
+        virtio_blk_submit_read_bytes += qiov->size;
+        virtio_blk_submit_read_count++;
+        
+
+        for (int i = 0; i < qiov->niov; i++) {
+            qemu_ram_load(
+                    1 /* Access type:
+                         From host, only allow one access and dirty it immediately.
+                         Because we aren't necessarily in control of further signals
+                         that the block device can emit at lower levels, especially
+                         on Mac where it's hard to get kernel-level faults. */,
+                    qiov->iov[i].iov_base, qiov->iov[i].iov_len);
+        }
+        
         blk_aio_preadv(blk, sector_num << BDRV_SECTOR_BITS, qiov, 0,
                        virtio_blk_rw_complete, mrb->reqs[start]);
     }
@@ -426,6 +478,7 @@ static void virtio_blk_submit_multireq(BlockBackend *blk, MultiReqBuffer *mrb)
         nb_sectors += req->qiov.size / BDRV_SECTOR_SIZE;
         niov += req->qiov.niov;
         num_reqs++;
+
     }
 
     submit_requests(blk, mrb, start, num_reqs, niov);

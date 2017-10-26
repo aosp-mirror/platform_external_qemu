@@ -28,6 +28,7 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 namespace android {
@@ -133,6 +134,8 @@ private:
     base::System::WallDuration mStartTime =
             base::System::get()->getHighResTimeUs();
 #endif
+
+    std::unordered_map<std::string, uint32_t> memCounts;
 };
 
 }  // namespace snapshot

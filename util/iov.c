@@ -277,6 +277,9 @@ void qemu_iovec_init(QEMUIOVector *qiov, int alloc_hint)
     qiov->size = 0;
 }
 
+static uint32_t iovec_total_bytes = 0;
+static uint32_t iovec_counter = 0;
+
 void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
 {
     int i;
@@ -290,14 +293,19 @@ void qemu_iovec_init_external(QEMUIOVector *qiov, struct iovec *iov, int niov)
         // We need to load iovec's eagerly under lazy snapshot RAM loading
         // with at least Hypervisor.Framework (likely with HAXM as well).
         // Touch them here.
-        qemu_ram_load(
-           1 /* Access type:
-                From host, only allow one access and dirty it immediately.
-                Because we aren't necessarily in control of further signals
-                that the block device can emit at lower levels, especially
-                on Mac where it's hard to get kernel-level faults. */,
-           qiov->iov[i].iov_base, iov[i].iov_len);
+        // qemu_ram_load(
+        //    1 /* Access type:
+        //         From host, only allow one access and dirty it immediately.
+        //         Because we aren't necessarily in control of further signals
+        //         that the block device can emit at lower levels, especially
+        //         on Mac where it's hard to get kernel-level faults. */,
+        //    qiov->iov[i].iov_base, iov[i].iov_len);
         qiov->size += iov[i].iov_len;
+        iovec_total_bytes += iov[i].iov_len;
+        iovec_counter++;
+        if (iovec_counter % 1000 == 0) {
+            fprintf(stderr, "%s: iovec total sz %u mb count %u\n", __func__, iovec_total_bytes / 1048576, iovec_counter);
+        }
     }
 }
 
@@ -385,6 +393,7 @@ bool qemu_iovec_is_zero(QEMUIOVector *qiov)
             }
         }
     }
+    fprintf(stderr, "%s: iov complete zero with %u bytes\n", __func__, qiov->size);
     return true;
 }
 
@@ -398,9 +407,18 @@ void qemu_iovec_destroy(QEMUIOVector *qiov)
     qiov->iov = NULL;
 }
 
+uint32_t reset_iov_bytes = 0;
+uint32_t reset_iov_ctr = 0;
+
 void qemu_iovec_reset(QEMUIOVector *qiov)
 {
     assert(qiov->nalloc != -1);
+
+    reset_iov_ctr++;
+    if (reset_iov_ctr % 1000 == 0) {
+        reset_iov_bytes += qiov->size;
+        fprintf(stderr, "%s: reset iov: %u b count %u\n", __func__, reset_iov_bytes, reset_iov_ctr);
+    }
 
     qiov->niov = 0;
     qiov->size = 0;
