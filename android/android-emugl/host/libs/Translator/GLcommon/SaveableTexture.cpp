@@ -512,7 +512,10 @@ void SaveableTexture::onSave(
             }
         }
         dispatcher.glBindTexture(m_target, prevTex);
-    } else {
+        m_isDirty = false;
+    } else if (m_target != 0) {
+        // SaveableTexture is uninitialized iff a texture hasn't been bound,
+        // which will give m_target==0
         fprintf(stderr, "Warning: texture target 0x%x not supported\n",
                 m_target);
     }
@@ -521,6 +524,9 @@ void SaveableTexture::onSave(
 void SaveableTexture::restore() {
     assert(m_loader);
     m_loader(this);
+    m_globalTexObj.reset(new NamedObject(
+            GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
+    m_globalName = m_globalTexObj->getGlobalName();
     if (m_target == GL_TEXTURE_2D || m_target == GL_TEXTURE_CUBE_MAP ||
         m_target == GL_TEXTURE_3D || m_target == GL_TEXTURE_2D_ARRAY) {
         // restore the texture
@@ -549,9 +555,6 @@ void SaveableTexture::restore() {
             }
         }
 
-        m_globalTexObj.reset(new NamedObject(
-                GenNameInfo(NamedObjectType::TEXTURE), m_globalNamespace));
-        m_globalName = m_globalTexObj->getGlobalName();
         GLint prevTex = 0;
         switch (m_target) {
             case GL_TEXTURE_2D:
