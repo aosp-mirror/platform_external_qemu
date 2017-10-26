@@ -101,6 +101,7 @@ CLANG_COMPILER_FLAGS= \
                       -Wno-unused-function \
                       -Wno-unused-lambda-capture \
                       -Wno-unused-private-field \
+                      -Wno-c++14-extensions \
                       -Wno-unused-value \
 
 BUILD_TARGET_CFLAGS += $(call if-target-clang,$(CLANG_COMPILER_FLAGS))
