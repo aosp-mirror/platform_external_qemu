@@ -22,6 +22,30 @@
       "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "765203f6_62c00cb1",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-26T16:16:25Z",
+      "side": 1,
+      "message": "We cannot, this loop is converting two pixels at a time.  The first RGB pixel is used for Y, U, and V, and the second is only used for Y.\n\nChanging white-balance modifies the Y value, so we need to perform it for each pixel.\n\nNote that there\u0027s a bigger optimization that I\u0027ve been eyeing here, which is that _change_white_balance is effectively doing r /\u003d r_scale, g /\u003d g_scale, b /\u003d b_scale, which is a lot of divides, all unnecessary! Computing 1 / r_scale, etc, in advance and then doing multiplies would be significantly faster (I don\u0027t have numbers, but searching has revealed 10-20x faster for multiply vs divide).  However, I\u0027d first want to write tests to verify because this code has been full of surprises :-)",
+      "parentUuid": "c2a0d76e_8fd80576",
+      "range": {
+        "startLine": 1083,
+        "startChar": 0,
+        "endLine": 1084,
+        "endChar": 79
+      },
+      "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
