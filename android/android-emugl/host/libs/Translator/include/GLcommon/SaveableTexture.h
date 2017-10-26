@@ -62,7 +62,6 @@ public:
     SaveableTexture(GlobalNameSpace* globalNameSpace, loader_t&& loader);
     SaveableTexture& operator=(SaveableTexture&&) = delete;
 
-    SaveableTexture(const EglImage& eglImage);
     SaveableTexture(const TextureData& texture);
     // precondition: a context must be properly bound
     void onSave(android::base::Stream* stream);
@@ -74,6 +73,7 @@ public:
     void loadFromStream(android::base::Stream* stream);
     void makeDirty();
     bool isDirty() const;
+    void setTarget(GLenum target);
 public:
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up

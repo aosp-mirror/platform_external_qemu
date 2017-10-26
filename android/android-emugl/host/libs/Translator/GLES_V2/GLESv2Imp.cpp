@@ -490,8 +490,9 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
         }
 
         TextureData* texData = getTextureData(localTexName);
-        if (texData->target==0)
-            texData->target = target;
+        if (texData->target==0) {
+            texData->setTarget(target);
+        }
         //if texture was already bound to another target
 
         if (ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target)) {
@@ -754,7 +755,6 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
                 texData->globalName = globalTextureName;
             }
             texData->resetSaveableTexture();
-            texData->makeDirty();
         }
     }
 
@@ -782,7 +782,6 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
             texData->format = format;
             texData->type = type;
             texData->resetSaveableTexture();
-            texData->makeDirty();
         }
     }
 }
@@ -1344,7 +1343,7 @@ GL_APICALL void  GL_APIENTRY glFramebufferTexture2D(GLenum target, GLenum attach
         ObjectLocalName texname = ctx->getTextureLocalName(textarget,texture);
         globalTextureName = ctx->shareGroup()->getGlobalName(
                 NamedObjectType::TEXTURE, texname);
-        TextureData* texData = getTextureTargetData(target);
+        TextureData* texData = getTextureData(texname);
         if (texData) {
             texData->makeDirty();
         }
@@ -3565,7 +3564,6 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target
     // acquire the texture in the renderbufferData that it is an eglImage target
     //
     rbData->eglImageGlobalTexObject = img->globalTexObj;
-    img->isDirty = true;
     img->saveableTexture->makeDirty();
 
     //

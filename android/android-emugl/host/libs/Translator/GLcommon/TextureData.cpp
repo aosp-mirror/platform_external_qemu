@@ -45,7 +45,6 @@ TextureData::TextureData(android::base::Stream* stream) : ObjectData(stream) {
     stream->read(crop_rect, sizeof(crop_rect));
     texStorageLevels = stream->getBe32();
     globalName = stream->getBe32();
-    m_isDirty = false;
     loadCollection(stream, &m_texParam, [](android::base::Stream* stream) {
         GLenum item = stream->getBe32();
         GLint val = stream->getBe32();
@@ -95,7 +94,7 @@ const SaveableTexturePtr& TextureData::getSaveableTexture() const {
 }
 
 void TextureData::resetSaveableTexture() {
-    m_saveableTexture.reset();
+    m_saveableTexture.reset(new SaveableTexture(*this));
 }
 
 void TextureData::setTexParam(GLenum pname, GLint param) {
@@ -120,17 +119,12 @@ GLenum TextureData::getSwizzle(GLenum component) const {
     }
 }
 
-bool TextureData::isDirty() const {
-    return m_isDirty;
-}
-
 void TextureData::makeDirty() {
-    m_isDirty = true;
-    if (m_saveableTexture) {
-        m_saveableTexture->makeDirty();
-    }
+    assert(m_saveableTexture);
+    m_saveableTexture->makeDirty();
 }
 
-void TextureData::makeClean() {
-    m_isDirty = false;
+void TextureData::setTarget(GLenum _target) {
+    target = _target;
+    m_saveableTexture->setTarget(target);
 }

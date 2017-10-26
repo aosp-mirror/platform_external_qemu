@@ -255,41 +255,24 @@ void GlobalNameSpace::preSaveAddEglImage(EglImage* eglImage) {
     emugl::Mutex::AutoLock lock(m_lock);
     const auto& saveableTexIt = m_textureMap.find(globalName);
     if (saveableTexIt == m_textureMap.end()) {
-        if (!eglImage->saveableTexture) {
-            eglImage->saveableTexture.reset(new SaveableTexture(*eglImage));
-        }
+        assert(eglImage->saveableTexture);
         m_textureMap.emplace(globalName, eglImage->saveableTexture);
     } else {
-        if (eglImage->isDirty) {
-           saveableTexIt->second->makeDirty();
-        }
-        if (!eglImage->saveableTexture) {
-            eglImage->saveableTexture = saveableTexIt->second;
-        }
+        assert(m_textureMap[globalName] == eglImage->saveableTexture);
     }
-    eglImage->isDirty = false;
 }
 
 void GlobalNameSpace::preSaveAddTex(TextureData* texture) {
     emugl::Mutex::AutoLock lock(m_lock);
     const auto& saveableTexIt = m_textureMap.find(texture->globalName);
     if (saveableTexIt == m_textureMap.end()) {
-        if (!texture->getSaveableTexture()) {
-            texture->setSaveableTexture(SaveableTexturePtr(
-                new SaveableTexture(*texture)));
-        }
+        assert(texture->getSaveableTexture());
         m_textureMap.emplace(texture->globalName,
                 texture->getSaveableTexture());
     } else {
-        if (texture->isDirty()) {
-            saveableTexIt->second->makeDirty();
-        }
-        if (!texture->getSaveableTexture()) {
-            texture->setSaveableTexture(SaveableTexturePtr(
-                saveableTexIt->second));
-        }
+        assert(m_textureMap[texture->globalName]
+                == texture->getSaveableTexture());
     }
-    texture->makeClean();
 }
 
 void GlobalNameSpace::onSave(android::base::Stream* stream,
