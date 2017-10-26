@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6077e3f_3e1eabec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-26T04:44:35Z",
+      "side": 1,
+      "message": "more explanation on the important parts of the implementaiton might be very welcomed :)\n\nalso how do you drag the emulator window around without frame ?",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 44
+      },
+      "revId": "1079c863434f145a8dfd9cf250d39cdb96de0e63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c1747ce_ed444be8",
+        "filename": "android/android-emu/android/skin/event.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-26T04:44:35Z",
+      "side": 1,
+      "message": "nite: enable/disable might be better, IIUC",
+      "range": {
+        "startLine": 117,
+        "startChar": 12,
+        "endLine": 117,
+        "endChar": 35
+      },
+      "revId": "1079c863434f145a8dfd9cf250d39cdb96de0e63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "46bbeb20_69e9a170",
+        "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-10-26T04:44:35Z",
+      "side": 1,
+      "message": "this block may use some refactoring into smaller functions",
+      "range": {
+        "startLine": 259,
+        "startChar": 5,
+        "endLine": 320,
+        "endChar": 49
+      },
+      "revId": "1079c863434f145a8dfd9cf250d39cdb96de0e63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
