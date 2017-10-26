@@ -118,6 +118,30 @@
       "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5fc9b8bb_fd544cee",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-26T17:33:38Z",
+      "side": 1,
+      "message": "Yep, all good ideas.  While it\u0027s fun to optimize, let\u0027s defer that to another time once we have more data about the bottlenecks :-)\n\nThis part of the change was less about optimization, and more about validating parity between the slow path.",
+      "parentUuid": "3937f0ac_4beba743",
+      "range": {
+        "startLine": 1083,
+        "startChar": 0,
+        "endLine": 1084,
+        "endChar": 79
+      },
+      "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
