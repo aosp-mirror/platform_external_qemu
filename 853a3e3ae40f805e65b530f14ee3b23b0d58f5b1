@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c2a0d76e_8fd80576",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-26T15:37:29Z",
+      "side": 1,
+      "message": "Can we get rid of the second white balance adjustment in RGB too?",
+      "range": {
+        "startLine": 1083,
+        "startChar": 0,
+        "endLine": 1084,
+        "endChar": 79
+      },
+      "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
