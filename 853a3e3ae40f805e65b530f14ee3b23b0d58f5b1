@@ -94,6 +94,30 @@
       "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3937f0ac_4beba743",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1087048
+      },
+      "writtenOn": "2017-10-26T17:05:21Z",
+      "side": 1,
+      "message": "Assuming that [rgb]_scale doesn\u0027t change all the time it would also be possible to pre-calculate the result of all divisions and have a lookup table for each component. This would be a total of 768 bytes which should be OK. :)",
+      "parentUuid": "bb2456e5_8979f0a5",
+      "range": {
+        "startLine": 1083,
+        "startChar": 0,
+        "endLine": 1084,
+        "endChar": 79
+      },
+      "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
