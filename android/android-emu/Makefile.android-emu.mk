@@ -496,6 +496,14 @@ ifeq ($(BUILD_TARGET_OS),windows)
 
 endif
 
+LOCAL_COPY_COMMON_PREBUILT_RESOURCES := \
+  virtualscene/cubemap/micro_kitchen1_negx.png \
+  virtualscene/cubemap/micro_kitchen1_negy.png \
+  virtualscene/cubemap/micro_kitchen1_negz.png \
+  virtualscene/cubemap/micro_kitchen1_posx.png \
+  virtualscene/cubemap/micro_kitchen1_posy.png \
+  virtualscene/cubemap/micro_kitchen1_posz.png \
+
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
 

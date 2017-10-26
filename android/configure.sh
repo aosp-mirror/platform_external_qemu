@@ -579,6 +579,10 @@ probe_prebuilts_dir () {
     eval $2=\$PREBUILTS_DIR
 }
 
+###
+###  Common probe
+###
+probe_prebuilts_dir "Common" COMMON_PREBUILTS_DIR common
 
 ###
 ###  Zlib probe
@@ -1120,6 +1124,7 @@ else
     echo "EMULATOR_USE_ANGLE := false" >> $config_mk
 fi
 
+echo "COMMON_PREBUILTS_DIR := $COMMON_PREBUILTS_DIR" >> $config_mk
 echo "ZLIB_PREBUILTS_DIR := $ZLIB_PREBUILTS_DIR" >> $config_mk
 echo "LIBPNG_PREBUILTS_DIR := $LIBPNG_PREBUILTS_DIR" >> $config_mk
 echo "LIBSDL2_PREBUILTS_DIR := $LIBSDL2_PREBUILTS_DIR" >> $config_mk
