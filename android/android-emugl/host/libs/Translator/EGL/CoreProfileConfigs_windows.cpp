@@ -21,6 +21,13 @@
 #include <GL/wglext.h>
 
 // Based on https://git.reviewboard.kde.org/r/130118/diff/1#index_header
+static const int kCoreProfileConfig_4_6[] = {
+    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+    WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+    0
+};
+
 static const int kCoreProfileConfig_4_5[] = {
     WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
     WGL_CONTEXT_MINOR_VERSION_ARB, 5,
@@ -78,6 +85,7 @@ static const int kCoreProfileConfig_3_2[] = {
 };
 
 static const int* kCoreProfileConfigs[] = {
+    kCoreProfileConfig_4_6,
     kCoreProfileConfig_4_5,
     kCoreProfileConfig_4_4,
     kCoreProfileConfig_4_3,
