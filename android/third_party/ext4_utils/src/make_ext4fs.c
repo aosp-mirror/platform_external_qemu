@@ -72,6 +72,7 @@
 
 #endif
 
+#define AID_SYSTEM 1000
 #ifdef USE_MINGW
 static int scandir_win(const char* path, struct dirent ***namelist) {
     int pathSize = strlen(path);
@@ -251,6 +252,8 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		dentries[i].size = _stat.st_size;
 		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
 		dentries[i].mtime = _stat.st_mtime;
+		dentries[i].uid = AID_SYSTEM;
+		dentries[i].gid = AID_SYSTEM;
 		if (fs_config_func != NULL) {
 #ifdef ANDROID
 			uint64_t capabilities;
