@@ -44,8 +44,7 @@ public:
                     requiresAutoMipmap(false),
                     compressed(false),
                     compressedFormat(0),
-                    target(0),
-                    m_isDirty(true) {};
+                    target(0) { resetSaveableTexture(); };
     TextureData(android::base::Stream* stream);
 
     unsigned int width;
@@ -76,11 +75,8 @@ public:
     void resetSaveableTexture();
     void setTexParam(GLenum pname, GLint param);
     GLenum getSwizzle(GLenum component) const;
-    bool isDirty() const;
     void makeDirty();
-    void makeClean();
 protected:
     std::unordered_map<GLenum, GLint> m_texParam;
     SaveableTexturePtr m_saveableTexture;
-    bool m_isDirty = true;
 };

@@ -62,7 +62,6 @@ public:
     SaveableTexture(GlobalNameSpace* globalNameSpace, loader_t&& loader);
     SaveableTexture& operator=(SaveableTexture&&) = delete;
 
-    SaveableTexture(const EglImage& eglImage);
     SaveableTexture(const TextureData& texture);
     // precondition: a context must be properly bound
     void onSave(android::base::Stream* stream);

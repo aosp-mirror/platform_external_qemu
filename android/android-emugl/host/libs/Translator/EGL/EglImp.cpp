@@ -1399,7 +1399,6 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->format = texData->format;
             img->type = texData->type;
             img->texStorageLevels = texData->texStorageLevels;
-            img->isDirty = texData->isDirty();
             img->saveableTexture = texData->getSaveableTexture();
             img->needRestore = false;
             return dpy->addImageKHR(img);
