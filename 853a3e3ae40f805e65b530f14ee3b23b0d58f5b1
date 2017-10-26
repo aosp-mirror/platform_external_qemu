@@ -46,6 +46,30 @@
       "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "157a34a1_2ff53d1b",
+        "filename": "android/android-emu/android/camera/camera-format-converters.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1084,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-26T16:27:43Z",
+      "side": 1,
+      "message": "Ah, load rgb increments the rgb ptr :p\n\nThat sounds really cool. Something quick you could try is to replace _change_white_balance with a simd instruction for 1/x\n\nhttp://x86.renejeschke.de/html/file_module_x86_id_274.html",
+      "parentUuid": "765203f6_62c00cb1",
+      "range": {
+        "startLine": 1083,
+        "startChar": 0,
+        "endLine": 1084,
+        "endChar": 79
+      },
+      "revId": "853a3e3ae40f805e65b530f14ee3b23b0d58f5b1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
