@@ -316,17 +316,6 @@ static uint32_t s_texImageSize(GLenum internalformat,
     return totalSize;
 }
 
-SaveableTexture::SaveableTexture(const EglImage& eglImage)
-    : m_width(eglImage.width),
-      m_height(eglImage.height),
-      m_format(eglImage.format),
-      m_internalFormat(eglImage.internalFormat),
-      m_type(eglImage.type),
-      m_border(eglImage.border),
-      m_texStorageLevels(eglImage.texStorageLevels),
-      m_globalName(eglImage.globalTexObj->getGlobalName()),
-      m_isDirty(eglImage.isDirty) {}
-
 SaveableTexture::SaveableTexture(const TextureData& texture)
     : m_target(texture.target),
       m_width(texture.width),
@@ -338,7 +327,7 @@ SaveableTexture::SaveableTexture(const TextureData& texture)
       m_border(texture.border),
       m_texStorageLevels(texture.texStorageLevels),
       m_globalName(texture.globalName),
-      m_isDirty(texture.isDirty()) {}
+      m_isDirty(true) {}
 
 SaveableTexture::SaveableTexture(GlobalNameSpace* globalNameSpace,
                                  loader_t&& loader)
@@ -807,7 +796,6 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->type = m_type;
     eglImage->width = m_width;
     eglImage->texStorageLevels = m_texStorageLevels;
-    eglImage->isDirty = true;
 }
 
 void SaveableTexture::makeDirty() {
@@ -816,4 +804,8 @@ void SaveableTexture::makeDirty() {
 
 bool SaveableTexture::isDirty() const {
     return m_isDirty;
+}
+
+void SaveableTexture::setTarget(GLenum target) {
+    m_target = target;
 }
