@@ -754,8 +754,8 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
                 texData->globalName = globalTextureName;
             }
             texData->resetSaveableTexture();
-            texData->makeDirty();
         }
+        texData->makeDirty();
     }
 
 }
@@ -782,8 +782,8 @@ void s_glInitTexImage3D(GLenum target, GLint level, GLint internalformat,
             texData->format = format;
             texData->type = type;
             texData->resetSaveableTexture();
-            texData->makeDirty();
         }
+        texData->makeDirty();
     }
 }
 
