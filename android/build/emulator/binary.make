@@ -130,6 +130,10 @@ $(foreach src,$(LOCAL_OBJCXX_SOURCES), \
     $(eval $(call compile-objcxx-source,$(src))) \
 )
 
+$(foreach src,$(LOCAL_COPY_COMMON_PREBUILT_RESOURCES), \
+    $(eval $(call install-file,$(COMMON_PREBUILTS_DIR)/$(src),$(call local-resource-install-path,$(notdir $(src))))) \
+)
+
 # Ensure that we build all generated sources before the objects
 $(LOCAL_OBJECTS): | $(LOCAL_GENERATED_SOURCES) $(LOCAL_ADDITIONAL_DEPENDENCIES)
 
