@@ -926,7 +926,10 @@ public:
         HGLRC ctx;
         if (useCoreProfile) {
             ctx = mDispatch->wglCreateContextAttribsARB(
-                dpy, WinContext::from(sharedContext), mCoreProfileCtxAttribs);
+                      dpy,
+                      sharedContext ?
+                          WinContext::from(sharedContext) :
+                          nullptr, mCoreProfileCtxAttribs);
         } else {
             ctx = mDispatch->wglCreateContext(dpy);
             if (ctx && sharedContext) {
