@@ -30,8 +30,8 @@ void GLEScmContext::setMaxGlesVersion(GLESVersion version) {
 
 void GLEScmContext::init(EGLiface* eglIface) {
     emugl::Mutex::AutoLock mutex(s_lock);
+    s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
         GLEScontext::init(eglIface);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];

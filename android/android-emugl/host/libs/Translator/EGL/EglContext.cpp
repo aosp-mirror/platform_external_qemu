@@ -53,6 +53,13 @@ EglContext::EglContext(EglDisplay *dpy,
                       (profileMask | EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR) :
                       profileMask)
 {
+    // Set the GLES-side core profile flag,
+    // and the global EGL flag.
+    bool usingCoreProfile =
+        m_profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
+    setCoreProfile(usingCoreProfile);
+    glesCtx->setCoreProfile(usingCoreProfile);
+
     if (stream) {
         EGLint configId = EGLint(stream->getBe32());
         m_config = dpy->getConfig(configId);
@@ -85,13 +92,6 @@ EglContext::EglContext(EglDisplay *dpy,
             glesCtx->postLoad();
         }
         m_hndl = ++s_nextContextHndl;
-
-        // Set the GLES-side core profile flag,
-        // and the global EGL flag.
-        bool usingCoreProfile =
-            m_profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR;
-        setCoreProfile(usingCoreProfile);
-        glesCtx->setCoreProfile(usingCoreProfile);
     } else {
         m_hndl = 0;
     }

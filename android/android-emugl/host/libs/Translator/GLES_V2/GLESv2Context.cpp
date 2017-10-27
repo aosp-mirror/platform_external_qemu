@@ -59,8 +59,8 @@ void GLESv2Context::setMaxGlesVersion(GLESVersion version) {
 
 void GLESv2Context::init(EGLiface* eglIface) {
     emugl::Mutex::AutoLock mutex(s_lock);
+    s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
     if(!m_initialized) {
-        s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
         GLEScontext::init(eglIface);
         addVertexArrayObject(0);
         setVertexArrayObject(0);
