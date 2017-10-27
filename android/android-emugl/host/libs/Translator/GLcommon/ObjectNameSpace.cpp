@@ -16,14 +16,15 @@
 
 #include "GLcommon/ObjectNameSpace.h"
 
-#include "GLcommon/GLEScontext.h"
-#include "GLcommon/TranslatorIfaces.h"
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
+#include "emugl/common/crash_reporter.h"
+#include "GLcommon/GLEScontext.h"
+#include "GLcommon/TranslatorIfaces.h"
 
 #include <assert.h>
 
@@ -288,6 +289,8 @@ void GlobalNameSpace::onLoad(android::base::Stream* stream,
     assert(m_textureMap.size() == 0);
     if (!textureLoader->start()) {
         fprintf(stderr,
+                "Error: texture file unsupported version or corrupted.\n");
+        emugl_crash_reporter(
                 "Error: texture file unsupported version or corrupted.\n");
         return;
     }
