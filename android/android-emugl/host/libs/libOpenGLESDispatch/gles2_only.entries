@@ -70,6 +70,7 @@ void glBindFramebuffer(GLenum target, GLuint framebuffer);
 void glGenFramebuffers(GLsizei n, GLuint* framebuffers);
 void glFramebufferTexture2D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 GLenum glCheckFramebufferStatus(GLenum target);
+GLboolean glIsFramebuffer(GLuint framebuffer);
 void glDeleteFramebuffers(GLsizei n, const GLuint* framebuffers);
 
 GLboolean glIsRenderbuffer(GLuint renderbuffer);

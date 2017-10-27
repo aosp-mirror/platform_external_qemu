@@ -1907,17 +1907,35 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
         // underlying texture of the img
         GLuint prevFB = ctx->getFramebufferBinding(GL_FRAMEBUFFER_EXT);
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
-                                                   rbData->attachedFB);
+            if (isCoreProfile()) {
+                ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER,
+                        rbData->attachedFB);
+            } else {
+                ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
+                        rbData->attachedFB);
+            }
         }
-        ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
-                                                    rbData->attachedPoint,
-                                                    GL_TEXTURE_2D,
-                                                    img->globalTexObj->getGlobalName(),
-                                                    0);
+        if (isCoreProfile()) {
+            ctx->dispatcher().glFramebufferTexture2D(GL_FRAMEBUFFER,
+                    rbData->attachedPoint,
+                    GL_TEXTURE_2D,
+                    img->globalTexObj->getGlobalName(),
+                    0);
+        } else {
+            ctx->dispatcher().glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,
+                    rbData->attachedPoint,
+                    GL_TEXTURE_2D,
+                    img->globalTexObj->getGlobalName(),
+                    0);
+        }
         if (prevFB != rbData->attachedFB) {
-            ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
-                                                   prevFB);
+            if (isCoreProfile()) {
+                ctx->dispatcher().glBindFramebuffer(GL_FRAMEBUFFER,
+                                                    prevFB);
+            } else {
+                ctx->dispatcher().glBindFramebufferEXT(GL_FRAMEBUFFER_EXT,
+                                                       prevFB);
+            }
         }
     }
 }
@@ -1958,7 +1976,11 @@ GL_API GLboolean GL_APIENTRY glIsRenderbufferOES(GLuint renderbuffer) {
                        ? GL_TRUE
                        : GL_FALSE;
     }
-    return ctx->dispatcher().glIsRenderbufferEXT(renderbuffer);
+    if (isCoreProfile()) {
+        return ctx->dispatcher().glIsRenderbuffer(renderbuffer);
+    } else {
+        return ctx->dispatcher().glIsRenderbufferEXT(renderbuffer);
+    }
 }
 
 GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer) {
@@ -1982,7 +2004,11 @@ GL_API void GLAPIENTRY glBindRenderbufferOES(GLenum target, GLuint renderbuffer)
                     ? ctx->shareGroup()->getGlobalName(
                               NamedObjectType::RENDERBUFFER, renderbuffer)
                     : 0;
-    ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
+    if (isCoreProfile()) {
+        ctx->dispatcher().glBindRenderbuffer(target,globalBufferName);
+    } else {
+        ctx->dispatcher().glBindRenderbufferEXT(target,globalBufferName);
+    }
 
     // update renderbuffer binding state
     ctx->setRenderbufferBinding(renderbuffer);
@@ -2112,7 +2138,11 @@ GL_API GLboolean GLAPIENTRY glIsFramebufferOES(GLuint framebuffer) {
                        ? GL_TRUE
                        : GL_FALSE;
     }
-    return ctx->dispatcher().glIsFramebufferEXT(framebuffer);
+    if (isCoreProfile()) {
+        return ctx->dispatcher().glIsFramebuffer(framebuffer);
+    } else {
+        return ctx->dispatcher().glIsFramebufferEXT(framebuffer);
+    }
 }
 
 GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
@@ -2129,7 +2159,11 @@ GL_API void GLAPIENTRY glBindFramebufferOES(GLenum target, GLuint framebuffer) {
             (framebuffer != 0)
                     ? ctx->getFBOGlobalName(framebuffer)
                     : ctx->getDefaultFBOGlobalName();
-    ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
+    if (isCoreProfile()) {
+        ctx->dispatcher().glBindFramebuffer(target,globalBufferName);
+    } else {
+        ctx->dispatcher().glBindFramebufferEXT(target,globalBufferName);
+    }
 
     // update framebuffer binding state
     ctx->setFramebufferBinding(GL_FRAMEBUFFER_EXT, framebuffer);
@@ -2251,7 +2285,11 @@ GL_API void GLAPIENTRY glFramebufferRenderbufferOES(GLenum target, GLenum attach
         }
     }
 
-    ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalBufferName);
+    if (isCoreProfile()) {
+        ctx->dispatcher().glFramebufferRenderbuffer(target,attachment,renderbuffertarget,globalBufferName);
+    } else {
+        ctx->dispatcher().glFramebufferRenderbufferEXT(target,attachment,renderbuffertarget,globalBufferName);
+    }
 }
 
 GL_API void GLAPIENTRY glGetFramebufferAttachmentParameterivOES(GLenum target, GLenum attachment, GLenum pname, GLint *params) {

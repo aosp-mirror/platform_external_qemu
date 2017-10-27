@@ -72,6 +72,7 @@
   X(void, glGenFramebuffers, (GLsizei n, GLuint* framebuffers), (n, framebuffers)) \
   X(void, glFramebufferTexture2D, (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level), (target, attachment, textarget, texture, level)) \
   X(GLenum, glCheckFramebufferStatus, (GLenum target), (target)) \
+  X(GLboolean, glIsFramebuffer, (GLuint framebuffer), (framebuffer)) \
   X(void, glDeleteFramebuffers, (GLsizei n, const GLuint* framebuffers), (n, framebuffers)) \
   X(GLboolean, glIsRenderbuffer, (GLuint renderbuffer), (renderbuffer)) \
   X(void, glBindRenderbuffer, (GLenum target, GLuint renderbuffer), (target, renderbuffer)) \

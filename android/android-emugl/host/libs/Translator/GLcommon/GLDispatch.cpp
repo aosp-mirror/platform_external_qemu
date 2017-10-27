@@ -18,6 +18,7 @@
 #include "GLcommon/GLLibrary.h"
 
 #include "emugl/common/lazy_instance.h"
+#include "emugl/common/logging.h"
 #include "emugl/common/shared_library.h"
 
 #include "OpenglCodecCommon/ErrorLog.h"
@@ -41,11 +42,22 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
         if (!func_name) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             /*Check alias*/ \
-            if (!address) address = (void *)getGLFuncAddress(#func_name "OES", glLib); \
-            if (!address) address = (void *)getGLFuncAddress(#func_name "EXT", glLib); \
+            if (!address) { \
+                address = (void *)getGLFuncAddress(#func_name "OES", glLib); \
+                if (address) GL_LOG("%s not found, using %sOES", #func_name, #func_name); \
+            } \
+            if (!address) { \
+                address = (void *)getGLFuncAddress(#func_name "EXT", glLib); \
+                if (address) GL_LOG("%s not found, using %sEXT", #func_name, #func_name); \
+            } \
+            if (!address) { \
+                address = (void *)getGLFuncAddress(#func_name "ARB", glLib); \
+                if (address) GL_LOG("%s not found, using %sARB", #func_name, #func_name); \
+            } \
             if (address) { \
                 func_name = (__typeof__(func_name))(address); \
             } else { \
+                GL_LOG("%s not found", #func_name); \
                 func_name = (__typeof__(func_name))(dummy_##func_name); \
             } \
         } \
