@@ -574,7 +574,7 @@ EglOS::Context* EglDisplay::getGlobalSharedContext() const {
         }
         EglConfig *cfg = m_configs.front().get();
         m_globalSharedContext = m_idpy->createContext(
-                false /* no core profile on Windows yet*/,
+                isCoreProfile() ? EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR : 0,
                 cfg->nativeFormat(), NULL);
     }
 
