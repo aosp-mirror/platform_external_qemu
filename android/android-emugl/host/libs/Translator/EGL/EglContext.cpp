@@ -56,6 +56,10 @@ EglContext::EglContext(EglDisplay *dpy,
     if (stream) {
         EGLint configId = EGLint(stream->getBe32());
         m_config = dpy->getConfig(configId);
+        if (!m_config) {
+            m_config = dpy->getDefaultConfig();
+        }
+        assert(m_config);
         shareGroupId = static_cast<uint64_t>(stream->getBe64());
     }
 

@@ -244,9 +244,6 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
             dpy, frmt, GLX_LEVEL, &info.frame_buffer_level));
 
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
-            dpy, frmt, GLX_FBCONFIG_ID, &info.config_id));
-
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
             dpy, frmt, GLX_SAMPLES, &info.samples_per_pixel));
 
     // Filter out configs that do not support RGBA
