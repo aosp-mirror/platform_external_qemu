@@ -220,7 +220,7 @@ static void handlePacket(InboundPacket* p) {
     uint32_t type = ntohl(p->type);
     if (type < PACKET_TYPE_MT_ACTION_DOWN && sGlobals->sensors) {
         // Sensor data packet.
-        sGlobals->sensors->setSensor(
+        sGlobals->sensors->setSensorOverride(
             ANDROID_SENSOR_ACCELERATION + (type-1),
             float_ntohl(p->x),
             float_ntohl(p->y),

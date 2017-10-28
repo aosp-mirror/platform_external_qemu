@@ -34,6 +34,13 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi(new Ui::VirtualSensorsPage()),
     mSensorsAgent(nullptr)
 {
+    mQAndroidPhysicalStateAgent.onTargetStateChanged = onTargetStateChanged;
+    mQAndroidPhysicalStateAgent.onPhysicalStateChanging =
+            onPhysicalStateChanging;
+    mQAndroidPhysicalStateAgent.onPhysicalStateStabilized =
+            onPhysicalStateStabilized;
+    mQAndroidPhysicalStateAgent.context = static_cast<void*>(this);
+
     mUi->setupUi(this);
     // The initial values are set here to match the initial
     // values reported by an AVD.
@@ -52,41 +59,22 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->magVerticalWidget->setLocale(QLocale::c());
 
     connect(mUi->accelWidget, SIGNAL(rotationChanged()),
-            this, SLOT(syncUIAndUpdateModel()));
+            this, SLOT(propagateAccelWidgetChange()));
 
     connect(mUi->accelWidget, SIGNAL(positionChanged()),
-            this, SLOT(syncUIAndUpdateModel()));
-
-    connect(mUi->positionXSlider, SIGNAL(sliderPressed()),
-            this, SLOT(onDragStarted()));
-    connect(mUi->positionXSlider, SIGNAL(sliderReleased()),
-            this, SLOT(onDragStopped()));
-
-    connect(mUi->positionYSlider, SIGNAL(sliderPressed()),
-            this, SLOT(onDragStarted()));
-    connect(mUi->positionYSlider, SIGNAL(sliderReleased()),
-            this, SLOT(onDragStopped()));
-
-    connect(mUi->zRotSlider, SIGNAL(sliderPressed()),
-            this, SLOT(onDragStarted()));
-    connect(mUi->zRotSlider, SIGNAL(sliderReleased()),
-            this, SLOT(onDragStopped()));
-
-    connect(mUi->xRotSlider, SIGNAL(sliderPressed()),
-            this, SLOT(onDragStarted()));
-    connect(mUi->xRotSlider, SIGNAL(sliderReleased()),
-            this, SLOT(onDragStopped()));
-
-    connect(mUi->yRotSlider, SIGNAL(sliderPressed()),
-            this, SLOT(onDragStarted()));
-    connect(mUi->yRotSlider, SIGNAL(sliderReleased()),
-            this, SLOT(onDragStopped()));
+            this, SLOT(propagateAccelWidgetChange()));
 
     connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
             this, &VirtualSensorsPage::updateResultingValues);
 
+    connect(this, &VirtualSensorsPage::startSensorUpdateTimerRequired,
+            this, &VirtualSensorsPage::startSensorUpdateTimer);
+
+    connect(this, &VirtualSensorsPage::stopSensorUpdateTimerRequired,
+            this, &VirtualSensorsPage::stopSensorUpdateTimer);
+
     connect(&mAccelerationTimer, SIGNAL(timeout()),
-            this, SLOT(updateAccelerations()));
+            this, SLOT(updateSensorValuesInUI()));
     mAccelerationTimer.setInterval(100);
     mAccelerationTimer.stop();
 
@@ -105,7 +93,8 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     // value of Sliders.
     static const glm::quat initialQuat(glm::vec3(glm::radians(-4.75f), 0.00f, 0.00f));
     mUi->accelWidget->setRotation(initialQuat);
-    syncUIAndUpdateModelInstant();
+    // TODO(tpsiaki): this should probably be instant.
+    propagateAccelWidgetChange();
 
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
@@ -122,10 +111,17 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     });
 }
 
+VirtualSensorsPage::~VirtualSensorsPage() {
+    // Unregister for physical state change callbacks.
+    if (mSensorsAgent != nullptr) {
+        mSensorsAgent->setPhysicalStateAgent(nullptr);
+    }
+}
+
 void VirtualSensorsPage::showEvent(QShowEvent*) {
     auto layout = skin_ui_get_current_layout(emulator_window_get()->ui);
     if (layout) {
-        resetAccelerometerRotationFromSkinLayout(layout->orientation);
+        resetDeviceRotationFromSkinLayout(layout->orientation);
     }
     mFirstShow = false;
 }
@@ -137,10 +133,10 @@ void VirtualSensorsPage::setLayoutChangeNotifier(
 }
 
 void VirtualSensorsPage::onSkinLayoutChange(SkinRotation rot) {
-    resetAccelerometerRotationFromSkinLayout(rot);
+    resetDeviceRotationFromSkinLayout(rot);
 }
 
-void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
+void VirtualSensorsPage::resetDeviceRotationFromSkinLayout(
         SkinRotation orientation) {
 
     if (mCoarseOrientation == orientation) {
@@ -176,144 +172,186 @@ void VirtualSensorsPage::resetAccelerometerRotationFromSkinLayout(
     // would make us to handle it again for the second time, which is
     // very CPU-intensive.
     QSignalBlocker blockSignals(this);
-    resetAccelerometerRotation(
+    resetDeviceRotation(
             glm::angleAxis(glm::radians(rot), glm::vec3(0.0f, 0.0f, 1.0f)));
 }
 
-void VirtualSensorsPage::resetAccelerometerRotation(const glm::quat& rotation) {
+void VirtualSensorsPage::resetDeviceRotation(const glm::quat& rotation) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
     mUi->accelWidget->setPosition(glm::vec2(0.0f, 0.0f));
     mUi->accelWidget->setRotation(rotation);
     mUi->accelWidget->update();
-    syncUIAndUpdateModelInstant();
+    propagateAccelWidgetChange();
 }
 
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
-    resetAccelerometerRotation(glm::quat());
+    resetDeviceRotation(glm::quat());
 }
 
 void VirtualSensorsPage::on_rotateToLandscape_clicked() {
-    resetAccelerometerRotation(
+    resetDeviceRotation(
         glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 }
 
 void VirtualSensorsPage::on_rotateToReversePortrait_clicked() {
-    resetAccelerometerRotation(
+    resetDeviceRotation(
         glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 }
 
 void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
-    resetAccelerometerRotation(
+    resetDeviceRotation(
         glm::angleAxis(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
 }
 
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
+    if (mSensorsAgent != nullptr) {
+        mSensorsAgent->setPhysicalStateAgent(nullptr);
+    }
     mSensorsAgent = agent;
+    mSensorsAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
 
     auto layout = skin_ui_get_current_layout(emulator_window_get()->ui);
     if (layout) {
-        resetAccelerometerRotationFromSkinLayout(layout->orientation);
+        resetDeviceRotationFromSkinLayout(layout->orientation);
     }
-    mInertialModel.setSensorsAgent(agent);
 }
 
 // Helper function
-static void setSensorValue(
-        const QAndroidSensorsAgent* agent,
-        AndroidSensor sensor_id,
-        double v1,
-        double v2 = 0.0,
-        double v3 = 0.0) {
-  if (agent) {
-        agent->setSensor(sensor_id,
-                         static_cast<float>(v1),
-                         static_cast<float>(v2),
-                         static_cast<float>(v3));
+void VirtualSensorsPage::setPhysicalParameterTarget(
+        PhysicalParameter parameter_id, double v1, double v2, double v3) {
+    if (mSensorsAgent) {
+        mIsUIModifyingPhysicalState = true;
+        mSensorsAgent->setPhysicalParameterTarget(parameter_id,
+                                                  static_cast<float>(v1),
+                                                  static_cast<float>(v2),
+                                                  static_cast<float>(v3));
+        mIsUIModifyingPhysicalState = false;
     }
 }
 
 void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
         double value) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_TEMPERATURE, value);
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_TEMPERATURE, value);
 }
 
 void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
         double value) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_PROXIMITY, value);
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_PROXIMITY, value);
 }
 
 void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_LIGHT, value);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_LIGHT, value);
 }
 
 void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
     double value) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_PRESSURE, value);
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_PRESSURE, value);
 }
 
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
     double value) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    setSensorValue(mSensorsAgent, ANDROID_SENSOR_HUMIDITY, value);
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_HUMIDITY, value);
 }
 
 void VirtualSensorsPage::on_magNorthWidget_valueChanged(double value) {
-    syncUIAndUpdateModelInstant();
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
+            mUi->magNorthWidget->value(),
+            mUi->magEastWidget->value(),
+            mUi->magVerticalWidget->value());
 }
 
 void VirtualSensorsPage::on_magEastWidget_valueChanged(double value) {
-    syncUIAndUpdateModelInstant();
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
+            mUi->magNorthWidget->value(),
+            mUi->magEastWidget->value(),
+            mUi->magVerticalWidget->value());
 }
 
 void VirtualSensorsPage::on_magVerticalWidget_valueChanged(double value) {
-    syncUIAndUpdateModelInstant();
-}
-
-void VirtualSensorsPage::setAccelerometerRotationFromSliders() {
-    const glm::quat rotation(glm::vec3(
-            glm::radians(mUi->xRotSlider->getValue()),
-            glm::radians(mUi->yRotSlider->getValue()),
-            glm::radians(mUi->zRotSlider->getValue())));
-    mUi->accelWidget->setRotation(rotation);
-    mUi->accelWidget->update();
-    // When setting the position via the text box, set it instantaneously.
-    updateModel(!mIsDragging);
-    updateSensorValuesInUI();
+    setPhysicalParameterTarget(
+            PHYSICAL_PARAMETER_MAGNETIC_FIELD,
+            mUi->magNorthWidget->value(),
+            mUi->magEastWidget->value(),
+            mUi->magVerticalWidget->value());
 }
 
 void VirtualSensorsPage::on_zRotSlider_valueChanged(double) {
-    setAccelerometerRotationFromSliders();
+    propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_xRotSlider_valueChanged(double) {
-    setAccelerometerRotationFromSliders();
+    propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_yRotSlider_valueChanged(double) {
-    setAccelerometerRotationFromSliders();
-}
-
-void VirtualSensorsPage::setPhonePositionFromSliders() {
-    glm::vec3 position(mUi->positionXSlider->getValue(),
-                       mUi->positionYSlider->getValue(),
-                       0.f);
-    mUi->accelWidget->setPosition(glm::vec2(position));
-    mUi->accelWidget->update();
-    // When setting the position from the text box, set it instantaneously.
-    updateModel(!mIsDragging);
-    updateSensorValuesInUI();
+    propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionXSlider_valueChanged(double) {
-    setPhonePositionFromSliders();
+    propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
-    setPhonePositionFromSliders();
+    propagateSlidersChange();
+}
+
+void VirtualSensorsPage::onTargetStateChanged() {
+    // TODO: make sure this is always happening on the right thread.
+    if (!mIsUIModifyingPhysicalState) {
+        updateAccelWidgetAndSlidersFromModel();
+    }
+}
+
+void VirtualSensorsPage::startSensorUpdateTimer() {
+    mAccelerationTimer.start();
+}
+
+void VirtualSensorsPage::stopSensorUpdateTimer() {
+    mAccelerationTimer.stop();
+    updateSensorValuesInUI();
+}
+
+void VirtualSensorsPage::onPhysicalStateChanging() {
+    emit startSensorUpdateTimerRequired();
+}
+
+void VirtualSensorsPage::onPhysicalStateStabilized() {
+    emit stopSensorUpdateTimerRequired();
+}
+
+void VirtualSensorsPage::onTargetStateChanged(void* context) {
+    if (context != nullptr) {
+        VirtualSensorsPage* virtual_sensors_page =
+                static_cast<VirtualSensorsPage*>(context);
+        virtual_sensors_page->onTargetStateChanged();
+    }
+}
+
+void VirtualSensorsPage::onPhysicalStateChanging(void* context) {
+    if (context != nullptr) {
+        VirtualSensorsPage* virtual_sensors_page =
+                static_cast<VirtualSensorsPage*>(context);
+        virtual_sensors_page->onPhysicalStateChanging();
+    }
+}
+
+void VirtualSensorsPage::onPhysicalStateStabilized(void* context) {
+    if (context != nullptr) {
+        VirtualSensorsPage* virtual_sensors_page =
+                static_cast<VirtualSensorsPage*>(context);
+        virtual_sensors_page->onPhysicalStateStabilized();
+    }
 }
 
 void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
@@ -362,26 +400,43 @@ void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
 }
 
 /*
- * Sync the sliders in the UI to the accel widget state, update the model, and
- * update the sensor values in the UI to the most recent simulated sensor
- * values.
+ * Propagate a UI change from the accel widget to the sliders and model.
  */
-void VirtualSensorsPage::syncUIAndUpdateModel() {
-    syncUI();
-    updateModel(false);
-    updateSensorValuesInUI();
-}
-
-void VirtualSensorsPage::syncUIAndUpdateModelInstant() {
-    syncUI();
-    updateModel(true);
-    updateSensorValuesInUI();
+void VirtualSensorsPage::propagateAccelWidgetChange() {
+    updateSlidersFromAccelWidget();
+    updateModelFromAccelWidget(false);
 }
 
 /*
- * Sync the sliders in the UI with the accel widget state
+ * Propagate a UI change from the sliders to the accel widget and model.
  */
-void VirtualSensorsPage::syncUI() {
+void VirtualSensorsPage::propagateSlidersChange() {
+    updateAccelWidgetFromSliders();
+    updateModelFromAccelWidget(false);
+}
+
+/*
+ * Send the sliders' position and rotation to the accel widget.
+ */
+void VirtualSensorsPage::updateAccelWidgetFromSliders() {
+    glm::vec3 position(mUi->positionXSlider->getValue(),
+                       mUi->positionYSlider->getValue(),
+                       0.f);
+    mUi->accelWidget->setPosition(glm::vec2(position));
+
+    const glm::quat rotation(glm::vec3(
+            glm::radians(mUi->xRotSlider->getValue()),
+            glm::radians(mUi->yRotSlider->getValue()),
+            glm::radians(mUi->zRotSlider->getValue())));
+    mUi->accelWidget->setRotation(rotation);
+
+    mUi->accelWidget->update();
+}
+
+/*
+ * Send the accel widget's position and rotation to the sliders.
+ */
+void VirtualSensorsPage::updateSlidersFromAccelWidget() {
     const glm::vec2& pos = mUi->accelWidget->position();
     glm::vec3 position(pos, 0.0f);
     const glm::quat& rotation = mUi->accelWidget->rotation();
@@ -395,84 +450,117 @@ void VirtualSensorsPage::syncUI() {
     mUi->positionYSlider->setValue(pos.y, false);
 }
 
+
+/*
+ * Send the accel widget's position and rotation to the model as the new
+ * targets.
+ */
+void VirtualSensorsPage::updateModelFromAccelWidget(bool instantaneous) {
+    const glm::vec2& position = mUi->accelWidget->position();
+    const glm::vec3 rotation(glm::eulerAngles(mUi->accelWidget->rotation()));
+
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION,
+            position.x, position.y, 0.f);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
+            rotation.x, rotation.y, rotation.z);
+}
+
+/*
+ * Update the accel widge and sliders to reflect the underlying model state.
+ */
+void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
+    if (mSensorsAgent != nullptr) {
+        glm::vec3 position;
+        mSensorsAgent->getPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION,
+            &position.x, &position.y, &position.z);
+        // TODO(tpsiaki): consider removing the following line and letting
+        // z change in the UI.
+        position.z = 0.0f;
+        glm::vec3 eulerAngles;
+        mSensorsAgent->getPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
+            &eulerAngles.x, &eulerAngles.y, &eulerAngles.z);
+
+        mUi->accelWidget->setPosition(glm::vec2(position.x, position.y));
+        mUi->accelWidget->setRotation(glm::quat(eulerAngles));
+        mUi->accelWidget->update();
+
+        mUi->xRotSlider->setValue(glm::degrees(eulerAngles.x), false);
+        mUi->yRotSlider->setValue(glm::degrees(eulerAngles.y), false);
+        mUi->zRotSlider->setValue(glm::degrees(eulerAngles.z), false);
+
+        mUi->positionXSlider->setValue(position.x, false);
+        mUi->positionYSlider->setValue(position.y, false);
+
+        // TODO(tpsiaki): the rest of the ambient parameters from the model.
+    }
+}
+
 /*
  * Update the sensor readings in the UI to match the current readings from the
  * inertial model.
  */
 void VirtualSensorsPage::updateSensorValuesInUI() {
-    glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
-    glm::quat device_rotation_quat = mInertialModel.getRotation();
-    glm::vec3 device_gravity_vector =
-        glm::conjugate(device_rotation_quat) * gravity_vector;
+    if (mSensorsAgent != nullptr) {
+        glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
-    // Update the "rotation" label according to the simulated gravity vector.
-    glm::vec3 normalized_gravity = glm::normalize(device_gravity_vector);
-    static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions {
-      std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
-      std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
-      std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
-      std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)
-    };
-    QString rotation_label;
-    SkinRotation coarse_orientation = mCoarseOrientation;
-    for (const auto& v : directions) {
-      if (fabs(glm::dot(normalized_gravity, v.first) - 1.0f) < 0.1f) {
-        coarse_orientation = v.second;
-        break;
-      }
+        glm::vec3 device_accelerometer;
+        mSensorsAgent->getSensor(ANDROID_SENSOR_ACCELERATION,
+                &device_accelerometer.x,
+                &device_accelerometer.y,
+                &device_accelerometer.z);
+        glm::vec3 normalized_accelerometer =
+            glm::normalize(device_accelerometer);
+        
+        // Update the "rotation" label according to the current acceleraiton.
+        static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions {
+            std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
+            std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
+            std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
+            std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)
+        };
+        QString rotation_label;
+        SkinRotation coarse_orientation = mCoarseOrientation;
+        for (const auto& v : directions) {
+            if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) <
+                    0.1f) {
+                coarse_orientation = v.second;
+                break;
+            }
+        }
+        if (coarse_orientation != mCoarseOrientation) {
+            mCoarseOrientation = coarse_orientation;
+            emit(coarseOrientationChanged(mCoarseOrientation));
+        }
+
+        glm::vec3 device_magnetometer;
+        mSensorsAgent->getSensor(ANDROID_SENSOR_MAGNETIC_FIELD,
+                &device_magnetometer.x,
+                &device_magnetometer.y,
+                &device_magnetometer.z);
+
+        glm::vec3 device_gyroscope;
+        mSensorsAgent->getSensor(ANDROID_SENSOR_GYROSCOPE,
+                &device_gyroscope.x,
+                &device_gyroscope.y,
+                &device_gyroscope.z);
+
+        // Emit a signal to update the UI. We cannot just update
+        // the UI here because the current function is sometimes
+        // called from a non-Qt thread.
+        // We only block signals for this widget if it's running on the Qt
+        // thread, so it's Ok to call the connected function directly.
+        if (signalsBlocked()) {
+            updateResultingValues(
+                    device_accelerometer,
+                    device_gyroscope,
+                    device_magnetometer);
+        } else {
+            emit updateResultingValuesRequired(
+                    device_accelerometer,
+                    device_gyroscope,
+                    device_magnetometer);
+        }
     }
-    if (coarse_orientation != mCoarseOrientation) {
-      mCoarseOrientation = coarse_orientation;
-      emit(coarseOrientationChanged(mCoarseOrientation));
-    }
-    const glm::vec3& acceleration = mInertialModel.getAcceleration();
-    const glm::vec3& device_magnetic_vector =
-            mInertialModel.getMagneticVector();
-    const glm::vec3& gyroscope =
-            mInertialModel.getGyroscope();
-
-    // Emit a signal to update the UI. We cannot just update
-    // the UI here because the current function is sometimes
-    // called from a non-Qt thread.
-    // We only block signals for this widget if it's running on the Qt thread,
-    // so it's Ok to call the connected function directly.
-    if (signalsBlocked()) {
-        updateResultingValues(acceleration, gyroscope, device_magnetic_vector);
-    } else {
-        emit updateResultingValuesRequired(
-                acceleration, gyroscope, device_magnetic_vector);
-    }
-}
-
-void VirtualSensorsPage::updateModel(bool instantaneous) {
-    const glm::vec2& pos = mUi->accelWidget->position();
-    glm::vec3 position(pos, 0.0f);
-    const glm::quat& rotation = mUi->accelWidget->rotation();
-
-    mInertialModel.setTargetPosition(position, instantaneous);
-    mInertialModel.setTargetRotation(rotation, instantaneous);
-    mInertialModel.setMagneticValue(
-            mUi->magEastWidget->value(),
-            mUi->magVerticalWidget->value(),
-            -mUi->magNorthWidget->value(),
-            instantaneous);
-}
-
-void VirtualSensorsPage::onDragStarted() {
-    mIsDragging = true;
-    mAccelerationTimer.start();
-}
-
-void VirtualSensorsPage::onDragStopped() {
-    mIsDragging = false;
-    // update the model instantaneously to zero accelerations.
-    updateModel(true);
-    updateSensorValuesInUI();
-    mAccelerationTimer.stop();
-}
-
-void VirtualSensorsPage::updateAccelerations() {
-    updateSensorValuesInUI();
 }
 
 void VirtualSensorsPage::on_accelModeRotate_toggled() {
