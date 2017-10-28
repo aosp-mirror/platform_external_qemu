@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d253e422_cdc7f203",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglOsApi_wgl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 932,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-10-28T18:53:22Z",
+      "side": 1,
+      "message": "is this the only place where the passed context could be null? Maybe it is safer to move the check into the from() function?",
+      "range": {
+        "startLine": 930,
+        "startChar": 22,
+        "endLine": 932,
+        "endChar": 33
+      },
+      "revId": "51375e076d90825f7cbf092fe4405bb3de665706",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
