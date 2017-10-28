@@ -1,0 +1,211 @@
+// Copyright (C) 2017 The Android Open Source Project
+//
+// This software is licensed under the terms of the GNU General Public
+// License version 2, as published by the Free Software Foundation, and
+// may be copied, distributed, and modified under those terms.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+#include "android/physics/PhysicalModel.h"
+
+#include "android/base/testing/TestSystem.h"
+#include "android/base/testing/TestTempDir.h"
+
+#include <glm/vec3.hpp>
+#include <gtest/gtest.h>
+
+#include <assert.h>
+
+using android::base::TestSystem;
+using android::base::System;
+
+TEST(PhysicalModel, CreateAndDestroy) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel *model = _physicalModel_new();
+    EXPECT_NE(model, nullptr);
+    _physicalModel_free(model);
+}
+
+TEST(PhysicalModel, DefaultInertialSensorValues) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(1);
+    PhysicalModel *model = _physicalModel_new();
+    vec3 accelerometer = _physicalModel_getAccelerometer(model);
+    EXPECT_NEAR(0.f, accelerometer.x, 0.001f);
+    EXPECT_NEAR(9.81f, accelerometer.y, 0.001f);
+    EXPECT_NEAR(0.f, accelerometer.z, 0.001f);
+    
+    vec3 gyro = _physicalModel_getGyroscope(model);
+    EXPECT_NEAR(0.f, gyro.x, 0.001f);
+    EXPECT_NEAR(0.f, gyro.y, 0.001f);
+    EXPECT_NEAR(0.f, gyro.z, 0.001f);
+    
+    _physicalModel_free(model);
+}
+
+TEST(PhysicalModel, SetTargetPosition) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(0);
+    PhysicalModel *model = _physicalModel_new();
+    vec3 targetPosition;
+    targetPosition.x = 2.0f;
+    targetPosition.y = 3.0f;
+    targetPosition.z = 4.0f;
+    _physicalModel_setTargetPosition(model, targetPosition, true);
+    
+    mTestSystem.setUnixTime(1);
+    vec3 currentPosition = _physicalModel_getTargetPosition(model);
+    
+    EXPECT_NEAR(targetPosition.x, currentPosition.x, 0.0001f);
+    EXPECT_NEAR(targetPosition.y, currentPosition.y, 0.0001f);
+    EXPECT_NEAR(targetPosition.z, currentPosition.z, 0.0001f);
+    
+    _physicalModel_free(model);
+}
+
+TEST(PhysicalModel, SetTargetRotation) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(0);
+    PhysicalModel *model = _physicalModel_new();
+    vec3 targetRotation;
+    targetRotation.x = 45.0f;
+    targetRotation.y = 10.0f;
+    targetRotation.z = 4.0f;
+    _physicalModel_setTargetRotation(model, targetRotation, true);
+    
+    mTestSystem.setUnixTime(1);
+    vec3 currentRotation = _physicalModel_getTargetRotation(model);
+    
+    EXPECT_NEAR(targetRotation.x, currentRotation.x, 0.0001f);
+    EXPECT_NEAR(targetRotation.y, currentRotation.y, 0.0001f);
+    EXPECT_NEAR(targetRotation.z, currentRotation.z, 0.0001f);
+    
+    _physicalModel_free(model);
+}
+
+typedef struct GravityTestCase_ {
+    glm::vec3 target_rotation;
+    glm::vec3 expected_acceleration;
+} GravityTestCase;
+
+const GravityTestCase gravityTestCases[] = {
+    {{0.0f, 0.0f, 0.0f}, {0.0f, 9.81f, 0.0f}},
+    {{90.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -9.81f}},
+    {{-90.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 9.81f}},
+    {{0.0f, 90.0f, 0.0f}, {0.0f, 9.81f, 0.0f}},
+    {{0.0f, 0.0f, 90.0f}, {9.81f, 0.0f, 0.0f}},
+    {{0.0f, 0.0f, -90.0f}, {-9.81f, 0.0f, 0.0f}},
+    {{0.0f, 0.0f, 180.0f}, {0.0f, -9.81f, 0.0f}},
+};
+
+TEST(PhysicalModel, GravityAcceleration) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    for (const auto& testCase : gravityTestCases) {
+        mTestSystem.setUnixTime(1);
+        PhysicalModel* model = _physicalModel_new();
+        
+        vec3 targetRotation;
+        targetRotation.x = testCase.target_rotation.x;
+        targetRotation.y = testCase.target_rotation.y;
+        targetRotation.z = testCase.target_rotation.z;
+        
+        _physicalModel_setTargetRotation(model, targetRotation, false);
+        
+        mTestSystem.setUnixTime(2);
+        
+        vec3 accelerometer = _physicalModel_getAccelerometer(model);
+        
+        EXPECT_NEAR(testCase.expected_acceleration.x,
+                    accelerometer.x, 0.01f);
+        EXPECT_NEAR(testCase.expected_acceleration.y,
+                    accelerometer.y, 0.01f);
+        EXPECT_NEAR(testCase.expected_acceleration.z,
+                    accelerometer.z, 0.01f);
+        
+        _physicalModel_free(model);
+    }
+}
+
+TEST(PhysicalModel, GravityOnlyAcceleration) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(1);
+    
+    PhysicalModel* model = _physicalModel_new();
+    
+    vec3 targetPosition;
+    targetPosition.x = 2.0f;
+    targetPosition.y = 3.0f;
+    targetPosition.z = 4.0f;
+    // at 1 second we move the target to (2, 3, 4)
+    _physicalModel_setTargetPosition(model, targetPosition, false);
+    
+    mTestSystem.setUnixTime(2);
+    // at 2 seconds the target is still at (2, 3, 4);
+    _physicalModel_setTargetPosition(model, targetPosition, false);
+    
+    // the acceleration is expected to be close to zero at this point.
+    vec3 currentAcceleration = _physicalModel_getAccelerometer(model);
+    EXPECT_NEAR(currentAcceleration.x, 0.f, 0.01f);
+    EXPECT_NEAR(currentAcceleration.y, 9.81f, 0.01f);
+    EXPECT_NEAR(currentAcceleration.z, 0.f, 0.01f);
+    
+    _physicalModel_free(model);
+}
+
+TEST(PhysicalModel, NonInstantaneousRotation) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(0);
+    PhysicalModel* model = _physicalModel_new();
+    
+    vec3 startRotation;
+    startRotation.x = 0.f;
+    startRotation.y = 0.f;
+    startRotation.z = 0.f;
+    _physicalModel_setTargetRotation(model, startRotation, true);
+    
+    mTestSystem.setUnixTime(1);
+    vec3 newRotation;
+    newRotation.x = 180.0f;
+    newRotation.y = 0.0f;
+    newRotation.z = 0.0f;
+    _physicalModel_setTargetRotation(model, newRotation, false);
+    
+    vec3 currentGyro = _physicalModel_getGyroscope(model);
+    EXPECT_LE(currentGyro.x, -0.01f);
+    EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
+    EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
+}
+
+TEST(PhysicalModel, InstantaneousRotation) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    mTestSystem.setLiveUnixTime(false);
+    mTestSystem.setUnixTime(0);
+    PhysicalModel* model = _physicalModel_new();
+    
+    vec3 startRotation;
+    startRotation.x = 0.f;
+    startRotation.y = 0.f;
+    startRotation.z = 0.f;
+    _physicalModel_setTargetRotation(model, startRotation, true);
+    
+    mTestSystem.setUnixTime(1);
+    vec3 newRotation;
+    newRotation.x = 180.0f;
+    newRotation.y = 0.0f;
+    newRotation.z = 0.0f;
+    _physicalModel_setTargetRotation(model, newRotation, true);
+    
+    vec3 currentGyro = _physicalModel_getGyroscope(model);
+    EXPECT_NEAR(currentGyro.x, 0.0, 0.000001f);
+    EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
+    EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
+}
