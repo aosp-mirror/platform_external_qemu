@@ -439,7 +439,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>334</y>
+       <y>410</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -464,7 +464,7 @@
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>314</y>
+       <y>390</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -581,6 +581,69 @@
      <property name="report_metrics" stdset="0">
       <bool>false</bool>
      </property>
+    </widget>
+    <widget class="QGroupBox" name="saveOnExitTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>314</y>
+       <width>281</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border: 0px;</string>
+     </property>
+     <property name="title">
+      <string>Save quick-boot state on exit for this AVD</string>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="set_saveSnapshotOnExit">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>334</y>
+       <width>281</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">padding: 3px 3px 3px 3px;</string>
+     </property>
+     <property name="maxVisibleItems">
+      <number>3</number>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+     <item>
+      <property name="text">
+       <string>Yes</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>No</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Ask</string>
+      </property>
+     </item>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
