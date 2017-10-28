@@ -17,6 +17,7 @@
 #include <QtWidgets>
 
 #include "android/android.h"
+#include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
@@ -509,7 +510,60 @@ void ToolWindow::on_back_button_released() {
     handleUICommand(QtUICommand::BACK, false);
 }
 
+void ToolWindow::decideToSaveSnapshot() {
+    // Check the UI setting
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (!avdPath) {
+        // Can't find the setting! Default to 'save.'
+        android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        return;
+    }
+    QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+    Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_VALUE saveOnExit_pref =
+        static_cast<Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_VALUE>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ALWAYS).toInt());
+
+    if (saveOnExit_pref == Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ALWAYS) {
+        android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        return;
+    }
+    if (saveOnExit_pref == Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_NEVER) {
+        android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        return;
+    }
+    // The UI setting is ASK.
+    // But don't ask if the command line was used. That overrides the UI.
+    if (android_cmdLineOptions->no_snapshot_save) {
+        android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+        return;
+    }
+
+    QMessageBox msgBox(QMessageBox::NoIcon,
+                       nullptr, // No title
+                       "Do you want to resume from the current state on the next quick boot?",
+                       0,
+                       this,
+                       Qt::FramelessWindowHint);
+
+    // Note: The order of 'addButton' determines the return value.
+    //       The 'Role' determines where the button appears in the
+    //       message box.
+    msgBox.addButton("NO",  QMessageBox::RejectRole); // Button 0
+    msgBox.addButton("YES", QMessageBox::AcceptRole); // Button 1
+    int selection = msgBox.exec();
+    if (selection == 0) {
+        android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+    } else {
+        android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+    }
+}
+
 void ToolWindow::on_close_button_clicked() {
+    decideToSaveSnapshot();
     parentWidget()->close();
 }
 

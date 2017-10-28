@@ -95,6 +95,7 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     initProxy();
 
+    // Crash reporting
     Ui::Settings::CRASHREPORT_PREFERENCE_VALUE report_pref =
         static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
             settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
@@ -122,6 +123,45 @@ SettingsPage::SettingsPage(QWidget* parent)
             break;
     }
 
+    // Save snapshot on exit
+    // This setting belongs to the AVD, not to the entire Emulator.
+    Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_VALUE saveOnExit_pref =
+            Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ALWAYS;
+
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        saveOnExit_pref = static_cast<Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_VALUE>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ALWAYS).toInt());
+    }
+    switch (saveOnExit_pref) {
+        case Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ALWAYS:
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_ALWAYS);
+            break;
+        case Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ASK:
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_ASK);
+            break;
+        case Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_NEVER:
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_NEVER);
+            break;
+        default:
+            fprintf(stderr,
+                    "%s: warning: unknown 'Save snapshot on exit' preference value 0x%x. "
+                    "Setting to Always.\n",
+                    __func__, (unsigned int)saveOnExit_pref);
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_ALWAYS);
+            break;
+    }
+
+    // OpenGL ES renderer
     for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
         mUi->set_glesBackendPrefComboBox->setItemData(i, QVariant(i));
     }
@@ -413,6 +453,32 @@ void SettingsPage::on_set_crashReportPrefComboBox_currentIndexChanged(int index)
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
     } else if (index == Ui::Settings::CRASHREPORT_COMBOBOX_ASK) {
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+    }
+}
+
+void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int index) {
+    int preferenceValue;
+
+    switch(index) {
+        case Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_NEVER:
+            preferenceValue = Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_NEVER;
+            break;
+        case Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_ASK:
+            preferenceValue = Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ASK;
+            break;
+        default:
+        case Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_ALWAYS:
+            preferenceValue = Ui::Settings::SAVE_SNAPSHOT_ON_EXIT_PREFERENCE_ALWAYS;
+            break;
+    }
+
+    // Save for only this AVD
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        avdSpecificSettings.setValue(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT, preferenceValue);
     }
 }
 

@@ -99,7 +99,9 @@ typedef enum {
     /* use to wipe the system image with new initial values */
     AVDINFO_WIPE_SYSTEM = (1 << 4),
     /* use to ignore ignore state snapshot image (default or provided) */
-    AVDINFO_NO_SNAPSHOTS = (1 << 5),
+    AVDINFO_NO_SNAPSHOT_LOAD = (1 << 5),
+    /* use to ignore prevent saving state on exit (set by the UI) */
+    AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT = (1 << 6),
 } AvdFlags;
 
 typedef struct {

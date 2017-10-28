@@ -266,3 +266,21 @@ QToolTip {
     background-color: #ffffff;
     color: #000000;
 }
+QMessageBox {
+    background-color: %%TAB_DARKENED_COLOR%%; /* Pop-up background */
+}
+QMessageBox QLabel { /* The message part */
+    color: %%BUTTON_COLOR%%; /* Text color */
+    background: %%TAB_DARKENED_COLOR%%;
+    min-width: 400px;
+    max-width: 400px;
+    min-height: 100px;
+    max-height: 100px;
+}
+QMessageBox QPushButton {
+    border: none;
+    background: %%TAB_DARKENED_COLOR%%; /* Button background */
+    color: %%TOOL_COLOR%%; /* Text color */
+    padding-left: 12px;
+    padding-right: 12px;
+}
