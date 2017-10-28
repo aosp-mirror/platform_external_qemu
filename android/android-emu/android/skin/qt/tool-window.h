@@ -106,6 +106,7 @@ private:
     bool isExiting() const {
         return mIsExiting;
     }
+    bool askWhetherToSaveSnapshot();
 
     void showOrRaiseExtendedWindow(ExtendedWindowPane pane);
 
