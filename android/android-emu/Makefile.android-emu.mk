@@ -414,7 +414,9 @@ LOCAL_SRC_FILES := \
     android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
+    android/physics/AmbientEnvironment.cpp \
     android/physics/InertialModel.cpp \
+    android/physics/PhysicalModel.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
     android/protobuf/ProtobufLogging.cpp \
@@ -697,7 +699,9 @@ LOCAL_SRC_FILES := \
   android/opengl/emugl_config_unittest.cpp \
   android/opengl/GpuFrameBridge_unittest.cpp \
   android/opengl/gpuinfo_unittest.cpp \
+  android/physics/AmbientEnvironment_unittest.cpp \
   android/physics/InertialModel_unittest.cpp \
+  android/physics/PhysicalModel_unittest.cpp \
   android/proxy/proxy_common_unittest.cpp \
   android/proxy/ProxyUtils_unittest.cpp \
   android/qt/qt_path_unittest.cpp \

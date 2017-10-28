@@ -30,7 +30,10 @@ static_assert(WINDOW_MESSAGE_ERROR == int(Ui::OverlayMessageIcon::Error),
 
 static const QAndroidEmulatorWindowAgent sQAndroidEmulatorWindowAgent = {
         .getEmulatorWindow = emulator_window_get,
-        .rotate90Clockwise = emulator_window_rotate_90_clockwise,
+        .rotate90Clockwise =
+                [] {
+                    return emulator_window_rotate_90(true);
+                },
         .rotate = emulator_window_rotate,
         .getRotation =
                 [] {
