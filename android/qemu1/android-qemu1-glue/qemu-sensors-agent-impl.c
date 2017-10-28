@@ -14,16 +14,34 @@
 
 #include "android/hw-sensors.h"
 
-int sensor_set(int sensorId, float a, float b, float c) {
-    return android_sensors_set(sensorId, a, b, c);
+int physical_parameter_target_set(
+        int parameterId, float a, float b, float c, int interpolation_method) {
+    return android_physical_model_set(
+            parameterId, a, b, c, interpolation_method);
+}
+
+int physical_parameter_target_get(
+        int parameterId, float *a, float *b, float *c) {
+    return android_physical_model_get(parameterId, a, b, c);
+}
+
+int sensor_override_set(int sensorId, float a, float b, float c) {
+    return android_sensors_override_set(sensorId, a, b, c);
 }
 
 int sensor_get(int sensorId, float *a, float *b, float *c) {
     return android_sensors_get(sensorId, a, b, c);
 }
 
+int physical_state_agent_set(const struct QAndroidPhysicalStateAgent* agent) {
+    return android_physical_agent_set(agent);
+}
+
 static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
-    .setSensor = sensor_set,
-    .getSensor = sensor_get};
+    .setPhysicalParameterTarget = physical_parameter_target_set,
+    .getPhysicalParameterTarget = physical_parameter_target_get,
+    .setSensorOverride = sensor_override_set,
+    .getSensor = sensor_get,
+    .setPhysicalStateAgent = physical_state_agent_set};
 const QAndroidSensorsAgent* const gQAndroidSensorsAgent =
     &sQAndroidSensorsAgent;

@@ -414,7 +414,9 @@ LOCAL_SRC_FILES := \
     android/opengl/OpenglEsPipe.cpp \
     android/opengles.cpp \
     android/openssl-support.cpp \
+    android/physics/AmbientEnvironment.cpp \
     android/physics/InertialModel.cpp \
+    android/physics/PhysicalModel.cpp \
     android/process_setup.cpp \
     android/protobuf/DelimitedSerialization.cpp \
     android/protobuf/ProtobufLogging.cpp \

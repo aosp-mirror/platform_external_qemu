@@ -37,8 +37,7 @@ TEST(InertialModel, DefaultSensorValues) {
     mTestSystem.setUnixTime(1);
     InertialModel inertialModel;
     EXPECT_EQ(glm::vec3(0.f, 9.81f, 0.f), inertialModel.getAcceleration());
-    EXPECT_EQ(glm::vec3(1.f, 0.f, 0.f), inertialModel.getMagneticVector());
-    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getGyroscope());
+    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getRotationalVelocity());
 }
 
 TEST(InertialModel, ConvergeToPosition) {
@@ -56,13 +55,13 @@ TEST(InertialModel, ConvergeToPosition) {
     EXPECT_NEAR(targetPosition.z, currentPosition.z, 0.01f);
 }
 
-TEST(InertialModel, AtRestGyroscope) {
+TEST(InertialModel, AtRestRotationalVelocity) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
     mTestSystem.setUnixTime(1);
     InertialModel inertialModel;
     EXPECT_EQ(glm::vec3(0.0f, 0.0f, 0.0f),
-                 inertialModel.getGyroscope());
+                 inertialModel.getRotationalVelocity());
 }
 
 typedef struct GravityTestCase_ {
@@ -147,7 +146,7 @@ TEST(InertialModel, NonInstantaneousRotation) {
     mTestSystem.setUnixTime(1);
     glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
     inertialModel.setTargetRotation(newRotation, false);
-    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
     EXPECT_LE(currentGyro.x, -0.01f);
     EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
@@ -163,7 +162,7 @@ TEST(InertialModel, InstantaneousRotation) {
     mTestSystem.setUnixTime(1);
     glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
     inertialModel.setTargetRotation(newRotation, true);
-    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
     EXPECT_NEAR(currentGyro.x, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
