@@ -2603,7 +2603,8 @@ do_sensors_set( ControlClient client, char* args )
                 }
             }
 
-            status = android_sensors_set( sensor_id, fvalues[0], fvalues[1], fvalues[2] );
+            status = android_sensors_override_set(
+                    sensor_id, fvalues[0], fvalues[1], fvalues[2] );
             if (status != SENSOR_STATUS_OK)
                 goto SENSOR_STATUS_ERROR;
 
@@ -2712,6 +2713,211 @@ static const CommandDefRec fingerprint_commands[] =
     { "remove", "remove finger from the fingerprint sensor",
       "'remove' remove finger from the fingerprint sensor.\r\n",
       NULL, do_fingerprint_remove, NULL },
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
+/*****                        P H Y S I C S  C O M M A N D S                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+/* For physics user prompt string size.*/
+constexpr size_t kPhysicsInfoSize = 150;
+
+/* Get physical model data - (a,b,c) from physical parameter name */
+static int
+do_physical_param_get( ControlClient client, char* args )
+{
+    if (! args) {
+        control_write( client, "KO: Usage: \"get <physics_parameter_name>\"\n" );
+        return -1;
+    }
+
+    char buffer[kPhysicsInfoSize] = { 0 };
+
+    int status = PHYSICAL_PARAMETER_STATUS_UNKNOWN;
+    char physical_param_name[strlen(args) + 1];
+    if (1 != sscanf( args, "%s", &physical_param_name[0] ))
+        goto PHYSICS_STATUS_ERROR;
+
+    {
+        int physical_param_id =
+                android_physical_model_get_parameter_id_from_name( physical_param_name );
+        if (physical_param_id < 0) {
+            status = physical_param_id;
+            goto PHYSICS_STATUS_ERROR;
+        }
+
+        // intentional block with no conditional.
+        {
+            float a, b, c;
+            status = android_physical_model_get( physical_param_id, &a, &b, &c );
+            if (status != PHYSICAL_PARAMETER_STATUS_OK) {
+                goto PHYSICS_STATUS_ERROR;
+            }
+
+            snprintf( buffer, sizeof(buffer), "%s = %g:%g:%g\r\n", physical_param_name, a, b, c );
+            do_control_write( client, buffer );
+            return 0;
+        }
+    }
+
+PHYSICS_STATUS_ERROR:
+    switch(status) {
+    case PHYSICAL_PARAMETER_STATUS_NO_SERVICE:
+        snprintf( buffer, sizeof(buffer), "KO: No physical model service found!\r\n" );
+        break;
+    case PHYSICAL_PARAMETER_STATUS_UNKNOWN:
+        snprintf( buffer, sizeof(buffer),
+                "KO: unknown physical parameter name: %s, run 'physics list' to get available physical parameters.\r\n", physical_param_name );
+        break;
+    default:
+        snprintf( buffer, sizeof(buffer), "KO: '%s' physical parameter: exception happened.\r\n", physical_param_name );
+    }
+    do_control_write( client, buffer );
+    return -1;
+}
+
+/* set physical param target value - (a,b,c) from physical param name */
+static int
+do_physical_param_set( ControlClient client, char* args )
+{
+    if (! args) {
+        control_write( client, "KO: Usage: \"set <physical_parameter_name> <value-a>[:<value-b>[:<value-c>]]\"\n" );
+        return -1;
+    }
+
+    char buffer[kPhysicsInfoSize] = { 0 };
+
+    int status;
+    char* physical_param_name;
+    char* value;
+    char* args_dup = strdup( args );
+    if (args_dup == NULL) {
+        control_write( client, "KO: Memory allocation failed.\n" );
+        return -1;
+    }
+    char* p = args_dup;
+
+    /* Parsing the args to get physical param name string */
+    while (*p && isspace(*p)) p++;
+    if (*p == 0)
+        goto INPUT_ERROR;
+    physical_param_name = p;
+
+    /* Parsing the args to get value string */
+    while (*p && (! isspace(*p))) p++;
+    if (*p == 0 || *(p + 1) == 0/* make sure value isn't NULL */) {
+        goto INPUT_ERROR;
+    }
+    *p = 0;
+    value = p + 1;
+
+    if (! (strlen(physical_param_name) && strlen(value))) {
+        goto INPUT_ERROR;
+    }
+
+    // intentional block with no conditional
+    {
+        int physical_param_id = android_physical_model_get_parameter_id_from_name( physical_param_name );
+        if (physical_param_id < 0) {
+            status = physical_param_id;
+            goto PHYSICS_STATUS_ERROR;
+        } else {
+            float fvalues[3];
+            status = android_physical_model_get( physical_param_id, &fvalues[0], &fvalues[1], &fvalues[2] );
+            if (status != PHYSICAL_PARAMETER_STATUS_OK)
+                goto PHYSICS_STATUS_ERROR;
+
+            {
+                /* Parsing the value part to get the physical parameter values(a, b, c) */
+                int i;
+                char* pnext;
+                char* pend = value + strlen(value);
+                for (i = 0; i < 3; i++, value = pnext + 1) {
+                    pnext=strchr( value, ':' );
+                    if (pnext) {
+                        *pnext = 0;
+                    } else {
+                        pnext = pend;
+                    }
+
+                    if (pnext > value) {
+                        if (1 != sscanf( value,"%g", &fvalues[i] ))
+                            goto INPUT_ERROR;
+                    }
+                }
+            }
+
+            status = android_physical_model_set(
+                    physical_param_id, fvalues[0], fvalues[1], fvalues[2],
+                    PHYSICAL_INTERPOLATION_STEP);
+            if (status != PHYSICAL_PARAMETER_STATUS_OK) {
+                goto PHYSICS_STATUS_ERROR;
+            }
+
+            free( args_dup );
+            return 0;
+        }
+    }
+
+PHYSICS_STATUS_ERROR:
+    switch(status) {
+    case PHYSICAL_PARAMETER_STATUS_NO_SERVICE:
+        snprintf( buffer, sizeof(buffer), "KO: No physical model service found!\r\n" );
+        break;
+    case PHYSICAL_PARAMETER_STATUS_UNKNOWN:
+        snprintf( buffer, sizeof(buffer),
+                "KO: unknown physical parameter name: %s, run 'physics list' to get available physical parameters.\r\n", physical_param_name );
+        break;
+    default:
+        snprintf( buffer, sizeof(buffer), "KO: '%s' physical parameter: exception happened.\r\n", physical_param_name );
+    }
+    do_control_write( client, buffer );
+    free( args_dup );
+    return -1;
+
+INPUT_ERROR:
+    control_write( client, "KO: Usage: \"set <physical_param_name> <value-a>[:<value-b>[:<value-c>]]\"\n" );
+    free( args_dup );
+    return -1;
+}
+
+/* get all available physical parameter names. */
+static int
+do_physical_params_list( ControlClient client, char* args )
+{
+    uint8_t id;
+    char buffer[kPhysicsInfoSize] = { 0 };
+
+    for(id = 0; id < MAX_PHYSICAL_PARAMETERS; id++) {
+        snprintf( buffer, sizeof(buffer), "%s\n",
+                android_physical_model_get_parameter_name_from_id(id) );
+        control_write( client, buffer );
+    }
+
+    return 0;
+}
+
+/* Physics commands for get/set physical parameter values and get physical parameter names. */
+static const CommandDefRec physics_commands[] =
+{
+    { "list", "list all physical parameters.",
+      "'list': list all physical parameters.\r\n",
+      NULL, do_physical_params_list, NULL },
+
+    { "get", "get physical parameter target values",
+      "'get <physical_param_name>' returns the target values of a given physical parameter.\r\n",
+      NULL, do_physical_param_get, NULL },
+
+    { "set", "set physical parameter target values",
+      "'set <physical_param_name> <value-a>[:<value-b>[:<value-c>]]' set the values of a given physical parameter.\r\n",
+      NULL, do_physical_param_set, NULL },
+
     { NULL, NULL, NULL, NULL, NULL, NULL }
 };
 
@@ -2895,6 +3101,11 @@ extern const CommandDefRec main_commands[] = {
         {"finger", "manage emulator finger print",
          "allows you to touch the emulator finger print sensor\r\n", NULL, NULL,
          fingerprint_commands},
+
+        {"physics", "control the physical model parameters",
+         "allows you set target physical parameters that are used to drive "
+         "the simulated sensor values.\r\n", NULL, NULL,
+         physics_commands},
 
         {"debug", "control the emulator debug output tags", NULL, NULL,
          do_debug},

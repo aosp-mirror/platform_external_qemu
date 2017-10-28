@@ -31,14 +31,13 @@ TEST(InertialModel, DefaultPosition) {
     EXPECT_EQ(glm::quat(1.f, 0.f, 0.f, 0.f), inertialModel.getRotation());
 }
 
-TEST(InertialModel, DefaultSensorValues) {
+TEST(InertialModel, DefaultAccelerationAndRotationalVelocity) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
     mTestSystem.setUnixTime(1);
     InertialModel inertialModel;
-    EXPECT_EQ(glm::vec3(0.f, 9.81f, 0.f), inertialModel.getAcceleration());
-    EXPECT_EQ(glm::vec3(1.f, 0.f, 0.f), inertialModel.getMagneticVector());
-    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getGyroscope());
+    EXPECT_EQ(glm::vec3(0.f, 0.0f, 0.f), inertialModel.getAcceleration());
+    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getRotationalVelocity());
 }
 
 TEST(InertialModel, ConvergeToPosition) {
@@ -47,7 +46,8 @@ TEST(InertialModel, ConvergeToPosition) {
     mTestSystem.setUnixTime(0);
     InertialModel inertialModel;
     glm::vec3 targetPosition(2.0f, 3.0f, 4.0f);
-    inertialModel.setTargetPosition(targetPosition, false);
+    inertialModel.setTargetPosition(
+            targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
     // After 1 second, check that we are close to the target position.
     mTestSystem.setUnixTime(1);
     glm::vec3 currentPosition(inertialModel.getPosition());
@@ -56,53 +56,14 @@ TEST(InertialModel, ConvergeToPosition) {
     EXPECT_NEAR(targetPosition.z, currentPosition.z, 0.01f);
 }
 
-TEST(InertialModel, AtRestGyroscope) {
+TEST(InertialModel, AtRestRotationalVelocity) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
     mTestSystem.setUnixTime(1);
     InertialModel inertialModel;
     EXPECT_EQ(glm::vec3(0.0f, 0.0f, 0.0f),
-                 inertialModel.getGyroscope());
+                 inertialModel.getRotationalVelocity());
 }
-
-typedef struct GravityTestCase_ {
-    glm::vec3 target_rotation;
-    glm::vec3 expected_acceleration;
-} GravityTestCase;
-
-const GravityTestCase gravityTestCases[] = {
-    {{0.0f, 0.0f, 0.0f}, {0.0f, 9.81f, 0.0f}},
-    {{90.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -9.81f}},
-    {{-90.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 9.81f}},
-    {{0.0f, 90.0f, 0.0f}, {0.0f, 9.81f, 0.0f}},
-    {{0.0f, 0.0f, 90.0f}, {9.81f, 0.0f, 0.0f}},
-    {{0.0f, 0.0f, -90.0f}, {-9.81f, 0.0f, 0.0f}},
-    {{0.0f, 0.0f, 180.0f}, {0.0f, -9.81f, 0.0f}},
-};
-
-TEST(InertialModel, GravityAcceleration) {
-    TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    for (const auto& testCase : gravityTestCases) {
-        mTestSystem.setUnixTime(1);
-        InertialModel inertialModel;
-        inertialModel.setTargetRotation(
-                glm::quat(testCase.target_rotation *
-                          (static_cast<float>(M_PI) / 180.0f)), false);
-        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
-        mTestSystem.setUnixTime(2);
-        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
-        EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getPosition());
-        glm::vec3 acceleration(inertialModel.getAcceleration());
-        EXPECT_NEAR(testCase.expected_acceleration.x,
-                    acceleration.x, 0.01f);
-        EXPECT_NEAR(testCase.expected_acceleration.y,
-                    acceleration.y, 0.01f);
-        EXPECT_NEAR(testCase.expected_acceleration.z,
-                    acceleration.z, 0.01f);
-    }
-}
-
 TEST(InertialModel, ZeroAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
@@ -110,10 +71,12 @@ TEST(InertialModel, ZeroAcceleration) {
     InertialModel inertialModel;
     glm::vec3 targetPosition(2.0f, 3.0f, 4.0f);
     // at 1 second we move the target to (2, 3, 4)
-    inertialModel.setTargetPosition(targetPosition, false);
+    inertialModel.setTargetPosition(
+            targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
     mTestSystem.setUnixTime(2);
     // at 2 seconds the target is still at (2, 3, 4);
-    inertialModel.setTargetPosition(targetPosition, false);
+    inertialModel.setTargetPosition(
+            targetPosition, PHYSICAL_INTERPOLATION_STEP);
     // the acceleration is expected to be close to zero at this point.
     glm::vec3 currentPosition(inertialModel.getPosition());
     EXPECT_NEAR(targetPosition.x, currentPosition.x, 0.01f);
@@ -127,7 +90,8 @@ TEST(InertialModel, ConvergeToRotation) {
     mTestSystem.setUnixTime(0);
     InertialModel inertialModel;
     glm::quat targetRotation(glm::vec3(90.f, 90.f, 90.f));
-    inertialModel.setTargetRotation(targetRotation, false);
+    inertialModel.setTargetRotation(
+            targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
     // After 1 second, check that we are close to the target rotation.
     mTestSystem.setUnixTime(1);
     glm::quat currentRotation(inertialModel.getRotation());
@@ -143,11 +107,13 @@ TEST(InertialModel, NonInstantaneousRotation) {
     mTestSystem.setUnixTime(0);
     InertialModel inertialModel;
     glm::quat startRotation(glm::vec3(0.f, 0.f, 0.f));
-    inertialModel.setTargetRotation(startRotation, true);
+    inertialModel.setTargetRotation(
+            startRotation, PHYSICAL_INTERPOLATION_STEP);
     mTestSystem.setUnixTime(1);
     glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
-    inertialModel.setTargetRotation(newRotation, false);
-    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    inertialModel.setTargetRotation(
+            newRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+    glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
     EXPECT_LE(currentGyro.x, -0.01f);
     EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
@@ -159,11 +125,13 @@ TEST(InertialModel, InstantaneousRotation) {
     mTestSystem.setUnixTime(0);
     InertialModel inertialModel;
     glm::quat startRotation(glm::vec3(0.f, 0.f, 0.f));
-    inertialModel.setTargetRotation(startRotation, true);
+    inertialModel.setTargetRotation(
+            startRotation, PHYSICAL_INTERPOLATION_STEP);
     mTestSystem.setUnixTime(1);
     glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
-    inertialModel.setTargetRotation(newRotation, true);
-    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    inertialModel.setTargetRotation(
+            newRotation, PHYSICAL_INTERPOLATION_STEP);
+    glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
     EXPECT_NEAR(currentGyro.x, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);

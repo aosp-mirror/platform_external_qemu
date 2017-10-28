@@ -104,7 +104,6 @@ static void _emulator_window_update_rotation(SkinUI* ui, SkinRotation rotation) 
 }
 
 static void emulator_window_set_device_orientation(SkinRotation rotation) {
-    android_sensors_set_coarse_orientation((AndroidCoarseOrientation) rotation);
     if (qemulator->ui) {
         // Make sure UI knows about the updated orientation.
         _emulator_window_update_rotation(qemulator->ui, rotation);
@@ -465,7 +464,24 @@ emulator_window_get_layout(EmulatorWindow* emulator)
 
 bool emulator_window_rotate_90_clockwise(void) {
     if (qemulator->ui) {
-        skin_ui_select_next_layout(qemulator->ui);
+        const SkinLayout* layout = skin_ui_get_next_layout(qemulator->ui);
+        AndroidCoarseOrientation coarseOrientation =
+                ANDROID_COARSE_PORTRAIT;
+        switch (layout->orientation) {
+            case SKIN_ROTATION_0:
+                coarseOrientation = ANDROID_COARSE_PORTRAIT;
+                break;
+            case SKIN_ROTATION_90:
+                coarseOrientation = ANDROID_COARSE_REVERSE_LANDSCAPE;
+                break;
+            case SKIN_ROTATION_180:
+                coarseOrientation = ANDROID_COARSE_REVERSE_PORTRAIT;
+                break;
+            case SKIN_ROTATION_270:
+                coarseOrientation = ANDROID_COARSE_LANDSCAPE;
+                break;
+        }
+        android_sensors_set_coarse_orientation(coarseOrientation);
         return true;
     }
     return false;
