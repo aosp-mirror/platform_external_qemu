@@ -329,16 +329,49 @@ bool Quickboot::load(StringView name) {
 }
 
 bool Quickboot::save(StringView name) {
+    // TODO: detect if emulator was restarted since loading.
+    const bool shouldTrySaving =
+            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted();
+
+    if (!shouldTrySaving) {
+        // Emulator hasn't booted yet, and this isn't a quickboot-loaded
+        // session. Don't save.
+        dwarning("Skipping state saving as emulator not finished booting.");
+        reportFailedSave(
+                pb::EmulatorQuickbootSave::
+                        EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED);
+        return false;
+    }
+
+    mLivenessTimer->stop();
+
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_FEATURE);
         return false;
     }
+
+    if (android_cmdLineOptions->no_snapshot_save) {
+        // Command line says not to save
+        mWindow.showMessage("Discarding the changed state: command-line flag",
+                            WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+
+        dwarning("Discarding the changed state (command-line flag).");
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE);
+        return false;
+    }
+
+    if (android_avdParams->flags & AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT) {
+        // UI says not to save
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_DISABLED_UI);
+        return false;
+    }
+
     if (name.empty()) {
         name = kDefaultBootSnapshot;
     }
-
-    mLivenessTimer->stop();
 
     const int kMinUptimeForSavingMs = 1500;
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
@@ -350,18 +383,7 @@ bool Quickboot::save(StringView name) {
     //  of its invalidation in it - this way emulator will be able to give a
     //  better idea on the next clean boot other than "no snapshot".
 
-    // TODO: detect if emulator was restarted since loading.
-    const bool shouldTrySaving =
-            mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted();
-
-    if (android_cmdLineOptions->no_snapshot_save) {
-        mWindow.showMessage("Discarding the changed state: command-line flag",
-                            WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
-
-        dwarning("Discarding the changed state (command-line flag).");
-        reportFailedSave(pb::EmulatorQuickbootSave::
-                                 EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE);
-    } else if (!emuglConfig_current_renderer_supports_snapshot()) {
+    if (!emuglConfig_current_renderer_supports_snapshot()) {
         if (shouldTrySaving && ranLongEnoughForSaving) {
             // Preserve the state changes - we've ran for a while now
             // and the AVD state is different from what could be saved in
@@ -384,47 +406,38 @@ bool Quickboot::save(StringView name) {
         }
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
-    } else {
-        if (ranLongEnoughForSaving) {
-            if (shouldTrySaving) {
-                dprint("Saving state on exit with session uptime %d ms",
-                       int(sessionUptimeMs));
-                Stopwatch sw;
-                auto res = Snapshotter::get().save(name.c_str());
-                if (res == OperationStatus::Ok) {
-                    reportSuccessfulSave(name, sw.elapsedUs() / 1000,
-                                         sessionUptimeMs);
-                } else {
-                    mWindow.showMessage(
-                            "State saving failed, cleaning out the snapshot",
-                            WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
-
-                    dwarning("State saving failed, cleaning out the snapshot.");
-                    Snapshotter::get().deleteSnapshot(name.c_str());
-                    reportFailedSave(pb::EmulatorQuickbootSave::
-                                             EMULATOR_QUICKBOOT_SAVE_FAILED);
-                }
-            } else {
-                // Emulator was up for a while but it hasn't booted yet, and
-                // this isn't a quickboot-loaded session. Discard whatever
-                // state we've got.
-                dwarning(
-                        "Skipping state saving as emulator not finished "
-                        "booting.");
-                reportFailedSave(
-                        pb::EmulatorQuickbootSave::
-                                EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
-            }
-        } else {
-            dwarning(
-                    "Skipping state saving as emulator ran for just %d "
-                    "ms (<%d ms)",
-                    int(sessionUptimeMs), kMinUptimeForSavingMs);
-            reportFailedSave(
-                    pb::EmulatorQuickbootSave::
-                            EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME);
-        }
+        return false;
     }
+
+    if (!ranLongEnoughForSaving) {
+        dwarning(
+                "Skipping state saving as emulator ran for just %d "
+                "ms (<%d ms)",
+                int(sessionUptimeMs), kMinUptimeForSavingMs);
+        reportFailedSave(
+                pb::EmulatorQuickbootSave::
+                        EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME);
+        return false;
+    }
+
+    dprint("Saving state on exit with session uptime %d ms",
+           int(sessionUptimeMs));
+    Stopwatch sw;
+    auto res = Snapshotter::get().save(name.c_str());
+    if (res != OperationStatus::Ok) {
+        mWindow.showMessage(
+                "State saving failed, cleaning out the snapshot",
+                WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
+
+        dwarning("State saving failed, cleaning out the snapshot.");
+        Snapshotter::get().deleteSnapshot(name.c_str());
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_FAILED);
+        return false;
+    }
+
+    reportSuccessfulSave(name, sw.elapsedUs() / 1000,
+                         sessionUptimeMs);
     return true;
 }
 
