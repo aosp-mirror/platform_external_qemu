@@ -14,6 +14,7 @@
 
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"
+#include "android/physics/PhysicalModel.h"
 #include "android/sensors-port.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
@@ -51,11 +52,15 @@
  *
  */
 
+/* the version number used for compatibility checks when saving and loading */
+#define SENSOR_FILE_VERSION 0
+
+
 static const struct {
     const char* name;
     int id;
 } _sSensors[MAX_SENSORS] = {
-#define SENSOR_(x, y) {y, ANDROID_SENSOR_##x},
+#define SENSOR_(x,y,z,v,w) {y, ANDROID_SENSOR_##x},
         SENSORS_LIST
 #undef SENSOR_
 };
@@ -76,53 +81,39 @@ static const char* _sensorNameFromId(int id) {
     return NULL;
 }
 
-/* For common Sensor Value struct */
-typedef struct { float a, b, c; } SensorValues;
+static const struct {
+    const char* name;
+    int id;
+} _sPhysicalParameters[MAX_PHYSICAL_PARAMETERS] = {
+#define PHYSICAL_PARAMETER_(x,y,z,w) {y, PHYSICAL_PARAMETER_##x},
+    PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+};
 
-typedef struct { float x, y, z; } Acceleration;
+static int _physicalParamIdFromName(const char* name) {
+    int nn;
+    for (nn = 0; nn < MAX_PHYSICAL_PARAMETERS; nn++)
+        if (!strcmp(_sPhysicalParameters[nn].name, name))
+            return _sPhysicalParameters[nn].id;
+    return -1;
+}
 
-typedef struct { float x, y, z; } Gyroscope;
-
-typedef struct { float x, y, z; } MagneticField;
+static const char* _physicalParamNameFromId(int id) {
+    int nn;
+    for (nn = 0; nn < MAX_SENSORS; nn++)
+        if (id == _sPhysicalParameters[nn].id)
+            return _sPhysicalParameters[nn].name;
+    return NULL;
+}
 
 typedef struct {
-    float azimuth;
-    float pitch;
-    float roll;
-} Orientation;
-
-typedef struct { float celsius; } Temperature;
-
-typedef struct { float value; } Proximity;
-
-typedef struct { float value; } Light;
-
-typedef struct { float value; } Pressure;
-
-typedef struct { float value; } Humidity;
-
-typedef struct {
-    bool valid;
+    unsigned long measurement_id;
     int length;
     char value[128];
 } SerializedSensor;
 
 typedef struct {
     bool enabled;
-    union {
-        SensorValues value;
-        Acceleration acceleration;
-        Gyroscope gyroscope;
-        MagneticField magnetic;
-        Orientation orientation;
-        Temperature temperature;
-        Proximity proximity;
-        Light light;
-        Pressure pressure;
-        Humidity humidity;
-        MagneticField magnetic_uncalibrated;
-        Gyroscope gyroscope_uncalibrated;
-    } u;
     SerializedSensor serialized;
 } Sensor;
 
@@ -181,6 +172,7 @@ typedef struct HwSensorClient HwSensorClient;
 typedef struct {
     QemudService* service;
     Sensor sensors[MAX_SENSORS];
+    PhysicalModel* physical_model;
     HwSensorClient* clients;
     AndroidSensorsPort* sensors_port;
 } HwSensors;
@@ -300,100 +292,57 @@ static void _hwSensorClient_sanitizeSensorString(char* string, int maxlen) {
     }
 }
 
-// a function to serialize the sensor value based on its ID
-static void serializeSensorValue(Sensor* sensor, AndroidSensor sensor_id) {
-    switch (sensor_id) {
-        case ANDROID_SENSOR_ACCELERATION: {
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "acceleration:%g:%g:%g", sensor->u.acceleration.x,
-                    sensor->u.acceleration.y, sensor->u.acceleration.z);
+static void serializeValue_float(Sensor* sensor, const char* format, float value) {
+    sensor->serialized.length = snprintf(
+            sensor->serialized.value,
+            sizeof(sensor->serialized.value),
+            format,
+            value);
+}
 
-            // TODO(grigoryj): debug output for investigating rotation bug
-            static float prev_acceleration[] = {0.0f, 0.0f, 0.0f};
-            if (VERBOSE_CHECK(rotation) &&
-                (prev_acceleration[0] != sensor->u.acceleration.x ||
-                 prev_acceleration[1] != sensor->u.acceleration.y ||
-                 prev_acceleration[2] != sensor->u.acceleration.z)) {
-                fprintf(stderr, "Sent %s to sensors HAL\n",
-                        sensor->serialized.value);
-                prev_acceleration[0] = sensor->u.acceleration.x;
-                prev_acceleration[1] = sensor->u.acceleration.y;
-                prev_acceleration[2] = sensor->u.acceleration.z;
-            }
-            break;
+static void serializeValue_vec3(Sensor* sensor, const char* format, vec3 value) {
+    sensor->serialized.length = snprintf(
+            sensor->serialized.value,
+            sizeof(sensor->serialized.value),
+            format,
+            value.x, value.y, value.z);
+}
+
+// a function to serialize the sensor value based on its ID
+static void serializeSensorValue(
+        PhysicalModel* physical_model,
+        Sensor* sensor,
+        AndroidSensor sensor_id) {
+    long measurement_id = -1L;
+    
+    switch (sensor_id) {
+#define ENUM_NAME(x) ANDROID_SENSOR_##x
+#define GET_FUNCTION_NAME(x) physicalModel_get##x
+#define SERIALIZE_VALUE_NAME(x) serializeValue_##x
+#define SENSOR_(x,y,z,v,w) case ENUM_NAME(x): {\
+            const v current_value = GET_FUNCTION_NAME(z)(\
+                    physical_model, &measurement_id);\
+            if (measurement_id != sensor->serialized.measurement_id) {\
+                SERIALIZE_VALUE_NAME(v)(sensor, w, current_value);\
+            }\
+            break;\
         }
-        case ANDROID_SENSOR_GYROSCOPE: {
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "gyroscope:%g:%g:%g", sensor->u.gyroscope.x,
-                    sensor->u.gyroscope.y, sensor->u.gyroscope.z);
-            break;
-        }
-        case ANDROID_SENSOR_MAGNETIC_FIELD:
-            /* NOTE: sensors HAL expects "magnetic", not "magnetic-field"
-             * name here.
-             */
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "magnetic:%g:%g:%g", sensor->u.magnetic.x,
-                    sensor->u.magnetic.y, sensor->u.magnetic.z);
-            break;
-        case ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED:
-            /* NOTE: sensors HAL expects "magnetic-uncalibrated",
-             * not "magnetic-field-uncalibrated" name here.
-             */
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "magnetic-uncalibrated:%g:%g:%g", sensor->u.magnetic_uncalibrated.x,
-                    sensor->u.magnetic_uncalibrated.y, sensor->u.magnetic_uncalibrated.z);
-            break;
-        case ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "gyroscope-uncalibrated:%g:%g:%g", sensor->u.gyroscope_uncalibrated.x,
-                    sensor->u.gyroscope_uncalibrated.y, sensor->u.gyroscope_uncalibrated.z);
-            break;
-        case ANDROID_SENSOR_ORIENTATION:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "orientation:%g:%g:%g", sensor->u.orientation.azimuth,
-                    sensor->u.orientation.pitch, sensor->u.orientation.roll);
-            break;
-        case ANDROID_SENSOR_TEMPERATURE:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "temperature:%g", sensor->u.temperature.celsius);
-            break;
-        case ANDROID_SENSOR_PROXIMITY:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "proximity:%g", sensor->u.proximity.value);
-            break;
-        case ANDROID_SENSOR_LIGHT:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "light:%g", sensor->u.light.value);
-            break;
-        case ANDROID_SENSOR_PRESSURE:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "pressure:%g", sensor->u.pressure.value);
-            break;
-        case ANDROID_SENSOR_HUMIDITY:
-            sensor->serialized.length = snprintf(
-                    sensor->serialized.value, sizeof(sensor->serialized.value),
-                    "humidity:%g", sensor->u.humidity.value);
-            break;
+SENSORS_LIST
+#undef SENSOR_
+#undef SERIALIZE_VALUE_NAME
+#undef GET_FUNCTION_NAME
+#undef ENUM_NAME
         default:
             assert(false);  // should never happen
             return;
     }
     assert(sensor->serialized.length < sizeof(sensor->serialized.value));
-    sensor->serialized.valid = true;
 
-    _hwSensorClient_sanitizeSensorString(sensor->serialized.value,
-                                         sensor->serialized.length);
+    if (measurement_id != sensor->serialized.measurement_id) {
+        _hwSensorClient_sanitizeSensorString(sensor->serialized.value,
+                                            sensor->serialized.length);
+    }
+    sensor->serialized.measurement_id = measurement_id;
 }
 
 /* this function is called periodically to send sensor reports
@@ -417,9 +366,8 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
             continue;
         }
         Sensor* sensor = &cl->sensors->sensors[sensor_id];
-        if (!sensor->serialized.valid) {
-            serializeSensorValue(sensor, sensor_id);
-        }
+        serializeSensorValue(
+                cl->sensors->physical_model, sensor, sensor_id);
         _hwSensorClient_send(cl, (uint8_t*)sensor->serialized.value,
                              sensor->serialized.length);
     }
@@ -588,162 +536,180 @@ static QemudClient* _hwSensors_connect(void* opaque,
     return client;
 }
 
+vec3 get_vec3_value(float a, float b, float c) {
+    vec3 result = {a, b, c};
+    return result;
+}
+
+float get_float_value(float a, float b, float c) {
+    return a;
+}
+
 /* change the value of the emulated sensor vector */
 static void _hwSensors_setSensorValue(HwSensors* h,
                                       int sensor_id,
                                       float a,
                                       float b,
                                       float c) {
-    Sensor* s = &h->sensors[sensor_id];
-
-    if (s->u.value.a != a || s->u.value.b != b || s->u.value.c != c) {
-        s->u.value.a = a;
-        s->u.value.b = b;
-        s->u.value.c = c;
-        s->serialized.valid = false;
+    switch (sensor_id) {
+#define OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
+#define GET_TYPE_VALUE_FUNCTION_NAME(x) get_##x##_value
+#define ENUM_NAME(x) ANDROID_SENSOR_##x
+#define SENSOR_(x,y,z,v,w) case ENUM_NAME(x):\
+            OVERRIDE_FUNCTION_NAME(z)(\
+                    h->physical_model,\
+                    GET_TYPE_VALUE_FUNCTION_NAME(v)(a, b, c));\
+            break;
+SENSORS_LIST
+#undef SENSOR_
+#undef ENUM_NAME
+#undef GET_TYPE_VALUE_FUNCTION_NAME
+#undef OVERRIDE_FUNCTION_NAME
+        default:
+            assert(false);  // should never happen
+            break;
     }
 }
 
-/* Saves available sensors to allow checking availability when loaded.
+void vec3_get_values(const vec3 value,
+                     float* out_a, float* out_b, float* out_c) {
+    *out_a = value.x;
+    *out_b = value.y;
+    *out_c = value.z;
+}
+
+void float_get_values(const float value,
+                      float* out_a, float* out_b, float* out_c) {
+    *out_a = value;
+    *out_b = 0.f;
+    *out_c = 0.f;
+}
+
+/* get the value of the emulated sensor vector */
+static void _hwSensors_getSensorValue(HwSensors* h,
+                                      int sensor_id,
+                                      float *a,
+                                      float *b,
+                                      float *c) {
+    long measurement_id;
+    switch (sensor_id) {
+#define GET_FUNCTION_NAME(x) physicalModel_get##x
+#define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_values
+#define ENUM_NAME(x) ANDROID_SENSOR_##x
+#define SENSOR_(x,y,z,v,w) case ENUM_NAME(x):\
+            TYPE_GET_VALUES_FUNCTION_NAME(v)(\
+                GET_FUNCTION_NAME(z)(h->physical_model, &measurement_id),\
+                a, b, c);\
+            break;
+SENSORS_LIST
+#undef SENSOR_
+#undef ENUM_NAME
+#undef TYPE_GET_VALUES_FUNCTION_NAME
+#undef GET_FUNCTION_NAME
+        default:
+            assert(false);  // should never happen
+            break;
+    }
+}
+
+/* change the value of the physical parameter */
+static void _hwSensors_setPhysicalParameterValue(HwSensors* h,
+                                                 int parameter_id,
+                                                 float a,
+                                                 float b,
+                                                 float c,
+                                                 int interpolation_mode) {
+    switch (parameter_id) {
+#define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
+#define GET_TYPE_VALUE_FUNCTION_NAME(x) get_##x##_value
+#define SET_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
+#define PHYSICAL_PARAMETER_(x,y,z,w) case ENUM_NAME(x):\
+            SET_TARGET_FUNCTION_NAME(z)(\
+                    h->physical_model,\
+                    GET_TYPE_VALUE_FUNCTION_NAME(w)(a, b, c),\
+                    interpolation_mode);\
+            break;
+PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+#undef SET_TARGET_FUNCTION_NAME
+#undef GET_TYPE_VALUE_FUNCTION_NAME
+#undef ENUM_NAME
+        default:
+            assert(false);  // should never happen
+            break;
+    }
+}
+
+/* get the value of the physical parameter */
+static void _hwSensors_getPhysicalParameterValue(HwSensors* h,
+                                                 int parameter_id,
+                                                 float* a,
+                                                 float* b,
+                                                 float* c) {
+    switch (parameter_id) {
+#define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
+#define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_values
+#define GET_TARGET_FUNCTION_NAME(x) physicalModel_getTarget##x
+#define PHYSICAL_PARAMETER_(x,y,z,w) case ENUM_NAME(x):\
+            TYPE_GET_VALUES_FUNCTION_NAME(w)(\
+                    GET_TARGET_FUNCTION_NAME(z)(h->physical_model),\
+                    a, b, c);\
+            break;
+PHYSICAL_PARAMETERS_LIST
+#undef SET_TARGET_FUNCTION_NAME
+#undef TYPE_GET_VALUES_FUNCTION_NAME
+#undef ENUM_NAME
+        default:
+            assert(false);  // should never happen
+            break;
+    }
+}
+
+/*
+ * Saves available sensors and physical state to allow checking availability
+ * when loaded.
  */
 static void _hwSensors_save(Stream* f, QemudService* sv, void* opaque) {
     HwSensors* h = opaque;
 
-    // number of sensors
+    /* save a version number for compatibility. */
+    stream_put_be32(f, SENSOR_FILE_VERSION);
+
+    /* number of sensors. */
     stream_put_be32(f, MAX_SENSORS);
     AndroidSensor sensor_id;
     for (sensor_id = 0; sensor_id < MAX_SENSORS; sensor_id++) {
         Sensor* s = &h->sensors[sensor_id];
         stream_put_be32(f, s->enabled);
-
-        /* this switch ensures that a warning is raised when a new sensor is
-         * added and is not added here as well.
-         */
-        switch (sensor_id) {
-            case ANDROID_SENSOR_ACCELERATION:
-                stream_put_float(f, s->u.acceleration.x);
-                stream_put_float(f, s->u.acceleration.y);
-                stream_put_float(f, s->u.acceleration.z);
-                break;
-            case ANDROID_SENSOR_GYROSCOPE:
-                stream_put_float(f, s->u.gyroscope.x);
-                stream_put_float(f, s->u.gyroscope.y);
-                stream_put_float(f, s->u.gyroscope.z);
-                break;
-            case ANDROID_SENSOR_MAGNETIC_FIELD:
-                stream_put_float(f, s->u.magnetic.x);
-                stream_put_float(f, s->u.magnetic.y);
-                stream_put_float(f, s->u.magnetic.z);
-                break;
-            case ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED:
-                stream_put_float(f, s->u.magnetic_uncalibrated.x);
-                stream_put_float(f, s->u.magnetic_uncalibrated.y);
-                stream_put_float(f, s->u.magnetic_uncalibrated.z);
-                break;
-            case ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED:
-                stream_put_float(f, s->u.gyroscope_uncalibrated.x);
-                stream_put_float(f, s->u.gyroscope_uncalibrated.y);
-                stream_put_float(f, s->u.gyroscope_uncalibrated.z);
-                break;
-            case ANDROID_SENSOR_ORIENTATION:
-                stream_put_float(f, s->u.orientation.azimuth);
-                stream_put_float(f, s->u.orientation.pitch);
-                stream_put_float(f, s->u.orientation.roll);
-                break;
-            case ANDROID_SENSOR_TEMPERATURE:
-                stream_put_float(f, s->u.temperature.celsius);
-                break;
-            case ANDROID_SENSOR_PROXIMITY:
-                stream_put_float(f, s->u.proximity.value);
-                break;
-            case ANDROID_SENSOR_LIGHT:
-                stream_put_float(f, s->u.light.value);
-                break;
-            case ANDROID_SENSOR_PRESSURE:
-                stream_put_float(f, s->u.pressure.value);
-                break;
-            case ANDROID_SENSOR_HUMIDITY:
-                stream_put_float(f, s->u.humidity.value);
-                break;
-
-            case MAX_SENSORS:
-                break;
-        }
     }
+
+    physicalModel_save(h->physical_model, f);
 }
 
 static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
     HwSensors* h = opaque;
 
+    /* load version number to check compatibility. */
+    const int32_t version_number = stream_get_be32(f);
+    if (version_number != SENSOR_FILE_VERSION) {
+        D("%s: cannot load: snapshot requires file version %d.  Saved file is version %d\n",
+          __FUNCTION__, SENSOR_FILE_VERSION, version_number);
+        return -EIO;
+    }
+
     /* check number of sensors */
-    int32_t num_sensors = stream_get_be32(f);
+    const int32_t num_sensors = stream_get_be32(f);
     if (num_sensors > MAX_SENSORS) {
         D("%s: cannot load: snapshot requires %d sensors, %d available\n",
           __FUNCTION__, num_sensors, MAX_SENSORS);
         return -EIO;
     }
 
-    /* load sensor state */
+    /* load sensor state, but ignore legacy values*/
     AndroidSensor sensor_id;
     for (sensor_id = 0; sensor_id < (AndroidSensor)num_sensors; sensor_id++) {
         Sensor* s = &h->sensors[sensor_id];
         s->enabled = stream_get_be32(f);
-
-        /* this switch ensures that a warning is raised when a new sensor is
-         * added and is not added here as well.
-         */
-        switch (sensor_id) {
-            case ANDROID_SENSOR_ACCELERATION:
-                s->u.acceleration.x = stream_get_float(f);
-                s->u.acceleration.y = stream_get_float(f);
-                s->u.acceleration.z = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_GYROSCOPE:
-                s->u.gyroscope.x = stream_get_float(f);
-                s->u.gyroscope.y = stream_get_float(f);
-                s->u.gyroscope.z = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_MAGNETIC_FIELD:
-                s->u.magnetic.x = stream_get_float(f);
-                s->u.magnetic.y = stream_get_float(f);
-                s->u.magnetic.z = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED:
-                s->u.magnetic_uncalibrated.x = stream_get_float(f);
-                s->u.magnetic_uncalibrated.y = stream_get_float(f);
-                s->u.magnetic_uncalibrated.z = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED:
-                s->u.gyroscope_uncalibrated.x = stream_get_float(f);
-                s->u.gyroscope_uncalibrated.y = stream_get_float(f);
-                s->u.gyroscope_uncalibrated.z = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_ORIENTATION:
-                s->u.orientation.azimuth = stream_get_float(f);
-                s->u.orientation.pitch = stream_get_float(f);
-                s->u.orientation.roll = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_TEMPERATURE:
-                s->u.temperature.celsius = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_PROXIMITY:
-                s->u.proximity.value = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_LIGHT:
-                s->u.light.value = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_PRESSURE:
-                s->u.pressure.value = stream_get_float(f);
-                break;
-            case ANDROID_SENSOR_HUMIDITY:
-                s->u.humidity.value = stream_get_float(f);
-                break;
-            case MAX_SENSORS:
-                break;
-        }
-
-        // Make sure we re-serialize it on the next tick.
-        s->serialized.valid = false;
     }
 
     /* The following is necessary when we resume a snaphost
@@ -752,19 +718,9 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
      */
     for (; sensor_id < MAX_SENSORS; sensor_id++) {
         h->sensors[sensor_id].enabled = false;
-        h->sensors[sensor_id].serialized.valid = false;
     }
 
-    return 0;
-}
-
-/* change the emulated proximity */
-static void _hwSensors_setProximity(HwSensors* h, float value) {
-    Sensor* s = &h->sensors[ANDROID_SENSOR_PROXIMITY];
-    if (s->u.proximity.value != value) {
-        s->u.proximity.value = value;
-        s->serialized.valid = false;
-    }
+    return physicalModel_load(h->physical_model, f);
 }
 
 /* change the coarse orientation (landscape/portrait) of the emulated device */
@@ -782,11 +738,6 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
      *
      * If the phone is completely vertical, rotating it will not do anything !
      */
-    const double g = 9.81;
-    const double angle = 20.0;
-    const double cos_angle = cos(angle / M_PI);
-    const double sin_angle = sin(angle / M_PI);
-
     if (VERBOSE_CHECK(rotation)) {
         fprintf(stderr, "setCoarseOrientation - HwSensors %p\n", h);
     }
@@ -795,8 +746,9 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Setting coarse orientation to portrait\n");
             }
-            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION, 0.,
-                                      g * cos_angle, g * sin_angle);
+            _hwSensors_setPhysicalParameterValue(h,
+                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, 0.f,
+                    PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_REVERSE_LANDSCAPE:
@@ -804,8 +756,9 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr,
                         "Setting coarse orientation to reverse landscape\n");
             }
-            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION,
-                                      -g * cos_angle, 0., -g * sin_angle);
+            _hwSensors_setPhysicalParameterValue(h,
+                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, -90.f,
+                    PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_REVERSE_PORTRAIT:
@@ -813,16 +766,18 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr,
                         "Setting coarse orientation to reverse portrait\n");
             }
-            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION, 0.,
-                                      -g * cos_angle, -g * sin_angle);
+            _hwSensors_setPhysicalParameterValue(h,
+                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, 180.f,
+                    PHYSICAL_INTERPOLATION_STEP);
             break;
 
         case ANDROID_COARSE_LANDSCAPE:
             if (VERBOSE_CHECK(rotation)) {
                 fprintf(stderr, "Setting coarse orientation to landscape\n");
             }
-            _hwSensors_setSensorValue(h, ANDROID_SENSOR_ACCELERATION,
-                                      g * cos_angle, 0., g * sin_angle);
+            _hwSensors_setPhysicalParameterValue(h,
+                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, 90.f,
+                    PHYSICAL_INTERPOLATION_STEP);
             break;
         default:
             if (VERBOSE_CHECK(rotation)) {
@@ -837,6 +792,12 @@ static void _hwSensors_init(HwSensors* h) {
 
     h->service = qemud_service_register("sensors", 0, h, _hwSensors_connect,
                                         _hwSensors_save, _hwSensors_load);
+
+    if (h->physical_model != NULL) {
+        physicalModel_free(h->physical_model);
+        h->physical_model = NULL;
+    }
+    h->physical_model = physicalModel_new();
 
     if (android_hw->hw_accelerometer) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
@@ -886,7 +847,8 @@ static void _hwSensors_init(HwSensors* h) {
         * properties to hardware-properties.ini et al. */
 
     _hwSensors_setCoarseOrientation(h, ANDROID_COARSE_PORTRAIT);
-    _hwSensors_setProximity(h, 1);
+    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PROXIMITY,
+            1.f, 0.f, 0.f, PHYSICAL_INTERPOLATION_STEP);
 }
 
 static HwSensors _sensorsState[1] = {};
@@ -931,7 +893,7 @@ extern const char* android_sensors_get_name_from_id(int sensor_id) {
 }
 
 /* Get sensor id from sensor name */
-extern int android_sensors_get_id_from_name(char* sensorname) {
+extern int android_sensors_get_id_from_name(const char* sensorname) {
     HwSensors* hw = _sensorsState;
 
     if (sensorname == NULL)
@@ -952,32 +914,34 @@ extern int android_sensors_get_id_from_name(char* sensorname) {
 }
 
 /* Interface of reading the data for all sensors */
-extern int android_sensors_get(int sensor_id, float* a, float* b, float* c) {
+extern int android_sensors_get(
+        int sensor_id, float* out_a, float* out_b, float* out_c) {
     HwSensors* hw = _sensorsState;
 
-    *a = 0;
-    *b = 0;
-    *c = 0;
+    *out_a = 0;
+    *out_b = 0;
+    *out_c = 0;
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
         return SENSOR_STATUS_UNKNOWN;
+
 
     Sensor* sensor = &hw->sensors[sensor_id];
     if (hw->service != NULL) {
         if (!sensor->enabled)
             return SENSOR_STATUS_DISABLED;
-    } else
+    } else {
         return SENSOR_STATUS_NO_SERVICE;
+    }
 
-    *a = sensor->u.value.a;
-    *b = sensor->u.value.b;
-    *c = sensor->u.value.c;
+    _hwSensors_getSensorValue(hw, sensor_id, out_a, out_b, out_c);
 
     return SENSOR_STATUS_OK;
 }
 
 /* Interface of setting the data for all sensors */
-extern int android_sensors_set(int sensor_id, float a, float b, float c) {
+extern int android_sensors_override_set(
+        int sensor_id, float a, float b, float c) {
     HwSensors* hw = _sensorsState;
 
     if (sensor_id < 0 || sensor_id >= MAX_SENSORS)
@@ -1003,4 +967,77 @@ extern uint8_t android_sensors_get_sensor_status(int sensor_id) {
         return SENSOR_STATUS_UNKNOWN;
 
     return hw->sensors[sensor_id].enabled;
+}
+
+/* Get a physical model parameter */
+extern int android_physical_model_get(
+        int physical_parameter, float* out_a, float* out_b, float* out_c) {
+    HwSensors* hw = _sensorsState;
+
+    *out_a = 0;
+    *out_b = 0;
+    *out_c = 0;
+
+    if (physical_parameter < 0 || physical_parameter >= MAX_PHYSICAL_PARAMETERS)
+        return PHYSICAL_PARAMETER_STATUS_UNKNOWN;
+
+    if (hw->physical_model == NULL) {
+        return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
+    }
+
+    _hwSensors_getPhysicalParameterValue(
+            hw, physical_parameter, out_a, out_b, out_c);
+
+    return PHYSICAL_PARAMETER_STATUS_OK;
+}
+
+/* Set a physical model parameter */
+extern int android_physical_model_set(
+        int physical_parameter, float a, float b, float c,
+        int interpolation_mode) {
+    HwSensors* hw = _sensorsState;
+
+    if (physical_parameter < 0 || physical_parameter >= MAX_PHYSICAL_PARAMETERS)
+        return PHYSICAL_PARAMETER_STATUS_UNKNOWN;
+
+    if (hw->physical_model == NULL) {
+        return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
+    }
+
+    _hwSensors_setPhysicalParameterValue(hw, physical_parameter, a, b, c,
+            interpolation_mode);
+
+    return PHYSICAL_PARAMETER_STATUS_OK;
+}
+
+/* Set agent to receive physical state change callbacks */
+extern int android_physical_agent_set(const struct QAndroidPhysicalStateAgent* agent) {
+    HwSensors* hw = _sensorsState;
+
+    physicalModel_setPhysicalStateAgent(hw->physical_model, agent);
+    return SENSOR_STATUS_OK;
+}
+
+/* Get physical parameter id from name */
+extern int android_physical_model_get_parameter_id_from_name(
+        const char* physical_parameter_name ) {
+    if (physical_parameter_name == NULL)
+        return PHYSICAL_PARAMETER_STATUS_UNKNOWN;
+
+    const int id = _physicalParamIdFromName(physical_parameter_name);
+
+    if (id < 0 || id >= MAX_PHYSICAL_PARAMETERS)
+        return PHYSICAL_PARAMETER_STATUS_UNKNOWN;
+
+    return id;
+}
+
+/* Get physical parameter name from id */
+extern const char* android_physical_model_get_parameter_name_from_id(
+        int physical_parameter_id ) {
+    if (physical_parameter_id < 0 ||
+            physical_parameter_id >= MAX_PHYSICAL_PARAMETERS)
+        return NULL;
+
+    return _physicalParamNameFromId(physical_parameter_id);
 }

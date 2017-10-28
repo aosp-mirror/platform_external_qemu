@@ -61,9 +61,9 @@ emulator_window_done(EmulatorWindow* emulator);
 SkinLayout*
 emulator_window_get_layout(EmulatorWindow* emulator);
 
-/* Rotates the screen clockwise by 90 degrees. Returns true on success, false
- * otherwise */
-bool emulator_window_rotate_90_clockwise(void);
+/* Rotates the screen by 90 degrees either clockwise or counterclockwise
+ * accordint to the input argument. Returns true on success, false otherwise */
+bool emulator_window_rotate_90(bool clockwise);
 bool emulator_window_rotate(SkinRotation rotation);
 
 /* Start recording the screen. Returns false if recording is already
