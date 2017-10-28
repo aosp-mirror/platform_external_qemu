@@ -31,14 +31,13 @@ TEST(InertialModel, DefaultPosition) {
     EXPECT_EQ(glm::quat(1.f, 0.f, 0.f, 0.f), inertialModel.getRotation());
 }
 
-TEST(InertialModel, DefaultSensorValues) {
+TEST(InertialModel, DefaultAccelerationAndRotationalVelocity) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
     mTestSystem.setUnixTime(1);
     InertialModel inertialModel;
-    EXPECT_EQ(glm::vec3(0.f, 9.81f, 0.f), inertialModel.getAcceleration());
-    EXPECT_EQ(glm::vec3(1.f, 0.f, 0.f), inertialModel.getMagneticVector());
-    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getGyroscope());
+    EXPECT_EQ(glm::vec3(0.f, 0.0f, 0.f), inertialModel.getAcceleration());
+    EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getRotationalVelocity());
 }
 
 TEST(InertialModel, ConvergeToPosition) {
@@ -56,53 +55,14 @@ TEST(InertialModel, ConvergeToPosition) {
     EXPECT_NEAR(targetPosition.z, currentPosition.z, 0.01f);
 }
 
-TEST(InertialModel, AtRestGyroscope) {
+TEST(InertialModel, AtRestRotationalVelocity) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
     mTestSystem.setUnixTime(1);
     InertialModel inertialModel;
     EXPECT_EQ(glm::vec3(0.0f, 0.0f, 0.0f),
-                 inertialModel.getGyroscope());
+                 inertialModel.getRotationalVelocity());
 }
-
-typedef struct GravityTestCase_ {
-    glm::vec3 target_rotation;
-    glm::vec3 expected_acceleration;
-} GravityTestCase;
-
-const GravityTestCase gravityTestCases[] = {
-    {{0.0f, 0.0f, 0.0f}, {0.0f, 9.81f, 0.0f}},
-    {{90.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -9.81f}},
-    {{-90.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 9.81f}},
-    {{0.0f, 90.0f, 0.0f}, {0.0f, 9.81f, 0.0f}},
-    {{0.0f, 0.0f, 90.0f}, {9.81f, 0.0f, 0.0f}},
-    {{0.0f, 0.0f, -90.0f}, {-9.81f, 0.0f, 0.0f}},
-    {{0.0f, 0.0f, 180.0f}, {0.0f, -9.81f, 0.0f}},
-};
-
-TEST(InertialModel, GravityAcceleration) {
-    TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    for (const auto& testCase : gravityTestCases) {
-        mTestSystem.setUnixTime(1);
-        InertialModel inertialModel;
-        inertialModel.setTargetRotation(
-                glm::quat(testCase.target_rotation *
-                          (static_cast<float>(M_PI) / 180.0f)), false);
-        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
-        mTestSystem.setUnixTime(2);
-        inertialModel.setTargetPosition(glm::vec3(0.0f, 0.0f, 0.0f), false);
-        EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getPosition());
-        glm::vec3 acceleration(inertialModel.getAcceleration());
-        EXPECT_NEAR(testCase.expected_acceleration.x,
-                    acceleration.x, 0.01f);
-        EXPECT_NEAR(testCase.expected_acceleration.y,
-                    acceleration.y, 0.01f);
-        EXPECT_NEAR(testCase.expected_acceleration.z,
-                    acceleration.z, 0.01f);
-    }
-}
-
 TEST(InertialModel, ZeroAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     mTestSystem.setLiveUnixTime(false);
@@ -147,7 +107,7 @@ TEST(InertialModel, NonInstantaneousRotation) {
     mTestSystem.setUnixTime(1);
     glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
     inertialModel.setTargetRotation(newRotation, false);
-    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
     EXPECT_LE(currentGyro.x, -0.01f);
     EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
@@ -163,7 +123,7 @@ TEST(InertialModel, InstantaneousRotation) {
     mTestSystem.setUnixTime(1);
     glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
     inertialModel.setTargetRotation(newRotation, true);
-    glm::vec3 currentGyro(inertialModel.getGyroscope());
+    glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
     EXPECT_NEAR(currentGyro.x, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);

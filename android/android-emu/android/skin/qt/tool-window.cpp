@@ -24,6 +24,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/hw-sensors.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -411,7 +412,24 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                         (cmd == QtUICommand::ROTATE_RIGHT
                          ? skin_ui_get_next_layout
                          : skin_ui_get_prev_layout)(ui);
-                    mEmulatorWindow->rotateSkin(layout->orientation);
+                    AndroidCoarseOrientation coarseOrientation =
+                            ANDROID_COARSE_PORTRAIT;
+                    switch (layout->orientation) {
+                        case SKIN_ROTATION_0:
+                            coarseOrientation = ANDROID_COARSE_PORTRAIT;
+                            break;
+                        case SKIN_ROTATION_90:
+                            coarseOrientation =
+                                    ANDROID_COARSE_REVERSE_LANDSCAPE;
+                            break;
+                        case SKIN_ROTATION_180:
+                            coarseOrientation = ANDROID_COARSE_REVERSE_PORTRAIT;
+                            break;
+                        case SKIN_ROTATION_270:
+                            coarseOrientation = ANDROID_COARSE_LANDSCAPE;
+                            break;
+                    }
+                    android_sensors_set_coarse_orientation(coarseOrientation);
                 }
             }
             break;
