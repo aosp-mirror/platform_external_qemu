@@ -12,10 +12,21 @@
 
 // This file contains values that are used for saving and
 // restoring user settings associated with the Qt-based UI.
+
+// For settings that apply to all AVDs, use the default QSettings
+// object:
+//     QSettings universalSettings;
+//
+// For settings that apply only to the current AVD, construct
+// a QSettings object using the AVD's path:
+//     QSettings perAvdSettings(<avd path> + PER_AVD_SETTINGS_NAME, QSettings::IniFormat);
+
 #pragma once
 
 namespace Ui {
 namespace Settings {
+
+// ***** These settings apply to all AVDs *****
 
 constexpr char ORG_NAME[] = "Android Open Source Project";
 constexpr char ORG_DOMAIN[] = "android.com";
@@ -82,5 +93,17 @@ constexpr char LOCATION_RECENT_LATITUDE[] = "loc/recent_latitude";
 constexpr char LOCATION_RECENT_LONGITUDE[] = "loc/recent_longitude";
 
 constexpr char SCREENREC_SAVE_PATH[] = "rec/savePath";
+
+// ***** These settings apply only to the current AVD *****
+
+constexpr char PER_AVD_SETTINGS_NAME[] = "/AVD.conf";
+
+constexpr char SAVE_SNAPSHOT_ON_EXIT[] = "perAvd/set/saveSnapshotOnExit";
+
+// Enum values saved in the settings
+enum class SaveSnapshotOnExit { Always, Never, Ask };
+// Order of the items on the GUI
+enum class SaveSnapshotOnExitUiOrder { Always, Never, Ask };
+
 }  // namespace Settings
 }  // namespace Ui
