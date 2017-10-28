@@ -318,8 +318,8 @@ _on_sensor_event(AndroidSensorsPort* asp, const SensorEvent* event)
           event->fvalues[0], event->fvalues[1],
           event->fvalues[2]);
         /* Fire up sensor change in the guest. */
-        android_sensors_set(desc->emulator_id, event->fvalues[0],
-                            event->fvalues[1], event->fvalues[2]);
+        android_sensors_override_set(desc->emulator_id, event->fvalues[0],
+                                     event->fvalues[1], event->fvalues[2]);
     } else {
         W("Sensors: No descriptor for sensor %d", event->sensor_id);
     }

@@ -21,7 +21,7 @@
 
 #include <array>
 
-struct QAndroidSensorsAgent;
+#include "android/physics/Physics.h"
 
 namespace android {
 namespace physics {
@@ -31,13 +31,9 @@ namespace physics {
  * movement occurs bringing the body to the target rotation and position with
  * dependent sensor data constantly available and up to date.
  *
- * The inertial model should be given a pointer to a valid sensor agent via
- * setSensorAgent, after which dependent sensor data (gyroscope,
- * accelerometer, magnetometer) will be regularly sent to the agent. A target
- * position and rotation should be set via user input (such as UI controls,
- * mouse, keyboard, etc...) - using setTargetPosition and setTargetRotation.
- * The various getXXXX() calls may be regularly polled to update UI, or if the
- * current sensor values are needed for any reason.
+ * The inertial model should be used by sending it target positions and
+ * then polling the current actual rotation and position, acceleration and
+ * velocity values in order to find the current state of the rigid body.
  */
 class InertialModel {
 public:
@@ -46,50 +42,31 @@ public:
     /*
      * Sets the position that the modeled object should move toward.
      */
-    void setTargetPosition(glm::vec3 position, bool instantaneous);
+    void setTargetPosition(glm::vec3 position, PhysicalInterpolation mode);
 
     /*
      * Sets the rotation that the modeled object should move toward.
      */
-    void setTargetRotation(glm::quat rotation, bool instantaneous);
-
-    /*
-     * Sets the strength of the magnetic field in which the modeled object
-     * is moving, in order to simulate a magnetic vector.
-     */
-    void setMagneticValue(
-        float north, float east, float vertical, bool instantaneous);
+    void setTargetRotation(glm::quat rotation, PhysicalInterpolation mode);
 
     /*
      * Gets current simulated state and sensor values of the modeled object.
      */
     glm::vec3 getPosition() const;
     glm::vec3 getAcceleration() const;
-    glm::vec3 getMagneticVector() const;
     glm::quat getRotation() const;
-    glm::vec3 getGyroscope() const;
+    glm::vec3 getRotationalVelocity() const;
 
-    /*
-     * Sets the agent to which sensor data will be sent.
-     */
-    void setSensorsAgent(const QAndroidSensorsAgent* agent);
 private:
-    void updateSensorValues();
     void updateAccelerations();
+    void updateRotations();
 
-    void recalcRotationUpdateInterval();
-
-    glm::vec3 mLinearAcceleration = glm::vec3(0.f);
+    glm::vec3 mAcceleration = glm::vec3(0.f);
     glm::vec3 mPreviousPosition = glm::vec3(0.f);
     glm::vec3 mCurrentPosition = glm::vec3(0.f);
     glm::quat mPreviousRotation;
     glm::quat mCurrentRotation;
-
-    glm::vec3 mAcceleration = glm::vec3(0.f, 9.81f, 0.f);
-    glm::vec3 mMagneticVector = glm::vec3(1.f, 0.f, 0.f);
-    glm::vec3 mGyroscope = glm::vec3(0.f);
-
-    const QAndroidSensorsAgent* mSensorsAgent = nullptr;
+    glm::vec3 mRotationalVelocity = glm::vec3(0.f);
 
     uint64_t mUpdateIntervalMs = 0;
     uint64_t mLastRotationUpdateMs = 0;

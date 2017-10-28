@@ -23,30 +23,24 @@
 namespace android {
 namespace physics {
 
-void InertialModel::setTargetPosition(glm::vec3 position, bool instantaneous) {
-    if (instantaneous) {
+void InertialModel::setTargetPosition(
+        glm::vec3 position, PhysicalInterpolation mode) {
+    if (mode == PHYSICAL_INTERPOLATION_STEP) {
         mPreviousPosition = position;
     }
     mCurrentPosition = position;
     updateAccelerations();
-    updateSensorValues();
 }
 
-void InertialModel::setTargetRotation(glm::quat rotation, bool instantaneous) {
-    if (instantaneous) {
+void InertialModel::setTargetRotation(
+        glm::quat rotation, PhysicalInterpolation mode) {
+    if (mode == PHYSICAL_INTERPOLATION_STEP) {
         mPreviousRotation = rotation;
     } else {
         mPreviousRotation = mCurrentRotation;
     }
     mCurrentRotation = rotation;
-    recalcRotationUpdateInterval();
-    updateSensorValues();
-}
-
-void InertialModel::setMagneticValue(
-        float north, float east, float vertical, bool instantanous) {
-    mMagneticVector = glm::vec3(north, east, vertical);
-    updateSensorValues();
+    updateRotations();
 }
 
 glm::vec3 InertialModel::getPosition() const {
@@ -57,82 +51,12 @@ glm::vec3 InertialModel::getAcceleration() const {
     return mAcceleration;
 }
 
-glm::vec3 InertialModel::getMagneticVector() const {
-    return mMagneticVector;
-}
-
 glm::quat InertialModel::getRotation() const {
     return mCurrentRotation;
 }
 
-glm::vec3 InertialModel::getGyroscope() const {
-    return mGyroscope;
-}
-
-void InertialModel::setSensorsAgent(const QAndroidSensorsAgent* agent) {
-    mSensorsAgent = agent;
-    updateSensorValues();
-}
-
-void InertialModel::updateSensorValues() {
-    // Gravity and magnetic vector in the device's frame of
-    // reference.
-    constexpr glm::vec3 gravityVector(0.f, 9.81f, 0.f);
-
-    const glm::quat deviceRotationQuat = mCurrentRotation;
-    const glm::quat rotationDelta =
-            mCurrentRotation * glm::conjugate(mPreviousRotation);
-    const glm::vec3 eulerAngles = glm::eulerAngles(rotationDelta);
-
-    //Implementation Note:
-    //Qt's rotation is around fixed axis, in the following
-    //order: z first, x second and y last
-    //refs:
-    //http://doc.qt.io/qt-5/qquaternion.html#fromEulerAngles
-    //
-    // Gravity and magnetic vectors as observed by the device.
-    // Note how we're applying the *inverse* of the transformation
-    // represented by device_rotation_quat to the "absolute" coordinates
-    // of the vectors.
-    const glm::vec3 deviceGravityVector =
-        glm::conjugate(deviceRotationQuat) * gravityVector;
-    mMagneticVector =
-        glm::conjugate(deviceRotationQuat) * mMagneticVector;
-    mAcceleration = deviceGravityVector - mLinearAcceleration;
-
-    const float gyroUpdateRate = mUpdateIntervalMs < 16 ? 0.016f :
-            mUpdateIntervalMs / 1000.0f;
-
-    // Convert raw UI pitch/roll/yaw delta
-    // to device-space rotation in radians per second.
-    mGyroscope = glm::conjugate(deviceRotationQuat) *
-            (eulerAngles * static_cast<float>(M_PI) / (180.f * gyroUpdateRate));
-
-    if (mSensorsAgent != nullptr) {
-        mSensorsAgent->setSensor(
-                   ANDROID_SENSOR_ACCELERATION,
-                   mAcceleration.x,
-                   mAcceleration.y,
-                   mAcceleration.z);
-
-        mSensorsAgent->setSensor(ANDROID_SENSOR_GYROSCOPE,
-                   mGyroscope.x, mGyroscope.y, mGyroscope.z);
-
-        mSensorsAgent->setSensor(ANDROID_SENSOR_GYROSCOPE_UNCALIBRATED,
-                   mGyroscope.x, mGyroscope.y, mGyroscope.z);
-
-        mSensorsAgent->setSensor(
-                   ANDROID_SENSOR_MAGNETIC_FIELD,
-                   mMagneticVector.x,
-                   mMagneticVector.y,
-                   mMagneticVector.z);
-
-        mSensorsAgent->setSensor(
-                   ANDROID_SENSOR_MAGNETIC_FIELD_UNCALIBRATED,
-                   mMagneticVector.x,
-                   mMagneticVector.y,
-                   mMagneticVector.z);
-    }
+glm::vec3 InertialModel::getRotationalVelocity() const {
+    return mRotationalVelocity;
 }
 
 void InertialModel::updateAccelerations() {
@@ -140,15 +64,12 @@ void InertialModel::updateAccelerations() {
     constexpr float mass = 1.f;
     constexpr float meters_per_unit = 0.0254f;
 
-    const glm::vec3 delta = glm::conjugate(mCurrentRotation) *
-            (meters_per_unit * (mCurrentPosition - mPreviousPosition));
-    mLinearAcceleration = delta * k / mass;
+    const glm::vec3 delta = (meters_per_unit * (mCurrentPosition - mPreviousPosition));
+    mAcceleration = delta * k / mass;
     mPreviousPosition = mCurrentPosition;
-
-    updateSensorValues();
 }
 
-void InertialModel::recalcRotationUpdateInterval() {
+void InertialModel::updateRotations() {
     const uint64_t currTimeMs = static_cast<uint64_t>(
         android::base::System::get()->getHighResTimeUs() / 1000);
 
@@ -179,6 +100,18 @@ void InertialModel::recalcRotationUpdateInterval() {
         mUpdateIntervalMs /= nontrivialUpdateIntervals;
 
     mLastRotationUpdateMs = currTimeMs;
+
+    const glm::quat rotationDelta =
+            mCurrentRotation * glm::conjugate(mPreviousRotation);
+    const glm::vec3 eulerAngles = glm::eulerAngles(rotationDelta);
+
+    const float gyroUpdateRate = mUpdateIntervalMs < 16 ? 0.016f :
+            mUpdateIntervalMs / 1000.0f;
+
+    // Convert raw UI pitch/roll/yaw delta
+    // to device-space rotation in radians per second.
+    mRotationalVelocity =
+            (eulerAngles * static_cast<float>(M_PI) / (180.f * gyroUpdateRate));
 }
 
 }  // namespace physics

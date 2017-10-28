@@ -12,10 +12,12 @@
 
 #include "ui_virtual-sensors-page.h"
 
+#include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
+#include "android/physics/Physics.h"
+#include "android/physics/physical_state_agent.h"
 #include "android/skin/file.h"
 #include "android/skin/rect.h"
-#include "android/physics/InertialModel.h"
 
 #include <QDoubleValidator>
 #include <QTimer>
@@ -33,9 +35,9 @@ class VirtualSensorsPage : public QWidget
 
 public:
     explicit VirtualSensorsPage(QWidget* parent = 0);
+    ~VirtualSensorsPage();
 
     void setSensorsAgent(const QAndroidSensorsAgent* agent);
-    void setLayoutChangeNotifier(QObject* layout_change_notifier);
 
 private slots:
     void on_temperatureSensorValueWidget_valueChanged(double value);
@@ -50,14 +52,19 @@ private slots:
     void on_magEastWidget_valueChanged(double value);
     void on_magVerticalWidget_valueChanged(double value);
 
-    void updateAccelerations();
-    void syncUIAndUpdateModel();
-    void syncUIAndUpdateModelInstant();
-    void syncUI();
+    void propagateAccelWidgetChange();
+    void propagateSlidersChange();
+
+    void updateAccelWidgetFromSliders();
+    void updateSlidersFromAccelWidget();
+    void updateModelFromAccelWidget(PhysicalInterpolation mode);
+    void updateAccelWidgetAndSlidersFromModel();
+
     void updateSensorValuesInUI();
-    void updateModel(bool instantaneous);
+
     void onDragStarted();
     void onDragStopped();
+
     void onSkinLayoutChange(SkinRotation rot);
 
 signals:
@@ -65,6 +72,8 @@ signals:
     void updateResultingValuesRequired(glm::vec3 acceleration,
                                        glm::vec3 gyroscope,
                                        glm::vec3 device_magnetic_vector);
+    void startSensorUpdateTimerRequired();
+    void stopSensorUpdateTimerRequired();
 
 private slots:
     void on_rotateToPortrait_clicked();
@@ -87,13 +96,28 @@ private slots:
                                glm::vec3 gyroscope,
                                glm::vec3 device_magnetic_vector);
 
+    void startSensorUpdateTimer();
+    void stopSensorUpdateTimer();
+
 private:
     void showEvent(QShowEvent*) override;
 
-    void resetAccelerometerRotation(const glm::quat&);
-    void resetAccelerometerRotationFromSkinLayout(SkinRotation orientation);
-    void setAccelerometerRotationFromSliders();
-    void setPhonePositionFromSliders();
+    void resetDeviceRotation(const glm::quat&);
+    void resetDeviceRotationFromSkinLayout(SkinRotation orientation);
+
+    void setPhysicalParameterTarget(PhysicalParameter parameter_id,
+            PhysicalInterpolation mode,
+            double v1,
+            double v2 = 0.0,
+            double v3 = 0.0);
+
+    void onTargetStateChanged();
+    void onPhysicalStateChanging();
+    void onPhysicalStateStabilized();
+
+    static void onTargetStateChanged(void* context);
+    static void onPhysicalStateChanging(void* context);
+    static void onPhysicalStateStabilized(void* context);
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
@@ -104,5 +128,8 @@ private:
     SkinRotation mCoarseOrientation;
     bool mVirtualSensorsUsed = false;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
-    android::physics::InertialModel mInertialModel;
+
+    QAndroidPhysicalStateAgent mQAndroidPhysicalStateAgent;
+    bool mIsUIModifyingPhysicalState = false;
+    bool mIsUpdatingUIFromModel = false;
 };

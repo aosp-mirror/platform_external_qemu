@@ -24,6 +24,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/hw-sensors.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
@@ -404,15 +405,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         case QtUICommand::ROTATE_RIGHT:
         case QtUICommand::ROTATE_LEFT:
             if (down) {
-                const auto emulatorWindow = emulator_window_get();
-                assert(emulatorWindow);
-                if (const SkinUI* const ui = emulatorWindow->ui) {
-                    const SkinLayout* layout =
-                        (cmd == QtUICommand::ROTATE_RIGHT
-                         ? skin_ui_get_next_layout
-                         : skin_ui_get_prev_layout)(ui);
-                    mEmulatorWindow->rotateSkin(layout->orientation);
-                }
+                emulator_window_rotate_90(cmd == QtUICommand::ROTATE_RIGHT);
             }
             break;
         case QtUICommand::TOGGLE_TRACKBALL:

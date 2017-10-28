@@ -61,7 +61,6 @@ ExtendedWindow::ExtendedWindow(
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->settingsPage->setAdbInterface(
             mEmulatorWindow->getAdbInterface());
-    mExtendedUi->virtualSensorsPage->setLayoutChangeNotifier(eW);
     mExtendedUi->bugreportPage->initialize(mEmulatorWindow);
 
     connect(
