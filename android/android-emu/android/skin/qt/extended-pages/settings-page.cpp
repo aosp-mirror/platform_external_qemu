@@ -20,6 +20,9 @@
 #include <QMessageBox>
 #include <QSettings>
 
+using Ui::Settings::SaveSnapshotOnExit;
+using Ui::Settings::SaveSnapshotOnExitUiOrder;
+
 // Helper function to set the contents of a QLineEdit.
 static void setElidedText(QLineEdit* line_edit, const QString& text) {
     QFontMetrics font_metrics(line_edit->font());
@@ -95,6 +98,7 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     initProxy();
 
+    // Crash reporting
     Ui::Settings::CRASHREPORT_PREFERENCE_VALUE report_pref =
         static_cast<Ui::Settings::CRASHREPORT_PREFERENCE_VALUE>(
             settings.value(Ui::Settings::CRASHREPORT_PREFERENCE, 0).toInt());
@@ -122,6 +126,51 @@ SettingsPage::SettingsPage(QWidget* parent)
             break;
     }
 
+    // Save snapshot on exit
+    mUi->saveOnExitTitle->setTitle(QString(tr("Save quick-boot state on exit for AVD "))
+                                   + android_hw->avd_name);
+    // This setting belongs to the AVD, not to the entire Emulator.
+    SaveSnapshotOnExit saveOnExitChoice(SaveSnapshotOnExit::Always);
+
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        saveOnExitChoice = static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+    }
+    switch (saveOnExitChoice) {
+        case SaveSnapshotOnExit::Always:
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        case SaveSnapshotOnExit::Ask:
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    static_cast<int>(SaveSnapshotOnExitUiOrder::Ask));
+            // If we can't ask, we'll treat ASK the same as ALWAYS.
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        case SaveSnapshotOnExit::Never:
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    static_cast<int>(SaveSnapshotOnExitUiOrder::Never));
+            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        default:
+            fprintf(stderr,
+                    "%s: warning: unknown 'Save snapshot on exit' preference value 0x%x. "
+                    "Setting to Always.\n",
+                    __func__, (unsigned int)saveOnExitChoice);
+            mUi->set_saveSnapshotOnExit->setCurrentIndex(
+                    static_cast<int>(SaveSnapshotOnExitUiOrder::Always));
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+    }
+
+    // OpenGL ES renderer
     for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
         mUi->set_glesBackendPrefComboBox->setItemData(i, QVariant(i));
     }
@@ -413,6 +462,35 @@ void SettingsPage::on_set_crashReportPrefComboBox_currentIndexChanged(int index)
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_NEVER);
     } else if (index == Ui::Settings::CRASHREPORT_COMBOBOX_ASK) {
         set_reportPref_to(Ui::Settings::CRASHREPORT_PREFERENCE_ASK);
+    }
+}
+
+void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
+    SaveSnapshotOnExit preferenceValue;
+    switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
+        case SaveSnapshotOnExitUiOrder::Never:
+            preferenceValue = SaveSnapshotOnExit::Never;
+            android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        case SaveSnapshotOnExitUiOrder::Ask:
+            preferenceValue = SaveSnapshotOnExit::Ask;
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            break;
+        default:
+        case SaveSnapshotOnExitUiOrder::Always:
+            android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+            preferenceValue = SaveSnapshotOnExit::Always;
+            break;
+    }
+
+    // Save for only this AVD
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        avdSpecificSettings.setValue(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                                     static_cast<int>(preferenceValue));
     }
 }
 
