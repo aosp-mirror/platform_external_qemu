@@ -30,7 +30,7 @@ void GLEScmContext::setMaxGlesVersion(GLESVersion version) {
 
 void GLEScmContext::init(EGLiface* eglIface) {
     emugl::Mutex::AutoLock mutex(s_lock);
-    if(!m_initialized) {
+    if(!m_initialized || m_needRestoreFromSnapshot) {
         s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
         GLEScontext::init(eglIface);
 
@@ -47,6 +47,7 @@ void GLEScmContext::init(EGLiface* eglIface) {
         }
     }
     m_initialized = true;
+    m_needRestoreFromSnapshot = false;
 }
 
 void GLEScmContext::initDefaultFBO(

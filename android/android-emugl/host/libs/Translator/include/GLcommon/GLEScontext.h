@@ -420,6 +420,10 @@ public:
     static GLuint compileAndValidateCoreShader(GLenum shaderType, const char* src);
     static GLuint linkAndValidateProgram(GLuint vshader, GLuint fshader);
 
+    bool contextNeedsRestore() const {
+        return m_needRestoreFromSnapshot;
+    }
+
 protected:
     void initDefaultFboImpl(
         GLint width, GLint height,

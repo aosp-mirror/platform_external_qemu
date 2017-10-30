@@ -276,6 +276,7 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
                         tex.first,
                         [saver, &tex](android::base::Stream* stream,
                                       ITextureSaver::Buffer* buffer) {
+                            if (!tex.second.get()) return;
                             saver(tex.second.get(), stream, buffer);
                         });
             });
