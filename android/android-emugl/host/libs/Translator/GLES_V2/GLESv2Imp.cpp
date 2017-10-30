@@ -101,12 +101,13 @@ static void setMaxGlesVersion(GLESVersion version) {
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     setCoreProfile(ctx->isCoreProfile());
+    GLESv2Context::initGlobal(s_eglIface);
 
     if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
     }
     if (!ctx->isInitialized()) {
-        ctx->init(s_eglIface);
+        ctx->init();
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
