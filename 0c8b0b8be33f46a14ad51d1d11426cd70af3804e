@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "679195ab_90c08eda",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmContext.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-30T23:09:43Z",
+      "side": 1,
+      "message": "you can remove it actually",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 103,
+        "endChar": 23
+      },
+      "revId": "0c8b0b8be33f46a14ad51d1d11426cd70af3804e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
