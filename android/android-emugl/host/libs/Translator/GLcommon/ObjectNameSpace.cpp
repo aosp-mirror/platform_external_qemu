@@ -79,6 +79,8 @@ void NameSpace::touchTextures() {
             continue;
         }
         const SaveableTexturePtr& saveableTexture = texData->getSaveableTexture();
+        if (!saveableTexture.get()) continue;
+
         NamedObjectPtr texNamedObj = saveableTexture->getGlobalObject();
         setGlobalObject(obj.first, texNamedObj);
         texData->globalName = texNamedObj->getGlobalName();
@@ -295,7 +297,7 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
                             tex) {
                 stream->putBe32(tex.first);
 #if SNAPSHOT_PROFILE > 1
-                if (tex.second->isDirty()) {
+                if (tex.second.get() && tex.second->isDirty()) {
                     dirtyTexs ++;
                 } else {
                     cleanTexs ++;
@@ -305,6 +307,7 @@ void GlobalNameSpace::onSave(android::base::Stream* stream,
                         tex.first,
                         [saver, &tex](android::base::Stream* stream,
                                       ITextureSaver::Buffer* buffer) {
+                            if (!tex.second.get()) return;
                             saver(tex.second.get(), stream, buffer);
                         });
             });
