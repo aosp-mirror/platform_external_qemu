@@ -271,6 +271,10 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
 
         m_geometryDrawState.textureEnvModeLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "texture_env_mode");
+
+        m_geometryDrawState.textureFormatLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "texture_format");
+
     }
 
     if (!m_geometryDrawState.vao) {
@@ -408,23 +412,39 @@ void CoreProfileEngine::setupArrayForDraw(
         gl.glEnableVertexAttribArray(attribNum);
         gl.glBindBuffer(GL_ARRAY_BUFFER, getVboFor(arrayType));
 
+        GLESConversionArrays arrs;
+
+        bool convert = mCtx->doConvert(arrs, first, count, indicesType, indices, !isIndexed, p, arrayType);
+        ArrayData currentArr = arrs.getCurrentArray();
+
         GLint size = p->getSize();
-        GLenum dataType = p->getType();
-        GLsizei stride = p->getStride();
+        GLenum dataType = convert ? currentArr.type : p->getType();
+        GLsizei stride = convert ? currentArr.stride : p->getStride();
 
         GLsizei effectiveStride =
             stride ? stride :
                      (size * sizeOfType(dataType));
 
-        char* bufData = (char*)p->getData();
+        char* bufData = convert ? (char*)currentArr.data : (char*)p->getData();
         uint32_t offset = first * effectiveStride;
         uint32_t bufSize = offset + vboCount * effectiveStride;
 
         gl.glBufferData(GL_ARRAY_BUFFER, bufSize, bufData, GL_STREAM_DRAW);
 
         gl.glVertexAttribDivisor(attribNum, 0);
-        gl.glVertexAttribPointer(attribNum, size, dataType, GL_FALSE /* normalized */, effectiveStride, nullptr);
+        GLboolean shouldNormalize = GL_FALSE;
 
+        if (arrayType == GL_COLOR_ARRAY &&
+            (dataType == GL_BYTE ||
+             dataType == GL_UNSIGNED_BYTE ||
+             dataType == GL_INT ||
+             dataType == GL_UNSIGNED_INT ||
+             dataType == GL_FIXED))
+            shouldNormalize = true;
+
+        gl.glVertexAttribPointer(attribNum, size, dataType,
+                                 shouldNormalize ? GL_TRUE : GL_FALSE /* normalized */,
+                                 effectiveStride, nullptr /* no offset into vbo */);
         gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     } else {
@@ -444,8 +464,9 @@ void CoreProfileEngine::setupArrayForDraw(
             }
             gl.glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float), (GLvoid*)&data[0], GL_STREAM_DRAW);
             gl.glVertexAttribDivisor(attribNum, 1);
-            gl.glVertexAttribPointer(attribNum, size, dataType, GL_FALSE /* normalized */, stride, nullptr);
-
+            gl.glVertexAttribPointer(attribNum, size, dataType,
+                                     GL_FALSE /* normalized */,
+                                     stride, nullptr /* no offset into vbo */);
             gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
         } else {
             gl.glDisableVertexAttribArray(attribNum);
@@ -461,7 +482,6 @@ void CoreProfileEngine::bindTextureWithTextureUnitEmulation(
         mCubeMapBoundTextures[mCurrTextureUnit] = globalTexName;
     }
 }
-
 
 // API
 
@@ -775,6 +795,17 @@ void CoreProfileEngine::preDrawTextureUnitEmulation() {
             gl.glUniform1i(m_geometryDrawState.enableTextureLoc, 1);
             gl.glUniform1i(m_geometryDrawState.enableReflectionMapLoc, 1);
         }
+    }
+
+    auto bindedTex = mCtx->getBindedTexture(GL_TEXTURE_2D);
+    ObjectLocalName tex = mCtx->getTextureLocalName(GL_TEXTURE_2D, bindedTex);
+    auto objData = mCtx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, tex);
+
+    if (objData) {
+        TextureData* texData = (TextureData*)objData;
+        gl.glUniform1i(m_geometryDrawState.textureFormatLoc, texData->internalFormat);
+    } else {
+        gl.glUniform1i(m_geometryDrawState.textureFormatLoc, GL_RGBA);
     }
 
     gl.glUniform1i(m_geometryDrawState.textureEnvModeLoc, currTextureEnvMode());
