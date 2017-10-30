@@ -1078,12 +1078,12 @@ RGBToYUV(const RGBDesc* rgb_fmt,
             uint8_t r, g, b;
             rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
             _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGB(&r, &g, &b, exp_comp);
             R8G8B8ToYUV(r, g, b, pY, pU, pV);
+            *pY = _change_exposure(*pY, exp_comp);
             rgb = rgb_fmt->load_rgb(rgb, &r, &g, &b);
             _change_white_balance_RGB_b(&r, &g, &b, r_scale, g_scale, b_scale);
-            _change_exposure_RGB(&r, &g, &b, exp_comp);
-            pY[Y_Inc] = RGB2Y((int)r, (int)g, (int)b);
+            pY[Y_Inc] =
+                    _change_exposure(RGB2Y((int)r, (int)g, (int)b), exp_comp);
         }
         /* Aling rgb_ptr to 16 bit */
         if (((uintptr_t)rgb & 1) != 0) rgb = (const uint8_t*)rgb + 1;
