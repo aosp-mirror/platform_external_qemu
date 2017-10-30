@@ -342,6 +342,10 @@ glm::mat4 GLEScmContext::getModelviewMatrix() {
     return mModelviewMatrices.back();
 }
 
+glm::mat4 GLEScmContext::getTextureMatrix() {
+    return mTextureMatrices[m_activeTexture].back();
+}
+
 glm::mat4& GLEScmContext::currMatrix() {
     return currMatrixStack().back();
 }

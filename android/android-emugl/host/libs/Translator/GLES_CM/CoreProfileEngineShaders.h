@@ -43,6 +43,7 @@ layout(location = 4) in vec4 texcoord;
 
 uniform mat4 projection;
 uniform mat4 modelview;
+uniform mat4 texture_matrix;
 
 out vec4 pos_varying;
 out vec3 normal_varying;
@@ -56,7 +57,7 @@ void main() {
     normal_varying = (modelview * vec4(normal.xyz, 0)).xyz;
     color_varying = color;
     pointsize_varying = pointsize;
-    texcoord_varying = texcoord;
+    texcoord_varying = texture_matrix * texcoord;
 
     gl_Position = projection * modelview * pos;
 }

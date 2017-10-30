@@ -127,6 +127,7 @@ public:
 
     glm::mat4 getProjMatrix();
     glm::mat4 getModelviewMatrix();
+    glm::mat4 getTextureMatrix();
 
 protected:
 
