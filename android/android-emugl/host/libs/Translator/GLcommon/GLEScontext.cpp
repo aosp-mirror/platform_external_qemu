@@ -1360,6 +1360,10 @@ void GLEScontext::setEnable(GLenum item, bool isEnable) {
     m_glEnableList[item] = isEnable;
 }
 
+bool GLEScontext::isEnabled(GLenum item) const {
+    return android::base::findOrDefault(m_glEnableList, item, false);
+}
+
 void GLEScontext::setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
             GLenum srcAlpha, GLenum dstAlpha) {
     m_blendSrcRgb = srcRGB;
