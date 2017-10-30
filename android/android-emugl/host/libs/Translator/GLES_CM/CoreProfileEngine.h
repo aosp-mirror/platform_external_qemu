@@ -56,6 +56,7 @@ public:
         GLint enableReflectionMapLoc;
 
         GLint textureEnvModeLoc;
+        GLint textureFormatLoc;
 
         GLuint posVbo;
         GLuint normalVbo;
