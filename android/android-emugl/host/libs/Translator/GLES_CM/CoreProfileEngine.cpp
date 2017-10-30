@@ -239,6 +239,8 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
             gl.glGetUniformLocation(m_geometryDrawState.program, "projection");
         m_geometryDrawState.modelviewMatrixLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "modelview");
+        m_geometryDrawState.textureMatrixLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "texture_matrix");
         m_geometryDrawState.textureSamplerLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "tex_sampler");
         m_geometryDrawState.textureCubeSamplerLoc =
@@ -741,6 +743,7 @@ void CoreProfileEngine::preDrawVertexSetup() {
 
     glm::mat4 currProjMatrix = mCtx->getProjMatrix();
     glm::mat4 currModelviewMatrix = mCtx->getModelviewMatrix();
+    glm::mat4 currTextureMatrix = mCtx->getTextureMatrix();
 
     gl.glBindVertexArray(m_geometryDrawState.vao);
     gl.glUseProgram(mCtx->getShadeModel() == GL_FLAT ?
@@ -748,6 +751,7 @@ void CoreProfileEngine::preDrawVertexSetup() {
                     m_geometryDrawState.program);
     gl.glUniformMatrix4fv(m_geometryDrawState.projMatrixLoc, 1, GL_FALSE, glm::value_ptr(currProjMatrix));
     gl.glUniformMatrix4fv(m_geometryDrawState.modelviewMatrixLoc, 1, GL_FALSE, glm::value_ptr(currModelviewMatrix));
+    gl.glUniformMatrix4fv(m_geometryDrawState.textureMatrixLoc, 1, GL_FALSE, glm::value_ptr(currTextureMatrix));
 }
 
 void CoreProfileEngine::postDrawVertexSetup() {
