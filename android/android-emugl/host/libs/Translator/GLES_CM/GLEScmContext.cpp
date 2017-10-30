@@ -74,7 +74,6 @@ GLEScmContext::GLEScmContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
     : GLEScontext(globalNameSpace, stream, nullptr) {
     // TODO: snapshot support
-    if (stream) return;
     m_glesMajorVersion = maj;
     m_glesMinorVersion = min;
     addVertexArrayObject(0);
