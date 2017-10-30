@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2365301d_58b9708a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 300,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-30T18:02:57Z",
+      "side": 1,
+      "message": "nit: trailing spaces (and many lines bellow)",
+      "range": {
+        "startLine": 300,
+        "startChar": 46,
+        "endLine": 300,
+        "endChar": 47
+      },
+      "revId": "cc554cc05a04118bd033192fe7fece16f69e5e7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df0686d_e3b321a1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmContext.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-10-30T18:02:57Z",
+      "side": 1,
+      "message": "if you do want to abort, would you use emugl_crash_reporter so that we could get a better crash report? Or you can use assert(false) so it does not crash on customer\u0027s machine",
+      "range": {
+        "startLine": 358,
+        "startChar": 8,
+        "endLine": 358,
+        "endChar": 13
+      },
+      "revId": "cc554cc05a04118bd033192fe7fece16f69e5e7f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
