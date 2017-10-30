@@ -197,6 +197,7 @@ public:
     void setShareGroup(ShareGroupPtr grp){m_shareGroup = std::move(grp);};
     const ShareGroupPtr& shareGroup() const { return m_shareGroup; }
     virtual void setActiveTexture(GLenum tex);
+    unsigned int getActiveTextureUnit() const { return m_activeTexture; }
     unsigned int getBindedTexture(GLenum target);
     unsigned int getBindedTexture(GLenum unit,GLenum target);
     void setBindedTexture(GLenum target,unsigned int tex);
@@ -304,6 +305,7 @@ public:
     }
 
     void setEnable(GLenum item, bool isEnable);
+    bool isEnabled(GLenum item) const;
     void setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
             GLenum srcAlpha, GLenum dstAlpha);
     void setPixelStorei(GLenum pname, GLint param);
