@@ -35,11 +35,12 @@ void GLEScmContext::setMaxGlesVersion(GLESVersion version) {
     s_maxGlesVersion = version;
 }
 
-void GLEScmContext::init(EGLiface* eglIface) {
+void GLEScmContext::init() {
     emugl::Mutex::AutoLock mutex(s_lock);
-    if(!m_initialized || m_needRestoreFromSnapshot) {
-        s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
-        GLEScontext::init(eglIface);
+    if(!m_initialized) {
+        GLEScontext::init();
+        addVertexArrayObject(0);
+        setVertexArrayObject(0);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
         m_currVaoState[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
@@ -55,6 +56,11 @@ void GLEScmContext::init(EGLiface* eglIface) {
     }
     m_initialized = true;
     m_needRestoreFromSnapshot = false;
+}
+
+void GLEScmContext::initGlobal(EGLiface* eglIface) {
+    s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
+    GLEScontext::initGlobal(eglIface);
 }
 
 void GLEScmContext::initDefaultFBO(
@@ -76,8 +82,6 @@ GLEScmContext::GLEScmContext(int maj, int min,
     // TODO: snapshot support
     m_glesMajorVersion = maj;
     m_glesMinorVersion = min;
-    addVertexArrayObject(0);
-    setVertexArrayObject(0);
 
     m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
     m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();

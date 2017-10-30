@@ -37,8 +37,8 @@ class CoreProfileEngine;
 class GLEScmContext: public GLEScontext
 {
 public:
-    virtual void init(EGLiface* eglIface);
-
+    virtual void init();
+    static void initGlobal(EGLiface* eglIface);
     GLEScmContext(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream);
     void setActiveTexture(GLenum tex);
