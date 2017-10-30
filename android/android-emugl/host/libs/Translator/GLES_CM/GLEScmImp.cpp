@@ -388,6 +388,7 @@ GL_API void GL_APIENTRY  glBindTexture( GLenum target, GLuint texture) {
         //if texture was already bound to another target
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
         texData->wasBound = true;
+        texData->globalName = globalTextureName;
     }
 
     ctx->setBindedTexture(target, texture, globalTextureName);
@@ -518,6 +519,54 @@ GL_API void GL_APIENTRY  glColorPointer( GLint size, GLenum type, GLsizei stride
     ctx->setPointer(GL_COLOR_ARRAY,size,type,stride,pointer, 0);
 }
 
+void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
+        GLsizei width, GLsizei height, GLint border, GLenum* format,
+        GLenum* type, GLint* internalformat_out) {
+    GET_CTX();
+
+    if (ctx->shareGroup().get()) {
+        TextureData *texData = getTextureTargetData(target);
+
+        if (texData) {
+            texData->hasStorage = true;
+        }
+
+        if (texData && level == 0) {
+            assert(texData->target == GL_TEXTURE_2D ||
+                    texData->target == GL_TEXTURE_CUBE_MAP);
+            texData->internalFormat = internalformat;
+            if (internalformat_out) {
+                *internalformat_out = texData->internalFormat;
+            }
+            texData->width = width;
+            texData->height = height;
+            texData->border = border;
+            if (format) texData->format = *format;
+            if (type) texData->type = *type;
+
+            if (texData->sourceEGLImage != 0) {
+                //
+                // This texture was a target of EGLImage,
+                // but now it is re-defined so we need to
+                // re-generate global texture name for it.
+                //
+                unsigned int tex = ctx->getBindedTexture(target);
+                ctx->shareGroup()->genName(NamedObjectType::TEXTURE, tex,
+                        false);
+                unsigned int globalTextureName =
+                    ctx->shareGroup()->getGlobalName(
+                            NamedObjectType::TEXTURE, tex);
+                ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
+                        globalTextureName);
+                texData->sourceEGLImage = 0;
+                texData->globalName = globalTextureName;
+            }
+            texData->resetSaveableTexture();
+        }
+        texData->makeDirty();
+    }
+}
+
 GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLenum internalformat, GLsizei width, GLsizei height, GLint border, GLsizei imageSize, const GLvoid *data) {
     GET_CTX_CM()
     GLES_CM_TRACE()
@@ -527,6 +576,11 @@ GL_API void GL_APIENTRY  glCompressedTexImage2D( GLenum target, GLint level, GLe
     doCompressedTexImage2D(ctx, target, level, internalformat,
                                 width, height, border,
                                 imageSize, data, glTexImage2D);
+    TextureData* texData = getTextureTargetData(target);
+    if (texData) {
+        texData->compressed = true;
+        texData->compressedFormat = internalformat;
+    }
 }
 
 GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLsizei imageSize, const GLvoid *data) {
@@ -540,20 +594,51 @@ GL_API void GL_APIENTRY  glCompressedTexSubImage2D( GLenum target, GLint level, 
     unsigned char* uncompressed = uncompressTexture(format,uncompressedFrmt,width,height,imageSize,data,level);
     ctx->dispatcher().glTexSubImage2D(target,level,xoffset,yoffset,width,height,uncompressedFrmt,GL_UNSIGNED_BYTE,uncompressed);
     delete uncompressed;
+    TextureData* texData = getTextureTargetData(target);
+    if (texData) {
+        texData->makeDirty();
+    }
 }
 
 GL_API void GL_APIENTRY  glCopyTexImage2D( GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width, GLsizei height, GLint border) {
     GET_CTX()
     GLES_CM_TRACE()
-    SET_ERROR_IF(!(GLEScmValidate::pixelFrmt(ctx,internalformat) && GLEScmValidate::textureTargetEx(target)),GL_INVALID_ENUM);
+    SET_ERROR_IF(!(GLEScmValidate::pixelFrmt(ctx,internalformat)
+            && GLEScmValidate::textureTargetEx(target)),GL_INVALID_ENUM);
     SET_ERROR_IF(border != 0,GL_INVALID_VALUE);
-    ctx->dispatcher().glCopyTexImage2D(target,level,internalformat,x,y,width,height,border);
+
+    GLenum format = baseFormatOfInternalFormat((GLint)internalformat);
+    GLenum type = accurateTypeOfInternalFormat((GLint)internalformat);
+    s_glInitTexImage2D(
+        target, level, internalformat, width, height, border,
+        &format, &type, (GLint*)&internalformat);
+
+    TextureData* texData = getTextureTargetData(target);
+    if (texData && isCoreProfile() &&
+        isCoreProfileEmulatedFormat(texData->format)) {
+        GLEScontext::prepareCoreProfileEmulatedTexture(
+            getTextureTargetData(target),
+            false, target, format, type,
+            (GLint*)&internalformat, &format);
+        ctx->copyTexImageWithEmulation(
+            texData, false, target, level, internalformat,
+            0, 0, x, y, width, height, border);
+    } else {
+        ctx->dispatcher().glCopyTexImage2D(
+            target, level, internalformat,
+            x, y, width, height, border);
+    }
 }
 
 GL_API void GL_APIENTRY  glCopyTexSubImage2D( GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y, GLsizei width, GLsizei height) {
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::textureTargetEx(target),GL_INVALID_ENUM);
+    if (ctx->shareGroup().get()){
+        TextureData *texData = getTextureTargetData(target);
+        SET_ERROR_IF(!texData, GL_INVALID_OPERATION);
+        texData->makeDirty();
+    }
     ctx->dispatcher().glCopyTexSubImage2D(target,level,xoffset,yoffset,x,y,width,height);
 }
 
@@ -1687,36 +1772,8 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
 
     bool needAutoMipmap = false;
 
-    if (ctx->shareGroup().get() && level == 0){
-        TextureData *texData = getTextureTargetData(target);
-        SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
-        if(texData) {
-            texData->width = width;
-            texData->height = height;
-            texData->border = border;
-            texData->internalFormat = internalformat;
-            texData->target = target;
-
-            if (texData->sourceEGLImage != 0) {
-                //
-                // This texture was a target of EGLImage,
-                // but now it is re-defined so we need to
-                // re-generate global texture name for it.
-                //
-                unsigned int tex = ctx->getBindedTexture(target);
-                ctx->shareGroup()->genName(NamedObjectType::TEXTURE, tex,
-                                           false);
-                unsigned int globalTextureName =
-                        ctx->shareGroup()->getGlobalName(
-                                NamedObjectType::TEXTURE, tex);
-                ctx->dispatcher().glBindTexture(GL_TEXTURE_2D,
-                                                globalTextureName);
-                texData->sourceEGLImage = 0;
-            }
-
-            needAutoMipmap = texData->requiresAutoMipmap;
-        }
-    }
+    s_glInitTexImage2D(target, level, internalformat, width, height, border,
+            &format, &type, &internalformat);
 
     // TODO: Emulate swizzles
     if (isCoreProfile()) {
@@ -1860,11 +1917,10 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
     SET_ERROR_IF(xoffset < 0 || yoffset < 0 || width < 0 || height < 0, GL_INVALID_VALUE);
     if (ctx->shareGroup().get()) {
         TextureData *texData = getTextureTargetData(target);
-        if (texData) {
-            SET_ERROR_IF(xoffset + width > (GLint)texData->width ||
-                     yoffset + height > (GLint)texData->height,
-                     GL_INVALID_VALUE);
-        }
+        SET_ERROR_IF(!texData, GL_INVALID_OPERATION);
+        SET_ERROR_IF(xoffset + width > (GLint)texData->width ||
+                 yoffset + height > (GLint)texData->height,
+                 GL_INVALID_VALUE);
     }
     SET_ERROR_IF(!pixels,GL_INVALID_OPERATION);
 
@@ -1872,11 +1928,11 @@ GL_API void GL_APIENTRY  glTexSubImage2D( GLenum target, GLint level, GLint xoff
 
     if (ctx->shareGroup().get()){
         TextureData *texData = getTextureTargetData(target);
-        SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
         if(texData && texData->requiresAutoMipmap)
         {
                 ctx->dispatcher().glGenerateMipmapEXT(target);
         }
+        texData->makeDirty();
     }
 }
 
@@ -1932,6 +1988,9 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
             texData->sourceEGLImage = imagehndl;
+            texData->globalName = img->globalTexObj->getGlobalName();
+            texData->setSaveableTexture(
+                    SaveableTexturePtr(img->saveableTexture));
         }
     }
 }
