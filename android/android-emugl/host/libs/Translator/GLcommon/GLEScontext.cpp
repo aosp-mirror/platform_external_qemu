@@ -19,8 +19,6 @@
 #include "android/base/containers/Lookup.h"
 #include "android/base/files/StreamSerializing.h"
 
-#include "emugl/common/logging.h"
-
 #include <GLcommon/GLconversion_macros.h>
 #include <GLcommon/GLSnapshotSerializers.h>
 #include <GLcommon/GLESmacros.h>
@@ -1884,21 +1882,6 @@ void GLEScontext::initDefaultFBO(
         GLuint* eglSurfaceRBColorId, GLuint* eglSurfaceRBDepthId,
         GLuint readWidth, GLint readHeight, GLint readColorFormat, GLint readDepthStencilFormat, GLint readMultisamples,
         GLuint* eglReadSurfaceRBColorId, GLuint* eglReadSurfaceRBDepthId) {
-
-    if (!m_initialized) {
-        GL_LOG("ERROR: context not initialized!");
-    }
-
-    if (!dispatcher().glGenFramebuffers) {
-        fprintf(stderr, "ERROR: dispatch not initialized!\n");
-        GL_LOG("ERROR: dispatch for glGenFramebuffers not initialized!");
-        if (!s_eglIface) {
-            fprintf(stderr, "ERROR: EGL iface not initialized!\n");
-            GL_LOG("ERROR: EGL iface not initialized!");
-            abort();
-        }
-        dispatcher().dispatchFuncs(GLES_3_1, s_eglIface->eglGetGlLibrary());
-    }
 
     if (!m_defaultFBO) {
         dispatcher().glGenFramebuffers(1, &m_defaultFBO);
