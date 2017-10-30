@@ -271,6 +271,10 @@ void GLEScmContext::drawPointsElems(GLESConversionArrays& arrs,GLsizei count,GLe
     drawPointsData(arrs,0,count,type,indices_in,true);
 }
 
+bool GLEScmContext::doConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
+    return needConvert(cArrs, first, count, type, indices, direct, p, array_id);
+}
+
 bool GLEScmContext::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
 
     bool usingVBO = p->getAttribType() == GLESpointer::BUFFER;
@@ -892,7 +896,6 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
     drawValidate();
 
     if (isCoreProfile()) {
-        // GLESConversionArrays tmpArrs; TODO
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -938,7 +941,6 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
     }
 
     if (isCoreProfile()) {
-        // GLESConversionArrays tmpArrs; TODO
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 

@@ -73,6 +73,7 @@ uniform bool enable_fog;
 uniform bool enable_reflection_map;
 
 uniform int texture_env_mode;
+uniform int texture_format;
 
 in vec4 pos_varying;
 in vec3 normal_varying;
@@ -82,11 +83,17 @@ in vec4 texcoord_varying;
 
 out vec4 frag_color;
 
-// GL_MODULATE/COMBINE/REPLACE can result in
+// Don't use the enum defines, it can result in
 // syntax errors on some GPUs.
 #define kModulate 0x2100
 #define kCombine 0x8570
 #define kReplace 0x1E01
+
+#define kAlpha 0x1906
+#define kRGB 0x1907
+#define kRGBA 0x1908
+#define kLuminance 0x1909
+#define kLuminanceAlpha 0x190A
 
 void main() {
     if (enable_textures) {
@@ -98,12 +105,42 @@ void main() {
             textureColor = texture(tex_sampler, texcoord_varying.xy);
             switch (texture_env_mode) {
             case kReplace:
-                frag_color = textureColor;
+                switch (texture_format) {
+                case kAlpha:
+                    frag_color.rgb = color_varying.rgb;
+                    frag_color.a = textureColor.a;
+                    break;
+                case kRGBA:
+                case kLuminanceAlpha:
+                    frag_color.rgba = textureColor.rgba;
+                    break;
+                case kRGB:
+                case kLuminance:
+                default:
+                    frag_color.rgb = textureColor.rgb;
+                    frag_color.a = color_varying.a;
+                    break;
+                }
                 break;
             case kCombine:
             case kModulate:
             default:
-                frag_color = color_varying * textureColor;
+                switch (texture_format) {
+                case kAlpha:
+                    frag_color.rgb = color_varying.rgb;
+                    frag_color.a = color_varying.a * textureColor.a;
+                    break;
+                case kRGBA:
+                case kLuminanceAlpha:
+                    frag_color.rgba = color_varying.rgba * textureColor.rgba;
+                    break;
+                case kRGB:
+                case kLuminance:
+                default:
+                    frag_color.rgb = color_varying.rgb * textureColor.rgb;
+                    frag_color.a = color_varying.a;
+                    break;
+                }
                 break;
             }
         }
