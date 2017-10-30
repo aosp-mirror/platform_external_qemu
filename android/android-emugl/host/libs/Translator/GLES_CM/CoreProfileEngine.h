@@ -47,6 +47,7 @@ public:
 
         GLint projMatrixLoc;
         GLint modelviewMatrixLoc;
+        GLint textureMatrixLoc;
         GLint textureSamplerLoc;
         GLint textureCubeSamplerLoc;
 
