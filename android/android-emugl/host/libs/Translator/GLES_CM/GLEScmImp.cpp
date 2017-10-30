@@ -106,12 +106,23 @@ static void initGLESx(bool isGles2Gles) {
 
 static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     setCoreProfile(ctx->isCoreProfile());
-    if (!ctx->isInitialized()) {
+
+    // TODO: Properly restore GLES1 context from snapshot.
+    // This is just to avoid a crash.
+    if (ctx->contextNeedsRestore()) {
+        // TODO: metrics for GLES1 snapshots
+        fprintf(stderr,
+                "Warning: restoring GLES1 context from snapshot. App "
+                "may need reloading.\n");
+    }
+
+    if (!ctx->isInitialized() ||
+        ctx->contextNeedsRestore()) {
         ctx->setShareGroup(grp);
         ctx->init(s_eglIface);
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP_OES,0);
-     }
+    }
 }
 
 static GLEScontext* createGLESContext(int maj, int min,
