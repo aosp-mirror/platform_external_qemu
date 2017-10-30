@@ -74,7 +74,6 @@ GLEScmContext::GLEScmContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
     : GLEScontext(globalNameSpace, stream, nullptr) {
     // TODO: snapshot support
-    if (stream) return;
     m_glesMajorVersion = maj;
     m_glesMinorVersion = min;
     addVertexArrayObject(0);
@@ -100,6 +99,8 @@ GLEScmContext::GLEScmContext(int maj, int min,
         mTexUnitEnvs[i][GL_COMBINE_RGB].intVal[0] = GL_REPLACE;
         mTexUnitEnvs[i][GL_COMBINE_ALPHA].intVal[0] = GL_REPLACE;
     }
+
+    if (stream) return;
 }
 
 
