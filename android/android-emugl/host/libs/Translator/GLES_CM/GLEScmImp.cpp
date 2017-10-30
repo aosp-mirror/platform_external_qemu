@@ -767,6 +767,9 @@ GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
     GET_CTX()
     GLES_CM_TRACE()
 
+#define TO_GLBOOL(params, x) \
+    *params = x ? GL_TRUE : GL_FALSE; \
+
     if(ctx->glGetBooleanv(pname, params))
     {
         return;
@@ -807,6 +810,26 @@ GL_API void GL_APIENTRY  glGetBooleanv( GLenum pname, GLboolean *params) {
             }
         }
     break;
+    case GL_GENERATE_MIPMAP_HINT:
+        if (isCoreProfile()) {
+            TO_GLBOOL(params, ctx->getHint(GL_GENERATE_MIPMAP_HINT));
+        } else {
+            ctx->dispatcher().glGetBooleanv(pname,params);
+        }
+        break;
+    case GL_RED_BITS:
+    case GL_GREEN_BITS:
+    case GL_BLUE_BITS:
+    case GL_ALPHA_BITS:
+    case GL_DEPTH_BITS:
+    case GL_STENCIL_BITS:
+        if (isCoreProfile()) {
+            GLuint fboBinding = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+            TO_GLBOOL(params, ctx->queryCurrFboBits(fboBinding, pname));
+        } else {
+            ctx->dispatcher().glGetBooleanv(pname,params);
+        }
+        break;
     default:
         ctx->dispatcher().glGetBooleanv(pname,params);
     }
@@ -1005,6 +1028,26 @@ GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params) {
             *params = 16;
         }
         break;
+    case GL_GENERATE_MIPMAP_HINT:
+        if (isCoreProfile()) {
+            *params = ctx->getHint(GL_GENERATE_MIPMAP_HINT);
+        } else {
+            ctx->dispatcher().glGetIntegerv(pname,params);
+        }
+        break;
+    case GL_RED_BITS:
+    case GL_GREEN_BITS:
+    case GL_BLUE_BITS:
+    case GL_ALPHA_BITS:
+    case GL_DEPTH_BITS:
+    case GL_STENCIL_BITS:
+        if (isCoreProfile()) {
+            GLuint fboBinding = ctx->getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+            *params = ctx->queryCurrFboBits(fboBinding, pname);
+        } else {
+            ctx->dispatcher().glGetIntegerv(pname,params);
+        }
+        break;
 
     default:
         ctx->dispatcher().glGetIntegerv(pname,params);
@@ -1170,7 +1213,13 @@ GL_API void GL_APIENTRY  glHint( GLenum target, GLenum mode) {
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::hintTargetMode(target,mode),GL_INVALID_ENUM);
-    ctx->dispatcher().glHint(target,mode);
+
+    // No GLES1 hints are supported.
+    if (isCoreProfile()) {
+        ctx->setHint(target, mode);
+    } else {
+        ctx->dispatcher().glHint(target,mode);
+    }
 }
 
 GL_API void GL_APIENTRY  glLightModelf( GLenum pname, GLfloat param) {
@@ -1681,10 +1730,12 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
                                    internalformat,width,height,
                                    border,format,type,pixels);
 
-    if(needAutoMipmap)
-    {
+    if (isCoreProfile()) {
+        ctx->dispatcher().glGenerateMipmap(target);
+    } else if (needAutoMipmap) {
         ctx->dispatcher().glGenerateMipmapEXT(target);
     }
+
 }
 
 static bool handleMipmapGeneration(GLenum target, GLenum pname, bool param)
@@ -1692,7 +1743,8 @@ static bool handleMipmapGeneration(GLenum target, GLenum pname, bool param)
     GET_CTX_RET(false)
     GLES_CM_TRACE()
 
-    if(pname == GL_GENERATE_MIPMAP && !ctx->isAutoMipmapSupported())
+    if(pname == GL_GENERATE_MIPMAP &&
+       (isCoreProfile() || !ctx->isAutoMipmapSupported()))
     {
         TextureData *texData = getTextureTargetData(target);
         if(texData)
@@ -1769,7 +1821,6 @@ GL_API void GL_APIENTRY  glTexParameterx( GLenum target, GLenum pname, GLfixed p
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::texParams(target,pname),GL_INVALID_ENUM);
-
     if(handleMipmapGeneration(target, pname, (bool)param))
         return;
 
