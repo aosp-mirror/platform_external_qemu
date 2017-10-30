@@ -32,7 +32,8 @@ class ProgramData;
 
 class GLESv2Context : public GLEScontext{
 public:
-    virtual void init(EGLiface* eglIface);
+    virtual void init();
+    static void initGlobal(EGLiface* eglIface);
     GLESv2Context(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream, GlLibrary* glLib);
     virtual ~GLESv2Context();
