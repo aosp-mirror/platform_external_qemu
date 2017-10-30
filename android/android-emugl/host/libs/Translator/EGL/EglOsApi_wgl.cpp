@@ -508,6 +508,7 @@ public:
     HGLRC context() const { return mCtx; }
 
     static HGLRC from(const EglOS::Context* c) {
+        if (!c) return nullptr;
         return static_cast<const WinContext*>(c)->context();
     }
 
@@ -926,10 +927,8 @@ public:
         HGLRC ctx;
         if (useCoreProfile) {
             ctx = mDispatch->wglCreateContextAttribsARB(
-                      dpy,
-                      sharedContext ?
-                          WinContext::from(sharedContext) :
-                          nullptr, mCoreProfileCtxAttribs);
+                      dpy, WinContext::from(sharedContext),
+                      mCoreProfileCtxAttribs);
         } else {
             ctx = mDispatch->wglCreateContext(dpy);
             if (ctx && sharedContext) {
