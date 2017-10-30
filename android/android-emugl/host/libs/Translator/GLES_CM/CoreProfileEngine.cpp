@@ -685,14 +685,17 @@ void CoreProfileEngine::preDrawTextureUnitEmulation() {
     gl.glUniform1i(m_geometryDrawState.enableTextureLoc,
                    mCtx->isEnabled(GL_TEXTURE_2D) &&
                    mCtx->isArrEnabled(GL_TEXTURE_COORD_ARRAY));
+
     gl.glUniform1i(m_geometryDrawState.textureSamplerLoc, currTextureUnit * 2);
     gl.glUniform1i(m_geometryDrawState.textureCubeSamplerLoc, currTextureUnit * 2 + 1);
 
     if (auto cubeMapTex = mCtx->getBindedTexture(currTextureUnit + GL_TEXTURE0, GL_TEXTURE_CUBE_MAP)) {
+        GLuint cubeMapTexGlobal = mCtx->shareGroup()->getGlobalName(
+                                      NamedObjectType::TEXTURE, cubeMapTex);
         gl.glActiveTexture(GL_TEXTURE0 + currTextureUnit * 2);
         gl.glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         gl.glActiveTexture(GL_TEXTURE0 + currTextureUnit * 2 + 1);
-        gl.glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTex);
+        gl.glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexGlobal);
         gl.glActiveTexture(GL_TEXTURE0 + currTextureUnit * 2);
     }
 
@@ -723,8 +726,10 @@ void CoreProfileEngine::postDrawTextureUnitEmulation() {
     GLuint cubeMapTex = mCtx->getBindedTexture(currTextureUnit + GL_TEXTURE0, GL_TEXTURE_CUBE_MAP);
 
     if (cubeMapTex) {
+        GLuint cubeMapTexGlobal = mCtx->shareGroup()->getGlobalName(
+                                      NamedObjectType::TEXTURE, cubeMapTex);
         gl.glActiveTexture(GL_TEXTURE0 + currTextureUnit * 2);
-        gl.glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTex);
+        gl.glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexGlobal);
         gl.glActiveTexture(GL_TEXTURE0 + currTextureUnit * 2 + 1);
         gl.glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
         gl.glActiveTexture(GL_TEXTURE0 + currTextureUnit * 2);
