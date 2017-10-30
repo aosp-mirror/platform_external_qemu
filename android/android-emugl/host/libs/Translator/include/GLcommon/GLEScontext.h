@@ -191,7 +191,8 @@ public:
     GLEScontext();
     GLEScontext(GlobalNameSpace* globalNameSpace, android::base::Stream* stream,
             GlLibrary* glLib);
-    virtual void init(EGLiface* eglIface);
+    virtual void init();
+    static void initGlobal(EGLiface* eglIface);
     GLenum getGLerror();
     void setGLerror(GLenum err);
     void setShareGroup(ShareGroupPtr grp){m_shareGroup = std::move(grp);};
@@ -448,7 +449,7 @@ protected:
     void convertDirectVBO(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum array_id,GLESpointer* p);
     void convertIndirect(GLESConversionArrays& fArrs,GLsizei count,GLenum type,const GLvoid* indices,GLenum array_id,GLESpointer* p);
     void convertIndirectVBO(GLESConversionArrays& fArrs,GLsizei count,GLenum indices_type,const GLvoid* indices,GLenum array_id,GLESpointer* p);
-    void initCapsLocked(const GLubyte * extensionString);
+    static void initCapsLocked(const GLubyte * extensionString);
     virtual void initExtensionString() =0;
 
     bool                  m_needRestoreFromSnapshot = false;

@@ -341,9 +341,8 @@ void GLEScontext::initEglIface(EGLiface* iface) {
     if (!s_eglIface) s_eglIface = iface;
 }
 
-void GLEScontext::init(EGLiface* eglIface) {
-    initEglIface(eglIface);
-
+void GLEScontext::initGlobal(EGLiface* iface) {
+    initEglIface(iface);
     if (!s_glExtensions) {
         initCapsLocked(reinterpret_cast<const GLubyte*>(
                 getHostExtensionsString(&s_glDispatch).c_str()));
@@ -354,7 +353,9 @@ void GLEScontext::init(EGLiface* eglIface) {
         // be populated after calling this ::init() method.
         s_glExtensions = new std::string();
     }
+}
 
+void GLEScontext::init() {
     if (!m_initialized) {
         initExtensionString();
 
@@ -1526,7 +1527,6 @@ void GLEScontext::releaseGlobalLock() {
     s_lock.unlock();
 }
 
-
 void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 {
     const char* cstring = (const char*)extensionString;
@@ -1539,7 +1539,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     // Core profile lacks a fixed-function pipeline with texture units,
     // but we still want glDrawTexOES to work in core profile.
     // So, set it to 8.
-    if (isCoreProfile() && !s_glSupport.maxTexUnits) {
+    if (::isCoreProfile() && !s_glSupport.maxTexUnits) {
         s_glSupport.maxTexUnits = 8;
     }
     s_glDispatch.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS,&s_glSupport.maxTexImageUnits);
@@ -1599,12 +1599,12 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring,"GL_OES_standard_derivatives ")!=NULL)
         s_glSupport.GL_OES_STANDARD_DERIVATIVES = true;
 
-    if (isCoreProfile() ||
+    if (::isCoreProfile() ||
         strstr(cstring,"GL_ARB_texture_non_power_of_two")!=NULL ||
         strstr(cstring,"GL_OES_texture_npot")!=NULL)
         s_glSupport.GL_OES_TEXTURE_NPOT = true;
 
-    if (isCoreProfile() ||
+    if (::isCoreProfile() ||
         strstr(cstring,"GL_ARB_color_buffer_float")!=NULL ||
         strstr(cstring,"GL_EXT_color_buffer_float")!=NULL)
         s_glSupport.GL_EXT_color_buffer_float = true;
