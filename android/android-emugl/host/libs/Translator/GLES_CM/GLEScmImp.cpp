@@ -1730,12 +1730,13 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
                                    internalformat,width,height,
                                    border,format,type,pixels);
 
-    if (isCoreProfile()) {
-        ctx->dispatcher().glGenerateMipmap(target);
-    } else if (needAutoMipmap) {
-        ctx->dispatcher().glGenerateMipmapEXT(target);
+    if (needAutoMipmap) {
+        if (isCoreProfile() && !isCubeMapFaceTarget(target)) {
+            ctx->dispatcher().glGenerateMipmap(target);
+        } else {
+            ctx->dispatcher().glGenerateMipmapEXT(target);
+        }
     }
-
 }
 
 static bool handleMipmapGeneration(GLenum target, GLenum pname, bool param)
