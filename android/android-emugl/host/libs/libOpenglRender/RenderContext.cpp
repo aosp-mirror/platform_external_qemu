@@ -142,3 +142,9 @@ RenderContext *RenderContext::onLoad(android::base::Stream* stream,
                       stream);
 }
 
+GLESApi RenderContext::clientVersion() const {
+    if (getEmulatedGLES1Context()) {
+        return GLESApi_CM;
+    }
+    return mVersion;
+}

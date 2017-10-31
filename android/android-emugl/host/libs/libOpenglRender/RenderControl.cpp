@@ -303,7 +303,7 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     if (tInfo && tInfo->currContext.get()) {
         const char *str = nullptr;
-        if (tInfo->currContext->version() > GLESApi_CM) {
+        if (tInfo->currContext->clientVersion() > GLESApi_CM) {
             str = (const char *)s_gles2.glGetString(name);
         }
         else {
