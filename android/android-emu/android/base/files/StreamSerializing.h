@@ -60,6 +60,24 @@ bool loadBuffer(Stream* stream, SmallVector<T>* buffer) {
     return ret == len * sizeof(T);
 }
 
+template <class T, class SaveFunc>
+void saveBuffer(Stream* stream, const std::vector<T>& buffer, SaveFunc&& saver) {
+    stream->putBe32(buffer.size());
+    for (const auto& val : buffer) {
+        saver(stream, val);
+    }
+}
+
+template <class T, class LoadFunc>
+void loadBuffer(Stream* stream, std::vector<T>* buffer, LoadFunc&& loader) {
+    auto len = stream->getBe32();
+    buffer->clear();
+    buffer->reserve(len);
+    for (uint32_t i = 0; i < len; i++) {
+        buffer->emplace_back(loader(stream));
+    }
+}
+
 template <class Collection, class SaveFunc>
 void saveCollection(Stream* stream, const Collection& c, SaveFunc&& saver) {
     stream->putBe32(c.size());
