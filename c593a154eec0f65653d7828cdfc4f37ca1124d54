@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7401261a_d49949d4",
+        "filename": "android/android-emu/android/physics/PhysicalModel.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-31T19:08:01Z",
+      "side": 1,
+      "message": "I received feedback on a previous review to not prefix functions with underscores, since that is reserved for the compiler and standard library.",
+      "range": {
+        "startLine": 111,
+        "startChar": 12,
+        "endLine": 111,
+        "endChar": 44
+      },
+      "revId": "c593a154eec0f65653d7828cdfc4f37ca1124d54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
