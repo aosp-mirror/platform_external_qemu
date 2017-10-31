@@ -1348,7 +1348,7 @@ bool FrameBuffer::bindContext(HandleType p_context,
     tinfo->currDrawSurf = draw;
     tinfo->currReadSurf = read;
     if (ctx) {
-        if (ctx->version() > GLESApi_CM)
+        if (ctx->clientVersion() > GLESApi_CM)
             tinfo->m_gl2Dec.setContextData(&ctx->decoderContextData());
         else
             tinfo->m_glDec.setContextData(&ctx->decoderContextData());
