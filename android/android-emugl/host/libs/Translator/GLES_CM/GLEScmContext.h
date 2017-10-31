@@ -79,6 +79,7 @@ public:
 
     void matrixMode(GLenum mode);
     void loadIdentity();
+    void loadMatrixf(const GLfloat* m);
     void pushMatrix();
     void popMatrix();
     void multMatrixf(const GLfloat* m);

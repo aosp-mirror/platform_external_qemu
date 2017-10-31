@@ -1414,19 +1414,19 @@ GL_API void GL_APIENTRY  glLoadIdentity( void) {
 }
 
 GL_API void GL_APIENTRY  glLoadMatrixf( const GLfloat *m) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glLoadMatrixf(m);
+    ctx->loadMatrixf(m);
 }
 
 GL_API void GL_APIENTRY  glLoadMatrixx( const GLfixed *m) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat mat[16];
     for(int i=0; i< 16 ; i++) {
         mat[i] = X2F(m[i]);
     }
-    ctx->dispatcher().glLoadMatrixf(mat);
+    ctx->loadMatrixf(mat);
 }
 
 GL_API void GL_APIENTRY  glLogicOp( GLenum opcode) {

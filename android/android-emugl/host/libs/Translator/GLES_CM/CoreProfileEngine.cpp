@@ -478,6 +478,10 @@ void CoreProfileEngine::loadIdentity() {
     // no-op
 }
 
+void CoreProfileEngine::loadMatrixf(const GLfloat* m) {
+    // no-op
+}
+
 void CoreProfileEngine::pushMatrix() {
     // no-op
 }
