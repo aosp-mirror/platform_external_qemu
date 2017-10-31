@@ -129,7 +129,9 @@ public:
     glm::mat4 getModelviewMatrix();
     glm::mat4 getTextureMatrix();
 
+    virtual void onSave(android::base::Stream* stream) const override;
 protected:
+    virtual void postLoadRestoreCtx() override;
 
     static const GLint kMaxTextureUnits = 8;
     static const GLint kMaxMatrixStackSize = 16;

@@ -22,6 +22,7 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include "android/base/files/StreamSerializing.h"
 #include "emugl/common/crash_reporter.h"
 
 #include <glm/vec3.hpp>
@@ -39,16 +40,9 @@ void GLEScmContext::init() {
     emugl::Mutex::AutoLock mutex(s_lock);
     if(!m_initialized) {
         GLEScontext::init();
-        addVertexArrayObject(0);
-        setVertexArrayObject(0);
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
         m_currVaoState[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
-
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
-                     (const char*)dispatcher().glGetString(GL_RENDERER),
-                     (const char*)dispatcher().glGetString(GL_VERSION),
-                     "OpenGL ES-CM 1.1");
 
         if (isCoreProfile()) {
             m_coreProfileEngine = new CoreProfileEngine(this);
@@ -61,6 +55,10 @@ void GLEScmContext::init() {
 void GLEScmContext::initGlobal(EGLiface* eglIface) {
     s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
     GLEScontext::initGlobal(eglIface);
+    buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
+                 (const char*)dispatcher().glGetString(GL_RENDERER),
+                 (const char*)dispatcher().glGetString(GL_VERSION),
+                 "OpenGL ES-CM 1.1");
 }
 
 void GLEScmContext::initDefaultFBO(
@@ -80,28 +78,78 @@ GLEScmContext::GLEScmContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
     : GLEScontext(globalNameSpace, stream, nullptr) {
     // TODO: snapshot support
-    m_glesMajorVersion = maj;
-    m_glesMinorVersion = min;
+    if (stream) {
+        assert(maj == m_glesMajorVersion);
+        assert(min == m_glesMinorVersion);
+        android::base::loadBuffer(stream, &mProjMatrices);
+        android::base::loadBuffer(stream, &mModelviewMatrices);
+        android::base::loadBuffer(stream, &mTextureMatrices,
+                [](android::base::Stream* stream) {
+                    MatrixStack matrices;
+                    android::base::loadBuffer(stream, &matrices);
+                    return std::move(matrices);
+                });
+        android::base::loadBuffer(stream, &mTexUnitEnvs,
+                [](android::base::Stream* stream) {
+                    TexEnv texEnv;
+                    android::base::loadCollection(stream, &texEnv,
+                            [] (android::base::Stream* stream) {
+                                GLenum idx = stream->getBe32();
+                                GLVal val;
+                                stream->read(&val, sizeof(GLVal));
+                                return std::make_pair(idx, val);
+                            });
+                    return std::move(texEnv);
+                });
+        android::base::loadBuffer(stream, &mTexGens,
+                [](android::base::Stream* stream) {
+                    TexEnv texEnv;
+                    android::base::loadCollection(stream, &texEnv,
+                            [] (android::base::Stream* stream) {
+                                GLenum idx = stream->getBe32();
+                                GLVal val;
+                                stream->read(&val, sizeof(GLVal));
+                                return std::make_pair(idx, val);
+                            });
+                    return std::move(texEnv);
+                });
+        m_clientActiveTexture = stream->getBe32();
+        if (m_initialized) {
+            uint32_t size = stream->getBe32();
+            m_texCoords = new GLESpointer[size];
+            for (uint32_t i = 0; i < size; i++) {
+                m_texCoords[i].onLoad(stream);
+            }
+            m_currVaoState[GL_TEXTURE_COORD_ARRAY] =
+                    &m_texCoords[m_clientActiveTexture];
+        }
+    } else {
+        m_glesMajorVersion = maj;
+        m_glesMinorVersion = min;
 
-    m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
-    m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();
-    m_currVaoState[GL_VERTEX_ARRAY]         = new GLESpointer();
-    m_currVaoState[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
+        addVertexArrayObject(0);
+        setVertexArrayObject(0);
 
-    mProjMatrices.resize(1, glm::mat4());
-    mModelviewMatrices.resize(1, glm::mat4());
-    mTextureMatrices.resize(kMaxTextureUnits, { glm::mat4() });
-    mTexUnitEnvs.resize(kMaxTextureUnits, {});
-    mTexGens.resize(kMaxTextureUnits, {});
+        m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
+        m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();
+        m_currVaoState[GL_VERTEX_ARRAY]         = new GLESpointer();
+        m_currVaoState[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
 
-    for (int i = 0; i < kMaxTextureUnits; i++) {
-        mTexUnitEnvs[i][GL_TEXTURE_ENV_MODE].intVal[0] = GL_MODULATE;
-        mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[0] = 0.2f;
-        mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[1] = 0.4f;
-        mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[2] = 0.8f;
-        mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[3] = 0.7f;
-        mTexUnitEnvs[i][GL_COMBINE_RGB].intVal[0] = GL_REPLACE;
-        mTexUnitEnvs[i][GL_COMBINE_ALPHA].intVal[0] = GL_REPLACE;
+        mProjMatrices.resize(1, glm::mat4());
+        mModelviewMatrices.resize(1, glm::mat4());
+        mTextureMatrices.resize(kMaxTextureUnits, { glm::mat4() });
+        mTexUnitEnvs.resize(kMaxTextureUnits, {});
+        mTexGens.resize(kMaxTextureUnits, {});
+
+        for (int i = 0; i < kMaxTextureUnits; i++) {
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_MODE].intVal[0] = GL_MODULATE;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[0] = 0.2f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[1] = 0.4f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[2] = 0.8f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[3] = 0.7f;
+            mTexUnitEnvs[i][GL_COMBINE_RGB].intVal[0] = GL_REPLACE;
+            mTexUnitEnvs[i][GL_COMBINE_ALPHA].intVal[0] = GL_REPLACE;
+        }
     }
 }
 
@@ -132,6 +180,45 @@ GLEScmContext::~GLEScmContext(){
     }
 }
 
+void GLEScmContext::onSave(android::base::Stream* stream) const {
+    GLEScontext::onSave(stream);
+    android::base::saveBuffer(stream, mProjMatrices);
+    android::base::saveBuffer(stream, mModelviewMatrices);
+    android::base::saveBuffer(stream, mTextureMatrices,
+            [](android::base::Stream* stream, const MatrixStack& matrices) {
+                android::base::saveBuffer(stream, matrices);
+            });
+    android::base::saveBuffer(stream, mTexUnitEnvs,
+            [](android::base::Stream* stream, const TexEnv& texEnv) {
+                android::base::saveCollection(stream, texEnv,
+                        [] (android::base::Stream* stream,
+                            const std::pair<GLenum, GLVal>& it) {
+                            stream->putBe32(it.first);
+                            stream->write(&it.second, sizeof(GLVal));
+                        });
+            });
+    android::base::saveBuffer(stream, mTexGens,
+            [](android::base::Stream* stream, const TexEnv& texEnv) {
+                android::base::saveCollection(stream, texEnv,
+                        [] (android::base::Stream* stream,
+                            const std::pair<GLenum, GLVal>& it) {
+                            stream->putBe32(it.first);
+                            stream->write(&it.second, sizeof(GLVal));
+                        });
+            });
+    stream->putBe32(m_clientActiveTexture);
+    if (m_initialized) {
+        stream->putBe32(s_glSupport.maxTexUnits);
+        for (uint32_t i = 0; i < s_glSupport.maxTexUnits; i++) {
+            m_texCoords[i].onSave(stream);
+        }
+    }
+}
+
+void GLEScmContext::postLoadRestoreCtx() {
+    // TODO
+    GLEScontext::postLoadRestoreCtx();
+}
 
 //setting client side arr
 void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
