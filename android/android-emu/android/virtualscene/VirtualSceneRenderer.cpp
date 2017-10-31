@@ -16,47 +16,115 @@
 
 #include "android/virtualscene/VirtualSceneRenderer.h"
 
+#include "android/base/ArraySize.h"
 #include "android/utils/debug.h"
-#include <vector>
+#include "android/virtualscene/VirtualSceneTexture.h"
 
-using android::base::AutoLock;
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+
+#include <vector>
+#include <cmath>
+
+using namespace android::base;
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
-#define D(...) VERBOSE_PRINT(camera, __VA_ARGS__)
-#define D_ACTIVE VERBOSE_CHECK(camera)
+#define D(...) VERBOSE_PRINT(virtualscene, __VA_ARGS__)
+#define D_ACTIVE VERBOSE_CHECK(virtualscene)
 
 /*******************************************************************************
  *                     Renderer routines
  ******************************************************************************/
 
+namespace android {
+namespace virtualscene {
+
 static constexpr char kSimpleVertexShader[] = R"(
 attribute vec3 in_position;
+attribute vec2 in_uv;
+
+uniform mat4 u_modelViewProj;
+
+varying vec2 uv;
 
 void main() {
-    gl_Position = vec4(in_position, 1.0);
+    uv = in_uv;
+    gl_Position = u_modelViewProj * vec4(in_position, 1.0);
 }
 )";
 
 static constexpr char kSimpleFragmentShader[] = R"(
 precision mediump float;
+varying vec2 uv;
+
+uniform sampler2D tex_sampler;
 
 void main() {
-  gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+  gl_FragColor = texture2D(tex_sampler, uv);
 }
 )";
 
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec2 uv;
+};
+
 // clang-format off
-// Vertices for a simple screen-space triangle.
-static constexpr GLfloat kVertexBufferData[] = {
-     1.0f,  1.0f, 0.0f,
-    -1.0f,  1.0f, 0.0f,
-     0.0f, -1.0f, 0.0f,
+// Vertices for a for a quad.
+static constexpr Vertex kQuadVertices[] = {
+    { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec2(0.0f, 1.0f) },  // top left
+    { glm::vec3( 1.0f,  1.0f, 0.0f), glm::vec2(1.0f, 1.0f) },  // top right
+    { glm::vec3( 1.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f) },  // bottom right
+    { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f) },  // bottom left
+};
+
+static constexpr GLubyte kQuadIndices[] = {
+  0, 2, 1,  // TL->BR->TR
+  0, 3, 2,  // TL->BL->BR
 };
 // clang-format on
 
-namespace android {
-namespace virtualscene {
+// The OpenGL coordinate system is right-handed with negative-Z forward.
+//
+// Cube quads are 10x10 meters, 5 meters away from the camera to form a 10-meter
+// cube around the origin.
+//
+// The cube textures are oriented so that if you are looking at +z and look
+// down, the -y texture is visible and oriented correctly, so rotate the quads
+// relative to +z.
+//
+//       y  -z
+//       | /
+// -x ___|/____ x
+//      /|
+//     / |
+//    z  -y
+
+struct CubeSide {
+    const char* texture;
+    glm::quat rotation;
+};
+
+static constexpr float kPi = 3.14159265358979323846f;
+static constexpr float kPi2 = kPi / 2.00f;
+
+static const CubeSide kCubeSides[] = {
+        {"micro_kitchen1_negz.png",
+         glm::angleAxis(kPi, glm::vec3(0.0f, 1.0f, 0.0f))},
+        {"micro_kitchen1_posz.png", glm::quat()},
+        {"micro_kitchen1_posx.png",
+         glm::angleAxis(-kPi2, glm::vec3(0.0f, 1.0f, 0.0f))},
+        {"micro_kitchen1_negx.png",
+         glm::angleAxis(kPi2, glm::vec3(0.0f, 1.0f, 0.0f))},
+        {"micro_kitchen1_negy.png",
+         glm::angleAxis(-kPi2, glm::vec3(1.0f, 0.0f, 0.0f))},
+        {"micro_kitchen1_posy.png",
+         glm::angleAxis(kPi2, glm::vec3(1.0f, 0.0f, 0.0f))},
+};
 
 class VirtualSceneRendererImpl {
     DISALLOW_COPY_AND_ASSIGN(VirtualSceneRendererImpl);
@@ -65,6 +133,27 @@ public:
     VirtualSceneRendererImpl(const GLESv2Dispatch* gles2) : mGles2(gles2) {}
 
     bool initialize() {
+        for (const CubeSide& side : kCubeSides) {
+            std::unique_ptr<VirtualSceneTexture> texture =
+                    VirtualSceneTexture::load(mGles2, side.texture);
+            if (!texture) {
+                return false;
+            }
+
+            mCubeTextures.push_back(std::move(texture));
+        }
+
+        mGles2->glGenBuffers(1, &mVertexBuffer);
+        mGles2->glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+        mGles2->glBufferData(GL_ARRAY_BUFFER, sizeof(kQuadVertices),
+                             kQuadVertices, GL_STATIC_DRAW);
+
+        mGles2->glGenBuffers(1, &mIndexBuffer);
+        mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+        mGles2->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(kQuadIndices),
+                             kQuadIndices, GL_STATIC_DRAW);
+
+        // Compile and setup shaders.
         const GLuint vertexId =
                 compileShader(GL_VERTEX_SHADER, kSimpleVertexShader);
         const GLuint fragmentId =
@@ -83,24 +172,37 @@ public:
             return false;
         }
 
-        const GLint positionHandle =
+        const GLint positionLocation =
                 mGles2->glGetAttribLocation(mProgram, "in_position");
+        const GLint uvLocation = mGles2->glGetAttribLocation(mProgram, "in_uv");
+        mTexSamplerLocation =
+                mGles2->glGetAttribLocation(mProgram, "tex_sampler");
 
-        if (positionHandle >= 0) {
-            mGles2->glEnableVertexAttribArray(positionHandle);
+        mMvpLocation =
+                mGles2->glGetUniformLocation(mProgram, "u_modelViewProj");
 
-            mGles2->glGenBuffers(1, &mVertexBuffer);
-            mGles2->glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
-            mGles2->glBufferData(GL_ARRAY_BUFFER, sizeof(kVertexBufferData),
-                                 kVertexBufferData, GL_STATIC_DRAW);
+        if (positionLocation >= 0) {
+            mGles2->glEnableVertexAttribArray(positionLocation);
+            mGles2->glVertexAttribPointer(
+                    positionLocation,
+                    3,               // size
+                    GL_FLOAT,        // type
+                    GL_FALSE,        // normalized?
+                    sizeof(Vertex),  // stride
+                    reinterpret_cast<void*>(offsetof(Vertex, pos))  // offset
+                    );
+        }
 
-            mGles2->glVertexAttribPointer(positionHandle,
-                                          3,                     // size
-                                          GL_FLOAT,              // type
-                                          GL_FALSE,              // normalized?
-                                          0,                     // stride
-                                          static_cast<void*>(0)  // offset
-            );
+        if (uvLocation >= 0) {
+            mGles2->glEnableVertexAttribArray(uvLocation);
+            mGles2->glVertexAttribPointer(
+                    uvLocation,
+                    2,               // size
+                    GL_FLOAT,        // type
+                    GL_FALSE,        // normalized?
+                    sizeof(Vertex),  // stride
+                    reinterpret_cast<void*>(offsetof(Vertex, uv))  // offset
+                    );
         }
 
         return true;
@@ -110,6 +212,9 @@ public:
         // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
         mGles2->glDeleteBuffers(1, &mVertexBuffer);
         mVertexBuffer = 0;
+
+        mGles2->glDeleteBuffers(1, &mIndexBuffer);
+        mIndexBuffer = 0;
 
         mGles2->glDeleteProgram(mProgram);
         mProgram = 0;
@@ -190,31 +295,96 @@ public:
         return programId;
     }
 
+    glm::mat4 projectionMatrixForCameraIntrinsics(float width,
+                                                  float height,
+                                                  float fx,
+                                                  float fy,
+                                                  float cx,
+                                                  float cy,
+                                                  float near,
+                                                  float far) {
+        const float xscale = near / fx;
+        const float yscale = near / fy;
+        const float xoffset = (cx - (width / 2.0)) * xscale;
+        // Color camera's coordinates has y pointing downwards so we negate this
+        // term.
+        const float yoffset = -(cy - (height / 2.0)) * yscale;
+
+        return glm::frustum(xscale * -width / 2.0f - xoffset,
+                            xscale * width / 2.0f - xoffset,
+                            yscale * -height / 2.0f - yoffset,
+                            yscale * height / 2.0f - yoffset, near, far);
+    }
+
     void render() {
-        mBackgroundColor += 0.02f;
-        if (mBackgroundColor > 1.0f) {
-            mBackgroundColor = 0.2f;
+        const glm::mat4 projection = projectionMatrixForCameraIntrinsics(
+                640.0f,  // width
+                480.0f,  // height
+                478.818f, 478.745f, 320.398f, 241.369f, 0.1f, 100.0f);
+
+        mRotation += kPi / 30.0f / 4.0f;  // Four seconds per rotation.
+        if (mRotation >= kPi * 2.0f) {
+            mRotation -= kPi * 2.0f;
+            mRotateY = !mRotateY;
         }
 
-        mGles2->glClearColor(mBackgroundColor, 0.0f, 0.0f, 1.0f);
+        mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mGles2->glClear(GL_COLOR_BUFFER_BIT);
 
-        mGles2->glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+        const glm::mat4 defaultView = glm::lookAt(
+                glm::vec3(0.0f, 0.0f,
+                          0.0f),  // Camera is at zero in world-space
+                glm::vec3(0.0f, 0.0f,
+                          -1.0f),  // Look forward in the Z direction
+                glm::vec3(0.0f, 1.0f,
+                          0.0f));  // Head is up, 0 rotation is portrait
 
-        // Draw the triangle!
+        // Transform view by rotation.
+        glm::mat4 view = (mRotateY ? glm::eulerAngleY(mRotation)
+                                   : glm::eulerAngleX(mRotation)) *
+                         defaultView;
+
         mGles2->glUseProgram(mProgram);
-        mGles2->glDrawArrays(
-                GL_TRIANGLES, 0,
-                3);  // Starting from vertex 0; 3 vertices total -> 1 triangle
+
+        mGles2->glActiveTexture(GL_TEXTURE0);
+        mGles2->glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
+        mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
+        mGles2->glUniform1i(mTexSamplerLocation, 0);
+
+        // Build a 10-meter cube around the origin.
+        for (size_t i = 0; i < arraySize(kCubeSides); ++i) {
+            glm::mat4 model =
+                    glm::toMat4(kCubeSides[i].rotation) *
+                    glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 5.0f)) *
+                    glm::eulerAngleY(kPi) *  // Flip since we're rendering at +z
+                    glm::scale(glm::mat4(), glm::vec3(5.0f, 5.0f, 1.0f));
+
+            const glm::mat4 mvp = projection * view * model;
+            mGles2->glUniformMatrix4fv(mMvpLocation, 1, GL_FALSE, &mvp[0][0]);
+
+            mGles2->glBindTexture(GL_TEXTURE_2D,
+                                  mCubeTextures[i]->getTextureId());
+            mGles2->glDrawElements(GL_TRIANGLES, arraySize(kQuadIndices),
+                                   GL_UNSIGNED_BYTE, (void*)0);
+        }
 
         mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
 private:
     const GLESv2Dispatch* const mGles2;
 
+    float mRotation = 0.0f;
+    bool mRotateY = true;
+
+    std::vector<std::unique_ptr<VirtualSceneTexture>> mCubeTextures;
+
     GLuint mProgram = 0;
     GLuint mVertexBuffer = 0;
+    GLuint mIndexBuffer = 0;
+    GLuint mTexSamplerLocation = 0;
+    GLuint mMvpLocation = 0;
 
     float mBackgroundColor = 0.2f;
 };
