@@ -210,6 +210,7 @@ AndroidCpuAcceleration ProbeKVM(std::string* status) {
 #if HAVE_HAX
 
 #define HAXM_INSTALLER_VERSION_MINIMUM 0x06000001
+#define HAXM_INSTALLER_VERSION_MINIMUM_APPLE 0x6020001
 
 std::string cpuAcceleratorFormatVersion(int32_t version) {
     if (version < 0) {
@@ -630,6 +631,9 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
         return ANDROID_CPU_ACCELERATION_ACCEL_NOT_INSTALLED;
     }
 
+    // Don't fail early with HAXM_INSTALLER_VERSION_MINIMUM_APPLE,
+    // otherwise the user will see a lot of unhelpful vcpu shutdown
+    // requests and register dumps.
     if (version < HAXM_INSTALLER_VERSION_MINIMUM) {
         // HAXM was found but version number was too old or missing
         StringAppendFormat(
@@ -698,6 +702,19 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     GlobalState* g = &gGlobals;
     ::snprintf(g->version, sizeof(g->version), "%s",
                cpuAcceleratorFormatVersion(version).c_str());
+
+    // Check if < HAXM_INSTALLER_VERSION_MINIMUM_APPLE for best Mac compatibility.
+    if (version < HAXM_INSTALLER_VERSION_MINIMUM_APPLE) {
+        fprintf(stderr, "WARNING: HAXM %s is installed. "
+                        "Please install HAXM >= %s to fix compatibility "
+                        "issues on Mac. On macOS 10.13 High Sierra, "
+                        "you may need to specifically approve the HAXM "
+                        "kernel extension for HAXM to successfully install. "
+                        "See https://developer.apple.com/library/content/technotes/tn2459/_index.html\n",
+                        cpuAcceleratorFormatVersion(version).c_str(),
+                        cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM_APPLE).c_str());
+    }
+
     return ANDROID_CPU_ACCELERATION_READY;
 }
 
