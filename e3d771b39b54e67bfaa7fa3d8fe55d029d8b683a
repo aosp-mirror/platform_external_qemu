@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "50a635b3_da9b008b",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-31T22:35:18Z",
+      "side": 1,
+      "message": "What are the threading expectations for rendering these? It could be a good idea to reset the state (glDisableVertexAttribArray for the 2 attributes, bind ARRAY_BUFFER and ELEMENT_ARRAY_BUFFER back to 0) after initialization is done, so that we don\u0027t use the same context for something else and have something mess up.",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 206,
+        "endChar": 9
+      },
+      "revId": "e3d771b39b54e67bfaa7fa3d8fe55d029d8b683a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9cf36787_9e7e0e8f",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-10-31T22:35:18Z",
+      "side": 1,
+      "message": "Depending on how much other rendering you expect to do with the same context, for clean state usage here, I\u0027d recommend not just binding the buffers back to zero, but also using program 0 again, binding texture 0, and bracketing it with enable/disable vertex attributes.\n\nOn the other hand, if the context is going to be used just for virtual scene rendering, you could even get away with just binding the texture once at the beginning in initialization, then maybe binding different buffers based on what different model types there are.",
+      "revId": "e3d771b39b54e67bfaa7fa3d8fe55d029d8b683a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
