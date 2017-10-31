@@ -646,6 +646,16 @@ void GLEScmContext::loadIdentity() {
     }
 }
 
+void GLEScmContext::loadMatrixf(const GLfloat* m) {
+    currMatrix() = glm::make_mat4(m);
+
+    if (isCoreProfile()) {
+        core().loadMatrixf(m);
+    } else {
+        dispatcher().glLoadMatrixf(m);
+    }
+}
+
 void GLEScmContext::pushMatrix() {
     if (currMatrixStack().size() >= kMaxMatrixStackSize) {
         setGLerror(GL_STACK_OVERFLOW);
