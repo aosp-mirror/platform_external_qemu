@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "759e264e_c0cb6a7d",
+        "filename": "android/build/emulator/binary.make",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-10-31T21:56:18Z",
+      "side": 1,
+      "message": "Oops, I\u0027ll fix the tabs",
+      "range": {
+        "startLine": 134,
+        "startChar": 0,
+        "endLine": 134,
+        "endChar": 2
+      },
+      "revId": "a282f84b91c4743697298f1da0c32674fe3ad837",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
