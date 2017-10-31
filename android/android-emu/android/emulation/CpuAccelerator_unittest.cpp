@@ -58,6 +58,10 @@ TEST_F(CpuAcceleratorTest, Default) {
         printf("HAX acceleration usable on this machine!\n");
         break;
 
+    case CPU_ACCELERATOR_HVF:
+        printf("HVF acceleration usable on this machine!\n");
+        break;
+
     default:
         ASSERT_FALSE(1) << "Invalid accelerator value: " << accel;
     }
