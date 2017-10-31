@@ -170,6 +170,10 @@ void GLESpointer::getBufferConversions(const RangeList& rl, RangeList& rlOut) {
 }
 
 GLESpointer::GLESpointer(android::base::Stream* stream) {
+    onLoad(stream);
+}
+
+void GLESpointer::onLoad(android::base::Stream* stream) {
     m_size = stream->getBe32();
     m_type = stream->getBe32();
     m_stride = stream->getBe32();
