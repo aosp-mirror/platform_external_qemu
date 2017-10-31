@@ -18,6 +18,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef _WIN32
+#include <io.h>
+#endif
+
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -64,6 +68,14 @@ base::Optional<std::string> readFileIntoString(base::StringView name) {
     std::ostringstream ss;
     ss << is.rdbuf();
     return ss.str();
+}
+
+bool setFileSize(int fd, int64_t size) {
+#ifdef _WIN32
+    return _chsize_s(fd, size) == 0;
+#else
+    return ftruncate(fd, size) == 0;
+#endif
 }
 
 }  // namespace android

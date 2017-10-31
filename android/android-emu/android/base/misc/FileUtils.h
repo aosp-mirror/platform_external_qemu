@@ -29,4 +29,7 @@ base::Optional<std::string> readFileIntoString(base::StringView name);
 // Returns false if something went wrong
 bool writeStringToFile(int fd, const std::string& file_contents);
 
+// Sets the file size to |size|, could either extend or truncate it.
+bool setFileSize(int fd, int64_t size);
+
 }  // namespace android
