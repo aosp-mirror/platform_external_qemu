@@ -29,6 +29,7 @@ public:
     };
     GLESpointer() = default;
     GLESpointer(android::base::Stream* stream);
+    void onLoad(android::base::Stream* stream);
     GLenum getType() const;
     GLint getSize() const;
     GLsizei getStride() const;
