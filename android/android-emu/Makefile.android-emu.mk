@@ -471,6 +471,7 @@ LOCAL_SRC_FILES := \
     android/utils/sockets.c \
     android/utils/looper.cpp \
     android/virtualscene/VirtualSceneRenderer.cpp \
+    android/virtualscene/VirtualSceneTexture.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \
