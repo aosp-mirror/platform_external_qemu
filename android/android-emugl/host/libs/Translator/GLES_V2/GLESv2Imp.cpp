@@ -3127,7 +3127,7 @@ GL_APICALL void  GL_APIENTRY glTexParameterf(GLenum target, GLenum pname, GLfloa
 
     TextureData *texData = getTextureTargetData(target);
     if (texData) {
-        texData->setTexParam(pname, (GLint)param);
+        texData->setTexParam(pname, static_cast<GLint>(param));
     }
 
     if (sShouldEmulateSwizzles(texData, target, pname)) {
@@ -3145,7 +3145,7 @@ GL_APICALL void  GL_APIENTRY glTexParameterfv(GLenum target, GLenum pname, const
 
     TextureData *texData = getTextureTargetData(target);
     if (texData) {
-        texData->setTexParam(pname, (GLint)params[0]);
+        texData->setTexParam(pname, static_cast<GLint>(params[0]));
     }
 
     if (sShouldEmulateSwizzles(texData, target, pname)) {
