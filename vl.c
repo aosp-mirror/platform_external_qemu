@@ -1003,20 +1003,19 @@ static int create_qcow2_images(void) {
             /* If the path is NULL or empty, just ignore it.*/
             continue;
         }
+        char* image_basename = path_basename(backing_image_path);
         if (p < 2) {
             /* System & vendor image are special cases, the backing image is
              * in the SDK folder, but the QCoW2 image that the emulator
              * uses is created on a per-AVD basis and is placed in the
              * AVD's data folder.
              */
-            char* image_basename = path_basename(backing_image_path);
             const char qcow2_suffix[] = "." QCOW2_SUFFIX;
             size_t path_size = strlen(image_basename) + sizeof(qcow2_suffix) + 1;
             char* image_qcow2_basename = malloc(path_size);
             bufprint(image_qcow2_basename, image_qcow2_basename + path_size, "%s%s", image_basename, qcow2_suffix);
             qcow2_image_path =
                 path_join(avd_data_dir, image_qcow2_basename);
-            free(image_basename);
             free(image_qcow2_basename);
         } else {
             /* For all the other images except system image,
@@ -1044,7 +1043,8 @@ static int create_qcow2_images(void) {
             bdrv_img_create(
                 qcow2_image_path,
                 QCOW2_SUFFIX,
-                backing_image_path,
+                /*absolute path only for sys vendor*/
+                p < 2 ? backing_image_path : image_basename,
                 fmt,
                 NULL,
                 -1,
@@ -1052,6 +1052,7 @@ static int create_qcow2_images(void) {
                 &img_creation_error,
                 true);
         }
+        free(image_basename);
         free(qcow2_image_path);
         if (img_creation_error) {
             error_report("%s", error_get_pretty(img_creation_error));
