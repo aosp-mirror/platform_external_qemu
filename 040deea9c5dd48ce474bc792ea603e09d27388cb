@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "40844e9c_794892d5",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-01T02:10:40Z",
+      "side": 1,
+      "message": "My guess for the crash: glVertexAttribPointer below picks up the data or offset to use in the VBO based on the current GL_ARRAY_BUFFER binding. Now that we set the GL_ARRAY_BUFFER binding to 0 here, the glVertexAttribPointer below causes corrupt memory or segfaults immediately, because it thinks it got a CPU-side pointer, or it is looking for an offset into a buffer that we shadow on the host that is not there, or the underlying host GPU driver is looking at the wrong buffer.\n\nAnother caveat that is semi-related: The Translator has been subtly core-profiled here; it assumes the guest always provides it with either offsets into GL buffers, or calls a special guest-\u003ehost serialization glVertexAttribPointerWithDataSize that holds the number of bytes of CPU-side pointers to use. Please try not to use glVertexAttribPointer with CPU-side pointers in this setting :)",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 49
+      },
+      "revId": "040deea9c5dd48ce474bc792ea603e09d27388cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
