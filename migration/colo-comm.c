@@ -13,7 +13,7 @@
 
 #include "qemu/osdep.h"
 #include <migration/colo.h>
-#include "trace.h"
+#include "migration/trace.h"
 
 typedef struct {
      bool colo_requested;

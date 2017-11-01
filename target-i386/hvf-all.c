@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (60c8a4 Merge "[GPU Snapshot] API 18 non-core profile snapshot" into)
 // Copyright 2008 IBM Corporation
 //           2008 Red Hat, Inc.
 // Copyright 2011 Intel Corporation
@@ -1161,3 +1162,5 @@ static void hvf_type_init(void)
 
 type_init(hvf_type_init);
 
+=======
+>>>>>>> BRANCH (7a235b Fix android build system for qemu v2.9.0)

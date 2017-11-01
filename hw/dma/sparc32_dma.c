@@ -30,7 +30,7 @@
 #include "hw/sparc/sparc32_dma.h"
 #include "hw/sparc/sun4m.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/dma/trace.h"
 
 /*
  * This is the DMA controller part of chip STP2000 (Master I/O), also
