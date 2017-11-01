@@ -37,7 +37,7 @@
 #include "hw/sysbus.h"
 #include "net/net.h"
 #include "sysemu/sysemu.h"
-#include "trace.h"
+#include "hw/net/trace.h"
 
 /* RECSMALL is not used because it breaks tap networking in linux:
  * incoming ARP responses are too short
