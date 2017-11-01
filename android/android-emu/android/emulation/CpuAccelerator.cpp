@@ -594,6 +594,32 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 
 #elif defined(__APPLE__)
 
+using android::base::System;
+using android::base::StringView;
+static Version currentMacOSVersion(std::string* status) {
+    std::string osProductVersion = System::get()->getOsName();
+    // Example os version :  Max OS X 10.12.4
+    size_t pos = osProductVersion.rfind(' ');
+    if (strncmp("Error: ", osProductVersion.c_str(), 7) == 0 ||
+        pos == std::string::npos) {
+        StringAppendFormat(status,
+                "Internal error: failed to parse OS version '%s'",
+                osProductVersion);
+        return Version(0,0,0);
+    }
+
+    auto ver = Version(StringView(osProductVersion.c_str() + pos + 1,
+                       osProductVersion.size() - pos));
+    if (!ver.isValid()) {
+        StringAppendFormat(status,
+                           "Internal error: failed to parse OS version '%s'",
+                           osProductVersion);
+        return Version(0,0,0);
+    }
+
+    return ver;
+}
+
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 /////
@@ -662,6 +688,16 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     if (!fd.valid()) {
         status->assign("Could not open /dev/HAX: ");
         status->append(strerror(errno));
+
+        auto ver = currentMacOSVersion(status);
+        if (!(ver < Version(10, 13, 0))) {
+            fprintf(stderr,
+                    "It seems you have macOS 10.13 High Sierra or later."
+                    "You will need HAXM 6.2.1+ and may need to specifically "
+                    "approve the HAXM kernel extension for install. "
+                    "See https://developer.apple.com/library/content/technotes/tn2459/_index.html\n");
+        }
+
         return ANDROID_CPU_ACCELERATION_DEV_OPEN_FAILED;
     }
 
@@ -707,10 +743,7 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
     if (version < HAXM_INSTALLER_VERSION_MINIMUM_APPLE) {
         fprintf(stderr, "WARNING: HAXM %s is installed. "
                         "Please install HAXM >= %s to fix compatibility "
-                        "issues on Mac. On macOS 10.13 High Sierra, "
-                        "you may need to specifically approve the HAXM "
-                        "kernel extension for HAXM to successfully install. "
-                        "See https://developer.apple.com/library/content/technotes/tn2459/_index.html\n",
+                        "issues on Mac.\n",
                         cpuAcceleratorFormatVersion(version).c_str(),
                         cpuAcceleratorFormatVersion(HAXM_INSTALLER_VERSION_MINIMUM_APPLE).c_str());
     }
@@ -729,28 +762,17 @@ AndroidCpuAcceleration ProbeHAX(std::string* status) {
 
 #if HAVE_HVF
 
-using android::base::System;
 AndroidCpuAcceleration ProbeHVF(std::string* status) {
     status->clear();
 
     AndroidCpuAcceleration res = ANDROID_CPU_ACCELERATION_NO_CPU_SUPPORT;
-    std::string osProductVersion = System::get()->getOsName();
-    // Example os version :  Max OS X 10.12.4
-    size_t pos = osProductVersion.rfind(" ");
-    if (strncmp("Error: ", osProductVersion.c_str(), 7) == 0 ||
-        pos == std::string::npos) {
-      StringAppendFormat(status,
-                         "Internal error: failed to parse OS version '%s'",
-                         osProductVersion);
-      return res;
-    }
 
-    auto ver = Version(
-            osProductVersion.substr(pos + 1, osProductVersion.size() - pos));
-    if (!ver.isValid()) {
+    // Hypervisor.framework is only supported on OS X 10.10 and above.
+    auto macOsVersion = currentMacOSVersion(status);
+    if (macOsVersion < Version(10, 10, 0)) {
         StringAppendFormat(status,
-                           "Internal error: failed to parse OS version '%s'",
-                           osProductVersion);
+                           "Hypervisor.Framework is only supported"
+                           "on OS X 10.10 and above");
         return res;
     }
 
@@ -767,19 +789,12 @@ AndroidCpuAcceleration ProbeHVF(std::string* status) {
         return res;
     }
 
-    // Hypervisor.framework is only supported on OS X 10.10 and above.
-    if (ver < Version(10, 10, 0)) {
-        StringAppendFormat(status,
-                           "Hypervisor.Framework is only supported"
-                           "on OS X 10.10 and above");
-        return res;
-    } else {
-        res = ANDROID_CPU_ACCELERATION_READY;
-    }
+    // HVF supported
+    res = ANDROID_CPU_ACCELERATION_READY;
 
     GlobalState* g = &gGlobals;
-    int maj = ver.component<Version::kMajor>();
-    int min = ver.component<Version::kMinor>();
+    int maj = macOsVersion.component<Version::kMajor>();
+    int min = macOsVersion.component<Version::kMinor>();
     ::snprintf(g->version, sizeof(g->version), "%d.%d", maj, min);
     StringAppendFormat(status, "Hypervisor.Framework OS X Version %d.%d", maj,
                        min);
