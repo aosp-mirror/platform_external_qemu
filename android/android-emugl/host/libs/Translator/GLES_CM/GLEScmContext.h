@@ -37,8 +37,8 @@ class CoreProfileEngine;
 class GLEScmContext: public GLEScontext
 {
 public:
-    virtual void init(EGLiface* eglIface);
-
+    virtual void init();
+    static void initGlobal(EGLiface* eglIface);
     GLEScmContext(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream);
     void setActiveTexture(GLenum tex);
@@ -129,7 +129,9 @@ public:
     glm::mat4 getModelviewMatrix();
     glm::mat4 getTextureMatrix();
 
+    virtual void onSave(android::base::Stream* stream) const override;
 protected:
+    virtual void postLoadRestoreCtx() override;
 
     static const GLint kMaxTextureUnits = 8;
     static const GLint kMaxMatrixStackSize = 16;
