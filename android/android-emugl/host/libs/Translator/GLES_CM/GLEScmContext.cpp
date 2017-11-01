@@ -216,12 +216,43 @@ void GLEScmContext::onSave(android::base::Stream* stream) const {
     }
 }
 
+void GLEScmContext::restoreMatrixStack(const MatrixStack& matrices) {
+    for (size_t i = 0; i < matrices.size(); i++) {
+        if (i > 0) {
+            dispatcher().glPushMatrix();
+        }
+        dispatcher().glLoadMatrixf(&matrices[i][0][0]);
+    }
+}
+
 void GLEScmContext::postLoadRestoreCtx() {
     if (isInitialized()) {
         if (isCoreProfile()) {
             m_coreProfileEngine = new CoreProfileEngine(this);
         } else if (isGles2Gles()) {
             m_coreProfileEngine = new CoreProfileEngine(this, true);
+        }
+        if (!m_coreProfileEngine) {
+            GLDispatch& dispatcher = GLEScontext::dispatcher();
+            dispatcher.glMatrixMode(GL_PROJECTION);
+            restoreMatrixStack(mProjMatrices);
+            dispatcher.glMatrixMode(GL_MODELVIEW);
+            restoreMatrixStack(mModelviewMatrices);
+            dispatcher.glMatrixMode(GL_TEXTURE);
+            for (size_t i = 0; i < mTextureMatrices.size(); i++) {
+                if (mTextureMatrices[i].size() == 0) {
+                    continue;
+                }
+                dispatcher.glActiveTexture(GL_TEXTURE0 + i);
+                restoreMatrixStack(mTextureMatrices[i]);
+            }
+            dispatcher.glMatrixMode(mCurrMatrixMode);
+            dispatcher.glActiveTexture(GL_TEXTURE0 + m_activeTexture);
+            for (const auto& it : *m_currVaoState.it->second.arraysMap) {
+                if (it.second->isEnable()) {
+                    dispatcher.glEnableClientState(it.first);
+                }
+            }
         }
     }
     GLEScontext::postLoadRestoreCtx();
@@ -989,7 +1020,6 @@ void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
 }
 
 void GLEScmContext::enableClientState(GLenum clientState) {
-    // TODO: Track enabled state in vao state.
     if (m_coreProfileEngine) {
         core().enableClientState(clientState);
     } else {
@@ -998,7 +1028,6 @@ void GLEScmContext::enableClientState(GLenum clientState) {
 }
 
 void GLEScmContext::disableClientState(GLenum clientState) {
-    // TODO: Track enabled state in vao state.
     if (m_coreProfileEngine) {
         core().disableClientState(clientState);
     } else {

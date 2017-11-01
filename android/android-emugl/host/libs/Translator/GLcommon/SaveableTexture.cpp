@@ -389,7 +389,7 @@ void SaveableTexture::loadFromStream(android::base::Stream* stream) {
                     GLint value = stream->getBe32();
                     return std::make_pair(pname, value);
                 });
-    } else {
+    } else if (m_target != 0) {
         fprintf(stderr, "Warning: texture target %d not supported\n", m_target);
     }
 }
