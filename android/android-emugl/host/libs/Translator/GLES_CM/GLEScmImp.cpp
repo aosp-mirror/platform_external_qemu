@@ -526,7 +526,8 @@ GL_API void GL_APIENTRY  glColorPointer( GLint size, GLenum type, GLsizei stride
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
         GLsizei width, GLsizei height, GLint border, GLenum* format,
-        GLenum* type, GLint* internalformat_out) {
+        GLenum* type, GLint* internalformat_out,
+        bool* needAutoMipmap) {
     GET_CTX();
 
     if (ctx->shareGroup().get()) {
@@ -534,6 +535,9 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
 
         if (texData) {
             texData->hasStorage = true;
+            if (needAutoMipmap) {
+                *needAutoMipmap = texData->requiresAutoMipmap;
+            }
         }
 
         if (texData && level == 0) {
@@ -616,7 +620,7 @@ GL_API void GL_APIENTRY  glCopyTexImage2D( GLenum target, GLint level, GLenum in
     GLenum type = accurateTypeOfInternalFormat((GLint)internalformat);
     s_glInitTexImage2D(
         target, level, internalformat, width, height, border,
-        &format, &type, (GLint*)&internalformat);
+        &format, &type, (GLint*)&internalformat, nullptr);
 
     TextureData* texData = getTextureTargetData(target);
     if (texData && isCoreProfile() &&
@@ -1305,7 +1309,7 @@ GL_API void GL_APIENTRY  glHint( GLenum target, GLenum mode) {
     SET_ERROR_IF(!GLEScmValidate::hintTargetMode(target,mode),GL_INVALID_ENUM);
 
     // No GLES1 hints are supported.
-    if (isCoreProfile()) {
+    if (isGles2Gles() || isCoreProfile()) {
         ctx->setHint(target, mode);
     } else {
         ctx->dispatcher().glHint(target,mode);
@@ -1414,19 +1418,19 @@ GL_API void GL_APIENTRY  glLoadIdentity( void) {
 }
 
 GL_API void GL_APIENTRY  glLoadMatrixf( const GLfloat *m) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glLoadMatrixf(m);
+    ctx->loadMatrixf(m);
 }
 
 GL_API void GL_APIENTRY  glLoadMatrixx( const GLfixed *m) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat mat[16];
     for(int i=0; i< 16 ; i++) {
         mat[i] = X2F(m[i]);
     }
-    ctx->dispatcher().glLoadMatrixf(mat);
+    ctx->loadMatrixf(mat);
 }
 
 GL_API void GL_APIENTRY  glLogicOp( GLenum opcode) {
@@ -1778,7 +1782,7 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
     bool needAutoMipmap = false;
 
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            &format, &type, &internalformat);
+            &format, &type, &internalformat, &needAutoMipmap);
 
     // TODO: Emulate swizzles
     if (isCoreProfile()) {
@@ -1793,7 +1797,10 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
                                    border,format,type,pixels);
 
     if (needAutoMipmap) {
-        if (isCoreProfile() && !isCubeMapFaceTarget(target)) {
+        if ((isCoreProfile() || isGles2Gles()) &&
+            !isCubeMapFaceTarget(target)) {
+            ctx->dispatcher().glGenerateMipmap(target);
+        } else if (isGles2Gles()) {
             ctx->dispatcher().glGenerateMipmap(target);
         } else {
             ctx->dispatcher().glGenerateMipmapEXT(target);
@@ -1807,7 +1814,7 @@ static bool handleMipmapGeneration(GLenum target, GLenum pname, bool param)
     GLES_CM_TRACE()
 
     if(pname == GL_GENERATE_MIPMAP &&
-       (isCoreProfile() || !ctx->isAutoMipmapSupported()))
+       (isCoreProfile() || isGles2Gles() || !ctx->isAutoMipmapSupported()))
     {
         TextureData *texData = getTextureTargetData(target);
         if(texData)

@@ -46,6 +46,8 @@ void GLEScmContext::init() {
 
         if (isCoreProfile()) {
             m_coreProfileEngine = new CoreProfileEngine(this);
+        } else if (isGles2Gles()) {
+            m_coreProfileEngine = new CoreProfileEngine(this, true /* gles2gles */);
         }
     }
     m_initialized = true;
@@ -672,7 +674,7 @@ void GLEScmContext::enable(GLenum cap) {
             setTextureEnabled(cap,true);
     }
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().enable(cap);
     } else {
         if (cap==GL_TEXTURE_GEN_STR_OES) {
@@ -694,7 +696,7 @@ void GLEScmContext::disable(GLenum cap) {
             setTextureEnabled(cap, false);
     }
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().disable(cap);
     } else {
         if (cap==GL_TEXTURE_GEN_STR_OES) {
@@ -710,7 +712,7 @@ void GLEScmContext::disable(GLenum cap) {
 void GLEScmContext::shadeModel(GLenum mode) {
     mShadeModel = mode;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().shadeModel(mode);
     } else {
         dispatcher().glShadeModel(mode);
@@ -720,7 +722,7 @@ void GLEScmContext::shadeModel(GLenum mode) {
 void GLEScmContext::matrixMode(GLenum mode) {
     mCurrMatrixMode = mode;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().matrixMode(mode);
     } else {
         dispatcher().glMatrixMode(mode);
@@ -730,10 +732,20 @@ void GLEScmContext::matrixMode(GLenum mode) {
 void GLEScmContext::loadIdentity() {
     currMatrix() = glm::mat4();
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().loadIdentity();
     } else {
         dispatcher().glLoadIdentity();
+    }
+}
+
+void GLEScmContext::loadMatrixf(const GLfloat* m) {
+    currMatrix() = glm::make_mat4(m);
+
+    if (m_coreProfileEngine) {
+        core().loadMatrixf(m);
+    } else {
+        dispatcher().glLoadMatrixf(m);
     }
 }
 
@@ -744,7 +756,7 @@ void GLEScmContext::pushMatrix() {
     }
     currMatrixStack().emplace_back(currMatrixStack().back());
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().pushMatrix();
     } else {
         dispatcher().glPushMatrix();
@@ -758,7 +770,7 @@ void GLEScmContext::popMatrix() {
     }
     currMatrixStack().pop_back();
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().popMatrix();
     } else {
         dispatcher().glPopMatrix();
@@ -768,7 +780,7 @@ void GLEScmContext::popMatrix() {
 void GLEScmContext::multMatrixf(const GLfloat* m) {
     currMatrix() *= glm::make_mat4(m);
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().multMatrixf(m);
     } else {
         dispatcher().glMultMatrixf(m);
@@ -778,7 +790,7 @@ void GLEScmContext::multMatrixf(const GLfloat* m) {
 void GLEScmContext::orthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     currMatrix() *= glm::ortho(left, right, bottom, top, zNear, zFar);
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().orthof(left, right, bottom, top, zNear, zFar);
     } else {
         dispatcher().glOrtho(left,right,bottom,top,zNear,zFar);
@@ -788,7 +800,7 @@ void GLEScmContext::orthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat 
 void GLEScmContext::frustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     currMatrix() *= glm::frustum(left, right, bottom, top, zNear, zFar);
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().frustumf(left, right, bottom, top, zNear, zFar);
     } else {
         dispatcher().glFrustum(left,right,bottom,top,zNear,zFar);
@@ -803,7 +815,7 @@ void GLEScmContext::texEnvf(GLenum target, GLenum pname, GLfloat param) {
         mTexUnitEnvs[m_activeTexture][pname].floatVal[0] = param;
     }
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texEnvf(target, pname, param);
     } else {
         dispatcher().glTexEnvf(target, pname, param);
@@ -819,7 +831,7 @@ void GLEScmContext::texEnvfv(GLenum target, GLenum pname, const GLfloat* params)
         texEnvf(target, pname, params[0]);
     }
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texEnvfv(target, pname, params);
     } else {
         dispatcher().glTexEnvfv(target, pname, params);
@@ -829,7 +841,7 @@ void GLEScmContext::texEnvfv(GLenum target, GLenum pname, const GLfloat* params)
 void GLEScmContext::texEnvi(GLenum target, GLenum pname, GLint param) {
     mTexUnitEnvs[m_activeTexture][pname].intVal[0] = param;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texEnvi(target, pname, param);
     } else {
         dispatcher().glTexEnvi(target, pname, param);
@@ -839,7 +851,7 @@ void GLEScmContext::texEnvi(GLenum target, GLenum pname, GLint param) {
 void GLEScmContext::texEnviv(GLenum target, GLenum pname, const GLint* params) {
     mTexUnitEnvs[m_activeTexture][pname].intVal[0] = params[0];
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texEnviv(target, pname, params);
     } else {
         dispatcher().glTexEnviv(target, pname, params);
@@ -849,7 +861,7 @@ void GLEScmContext::texEnviv(GLenum target, GLenum pname, const GLint* params) {
 void GLEScmContext::getTexEnvfv(GLenum env, GLenum pname, GLfloat* params) {
     *params = mTexUnitEnvs[m_activeTexture][pname].floatVal[0];
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().getTexEnvfv(env, pname, params);
     } else {
         dispatcher().glGetTexEnvfv(env, pname, params);
@@ -859,7 +871,7 @@ void GLEScmContext::getTexEnvfv(GLenum env, GLenum pname, GLfloat* params) {
 void GLEScmContext::getTexEnviv(GLenum env, GLenum pname, GLint* params) {
     *params = mTexUnitEnvs[m_activeTexture][pname].intVal[0];
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().getTexEnviv(env, pname, params);
     } else {
         dispatcher().glGetTexEnviv(env, pname, params);
@@ -869,7 +881,7 @@ void GLEScmContext::getTexEnviv(GLenum env, GLenum pname, GLint* params) {
 void GLEScmContext::texGenf(GLenum coord, GLenum pname, GLfloat param) {
     mTexGens[m_activeTexture][pname].floatVal[0] = param;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texGenf(coord, pname, param);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -885,7 +897,7 @@ void GLEScmContext::texGenf(GLenum coord, GLenum pname, GLfloat param) {
 void GLEScmContext::texGenfv(GLenum coord, GLenum pname, const GLfloat* params) {
     mTexGens[m_activeTexture][pname].floatVal[0] = params[0];
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texGenfv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -901,7 +913,7 @@ void GLEScmContext::texGenfv(GLenum coord, GLenum pname, const GLfloat* params) 
 void GLEScmContext::texGeni(GLenum coord, GLenum pname, GLint param) {
     mTexGens[m_activeTexture][pname].intVal[0] = param;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texGeni(coord, pname, param);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -917,7 +929,7 @@ void GLEScmContext::texGeni(GLenum coord, GLenum pname, GLint param) {
 void GLEScmContext::texGeniv(GLenum coord, GLenum pname, const GLint* params) {
     mTexGens[m_activeTexture][pname].intVal[0] = params[0];
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().texGeniv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -933,7 +945,7 @@ void GLEScmContext::texGeniv(GLenum coord, GLenum pname, const GLint* params) {
 void GLEScmContext::getTexGeniv(GLenum coord, GLenum pname, GLint* params) {
     *params = mTexGens[m_activeTexture][pname].intVal[0];
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().getTexGeniv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -956,7 +968,7 @@ void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
     params[2] = mTexGens[m_activeTexture][pname].floatVal[2];
     params[3] = mTexGens[m_activeTexture][pname].floatVal[3];
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().getTexGenfv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -975,7 +987,7 @@ void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
 
 void GLEScmContext::enableClientState(GLenum clientState) {
     // TODO: Track enabled state in vao state.
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().enableClientState(clientState);
     } else {
         dispatcher().glEnableClientState(clientState);
@@ -984,7 +996,7 @@ void GLEScmContext::enableClientState(GLenum clientState) {
 
 void GLEScmContext::disableClientState(GLenum clientState) {
     // TODO: Track enabled state in vao state.
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().disableClientState(clientState);
     } else {
         dispatcher().glDisableClientState(clientState);
@@ -992,7 +1004,7 @@ void GLEScmContext::disableClientState(GLenum clientState) {
 }
 
 void GLEScmContext::drawTexOES(float x, float y, float z, float width, float height) {
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().drawTexOES(x, y, z, width, height);
     } else {
         auto& gl = dispatcher();
@@ -1100,7 +1112,7 @@ void GLEScmContext::rotatef(float angle, float x, float y, float z) {
     glm::mat4 rot = glm::rotate(glm::mat4(), 3.14159265358979f / 180.0f * angle, glm::vec3(x, y, z));
     currMatrix() *= rot;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().rotatef(angle, x, y, z);
     } else {
         dispatcher().glRotatef(angle, x, y, z);
@@ -1111,7 +1123,7 @@ void GLEScmContext::scalef(float x, float y, float z) {
     glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(x, y, z));
     currMatrix() *= scale;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().scalef(x, y, z);
     } else {
         dispatcher().glScalef(x, y, z);
@@ -1122,7 +1134,7 @@ void GLEScmContext::translatef(float x, float y, float z) {
     glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(x, y, z));
     currMatrix() *= tr;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().translatef(x, y, z);
     } else {
         dispatcher().glTranslatef(x, y, z);
@@ -1137,7 +1149,7 @@ void GLEScmContext::color4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat al
     mColor.val.floatVal[2] = blue;
     mColor.val.floatVal[3] = alpha;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().color4f(red,green,blue,alpha);
     } else{
         dispatcher().glColor4f(red,green,blue,alpha);
@@ -1152,7 +1164,7 @@ void GLEScmContext::color4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte a
     mColor.val.ubyteVal[2] = blue;
     mColor.val.ubyteVal[3] = alpha;
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().color4ub(red,green,blue,alpha);
     } else{
         dispatcher().glColor4ub(red,green,blue,alpha);
@@ -1164,7 +1176,7 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
 
     drawValidate();
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1209,7 +1221,7 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         indices = buf + SafeUIntFromPointer(indices);
     }
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1245,7 +1257,7 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
 }
 
 void GLEScmContext::clientActiveTexture(GLenum texture) {
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().clientActiveTexture(texture);
     } else {
         dispatcher().glClientActiveTexture(texture);

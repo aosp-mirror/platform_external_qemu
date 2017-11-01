@@ -30,7 +30,7 @@ class GLESpointer;
 
 class CoreProfileEngine {
 public:
-    explicit CoreProfileEngine(GLEScmContext* ctx);
+    CoreProfileEngine(GLEScmContext* ctx, bool onGles = false);
     ~CoreProfileEngine();
 
     struct GeometryDrawState {
@@ -103,6 +103,7 @@ public:
 
     void matrixMode(GLenum mode);
     void loadIdentity();
+    void loadMatrixf(const GLfloat* m);
     void pushMatrix();
     void popMatrix();
     void multMatrixf(const GLfloat* m);
@@ -152,4 +153,7 @@ private:
 
     DrawTexOESCoreState m_drawTexOESCoreState = {};
     GeometryDrawState   m_geometryDrawState = {};
+
+    // If we are on a gles impl.
+    bool mOnGles = false;
 };

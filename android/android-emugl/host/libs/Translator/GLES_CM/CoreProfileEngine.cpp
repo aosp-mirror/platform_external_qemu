@@ -29,7 +29,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-CoreProfileEngine::CoreProfileEngine(GLEScmContext* ctx) : mCtx(ctx) {
+CoreProfileEngine::CoreProfileEngine(GLEScmContext* ctx, bool onGles) :
+    mCtx(ctx),
+    mOnGles(onGles) {
     getGeometryDrawState();
 }
 
@@ -44,9 +46,13 @@ static const uint32_t sDrawTexIbo[] = {
 const CoreProfileEngine::DrawTexOESCoreState& CoreProfileEngine::getDrawTexOESCoreState() {
     if (!m_drawTexOESCoreState.program) {
         m_drawTexOESCoreState.vshader =
-            GLEScontext::compileAndValidateCoreShader(GL_VERTEX_SHADER, kDrawTexOESCore_vshader);
+            GLEScontext::compileAndValidateCoreShader(
+                GL_VERTEX_SHADER,
+                mOnGles ? kDrawTexOESGles2_vshader : kDrawTexOESCore_vshader);
         m_drawTexOESCoreState.fshader =
-            GLEScontext::compileAndValidateCoreShader(GL_FRAGMENT_SHADER, kDrawTexOESCore_fshader);
+            GLEScontext::compileAndValidateCoreShader(
+                GL_FRAGMENT_SHADER,
+                mOnGles ? kDrawTexOESGles2_fshader : kDrawTexOESCore_fshader);
         m_drawTexOESCoreState.program =
             GLEScontext::linkAndValidateProgram(m_drawTexOESCoreState.vshader,
                                                 m_drawTexOESCoreState.fshader);
@@ -164,16 +170,20 @@ static GLint arrayTypeToCoreAttrib(GLenum type) {
     return 0;
 }
 
-static std::string sMakeGeometryDrawShader(GLenum shaderType, bool flat) {
+static std::string sMakeGeometryDrawShader(bool isGles, GLenum shaderType, bool flat) {
     // Set up a std::string to hold the result of
     // interpolating the template. We will require some extra padding
     // in the result string depending on how many characters
     // we could potentially insert.
     // For now it's just 10 chars and for a
     // single interpolation qualifier |flat|.
+    static const char versionPartEssl300[] = "#version 300 es\n";
+    static const char versionPart330Core[] = "#version 330 core\n";
     static const char flatKeyword[] = "flat";
 
     size_t extraStringLengthRequired = 10 +
+        sizeof(versionPartEssl300) +
+        sizeof(versionPart330Core) +
         sizeof(flatKeyword);
 
     size_t reservation = extraStringLengthRequired;
@@ -182,12 +192,12 @@ static std::string sMakeGeometryDrawShader(GLenum shaderType, bool flat) {
 
     switch (shaderType) {
     case GL_VERTEX_SHADER:
-        reservation += sizeof(kGeometryDrawVShaderSrcTemplate);
-        shaderTemplate = kGeometryDrawVShaderSrcTemplate;
+        reservation += sizeof(kGeometryDrawVShaderSrcTemplateCore);
+        shaderTemplate = kGeometryDrawVShaderSrcTemplateCore;
         break;
     case GL_FRAGMENT_SHADER:
-        reservation += sizeof(kGeometryDrawFShaderSrcTemplate);
-        shaderTemplate = kGeometryDrawFShaderSrcTemplate;
+        reservation += sizeof(kGeometryDrawFShaderSrcTemplateCore);
+        shaderTemplate = kGeometryDrawFShaderSrcTemplateCore;
         break;
     default:
         emugl_crash_reporter(
@@ -198,6 +208,7 @@ static std::string sMakeGeometryDrawShader(GLenum shaderType, bool flat) {
     if (shaderTemplate) {
         res.resize(reservation);
         snprintf(&res[0], res.size(), shaderTemplate,
+                isGles ? versionPartEssl300 : versionPart330Core,
                 flat ? flatKeyword : "");
     }
     return res;
@@ -212,12 +223,12 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
         m_geometryDrawState.vshader =
             GLEScontext::compileAndValidateCoreShader(
                 GL_VERTEX_SHADER,
-                sMakeGeometryDrawShader(GL_VERTEX_SHADER, false /* no flat shading */).c_str());
+                sMakeGeometryDrawShader(mOnGles, GL_VERTEX_SHADER, false /* no flat shading */).c_str());
 
         m_geometryDrawState.fshader =
             GLEScontext::compileAndValidateCoreShader(
                 GL_FRAGMENT_SHADER,
-                sMakeGeometryDrawShader(GL_FRAGMENT_SHADER, false /* no flat shading */).c_str());
+                sMakeGeometryDrawShader(mOnGles, GL_FRAGMENT_SHADER, false /* no flat shading */).c_str());
 
         m_geometryDrawState.program =
             GLEScontext::linkAndValidateProgram(m_geometryDrawState.vshader,
@@ -226,11 +237,11 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
         m_geometryDrawState.vshaderFlat =
             GLEScontext::compileAndValidateCoreShader(
                     GL_VERTEX_SHADER,
-                    sMakeGeometryDrawShader(GL_VERTEX_SHADER, true /* flat shading */).c_str());
+                    sMakeGeometryDrawShader(mOnGles, GL_VERTEX_SHADER, true /* flat shading */).c_str());
         m_geometryDrawState.fshaderFlat =
             GLEScontext::compileAndValidateCoreShader(
                     GL_FRAGMENT_SHADER,
-                    sMakeGeometryDrawShader(GL_FRAGMENT_SHADER, true /* flat shading */).c_str());
+                    sMakeGeometryDrawShader(mOnGles, GL_FRAGMENT_SHADER, true /* flat shading */).c_str());
         m_geometryDrawState.programFlat =
             GLEScontext::linkAndValidateProgram(m_geometryDrawState.vshaderFlat,
                                                 m_geometryDrawState.fshaderFlat);
@@ -337,9 +348,11 @@ void CoreProfileEngine::setupArrayForDraw(
     bool isIndexed, GLenum indicesType, const GLvoid* indices) {
 
     auto& gl = GLEScontext::dispatcher();
+    GLint attribNum = -1;
+
     gl.glBindVertexArray(m_geometryDrawState.vao);
 
-    GLint attribNum = arrayTypeToCoreAttrib(arrayType);
+    attribNum = arrayTypeToCoreAttrib(arrayType);
 
     GLsizei vboCount = 0;
 
@@ -395,7 +408,7 @@ void CoreProfileEngine::setupArrayForDraw(
         gl.glBufferData(GL_ARRAY_BUFFER, bufSize, bufData, GL_STREAM_DRAW);
 
         gl.glVertexAttribDivisor(attribNum, 0);
-        GLboolean shouldNormalize = GL_FALSE;
+        GLboolean shouldNormalize = false;
 
         if (arrayType == GL_COLOR_ARRAY &&
             (dataType == GL_BYTE ||
@@ -409,7 +422,6 @@ void CoreProfileEngine::setupArrayForDraw(
                                  shouldNormalize ? GL_TRUE : GL_FALSE /* normalized */,
                                  effectiveStride, nullptr /* no offset into vbo */);
         gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     } else {
         if (arrayType == GL_COLOR_ARRAY) {
             gl.glEnableVertexAttribArray(attribNum);
@@ -475,6 +487,10 @@ void CoreProfileEngine::matrixMode(GLenum mode) {
 }
 
 void CoreProfileEngine::loadIdentity() {
+    // no-op
+}
+
+void CoreProfileEngine::loadMatrixf(const GLfloat* m) {
     // no-op
 }
 
@@ -578,6 +594,9 @@ void CoreProfileEngine::drawTexOES(float x, float y, float z, float width, float
     gl.glUseProgram(prog);
 
     gl.glBindVertexArray(vao);
+    // This is not strictly needed, but Swiftshader indirect VAO
+    // can forget its ELEMENT_ARRAY_BUFFER binding.
+    gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_drawTexOESCoreState.ibo);
 
     GLint samplerLoc = gl.glGetUniformLocation(prog, "tex_sampler");
 
@@ -639,6 +658,7 @@ void CoreProfileEngine::drawTexOES(float x, float y, float z, float width, float
     }
 
     gl.glBindVertexArray(0);
+
     gl.glUseProgram(0);
 
     gl.glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
@@ -705,6 +725,8 @@ void CoreProfileEngine::preDrawTextureUnitEmulation() {
     if (textureGenMode == GL_REFLECTION_MAP_OES) {
         gl.glUniform1i(m_geometryDrawState.enableTextureLoc, 1);
         gl.glUniform1i(m_geometryDrawState.enableReflectionMapLoc, 1);
+    } else {
+        gl.glUniform1i(m_geometryDrawState.enableReflectionMapLoc, 0);
     }
 
     auto bindedTex = mCtx->getBindedTexture(GL_TEXTURE_2D);
@@ -718,6 +740,7 @@ void CoreProfileEngine::preDrawTextureUnitEmulation() {
         gl.glUniform1i(m_geometryDrawState.textureFormatLoc, GL_RGBA);
     }
 
+    gl.glUniform1i(m_geometryDrawState.enableLightingLoc, 0);
     gl.glUniform1i(m_geometryDrawState.textureEnvModeLoc, mCtx->getTextureEnvMode());
 }
 
@@ -746,6 +769,7 @@ void CoreProfileEngine::preDrawVertexSetup() {
     glm::mat4 currTextureMatrix = mCtx->getTextureMatrix();
 
     gl.glBindVertexArray(m_geometryDrawState.vao);
+
     gl.glUseProgram(mCtx->getShadeModel() == GL_FLAT ?
                     m_geometryDrawState.programFlat :
                     m_geometryDrawState.program);
