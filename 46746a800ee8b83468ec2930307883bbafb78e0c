@@ -1,0 +1,84 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d75bc75_81a0e8a4",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T15:18:53Z",
+      "side": 1,
+      "message": "it would probably be worthwhile to check that width and height are something reasonable here - maybe compare to GL_MAX_TEXTURE_SIZE?  Maybe also check that they\u0027re equal... and powers of 2?",
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6bb11187_34dfff97",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T15:18:53Z",
+      "side": 1,
+      "message": "We should probably only check glGetError in non-production builds since it may have to do a synchronous flush - we should probably just check that the textureId is non-null and the png data is reasonable as you do above.  Incidentally, it would probably be worthwhile to consider wrapping all gl calls and always calling glGetError after each one for debug builds - maybe hidden behind a flag in debug builds.",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 68,
+        "endChar": 45
+      },
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9da56147_f00cb5af",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T15:18:53Z",
+      "side": 1,
+      "message": "This should probably be Debug instead of Warn.",
+      "range": {
+        "startLine": 140,
+        "startChar": 4,
+        "endLine": 140,
+        "endChar": 71
+      },
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6f5f5df_84c7f7c1",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T15:18:53Z",
+      "side": 1,
+      "message": "is fallthrough intended here?  If so please add a comment.",
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
