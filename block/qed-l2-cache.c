@@ -51,7 +51,7 @@
  */
 
 #include "qemu/osdep.h"
-#include "trace.h"
+#include "block/trace.h"
 #include "qed.h"
 
 /* Each L2 holds 2GB so this let's us fully cache a 100GB disk */

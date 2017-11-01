@@ -31,7 +31,7 @@
 #include "block/scsi.h"
 #include "hw/pci/msi.h"
 #include "vmw_pvscsi.h"
-#include "trace.h"
+#include "hw/scsi/trace.h"
 
 
 #define PVSCSI_USE_64BIT         (true)
@@ -1209,7 +1209,7 @@ static const VMStateDescription vmstate_pvscsi_pcie_device = {
     .name = "pvscsi/pcie",
     .needed = pvscsi_vmstate_need_pcie_device,
     .fields = (VMStateField[]) {
-        VMSTATE_PCIE_DEVICE(parent_obj, PVSCSIState),
+        VMSTATE_PCI_DEVICE(parent_obj, PVSCSIState),
         VMSTATE_END_OF_LIST()
     }
 };
