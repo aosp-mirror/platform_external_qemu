@@ -27,7 +27,7 @@
 #include "qemu-common.h"
 #include "hw/usb.h"
 #include "qemu/iov.h"
-#include "trace.h"
+#include "hw/usb/trace.h"
 
 void usb_pick_speed(USBPort *port)
 {
