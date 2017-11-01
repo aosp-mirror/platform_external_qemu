@@ -60,8 +60,10 @@ public:
     // Retrieve emulated GLES1 context.
     void* getEmulatedGLES1Context() const { return mEmulatedGLES1Context; }
 
-    // Return the actual underlying version used in this context.
-    GLESApi version() const { return mVersion; }
+    // Return the GLES version it is trying to emulate in this context.
+    // This can be different from the underlying version when using
+    // GLES12Translator.
+    GLESApi clientVersion() const;
 
     // Retrieve GLDecoderContextData instance reference for this
     // RenderContext instance.

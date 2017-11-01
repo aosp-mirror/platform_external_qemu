@@ -332,7 +332,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     // then call glCopyTexSubImage2D().
     GLuint tmpTex;
     GLint currTexBind;
-    if (tInfo->currContext->version() > GLESApi_CM) {
+    if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
         s_gles2.glGenTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
@@ -341,7 +341,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         // If the read buffer is multisampled, we need to resolve.
         GLint samples;
         s_gles2.glGetIntegerv(GL_SAMPLE_BUFFERS, &samples);
-        if (tInfo->currContext->version() > GLESApi_2 && samples > 0) {
+        if (tInfo->currContext->clientVersion() > GLESApi_2 && samples > 0) {
             s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
             GLuint resolve_fbo;
@@ -425,7 +425,7 @@ bool ColorBuffer::bindToTexture() {
         return false;
     }
     touch();
-    if (tInfo->currContext->version() > GLESApi_CM) {
+    if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
     } else {
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
@@ -442,7 +442,7 @@ bool ColorBuffer::bindToRenderbuffer() {
         return false;
     }
     touch();
-    if (tInfo->currContext->version() > GLESApi_CM) {
+    if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glEGLImageTargetRenderbufferStorageOES(GL_RENDERBUFFER_OES,
                                                        m_eglImage);
     } else {
