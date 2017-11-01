@@ -34,7 +34,7 @@
 #include "sysemu/block-backend.h"
 #include "qemu/bswap.h"
 #include "hw/block/block.h"
-#include "trace.h"
+#include "hw/block/trace.h"
 
 struct partition {
         uint8_t boot_ind;           /* 0x80 - active */

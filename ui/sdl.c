@@ -233,10 +233,12 @@ static int check_for_evdev(void)
     if (!SDL_GetWMInfo(&info)) {
         return 0;
     }
-    desc = XkbGetKeyboard(info.info.x11.display,
-                          XkbGBN_AllComponentsMask,
-                          XkbUseCoreKbd);
-    if (desc && desc->names) {
+    desc = XkbGetMap(info.info.x11.display,
+                     XkbGBN_AllComponentsMask,
+                     XkbUseCoreKbd);
+    if (desc &&
+        (XkbGetNames(info.info.x11.display,
+                     XkbKeycodesNameMask, desc) == Success)) {
         keycodes = XGetAtomName(info.info.x11.display, desc->names->keycodes);
         if (keycodes == NULL) {
             fprintf(stderr, "could not lookup keycode name\n");
@@ -947,6 +949,7 @@ bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
     int flags;
     uint8_t data = 0;
     const SDL_VideoInfo *vi;
+    SDL_SysWMinfo info;
     char *filename;
 
 #if defined(__APPLE__)
@@ -1022,6 +1025,30 @@ bool sdl_display_init(DisplayState *ds, int full_screen, int no_frame)
 
     sdl_cursor_hidden = SDL_CreateCursor(&data, &data, 8, 1, 0, 0);
     sdl_cursor_normal = SDL_GetCursor();
+
+    memset(&info, 0, sizeof(info));
+    SDL_VERSION(&info.version);
+    if (SDL_GetWMInfo(&info)) {
+        int i;
+        for (i = 0; ; i++) {
+            /* All consoles share the same window */
+            QemuConsole *con = qemu_console_lookup_by_index(i);
+            if (con) {
+#if defined(SDL_VIDEO_DRIVER_X11)
+                qemu_console_set_window_id(con, info.info.x11.wmwindow);
+#elif defined(SDL_VIDEO_DRIVER_NANOX) || \
+      defined(SDL_VIDEO_DRIVER_WINDIB) || defined(SDL_VIDEO_DRIVER_DDRAW) || \
+      defined(SDL_VIDEO_DRIVER_GAPI) || \
+      defined(SDL_VIDEO_DRIVER_RISCOS)
+                qemu_console_set_window_id(con, (int) (uintptr_t) info.window);
+#else
+                qemu_console_set_window_id(con, info.data);
+#endif
+            } else {
+                break;
+            }
+        }
+    }
 
     atexit(sdl_cleanup);
     return true;
