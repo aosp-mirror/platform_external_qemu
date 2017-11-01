@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "853c6c13_db3609f4",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T01:48:08Z",
+      "side": 1,
+      "message": "Threading expectations are documented in camera-virtualscene.h and VirtualSceneRenderer.h. Basically, callers need to be resilient to the GL state changing.  Technically we\u0027re the only ones rendering on this GL context today, but I could see that changing as the feature develops.\n\nThat said, I agree it\u0027s a good idea to leave a clean state on completion because the callers wouldn\u0027t know what state was modified.  I\u0027ll reset this state (plus the state you mentioned in other comments) back to 0 when exiting scope.",
+      "parentUuid": "50a635b3_da9b008b",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 206,
+        "endChar": 9
+      },
+      "revId": "e3d771b39b54e67bfaa7fa3d8fe55d029d8b683a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9cf36787_9e7e0e8f",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
         "patchSetId": 1
@@ -36,6 +60,24 @@
       "writtenOn": "2017-10-31T22:35:18Z",
       "side": 1,
       "message": "Depending on how much other rendering you expect to do with the same context, for clean state usage here, I\u0027d recommend not just binding the buffers back to zero, but also using program 0 again, binding texture 0, and bracketing it with enable/disable vertex attributes.\n\nOn the other hand, if the context is going to be used just for virtual scene rendering, you could even get away with just binding the texture once at the beginning in initialization, then maybe binding different buffers based on what different model types there are.",
+      "revId": "e3d771b39b54e67bfaa7fa3d8fe55d029d8b683a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57cfea40_c64c3beb",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 346,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T01:48:08Z",
+      "side": 1,
+      "message": "Good feedback, I\u0027ve gone the route of resetting state to 0 when possible.  See more details in my reply above.",
+      "parentUuid": "9cf36787_9e7e0e8f",
       "revId": "e3d771b39b54e67bfaa7fa3d8fe55d029d8b683a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
