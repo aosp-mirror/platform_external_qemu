@@ -1,0 +1,786 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dfee7069_47edfc45",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2729,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Nit: Use a constexpr size_t here instead",
+      "range": {
+        "startLine": 2729,
+        "startChar": 0,
+        "endLine": 2729,
+        "endChar": 29
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bbfa9dd_401b9132",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2733,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "const?  This applies in more than one place, but I won\u0027t add comments to each.  char* should be const whenever possible",
+      "range": {
+        "startLine": 2733,
+        "startChar": 45,
+        "endLine": 2733,
+        "endChar": 49
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4a7816ea_ff31087a",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2744,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Don\u0027t use yoda conditionals, see the emu style guide (and it\u0027s parent chromium C++ style guide). multiple places",
+      "range": {
+        "startLine": 2744,
+        "startChar": 8,
+        "endLine": 2744,
+        "endChar": 58
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec8cdbb5_7f683072",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2752,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "I\u0027m assuming that this is probably copied from somewhere else, but since this function is new, would it be possible to rewrite it without gotos? This is a .cpp file, so we can make it more C++-like too.",
+      "range": {
+        "startLine": 2752,
+        "startChar": 12,
+        "endLine": 2752,
+        "endChar": 16
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c692e03_26c903e4",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2754,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "This looks like a bug, missing else? (although because of the goto this didn\u0027t break anything)",
+      "range": {
+        "startLine": 2753,
+        "startChar": 8,
+        "endLine": 2754,
+        "endChar": 9
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7b45f0dc_6d586010",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2758,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Single-line statements should have brackets (see emu style guide)",
+      "range": {
+        "startLine": 2757,
+        "startChar": 12,
+        "endLine": 2758,
+        "endChar": 42
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9df128b9_f20be093",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2769,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "The more I look at this, the more I want a do_control_writef helper that does the snprintf and write.",
+      "range": {
+        "startLine": 2769,
+        "startChar": 8,
+        "endLine": 2769,
+        "endChar": 87
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "88ac3577_fc520b60",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2796,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "This is very C-like, but we have C++ available to use.  I recommend changing this to one of two approaches:\n\n1) Use std::string for args_dup instead; it will automatically free the memory for you, and then set the space to NUL to make substrings for physical_param_name.\n\n2) Don\u0027t copy the string immediately, instead get the start/end character of each substring, and then construct a std::string on-demand using the std::string(begin, end) constructor for physical_param_name.",
+      "range": {
+        "startLine": 2796,
+        "startChar": 4,
+        "endLine": 2796,
+        "endChar": 36
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3c77346d_2f2cb40d",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2811,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "How about p[1]? That\u0027s slightly clearer to me",
+      "range": {
+        "startLine": 2811,
+        "startChar": 19,
+        "endLine": 2811,
+        "endChar": 27
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b06dac36_340faf5e",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2835,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Since this is C++, int i \u003d 0;",
+      "range": {
+        "startLine": 2835,
+        "startChar": 21,
+        "endLine": 2835,
+        "endChar": 22
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f0efadf7_1339f328",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2844,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "It looks like this accepts floating point numbers in multiple formats, including hex and scientific notation, and if there are any invalid characters after it they are silently ignored. Ideally this should filter each term for valid characters before parsing and make sure that the next character after is a : or NUL.\n\nstrtof returns a pointer to the last character of the match, maybe that will be better here?",
+      "range": {
+        "startLine": 2844,
+        "startChar": 33,
+        "endLine": 2844,
+        "endChar": 39
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d903d9f9_329a1eed",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 2904,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Prefer nullptr over NULL.  This is a nit, I do see other places that use NULL in this file unfortunately :-(",
+      "range": {
+        "startLine": 2904,
+        "startChar": 6,
+        "endLine": 2904,
+        "endChar": 10
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "947848f1_1bf54942",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "TODO for another CL, or this one?",
+      "range": {
+        "startLine": 277,
+        "startChar": 4,
+        "endLine": 277,
+        "endChar": 21
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fa0d002_cfac320a",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 329,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "const?",
+      "range": {
+        "startLine": 329,
+        "startChar": 12,
+        "endLine": 329,
+        "endChar": 16
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "620bffe8_5e7edc2c",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 738,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "From the name I assumed that this would set the contents of vec3, maybe vec3_get_values?",
+      "range": {
+        "startLine": 738,
+        "startChar": 5,
+        "endLine": 738,
+        "endChar": 19
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95ac63d0_b07b35d5",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 823,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Can these be simplified with an initializer? vec3 position \u003d {a, b, c};",
+      "range": {
+        "startLine": 820,
+        "startChar": 12,
+        "endLine": 823,
+        "endChar": 27
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "24a365bc_a2df27ec",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 888,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "set_sensor_vec, here and below",
+      "range": {
+        "startLine": 885,
+        "startChar": 12,
+        "endLine": 888,
+        "endChar": 28
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8aa899ad_4183149c",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 923,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Move to the top of the file?",
+      "range": {
+        "startLine": 923,
+        "startChar": 0,
+        "endLine": 923,
+        "endChar": 29
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f53c518_628e4e91",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 950,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "const all the things! :-)",
+      "range": {
+        "startLine": 950,
+        "startChar": 4,
+        "endLine": 950,
+        "endChar": 11
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a97d7fa5_e335ab11",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Nit: Add out_ or similar prefix to out parameters?",
+      "range": {
+        "startLine": 142,
+        "startChar": 35,
+        "endLine": 142,
+        "endChar": 36
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c0d7388_6a0fbb3e",
+        "filename": "android/android-emu/android/hw-sensors.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 155,
+        "startChar": 4,
+        "endLine": 155,
+        "endChar": 8
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e63902f0_b9b6337b",
+        "filename": "android/android-emu/android/physics/AmbientEnvironment.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "I recommend factoring this bool into an enum to make calling code more readable, and to specify a default value",
+      "range": {
+        "startLine": 45,
+        "startChar": 49,
+        "endLine": 45,
+        "endChar": 67
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9838afc2_910ec946",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "physics?",
+      "range": {
+        "startLine": 32,
+        "startChar": 29,
+        "endLine": 32,
+        "endChar": 36
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2bb3c385_b8e1545f",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Use android::base::Lock instead (I previously received feedback on this)",
+      "range": {
+        "startLine": 182,
+        "startChar": 4,
+        "endLine": 182,
+        "endChar": 40
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5dfcb07c_c43f355b",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "static",
+      "range": {
+        "startLine": 202,
+        "startChar": 0,
+        "endLine": 202,
+        "endChar": 9
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2acb9eb6_18189456",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "static",
+      "range": {
+        "startLine": 206,
+        "startChar": 0,
+        "endLine": 206,
+        "endChar": 4
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "acfd563a_2f1edbd9",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "reinterpret_cast is more precise here, and when casting back",
+      "range": {
+        "startLine": 215,
+        "startChar": 37,
+        "endLine": 215,
+        "endChar": 48
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "acb408e7_36c21345",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 357,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "I\u0027d like to see as much code as possible moved into a non-macro\u0027d helper method, and make it so that the macro function defers calls to that.  Maybe a templated helper method so that it can handle different types?\n\nThis as it stands would be a pain to debug.  The same applies for the method below.",
+      "range": {
+        "startLine": 352,
+        "startChar": 0,
+        "endLine": 357,
+        "endChar": 31
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad8295cb_cd6aa12b",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 452,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Nit: This can be collapsed to a single if",
+      "range": {
+        "startLine": 451,
+        "startChar": 4,
+        "endLine": 452,
+        "endChar": 59
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "64b606ab_19fdef29",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 500,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "Make these static too",
+      "range": {
+        "startLine": 482,
+        "startChar": 0,
+        "endLine": 500,
+        "endChar": 1
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c9acc15_1ade5443",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 578,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "const",
+      "range": {
+        "startLine": 578,
+        "startChar": 4,
+        "endLine": 578,
+        "endChar": 11
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6416b0df_dc704265",
+        "filename": "android/android-emu/android/physics/PhysicalModel.h",
+        "patchSetId": 6
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "The struct keyword is unnecessary here and throughout",
+      "range": {
+        "startLine": 79,
+        "startChar": 24,
+        "endLine": 79,
+        "endChar": 44
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d48c50a9_35084fec",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "reinterpret_cast (or implicit cast)",
+      "range": {
+        "startLine": 42,
+        "startChar": 42,
+        "endLine": 42,
+        "endChar": 53
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "82466406_2325fb98",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-01T22:25:33Z",
+      "side": 1,
+      "message": "See comment above, to/from void* should be reinterpret_cast",
+      "range": {
+        "startLine": 372,
+        "startChar": 16,
+        "endLine": 372,
+        "endChar": 27
+      },
+      "revId": "5c26e11aee5ae727499bd2da3d5ebf9c6ca4c89b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
