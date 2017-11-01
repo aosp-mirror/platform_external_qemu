@@ -436,12 +436,14 @@ GL_API void GL_APIENTRY  glClear( GLbitfield mask) {
 GL_API void GL_APIENTRY  glClearColor( GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setClearColor(red, green, blue, alpha);
     ctx->dispatcher().glClearColor(red,green,blue,alpha);
 }
 
 GL_API void GL_APIENTRY  glClearColorx( GLclampx red, GLclampx green, GLclampx blue, GLclampx alpha) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setClearColor(X2F(red),X2F(green),X2F(blue),X2F(alpha));
     ctx->dispatcher().glClearColor(X2F(red),X2F(green),X2F(blue),X2F(alpha));
 }
 
@@ -449,18 +451,21 @@ GL_API void GL_APIENTRY  glClearColorx( GLclampx red, GLclampx green, GLclampx b
 GL_API void GL_APIENTRY  glClearDepthf( GLclampf depth) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setClearDepth(depth);
     ctx->dispatcher().glClearDepth(depth);
 }
 
 GL_API void GL_APIENTRY  glClearDepthx( GLclampx depth) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setClearDepth(X2F(depth));
     ctx->dispatcher().glClearDepth(X2F(depth));
 }
 
 GL_API void GL_APIENTRY  glClearStencil( GLint s) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setClearStencil(s);
     ctx->dispatcher().glClearStencil(s);
 }
 
@@ -513,6 +518,7 @@ GL_API void GL_APIENTRY  glColor4x( GLfixed red, GLfixed green, GLfixed blue, GL
 GL_API void GL_APIENTRY  glColorMask( GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setColorMask(red, green, blue, alpha);
     ctx->dispatcher().glColorMask(red,green,blue,alpha);
 }
 
@@ -654,6 +660,7 @@ GL_API void GL_APIENTRY  glCopyTexSubImage2D( GLenum target, GLint level, GLint 
 GL_API void GL_APIENTRY  glCullFace( GLenum mode) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setCullFace(mode);
     ctx->dispatcher().glCullFace(mode);
 }
 
@@ -692,24 +699,28 @@ GL_API void GL_APIENTRY  glDeleteTextures( GLsizei n, const GLuint *textures) {
 GL_API void GL_APIENTRY  glDepthFunc( GLenum func) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setDepthFunc(func);
     ctx->dispatcher().glDepthFunc(func);
 }
 
 GL_API void GL_APIENTRY  glDepthMask( GLboolean flag) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setDepthMask(flag);
     ctx->dispatcher().glDepthMask(flag);
 }
 
 GL_API void GL_APIENTRY  glDepthRangef( GLclampf zNear, GLclampf zFar) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setDepthRangef(zNear, zFar);
     ctx->dispatcher().glDepthRange(zNear,zFar);
 }
 
 GL_API void GL_APIENTRY  glDepthRangex( GLclampx zNear, GLclampx zFar) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setDepthRangef(X2F(zNear),X2F(zFar));
     ctx->dispatcher().glDepthRange(X2F(zNear),X2F(zFar));
 }
 
@@ -814,6 +825,7 @@ GL_API void GL_APIENTRY  glFogxv( GLenum pname, const GLfixed *params) {
 GL_API void GL_APIENTRY  glFrontFace( GLenum mode) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setFrontFace(mode);
     ctx->dispatcher().glFrontFace(mode);
 }
 
@@ -1401,12 +1413,14 @@ GL_API void GL_APIENTRY  glLightxv( GLenum light, GLenum pname, const GLfixed *p
 GL_API void GL_APIENTRY  glLineWidth( GLfloat width) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setLineWidth(width);
     ctx->dispatcher().glLineWidth(width);
 }
 
 GL_API void GL_APIENTRY  glLineWidthx( GLfixed width) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setLineWidth(X2F(width));
     ctx->dispatcher().glLineWidth(X2F(width));
 }
 
@@ -1600,12 +1614,14 @@ GL_API void GL_APIENTRY  glPointSizex( GLfixed size) {
 GL_API void GL_APIENTRY  glPolygonOffset( GLfloat factor, GLfloat units) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setPolygonOffset(factor, units);
     ctx->dispatcher().glPolygonOffset(factor,units);
 }
 
 GL_API void GL_APIENTRY  glPolygonOffsetx( GLfixed factor, GLfixed units) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setPolygonOffset(X2F(factor), X2F(units));
     ctx->dispatcher().glPolygonOffset(X2F(factor),X2F(units));
 }
 
@@ -1652,12 +1668,14 @@ GL_API void GL_APIENTRY  glRotatex( GLfixed angle, GLfixed x, GLfixed y, GLfixed
 GL_API void GL_APIENTRY  glSampleCoverage( GLclampf value, GLboolean invert) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setSampleCoverage(value, invert);
     ctx->dispatcher().glSampleCoverage(value,invert);
 }
 
 GL_API void GL_APIENTRY  glSampleCoveragex( GLclampx value, GLboolean invert) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setSampleCoverage(X2F(value), invert);
     ctx->dispatcher().glSampleCoverage(X2F(value),invert);
 }
 
@@ -1676,6 +1694,7 @@ GL_API void GL_APIENTRY  glScalex( GLfixed x, GLfixed y, GLfixed z) {
 GL_API void GL_APIENTRY  glScissor( GLint x, GLint y, GLsizei width, GLsizei height) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setScissor(x, y, width, height);
     ctx->dispatcher().glScissor(x,y,width,height);
 }
 
@@ -1688,12 +1707,14 @@ GL_API void GL_APIENTRY  glShadeModel( GLenum mode ) {
 GL_API void GL_APIENTRY  glStencilFunc( GLenum func, GLint ref, GLuint mask) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setStencilFuncSeparate(GL_FRONT_AND_BACK, func, ref, mask);
     ctx->dispatcher().glStencilFunc(func,ref,mask);
 }
 
 GL_API void GL_APIENTRY  glStencilMask( GLuint mask) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setStencilMaskSeparate(GL_FRONT_AND_BACK, mask);
     ctx->dispatcher().glStencilMask(mask);
 }
 
@@ -1701,6 +1722,7 @@ GL_API void GL_APIENTRY  glStencilOp( GLenum fail, GLenum zfail, GLenum zpass) {
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!(GLEScmValidate::stencilOp(fail) && GLEScmValidate::stencilOp(zfail) && GLEScmValidate::stencilOp(zpass)),GL_INVALID_ENUM);
+    ctx->setStencilOpSeparate(GL_FRONT_AND_BACK, fail, zfail, zpass);
     ctx->dispatcher().glStencilOp(fail,zfail,zpass);
 }
 
@@ -1835,6 +1857,8 @@ GL_API void GL_APIENTRY  glTexParameterf( GLenum target, GLenum pname, GLfloat p
     if(handleMipmapGeneration(target, pname, (bool)param))
         return;
 
+    TextureData *texData = getTextureTargetData(target);
+    texData->setTexParam(pname, static_cast<GLint>(param));
     ctx->dispatcher().glTexParameterf(target,pname,param);
 }
 
@@ -1846,13 +1870,14 @@ GL_API void GL_APIENTRY  glTexParameterfv( GLenum target, GLenum pname, const GL
     if(handleMipmapGeneration(target, pname, (bool)(*params)))
         return;
 
+    TextureData *texData = getTextureTargetData(target);
+
     if (pname==GL_TEXTURE_CROP_RECT_OES) {
-        TextureData *texData = getTextureTargetData(target);
         SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
         for (int i=0;i<4;++i)
             texData->crop_rect[i] = params[i];
-    }
-    else {
+    } else {
+        texData->setTexParam(pname, static_cast<GLint>(params[0]));
         ctx->dispatcher().glTexParameterfv(target,pname,params);
     }
 }
@@ -1865,6 +1890,8 @@ GL_API void GL_APIENTRY  glTexParameteri( GLenum target, GLenum pname, GLint par
     if(handleMipmapGeneration(target, pname, (bool)param))
         return;
 
+    TextureData *texData = getTextureTargetData(target);
+    texData->setTexParam(pname, (GLint)param);
     ctx->dispatcher().glTexParameteri(target,pname,param);
 }
 
@@ -1876,13 +1903,14 @@ GL_API void GL_APIENTRY  glTexParameteriv( GLenum target, GLenum pname, const GL
     if(handleMipmapGeneration(target, pname, (bool)(*params)))
         return;
 
+    TextureData *texData = getTextureTargetData(target);
     if (pname==GL_TEXTURE_CROP_RECT_OES) {
-        TextureData *texData = getTextureTargetData(target);
         SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
         for (int i=0;i<4;++i)
             texData->crop_rect[i] = params[i];
     }
     else {
+        texData->setTexParam(pname, (GLint)params[0]);
         ctx->dispatcher().glTexParameteriv(target,pname,params);
     }
 }
@@ -1894,6 +1922,8 @@ GL_API void GL_APIENTRY  glTexParameterx( GLenum target, GLenum pname, GLfixed p
     if(handleMipmapGeneration(target, pname, (bool)param))
         return;
 
+    TextureData *texData = getTextureTargetData(target);
+    texData->setTexParam(pname, static_cast<GLint>(param));
     ctx->dispatcher().glTexParameterf(target,pname,static_cast<GLfloat>(param));
 }
 
@@ -1905,14 +1935,15 @@ GL_API void GL_APIENTRY  glTexParameterxv( GLenum target, GLenum pname, const GL
     if(handleMipmapGeneration(target, pname, (bool)(*params)))
         return;
 
+    TextureData *texData = getTextureTargetData(target);
     if (pname==GL_TEXTURE_CROP_RECT_OES) {
-        TextureData *texData = getTextureTargetData(target);
         SET_ERROR_IF(texData==NULL,GL_INVALID_OPERATION);
         for (int i=0;i<4;++i)
             texData->crop_rect[i] = X2F(params[i]);
     }
     else {
         GLfloat param = static_cast<GLfloat>(params[0]);
+        texData->setTexParam(pname, static_cast<GLint>(params[0]));
         ctx->dispatcher().glTexParameterfv(target,pname,&param);
     }
 }
@@ -1972,6 +2003,7 @@ GL_API void GL_APIENTRY  glVertexPointer( GLint size, GLenum type, GLsizei strid
 GL_API void GL_APIENTRY  glViewport( GLint x, GLint y, GLsizei width, GLsizei height) {
     GET_CTX()
     GLES_CM_TRACE()
+    ctx->setViewport(x, y, width, height);
     ctx->dispatcher().glViewport(x,y,width,height);
 }
 
@@ -1999,6 +2031,9 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
             texData->height = img->height;
             texData->border = img->border;
             texData->internalFormat = img->internalFormat;
+            texData->format = img->format;
+            texData->type = img->type;
+            texData->texStorageLevels = img->texStorageLevels;
             texData->sourceEGLImage = imagehndl;
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
@@ -2030,6 +2065,7 @@ GL_API void GL_APIENTRY glEGLImageTargetRenderbufferStorageOES(GLenum target, GL
     // acquire the texture in the renderbufferData that it is an eglImage target
     //
     rbData->eglImageGlobalTexObject = img->globalTexObj;
+    img->saveableTexture->makeDirty();
 
     //
     // if the renderbuffer is attached to a framebuffer
@@ -2078,6 +2114,7 @@ GL_API void GL_APIENTRY glBlendFuncSeparateOES(GLenum srcRGB, GLenum dstRGB, GLe
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::blendSrc(srcRGB) || !GLEScmValidate::blendDst(dstRGB) ||
                  !GLEScmValidate::blendSrc(srcAlpha) || ! GLEScmValidate::blendDst(dstAlpha) ,GL_INVALID_ENUM);
+    ctx->setBlendFuncSeparate(srcRGB, dstRGB, srcAlpha, dstAlpha);
     ctx->dispatcher().glBlendFuncSeparate(srcRGB,dstRGB,srcAlpha,dstAlpha);
 }
 
