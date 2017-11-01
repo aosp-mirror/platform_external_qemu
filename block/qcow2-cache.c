@@ -26,7 +26,7 @@
 #include "block/block_int.h"
 #include "qemu-common.h"
 #include "qcow2.h"
-#include "trace.h"
+#include "block/trace.h"
 
 typedef struct Qcow2CachedTable {
     int64_t  offset;

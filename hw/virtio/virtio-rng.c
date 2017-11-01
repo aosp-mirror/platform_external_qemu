@@ -17,7 +17,7 @@
 #include "hw/virtio/virtio-rng.h"
 #include "sysemu/rng.h"
 #include "qom/object_interfaces.h"
-#include "trace.h"
+#include "hw/virtio/trace.h"
 
 static bool is_guest_ready(VirtIORNG *vrng)
 {
