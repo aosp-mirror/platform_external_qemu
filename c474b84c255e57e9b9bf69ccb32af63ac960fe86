@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31c57775_6dfb5fa9",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-01T03:35:43Z",
+      "side": 1,
+      "message": "Nicolas: I needed to put this here, or I got a 0x502 on the glDrawElements below.",
+      "range": {
+        "startLine": 631,
+        "startChar": 0,
+        "endLine": 633,
+        "endChar": 72
+      },
+      "revId": "c474b84c255e57e9b9bf69ccb32af63ac960fe86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
