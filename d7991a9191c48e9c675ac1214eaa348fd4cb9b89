@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "199b06d6_ceedcf80",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-01T16:01:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c917f4f6_a4b09d5d",
+      "range": {
+        "startLine": 601,
+        "startChar": 40,
+        "endLine": 601,
+        "endChar": 43
+      },
+      "revId": "d7991a9191c48e9c675ac1214eaa348fd4cb9b89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4249d7c5_47552361",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "176ed771_7ae4da39",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 611,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-01T16:01:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4249d7c5_47552361",
+      "range": {
+        "startLine": 611,
+        "startChar": 12,
+        "endLine": 611,
+        "endChar": 28
+      },
+      "revId": "d7991a9191c48e9c675ac1214eaa348fd4cb9b89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "40de4296_2110ae55",
         "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2017-11-01T15:53:53Z",
       "side": 1,
       "message": "so 11.1 is \u003c 10.13 for this code :)\nHappens all the time, I even remember some Windows security vulnerability because of this kind of code.\nuse \"!(ver \u003c Version(10, 13, 0))\" instead",
+      "range": {
+        "startLine": 692,
+        "startChar": 12,
+        "endLine": 693,
+        "endChar": 50
+      },
+      "revId": "d7991a9191c48e9c675ac1214eaa348fd4cb9b89",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57698fdb_e2cdde67",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 693,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-01T16:01:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "40de4296_2110ae55",
       "range": {
         "startLine": 692,
         "startChar": 12,
