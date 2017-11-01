@@ -144,6 +144,7 @@ private:
     void drawPoints(PointSizeIndices* points);
     void drawPointsData(GLESConversionArrays& arrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw);
     void initExtensionString();
+    void restoreVertexAttrib(GLenum attrib);
     CoreProfileEngine& core() { return *m_coreProfileEngine; }
 
     GLESpointer*          m_texCoords = nullptr;
