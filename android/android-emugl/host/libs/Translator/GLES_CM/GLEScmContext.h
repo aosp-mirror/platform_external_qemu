@@ -184,6 +184,7 @@ private:
     std::vector<MatrixStack> mTextureMatrices;
     glm::mat4& currMatrix();
     MatrixStack& currMatrixStack();
+    void restoreMatrixStack(const MatrixStack& matrices);
 
     // Core profile stuff
     CoreProfileEngine*    m_coreProfileEngine = nullptr;
