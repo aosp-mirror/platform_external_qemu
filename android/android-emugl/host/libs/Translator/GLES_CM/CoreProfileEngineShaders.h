@@ -14,6 +14,26 @@
 * limitations under the License.
 */
 
+const char kDrawTexOESGles2_vshader[] = R"(
+precision highp float;
+attribute highp vec3 pos;
+attribute highp vec2 texcoord;
+varying highp vec2 texcoord_varying;
+void main() {
+    gl_Position = vec4(pos.x, pos.y, pos.z, 1.0);
+    texcoord_varying = texcoord;
+}
+)";
+
+const char kDrawTexOESGles2_fshader[] = R"(
+precision highp float;
+uniform sampler2D tex_sampler;
+varying highp vec2 texcoord_varying;
+void main() {
+    gl_FragColor = texture2D(tex_sampler, texcoord_varying);
+}
+)";
+
 const char kDrawTexOESCore_vshader[] = R"(#version 330 core
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec2 texcoord;
@@ -33,8 +53,8 @@ void main() {
 }
 )";
 
-// flat,
-const char kGeometryDrawVShaderSrcTemplate[] = R"(#version 330 core
+// version, flat,
+const char kGeometryDrawVShaderSrcTemplateCore[] = R"(%s
 layout(location = 0) in vec4 pos;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec4 color;
@@ -63,8 +83,9 @@ void main() {
 }
 )";
 
-// flat,
-const char kGeometryDrawFShaderSrcTemplate[] = R"(#version 330 core
+// version, flat,
+const char kGeometryDrawFShaderSrcTemplateCore[] = R"(%s
+precision highp float;
 uniform sampler2D tex_sampler;
 uniform samplerCube tex_cube_sampler;
 uniform bool enable_textures;
