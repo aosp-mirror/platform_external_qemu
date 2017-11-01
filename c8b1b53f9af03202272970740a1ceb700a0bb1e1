@@ -70,6 +70,24 @@
       "revId": "c8b1b53f9af03202272970740a1ceb700a0bb1e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "66820bd3_f532d338",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-01T18:26:22Z",
+      "side": 1,
+      "message": "See line 594; it\u0027s already mac specific.",
+      "parentUuid": "8ba785b1_5186bb15",
+      "revId": "c8b1b53f9af03202272970740a1ceb700a0bb1e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
