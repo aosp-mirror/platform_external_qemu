@@ -52,6 +52,24 @@
       "revId": "c8b1b53f9af03202272970740a1ceb700a0bb1e1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ba785b1_5186bb15",
+        "filename": "android/android-emu/android/emulation/CpuAccelerator.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 707,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-11-01T18:24:55Z",
+      "side": 1,
+      "message": "Then filter with MacOS.",
+      "parentUuid": "f1b807dc_308f2c1a",
+      "revId": "c8b1b53f9af03202272970740a1ceb700a0bb1e1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
