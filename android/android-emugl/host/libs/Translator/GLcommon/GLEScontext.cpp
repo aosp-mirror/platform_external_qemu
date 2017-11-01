@@ -439,6 +439,7 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             // TODO: handle the case where the loaded size and the supported
             // side does not match
 
+            m_isViewport = stream->getByte();
             m_viewportX = static_cast<GLint>(stream->getBe32());
             m_viewportY = static_cast<GLint>(stream->getBe32());
             m_viewportWidth = static_cast<GLsizei>(stream->getBe32());
@@ -447,6 +448,7 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
             m_polygonOffsetFactor = static_cast<GLfloat>(stream->getFloat());
             m_polygonOffsetUnits = static_cast<GLfloat>(stream->getFloat());
 
+            m_isScissor = stream->getByte();
             m_scissorX = static_cast<GLint>(stream->getBe32());
             m_scissorY = static_cast<GLint>(stream->getBe32());
             m_scissorWidth = static_cast<GLsizei>(stream->getBe32());
@@ -615,6 +617,7 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         saveContainer(stream, m_indexedAtomicCounterBuffers);
         saveContainer(stream, m_indexedShaderStorageBuffers);
 
+        stream->putByte(m_isViewport);
         stream->putBe32(m_viewportX);
         stream->putBe32(m_viewportY);
         stream->putBe32(m_viewportWidth);
@@ -623,6 +626,7 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
         stream->putFloat(m_polygonOffsetFactor);
         stream->putFloat(m_polygonOffsetUnits);
 
+        stream->putByte(m_isScissor);
         stream->putBe32(m_scissorX);
         stream->putBe32(m_scissorY);
         stream->putBe32(m_scissorWidth);
@@ -694,6 +698,8 @@ void GLEScontext::postLoadRestoreShareGroup() {
 }
 
 void GLEScontext::postLoadRestoreCtx() {
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+
     assert(!m_shareGroup->needRestore());
     m_fboNameSpace->postLoadRestore(
             [this](NamedObjectType p_type, ObjectLocalName p_localName) {
@@ -704,8 +710,6 @@ void GLEScontext::postLoadRestoreCtx() {
                 }
             }
         );
-
-    GLDispatch& dispatcher = GLEScontext::dispatcher();
 
     // buffer bindings
     auto bindBuffer = [this](GLenum target, GLuint buffer) {
@@ -765,18 +769,30 @@ void GLEScontext::postLoadRestoreCtx() {
     dispatcher.glActiveTexture(m_activeTexture + GL_TEXTURE0);
 
     // viewport & scissor
-    dispatcher.glViewport(m_viewportX, m_viewportY,
-            m_viewportWidth, m_viewportHeight);
+    if (m_isViewport) {
+        dispatcher.glViewport(m_viewportX, m_viewportY,
+                m_viewportWidth, m_viewportHeight);
+    }
+    if (m_isScissor) {
+        dispatcher.glScissor(m_scissorX, m_scissorY,
+                m_scissorWidth, m_scissorHeight);
+    }
     dispatcher.glPolygonOffset(m_polygonOffsetFactor,
             m_polygonOffsetUnits);
-    dispatcher.glScissor(m_scissorX, m_scissorY,
-            m_scissorWidth, m_scissorHeight);
 
     for (auto item : m_glEnableList) {
-        if (item.second) {
-            dispatcher.glEnable(item.first);
+        if (item.first == GL_TEXTURE_2D
+                || item.first == GL_TEXTURE_CUBE_MAP_OES) {
+            continue;
+        }
+        std::function<void(GLenum)> enableFunc = item.second ? dispatcher.glEnable :
+                                                   dispatcher.glDisable;
+        if (item.first==GL_TEXTURE_GEN_STR_OES) {
+            enableFunc(GL_TEXTURE_GEN_S);
+            enableFunc(GL_TEXTURE_GEN_T);
+            enableFunc(GL_TEXTURE_GEN_R);
         } else {
-            dispatcher.glDisable(item.first);
+            enableFunc(item.first);
         }
     }
     dispatcher.glBlendFuncSeparate(m_blendSrcRgb, m_blendDstRgb,
@@ -1339,6 +1355,7 @@ bool GLEScontext::setBufferSubData(GLenum target,GLintptr offset,GLsizeiptr size
 }
 
 void GLEScontext::setViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
+    m_isViewport = true;
     m_viewportX = x;
     m_viewportY = y;
     m_viewportWidth = width;
@@ -1346,6 +1363,7 @@ void GLEScontext::setViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
 }
 
 void GLEScontext::setScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
+    m_isScissor = true;
     m_scissorX = x;
     m_scissorY = y;
     m_scissorWidth = width;
