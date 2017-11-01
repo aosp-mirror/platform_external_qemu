@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0273cb7b_84f60d2f",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T14:54:34Z",
+      "side": 1,
+      "message": "you could include math.h and use M_PI and M_PI_2",
+      "revId": "8bff55be007b57cf12ebbe47a565f65e410b7658",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57e92cfe_a9a1e66c",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T14:54:34Z",
+      "side": 1,
+      "message": "I believe you need to have GL_ARRAY_BUFFER bound when you call glVertexAttribPointer below.  You should be able to unbind GL_ARRAY_BUFFER right before this function returns.",
+      "range": {
+        "startLine": 150,
+        "startChar": 8,
+        "endLine": 151,
+        "endChar": 52
+      },
+      "revId": "8bff55be007b57cf12ebbe47a565f65e410b7658",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "18e055e7_4d862fd1",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T14:54:34Z",
+      "side": 1,
+      "message": "it would probably be worthwhile to have a warning if any of these attributes are not found for ease of development later when we\u0027re updating shaders",
+      "range": {
+        "startLine": 178,
+        "startChar": 8,
+        "endLine": 185,
+        "endChar": 74
+      },
+      "revId": "8bff55be007b57cf12ebbe47a565f65e410b7658",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bdaa8a17_407eebcf",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 331,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-01T14:54:34Z",
+      "side": 1,
+      "message": "we shouldn\u0027t need to build a new projection matrix every frame - we maybe save this around as a member var in the renderer... or constexpr?",
+      "range": {
+        "startLine": 323,
+        "startChar": 8,
+        "endLine": 331,
+        "endChar": 69
+      },
+      "revId": "8bff55be007b57cf12ebbe47a565f65e410b7658",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
