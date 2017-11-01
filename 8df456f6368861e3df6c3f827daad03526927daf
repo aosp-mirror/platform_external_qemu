@@ -22,6 +22,30 @@
       "revId": "8df456f6368861e3df6c3f827daad03526927daf",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "70256882_c9da496b",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmContext.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-01T18:45:09Z",
+      "side": 1,
+      "message": "In that case they will be loaded from the stream by the base class, so we do not need to set them again here.",
+      "parentUuid": "bb000e85_a5716a64",
+      "range": {
+        "startLine": 130,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 32
+      },
+      "revId": "8df456f6368861e3df6c3f827daad03526927daf",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
