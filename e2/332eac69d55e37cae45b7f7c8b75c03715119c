@@ -1,0 +1,9 @@
+Code-Review+2: Yahan Zhou <yahan@google.com>
+Autosubmit+1: Yahan Zhou <yahan@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Yahan Zhou <yahan@google.com>
+Submitted-by: Yahan Zhou <yahan@google.com>
+Submitted-at: Wed, 01 Nov 2017 17:54:37 +0000
+Reviewed-on: https://android-review.googlesource.com/526301
+Project: platform/external/qemu
+Branch: refs/heads/emu-2.5-release
