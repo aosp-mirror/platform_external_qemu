@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4b3cf1c4_dd8a08e3",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 361,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-01T17:47:49Z",
+      "side": 1,
+      "message": "fix the comment here?",
+      "range": {
+        "startLine": 360,
+        "startChar": 0,
+        "endLine": 361,
+        "endChar": 38
+      },
+      "revId": "5d28660403b2cc41f7c1d5a2a247755b74524119",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a0485535_8000a91a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 745,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-01T17:47:49Z",
+      "side": 1,
+      "message": "you don\u0027t need to change it here",
+      "range": {
+        "startLine": 745,
+        "startChar": 63,
+        "endLine": 745,
+        "endChar": 71
+      },
+      "revId": "5d28660403b2cc41f7c1d5a2a247755b74524119",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4cbf98e1_97207a02",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 820,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-01T17:47:49Z",
+      "side": 1,
+      "message": "nit: space",
+      "revId": "5d28660403b2cc41f7c1d5a2a247755b74524119",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2ed3cbd9_be330be6",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-01T17:47:49Z",
+      "side": 1,
+      "message": "This variable name is confusing. Can you give it a better name?",
+      "range": {
+        "startLine": 164,
+        "startChar": 9,
+        "endLine": 164,
+        "endChar": 14
+      },
+      "revId": "5d28660403b2cc41f7c1d5a2a247755b74524119",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1908274a_caa9685a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngineShaders.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-01T17:47:49Z",
+      "side": 1,
+      "message": "what are those magic values?",
+      "range": {
+        "startLine": 153,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 5
+      },
+      "revId": "5d28660403b2cc41f7c1d5a2a247755b74524119",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b659dcd7_76e6b758",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1798,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-01T17:47:49Z",
+      "side": 1,
+      "message": "put it as an \"||\" in the \"if\" above?",
+      "range": {
+        "startLine": 1797,
+        "startChar": 0,
+        "endLine": 1798,
+        "endChar": 55
+      },
+      "revId": "5d28660403b2cc41f7c1d5a2a247755b74524119",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
