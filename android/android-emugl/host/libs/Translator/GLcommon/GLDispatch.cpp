@@ -141,6 +141,7 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
         LIST_GLES3_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
         LIST_GLES3_EXTENSIONS_FUNCTIONS(LOAD_GLEXT_FUNC)
     }
+
     if (version >= GLES_3_1) {
         LIST_GLES31_ONLY_FUNCTIONS(LOAD_GLEXT_FUNC)
     }
