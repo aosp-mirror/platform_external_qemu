@@ -51,7 +51,6 @@ void GLEScmContext::init() {
         }
     }
     m_initialized = true;
-    m_needRestoreFromSnapshot = false;
 }
 
 void GLEScmContext::initGlobal(EGLiface* eglIface) {
@@ -218,7 +217,11 @@ void GLEScmContext::onSave(android::base::Stream* stream) const {
 }
 
 void GLEScmContext::postLoadRestoreCtx() {
-    // TODO
+    if (isInitialized()) {
+        if (isCoreProfile()) {
+            m_coreProfileEngine = new CoreProfileEngine(this);
+        }
+    }
     GLEScontext::postLoadRestoreCtx();
 }
 
@@ -673,7 +676,6 @@ void GLEScmContext::enable(GLenum cap) {
         case GL_TEXTURE_CUBE_MAP_OES:
             setTextureEnabled(cap,true);
     }
-
     if (m_coreProfileEngine) {
         core().enable(cap);
     } else {
@@ -695,7 +697,6 @@ void GLEScmContext::disable(GLenum cap) {
         case GL_TEXTURE_CUBE_MAP_OES:
             setTextureEnabled(cap, false);
     }
-
     if (m_coreProfileEngine) {
         core().disable(cap);
     } else {
