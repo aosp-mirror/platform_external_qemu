@@ -476,6 +476,7 @@ protected:
     std::vector<BufferBinding> m_indexedAtomicCounterBuffers;
     std::vector<BufferBinding> m_indexedShaderStorageBuffers;
 
+    bool m_isViewport = false;
     GLint m_viewportX = 0;
     GLint m_viewportY = 0;
     GLsizei m_viewportWidth = 0;
@@ -484,6 +485,7 @@ protected:
     GLfloat m_polygonOffsetFactor = 0.0f;
     GLfloat m_polygonOffsetUnits = 0.0f;
 
+    bool m_isScissor = false;
     GLint m_scissorX = 0;
     GLint m_scissorY = 0;
     GLsizei m_scissorWidth = 0;
