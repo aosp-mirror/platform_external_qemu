@@ -30,7 +30,7 @@ class GLESpointer;
 
 class CoreProfileEngine {
 public:
-    explicit CoreProfileEngine(GLEScmContext* ctx);
+    CoreProfileEngine(GLEScmContext* ctx, bool isGles = false);
     ~CoreProfileEngine();
 
     struct GeometryDrawState {
@@ -44,6 +44,12 @@ public:
 
         GLuint ibo;
         GLuint vao;
+
+        GLint posAttribLoc;
+        GLint normAttribLoc;
+        GLint colorAttribLoc;
+        GLint pointsizeAttribLoc;
+        GLint texcoordAttribLoc;
 
         GLint projMatrixLoc;
         GLint modelviewMatrixLoc;
@@ -153,4 +159,7 @@ private:
 
     DrawTexOESCoreState m_drawTexOESCoreState = {};
     GeometryDrawState   m_geometryDrawState = {};
+
+    // If we are on a gles2 impl.
+    bool mGles = false;
 };

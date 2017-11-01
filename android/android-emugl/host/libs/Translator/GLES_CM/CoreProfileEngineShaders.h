@@ -14,6 +14,26 @@
 * limitations under the License.
 */
 
+const char kDrawTexOESGles2_vshader[] = R"(
+precision highp float;
+attribute highp vec3 pos;
+attribute highp vec2 texcoord;
+varying highp vec2 texcoord_varying;
+void main() {
+    gl_Position = vec4(pos.x, pos.y, pos.z, 1.0);
+    texcoord_varying = texcoord;
+}
+)";
+
+const char kDrawTexOESGles2_fshader[] = R"(
+precision highp float;
+uniform sampler2D tex_sampler;
+varying highp vec2 texcoord_varying;
+void main() {
+    gl_FragColor = texture2D(tex_sampler, texcoord_varying);
+}
+)";
+
 const char kDrawTexOESCore_vshader[] = R"(#version 330 core
 layout(location = 0) in vec3 pos;
 layout(location = 1) in vec2 texcoord;
@@ -34,7 +54,110 @@ void main() {
 )";
 
 // flat,
-const char kGeometryDrawVShaderSrcTemplate[] = R"(#version 330 core
+const char kGeometryDrawVShaderSrcTemplateGles2[] = R"(
+precision highp float;
+attribute highp vec4 pos;
+attribute highp vec3 normal;
+attribute highp vec4 color;
+attribute highp float pointsize;
+attribute highp vec4 texcoord;
+
+uniform highp mat4 projection;
+uniform highp mat4 modelview;
+uniform highp mat4 texture_matrix;
+
+varying highp vec4 pos_varying;
+varying highp vec3 normal_varying;
+%s varying highp vec4 color_varying;
+varying highp float pointsize_varying;
+varying highp vec4 texcoord_varying;
+
+void main() {
+
+    pos_varying = modelview * pos;
+    normal_varying = (modelview * vec4(normal.xyz, 0)).xyz;
+    color_varying = color;
+    pointsize_varying = pointsize;
+    texcoord_varying = texture_matrix * texcoord;
+
+    gl_Position = projection * modelview * pos;
+}
+)";
+
+// flat,
+const char kGeometryDrawFShaderSrcTemplateGles2[] = R"(
+precision highp float;
+uniform sampler2D tex_sampler;
+uniform samplerCube tex_cube_sampler;
+uniform highp int enable_textures;
+uniform highp int enable_lighting;
+uniform highp int enable_fog;
+
+uniform highp int enable_reflection_map;
+
+uniform highp int texture_env_mode;
+uniform highp int texture_format;
+
+varying highp vec4 pos_varying;
+varying highp vec3 normal_varying;
+%s varying highp vec4 color_varying;
+varying highp float pointsize_varying;
+varying highp vec4 texcoord_varying;
+
+// Don't use the enum defines, it can result in
+// syntax errors on some GPUs.
+#define kModulate 0x2100
+#define kCombine 0x8570
+#define kReplace 0x1E01
+
+#define kAlpha 0x1906
+#define kRGB 0x1907
+#define kRGBA 0x1908
+#define kLuminance 0x1909
+#define kLuminanceAlpha 0x190A
+
+void main() {
+    if (enable_textures == 1) {
+        if (enable_reflection_map == 1) {
+            gl_FragColor = textureCube(tex_cube_sampler, reflect(pos_varying.xyz, normalize(normal_varying)));
+        } else {
+            highp vec4 textureColor = texture2D(tex_sampler, texcoord_varying.xy);
+            if (texture_env_mode == kReplace) {
+                if (texture_format == kAlpha) {
+                    gl_FragColor.rgb = color_varying.rgb;
+                    gl_FragColor.a = textureColor.a;
+                } else if (texture_format == kRGBA ||
+                           texture_format == kLuminanceAlpha) {
+                    gl_FragColor.rgba = textureColor.rgba;
+                } else {
+                    gl_FragColor.rgb = textureColor.rgb;
+                    gl_FragColor.a = color_varying.a;
+                }
+            } else {
+                if (texture_format == kAlpha) {
+                    gl_FragColor.rgb = color_varying.rgb;
+                    gl_FragColor.a = color_varying.a * textureColor.a;
+                } else if (texture_format == kRGBA ||
+                           texture_format == kLuminanceAlpha) {
+                    gl_FragColor.rgba = color_varying.rgba * textureColor.rgba;
+                } else {
+                    gl_FragColor.rgb = color_varying.rgb * textureColor.rgb;
+                    gl_FragColor.a = color_varying.a;
+                }
+            }
+        }
+    } else {
+        gl_FragColor = color_varying;
+    }
+
+    if (enable_lighting == 1123213) {
+        gl_FragColor= vec4(1,1,0,1);
+    }
+}
+)";
+
+// version, flat,
+const char kGeometryDrawVShaderSrcTemplateCore[] = R"(%s
 layout(location = 0) in vec4 pos;
 layout(location = 1) in vec3 normal;
 layout(location = 2) in vec4 color;
@@ -63,8 +186,9 @@ void main() {
 }
 )";
 
-// flat,
-const char kGeometryDrawFShaderSrcTemplate[] = R"(#version 330 core
+// version, flat,
+const char kGeometryDrawFShaderSrcTemplateCore[] = R"(%s
+precision highp float;
 uniform sampler2D tex_sampler;
 uniform samplerCube tex_cube_sampler;
 uniform bool enable_textures;
