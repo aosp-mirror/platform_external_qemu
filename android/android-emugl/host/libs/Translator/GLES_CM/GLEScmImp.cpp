@@ -521,7 +521,8 @@ GL_API void GL_APIENTRY  glColorPointer( GLint size, GLenum type, GLsizei stride
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
         GLsizei width, GLsizei height, GLint border, GLenum* format,
-        GLenum* type, GLint* internalformat_out) {
+        GLenum* type, GLint* internalformat_out,
+        bool* needAutoMipmap) {
     GET_CTX();
 
     if (ctx->shareGroup().get()) {
@@ -529,6 +530,9 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
 
         if (texData) {
             texData->hasStorage = true;
+            if (needAutoMipmap) {
+                *needAutoMipmap = texData->requiresAutoMipmap;
+            }
         }
 
         if (texData && level == 0) {
@@ -611,7 +615,7 @@ GL_API void GL_APIENTRY  glCopyTexImage2D( GLenum target, GLint level, GLenum in
     GLenum type = accurateTypeOfInternalFormat((GLint)internalformat);
     s_glInitTexImage2D(
         target, level, internalformat, width, height, border,
-        &format, &type, (GLint*)&internalformat);
+        &format, &type, (GLint*)&internalformat, nullptr);
 
     TextureData* texData = getTextureTargetData(target);
     if (texData && isCoreProfile() &&
@@ -1773,7 +1777,7 @@ GL_API void GL_APIENTRY  glTexImage2D( GLenum target, GLint level, GLint interna
     bool needAutoMipmap = false;
 
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
-            &format, &type, &internalformat);
+            &format, &type, &internalformat, &needAutoMipmap);
 
     // TODO: Emulate swizzles
     if (isCoreProfile()) {
