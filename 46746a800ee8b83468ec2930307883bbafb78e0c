@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "85156de4_ef9b1112",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-02T00:13:39Z",
+      "side": 1,
+      "message": "Good idea on checking for GL_MAX_TEXTURE_SIZE, I\u0027ve added that in the latest patch set.  For NPOT, GLESv2 supports it with some limitations; I\u0027d prefer to allow NPOT when possible. Once we want to make the filter modes customizable and allow mipmaps I\u0027d opt to handle this in more detail.",
+      "parentUuid": "3d75bc75_81a0e8a4",
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6bb11187_34dfff97",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
         "patchSetId": 2
@@ -30,6 +48,30 @@
       "writtenOn": "2017-11-01T15:18:53Z",
       "side": 1,
       "message": "We should probably only check glGetError in non-production builds since it may have to do a synchronous flush - we should probably just check that the textureId is non-null and the png data is reasonable as you do above.  Incidentally, it would probably be worthwhile to consider wrapping all gl calls and always calling glGetError after each one for debug builds - maybe hidden behind a flag in debug builds.",
+      "range": {
+        "startLine": 68,
+        "startChar": 4,
+        "endLine": 68,
+        "endChar": 45
+      },
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a15d5748_25ce0437",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-02T00:13:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6bb11187_34dfff97",
       "range": {
         "startLine": 68,
         "startChar": 4,
@@ -65,6 +107,30 @@
     },
     {
       "key": {
+        "uuid": "737c1bd8_f498a3af",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-02T00:13:39Z",
+      "side": 1,
+      "message": "Oops, yes it should.",
+      "parentUuid": "9da56147_f00cb5af",
+      "range": {
+        "startLine": 140,
+        "startChar": 4,
+        "endLine": 140,
+        "endChar": 71
+      },
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c6f5f5df_84c7f7c1",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
         "patchSetId": 2
@@ -76,6 +142,24 @@
       "writtenOn": "2017-11-01T15:18:53Z",
       "side": 1,
       "message": "is fallthrough intended here?  If so please add a comment.",
+      "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f7027d1f_3f6fb528",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneTexture.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-02T00:13:39Z",
+      "side": 1,
+      "message": "Not intended, good catch.",
+      "parentUuid": "c6f5f5df_84c7f7c1",
       "revId": "46746a800ee8b83468ec2930307883bbafb78e0c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
