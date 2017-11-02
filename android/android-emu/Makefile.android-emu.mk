@@ -462,6 +462,7 @@ LOCAL_SRC_FILES := \
     android/telephony/sms.c \
     android/telephony/sysdeps.c \
     android/telephony/TagLengthValue.cpp \
+    android/test/checkboot.cpp \
     android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
