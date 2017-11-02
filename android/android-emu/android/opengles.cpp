@@ -323,6 +323,16 @@ android_redrawOpenglesWindow(void)
     }
 }
 
+void
+android_getFrameTimes(long long* buf,
+                      unsigned int capacity,
+                      unsigned int* actualFrames)
+{
+    if (sRenderer) {
+        sRenderer->getFrameTimes(buf, capacity, actualFrames);
+    }
+}
+
 const emugl::RendererPtr& android_getOpenglesRenderer() {
     return sRenderer;
 }

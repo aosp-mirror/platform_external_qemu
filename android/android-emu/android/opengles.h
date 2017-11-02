@@ -75,6 +75,10 @@ void android_setOpenglesTranslation(float px, float py);
 
 void android_redrawOpenglesWindow(void);
 
+void android_getFrameTimes(long long* buf,
+                           unsigned int capacity,
+                           unsigned int* actualFrames);
+
 /* Stop the renderer process */
 void android_stopOpenglesRenderer(bool wait);
 

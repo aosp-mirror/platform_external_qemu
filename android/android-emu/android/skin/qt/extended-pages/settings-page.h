@@ -72,6 +72,8 @@ private slots:
     void on_set_clipboardSharing_toggled(bool checked);
     void on_set_disableMouseWheel_toggled(bool checked);
 
+    void on_get_frameTimesButton_clicked();
+
 private:
     bool eventFilter(QObject* object, QEvent* event) override;
 

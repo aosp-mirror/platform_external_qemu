@@ -29,6 +29,7 @@
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Profiler.h"
 #include "android/base/system/System.h"
 
 #include "emugl/common/feature_control.h"
@@ -40,6 +41,7 @@
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
+using android::base::ScopedProfiler;
 using android::base::Stream;
 using android::base::System;
 using android::base::WorkerProcessingResult;
@@ -529,6 +531,9 @@ void FrameBuffer::setMaxGLESVersion(GLESDispatchMaxVersion version) {
 GLESDispatchMaxVersion FrameBuffer::getMaxGLESVersion() {
     return sMaxGLESVersion;
 }
+
+#define FBPROFILE(tag, vec) \
+    ScopedProfiler tag##_profile(#tag, [this](const char* tag, uint64_t elapsedUs) { appendTime(vec, elapsedUs); });
 
 FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
     : m_framebufferWidth(p_width),
@@ -1286,6 +1291,7 @@ bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
 bool FrameBuffer::bindContext(HandleType p_context,
                               HandleType p_drawSurface,
                               HandleType p_readSurface) {
+    FBPROFILE(bindContext, m_allContextBinds);
     if (m_shuttingDown) {
         return false;
     }
@@ -1459,6 +1465,7 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
 // The framebuffer lock should be held when calling this function !
 //
 bool FrameBuffer::bind_locked() {
+    FBPROFILE(helperBinds, m_allHelperBinds);
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1482,6 +1489,8 @@ bool FrameBuffer::bind_locked() {
 }
 
 bool FrameBuffer::bindSubwin_locked() {
+    FBPROFILE(bindSubwin, m_bindSubwinTimes);
+
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1507,6 +1516,7 @@ bool FrameBuffer::bindSubwin_locked() {
     m_prevContext = prevContext;
     m_prevReadSurf = prevReadSurf;
     m_prevDrawSurf = prevDrawSurf;
+
     return true;
 }
 
@@ -1583,6 +1593,9 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
 }
 
 bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
+
+    FBPROFILE(postImpl, m_postTimes);
+
     if (needLockAndBind) {
         m_lock.lock();
     }
@@ -1597,11 +1610,27 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
 
     if (m_subWin) {
         markOpened(&c->second);
-        GLuint tex = c->second.cb->scale();
+        GLuint tex;
         // bind the subwindow eglSurface
         if (needLockAndBind && !bindSubwin_locked()) {
             ERR("FrameBuffer::postImpl(): eglMakeCurrent failed\n");
             goto EXIT;
+        }
+
+        {
+            FBPROFILE(resize, m_resizeTimes);
+
+            {
+               FBPROFILE(scaleBind, m_scaleBindTimes);
+                // bind_locked();
+            }
+
+            tex = c->second.cb->scale();
+
+            {
+               FBPROFILE(scaleUnbind, m_scaleUnbindTimes);
+                // unbind_locked();
+            }
         }
 
         // get the viewport
@@ -1626,13 +1655,17 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
         //
         // render the color buffer to the window
         //
-        ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
+        {
+            FBPROFILE(texdraw, m_texDrawTimes);
+            ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
+        }
         if (ret) {
             s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
         }
 
         // restore previous binding
         if (needLockAndBind) {
+            FBPROFILE(unbind, m_unbindTimes);
             unbind_locked();
         }
     } else {
@@ -1644,14 +1677,24 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     //
     // output FPS statistics
     //
-    if (m_fpsStats) {
+    {
         long long currTime = System::get()->getHighResTimeUs() / 1000;
-        m_statsNumFrames++;
-        if (currTime - m_statsStartTime >= 1000) {
-            float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
-            printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
-            m_statsStartTime = currTime;
-            m_statsNumFrames = 0;
+        long long frameTime = currTime - m_lastFrameTime;
+        m_lastFrameTime = currTime;
+
+        m_frameTimesLock.lock();
+        m_frameTimes.push_back(frameTime);
+        m_frameTimesLock.unlock();
+
+        if (m_fpsStats) {
+            long long frameTimeFromStart = currTime - m_statsStartTime;
+            m_statsNumFrames++;
+            if (frameTimeFromStart >= 1000) {
+                float dt = (float)(frameTimeFromStart) / 1000.0f;
+                printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
+                m_statsStartTime = currTime;
+                m_statsNumFrames = 0;
+            }
         }
     }
 
@@ -1684,6 +1727,54 @@ EXIT:
         m_lock.unlock();
     }
     return ret;
+}
+
+void FrameBuffer::dumpFrameTimes(long long* buf,
+                                 unsigned int count,
+                                 unsigned int* actualCount) {
+    *actualCount =
+        std::min((unsigned int)m_frameTimes.size(), count);
+    size_t startCountingFrom =
+        m_frameTimes.size() - *actualCount;
+
+    m_frameTimesLock.lock();
+    memcpy(buf, &m_frameTimes[startCountingFrom],
+           sizeof(long long) * (*actualCount));
+    fprintf(stderr, "%s: stats sizes: %zu %zu %zu %zu\n", __func__,
+            m_frameTimes.size(),
+            m_postTimes.size(),
+            m_resizeTimes.size(),
+            m_bindSubwinTimes.size());
+    if (*actualCount) {
+        auto maxFrameIt = std::upper_bound(m_frameTimes.begin(), m_frameTimes.end(), 0);
+        auto maxPostIt = std::upper_bound(m_postTimes.begin(), m_postTimes.end(), 0);
+        auto maxResizeIt = std::upper_bound(m_resizeTimes.begin(), m_resizeTimes.end(), 0);
+        auto maxBindIt = std::upper_bound(m_bindSubwinTimes.begin(), m_bindSubwinTimes.end(), 0);
+        auto maxTexDrawIt = std::upper_bound(m_texDrawTimes.begin(), m_texDrawTimes.end(), 0);
+        auto maxUnbindIt = std::upper_bound(m_unbindTimes.begin(), m_unbindTimes.end(), 0);
+        auto maxScaleBindIt = std::upper_bound(m_scaleBindTimes.begin(), m_scaleBindTimes.end(), 0);
+        auto maxScaleUnbindIt = std::upper_bound(m_scaleUnbindTimes.begin(), m_scaleUnbindTimes.end(), 0);
+        auto maxContextBindIt = std::upper_bound(m_allContextBinds.begin(), m_allContextBinds.end(), 0);
+        auto maxHelperBindIt = std::upper_bound(m_allHelperBinds.begin(), m_allHelperBinds.end(), 0);
+        fprintf(stderr, "%s: maxs: frame %lld post %lld resize %lld bind %lld texdraw %lld unbind %lld scaleBind %lld scaleUnbind %lld allContextBinds %lld allHelperBinds %lld\n", __func__,
+                *maxFrameIt,
+                *maxPostIt,
+                *maxResizeIt,
+                *maxBindIt,
+                *maxTexDrawIt,
+                *maxUnbindIt,
+                *maxScaleBindIt,
+                *maxScaleUnbindIt,
+                *maxContextBindIt,
+                *maxHelperBindIt);
+    }
+    resetFrameTimes_locked();
+    m_frameTimesLock.unlock();
+
+    // for (unsigned int i = 0; i < *actualCount; i++) {
+        // fprintf(stderr, "FRAME TIME %lld\n", buf[i]);
+    // }
+
 }
 
 void FrameBuffer::doPostCallback(void* pixels) {
@@ -1943,4 +2034,10 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+void FrameBuffer::appendTime(std::vector<long long>& times,
+                             uint64_t elapsedUs) {
+    AutoLock lock(m_frameTimesLock);
+    times.push_back(elapsedUs / 1000);
 }

@@ -128,6 +128,12 @@ public:
     // Force a repaint of the whole content into the sub-window.
     void repaint();
 
+    // Get frame times for the last N frames or however many recorded,
+    // whichever is lower.
+    void getFrameTimes(long long* times,
+                       unsigned int capacity,
+                       unsigned int* actualFrames);
+
 private:
     bool processMessage(const RenderWindowMessage& msg);
     bool useThread() const { return mThread != nullptr; }
