@@ -19,7 +19,7 @@
 #include "qom/object.h"
 #include "qemu/main-loop.h"
 #include "qemu/error-report.h"
-#include "trace.h"
+#include "net/trace.h"
 #include "sysemu/char.h"
 #include "qemu/iov.h"
 #include "qemu/sockets.h"
@@ -49,7 +49,7 @@ static int filter_mirror_send(CharBackend *chr_out,
 {
     int ret = 0;
     ssize_t size = 0;
-    uint32_t len =  0;
+    uint32_t len = 0;
     char *buf;
 
     size = iov_size(iov, iovcnt);
@@ -77,8 +77,9 @@ err:
     return ret < 0 ? ret : -EIO;
 }
 
-static void
-redirector_to_filter(NetFilterState *nf, const uint8_t *buf, int len)
+static void redirector_to_filter(NetFilterState *nf,
+                                 const uint8_t *buf,
+                                 int len)
 {
     struct iovec iov = {
         .iov_base = (void *)buf,
@@ -191,7 +192,7 @@ static void filter_redirector_cleanup(NetFilterState *nf)
 static void filter_mirror_setup(NetFilterState *nf, Error **errp)
 {
     MirrorState *s = FILTER_MIRROR(nf);
-    CharDriverState *chr;
+    Chardev *chr;
 
     if (!s->outdev) {
         error_setg(errp, "filter mirror needs 'outdev' "
@@ -220,7 +221,7 @@ static void redirector_rs_finalize(SocketReadState *rs)
 static void filter_redirector_setup(NetFilterState *nf, Error **errp)
 {
     MirrorState *s = FILTER_REDIRECTOR(nf);
-    CharDriverState *chr;
+    Chardev *chr;
 
     if (!s->indev && !s->outdev) {
         error_setg(errp, "filter redirector needs 'indev' or "

@@ -26,7 +26,7 @@
 #include "hw/sparc/sun4m.h"
 #include "hw/sysbus.h"
 #include "exec/address-spaces.h"
-#include "trace.h"
+#include "hw/dma/trace.h"
 
 /*
  * I/O MMU used by Sun4m systems

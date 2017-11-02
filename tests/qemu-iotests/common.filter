@@ -35,7 +35,7 @@ _filter_generated_node_ids()
 # replace occurrences of the actual TEST_DIR value with TEST_DIR
 _filter_testdir()
 {
-    sed -e "s#$TEST_DIR#TEST_DIR#g"
+    sed -e "s#$TEST_DIR/#TEST_DIR/#g"
 }
 
 # replace occurrences of the actual IMGFMT value with IMGFMT
@@ -112,7 +112,6 @@ _filter_img_create()
         -e "s# block_size=[0-9]\\+##g" \
         -e "s# block_state_zero=\\(on\\|off\\)##g" \
         -e "s# log_size=[0-9]\\+##g" \
-        -e "s/archipelago:a/TEST_DIR\//g" \
         -e "s# refcount_bits=[0-9]\\+##g" \
         -e "s# key-secret=[a-zA-Z0-9]\\+##g"
 }
@@ -136,8 +135,7 @@ _filter_img_info()
         -e "/lazy_refcounts: \\(on\\|off\\)/d" \
         -e "/block_size: [0-9]\\+/d" \
         -e "/block_state_zero: \\(on\\|off\\)/d" \
-        -e "/log_size: [0-9]\\+/d" \
-        -e "s/archipelago:a/TEST_DIR\//g"
+        -e "/log_size: [0-9]\\+/d"
 }
 
 # filter out offsets and file names from qemu-img map

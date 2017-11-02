@@ -220,6 +220,12 @@ static int vpc_open(BlockDriverState *bs, QDict *options, int flags,
     int disk_type = VHD_DYNAMIC;
     int ret;
 
+    bs->file = bdrv_open_child(NULL, options, "file", bs, &child_file,
+                               false, errp);
+    if (!bs->file) {
+        return -EINVAL;
+    }
+
     opts = qemu_opts_create(&vpc_runtime_opts, NULL, 0, &error_abort);
     qemu_opts_absorb_qdict(opts, options, &local_err);
     if (local_err) {
@@ -422,13 +428,18 @@ static int vpc_open(BlockDriverState *bs, QDict *options, int flags,
 #endif
     }
 
-    qemu_co_mutex_init(&s->lock);
-
     /* Disable migration when VHD images are used */
     error_setg(&s->migration_blocker, "The vpc format used by node '%s' "
                "does not support live migration",
                bdrv_get_device_or_node_name(bs));
-    migrate_add_blocker(s->migration_blocker);
+    ret = migrate_add_blocker(s->migration_blocker, &local_err);
+    if (local_err) {
+        error_propagate(errp, local_err);
+        error_free(s->migration_blocker);
+        goto fail;
+    }
+
+    qemu_co_mutex_init(&s->lock);
 
     return 0;
 
@@ -904,7 +915,8 @@ static int vpc_create(const char *filename, QemuOpts *opts, Error **errp)
     }
 
     blk = blk_new_open(filename, NULL, NULL,
-                       BDRV_O_RDWR | BDRV_O_PROTOCOL, &local_err);
+                       BDRV_O_RDWR | BDRV_O_RESIZE | BDRV_O_PROTOCOL,
+                       &local_err);
     if (blk == NULL) {
         error_propagate(errp, local_err);
         ret = -EIO;
@@ -1056,6 +1068,7 @@ static BlockDriver bdrv_vpc = {
     .bdrv_open              = vpc_open,
     .bdrv_close             = vpc_close,
     .bdrv_reopen_prepare    = vpc_reopen_prepare,
+    .bdrv_child_perm        = bdrv_format_default_perms,
     .bdrv_create            = vpc_create,
 
     .bdrv_co_preadv             = vpc_co_preadv,

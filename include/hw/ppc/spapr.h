@@ -21,7 +21,6 @@ typedef struct sPAPREventSource sPAPREventSource;
 #define SPAPR_TIMEBASE_FREQ     512000000ULL
 
 typedef struct sPAPRMachineClass sPAPRMachineClass;
-typedef struct sPAPRMachineState sPAPRMachineState;
 
 #define TYPE_SPAPR_MACHINE      "spapr-machine"
 #define SPAPR_MACHINE(obj) \
@@ -58,11 +57,12 @@ struct sPAPRMachineState {
     struct VIOsPAPRBus *vio_bus;
     QLIST_HEAD(, sPAPRPHBState) phbs;
     struct sPAPRNVRAM *nvram;
-    XICSState *xics;
+    ICSState *ics;
     DeviceState *rtc;
 
     void *htab;
     uint32_t htab_shift;
+    uint64_t patb_entry; /* Process tbl registed in H_REGISTER_PROCESS_TABLE */
     hwaddr rma_size;
     int vrma_adjust;
     ssize_t rtas_size;
@@ -94,7 +94,9 @@ struct sPAPRMachineState {
     /*< public >*/
     char *kvm_type;
     MemoryHotplugState hotplug_memory;
-    Object **cores;
+
+    uint32_t nr_servers;
+    ICPState *icps;
 };
 
 #define H_SUCCESS         0
@@ -347,7 +349,8 @@ struct sPAPRMachineState {
 #define H_XIRR_X                0x2FC
 #define H_RANDOM                0x300
 #define H_SET_MODE              0x31C
-#define MAX_HCALL_OPCODE        H_SET_MODE
+#define H_SIGNAL_SYS_RESET      0x380
+#define MAX_HCALL_OPCODE        H_SIGNAL_SYS_RESET
 
 /* The hcalls above are standardized in PAPR and implemented by pHyp
  * as well.
@@ -589,7 +592,6 @@ void spapr_events_init(sPAPRMachineState *sm);
 void spapr_dt_events(sPAPRMachineState *sm, void *fdt);
 int spapr_h_cas_compose_response(sPAPRMachineState *sm,
                                  target_ulong addr, target_ulong size,
-                                 bool cpu_update,
                                  sPAPROptionVector *ov5_updates);
 sPAPRTCETable *spapr_tce_new_table(DeviceState *owner, uint32_t liobn);
 void spapr_tce_table_enable(sPAPRTCETable *tcet,
@@ -614,7 +616,6 @@ void spapr_hotplug_req_add_by_count_indexed(sPAPRDRConnectorType drc_type,
                                             uint32_t count, uint32_t index);
 void spapr_hotplug_req_remove_by_count_indexed(sPAPRDRConnectorType drc_type,
                                                uint32_t count, uint32_t index);
-void spapr_cpu_init(sPAPRMachineState *spapr, PowerPCCPU *cpu, Error **errp);
 void *spapr_populate_hotplug_cpu_dt(CPUState *cs, int *fdt_offset,
                                     sPAPRMachineState *spapr);
 
@@ -661,5 +662,7 @@ int spapr_rng_populate_dt(void *fdt);
 #define SPAPR_LMB_FLAGS_ASSIGNED 0x00000008
 #define SPAPR_LMB_FLAGS_DRC_INVALID 0x00000020
 #define SPAPR_LMB_FLAGS_RESERVED 0x00000080
+
+void spapr_do_system_reset_on_cpu(CPUState *cs, run_on_cpu_data arg);
 
 #endif /* HW_SPAPR_H */

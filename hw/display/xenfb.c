@@ -36,7 +36,7 @@
 #include <xen/io/kbdif.h>
 #include <xen/io/protocols.h>
 
-#include "trace.h"
+#include "hw/display/trace.h"
 
 #ifndef BTN_LEFT
 #define BTN_LEFT 0x110 /* from <linux/input.h> */

@@ -46,7 +46,7 @@
 #include "e1000x_common.h"
 #include "e1000e_core.h"
 
-#include "trace.h"
+#include "hw/net/trace.h"
 
 #define TYPE_E1000E "e1000e"
 #define E1000E(obj) OBJECT_CHECK(E1000EState, (obj), TYPE_E1000E)
@@ -292,7 +292,7 @@ e1000e_init_msix(E1000EState *s)
                         E1000E_MSIX_IDX, E1000E_MSIX_TABLE,
                         &s->msix,
                         E1000E_MSIX_IDX, E1000E_MSIX_PBA,
-                        0xA0);
+                        0xA0, NULL);
 
     if (res < 0) {
         trace_e1000e_msix_init_fail(res);
@@ -306,7 +306,7 @@ e1000e_init_msix(E1000EState *s)
 static void
 e1000e_cleanup_msix(E1000EState *s)
 {
-    if (msix_enabled(PCI_DEVICE(s))) {
+    if (msix_present(PCI_DEVICE(s))) {
         e1000e_unuse_msix_vectors(s, E1000E_MSIX_VEC_NUM);
         msix_uninit(PCI_DEVICE(s), &s->msix, &s->msix);
     }
@@ -472,7 +472,8 @@ static void e1000e_pci_realize(PCIDevice *pci_dev, Error **errp)
         hw_error("Failed to initialize PM capability");
     }
 
-    if (pcie_aer_init(pci_dev, e1000e_aer_offset, PCI_ERR_SIZEOF) < 0) {
+    if (pcie_aer_init(pci_dev, PCI_ERR_VER, e1000e_aer_offset,
+                      PCI_ERR_SIZEOF, NULL) < 0) {
         hw_error("Failed to initialize AER capability");
     }
 
@@ -592,7 +593,7 @@ static const VMStateDescription e1000e_vmstate = {
     .pre_save = e1000e_pre_save,
     .post_load = e1000e_post_load,
     .fields = (VMStateField[]) {
-        VMSTATE_PCIE_DEVICE(parent_obj, E1000EState),
+        VMSTATE_PCI_DEVICE(parent_obj, E1000EState),
         VMSTATE_MSIX(parent_obj, E1000EState),
 
         VMSTATE_UINT32(ioaddr, E1000EState),

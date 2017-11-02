@@ -29,7 +29,7 @@
 #include "qemu/iov.h"
 #include "hw/scsi/scsi.h"
 #include "block/scsi.h"
-#include "trace.h"
+#include "hw/scsi/trace.h"
 
 #include "mptsas.h"
 #include "mpi.h"
