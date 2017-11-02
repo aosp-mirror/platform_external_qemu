@@ -30,7 +30,7 @@
 
 #include "hw/sparc/grlib.h"
 
-#include "trace.h"
+#include "hw/intc/trace.h"
 #include "qapi/error.h"
 
 #define IRQMP_MAX_CPU 16

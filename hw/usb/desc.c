@@ -2,7 +2,7 @@
 
 #include "hw/usb.h"
 #include "hw/usb/desc.h"
-#include "trace.h"
+#include "hw/usb/trace.h"
 
 /* ------------------------------------------------------------------ */
 
@@ -772,6 +772,13 @@ int usb_desc_handle_control(USBDevice *dev, USBPacket *p,
             ret = 0;
         }
         trace_usb_set_device_feature(dev->addr, value, ret);
+        break;
+
+    case DeviceOutRequest | USB_REQ_SET_SEL:
+    case DeviceOutRequest | USB_REQ_SET_ISOCH_DELAY:
+        if (dev->speed == USB_SPEED_SUPER) {
+            ret = 0;
+        }
         break;
 
     case InterfaceRequest | USB_REQ_GET_INTERFACE:
