@@ -89,15 +89,16 @@ void GLESbuffer::onSave(android::base::Stream* stream,
                     m_size, GL_MAP_READ_BIT);
         assert(data);
         // BUG: 68051848
-        // We do not know why it happens, but we do receive such bug reports
+        // It is supposed to be fixed, but for safety we keep the fallback path
+        // here.
         if (data) {
             stream->write(data, m_size);
             bool success = dispatcher.glUnmapBuffer(GL_ARRAY_BUFFER);
             assert(success);
             (void)success;
-            dispatcher.glBindBuffer(GL_ARRAY_BUFFER, prevBuffer);
             mapSuccess = true;
         }
+        dispatcher.glBindBuffer(GL_ARRAY_BUFFER, prevBuffer);
     }
     if (!mapSuccess) {
         stream->write(m_data, m_size);

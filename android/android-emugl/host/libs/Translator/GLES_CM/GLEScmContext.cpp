@@ -1209,6 +1209,13 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
     drawValidate();
 
     if (m_coreProfileEngine) {
+        GLuint prev_vbo;
+        GLuint prev_ibo;
+        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_vbo);
+        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_ibo);
+
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1230,6 +1237,8 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawArrays(mode, first, count);
+        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
     } else {
         GLESConversionArrays tmpArrs;
 
@@ -1254,6 +1263,14 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
     }
 
     if (m_coreProfileEngine) {
+        // track previous vbo/ibo
+        GLuint prev_vbo;
+        GLuint prev_ibo;
+        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_vbo);
+        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_ibo);
+
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1275,6 +1292,8 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawElements(mode, count, type, indices);
+        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
     } else {
         GLESConversionArrays tmpArrs;
 
