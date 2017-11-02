@@ -218,11 +218,11 @@ void Quickboot::onLivenessTimer() {
                              bootTimeoutMs() / 1000)
                         .c_str(),
                 WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
-        Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
-        reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
-        mVmOps.vmReset();
-        return;
+        // Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+        // reportFailedLoad(
+        //         pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
+        // mVmOps.vmReset();
+        // return;
     }
 
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
