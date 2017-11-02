@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44c7da24_5cb5c2de",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-02T18:16:45Z",
+      "side": 1,
+      "message": "please use an agent instead, as this function is a part of QEMU code",
+      "range": {
+        "startLine": 23,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 50
+      },
+      "revId": "27d1a8e48522a8aabb478945df8718dd5fb2d9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0d4d70d_9b9e4acc",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-02T18:16:45Z",
+      "side": 1,
+      "message": "nit: static",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 4
+      },
+      "revId": "27d1a8e48522a8aabb478945df8718dd5fb2d9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0b141243_14d1a57b",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-02T18:16:45Z",
+      "side": 1,
+      "message": "this is unsafe - you\u0027re potentially reading past the end of input",
+      "range": {
+        "startLine": 30,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 49
+      },
+      "revId": "27d1a8e48522a8aabb478945df8718dd5fb2d9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fda308ee_0811d1a3",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-02T18:16:45Z",
+      "side": 1,
+      "message": "what about creating a MemStream here, putBe32() random numbers into it and then taking the data out? It is much safer and easier to understand, I believe",
+      "range": {
+        "startLine": 46,
+        "startChar": 12,
+        "endLine": 46,
+        "endChar": 37
+      },
+      "revId": "27d1a8e48522a8aabb478945df8718dd5fb2d9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b8d4e54_48f245ca",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-02T18:16:45Z",
+      "side": 1,
+      "message": "please use the C++ random number engines instead - http://en.cppreference.com/w/cpp/numeric/random\n(first example)\nor if you strongly prefer C rand(), don\u0027t call srand on each iteration - this way it\u0027s much less random compared to calling it once",
+      "range": {
+        "startLine": 48,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 37
+      },
+      "revId": "27d1a8e48522a8aabb478945df8718dd5fb2d9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
