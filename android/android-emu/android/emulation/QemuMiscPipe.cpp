@@ -12,6 +12,7 @@
 #include "android/emulation/QemuMiscPipe.h"
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/utils/debug.h"
+#include "android/globals.h"
 #include "android/hw-sensors.h"
 
 #include <assert.h>
@@ -33,8 +34,10 @@ void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         output[0]='O';
         output[1]='K';
         output[2]='\0';
-        fprintf(stderr, "boot completed, exit now\n");
-        qemu_system_shutdown_request();
+        printf("boot completed\n");
+        if (android_hw->test_quitAfterBootTimeOut > 0) {
+            qemu_system_shutdown_request();
+        }
 
         return;
     }else if (strncmp("get_random=", mesg, 11) == 0) {

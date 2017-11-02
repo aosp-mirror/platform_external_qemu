@@ -711,6 +711,18 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         str_reset(&android_hw->hw_logcatOutput_path, opts->logcat_output);
     }
 
+    if (opts->quit_after_boot) {
+        char*  end;
+        hw->test_quitAfterBootTimeOut = strtol(opts->quit_after_boot, &end, 0);
+        if (hw->test_quitAfterBootTimeOut <= 0) {
+            derror("-quit-after-boot must be followed by a positive timeout in seconds");
+            exit(1);
+        } else {
+            D("Will quit emulator after guest boots completely, or after %d seconds",
+                    hw->test_quitAfterBootTimeOut);
+        }
+    }
+
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
      */
