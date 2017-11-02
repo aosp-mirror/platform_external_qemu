@@ -27,8 +27,11 @@ LINK_QEMU_PREFIX = 'LINK-qemu-system-'
 IGNORED_OBJECTS = [
     '../audio/sdlaudio.o',
     'gdbstub-xml.o',
+    'hax-stub.o',
+    '../trace-root.o',
     'hw/i386/acpi-build.o',
     'hw/i386/pc_piix.o',
+    '../hw/smbios/smbios_type_38-stub.o',
 
     # these aren't used in the emulator but add 1MB+ to binary size
     '../hw/net/e1000.o',
@@ -115,6 +118,8 @@ def source_list_from_objects(objects):
         if obj in IGNORED_OBJECTS:
             continue
         if obj.startswith('@BUILD_DIR@/'):
+            continue
+        if 'trace.' in obj:
             continue
         if obj.endswith('.a'):
             continue
