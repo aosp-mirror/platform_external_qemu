@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * QEMU ARM CPU -- internal functions and types
  *
@@ -488,3 +489,5 @@ static inline void arm_call_el_change_hook(ARMCPU *cpu)
 }
 
 #endif
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

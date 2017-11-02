@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 #ifndef MIPS_CPU_H
 #define MIPS_CPU_H
 
@@ -1098,3 +1099,5 @@ static inline void QEMU_NORETURN do_raise_exception(CPUMIPSState *env,
 }
 
 #endif /* MIPS_CPU_H */
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

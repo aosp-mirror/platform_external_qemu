@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  AArch64 translation
  *
@@ -11428,3 +11429,5 @@ done_generating:
     tb->size = dc->pc - pc_start;
     tb->icount = num_insns;
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

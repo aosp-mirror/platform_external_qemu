@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  m68k/ColdFire Semihosting syscall interface
  *
@@ -460,3 +461,5 @@ void do_m68k_semihosting(CPUM68KState *env, int nr)
 failed:
     m68k_semi_return_u32(env, result, errno);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

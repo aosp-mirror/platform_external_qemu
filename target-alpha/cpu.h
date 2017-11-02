@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  Alpha emulation cpu definitions for qemu.
  *
@@ -517,3 +518,5 @@ static inline void cpu_get_tb_cpu_state(CPUAlphaState *env, target_ulong *pc,
 }
 
 #endif /* ALPHA_CPU_H */
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

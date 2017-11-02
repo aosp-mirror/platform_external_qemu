@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  i386 CPUID helper functions
  *
@@ -3837,3 +3838,5 @@ static void x86_cpu_register_types(void)
 }
 
 type_init(x86_cpu_register_types)
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

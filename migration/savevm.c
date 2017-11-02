@@ -220,17 +220,20 @@ void timer_get(QEMUFile *f, QEMUTimer *ts)
  * Not in vmstate.c to not add qemu-timer.c as dependency to vmstate.c
  */
 
-static int get_timer(QEMUFile *f, void *pv, size_t size)
+static int get_timer(QEMUFile *f, void *pv, size_t size, VMStateField *field)
 {
     QEMUTimer *v = pv;
     timer_get(f, v);
     return 0;
 }
 
-static void put_timer(QEMUFile *f, void *pv, size_t size)
+static int put_timer(QEMUFile *f, void *pv, size_t size, VMStateField *field,
+                     QJSON *vmdesc)
 {
     QEMUTimer *v = pv;
     timer_put(f, v);
+
+    return 0;
 }
 
 const VMStateInfo vmstate_info_timer = {
@@ -353,7 +356,7 @@ static const VMStateDescription vmstate_configuration = {
     .pre_save = configuration_pre_save,
     .fields = (VMStateField[]) {
         VMSTATE_UINT32(len, SaveState),
-        VMSTATE_VBUFFER_ALLOC_UINT32(name, SaveState, 0, NULL, 0, len),
+        VMSTATE_VBUFFER_ALLOC_UINT32(name, SaveState, 0, NULL, len),
         VMSTATE_END_OF_LIST()
     },
     .subsections = (const VMStateDescription*[]) {
@@ -532,6 +535,34 @@ static int calculate_compat_instance_id(const char *idstr)
     return instance_id;
 }
 
+static inline MigrationPriority save_state_priority(SaveStateEntry *se)
+{
+    if (se->vmsd) {
+        return se->vmsd->priority;
+    }
+    return MIG_PRI_DEFAULT;
+}
+
+static void savevm_state_handler_insert(SaveStateEntry *nse)
+{
+    MigrationPriority priority = save_state_priority(nse);
+    SaveStateEntry *se;
+
+    assert(priority <= MIG_PRI_MAX);
+
+    QTAILQ_FOREACH(se, &savevm_state.handlers, entry) {
+        if (save_state_priority(se) < priority) {
+            break;
+        }
+    }
+
+    if (se) {
+        QTAILQ_INSERT_BEFORE(se, nse, entry);
+    } else {
+        QTAILQ_INSERT_TAIL(&savevm_state.handlers, nse, entry);
+    }
+}
+
 /* TODO: Individual devices generally have very little idea about the rest
    of the system, so instance_id should be removed/replaced.
    Meanwhile pass -1 as instance_id if you do not already have a clearly
@@ -559,8 +590,14 @@ int register_savevm_live(DeviceState *dev,
     if (dev) {
         char *id = qdev_get_dev_path(dev);
         if (id) {
-            pstrcpy(se->idstr, sizeof(se->idstr), id);
-            pstrcat(se->idstr, sizeof(se->idstr), "/");
+            if (snprintf(se->idstr, sizeof(se->idstr), "%s/", id) >=
+                sizeof(se->idstr)) {
+                error_report("Path too long for VMState (%s)", id);
+                g_free(id);
+                g_free(se);
+
+                return -1;
+            }
             g_free(id);
 
             se->compat = g_new0(CompatEntry, 1);
@@ -578,8 +615,7 @@ int register_savevm_live(DeviceState *dev,
         se->instance_id = instance_id;
     }
     assert(!se->compat || se->instance_id == 0);
-    /* add at the end of list */
-    QTAILQ_INSERT_TAIL(&savevm_state.handlers, se, entry);
+    savevm_state_handler_insert(se);
     return 0;
 }
 
@@ -643,7 +679,8 @@ void unregister_savevm(DeviceState *dev, const char *idstr, void *opaque)
 int vmstate_register_with_alias_id(DeviceState *dev, int instance_id,
                                    const VMStateDescription *vmsd,
                                    void *opaque, int alias_id,
-                                   int required_for_version)
+                                   int required_for_version,
+                                   Error **errp)
 {
     SaveStateEntry *se;
 
@@ -660,8 +697,14 @@ int vmstate_register_with_alias_id(DeviceState *dev, int instance_id,
     if (dev) {
         char *id = qdev_get_dev_path(dev);
         if (id) {
-            pstrcpy(se->idstr, sizeof(se->idstr), id);
-            pstrcat(se->idstr, sizeof(se->idstr), "/");
+            if (snprintf(se->idstr, sizeof(se->idstr), "%s/", id) >=
+                sizeof(se->idstr)) {
+                error_setg(errp, "Path too long for VMState (%s)", id);
+                g_free(id);
+                g_free(se);
+
+                return -1;
+            }
             g_free(id);
 
             se->compat = g_new0(CompatEntry, 1);
@@ -679,8 +722,7 @@ int vmstate_register_with_alias_id(DeviceState *dev, int instance_id,
         se->instance_id = instance_id;
     }
     assert(!se->compat || se->instance_id == 0);
-    /* add at the end of list */
-    QTAILQ_INSERT_TAIL(&savevm_state.handlers, se, entry);
+    savevm_state_handler_insert(se);
     return 0;
 }
 
@@ -857,7 +899,7 @@ int qemu_savevm_send_packaged(QEMUFile *f, const uint8_t *buf, size_t len)
 void qemu_savevm_send_postcopy_advise(QEMUFile *f)
 {
     uint64_t tmp[2];
-    tmp[0] = cpu_to_be64(getpagesize());
+    tmp[0] = cpu_to_be64(ram_pagesize_summary());
     tmp[1] = cpu_to_be64(1ul << qemu_target_page_bits());
 
     trace_qemu_savevm_send_postcopy_advise();
@@ -1309,9 +1351,17 @@ done:
         status = MIGRATION_STATUS_COMPLETED;
     }
     migrate_set_state(&ms->state, MIGRATION_STATUS_SETUP, status);
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
     if (ms->enabled_capabilities[MIGRATION_CAPABILITY_COMPRESS]) {
         migrate_compress_threads_join();
     }
+=======
+
+    /* f is outer parameter, it should not stay in global migration state after
+     * this function finished */
+    ms->to_dst_file = NULL;
+
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
     return ret;
 }
 
@@ -1382,7 +1432,7 @@ static int qemu_loadvm_state_main(QEMUFile *f, MigrationIncomingState *mis);
 static int loadvm_postcopy_handle_advise(MigrationIncomingState *mis)
 {
     PostcopyState ps = postcopy_state_set(POSTCOPY_INCOMING_ADVISE);
-    uint64_t remote_hps, remote_tps;
+    uint64_t remote_pagesize_summary, local_pagesize_summary, remote_tps;
 
     trace_loadvm_postcopy_handle_advise();
     if (ps != POSTCOPY_INCOMING_NONE) {
@@ -1391,20 +1441,31 @@ static int loadvm_postcopy_handle_advise(MigrationIncomingState *mis)
     }
 
     if (!postcopy_ram_supported_by_host()) {
+        postcopy_state_set(POSTCOPY_INCOMING_NONE);
         return -1;
     }
 
-    remote_hps = qemu_get_be64(mis->from_src_file);
-    if (remote_hps != getpagesize())  {
+    remote_pagesize_summary = qemu_get_be64(mis->from_src_file);
+    local_pagesize_summary = ram_pagesize_summary();
+
+    if (remote_pagesize_summary != local_pagesize_summary)  {
         /*
-         * Some combinations of mismatch are probably possible but it gets
-         * a bit more complicated.  In particular we need to place whole
-         * host pages on the dest at once, and we need to ensure that we
-         * handle dirtying to make sure we never end up sending part of
-         * a hostpage on it's own.
+         * This detects two potential causes of mismatch:
+         *   a) A mismatch in host page sizes
+         *      Some combinations of mismatch are probably possible but it gets
+         *      a bit more complicated.  In particular we need to place whole
+         *      host pages on the dest at once, and we need to ensure that we
+         *      handle dirtying to make sure we never end up sending part of
+         *      a hostpage on it's own.
+         *   b) The use of different huge page sizes on source/destination
+         *      a more fine grain test is performed during RAM block migration
+         *      but this test here causes a nice early clear failure, and
+         *      also fails when passed to an older qemu that doesn't
+         *      do huge pages.
          */
-        error_report("Postcopy needs matching host page sizes (s=%d d=%d)",
-                     (int)remote_hps, getpagesize());
+        error_report("Postcopy needs matching RAM page sizes (s=%" PRIx64
+                                                             " d=%" PRIx64 ")",
+                     remote_pagesize_summary, local_pagesize_summary);
         return -1;
     }
 
@@ -2118,6 +2179,7 @@ int qemu_loadvm_state(QEMUFile *f)
     return ret;
 }
 
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 static QEMUSnapshotCallbacks s_snapshot_callbacks = {};
 
 void qemu_set_snapshot_callbacks(const QEMUSnapshotCallbacks* callbacks)
@@ -2159,6 +2221,9 @@ static QEMUMessageCallback make_monitor_message_cb(Monitor* mon)
 }
 
 void hmp_savevm(Monitor *mon, const QDict *qdict)
+=======
+int save_vmstate(Monitor *mon, const char *name)
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
 {
     const char *name = qdict_get_try_str(qdict, "name");
     QEMUMessageCallback cb = make_monitor_message_cb(mon);
@@ -2172,7 +2237,7 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 #endif
     BlockDriverState *bs, *bs1;
     QEMUSnapshotInfo sn1, *sn = &sn1, old_sn1, *old_sn = &old_sn1;
-    int ret;
+    int ret = -1;
     QEMUFile *f;
     int saved_vm_running;
     uint64_t vm_state_size;
@@ -2187,10 +2252,15 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
         }
         messages->out(messages->opaque, "Device '%s' is writable but does not "
                        "support snapshots.\n", bdrv_get_device_name(bs));
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
         return -1;
+=======
+        return ret;
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
     }
 
     /* Delete old snapshots of the same name */
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
     if (name && bdrv_all_delete_snapshot(name, &bs1, &local_err) < 0) {
         if (s_snapshot_callbacks.savevm.on_quick_fail) {
             s_snapshot_callbacks.savevm.on_quick_fail(name, -EFAULT);
@@ -2199,15 +2269,30 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
                      "Error while deleting snapshot on device '%s': ",
                      bdrv_get_device_name(bs1));
         return -1;
+=======
+    if (name) {
+        ret = bdrv_all_delete_snapshot(name, &bs1, &local_err);
+        if (ret < 0) {
+            error_reportf_err(local_err,
+                              "Error while deleting snapshot on device '%s': ",
+                              bdrv_get_device_name(bs1));
+            return ret;
+        }
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
     }
 
     bs = bdrv_all_find_vmstate_bs();
     if (bs == NULL) {
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
         if (s_snapshot_callbacks.savevm.on_quick_fail) {
             s_snapshot_callbacks.savevm.on_quick_fail(name, -ENOTSUP);
         }
         messages->out(messages->opaque, "No block device can accept snapshots\n");
         return -1;
+=======
+        monitor_printf(mon, "No block device can accept snapshots\n");
+        return ret;
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
     }
     aio_context = bdrv_get_aio_context(bs);
 
@@ -2215,10 +2300,14 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
 
     ret = global_state_store();
     if (ret) {
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
         if (s_snapshot_callbacks.savevm.on_quick_fail) {
             s_snapshot_callbacks.savevm.on_quick_fail(name, -EFAULT);
         }
         messages->out(messages->opaque, "Error saving global state\n");
+=======
+        monitor_printf(mon, "Error saving global state\n");
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
         return ret;
     }
     vm_stop(RUN_STATE_SAVE_VM);
@@ -2288,7 +2377,10 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     if (ret < 0) {
         messages->out(messages->opaque, "Error while creating snapshot on '%s'\n",
                        bdrv_get_device_name(bs));
+        goto the_end;
     }
+
+    ret = 0;
 
  the_end:
     aio_context_release(aio_context);
@@ -2309,8 +2401,17 @@ int qemu_savevm(const char* name, const QEMUMessageCallback* messages)
     if (saved_vm_running) {
         vm_start();
     }
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 
     return ret;
+=======
+    return ret;
+}
+
+void hmp_savevm(Monitor *mon, const QDict *qdict)
+{
+    save_vmstate(mon, qdict_get_try_str(qdict, "name"));
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
 }
 
 void qmp_xen_save_devices_state(const char *filename, Error **errp)
@@ -2364,7 +2465,6 @@ void qmp_xen_load_devices_state(const char *filename, Error **errp)
     qio_channel_set_name(QIO_CHANNEL(ioc), "migration-xen-load-state");
     f = qemu_fopen_channel_input(QIO_CHANNEL(ioc));
 
-    migration_incoming_state_new(f);
     ret = qemu_loadvm_state(f);
     qemu_fclose(f);
     if (ret < 0) {
@@ -2401,6 +2501,7 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     QEMUFile *f;
     int ret;
     AioContext *aio_context;
+    MigrationIncomingState *mis = migration_incoming_get_current();
 
     if (!bdrv_all_can_snapshot(&bs)) {
         if (s_snapshot_callbacks.loadvm.on_quick_fail) {
@@ -2497,7 +2598,7 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     qemu_file_set_hooks(f, sLoadFileHooks);
 
     qemu_system_reset(VMRESET_SILENT);
-    migration_incoming_state_new(f);
+    mis->from_src_file = f;
 
 #if SNAPSHOT_PROFILE > 1
     int64_t resetEndTime = qemu_clock_get_ns(QEMU_CLOCK_REALTIME);

@@ -13,8 +13,7 @@ struct QemuCond {
 };
 #else
 struct QemuMutex {
-    CRITICAL_SECTION lock;
-    LONG owner;
+    SRWLOCK lock;
 };
 
 struct QemuCond {
@@ -34,6 +33,12 @@ void qemu_rec_mutex_lock(QemuRecMutex *mutex);
 int qemu_rec_mutex_trylock(QemuRecMutex *mutex);
 void qemu_rec_mutex_unlock(QemuRecMutex *mutex);
 
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
+=======
+struct QemuCond {
+    CONDITION_VARIABLE var;
+};
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
 
 struct QemuSemaphore {
     HANDLE sema;

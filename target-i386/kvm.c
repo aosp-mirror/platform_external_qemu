@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * QEMU KVM support
  *
@@ -3534,3 +3535,5 @@ int kvm_arch_msi_data_to_gsi(uint32_t data)
 {
     abort();
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

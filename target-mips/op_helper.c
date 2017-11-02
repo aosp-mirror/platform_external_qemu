@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  MIPS emulation helpers for qemu.
  *
@@ -4197,3 +4198,5 @@ void helper_cache(CPUMIPSState *env, target_ulong addr, uint32_t op)
     }
 #endif
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

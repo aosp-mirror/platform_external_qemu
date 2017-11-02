@@ -25,14 +25,19 @@ enum {
     QEMU_ARCH_UNICORE32 = (1 << 14),
     QEMU_ARCH_MOXIE = (1 << 15),
     QEMU_ARCH_TRICORE = (1 << 16),
+    QEMU_ARCH_NIOS2 = (1 << 17),
 };
 
 extern const uint32_t arch_type;
 
 void select_soundhw(const char *optarg);
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 void do_acpitable_option(const QemuOpts *opts);
 void do_smbios_option(QemuOpts *opts);
 bool audio_init(void);
+=======
+void audio_init(void);
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
 int kvm_available(void);
 int xen_available(void);
 int hax_available(void);

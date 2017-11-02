@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * QEMU block layer thread pool
  *
@@ -347,3 +348,5 @@ void thread_pool_free(ThreadPool *pool)
     qemu_mutex_destroy(&pool->lock);
     g_free(pool);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

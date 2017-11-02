@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * Copyright (c) 2011, Max Filippov, Open Source and Linux Lab.
  * All rights reserved.
@@ -586,3 +587,5 @@ static inline void cpu_get_tb_cpu_state(CPUXtensaState *env, target_ulong *pc,
 #include "exec/cpu-all.h"
 
 #endif
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

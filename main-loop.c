@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * QEMU System Emulator
  *
@@ -552,3 +553,5 @@ QEMUBH *qemu_bh_new(QEMUBHFunc *cb, void *opaque)
 {
     return aio_bh_new(qemu_aio_context, cb, opaque);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

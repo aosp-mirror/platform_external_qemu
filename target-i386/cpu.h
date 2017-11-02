@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * i386 virtual CPU header
  *
@@ -1681,3 +1682,5 @@ void x86_cpu_dump_local_apic_state(CPUState *cs, FILE *f,
 bool cpu_is_bsp(X86CPU *cpu);
 
 #endif /* I386_CPU_H */
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

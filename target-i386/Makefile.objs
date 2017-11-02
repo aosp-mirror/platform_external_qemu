@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 obj-y += translate.o helper.o cpu.o bpt_helper.o
 obj-y += excp_helper.o fpu_helper.o cc_helper.o int_helper.o svm_helper.o
 obj-y += smm_helper.o misc_helper.o mem_helper.o seg_helper.o mpx_helper.o
@@ -21,3 +22,5 @@ obj-y += hvf-utils/x86_flags.o
 obj-y += hvf-utils/x86_mmu.o
 obj-y += hvf-utils/x86hvf.o
 endif
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  Lattice Mico32 semihosting syscall interface
  *
@@ -210,3 +211,5 @@ bool lm32_cpu_do_semihosting(CPUState *cs)
     env->regs[R_R1] = ret;
     return true;
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

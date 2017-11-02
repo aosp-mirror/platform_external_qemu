@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * MIPS SIMD Architecture Module Instruction emulation helpers for QEMU.
  *
@@ -3451,3 +3452,5 @@ void helper_msa_ffint_u_df(CPUMIPSState *env, uint32_t df, uint32_t wd,
 
     msa_move_v(pwd, pwx);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

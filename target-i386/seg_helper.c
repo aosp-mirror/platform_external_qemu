@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  x86 segmentation related helpers:
  *  TSS, interrupts, system calls, jumps and call/task gates, descriptors
@@ -2574,3 +2575,5 @@ void helper_check_iol(CPUX86State *env, uint32_t t0)
 {
     check_io(env, t0, 4, GETPC());
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

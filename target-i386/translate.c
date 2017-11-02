@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  i386 translation
  *
@@ -8516,3 +8517,5 @@ void restore_state_to_opc(CPUX86State *env, TranslationBlock *tb,
         env->cc_op = cc_op;
     }
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

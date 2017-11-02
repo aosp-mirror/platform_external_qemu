@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * ARM implementation of KVM hooks
  *
@@ -641,3 +642,5 @@ int kvm_arch_msi_data_to_gsi(uint32_t data)
 {
     return (data - 32) & 0xffff;
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

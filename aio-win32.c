@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * QEMU aio implementation
  *
@@ -420,3 +421,5 @@ bool aio_poll(AioContext *ctx, bool blocking)
 void aio_context_setup(AioContext *ctx)
 {
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

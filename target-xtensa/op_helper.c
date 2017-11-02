@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  * Copyright (c) 2011, Max Filippov, Open Source and Linux Lab.
  * All rights reserved.
@@ -984,3 +985,5 @@ void HELPER(ule_s)(CPUXtensaState *env, uint32_t br, float32 a, float32 b)
     int v = float32_compare_quiet(a, b, &env->fp_status);
     set_br(env, v != float_relation_greater, br);
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)

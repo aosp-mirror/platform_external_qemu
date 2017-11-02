@@ -1,3 +1,4 @@
+<<<<<<< HEAD   (1e9dc2 Merge "Bump snapshot version number." into emu-master-dev)
 /*
  *  MIPS32 emulation for qemu: main translation routines.
  *
@@ -21182,3 +21183,5 @@ void restore_state_to_opc(CPUMIPSState *env, TranslationBlock *tb,
         break;
     }
 }
+=======
+>>>>>>> BRANCH (359c41 Update version for v2.9.0 release)
