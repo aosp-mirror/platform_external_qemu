@@ -39,14 +39,16 @@ public:
     // Returns true if initialization succeeded.
     static bool initialize(const GLESv2Dispatch* gles2);
 
-    // Uninitialize virtual scene rendering, may be called on any thread. Like
-    // initialize(), this call modifies EGL rendering state and callers must be
-    // resilient to that.
+    // Uninitialize virtual scene rendering, may be called on any thread, but
+    // the same EGL context that was active when initialize() was called must be
+    // active. This function modifies the GL state, callers must be resilient to
+    // that.
     static void uninitialize();
 
-    // Uninitialize virtual scene rendering, may be called on any thread. Like
-    // initialize(), this call modifies EGL rendering state and callers must be
-    // resilient to that.
+    // Render the virtual scene to the currently bound render target. This may
+    // be called on any thread, but the same EGL context that was active when
+    // initialize() was called must be active. This function modifies the GL
+    // state, callers must be resilient to that.
     static void render();
 
 private:
