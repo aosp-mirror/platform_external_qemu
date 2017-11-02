@@ -22,6 +22,30 @@
       "revId": "040deea9c5dd48ce474bc792ea603e09d27388cb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d65e7ec_a043ca4c",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneRenderer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-02T00:09:31Z",
+      "side": 1,
+      "message": "Yep, that was the issue, thanks! I\u0027ll keep the caveat in mind.",
+      "parentUuid": "40844e9c_794892d5",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 49
+      },
+      "revId": "040deea9c5dd48ce474bc792ea603e09d27388cb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
