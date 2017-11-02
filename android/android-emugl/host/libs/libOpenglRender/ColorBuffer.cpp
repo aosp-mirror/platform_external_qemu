@@ -453,8 +453,6 @@ bool ColorBuffer::bindToRenderbuffer() {
 }
 
 GLuint ColorBuffer::scale() {
-    RecursiveScopedHelperContext context(m_helper);
-    touch();
     return m_resizer->update(m_tex);
 }
 
