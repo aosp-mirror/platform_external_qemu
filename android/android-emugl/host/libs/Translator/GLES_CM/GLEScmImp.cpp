@@ -359,6 +359,8 @@ GL_API void GL_APIENTRY  glBindBuffer( GLenum target, GLuint buffer) {
                                          ObjectDataPtr(new GLESbuffer()));
     }
     ctx->bindBuffer(target,buffer);
+    ctx->dispatcher().glBindBuffer(target, ctx->shareGroup()->getGlobalName(
+                NamedObjectType::VERTEXBUFFER, buffer));
     if (buffer) {
         GLESbuffer* vbo =
                 (GLESbuffer*)ctx->shareGroup()
@@ -413,6 +415,7 @@ GL_API void GL_APIENTRY  glBufferData( GLenum target, GLsizeiptr size, const GLv
     SET_ERROR_IF(!GLEScmValidate::bufferTarget(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     ctx->setBufferData(target,size,data,usage);
+    ctx->dispatcher().glBufferData(target, size, data, usage);
 }
 
 GL_API void GL_APIENTRY  glBufferSubData( GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid *data) {
@@ -421,6 +424,7 @@ GL_API void GL_APIENTRY  glBufferSubData( GLenum target, GLintptr offset, GLsize
     SET_ERROR_IF(!ctx->isBindedBuffer(target),GL_INVALID_OPERATION);
     SET_ERROR_IF(!GLEScmValidate::bufferTarget(target),GL_INVALID_ENUM);
     SET_ERROR_IF(!ctx->setBufferSubData(target,offset,size,data),GL_INVALID_VALUE);
+    ctx->dispatcher().glBufferSubData(target, offset, size, data);
 }
 
 GL_API void GL_APIENTRY  glClear( GLbitfield mask) {
