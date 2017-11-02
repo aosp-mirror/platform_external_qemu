@@ -23,6 +23,8 @@
 #include <GLcommon/GLESbuffer.h>
 #include <GLcommon/GLEScontext.h>
 
+#include <glm/mat4x4.hpp>
+
 #include <vector>
 #include <string>
 #include <unordered_map>
@@ -35,8 +37,8 @@ class CoreProfileEngine;
 class GLEScmContext: public GLEScontext
 {
 public:
-    virtual void init(EGLiface* eglIface);
-
+    virtual void init();
+    static void initGlobal(EGLiface* eglIface);
     GLEScmContext(int maj, int min, GlobalNameSpace* globalNameSpace,
             android::base::Stream* stream);
     void setActiveTexture(GLenum tex);
@@ -73,9 +75,11 @@ public:
     void disable(GLenum cap);
 
     void shadeModel(GLenum mode);
+    GLenum getShadeModel() const { return mShadeModel; }
 
     void matrixMode(GLenum mode);
     void loadIdentity();
+    void loadMatrixf(const GLfloat* m);
     void pushMatrix();
     void popMatrix();
     void multMatrixf(const GLfloat* m);
@@ -115,7 +119,23 @@ public:
     void clientActiveTexture(GLenum texture);
 
     bool doConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
+
+    std::vector<float> getColor() const;
+    std::vector<float> getNormal() const;
+    std::vector<float> getMultiTexCoord(uint32_t index) const;
+    GLenum getTextureEnvMode();
+    GLenum getTextureGenMode();
+
+    glm::mat4 getProjMatrix();
+    glm::mat4 getModelviewMatrix();
+    glm::mat4 getTextureMatrix();
+
+    virtual void onSave(android::base::Stream* stream) const override;
 protected:
+    virtual void postLoadRestoreCtx() override;
+
+    static const GLint kMaxTextureUnits = 8;
+    static const GLint kMaxMatrixStackSize = 16;
 
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
@@ -124,12 +144,47 @@ private:
     void drawPoints(PointSizeIndices* points);
     void drawPointsData(GLESConversionArrays& arrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices_in,bool isElemsDraw);
     void initExtensionString();
-
+    void restoreVertexAttrib(GLenum attrib);
     CoreProfileEngine& core() { return *m_coreProfileEngine; }
 
     GLESpointer*          m_texCoords = nullptr;
     int                   m_pointsIndex = -1;
     unsigned int          m_clientActiveTexture = 0;
+
+    GLenum mShadeModel = GL_SMOOTH;
+
+    union GLVal {
+        GLfloat floatVal[4];
+        GLint intVal[4];
+        GLubyte ubyteVal[4];
+        GLenum enumVal[4];
+    };
+
+    struct GLValTyped {
+        GLenum type;
+        GLVal val;
+    };
+
+    using TexEnv = std::unordered_map<GLenum, GLVal>;
+    using TexUnitEnvs = std::vector<TexEnv>;
+    using TexGens = std::vector<TexEnv>;
+    using MatrixStack = std::vector<glm::mat4>;
+
+    GLenum mCurrMatrixMode = GL_PROJECTION;
+
+    GLValTyped mColor;
+    GLValTyped mNormal;
+    std::vector<GLVal> mMultiTexCoord;
+
+    TexUnitEnvs mTexUnitEnvs;
+    TexGens mTexGens;
+
+    MatrixStack mProjMatrices;
+    MatrixStack mModelviewMatrices;
+    std::vector<MatrixStack> mTextureMatrices;
+    glm::mat4& currMatrix();
+    MatrixStack& currMatrixStack();
+    void restoreMatrixStack(const MatrixStack& matrices);
 
     // Core profile stuff
     CoreProfileEngine*    m_coreProfileEngine = nullptr;

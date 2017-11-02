@@ -62,17 +62,18 @@ public:
     SaveableTexture(GlobalNameSpace* globalNameSpace, loader_t&& loader);
     SaveableTexture& operator=(SaveableTexture&&) = delete;
 
-    SaveableTexture(const EglImage& eglImage);
     SaveableTexture(const TextureData& texture);
     // precondition: a context must be properly bound
-    void onSave(android::base::Stream* stream, Buffer* buffer) const;
+    void onSave(android::base::Stream* stream);
     // getGlobalObject() will touch and load data onto GPU if it is not yet
     // restored
     const NamedObjectPtr& getGlobalObject();
     // precondition: a context must be properly bound
     void fillEglImage(EglImage* eglImage);
     void loadFromStream(android::base::Stream* stream);
-
+    void makeDirty();
+    bool isDirty() const;
+    void setTarget(GLenum target);
 public:
     // precondition: (1) a context must be properly bound
     //               (2) m_fileReader is set up
@@ -102,6 +103,7 @@ private:
     std::unordered_map<GLenum, GLint> m_texParam;
     loader_t m_loader;
     GlobalNameSpace* m_globalNamespace = nullptr;
+    bool m_isDirty = true;
 };
 
 typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;

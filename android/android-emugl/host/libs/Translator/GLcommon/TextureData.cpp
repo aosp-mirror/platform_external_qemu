@@ -89,9 +89,12 @@ void TextureData::setSaveableTexture(SaveableTexturePtr&& saveableTexture) {
     m_saveableTexture = std::move(saveableTexture);
 }
 
-SaveableTexturePtr TextureData::releaseSaveableTexture() {
-    SaveableTexturePtr res = std::move(m_saveableTexture);
-    return res;
+const SaveableTexturePtr& TextureData::getSaveableTexture() const {
+    return m_saveableTexture;
+}
+
+void TextureData::resetSaveableTexture() {
+    m_saveableTexture.reset(new SaveableTexture(*this));
 }
 
 void TextureData::setTexParam(GLenum pname, GLint param) {
@@ -114,4 +117,14 @@ GLenum TextureData::getSwizzle(GLenum component) const {
         default:
             return GL_ZERO;
     }
+}
+
+void TextureData::makeDirty() {
+    assert(m_saveableTexture);
+    m_saveableTexture->makeDirty();
+}
+
+void TextureData::setTarget(GLenum _target) {
+    target = _target;
+    m_saveableTexture->setTarget(target);
 }

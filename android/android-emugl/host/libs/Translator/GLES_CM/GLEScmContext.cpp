@@ -22,32 +22,44 @@
 #include <GLES/gl.h>
 #include <GLES/glext.h>
 
+#include "android/base/files/StreamSerializing.h"
+#include "emugl/common/crash_reporter.h"
+
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 static GLESVersion s_maxGlesVersion = GLES_1_1;
 
 void GLEScmContext::setMaxGlesVersion(GLESVersion version) {
     s_maxGlesVersion = version;
 }
 
-void GLEScmContext::init(EGLiface* eglIface) {
+void GLEScmContext::init() {
     emugl::Mutex::AutoLock mutex(s_lock);
-    if(!m_initialized || m_needRestoreFromSnapshot) {
-        s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
-        GLEScontext::init(eglIface);
+    if(!m_initialized) {
+        GLEScontext::init();
 
         m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
         m_currVaoState[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
 
-        buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
-                     (const char*)dispatcher().glGetString(GL_RENDERER),
-                     (const char*)dispatcher().glGetString(GL_VERSION),
-                     "OpenGL ES-CM 1.1");
-
         if (isCoreProfile()) {
             m_coreProfileEngine = new CoreProfileEngine(this);
+        } else if (isGles2Gles()) {
+            m_coreProfileEngine = new CoreProfileEngine(this, true /* gles2gles */);
         }
     }
     m_initialized = true;
-    m_needRestoreFromSnapshot = false;
+}
+
+void GLEScmContext::initGlobal(EGLiface* eglIface) {
+    s_glDispatch.dispatchFuncs(s_maxGlesVersion, eglIface->eglGetGlLibrary());
+    GLEScontext::initGlobal(eglIface);
+    buildStrings((const char*)dispatcher().glGetString(GL_VENDOR),
+                 (const char*)dispatcher().glGetString(GL_RENDERER),
+                 (const char*)dispatcher().glGetString(GL_VERSION),
+                 "OpenGL ES-CM 1.1");
 }
 
 void GLEScmContext::initDefaultFBO(
@@ -67,16 +79,79 @@ GLEScmContext::GLEScmContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream)
     : GLEScontext(globalNameSpace, stream, nullptr) {
     // TODO: snapshot support
-    if (stream) return;
-    m_glesMajorVersion = maj;
-    m_glesMinorVersion = min;
-    addVertexArrayObject(0);
-    setVertexArrayObject(0);
+    if (stream) {
+        assert(maj == m_glesMajorVersion);
+        assert(min == m_glesMinorVersion);
+        android::base::loadBuffer(stream, &mProjMatrices);
+        android::base::loadBuffer(stream, &mModelviewMatrices);
+        android::base::loadBuffer(stream, &mTextureMatrices,
+                [](android::base::Stream* stream) {
+                    MatrixStack matrices;
+                    android::base::loadBuffer(stream, &matrices);
+                    return std::move(matrices);
+                });
+        android::base::loadBuffer(stream, &mTexUnitEnvs,
+                [](android::base::Stream* stream) {
+                    TexEnv texEnv;
+                    android::base::loadCollection(stream, &texEnv,
+                            [] (android::base::Stream* stream) {
+                                GLenum idx = stream->getBe32();
+                                GLVal val;
+                                stream->read(&val, sizeof(GLVal));
+                                return std::make_pair(idx, val);
+                            });
+                    return std::move(texEnv);
+                });
+        android::base::loadBuffer(stream, &mTexGens,
+                [](android::base::Stream* stream) {
+                    TexEnv texEnv;
+                    android::base::loadCollection(stream, &texEnv,
+                            [] (android::base::Stream* stream) {
+                                GLenum idx = stream->getBe32();
+                                GLVal val;
+                                stream->read(&val, sizeof(GLVal));
+                                return std::make_pair(idx, val);
+                            });
+                    return std::move(texEnv);
+                });
+        m_clientActiveTexture = stream->getBe32();
+        if (m_initialized) {
+            uint32_t size = stream->getBe32();
+            m_texCoords = new GLESpointer[size];
+            for (uint32_t i = 0; i < size; i++) {
+                m_texCoords[i].onLoad(stream);
+            }
+            m_currVaoState[GL_TEXTURE_COORD_ARRAY] =
+                    &m_texCoords[m_clientActiveTexture];
+        }
+    } else {
+        m_glesMajorVersion = maj;
+        m_glesMinorVersion = min;
 
-    m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
-    m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();
-    m_currVaoState[GL_VERTEX_ARRAY]         = new GLESpointer();
-    m_currVaoState[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
+        addVertexArrayObject(0);
+        setVertexArrayObject(0);
+
+        m_currVaoState[GL_COLOR_ARRAY]          = new GLESpointer();
+        m_currVaoState[GL_NORMAL_ARRAY]         = new GLESpointer();
+        m_currVaoState[GL_VERTEX_ARRAY]         = new GLESpointer();
+        m_currVaoState[GL_POINT_SIZE_ARRAY_OES] = new GLESpointer();
+
+        mProjMatrices.resize(1, glm::mat4());
+        mModelviewMatrices.resize(1, glm::mat4());
+        mTextureMatrices.resize(kMaxTextureUnits, { glm::mat4() });
+        mTexUnitEnvs.resize(kMaxTextureUnits, {});
+        mTexGens.resize(kMaxTextureUnits, {});
+
+        for (int i = 0; i < kMaxTextureUnits; i++) {
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_MODE].intVal[0] = GL_MODULATE;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[0] = 0.2f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[1] = 0.4f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[2] = 0.8f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[3] = 0.7f;
+            mTexUnitEnvs[i][GL_COMBINE_RGB].intVal[0] = GL_REPLACE;
+            mTexUnitEnvs[i][GL_COMBINE_ALPHA].intVal[0] = GL_REPLACE;
+        }
+    }
 }
 
 
@@ -91,9 +166,6 @@ void GLEScmContext::setClientActiveTexture(GLenum tex) {
 
 void GLEScmContext::setBindedTexture(GLenum target, unsigned int texture, unsigned int globalTexName) {
     GLEScontext::setBindedTexture(target, texture);
-    if (isCoreProfile()) {
-        core().bindTextureWithTextureUnitEmulation(target, texture, globalTexName);
-    }
 }
 
 GLEScmContext::~GLEScmContext(){
@@ -109,6 +181,82 @@ GLEScmContext::~GLEScmContext(){
     }
 }
 
+void GLEScmContext::onSave(android::base::Stream* stream) const {
+    GLEScontext::onSave(stream);
+    android::base::saveBuffer(stream, mProjMatrices);
+    android::base::saveBuffer(stream, mModelviewMatrices);
+    android::base::saveBuffer(stream, mTextureMatrices,
+            [](android::base::Stream* stream, const MatrixStack& matrices) {
+                android::base::saveBuffer(stream, matrices);
+            });
+    android::base::saveBuffer(stream, mTexUnitEnvs,
+            [](android::base::Stream* stream, const TexEnv& texEnv) {
+                android::base::saveCollection(stream, texEnv,
+                        [] (android::base::Stream* stream,
+                            const std::pair<GLenum, GLVal>& it) {
+                            stream->putBe32(it.first);
+                            stream->write(&it.second, sizeof(GLVal));
+                        });
+            });
+    android::base::saveBuffer(stream, mTexGens,
+            [](android::base::Stream* stream, const TexEnv& texEnv) {
+                android::base::saveCollection(stream, texEnv,
+                        [] (android::base::Stream* stream,
+                            const std::pair<GLenum, GLVal>& it) {
+                            stream->putBe32(it.first);
+                            stream->write(&it.second, sizeof(GLVal));
+                        });
+            });
+    stream->putBe32(m_clientActiveTexture);
+    if (m_initialized) {
+        stream->putBe32(s_glSupport.maxTexUnits);
+        for (uint32_t i = 0; i < s_glSupport.maxTexUnits; i++) {
+            m_texCoords[i].onSave(stream);
+        }
+    }
+}
+
+void GLEScmContext::restoreMatrixStack(const MatrixStack& matrices) {
+    for (size_t i = 0; i < matrices.size(); i++) {
+        if (i > 0) {
+            dispatcher().glPushMatrix();
+        }
+        dispatcher().glLoadMatrixf(&matrices[i][0][0]);
+    }
+}
+
+void GLEScmContext::postLoadRestoreCtx() {
+    if (isInitialized()) {
+        if (isCoreProfile()) {
+            m_coreProfileEngine = new CoreProfileEngine(this);
+        } else if (isGles2Gles()) {
+            m_coreProfileEngine = new CoreProfileEngine(this, true);
+        }
+        if (!m_coreProfileEngine) {
+            GLDispatch& dispatcher = GLEScontext::dispatcher();
+            dispatcher.glMatrixMode(GL_PROJECTION);
+            restoreMatrixStack(mProjMatrices);
+            dispatcher.glMatrixMode(GL_MODELVIEW);
+            restoreMatrixStack(mModelviewMatrices);
+            dispatcher.glMatrixMode(GL_TEXTURE);
+            for (size_t i = 0; i < mTextureMatrices.size(); i++) {
+                if (mTextureMatrices[i].size() == 0) {
+                    continue;
+                }
+                dispatcher.glActiveTexture(GL_TEXTURE0 + i);
+                restoreMatrixStack(mTextureMatrices[i]);
+            }
+            dispatcher.glMatrixMode(mCurrMatrixMode);
+            dispatcher.glActiveTexture(GL_TEXTURE0 + m_activeTexture);
+            for (const auto& it : *m_currVaoState.it->second.arraysMap) {
+                if (it.second->isEnable()) {
+                    dispatcher.glEnableClientState(it.first);
+                }
+            }
+        }
+    }
+    GLEScontext::postLoadRestoreCtx();
+}
 
 //setting client side arr
 void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
@@ -273,6 +421,78 @@ void GLEScmContext::drawPointsElems(GLESConversionArrays& arrs,GLsizei count,GLe
 
 bool GLEScmContext::doConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
     return needConvert(cArrs, first, count, type, indices, direct, p, array_id);
+}
+
+std::vector<float> GLEScmContext::getColor() const {
+    switch (mColor.type) {
+        case GL_UNSIGNED_BYTE:
+            return
+            { mColor.val.ubyteVal[0] / 255.0f,
+              mColor.val.ubyteVal[1] / 255.0f,
+              mColor.val.ubyteVal[2] / 255.0f,
+              mColor.val.ubyteVal[3] / 255.0f, };
+        default:
+        case GL_FLOAT:
+            return { mColor.val.floatVal[0],
+                     mColor.val.floatVal[1],
+                     mColor.val.floatVal[2],
+                     mColor.val.floatVal[3], };
+    }
+}
+
+std::vector<float> GLEScmContext::getNormal() const {
+    return
+        { mNormal.val.floatVal[0],
+          mNormal.val.floatVal[1],
+          mNormal.val.floatVal[2] };
+}
+
+std::vector<float> GLEScmContext::getMultiTexCoord(uint32_t index) const {
+    return // s, t, r components
+        { mMultiTexCoord[index].floatVal[0],
+          mMultiTexCoord[index].floatVal[1],
+          mMultiTexCoord[index].floatVal[2], };
+}
+
+GLenum GLEScmContext::getTextureEnvMode() {
+    return mTexUnitEnvs[m_activeTexture][GL_TEXTURE_ENV_MODE].intVal[0];
+}
+
+GLenum GLEScmContext::getTextureGenMode() {
+    return mTexGens[m_activeTexture][GL_TEXTURE_GEN_MODE_OES].intVal[0];
+}
+
+glm::mat4 GLEScmContext::getProjMatrix() {
+    return mProjMatrices.back();
+}
+
+glm::mat4 GLEScmContext::getModelviewMatrix() {
+    return mModelviewMatrices.back();
+}
+
+glm::mat4 GLEScmContext::getTextureMatrix() {
+    return mTextureMatrices[m_activeTexture].back();
+}
+
+glm::mat4& GLEScmContext::currMatrix() {
+    return currMatrixStack().back();
+}
+
+GLEScmContext::MatrixStack& GLEScmContext::currMatrixStack() {
+    switch (mCurrMatrixMode) {
+    case GL_TEXTURE:
+        return mTextureMatrices[m_activeTexture];
+    case GL_PROJECTION:
+        return mProjMatrices;
+    case GL_MODELVIEW:
+        return mModelviewMatrices;
+    default:
+        emugl_crash_reporter(
+            "error: matrix mode set to 0x%x!",
+            mCurrMatrixMode);
+    }
+    // Make compiler happy
+    return mModelviewMatrices;
 }
 
 bool GLEScmContext::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id) {
@@ -482,14 +702,14 @@ GLint GLEScmContext::getErrorCoreProfile() {
 }
 
 void GLEScmContext::enable(GLenum cap) {
+    setEnable(cap, true);
 
     switch (cap) {
         case GL_TEXTURE_2D:
         case GL_TEXTURE_CUBE_MAP_OES:
             setTextureEnabled(cap,true);
     }
-
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().enable(cap);
     } else {
         if (cap==GL_TEXTURE_GEN_STR_OES) {
@@ -503,14 +723,14 @@ void GLEScmContext::enable(GLenum cap) {
 }
 
 void GLEScmContext::disable(GLenum cap) {
+    setEnable(cap, false);
 
     switch (cap) {
         case GL_TEXTURE_2D:
         case GL_TEXTURE_CUBE_MAP_OES:
             setTextureEnabled(cap, false);
     }
-
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().disable(cap);
     } else {
         if (cap==GL_TEXTURE_GEN_STR_OES) {
@@ -524,7 +744,9 @@ void GLEScmContext::disable(GLenum cap) {
 }
 
 void GLEScmContext::shadeModel(GLenum mode) {
-    if (isCoreProfile()) {
+    mShadeModel = mode;
+
+    if (m_coreProfileEngine) {
         core().shadeModel(mode);
     } else {
         dispatcher().glShadeModel(mode);
@@ -532,7 +754,9 @@ void GLEScmContext::shadeModel(GLenum mode) {
 }
 
 void GLEScmContext::matrixMode(GLenum mode) {
-    if (isCoreProfile()) {
+    mCurrMatrixMode = mode;
+
+    if (m_coreProfileEngine) {
         core().matrixMode(mode);
     } else {
         dispatcher().glMatrixMode(mode);
@@ -540,15 +764,33 @@ void GLEScmContext::matrixMode(GLenum mode) {
 }
 
 void GLEScmContext::loadIdentity() {
-    if (isCoreProfile()) {
+    currMatrix() = glm::mat4();
+
+    if (m_coreProfileEngine) {
         core().loadIdentity();
     } else {
         dispatcher().glLoadIdentity();
     }
 }
 
+void GLEScmContext::loadMatrixf(const GLfloat* m) {
+    currMatrix() = glm::make_mat4(m);
+
+    if (m_coreProfileEngine) {
+        core().loadMatrixf(m);
+    } else {
+        dispatcher().glLoadMatrixf(m);
+    }
+}
+
 void GLEScmContext::pushMatrix() {
-    if (isCoreProfile()) {
+    if (currMatrixStack().size() >= kMaxMatrixStackSize) {
+        setGLerror(GL_STACK_OVERFLOW);
+        return;
+    }
+    currMatrixStack().emplace_back(currMatrixStack().back());
+
+    if (m_coreProfileEngine) {
         core().pushMatrix();
     } else {
         dispatcher().glPushMatrix();
@@ -556,7 +798,13 @@ void GLEScmContext::pushMatrix() {
 }
 
 void GLEScmContext::popMatrix() {
-    if (isCoreProfile()) {
+    if (currMatrixStack().size() == 1) {
+        setGLerror(GL_STACK_UNDERFLOW);
+        return;
+    }
+    currMatrixStack().pop_back();
+
+    if (m_coreProfileEngine) {
         core().popMatrix();
     } else {
         dispatcher().glPopMatrix();
@@ -564,7 +812,9 @@ void GLEScmContext::popMatrix() {
 }
 
 void GLEScmContext::multMatrixf(const GLfloat* m) {
-    if (isCoreProfile()) {
+    currMatrix() *= glm::make_mat4(m);
+
+    if (m_coreProfileEngine) {
         core().multMatrixf(m);
     } else {
         dispatcher().glMultMatrixf(m);
@@ -572,7 +822,9 @@ void GLEScmContext::multMatrixf(const GLfloat* m) {
 }
 
 void GLEScmContext::orthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
-    if (isCoreProfile()) {
+    currMatrix() *= glm::ortho(left, right, bottom, top, zNear, zFar);
+
+    if (m_coreProfileEngine) {
         core().orthof(left, right, bottom, top, zNear, zFar);
     } else {
         dispatcher().glOrtho(left,right,bottom,top,zNear,zFar);
@@ -580,7 +832,9 @@ void GLEScmContext::orthof(GLfloat left, GLfloat right, GLfloat bottom, GLfloat 
 }
 
 void GLEScmContext::frustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
-    if (isCoreProfile()) {
+    currMatrix() *= glm::frustum(left, right, bottom, top, zNear, zFar);
+
+    if (m_coreProfileEngine) {
         core().frustumf(left, right, bottom, top, zNear, zFar);
     } else {
         dispatcher().glFrustum(left,right,bottom,top,zNear,zFar);
@@ -588,7 +842,14 @@ void GLEScmContext::frustumf(GLfloat left, GLfloat right, GLfloat bottom, GLfloa
 }
 
 void GLEScmContext::texEnvf(GLenum target, GLenum pname, GLfloat param) {
-    if (isCoreProfile()) {
+    // Assume |target| is GL_TEXTURE_ENV
+    if (pname == GL_TEXTURE_ENV_MODE) {
+        texEnvi(target, pname, (GLint)param);
+    } else {
+        mTexUnitEnvs[m_activeTexture][pname].floatVal[0] = param;
+    }
+
+    if (m_coreProfileEngine) {
         core().texEnvf(target, pname, param);
     } else {
         dispatcher().glTexEnvf(target, pname, param);
@@ -596,7 +857,15 @@ void GLEScmContext::texEnvf(GLenum target, GLenum pname, GLfloat param) {
 }
 
 void GLEScmContext::texEnvfv(GLenum target, GLenum pname, const GLfloat* params) {
-    if (isCoreProfile()) {
+    if (pname == GL_TEXTURE_ENV_COLOR) {
+        for (int i = 0; i < 4; i++) {
+            mTexUnitEnvs[m_activeTexture][pname].floatVal[i] = params[i];
+        }
+    } else {
+        texEnvf(target, pname, params[0]);
+    }
+
+    if (m_coreProfileEngine) {
         core().texEnvfv(target, pname, params);
     } else {
         dispatcher().glTexEnvfv(target, pname, params);
@@ -604,7 +873,9 @@ void GLEScmContext::texEnvfv(GLenum target, GLenum pname, const GLfloat* params)
 }
 
 void GLEScmContext::texEnvi(GLenum target, GLenum pname, GLint param) {
-    if (isCoreProfile()) {
+    mTexUnitEnvs[m_activeTexture][pname].intVal[0] = param;
+
+    if (m_coreProfileEngine) {
         core().texEnvi(target, pname, param);
     } else {
         dispatcher().glTexEnvi(target, pname, param);
@@ -612,7 +883,9 @@ void GLEScmContext::texEnvi(GLenum target, GLenum pname, GLint param) {
 }
 
 void GLEScmContext::texEnviv(GLenum target, GLenum pname, const GLint* params) {
-    if (isCoreProfile()) {
+    mTexUnitEnvs[m_activeTexture][pname].intVal[0] = params[0];
+
+    if (m_coreProfileEngine) {
         core().texEnviv(target, pname, params);
     } else {
         dispatcher().glTexEnviv(target, pname, params);
@@ -620,7 +893,9 @@ void GLEScmContext::texEnviv(GLenum target, GLenum pname, const GLint* params) {
 }
 
 void GLEScmContext::getTexEnvfv(GLenum env, GLenum pname, GLfloat* params) {
-    if (isCoreProfile()) {
+    *params = mTexUnitEnvs[m_activeTexture][pname].floatVal[0];
+
+    if (m_coreProfileEngine) {
         core().getTexEnvfv(env, pname, params);
     } else {
         dispatcher().glGetTexEnvfv(env, pname, params);
@@ -628,7 +903,9 @@ void GLEScmContext::getTexEnvfv(GLenum env, GLenum pname, GLfloat* params) {
 }
 
 void GLEScmContext::getTexEnviv(GLenum env, GLenum pname, GLint* params) {
-    if (isCoreProfile()) {
+    *params = mTexUnitEnvs[m_activeTexture][pname].intVal[0];
+
+    if (m_coreProfileEngine) {
         core().getTexEnviv(env, pname, params);
     } else {
         dispatcher().glGetTexEnviv(env, pname, params);
@@ -636,7 +913,9 @@ void GLEScmContext::getTexEnviv(GLenum env, GLenum pname, GLint* params) {
 }
 
 void GLEScmContext::texGenf(GLenum coord, GLenum pname, GLfloat param) {
-    if (isCoreProfile()) {
+    mTexGens[m_activeTexture][pname].floatVal[0] = param;
+
+    if (m_coreProfileEngine) {
         core().texGenf(coord, pname, param);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -650,7 +929,9 @@ void GLEScmContext::texGenf(GLenum coord, GLenum pname, GLfloat param) {
 }
 
 void GLEScmContext::texGenfv(GLenum coord, GLenum pname, const GLfloat* params) {
-    if (isCoreProfile()) {
+    mTexGens[m_activeTexture][pname].floatVal[0] = params[0];
+
+    if (m_coreProfileEngine) {
         core().texGenfv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -664,7 +945,9 @@ void GLEScmContext::texGenfv(GLenum coord, GLenum pname, const GLfloat* params) 
 }
 
 void GLEScmContext::texGeni(GLenum coord, GLenum pname, GLint param) {
-    if (isCoreProfile()) {
+    mTexGens[m_activeTexture][pname].intVal[0] = param;
+
+    if (m_coreProfileEngine) {
         core().texGeni(coord, pname, param);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -678,7 +961,9 @@ void GLEScmContext::texGeni(GLenum coord, GLenum pname, GLint param) {
 }
 
 void GLEScmContext::texGeniv(GLenum coord, GLenum pname, const GLint* params) {
-    if (isCoreProfile()) {
+    mTexGens[m_activeTexture][pname].intVal[0] = params[0];
+
+    if (m_coreProfileEngine) {
         core().texGeniv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -692,7 +977,9 @@ void GLEScmContext::texGeniv(GLenum coord, GLenum pname, const GLint* params) {
 }
 
 void GLEScmContext::getTexGeniv(GLenum coord, GLenum pname, GLint* params) {
-    if (isCoreProfile()) {
+    *params = mTexGens[m_activeTexture][pname].intVal[0];
+
+    if (m_coreProfileEngine) {
         core().getTexGeniv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -710,7 +997,12 @@ void GLEScmContext::getTexGeniv(GLenum coord, GLenum pname, GLint* params) {
 }
 
 void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
-    if (isCoreProfile()) {
+    params[0] = mTexGens[m_activeTexture][pname].floatVal[0];
+    params[1] = mTexGens[m_activeTexture][pname].floatVal[1];
+    params[2] = mTexGens[m_activeTexture][pname].floatVal[2];
+    params[3] = mTexGens[m_activeTexture][pname].floatVal[3];
+
+    if (m_coreProfileEngine) {
         core().getTexGenfv(coord, pname, params);
     } else {
         if (coord == GL_TEXTURE_GEN_STR_OES) {
@@ -728,8 +1020,7 @@ void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
 }
 
 void GLEScmContext::enableClientState(GLenum clientState) {
-    // TODO: Track enabled state in vao state.
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().enableClientState(clientState);
     } else {
         dispatcher().glEnableClientState(clientState);
@@ -737,8 +1028,7 @@ void GLEScmContext::enableClientState(GLenum clientState) {
 }
 
 void GLEScmContext::disableClientState(GLenum clientState) {
-    // TODO: Track enabled state in vao state.
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().disableClientState(clientState);
     } else {
         dispatcher().glDisableClientState(clientState);
@@ -746,7 +1036,7 @@ void GLEScmContext::disableClientState(GLenum clientState) {
 }
 
 void GLEScmContext::drawTexOES(float x, float y, float z, float width, float height) {
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().drawTexOES(x, y, z, width, height);
     } else {
         auto& gl = dispatcher();
@@ -851,7 +1141,10 @@ void GLEScmContext::drawTexOES(float x, float y, float z, float width, float hei
 }
 
 void GLEScmContext::rotatef(float angle, float x, float y, float z) {
-    if (isCoreProfile()) {
+    glm::mat4 rot = glm::rotate(glm::mat4(), 3.14159265358979f / 180.0f * angle, glm::vec3(x, y, z));
+    currMatrix() *= rot;
+
+    if (m_coreProfileEngine) {
         core().rotatef(angle, x, y, z);
     } else {
         dispatcher().glRotatef(angle, x, y, z);
@@ -859,7 +1152,10 @@ void GLEScmContext::rotatef(float angle, float x, float y, float z) {
 }
 
 void GLEScmContext::scalef(float x, float y, float z) {
-    if (isCoreProfile()) {
+    glm::mat4 scale = glm::scale(glm::mat4(), glm::vec3(x, y, z));
+    currMatrix() *= scale;
+
+    if (m_coreProfileEngine) {
         core().scalef(x, y, z);
     } else {
         dispatcher().glScalef(x, y, z);
@@ -867,7 +1163,10 @@ void GLEScmContext::scalef(float x, float y, float z) {
 }
 
 void GLEScmContext::translatef(float x, float y, float z) {
-    if (isCoreProfile()) {
+    glm::mat4 tr = glm::translate(glm::mat4(), glm::vec3(x, y, z));
+    currMatrix() *= tr;
+
+    if (m_coreProfileEngine) {
         core().translatef(x, y, z);
     } else {
         dispatcher().glTranslatef(x, y, z);
@@ -875,7 +1174,14 @@ void GLEScmContext::translatef(float x, float y, float z) {
 }
 
 void GLEScmContext::color4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) {
-    if (isCoreProfile()) {
+
+    mColor.type = GL_FLOAT;
+    mColor.val.floatVal[0] = red;
+    mColor.val.floatVal[1] = green;
+    mColor.val.floatVal[2] = blue;
+    mColor.val.floatVal[3] = alpha;
+
+    if (m_coreProfileEngine) {
         core().color4f(red,green,blue,alpha);
     } else{
         dispatcher().glColor4f(red,green,blue,alpha);
@@ -883,7 +1189,14 @@ void GLEScmContext::color4f(GLfloat red, GLfloat green, GLfloat blue, GLfloat al
 }
 
 void GLEScmContext::color4ub(GLubyte red, GLubyte green, GLubyte blue, GLubyte alpha) {
-    if (isCoreProfile()) {
+
+    mColor.type = GL_UNSIGNED_BYTE;
+    mColor.val.ubyteVal[0] = red;
+    mColor.val.ubyteVal[1] = green;
+    mColor.val.ubyteVal[2] = blue;
+    mColor.val.ubyteVal[3] = alpha;
+
+    if (m_coreProfileEngine) {
         core().color4ub(red,green,blue,alpha);
     } else{
         dispatcher().glColor4ub(red,green,blue,alpha);
@@ -895,7 +1208,14 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
 
     drawValidate();
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
+        GLuint prev_vbo;
+        GLuint prev_ibo;
+        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_vbo);
+        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_ibo);
+
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -917,6 +1237,8 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawArrays(mode, first, count);
+        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
     } else {
         GLESConversionArrays tmpArrs;
 
@@ -940,7 +1262,15 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         indices = buf + SafeUIntFromPointer(indices);
     }
 
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
+        // track previous vbo/ibo
+        GLuint prev_vbo;
+        GLuint prev_ibo;
+        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_vbo);
+        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+                (GLint*)&prev_ibo);
+
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -962,6 +1292,8 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawElements(mode, count, type, indices);
+        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
     } else {
         GLESConversionArrays tmpArrs;
 
@@ -976,7 +1308,7 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
 }
 
 void GLEScmContext::clientActiveTexture(GLenum texture) {
-    if (isCoreProfile()) {
+    if (m_coreProfileEngine) {
         core().clientActiveTexture(texture);
     } else {
         dispatcher().glClientActiveTexture(texture);

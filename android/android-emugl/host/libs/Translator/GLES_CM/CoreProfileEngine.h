@@ -30,7 +30,7 @@ class GLESpointer;
 
 class CoreProfileEngine {
 public:
-    explicit CoreProfileEngine(GLEScmContext* ctx);
+    CoreProfileEngine(GLEScmContext* ctx, bool onGles = false);
     ~CoreProfileEngine();
 
     struct GeometryDrawState {
@@ -47,6 +47,7 @@ public:
 
         GLint projMatrixLoc;
         GLint modelviewMatrixLoc;
+        GLint textureMatrixLoc;
         GLint textureSamplerLoc;
         GLint textureCubeSamplerLoc;
 
@@ -86,7 +87,6 @@ public:
 
     // Utility functions
     void setupArrayForDraw(GLenum arrayType, GLESpointer* p, GLint first, GLsizei count, bool isIndexed, GLenum indicesType, const GLvoid* indices);
-    void bindTextureWithTextureUnitEmulation(GLenum target, GLuint texture, GLuint globalTexName);
 
     void preDrawTextureUnitEmulation();
     void postDrawTextureUnitEmulation();
@@ -103,6 +103,7 @@ public:
 
     void matrixMode(GLenum mode);
     void loadIdentity();
+    void loadMatrixf(const GLfloat* m);
     void pushMatrix();
     void popMatrix();
     void multMatrixf(const GLfloat* m);
@@ -144,64 +145,15 @@ public:
 private:
     GLEScmContext* mCtx = nullptr;
 
-    std::unordered_set<GLenum> mEnables;
-    bool isEnabled(GLenum cap) {
-        auto it = mEnables.find(cap);
-        return it != mEnables.end();
-    }
-
-    GLenum mShadeModel = GL_SMOOTH;
-
-    static const GLint kMaxTextureUnits = 8;
-    static const GLint kMaxMatrixStackSize = 16;
-
     GLint mCurrError = 0;
     void setError(GLint err) { mCurrError = err; }
-
-    union GLVal {
-        GLfloat floatVal[4];
-        GLint intVal[4];
-        GLubyte ubyteVal[4];
-        GLenum enumVal[4];
-    };
-
-    struct GLValTyped {
-        GLenum type;
-        GLVal val;
-    };
-
-    GLenum mCurrMatrixMode = GL_PROJECTION;
-
-    GLValTyped mColor;
-    GLValTyped mNormal;
-    std::vector<GLVal> mMultiTexCoord;
 
     size_t sizeOfType(GLenum dataType);
     GLuint getVboFor(GLenum arrayType);
 
-    uint32_t mCurrTextureUnit = 0;
-    using TexEnv = std::unordered_map<GLenum, GLVal>;
-    using TexUnitEnvs = std::vector<TexEnv>;
-    using TexGens = std::vector<TexEnv>;
-    TexUnitEnvs mTexUnitEnvs;
-    TexGens mTexGens;
-    std::unordered_map<GLenum, GLuint> mCubeMapBoundTextures;
-
-    GLenum currTextureEnvMode();
-
-    using MatrixStack = std::vector<glm::mat4>;
-
-    MatrixStack mProjMatrices;
-    MatrixStack mModelviewMatrices;
-    std::vector<MatrixStack> mTextureMatrices;
-    glm::mat4& currMatrix();
-    MatrixStack& currMatrixStack();
-
-    glm::mat4 getProjMatrix() const;
-    glm::mat4 getModelviewMatrix() const;
-
-    void setTextureUnit(uint32_t textureUnit) { mCurrTextureUnit = textureUnit; }
-
     DrawTexOESCoreState m_drawTexOESCoreState = {};
     GeometryDrawState   m_geometryDrawState = {};
+
+    // If we are on a gles impl.
+    bool mOnGles = false;
 };

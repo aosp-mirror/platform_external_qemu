@@ -357,9 +357,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
     g_eglInfo->setEglIface(&s_eglIface);
 
     char error[256];
-    // When running on top of another GLES library, we do not load GLES1
-    // We use GLES12Translator instead
-    if(!isGles2Gles() && !g_eglInfo->getIface(GLES_1_1)) {
+    // When running on top of another GLES library, our GLES1
+    // translator uses the GLES library's underlying GLES3.
+    if(!g_eglInfo->getIface(GLES_1_1)) {
         func  = loadIfaces(LIB_GLES_CM_NAME, error, sizeof(error));
         if (func) {
             g_eglInfo->setIface(func(&s_eglIface),GLES_1_1);
@@ -1399,6 +1399,8 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->format = texData->format;
             img->type = texData->type;
             img->texStorageLevels = texData->texStorageLevels;
+            img->saveableTexture = texData->getSaveableTexture();
+            img->needRestore = false;
             return dpy->addImageKHR(img);
         }
     }
@@ -1582,6 +1584,13 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
         glesVersion = GLES_3_1;
         break;
     }
+
+    // If egl2egl, set internal gles version to 3 as
+    // that is what we use (EglOsApi_egl.cpp)
+    if (EglGlobalInfo::isEgl2Egl()) {
+        glesVersion = GLES_3_0;
+    }
+
     if (g_eglInfo->getIface(GLES_1_1)) {
         g_eglInfo->getIface(GLES_1_1)->setMaxGlesVersion(glesVersion);
     }

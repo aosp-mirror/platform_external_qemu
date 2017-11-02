@@ -191,12 +191,14 @@ public:
     GLEScontext();
     GLEScontext(GlobalNameSpace* globalNameSpace, android::base::Stream* stream,
             GlLibrary* glLib);
-    virtual void init(EGLiface* eglIface);
+    virtual void init();
+    static void initGlobal(EGLiface* eglIface);
     GLenum getGLerror();
     void setGLerror(GLenum err);
     void setShareGroup(ShareGroupPtr grp){m_shareGroup = std::move(grp);};
     const ShareGroupPtr& shareGroup() const { return m_shareGroup; }
     virtual void setActiveTexture(GLenum tex);
+    unsigned int getActiveTextureUnit() const { return m_activeTexture; }
     unsigned int getBindedTexture(GLenum target);
     unsigned int getBindedTexture(GLenum unit,GLenum target);
     void setBindedTexture(GLenum target,unsigned int tex);
@@ -304,6 +306,7 @@ public:
     }
 
     void setEnable(GLenum item, bool isEnable);
+    bool isEnabled(GLenum item) const;
     void setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
             GLenum srcAlpha, GLenum dstAlpha);
     void setPixelStorei(GLenum pname, GLint param);
@@ -446,7 +449,7 @@ protected:
     void convertDirectVBO(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum array_id,GLESpointer* p);
     void convertIndirect(GLESConversionArrays& fArrs,GLsizei count,GLenum type,const GLvoid* indices,GLenum array_id,GLESpointer* p);
     void convertIndirectVBO(GLESConversionArrays& fArrs,GLsizei count,GLenum indices_type,const GLvoid* indices,GLenum array_id,GLESpointer* p);
-    void initCapsLocked(const GLubyte * extensionString);
+    static void initCapsLocked(const GLubyte * extensionString);
     virtual void initExtensionString() =0;
 
     bool                  m_needRestoreFromSnapshot = false;
@@ -473,6 +476,7 @@ protected:
     std::vector<BufferBinding> m_indexedAtomicCounterBuffers;
     std::vector<BufferBinding> m_indexedShaderStorageBuffers;
 
+    bool m_isViewport = false;
     GLint m_viewportX = 0;
     GLint m_viewportY = 0;
     GLsizei m_viewportWidth = 0;
@@ -481,6 +485,7 @@ protected:
     GLfloat m_polygonOffsetFactor = 0.0f;
     GLfloat m_polygonOffsetUnits = 0.0f;
 
+    bool m_isScissor = false;
     GLint m_scissorX = 0;
     GLint m_scissorY = 0;
     GLsizei m_scissorWidth = 0;
