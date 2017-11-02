@@ -336,6 +336,7 @@ LOCAL_SRC_FILES := \
     android/emulation/LogcatPipe.cpp \
     android/emulation/Keymaster3.cpp \
     android/emulation/FakeRotatingCameraSensor.cpp \
+    android/emulation/QemuMiscPipe.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
