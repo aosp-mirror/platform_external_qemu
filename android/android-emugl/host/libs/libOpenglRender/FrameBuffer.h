@@ -24,6 +24,7 @@
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
+#include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
@@ -328,6 +329,7 @@ public:
 
     // Return the host EGLDisplay used by this instance.
     EGLDisplay getDisplay() const { return m_eglDisplay; }
+    EGLSurface getWindowSurface() const { return m_eglSurface; }
 
     // Change the rotation of the displayed GPU sub-window.
     void setDisplayRotation(float zRot) {
@@ -369,6 +371,7 @@ public:
     // Used internally.
     bool bind_locked();
     bool unbind_locked();
+    bool unbindSubwin_locked(bool lazy = false);
 
     void lockContextStructureRead() { m_contextStructureLock.lockRead(); }
     void unlockContextStructureRead() { m_contextStructureLock.unlockRead(); }
@@ -405,11 +408,18 @@ public:
     static void setMaxGLESVersion(GLESDispatchMaxVersion version);
     static GLESDispatchMaxVersion getMaxGLESVersion();
 
+    float getDpr() { return m_dpr; }
+    int windowWidth() { return m_windowWidth; }
+    int windowHeight() { return m_windowHeight; }
+    float getPx() { return m_px; }
+    float getPy() { return m_py; }
+    int getZrot() { return m_zRot; }
+    bool bindSubwin_locked(bool lazy = false);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
 
-    bool bindSubwin_locked();
     bool removeSubWindow_locked();
     void cleanupProcGLObjects_locked(uint64_t puid, bool forced = false);
 
@@ -522,5 +532,12 @@ private:
 
     bool m_asyncReadbackSupported = true;
     bool m_guestPostedAFrame = false;
+
+    struct Post {
+        ColorBuffer* cb;
+    };
+    std::unique_ptr<PostWorker> m_postWorker = {};
+    android::base::WorkerThread<Post> m_postThread;
+    android::base::WorkerProcessingResult sendPostWorkerCmd(const Post& readback);
 };
 #endif

@@ -541,7 +541,12 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_readbackThread(
           [this](FrameBuffer::Readback&& readback) {
               return sendReadbackWorkerCmd(readback);
-          }) {}
+          }),
+      m_postThread(
+          [this](FrameBuffer::Post&& post) {
+              return sendPostWorkerCmd(post);
+              })
+{}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -566,6 +571,12 @@ FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
         return WorkerProcessingResult::Stop;
     }
     return WorkerProcessingResult::Stop;
+}
+
+WorkerProcessingResult
+FrameBuffer::sendPostWorkerCmd(const Post& post) {
+    m_postWorker->post(post.cb);
+    return WorkerProcessingResult::Continue;
 }
 
 void FrameBuffer::setPostCallback(
@@ -726,8 +737,9 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                 bool posted = false;
                 if (m_lastPostedColorBuffer) {
                     GL_LOG("setupSubwindow: draw last posted cb");
-                    posted = postImpl(m_lastPostedColorBuffer,
-                                      false /* not locking */);
+                    posted = true;
+                    // posted = postImpl(m_lastPostedColorBuffer,
+                    //                   false /* not locking */);
                     GL_LOG("setupSubwindow: draw last posted cb %s",
                            posted ? "succeeded" : "failed");
                 }
@@ -1481,20 +1493,22 @@ bool FrameBuffer::bind_locked() {
     return true;
 }
 
-bool FrameBuffer::bindSubwin_locked() {
+bool FrameBuffer::bindSubwin_locked(bool lazy) {
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
 
     if (prevContext != m_eglContext || prevReadSurf != m_eglSurface ||
         prevDrawSurf != m_eglSurface) {
+        fprintf(stderr, "%s: did a makeCurrent\n", __func__);
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
             ERR("eglMakeCurrent failed\n");
             return false;
         }
     } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
+        // fprintf(stderr, "%s: skipped a makeCurrent\n", __func__);
+        // ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     //
@@ -1511,6 +1525,28 @@ bool FrameBuffer::bindSubwin_locked() {
 }
 
 bool FrameBuffer::unbind_locked() {
+    EGLContext curContext = s_egl.eglGetCurrentContext();
+    EGLSurface curReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
+    EGLSurface curDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
+
+    if (m_prevContext != curContext || m_prevReadSurf != curReadSurf ||
+        m_prevDrawSurf != curDrawSurf) {
+        if (!s_egl.eglMakeCurrent(m_eglDisplay, m_prevDrawSurf, m_prevReadSurf,
+                                  m_prevContext)) {
+            return false;
+        }
+    }
+
+    m_prevContext = EGL_NO_CONTEXT;
+    m_prevReadSurf = EGL_NO_SURFACE;
+    m_prevDrawSurf = EGL_NO_SURFACE;
+    return true;
+}
+
+
+bool FrameBuffer::unbindSubwin_locked(bool lazy) {
+    if (lazy) return true;;
+
     EGLContext curContext = s_egl.eglGetCurrentContext();
     EGLSurface curReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface curDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1586,6 +1622,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
     }
+
     bool ret = false;
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
@@ -1597,44 +1634,55 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
 
     if (m_subWin) {
         markOpened(&c->second);
-        GLuint tex = c->second.cb->scale();
+        c->second.cb->touch();
+
+        if (!m_postThread.isStarted()) {
+            m_postWorker.reset(new PostWorker());
+            m_postThread.start();
+        }
+
+        m_postThread.enqueue({ c->second.cb.get() });
+        m_postThread.waitQueuedItems();
+
         // bind the subwindow eglSurface
-        if (needLockAndBind && !bindSubwin_locked()) {
-            ERR("FrameBuffer::postImpl(): eglMakeCurrent failed\n");
-            goto EXIT;
-        }
+        // if (needLockAndBind && !bindSubwin_locked()) {
+        //     ERR("FrameBuffer::postImpl(): eglMakeCurrent failed\n");
+        //     goto EXIT;
+        // }
 
-        // get the viewport
-        GLint vp[4];
-        s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
+        // GLuint tex = c->second.cb->scale();
 
-        // divide by device pixel ratio because windowing coordinates ignore
-        // DPR,
-        // but the framebuffer includes DPR
-        vp[2] = vp[2] / m_dpr;
-        vp[3] = vp[3] / m_dpr;
+        // // get the viewport
+        // GLint vp[4];
+        // s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
 
-        // find the x and y values at the origin when "fully scrolled"
-        // multiply by 2 because the texture goes from -1 to 1, not 0 to 1
-        float fx = 2.f * (vp[2] - m_windowWidth) / (float)vp[2];
-        float fy = 2.f * (vp[3] - m_windowHeight) / (float)vp[3];
+        // // divide by device pixel ratio because windowing coordinates ignore
+        // // DPR,
+        // // but the framebuffer includes DPR
+        // vp[2] = vp[2] / m_dpr;
+        // vp[3] = vp[3] / m_dpr;
 
-        // finally, compute translation values
-        float dx = m_px * fx;
-        float dy = m_py * fy;
+        // // find the x and y values at the origin when "fully scrolled"
+        // // multiply by 2 because the texture goes from -1 to 1, not 0 to 1
+        // float fx = 2.f * (vp[2] - m_windowWidth) / (float)vp[2];
+        // float fy = 2.f * (vp[3] - m_windowHeight) / (float)vp[3];
 
-        //
-        // render the color buffer to the window
-        //
-        ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
-        if (ret) {
-            s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
-        }
+        // // finally, compute translation values
+        // float dx = m_px * fx;
+        // float dy = m_py * fy;
 
-        // restore previous binding
-        if (needLockAndBind) {
-            unbind_locked();
-        }
+        // //
+        // // render the color buffer to the window
+        // //
+        // ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
+        // if (ret) {
+        //     s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+        // }
+
+        // // restore previous binding
+        // if (needLockAndBind) {
+        //     unbindSubwin_locked(true /*lazy*/);
+        // }
     } else {
         // If there is no sub-window, don't display anything, the client will
         // rely on m_onPost to get the pixels instead.
@@ -1715,7 +1763,8 @@ bool FrameBuffer::repost(bool needLockAndBind) {
     if (m_lastPostedColorBuffer &&
         sInitialized.load(std::memory_order_relaxed)) {
         GL_LOG("Has last posted colorbuffer and is initialized; post.");
-        return postImpl(m_lastPostedColorBuffer, needLockAndBind);
+        return true;
+        // return postImpl(m_lastPostedColorBuffer, needLockAndBind);
     } else {
         GL_LOG("No repost: no last posted color buffer");
         if (!sInitialized.load(std::memory_order_relaxed)) {
