@@ -28,7 +28,7 @@
 #include "qemu/iov.h"
 #include "hw/scsi/scsi.h"
 #include "block/scsi.h"
-#include "trace.h"
+#include "hw/scsi/trace.h"
 #include "qapi/error.h"
 #include "mfi.h"
 
@@ -291,7 +291,7 @@ static int megasas_map_sgl(MegasasState *s, MegasasCmd *cmd, union mfi_sgl *sgl)
     if (cmd->iov_size > iov_size) {
         trace_megasas_iovec_overflow(cmd->index, iov_size, cmd->iov_size);
     } else if (cmd->iov_size < iov_size) {
-        trace_megasas_iovec_underflow(cmd->iov_size, iov_size, cmd->iov_size);
+        trace_megasas_iovec_underflow(cmd->index, iov_size, cmd->iov_size);
     }
     cmd->iov_offset = 0;
     return 0;
@@ -683,14 +683,14 @@ static int megasas_map_dcmd(MegasasState *s, MegasasCmd *cmd)
         trace_megasas_dcmd_invalid_sge(cmd->index,
                                        cmd->frame->header.sge_count);
         cmd->iov_size = 0;
-        return -1;
+        return -EINVAL;
     }
     iov_pa = megasas_sgl_get_addr(cmd, &cmd->frame->dcmd.sgl);
     iov_size = megasas_sgl_get_len(cmd, &cmd->frame->dcmd.sgl);
     pci_dma_sglist_init(&cmd->qsg, PCI_DEVICE(s), 1);
     qemu_sglist_add(&cmd->qsg, iov_pa, iov_size);
     cmd->iov_size = iov_size;
-    return cmd->iov_size;
+    return 0;
 }
 
 static void megasas_finish_dcmd(MegasasCmd *cmd, uint32_t iov_size)
@@ -1559,19 +1559,20 @@ static const struct dcmd_cmd_tbl_t {
 
 static int megasas_handle_dcmd(MegasasState *s, MegasasCmd *cmd)
 {
-    int opcode, len;
+    int opcode;
     int retval = 0;
+    size_t len;
     const struct dcmd_cmd_tbl_t *cmdptr = dcmd_cmd_tbl;
 
     opcode = le32_to_cpu(cmd->frame->dcmd.opcode);
     trace_megasas_handle_dcmd(cmd->index, opcode);
-    len = megasas_map_dcmd(s, cmd);
-    if (len < 0) {
+    if (megasas_map_dcmd(s, cmd) < 0) {
         return MFI_STAT_MEMORY_NOT_AVAILABLE;
     }
     while (cmdptr->opcode != -1 && cmdptr->opcode != opcode) {
         cmdptr++;
     }
+    len = cmd->iov_size;
     if (cmdptr->opcode == -1) {
         trace_megasas_dcmd_unhandled(cmd->index, opcode, len);
         retval = megasas_dcmd_dummy(s, cmd);
@@ -1923,8 +1924,8 @@ static int megasas_handle_abort(MegasasState *s, MegasasCmd *cmd)
         abort_ctx &= (uint64_t)0xFFFFFFFF;
     }
     if (abort_cmd->context != abort_ctx) {
-        trace_megasas_abort_invalid_context(cmd->index, abort_cmd->index,
-                                            abort_cmd->context);
+        trace_megasas_abort_invalid_context(cmd->index, abort_cmd->context,
+                                            abort_cmd->index);
         s->event_count++;
         return MFI_STAT_ABORT_NOT_POSSIBLE;
     }
@@ -2288,7 +2289,7 @@ static const VMStateDescription vmstate_megasas_gen2 = {
     .minimum_version_id = 0,
     .minimum_version_id_old = 0,
     .fields      = (VMStateField[]) {
-        VMSTATE_PCIE_DEVICE(parent_obj, MegasasState),
+        VMSTATE_PCI_DEVICE(parent_obj, MegasasState),
         VMSTATE_MSIX(parent_obj, MegasasState),
 
         VMSTATE_INT32(fw_state, MegasasState),
@@ -2324,7 +2325,6 @@ static const struct SCSIBusInfo megasas_scsi_info = {
 
 static void megasas_scsi_realize(PCIDevice *dev, Error **errp)
 {
-    DeviceState *d = DEVICE(dev);
     MegasasState *s = MEGASAS(dev);
     MegasasBaseClass *b = MEGASAS_DEVICE_GET_CLASS(s);
     uint8_t *pci_conf;
@@ -2366,9 +2366,11 @@ static void megasas_scsi_realize(PCIDevice *dev, Error **errp)
 
     if (megasas_use_msix(s) &&
         msix_init(dev, 15, &s->mmio_io, b->mmio_bar, 0x2000,
-                  &s->mmio_io, b->mmio_bar, 0x3800, 0x68)) {
+                  &s->mmio_io, b->mmio_bar, 0x3800, 0x68, NULL)) {
+        /* TODO: check msix_init's error, and should fail on msix=on */
         s->msix = ON_OFF_AUTO_OFF;
     }
+
     if (pci_is_express(dev)) {
         pcie_endpoint_cap_init(dev, 0xa0);
     }
@@ -2423,9 +2425,6 @@ static void megasas_scsi_realize(PCIDevice *dev, Error **errp)
 
     scsi_bus_new(&s->bus, sizeof(s->bus), DEVICE(dev),
                  &megasas_scsi_info, NULL);
-    if (!d->hotplugged) {
-        scsi_bus_legacy_handle_cmdline(&s->bus, errp);
-    }
 }
 
 static Property megasas_properties_gen1[] = {

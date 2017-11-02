@@ -27,7 +27,7 @@ namespace qemu2 {
 class CharSerialLine : public android::SerialLine {
 public:
     // takes ownership of |cs|, deletes it in destructor
-    CharSerialLine(CharDriverState* cs);
+    CharSerialLine(Chardev* dev);
 
     ~CharSerialLine();
 
@@ -35,7 +35,7 @@ public:
 
     virtual int write(const uint8_t* data, int len);
 
-    CharDriverState* state() const { return mBackend.chr; }
+    Chardev* state() const { return mBackend.chr; }
 
 private:
     DISALLOW_COPY_AND_ASSIGN(CharSerialLine);
