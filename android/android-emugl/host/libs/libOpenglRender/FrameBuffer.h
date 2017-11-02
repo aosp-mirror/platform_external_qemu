@@ -35,6 +35,7 @@
 
 #include <EGL/egl.h>
 
+#include <functional>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -415,6 +416,16 @@ public:
     int getZrot() { return m_zRot; }
     bool bindSubwin_locked();
 
+    void resetFrameTimes_locked() {
+        m_frameTimes.clear();
+        m_allContextBinds.clear();
+        m_allHelperBinds.clear();
+    }
+
+    void dumpFrameTimes(long long* buf,
+                        unsigned int count,
+                        unsigned int* actualCount);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -448,6 +459,7 @@ private:
     bool m_fpsStats = false;
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
+    long long m_lastFrameTime = 0;
 
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
@@ -553,5 +565,11 @@ private:
     android::base::WorkerThread<Post> m_postThread;
     android::base::WorkerProcessingResult postWorkerFunc(const Post& post);
     void sendPostWorkerCmd(Post post);
+    emugl::Mutex m_frameTimesLock;
+    std::vector<long long> m_frameTimes = {};
+    std::vector<long long> m_allContextBinds = {};
+    std::vector<long long> m_allHelperBinds = {};
+
+    void appendTime(std::vector<long long>& times, uint64_t elapsedUs);
 };
 #endif

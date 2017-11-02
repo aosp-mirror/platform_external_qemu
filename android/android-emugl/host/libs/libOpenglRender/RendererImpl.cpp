@@ -349,6 +349,13 @@ void RendererImpl::repaintOpenGLDisplay() {
     mRenderWindow->repaint();
 }
 
+void RendererImpl::getFrameTimes(long long* buf,
+                                 unsigned int capacity,
+                                 unsigned int* actual_frames) {
+    assert(mRenderWindow);
+    mRenderWindow->getFrameTimes(buf, capacity, actual_frames);
+}
+
 void RendererImpl::cleanupProcGLObjects(uint64_t puid) {
     mCleanupThread->cleanup(puid);
 }

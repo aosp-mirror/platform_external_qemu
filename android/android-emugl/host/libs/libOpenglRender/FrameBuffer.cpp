@@ -29,6 +29,7 @@
 #include "android/base/files/StreamSerializing.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
+#include "android/base/Profiler.h"
 #include "android/base/system/System.h"
 
 #include "emugl/common/feature_control.h"
@@ -40,6 +41,7 @@
 
 using android::base::AutoLock;
 using android::base::LazyInstance;
+using android::base::ScopedProfiler;
 using android::base::Stream;
 using android::base::System;
 using android::base::WorkerProcessingResult;
@@ -530,6 +532,9 @@ void FrameBuffer::setMaxGLESVersion(GLESDispatchMaxVersion version) {
 GLESDispatchMaxVersion FrameBuffer::getMaxGLESVersion() {
     return sMaxGLESVersion;
 }
+
+#define FBPROFILE(tag, vec) \
+    ScopedProfiler tag##_profile(#tag, [this](const char* tag, uint64_t elapsedUs) { appendTime(vec, elapsedUs); });
 
 FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
     : m_framebufferWidth(p_width),
@@ -1309,6 +1314,7 @@ bool FrameBuffer::bindColorBufferToRenderbuffer(HandleType p_colorbuffer) {
 bool FrameBuffer::bindContext(HandleType p_context,
                               HandleType p_drawSurface,
                               HandleType p_readSurface) {
+    FBPROFILE(bindContext, m_allContextBinds);
     if (m_shuttingDown) {
         return false;
     }
@@ -1482,6 +1488,7 @@ EGLBoolean FrameBuffer::destroyClientImage(HandleType image) {
 // The framebuffer lock should be held when calling this function !
 //
 bool FrameBuffer::bind_locked() {
+    FBPROFILE(helperBinds, m_allHelperBinds);
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1505,6 +1512,7 @@ bool FrameBuffer::bind_locked() {
 }
 
 bool FrameBuffer::bindSubwin_locked() {
+
     EGLContext prevContext = s_egl.eglGetCurrentContext();
     EGLSurface prevReadSurf = s_egl.eglGetCurrentSurface(EGL_READ);
     EGLSurface prevDrawSurf = s_egl.eglGetCurrentSurface(EGL_DRAW);
@@ -1528,6 +1536,7 @@ bool FrameBuffer::bindSubwin_locked() {
     m_prevContext = prevContext;
     m_prevReadSurf = prevReadSurf;
     m_prevDrawSurf = prevDrawSurf;
+
     return true;
 }
 
@@ -1604,6 +1613,7 @@ bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
 }
 
 bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
+
     if (needLockAndBind) {
         m_lock.lock();
     }
@@ -1636,14 +1646,24 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     //
     // output FPS statistics
     //
-    if (m_fpsStats) {
+    {
         long long currTime = System::get()->getHighResTimeUs() / 1000;
-        m_statsNumFrames++;
-        if (currTime - m_statsStartTime >= 1000) {
-            float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
-            printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
-            m_statsStartTime = currTime;
-            m_statsNumFrames = 0;
+        long long frameTime = currTime - m_lastFrameTime;
+        m_lastFrameTime = currTime;
+
+        m_frameTimesLock.lock();
+        m_frameTimes.push_back(frameTime);
+        m_frameTimesLock.unlock();
+
+        if (m_fpsStats) {
+            long long frameTimeFromStart = currTime - m_statsStartTime;
+            m_statsNumFrames++;
+            if (frameTimeFromStart >= 1000) {
+                float dt = (float)(frameTimeFromStart) / 1000.0f;
+                printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
+                m_statsStartTime = currTime;
+                m_statsNumFrames = 0;
+            }
         }
     }
 
@@ -1676,6 +1696,32 @@ EXIT:
         m_lock.unlock();
     }
     return ret;
+}
+
+void FrameBuffer::dumpFrameTimes(long long* buf,
+                                 unsigned int count,
+                                 unsigned int* actualCount) {
+    *actualCount =
+        std::min((unsigned int)m_frameTimes.size(), count);
+    size_t startCountingFrom =
+        m_frameTimes.size() - *actualCount;
+
+    m_frameTimesLock.lock();
+    memcpy(buf, &m_frameTimes[startCountingFrom],
+           sizeof(long long) * (*actualCount));
+
+    if (*actualCount) {
+        auto maxFrameIt = std::max_element(m_frameTimes.begin(), m_frameTimes.end());
+        auto maxContextBindIt = std::max_element(m_allContextBinds.begin(), m_allContextBinds.end());
+        auto maxHelperBindIt = std::max_element(m_allHelperBinds.begin(), m_allHelperBinds.end());
+        fprintf(stderr, "%s: maxs: frame %lld allContextBinds %lld allHelperBinds %lld\n", __func__,
+                *maxFrameIt,
+                *maxContextBindIt,
+                *maxHelperBindIt);
+    }
+
+    resetFrameTimes_locked();
+    m_frameTimesLock.unlock();
 }
 
 void FrameBuffer::doPostCallback(void* pixels) {
@@ -1935,4 +1981,10 @@ void FrameBuffer::lock() {
 
 void FrameBuffer::unlock() {
     m_lock.unlock();
+}
+
+void FrameBuffer::appendTime(std::vector<long long>& times,
+                             uint64_t elapsedUs) {
+    AutoLock lock(m_frameTimesLock);
+    times.push_back(elapsedUs / 1000);
 }

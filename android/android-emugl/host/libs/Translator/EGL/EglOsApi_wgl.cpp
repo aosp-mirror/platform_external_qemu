@@ -299,7 +299,7 @@ HWND createDummyWindow() {
 #define LIST_WGL_ARB_create_context_FUNCTIONS(X) \
     X(HGLRC, wglCreateContextAttribsARB, (HDC hDC, HGLRC hshareContext, const int *attribList)) \
 
-// List of functions define by WGL_EXT_swap_control
+// List of functions defined by WGL_EXT_swap_control
 #define LIST_WGL_EXT_swap_control_FUNCTIONS(X) \
     X(void, wglSwapIntervalEXT, (int)) \
     X(int, wglGetSwapIntervalEXT, (void)) \

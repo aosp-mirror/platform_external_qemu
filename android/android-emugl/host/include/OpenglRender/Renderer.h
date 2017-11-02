@@ -144,6 +144,11 @@ public:
     //    latest framebuffer content.
     virtual void repaintOpenGLDisplay() = 0;
 
+    // getFrameTimes -
+    //    retrieves stats for the last |capacity| frames into |buf|
+    //    and outputs |actual_frames| for how many actual frames elapsed.
+    virtual void getFrameTimes(long long* buf, unsigned int capacity, unsigned int* actual_frames) = 0;
+
     // cleanupProcGLObjects -
     //    clean up all per-process resources when guest process exits (or is
     // killed). Such resources include color buffer handles and EglImage handles.
