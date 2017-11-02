@@ -117,6 +117,7 @@ GLEScmContext::GLEScmContext(int maj, int min,
         m_clientActiveTexture = stream->getBe32();
         if (m_initialized) {
             uint32_t size = stream->getBe32();
+            assert(size == s_glSupport.maxTexUnits);
             m_texCoords = new GLESpointer[size];
             for (uint32_t i = 0; i < size; i++) {
                 m_texCoords[i].onLoad(stream);
@@ -248,11 +249,23 @@ void GLEScmContext::postLoadRestoreCtx() {
             }
             dispatcher.glMatrixMode(mCurrMatrixMode);
             dispatcher.glActiveTexture(GL_TEXTURE0 + m_activeTexture);
+
             for (const auto& it : *m_currVaoState.it->second.arraysMap) {
-                if (it.second->isEnable()) {
+                if (it.first != GL_TEXTURE_COORD_ARRAY &&
+                        it.second->isEnable()) {
                     dispatcher.glEnableClientState(it.first);
                 }
             }
+
+            for (int i = 0; i < s_glSupport.maxTexUnits; i++) {
+                GLESpointer* texcoord = m_texCoords + i;
+                if (texcoord->isEnable()) {
+                    dispatcher.glClientActiveTexture(i + GL_TEXTURE0);
+                    dispatcher.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+                }
+            }
+            dispatcher.glClientActiveTexture(
+                    m_clientActiveTexture + GL_TEXTURE0);
         }
     }
     GLEScontext::postLoadRestoreCtx();
@@ -260,6 +273,7 @@ void GLEScmContext::postLoadRestoreCtx() {
 
 //setting client side arr
 void GLEScmContext::setupArr(const GLvoid* arr,GLenum arrayType,GLenum dataType,GLint size,GLsizei stride,GLboolean normalized, int index, bool isInt){
+    assert(arr);
     if( arr == NULL) return;
     switch(arrayType) {
         case GL_VERTEX_ARRAY:
@@ -286,6 +300,7 @@ void GLEScmContext::setupArrayPointerHelper(GLESConversionArrays& cArrs,GLint fi
         GLenum dataType = p->getType();
 
         if(needConvert(cArrs,first,count,type,indices,direct,p,array_id)){
+            //assert(0);
             //conversion has occured
             ArrayData currentArr = cArrs.getCurrentArray();
             setupArr(currentArr.data,array_id,currentArr.type,size,currentArr.stride,GL_FALSE, cArrs.getCurrentIndex());
@@ -304,8 +319,14 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 
         GLenum array_id   = (*it).first;
         GLESpointer* p = (*it).second;
-        if(!p->isEnable()) continue;
         if(array_id == GL_TEXTURE_COORD_ARRAY) continue; //handling textures later
+        assert((array_id < s_glSupport.maxVertexAttribs && !p->isEnable()) ||
+                s_glDispatch.glIsEnabled(array_id) == p->isEnable());
+        if (GLenum err = s_glDispatch.glGetError()) {
+            fprintf(stderr, "glIsEnabled(0x%x) got error 0x%x\n", array_id, err);
+            assert(0);
+        }
+        if(!p->isEnable()) continue;
         setupArrayPointerHelper(cArrs,first,count,type,indices,direct,array_id,p);
     }
 
@@ -324,6 +345,11 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 
         GLenum array_id   = GL_TEXTURE_COORD_ARRAY;
         GLESpointer* p = m_currVaoState[array_id];
+        assert(s_glDispatch.glIsEnabled(array_id) == p->isEnable());
+        if (GLenum err = s_glDispatch.glGetError()) {
+            fprintf(stderr, "glIsEnabled(0x%x) got error 0x%x\n", array_id, err);
+            assert(0);
+        }
         if(!p->isEnable()) continue;
         setupArrayPointerHelper(cArrs,first,count,type,indices,direct,array_id,p);
     }
@@ -504,9 +530,11 @@ bool GLEScmContext::needConvert(GLESConversionArrays& cArrs,GLint first,GLsizei 
       (*) array type is byte but it is not vertex or texture array
       (*) array type is not fixed
     */
+    //if (arrType != GL_BYTE) return false;
     if((arrType != GL_FIXED) && (arrType != GL_BYTE)) return false;
     if((arrType == GL_BYTE   && (array_id != GL_VERTEX_ARRAY)) &&
        (arrType == GL_BYTE   && (array_id != GL_TEXTURE_COORD_ARRAY)) ) return false;
+    //assert(0);
 
 
     bool byteVBO = (arrType == GL_BYTE) && usingVBO;
@@ -1074,6 +1102,7 @@ void GLEScmContext::drawTexOES(float x, float y, float z, float width, float hei
         gl.glLoadIdentity();
         //backup vbo's
         int array_buffer,element_array_buffer;
+        
         gl.glGetIntegerv(GL_ARRAY_BUFFER_BINDING,&array_buffer);
         gl.glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,&element_array_buffer);
         gl.glBindBuffer(GL_ARRAY_BUFFER,0);
@@ -1116,10 +1145,18 @@ void GLEScmContext::drawTexOES(float x, float y, float z, float width, float hei
 
         if (nTexPtrs>0) {
             //draw rectangle - only if we have some textures enabled & ready
+            bool enabled_vertex = gl.glIsEnabled(GL_VERTEX_ARRAY);
+            bool enabled_texcoord = gl.glIsEnabled(GL_TEXTURE_COORD_ARRAY);
             gl.glEnableClientState(GL_VERTEX_ARRAY);
             gl.glVertexPointer(3,GL_FLOAT,0,vertices);
             gl.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
             gl.glDrawArrays(GL_TRIANGLE_FAN,0,4);
+            if (!enabled_vertex) {
+                gl.glDisableClientState(GL_VERTEX_ARRAY);
+            }
+            if (!enabled_texcoord) {
+                gl.glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+            }
         }
 
         //restore vbo's
@@ -1208,14 +1245,16 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
 
     drawValidate();
 
-    if (m_coreProfileEngine) {
-        GLuint prev_vbo;
-        GLuint prev_ibo;
-        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_vbo);
-        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_ibo);
+    GLuint prev_vbo;
+    GLuint prev_ibo;
+    dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_vbo);
+    dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_ibo);
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    if (m_coreProfileEngine) {
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1237,8 +1276,6 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawArrays(mode, first, count);
-        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
-        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
     } else {
         GLESConversionArrays tmpArrs;
 
@@ -1250,6 +1287,8 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
             dispatcher().glDrawArrays(mode,first,count);
         }
     }
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
 }
 
 void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
@@ -1262,15 +1301,16 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         indices = buf + SafeUIntFromPointer(indices);
     }
 
-    if (m_coreProfileEngine) {
-        // track previous vbo/ibo
-        GLuint prev_vbo;
-        GLuint prev_ibo;
-        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_vbo);
-        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_ibo);
+    GLuint prev_vbo;
+    GLuint prev_ibo;
+    dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_vbo);
+    dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_ibo);
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    if (m_coreProfileEngine) {
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1292,9 +1332,7 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawElements(mode, count, type, indices);
-        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
-        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
-    } else {
+   } else {
         GLESConversionArrays tmpArrs;
 
         setupArraysPointers(tmpArrs,0,count,type,indices,false);
@@ -1305,6 +1343,8 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
             dispatcher().glDrawElements(mode,count,type,indices);
         }
     }
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
 }
 
 void GLEScmContext::clientActiveTexture(GLenum texture) {

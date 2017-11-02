@@ -477,6 +477,7 @@ GL_API void GL_APIENTRY  glClientActiveTexture( GLenum texture) {
     GET_CTX_CM()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::textureEnum(texture,ctx->getMaxTexUnits()),GL_INVALID_ENUM);
+    ctx->setClientActiveTexture(texture);
     ctx->clientActiveTexture(texture);
 }
 

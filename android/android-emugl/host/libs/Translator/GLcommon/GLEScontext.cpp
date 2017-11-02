@@ -893,6 +893,7 @@ void GLEScontext::enableArr(GLenum arr,bool enable) {
 }
 
 bool GLEScontext::isArrEnabled(GLenum arr) {
+    assert(m_currVaoState.find(arr) != m_currVaoState.end());
     return m_currVaoState[arr]->isEnable();
 }
 
