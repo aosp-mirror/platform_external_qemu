@@ -13,13 +13,14 @@
  */
 
 #include "qemu/osdep.h"
-#include "trace.h"
+#include "util/trace.h"
 #include "qemu-common.h"
 #include "qemu/thread.h"
 #include "qemu/thread_local.h"
 #include "qemu/atomic.h"
 #include "qemu/coroutine.h"
 #include "qemu/coroutine_int.h"
+#include "block/aio.h"
 
 enum {
 #if defined(_WIN32) && !defined(_WIN64)
@@ -114,12 +115,12 @@ static void coroutine_delete(Coroutine *co)
     qemu_coroutine_delete(co);
 }
 
-void qemu_coroutine_enter(Coroutine *co)
+void qemu_aio_coroutine_enter(AioContext *ctx, Coroutine *co)
 {
     Coroutine *self = qemu_coroutine_self();
     CoroutineAction ret;
 
-    trace_qemu_coroutine_enter(self, co, co->entry_arg);
+    trace_qemu_aio_coroutine_enter(ctx, self, co, co->entry_arg);
 
     if (co->caller) {
         fprintf(stderr, "Co-routine re-entered recursively\n");
@@ -127,6 +128,13 @@ void qemu_coroutine_enter(Coroutine *co)
     }
 
     co->caller = self;
+    co->ctx = ctx;
+
+    /* Store co->ctx before anything that stores co.  Matches
+     * barrier in aio_co_wake and qemu_co_mutex_wake.
+     */
+    smp_wmb();
+
     ret = qemu_coroutine_switch(self, co, COROUTINE_ENTER);
 
     qemu_co_queue_run_restart(co);
@@ -141,6 +149,18 @@ void qemu_coroutine_enter(Coroutine *co)
         return;
     default:
         abort();
+    }
+}
+
+void qemu_coroutine_enter(Coroutine *co)
+{
+    qemu_aio_coroutine_enter(qemu_get_current_aio_context(), co);
+}
+
+void qemu_coroutine_enter_if_inactive(Coroutine *co)
+{
+    if (!qemu_coroutine_entered(co)) {
+        qemu_coroutine_enter(co);
     }
 }
 

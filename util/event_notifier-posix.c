@@ -81,22 +81,15 @@ void event_notifier_cleanup(EventNotifier *e)
 {
     if (e->rfd != e->wfd) {
         close(e->rfd);
+        e->rfd = -1;
     }
     close(e->wfd);
+    e->wfd = -1;
 }
 
 int event_notifier_get_fd(const EventNotifier *e)
 {
     return e->rfd;
-}
-
-int event_notifier_set_handler(EventNotifier *e,
-                               bool is_external,
-                               EventNotifierHandler *handler)
-{
-    aio_set_fd_handler(iohandler_get_aio_context(), e->rfd, is_external,
-                       (IOHandler *)handler, NULL, e);
-    return 0;
 }
 
 int event_notifier_set(EventNotifier *e)

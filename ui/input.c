@@ -4,7 +4,7 @@
 #include "qapi-types.h"
 #include "qemu/error-report.h"
 #include "qmp-commands.h"
-#include "trace.h"
+#include "ui/trace.h"
 #include "ui/input.h"
 #include "ui/console.h"
 #include "sysemu/replay.h"
