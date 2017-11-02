@@ -13,7 +13,7 @@
 #include "qemu/osdep.h"
 #include "sysemu/char.h"
 #include "qemu/error-report.h"
-#include "trace.h"
+#include "hw/char/trace.h"
 #include "hw/virtio/virtio-serial.h"
 #include "qapi-event.h"
 
@@ -168,7 +168,7 @@ static void virtconsole_realize(DeviceState *dev, Error **errp)
     VirtIOSerialPort *port = VIRTIO_SERIAL_PORT(dev);
     VirtConsole *vcon = VIRTIO_CONSOLE(dev);
     VirtIOSerialPortClass *k = VIRTIO_SERIAL_PORT_GET_CLASS(dev);
-    CharDriverState *chr = qemu_chr_fe_get_driver(&vcon->chr);
+    Chardev *chr = qemu_chr_fe_get_driver(&vcon->chr);
 
     if (port->id == 0 && !k->is_console) {
         error_setg(errp, "Port number 0 on virtio-serial devices reserved "

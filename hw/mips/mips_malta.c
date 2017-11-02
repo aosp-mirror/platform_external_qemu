@@ -551,10 +551,10 @@ static void malta_fgpa_display_event(void *opaque, int event)
 }
 
 static MaltaFPGAState *malta_fpga_init(MemoryRegion *address_space,
-         hwaddr base, qemu_irq uart_irq, CharDriverState *uart_chr)
+         hwaddr base, qemu_irq uart_irq, Chardev *uart_chr)
 {
     MaltaFPGAState *s;
-    CharDriverState *chr;
+    Chardev *chr;
 
     s = (MaltaFPGAState *)g_malloc0(sizeof(MaltaFPGAState));
 
@@ -1264,6 +1264,7 @@ static void mips_malta_machine_init(MachineClass *mc)
 {
     mc->desc = "MIPS Malta Core LV";
     mc->init = mips_malta_init;
+    mc->block_default_type = IF_IDE;
     mc->max_cpus = 16;
     mc->is_default = 1;
 }

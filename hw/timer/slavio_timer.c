@@ -27,7 +27,7 @@
 #include "qemu/timer.h"
 #include "hw/ptimer.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/timer/trace.h"
 #include "qemu/main-loop.h"
 
 /*

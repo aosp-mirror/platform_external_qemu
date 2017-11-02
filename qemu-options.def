@@ -1,5 +1,5 @@
 
-DEFHEADING(Standard options:)
+DEFHEADING(Standard options)
 
 DEF("help", 0, QEMU_OPTION_h,
 "-h or -help     display this help and exit\n", QEMU_ARCH_ALL)
@@ -12,7 +12,6 @@ DEF("machine", HAS_ARG, QEMU_OPTION_machine, \
 "                selects emulated machine ('-machine help' for list)\n"
 "                property accel=accel1[:accel2[:...]] selects accelerator\n"
 "                supported accelerators are kvm, xen, tcg (default: tcg)\n"
-"                kernel_irqchip=on|off controls accelerated irqchip support\n"
 "                kernel_irqchip=on|off|split controls accelerated irqchip support (default=off)\n"
 "                vmport=on|off|auto controls emulation of vmport (default: auto)\n"
 "                kvm_shadow_mem=size of KVM shadow MMU in bytes\n"
@@ -31,6 +30,11 @@ DEF("M", HAS_ARG, QEMU_OPTION_M, "", QEMU_ARCH_ALL)
 DEF("cpu", HAS_ARG, QEMU_OPTION_cpu,
 "-cpu cpu        select CPU ('-cpu help' for list)\n", QEMU_ARCH_ALL)
 
+DEF("accel", HAS_ARG, QEMU_OPTION_accel,
+"-accel [accel=]accelerator[,thread=single|multi]\n"
+"               select accelerator ('-accel help for list')\n"
+"               thread=single|multi (enable multi-threaded TCG)", QEMU_ARCH_ALL)
+
 DEF("smp", HAS_ARG, QEMU_OPTION_smp,
 "-smp [cpus=]n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]\n"
 "                set the number of CPUs to 'n' [default=1]\n"
@@ -42,8 +46,8 @@ DEF("smp", HAS_ARG, QEMU_OPTION_smp,
 QEMU_ARCH_ALL)
 
 DEF("numa", HAS_ARG, QEMU_OPTION_numa,
-"-numa node[,mem=size][,cpus=cpu[-cpu]][,nodeid=node]\n"
-"-numa node[,memdev=id][,cpus=cpu[-cpu]][,nodeid=node]\n", QEMU_ARCH_ALL)
+"-numa node[,mem=size][,cpus=firstcpu[-lastcpu]][,nodeid=node]\n"
+"-numa node[,memdev=id][,cpus=firstcpu[-lastcpu]][,nodeid=node]\n", QEMU_ARCH_ALL)
 
 DEF("add-fd", HAS_ARG, QEMU_OPTION_add_fd,
 "-add-fd fd=fd,set=set[,opaque=opaque]\n"
@@ -70,7 +74,7 @@ DEF("boot", HAS_ARG, QEMU_OPTION_boot,
 QEMU_ARCH_ALL)
 
 DEF("m", HAS_ARG, QEMU_OPTION_m,
-"-m[emory] [size=]megs[,slots=n,maxmem=size]\n"
+"-m [size=]megs[,slots=n,maxmem=size]\n"
 "                configure guest RAM\n"
 "                size: initial amount of guest memory\n"
 "                slots: number of hotplug slots (default: none)\n"
@@ -131,7 +135,7 @@ DEF("uuid", HAS_ARG, QEMU_OPTION_uuid,
 
 DEFHEADING()
 
-DEFHEADING(Block device options:)
+DEFHEADING(Block device options)
 
 DEF("fda", HAS_ARG, QEMU_OPTION_fda,
 "-fda/-fdb file  use 'file' as floppy disk 0/1 image\n", QEMU_ARCH_ALL)
@@ -147,6 +151,13 @@ DEF("hdd", HAS_ARG, QEMU_OPTION_hdd, "", QEMU_ARCH_ALL)
 DEF("cdrom", HAS_ARG, QEMU_OPTION_cdrom,
 "-cdrom file     use 'file' as IDE cdrom image (cdrom is ide1 master)\n",
 QEMU_ARCH_ALL)
+
+DEF("blockdev", HAS_ARG, QEMU_OPTION_blockdev,
+"-blockdev [driver=]driver[,node-name=N][,discard=ignore|unmap]\n"
+"          [,cache.direct=on|off][,cache.no-flush=on|off]\n"
+"          [,read-only=on|off][,detect-zeroes=on|off|unmap]\n"
+"          [,driver specific parameters...]\n"
+"                configure a block backend\n", QEMU_ARCH_ALL)
 
 DEF("drive", HAS_ARG, QEMU_OPTION_drive,
 "-drive [file=file][,if=type][,bus=n][,unit=m][,media=d][,index=i]\n"
@@ -186,7 +197,12 @@ QEMU_ARCH_ALL)
 
 DEF("fsdev", HAS_ARG, QEMU_OPTION_fsdev,
 "-fsdev fsdriver,id=id[,path=path,][security_model={mapped-xattr|mapped-file|passthrough|none}]\n"
-" [,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd]\n",
+" [,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd]\n"
+" [[,throttling.bps-total=b]|[[,throttling.bps-read=r][,throttling.bps-write=w]]]\n"
+" [[,throttling.iops-total=i]|[[,throttling.iops-read=r][,throttling.iops-write=w]]]\n"
+" [[,throttling.bps-total-max=bm]|[[,throttling.bps-read-max=rm][,throttling.bps-write-max=wm]]]\n"
+" [[,throttling.iops-total-max=im]|[[,throttling.iops-read-max=irm][,throttling.iops-write-max=iwm]]]\n"
+" [[,throttling.iops-size=is]]\n",
 QEMU_ARCH_ALL)
 
 
@@ -202,7 +218,7 @@ QEMU_ARCH_ALL)
 
 DEFHEADING()
 
-DEFHEADING(USB options:)
+DEFHEADING(USB options)
 
 DEF("usb", 0, QEMU_OPTION_usb,
 "-usb            enable the USB driver (will be the default soon)\n",
@@ -214,11 +230,11 @@ QEMU_ARCH_ALL)
 
 DEFHEADING()
 
-DEFHEADING(Display options:)
+DEFHEADING(Display options)
 
 DEF("display", HAS_ARG, QEMU_OPTION_display,
 "-display sdl[,frame=on|off][,alt_grab=on|off][,ctrl_grab=on|off]\n"
-"            [,window_close=on|off][,gl=on|off]|curses|none|\n"
+"            [,window_close=on|off][,gl=on|off]\n"
 "-display gtk[,grab_on_hover=on|off][,gl=on|off]|\n"
 "-display vnc=<display>[,<optargs>]\n"
 "-display curses\n"
@@ -279,7 +295,7 @@ DEF("spice", HAS_ARG, QEMU_OPTION_spice,
 "       [,streaming-video=[off|all|filter]][,disable-copy-paste]\n"
 "       [,disable-agent-file-xfer][,agent-mouse=[on|off]]\n"
 "       [,playback-compression=[on|off]][,seamless-migration=[on|off]]\n"
-"       [,gl=[on|off]]\n"
+"       [,gl=[on|off]][,rendernode=<file>]\n"
 "   enable spice\n"
 "   at least one of {port, tls-port} is mandatory\n",
 QEMU_ARCH_ALL)
@@ -308,7 +324,7 @@ DEF("vnc", HAS_ARG, QEMU_OPTION_vnc ,
 
 ARCHHEADING(, QEMU_ARCH_I386)
 
-ARCHHEADING(i386 target only:, QEMU_ARCH_I386)
+ARCHHEADING(i386 target only, QEMU_ARCH_I386)
 
 DEF("win2k-hack", 0, QEMU_OPTION_win2k_hack,
 "-win2k-hack     use it when installing Windows 2000 to avoid a disk full bug\n",
@@ -355,7 +371,7 @@ QEMU_ARCH_I386 | QEMU_ARCH_ARM)
 
 DEFHEADING()
 
-DEFHEADING(Network options:)
+DEFHEADING(Network options)
 
 #ifdef CONFIG_SLIRP
 DEF("tftp", HAS_ARG, QEMU_OPTION_tftp, "", QEMU_ARCH_ALL)
@@ -493,7 +509,7 @@ DEF("net", HAS_ARG, QEMU_OPTION_net,
 
 DEFHEADING()
 
-DEFHEADING(Character device options:)
+DEFHEADING(Character device options)
 
 DEF("chardev", HAS_ARG, QEMU_OPTION_chardev,
 "-chardev help\n"
@@ -541,7 +557,7 @@ DEF("chardev", HAS_ARG, QEMU_OPTION_chardev,
 
 DEFHEADING()
 
-DEFHEADING(Device URL Syntax:)
+DEFHEADING(Device URL Syntax)
 DEF("iscsi", HAS_ARG, QEMU_OPTION_iscsi,
 "-iscsi [user=user][,password=password]\n"
 "       [,header-digest=CRC32C|CR32C-NONE|NONE-CRC32C|NONE\n"
@@ -550,7 +566,7 @@ DEF("iscsi", HAS_ARG, QEMU_OPTION_iscsi,
 "                iSCSI session parameters\n", QEMU_ARCH_ALL)
 
 
-DEFHEADING(Bluetooth(R) options:)
+DEFHEADING(Bluetooth(R) options)
 
 DEF("bt", HAS_ARG, QEMU_OPTION_bt, \
 "-bt hci,null    dumb bluetooth HCI - doesn't respond to commands\n" \
@@ -567,7 +583,7 @@ QEMU_ARCH_ALL)
 DEFHEADING()
 
 #ifdef CONFIG_TPM
-DEFHEADING(TPM device options:)
+DEFHEADING(TPM device options)
 
 DEF("tpmdev", HAS_ARG, QEMU_OPTION_tpmdev, \
 "-tpmdev passthrough,id=id[,path=path][,cancel-path=path]\n"
@@ -580,7 +596,7 @@ DEFHEADING()
 
 #endif
 
-DEFHEADING(Linux/Multiboot boot specific:)
+DEFHEADING(Linux/Multiboot boot specific)
 
 DEF("kernel", HAS_ARG, QEMU_OPTION_kernel, \
 "-kernel bzImage use 'bzImage' as kernel image\n", QEMU_ARCH_ALL)
@@ -596,7 +612,7 @@ DEF("dtb", HAS_ARG, QEMU_OPTION_dtb, \
 
 DEFHEADING()
 
-DEFHEADING(Debug/Expert options:)
+DEFHEADING(Debug/Expert options)
 
 DEF("fw_cfg", HAS_ARG, QEMU_OPTION_fwcfg,
 "-fw_cfg [name=]<name>,file=<file>\n"
@@ -724,7 +740,7 @@ QEMU_ARCH_ALL)
 
 
 DEF("icount", HAS_ARG, QEMU_OPTION_icount, \
-"-icount [shift=N|auto][,align=on|off][,sleep=on|off,rr=record|replay,rrfile=<filename>]\n" \
+"-icount [shift=N|auto][,align=on|off][,sleep=on|off,rr=record|replay,rrfile=<filename>,rrsnapshot=<snapshot>]\n" \
 "                enable virtual instruction counter with 2^N clock ticks per\n" \
 "                instruction, enable aligning the host and virtual clocks\n" \
 "                or disable real time cpu sleeping\n", QEMU_ARCH_ALL)
@@ -766,6 +782,9 @@ DEF("incoming", HAS_ARG, QEMU_OPTION_incoming, \
 "-incoming defer\n" \
 "                wait for the URI to be specified via migrate_incoming\n",
 QEMU_ARCH_ALL)
+
+DEF("only-migratable", 0, QEMU_OPTION_only_migratable, \
+"-only-migratable     allow only migratable devices\n", QEMU_ARCH_ALL)
 
 DEF("nodefaults", 0, QEMU_OPTION_nodefaults, \
 "-nodefaults     don't create default devices\n", QEMU_ARCH_ALL)
@@ -854,6 +873,7 @@ DEF("dump-vmstate", HAS_ARG, QEMU_OPTION_dump_vmstate,
 "                by comparing two such vmstate dumps.\n",
 QEMU_ARCH_ALL)
 
+DEFHEADING()
 DEFHEADING(Generic object creation)
 
 DEF("object", HAS_ARG, QEMU_OPTION_object,

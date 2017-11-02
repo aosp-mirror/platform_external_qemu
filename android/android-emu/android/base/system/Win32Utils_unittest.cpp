@@ -13,8 +13,7 @@
 // limitations under the License.
 
 // Define WINVER and _WIN32_WINNT to 0x0600 which matches Windows Vista.
-// This is to get GetThreadUILanguage(). This is ok since this unit-test
-// will only run on recent versions of Windows or under Wine on Linux.
+// This is to get GetThreadUILanguage().
 #ifdef WINVER
 #undef WINVER
 #endif

@@ -25,7 +25,7 @@
 #include "qemu/error-report.h"
 #include "qemu/queue.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/char/trace.h"
 #include "hw/virtio/virtio-serial.h"
 #include "hw/virtio/virtio-access.h"
 
@@ -724,6 +724,7 @@ static void virtio_serial_post_load_timer_cb(void *opaque)
         }
     }
     g_free(s->post_load->connected);
+    timer_del(s->post_load->timer);
     timer_free(s->post_load->timer);
     g_free(s->post_load);
     s->post_load = NULL;
@@ -732,6 +733,7 @@ static void virtio_serial_post_load_timer_cb(void *opaque)
 static int fetch_active_ports_list(QEMUFile *f,
                                    VirtIOSerial *s, uint32_t nr_active_ports)
 {
+    VirtIODevice *vdev = VIRTIO_DEVICE(s);
     uint32_t i;
 
     s->post_load = g_malloc0(sizeof(*s->post_load));
@@ -765,7 +767,7 @@ static int fetch_active_ports_list(QEMUFile *f,
             qemu_get_be64s(f, &port->iov_offset);
 
             port->elem =
-                qemu_get_virtqueue_element(f, sizeof(VirtQueueElement));
+                qemu_get_virtqueue_element(vdev, f, sizeof(VirtQueueElement));
 
             /*
              *  Port was throttled on source machine.  Let's

@@ -169,6 +169,8 @@ struct InputLinux {
     bool        has_abs_x;
     int         num_keys;
     int         num_btns;
+    struct input_event event;
+    int         read_offset;
 
     QTAILQ_ENTRY(InputLinux) next;
 };
@@ -291,6 +293,12 @@ static void input_linux_handle_mouse(InputLinux *il, struct input_event *event)
             qemu_input_queue_btn(NULL, INPUT_BUTTON_WHEEL_DOWN,
                                  event->value);
             break;
+        case BTN_SIDE:
+            qemu_input_queue_btn(NULL, INPUT_BUTTON_SIDE, event->value);
+            break;
+        case BTN_EXTRA:
+            qemu_input_queue_btn(NULL, INPUT_BUTTON_EXTRA, event->value);
+            break;
         };
         break;
     case EV_REL:
@@ -321,25 +329,30 @@ static void input_linux_handle_mouse(InputLinux *il, struct input_event *event)
 static void input_linux_event(void *opaque)
 {
     InputLinux *il = opaque;
-    struct input_event event;
     int rc;
+    int read_size;
+    uint8_t *p = (uint8_t *)&il->event;
 
     for (;;) {
-        rc = read(il->fd, &event, sizeof(event));
-        if (rc != sizeof(event)) {
+        read_size = sizeof(il->event) - il->read_offset;
+        rc = read(il->fd, &p[il->read_offset], read_size);
+        if (rc != read_size) {
             if (rc < 0 && errno != EAGAIN) {
                 fprintf(stderr, "%s: read: %s\n", __func__, strerror(errno));
                 qemu_set_fd_handler(il->fd, NULL, NULL, NULL);
                 close(il->fd);
+            } else if (rc > 0) {
+                il->read_offset += rc;
             }
             break;
         }
+        il->read_offset = 0;
 
         if (il->num_keys) {
-            input_linux_handle_keyboard(il, &event);
+            input_linux_handle_keyboard(il, &il->event);
         }
         if (il->has_rel_x && il->num_btns) {
-            input_linux_handle_mouse(il, &event);
+            input_linux_handle_mouse(il, &il->event);
         }
     }
 }

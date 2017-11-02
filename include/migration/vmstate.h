@@ -93,11 +93,20 @@ void unregister_savevm(DeviceState *dev, const char *idstr, void *opaque);
 
 typedef struct VMStateInfo VMStateInfo;
 typedef struct VMStateDescription VMStateDescription;
+typedef struct VMStateField VMStateField;
 
+/* VMStateInfo allows customized migration of objects that don't fit in
+ * any category in VMStateFlags. Additional information is always passed
+ * into get and put in terms of field and vmdesc parameters. However
+ * these two parameters should only be used in cases when customized
+ * handling is needed, such as QTAILQ. For primitive data types such as
+ * integer, field and vmdesc parameters should be ignored inside get/put.
+ */
 struct VMStateInfo {
     const char *name;
-    int (*get)(QEMUFile *f, void *pv, size_t size);
-    void (*put)(QEMUFile *f, void *pv, size_t size);
+    int (*get)(QEMUFile *f, void *pv, size_t size, VMStateField *field);
+    int (*put)(QEMUFile *f, void *pv, size_t size, VMStateField *field,
+               QJSON *vmdesc);
 };
 
 enum VMStateFlags {
@@ -198,7 +207,13 @@ enum VMStateFlags {
     VMS_MULTIPLY_ELEMENTS = 0x4000,
 };
 
-typedef struct {
+typedef enum {
+    MIG_PRI_DEFAULT = 0,
+    MIG_PRI_IOMMU,              /* Must happen before PCI devices */
+    MIG_PRI_MAX,
+} MigrationPriority;
+
+struct VMStateField {
     const char *name;
     size_t offset;
     size_t size;
@@ -211,7 +226,7 @@ typedef struct {
     const VMStateDescription *vmsd;
     int version_id;
     bool (*field_exists)(void *opaque, int version_id);
-} VMStateField;
+};
 
 struct VMStateDescription {
     const char *name;
@@ -219,6 +234,7 @@ struct VMStateDescription {
     int version_id;
     int minimum_version_id;
     int minimum_version_id_old;
+    MigrationPriority priority;
     LoadStateHandler *load_state_old;
     int (*pre_load)(void *opaque);
     int (*post_load)(void *opaque, int version_id);
@@ -249,13 +265,19 @@ extern const VMStateInfo vmstate_info_uint16;
 extern const VMStateInfo vmstate_info_uint32;
 extern const VMStateInfo vmstate_info_uint64;
 
+/** Put this in the stream when migrating a null pointer.*/
+#define VMS_NULLPTR_MARKER (0x30U) /* '0' */
+extern const VMStateInfo vmstate_info_nullptr;
+
 extern const VMStateInfo vmstate_info_float64;
 extern const VMStateInfo vmstate_info_cpudouble;
 
 extern const VMStateInfo vmstate_info_timer;
 extern const VMStateInfo vmstate_info_buffer;
 extern const VMStateInfo vmstate_info_unused_buffer;
+extern const VMStateInfo vmstate_info_tmp;
 extern const VMStateInfo vmstate_info_bitmap;
+extern const VMStateInfo vmstate_info_qtailq;
 
 #define type_check_2darray(t1,t2,n,m) ((t1(*)[n][m])0 - (t2*)0)
 #define type_check_array(t1,t2,n) ((t1(*)[n])0 - (t2*)0)
@@ -582,7 +604,8 @@ extern const VMStateInfo vmstate_info_bitmap;
     .offset       = vmstate_offset_buffer(_state, _field) + _start,  \
 }
 
-#define VMSTATE_VBUFFER_MULTIPLY(_field, _state, _version, _test, _start, _field_size, _multiply) { \
+#define VMSTATE_VBUFFER_MULTIPLY(_field, _state, _version, _test,    \
+                                 _field_size, _multiply) {           \
     .name         = (stringify(_field)),                             \
     .version_id   = (_version),                                      \
     .field_exists = (_test),                                         \
@@ -591,10 +614,9 @@ extern const VMStateInfo vmstate_info_bitmap;
     .info         = &vmstate_info_buffer,                            \
     .flags        = VMS_VBUFFER|VMS_POINTER|VMS_MULTIPLY,            \
     .offset       = offsetof(_state, _field),                        \
-    .start        = (_start),                                        \
 }
 
-#define VMSTATE_VBUFFER(_field, _state, _version, _test, _start, _field_size) { \
+#define VMSTATE_VBUFFER(_field, _state, _version, _test, _field_size) { \
     .name         = (stringify(_field)),                             \
     .version_id   = (_version),                                      \
     .field_exists = (_test),                                         \
@@ -602,10 +624,9 @@ extern const VMStateInfo vmstate_info_bitmap;
     .info         = &vmstate_info_buffer,                            \
     .flags        = VMS_VBUFFER|VMS_POINTER,                         \
     .offset       = offsetof(_state, _field),                        \
-    .start        = (_start),                                        \
 }
 
-#define VMSTATE_VBUFFER_UINT32(_field, _state, _version, _test, _start, _field_size) { \
+#define VMSTATE_VBUFFER_UINT32(_field, _state, _version, _test, _field_size) { \
     .name         = (stringify(_field)),                             \
     .version_id   = (_version),                                      \
     .field_exists = (_test),                                         \
@@ -613,10 +634,10 @@ extern const VMStateInfo vmstate_info_bitmap;
     .info         = &vmstate_info_buffer,                            \
     .flags        = VMS_VBUFFER|VMS_POINTER,                         \
     .offset       = offsetof(_state, _field),                        \
-    .start        = (_start),                                        \
 }
 
-#define VMSTATE_VBUFFER_ALLOC_UINT32(_field, _state, _version, _test, _start, _field_size) { \
+#define VMSTATE_VBUFFER_ALLOC_UINT32(_field, _state, _version,       \
+                                     _test, _field_size) {           \
     .name         = (stringify(_field)),                             \
     .version_id   = (_version),                                      \
     .field_exists = (_test),                                         \
@@ -624,7 +645,6 @@ extern const VMStateInfo vmstate_info_bitmap;
     .info         = &vmstate_info_buffer,                            \
     .flags        = VMS_VBUFFER|VMS_POINTER|VMS_ALLOC,               \
     .offset       = offsetof(_state, _field),                        \
-    .start        = (_start),                                        \
 }
 
 #define VMSTATE_BUFFER_UNSAFE_INFO_TEST(_field, _state, _test, _version, _info, _size) { \
@@ -646,6 +666,24 @@ extern const VMStateInfo vmstate_info_bitmap;
     .offset     = offsetof(_state, _field),                          \
 }
 
+/* Allocate a temporary of type 'tmp_type', set tmp->parent to _state
+ * and execute the vmsd on the temporary.  Note that we're working with
+ * the whole of _state here, not a field within it.
+ * We compile time check that:
+ *    That _tmp_type contains a 'parent' member that's a pointer to the
+ *        '_state' type
+ *    That the pointer is right at the start of _tmp_type.
+ */
+#define VMSTATE_WITH_TMP(_state, _tmp_type, _vmsd) {                 \
+    .name         = "tmp",                                           \
+    .size         = sizeof(_tmp_type) +                              \
+                    QEMU_BUILD_BUG_ON_ZERO(offsetof(_tmp_type, parent) != 0) + \
+                    type_check_pointer(_state,                       \
+                        typeof_field(_tmp_type, parent)),            \
+    .vmsd         = &(_vmsd),                                        \
+    .info         = &vmstate_info_tmp,                               \
+}
+
 #define VMSTATE_UNUSED_BUFFER(_test, _version, _size) {              \
     .name         = "unused",                                        \
     .field_exists = (_test),                                         \
@@ -653,6 +691,17 @@ extern const VMStateInfo vmstate_info_bitmap;
     .size         = (_size),                                         \
     .info         = &vmstate_info_unused_buffer,                     \
     .flags        = VMS_BUFFER,                                      \
+}
+
+/* Discard size * field_num bytes, where field_num is a uint32 member */
+#define VMSTATE_UNUSED_VARRAY_UINT32(_state, _test, _version, _field_num, _size) {\
+    .name         = "unused",                                        \
+    .field_exists = (_test),                                         \
+    .num_offset   = vmstate_offset_value(_state, _field_num, uint32_t),\
+    .version_id   = (_version),                                      \
+    .size         = (_size),                                         \
+    .info         = &vmstate_info_unused_buffer,                     \
+    .flags        = VMS_VARRAY_UINT32 | VMS_BUFFER,                  \
 }
 
 /* _field_size should be a int32_t field in the _state struct giving the
@@ -665,6 +714,25 @@ extern const VMStateInfo vmstate_info_bitmap;
     .info         = &vmstate_info_bitmap,                            \
     .flags        = VMS_VBUFFER|VMS_POINTER,                         \
     .offset       = offsetof(_state, _field),                        \
+}
+
+/* For migrating a QTAILQ.
+ * Target QTAILQ needs be properly initialized.
+ * _type: type of QTAILQ element
+ * _next: name of QTAILQ entry field in QTAILQ element
+ * _vmsd: VMSD for QTAILQ element
+ * size: size of QTAILQ element
+ * start: offset of QTAILQ entry in QTAILQ element
+ */
+#define VMSTATE_QTAILQ_V(_field, _state, _version, _vmsd, _type, _next)  \
+{                                                                        \
+    .name         = (stringify(_field)),                                 \
+    .version_id   = (_version),                                          \
+    .vmsd         = &(_vmsd),                                            \
+    .size         = sizeof(_type),                                       \
+    .info         = &vmstate_info_qtailq,                                \
+    .offset       = offsetof(_state, _field),                            \
+    .start        = offsetof(_type, _next),                              \
 }
 
 /* _f : field name
@@ -924,13 +992,10 @@ extern const VMStateInfo vmstate_info_bitmap;
     VMSTATE_BUFFER_START_MIDDLE_V(_f, _s, _start, 0)
 
 #define VMSTATE_PARTIAL_VBUFFER(_f, _s, _size)                        \
-    VMSTATE_VBUFFER(_f, _s, 0, NULL, 0, _size)
+    VMSTATE_VBUFFER(_f, _s, 0, NULL, _size)
 
 #define VMSTATE_PARTIAL_VBUFFER_UINT32(_f, _s, _size)                        \
-    VMSTATE_VBUFFER_UINT32(_f, _s, 0, NULL, 0, _size)
-
-#define VMSTATE_SUB_VBUFFER(_f, _s, _start, _size)                    \
-    VMSTATE_VBUFFER(_f, _s, 0, NULL, _start, _size)
+    VMSTATE_VBUFFER_UINT32(_f, _s, 0, NULL, _size)
 
 #define VMSTATE_BUFFER_TEST(_f, _s, _test)                            \
     VMSTATE_STATIC_BUFFER(_f, _s, 0, _test, 0, sizeof(typeof_field(_s, _f)))
@@ -961,17 +1026,20 @@ void vmstate_save_state(QEMUFile *f, const VMStateDescription *vmsd,
 
 bool vmstate_save_needed(const VMStateDescription *vmsd, void *opaque);
 
+/* Returns: 0 on success, -1 on failure */
 int vmstate_register_with_alias_id(DeviceState *dev, int instance_id,
                                    const VMStateDescription *vmsd,
                                    void *base, int alias_id,
-                                   int required_for_version);
+                                   int required_for_version,
+                                   Error **errp);
 
+/* Returns: 0 on success, -1 on failure */
 static inline int vmstate_register(DeviceState *dev, int instance_id,
                                    const VMStateDescription *vmsd,
                                    void *opaque)
 {
     return vmstate_register_with_alias_id(dev, instance_id, vmsd,
-                                          opaque, -1, 0);
+                                          opaque, -1, 0, NULL);
 }
 
 void vmstate_unregister(DeviceState *dev, const VMStateDescription *vmsd,

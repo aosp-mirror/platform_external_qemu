@@ -20,7 +20,7 @@
 #include "migration/migration.h"
 #include "monitor/monitor.h"
 #include "io/channel-util.h"
-#include "trace.h"
+#include "migration/trace.h"
 
 
 void fd_start_outgoing_migration(MigrationState *s, const char *fdname, Error **errp)

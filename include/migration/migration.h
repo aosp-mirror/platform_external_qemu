@@ -22,6 +22,7 @@
 #include "qapi-types.h"
 #include "exec/cpu-common.h"
 #include "qemu/coroutine_int.h"
+#include "qom/object.h"
 
 #define QEMU_VM_FILE_MAGIC           0x5145564d
 #define QEMU_VM_FILE_VERSION_COMPAT  0x00000002
@@ -37,6 +38,9 @@
 #define QEMU_VM_CONFIGURATION        0x07
 #define QEMU_VM_COMMAND              0x08
 #define QEMU_VM_SECTION_FOOTER       0x7e
+
+/* for vl.c */
+extern int only_migratable;
 
 struct MigrationParams {
     bool blk;
@@ -89,6 +93,7 @@ struct MigrationIncomingState {
      */
     QemuEvent main_thread_load_event;
 
+    size_t         largest_page_size;
     bool           have_fault_thread;
     QemuThread     fault_thread;
     QemuSemaphore  fault_thread_sem;
@@ -104,6 +109,7 @@ struct MigrationIncomingState {
     QEMUFile *to_src_file;
     QemuMutex rp_mutex;    /* We send replies from multiple threads */
     void     *postcopy_tmp_page;
+    void     *postcopy_tmp_zero_page;
 
     QEMUBH *bh;
 
@@ -113,13 +119,13 @@ struct MigrationIncomingState {
     QemuThread colo_incoming_thread;
     /* The coroutine we should enter (back) after failover */
     Coroutine *migration_incoming_co;
+    QemuSemaphore colo_incoming_sem;
 
     /* See savevm.c */
     LoadStateEntry_Head loadvm_handlers;
 };
 
 MigrationIncomingState *migration_incoming_get_current(void);
-MigrationIncomingState *migration_incoming_state_new(QEMUFile *f);
 void migration_incoming_state_destroy(void);
 
 /*
@@ -177,11 +183,21 @@ struct MigrationState
     /* Flag set once the migration thread is running (and needs joining) */
     bool migration_thread_running;
 
+    /* Flag set once the migration thread called bdrv_inactivate_all */
+    bool block_inactive;
+
     /* Queue of outstanding page requests from the destination */
     QemuMutex src_page_req_mutex;
     QSIMPLEQ_HEAD(src_page_requests, MigrationSrcPageRequest) src_page_requests;
     /* The RAMBlock used in the last src_page_request */
     RAMBlock *last_req_rb;
+    /* The semaphore is used to notify COLO thread that failover is finished */
+    QemuSemaphore colo_exit_sem;
+
+    /* The semaphore is used to notify COLO thread to do checkpoint */
+    QemuSemaphore colo_checkpoint_sem;
+    int64_t colo_checkpoint_time;
+    QEMUTimer *colo_delay_timer;
 
     /* The last error that occurred */
     Error *error;
@@ -255,6 +271,7 @@ void remove_migration_state_change_notifier(Notifier *notify);
 MigrationState *migrate_init(const MigrationParams *params);
 bool migration_is_blocked(Error **errp);
 bool migration_in_setup(MigrationState *);
+bool migration_is_idle(MigrationState *s);
 bool migration_has_finished(MigrationState *);
 bool migration_has_failed(MigrationState *);
 /* True if outgoing migration has entered postcopy phase */
@@ -295,13 +312,18 @@ int ram_postcopy_send_discard_bitmap(MigrationState *ms);
 int ram_discard_range(MigrationIncomingState *mis, const char *block_name,
                       uint64_t start, size_t length);
 int ram_postcopy_incoming_init(MigrationIncomingState *mis);
+void ram_postcopy_migrated_memory_release(MigrationState *ms);
 
 /**
  * @migrate_add_blocker - prevent migration from proceeding
  *
  * @reason - an error to be returned whenever migration is attempted
+ *
+ * @errp - [out] The reason (if any) we cannot block migration right now.
+ *
+ * @returns - 0 on success, -EBUSY/-EACCES on failure, with errp set.
  */
-void migrate_add_blocker(Error *reason);
+int migrate_add_blocker(Error *reason, Error **errp);
 
 /**
  * @migrate_del_blocker - remove a blocking error from migration
@@ -310,6 +332,9 @@ void migrate_add_blocker(Error *reason);
  */
 void migrate_del_blocker(Error *reason);
 
+int check_migratable(Object *obj, Error **err);
+
+bool migrate_release_ram(void);
 bool migrate_postcopy_ram(void);
 bool migrate_zero_blocks(void);
 
@@ -374,6 +399,7 @@ void global_state_store_running(void);
 void flush_page_queue(MigrationState *ms);
 int ram_save_queue_pages(MigrationState *ms, const char *rbname,
                          ram_addr_t start, ram_addr_t len);
+uint64_t ram_pagesize_summary(void);
 
 PostcopyState postcopy_state_get(void);
 /* Set the state and return the old state */

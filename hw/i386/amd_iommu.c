@@ -22,7 +22,7 @@
 #include "qemu/osdep.h"
 #include "hw/i386/amd_iommu.h"
 #include "qemu/error-report.h"
-#include "trace.h"
+#include "hw/i386/trace.h"
 
 /* used AMD-Vi MMIO registers */
 const char *amdvi_mmio_low[] = {
@@ -562,7 +562,7 @@ static void amdvi_mmio_trace(hwaddr addr, unsigned size)
         trace_amdvi_mmio_read(amdvi_mmio_high[index], addr, size, addr & ~0x07);
     } else {
         index = index >= AMDVI_MMIO_REGS_LOW ? AMDVI_MMIO_REGS_LOW : index;
-        trace_amdvi_mmio_read(amdvi_mmio_high[index], addr, size, addr & ~0x07);
+        trace_amdvi_mmio_read(amdvi_mmio_low[index], addr, size, addr & ~0x07);
     }
 }
 
@@ -572,8 +572,7 @@ static uint64_t amdvi_mmio_read(void *opaque, hwaddr addr, unsigned size)
 
     uint64_t val = -1;
     if (addr + size > AMDVI_MMIO_SIZE) {
-        trace_amdvi_mmio_read("error: addr outside region: max ",
-                (uint64_t)AMDVI_MMIO_SIZE, addr, size);
+        trace_amdvi_mmio_read_invalid(AMDVI_MMIO_SIZE, addr, size);
         return (uint64_t)-1;
     }
 

@@ -23,7 +23,7 @@
 #include "hw/i386/pc.h"
 #include "monitor/monitor.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/intc/trace.h"
 #include "hw/lm32/lm32_pic.h"
 #include "hw/intc/intc.h"
 

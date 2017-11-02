@@ -31,7 +31,7 @@
 #include "qapi/error.h"
 #include "hw/usb/ehci-regs.h"
 #include "hw/usb/hcd-ehci.h"
-#include "trace.h"
+#include "hw/usb/trace.h"
 
 #define FRAME_TIMER_FREQ 1000
 #define FRAME_TIMER_NS   (NANOSECONDS_PER_SECOND / FRAME_TIMER_FREQ)
@@ -2543,6 +2543,11 @@ void usb_ehci_init(EHCIState *s, DeviceState *dev)
     memory_region_add_subregion(&s->mem, s->opregbase, &s->mem_opreg);
     memory_region_add_subregion(&s->mem, s->opregbase + s->portscbase,
                                 &s->mem_ports);
+}
+
+void usb_ehci_finalize(EHCIState *s)
+{
+    usb_packet_cleanup(&s->ipacket);
 }
 
 /*
