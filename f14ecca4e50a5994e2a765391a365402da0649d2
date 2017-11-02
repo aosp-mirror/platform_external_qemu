@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "42aa2bf0_62d8921a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-11-02T04:09:14Z",
+      "side": 1,
+      "message": "please add the following:\n\nTest: run cts sensor tests and pass without regression",
+      "revId": "f14ecca4e50a5994e2a765391a365402da0649d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
