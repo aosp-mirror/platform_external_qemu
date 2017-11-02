@@ -60,6 +60,7 @@ public:
     void setOpenGLDisplayRotation(float zRot) final;
     void setOpenGLDisplayTranslation(float px, float py) final;
     void repaintOpenGLDisplay() final;
+    void getFrameTimes(long long* buf, unsigned int capacity, unsigned int* actual_frames);
     void cleanupProcGLObjects(uint64_t puid) final;
 
     void pauseAllPreSave() final;

@@ -12,6 +12,7 @@
 #include "android/skin/qt/extended-pages/settings-page.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/opengles.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -471,4 +472,12 @@ void SettingsPage::on_set_disableMouseWheel_toggled(bool checked) {
     QSettings settings;
     settings.setValue(Ui::Settings::DISABLE_MOUSE_WHEEL, checked);
     emit disableMouseWheelChanged(checked);
+}
+
+void SettingsPage::on_get_frameTimesButton_clicked() {
+    unsigned int capacity = 60;
+    unsigned int actual = 0;
+    std::vector<long long> buf(capacity, 0);
+    android_getFrameTimes(buf.data(), capacity, &actual);
+    fprintf(stderr, "%s: got %u frames\n", __func__, actual);
 }

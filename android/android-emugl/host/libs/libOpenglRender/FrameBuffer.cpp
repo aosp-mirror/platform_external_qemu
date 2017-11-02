@@ -1646,9 +1646,17 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     //
     if (m_fpsStats) {
         long long currTime = System::get()->getHighResTimeUs() / 1000;
+        long long frameTime = currTime - m_lastFrameTime;
+        long long frameTimeFromStart = currTime - m_statsStartTime;
+        m_lastFrameTime = currTime;
+
+        m_frameTimesLock.lock();
+        m_frameTimes.push_back(frameTime);
+        m_frameTimesLock.unlock();
+
         m_statsNumFrames++;
-        if (currTime - m_statsStartTime >= 1000) {
-            float dt = (float)(currTime - m_statsStartTime) / 1000.0f;
+        if (frameTimeFromStart >= 1000) {
+            float dt = (float)(frameTimeFromStart) / 1000.0f;
             printf("FPS: %5.3f\n", (float)m_statsNumFrames / dt);
             m_statsStartTime = currTime;
             m_statsNumFrames = 0;
@@ -1684,6 +1692,24 @@ EXIT:
         m_lock.unlock();
     }
     return ret;
+}
+
+void FrameBuffer::dumpFrameTimes(long long* buf,
+                                 unsigned int count,
+                                 unsigned int* actualCount) {
+    *actualCount =
+        std::min((unsigned int)m_frameTimes.size(), count);
+    size_t startCountingFrom =
+        m_frameTimes.size() - *actualCount;
+
+    m_frameTimesLock.lock();
+    memcpy(buf, &m_frameTimes[startCountingFrom],
+           sizeof(long long) * (*actualCount));
+    m_frameTimesLock.unlock();
+
+    for (unsigned int i = 0; i < *actualCount; i++) {
+        fprintf(stderr, "FRAME TIME %lld\n", buf[i]);
+    }
 }
 
 void FrameBuffer::doPostCallback(void* pixels) {

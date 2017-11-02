@@ -61,6 +61,7 @@ enum Command {
     CMD_SET_TRANSLATION,
     CMD_REPAINT,
     CMD_FINALIZE,
+    CMD_GET_FRAMETIMES,
 };
 
 }  // namespace
@@ -107,6 +108,13 @@ struct RenderWindowMessage {
         // CMD_SET_ROTATION
         float rotation;
 
+        // CMD_GET_FRAMETIMES
+        struct {
+            long long* times_buf;
+            unsigned int capacity;
+            unsigned int* actual_frames;
+        } frametimes;
+
         // result of operations.
         bool result;
     };
@@ -139,6 +147,18 @@ struct RenderWindowMessage {
                 result = true;
                 break;
 
+            case CMD_GET_FRAMETIMES:
+                GL_LOG("CMD_GET_FRAMETIMES");
+                D("CMD_GET_FRAMETIMES\n");
+                if (const auto fb = FrameBuffer::getFB()) {
+                    fb->dumpFrameTimes(msg.frametimes.times_buf,
+                                       msg.frametimes.capacity,
+                                       msg.frametimes.actual_frames);
+                    result = true;
+                } else {
+                    result = false;
+                }
+                break;
             case CMD_SET_POST_CALLBACK:
                 GL_LOG("CMD_SET_POST_CALLBACK");
                 D("CMD_SET_POST_CALLBACK\n");
@@ -495,6 +515,17 @@ void RenderWindow::repaint() {
     msg.cmd = CMD_REPAINT;
     (void) processMessage(msg);
     D("Exiting\n");
+}
+
+void RenderWindow::getFrameTimes(long long* times,
+                                 unsigned int capacity,
+                                 unsigned int* actualFrames) {
+    RenderWindowMessage msg = {};
+    msg.cmd = CMD_GET_FRAMETIMES;
+    msg.frametimes.times_buf = times;
+    msg.frametimes.capacity = capacity;
+    msg.frametimes.actual_frames = actualFrames;
+    (void) processMessage(msg);
 }
 
 bool RenderWindow::processMessage(const RenderWindowMessage& msg) {

@@ -405,6 +405,16 @@ public:
     static void setMaxGLESVersion(GLESDispatchMaxVersion version);
     static GLESDispatchMaxVersion getMaxGLESVersion();
 
+    void resetFrameTimes() {
+        m_frameTimesLock.lock();
+        m_frameTimes.clear();
+        m_frameTimesLock.unlock();
+    }
+
+    void dumpFrameTimes(long long* buf,
+                        unsigned int count,
+                        unsigned int* actualCount);
+
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
@@ -439,6 +449,7 @@ private:
     bool m_fpsStats = false;
     int m_statsNumFrames = 0;
     long long m_statsStartTime = 0;
+    long long m_lastFrameTime = 0;
 
     emugl::Mutex m_lock;
     emugl::ReadWriteMutex m_contextStructureLock;
@@ -522,5 +533,8 @@ private:
 
     bool m_asyncReadbackSupported = true;
     bool m_guestPostedAFrame = false;
+
+    emugl::Mutex m_frameTimesLock;
+    std::vector<long long> m_frameTimes = {};
 };
 #endif
