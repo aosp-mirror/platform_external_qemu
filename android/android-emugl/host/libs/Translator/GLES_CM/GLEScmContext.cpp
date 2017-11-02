@@ -1208,14 +1208,16 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
 
     drawValidate();
 
-    if (m_coreProfileEngine) {
-        GLuint prev_vbo;
-        GLuint prev_ibo;
-        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_vbo);
-        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_ibo);
+    GLuint prev_vbo;
+    GLuint prev_ibo;
+    dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_vbo);
+    dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_ibo);
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    if (m_coreProfileEngine) {
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1250,6 +1252,8 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
             dispatcher().glDrawArrays(mode,first,count);
         }
     }
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
 }
 
 void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const GLvoid* indices) {
@@ -1261,6 +1265,15 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         const unsigned char* buf = static_cast<unsigned char *>(getBindedBuffer(GL_ELEMENT_ARRAY_BUFFER));
         indices = buf + SafeUIntFromPointer(indices);
     }
+
+    GLuint prev_vbo;
+    GLuint prev_ibo;
+    dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_vbo);
+    dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
+            (GLint*)&prev_ibo);
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, 0);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     if (m_coreProfileEngine) {
         // track previous vbo/ibo
@@ -1305,6 +1318,8 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
             dispatcher().glDrawElements(mode,count,type,indices);
         }
     }
+    dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
+    dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
 }
 
 void GLEScmContext::clientActiveTexture(GLenum texture) {
