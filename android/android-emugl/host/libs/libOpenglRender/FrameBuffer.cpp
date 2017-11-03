@@ -288,6 +288,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     GLESDispatchMaxVersion dispatchMaxVersion =
             calcMaxVersionFromDispatch(fb->m_eglDisplay);
+
     FrameBuffer::setMaxGLESVersion(dispatchMaxVersion);
     if (s_egl.eglSetMaxGLESVersion) {
         // eglSetMaxGLESVersion must be called before any context binding
