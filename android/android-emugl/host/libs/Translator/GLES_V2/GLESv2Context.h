@@ -76,6 +76,7 @@ public:
     void validateAtt0PostDraw(void);
     const float* getAtt0(void) const {return m_attribute0value;}
     void setUseProgram(GLuint program, const ObjectDataPtr& programData);
+    GLuint getCurrentProgram() const;
     ProgramData* getUseProgram();
 
     virtual void onSave(android::base::Stream* stream) const override;
