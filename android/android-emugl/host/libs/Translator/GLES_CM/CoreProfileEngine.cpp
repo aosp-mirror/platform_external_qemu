@@ -741,7 +741,7 @@ void CoreProfileEngine::preDrawTextureUnitEmulation() {
     }
 
     gl.glUniform1i(m_geometryDrawState.enableLightingLoc, 0);
-    gl.glUniform1i(m_geometryDrawState.textureEnvModeLoc, mCtx->getTextureEnvMode());
+    gl.glUniform1i(m_geometryDrawState.textureEnvModeLoc, GL_COMBINE);
 }
 
 void CoreProfileEngine::postDrawTextureUnitEmulation() {
