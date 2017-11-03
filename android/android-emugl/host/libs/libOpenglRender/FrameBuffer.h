@@ -24,6 +24,7 @@
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
+#include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
@@ -328,6 +329,7 @@ public:
 
     // Return the host EGLDisplay used by this instance.
     EGLDisplay getDisplay() const { return m_eglDisplay; }
+    EGLSurface getWindowSurface() const { return m_eglSurface; }
 
     // Change the rotation of the displayed GPU sub-window.
     void setDisplayRotation(float zRot) {
@@ -404,6 +406,13 @@ public:
 
     static void setMaxGLESVersion(GLESDispatchMaxVersion version);
     static GLESDispatchMaxVersion getMaxGLESVersion();
+
+    float getDpr() { return m_dpr; }
+    int windowWidth() { return m_windowWidth; }
+    int windowHeight() { return m_windowHeight; }
+    float getPx() { return m_px; }
+    float getPy() { return m_py; }
+    int getZrot() { return m_zRot; }
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -522,5 +531,27 @@ private:
 
     bool m_asyncReadbackSupported = true;
     bool m_guestPostedAFrame = false;
+
+    // Posting
+    enum class PostCmd {
+        Post = 0,
+        Viewport = 1,
+    };
+
+    struct Post {
+        PostCmd cmd;
+        union {
+            ColorBuffer* cb;
+            struct {
+                int width;
+                int height;
+            } viewport;
+        };
+    };
+
+    std::unique_ptr<PostWorker> m_postWorker = {};
+    android::base::WorkerThread<Post> m_postThread;
+    android::base::WorkerProcessingResult postWorkerFunc(const Post& post);
+    void sendPostWorkerCmd(Post post);
 };
 #endif

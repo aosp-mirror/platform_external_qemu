@@ -299,11 +299,17 @@ HWND createDummyWindow() {
 #define LIST_WGL_ARB_create_context_FUNCTIONS(X) \
     X(HGLRC, wglCreateContextAttribsARB, (HDC hDC, HGLRC hshareContext, const int *attribList)) \
 
+// List of functions define by WGL_EXT_swap_control
+#define LIST_WGL_EXT_swap_control_FUNCTIONS(X) \
+    X(void, wglSwapIntervalEXT, (int)) \
+    X(int, wglGetSwapIntervalEXT, (void)) \
+
 #define LIST_WGL_EXTENSIONS_FUNCTIONS(X) \
     LIST_WGL_ARB_pixel_format_FUNCTIONS(X) \
     LIST_WGL_ARB_make_current_read_FUNCTIONS(X) \
     LIST_WGL_ARB_pbuffer_FUNCTIONS(X) \
     LIST_WGL_ARB_create_context_FUNCTIONS(X) \
+    LIST_WGL_EXT_swap_control_FUNCTIONS(X) \
 
 // A structure used to hold pointers to WGL extension functions.
 struct WglExtensionsDispatch : public WglBaseDispatch {
@@ -363,6 +369,7 @@ public:
         LOAD_WGL_EXTENSION(WGL_ARB_make_current_read)
         LOAD_WGL_EXTENSION(WGL_ARB_pbuffer)
         LOAD_WGL_EXTENSION(WGL_ARB_create_context)
+        LOAD_WGL_EXTENSION(WGL_EXT_swap_control)
 
         // Done.
         return result;
@@ -874,6 +881,10 @@ public:
         }
 
         queryCoreProfileSupport();
+
+        if (mDispatch->wglSwapIntervalEXT) {
+            mDispatch->wglSwapIntervalEXT(0); // use guest SF / HWC instead
+        }
     }
 
     virtual bool isValidNativeWin(EglOS::Surface* win) {
