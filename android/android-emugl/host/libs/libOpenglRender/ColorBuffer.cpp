@@ -29,6 +29,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef NDEBUG
+#define DEBUG_CB_FBO 0
+#else
+#define DEBUG_CB_FBO 1
+#endif
+
 namespace {
 
 // Lazily create and bind a framebuffer object to the current host context.
@@ -47,6 +53,7 @@ bool bindFbo(GLuint* fbo, GLuint tex) {
     s_gles2.glBindFramebuffer(GL_FRAMEBUFFER, *fbo);
     s_gles2.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_OES,
                                    GL_TEXTURE_2D, tex, 0);
+#if DEBUG_CB_FBO
     GLenum status = s_gles2.glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE_OES) {
         ERR("ColorBuffer::bindFbo: FBO not complete: %#x\n", status);
@@ -55,6 +62,8 @@ bool bindFbo(GLuint* fbo, GLuint tex) {
         *fbo = 0;
         return false;
     }
+#endif
+
     return true;
 }
 

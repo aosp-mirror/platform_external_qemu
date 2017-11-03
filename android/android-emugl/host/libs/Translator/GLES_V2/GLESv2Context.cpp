@@ -652,6 +652,10 @@ void GLESv2Context::setUseProgram(GLuint program,
     m_useProgramData = programData;
 }
 
+GLuint GLESv2Context::getCurrentProgram() const {
+    return m_useProgram;
+}
+
 ProgramData* GLESv2Context::getUseProgram() {
     return (ProgramData*)m_useProgramData.get();
 }
