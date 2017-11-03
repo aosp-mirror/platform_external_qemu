@@ -763,6 +763,9 @@ void GLEScontext::postLoadRestoreCtx() {
                         texTarget,
                         m_shareGroup->getGlobalName(
                             NamedObjectType::TEXTURE, texName));
+                if (texState.enabled) {
+                    dispatcher.glEnable(texTarget);
+                }
             }
         }
     }
@@ -1376,7 +1379,15 @@ void GLEScontext::setPolygonOffset(GLfloat factor, GLfloat units) {
 }
 
 void GLEScontext::setEnable(GLenum item, bool isEnable) {
-    m_glEnableList[item] = isEnable;
+    switch (item) {
+        case GL_TEXTURE_2D:
+        case GL_TEXTURE_CUBE_MAP_OES:
+        case GL_TEXTURE_3D:
+        case GL_TEXTURE_2D_ARRAY:
+            setTextureEnabled(item,true);
+        default:
+            m_glEnableList[item] = isEnable;
+    }
 }
 
 bool GLEScontext::isEnabled(GLenum item) const {
