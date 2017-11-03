@@ -1,0 +1,123 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e36c7aec_5577e6ee",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2743,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-11-03T17:27:44Z",
+      "side": 1,
+      "message": "This is a bit risky.  C++0x doesn\u0027t support VLAs and it could be a potential attack vector for stack overflows.\n\nSee: https://groups.google.com/forum/#!topic/comp.std.c++/K_4lgA1JYeg",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0a3df7cf_adc65e69",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2745,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-11-03T17:27:44Z",
+      "side": 1,
+      "message": "\u0026physical_param_name[0] \u003d\u003d physical_param_name",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25000bf3_f16a5ab9",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2811,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-11-03T17:27:44Z",
+      "side": 1,
+      "message": "Is it possible to parse this with sscanf? For example:\n\n#include \u003cstdio.h\u003e\n#include \u003cstring.h\u003e\n\nint main(int argc, char** argv) {\n    char name[245];\n    float fval[3] \u003d {0};\n    int i \u003d sscanf(argv[1], \"%s %g:%g:%g\",name, fval, fval+1, fval+2);\n    printf(\"%d: %s %g,%g,%g\", i, name, fval[0], fval[1], fval[2]);\n}\n\nI\u003d3 will mean that fval[0], fval[1] are set.",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68be8325_99ef5a53",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-11-03T17:27:44Z",
+      "side": 1,
+      "message": "You can extract this to a function, it is used in 2 places. Here as well as tool-window.cpp. This will make it easier to understand.",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "14ffb872_a66564e8",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 720,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-11-03T17:27:44Z",
+      "side": 1,
+      "message": "Is it possible to DRY this up?  It looks like we are repeating a pattern where we either get a vector or a single value.\n\nMaybe _sPhysicalParameters can have a callback for getter/setter? or does that make no sense?",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "35755695_f280e232",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-11-03T17:27:44Z",
+      "side": 1,
+      "message": "Should we have default?",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "da33cf67_402950f4",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1125918
+      },
+      "writtenOn": "2017-11-03T17:27:44Z",
+      "side": 1,
+      "message": "Same as above, is there a way to DRY it up?",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
