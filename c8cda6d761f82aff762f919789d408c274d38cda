@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7eb211e_715bd51f",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-03T18:06:28Z",
+      "side": 0,
+      "message": "Can we add back the messagecenter notification and warning?\n\nThanks for the reorganization!",
+      "range": {
+        "startLine": 360,
+        "startChar": 0,
+        "endLine": 363,
+        "endChar": 70
+      },
+      "revId": "c8cda6d761f82aff762f919789d408c274d38cda",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
