@@ -95,11 +95,6 @@ static bool sTryContextCreation(EGLDisplay dpy, GLESDispatchMaxVersion ver) {
 }
 
 GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
-    // Don't try to detect anything if GLESDynamicVersion is disabled.
-    if (!emugl_feature_is_enabled(
-            android::featurecontrol::GLESDynamicVersion)) {
-        return GLES_DISPATCH_MAX_VERSION_2;
-    }
 
     // TODO: 3.1 is the highest
     GLESDispatchMaxVersion maxVersion =
@@ -157,8 +152,7 @@ GLESDispatchMaxVersion calcMaxVersionFromDispatch(EGLDisplay dpy) {
 // (Note: This does not affect the detection of possible core profile configs,
 // just whether to use them)
 bool shouldEnableCoreProfile() {
-    return emugl::getRenderer() == SELECTED_RENDERER_HOST &&
-           emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion);
+    return emugl::getRenderer() == SELECTED_RENDERER_HOST;
 }
 
 void sAddExtensionIfSupported(GLESDispatchMaxVersion currVersion,
@@ -224,7 +218,12 @@ WHITELIST(GL_NV_read_depth)
 
 std::string filterExtensionsBasedOnMaxVersion(GLESDispatchMaxVersion ver,
                                               const std::string& exts) {
-    if (ver > GLES_DISPATCH_MAX_VERSION_2) {
+    // We need to advertise ES 2 extensions if:
+    // a. the dispatch version on the host is ES 2
+    // b. the guest image is not updated for ES 3+
+    // (GLESDynamicVersion is disabled)
+    if (ver > GLES_DISPATCH_MAX_VERSION_2 &&
+        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
         return exts;
     }
 

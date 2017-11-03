@@ -349,7 +349,13 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     if (name == GL_EXTENSIONS) {
-        glStr += maxVersionToFeatureString(maxVersion);
+
+        GLESDispatchMaxVersion guestExtVer = GLES_DISPATCH_MAX_VERSION_2;
+        if (emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+            guestExtVer = maxVersion;
+        }
+
+        glStr += maxVersionToFeatureString(guestExtVer);
         glStr += " ";
 
         // If we have a GLES3 implementation, add the corresponding
@@ -360,8 +366,9 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
     }
 
     if (name == GL_VERSION) {
-        GLESDispatchMaxVersion maxVersion = FrameBuffer::getMaxGLESVersion();
-        switch (maxVersion) {
+        if (emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion)) {
+            GLESDispatchMaxVersion maxVersion = FrameBuffer::getMaxGLESVersion();
+            switch (maxVersion) {
             // Underlying GLES implmentation's max version string
             // is allowed to be higher than the version of the request
             // for the context---it can create a higher version context,
@@ -377,6 +384,9 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
                 break;
             default:
                 break;
+            }
+        } else {
+            glStr = replaceESVersionString(glStr, "2.0");
         }
     }
 
