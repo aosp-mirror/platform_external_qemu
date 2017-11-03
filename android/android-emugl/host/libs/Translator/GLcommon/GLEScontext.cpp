@@ -1371,6 +1371,17 @@ void GLEScontext::setViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     m_viewportHeight = height;
 }
 
+void GLEScontext::getViewport(GLint* params) {
+    if (!m_isViewport) {
+        dispatcher().glGetIntegerv(GL_VIEWPORT, params);
+    } else {
+        params[0] = m_viewportX;
+        params[1] = m_viewportY;
+        params[2] = m_viewportWidth;
+        params[3] = m_viewportHeight;
+    }
+}
+
 void GLEScontext::setScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     m_isScissor = true;
     m_scissorX = x;

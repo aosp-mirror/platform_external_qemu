@@ -1614,13 +1614,19 @@ static void s_glGetInteger64i_v_wrapper(GLenum pname, GLuint index, GLint64* dat
 template <class T>
 static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc<T> getter) {
     T i;
+    GLint iparams[4];
     GET_CTX_V2();
     switch (pname) {
+    case GL_VIEWPORT:
+        ctx->getViewport(iparams);
+        params[0] = (T)iparams[0];
+        params[1] = (T)iparams[1];
+        params[2] = (T)iparams[2];
+        params[3] = (T)iparams[3];
+        break;
     case GL_CURRENT_PROGRAM:
         if (ctx->shareGroup().get()) {
-            getter(pname,&i);
-            *params = ctx->shareGroup()->getLocalName(NamedObjectType::SHADER_OR_PROGRAM,
-                                                      i);
+            *params = (T)ctx->getCurrentProgram();
         }
         break;
     case GL_FRAMEBUFFER_BINDING:
