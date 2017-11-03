@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "ba4d8b92_4a21da16",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-03T18:35:07Z",
+      "side": 1,
+      "message": "what\u0027s the difference between the two enums? it\u0027s really not clear from the names",
+      "range": {
+        "startLine": 109,
+        "startChar": 5,
+        "endLine": 109,
+        "endChar": 32
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "07f5a128_4907a2cf",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-03T18:35:07Z",
+      "side": 1,
+      "message": "very nit: as it\u0027s a C++ class we could move to enum classes here and make it more readable:\n\nenum class SaveSnasphotOnExitPreference { Ask, Always, Never };\n\nlater: if (value \u003d\u003d SaveSnasphotOnExitPreference::Ask) {...}",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 2
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9f0e7f4c_a29ce62e",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -18,6 +64,92 @@
         "startChar": 0,
         "endLine": 521,
         "endChar": 85
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88c1f07b_eac663ca",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-03T18:35:07Z",
+      "side": 1,
+      "message": "nit: Isn\u0027t it simpler to use StandardButtons enum here to show \"yes\" and \"no\"?",
+      "range": {
+        "startLine": 548,
+        "startChar": 24,
+        "endLine": 548,
+        "endChar": 25
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "df64ea08_0a0a70fa",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 555,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-03T18:35:07Z",
+      "side": 1,
+      "message": "nit: tr(), here and later",
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2d1f4e34_be210079",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-03T18:35:07Z",
+      "side": 1,
+      "message": "what about the ctrl-c exit, or when you power off the device from the inside or via console? I think this method isn\u0027t call for those",
+      "range": {
+        "startLine": 566,
+        "startChar": 4,
+        "endLine": 566,
+        "endChar": 24
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "870b91d4_5d71a18d",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-03T18:35:07Z",
+      "side": 1,
+      "message": "please stop this timer, otherwise it may trigger a guest restart in the most unexpected moment",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 27
       },
       "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
