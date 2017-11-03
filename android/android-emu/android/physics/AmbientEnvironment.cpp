@@ -19,6 +19,10 @@
 namespace android {
 namespace physics {
 
+AmbientState AmbientEnvironment::setCurrentTime(uint64_t time_ns) {
+    return AMBIENT_STATE_STABLE;
+}
+
 void AmbientEnvironment::setMagneticField(
         float north, float east, float vertical, PhysicalInterpolation mode) {
     mMagneticField = glm::vec3(north, east, vertical);
