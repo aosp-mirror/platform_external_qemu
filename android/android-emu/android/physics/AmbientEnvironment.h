@@ -26,6 +26,11 @@
 namespace android {
 namespace physics {
 
+typedef enum {
+    AMBIENT_STATE_CHANGING=0,
+    AMBIENT_STATE_STABLE=1,
+} AmbientState;
+
 /*
  * Implements a model of an ambient environment, within which sensor
  * values could be calculated related to the ambient state (e.g. the
@@ -39,6 +44,14 @@ namespace physics {
 class AmbientEnvironment {
 public:
     AmbientEnvironment() = default;
+
+    /*
+     * Sets the current time of the AmbientEnvironment simulation.  This time is
+     * used as the current time in calculating ambient environment states, along
+     * with the time when target state change requests are recorded as taking
+     * place.  Time values must be non-decreasing.
+     */
+    AmbientState setCurrentTime(uint64_t time_ns);
 
     /*
      * Sets the strength of the ambient magnetic field.

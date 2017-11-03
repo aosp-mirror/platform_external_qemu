@@ -26,6 +26,11 @@
 namespace android {
 namespace physics {
 
+typedef enum {
+    INERTIAL_STATE_CHANGING=0,
+    INERTIAL_STATE_STABLE=1,
+} InertialState;
+
 /*
  * Implements a model of inertial motion of a rigid body such that smooth
  * movement occurs bringing the body to the target rotation and position with
@@ -40,6 +45,15 @@ public:
     InertialModel() = default;
 
     /*
+     * Sets the current time of the InertialModel simulation.  This time is
+     * used as the current time in calculating current position, velocity and
+     * acceleration, along with the time when target position/rotation change
+     * requests are recorded as taking place.  Time values must be
+     * non-decreasing.
+     */
+    InertialState setCurrentTime(uint64_t time_ns);
+
+    /*
      * Sets the position that the modeled object should move toward.
      */
     void setTargetPosition(glm::vec3 position, PhysicalInterpolation mode);
@@ -50,23 +64,55 @@ public:
     void setTargetRotation(glm::quat rotation, PhysicalInterpolation mode);
 
     /*
-     * Gets current simulated state and sensor values of the modeled object.
+     * Gets current simulated state and sensor values of the modeled object at
+     * the most recently set current time (from setCurrentTime).
      */
     glm::vec3 getPosition() const;
+    glm::vec3 getVelocity() const;
     glm::vec3 getAcceleration() const;
     glm::quat getRotation() const;
     glm::vec3 getRotationalVelocity() const;
 
 private:
-    void updateAccelerations();
     void updateRotations();
 
-    glm::vec3 mAcceleration = glm::vec3(0.f);
-    glm::vec3 mPreviousPosition = glm::vec3(0.f);
-    glm::vec3 mCurrentPosition = glm::vec3(0.f);
+    // Helper for calculating the current state given a transform specifying
+    // either the acceleration, velocity, or position, for each phase.
+    glm::vec3 calculateInertialState(
+            const glm::mat2x3 quinticTransform,
+            const glm::mat4x3 cubicTransform) const;
+
+    // Note: Each target interpolation begins at a set time, accelerates at a
+    //       for half of the target time, then decelerates for the second half
+    //       with each half defined by a quartic polynomial such that the two
+    //       halves are continuous up through the 3rd derivative.
+    //
+    //       Position/Velocity/Acceleration are calculated by multiplying a
+    //       vector containing [t*t*t, t*t, t, 1] by the appropriate transform,
+    //       and adding t*t*t*t multiplied by the quartic scale (if applicable -
+    //       this is necessary because there is no glm::mat5x3 which would be
+    //       necessary to do this calculation with a single matrix) where t is
+    //       the amount of time in seconds since mAccelPhaseStartTime, and the
+    //       AccelPhase transforms are used for the first half of the time
+    //       between mAccelPhaseStartTime, and DecelPhaseTransforms for the
+    //       second half.  At the end of the decel phase, the velocity and
+    //       acceleration will be zero and the position will be as set in the
+    //       target.
+    uint64_t mStateChangeStartTime = 0UL;
+    glm::mat2x3 mPositionQuintic = glm::mat2x3(0.f);
+    glm::mat4x3 mPositionCubic = glm::mat4x3(0.f);
+    glm::mat2x3 mVelocityQuintic = glm::mat2x3(0.f);
+    glm::mat4x3 mVelocityCubic = glm::mat4x3(0.f);
+    glm::mat2x3 mAccelerationQuintic = glm::mat2x3(0.f);
+    glm::mat4x3 mAccelerationCubic = glm::mat4x3(0.f);
+    uint64_t mStateChangeEndTime = 0UL;
+
+    /* The time to use as current in this model */
+    uint64_t mModelTimeNs = 0UL;
+
     glm::quat mPreviousRotation;
     glm::quat mCurrentRotation;
-    glm::vec3 mRotationalVelocity = glm::vec3(0.f);
+    glm::vec3 mRotationalVelocity = glm::vec3();
 
     uint64_t mUpdateIntervalMs = 0;
     uint64_t mLastRotationUpdateMs = 0;
