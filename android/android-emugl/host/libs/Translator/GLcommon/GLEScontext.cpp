@@ -1626,7 +1626,8 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring,"GL_EXT_bgra ")!=NULL)
         s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888 = true;
 
-    if (strstr(cstring,"GL_EXT_framebuffer_object ")!=NULL)
+    if (::isCoreProfile() ||
+        strstr(cstring,"GL_EXT_framebuffer_object ")!=NULL)
         s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT = true;
 
     if (strstr(cstring,"GL_ARB_vertex_blend ")!=NULL)

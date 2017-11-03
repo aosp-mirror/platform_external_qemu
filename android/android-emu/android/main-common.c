@@ -1973,9 +1973,14 @@ bool configAndStartRenderer(
 
     // We need to know boot property
     // for opengles version in advance.
-    config_out->bootPropOpenglesVersion =
-        gles_major_version << 16 |
-        gles_minor_version;
+    const bool guest_es3_is_ok = feature_is_enabled(kFeature_GLESDynamicVersion);
+    if (guest_es3_is_ok) {
+        config_out->bootPropOpenglesVersion =
+            gles_major_version << 16 |
+            gles_minor_version;
+    } else {
+        config_out->bootPropOpenglesVersion = (2 << 16) | 0;
+    }
 
     // Now estimate the GL framebuffer size.
     // Use the conservative value for bytes per pixel (RGBA8)
