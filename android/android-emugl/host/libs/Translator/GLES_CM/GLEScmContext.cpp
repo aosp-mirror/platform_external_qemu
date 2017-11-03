@@ -24,6 +24,7 @@
 
 #include "android/base/files/StreamSerializing.h"
 #include "emugl/common/crash_reporter.h"
+#include "GLEScmValidate.h"
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
@@ -96,8 +97,8 @@ GLEScmContext::GLEScmContext(int maj, int min,
                     android::base::loadCollection(stream, &texEnv,
                             [] (android::base::Stream* stream) {
                                 GLenum idx = stream->getBe32();
-                                GLVal val;
-                                stream->read(&val, sizeof(GLVal));
+                                GLValTyped val;
+                                stream->read(&val, sizeof(GLValTyped));
                                 return std::make_pair(idx, val);
                             });
                     return std::move(texEnv);
@@ -108,14 +109,15 @@ GLEScmContext::GLEScmContext(int maj, int min,
                     android::base::loadCollection(stream, &texEnv,
                             [] (android::base::Stream* stream) {
                                 GLenum idx = stream->getBe32();
-                                GLVal val;
-                                stream->read(&val, sizeof(GLVal));
+                                GLValTyped val;
+                                stream->read(&val, sizeof(GLValTyped));
                                 return std::make_pair(idx, val);
                             });
                     return std::move(texEnv);
                 });
         m_clientActiveTexture = stream->getBe32();
         if (m_initialized) {
+            mShadeModel = stream->getBe32();
             uint32_t size = stream->getBe32();
             m_texCoords = new GLESpointer[size];
             for (uint32_t i = 0; i < size; i++) {
@@ -143,13 +145,17 @@ GLEScmContext::GLEScmContext(int maj, int min,
         mTexGens.resize(kMaxTextureUnits, {});
 
         for (int i = 0; i < kMaxTextureUnits; i++) {
-            mTexUnitEnvs[i][GL_TEXTURE_ENV_MODE].intVal[0] = GL_MODULATE;
-            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[0] = 0.2f;
-            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[1] = 0.4f;
-            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[2] = 0.8f;
-            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].floatVal[3] = 0.7f;
-            mTexUnitEnvs[i][GL_COMBINE_RGB].intVal[0] = GL_REPLACE;
-            mTexUnitEnvs[i][GL_COMBINE_ALPHA].intVal[0] = GL_REPLACE;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_MODE].val.intVal[0] = GL_MODULATE;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_MODE].type = GL_INT;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].val.floatVal[0] = 0.2f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].val.floatVal[1] = 0.4f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].val.floatVal[2] = 0.8f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].val.floatVal[3] = 0.7f;
+            mTexUnitEnvs[i][GL_TEXTURE_ENV_COLOR].type = GL_FLOAT;
+            mTexUnitEnvs[i][GL_COMBINE_RGB].val.intVal[0] = GL_REPLACE;
+            mTexUnitEnvs[i][GL_COMBINE_RGB].type = GL_INT;
+            mTexUnitEnvs[i][GL_COMBINE_ALPHA].val.intVal[0] = GL_REPLACE;
+            mTexUnitEnvs[i][GL_COMBINE_ALPHA].type = GL_INT;
         }
     }
 }
@@ -193,22 +199,23 @@ void GLEScmContext::onSave(android::base::Stream* stream) const {
             [](android::base::Stream* stream, const TexEnv& texEnv) {
                 android::base::saveCollection(stream, texEnv,
                         [] (android::base::Stream* stream,
-                            const std::pair<GLenum, GLVal>& it) {
+                            const std::pair<GLenum, GLValTyped>& it) {
                             stream->putBe32(it.first);
-                            stream->write(&it.second, sizeof(GLVal));
+                            stream->write(&it.second, sizeof(GLValTyped));
                         });
             });
     android::base::saveBuffer(stream, mTexGens,
             [](android::base::Stream* stream, const TexEnv& texEnv) {
                 android::base::saveCollection(stream, texEnv,
                         [] (android::base::Stream* stream,
-                            const std::pair<GLenum, GLVal>& it) {
+                            const std::pair<GLenum, GLValTyped>& it) {
                             stream->putBe32(it.first);
-                            stream->write(&it.second, sizeof(GLVal));
+                            stream->write(&it.second, sizeof(GLValTyped));
                         });
             });
     stream->putBe32(m_clientActiveTexture);
     if (m_initialized) {
+        stream->putBe32(mShadeModel);
         stream->putBe32(s_glSupport.maxTexUnits);
         for (uint32_t i = 0; i < s_glSupport.maxTexUnits; i++) {
             m_texCoords[i].onSave(stream);
@@ -249,10 +256,42 @@ void GLEScmContext::postLoadRestoreCtx() {
             dispatcher.glMatrixMode(mCurrMatrixMode);
             dispatcher.glActiveTexture(GL_TEXTURE0 + m_activeTexture);
             for (const auto& it : *m_currVaoState.it->second.arraysMap) {
-                if (it.second->isEnable()) {
-                    dispatcher.glEnableClientState(it.first);
+                if (GLEScmValidate::supportedArrays(it.first) &&
+                        it.first != GL_TEXTURE_COORD_ARRAY) {
+                    if (it.second->isEnable()) {
+                        dispatcher.glEnableClientState(it.first);
+                    } else {
+                        dispatcher.glDisableClientState(it.first);
+                    }
                 }
             }
+
+            for (int i = 0; i < s_glSupport.maxTexUnits; i++) {
+                GLESpointer* texcoord = m_texCoords + i;
+                dispatcher.glClientActiveTexture(i + GL_TEXTURE0);
+                if (texcoord->isEnable()) {
+                    dispatcher.glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+                } else {
+                    dispatcher.glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+                }
+                dispatcher.glActiveTexture(i + GL_TEXTURE0);
+                for (const auto& texEnv : mTexUnitEnvs[i]) {
+                    GLenum target = texEnv.first == GL_POINT_SPRITE_OES ?
+                        GL_COORD_REPLACE_OES : GL_TEXTURE_ENV;
+                    if (texEnv.second.type == GL_INT) {
+                        dispatcher.glTexEnviv(target, texEnv.first,
+                                texEnv.second.val.intVal);
+                    } else {
+                        assert(texEnv.second.type == GL_FLOAT);
+                        dispatcher.glTexEnvfv(target, texEnv.first,
+                                texEnv.second.val.floatVal);
+                    }
+                }
+            }
+            dispatcher.glClientActiveTexture(
+                    m_clientActiveTexture + GL_TEXTURE0);
+            dispatcher.glActiveTexture(m_activeTexture + GL_TEXTURE0);
+            dispatcher.glShadeModel(mShadeModel);
         }
     }
     GLEScontext::postLoadRestoreCtx();
@@ -455,11 +494,11 @@ std::vector<float> GLEScmContext::getMultiTexCoord(uint32_t index) const {
 }
 
 GLenum GLEScmContext::getTextureEnvMode() {
-    return mTexUnitEnvs[m_activeTexture][GL_TEXTURE_ENV_MODE].intVal[0];
+    return mTexUnitEnvs[m_activeTexture][GL_TEXTURE_ENV_MODE].val.intVal[0];
 }
 
 GLenum GLEScmContext::getTextureGenMode() {
-    return mTexGens[m_activeTexture][GL_TEXTURE_GEN_MODE_OES].intVal[0];
+    return mTexGens[m_activeTexture][GL_TEXTURE_GEN_MODE_OES].val.intVal[0];
 }
 
 glm::mat4 GLEScmContext::getProjMatrix() {
@@ -704,11 +743,6 @@ GLint GLEScmContext::getErrorCoreProfile() {
 void GLEScmContext::enable(GLenum cap) {
     setEnable(cap, true);
 
-    switch (cap) {
-        case GL_TEXTURE_2D:
-        case GL_TEXTURE_CUBE_MAP_OES:
-            setTextureEnabled(cap,true);
-    }
     if (m_coreProfileEngine) {
         core().enable(cap);
     } else {
@@ -725,11 +759,6 @@ void GLEScmContext::enable(GLenum cap) {
 void GLEScmContext::disable(GLenum cap) {
     setEnable(cap, false);
 
-    switch (cap) {
-        case GL_TEXTURE_2D:
-        case GL_TEXTURE_CUBE_MAP_OES:
-            setTextureEnabled(cap, false);
-    }
     if (m_coreProfileEngine) {
         core().disable(cap);
     } else {
@@ -846,7 +875,8 @@ void GLEScmContext::texEnvf(GLenum target, GLenum pname, GLfloat param) {
     if (pname == GL_TEXTURE_ENV_MODE) {
         texEnvi(target, pname, (GLint)param);
     } else {
-        mTexUnitEnvs[m_activeTexture][pname].floatVal[0] = param;
+        mTexUnitEnvs[m_activeTexture][pname].val.floatVal[0] = param;
+        mTexUnitEnvs[m_activeTexture][pname].type = GL_FLOAT;
     }
 
     if (m_coreProfileEngine) {
@@ -859,7 +889,8 @@ void GLEScmContext::texEnvf(GLenum target, GLenum pname, GLfloat param) {
 void GLEScmContext::texEnvfv(GLenum target, GLenum pname, const GLfloat* params) {
     if (pname == GL_TEXTURE_ENV_COLOR) {
         for (int i = 0; i < 4; i++) {
-            mTexUnitEnvs[m_activeTexture][pname].floatVal[i] = params[i];
+            mTexUnitEnvs[m_activeTexture][pname].val.floatVal[i] = params[i];
+            mTexUnitEnvs[m_activeTexture][pname].type = GL_FLOAT;
         }
     } else {
         texEnvf(target, pname, params[0]);
@@ -873,7 +904,8 @@ void GLEScmContext::texEnvfv(GLenum target, GLenum pname, const GLfloat* params)
 }
 
 void GLEScmContext::texEnvi(GLenum target, GLenum pname, GLint param) {
-    mTexUnitEnvs[m_activeTexture][pname].intVal[0] = param;
+    mTexUnitEnvs[m_activeTexture][pname].val.intVal[0] = param;
+    mTexUnitEnvs[m_activeTexture][pname].type = GL_INT;
 
     if (m_coreProfileEngine) {
         core().texEnvi(target, pname, param);
@@ -883,7 +915,8 @@ void GLEScmContext::texEnvi(GLenum target, GLenum pname, GLint param) {
 }
 
 void GLEScmContext::texEnviv(GLenum target, GLenum pname, const GLint* params) {
-    mTexUnitEnvs[m_activeTexture][pname].intVal[0] = params[0];
+    mTexUnitEnvs[m_activeTexture][pname].val.intVal[0] = params[0];
+    mTexUnitEnvs[m_activeTexture][pname].type = GL_INT;
 
     if (m_coreProfileEngine) {
         core().texEnviv(target, pname, params);
@@ -893,7 +926,7 @@ void GLEScmContext::texEnviv(GLenum target, GLenum pname, const GLint* params) {
 }
 
 void GLEScmContext::getTexEnvfv(GLenum env, GLenum pname, GLfloat* params) {
-    *params = mTexUnitEnvs[m_activeTexture][pname].floatVal[0];
+    *params = mTexUnitEnvs[m_activeTexture][pname].val.floatVal[0];
 
     if (m_coreProfileEngine) {
         core().getTexEnvfv(env, pname, params);
@@ -903,7 +936,7 @@ void GLEScmContext::getTexEnvfv(GLenum env, GLenum pname, GLfloat* params) {
 }
 
 void GLEScmContext::getTexEnviv(GLenum env, GLenum pname, GLint* params) {
-    *params = mTexUnitEnvs[m_activeTexture][pname].intVal[0];
+    *params = mTexUnitEnvs[m_activeTexture][pname].val.intVal[0];
 
     if (m_coreProfileEngine) {
         core().getTexEnviv(env, pname, params);
@@ -913,7 +946,8 @@ void GLEScmContext::getTexEnviv(GLenum env, GLenum pname, GLint* params) {
 }
 
 void GLEScmContext::texGenf(GLenum coord, GLenum pname, GLfloat param) {
-    mTexGens[m_activeTexture][pname].floatVal[0] = param;
+    mTexGens[m_activeTexture][pname].val.floatVal[0] = param;
+    mTexGens[m_activeTexture][pname].type = GL_FLOAT;
 
     if (m_coreProfileEngine) {
         core().texGenf(coord, pname, param);
@@ -929,7 +963,8 @@ void GLEScmContext::texGenf(GLenum coord, GLenum pname, GLfloat param) {
 }
 
 void GLEScmContext::texGenfv(GLenum coord, GLenum pname, const GLfloat* params) {
-    mTexGens[m_activeTexture][pname].floatVal[0] = params[0];
+    mTexGens[m_activeTexture][pname].val.floatVal[0] = params[0];
+    mTexGens[m_activeTexture][pname].type = GL_FLOAT;
 
     if (m_coreProfileEngine) {
         core().texGenfv(coord, pname, params);
@@ -945,7 +980,8 @@ void GLEScmContext::texGenfv(GLenum coord, GLenum pname, const GLfloat* params) 
 }
 
 void GLEScmContext::texGeni(GLenum coord, GLenum pname, GLint param) {
-    mTexGens[m_activeTexture][pname].intVal[0] = param;
+    mTexGens[m_activeTexture][pname].val.intVal[0] = param;
+    mTexGens[m_activeTexture][pname].type = GL_INT;
 
     if (m_coreProfileEngine) {
         core().texGeni(coord, pname, param);
@@ -961,7 +997,8 @@ void GLEScmContext::texGeni(GLenum coord, GLenum pname, GLint param) {
 }
 
 void GLEScmContext::texGeniv(GLenum coord, GLenum pname, const GLint* params) {
-    mTexGens[m_activeTexture][pname].intVal[0] = params[0];
+    mTexGens[m_activeTexture][pname].val.intVal[0] = params[0];
+    mTexGens[m_activeTexture][pname].type = GL_INT;
 
     if (m_coreProfileEngine) {
         core().texGeniv(coord, pname, params);
@@ -977,7 +1014,7 @@ void GLEScmContext::texGeniv(GLenum coord, GLenum pname, const GLint* params) {
 }
 
 void GLEScmContext::getTexGeniv(GLenum coord, GLenum pname, GLint* params) {
-    *params = mTexGens[m_activeTexture][pname].intVal[0];
+    *params = mTexGens[m_activeTexture][pname].val.intVal[0];
 
     if (m_coreProfileEngine) {
         core().getTexGeniv(coord, pname, params);
@@ -997,10 +1034,10 @@ void GLEScmContext::getTexGeniv(GLenum coord, GLenum pname, GLint* params) {
 }
 
 void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
-    params[0] = mTexGens[m_activeTexture][pname].floatVal[0];
-    params[1] = mTexGens[m_activeTexture][pname].floatVal[1];
-    params[2] = mTexGens[m_activeTexture][pname].floatVal[2];
-    params[3] = mTexGens[m_activeTexture][pname].floatVal[3];
+    params[0] = mTexGens[m_activeTexture][pname].val.floatVal[0];
+    params[1] = mTexGens[m_activeTexture][pname].val.floatVal[1];
+    params[2] = mTexGens[m_activeTexture][pname].val.floatVal[2];
+    params[3] = mTexGens[m_activeTexture][pname].val.floatVal[3];
 
     if (m_coreProfileEngine) {
         core().getTexGenfv(coord, pname, params);
@@ -1036,6 +1073,7 @@ void GLEScmContext::disableClientState(GLenum clientState) {
 }
 
 void GLEScmContext::drawTexOES(float x, float y, float z, float width, float height) {
+    return;
     if (m_coreProfileEngine) {
         core().drawTexOES(x, y, z, width, height);
     } else {
@@ -1239,8 +1277,6 @@ void GLEScmContext::drawArrays(GLenum mode, GLint first, GLsizei count) {
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawArrays(mode, first, count);
-        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
-        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
     } else {
         GLESConversionArrays tmpArrs;
 
@@ -1276,14 +1312,6 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
     dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
     if (m_coreProfileEngine) {
-        // track previous vbo/ibo
-        GLuint prev_vbo;
-        GLuint prev_ibo;
-        dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_vbo);
-        dispatcher().glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING,
-                (GLint*)&prev_ibo);
-
         ArraysMap::iterator it;
         m_pointsIndex = -1;
 
@@ -1305,8 +1333,6 @@ void GLEScmContext::drawElements(GLenum mode, GLsizei count, GLenum type, const 
         setClientActiveTexture(activeTexture);
         core().clientActiveTexture(activeTexture);
         core().drawElements(mode, count, type, indices);
-        dispatcher().glBindBuffer(GL_ARRAY_BUFFER, prev_vbo);
-        dispatcher().glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, prev_ibo);
     } else {
         GLESConversionArrays tmpArrs;
 
