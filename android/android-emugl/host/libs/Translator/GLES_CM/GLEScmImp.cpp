@@ -406,6 +406,7 @@ GL_API void GL_APIENTRY  glBlendFunc( GLenum sfactor, GLenum dfactor) {
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::blendSrc(sfactor) || !GLEScmValidate::blendDst(dfactor),GL_INVALID_ENUM)
+    ctx->setBlendFuncSeparate(sfactor, dfactor, sfactor, dfactor);
     ctx->dispatcher().glBlendFunc(sfactor,dfactor);
 }
 
