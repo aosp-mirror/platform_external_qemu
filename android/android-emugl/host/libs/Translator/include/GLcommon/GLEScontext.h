@@ -312,6 +312,7 @@ public:
     void setPixelStorei(GLenum pname, GLint param);
 
     void setViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+    void getViewport(GLint* params);
     void setPolygonOffset(GLfloat factor, GLfloat units);
     void setScissor(GLint x, GLint y, GLsizei width, GLsizei height);
     void setCullFace(GLenum mode);
