@@ -46,6 +46,30 @@
       "revId": "7e56668499c99d0ad485261edcdd1a97d3edc66b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a9b197b_353649bb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-03T19:13:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6d0e53d3_359c6125",
+      "range": {
+        "startLine": 32,
+        "startChar": 8,
+        "endLine": 32,
+        "endChar": 20
+      },
+      "revId": "7e56668499c99d0ad485261edcdd1a97d3edc66b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
