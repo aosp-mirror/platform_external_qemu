@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9f0e7f4c_a29ce62e",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-03T18:27:16Z",
+      "side": 1,
+      "message": "Does this handle if you create AVD \"A\", delete it and create AVD \"A\" again, the Qt setting is also reset?\n\nIf not, we could decide to add it, or just let it preserve the setting as a Hidden Feature (AVD name determining settings). I\u0027m not really dedicated to either alternative at the moment.",
+      "range": {
+        "startLine": 521,
+        "startChar": 0,
+        "endLine": 521,
+        "endChar": 85
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
