@@ -360,12 +360,16 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
     const DurationNs now_ns =
             looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
 
+    // Update the current time on the physical model.
+    physicalModel_setCurrentTime(cl->sensors->physical_model, now_ns);
+
     AndroidSensor sensor_id;
     for (sensor_id = 0; sensor_id < MAX_SENSORS; ++sensor_id) {
         if (!_hwSensorClient_enabled(cl, sensor_id)) {
             continue;
         }
         Sensor* sensor = &cl->sensors->sensors[sensor_id];
+
         serializeSensorValue(
                 cl->sensors->physical_model, sensor, sensor_id);
         _hwSensorClient_send(cl, (uint8_t*)sensor->serialized.value,
