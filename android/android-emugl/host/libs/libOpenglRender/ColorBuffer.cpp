@@ -151,6 +151,7 @@ ColorBuffer* ColorBuffer::create(EGLDisplay p_display,
     ColorBuffer* cb = new ColorBuffer(p_display, hndl, helper);
 
     s_gles2.glGenTextures(1, &cb->m_tex);
+    s_gles2.glGenTextures(1, &cb->m_tmpTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, cb->m_tex);
 
     s_gles2.glTexImage2D(GL_TEXTURE_2D, 0, texInternalFormat, p_width, p_height,
@@ -232,8 +233,8 @@ ColorBuffer::~ColorBuffer() {
 
     m_yuv_converter.reset();
 
-    GLuint tex[2] = {m_tex, m_blitTex};
-    s_gles2.glDeleteTextures(2, tex);
+    GLuint tex[3] = {m_tex, m_tmpTex, m_blitTex};
+    s_gles2.glDeleteTextures(3, tex);
 
     delete m_resizer;
 }
@@ -339,12 +340,10 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     // Copy the content of the current read surface into m_blitEGLImage.
     // This is done by creating a temporary texture, bind it to the EGLImage
     // then call glCopyTexSubImage2D().
-    GLuint tmpTex;
     GLint currTexBind;
     if (tInfo->currContext->clientVersion() > GLESApi_CM) {
         s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gles2.glGenTextures(1, &tmpTex);
-        s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        s_gles2.glBindTexture(GL_TEXTURE_2D, m_tmpTex);
         s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
 
         // If the read buffer is multisampled, we need to resolve.
@@ -361,7 +360,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
             s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
             s_gles2.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
                                            GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                           tmpTex, 0);
+                                           m_tmpTex, 0);
             s_gles2.glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width,
                                       m_height, GL_COLOR_BUFFER_BIT,
                                       GL_NEAREST);
@@ -369,12 +368,11 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
                                       (GLuint)prev_draw_fbo);
 
             s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
-            s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
+            s_gles2.glBindTexture(GL_TEXTURE_2D, m_tmpTex);
         } else {
             s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                         m_height);
         }
-        s_gles2.glDeleteTextures(1, &tmpTex);
         s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
 
         // clear GL errors, because its possible that the fbo format does not
@@ -390,12 +388,10 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
         // or we get some really psychedelic patterns.
     } else {
         s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gles1.glGenTextures(1, &tmpTex);
-        s_gles1.glBindTexture(GL_TEXTURE_2D, tmpTex);
+        s_gles1.glBindTexture(GL_TEXTURE_2D, m_tmpTex);
         s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
         s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
                                     m_height);
-        s_gles1.glDeleteTextures(1, &tmpTex);
         s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
     }
 
@@ -567,6 +563,7 @@ ColorBuffer* ColorBuffer::onLoad(android::base::Stream* stream,
 void ColorBuffer::restore() {
     RecursiveScopedHelperContext context(m_helper);
     s_gles2.glGenTextures(1, &m_tex);
+    s_gles2.glGenTextures(1, &m_tmpTex);
     s_gles2.glBindTexture(GL_TEXTURE_2D, m_tex);
     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_eglImage);
 
