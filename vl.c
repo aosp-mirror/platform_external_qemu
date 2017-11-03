@@ -4681,7 +4681,12 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
         RendererConfig rendererConfig = getLastRendererConfig();
 
-        goldfish_fb_set_display_depth(depth);
+        if (avdInfo_getApiLevel(android_avdInfo) >= 26) {
+            // api26 and up hardcoded pixel format ast RGBA8888, so only use 32bit
+            goldfish_fb_set_display_depth(32);
+        } else {
+            goldfish_fb_set_display_depth(depth);
+        }
         goldfish_fb_set_use_host_gpu(
                 rendererConfig.glesMode == kAndroidGlesEmulationHost);
         is_opengl_alive = rendererConfig.openglAlive;
