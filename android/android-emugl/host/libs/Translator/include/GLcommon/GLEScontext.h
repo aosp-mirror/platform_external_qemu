@@ -307,6 +307,7 @@ public:
 
     void setEnable(GLenum item, bool isEnable);
     bool isEnabled(GLenum item) const;
+    void setBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha);
     void setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
             GLenum srcAlpha, GLenum dstAlpha);
     void setPixelStorei(GLenum pname, GLint param);
@@ -492,6 +493,9 @@ protected:
     GLsizei m_scissorHeight = 0;
 
     std::unordered_map<GLenum, bool> m_glEnableList = std::unordered_map<GLenum, bool>();
+
+    GLenum m_blendEquationRgb = GL_FUNC_ADD;
+    GLenum m_blendEquationAlpha = GL_FUNC_ADD;
 
     GLenum m_blendSrcRgb = GL_ONE;
     GLenum m_blendDstRgb = GL_ZERO;

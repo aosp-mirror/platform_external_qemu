@@ -165,7 +165,7 @@ private:
         GLVal val;
     };
 
-    using TexEnv = std::unordered_map<GLenum, GLVal>;
+    using TexEnv = std::unordered_map<GLenum, GLValTyped>;
     using TexUnitEnvs = std::vector<TexEnv>;
     using TexGens = std::vector<TexEnv>;
     using MatrixStack = std::vector<glm::mat4>;

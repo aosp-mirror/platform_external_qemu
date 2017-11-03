@@ -527,6 +527,7 @@ GL_APICALL void  GL_APIENTRY glBlendColor(GLclampf red, GLclampf green, GLclampf
 GL_APICALL void  GL_APIENTRY glBlendEquation( GLenum mode ){
     GET_CTX_V2();
     SET_ERROR_IF(!GLESv2Validate::blendEquationMode(ctx, mode), GL_INVALID_ENUM);
+    ctx->setBlendEquationSeparate(mode, mode);
     ctx->dispatcher().glBlendEquation(mode);
 }
 
@@ -534,6 +535,7 @@ GL_APICALL void  GL_APIENTRY glBlendEquationSeparate(GLenum modeRGB, GLenum mode
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::blendEquationMode(ctx, modeRGB) &&
                    GLESv2Validate::blendEquationMode(ctx, modeAlpha)), GL_INVALID_ENUM);
+    ctx->setBlendEquationSeparate(modeRGB, modeAlpha);
     ctx->dispatcher().glBlendEquationSeparate(modeRGB,modeAlpha);
 }
 
