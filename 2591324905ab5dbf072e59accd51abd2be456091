@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e0b1f19e_17b31d27",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2743,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-03T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e36c7aec_5577e6ee",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "0a3df7cf_adc65e69",
         "filename": "android/android-emu/android/console.cpp",
         "patchSetId": 8
@@ -30,6 +48,24 @@
       "writtenOn": "2017-11-03T17:27:44Z",
       "side": 1,
       "message": "\u0026physical_param_name[0] \u003d\u003d physical_param_name",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45cb64ca_f3369ca3",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2745,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-03T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0a3df7cf_adc65e69",
       "revId": "2591324905ab5dbf072e59accd51abd2be456091",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -53,6 +89,24 @@
     },
     {
       "key": {
+        "uuid": "5ff91377_d97542cc",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2811,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-03T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "25000bf3_f16a5ab9",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "68be8325_99ef5a53",
         "filename": "android/android-emu/android/emulator-window.c",
         "patchSetId": 8
@@ -64,6 +118,24 @@
       "writtenOn": "2017-11-03T17:27:44Z",
       "side": 1,
       "message": "You can extract this to a function, it is used in 2 places. Here as well as tool-window.cpp. This will make it easier to understand.",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dfcd81d2_91363dee",
+        "filename": "android/android-emu/android/emulator-window.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 470,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-03T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68be8325_99ef5a53",
       "revId": "2591324905ab5dbf072e59accd51abd2be456091",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -87,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "a9b56672_4c7c806e",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 720,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-03T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "14ffb872_a66564e8",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "35755695_f280e232",
         "filename": "android/android-emu/android/hw-sensors.c",
         "patchSetId": 8
@@ -104,6 +194,24 @@
     },
     {
       "key": {
+        "uuid": "a85dfd1d_d2613e09",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 778,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-03T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "35755695_f280e232",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "da33cf67_402950f4",
         "filename": "android/android-emu/android/hw-sensors.c",
         "patchSetId": 8
@@ -115,6 +223,24 @@
       "writtenOn": "2017-11-03T17:27:44Z",
       "side": 1,
       "message": "Same as above, is there a way to DRY it up?",
+      "revId": "2591324905ab5dbf072e59accd51abd2be456091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3689ae06_74e61728",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 789,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-03T21:25:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da33cf67_402950f4",
       "revId": "2591324905ab5dbf072e59accd51abd2be456091",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
