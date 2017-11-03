@@ -221,6 +221,7 @@ private:
 
 private:
     GLuint m_tex = 0;
+    GLuint m_tmpTex = 0;
     GLuint m_blitTex = 0;
     EGLImageKHR m_eglImage = nullptr;
     EGLImageKHR m_blitEGLImage = nullptr;
