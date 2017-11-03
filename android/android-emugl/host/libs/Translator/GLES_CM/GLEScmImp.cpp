@@ -406,7 +406,7 @@ GL_API void GL_APIENTRY  glBindTexture( GLenum target, GLuint texture) {
 
         TextureData* texData = getTextureData(localTexName);
         if (texData->target==0)
-            texData->target = target;
+            texData->setTarget(target);
         //if texture was already bound to another target
         SET_ERROR_IF(ctx->GLTextureTargetToLocal(texData->target) != ctx->GLTextureTargetToLocal(target), GL_INVALID_OPERATION);
         texData->wasBound = true;
@@ -421,6 +421,7 @@ GL_API void GL_APIENTRY  glBlendFunc( GLenum sfactor, GLenum dfactor) {
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::blendSrc(sfactor) || !GLEScmValidate::blendDst(dfactor),GL_INVALID_ENUM)
+    ctx->setBlendFuncSeparate(sfactor, dfactor, sfactor, dfactor);
     ctx->dispatcher().glBlendFunc(sfactor,dfactor);
 }
 
@@ -2171,6 +2172,7 @@ GL_API void GL_APIENTRY glBlendEquationOES(GLenum mode) {
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!(GLEScmValidate::blendEquationMode(mode)), GL_INVALID_ENUM);
+    ctx->setBlendEquationSeparate(mode, mode);
     ctx->dispatcher().glBlendEquation(mode);
 }
 
@@ -2179,6 +2181,7 @@ GL_API void GL_APIENTRY glBlendEquationSeparateOES (GLenum modeRGB, GLenum modeA
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!(GLEScmValidate::blendEquationMode(modeRGB) && GLEScmValidate::blendEquationMode(modeAlpha)), GL_INVALID_ENUM);
+    ctx->setBlendEquationSeparate(modeRGB, modeAlpha);
     ctx->dispatcher().glBlendEquationSeparate(modeRGB,modeAlpha);
 }
 

@@ -477,7 +477,7 @@ void SaveableTexture::onSave(
                         dispatcher.glGetTexLevelParameteriv(target, level,
                                 GL_TEXTURE_HEIGHT, &glHeight);
                         width = static_cast<unsigned int>(glWidth);
-                        height = static_cast<unsigned int>(height);
+                        height = static_cast<unsigned int>(glHeight);
                     }
                     if (isDepth) {
                         if (!isGles2Gles()) {
