@@ -329,6 +329,7 @@ void ColorBuffer::subUpdate(int x,
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {
+    
     RenderThreadInfo* tInfo = RenderThreadInfo::get();
     if (!tInfo->currContext.get()) {
         // no Current context
@@ -336,91 +337,92 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     }
 
     touch();
+    s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
     // Copy the content of the current read surface into m_blitEGLImage.
     // This is done by creating a temporary texture, bind it to the EGLImage
     // then call glCopyTexSubImage2D().
-    GLuint tmpTex;
-    GLint currTexBind;
-    if (tInfo->currContext->clientVersion() > GLESApi_CM) {
-        s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gles2.glGenTextures(1, &tmpTex);
-        s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
-        s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+    // GLuint tmpTex;
+    // GLint currTexBind;
+    // if (tInfo->currContext->clientVersion() > GLESApi_CM) {
+    //     s_gles2.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
+    //     s_gles2.glGenTextures(1, &tmpTex);
+    //     s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
+    //     s_gles2.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
 
-        // If the read buffer is multisampled, we need to resolve.
-        GLint samples;
-        s_gles2.glGetIntegerv(GL_SAMPLE_BUFFERS, &samples);
-        if (tInfo->currContext->clientVersion() > GLESApi_2 && samples > 0) {
-            s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
+    //     // If the read buffer is multisampled, we need to resolve.
+    //     GLint samples;
+    //     s_gles2.glGetIntegerv(GL_SAMPLE_BUFFERS, &samples);
+    //     if (tInfo->currContext->clientVersion() > GLESApi_2 && samples > 0) {
+    //         s_gles2.glBindTexture(GL_TEXTURE_2D, 0);
 
-            GLuint resolve_fbo;
-            GLint prev_draw_fbo;
-            s_gles2.glGenFramebuffers(1, &resolve_fbo);
-            s_gles2.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_draw_fbo);
+    //         GLuint resolve_fbo;
+    //         GLint prev_draw_fbo;
+    //         s_gles2.glGenFramebuffers(1, &resolve_fbo);
+    //         s_gles2.glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prev_draw_fbo);
 
-            s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
-            s_gles2.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
-                                           GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                                           tmpTex, 0);
-            s_gles2.glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width,
-                                      m_height, GL_COLOR_BUFFER_BIT,
-                                      GL_NEAREST);
-            s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
-                                      (GLuint)prev_draw_fbo);
+    //         s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, resolve_fbo);
+    //         s_gles2.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER,
+    //                                        GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+    //                                        tmpTex, 0);
+    //         s_gles2.glBlitFramebuffer(0, 0, m_width, m_height, 0, 0, m_width,
+    //                                   m_height, GL_COLOR_BUFFER_BIT,
+    //                                   GL_NEAREST);
+    //         s_gles2.glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+    //                                   (GLuint)prev_draw_fbo);
 
-            s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
-            s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
-        } else {
-            s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
-                                        m_height);
-        }
-        s_gles2.glDeleteTextures(1, &tmpTex);
-        s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
+    //         s_gles2.glDeleteFramebuffers(1, &resolve_fbo);
+    //         s_gles2.glBindTexture(GL_TEXTURE_2D, tmpTex);
+    //     } else {
+    //         s_gles2.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
+    //                                     m_height);
+    //     }
+    //     s_gles2.glDeleteTextures(1, &tmpTex);
+    //     s_gles2.glBindTexture(GL_TEXTURE_2D, currTexBind);
 
-        // clear GL errors, because its possible that the fbo format does not
-        // match
-        // the format of the read buffer, in the case of OpenGL ES 3.1 and
-        // integer
-        // RGBA formats.
-        s_gles2.glGetError();
-        // This is currently for dEQP purposes only; if we actually want these
-        // integer FBO formats to actually serve to display something for human
-        // consumption,
-        // we need to change the egl image to be of the same format,
-        // or we get some really psychedelic patterns.
-    } else {
-        s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
-        s_gles1.glGenTextures(1, &tmpTex);
-        s_gles1.glBindTexture(GL_TEXTURE_2D, tmpTex);
-        s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
-        s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
-                                    m_height);
-        s_gles1.glDeleteTextures(1, &tmpTex);
-        s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
-    }
+    //     // clear GL errors, because its possible that the fbo format does not
+    //     // match
+    //     // the format of the read buffer, in the case of OpenGL ES 3.1 and
+    //     // integer
+    //     // RGBA formats.
+    //     s_gles2.glGetError();
+    //     // This is currently for dEQP purposes only; if we actually want these
+    //     // integer FBO formats to actually serve to display something for human
+    //     // consumption,
+    //     // we need to change the egl image to be of the same format,
+    //     // or we get some really psychedelic patterns.
+    // } else {
+    //     s_gles1.glGetIntegerv(GL_TEXTURE_BINDING_2D, &currTexBind);
+    //     s_gles1.glGenTextures(1, &tmpTex);
+    //     s_gles1.glBindTexture(GL_TEXTURE_2D, tmpTex);
+    //     s_gles1.glEGLImageTargetTexture2DOES(GL_TEXTURE_2D, m_blitEGLImage);
+    //     s_gles1.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, m_width,
+    //                                 m_height);
+    //     s_gles1.glDeleteTextures(1, &tmpTex);
+    //     s_gles1.glBindTexture(GL_TEXTURE_2D, currTexBind);
+    // }
 
-    RecursiveScopedHelperContext context(m_helper);
-    if (!context.isOk()) {
-        return false;
-    }
+    // RecursiveScopedHelperContext context(m_helper);
+    // if (!context.isOk()) {
+    //     return false;
+    // }
 
-    if (!bindFbo(&m_fbo, m_tex)) {
-        return false;
-    }
+    // if (!bindFbo(&m_fbo, m_tex)) {
+    //     return false;
+    // }
 
-    // Save current viewport and match it to the current colorbuffer size.
-    GLint vport[4] = {
-            0,
-    };
-    s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
-    s_gles2.glViewport(0, 0, m_width, m_height);
+    // // Save current viewport and match it to the current colorbuffer size.
+    // GLint vport[4] = {
+    //         0,
+    // };
+    // s_gles2.glGetIntegerv(GL_VIEWPORT, vport);
+    // s_gles2.glViewport(0, 0, m_width, m_height);
 
-    // render m_blitTex
-    m_helper->getTextureDraw()->draw(m_blitTex, 0., 0, 0);
+    // // render m_blitTex
+    // m_helper->getTextureDraw()->draw(m_blitTex, 0., 0, 0);
 
-    // Restore previous viewport.
-    s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
-    unbindFbo();
+    // // Restore previous viewport.
+    // s_gles2.glViewport(vport[0], vport[1], vport[2], vport[3]);
+    // unbindFbo();
 
     return true;
 }
