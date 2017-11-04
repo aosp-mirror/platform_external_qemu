@@ -63,11 +63,14 @@ SyncThread::SyncThread(EGLContext parentContext) :
     }
 
     FrameBuffer *fb = FrameBuffer::getFB();
+    m_fastBlitSupported = fb->isFastBlitSupported();
     mDisplay = fb->getDisplay();
 
     this->start();
 
-    initSyncContext();
+    if (!m_fastBlitSupported) {
+        initSyncContext();
+    }
 }
 
 void SyncThread::triggerWait(FenceSync* fenceSync,
@@ -181,7 +184,15 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     EGLint wait_result = 0x0;
 
     DPRINT("wait on sync obj: %p", cmd->fenceSync);
-    wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
+    if (m_fastBlitSupported) {
+        // If fast blit is supported, we don't need to do
+        // a client wait here; the server-side fence from
+        // blitFromCurrentReadBuffer will cause the GPU alone
+        // to block, letting us proceed immediately.
+        wait_result = EGL_CONDITION_SATISFIED_KHR;
+    } else {
+        wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
+    }
 
     DPRINT("done waiting, with wait result=0x%x. "
            "increment timeline (and signal fence)",
@@ -227,6 +238,8 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
 }
 
 void SyncThread::doExit() {
+    if (m_fastBlitSupported) return;
+
     // This sequence parallels the exit sequence
     // in RenderThread.
     FrameBuffer::getFB()->bindContext(0, 0, 0);
@@ -275,7 +288,7 @@ void SyncThread::destroySyncThread() {
 
     DPRINT("exiting a sync thread for render thread info=%p.", tInfo);
 
-    if (!tInfo->syncThread) return;
+    if (!tInfo || !tInfo->syncThread) return;
 
     tInfo->syncThread->cleanup();
     tInfo->syncThread->wait();
