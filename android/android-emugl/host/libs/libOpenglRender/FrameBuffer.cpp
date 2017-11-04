@@ -310,6 +310,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         GL_LOG("Async readback not supported");
     }
 
+    fb->m_fastBlitSupported =
+        (dispatchMaxVersion > GLES_DISPATCH_MAX_VERSION_2) &&
+        (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
+         // TODO: Swiftshader issues 0x502
+         // emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+         emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
+
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string
@@ -844,7 +851,8 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
     ret = genHandle_locked();
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
-                                          ret, m_colorBufferHelper));
+                                          ret, m_colorBufferHelper,
+                                          m_fastBlitSupported));
     if (cb.get() != NULL) {
         m_colorbuffers[ret] = { std::move(cb), 1, false };
 
@@ -1208,8 +1216,19 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
         return false;
     }
 
+    if (m_fastBlitSupported) {
+        for (auto cb : m_blitsInFlight) {
+            cb->waitAndClearSync();
+        }
+        m_blitsInFlight.clear();
+    }
+
     WindowSurface* surface = (*w).second.first.get();
     surface->flushColorBuffer();
+
+    if (m_fastBlitSupported) {
+        m_blitsInFlight.push_back(surface->getAttachedColorBuffer());
+    }
 
     return true;
 }
@@ -1894,7 +1913,8 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadCollection(stream, &m_colorbuffers,
                    [this, now](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
-                                              m_colorBufferHelper));
+                                              m_colorBufferHelper,
+                                              m_fastBlitSupported));
         const HandleType handle = cb->getHndl();
         const unsigned refCount = stream->getBe32();
         const bool opened = stream->getByte();
