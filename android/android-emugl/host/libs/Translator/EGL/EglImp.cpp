@@ -99,6 +99,7 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sy
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
 EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags);
+EGLAPI EGLBoolean EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -116,6 +117,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglGetMaxGLESVersion },
         {"eglWaitSyncKHR",
                 (__eglMustCastToProperFunctionPointerType)eglWaitSyncKHR },
+        {"eglBlitFromCurrentReadBufferANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglBlitFromCurrentReadBufferANDROID },
 };
 
 static const int s_eglExtensionsSize =
@@ -1475,6 +1478,13 @@ EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint
     }
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->waitSync((GLsync)sync, 0, -1);
+    return EGL_TRUE;
+}
+
+EGLAPI EGLBoolean EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLImageKHR image) {
+
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    iface->blitFromCurrentReadBufferANDROID((GLeglImageOES)image);
     return EGL_TRUE;
 }
 

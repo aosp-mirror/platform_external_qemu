@@ -76,6 +76,7 @@ void ScopedGLState::push(std::initializer_list<GLenum> names) {
 void ScopedGLState::pushForCoreProfileTextureEmulation() {
     push({ GL_DRAW_FRAMEBUFFER_BINDING,
            GL_READ_FRAMEBUFFER_BINDING,
+           GL_VERTEX_ARRAY_BINDING,
            GL_CURRENT_PROGRAM,
            GL_VIEWPORT,
            GL_SCISSOR_TEST,
