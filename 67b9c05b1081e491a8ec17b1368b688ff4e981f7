@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "dc561376_936f1022",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2194,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-04T23:47:24Z",
+      "side": 1,
+      "message": "Nope, the current build of Swiftshader does have gl_VertexID",
+      "parentUuid": "fb853518_c59ddade",
+      "range": {
+        "startLine": 2179,
+        "startChar": 0,
+        "endLine": 2194,
+        "endChar": 4
+      },
+      "revId": "67b9c05b1081e491a8ec17b1368b688ff4e981f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8afcaf06_92b77e1e",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 5
