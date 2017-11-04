@@ -209,6 +209,7 @@ static EGLint rcQueryEGLString(EGLenum name, void* buffer, EGLint bufferSize)
 
     std::string eglStr(str);
     if ((FrameBuffer::getMaxGLESVersion() >= GLES_DISPATCH_MAX_VERSION_3_0) &&
+        emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion) &&
         eglStr.find("EGL_KHR_create_context") == std::string::npos) {
         eglStr += "EGL_KHR_create_context ";
     }
