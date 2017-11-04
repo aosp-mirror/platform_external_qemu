@@ -2175,6 +2175,22 @@ void main() {
     v_texcoord = quad_pos[gl_VertexID];
 })";
 
+static const char kTexImageEmulationVShaderSrcFlipped[] = R"(#version 330 core
+out vec2 v_texcoord;
+void main() {
+    const vec2 quad_pos[6] = vec2[6](
+        vec2(0.0, 0.0),
+        vec2(0.0, 1.0),
+        vec2(1.0, 0.0),
+        vec2(0.0, 1.0),
+        vec2(1.0, 0.0),
+        vec2(1.0, 1.0));
+
+    gl_Position = vec4((quad_pos[gl_VertexID] * 2.0) - 1.0, 0.0, 1.0);
+    v_texcoord = quad_pos[gl_VertexID];
+    v_texcoord.y = 1.0 - v_texcoord.y;
+})";
+
 static const char kTexImageEmulationFShaderSrc[] = R"(#version 330 core
 uniform sampler2D source_tex;
 in vec2 v_texcoord;
@@ -2348,6 +2364,109 @@ GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
     }
 
     return program;
+}
+
+void GLEScontext::setupImageBlitState() {
+    if (m_blitState.program) return;
+
+    auto& gl = dispatcher();
+
+    GLuint vshader =
+        compileAndValidateCoreShader(GL_VERTEX_SHADER,
+                                     kTexImageEmulationVShaderSrcFlipped);
+    GLuint fshader =
+        compileAndValidateCoreShader(GL_FRAGMENT_SHADER,
+                                     kTexImageEmulationFShaderSrc);
+
+    m_blitState.program = linkAndValidateProgram(vshader, fshader);
+    m_blitState.samplerLoc =
+        gl.glGetUniformLocation(m_blitState.program, "source_tex");
+
+    gl.glGenFramebuffers(1, &m_blitState.fbo);
+    gl.glGenTextures(1, &m_blitState.tex);
+    gl.glGenVertexArrays(1, &m_blitState.vao);
+}
+
+void GLEScontext::blitFromReadBufferToTextureFlipped(
+    GLuint globalTexObj,
+    GLuint width, GLuint height,
+    GLint internalFormat, GLenum format, GLenum type) {
+    auto& gl = dispatcher();
+
+    setupImageBlitState();
+
+    GLint prevViewport[4];
+    getViewport(prevViewport);
+
+    gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
+    gl.glCopyTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+                        0, 0, width, height, 0);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.fbo);
+    gl.glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+        globalTexObj, 0);
+
+    gl.glDisable(GL_BLEND);
+    gl.glDisable(GL_SCISSOR_TEST);
+    gl.glDisable(GL_DEPTH_TEST);
+    gl.glDisable(GL_STENCIL_TEST);
+    gl.glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    gl.glDisable(GL_SAMPLE_COVERAGE);
+    gl.glDisable(GL_CULL_FACE);
+    gl.glDisable(GL_POLYGON_OFFSET_FILL);
+    gl.glDisable(GL_RASTERIZER_DISCARD);
+
+    gl.glViewport(0, 0, width, height);
+    gl.glDepthRange(0.0f, 1.0f);
+    gl.glColorMask(1, 1, 1, 1);
+
+    gl.glUseProgram(m_blitState.program);
+    gl.glUniform1i(m_blitState.samplerLoc, m_activeTexture);
+
+    gl.glBindVertexArray(m_blitState.vao);
+    gl.glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // state restore
+    const GLuint globalProgramName =
+        shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM,
+                m_useProgram);
+    gl.glUseProgram(globalProgramName);
+    gl.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
+    gl.glBindTexture(GL_TEXTURE_2D,
+                     shareGroup()->getGlobalName(
+                         NamedObjectType::TEXTURE,
+                         getTextureLocalName(GL_TEXTURE_2D,
+                             getBindedTexture(GL_TEXTURE_2D))));
+    GLuint drawFboBinding = getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+    GLuint readFboBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER,
+                         drawFboBinding ? getFBOGlobalName(drawFboBinding) : m_defaultFBO);
+    gl.glBindFramebuffer(GL_READ_FRAMEBUFFER,
+                         readFboBinding ? getFBOGlobalName(readFboBinding) : m_defaultReadFBO);
+
+    if (isEnabled(GL_BLEND)) { gl.glEnable(GL_BLEND); }
+    if (isEnabled(GL_SCISSOR_TEST)) { gl.glEnable(GL_SCISSOR_TEST); }
+    if (isEnabled(GL_DEPTH_TEST)) { gl.glEnable(GL_DEPTH_TEST); }
+    if (isEnabled(GL_STENCIL_TEST)) { gl.glEnable(GL_STENCIL_TEST); }
+    if (isEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE)) { gl.glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE); }
+    if (isEnabled(GL_SAMPLE_COVERAGE)) { gl.glEnable(GL_SAMPLE_COVERAGE); }
+    if (isEnabled(GL_CULL_FACE)) { gl.glEnable(GL_CULL_FACE); }
+    if (isEnabled(GL_POLYGON_OFFSET_FILL)) { gl.glEnable(GL_POLYGON_OFFSET_FILL); }
+    if (isEnabled(GL_RASTERIZER_DISCARD)) { gl.glEnable(GL_RASTERIZER_DISCARD); }
+
+    gl.glViewport(prevViewport[0],
+                  prevViewport[1],
+                  prevViewport[2],
+                  prevViewport[3]);
+    gl.glDepthRange(m_zNear, m_zFar);
+    gl.glColorMask(m_colorMaskR,
+                   m_colorMaskG,
+                   m_colorMaskB,
+                   m_colorMaskA);
+    gl.glFlush();
 }
 
 // Primitive restart emulation
