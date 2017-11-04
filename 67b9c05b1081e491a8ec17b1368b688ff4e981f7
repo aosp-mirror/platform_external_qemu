@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fb853518_c59ddade",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2194,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-04T23:24:16Z",
+      "side": 1,
+      "message": "This is the vertex shader in question that is active while that glDrawArrays is going on.\n\nI might not have gotten the Swiftshader version with gl_VertexID, will check with that.",
+      "range": {
+        "startLine": 2179,
+        "startChar": 0,
+        "endLine": 2194,
+        "endChar": 4
+      },
+      "revId": "67b9c05b1081e491a8ec17b1368b688ff4e981f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8afcaf06_92b77e1e",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2443,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-04T23:24:16Z",
+      "side": 1,
+      "message": "Nicolas, is it OK to bind a fresh VAO and glDrawArrays like this in Swiftshader? Works fine in desktop OpenGL and D3D via ANGLE, but if |gl| refers to Swiftshader here, I\u0027m getting a 0x502 on this line on Windows and memory corruption on Mac.",
+      "range": {
+        "startLine": 2442,
+        "startChar": 0,
+        "endLine": 2443,
+        "endChar": 40
+      },
+      "revId": "67b9c05b1081e491a8ec17b1368b688ff4e981f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
