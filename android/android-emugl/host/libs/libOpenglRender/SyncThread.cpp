@@ -63,6 +63,7 @@ SyncThread::SyncThread(EGLContext parentContext) :
     }
 
     FrameBuffer *fb = FrameBuffer::getFB();
+    m_fastBlitSupported = fb->isFastBlitSupported();
     mDisplay = fb->getDisplay();
 
     this->start();
@@ -181,7 +182,11 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     EGLint wait_result = 0x0;
 
     DPRINT("wait on sync obj: %p", cmd->fenceSync);
-    wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
+    if (m_fastBlitSupported) {
+        wait_result = EGL_CONDITION_SATISFIED_KHR;
+    } else {
+        wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
+    }
 
     DPRINT("done waiting, with wait result=0x%x. "
            "increment timeline (and signal fence)",

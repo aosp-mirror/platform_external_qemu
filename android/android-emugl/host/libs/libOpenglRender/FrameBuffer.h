@@ -407,12 +407,14 @@ public:
     static void setMaxGLESVersion(GLESDispatchMaxVersion version);
     static GLESDispatchMaxVersion getMaxGLESVersion();
 
-    float getDpr() { return m_dpr; }
-    int windowWidth() { return m_windowWidth; }
-    int windowHeight() { return m_windowHeight; }
-    float getPx() { return m_px; }
-    float getPy() { return m_py; }
-    int getZrot() { return m_zRot; }
+    float getDpr() const { return m_dpr; }
+    int windowWidth() const { return m_windowWidth; }
+    int windowHeight() const { return m_windowHeight; }
+    float getPx() const { return m_px; }
+    float getPy() const { return m_py; }
+    int getZrot() const { return m_zRot; }
+
+    bool isFastBlitSupported() const { return m_fastBlitSupported; }
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -553,5 +555,7 @@ private:
     android::base::WorkerThread<Post> m_postThread;
     android::base::WorkerProcessingResult postWorkerFunc(const Post& post);
     void sendPostWorkerCmd(Post post);
+
+    bool m_fastBlitSupported = false;
 };
 #endif

@@ -56,6 +56,7 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+static void blitFromCurrentReadBufferANDROID(EGLImage image);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -65,20 +66,25 @@ ProcTableMap *s_glesExtensions = NULL;
 
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
-    .initGLESx                   = initGLESx,
-    .createGLESContext           = createGLESContext,
-    .initContext                 = initContext,
-    .setMaxGlesVersion           = setMaxGlesVersion,
-    .deleteGLESContext           = deleteGLESContext,
-    .flush                       = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish                      = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError                    = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
-    .setShareGroup               = setShareGroup,
-    .getProcAddress              = getProcAddress,
-    .fenceSync                   = NULL,
-    .clientWaitSync              = NULL,
-    .waitSync                    = NULL,
-    .deleteSync                  = NULL,
+    .initGLESx                        = initGLESx,
+    .createGLESContext                = createGLESContext,
+    .initContext                      = initContext,
+    .setMaxGlesVersion                = setMaxGlesVersion,
+    .deleteGLESContext                = deleteGLESContext,
+    .flush                            = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
+    .finish                           = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+    .getError                         = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
+    .setShareGroup                    = setShareGroup,
+    .getProcAddress                   = getProcAddress,
+    .fenceSync                        = NULL,
+    .clientWaitSync                   = NULL,
+    .waitSync                         = NULL,
+    .deleteSync                       = NULL,
+    .saveTexture                      = NULL,
+    .createTexture                    = NULL,
+    .restoreTexture                   = NULL,
+    .deleteRbo                        = NULL,
+    .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -226,7 +232,23 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     return &s_glesIface;
 }
 
+static void blitFromCurrentReadBufferANDROID(EGLImage image) {
+    GET_CTX()
+    unsigned int imagehndl = SafeUIntFromPointer(image);
+    ImagePtr img = s_eglIface->getEGLImage(imagehndl);
+    if (!img ||
+        !ctx->shareGroup().get()) {
+        fprintf(stderr, "%s: wtf, couldnt find img! asdf\n", __func__);
+        return;
+    }
+
+    GLuint globalTexObj = img->globalTexObj->getGlobalName();
+    ctx->blitFromReadBufferToTextureFlipped(
+            globalTexObj, img->width, img->height,
+            img->internalFormat, img->format, img->type);
 }
+
+} // extern "C"
 
 static TextureData* getTextureData(ObjectLocalName tex){
     GET_CTX_RET(NULL);
