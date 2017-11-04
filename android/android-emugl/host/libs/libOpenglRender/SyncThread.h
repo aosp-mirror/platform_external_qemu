@@ -129,5 +129,6 @@ private:
     RenderThreadInfo* mTLS;
     uint32_t mContext;
     uint32_t mSurf;
+    bool m_fastBlitSupported = false;
 };
 

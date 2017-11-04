@@ -109,7 +109,6 @@ private:
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;
 
-    GLuint m_useProgram = 0;
     ObjectDataPtr m_useProgramData = {};
     std::unordered_map<GLuint, GLuint> m_bindSampler;
 
