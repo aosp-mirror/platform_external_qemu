@@ -39,6 +39,8 @@
 #include "GLcommon/GLutils.h"
 #include "GLcommon/FramebufferData.h"
 
+#include "emugl/common/crash_reporter.h"
+
 #include "ANGLEShaderParser.h"
 
 #include <stdio.h>
@@ -62,6 +64,7 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
 static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
                                       SaveableTexture::loader_t&& loader);
 static void restoreTexture(SaveableTexture* texture);
+static void blitFromCurrentReadBufferANDROID(EGLImage image);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -89,6 +92,7 @@ static GLESiface s_glesIface = {
     .createTexture = createTexture,
     .restoreTexture = restoreTexture,
     .deleteRbo = deleteRenderbufferGlobal,
+    .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -188,6 +192,24 @@ GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
     return & s_glesIface;
+}
+
+static void blitFromCurrentReadBufferANDROID(EGLImage image) {
+    GET_CTX()
+    unsigned int imagehndl = SafeUIntFromPointer(image);
+    ImagePtr img = s_eglIface->getEGLImage(imagehndl);
+    if (!img ||
+        !ctx->shareGroup().get()) {
+        emugl_crash_reporter("FATAL: blitFromCurrentReadBufferANDROID: "
+                             "image (%p) or share group (%p) not found",
+                             img.get(), ctx->shareGroup().get());
+        return;
+    }
+
+    GLuint globalTexObj = img->globalTexObj->getGlobalName();
+    ctx->blitFromReadBufferToTextureFlipped(
+            globalTexObj, img->width, img->height,
+            img->internalFormat, img->format, img->type);
 }
 
 }  // extern "C"
@@ -3644,3 +3666,4 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
 
 #include "GLESv30Imp.cpp"
 #include "GLESv31Imp.cpp"
+

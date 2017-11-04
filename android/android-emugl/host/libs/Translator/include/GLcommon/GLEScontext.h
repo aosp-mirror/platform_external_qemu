@@ -430,6 +430,10 @@ public:
         return m_needRestoreFromSnapshot;
     }
 
+    void blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
+                                            GLuint width, GLuint height,
+                                            GLint internalFormat, GLenum format, GLenum type);
+
 protected:
     void initDefaultFboImpl(
         GLint width, GLint height,
@@ -584,6 +588,8 @@ protected:
                     (ObjectLocalName)bufferName);
             };
 
+    GLuint m_useProgram = 0;
+
 private:
 
     GLenum                m_glError = GL_NO_ERROR;
@@ -610,6 +616,30 @@ private:
     std::unordered_map<GLenum, GLenum> m_hints;
 
     bool m_primitiveRestartEnabled = false;
+
+
+    struct ImageBlitState {
+        GLuint program = 0;
+        GLuint samplerLoc = 0;
+
+        GLuint vao = 0;
+        GLuint vbo = 0;
+        GLuint ibo = 0;
+
+        GLuint fbo = 0;
+        GLuint resolveFbo = 0;
+        GLuint tex = 0;
+
+        uint32_t width = 0;
+        uint32_t height = 0;
+        GLint internalFormat = 0;
+        uint32_t samples = 0;
+    };
+
+    ImageBlitState m_blitState = {};
+    void setupImageBlitState();
+    void setupImageBlitForTexture(uint32_t width, uint32_t height,
+                                  GLint internalFormat);
 };
 
 #endif
