@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "c0c86852_145121bb",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmImp.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-05T04:55:55Z",
+      "side": 1,
+      "message": "I really don\u0027t think this will look useful to the user when they see it :)",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 71
+      },
+      "revId": "67b9c05b1081e491a8ec17b1368b688ff4e981f7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fb853518_c59ddade",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 5
