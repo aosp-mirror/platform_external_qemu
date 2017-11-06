@@ -114,6 +114,30 @@
       "revId": "27d1a8e48522a8aabb478945df8718dd5fb2d9af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de4eeff6_b6ae0062",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-11-06T23:59:32Z",
+      "side": 1,
+      "message": "thanks yurii, updated in another cl: go/oag/530215",
+      "parentUuid": "9b8d4e54_48f245ca",
+      "range": {
+        "startLine": 48,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 37
+      },
+      "revId": "27d1a8e48522a8aabb478945df8718dd5fb2d9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
