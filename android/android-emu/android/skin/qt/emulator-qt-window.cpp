@@ -40,6 +40,7 @@
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/test/checkboot.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
@@ -1577,6 +1578,9 @@ void EmulatorQtWindow::showEvent(QShowEvent* event) {
     if (mFirstShowEvent) {
         // moved from android_metrics_start() in metrics.cpp
         android_metrics_start_adb_liveness_checker(mAdbInterface->get());
+        if (android_hw->test_quitAfterBootTimeOut > 0) {
+            android_test_start_boot_complete_timer(android_hw->test_quitAfterBootTimeOut);
+        }
         mFirstShowEvent = false;
     }
 }

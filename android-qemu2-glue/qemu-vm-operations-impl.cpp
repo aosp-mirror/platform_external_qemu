@@ -371,6 +371,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
         .vmReset = qemu_system_reset_request,
+        .vmShutdown = qemu_system_shutdown_request,
         .vmIsRunning = qemu_vm_is_running,
         .snapshotList = qemu_snapshot_list,
         .snapshotSave = qemu_snapshot_save,
