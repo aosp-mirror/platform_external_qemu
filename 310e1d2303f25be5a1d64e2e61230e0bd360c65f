@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "034f3937_6d2aeda3",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T23:46:46Z",
+      "side": 1,
+      "message": "Actually, without separating these two, if we change the order on the UI pull-down, the meaning of the existing setting values will change. I left the distinction, but tried to make the code more clear.",
+      "parentUuid": "97e05a05_249096ce",
+      "range": {
+        "startLine": 109,
+        "startChar": 5,
+        "endLine": 109,
+        "endChar": 32
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07f5a128_4907a2cf",
         "filename": "android/android-emu/android/skin/qt/qt-settings.h",
         "patchSetId": 2
@@ -60,6 +84,30 @@
       "writtenOn": "2017-11-03T18:35:07Z",
       "side": 1,
       "message": "very nit: as it\u0027s a C++ class we could move to enum classes here and make it more readable:\n\nenum class SaveSnasphotOnExitPreference { Ask, Always, Never };\n\nlater: if (value \u003d\u003d SaveSnasphotOnExitPreference::Ask) {...}",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 113,
+        "endChar": 2
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e52a2c8e_5cd58eb9",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T23:46:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "07f5a128_4907a2cf",
       "range": {
         "startLine": 103,
         "startChar": 0,
@@ -236,6 +284,30 @@
       "side": 1,
       "message": "Frank and I talked a little about this. I think we should not prompt when ^C. Not sure about power off.\n\nBut the UI\u0027s \"yes\" or \"no\" should still be used.",
       "parentUuid": "2d1f4e34_be210079",
+      "range": {
+        "startLine": 566,
+        "startChar": 4,
+        "endLine": 566,
+        "endChar": 24
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc0c37ce_bbfa781a",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T23:46:46Z",
+      "side": 1,
+      "message": "I\u0027ve made it so the UI settings are used for all exit paths. \n\nI prompt, however, only if the exit is via the tool bar. In other cases, the Ask setting is treated as Yes.",
+      "parentUuid": "2e25e246_a3cbd9eb",
       "range": {
         "startLine": 566,
         "startChar": 4,
