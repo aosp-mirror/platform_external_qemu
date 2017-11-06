@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0d1c1a45_518255f7",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 2740,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-11-06T19:26:21Z",
+      "side": 1,
+      "message": "Without absolute path, does the file get generated according to the launching folder? Perhaps, you have a parent folder set in record_agent, and here only need to specify a simple filename?",
+      "revId": "99cf4f4423ec4fdac69d4ecb9e71547dcc2ac40c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
