@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "939b0d9c_bd5cfee1",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/GLEScmContext.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 1076,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-06T19:30:54Z",
+      "side": 1,
+      "message": "Fixed boot animation; removed extra return here",
+      "range": {
+        "startLine": 1076,
+        "startChar": 0,
+        "endLine": 1076,
+        "endChar": 11
+      },
+      "revId": "5a54a984515a996d00145d7cd08cfe39c067c0fe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}

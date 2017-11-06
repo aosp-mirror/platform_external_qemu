@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3cb15fbc_f53920ed",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 1406,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-06T19:30:54Z",
+      "side": 1,
+      "message": "Fix loading: GL_TEXTURE_2D was not enabled",
+      "range": {
+        "startLine": 1406,
+        "startChar": 0,
+        "endLine": 1406,
+        "endChar": 44
+      },
+      "revId": "e63ea28643aaa5b7dcd0f8b4f061d04c66100569",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
