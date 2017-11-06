@@ -10,6 +10,7 @@
 // GNU General Public License for more details.
 
 #include "android/emulation/QemuMiscPipe.h"
+#include "android/base/files/MemStream.h"
 #include "android/emulation/AndroidMessagePipe.h"
 #include "android/emulation/control/vm_operations.h"
 #include "android/utils/debug.h"
@@ -19,17 +20,40 @@
 #include <assert.h>
 
 #include <memory>
+#include <random>
 #include <vector>
 
 extern const QAndroidVmOperations* const gQAndroidVmOperations;
 
 namespace android {
+static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
+    if (input.empty()) {
+        return false;
+    }
+    int size = strlen(keyword);
+    const char *mesg = (const char*)(&input[0]);
+    return (input.size() >= size && strncmp(mesg, keyword, size) == 0);
+}
+
+static void getRandomBytes(int bytes, std::vector<uint8_t>* outputp) {
+    android::base::MemStream stream;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> uniform_dist(0,255); //fill a byte
+
+    for (int i=0; i < bytes; ++i) {
+        stream.putByte(uniform_dist(gen));
+    }
+
+    std::vector<uint8_t> & output = *outputp;
+    output.resize(bytes);
+    stream.read(&(output[0]), bytes);
+}
 
 static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                                std::vector<uint8_t>* outputp) {
     std::vector<uint8_t> & output = *outputp;
-    const char *mesg = (const char*)(&input[0]);
-    if (input.size() >= 12 && strncmp("bootcomplete", mesg, 12) == 0) {
+    if (beginWith(input, "bootcomplete")) {
         output.resize(3);
         output[0]='O';
         output[1]='K';
@@ -41,6 +65,15 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
         }
 
         return;
+    } else if (beginWith(input, "get_random=")) {
+        // need to parse the value after =
+        int bytes=0;
+        const char *mesg = (const char*)(&input[0]);
+        sscanf(mesg, "get_random=%d", &bytes);
+        if (bytes > 0) {
+            getRandomBytes(bytes, outputp);
+            return;
+        }
     }
 
     //not implemented Kock out
