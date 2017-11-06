@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "97e05a05_249096ce",
+        "filename": "android/android-emu/android/skin/qt/qt-settings.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T19:36:27Z",
+      "side": 1,
+      "message": "I copied from some of the other settings. I think the idea is to isolate the enum the code uses from the UI order.\nBut I think it\u0027s an unnecessary complication.",
+      "parentUuid": "ba4d8b92_4a21da16",
+      "range": {
+        "startLine": 109,
+        "startChar": 5,
+        "endLine": 109,
+        "endChar": 32
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "07f5a128_4907a2cf",
         "filename": "android/android-emu/android/skin/qt/qt-settings.h",
         "patchSetId": 2
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "0bad2977_455add11",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T19:36:27Z",
+      "side": 1,
+      "message": "I thought about that. It\u0027s not obvious to me whether the user would prefer to get defaulted to to keep the name\u0027s previous settings.\n\nThis code has the AVD-specific settings in the AVD\u0027s directory. When you delete the AVD, those settings get deleted, too.\n\nIt would not be hard to retain those settings.",
+      "parentUuid": "9f0e7f4c_a29ce62e",
+      "range": {
+        "startLine": 521,
+        "startChar": 0,
+        "endLine": 521,
+        "endChar": 85
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88c1f07b_eac663ca",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -82,6 +130,30 @@
       "writtenOn": "2017-11-03T18:35:07Z",
       "side": 1,
       "message": "nit: Isn\u0027t it simpler to use StandardButtons enum here to show \"yes\" and \"no\"?",
+      "range": {
+        "startLine": 548,
+        "startChar": 24,
+        "endLine": 548,
+        "endChar": 25
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbed390f_475d8b1b",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T19:36:27Z",
+      "side": 1,
+      "message": "I added them explicitly so I could mimic Android style: \"YES\" vs \"Yes\".\n\nBut we decided we don\u0027t want Android style.",
+      "parentUuid": "88c1f07b_eac663ca",
       "range": {
         "startLine": 548,
         "startChar": 24,
@@ -111,6 +183,24 @@
     },
     {
       "key": {
+        "uuid": "ff2a7754_8a35ae18",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 555,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T19:36:27Z",
+      "side": 1,
+      "message": "Thanks for the reminder",
+      "parentUuid": "df64ea08_0a0a70fa",
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2d1f4e34_be210079",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 2
@@ -122,6 +212,30 @@
       "writtenOn": "2017-11-03T18:35:07Z",
       "side": 1,
       "message": "what about the ctrl-c exit, or when you power off the device from the inside or via console? I think this method isn\u0027t call for those",
+      "range": {
+        "startLine": 566,
+        "startChar": 4,
+        "endLine": 566,
+        "endChar": 24
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2e25e246_a3cbd9eb",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-06T19:36:27Z",
+      "side": 1,
+      "message": "Frank and I talked a little about this. I think we should not prompt when ^C. Not sure about power off.\n\nBut the UI\u0027s \"yes\" or \"no\" should still be used.",
+      "parentUuid": "2d1f4e34_be210079",
       "range": {
         "startLine": 566,
         "startChar": 4,
