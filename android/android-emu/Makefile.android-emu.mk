@@ -337,6 +337,7 @@ LOCAL_SRC_FILES := \
     android/emulation/LogcatPipe.cpp \
     android/emulation/Keymaster3.cpp \
     android/emulation/FakeRotatingCameraSensor.cpp \
+    android/emulation/QemuMiscPipe.cpp \
     android/emulation/nand_limits.c \
     android/emulation/ParameterList.cpp \
     android/emulation/qemud/android_qemud_client.cpp \
@@ -464,6 +465,7 @@ LOCAL_SRC_FILES := \
     android/telephony/sms.c \
     android/telephony/sysdeps.c \
     android/telephony/TagLengthValue.cpp \
+    android/test/checkboot.cpp \
     android/uncompress.cpp \
     android/update-check/UpdateChecker.cpp \
     android/update-check/VersionExtractor.cpp \
