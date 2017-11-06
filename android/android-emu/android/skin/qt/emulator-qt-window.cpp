@@ -1826,7 +1826,9 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
         }
     }
 
-    if (mForwardShortcutsToDevice || !mToolWindow->handleQtKeyEvent(event)) {
+    bool qt_event = mToolWindow->handleQtKeyEvent(event);
+
+    if (mForwardShortcutsToDevice || !qt_event) {
         forwardKeyEventToEmulator(type, event);
         if (type == kEventKeyDown && event->text().length() > 0) {
             Qt::KeyboardModifiers mods = event->modifiers();
