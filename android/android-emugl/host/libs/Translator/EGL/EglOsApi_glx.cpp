@@ -443,8 +443,8 @@ public:
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
         const int attribs[] = {
-            GLX_PBUFFER_WIDTH, info->width,
-            GLX_PBUFFER_HEIGHT, info->height,
+            GLX_PBUFFER_WIDTH, 1,
+            GLX_PBUFFER_HEIGHT, 1,
             GLX_LARGEST_PBUFFER, info->largest,
             None
         };
@@ -459,7 +459,7 @@ public:
         if (!pb) {
             return false;
         } else {
-            glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
+            // glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
             return true;
         }
     }

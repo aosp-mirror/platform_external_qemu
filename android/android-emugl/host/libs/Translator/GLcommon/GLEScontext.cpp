@@ -2003,6 +2003,11 @@ void GLEScontext::initDefaultFBO(
         dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getFBOGlobalName(prevDrawFBOBinding));
     if (prevReadFBOBinding)
         dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
+
+    if (!m_isViewport) {
+        setViewport(0, 0, width, height);
+        dispatcher().glViewport(0, 0, width, height);
+    }
 }
 
 
