@@ -46,6 +46,30 @@
       "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "762a7fb8_6fca03d5",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-07T22:55:27Z",
+      "side": 1,
+      "message": "For taking snapshots from UI, we\u0027ll be using androidSnapshot_save, not quickboot save, so I think we can safely put the timer stop at the very top of this function.",
+      "parentUuid": "cbb8f0d9_66df062c",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 27
+      },
+      "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
