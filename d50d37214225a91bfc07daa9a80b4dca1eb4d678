@@ -22,6 +22,30 @@
       "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cbb8f0d9_66df062c",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-07T21:24:27Z",
+      "side": 1,
+      "message": "We will soon allow Take Snapshot from the UI, so not all save() calls will be on exit.\nStill, it seems better to stop the timer at the very top of save().",
+      "parentUuid": "20b8d94d_64010b3a",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 27
+      },
+      "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
