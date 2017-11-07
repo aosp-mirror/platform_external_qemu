@@ -45,6 +45,10 @@ void PostWorker::post(ColorBuffer* cb) {
     s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
 }
 
+// Called whenever the subwindow needs a refresh (FrameBuffer::setupSubWindow).
+// This rebinds the subwindow context (to account for
+// when the refresh is a display change, for instance)
+// and resets the posting viewport.
 void PostWorker::viewport(int width, int height) {
     // rebind the subwindow eglSurface unconditionally---
     // this could be from a display change
