@@ -13,7 +13,8 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-#include <GLcommon/GLESpointer.h>
+#include "GLcommon/GLESpointer.h"
+
 #include <stdlib.h>
 
 GLenum GLESpointer::getType() const {
@@ -173,6 +174,12 @@ GLESpointer::GLESpointer(android::base::Stream* stream) {
     onLoad(stream);
 }
 
+void GLESpointer::restoreBufferObj(
+        std::function<GLESbuffer*(GLuint)> getBufferObj) {
+    if (m_attribType != BUFFER) return;
+    m_buffer = getBufferObj(m_bufferName);
+}
+
 void GLESpointer::onLoad(android::base::Stream* stream) {
     m_size = stream->getBe32();
     m_type = stream->getBe32();
@@ -181,7 +188,7 @@ void GLESpointer::onLoad(android::base::Stream* stream) {
     m_normalize = stream->getByte();
     m_attribType = (GLESpointer::AttribType)stream->getByte();
     m_bufferName = stream->getBe32();
-    if (m_attribType == BUFFER) {
+    if (m_attribType == ARRAY) {
         m_dataSize = stream->getBe32();
         m_ownData.resize(m_dataSize);
         stream->read(m_ownData.data(), m_dataSize);
@@ -204,7 +211,7 @@ void GLESpointer::onSave(android::base::Stream* stream) const {
     stream->putByte(m_normalize);
     stream->putByte(m_attribType);
     stream->putBe32(m_bufferName);
-    if (m_attribType == BUFFER) {
+    if (m_attribType == ARRAY) {
         stream->putBe32(m_dataSize);
         stream->write(m_data, m_dataSize);
     }
