@@ -15,6 +15,10 @@
   X(void, glTexGeniv, (GLenum coord, GLenum pname, const GLint * params), (coord, pname, params)) \
   X(void, glGetTexGenfv, (GLenum coord, GLenum pname, GLfloat * params), (coord, pname, params)) \
   X(void, glGetTexGeniv, (GLenum coord, GLenum pname, GLint * params), (coord, pname, params)) \
+  X(void, glColorPointerWithDataSize, (GLint size, GLenum type, GLsizei stride, const GLvoid * pointer, GLsizei dataSize), (size, type, stride, pointer, dataSize)) \
+  X(void, glNormalPointerWithDataSize, (GLenum type, GLsizei stride, const GLvoid * pointer, GLsizei dataSize), (type, stride, pointer, dataSize)) \
+  X(void, glTexCoordPointerWithDataSize, (GLint size, GLenum type, GLsizei stride, const GLvoid * pointer, GLsizei dataSize), (size, type, stride, pointer, dataSize)) \
+  X(void, glVertexPointerWithDataSize, (GLint size, GLenum type, GLsizei stride, const GLvoid * pointer, GLsizei dataSize), (size, type, stride, pointer, dataSize)) \
 
 
 #endif  // GLES1_EXTENSIONS_FUNCTIONS_H
