@@ -461,6 +461,8 @@ GLEScontext::GLEScontext(GlobalNameSpace* globalNameSpace,
                         return std::make_pair(item, enabled);
             });
 
+            m_blendEquationRgb = static_cast<GLenum>(stream->getBe32());
+            m_blendEquationAlpha = static_cast<GLenum>(stream->getBe32());
             m_blendSrcRgb = static_cast<GLenum>(stream->getBe32());
             m_blendDstRgb = static_cast<GLenum>(stream->getBe32());
             m_blendSrcAlpha = static_cast<GLenum>(stream->getBe32());
@@ -638,6 +640,8 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
                     stream->putByte(enableItem.second);
         });
 
+        stream->putBe32(m_blendEquationRgb);
+        stream->putBe32(m_blendEquationAlpha);
         stream->putBe32(m_blendSrcRgb);
         stream->putBe32(m_blendDstRgb);
         stream->putBe32(m_blendSrcAlpha);
@@ -763,6 +767,9 @@ void GLEScontext::postLoadRestoreCtx() {
                         texTarget,
                         m_shareGroup->getGlobalName(
                             NamedObjectType::TEXTURE, texName));
+                if (!isCoreProfile() && texState.enabled) {
+                    dispatcher.glEnable(texTarget);
+                }
             }
         }
     }
@@ -795,6 +802,8 @@ void GLEScontext::postLoadRestoreCtx() {
             enableFunc(item.first);
         }
     }
+    dispatcher.glBlendEquationSeparate(m_blendEquationRgb,
+            m_blendEquationAlpha);
     dispatcher.glBlendFuncSeparate(m_blendSrcRgb, m_blendDstRgb,
             m_blendSrcAlpha, m_blendDstAlpha);
     for (const auto& pixelStore : m_glPixelStoreiList) {
@@ -1387,11 +1396,36 @@ void GLEScontext::setPolygonOffset(GLfloat factor, GLfloat units) {
 }
 
 void GLEScontext::setEnable(GLenum item, bool isEnable) {
-    m_glEnableList[item] = isEnable;
+    switch (item) {
+        case GL_TEXTURE_2D:
+        case GL_TEXTURE_CUBE_MAP_OES:
+        case GL_TEXTURE_3D:
+        case GL_TEXTURE_2D_ARRAY:
+        case GL_TEXTURE_2D_MULTISAMPLE:
+            setTextureEnabled(item,true);
+            break;
+        default:
+            m_glEnableList[item] = isEnable;
+            break;
+    }
 }
 
 bool GLEScontext::isEnabled(GLenum item) const {
-    return android::base::findOrDefault(m_glEnableList, item, false);
+    switch (item) {
+        case GL_TEXTURE_2D:
+        case GL_TEXTURE_CUBE_MAP_OES:
+        case GL_TEXTURE_3D:
+        case GL_TEXTURE_2D_ARRAY:
+        case GL_TEXTURE_2D_MULTISAMPLE:
+            return m_texState[m_activeTexture][GLTextureTargetToLocal(item)].enabled;
+        default:
+            return android::base::findOrDefault(m_glEnableList, item, false);
+    }
+}
+
+void GLEScontext::setBlendEquationSeparate(GLenum modeRGB, GLenum modeAlpha) {
+    m_blendEquationRgb = modeRGB;
+    m_blendEquationAlpha = modeAlpha;
 }
 
 void GLEScontext::setBlendFuncSeparate(GLenum srcRGB, GLenum dstRGB,
