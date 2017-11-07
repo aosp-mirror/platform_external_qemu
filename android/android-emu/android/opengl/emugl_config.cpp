@@ -321,7 +321,7 @@ bool emuglConfig_init(EmuglConfig* config,
                     gpu_mode = "angle9";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
-                    gpu_mode = "swiftshader";
+                    gpu_mode = "swiftshader_indirect";
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_NATIVEGL:
                     gpu_mode = "host";
