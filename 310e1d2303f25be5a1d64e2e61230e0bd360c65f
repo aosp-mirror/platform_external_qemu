@@ -167,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "dc979e5d_4c586602",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 521,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-07T01:54:58Z",
+      "side": 1,
+      "message": "Got it, thanks for the clarification!",
+      "parentUuid": "0bad2977_455add11",
+      "range": {
+        "startLine": 521,
+        "startChar": 0,
+        "endLine": 521,
+        "endChar": 85
+      },
+      "revId": "310e1d2303f25be5a1d64e2e61230e0bd360c65f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88c1f07b_eac663ca",
         "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
         "patchSetId": 2
