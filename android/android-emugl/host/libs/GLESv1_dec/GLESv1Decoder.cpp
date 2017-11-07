@@ -16,6 +16,7 @@
 #include "GLESv1Decoder.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "OpenGLESDispatch/GLESv1Dispatch.h"
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>
@@ -30,6 +31,28 @@ static inline void* SafePointerFromUInt(GLuint value) {
   return (void*)(uintptr_t)value;
 }
 
+int gles1_decoder_extended_context::initDispatch(
+    void *(*getProc)(const char *name, void *userData), void *userData) {
+    gles1_server_context_t::initDispatchByName(getProc, userData);
+    glColorPointerWithDataSize =
+            (glColorPointerWithDataSize_server_proc_t)
+            getProc("glColorPointerWithDataSize", userData);
+    glNormalPointerWithDataSize =
+            (glNormalPointerWithDataSize_server_proc_t)
+            getProc("glNormalPointerWithDataSize", userData);
+    glTexCoordPointerWithDataSize =
+            (glTexCoordPointerWithDataSize_server_proc_t)
+            getProc("glTexCoordPointerWithDataSize", userData);
+    glVertexPointerWithDataSize =
+            (glVertexPointerWithDataSize_server_proc_t)
+            getProc("glVertexPointerWithDataSize", userData);
+    assert((void*)glColorPointerWithDataSize != gles1_unimplemented);
+    assert((void*)glNormalPointerWithDataSize != gles1_unimplemented);
+    assert((void*)glTexCoordPointerWithDataSize != gles1_unimplemented);
+    assert((void*)glVertexPointerWithDataSize != gles1_unimplemented);
+    return 0;
+}
+
 static GLESv1Decoder::get_proc_func_t sGetProcFunc;
 static void* sGetProcFuncData;
 
@@ -37,9 +60,9 @@ namespace {
 
 struct ContextTemplateLoader {
     ContextTemplateLoader() {
-        context.initDispatchByName(sGetProcFunc, sGetProcFuncData);
+        context.initDispatch(sGetProcFunc, sGetProcFuncData);
     }
-    gles1_decoder_context_t context;
+    gles1_decoder_extended_context context;
 };
 
 }  // namespace
@@ -60,7 +83,7 @@ int GLESv1Decoder::initGL(get_proc_func_t getProcFunc, void *getProcFuncData)
 {
     sGetProcFunc = getProcFunc;
     sGetProcFuncData = getProcFuncData;
-    static_cast<gles1_decoder_context_t&>(*this) = sContextTemplate->context;
+    static_cast<gles1_decoder_extended_context&>(*this) = sContextTemplate->context;
 
     glGetCompressedTextureFormats = s_glGetCompressedTextureFormats;
     glVertexPointerOffset = s_glVertexPointerOffset;
@@ -164,7 +187,15 @@ void GLESv1Decoder::s_glVertexPointerData(void *self, GLint size, GLenum type, G
 
     STORE_POINTER_DATA_OR_ABORT(GLDecoderContextData::VERTEX_LOCATION);
 
-    ctx->glVertexPointer(size, type, 0, ctx->m_contextData->pointerData(GLDecoderContextData::VERTEX_LOCATION));
+    if ((void*)ctx->glVertexPointerWithDataSize != gles1_unimplemented) {
+        ctx->glVertexPointerWithDataSize(size, type, 0,
+                ctx->m_contextData->pointerData(GLDecoderContextData::VERTEX_LOCATION),
+                datalen);
+    } else {
+        assert(0);
+        ctx->glVertexPointer(size, type, 0,
+                ctx->m_contextData->pointerData(GLDecoderContextData::VERTEX_LOCATION));
+    }
 }
 
 void GLESv1Decoder::s_glColorPointerData(void *self, GLint size, GLenum type, GLsizei stride, void *data, GLuint datalen)
@@ -173,7 +204,15 @@ void GLESv1Decoder::s_glColorPointerData(void *self, GLint size, GLenum type, GL
 
     STORE_POINTER_DATA_OR_ABORT(GLDecoderContextData::COLOR_LOCATION);
 
-    ctx->glColorPointer(size, type, 0, ctx->m_contextData->pointerData(GLDecoderContextData::COLOR_LOCATION));
+    if ((void*)ctx->glColorPointerWithDataSize != gles1_unimplemented) {
+        ctx->glColorPointerWithDataSize(size, type, 0,
+                ctx->m_contextData->pointerData(GLDecoderContextData::COLOR_LOCATION),
+                datalen);
+    } else {
+        assert(0);
+        ctx->glColorPointer(size, type, 0,
+                ctx->m_contextData->pointerData(GLDecoderContextData::COLOR_LOCATION));
+    }
 }
 
 void GLESv1Decoder::s_glTexCoordPointerData(void *self, GLint unit, GLint size, GLenum type, GLsizei stride, void *data, GLuint datalen)
@@ -182,9 +221,17 @@ void GLESv1Decoder::s_glTexCoordPointerData(void *self, GLint unit, GLint size, 
     STORE_POINTER_DATA_OR_ABORT((GLDecoderContextData::PointerDataLocation)
                                 (GLDecoderContextData::TEXCOORD0_LOCATION + unit));
 
-    ctx->glTexCoordPointer(size, type, 0,
-                           ctx->m_contextData->pointerData((GLDecoderContextData::PointerDataLocation)
-                                                           (GLDecoderContextData::TEXCOORD0_LOCATION + unit)));
+    if ((void*)ctx->glTexCoordPointerWithDataSize != gles1_unimplemented) {
+        ctx->glTexCoordPointerWithDataSize(size, type, 0,
+                ctx->m_contextData->pointerData((GLDecoderContextData::PointerDataLocation)
+                                                (GLDecoderContextData::TEXCOORD0_LOCATION + unit)),
+                datalen);
+    } else {
+        assert(0);
+        ctx->glTexCoordPointer(size, type, 0,
+                ctx->m_contextData->pointerData((GLDecoderContextData::PointerDataLocation)
+                                                (GLDecoderContextData::TEXCOORD0_LOCATION + unit)));
+    }
 }
 
 void GLESv1Decoder::s_glNormalPointerData(void *self, GLenum type, GLsizei stride, void *data, GLuint datalen)
@@ -193,7 +240,15 @@ void GLESv1Decoder::s_glNormalPointerData(void *self, GLenum type, GLsizei strid
 
     STORE_POINTER_DATA_OR_ABORT(GLDecoderContextData::NORMAL_LOCATION);
 
-    ctx->glNormalPointer(type, 0, ctx->m_contextData->pointerData(GLDecoderContextData::NORMAL_LOCATION));
+    if ((void*)ctx->glNormalPointerWithDataSize != gles1_unimplemented) {
+        ctx->glNormalPointerWithDataSize(type, 0,
+                ctx->m_contextData->pointerData(GLDecoderContextData::NORMAL_LOCATION),
+                datalen);
+    } else {
+        assert(0);
+        ctx->glNormalPointer(type, 0,
+                ctx->m_contextData->pointerData(GLDecoderContextData::NORMAL_LOCATION));
+    }
 }
 
 void GLESv1Decoder::s_glPointSizePointerData(void *self, GLenum type, GLsizei stride, void *data, GLuint datalen)
