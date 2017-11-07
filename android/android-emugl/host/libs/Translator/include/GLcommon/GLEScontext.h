@@ -29,6 +29,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <functional>
 
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
@@ -574,6 +575,13 @@ protected:
     GLuint m_textureEmulationVAO = 0;
     GLuint m_textureEmulationVBO = 0;
     GLuint m_textureEmulationSamplerLoc = 0;
+
+    std::function<GLESbuffer*(GLuint)> getBufferObj
+            = [this] (GLuint bufferName) -> GLESbuffer* {
+                return (GLESbuffer*)m_shareGroup->getObjectData(
+                    NamedObjectType::VERTEXBUFFER,
+                    (ObjectLocalName)bufferName);
+            };
 
 private:
 
