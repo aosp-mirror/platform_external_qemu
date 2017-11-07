@@ -354,8 +354,6 @@ bool Quickboot::save(StringView name) {
     const bool shouldTrySaving =
             mLoaded || metrics::AdbLivenessChecker::isEmulatorBooted();
 
-    const int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-
     if (android_cmdLineOptions->no_snapshot_save) {
         mWindow.showMessage("Discarding the changed state: command-line flag",
                             WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
@@ -384,16 +382,6 @@ bool Quickboot::save(StringView name) {
                             emuglConfig_get_current_renderer()),
                     int(emuglConfig_get_current_renderer()));
         }
-        reportFailedSave(pb::EmulatorQuickbootSave::
-                                 EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
-    } else if (apiLevel >= kUnknownApiLevel || apiLevel < 19) {
-        // Clean up the boot snapshot here as we don't expect the API level
-        // to change back to the old value where the saved snapshot was relevant
-        dwarning(
-                "Cleaning out the default boot snapshot to preserve the "
-                "current session (quick boot requires API level 19+, got %d).",
-                apiLevel);
-        Snapshotter::get().deleteSnapshot(name.c_str());
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED);
     } else {
