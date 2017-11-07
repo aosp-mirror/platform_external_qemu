@@ -11,3 +11,7 @@ void glTexGenfv(GLenum coord, GLenum pname, const GLfloat *params );
 void glTexGeniv(GLenum coord, GLenum pname, const GLint *params );
 void glGetTexGenfv(GLenum coord, GLenum pname, GLfloat *params );
 void glGetTexGeniv(GLenum coord, GLenum pname, GLint *params );
+void glColorPointerWithDataSize(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+void glNormalPointerWithDataSize(GLenum type, GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+void glTexCoordPointerWithDataSize(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+void glVertexPointerWithDataSize(GLint size, GLenum type, GLsizei stride, const GLvoid *pointer, GLsizei dataSize);

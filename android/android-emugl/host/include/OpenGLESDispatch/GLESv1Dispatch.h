@@ -44,3 +44,6 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table);
 
 // Used to initialize the decoder.
 void* gles1_dispatch_get_proc_func(const char* name, void* userData);
+
+// Used to check for unimplemented.
+void gles1_unimplemented();
