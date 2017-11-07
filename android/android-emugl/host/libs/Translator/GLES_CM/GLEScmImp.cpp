@@ -146,6 +146,15 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
     }
 }
 
+GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+GL_API void GL_APIENTRY  glNormalPointerWithDataSize(GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+GL_API void GL_APIENTRY  glTexCoordPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+GL_API void GL_APIENTRY  glVertexPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize);
+
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName) {
     GET_CTX_RET(NULL)
     ctx->getGlobalLock();
@@ -209,6 +218,12 @@ static __translatorMustCastToProperFunctionPointerType getProcAddress(const char
         (*s_glesExtensions)["glDrawTexivOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexivOES;
         (*s_glesExtensions)["glDrawTexfvOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexfvOES;
         (*s_glesExtensions)["glDrawTexxvOES"] = (__translatorMustCastToProperFunctionPointerType)glDrawTexxvOES;
+
+        // Vertex array functions with size for snapshot
+        (*s_glesExtensions)["glColorPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glColorPointerWithDataSize;
+        (*s_glesExtensions)["glNormalPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glNormalPointerWithDataSize;
+        (*s_glesExtensions)["glTexCoordPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glTexCoordPointerWithDataSize;
+        (*s_glesExtensions)["glVertexPointerWithDataSize"] = (__translatorMustCastToProperFunctionPointerType)glVertexPointerWithDataSize;
     }
     __translatorMustCastToProperFunctionPointerType ret=NULL;
     ProcTableMap::iterator val = s_glesExtensions->find(procName);
@@ -533,6 +548,15 @@ GL_API void GL_APIENTRY  glColorPointer( GLint size, GLenum type, GLsizei stride
     SET_ERROR_IF(!GLEScmValidate::colorPointerParams(size,stride),GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::colorPointerType(type),GL_INVALID_ENUM);
     ctx->setPointer(GL_COLOR_ARRAY,size,type,stride,pointer, 0);
+}
+
+GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize) {
+    GET_CTX_CM()
+    GLES_CM_TRACE()
+    SET_ERROR_IF(!GLEScmValidate::colorPointerParams(size,stride),GL_INVALID_VALUE);
+    SET_ERROR_IF(!GLEScmValidate::colorPointerType(type),GL_INVALID_ENUM);
+    ctx->setPointer(GL_COLOR_ARRAY,size,type,stride,pointer, dataSize);
 }
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
@@ -1548,6 +1572,15 @@ GL_API void GL_APIENTRY  glNormalPointer( GLenum type, GLsizei stride, const GLv
     ctx->setPointer(GL_NORMAL_ARRAY,3,type,stride,pointer, 0);//3 normal verctor
 }
 
+GL_API void GL_APIENTRY glNormalPointerWithDataSize(GLenum type, GLsizei stride,
+        const GLvoid *pointer, GLsizei dataSize) {
+    GET_CTX()
+    GLES_CM_TRACE()
+    SET_ERROR_IF(stride < 0,GL_INVALID_VALUE);
+    SET_ERROR_IF(!GLEScmValidate::normalPointerType(type),GL_INVALID_ENUM);
+    ctx->setPointer(GL_NORMAL_ARRAY,3,type,stride,pointer, dataSize);//3 normal verctor
+}
+
 GL_API void GL_APIENTRY  glOrthof( GLfloat left, GLfloat right, GLfloat bottom, GLfloat top, GLfloat zNear, GLfloat zFar) {
     GET_CTX_CM()
     GLES_CM_TRACE()
@@ -1737,6 +1770,15 @@ GL_API void GL_APIENTRY  glTexCoordPointer( GLint size, GLenum type, GLsizei str
     SET_ERROR_IF(!GLEScmValidate::texCoordPointerParams(size,stride),GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::texCoordPointerType(type),GL_INVALID_ENUM);
     ctx->setPointer(GL_TEXTURE_COORD_ARRAY,size,type,stride,pointer, 0);
+}
+
+GL_API void GL_APIENTRY  glTexCoordPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize) {
+    GET_CTX()
+    GLES_CM_TRACE()
+    SET_ERROR_IF(!GLEScmValidate::texCoordPointerParams(size,stride),GL_INVALID_VALUE);
+    SET_ERROR_IF(!GLEScmValidate::texCoordPointerType(type),GL_INVALID_ENUM);
+    ctx->setPointer(GL_TEXTURE_COORD_ARRAY,size,type,stride,pointer, dataSize);
 }
 
 GL_API void GL_APIENTRY  glTexEnvf( GLenum target, GLenum pname, GLfloat param) {
@@ -2003,6 +2045,16 @@ GL_API void GL_APIENTRY  glVertexPointer( GLint size, GLenum type, GLsizei strid
     SET_ERROR_IF(!GLEScmValidate::vertexPointerParams(size,stride),GL_INVALID_VALUE);
     SET_ERROR_IF(!GLEScmValidate::vertexPointerType(type),GL_INVALID_ENUM);
     ctx->setPointer(GL_VERTEX_ARRAY,size,type,stride,pointer, 0);
+}
+
+GL_API void GL_APIENTRY  glVertexPointerWithDataSize( GLint size, GLenum type,
+        GLsizei stride, const GLvoid *pointer, GLsizei dataSize) {
+    GET_CTX()
+    GLES_CM_TRACE()
+
+    SET_ERROR_IF(!GLEScmValidate::vertexPointerParams(size,stride),GL_INVALID_VALUE);
+    SET_ERROR_IF(!GLEScmValidate::vertexPointerType(type),GL_INVALID_ENUM);
+    ctx->setPointer(GL_VERTEX_ARRAY,size,type,stride,pointer, dataSize);
 }
 
 GL_API void GL_APIENTRY  glViewport( GLint x, GLint y, GLsizei width, GLsizei height) {
