@@ -22,6 +22,30 @@
       "revId": "04dbed08d0728ee09d74dc222f4b6b26403bf04f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "207d070a_ef3e663f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/PostWorker.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-07T20:18:49Z",
+      "side": 1,
+      "message": "Qt signal onScreenChanged eventually calls FrameBuffer::setupSubWindow, so we\u0027re using Qt signals already.\n\nAlso, I\u0027m not too sure on the reliability of asking various host drivers if anything is wrong---no EGL/GL error was issued in the previous blackscreen setups.",
+      "parentUuid": "7998df86_f238bc09",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 51,
+        "endChar": 34
+      },
+      "revId": "04dbed08d0728ee09d74dc222f4b6b26403bf04f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
