@@ -20,7 +20,10 @@
 #include <GLES/gl.h>
 #include "GLESbuffer.h"
 
+#include <functional>
 #include <vector>
+
+class NameSpace;
 
 class GLESpointer {
 public:
@@ -78,6 +81,7 @@ public:
     bool isIntPointer() const;
     void enable(bool b);
     void onSave(android::base::Stream* stream) const;
+    void restoreBufferObj(std::function<GLESbuffer*(GLuint)> getBufferObj);
 private:
     GLint m_size = 4;
     GLenum m_type = GL_FLOAT;

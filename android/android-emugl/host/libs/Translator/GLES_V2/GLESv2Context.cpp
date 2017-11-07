@@ -213,7 +213,7 @@ void GLESv2Context::postLoadRestoreCtx() {
             dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
         }
         for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
-            const GLESpointer* glesPointer = glesPointerIte.second;
+            GLESpointer* glesPointer = glesPointerIte.second;
             // attribute 0 are bound right before draw, no need to bind it here
             if (glesPointer->getAttribType() == GLESpointer::VALUE
                     && glesPointerIte.first == 0) {
@@ -227,6 +227,7 @@ void GLESv2Context::postLoadRestoreCtx() {
                     if (!globalBufferName) {
                         continue;
                     }
+                    glesPointer->restoreBufferObj(getBufferObj);
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
                     if (glesPointer->isIntPointer()) {

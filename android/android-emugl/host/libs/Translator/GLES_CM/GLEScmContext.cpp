@@ -246,6 +246,13 @@ void GLEScmContext::postLoadRestoreCtx() {
                 dispatcher.glActiveTexture(GL_TEXTURE0 + i);
                 restoreMatrixStack(mTextureMatrices[i]);
             }
+            for (const auto& array : m_currVaoState) {
+                if (array.first == GL_TEXTURE_COORD_ARRAY) continue;
+                array.second->restoreBufferObj(getBufferObj);
+            }
+            for (uint32_t i = 0; i < s_glSupport.maxTexUnits; i++) {
+                m_texCoords[i].restoreBufferObj(getBufferObj);
+            }
             dispatcher.glMatrixMode(mCurrMatrixMode);
             dispatcher.glActiveTexture(GL_TEXTURE0 + m_activeTexture);
             for (const auto& it : *m_currVaoState.it->second.arraysMap) {
