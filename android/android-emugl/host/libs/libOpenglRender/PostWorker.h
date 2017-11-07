@@ -22,8 +22,10 @@ public:
     // post: posts the next color buffer.
     // Assumes framebuffer lock is held.
     void post(ColorBuffer* cb);
+
     // viewport: (re)initializes viewport dimensions.
     // Assumes framebuffer lock is held.
+    // This is called whenever the subwindow needs a refresh (FrameBuffer::setupSubWindow).
     void viewport(int width, int height);
 
 private:
