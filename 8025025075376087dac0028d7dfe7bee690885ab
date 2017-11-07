@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a041e49e_fd4f3926",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 1423,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-07T16:34:21Z",
+      "side": 1,
+      "message": "I\u0027ve put the isEnabled query for GL_TEXTURE_2D here.",
+      "range": {
+        "startLine": 1414,
+        "startChar": 0,
+        "endLine": 1423,
+        "endChar": 5
+      },
+      "revId": "8025025075376087dac0028d7dfe7bee690885ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
