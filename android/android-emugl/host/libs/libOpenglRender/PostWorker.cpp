@@ -46,10 +46,9 @@ void PostWorker::post(ColorBuffer* cb) {
 }
 
 void PostWorker::viewport(int width, int height) {
-    // bind the subwindow eglSurface
-    if (!m_initialized) {
-        m_initialized = mBindSubwin();
-    }
+    // rebind the subwindow eglSurface unconditionally---
+    // this could be from a display change
+    m_initialized = mBindSubwin();
 
     float dpr = mFb->getDpr();
     m_viewportWidth = width * dpr;
