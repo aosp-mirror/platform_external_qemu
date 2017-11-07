@@ -288,18 +288,25 @@ void EglDisplay::addReservedConfigs() {
                 kCommonCfgs[i][3],
                 kCommonCfgs[i][4]);
         if (!cfg) { // if multi-sample fails, fall back to the basic ones
-            cfg = addSimplePixelFormat(kCommonCfgs[i][0],
-                kCommonCfgs[i][1],
-                kCommonCfgs[i][2],
-                kCommonCfgs[i][3],
-                EGL_DONT_CARE);
-            assert(cfg);
-            // Clone the basic cfg, and give it a different ID later
-            cfg = new EglConfig(*cfg);
-            m_configs.emplace_back(cfg);
+            int fallbackCfg = 2;
+            do {
+                cfg = addSimplePixelFormat(kCommonCfgs[fallbackCfg][0],
+                        kCommonCfgs[fallbackCfg][1],
+                        kCommonCfgs[fallbackCfg][2],
+                        kCommonCfgs[fallbackCfg][3],
+                        kCommonCfgs[fallbackCfg][4]);
+                fallbackCfg --;
+            } while (!cfg && fallbackCfg >= 0);
+            if (cfg) {
+                // Clone the basic cfg, and give it a different ID later
+                cfg = new EglConfig(*cfg);
+                m_configs.emplace_back(cfg);
+            }
         }
         // ID starts with 1
-        cfg->setId(i + 1);
+        if (cfg) {
+            cfg->setId(i + 1);
+        }
     }
 }
 
