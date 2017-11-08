@@ -70,6 +70,30 @@
       "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9aee0e0a_436d6558",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-08T19:59:13Z",
+      "side": 1,
+      "message": "Wow, that\u0027s a future bug:\nthis liveness timer will break hard if the user tries to take a snapshot right after loading\nliveness timer would trigger when the emulator is paused for the snapshot, so the \u0027booted\u0027 flag isn\u0027t set yet. So this timer will force-reset the guest thinking it\u0027s hanging",
+      "parentUuid": "762a7fb8_6fca03d5",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 27
+      },
+      "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
