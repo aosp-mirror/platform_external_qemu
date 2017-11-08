@@ -557,17 +557,5 @@ private:
     void sendPostWorkerCmd(Post post);
 
     bool m_fastBlitSupported = false;
-    // Under fast blit, we don't rely on SyncThread's
-    // glClientWaitSync to sync frames and instead immediately notify
-    // the guest that everything is good to proceed.
-    // This means we need to introduce a group of our own
-    // glClientWaitSyncs on each color buffer flush
-    // that ensures work has been finished for every other color buffer
-    // in flight (that has been blitted but not consumed).
-    // |m_blitsInFlight| tracks these color buffers so
-    // that we don't have to loop over every single one.
-    // It is assumed the framebuffer lock is held
-    // during these operations.
-    std::vector<ColorBuffer*> m_blitsInFlight = {};
 };
 #endif
