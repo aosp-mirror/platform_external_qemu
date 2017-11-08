@@ -513,7 +513,7 @@ PHYSICAL_PARAMETERS_LIST
          sensor < MAX_SENSORS;
          sensor++) {
         stream_put_be32(f, mUseOverride[sensor]);
-        if (mUseOverride) {
+        if (mUseOverride[sensor]) {
             switch(sensor) {
 #define SENSOR_NAME(x) ANDROID_SENSOR_##x
 #define OVERRIDE_NAME(x) m##x##Override
