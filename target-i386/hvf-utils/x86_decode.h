@@ -306,8 +306,8 @@ uint64_t sign(uint64_t val, int size);
 
 uint32_t decode_instruction(CPUState *cpu, struct x86_decode *decode);
 
-addr_t get_reg_ref(CPUState *cpu, int reg, int is_extended, int size);
-addr_t get_reg_val(CPUState *cpu, int reg, int is_extended, int size);
+addr_t get_reg_ref(CPUState *cpu, int reg, int is_extended, int rex, int size);
+addr_t get_reg_val(CPUState *cpu, int reg, int is_extended, int rex, int size);
 void calc_modrm_operand(CPUState *cpu, struct x86_decode *decode, struct x86_decode_op *op);
 addr_t decode_linear_addr(struct CPUState *cpu, struct x86_decode *decode, addr_t addr, x86_reg_segment seg);
 
