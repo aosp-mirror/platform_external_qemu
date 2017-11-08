@@ -303,6 +303,10 @@ void ColorBuffer::subUpdate(int x,
 
     touch();
 
+    if (m_sync) {
+        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+    }
+
     if (m_needFormatCheck) {
         if (p_type != m_type || p_format != m_format) {
             reformat((GLint)p_format, p_format, p_type);
@@ -329,6 +333,9 @@ void ColorBuffer::subUpdate(int x,
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format,
                                 p_type, pixels);
     }
+
+    s_gles2.glFlush();
+    s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {
@@ -342,8 +349,12 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     touch();
 
     if (m_fastBlitSupported) {
-        s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
-        m_sync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        // if (m_sync) {
+        //     s_gles2.glDeleteSync(m_sync);
+        //     m_sync = nullptr;
+        // }
+        m_sync = (GLsync)s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
+        // m_sync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     } else {
         // Copy the content of the current read surface into m_blitEGLImage.
         // This is done by creating a temporary texture, bind it to the EGLImage
@@ -443,9 +454,10 @@ void ColorBuffer::waitAndClearSync() {
         // order frames.
         // TODO: Either remove the second eglSwapBuffers in SurfaceFlinger,
         // remove the shared update, or track dependencies between color buffers.
-        s_gles2.glClientWaitSync(m_sync, GL_SYNC_FLUSH_COMMANDS_BIT, (uint64_t)-1);
-        s_gles2.glDeleteSync(m_sync);
-        m_sync = nullptr;
+        // s_gles2.glClientWaitSync(m_sync, GL_SYNC_FLUSH_COMMANDS_BIT, (uint64_t)-1);
+        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+        // s_gles2.glDeleteSync(m_sync);
+        // m_sync = nullptr;
     }
 }
 

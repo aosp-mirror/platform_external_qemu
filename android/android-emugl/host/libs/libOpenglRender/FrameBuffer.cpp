@@ -1218,9 +1218,9 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
     }
 
     if (m_fastBlitSupported) {
-        for (auto cb : m_blitsInFlight) {
-            cb->waitAndClearSync();
-        }
+        // for (auto cb : m_blitsInFlight) {
+        //     cb->waitAndClearSync();
+        // }
         m_blitsInFlight.clear();
     }
 
