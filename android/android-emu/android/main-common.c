@@ -1297,9 +1297,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
             // select HVF on Mac if available and we are running on x86
             // TODO: Fix x86_64 support in HVF
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
-                    androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF) &&
-                    strncmp(abi, "x86_64", 6) &&
-                    strncmp(android_hw->hw_cpu_arch, "x86_64", 6);
+                    androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF);
             if (!hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
                 derror("%s emulation currently requires hardware acceleration!\n"
                     "Please ensure %s is properly installed and usable.\n"
