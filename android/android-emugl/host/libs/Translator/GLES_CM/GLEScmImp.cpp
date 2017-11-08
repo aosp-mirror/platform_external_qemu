@@ -58,7 +58,6 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-static void blitFromCurrentReadBufferANDROID(EGLImage image);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -86,7 +85,7 @@ static GLESiface  s_glesIface = {
     .createTexture                    = NULL,
     .restoreTexture                   = NULL,
     .deleteRbo                        = NULL,
-    .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
+    .blitFromCurrentReadBufferANDROID = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -247,24 +246,6 @@ GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
     return &s_glesIface;
-}
-
-static void blitFromCurrentReadBufferANDROID(EGLImage image) {
-    GET_CTX()
-    unsigned int imagehndl = SafeUIntFromPointer(image);
-    ImagePtr img = s_eglIface->getEGLImage(imagehndl);
-    if (!img ||
-        !ctx->shareGroup().get()) {
-        emugl_crash_reporter("FATAL: blitFromCurrentReadBufferANDROID: "
-                             "image (%p) or share group (%p) not found",
-                             img.get(), ctx->shareGroup().get());
-        return;
-    }
-
-    GLuint globalTexObj = img->globalTexObj->getGlobalName();
-    ctx->blitFromReadBufferToTextureFlipped(
-            globalTexObj, img->width, img->height,
-            img->internalFormat, img->format, img->type);
 }
 
 } // extern "C"
@@ -2121,6 +2102,10 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
+            if (img->sync) {
+                // insert gpu side fence to make sure we are done with any blit ops.
+                ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+            }
         }
     }
 }

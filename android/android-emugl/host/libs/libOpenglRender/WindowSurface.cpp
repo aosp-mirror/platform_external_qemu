@@ -70,7 +70,6 @@ void WindowSurface::setColorBuffer(ColorBufferPtr p_colorBuffer) {
     // size.
     unsigned int cbWidth = mAttachedColorBuffer->getWidth();
     unsigned int cbHeight = mAttachedColorBuffer->getHeight();
-    mAttachedColorBuffer->waitAndClearSync();
 
     if (cbWidth != mWidth || cbHeight != mHeight) {
         resize(cbWidth, cbHeight);
