@@ -86,6 +86,7 @@ typedef struct {
                                       std::function<void(SaveableTexture*)>&&);
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
+    void                                            (*blitFromCurrentReadBufferANDROID)(EGLImage);
 } GLESiface;
 
 class GlLibrary;
