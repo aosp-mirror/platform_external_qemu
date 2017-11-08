@@ -191,6 +191,30 @@
     },
     {
       "key": {
+        "uuid": "83f30794_1d36d449",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T00:51:40Z",
+      "side": 1,
+      "message": "Querying current program from drivers is exactly what we don\u0027t want to do here, since that is one of the things that can cause a big delay in the driver.",
+      "parentUuid": "bbb4b288_e37e4649",
+      "range": {
+        "startLine": 591,
+        "startChar": 11,
+        "endLine": 591,
+        "endChar": 23
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "17644148_1bdfa2e8",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 11
