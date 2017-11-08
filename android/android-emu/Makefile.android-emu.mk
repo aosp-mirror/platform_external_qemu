@@ -260,8 +260,9 @@ LOCAL_C_INCLUDES := \
     $(LIBEXT4_UTILS_INCLUDES) \
     $(LIBKEYMASTER3_INCLUDES) \
     $(LIBPNG_INCLUDES) \
-    $(ZLIB_INCLUDES) \
     $(LZ4_INCLUDES) \
+    $(TINYOBJLOADER_INCLUDES) \
+    $(ZLIB_INCLUDES) \
 
 LOCAL_SRC_FILES := \
     android/adb-server.cpp \
@@ -552,6 +553,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     emulator-libpng \
     emulator-libyuv \
     emulator-libwebp \
+    emulator-tinyobjloader \
     emulator-zlib \
     $(METRICS_PROTO_STATIC_LIBRARIES) \
     $(LIBMMAN_WIN32_STATIC_LIBRARIES) \

@@ -26,6 +26,7 @@ include $(LOCAL_PATH)/android/third_party/libffmpeg.mk
 include $(LOCAL_PATH)/android/third_party/libx264.mk
 include $(LOCAL_PATH)/android/third_party/libvpx.mk
 include $(LOCAL_PATH)/android/third_party/libsdl2.mk
+include $(LOCAL_PATH)/android/third_party/tinyobjloader.mk
 include $(LOCAL_PATH)/android/third_party/picosha2/picosha2.mk
 
 # Bluez only works on linux
