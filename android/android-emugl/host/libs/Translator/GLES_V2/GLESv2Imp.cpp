@@ -64,7 +64,7 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
 static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
                                       SaveableTexture::loader_t&& loader);
 static void restoreTexture(SaveableTexture* texture);
-static void blitFromCurrentReadBufferANDROID(EGLImage image);
+static void* blitFromCurrentReadBufferANDROID(EGLImage image);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -194,8 +194,8 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     return & s_glesIface;
 }
 
-static void blitFromCurrentReadBufferANDROID(EGLImage image) {
-    GET_CTX()
+static void* blitFromCurrentReadBufferANDROID(EGLImage image) {
+    GET_CTX_RET(nullptr)
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (!img ||
@@ -203,13 +203,19 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
         emugl_crash_reporter("FATAL: blitFromCurrentReadBufferANDROID: "
                              "image (%p) or share group (%p) not found",
                              img.get(), ctx->shareGroup().get());
-        return;
+        return nullptr;
     }
 
     GLuint globalTexObj = img->globalTexObj->getGlobalName();
     ctx->blitFromReadBufferToTextureFlipped(
             globalTexObj, img->width, img->height,
             img->internalFormat, img->format, img->type);
+    if (img->sync) {
+        ctx->dispatcher().glDeleteSync(img->sync);
+        img->sync = nullptr;
+    }
+    img->sync = ctx->dispatcher().glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    return (void*)img->sync;
 }
 
 }  // extern "C"
@@ -595,11 +601,12 @@ GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLs
 
 
 GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
-    GET_CTX_V2_RET(GL_FRAMEBUFFER_COMPLETE);
-    RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target), GL_INVALID_ENUM, GL_FRAMEBUFFER_COMPLETE);
-    // We used to issue ctx->drawValidate() here, but it can corrupt the status of
-    // separately bound draw/read framebuffer objects. So we just don't call it now.
-    return ctx->dispatcher().glCheckFramebufferStatus(target);
+    return GL_FRAMEBUFFER_COMPLETE;
+    // GET_CTX_V2_RET(GL_FRAMEBUFFER_COMPLETE);
+    // RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target), GL_INVALID_ENUM, GL_FRAMEBUFFER_COMPLETE);
+    // // We used to issue ctx->drawValidate() here, but it can corrupt the status of
+    // // separately bound draw/read framebuffer objects. So we just don't call it now.
+    // return ctx->dispatcher().glCheckFramebufferStatus(target);
 }
 
 GL_APICALL void  GL_APIENTRY glClear(GLbitfield mask){
@@ -1988,6 +1995,7 @@ GL_APICALL void  GL_APIENTRY glGetBufferParameteriv(GLenum target, GLenum pname,
 
 
 GL_APICALL GLenum GL_APIENTRY glGetError(void){
+    return 0;
     GET_CTX_RET(GL_NO_ERROR)
     GLenum err = ctx->getGLerror();
     if(err != GL_NO_ERROR) {
@@ -2815,7 +2823,7 @@ GL_APICALL void  GL_APIENTRY glPolygonOffset(GLfloat factor, GLfloat units){
 GL_APICALL void  GL_APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, GLvoid* pixels){
     GET_CTX_V2();
     SET_ERROR_IF(!(GLESv2Validate::pixelOp(format,type)),GL_INVALID_OPERATION);
-    SET_ERROR_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, GL_INVALID_FRAMEBUFFER_OPERATION);
+    // SET_ERROR_IF(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE, GL_INVALID_FRAMEBUFFER_OPERATION);
 
     if (ctx->isDefaultFBOBound(GL_READ_FRAMEBUFFER) &&
         ctx->getDefaultFBOMultisamples()) {
@@ -3568,6 +3576,10 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
+            if (img->sync) {
+                // insert gpu side fence to make sure we are done with any blit ops.
+                ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+            }
             if (!imagehndl) {
                 fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
             }

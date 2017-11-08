@@ -58,7 +58,7 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
-static void blitFromCurrentReadBufferANDROID(EGLImage image);
+static void* blitFromCurrentReadBufferANDROID(EGLImage image);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -249,8 +249,8 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     return &s_glesIface;
 }
 
-static void blitFromCurrentReadBufferANDROID(EGLImage image) {
-    GET_CTX()
+static void* blitFromCurrentReadBufferANDROID(EGLImage image) {
+    GET_CTX_RET(nullptr)
     unsigned int imagehndl = SafeUIntFromPointer(image);
     ImagePtr img = s_eglIface->getEGLImage(imagehndl);
     if (!img ||
@@ -258,13 +258,19 @@ static void blitFromCurrentReadBufferANDROID(EGLImage image) {
         emugl_crash_reporter("FATAL: blitFromCurrentReadBufferANDROID: "
                              "image (%p) or share group (%p) not found",
                              img.get(), ctx->shareGroup().get());
-        return;
+        return nullptr;
     }
 
     GLuint globalTexObj = img->globalTexObj->getGlobalName();
     ctx->blitFromReadBufferToTextureFlipped(
             globalTexObj, img->width, img->height,
             img->internalFormat, img->format, img->type);
+    if (img->sync) {
+        ctx->dispatcher().glDeleteSync(img->sync);
+        img->sync = nullptr;
+    }
+    img->sync = ctx->dispatcher().glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    return (void*)img->sync;
 }
 
 } // extern "C"
