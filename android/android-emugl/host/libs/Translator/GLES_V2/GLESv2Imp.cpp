@@ -3568,6 +3568,10 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
+            if (img->sync) {
+                // insert gpu side fence to make sure we are done with any blit ops.
+                ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+            }
             if (!imagehndl) {
                 fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
             }
