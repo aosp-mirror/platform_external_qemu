@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "a1c16d71_0dcd426c",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 1500,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-08T23:13:45Z",
+      "side": 1,
+      "message": "the comment is gone in PS12. put it back?",
+      "range": {
+        "startLine": 1493,
+        "startChar": 0,
+        "endLine": 1500,
+        "endChar": 55
+      },
+      "revId": "5a3a8bbf4f6246cbaea95d1dc23fd84312864780",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d3987a62_8c0bb3dc",
         "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
         "patchSetId": 10
