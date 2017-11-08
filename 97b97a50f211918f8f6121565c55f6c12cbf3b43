@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "297306a7_517cfbd5",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1410,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-08T19:32:31Z",
+      "side": 1,
+      "message": "do we need to worry about snapshoting it?",
+      "range": {
+        "startLine": 1410,
+        "startChar": 17,
+        "endLine": 1410,
+        "endChar": 21
+      },
+      "revId": "97b97a50f211918f8f6121565c55f6c12cbf3b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74546381_240f926f",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1493,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-08T19:32:31Z",
+      "side": 1,
+      "message": "leave some comments about what it does / how to use it?",
+      "range": {
+        "startLine": 1493,
+        "startChar": 0,
+        "endLine": 1493,
+        "endChar": 85
+      },
+      "revId": "97b97a50f211918f8f6121565c55f6c12cbf3b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
