@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0fc752ed_5f685bbe",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "Units?",
+      "range": {
+        "startLine": 27,
+        "startChar": 16,
+        "endLine": 27,
+        "endChar": 38
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c44ca9d8_784b1311",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "What\u0027s the definition of changing here?  My initial assumption is that changing indicates that getPosition will potentially return a different value.\n\nI think there\u0027s an edge case here, where we want to return _CHANGING if the previous mModelTimeNs is less than mStateChangeEndTime and the new one is after, to account for any changes between the previous model time and mStateChangeEndTime.",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 60
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c648c6b_4858d63b",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "Nit: glm::vec3() should be equivalent",
+      "range": {
+        "startLine": 44,
+        "startChar": 16,
+        "endLine": 44,
+        "endChar": 30
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e0ce228c_ab00313d",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "This produces a degenerate all-zero matrix, is that intentional?  Consider glm::mat4x3() or glm::mat4x3(1.f) instead which both produce identity.",
+      "range": {
+        "startLine": 46,
+        "startChar": 39,
+        "endLine": 46,
+        "endChar": 55
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "274876fe_9d21a68f",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "You knew it was coming... const all the things :-)",
+      "range": {
+        "startLine": 60,
+        "startChar": 8,
+        "endLine": 60,
+        "endChar": 17
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2267a5ab_63ce57f6",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "SGTM ;-)",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 22
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0df0256e_a8035978",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "Nit: Split out into a secondsToNanoseconds function?",
+      "range": {
+        "startLine": 158,
+        "startChar": 45,
+        "endLine": 158,
+        "endChar": 105
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fec1be08_297df6fc",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-08T02:18:25Z",
+      "side": 1,
+      "message": "Same comment as above, nanosecondsToSeconds helper? Also, const.",
+      "range": {
+        "startLine": 252,
+        "startChar": 19,
+        "endLine": 255,
+        "endChar": 51
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
