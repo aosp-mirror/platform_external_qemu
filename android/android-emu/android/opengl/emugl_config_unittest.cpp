@@ -257,7 +257,7 @@ TEST(EmuglConfig, initFromUISetting) {
             EXPECT_STREQ("angle9", config.backend);
             break;
         case 3:
-            EXPECT_STREQ("swiftshader", config.backend);
+            EXPECT_STREQ("swiftshader_indirect", config.backend);
             break;
         case 4:
             EXPECT_STREQ("host", config.backend);
