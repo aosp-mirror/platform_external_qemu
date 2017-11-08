@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "020064f0_e2a2b716",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2490,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-08T00:09:41Z",
+      "side": 1,
+      "message": "are the src and dst supposed to have the same size? otherwise please use GL_LINEAR instead",
+      "range": {
+        "startLine": 2490,
+        "startChar": 61,
+        "endLine": 2490,
+        "endChar": 71
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "61d46ba3_a4dbb815",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2492,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-08T00:09:41Z",
+      "side": 1,
+      "message": "nit: space",
+      "range": {
+        "startLine": 2492,
+        "startChar": 0,
+        "endLine": 2492,
+        "endChar": 4
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "126a1cec_2c816dbf",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-08T00:09:41Z",
+      "side": 1,
+      "message": "move the snapshot save / load / restore of this variable to GLEScontext as well?",
+      "range": {
+        "startLine": 591,
+        "startChar": 11,
+        "endLine": 591,
+        "endChar": 23
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "17644148_1bdfa2e8",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-08T00:09:41Z",
+      "side": 1,
+      "message": "nit: trailing space",
+      "range": {
+        "startLine": 315,
+        "startChar": 61,
+        "endLine": 315,
+        "endChar": 62
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
