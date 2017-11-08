@@ -15,6 +15,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/cmdline-option.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
@@ -33,6 +34,7 @@ using android::base::Stopwatch;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
+using android::crashreport::CrashReporter;
 using android::metrics::MetricsReporter;
 namespace pb = android_studio;
 
@@ -282,6 +284,16 @@ bool Quickboot::load(StringView name) {
             mLoadedSnapshotName = name;
             reportSuccessfulLoad(name, startTimeMs);
             startLivenessMonitor();
+            // Invalidate quickboot snapshot if the crash reporter trips.
+            // It's possible the crash was not due to snapshot load,
+            // but it's better than crashing over and over in
+            // the same load.
+            // Don't try to delete it completely as that is a heavyweight
+            // operation and we are in the middle of crashing.
+            CrashReporter::get()->addCrashCallback([this]() {
+                Snapshotter::get().invalidateSnapshot(
+                    mLoadedSnapshotName.c_str(), -EINVAL);
+            });
         } else {
             // Check if the error is about something done before the real load
             // (e.g. condition check) or we've started actually loading the VM
@@ -325,6 +337,7 @@ bool Quickboot::load(StringView name) {
             }
         }
     }
+
     return true;
 }
 
