@@ -1456,7 +1456,6 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
             char *tag = iniFile_getString(i->configIni, TAG_ID, "default");
             if (!strcmp(tag, TAG_ID_CHROMEOS)) {
                 hw->hw_arc = true;
-                str_reset(&hw->hw_cpu_arch, "x86_64");
             }
             AFREE(tag);
         }
@@ -1486,6 +1485,16 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
     // https://code.google.com/p/android/issues/detail?id=200332
     if (i->apiLevel <= 10 || (!isQemu2 && i->apiLevel <= 21)) {
             str_reset(&hw->hw_screen, "touch");
+    }
+
+    if (hw->hw_arc) {
+        // Chrome OS images do not yet support snapshotting, force
+        // coldboot.
+        hw->fastboot_forceColdBoot = true;
+        // Chrome OS has a different graphics pipeline, disable GPU
+        // acceleration for now.
+        str_reset(&hw->hw_gpu_mode, "off");
+        str_reset(&hw->hw_cpu_arch, "x86_64");
     }
 
     return ret;
