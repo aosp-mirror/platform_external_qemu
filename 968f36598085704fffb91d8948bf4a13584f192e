@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "55c00887_18bf87ec",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2490,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T00:36:03Z",
+      "side": 1,
+      "message": "BTW, some trivia: the next step is to stop letting SurfaceFlinger compose our framebuffer. The only reason we are drawing here is that SurfaceFlinger composes Layers upside-down relative to GL texture coordinates, (0,0) is top left. So we could have just went back to ColorBuffer.cpp and glCopyTexSubImage2D and that could have been it, but then it would not reflect the correct orientation of system ui elements; elements that were put through the SF pipeline an odd number of times would be upside down.",
+      "parentUuid": "e3d9b437_a2f38cc7",
+      "range": {
+        "startLine": 2490,
+        "startChar": 61,
+        "endLine": 2490,
+        "endChar": 71
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "61d46ba3_a4dbb815",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 11
