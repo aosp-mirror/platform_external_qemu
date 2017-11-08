@@ -118,6 +118,30 @@
       "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "94a3ca57_17eaf2e7",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T23:16:42Z",
+      "side": 1,
+      "message": "Yes, we don\u0027t allow snapshots in the middle of booting for the time being.",
+      "parentUuid": "26030e2a_f3343dc9",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 27
+      },
+      "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
