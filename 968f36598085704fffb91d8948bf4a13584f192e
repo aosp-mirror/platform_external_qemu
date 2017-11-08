@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e3d9b437_a2f38cc7",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2490,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T00:26:30Z",
+      "side": 1,
+      "message": "yes, this is effectively just a texture conversion, the only thing extra it does is that it flips the texture on the Y axis. GL_LINEAR would only do extra work and possibly decrease accuracy here.",
+      "parentUuid": "020064f0_e2a2b716",
+      "range": {
+        "startLine": 2490,
+        "startChar": 61,
+        "endLine": 2490,
+        "endChar": 71
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "61d46ba3_a4dbb815",
         "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
         "patchSetId": 11
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-08T00:09:41Z",
       "side": 1,
       "message": "nit: space",
+      "range": {
+        "startLine": 2492,
+        "startChar": 0,
+        "endLine": 2492,
+        "endChar": 4
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "21900ba7_50e8cbf9",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/GLEScontext.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 2492,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T00:26:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "61d46ba3_a4dbb815",
       "range": {
         "startLine": 2492,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "b3571d4a_e22eac7c",
+        "filename": "android/android-emugl/host/libs/Translator/include/GLcommon/GLEScontext.h",
+        "patchSetId": 11
+      },
+      "lineNbr": 591,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T00:26:30Z",
+      "side": 1,
+      "message": "I think we are good with saving/restoring it for guest contexts that will actually use it. m_useProgram has a different semantics when it is used internally in GLEScontext (for core profile utility functions that might step on the current GL state). For purposes of snapshot, it should not affect what is snapshotted. Plus, it\u0027ll be confusing to have the other shader related variables in GLESv2Context snapshotted, but this separated over here.",
+      "parentUuid": "126a1cec_2c816dbf",
+      "range": {
+        "startLine": 591,
+        "startChar": 11,
+        "endLine": 591,
+        "endChar": 23
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "17644148_1bdfa2e8",
         "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
         "patchSetId": 11
@@ -82,6 +154,30 @@
       "writtenOn": "2017-11-08T00:09:41Z",
       "side": 1,
       "message": "nit: trailing space",
+      "range": {
+        "startLine": 315,
+        "startChar": 61,
+        "endLine": 315,
+        "endChar": 62
+      },
+      "revId": "968f36598085704fffb91d8948bf4a13584f192e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "202bc7de_7d0a8e8f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/FrameBuffer.cpp",
+        "patchSetId": 11
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T00:26:30Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17644148_1bdfa2e8",
       "range": {
         "startLine": 315,
         "startChar": 61,
