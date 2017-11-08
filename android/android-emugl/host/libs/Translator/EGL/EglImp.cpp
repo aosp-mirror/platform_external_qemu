@@ -1119,7 +1119,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
 
     if(releaseContext) { //releasing current context
        if(prevCtx.get()) {
-           g_eglInfo->getIface(prevCtx->version())->flush();
+           // g_eglInfo->getIface(prevCtx->version())->flush();
            if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
            }
@@ -1168,7 +1168,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         }
 
         if(prevCtx.get()) {
-            g_eglInfo->getIface(prevCtx->version())->flush();
+            // g_eglInfo->getIface(prevCtx->version())->flush();
         }
         if (!dpy->nativeType()->makeCurrent(
                 newReadPtr->native(),
@@ -1404,6 +1404,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->texStorageLevels = texData->texStorageLevels;
             img->saveableTexture = texData->getSaveableTexture();
             img->needRestore = false;
+            img->sync = nullptr;
             return dpy->addImageKHR(img);
         }
     }

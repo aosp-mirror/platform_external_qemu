@@ -32,7 +32,10 @@
 
 #include <EGL/eglext.h>
 
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -304,6 +307,10 @@ HWND createDummyWindow() {
     X(void, wglSwapIntervalEXT, (int)) \
     X(int, wglGetSwapIntervalEXT, (void)) \
 
+// List of functions define by WGL_ARB_context_flush_control
+#define LIST_WGL_ARB_context_flush_control_FUNCTIONS(X) \
+    // No such functions, just extra parameters
+
 #define LIST_WGL_EXTENSIONS_FUNCTIONS(X) \
     LIST_WGL_ARB_pixel_format_FUNCTIONS(X) \
     LIST_WGL_ARB_make_current_read_FUNCTIONS(X) \
@@ -343,6 +350,7 @@ public:
             return false;
         }
         const char* extensionList = wglGetExtensionsStringARB(hdc);
+        fprintf(stderr, "%s: extensions: %s\n", __func__, extensionList);
         if (!extensionList) {
             extensionList = "";
         }
@@ -362,6 +370,7 @@ public:
     if (!supportsExtension(#extension, extensionList)) { \
         ERR("WARNING: %s: Missing WGL extension %s\n", __FUNCTION__, #extension); \
     } else { \
+        mSupportedExtensions.insert(#extension); \
         LIST_##extension##_FUNCTIONS(LOAD_WGL_EXTENSION_FUNCTION) \
     }
 
@@ -370,13 +379,21 @@ public:
         LOAD_WGL_EXTENSION(WGL_ARB_pbuffer)
         LOAD_WGL_EXTENSION(WGL_ARB_create_context)
         LOAD_WGL_EXTENSION(WGL_EXT_swap_control)
+        LOAD_WGL_EXTENSION(WGL_ARB_context_flush_control)
 
         // Done.
         return result;
     }
 
+    bool isExtensionSupported(const std::string& ext) const {
+        return mSupportedExtensions.find(ext) !=
+               mSupportedExtensions.end();
+    }
+
 private:
     WglExtensionsDispatch();  // no default constructor.
+
+    std::unordered_set<std::string> mSupportedExtensions = {};
 };
 
 const WglExtensionsDispatch* initExtensionsDispatch(
@@ -934,12 +951,31 @@ public:
         bool useCoreProfile =
             mCoreProfileSupported &&
             (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
+        bool flushControlSupported =
+            mDispatch->isExtensionSupported("WGL_ARB_context_flush_control");
 
         HGLRC ctx;
         if (useCoreProfile) {
+            std::vector<int> ctxAttribs;
+            for (int i = 0; i < getNonzeroAttribsCount(mCoreProfileCtxAttribs); i++) {
+                ctxAttribs.push_back(mCoreProfileCtxAttribs[i]);
+            }
+            if (flushControlSupported) {
+#define WGL_CONTEXT_RELEASE_BEHAVIOR_ARB  0x2097
+#define WGL_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB 0
+#define WGL_CONTEXT_RELEASE_BEHAVIOR_FLUSH_ARB 0x2098
+#define WGL_CONTEXT_OPENGL_NO_ERROR_ARB                 0x31B3
+                ctxAttribs.push_back(WGL_CONTEXT_RELEASE_BEHAVIOR_ARB);
+                ctxAttribs.push_back(WGL_CONTEXT_RELEASE_BEHAVIOR_NONE_ARB);
+                ctxAttribs.push_back(WGL_CONTEXT_OPENGL_NO_ERROR_ARB);
+                ctxAttribs.push_back(0);
+            } else {
+                ctxAttribs.push_back(0);
+            }
+
             ctx = mDispatch->wglCreateContextAttribsARB(
                       dpy, WinContext::from(sharedContext),
-                      mCoreProfileCtxAttribs);
+                      ctxAttribs.data());
         } else {
             ctx = mDispatch->wglCreateContext(dpy);
             if (ctx && sharedContext) {
@@ -1093,6 +1129,14 @@ private:
                 return;
             }
         }
+    }
+
+    int getNonzeroAttribsCount(const int* attribs) {
+        int i = 0;
+        while (attribs[i] != 0) {
+            i++;
+        }
+        return i + 1;
     }
 
     bool mCoreProfileSupported = false;

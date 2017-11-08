@@ -342,8 +342,12 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     touch();
 
     if (m_fastBlitSupported) {
+        // if (m_sync) {
+        //     s_gles2.glDeleteSync(m_sync);
+        //     m_sync = nullptr;
+        // }
         s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
-        m_sync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        // m_sync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     } else {
         // Copy the content of the current read surface into m_blitEGLImage.
         // This is done by creating a temporary texture, bind it to the EGLImage
@@ -443,9 +447,10 @@ void ColorBuffer::waitAndClearSync() {
         // order frames.
         // TODO: Either remove the second eglSwapBuffers in SurfaceFlinger,
         // remove the shared update, or track dependencies between color buffers.
-        s_gles2.glClientWaitSync(m_sync, GL_SYNC_FLUSH_COMMANDS_BIT, (uint64_t)-1);
-        s_gles2.glDeleteSync(m_sync);
-        m_sync = nullptr;
+        // s_gles2.glClientWaitSync(m_sync, GL_SYNC_FLUSH_COMMANDS_BIT, (uint64_t)-1);
+        // s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+        // s_gles2.glDeleteSync(m_sync);
+        // m_sync = nullptr;
     }
 }
 
