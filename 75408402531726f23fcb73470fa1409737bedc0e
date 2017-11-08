@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f08fd781_ef0ad3c5",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0fc752ed_5f685bbe",
+      "range": {
+        "startLine": 27,
+        "startChar": 16,
+        "endLine": 27,
+        "endChar": 38
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c44ca9d8_784b1311",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-08T02:18:25Z",
       "side": 1,
       "message": "What\u0027s the definition of changing here?  My initial assumption is that changing indicates that getPosition will potentially return a different value.\n\nI think there\u0027s an edge case here, where we want to return _CHANGING if the previous mModelTimeNs is less than mStateChangeEndTime and the new one is after, to account for any changes between the previous model time and mStateChangeEndTime.",
+      "range": {
+        "startLine": 33,
+        "startChar": 4,
+        "endLine": 34,
+        "endChar": 60
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5ba94e84_83002476",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "That is taken care of by the way onPhysicalStateStabilized happen in the physical model, and how they are handled.  Once the result switches from changing to stable, the onPhysicalStateStabilized callback happens and the virtual sensors page responds by polling for the stable value, and stopping the value-polling timer.",
+      "parentUuid": "c44ca9d8_784b1311",
       "range": {
         "startLine": 33,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "66de2119_44fa936d",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c648c6b_4858d63b",
+      "range": {
+        "startLine": 44,
+        "startChar": 16,
+        "endLine": 44,
+        "endChar": 30
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0ce228c_ab00313d",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "f819e907_6f94a5fe",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "yes, that is intential.  That just means the velocity is zero (same for accel and for initial values).  This is being multiplied by the [t^3, t^2, t, 1] vector - not used as a spatial transform.",
+      "parentUuid": "e0ce228c_ab00313d",
+      "range": {
+        "startLine": 46,
+        "startChar": 39,
+        "endLine": 46,
+        "endChar": 55
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "274876fe_9d21a68f",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
@@ -105,6 +201,30 @@
       "writtenOn": "2017-11-08T02:18:25Z",
       "side": 1,
       "message": "You knew it was coming... const all the things :-)",
+      "range": {
+        "startLine": 60,
+        "startChar": 8,
+        "endLine": 60,
+        "endChar": 17
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "91d43917_da09d986",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "274876fe_9d21a68f",
       "range": {
         "startLine": 60,
         "startChar": 8,
@@ -164,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "a9fc98fb_4e405234",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9d30283e_0ce8cbdf",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 22
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0df0256e_a8035978",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
@@ -187,6 +331,30 @@
     },
     {
       "key": {
+        "uuid": "3aa1c5fe_052015f6",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0df0256e_a8035978",
+      "range": {
+        "startLine": 158,
+        "startChar": 45,
+        "endLine": 158,
+        "endChar": 105
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fec1be08_297df6fc",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
@@ -198,6 +366,30 @@
       "writtenOn": "2017-11-08T02:18:25Z",
       "side": 1,
       "message": "Same comment as above, nanosecondsToSeconds helper? Also, const.",
+      "range": {
+        "startLine": 252,
+        "startChar": 19,
+        "endLine": 255,
+        "endChar": 51
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d15d7090_2b2154d0",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-08T15:54:53Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fec1be08_297df6fc",
       "range": {
         "startLine": 252,
         "startChar": 19,
