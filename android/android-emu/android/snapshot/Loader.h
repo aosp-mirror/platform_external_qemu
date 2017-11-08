@@ -36,6 +36,7 @@ public:
     void prepare();
     void start();
     void complete(bool succeeded);
+    void setCorrupted(int error);
 
 private:
     OperationStatus mStatus;
