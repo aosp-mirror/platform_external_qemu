@@ -199,8 +199,6 @@ public:
     // ColorBuffer. This is used from WindowSurface::flushColorBuffer().
     // Return true on success, false on failure (e.g. no current context).
     bool blitFromCurrentReadBuffer();
-    void waitSync();
-    void waitAndClearSync();
 
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
@@ -225,6 +223,7 @@ public:
 
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
+    void waitSync();
 
 private:
     GLuint m_tex = 0;

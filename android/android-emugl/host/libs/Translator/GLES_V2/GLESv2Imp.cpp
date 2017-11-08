@@ -595,6 +595,7 @@ GL_APICALL void  GL_APIENTRY glBufferSubData(GLenum target, GLintptr offset, GLs
 
 
 GL_APICALL GLenum GL_APIENTRY glCheckFramebufferStatus(GLenum target){
+    return GL_FRAMEBUFFER_COMPLETE;
     GET_CTX_V2_RET(GL_FRAMEBUFFER_COMPLETE);
     RET_AND_SET_ERROR_IF(!GLESv2Validate::framebufferTarget(ctx, target), GL_INVALID_ENUM, GL_FRAMEBUFFER_COMPLETE);
     // We used to issue ctx->drawValidate() here, but it can corrupt the status of
@@ -3568,6 +3569,10 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
+            if (img->sync) {
+                // insert gpu side fence to make sure we are done with any blit ops.
+                ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+            }
             if (!imagehndl) {
                 fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
             }
