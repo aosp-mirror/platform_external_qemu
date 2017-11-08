@@ -15,7 +15,7 @@
 
 #include <QMouseEvent>
 
-#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
@@ -30,7 +30,7 @@
 class Accelerometer3DWidget : public GLWidget {
     Q_OBJECT
     Q_PROPERTY(glm::mat4 rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
-    Q_PROPERTY(glm::vec2 position READ position WRITE setPosition NOTIFY positionChanged USER true);
+    Q_PROPERTY(glm::vec3 position READ position WRITE setPosition NOTIFY positionChanged USER true);
 public:
     enum class OperationMode {
         Rotate,
@@ -59,8 +59,8 @@ public slots:
         mRotation = rotation;
     }
 
-    // Sets the X and Y coordinates of the model's origin;
-    void setPosition(const glm::vec2& pos) { mTranslation = pos; }
+    // Sets the X, Y and Z coordinates of the model's origin;
+    void setPosition(const glm::vec3& pos) { mTranslation = pos; }
 
     // Sets the widget's operation mode which determines how it reacts
     // to mose dragging. It may either rotate the model or move it around.
@@ -70,16 +70,21 @@ public:
     // Getters for the rotation quaternion and delta.
     const glm::mat4& rotation() const { return mRotation; }
 
-    // Returns the X and Y coordinates of the model's origin.
-    const glm::vec2& position() const { return mTranslation; }
+    // Returns the X, Y and Z coordinates of the model's origin.
+    const glm::vec3& position() const { return mTranslation; }
 
-    static constexpr float MaxX = 7.0f;
-    static constexpr float MinX = -7.0f;
-    static constexpr float MaxY = 4.0f;
-    static constexpr float MinY = -4.0f;
-    static constexpr float CameraDistance = 8.5f;
-    static constexpr float NearClip = 1.0f;
-    static constexpr float FarClip = 100.0f;
+    static constexpr float MaxX = 7.f;
+    static constexpr float MinX = -7.f;
+    static constexpr float MaxY = 4.f;
+    static constexpr float MinY = -4.f;
+    static constexpr float MaxZ = 4.f;
+    static constexpr float MinZ = -4.f;
+    static constexpr float CameraDistance = 40.f;
+    static constexpr float NearClip = 1.f;
+    static constexpr float FarClip = 100.f;
+    // Each 15 degree wheel movement should move 0.2 of an inch.
+    static constexpr float InchesPerWheelDegree = 2.f / 150.f;
+
 
 protected:
     // This is called once, after the GL context is created, to do some one-off
@@ -94,6 +99,8 @@ protected:
 
     // This is called every time the mouse is moved.
     void mouseMoveEvent(QMouseEvent *event) override;
+    // This is called every time the mouse wheel is moved.
+    void wheelEvent(QWheelEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
 
@@ -104,13 +111,15 @@ private:
 
     // Returns the world coordinates of a point on the XY plane
     // that corresponds to the given point on the screen.
-    glm::vec2 screenToXYPlane(int x, int y) const;
+    glm::vec3 screenToWorldCoordinate(int x, int y) const;
 
     glm::mat4 mRotation;
 
-    glm::vec2 mTranslation;
+    glm::vec3 mTranslation;
     glm::mat4 mPerspective;
+    glm::mat4 mPerspectiveInverse;
     glm::mat4 mCameraTransform;
+    glm::mat4 mCameraTransformInverse;
 
     GLuint mProgram;
     GLuint mVertexDataBuffer;
@@ -127,7 +136,7 @@ private:
 
     int mPrevMouseX;
     int mPrevMouseY;
-    glm::vec2 mPrevDragOrigin;
+    glm::vec3 mPrevDragOrigin;
     bool mTracking;
     bool mDragging;
     OperationMode mOperationMode;
