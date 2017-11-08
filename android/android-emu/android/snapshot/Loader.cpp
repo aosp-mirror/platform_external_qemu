@@ -131,5 +131,11 @@ void Loader::complete(bool succeeded) {
     mStatus = OperationStatus::Ok;
 }
 
+// Don't do heavy operations like interrupting the loader
+// here since this could be in a crash handler.
+void Loader::setCorrupted(int error) {
+    mSnapshot.saveFailure(errnoToFailure(error));
+}
+
 }  // namespace snapshot
 }  // namespace android
