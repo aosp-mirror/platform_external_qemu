@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "f8af701d_9bbf4a11",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1410,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T19:40:48Z",
+      "side": 1,
+      "message": "It shouldn\u0027t be necessary to snapshot it unless we really end up caring about snapshotting the execution order of GL calls that write to the egl image versus those that read it. At most we will see 1 out of order frame event while loading an animation.",
+      "parentUuid": "297306a7_517cfbd5",
+      "range": {
+        "startLine": 1410,
+        "startChar": 17,
+        "endLine": 1410,
+        "endChar": 21
+      },
+      "revId": "97b97a50f211918f8f6121565c55f6c12cbf3b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74546381_240f926f",
         "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-08T19:32:31Z",
       "side": 1,
       "message": "leave some comments about what it does / how to use it?",
+      "range": {
+        "startLine": 1493,
+        "startChar": 0,
+        "endLine": 1493,
+        "endChar": 85
+      },
+      "revId": "97b97a50f211918f8f6121565c55f6c12cbf3b43",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9eae7833_ee9939fc",
+        "filename": "android/android-emugl/host/libs/Translator/EGL/EglImp.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 1493,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T19:40:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "74546381_240f926f",
       "range": {
         "startLine": 1493,
         "startChar": 0,
