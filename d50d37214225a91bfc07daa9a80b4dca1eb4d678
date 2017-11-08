@@ -94,6 +94,30 @@
       "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "26030e2a_f3343dc9",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-08T23:12:45Z",
+      "side": 1,
+      "message": "Should we refuse to take a snapshot if !isEmulatorBooted?",
+      "parentUuid": "9aee0e0a_436d6558",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 27
+      },
+      "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
