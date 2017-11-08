@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f78d2db6_cfaf66e3",
+        "filename": "target-i386/hvf-utils/x86_decode.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 253,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T20:17:44Z",
+      "side": 1,
+      "message": "nit: whitespace trailing",
+      "range": {
+        "startLine": 253,
+        "startChar": 74,
+        "endLine": 253,
+        "endChar": 75
+      },
+      "revId": "011f8916733121cdce9f257baff8b03fe3a5700f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
