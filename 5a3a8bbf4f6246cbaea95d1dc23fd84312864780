@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "dbfc1360_65707beb",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T21:59:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd712e95_bfe5a1a5",
+      "range": {
+        "startLine": 598,
+        "startChar": 4,
+        "endLine": 598,
+        "endChar": 35
+      },
+      "revId": "5a3a8bbf4f6246cbaea95d1dc23fd84312864780",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e28f81ae_d3097196",
         "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
         "patchSetId": 10
@@ -59,6 +83,30 @@
       "writtenOn": "2017-11-08T19:49:44Z",
       "side": 1,
       "message": "do these two always come together now?",
+      "range": {
+        "startLine": 505,
+        "startChar": 0,
+        "endLine": 507,
+        "endChar": 15
+      },
+      "revId": "5a3a8bbf4f6246cbaea95d1dc23fd84312864780",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d4a5f264_77b6710f",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T21:59:10Z",
+      "side": 1,
+      "message": "touch() is to initialize the colorbuffer from snapshot, while waitSync is for operations that might read the colorbuffer, like readback, post, etc. they don\u0027t exactly coincide, since touch() needs to be in the color buffer helper context, while post should not be using the helper context.",
+      "parentUuid": "e28f81ae_d3097196",
       "range": {
         "startLine": 505,
         "startChar": 0,
