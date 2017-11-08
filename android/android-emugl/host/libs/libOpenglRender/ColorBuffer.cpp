@@ -329,6 +329,11 @@ void ColorBuffer::subUpdate(int x,
         s_gles2.glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, width, height, p_format,
                                 p_type, pixels);
     }
+
+    if (m_fastBlitSupported) {
+        s_gles2.glFlush();
+        m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
+    }
 }
 
 bool ColorBuffer::blitFromCurrentReadBuffer() {
@@ -343,7 +348,7 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
 
     if (m_fastBlitSupported) {
         s_egl.eglBlitFromCurrentReadBufferANDROID(m_display, m_eglImage);
-        m_sync = s_gles2.glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+        m_sync = (GLsync)s_egl.eglSetImageFenceANDROID(m_display, m_eglImage);
     } else {
         // Copy the content of the current read surface into m_blitEGLImage.
         // This is done by creating a temporary texture, bind it to the EGLImage
@@ -435,20 +440,6 @@ bool ColorBuffer::blitFromCurrentReadBuffer() {
     return true;
 }
 
-void ColorBuffer::waitAndClearSync() {
-    if (m_sync) {
-        // Must be client wait, because if is a device-side-only wait
-        // like glWaitSync, we do something on the host that updates
-        // some shared state anyway, which eventually causes out of
-        // order frames.
-        // TODO: Either remove the second eglSwapBuffers in SurfaceFlinger,
-        // remove the shared update, or track dependencies between color buffers.
-        s_gles2.glClientWaitSync(m_sync, GL_SYNC_FLUSH_COMMANDS_BIT, (uint64_t)-1);
-        s_gles2.glDeleteSync(m_sync);
-        m_sync = nullptr;
-    }
-}
-
 bool ColorBuffer::bindToTexture() {
     if (!m_eglImage) {
         return false;
@@ -491,7 +482,9 @@ GLuint ColorBuffer::scale() {
 
 bool ColorBuffer::post(GLuint tex, float rotation, float dx, float dy) {
     // NOTE: Do not call m_helper->setupContext() here!
-    waitAndClearSync();
+    if (m_sync) {
+        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+    }
     return m_helper->getTextureDraw()->draw(tex, rotation, dx, dy);
 }
 
@@ -501,6 +494,11 @@ void ColorBuffer::readback(unsigned char* img) {
         return;
     }
     touch();
+
+    if (m_sync) {
+        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+    }
+
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, img);
         unbindFbo();
@@ -515,6 +513,11 @@ void ColorBuffer::readbackAsync(GLuint buffer) {
         return;
     }
     touch();
+
+    if (m_sync) {
+        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+    }
+
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer);
         s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
@@ -529,6 +532,11 @@ void ColorBuffer::readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* i
         return;
     }
     touch();
+
+    if (m_sync) {
+        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+    }
+
     if (bindFbo(&m_fbo, m_tex)) {
         s_gles2.glBindBuffer(GL_PIXEL_PACK_BUFFER, buffer1);
         s_gles2.glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8_REV, 0);
