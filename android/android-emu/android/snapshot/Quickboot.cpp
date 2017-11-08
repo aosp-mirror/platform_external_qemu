@@ -131,6 +131,7 @@ Quickboot::~Quickboot() {
 void Quickboot::reportSuccessfulLoad(StringView name,
                                      System::WallDuration startTimeMs) {
     auto& loader = Snapshotter::get().loader();
+    loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
     const auto onDemandRamEnabled = loader.ramLoader().onDemandEnabled();
     const auto compressedRam = loader.ramLoader().compressed();
@@ -221,6 +222,7 @@ void Quickboot::onLivenessTimer() {
                         .c_str(),
                 WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
         Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+        Snapshotter::get().loader().reportInvalid();
         reportFailedLoad(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
         mVmOps.vmReset();
@@ -248,6 +250,16 @@ bool Quickboot::load(StringView name) {
     if (name.empty()) {
         name = kDefaultBootSnapshot;
     }
+
+    // Invalidate quickboot snapshot if the crash reporter trips.
+    // It's possible the crash was not due to snapshot load,
+    // but it's better than crashing over and over in
+    // the same load.
+    // Don't try to delete it completely as that is a heavyweight
+    // operation and we are in the middle of crashing.
+    CrashReporter::get()->addCrashCallback([this, &name]() {
+        Snapshotter::get().onCrashedSnapshot(name.c_str());
+    });
 
     if (android_cmdLineOptions->no_snapshot_load) {
         if (!android_hw->fastboot_forceColdBoot) {
@@ -284,16 +296,6 @@ bool Quickboot::load(StringView name) {
             mLoadedSnapshotName = name;
             reportSuccessfulLoad(name, startTimeMs);
             startLivenessMonitor();
-            // Invalidate quickboot snapshot if the crash reporter trips.
-            // It's possible the crash was not due to snapshot load,
-            // but it's better than crashing over and over in
-            // the same load.
-            // Don't try to delete it completely as that is a heavyweight
-            // operation and we are in the middle of crashing.
-            CrashReporter::get()->addCrashCallback([this]() {
-                Snapshotter::get().invalidateSnapshot(
-                    mLoadedSnapshotName.c_str(), -EINVAL);
-            });
         } else {
             // Check if the error is about something done before the real load
             // (e.g. condition check) or we've started actually loading the VM
@@ -324,6 +326,7 @@ bool Quickboot::load(StringView name) {
                                     .c_str(),
                             WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
                     mVmOps.vmReset();
+                    Snapshotter::get().loader().reportInvalid();
                     reportFailedLoad(pb::EmulatorQuickbootLoad::
                                              EMULATOR_QUICKBOOT_LOAD_FAILED);
                 }
