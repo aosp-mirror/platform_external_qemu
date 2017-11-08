@@ -45,6 +45,7 @@ public:
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(const char* name);
     void deleteSnapshot(const char* name);
+    void invalidateSnapshot(const char* name, int failureCode);
 
     base::System::Duration lastLoadUptimeMs() const {
         return mLastLoadUptimeMs;

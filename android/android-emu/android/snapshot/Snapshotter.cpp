@@ -219,6 +219,10 @@ void Snapshotter::deleteSnapshot(const char* name) {
     mVmOperations.snapshotDelete(name, this, nullptr);
 }
 
+void Snapshotter::invalidateSnapshot(const char* name, int failureCode) {
+    onLoadingFailed(name, failureCode);
+}
+
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     mCallback(Operation::Save, Stage::Start);
@@ -270,10 +274,16 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     return mLoader->status() != OperationStatus::Error;
 }
 
-void Snapshotter::onLoadingFailed(const char* name, int res) {
+void Snapshotter::onLoadingFailed(const char* name, int err) {
     assert(res < 0);
     mSaver.clear();
-    mLoader.emplace(name, -res);
+    if (err == -EINVAL) { // corrupted snapshot. abort immediately,
+                          // try not to do anything since this could be
+                          // in the crash handler
+        mLoader->setCorrupted(-err);
+        return;
+    }
+    mLoader.emplace(name, -err);
     mLoader->complete(false);
 }
 
