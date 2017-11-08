@@ -130,7 +130,7 @@ bool Accelerometer3DWidget::initGL() {
 
     // Set up the camera transformation.
     mCameraTransform = glm::lookAt(
-        glm::vec3(0.0f, 0.0f, CameraDistance), // Camera position
+        glm::vec3(0.f, 0.f, CameraDistance), // Camera Position
         glm::vec3(0.0f, 0.0f, 0.0f), // Point at which the camera is looking
         glm::vec3(0.0f, 1.0f, 0.0f)); // "up" vector
 
@@ -267,12 +267,15 @@ void Accelerometer3DWidget::resizeGL(int w, int h) {
             MaxY - MinY :
             (MaxX - MinX) / min_move_aspect_ratio;
 
+    assert(NearClip - CameraDistance < MinZ);
+    assert(FarClip - CameraDistance > MaxZ);
+
     // Recompute the perspective projection transform.
     mPerspective = glm::frustum(
-            -plane_width * NearClip / (2.0f * CameraDistance),
-            plane_width * NearClip / (2.0f * CameraDistance),
-            -plane_height * NearClip / (2.0f * CameraDistance),
-            plane_height * NearClip / (2.0f * CameraDistance),
+            -plane_width * NearClip / (2.0f * (CameraDistance + MaxZ)),
+            plane_width * NearClip / (2.0f * (CameraDistance + MaxZ)),
+            -plane_height * NearClip / (2.0f * (CameraDistance + MaxZ)),
+            plane_height * NearClip / (2.0f * (CameraDistance + MaxZ)),
             NearClip,
             FarClip);
 }
@@ -285,7 +288,7 @@ void Accelerometer3DWidget::repaintGL() {
     // Handle repaint event.
     // Recompute the model transformation matrix using the given rotations.
     glm::mat4 model_view_transform = glm::mat4_cast(mQuat);
-    model_view_transform = glm::translate(glm::mat4(), glm::vec3(mTranslation, 0.0f)) * model_view_transform;
+    model_view_transform = glm::translate(glm::mat4(), mTranslation) * model_view_transform;
     model_view_transform = mCameraTransform * model_view_transform;
 
     // Normals need to be transformed using the inverse transpose of modelview matrix.
@@ -374,32 +377,49 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
         mPrevMouseX = event->x();
         mPrevMouseY = event->y();
     } else if (mTracking && mOperationMode == OperationMode::Move) {
-        glm::vec2 vec = screenToXYPlane(event->x(), event->y());
-        mTranslation += vec - mPrevDragOrigin;
-        mTranslation.x = clamp(MinX, MaxX, mTranslation.x);
-        mTranslation.y = clamp(MinY, MaxY, mTranslation.y);
+        const glm::vec3 vec = screenToWorldCoordinate(event->x(), event->y());
+        const glm::vec3 newLocation = mTranslation + vec - mPrevDragOrigin;
+        mTranslation.x = clamp(MinX, MaxX, newLocation.x);
+        mTranslation.y = clamp(MinY, MaxY, newLocation.y);
         renderFrame();
         emit(positionChanged());
         mPrevDragOrigin = vec;
     }
 }
 
-glm::vec2 Accelerometer3DWidget::screenToXYPlane(int x, int y) const {
-    glm::vec4 vec((2.0f * x / static_cast<float>(width())) - 1.0f,
-                  1.0f - (2.0f * y / static_cast<float>(height())),
-                  0.0f,
-                  1.0f);
+void Accelerometer3DWidget::wheelEvent(QWheelEvent *event) {
+    if (mOperationMode == OperationMode::Move) {
+        int angleDelta = event->angleDelta().y() / 8;
+        mTranslation.z = clamp(MinZ, MaxZ, mTranslation.z +
+                angleDelta * InchesPerWheelDegree);
+        renderFrame();
+        emit(positionChanged());
+    }
+}
 
-    // Now, by applying the inverse perspective and camera transform,
-    // turn vec into world coordinates.
-    vec = glm::inverse(mPerspective * mCameraTransform) * vec;
-    return glm::vec2(vec * (CameraDistance / NearClip));
+glm::vec3 Accelerometer3DWidget::screenToWorldCoordinate(int x, int y) const {
+    const glm::vec4 screenSpace((2.0f * x / static_cast<float>(width())) - 1.0f,
+                  1.0f - (2.0f * y / static_cast<float>(height())),
+                  -1.f,
+                  1.f);
+
+    // Now, by applying the inverse perspective, camera transform turn vec into
+    // world coordinates at the near plane
+    const glm::vec3 worldSpaceNearPlaneCoordinate =
+            glm::inverse(mPerspective * mCameraTransform) * screenSpace;
+
+    // move the near plane position out to the camera plane.
+    const glm::vec3 worldSpaceCoordinate = glm::vec3(0.f, 0.f, CameraDistance) +
+            (worldSpaceNearPlaneCoordinate - glm::vec3(0.f, 0.f, CameraDistance)) *
+            ((CameraDistance - mTranslation.z) / NearClip);
+
+    return glm::vec3(worldSpaceCoordinate);
 }
 
 void Accelerometer3DWidget::mousePressEvent(QMouseEvent *event) {
     mPrevMouseX = event->x();
     mPrevMouseY = event->y();
-    mPrevDragOrigin = screenToXYPlane(event->x(), event->y());
+    mPrevDragOrigin = screenToWorldCoordinate(event->x(), event->y());
     mTracking = true;
     if (mOperationMode == OperationMode::Move) {
         mDragging = true;

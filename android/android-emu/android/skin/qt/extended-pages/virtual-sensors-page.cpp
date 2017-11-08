@@ -75,6 +75,11 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     connect(mUi->positionYSlider, SIGNAL(sliderReleased()),
             this, SLOT(onDragStopped()));
 
+    connect(mUi->positionZSlider, SIGNAL(sliderPressed()),
+            this, SLOT(onDragStarted()));
+    connect(mUi->positionZSlider, SIGNAL(sliderReleased()),
+            this, SLOT(onDragStopped()));
+
     connect(mUi->zRotSlider, SIGNAL(sliderPressed()),
             this, SLOT(onDragStarted()));
     connect(mUi->zRotSlider, SIGNAL(sliderReleased()),
@@ -111,6 +116,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
                                    Accelerometer3DWidget::MaxX);
     mUi->positionYSlider->setRange(Accelerometer3DWidget::MinY,
                                    Accelerometer3DWidget::MaxY);
+    mUi->positionZSlider->setRange(Accelerometer3DWidget::MinZ,
+                                   Accelerometer3DWidget::MaxZ);
+
     // Historically, the AVD starts up with the screen mostly
     // vertical, but tilted back 4.75 degrees. Retain that
     // initial orientation.
@@ -199,7 +207,7 @@ void VirtualSensorsPage::resetDeviceRotationFromSkinLayout(
 
 void VirtualSensorsPage::resetDeviceRotation(const glm::quat& rotation) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
-    mUi->accelWidget->setPosition(glm::vec2(0.0f, 0.0f));
+    mUi->accelWidget->setPosition(glm::vec3(0.f));
     mUi->accelWidget->setRotation(rotation);
     mUi->accelWidget->update();
 
@@ -352,6 +360,10 @@ void VirtualSensorsPage::on_positionYSlider_valueChanged(double) {
     propagateSlidersChange();
 }
 
+void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
+    propagateSlidersChange();
+}
+
 void VirtualSensorsPage::onTargetStateChanged() {
     if (!mIsUIModifyingPhysicalState) {
         mIsUpdatingUIFromModel = true;
@@ -468,8 +480,8 @@ void VirtualSensorsPage::propagateSlidersChange() {
 void VirtualSensorsPage::updateAccelWidgetFromSliders() {
     glm::vec3 position(mUi->positionXSlider->getValue(),
                        mUi->positionYSlider->getValue(),
-                       0.f);
-    mUi->accelWidget->setPosition(glm::vec2(position));
+                       mUi->positionZSlider->getValue());
+    mUi->accelWidget->setPosition(position);
 
     const glm::quat rotation(glm::vec3(
             glm::radians(mUi->xRotSlider->getValue()),
@@ -484,8 +496,7 @@ void VirtualSensorsPage::updateAccelWidgetFromSliders() {
  * Send the accel widget's position and rotation to the sliders.
  */
 void VirtualSensorsPage::updateSlidersFromAccelWidget() {
-    const glm::vec2& pos = mUi->accelWidget->position();
-    glm::vec3 position(pos, 0.0f);
+    const glm::vec3& position = mUi->accelWidget->position();
     const glm::quat& rotation = mUi->accelWidget->rotation();
 
     glm::vec3 eulerAngles(glm::eulerAngles(rotation));
@@ -493,8 +504,9 @@ void VirtualSensorsPage::updateSlidersFromAccelWidget() {
     mUi->yRotSlider->setValue(glm::degrees(eulerAngles.y), false);
     mUi->zRotSlider->setValue(glm::degrees(eulerAngles.z), false);
 
-    mUi->positionXSlider->setValue(pos.x, false);
-    mUi->positionYSlider->setValue(pos.y, false);
+    mUi->positionXSlider->setValue(position.x, false);
+    mUi->positionYSlider->setValue(position.y, false);
+    mUi->positionZSlider->setValue(position.z, false);
 }
 
 constexpr float kMetersPerInch = 0.0254f;
@@ -504,12 +516,12 @@ constexpr float kMetersPerInch = 0.0254f;
  * targets.
  */
 void VirtualSensorsPage::updateModelFromAccelWidget(PhysicalInterpolation mode) {
-    const glm::vec2& position = kMetersPerInch * mUi->accelWidget->position();
+    const glm::vec3& position = kMetersPerInch * mUi->accelWidget->position();
     const glm::vec3 rotationDegrees(glm::degrees(glm::eulerAngles(
             mUi->accelWidget->rotation())));
 
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
-            position.x, position.y, 0.f);
+            position.x, position.y, position.z);
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
             rotationDegrees.x, rotationDegrees.y, rotationDegrees.z);
 }
@@ -528,7 +540,7 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
         mSensorsAgent->getPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
                 &eulerDegrees.x, &eulerDegrees.y, &eulerDegrees.z);
 
-        mUi->accelWidget->setPosition(glm::vec2(position.x, position.y));
+        mUi->accelWidget->setPosition(position);
         mUi->accelWidget->setRotation(glm::quat(glm::radians(eulerDegrees)));
         mUi->accelWidget->update();
 
@@ -538,6 +550,7 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
 
         mUi->positionXSlider->setValue(position.x, false);
         mUi->positionYSlider->setValue(position.y, false);
+        mUi->positionZSlider->setValue(position.z, false);
 
         float scratch0, scratch1;
 
