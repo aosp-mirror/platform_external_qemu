@@ -108,14 +108,15 @@ static void decode_modrm_reg(CPUState *cpu, struct x86_decode *decode, struct x8
 {
     op->type = X86_VAR_REG;
     op->reg = decode->modrm.reg;
-    op->ptr = get_reg_ref(cpu, op->reg, decode->rex.r, decode->operand_size);
+    op->ptr = get_reg_ref(cpu, op->reg, decode->rex.r,
+                            decode->rex.unused == 4, decode->operand_size);
 }
 
 static void decode_rax(CPUState *cpu, struct x86_decode *decode, struct x86_decode_op *op)
 {
     op->type = X86_VAR_REG;
     op->reg = REG_RAX;
-    op->ptr = get_reg_ref(cpu, op->reg, 0, decode->operand_size);
+    op->ptr = get_reg_ref(cpu, op->reg, 0, 0, decode->operand_size);
 }
 
 static inline void decode_immediate(CPUState *cpu, struct x86_decode *decode, struct x86_decode_op *var, int size)
@@ -249,14 +250,16 @@ static void decode_incgroup(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[0] - 0x40;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
 }
 
 static void decode_decgroup(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[0] - 0x48;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
 }
 
 static void decode_incgroup2(CPUState *cpu, struct x86_decode *decode)
@@ -271,14 +274,16 @@ static void decode_pushgroup(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[0] - 0x50;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
 }
 
 static void decode_popgroup(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[0] - 0x58;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
 }
 
 static void decode_jxx(CPUState *cpu, struct x86_decode *decode)
@@ -359,14 +364,16 @@ static void decode_xchgroup(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[0] - 0x90;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
 }
 
 static void decode_movgroup(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[0] - 0xb8;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
     decode_immediate(cpu, decode, &decode->op[1], decode->operand_size);
 }
 
@@ -380,7 +387,8 @@ static void decode_movgroup8(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[0] - 0xb0;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
     decode_immediate(cpu, decode, &decode->op[1], decode->operand_size);
 }
 
@@ -388,7 +396,7 @@ static void decode_rcx(CPUState *cpu, struct x86_decode *decode, struct x86_deco
 {
     op->type = X86_VAR_REG;
     op->reg = REG_RCX;
-    op->ptr = get_reg_ref(cpu, op->reg, decode->rex.b, decode->operand_size);
+    op->ptr = get_reg_ref(cpu, op->reg, decode->rex.b, decode->rex.unused == 4, decode->operand_size);
 }
 
 struct decode_tbl {
@@ -592,7 +600,8 @@ static void decode_bswap(CPUState *cpu, struct x86_decode *decode)
 {
     decode->op[0].type = X86_VAR_REG;
     decode->op[0].reg = decode->opcode[1] - 0xc8;
-    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b, decode->operand_size);
+    decode->op[0].ptr = get_reg_ref(cpu, decode->op[0].reg, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
 }
 
 static void decode_d9_4(CPUState *cpu, struct x86_decode *decode)
@@ -1202,7 +1211,7 @@ calc_addr:
         op->ptr = decode_linear_addr(cpu, decode, (uint16_t)ptr, seg);
 }
 
-addr_t get_reg_ref(CPUState *cpu, int reg, int is_extended, int size)
+addr_t get_reg_ref(CPUState *cpu, int reg, int is_extended, int rex, int size)
 {
     addr_t ptr = 0;
     int which = 0;
@@ -1213,7 +1222,7 @@ addr_t get_reg_ref(CPUState *cpu, int reg, int is_extended, int size)
 
     switch (size) {
         case 1:
-            if (is_extended || reg < 4) {
+            if (rex || is_extended || reg < 4) {
                 which = 1;
                 ptr = (addr_t)&RL(cpu, reg);
             } else {
@@ -1229,10 +1238,10 @@ addr_t get_reg_ref(CPUState *cpu, int reg, int is_extended, int size)
     return ptr;
 }
 
-addr_t get_reg_val(CPUState *cpu, int reg, int is_extended, int size)
+addr_t get_reg_val(CPUState *cpu, int reg, int is_extended, int rex, int size)
 {
     addr_t val = 0;
-    memcpy(&val, (void*)get_reg_ref(cpu, reg, is_extended, size), size);
+    memcpy(&val, (void*)get_reg_ref(cpu, reg, is_extended, rex, size), size);
     return val;
 }
 
@@ -1251,14 +1260,15 @@ static addr_t get_sib_val(CPUState *cpu, struct x86_decode *decode, x86_reg_segm
             base_reg |= REG_R8;
         if (REG_RSP == base_reg || REG_RBP == base_reg)
             *sel = REG_SEG_SS;
-        base = get_reg_val(cpu, decode->sib.base, decode->rex.b, addr_size);
+        base = get_reg_val(cpu, decode->sib.base, decode->rex.b, decode->rex.unused == 4, addr_size);
     }
 
     if (decode->rex.x)
         index_reg |= REG_R8;
 
     if (index_reg != REG_RSP)
-        scaled_index = get_reg_val(cpu, index_reg, decode->rex.x, addr_size) << decode->sib.scale;
+        scaled_index = get_reg_val(cpu, index_reg, decode->rex.x,
+                    decode->rex.unused == 4, addr_size) << decode->sib.scale;
     return base + scaled_index;
 }
 
@@ -1283,7 +1293,7 @@ void calc_modrm_operand32(CPUState *cpu, struct x86_decode *decode, struct x86_d
     else {
         if (REG_RBP == decode->modrm.rm || REG_RSP == decode->modrm.rm)
             seg = REG_SEG_SS;
-        ptr += get_reg_val(cpu, decode->modrm.rm, decode->rex.b, addr_size);
+        ptr += get_reg_val(cpu, decode->modrm.rm, decode->rex.b, decode->rex.unused == 4, addr_size);
     }
 
     if (X86_DECODE_CMD_LEA == decode->cmd)
@@ -1309,7 +1319,7 @@ void calc_modrm_operand64(CPUState *cpu, struct x86_decode *decode, struct x86_d
     else if (0 == mod && 5 == rm)
         ptr = RIP(cpu) + decode->len + (int32_t) offset;
     else
-        ptr = get_reg_val(cpu, src, decode->rex.b, 8) + (int64_t) offset;
+        ptr = get_reg_val(cpu, src, decode->rex.b, decode->rex.unused == 4,  8) + (int64_t) offset;
     
     if (X86_DECODE_CMD_LEA == decode->cmd)
         op->ptr = ptr;
@@ -1323,7 +1333,8 @@ void calc_modrm_operand(CPUState *cpu, struct x86_decode *decode, struct x86_dec
     if (3 == decode->modrm.mod) {
         op->reg = decode->modrm.reg;
         op->type = X86_VAR_REG;
-        op->ptr = get_reg_ref(cpu, decode->modrm.rm, decode->rex.b, decode->operand_size);
+        op->ptr = get_reg_ref(cpu, decode->modrm.rm, decode->rex.b,
+                                decode->rex.unused == 4, decode->operand_size);
         return;
     }
 
