@@ -140,6 +140,30 @@
     },
     {
       "key": {
+        "uuid": "9d30283e_0ce8cbdf",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-08T02:58:21Z",
+      "side": 1,
+      "message": "Can we also express this in terms of some algebraic relations? I feel like A\u003dxB things are easier to understand and more precise.",
+      "parentUuid": "2267a5ab_63ce57f6",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 22
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0df0256e_a8035978",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
