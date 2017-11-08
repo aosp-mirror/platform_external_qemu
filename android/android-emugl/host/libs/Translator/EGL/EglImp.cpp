@@ -99,7 +99,8 @@ EGLAPI EGLint EGLAPIENTRY eglClientWaitSyncKHR(EGLDisplay display, EGLSyncKHR sy
 EGLAPI EGLBoolean EGLAPIENTRY eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
 EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags);
-EGLAPI EGLBoolean EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
+EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
+EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -119,6 +120,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglWaitSyncKHR },
         {"eglBlitFromCurrentReadBufferANDROID",
                 (__eglMustCastToProperFunctionPointerType)eglBlitFromCurrentReadBufferANDROID },
+        {"eglSetImageFenceANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglSetImageFenceANDROID },
 };
 
 static const int s_eglExtensionsSize =
@@ -1404,6 +1407,7 @@ EGLAPI EGLImageKHR EGLAPIENTRY eglCreateImageKHR(EGLDisplay display, EGLContext 
             img->texStorageLevels = texData->texStorageLevels;
             img->saveableTexture = texData->getSaveableTexture();
             img->needRestore = false;
+            img->sync = nullptr;
             return dpy->addImageKHR(img);
         }
     }
@@ -1481,11 +1485,24 @@ EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint
     return EGL_TRUE;
 }
 
-EGLAPI EGLBoolean EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLImageKHR image) {
-
+EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay dpy, EGLImageKHR image) {
     const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
     iface->blitFromCurrentReadBufferANDROID((GLeglImageOES)image);
-    return EGL_TRUE;
+}
+
+EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR image) {
+    unsigned int imagehndl = SafeUIntFromPointer(image);
+    ImagePtr img = getEGLImage(imagehndl);
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+
+    if (img->sync) {
+        iface->deleteSync((GLsync)img->sync);
+        img->sync = nullptr;
+    }
+
+    GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+    img->sync = res;
+    return (void*)res;
 }
 
 /*********************************************************************************/
