@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d3987a62_8c0bb3dc",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 598,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-08T19:49:44Z",
+      "side": 1,
+      "message": "hmm",
+      "range": {
+        "startLine": 598,
+        "startChar": 0,
+        "endLine": 598,
+        "endChar": 35
+      },
+      "revId": "5a3a8bbf4f6246cbaea95d1dc23fd84312864780",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e28f81ae_d3097196",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/ColorBuffer.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 507,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-08T19:49:44Z",
+      "side": 1,
+      "message": "do these two always come together now?",
+      "range": {
+        "startLine": 505,
+        "startChar": 0,
+        "endLine": 507,
+        "endChar": 15
+      },
+      "revId": "5a3a8bbf4f6246cbaea95d1dc23fd84312864780",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
