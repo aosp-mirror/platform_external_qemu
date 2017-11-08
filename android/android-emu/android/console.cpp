@@ -2603,7 +2603,8 @@ do_sensors_set( ControlClient client, char* args )
                 }
             }
 
-            status = android_sensors_set( sensor_id, fvalues[0], fvalues[1], fvalues[2] );
+            status = android_sensors_override_set(
+                    sensor_id, fvalues[0], fvalues[1], fvalues[2] );
             if (status != SENSOR_STATUS_OK)
                 goto SENSOR_STATUS_ERROR;
 
