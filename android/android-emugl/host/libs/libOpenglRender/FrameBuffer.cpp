@@ -1217,19 +1217,8 @@ bool FrameBuffer::flushWindowSurfaceColorBuffer(HandleType p_surface) {
         return false;
     }
 
-    if (m_fastBlitSupported) {
-        for (auto cb : m_blitsInFlight) {
-            cb->waitAndClearSync();
-        }
-        m_blitsInFlight.clear();
-    }
-
     WindowSurface* surface = (*w).second.first.get();
     surface->flushColorBuffer();
-
-    if (m_fastBlitSupported) {
-        m_blitsInFlight.push_back(surface->getAttachedColorBuffer());
-    }
 
     return true;
 }
