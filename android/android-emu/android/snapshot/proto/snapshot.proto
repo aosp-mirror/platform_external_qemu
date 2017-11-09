@@ -83,4 +83,10 @@ message Snapshot {
     // Emulator rotation angle, in right angles (e.g. 1 is 90 degrees, 2 is 180
     // etc).
     optional int32 rotation = 9;
+
+    // Number of invalid loads / crashes that happened under this snapshot.
+    optional int32 invalid_loads = 10;
+
+    // Number of successful loads.
+    optional int32 successful_loads = 11;
 }

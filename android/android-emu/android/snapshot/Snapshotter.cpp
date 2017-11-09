@@ -63,6 +63,8 @@ static bool buffer_zero_sse2(const void* buf, int len) {
 namespace android {
 namespace snapshot {
 
+static const System::Duration kSnapshotCrashThresholdMs = 120000; // 2 minutes
+
 // TODO: implement an optimized SSE4 version and dynamically select it if host
 // supports SSE4.
 bool isBufferZeroed(const void* ptr, int32_t size) {
@@ -219,6 +221,15 @@ void Snapshotter::deleteSnapshot(const char* name) {
     mVmOperations.snapshotDelete(name, this, nullptr);
 }
 
+void Snapshotter::onCrashedSnapshot(const char* name) {
+    // if it's been less than 2 minutes since the load,
+    // consider it a snapshot fail.
+    if (System::Duration(System::get()->getProcessTimes().wallClockMs) -
+        mLastLoadUptimeMs < kSnapshotCrashThresholdMs) {
+        onLoadingFailed(name, -EINVAL);
+    }
+}
+
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     mCallback(Operation::Save, Stage::Start);
@@ -273,10 +284,16 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     return mLoader->status() != OperationStatus::Error;
 }
 
-void Snapshotter::onLoadingFailed(const char* name, int res) {
+void Snapshotter::onLoadingFailed(const char* name, int err) {
     assert(res < 0);
     mSaver.clear();
-    mLoader.emplace(name, -res);
+    if (err == -EINVAL) { // corrupted snapshot. abort immediately,
+                          // try not to do anything since this could be
+                          // in the crash handler
+        mLoader->onInvalidSnapshotLoad();
+        return;
+    }
+    mLoader.emplace(name, -err);
     mLoader->complete(false);
 }
 

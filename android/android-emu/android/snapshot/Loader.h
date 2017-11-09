@@ -37,7 +37,10 @@ public:
 
     void prepare();
     void start();
+    void reportSuccessful();
+    void reportInvalid();
     void complete(bool succeeded);
+    void onInvalidSnapshotLoad();
 
 private:
     OperationStatus mStatus;

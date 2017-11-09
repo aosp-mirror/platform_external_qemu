@@ -15,6 +15,7 @@
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/cmdline-option.h"
+#include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
@@ -33,6 +34,7 @@ using android::base::Stopwatch;
 using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
+using android::crashreport::CrashReporter;
 using android::metrics::MetricsReporter;
 namespace pb = android_studio;
 
@@ -129,6 +131,7 @@ Quickboot::~Quickboot() {
 void Quickboot::reportSuccessfulLoad(StringView name,
                                      System::WallDuration startTimeMs) {
     auto& loader = Snapshotter::get().loader();
+    loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
     const auto onDemandRamEnabled = loader.ramLoader().onDemandEnabled();
     const auto compressedRam = loader.ramLoader().compressed();
@@ -219,6 +222,7 @@ void Quickboot::onLivenessTimer() {
                         .c_str(),
                 WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
         Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+        Snapshotter::get().loader().reportInvalid();
         reportFailedLoad(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
         mVmOps.vmReset();
@@ -246,6 +250,16 @@ bool Quickboot::load(StringView name) {
     if (name.empty()) {
         name = kDefaultBootSnapshot;
     }
+
+    // Invalidate quickboot snapshot if the crash reporter trips.
+    // It's possible the crash was not due to snapshot load,
+    // but it's better than crashing over and over in
+    // the same load.
+    // Don't try to delete it completely as that is a heavyweight
+    // operation and we are in the middle of crashing.
+    CrashReporter::get()->addCrashCallback([this, &name]() {
+        Snapshotter::get().onCrashedSnapshot(name.c_str());
+    });
 
     if (android_cmdLineOptions->no_snapshot_load) {
         if (!android_hw->fastboot_forceColdBoot) {
@@ -312,6 +326,7 @@ bool Quickboot::load(StringView name) {
                                     .c_str(),
                             WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
                     mVmOps.vmReset();
+                    Snapshotter::get().loader().reportInvalid();
                     reportFailedLoad(pb::EmulatorQuickbootLoad::
                                              EMULATOR_QUICKBOOT_LOAD_FAILED);
                 }
@@ -325,6 +340,7 @@ bool Quickboot::load(StringView name) {
             }
         }
     }
+
     return true;
 }
 
