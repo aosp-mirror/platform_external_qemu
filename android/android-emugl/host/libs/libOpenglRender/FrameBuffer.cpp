@@ -213,7 +213,6 @@ void FrameBuffer::finalize() {
         // The only visible thing in the framebuffer is subwindow. Everything else
         // will get cleaned when the process exits.
         if (m_useSubWindow) {
-            m_postWorker.reset();
             removeSubWindow_locked();
         }
         return;
@@ -550,12 +549,7 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_readbackThread(
           [this](FrameBuffer::Readback&& readback) {
               return sendReadbackWorkerCmd(readback);
-          }),
-      m_postThread(
-          [this](FrameBuffer::Post&& post) {
-              return postWorkerFunc(post);
-          })
-{}
+          }) {}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -580,32 +574,6 @@ FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
         return WorkerProcessingResult::Stop;
     }
     return WorkerProcessingResult::Stop;
-}
-
-WorkerProcessingResult
-FrameBuffer::postWorkerFunc(const Post& post) {
-    switch (post.cmd) {
-        case PostCmd::Post:
-            m_postWorker->post(post.cb);
-            break;
-        case PostCmd::Viewport:
-            m_postWorker->viewport(post.viewport.width,
-                                   post.viewport.height);
-            break;
-        default:
-            break;
-    }
-    return WorkerProcessingResult::Continue;
-}
-
-void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
-    if (!m_postThread.isStarted()) {
-        m_postWorker.reset(new PostWorker([this]() { return bindSubwin_locked(); }));
-        m_postThread.start();
-    }
-
-    m_postThread.enqueue(Post(post));
-    m_postThread.waitQueuedItems();
 }
 
 void FrameBuffer::setPostCallback(
@@ -754,20 +722,29 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         }
 
         if (success && redrawSubwindow) {
-            // Subwin creation or movement was successful,
-            // update viewport and z rotation and draw
-            // the last posted color buffer.
-            m_dpr = dpr;
-            m_zRot = zRot;
-            Post postCmd;
-            postCmd.cmd = PostCmd::Viewport;
-            postCmd.viewport.width = fbw;
-            postCmd.viewport.height = fbh;
-            sendPostWorkerCmd(postCmd);
-
-            if (m_lastPostedColorBuffer) {
-                GL_LOG("setupSubwindow: draw last posted cb");
-                postImpl(m_lastPostedColorBuffer, false);
+            if (!bindSubwin_locked()) {
+                success = false;
+            } else {
+                // Subwin creation or movement was successful,
+                // update viewport and z rotation and draw
+                // the last posted color buffer.
+                s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
+                m_dpr = dpr;
+                m_zRot = zRot;
+                bool posted = false;
+                if (m_lastPostedColorBuffer) {
+                    GL_LOG("setupSubwindow: draw last posted cb");
+                    posted = postImpl(m_lastPostedColorBuffer,
+                                      false /* not locking */);
+                    GL_LOG("setupSubwindow: draw last posted cb %s",
+                           posted ? "succeeded" : "failed");
+                }
+                if (!posted) {
+                    s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+                                    GL_STENCIL_BUFFER_BIT);
+                    s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+                }
+                unbind_locked();
             }
         }
     }
@@ -1522,9 +1499,11 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed in binding subwindow!\n");
+            ERR("eglMakeCurrent failed\n");
             return false;
         }
+    } else {
+        ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     //
@@ -1616,7 +1595,6 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
     }
-
     bool ret = false;
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
@@ -1626,16 +1604,46 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
 
     m_lastPostedColorBuffer = p_colorbuffer;
 
-    ret = true;
-
     if (m_subWin) {
         markOpened(&c->second);
-        c->second.cb->touch();
+        GLuint tex = c->second.cb->scale();
+        // bind the subwindow eglSurface
+        if (needLockAndBind && !bindSubwin_locked()) {
+            ERR("FrameBuffer::postImpl(): eglMakeCurrent failed\n");
+            goto EXIT;
+        }
 
-        Post postCmd;
-        postCmd.cmd = PostCmd::Post;
-        postCmd.cb = c->second.cb.get();
-        sendPostWorkerCmd(postCmd);
+        // get the viewport
+        GLint vp[4];
+        s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
+
+        // divide by device pixel ratio because windowing coordinates ignore
+        // DPR,
+        // but the framebuffer includes DPR
+        vp[2] = vp[2] / m_dpr;
+        vp[3] = vp[3] / m_dpr;
+
+        // find the x and y values at the origin when "fully scrolled"
+        // multiply by 2 because the texture goes from -1 to 1, not 0 to 1
+        float fx = 2.f * (vp[2] - m_windowWidth) / (float)vp[2];
+        float fy = 2.f * (vp[3] - m_windowHeight) / (float)vp[3];
+
+        // finally, compute translation values
+        float dx = m_px * fx;
+        float dy = m_py * fy;
+
+        //
+        // render the color buffer to the window
+        //
+        ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
+        if (ret) {
+            s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
+        }
+
+        // restore previous binding
+        if (needLockAndBind) {
+            unbind_locked();
+        }
     } else {
         // If there is no sub-window, don't display anything, the client will
         // rely on m_onPost to get the pixels instead.

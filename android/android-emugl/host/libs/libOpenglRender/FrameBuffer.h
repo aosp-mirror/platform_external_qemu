@@ -24,7 +24,6 @@
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
-#include "PostWorker.h"
 #include "ReadbackWorker.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
@@ -329,7 +328,6 @@ public:
 
     // Return the host EGLDisplay used by this instance.
     EGLDisplay getDisplay() const { return m_eglDisplay; }
-    EGLSurface getWindowSurface() const { return m_eglSurface; }
 
     // Change the rotation of the displayed GPU sub-window.
     void setDisplayRotation(float zRot) {

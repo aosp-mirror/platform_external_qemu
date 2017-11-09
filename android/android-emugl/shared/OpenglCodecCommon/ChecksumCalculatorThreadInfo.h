@@ -29,6 +29,8 @@ public:
 
     ChecksumCalculator& get();
 
+    static void setCurrent(ChecksumCalculatorThreadInfo* otherThreadCalc);
+
     static bool setVersion(uint32_t version);
 
     static uint32_t getMaxVersion();
