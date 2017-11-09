@@ -284,8 +284,8 @@ void Accelerometer3DWidget::repaintGL() {
 
     // Handle repaint event.
     // Recompute the model transformation matrix using the given rotations.
-    glm::mat4 model_view_transform = glm::mat4_cast(mQuat);
-    model_view_transform = glm::translate(glm::mat4(), glm::vec3(mTranslation, 0.0f)) * model_view_transform;
+    glm::mat4 model_view_transform =
+            glm::translate(glm::mat4(), glm::vec3(mTranslation, 0.0f)) * mRotation;
     model_view_transform = mCameraTransform * model_view_transform;
 
     // Normals need to be transformed using the inverse transpose of modelview matrix.
@@ -364,11 +364,14 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         float diff_x = event->x() - mPrevMouseX,
               diff_y = event->y() - mPrevMouseY;
-        glm::quat q = glm::angleAxis(glm::radians(diff_y),
-                                     glm::vec3(1.0f, 0.0f, 0.0f)) *
-                      glm::angleAxis(glm::radians(diff_x),
-                                     glm::vec3(0.0f, 1.0f, 0.0f));
-        mQuat = q * mQuat;
+        mRotation = glm::rotate(
+                mRotation,
+                glm::radians(diff_x),
+                glm::vec3(0.0f, 1.0f, 0.0f));
+        mRotation = glm::rotate(
+                mRotation,
+                glm::radians(diff_y),
+                glm::vec3(1.0f, 0.0f, 0.0f));
         renderFrame();
         emit(rotationChanged());
         mPrevMouseX = event->x();
