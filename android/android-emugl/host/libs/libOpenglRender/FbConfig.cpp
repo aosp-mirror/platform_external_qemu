@@ -211,7 +211,10 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
     } else if (wantSwapPreserved && apiLevel <= 19) {
         newAttribs[surfaceTypeIdx + 1] &= ~(EGLint)EGL_SWAP_BEHAVIOR_PRESERVED_BIT;
     }
-    if (emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER) {
+    if (emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER ||
+        emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+        emugl::getRenderer() == SELECTED_RENDERER_ANGLE ||
+        emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT) {
         newAttribs.push_back(EGL_CONFIG_CAVEAT);
         newAttribs.push_back(EGL_DONT_CARE);
     }
