@@ -2243,7 +2243,7 @@ void GLEScontext::initTexImageEmulation() {
     auto& gl = dispatcher();
 
     std::string vshaderSrc = isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
-    vshaderSrc += kTexImageEmulationVShaderSrcFlipped;
+    vshaderSrc += kTexImageEmulationVShaderSrc;
     std::string fshaderSrc = isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
     fshaderSrc += kTexImageEmulationFShaderSrc;
 
