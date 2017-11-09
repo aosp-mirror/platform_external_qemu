@@ -43,6 +43,8 @@ struct RenderThreadInfo {
 
     // Return the current thread's instance, if any, or NULL.
     static RenderThreadInfo* get();
+    static void setCurrent(RenderThreadInfo* other);
+
     // Allocates |syncThread| and updates tracking.
     void createSyncThread();
     // The opposite.

@@ -61,6 +61,11 @@ ChecksumCalculator& ChecksumCalculatorThreadInfo::get() {
     return getChecksumCalculatorThreadInfo()->m_protocol;
 }
 
+// static
+void ChecksumCalculatorThreadInfo::setCurrent(ChecksumCalculatorThreadInfo* otherThreadCalc) {
+    s_tls->set(otherThreadCalc);
+}
+
 bool ChecksumCalculatorThreadInfo::setVersion(uint32_t version) {
     return getChecksumCalculatorThreadInfo()->m_protocol.setVersion(version);
 }

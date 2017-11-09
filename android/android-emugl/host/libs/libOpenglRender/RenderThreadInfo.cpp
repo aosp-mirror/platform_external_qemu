@@ -52,6 +52,11 @@ RenderThreadInfo* RenderThreadInfo::get() {
     return static_cast<RenderThreadInfo*>(s_tls->get());
 }
 
+// static
+void RenderThreadInfo::setCurrent(RenderThreadInfo* other) {
+    s_tls->set(other);
+}
+
 // Each RenderThreadInfo may have 1 SyncThread associated with it.
 // These SyncThreads must be handled carefully for snapshots:
 // 1. The guest might ask for a SyncThread handle that doesn't

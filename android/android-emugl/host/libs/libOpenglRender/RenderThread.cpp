@@ -18,6 +18,7 @@
 #include "ChannelStream.h"
 #include "ErrorLog.h"
 #include "FrameBuffer.h"
+#include "GlobalRenderThread.h"
 #include "ReadBuffer.h"
 #include "RenderControl.h"
 #include "RendererImpl.h"
@@ -31,6 +32,7 @@
 
 #include "android/base/system/System.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/memory/LazyInstance.h"
 
 #define EMUGL_DEBUG_LEVEL 0
 #include "emugl/common/debug.h"
@@ -38,8 +40,11 @@
 #include <assert.h>
 
 using android::base::AutoLock;
+using android::base::LazyInstance;
 
 namespace emugl {
+
+static LazyInstance<GlobalRenderThread> sGrt = LAZY_INSTANCE_INIT;
 
 struct RenderThread::SnapshotObjects {
     RenderThreadInfo* threadInfo;
@@ -345,37 +350,53 @@ intptr_t RenderThread::main() {
             // To fix, this driver workaround avoids calling
             // any sort of GLES call when we are creating/destroying EGL
             // contexts.
-            FrameBuffer::getFB()->lockContextStructureRead();
-            size_t last = tInfo.m_glDec.decode(
-                    readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
-            if (last > 0) {
-                progress = true;
-                readBuf.consume(last);
-            }
-
-            //
-            // try to process some of the command buffer using the GLESv2
-            // decoder
-            //
-            last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
-                                         &stream, &checksumCalc);
-            FrameBuffer::getFB()->unlockContextStructureRead();
+            size_t last =
+                sGrt->decode(
+                    &tInfo,
+                    &tInfo.m_glDec,
+                    &tInfo.m_gl2Dec,
+                    &tInfo.m_rcDec,
+                    readBuf.buf(),
+                    readBuf.validData(),
+                    &stream,
+                    &tChecksumInfo);
 
             if (last > 0) {
                 progress = true;
                 readBuf.consume(last);
             }
 
-            //
-            // try to process some of the command buffer using the
-            // renderControl decoder
-            //
-            last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
-                                        &stream, &checksumCalc);
-            if (last > 0) {
-                readBuf.consume(last);
-                progress = true;
-            }
+            // FrameBuffer::getFB()->lockContextStructureRead();
+            // size_t last = tInfo.m_glDec.decode(
+            //         readBuf.buf(), readBuf.validData(), &stream, &checksumCalc);
+            // if (last > 0) {
+            //     progress = true;
+            //     readBuf.consume(last);
+            // }
+
+            // //
+            // // try to process some of the command buffer using the GLESv2
+            // // decoder
+            // //
+            // last = tInfo.m_gl2Dec.decode(readBuf.buf(), readBuf.validData(),
+            //                              &stream, &checksumCalc);
+            // FrameBuffer::getFB()->unlockContextStructureRead();
+
+            // if (last > 0) {
+            //     progress = true;
+            //     readBuf.consume(last);
+            // }
+
+            // //
+            // // try to process some of the command buffer using the
+            // // renderControl decoder
+            // //
+            // last = tInfo.m_rcDec.decode(readBuf.buf(), readBuf.validData(),
+            //                             &stream, &checksumCalc);
+            // if (last > 0) {
+            //     readBuf.consume(last);
+            //     progress = true;
+            // }
         } while (progress);
     }
 
