@@ -1899,8 +1899,7 @@ bool configAndStartRenderer(
       str_reset(&hw->hw_gpu_mode, "off");
     }
 
-    if (!hw->hw_arc &&
-        !androidEmuglConfigInit(&config,
+    if (!androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
                 api_level,
