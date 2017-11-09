@@ -142,6 +142,30 @@
       "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1afee1a9_c2b5095c",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 356,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-09T00:31:24Z",
+      "side": 1,
+      "message": "Well, it\u0027s not checked in the snapshotter now, so it\u0027s a \"nice to have\" requirement that can get lost",
+      "parentUuid": "94a3ca57_17eaf2e7",
+      "range": {
+        "startLine": 356,
+        "startChar": 0,
+        "endLine": 356,
+        "endChar": 27
+      },
+      "revId": "d50d37214225a91bfc07daa9a80b4dca1eb4d678",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
