@@ -259,7 +259,8 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
                                    AddConfigCallback* addConfigFunc,
                                    void* addConfigOpaque) {
     D("%s\n", __FUNCTION__);
-    // ANGLE does not support GLES1 and needs to use GLES12Translator
+    // ANGLE does not support GLES1 uses core profile engine.
+    // Querying underlying EGL with a conservative set of bits.
     renderableType &= ~EGL_OPENGL_ES_BIT;
     const EGLint attribList[] = {EGL_RENDERABLE_TYPE, renderableType,
                                  EGL_NONE};
@@ -278,7 +279,8 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
         EGLint _renderableType;
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_RENDERABLE_TYPE,
                                        &_renderableType);
-        configInfo.renderable_type = _renderableType;
+        // We do emulate GLES1
+        configInfo.renderable_type = _renderableType | EGL_OPENGL_ES_BIT;
 
         configInfo.frmt = new EglOsEglPixelFormat(cfg, _renderableType);
         D("config %p renderable type 0x%x\n", cfg, _renderableType);
@@ -308,8 +310,6 @@ void EglOsEglDisplay::queryConfigs(int renderableType,
 
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_NATIVE_RENDERABLE,
                                        (EGLint*)&configInfo.native_renderable);
-        mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_RENDERABLE_TYPE,
-                                       &configInfo.renderable_type);
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_NATIVE_VISUAL_ID,
                                        &configInfo.native_visual_id);
         mDispatcher.eglGetConfigAttrib(mDisplay, cfg, EGL_NATIVE_VISUAL_TYPE,

@@ -618,10 +618,6 @@ bool EglConfig::chosen(const EglConfig& dummy) const {
    }
 
    EGLint renderableType = dummy.m_renderable_type;
-   // HACK: ANGLE does not support gles1
-   if (EglGlobalInfo::isEgl2Egl() && renderableType != EGL_DONT_CARE) {
-       renderableType &= ~(EGLint)EGL_OPENGL_ES_BIT;
-   }
    if (renderableType != EGL_DONT_CARE &&
        ((renderableType & m_renderable_type) != renderableType)) {
        CHOOSE_CONFIG_DLOG("m_renderable_type does not match.");
