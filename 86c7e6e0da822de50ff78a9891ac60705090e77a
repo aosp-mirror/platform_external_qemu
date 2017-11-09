@@ -22,6 +22,30 @@
       "revId": "86c7e6e0da822de50ff78a9891ac60705090e77a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5d2e0e9e_df9c28dd",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1902,
+      "author": {
+        "id": 1118598
+      },
+      "writtenOn": "2017-11-09T01:25:31Z",
+      "side": 1,
+      "message": "It\u0027s just that the different configurations become inconsistent because they don\u0027t all go through initialisation.\nFor example sCurrentRenderer (https://android.googlesource.com/platform/external/qemu/+/emu-master-dev/android/android-emu/android/opengl/emugl_config.cpp#115) remains at the default SELECTED_RENDERER_UNKNOWN instead of being set to SELECTED_RENDERER_OFF as you would expect since hw-\u003ehw_gpu_mode \u003d\u003d \"off\".\n\nThat in turns triggers warnings because the renderer is \"unknown\". So calling androidEmuglConfigInit for the Chrome OS case too sets sCurrentRenderer as expected to SELECTED_RENDERER_OFF.",
+      "parentUuid": "17011fc2_bfd7d563",
+      "range": {
+        "startLine": 1902,
+        "startChar": 0,
+        "endLine": 1902,
+        "endChar": 40
+      },
+      "revId": "86c7e6e0da822de50ff78a9891ac60705090e77a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
