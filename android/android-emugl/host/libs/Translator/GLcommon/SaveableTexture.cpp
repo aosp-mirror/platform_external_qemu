@@ -795,6 +795,7 @@ void SaveableTexture::fillEglImage(EglImage* eglImage) {
     eglImage->type = m_type;
     eglImage->width = m_width;
     eglImage->texStorageLevels = m_texStorageLevels;
+    eglImage->sync = nullptr;
 }
 
 void SaveableTexture::makeDirty() {
