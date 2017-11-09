@@ -511,6 +511,14 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
         while(attrib_list[i] != EGL_NONE && !hasConfigId) {
 #define CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(attrname) \
             CHOOSE_CONFIG_DLOG("EGL_BAD_ATTRIBUTE: " #attrname "defined as 0x%x", attrib_list[i+1]);
+
+            if (attrib_list[i] != EGL_LEVEL &&
+                attrib_list[i] != EGL_MATCH_NATIVE_PIXMAP &&
+                attrib_list[i + 1] == EGL_DONT_CARE) {
+                i+=2;
+                continue;
+            }
+
             switch(attrib_list[i]) {
             case EGL_MAX_PBUFFER_WIDTH:
             case EGL_MAX_PBUFFER_HEIGHT:
@@ -526,8 +534,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_LEVEL);
                 break;
             case EGL_BUFFER_SIZE:
-                if(attrib_list[i + 1] != EGL_DONT_CARE &&
-                   attrib_list[i+1] < 0) {
+                if(attrib_list[i+1] < 0) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_BUFFER_SIZE);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
@@ -559,8 +566,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_BLUE_SIZE);
                 break;
             case EGL_LUMINANCE_SIZE:
-                if(attrib_list[i + 1] != EGL_DONT_CARE &&
-                   attrib_list[i+1] < 0) {
+                if(attrib_list[i+1] < 0) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_LUMINANCE_SIZE);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
@@ -583,8 +589,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_ALPHA_MASK_SIZE);
                 break;
             case EGL_BIND_TO_TEXTURE_RGB:
-                if (attrib_list[i+1] != EGL_DONT_CARE &&
-                    attrib_list[i+1] != EGL_TRUE &&
+                if (attrib_list[i+1] != EGL_TRUE &&
                     attrib_list[i+1] != EGL_FALSE) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_BIND_TO_TEXTURE_RGB);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
@@ -593,8 +598,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 //bind_to_tex_rgb = attrib_list[i+1];
                 break;
             case EGL_BIND_TO_TEXTURE_RGBA:
-                if (attrib_list[i+1] != EGL_DONT_CARE &&
-                    attrib_list[i+1] != EGL_TRUE &&
+                if (attrib_list[i+1] != EGL_TRUE &&
                     attrib_list[i+1] != EGL_FALSE) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_BIND_TO_TEXTURE_RGBA);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
@@ -604,7 +608,6 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 break;
             case EGL_CONFIG_CAVEAT:
                 if(attrib_list[i+1] != EGL_NONE &&
-                   attrib_list[i+1] != EGL_DONT_CARE &&
                    attrib_list[i+1] != EGL_SLOW_CONFIG &&
                    attrib_list[i+1] != EGL_NON_CONFORMANT_CONFIG) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_CONFIG_CAVEAT);
@@ -635,8 +638,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_DEPTH_SIZE);
                 break;
             case EGL_MAX_SWAP_INTERVAL:
-                if(attrib_list[i+1] != EGL_DONT_CARE &&
-                   attrib_list[i+1] < 0) {
+                if(attrib_list[i+1] < 0) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_MAX_SWAP_INTERVAL);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
@@ -644,8 +646,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_MAX_SWAP_INTERVAL);
                 break;
             case EGL_MIN_SWAP_INTERVAL:
-                if(attrib_list[i+1] != EGL_DONT_CARE &&
-                   attrib_list[i+1] < 0) {
+                if(attrib_list[i+1] < 0) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_MIN_SWAP_INTERVAL);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
                 }
@@ -653,8 +654,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_MIN_SWAP_INTERVAL);
                 break;
             case EGL_NATIVE_RENDERABLE:
-                if (attrib_list[i+1] != EGL_DONT_CARE &&
-                    attrib_list[i+1] != EGL_TRUE &&
+                if (attrib_list[i+1] != EGL_TRUE &&
                     attrib_list[i+1] != EGL_FALSE) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_NATIVE_RENDERABLE);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
@@ -704,7 +704,6 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 break;
             case EGL_TRANSPARENT_TYPE:
                 if(attrib_list[i+1] != EGL_NONE &&
-                   attrib_list[i+1] != EGL_DONT_CARE &&
                    attrib_list[i+1] != EGL_TRANSPARENT_RGB ) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_TRANSPARENT_TYPE);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
@@ -725,8 +724,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglChooseConfig(EGLDisplay display, const EGLint *
                 wanted_attribs.push_back(EGL_TRANSPARENT_BLUE_VALUE);
                 break;
             case EGL_COLOR_BUFFER_TYPE:
-                if(attrib_list[i+1] != EGL_DONT_CARE &&
-                   attrib_list[i+1] != EGL_RGB_BUFFER &&
+                if(attrib_list[i+1] != EGL_RGB_BUFFER &&
                    attrib_list[i+1] != EGL_LUMINANCE_BUFFER) {
                     CHOOSE_CONFIG_DLOG_BAD_ATTRIBUTE(EGL_COLOR_BUFFER_TYPE);
                     RETURN_ERROR(EGL_FALSE,EGL_BAD_ATTRIBUTE);
