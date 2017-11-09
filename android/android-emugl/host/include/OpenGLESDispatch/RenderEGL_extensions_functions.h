@@ -15,6 +15,8 @@
   X(EGLint, eglWaitSyncKHR, (EGLDisplay display, EGLSyncKHR sync, EGLint flags)) \
   X(EGLBoolean, eglDestroySyncKHR, (EGLDisplay display, EGLSyncKHR sync)) \
   X(EGLint, eglGetMaxGLESVersion, (EGLDisplay display)) \
+  X(void, eglBlitFromCurrentReadBufferANDROID, (EGLDisplay display, EGLImageKHR image)) \
+  X(void*, eglSetImageFenceANDROID, (EGLDisplay display, EGLImageKHR image)) \
 
 
 #endif  // RENDER_EGL_EXTENSIONS_FUNCTIONS_H

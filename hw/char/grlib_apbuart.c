@@ -26,7 +26,7 @@
 #include "hw/sysbus.h"
 #include "sysemu/char.h"
 
-#include "trace.h"
+#include "hw/char/trace.h"
 
 #define UART_REG_SIZE 20     /* Size of memory mapped registers */
 

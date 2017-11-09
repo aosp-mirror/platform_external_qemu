@@ -1297,9 +1297,7 @@ bool handleCpuAcceleration(AndroidOptions* opts, const AvdInfo* avd,
             // select HVF on Mac if available and we are running on x86
             // TODO: Fix x86_64 support in HVF
             const bool hvf_is_ok = feature_is_enabled(kFeature_HVF) &&
-                    androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF) &&
-                    strncmp(abi, "x86_64", 6) &&
-                    strncmp(android_hw->hw_cpu_arch, "x86_64", 6);
+                    androidCpuAcceleration_isAcceleratorSupported(ANDROID_CPU_ACCELERATOR_HVF);
             if (!hvf_is_ok && !accel_ok && *accel_mode != ACCEL_OFF) {
                 derror("%s emulation currently requires hardware acceleration!\n"
                     "Please ensure %s is properly installed and usable.\n"
@@ -1885,8 +1883,7 @@ bool configAndStartRenderer(
       str_reset(&hw->hw_gpu_mode, "off");
     }
 
-    if (!hw->hw_arc &&
-        !androidEmuglConfigInit(&config,
+    if (!androidEmuglConfigInit(&config,
                 opts->avd,
                 api_arch,
                 api_level,
@@ -1973,9 +1970,14 @@ bool configAndStartRenderer(
 
     // We need to know boot property
     // for opengles version in advance.
-    config_out->bootPropOpenglesVersion =
-        gles_major_version << 16 |
-        gles_minor_version;
+    const bool guest_es3_is_ok = feature_is_enabled(kFeature_GLESDynamicVersion);
+    if (guest_es3_is_ok) {
+        config_out->bootPropOpenglesVersion =
+            gles_major_version << 16 |
+            gles_minor_version;
+    } else {
+        config_out->bootPropOpenglesVersion = (2 << 16) | 0;
+    }
 
     // Now estimate the GL framebuffer size.
     // Use the conservative value for bytes per pixel (RGBA8)

@@ -41,7 +41,7 @@
 #include "qemu/timer.h"
 #include "qemu/sockets.h"
 #include "sysemu/sysemu.h"
-#include "trace.h"
+#include "hw/net/trace.h"
 
 #include "pcnet.h"
 

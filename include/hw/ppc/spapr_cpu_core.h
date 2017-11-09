@@ -11,7 +11,7 @@
 
 #include "hw/qdev.h"
 #include "hw/cpu/core.h"
-#include "target-ppc/cpu-qom.h"
+#include "target/ppc/cpu-qom.h"
 
 #define TYPE_SPAPR_CPU_CORE "spapr-cpu-core"
 #define SPAPR_CPU_CORE(obj) \
@@ -34,12 +34,6 @@ typedef struct sPAPRCPUCoreClass {
     ObjectClass *cpu_class;
 } sPAPRCPUCoreClass;
 
-void spapr_core_pre_plug(HotplugHandler *hotplug_dev, DeviceState *dev,
-                         Error **errp);
 char *spapr_get_cpu_core_type(const char *model);
-void spapr_core_plug(HotplugHandler *hotplug_dev, DeviceState *dev,
-                     Error **errp);
-void spapr_core_unplug(HotplugHandler *hotplug_dev, DeviceState *dev,
-                       Error **errp);
 void spapr_cpu_core_class_init(ObjectClass *oc, void *data);
 #endif

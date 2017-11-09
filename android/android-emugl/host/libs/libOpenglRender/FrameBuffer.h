@@ -17,12 +17,15 @@
 #define _LIBRENDER_FRAMEBUFFER_H
 
 #include "android/base/files/Stream.h"
+#include "android/base/threads/WorkerThread.h"
 #include "android/snapshot/common.h"
 
 #include "ColorBuffer.h"
 #include "emugl/common/mutex.h"
 #include "FbConfig.h"
 #include "GLESVersionDetector.h"
+#include "PostWorker.h"
+#include "ReadbackWorker.h"
 #include "RenderContext.h"
 #include "TextureDraw.h"
 #include "WindowSurface.h"
@@ -310,6 +313,15 @@ public:
     bool post(HandleType p_colorbuffer, bool needLockAndBind = true);
     bool hasGuestPostedAFrame() { return m_guestPostedAFrame; }
 
+    // Runs the post callback with |pixels| (good for when the readback
+    // happens in a separate place)
+    void doPostCallback(void* pixels);
+
+    void getPixels(void* pixels, uint32_t bytes);
+
+    bool asyncReadbackSupported();
+    emugl::Renderer::ReadPixelsCallback getReadPixelsCallback();
+
     // Re-post the last ColorBuffer that was displayed through post().
     // This is useful if you detect that the sub-window content needs to
     // be re-displayed for any reason.
@@ -317,6 +329,7 @@ public:
 
     // Return the host EGLDisplay used by this instance.
     EGLDisplay getDisplay() const { return m_eglDisplay; }
+    EGLSurface getWindowSurface() const { return m_eglSurface; }
 
     // Change the rotation of the displayed GPU sub-window.
     void setDisplayRotation(float zRot) {
@@ -370,6 +383,12 @@ public:
     void createTrivialContext(HandleType shared,
                               HandleType* contextOut,
                               HandleType* surfOut);
+    // createAndBindTrivialSharedContext(), but with a m_pbufContext
+    // as shared, and not adding itself to the context map at all.
+    void createAndBindTrivialSharedContext(EGLContext* contextOut,
+                                           EGLSurface* surfOut);
+    void unbindAndDestroyTrivialSharedContext(EGLContext context,
+                                              EGLSurface surf);
 
     void setShuttingDown() { m_shuttingDown = true; }
     bool isShuttingDown() const { return m_shuttingDown; }
@@ -387,6 +406,15 @@ public:
 
     static void setMaxGLESVersion(GLESDispatchMaxVersion version);
     static GLESDispatchMaxVersion getMaxGLESVersion();
+
+    float getDpr() const { return m_dpr; }
+    int windowWidth() const { return m_windowWidth; }
+    int windowHeight() const { return m_windowHeight; }
+    float getPx() const { return m_px; }
+    float getPy() const { return m_py; }
+    int getZrot() const { return m_zRot; }
+
+    bool isFastBlitSupported() const { return m_fastBlitSupported; }
 
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
@@ -486,7 +514,48 @@ private:
     // Flag set when emulator is shutting down.
     bool m_shuttingDown = false;
 
+    // Async readback
+    enum class ReadbackCmd {
+        Init = 0,
+        GetPixels = 1,
+        Exit = 2,
+    };
+
+    struct Readback {
+        ReadbackCmd cmd;
+        GLuint bufferId;
+        void* pixelsOut;
+        uint32_t bytes;
+    };
+    std::unique_ptr<ReadbackWorker> m_readbackWorker = {};
+    android::base::WorkerThread<Readback> m_readbackThread;
+    android::base::WorkerProcessingResult sendReadbackWorkerCmd(const Readback& readback);
+
     bool m_asyncReadbackSupported = true;
     bool m_guestPostedAFrame = false;
+
+    // Posting
+    enum class PostCmd {
+        Post = 0,
+        Viewport = 1,
+    };
+
+    struct Post {
+        PostCmd cmd;
+        union {
+            ColorBuffer* cb;
+            struct {
+                int width;
+                int height;
+            } viewport;
+        };
+    };
+
+    std::unique_ptr<PostWorker> m_postWorker = {};
+    android::base::WorkerThread<Post> m_postThread;
+    android::base::WorkerProcessingResult postWorkerFunc(const Post& post);
+    void sendPostWorkerCmd(Post post);
+
+    bool m_fastBlitSupported = false;
 };
 #endif

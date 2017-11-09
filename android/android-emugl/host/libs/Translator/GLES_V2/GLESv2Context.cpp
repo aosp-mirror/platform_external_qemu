@@ -392,9 +392,11 @@ bool GLESv2Context::needAtt0PreDrawValidation()
 {
     m_att0NeedsDisable = false;
 
-    int enabled = 0;
-    s_glDispatch.glGetVertexAttribiv(0, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
-    return enabled == 0;
+    // We could go into the driver here and call
+    //      s_glDispatch.glGetVertexAttribiv(0, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled)
+    // ... but it's too much for a simple check that runs on almost every draw
+    // call.
+    return !isArrEnabled(0);
 }
 
 void GLESv2Context::validateAtt0PreDraw(unsigned int count)
@@ -649,6 +651,10 @@ void GLESv2Context::setUseProgram(GLuint program,
     assert(!programData ||
             programData->getDataType() == ObjectDataType::PROGRAM_DATA);
     m_useProgramData = programData;
+}
+
+GLuint GLESv2Context::getCurrentProgram() const {
+    return m_useProgram;
 }
 
 ProgramData* GLESv2Context::getUseProgram() {

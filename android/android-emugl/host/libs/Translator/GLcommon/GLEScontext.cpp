@@ -1371,6 +1371,17 @@ void GLEScontext::setViewport(GLint x, GLint y, GLsizei width, GLsizei height) {
     m_viewportHeight = height;
 }
 
+void GLEScontext::getViewport(GLint* params) {
+    if (!m_isViewport) {
+        dispatcher().glGetIntegerv(GL_VIEWPORT, params);
+    } else {
+        params[0] = m_viewportX;
+        params[1] = m_viewportY;
+        params[2] = m_viewportWidth;
+        params[3] = m_viewportHeight;
+    }
+}
+
 void GLEScontext::setScissor(GLint x, GLint y, GLsizei width, GLsizei height) {
     m_isScissor = true;
     m_scissorX = x;
@@ -1615,7 +1626,8 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring,"GL_EXT_bgra ")!=NULL)
         s_glSupport.GL_EXT_TEXTURE_FORMAT_BGRA8888 = true;
 
-    if (strstr(cstring,"GL_EXT_framebuffer_object ")!=NULL)
+    if (::isCoreProfile() ||
+        strstr(cstring,"GL_EXT_framebuffer_object ")!=NULL)
         s_glSupport.GL_EXT_FRAMEBUFFER_OBJECT = true;
 
     if (strstr(cstring,"GL_ARB_vertex_blend ")!=NULL)
@@ -2183,7 +2195,8 @@ int GLEScontext::queryCurrFboBits(ObjectLocalName localFboName, GLenum pname) {
     return 0;
 }
 
-static const char kTexImageEmulationVShaderSrc[] = R"(#version 330 core
+static const char kTexImageEmulationVShaderSrc[] = R"(
+precision highp float;
 out vec2 v_texcoord;
 void main() {
     const vec2 quad_pos[6] = vec2[6](
@@ -2198,7 +2211,25 @@ void main() {
     v_texcoord = quad_pos[gl_VertexID];
 })";
 
-static const char kTexImageEmulationFShaderSrc[] = R"(#version 330 core
+static const char kTexImageEmulationVShaderSrcFlipped[] = R"(
+precision highp float;
+out vec2 v_texcoord;
+void main() {
+    const vec2 quad_pos[6] = vec2[6](
+        vec2(0.0, 0.0),
+        vec2(0.0, 1.0),
+        vec2(1.0, 0.0),
+        vec2(0.0, 1.0),
+        vec2(1.0, 0.0),
+        vec2(1.0, 1.0));
+
+    gl_Position = vec4((quad_pos[gl_VertexID] * 2.0) - 1.0, 0.0, 1.0);
+    v_texcoord = quad_pos[gl_VertexID];
+    v_texcoord.y = 1.0 - v_texcoord.y;
+})";
+
+static const char kTexImageEmulationFShaderSrc[] = R"(
+precision highp float;
 uniform sampler2D source_tex;
 in vec2 v_texcoord;
 out vec4 color;
@@ -2211,12 +2242,17 @@ void GLEScontext::initTexImageEmulation() {
 
     auto& gl = dispatcher();
 
+    std::string vshaderSrc = isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
+    vshaderSrc += kTexImageEmulationVShaderSrcFlipped;
+    std::string fshaderSrc = isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
+    fshaderSrc += kTexImageEmulationFShaderSrc;
+
     GLuint vshader =
         compileAndValidateCoreShader(GL_VERTEX_SHADER,
-                                     kTexImageEmulationVShaderSrc);
+                                     vshaderSrc.c_str());
     GLuint fshader =
         compileAndValidateCoreShader(GL_FRAGMENT_SHADER,
-                                     kTexImageEmulationFShaderSrc);
+                                     fshaderSrc.c_str());
     m_textureEmulationProg = linkAndValidateProgram(vshader, fshader);
     m_textureEmulationSamplerLoc =
         gl.glGetUniformLocation(m_textureEmulationProg, "source_tex");
@@ -2371,6 +2407,155 @@ GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
     }
 
     return program;
+}
+
+void GLEScontext::setupImageBlitState() {
+    if (m_blitState.program) return;
+
+    auto& gl = dispatcher();
+
+    std::string vshaderSrc =
+        isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
+    vshaderSrc += kTexImageEmulationVShaderSrcFlipped;
+
+    std::string fshaderSrc =
+        isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
+    fshaderSrc += kTexImageEmulationFShaderSrc;
+
+    GLuint vshader =
+        compileAndValidateCoreShader(GL_VERTEX_SHADER, vshaderSrc.c_str());
+    GLuint fshader =
+        compileAndValidateCoreShader(GL_FRAGMENT_SHADER, fshaderSrc.c_str());
+
+    m_blitState.program = linkAndValidateProgram(vshader, fshader);
+    m_blitState.samplerLoc =
+        gl.glGetUniformLocation(m_blitState.program, "source_tex");
+
+    gl.glGenFramebuffers(1, &m_blitState.fbo);
+    gl.glGenFramebuffers(1, &m_blitState.resolveFbo);
+    gl.glGenTextures(1, &m_blitState.tex);
+    gl.glGenVertexArrays(1, &m_blitState.vao);
+    gl.glGetIntegerv(GL_SAMPLE_BUFFERS, (GLint*)&m_blitState.samples);
+}
+
+void GLEScontext::setupImageBlitForTexture(uint32_t width,
+                                           uint32_t height,
+                                           GLint internalFormat) {
+    auto& gl = dispatcher();
+    gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
+
+    if (width != m_blitState.width || height != m_blitState.height ||
+        internalFormat != m_blitState.internalFormat) {
+        m_blitState.width = width;
+        m_blitState.height = height;
+        m_blitState.internalFormat = internalFormat;
+
+        gl.glCopyTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+                            0, 0, width, height, 0);
+        if (m_blitState.samples > 0) {
+            gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.resolveFbo);
+            gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                    GL_TEXTURE_2D, m_blitState.tex, 0);
+        }
+    }
+
+    if (m_blitState.samples > 0) {
+        gl.glBindTexture(GL_TEXTURE_2D, 0);
+        gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.resolveFbo);
+        gl.glBlitFramebuffer(0, 0, width, height, 0, 0, width, height,
+                GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
+    } else {
+        gl.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
+    }
+}
+
+void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
+                                                     GLuint width,
+                                                     GLuint height,
+                                                     GLint internalFormat,
+                                                     GLenum format,
+                                                     GLenum type) {
+    // TODO: these might also matter
+    (void)format;
+    (void)type;
+
+    auto& gl = dispatcher();
+    GLint prevViewport[4];
+    getViewport(prevViewport);
+
+    setupImageBlitState();
+    setupImageBlitForTexture(width, height, internalFormat);
+
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.fbo);
+    gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                              GL_TEXTURE_2D, globalTexObj, 0);
+
+    gl.glDisable(GL_BLEND);
+    gl.glDisable(GL_SCISSOR_TEST);
+    gl.glDisable(GL_DEPTH_TEST);
+    gl.glDisable(GL_STENCIL_TEST);
+    gl.glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    gl.glDisable(GL_SAMPLE_COVERAGE);
+    gl.glDisable(GL_CULL_FACE);
+    gl.glDisable(GL_POLYGON_OFFSET_FILL);
+    gl.glDisable(GL_RASTERIZER_DISCARD);
+
+    gl.glViewport(0, 0, width, height);
+    gl.glDepthRange(0.0f, 1.0f);
+    gl.glColorMask(1, 1, 1, 1);
+
+    gl.glUseProgram(m_blitState.program);
+    gl.glUniform1i(m_blitState.samplerLoc, m_activeTexture);
+
+    gl.glBindVertexArray(m_blitState.vao);
+    gl.glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    // state restore
+    const GLuint globalProgramName = shareGroup()->getGlobalName(
+        NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
+    gl.glUseProgram(globalProgramName);
+
+    gl.glBindVertexArray(getVAOGlobalName(m_currVaoState.vaoId()));
+
+    gl.glBindTexture(
+        GL_TEXTURE_2D,
+        shareGroup()->getGlobalName(
+            NamedObjectType::TEXTURE,
+            getTextureLocalName(GL_TEXTURE_2D,
+                                getBindedTexture(GL_TEXTURE_2D))));
+
+    GLuint drawFboBinding = getFramebufferBinding(GL_DRAW_FRAMEBUFFER);
+    GLuint readFboBinding = getFramebufferBinding(GL_READ_FRAMEBUFFER);
+
+    gl.glBindFramebuffer(
+        GL_DRAW_FRAMEBUFFER,
+        drawFboBinding ? getFBOGlobalName(drawFboBinding) : m_defaultFBO);
+    gl.glBindFramebuffer(
+        GL_READ_FRAMEBUFFER,
+        readFboBinding ? getFBOGlobalName(readFboBinding) : m_defaultReadFBO);
+
+    if (isEnabled(GL_BLEND)) gl.glEnable(GL_BLEND);
+    if (isEnabled(GL_SCISSOR_TEST)) gl.glEnable(GL_SCISSOR_TEST);
+    if (isEnabled(GL_DEPTH_TEST)) gl.glEnable(GL_DEPTH_TEST);
+    if (isEnabled(GL_STENCIL_TEST)) gl.glEnable(GL_STENCIL_TEST);
+    if (isEnabled(GL_SAMPLE_ALPHA_TO_COVERAGE)) gl.glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+    if (isEnabled(GL_SAMPLE_COVERAGE)) gl.glEnable(GL_SAMPLE_COVERAGE);
+    if (isEnabled(GL_CULL_FACE)) gl.glEnable(GL_CULL_FACE);
+    if (isEnabled(GL_POLYGON_OFFSET_FILL)) gl.glEnable(GL_POLYGON_OFFSET_FILL);
+    if (isEnabled(GL_RASTERIZER_DISCARD)) gl.glEnable(GL_RASTERIZER_DISCARD);
+
+    gl.glViewport(prevViewport[0], prevViewport[1],
+                  prevViewport[2], prevViewport[3]);
+
+    gl.glDepthRange(m_zNear, m_zFar);
+
+    gl.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB, m_colorMaskA);
+
+    gl.glFlush();
 }
 
 // Primitive restart emulation

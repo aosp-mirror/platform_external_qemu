@@ -251,7 +251,7 @@ struct {
          avdInfo_getEncryptionKeyImagePath},
 };
 
-static constexpr int kVersion = 8;
+static constexpr int kVersion = 9;
 
 base::StringView Snapshot::dataDir(const char* name) {
     return getSnapshotDir(name);
@@ -261,6 +261,9 @@ Snapshot::Snapshot(const char* name)
     : mName(name), mDataDir(getSnapshotDir(name)) {}
 
 bool Snapshot::save() {
+    // In saving, we assume the state is different,
+    // so we reset the invalid/successful counters.
+
     auto targetHwIni = PathUtils::join(mDataDir, "hardware.ini");
     if (path_copy_file(targetHwIni.c_str(),
                        avdInfo_getCoreHwIniPath(android_avdInfo)) != 0) {
@@ -294,6 +297,9 @@ bool Snapshot::save() {
     mSnapshotPb.set_rotation(
             int(Snapshotter::get().windowAgent().getRotation()));
 
+    mSnapshotPb.set_invalid_loads(mInvalidLoads);
+    mSnapshotPb.set_successful_loads(mSuccessfulLoads);
+
     return writeSnapshotToDisk();
 }
 
@@ -302,6 +308,8 @@ bool Snapshot::saveFailure(FailureReason reason) {
     if (!mSnapshotPb.has_version()) {
         mSnapshotPb.set_version(kVersion);
     }
+    mSnapshotPb.set_invalid_loads(mInvalidLoads);
+    mSnapshotPb.set_successful_loads(mSuccessfulLoads);
     return writeSnapshotToDisk();
 }
 
@@ -427,7 +435,45 @@ bool Snapshot::load() {
                 SkinRotation(mSnapshotPb.rotation()));
     }
 
+    if (mSnapshotPb.has_invalid_loads()) {
+        mInvalidLoads = mSnapshotPb.invalid_loads();
+    } else {
+        mInvalidLoads = 0;
+    }
+
+    if (mSnapshotPb.has_successful_loads()) {
+        mSuccessfulLoads = mSnapshotPb.successful_loads();
+    } else {
+        mSuccessfulLoads = 0;
+    }
+
     return true;
+}
+
+void Snapshot::incrementInvalidLoads() {
+    ++mInvalidLoads;
+    mSnapshotPb.set_invalid_loads(mInvalidLoads);
+    if (!mSnapshotPb.has_version()) {
+        mSnapshotPb.set_version(kVersion);
+    }
+    writeSnapshotToDisk();
+}
+
+void Snapshot::incrementSuccessfulLoads() {
+    ++mSuccessfulLoads;
+    mSnapshotPb.set_successful_loads(mSuccessfulLoads);
+    if (!mSnapshotPb.has_version()) {
+        mSnapshotPb.set_version(kVersion);
+    }
+    writeSnapshotToDisk();
+}
+
+bool Snapshot::shouldInvalidate() const {
+    // Either there wasn't any successful loads,
+    // or there was more than one invalid load
+    // of this snapshot.
+    return !mSuccessfulLoads ||
+           mInvalidLoads > 1;
 }
 
 base::Optional<FailureReason> Snapshot::failureReason() const {

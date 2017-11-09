@@ -348,7 +348,7 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
         log_packet(oc, &pkt);
 #endif
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
-        av_free_packet(&pkt);
+        av_packet_unref(&pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
                    avErr2Str(ret).c_str());
@@ -480,7 +480,7 @@ static int write_video_frame(ffmpeg_recorder* recorder,
             log_packet(oc, &pkt);
 #endif
             ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
-            av_free_packet(&pkt);
+            av_packet_unref(&pkt);
         } else {
             ret = 0;
         }
@@ -583,7 +583,7 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         write_frame(recorder, recorder->oc,
                     &recorder->video_st.st->codec->time_base,
                     recorder->video_st.st, &pkt);
-        av_free_packet(&pkt);
+        av_packet_unref(&pkt);
     }
 
     // flush the remaining audio packet
@@ -617,7 +617,7 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         write_frame(recorder, recorder->oc,
                     &recorder->audio_st.st->codec->time_base,
                     recorder->audio_st.st, &pkt);
-        av_free_packet(&pkt);
+        av_packet_unref(&pkt);
     }
 
     // Write the trailer, if any. The trailer must be written before you
@@ -1057,7 +1057,7 @@ static int encode_write_frame(AVFormatContext* ofmt_ctx,
                          ofmt_ctx->streams[stream_index]->time_base);
     // mux encoded frame
     ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
-    av_free_packet(&enc_pkt);
+    av_packet_unref(&enc_pkt);
     return ret;
 }
 
@@ -1298,7 +1298,7 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
                           tmp_frame->linesize);
             tmp_frame->pts = frame->pts;
             ret = encode_write_frame(ofmt_ctx, tmp_frame, stream_index, NULL);
-            av_free_packet(&packet);
+            av_packet_unref(&packet);
             av_frame_free(&frame);
             av_frame_free(&tmp_frame);
             if (ret < 0) {

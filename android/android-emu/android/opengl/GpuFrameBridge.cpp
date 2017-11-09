@@ -19,6 +19,7 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/synchronization/MessageChannel.h"
+#include "android/opengles.h"
 
 #include <atomic>
 
@@ -72,7 +73,8 @@ public:
             mCallbackOpaque(callbackOpaque),
             mRecFrame(NULL),
             mRecTmpFrame(NULL),
-            mRecFrameUpdated(false) {
+            mRecFrameUpdated(false),
+            mReadPixelsFunc(android_getReadPixelsFunc()) {
         if (!mLooper) {
             return;
         }
@@ -127,20 +129,22 @@ public:
     // Implementation of the GpuFrameBridge::postRecordFrame() method, must be
     // called from the EmuGL thread.
     virtual void postRecordFrame(int width, int height, const void* pixels) {
+        postRecordFrameAsync(width, height, pixels);
+        AutoLock lock(mRecLock);
+        memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
+    }
+
+    virtual void postRecordFrameAsync(int width, int height, const void* pixels) {
         {
             AutoLock lock(mRecLock);
-
             if (!mRecFrame) {
                 mRecFrame = new Frame(width, height, pixels);
             }
             if (!mRecTmpFrame) {
                 mRecTmpFrame = new Frame(width, height, pixels);
-            } else {
-                memcpy(mRecTmpFrame->pixels, pixels, width * height * 4);
             }
         }
-
-        mRecFrameUpdated = true;
+        mRecFrameUpdated.store(true, std::memory_order_release);
     }
 
     virtual void* getRecordFrame() {
@@ -148,6 +152,15 @@ public:
             AutoLock lock(mRecLock);
             memcpy(mRecFrame->pixels, mRecTmpFrame->pixels,
                    mRecFrame->width * mRecFrame->height * 4);
+        }
+        return mRecFrame ? mRecFrame->pixels : nullptr;
+    }
+
+    virtual void* getRecordFrameAsync() {
+        if (mRecFrameUpdated.exchange(false)) {
+            AutoLock lock(mRecLock);
+            mReadPixelsFunc(mRecFrame->pixels,
+                            mRecFrame->width * mRecFrame->height * 4);
         }
         return mRecFrame ? mRecFrame->pixels : nullptr;
     }
@@ -199,6 +212,8 @@ private:
     Frame* mRecFrame;
     Frame* mRecTmpFrame;
     std::atomic_bool mRecFrameUpdated;
+
+    ReadPixelsFunc mReadPixelsFunc = 0;
 };
 
 }  // namespace

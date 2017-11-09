@@ -25,7 +25,7 @@
 #include "qemu/osdep.h"
 #include "sysemu/sysemu.h"
 #include "hw/sysbus.h"
-#include "trace.h"
+#include "hw/misc/trace.h"
 
 /*
  * This is the auxio port, chip control and system control part of

@@ -57,6 +57,7 @@ struct EglImage
     unsigned int texStorageLevels;
     SaveableTexturePtr saveableTexture;
     bool needRestore;
+    GLsync sync;
 };
 
 typedef emugl::SmartPtr<EglImage> ImagePtr;
@@ -86,6 +87,7 @@ typedef struct {
                                       std::function<void(SaveableTexture*)>&&);
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
+    void                                            (*blitFromCurrentReadBufferANDROID)(EGLImage);
 } GLESiface;
 
 class GlLibrary;

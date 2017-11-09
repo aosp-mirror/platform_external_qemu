@@ -42,6 +42,7 @@ using android::base::AutoLock;
 using android::base::LazyInstance;
 using android::base::Stream;
 using android::base::System;
+using android::base::WorkerProcessingResult;
 
 namespace {
 
@@ -212,6 +213,7 @@ void FrameBuffer::finalize() {
         // The only visible thing in the framebuffer is subwindow. Everything else
         // will get cleaned when the process exits.
         if (m_useSubWindow) {
+            m_postWorker.reset();
             removeSubWindow_locked();
         }
         return;
@@ -240,6 +242,8 @@ void FrameBuffer::finalize() {
         }
         m_eglDisplay = EGL_NO_DISPLAY;
     }
+
+    m_readbackThread.enqueue({ReadbackCmd::Exit});
 }
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
@@ -284,6 +288,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     GLESDispatchMaxVersion dispatchMaxVersion =
             calcMaxVersionFromDispatch(fb->m_eglDisplay);
+
     FrameBuffer::setMaxGLESVersion(dispatchMaxVersion);
     if (s_egl.eglSetMaxGLESVersion) {
         // eglSetMaxGLESVersion must be called before any context binding
@@ -296,6 +301,22 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 
     DBG("gles version: %d %d\n", glesMaj, glesMin);
     GL_LOG("gles version: %d %d\n", glesMaj, glesMin);
+
+    fb->m_asyncReadbackSupported = glesMaj > 2;
+    if (fb->m_asyncReadbackSupported) {
+        DBG("Async readback supported\n");
+        GL_LOG("Async readback supported");
+    } else {
+        DBG("Async readback not supported\n");
+        GL_LOG("Async readback not supported");
+    }
+
+    fb->m_fastBlitSupported =
+        (dispatchMaxVersion > GLES_DISPATCH_MAX_VERSION_2) &&
+        (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
+         // TODO: Swiftshader issues 0x502
+         // emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+         emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
 
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
@@ -525,7 +546,16 @@ FrameBuffer::FrameBuffer(int p_width, int p_height, bool useSubWindow)
       m_windowHeight(p_height),
       m_useSubWindow(useSubWindow),
       m_fpsStats(getenv("SHOW_FPS_STATS") != nullptr),
-      m_colorBufferHelper(new ColorBufferHelper(this)) {}
+      m_colorBufferHelper(new ColorBufferHelper(this)),
+      m_readbackThread(
+          [this](FrameBuffer::Readback&& readback) {
+              return sendReadbackWorkerCmd(readback);
+          }),
+      m_postThread(
+          [this](FrameBuffer::Post&& post) {
+              return postWorkerFunc(post);
+          })
+{}
 
 FrameBuffer::~FrameBuffer() {
     finalize();
@@ -536,14 +566,57 @@ FrameBuffer::~FrameBuffer() {
     free(m_fbImage);
 }
 
-void FrameBuffer::setPostCallback(emugl::Renderer::OnPostCallback onPost,
-                                  void* onPostContext) {
+WorkerProcessingResult
+FrameBuffer::sendReadbackWorkerCmd(const Readback& readback) {
+    switch (readback.cmd) {
+    case ReadbackCmd::Init:
+        m_readbackWorker->initGL();
+        return WorkerProcessingResult::Continue;
+    case ReadbackCmd::GetPixels:
+        m_readbackWorker->getPixels(readback.pixelsOut, readback.bytes);
+        return WorkerProcessingResult::Continue;
+    case ReadbackCmd::Exit:
+        m_readbackWorker.reset();
+        return WorkerProcessingResult::Stop;
+    }
+    return WorkerProcessingResult::Stop;
+}
+
+WorkerProcessingResult
+FrameBuffer::postWorkerFunc(const Post& post) {
+    switch (post.cmd) {
+        case PostCmd::Post:
+            m_postWorker->post(post.cb);
+            break;
+        case PostCmd::Viewport:
+            m_postWorker->viewport(post.viewport.width,
+                                   post.viewport.height);
+            break;
+        default:
+            break;
+    }
+    return WorkerProcessingResult::Continue;
+}
+
+void FrameBuffer::sendPostWorkerCmd(FrameBuffer::Post post) {
+    if (!m_postThread.isStarted()) {
+        m_postWorker.reset(new PostWorker([this]() { return bindSubwin_locked(); }));
+        m_postThread.start();
+    }
+
+    m_postThread.enqueue(Post(post));
+    m_postThread.waitQueuedItems();
+}
+
+void FrameBuffer::setPostCallback(
+        emugl::Renderer::OnPostCallback onPost,
+        void* onPostContext) {
     AutoLock mutex(m_lock);
     m_onPost = onPost;
     m_onPostContext = onPostContext;
     if (m_onPost && !m_fbImage) {
         m_fbImage = (unsigned char*)malloc(4 * m_framebufferWidth *
-                                           m_framebufferHeight);
+                m_framebufferHeight);
         if (!m_fbImage) {
             ERR("out of memory, cancelling OnPost callback");
             m_onPost = NULL;
@@ -681,29 +754,20 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
         }
 
         if (success && redrawSubwindow) {
-            if (!bindSubwin_locked()) {
-                success = false;
-            } else {
-                // Subwin creation or movement was successful,
-                // update viewport and z rotation and draw
-                // the last posted color buffer.
-                s_gles2.glViewport(0, 0, fbw * dpr, fbh * dpr);
-                m_dpr = dpr;
-                m_zRot = zRot;
-                bool posted = false;
-                if (m_lastPostedColorBuffer) {
-                    GL_LOG("setupSubwindow: draw last posted cb");
-                    posted = postImpl(m_lastPostedColorBuffer,
-                                      false /* not locking */);
-                    GL_LOG("setupSubwindow: draw last posted cb %s",
-                           posted ? "succeeded" : "failed");
-                }
-                if (!posted) {
-                    s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-                                    GL_STENCIL_BUFFER_BIT);
-                    s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
-                }
-                unbind_locked();
+            // Subwin creation or movement was successful,
+            // update viewport and z rotation and draw
+            // the last posted color buffer.
+            m_dpr = dpr;
+            m_zRot = zRot;
+            Post postCmd;
+            postCmd.cmd = PostCmd::Viewport;
+            postCmd.viewport.width = fbw;
+            postCmd.viewport.height = fbh;
+            sendPostWorkerCmd(postCmd);
+
+            if (m_lastPostedColorBuffer) {
+                GL_LOG("setupSubwindow: draw last posted cb");
+                postImpl(m_lastPostedColorBuffer, false);
             }
         }
     }
@@ -788,7 +852,8 @@ HandleType FrameBuffer::createColorBuffer(int p_width,
     ret = genHandle_locked();
     ColorBufferPtr cb(ColorBuffer::create(getDisplay(), p_width, p_height,
                                           p_internalFormat, p_frameworkFormat,
-                                          ret, m_colorBufferHelper));
+                                          ret, m_colorBufferHelper,
+                                          m_fastBlitSupported));
     if (cb.get() != NULL) {
         m_colorbuffers[ret] = { std::move(cb), 1, false };
 
@@ -1457,11 +1522,9 @@ bool FrameBuffer::bindSubwin_locked() {
         prevDrawSurf != m_eglSurface) {
         if (!s_egl.eglMakeCurrent(m_eglDisplay, m_eglSurface, m_eglSurface,
                                   m_eglContext)) {
-            ERR("eglMakeCurrent failed\n");
+            ERR("eglMakeCurrent failed in binding subwindow!\n");
             return false;
         }
-    } else {
-        ERR("Nested %s call detected, should never happen\n", __func__);
     }
 
     //
@@ -1508,6 +1571,41 @@ void FrameBuffer::createTrivialContext(HandleType shared,
     *surfOut = createWindowSurface(0, 1, 1);
 }
 
+void FrameBuffer::createAndBindTrivialSharedContext(EGLContext* contextOut,
+                                                    EGLSurface* surfOut) {
+    assert(contextOut);
+    assert(surfOut);
+
+    const FbConfig* config = getConfigs()->get(0 /* p_config */);
+    if (!config) return;
+
+    int maj, min;
+    emugl::getGlesVersion(&maj, &min);
+
+    const EGLint contextAttribs[] = {
+        EGL_CONTEXT_MAJOR_VERSION_KHR, maj,
+        EGL_CONTEXT_MINOR_VERSION_KHR, min,
+        EGL_NONE };
+
+    *contextOut = s_egl.eglCreateContext(
+            m_eglDisplay, config->getEglConfig(), m_pbufContext, contextAttribs);
+
+    const EGLint pbufAttribs[] = {
+        EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE };
+
+    *surfOut = s_egl.eglCreatePbufferSurface(m_eglDisplay, config->getEglConfig(), pbufAttribs);
+
+    s_egl.eglMakeCurrent(m_eglDisplay, *surfOut, *surfOut, *contextOut);
+}
+
+void FrameBuffer::unbindAndDestroyTrivialSharedContext(EGLContext context,
+                                                       EGLSurface surface) {
+    s_egl.eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+
+    s_egl.eglDestroyContext(m_eglDisplay, context);
+    s_egl.eglDestroySurface(m_eglDisplay, surface);
+}
+
 bool FrameBuffer::post(HandleType p_colorbuffer, bool needLockAndBind) {
     bool res = postImpl(p_colorbuffer, needLockAndBind);
     if (res) setGuestPostedAFrame();
@@ -1518,6 +1616,7 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     if (needLockAndBind) {
         m_lock.lock();
     }
+
     bool ret = false;
 
     ColorBufferMap::iterator c(m_colorbuffers.find(p_colorbuffer));
@@ -1527,46 +1626,16 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
 
     m_lastPostedColorBuffer = p_colorbuffer;
 
+    ret = true;
+
     if (m_subWin) {
         markOpened(&c->second);
-        GLuint tex = c->second.cb->scale();
-        // bind the subwindow eglSurface
-        if (needLockAndBind && !bindSubwin_locked()) {
-            ERR("FrameBuffer::postImpl(): eglMakeCurrent failed\n");
-            goto EXIT;
-        }
+        c->second.cb->touch();
 
-        // get the viewport
-        GLint vp[4];
-        s_gles2.glGetIntegerv(GL_VIEWPORT, vp);
-
-        // divide by device pixel ratio because windowing coordinates ignore
-        // DPR,
-        // but the framebuffer includes DPR
-        vp[2] = vp[2] / m_dpr;
-        vp[3] = vp[3] / m_dpr;
-
-        // find the x and y values at the origin when "fully scrolled"
-        // multiply by 2 because the texture goes from -1 to 1, not 0 to 1
-        float fx = 2.f * (vp[2] - m_windowWidth) / (float)vp[2];
-        float fy = 2.f * (vp[3] - m_windowHeight) / (float)vp[3];
-
-        // finally, compute translation values
-        float dx = m_px * fx;
-        float dy = m_py * fy;
-
-        //
-        // render the color buffer to the window
-        //
-        ret = (*c).second.cb->post(tex, m_zRot, dx, dy);
-        if (ret) {
-            s_egl.eglSwapBuffers(m_eglDisplay, m_eglSurface);
-        }
-
-        // restore previous binding
-        if (needLockAndBind) {
-            unbind_locked();
-        }
+        Post postCmd;
+        postCmd.cmd = PostCmd::Post;
+        postCmd.cb = c->second.cb.get();
+        sendPostWorkerCmd(postCmd);
     } else {
         // If there is no sub-window, don't display anything, the client will
         // rely on m_onPost to get the pixels instead.
@@ -1591,9 +1660,24 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
     // Send framebuffer (without FPS overlay) to callback
     //
     if (m_onPost) {
-        (*c).second.cb->readback(m_fbImage);
-        m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1,
-                 GL_RGBA, GL_UNSIGNED_BYTE, m_fbImage);
+        if (m_asyncReadbackSupported) {
+            auto cb = (*c).second.cb;
+            if (!m_readbackWorker) {
+                if (!m_readbackThread.isStarted()) {
+                    m_readbackWorker.reset(new ReadbackWorker(cb->getWidth(), cb->getHeight()));
+                    m_readbackThread.start();
+                    m_readbackThread.enqueue({ReadbackCmd::Init});
+                    m_readbackThread.waitQueuedItems();
+                }
+                // do post callback just once to initialize things
+                doPostCallback(m_fbImage);
+            } else {
+                m_readbackWorker->doNextReadback(cb.get(), m_fbImage);
+            }
+        } else {
+            (*c).second.cb->readback(m_fbImage);
+            doPostCallback(m_fbImage);
+        }
     }
 
 EXIT:
@@ -1601,6 +1685,30 @@ EXIT:
         m_lock.unlock();
     }
     return ret;
+}
+
+void FrameBuffer::doPostCallback(void* pixels) {
+    m_onPost(m_onPostContext, m_framebufferWidth, m_framebufferHeight, -1, GL_RGBA, GL_UNSIGNED_BYTE,
+             (unsigned char*)pixels);
+}
+
+void FrameBuffer::getPixels(void* pixels, uint32_t bytes) {
+    m_readbackThread.enqueue({ ReadbackCmd::GetPixels, 0, pixels, bytes });
+    m_readbackThread.waitQueuedItems();
+}
+
+static void sFrameBuffer_ReadPixelsCallback(
+    void* pixels, uint32_t bytes) {
+    FrameBuffer::getFB()->getPixels(pixels, bytes);
+}
+
+bool FrameBuffer::asyncReadbackSupported() {
+    return m_asyncReadbackSupported;
+}
+
+emugl::Renderer::ReadPixelsCallback
+FrameBuffer::getReadPixelsCallback() {
+    return sFrameBuffer_ReadPixelsCallback;
 }
 
 bool FrameBuffer::repost(bool needLockAndBind) {
@@ -1795,7 +1903,8 @@ bool FrameBuffer::onLoad(Stream* stream,
     loadCollection(stream, &m_colorbuffers,
                    [this, now](Stream* stream) -> ColorBufferMap::value_type {
         ColorBufferPtr cb(ColorBuffer::onLoad(stream, m_eglDisplay,
-                                              m_colorBufferHelper));
+                                              m_colorBufferHelper,
+                                              m_fastBlitSupported));
         const HandleType handle = cb->getHndl();
         const unsigned refCount = stream->getBe32();
         const bool opened = stream->getByte();

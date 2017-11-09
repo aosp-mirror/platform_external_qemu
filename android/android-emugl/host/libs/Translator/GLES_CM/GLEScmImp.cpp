@@ -32,6 +32,8 @@
 #include <GLcommon/TranslatorIfaces.h>
 #include <GLcommon/FramebufferData.h>
 
+#include "emugl/common/crash_reporter.h"
+
 #include <cmath>
 #include <unordered_map>
 
@@ -65,20 +67,25 @@ ProcTableMap *s_glesExtensions = NULL;
 
 static EGLiface*  s_eglIface = NULL;
 static GLESiface  s_glesIface = {
-    .initGLESx                   = initGLESx,
-    .createGLESContext           = createGLESContext,
-    .initContext                 = initContext,
-    .setMaxGlesVersion           = setMaxGlesVersion,
-    .deleteGLESContext           = deleteGLESContext,
-    .flush                       = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
-    .finish                      = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
-    .getError                    = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
-    .setShareGroup               = setShareGroup,
-    .getProcAddress              = getProcAddress,
-    .fenceSync                   = NULL,
-    .clientWaitSync              = NULL,
-    .waitSync                    = NULL,
-    .deleteSync                  = NULL,
+    .initGLESx                        = initGLESx,
+    .createGLESContext                = createGLESContext,
+    .initContext                      = initContext,
+    .setMaxGlesVersion                = setMaxGlesVersion,
+    .deleteGLESContext                = deleteGLESContext,
+    .flush                            = (FUNCPTR_NO_ARGS_RET_VOID)glFlush,
+    .finish                           = (FUNCPTR_NO_ARGS_RET_VOID)glFinish,
+    .getError                         = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
+    .setShareGroup                    = setShareGroup,
+    .getProcAddress                   = getProcAddress,
+    .fenceSync                        = NULL,
+    .clientWaitSync                   = NULL,
+    .waitSync                         = NULL,
+    .deleteSync                       = NULL,
+    .saveTexture                      = NULL,
+    .createTexture                    = NULL,
+    .restoreTexture                   = NULL,
+    .deleteRbo                        = NULL,
+    .blitFromCurrentReadBufferANDROID = NULL,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -241,7 +248,7 @@ GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     return &s_glesIface;
 }
 
-}
+} // extern "C"
 
 static TextureData* getTextureData(ObjectLocalName tex){
     GET_CTX_RET(NULL);
@@ -2095,6 +2102,10 @@ GL_API void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglImageOE
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
+            if (img->sync) {
+                // insert gpu side fence to make sure we are done with any blit ops.
+                ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+            }
         }
     }
 }

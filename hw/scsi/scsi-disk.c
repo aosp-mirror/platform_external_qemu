@@ -207,6 +207,7 @@ static void scsi_aio_complete(void *opaque, int ret)
 
     assert(r->req.aiocb != NULL);
     r->req.aiocb = NULL;
+    aio_context_acquire(blk_get_aio_context(s->qdev.conf.blk));
     if (scsi_disk_req_check_error(r, ret, true)) {
         goto done;
     }
@@ -215,6 +216,7 @@ static void scsi_aio_complete(void *opaque, int ret)
     scsi_req_complete(&r->req, GOOD);
 
 done:
+    aio_context_release(blk_get_aio_context(s->qdev.conf.blk));
     scsi_req_unref(&r->req);
 }
 
@@ -291,12 +293,14 @@ static void scsi_dma_complete(void *opaque, int ret)
     (void)r;
     r->req.aiocb = NULL;
 
+    aio_context_acquire(blk_get_aio_context(s->qdev.conf.blk));
     if (ret < 0) {
         block_acct_failed(blk_get_stats(s->qdev.conf.blk), &r->acct);
     } else {
         block_acct_done(blk_get_stats(s->qdev.conf.blk), &r->acct);
     }
     scsi_dma_complete_noio(r, ret);
+    aio_context_release(blk_get_aio_context(s->qdev.conf.blk));
 }
 
 static void scsi_read_complete(void * opaque, int ret)
@@ -307,6 +311,7 @@ static void scsi_read_complete(void * opaque, int ret)
 
     assert(r->req.aiocb != NULL);
     r->req.aiocb = NULL;
+    aio_context_acquire(blk_get_aio_context(s->qdev.conf.blk));
     if (scsi_disk_req_check_error(r, ret, true)) {
         goto done;
     }
@@ -321,6 +326,7 @@ static void scsi_read_complete(void * opaque, int ret)
 
 done:
     scsi_req_unref(&r->req);
+    aio_context_release(blk_get_aio_context(s->qdev.conf.blk));
 }
 
 /* Actually issue a read to the block device.  */
@@ -365,12 +371,14 @@ static void scsi_do_read_cb(void *opaque, int ret)
     assert (r->req.aiocb != NULL);
     r->req.aiocb = NULL;
 
+    aio_context_acquire(blk_get_aio_context(s->qdev.conf.blk));
     if (ret < 0) {
         block_acct_failed(blk_get_stats(s->qdev.conf.blk), &r->acct);
     } else {
         block_acct_done(blk_get_stats(s->qdev.conf.blk), &r->acct);
     }
     scsi_do_read(opaque, ret);
+    aio_context_release(blk_get_aio_context(s->qdev.conf.blk));
 }
 
 /* Read more data from scsi device into buffer.  */
@@ -490,12 +498,14 @@ static void scsi_write_complete(void * opaque, int ret)
     assert (r->req.aiocb != NULL);
     r->req.aiocb = NULL;
 
+    aio_context_acquire(blk_get_aio_context(s->qdev.conf.blk));
     if (ret < 0) {
         block_acct_failed(blk_get_stats(s->qdev.conf.blk), &r->acct);
     } else {
         block_acct_done(blk_get_stats(s->qdev.conf.blk), &r->acct);
     }
     scsi_write_complete_noio(r, ret);
+    aio_context_release(blk_get_aio_context(s->qdev.conf.blk));
 }
 
 static void scsi_write_data(SCSIRequest *req)
@@ -1627,11 +1637,14 @@ static void scsi_unmap_complete(void *opaque, int ret)
 {
     UnmapCBData *data = opaque;
     SCSIDiskReq *r = data->r;
+    SCSIDiskState *s = DO_UPCAST(SCSIDiskState, qdev, r->req.dev);
 
     assert(r->req.aiocb != NULL);
     r->req.aiocb = NULL;
 
+    aio_context_acquire(blk_get_aio_context(s->qdev.conf.blk));
     scsi_unmap_complete_noio(data, ret);
+    aio_context_release(blk_get_aio_context(s->qdev.conf.blk));
 }
 
 static void scsi_disk_emulate_unmap(SCSIDiskReq *r, uint8_t *inbuf)
@@ -1698,6 +1711,7 @@ static void scsi_write_same_complete(void *opaque, int ret)
 
     assert(r->req.aiocb != NULL);
     r->req.aiocb = NULL;
+    aio_context_acquire(blk_get_aio_context(s->qdev.conf.blk));
     if (scsi_disk_req_check_error(r, ret, true)) {
         goto done;
     }
@@ -1726,6 +1740,7 @@ done:
     scsi_req_unref(&r->req);
     qemu_vfree(data->iov.iov_base);
     g_free(data);
+    aio_context_release(blk_get_aio_context(s->qdev.conf.blk));
 }
 
 static void scsi_disk_emulate_write_same(SCSIDiskReq *r, uint8_t *inbuf)
@@ -2159,6 +2174,14 @@ static int32_t scsi_disk_dma_command(SCSIRequest *req, uint8_t *buf)
         DPRINTF("Write %s(sector %" PRId64 ", count %u)\n",
                 (command & 0xe) == 0xe ? "And Verify " : "",
                 r->req.cmd.lba, len);
+        /* fall through */
+    case VERIFY_10:
+    case VERIFY_12:
+    case VERIFY_16:
+        /* We get here only for BYTCHK == 0x01 and only for scsi-block.
+         * As far as DMA is concerned, we can treat it the same as a write;
+         * scsi_block_do_sgio will send VERIFY commands.
+         */
         if (r->req.cmd.buf[1] & 0xe0) {
             goto illegal_request;
         }
@@ -2219,7 +2242,7 @@ static void scsi_disk_resize_cb(void *opaque)
     }
 }
 
-static void scsi_cd_change_media_cb(void *opaque, bool load)
+static void scsi_cd_change_media_cb(void *opaque, bool load, Error **errp)
 {
     SCSIDiskState *s = opaque;
 
@@ -2307,7 +2330,13 @@ static void scsi_realize(SCSIDevice *dev, Error **errp)
             return;
         }
     }
-    blkconf_apply_backend_options(&dev->conf);
+    blkconf_apply_backend_options(&dev->conf,
+                                  blk_is_read_only(s->qdev.conf.blk),
+                                  dev->type == TYPE_DISK, &err);
+    if (err) {
+        error_propagate(errp, err);
+        return;
+    }
 
     if (s->qdev.conf.discard_granularity == -1) {
         s->qdev.conf.discard_granularity =
@@ -2359,7 +2388,7 @@ static void scsi_cd_realize(SCSIDevice *dev, Error **errp)
     SCSIDiskState *s = DO_UPCAST(SCSIDiskState, qdev, dev);
 
     if (!dev->conf.blk) {
-        dev->conf.blk = blk_new();
+        dev->conf.blk = blk_new(0, BLK_PERM_ALL);
     }
 
     s->qdev.blocksize = 2048;
@@ -2696,7 +2725,7 @@ static bool scsi_block_is_passthrough(SCSIDiskState *s, uint8_t *buf)
          * for the number of logical blocks specified in the length
          * field).  For other modes, do not use scatter/gather operation.
          */
-        if ((buf[1] & 6) != 2) {
+        if ((buf[1] & 6) == 2) {
             return false;
         }
         break;
@@ -2714,7 +2743,7 @@ static bool scsi_block_is_passthrough(SCSIDiskState *s, uint8_t *buf)
     case WRITE_VERIFY_16:
         /* MMC writing cannot be done via DMA helpers, because it sometimes
          * involves writing beyond the maximum LBA or to negative LBA (lead-in).
-         * We might use scsi_disk_dma_reqops as long as no writing commands are
+         * We might use scsi_block_dma_reqops as long as no writing commands are
          * seen, but performance usually isn't paramount on optical media.  So,
          * just make scsi-block operate the same as scsi-generic for them.
          */

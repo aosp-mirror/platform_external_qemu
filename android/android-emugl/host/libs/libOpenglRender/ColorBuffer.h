@@ -19,6 +19,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <GLES/gl.h>
+#include <GLES3/gl3.h>
 #include "android/base/files/Stream.h"
 #include "android/snapshot/LazySnapshotObj.h"
 #include "emugl/common/smart_ptr.h"
@@ -127,13 +128,16 @@ public:
     // FRAMEWORK_FORMAT_GL_COMPATIBLE).
     // It is assumed underlying EGL has EGL_KHR_gl_texture_2D_image.
     // Returns NULL on failure.
+    // |fastBlitSupported|: whether or not this ColorBuffer can be
+    // blitted and posted to swapchain without context switches.
     static ColorBuffer* create(EGLDisplay p_display,
                                int p_width,
                                int p_height,
                                GLenum p_internalFormat,
                                FrameworkFormat p_frameworkFormat,
                                HandleType hndl,
-                               Helper* helper);
+                               Helper* helper,
+                               bool fastBlitSupported);
 
     // Sometimes things happen and we need to reformat the GL texture
     // used. This function replaces the format of the underlying texture
@@ -199,11 +203,18 @@ public:
     // Read the content of the whole ColorBuffer as 32-bit RGBA pixels.
     // |img| must be a buffer large enough (i.e. width * height * 4).
     void readback(unsigned char* img);
+    // readback() but async (to the specified |buffer|)
+    void readbackAsync(GLuint buffer);
+    // readbackAsync() but in one thread:
+    // glReadPixels will be done to buffer1, and then right after,
+    // glMapBufferRange -> memcpy(img, <memory of buffer2>)
+    void readbackAsync(GLuint buffer1, GLuint buffer2, unsigned char* img);
 
     void onSave(android::base::Stream* stream);
     static ColorBuffer* onLoad(android::base::Stream* stream,
                                EGLDisplay p_display,
-                               Helper* helper);
+                               Helper* helper,
+                               bool fastBlitSupported);
 
     HandleType getHndl() const;
 
@@ -212,6 +223,7 @@ public:
 
 private:
     ColorBuffer(EGLDisplay display, HandleType hndl, Helper* helper);
+    void waitSync();
 
 private:
     GLuint m_tex = 0;
@@ -242,6 +254,9 @@ private:
     GLuint m_yuv_conversion_fbo = 0;  // FBO to offscreen-convert YUV to RGB
     std::unique_ptr<YUVConverter> m_yuv_converter;
     HandleType mHndl;
+
+    GLsync m_sync = nullptr;
+    bool m_fastBlitSupported = false;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

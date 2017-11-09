@@ -76,6 +76,7 @@ public:
     void validateAtt0PostDraw(void);
     const float* getAtt0(void) const {return m_attribute0value;}
     void setUseProgram(GLuint program, const ObjectDataPtr& programData);
+    GLuint getCurrentProgram() const;
     ProgramData* getUseProgram();
 
     virtual void onSave(android::base::Stream* stream) const override;
@@ -108,7 +109,6 @@ private:
     unsigned int m_att0ArrayLength = 0;
     bool m_att0NeedsDisable = false;
 
-    GLuint m_useProgram = 0;
     ObjectDataPtr m_useProgramData = {};
     std::unordered_map<GLuint, GLuint> m_bindSampler;
 

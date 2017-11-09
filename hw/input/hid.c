@@ -27,7 +27,7 @@
 #include "ui/console.h"
 #include "qemu/timer.h"
 #include "hw/input/hid.h"
-#include "trace.h"
+#include "hw/input/trace.h"
 
 #define HID_USAGE_ERROR_ROLLOVER        0x01
 #define HID_USAGE_POSTFAIL              0x02

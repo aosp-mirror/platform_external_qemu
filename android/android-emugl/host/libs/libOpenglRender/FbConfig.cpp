@@ -15,6 +15,7 @@
 #include "FbConfig.h"
 
 #include "android/opengl/emugl_config.h"
+#include "emugl/common/feature_control.h"
 #include "emugl/common/misc.h"
 #include "FrameBuffer.h"
 #include "OpenGLESDispatch/EGLDispatch.h"
@@ -115,7 +116,7 @@ FbConfig::FbConfig(EGLConfig hostConfig, EGLDisplay hostDisplay) :
 
         // Don't report ES3 renderable type if we don't support it.
         if (kConfigAttributes[i] == EGL_RENDERABLE_TYPE) {
-            if (FrameBuffer::getMaxGLESVersion() < GLES_DISPATCH_MAX_VERSION_3_0 &&
+            if (!emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion) &&
                 mAttribValues[i] & EGL_OPENGL_ES3_BIT) {
                 mAttribValues[i] &= ~EGL_OPENGL_ES3_BIT;
             }
@@ -190,7 +191,8 @@ int FbConfigList::chooseConfig(const EGLint* attribs,
         if (attribs[numAttribs] == EGL_RENDERABLE_TYPE) {
             if (attribs[numAttribs + 1] != EGL_DONT_CARE &&
                 attribs[numAttribs + 1] & EGL_OPENGL_ES3_BIT_KHR &&
-                (FrameBuffer::getMaxGLESVersion() < GLES_DISPATCH_MAX_VERSION_3_0)) {
+                (!emugl_feature_is_enabled(android::featurecontrol::GLESDynamicVersion) ||
+                 FrameBuffer::getMaxGLESVersion() < GLES_DISPATCH_MAX_VERSION_3_0)) {
                 return 0;
             }
         }

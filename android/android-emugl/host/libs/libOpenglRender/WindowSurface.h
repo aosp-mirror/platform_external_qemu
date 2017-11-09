@@ -53,6 +53,11 @@ public:
     // dimensions. Potentially losing pixel values in the process.
     void setColorBuffer(ColorBufferPtr p_colorBuffer);
 
+    // Retrieves a pointer to the attached color buffer.
+    ColorBuffer* getAttachedColorBuffer() const {
+        return mAttachedColorBuffer.get();
+    }
+
     // Copy the Pbuffer's pixels to the attached color buffer.
     // Returns true on success, or false on error (e.g. if there is no
     // attached color buffer).

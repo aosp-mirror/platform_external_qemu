@@ -87,6 +87,14 @@ void Loader::start() {
     }
 }
 
+void Loader::reportSuccessful() {
+    mSnapshot.incrementSuccessfulLoads();
+}
+
+void Loader::reportInvalid() {
+    mSnapshot.incrementInvalidLoads();
+}
+
 Loader::~Loader() {
     // Wait for textureLoader to finish loading textures
     if (mRamLoader && !mRamLoader->hasError()) {
@@ -127,8 +135,13 @@ void Loader::complete(bool succeeded) {
 
 // Don't do heavy operations like interrupting the loader
 // here since this could be in a crash handler.
-void Loader::setCorrupted(int error) {
-    mSnapshot.saveFailure(errnoToFailure(error));
+void Loader::onInvalidSnapshotLoad() {
+    mSnapshot.incrementInvalidLoads();
+    if (mSnapshot.shouldInvalidate()) {
+        mSnapshot.saveFailure(FailureReason::CorruptedData);
+    } else {
+        mSnapshot.saveFailure(FailureReason::InternalError);
+    }
 }
 
 }  // namespace snapshot

@@ -77,23 +77,56 @@ public:
     ~WorkerThread() { join(); }
 
     // Starts the worker thread.
-    void start() { mThread.start(); }
+    void start() { mThread.start(); mStarted = true; }
+    bool isStarted() const { return mStarted; }
+    // Waits for all enqueue()'d items to finish.
+    void waitQueuedItems() {
+        if (!mStarted || mFinished) return;
+
+        SyncPoint sync;
+        enqueueImpl(&sync);
+
+        {
+            base::AutoLock lock(mSyncLock);
+            while (!sync.signaled) {
+                sync.cv.wait(&lock);
+            }
+        }
+    }
     // Waits for worker thread to complete.
     void join() { mThread.wait(); }
 
     // Moves the |item| into internal queue for processing.
     void enqueue(Item&& item) {
+        enqueueImpl(std::move(item));
+    }
+
+private:
+    struct SyncPoint {
+        bool signaled = false;
+        base::ConditionVariable cv;
+    };
+    struct Command {
+        Command(Item&& it) :
+            workItem(std::move(it)) { }
+        Command(SyncPoint* sp) :
+            syncPoint(sp) { }
+        SyncPoint* syncPoint = nullptr;
+        Item workItem;
+    };
+
+    template <class T>
+    void enqueueImpl(T&& x) {
         base::AutoLock lock(mLock);
         bool signal = mQueue.empty();
-        mQueue.emplace_back(std::move(item));
+        mQueue.emplace_back(Command(std::move(x)));
         if (signal) {
             mCv.signalAndUnlock(&lock);
         }
     }
 
-private:
     void worker() {
-        std::vector<Item> todo;
+        std::vector<Command> todo;
         todo.reserve(10);
         for (;;) {
             {
@@ -104,20 +137,32 @@ private:
                 todo.swap(mQueue);
             }
 
-            for (Item& item : todo) {
-                if (mProcessor(std::move(item)) == Result::Stop) {
-                    return;
+            for (Command& item : todo) {
+                if (item.syncPoint) { // Sync point
+                    base::AutoLock lock(mSyncLock);
+                    item.syncPoint->signaled = true;
+                    item.syncPoint->cv.signalAndUnlock(&lock);
+                } else { // Normal work item
+                    if (mProcessor(std::move(item.workItem)) == Result::Stop) {
+                        return;
+                    }
                 }
             }
+
             todo.clear();
         }
+        mFinished = true;
     }
 
     Processor mProcessor;
     base::FunctorThread mThread;
-    std::vector<Item> mQueue;
+    std::vector<Command> mQueue;
     base::Lock mLock;
+    base::Lock mSyncLock;
     base::ConditionVariable mCv;
+
+    bool mStarted = false;
+    bool mFinished = false;
 };
 
 }  // namespace base

@@ -102,6 +102,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/extended-pages/location-page.h \
     android/skin/qt/extended-pages/microphone-page.h \
     android/skin/qt/extended-pages/record-screen-page.h \
+    android/skin/qt/extended-pages/record-screen-page-tasks.h \
     android/skin/qt/extended-pages/rotary-input-dial.h \
     android/skin/qt/extended-pages/rotary-input-page.h \
     android/skin/qt/extended-pages/settings-page.h \

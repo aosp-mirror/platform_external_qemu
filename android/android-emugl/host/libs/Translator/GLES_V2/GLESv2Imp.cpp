@@ -39,6 +39,8 @@
 #include "GLcommon/GLutils.h"
 #include "GLcommon/FramebufferData.h"
 
+#include "emugl/common/crash_reporter.h"
+
 #include "ANGLEShaderParser.h"
 
 #include <stdio.h>
@@ -62,6 +64,7 @@ static void saveTexture(SaveableTexture* texture, android::base::Stream* stream,
 static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
                                       SaveableTexture::loader_t&& loader);
 static void restoreTexture(SaveableTexture* texture);
+static void blitFromCurrentReadBufferANDROID(EGLImage image);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -89,6 +92,7 @@ static GLESiface s_glesIface = {
     .createTexture = createTexture,
     .restoreTexture = restoreTexture,
     .deleteRbo = deleteRenderbufferGlobal,
+    .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
 };
 
 #include <GLcommon/GLESmacros.h>
@@ -188,6 +192,24 @@ GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
     return & s_glesIface;
+}
+
+static void blitFromCurrentReadBufferANDROID(EGLImage image) {
+    GET_CTX()
+    unsigned int imagehndl = SafeUIntFromPointer(image);
+    ImagePtr img = s_eglIface->getEGLImage(imagehndl);
+    if (!img ||
+        !ctx->shareGroup().get()) {
+        emugl_crash_reporter("FATAL: blitFromCurrentReadBufferANDROID: "
+                             "image (%p) or share group (%p) not found",
+                             img.get(), ctx->shareGroup().get());
+        return;
+    }
+
+    GLuint globalTexObj = img->globalTexObj->getGlobalName();
+    ctx->blitFromReadBufferToTextureFlipped(
+            globalTexObj, img->width, img->height,
+            img->internalFormat, img->format, img->type);
 }
 
 }  // extern "C"
@@ -1614,13 +1636,19 @@ static void s_glGetInteger64i_v_wrapper(GLenum pname, GLuint index, GLint64* dat
 template <class T>
 static void s_glStateQueryTv(bool es2, GLenum pname, T* params, GLStateQueryFunc<T> getter) {
     T i;
+    GLint iparams[4];
     GET_CTX_V2();
     switch (pname) {
+    case GL_VIEWPORT:
+        ctx->getViewport(iparams);
+        params[0] = (T)iparams[0];
+        params[1] = (T)iparams[1];
+        params[2] = (T)iparams[2];
+        params[3] = (T)iparams[3];
+        break;
     case GL_CURRENT_PROGRAM:
         if (ctx->shareGroup().get()) {
-            getter(pname,&i);
-            *params = ctx->shareGroup()->getLocalName(NamedObjectType::SHADER_OR_PROGRAM,
-                                                      i);
+            *params = (T)ctx->getCurrentProgram();
         }
         break;
     case GL_FRAMEBUFFER_BINDING:
@@ -3540,6 +3568,10 @@ GL_APICALL void GL_APIENTRY glEGLImageTargetTexture2DOES(GLenum target, GLeglIma
             texData->globalName = img->globalTexObj->getGlobalName();
             texData->setSaveableTexture(
                     SaveableTexturePtr(img->saveableTexture));
+            if (img->sync) {
+                // insert gpu side fence to make sure we are done with any blit ops.
+                ctx->dispatcher().glWaitSync(img->sync, 0, GL_TIMEOUT_IGNORED);
+            }
             if (!imagehndl) {
                 fprintf(stderr, "glEGLImageTargetTexture2DOES with empty handle\n");
             }
@@ -3638,3 +3670,4 @@ GL_APICALL GLboolean GL_APIENTRY glIsVertexArrayOES(GLuint array) {
 
 #include "GLESv30Imp.cpp"
 #include "GLESv31Imp.cpp"
+

@@ -227,6 +227,7 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
 }
 
 void SyncThread::doExit() {
+
     // This sequence parallels the exit sequence
     // in RenderThread.
     FrameBuffer::getFB()->bindContext(0, 0, 0);
@@ -275,7 +276,7 @@ void SyncThread::destroySyncThread() {
 
     DPRINT("exiting a sync thread for render thread info=%p.", tInfo);
 
-    if (!tInfo->syncThread) return;
+    if (!tInfo || !tInfo->syncThread) return;
 
     tInfo->syncThread->cleanup();
     tInfo->syncThread->wait();

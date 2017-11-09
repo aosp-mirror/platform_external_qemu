@@ -11,7 +11,7 @@
 #include "alpha_sys.h"
 #include "qemu/log.h"
 #include "sysemu/sysemu.h"
-#include "trace.h"
+#include "hw/alpha/trace.h"
 
 
 /* Fallback for unassigned PCI I/O operations.  Avoids MCHK.  */
