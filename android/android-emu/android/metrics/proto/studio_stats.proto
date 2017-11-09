@@ -67,6 +67,8 @@ message AndroidStudioEvent {
   // or kind = CLOUD_TESTING_LAUNCH_CLOUD_DEVICE
   // or kind = CLOUD_TESTING_DEBUG_FROM_RESULTS
   // or kind = TEST_RUN
+  // or kind = LayoutInspectorEvent and LayoutInspectorEventType = CAPTURE
+  // or kind = ANDROID_PROFILER and AndroidProfilerEvent.Type = CHANGE_DEVICE
   optional DeviceInfo device_info = 12;
 
   // set when kind = LLDB_INSTALL_FAILED
@@ -190,6 +192,18 @@ message AndroidStudioEvent {
   // GRADLE_SYNC_SETUP_STARTED
   optional GradleSyncStats gradle_sync_stats = 50;
 
+  // set when category = APK_DEBUG
+  optional ApkDebugProject apk_debug_project = 51;
+
+  // set when kind = LAYOUT_INSPECTOR_EVENT
+  optional LayoutInspectorEvent layout_inspector_event = 52;
+
+  // set when kind = ANDROID_PROFILER_DB_STATS
+  optional AndroidProfilerDbStats android_profiler_db_stats = 53;
+
+  // set when kind = TEMPLATE_RENDER
+  optional KotlinSupport kotlin_support = 54;
+
   // Describes a group of event kinds related to each other.
   // This is redundant in the presence of EventKind + event specific message,
   // and is only necessary for events originally sent to GA.
@@ -249,6 +263,8 @@ message AndroidStudioEvent {
     STUDIO_UI = 23;
     // the event is related to the layout editor
     LAYOUT_EDITOR = 24;
+    // The event is related to APK_DEBUGGING actions initiated by the user.
+    APK_DEBUG = 25;
   }
 
   // Specific kind of event, primary separation key of all Android Studio
@@ -511,6 +527,24 @@ message AndroidStudioEvent {
 
     // Instant Run Notification Tracking
     INSTANT_RUN_PROMPT_FOR_APPLY_CHANGES_SHOWN = 119;
+
+    // APK Main module imported for debugging
+    APK_DEBUG_IMPORT = 120;
+
+    // Attach java sources for apk debuggging
+    APK_DEBUG_ATTACH_JAVA_SOURCES = 121;
+
+    // Add debug symbols for apk debugging
+    APK_DEBUG_ADD_SYMBOLS = 122;
+
+    // Select Path mappings for apk debugging
+    APK_DEBUG_SELECT_PATH_MAPPINGS = 123;
+
+    // Layout Inspector event
+    LAYOUT_INSPECTOR_EVENT = 124;
+
+    // Android Profiler database statistics
+    ANDROID_PROFILER_DB_STATS = 125;
   }
 
   // Represents different Performance Monitoring types.
@@ -742,6 +776,16 @@ message LldbSessionStartDetails {
   optional DeviceInfo device_info = 5;
   // Version of the native debugger.
   optional string lldb_version = 6;
+  // Type of starter used to start this session.
+  optional StarterType starter_type = 7;
+
+  // Describes session starter implementations.
+  enum StarterType {
+    UNKNOWN_STARTER_TYPE = 0;
+    ROOT_SHELL_STARTER_TYPE = 1;
+    RUN_AS_SHELL_STARTER_TYPE = 2;
+    INJECTOR_STARTER_TYPE = 3;
+  }
 }
 
 message LldbSessionEndDetails {
@@ -906,9 +950,7 @@ message EmulatorFeatureFlagState {
     HVF = 14;
     KVM = 15;
     HAXM = 16;
-    //
     FAST_SNAPSHOT_V1 = 17;
-    //
     SCREEN_RECORDING = 18;
     // Next tag: 19
   }
@@ -933,53 +975,121 @@ message EmulatorMemoryUsage {
   optional uint64 total_page_file = 6;
 }
 
+// An enum representing all possible snapshot properties (bit flags).
 enum EmulatorSnapshotFlags {
+  // Default, no special properties.
   SNAPSHOT_FLAGS_NONE = 0;
+  // RAM is compressed in this snapshot.
   SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT = 1;
+  // Textures are compressed in this snapshot.
   SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT = 2;
 }
 
+// Emulator snapshot description.
 message EmulatorSnapshot {
+  // Anonymized snapshot name (SHA256 + salted).
   optional string name = 1;
   // A combination of EmulatorSnapshotFlags describing the snapshot.
   optional int32 flags = 2;
+  // Total size on disk, in bytes.
   optional int64 size_bytes = 3;
 }
 
+// Description of emulator's quickboot load.
 message EmulatorQuickbootLoad {
+  // List of possible states of a load operation.
   enum EmulatorQuickbootLoadState {
+    // Quickboot succeeded.
     EMULATOR_QUICKBOOT_LOAD_SUCCEEDED = 0;
+    // There was no snapshot for a quickboot load.
     EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT = 1;
+    // Generic failure during load.
     EMULATOR_QUICKBOOT_LOAD_FAILED = 2;
+    // Guest hung after loading a quickboot snapshot.
     EMULATOR_QUICKBOOT_LOAD_HUNG = 3;
+    // Performed a cold boot because of feature control settings.
     EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE = 4;
+    // Performed a cold boot because of command line flag.
     EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE = 5;
+    // Performed a cold boot because of AVD configuration.
     EMULATOR_QUICKBOOT_LOAD_COLD_AVD = 6;
+    // Performed a cold boot because quickboot is not supported in the current
+    // configuration.
     EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED = 7;
+    // Specified snapshot is too old for loading, fallback to cold boot.
     EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT = 8;
   }
+  // The state of the quickboot load operation.
   optional EmulatorQuickbootLoadState state = 1;
+  // How long it took, milliseconds.
   optional uint64 duration_ms = 2;
+  // Information about loaded snapshot.
   optional EmulatorSnapshot snapshot = 3;
+  // Flag is set when on demand RAM loading was enabled for the load.
   optional bool on_demand_ram_enabled = 4;
 }
 
+// Description of emulator's quickboot saving.
 message EmulatorQuickbootSave {
+  // List of possible states of a save operation.
   enum EmulatorQuickbootSaveState {
+    // Successful saving.
     EMULATOR_QUICKBOOT_SAVE_SUCCEEDED = 0;
+    // Generic failure when saving state.
     EMULATOR_QUICKBOOT_SAVE_FAILED = 1;
+    // Saving disabled: feature control.
     EMULATOR_QUICKBOOT_SAVE_DISABLED_FEATURE = 2;
+    // Saving disabled: command line argument.
     EMULATOR_QUICKBOOT_SAVE_DISABLED_CMDLINE = 3;
+    // Saving disabled: AVD configuration.
     EMULATOR_QUICKBOOT_SAVE_DISABLED_AVD = 4;
+    // Saving skipped: not supported in current configuration.
     EMULATOR_QUICKBOOT_SAVE_SKIPPED_UNSUPPORTED = 5;
+    // Saving skipped: too low guest uptime.
     EMULATOR_QUICKBOOT_SAVE_SKIPPED_LOW_UPTIME = 6;
     EMULATOR_QUICKBOOT_SAVE_DISABLED_UI = 7;
     EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED = 8;
   }
+  // The state of the quickboot save operation.
   optional EmulatorQuickbootSaveState state = 1;
+  // How long it took, milliseconds.
   optional uint64 duration_ms = 2;
+  // Information about the saved snapshot.
   optional EmulatorSnapshot snapshot = 3;
+  // What was the guest session uptime at the time of saving.
   optional uint64 sesion_uptime_ms = 4;
+}
+
+// Track whether a GLES1 command is used or not
+message EmulatorGLEScmUsages {
+  // Has the client create any GLES1 contexts
+  optional bool is_used = 1;
+  // Track glLight{f,fv,x,xv} command calls
+  optional bool light = 2;
+  // Track glTexGen{f,fv,x,xv,i,iv}OES command calls
+  optional bool tex_gen = 3;
+}
+
+// Track whether a GLES3.0 command is used or not
+message EmulatorGLESv30Usages {
+  // Has the client create any GLES3 contexts
+  optional bool is_used = 1;
+  // Track glFenceSync command calls
+  optional bool fence_sync = 2;
+  // Track glFramebufferTextureLayer command calls
+  optional bool framebuffer_texture_layer = 3;
+  // Track glRenderbufferStorageMultisample command calls
+  optional bool renderbuffer_storage_multisample = 4;
+  // Track glGenTransformFeedbacks command calls
+  optional bool gen_transform_feedbacks = 5;
+  // Track glBeginQuery command calls
+  optional bool begin_query = 6;
+}
+
+// Track whether a GLES command is used or not
+message EmulatorGLESUsages {
+  optional EmulatorGLEScmUsages gles_1_usages = 1;
+  optional EmulatorGLESv30Usages gles_3_0_usages = 2;
 }
 
 // Metrics related to the Emulator.
@@ -1025,6 +1135,8 @@ message EmulatorDetails {
   // Information about quickboot status of the current session.
   optional EmulatorQuickbootLoad quickboot_load = 21;
   optional EmulatorQuickbootSave quickboot_save = 22;
+  // Track GLES command usages
+  optional EmulatorGLESUsages gles_usages = 23;
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -1365,6 +1477,9 @@ message TestRun {
   // Provides details on commonly used test libraries.
   optional TestLibraries test_libraries = 7;
 
+  // Only set when test_kind=INSTRUMENTATION_TEST
+  optional TestExecution test_execution = 8;
+
   // Describes how tests where invoked.
   enum TestInvocationType {
     UNKNOWN_TEST_INVOCATION_TYPE = 0;
@@ -1381,6 +1496,13 @@ message TestRun {
     UNKNOWN_TEST_KIND = 0;
     UNIT_TEST = 1;
     INSTRUMENTATION_TEST = 2;
+  }
+
+  // How instrumentation tests will be run
+  enum TestExecution {
+    UNKNOWN_TEST_EXECUTION = 0;
+    HOST = 1;
+    ANDROID_TEST_ORCHESTRATOR = 2;
   }
 }
 
@@ -1525,6 +1647,18 @@ message GradleBuildProject {
   // For instantApps, the number of dependent atoms.
   optional int64 atoms = 8;
 
+  // The compile SDK.
+  // Stored in the form of a target hash
+  // e.g. "android-25" or "The Vendor Inc.:My Addon:10"
+  optional string compile_sdk = 9;
+
+  // The split config as defined by the user in the DSL.
+  optional GradleBuildSplits splits = 10;
+
+  // Version of the Kotlin Gradle plugin used, if any.
+  // e.g. '1.1.3'
+  optional string kotlin_plugin_version = 11;
+
   enum PluginType {
     UNKNOWN_PLUGIN_TYPE = 0;
     // The 'com.android.application' or 'com.android.model.application' plugins.
@@ -1547,6 +1681,53 @@ message GradleBuildProject {
     FIRST = 1;
     // The 'com.android.model.[application,library]' plugins
     COMPONENT_MODEL = 2;
+  }
+}
+
+message GradleBuildSplits {
+  // Are density splits enabled?
+  optional bool density_enabled = 1;
+  // Is automatic discovery based on the merged resources enabled?
+  // Only set if density splits are enabled.
+  optional bool density_auto = 2;
+  // Injected compatible screens manifest values.
+  // Only populated if language splits are enabled.
+  // e.g. NORMAL, LARGE, XLARGE
+  repeated CompatibleScreenSize density_compatible_screens = 3;
+  // Densities that the application will be split on.
+  // Only populated if density splits are enabled.
+  // e.g. 480, 560, 640
+  // See
+  // https://android.googlesource.com/platform/tools/base/+/studio-master-dev/layoutlib-api/src/main/java/com/android/resources/Density.java
+  // for a comprensive list of possible values.
+  repeated int32 density_values = 4;
+
+  // Are language splits enabled?
+  optional bool language_enabled = 5;
+  // Is automatic discovery based on the merged resources enabled?
+  // Only set if language splits are enabled.
+  optional bool language_auto = 6;
+  // Language and region codes that the application will be split on.
+  // Only populated if language splits are enabled.
+  // e.g. 'fr,fr-rBE', 'fr-rCA', 'en'
+  repeated string language_includes = 7;
+
+  // Are ABI splits enabled?
+  optional bool abi_enabled = 8;
+  // Will a universal APK be generated?
+  // Only set if abi splits are enabled.
+  optional bool abi_enable_universal_apk = 9;
+  // ABIs that the application will be split on.
+  // Only populated if abi splits are enabled.
+  // e.g. 'x86', 'armeabi-v7a'
+  repeated DeviceInfo.ApplicationBinaryInterface abi_filters = 10;
+
+  enum CompatibleScreenSize {
+    UNKNOWN_SCREEN_SIZE = 0;
+    SMALL = 1;
+    NORMAL = 2;
+    LARGE = 3;
+    XLARGE = 4;
   }
 }
 
@@ -1607,6 +1788,19 @@ message GradleBuildVariant {
   // If Java 8 language support is enabled, which tools provides it.
   optional Java8LangSupport java8_lang_support = 11;
 
+  // The various device api versions of this variant.
+  // Minimum supported.
+  optional ApiVersion min_sdk_version = 12;
+  // Target sdk version.
+  optional ApiVersion target_sdk_version = 13;
+  // The maximum sdk version
+  optional ApiVersion max_sdk_version = 14;
+  optional DexBuilderTool dex_builder = 15;
+  optional DexMergerTool dex_merger = 16;
+  optional CodeShrinkerTool code_shrinker = 17;
+  // The method used to run instrumentation tests for this variant.
+  optional TestRun.TestExecution test_execution = 18;
+
   // The nature of this variant.
   // The test variants have an associated tested variant.
   // See com.android.builder.core.VariantType
@@ -1637,6 +1831,30 @@ message GradleBuildVariant {
     DEXGUARD = 2;
     // Jack compiler
     JACK = 3;
+    // D8 compiler
+    D8 = 4;
+  }
+
+  // Tools that can used to build dex
+  enum DexBuilderTool {
+    UNKNOWN_DEX_BUILDER_TOOL = 0;
+    DX_DEXER = 1;
+    D8_DEXER = 2;
+  }
+
+  // Tools that can be used to merge dex files
+  enum DexMergerTool {
+    UNKNOWN_DEX_MERGER_TOOL = 0;
+    DX_MERGER = 1;
+    D8_MERGER = 2;
+  }
+
+  // The tool used for code shrinking
+  enum CodeShrinkerTool {
+    UNKNOWN_CODE_SHRINKER = 0;
+    PROGUARD = 1;
+    ANDROID_GRADLE_SHRINKER = 2;
+    R8 = 3;
   }
 }
 
@@ -1656,6 +1874,14 @@ message AnnotationProcessorInfo {
     // The new annotationProcessor way to include them.
     ANNOTATION_PROCESSOR = 2;
   }
+}
+
+// An android API version, for min, compile, max and target sdk versions.
+// E.g. for Nougat 7.1 this is api_level=25, codename unset.
+// For O-preview this is api_level=25, codename="O".
+message ApiVersion {
+  optional int64 api_level = 1;
+  optional string codename = 2;
 }
 
 message GradleBuildMemorySample {
@@ -1849,6 +2075,27 @@ message GradleBuildProfileSpan {
     INSTANTAPP_TASK_MANAGER_CREATE_ATOM_PACKAGING_TASKS = 5001;
     INSTANTAPP_TASK_MANAGER_CREATE_PROCESS_RES_TASK = 5002;
     INSTANTAPP_TASK_MANAGER_CREATE_PACKAGING_TASK = 5003;
+
+    // FeatureTaskManager per variant tasks.
+    FEATURE_TASK_MANAGER_CREATE_BASE_TASKS = 6000;
+    FEATURE_TASK_MANAGER_CREATE_NON_BASE_TASKS = 6001;
+    FEATURE_TASK_MANAGER_CREATE_MERGE_MANIFEST_TASK = 6002;
+    FEATURE_TASK_MANAGER_CREATE_GENERATE_RES_VALUES_TASK = 6003;
+    FEATURE_TASK_MANAGER_CREATE_CREATE_RENDERSCRIPT_TASK = 6004;
+    FEATURE_TASK_MANAGER_CREATE_MERGE_RESOURCES_TASK = 6005;
+    FEATURE_TASK_MANAGER_CREATE_MERGE_ASSETS_TASK = 6006;
+    FEATURE_TASK_MANAGER_CREATE_BUILD_CONFIG_TASK = 6007;
+    FEATURE_TASK_MANAGER_CREATE_PROCESS_RES_TASK = 6008;
+    FEATURE_TASK_MANAGER_CREATE_AIDL_TASK = 6009;
+    FEATURE_TASK_MANAGER_CREATE_SHADER_TASK = 6010;
+    FEATURE_TASK_MANAGER_CREATE_NDK_TASK = 6011;
+    FEATURE_TASK_MANAGER_CREATE_EXTERNAL_NATIVE_BUILD_TASK = 6012;
+    FEATURE_TASK_MANAGER_CREATE_MERGE_JNILIBS_FOLDERS_TASK = 6013;
+    FEATURE_TASK_MANAGER_CREATE_COMPILE_TASK = 6014;
+    FEATURE_TASK_MANAGER_CREATE_STRIP_NATIVE_LIBRARY_TASK = 6015;
+    FEATURE_TASK_MANAGER_CREATE_SPLIT_TASK = 6016;
+    FEATURE_TASK_MANAGER_CREATE_PACKAGING_TASK = 6017;
+    FEATURE_TASK_MANAGER_CREATE_LINT_TASK = 6018;
   }
 }
 
@@ -1856,7 +2103,7 @@ message GradleTaskExecution {
   // The task implementing class.
   // Custom tasks are recorded as UNKNOWN_TASK_TYPE.
   // This is an enum in android git:
-  // tools/base/build-system/gradle-core/src/main/proto/analytics_enums.proto
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
   optional int32 type = 1;
 
   // Whether the task did work (TaskState#getDidWork())
@@ -1878,7 +2125,7 @@ message GradleTransformExecution {
   // The transform implementing class.
   // Custom transforms are recorded as UNKNOWN_TRANSFORM_TYPE.
   // This is an enum in android git:
-  // tools/base/build-system/gradle-core/src/main/proto/analytics_enums.proto
+  // tools/analytics-library/protos/src/main/proto/analytics_enums.proto
   optional int32 type = 1;
 
   // Whether the transform could be (in the case of TASK_TRANSFORM_PREPARATION)
@@ -1922,6 +2169,8 @@ message InstantRunStatus {
     MULTI_DEX = 2;
     // Cold swap done by reinstalling APK splits.
     MULTI_APK = 3;
+    // Cold swap done by reinstalling APK splits, resources in separate APK.
+    MULTI_APK_SEPARATE_RESOURCES = 4;
   }
 
 
@@ -1991,6 +2240,10 @@ message InstantRunStatus {
     CHANGE_IN_SERIALIZABLE_CLASS_WITHOUT_VERSION_UID = 28;
 
     BUILD_NOT_INCREMENTAL = 29;
+
+    // abstract method became implemented | method with code became abstract.
+    ABSTRACT_METHOD_CHANGE = 30;
+
   }
 }
 
@@ -2603,6 +2856,7 @@ message AppLinksAssistantEvent {
     URL_MAPPING_APP_LINK_DELETE_BUTTON = 6;
     URL_MAPPING_CHECK_MAPPING_BUTTON = 7;
     URL_MAPPING_OPEN_ANDROID_MANIFEST_BUTTON = 8;
+    URL_MAPPING_ADD_TEST_URL_BUTTON = 21;
 
     // UI elements of code insert dialog.
     CODE_INSERT_DIALOG = 9;
@@ -2615,6 +2869,8 @@ message AppLinksAssistantEvent {
     DAL_PANEL_GENERATE_BUTTON = 14;
     DAL_PANEL_SAVE_BUTTON = 15;
     DAL_PANEL_VERIFY_BUTTON = 16;
+    DAL_PANEL_SMART_LOCK_CHECKBOX = 200;
+    DAL_PANEL_SIGN_IN_URL_SAME_AS_DOMAIN_CHECKBOX = 201;
 
     // UI elements of app links test panel.
     APP_LINKS_TEST_PANEL = 17;
@@ -2663,6 +2919,72 @@ message AdbAssistantStats {
   }
 }
 
+message CpuProfilingConfig {
+  // The type of the tool which provides profiling results.
+  optional Type type = 1;
+  // The profiling mode, each of which has different pros / cons.
+  optional Mode mode = 2;
+  // The maximum size of the trace recroding, in MB.
+  optional uint32 size_limit = 3;
+  // The sampling interval in μs, only used when |mode| is |SAMPLED|
+  optional uint32 sample_interval = 4;
+
+  enum Type {
+    UNKNOWN_TYPE = 0;
+    // Use general profiling features provided by the runtime
+    ART = 1;
+    // Use simpleperf for advanced Android profiling, works on Android O+
+    SIMPLE_PERF = 2;
+    // Use atrace for advanced Android profiling, works on Android O+
+    ATRACE = 3;
+  }
+
+  enum Mode {
+    UNKNOWN_MODE = 0;
+    // Periodically poll CPU; less accurate but more performant
+    SAMPLED = 1;
+    // Add timing hooks; more accurate but leaf calls are more expensive
+    INSTRUMENTED = 2;
+  }
+}
+
+// Data associated with capturing a CPU method trace
+message CpuCaptureMetadata {
+  enum CaptureStatus {
+    UNKNOWN_STATUS = 0;
+    // The capture was successful
+    SUCCESS = 1;
+    // The device responded to our request for a capture with an error
+    STOP_CAPTURING_FAILURE = 2;
+    // The capture data sent back to us could not be parsed successfully
+    PARSING_FAILURE = 3;
+    // User aborted parsing the trace after being notified it was too large
+    USER_ABORTED_PARSING = 4;
+  }
+
+  // The result of a CPU capture
+  optional CaptureStatus capture_status = 1;
+
+  // Duration from user pressing "Record" to pressing "Stop"
+  // Not set if |capture_status| is not set to |SUCCESS|
+  optional uint64 capture_duration_ms = 2;
+
+  // Duration from the first trace data timestamp to the last one.
+  // Not set if |capture_status| is not set to |SUCCESS|
+  optional uint64 record_duration_ms = 3;
+
+  // Size of the trace file generated by the capture.
+  // Not set if |capture_status| is set to |STOP_CAPTURING_FAILURE|
+  optional uint32 trace_file_size_bytes = 4;
+
+  // How much time it took to parse the trace file
+  // Not set if |capture_status| is not set to |SUCCESS|
+  optional uint64 parsing_time_ms = 5;
+
+  // The user's configuration used to generate this capture
+  optional CpuProfilingConfig profiling_config = 6;
+}
+
 // Android Profiler metrics
 message AndroidProfilerEvent {
   // The current stage we're on when this event was generated
@@ -2670,6 +2992,13 @@ message AndroidProfilerEvent {
 
   // The detailed type of this event.
   optional Type type = 2;
+
+  // Used to be set if |type| was |TRACE_CPU|
+  // Deprecated since 3.0.0.8 and superceded by cpu_capture_metadata
+  optional CpuProfilingConfig cpu_config = 3;
+
+  // Set if |type| is |CAPTURE_TRACE|
+  optional CpuCaptureMetadata cpu_capture_metadata = 4;
 
   enum Stage {
     UNKNOWN_STAGE = 0;
@@ -2712,12 +3041,17 @@ message AndroidProfilerEvent {
 
     /// CPU
 
-    TRACE_SAMPLED = 201;
-    TRACE_INSTRUMENTED = 202;
+    TRACE_SAMPLED = 201; // Deprecated since 3.0.0.5. Use TRACE_CPU.
+    TRACE_INSTRUMENTED = 202; // Deprecated since 3.0.0.5. Use TRACE_CPU.
     SELECT_THREAD = 204;
     SELECT_TOP_DOWN = 205;
     SELECT_BOTTOM_UP = 206;
     SELECT_FLAME_CHART = 207;
+    SELECT_CALL_CHART = 210;
+    OPEN_CPU_CONFIG_DIALOG = 208;
+    CREATE_CPU_CONFIG = 209;
+    TRACE_CPU = 211; // Deprecated since 3.0.0.8. Use CAPTURE_TRACE.
+    CAPTURE_TRACE = 212; // Correlate with |cpu_capture_metadata|
 
     /// Memory
 
@@ -2740,7 +3074,27 @@ message AndroidProfilerEvent {
   }
 }
 
-  // APK Analyzer stats
+// Stats for a single table in the Android Profiler DB
+message AndroidProfilerDbTable {
+  // The unique name that identifies this table, e.g. "Cpu_Data",
+  // "Memory_AllocationEvents", or "Network_Connection"
+  optional string name = 1;
+
+  // The number of records currently entered into this table
+  optional uint32 num_records = 2;
+}
+
+// Stats for the DB used by Android Profiler
+message AndroidProfilerDbStats {
+  // The amount of time the database has been running (in seconds)
+  optional uint32 age_sec = 1;
+  // DB cache on disk (in MB)
+  optional uint32 total_disk_mb = 2;
+  // Entries for each table in our DB
+  repeated AndroidProfilerDbTable tables = 3;
+}
+
+// APK Analyzer stats
 message ApkAnalyzerStats {
   // size of the APK
   optional uint64 uncompressed_size = 1;
@@ -2771,4 +3125,51 @@ message GradleSyncStats {
     // User requests the sync directly (by pressing sync button)
     TRIGGER_USER_REQUEST = 3;
   }
+}
+
+// APK Debugging project information
+message ApkDebugProject {
+  // Client-side salted hash of the package name for tracking purposes.
+  optional string package_id = 1;
+}
+
+// Details for layout inspector events
+message LayoutInspectorEvent {
+  enum LayoutInspectorEventType {
+    UNKNOWN_EVENT_TYPE = 0;
+    // Capture view data from a window
+    CAPTURE = 1;
+    // Layout inspector was opened
+    OPEN = 2;
+    // Dump Display List of selected node
+    DUMP_DISPLAYLIST = 3;
+    // Pixel perfect feature used to overlay a design mock
+    OVERLAY_IMAGE = 4;
+    // Render a sub section of the captured view
+    RENDER_SUB_VIEW = 5;
+    // Navigate to declaration of a view resource by id
+    GO_TO_DECLARATION = 6;
+    // Capture view data timeout
+    CAPTURE_TIME_OUT = 7;
+  }
+
+  // Type of event
+  optional LayoutInspectorEventType type = 1;
+
+  // defined if LayoutInspectorEventType = CAPTURE, CAPTURE_TIME_OUT
+  optional int64 duration_in_ms = 2;
+
+  // defined if LayoutInspectorEventType = CAPTURE
+  // size of the captured view data in bytes
+  optional int64 data_size = 3;
+}
+
+// Kotlin support information for new Android projects
+message KotlinSupport {
+  // True if "Include Kotlin Support" option checked
+  // when Android project created, False otherwise
+  optional bool include_kotlin_support = 1;
+
+  // Kotlin version used for Kotlin support; e.g., "1.1.3-2".
+  optional string kotlin_support_version = 2;
 }
