@@ -282,7 +282,7 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
 }
 
 void Snapshotter::onLoadingFailed(const char* name, int err) {
-    assert(res < 0);
+    assert(err < 0);
     mSaver.clear();
     if (err == -EINVAL) { // corrupted snapshot. abort immediately,
                           // try not to do anything since this could be
