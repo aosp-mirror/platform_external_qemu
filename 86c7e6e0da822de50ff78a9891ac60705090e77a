@@ -46,6 +46,30 @@
       "revId": "86c7e6e0da822de50ff78a9891ac60705090e77a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f6ab70ae_f6df6de4",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1902,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-09T01:56:15Z",
+      "side": 1,
+      "message": "Got it, thanks!",
+      "parentUuid": "5d2e0e9e_df9c28dd",
+      "range": {
+        "startLine": 1902,
+        "startChar": 0,
+        "endLine": 1902,
+        "endChar": 40
+      },
+      "revId": "86c7e6e0da822de50ff78a9891ac60705090e77a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
