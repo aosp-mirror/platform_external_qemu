@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "269243a0_82395805",
+        "filename": "android/android-emu/android/metrics/proto/studio_stats.proto",
+        "patchSetId": 1
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-09T01:29:31Z",
+      "side": 0,
+      "message": "🤔",
+      "range": {
+        "startLine": 1075,
+        "startChar": 0,
+        "endLine": 1078,
+        "endChar": 25
+      },
+      "revId": "989bd3324d452181051995ba0abdb80386a4e398",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
