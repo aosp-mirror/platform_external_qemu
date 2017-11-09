@@ -520,6 +520,7 @@ void ToolWindow::on_back_button_released() {
 // If the user cancels the pop-up, return
 // 'false' to say we should NOT exit now.
 bool ToolWindow::askWhetherToSaveSnapshot() {
+    mExtendedWindow.get();
     // Check the UI setting
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
     if (!avdPath) {
