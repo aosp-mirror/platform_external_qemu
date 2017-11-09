@@ -17,6 +17,7 @@
 #include <QtWidgets>
 
 #include "android/android.h"
+#include "android/avd/info.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/system/System.h"
 #include "android/emulation/ConfigDirs.h"
@@ -42,6 +43,8 @@
 
 #include <cassert>
 #include <string>
+
+using Ui::Settings::SaveSnapshotOnExit;
 
 ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
     : mWindow(new ExtendedWindow(tw->mEmulatorWindow,
@@ -509,8 +512,69 @@ void ToolWindow::on_back_button_released() {
     handleUICommand(QtUICommand::BACK, false);
 }
 
+// If we need to ask about saving a snapshot,
+// ask here, then set an avdParams flag to
+// indicate the choice.
+// If we don't need to ask, the avdParams flag
+// should already be set.
+// If the user cancels the pop-up, return
+// 'false' to say we should NOT exit now.
+bool ToolWindow::askWhetherToSaveSnapshot() {
+    // Check the UI setting
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (!avdPath) {
+        // Can't find the setting! Assume it's not ASK: just return;
+        return true;
+    }
+    QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+    QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+    SaveSnapshotOnExit saveOnExitChoice =
+        static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+
+    if (saveOnExitChoice != SaveSnapshotOnExit::Ask) {
+        // The flag should already be set
+        return true;
+    }
+
+    // The UI setting is ASK.
+    // But don't ask if the command line was used. That overrides the UI.
+    if (android_cmdLineOptions->no_snapshot_save) {
+        return true;
+    }
+
+    QMessageBox msgBox(QMessageBox::Question,
+                       tr("Save quick-boot state"),
+                       tr("Do you want to save the current state for the next quick boot?"),
+                       (QMessageBox::Yes | QMessageBox::No),
+                       this);
+    // Add a Cancel button to enable the MessageBox's X.
+    QPushButton *cancelButton = msgBox.addButton(QMessageBox::Cancel);
+    // Hide the Cancel button so X is the only way to cancel.
+    cancelButton->setHidden(true);
+
+    int selection = msgBox.exec();
+
+    if (selection == QMessageBox::Cancel) {
+        return false;
+    }
+
+    if (selection == QMessageBox::Yes) {
+        android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+    } else {
+        android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
+    }
+    return true;
+}
+
 void ToolWindow::on_close_button_clicked() {
-    parentWidget()->close();
+    bool actuallyExit = askWhetherToSaveSnapshot();
+    if (actuallyExit) {
+        parentWidget()->close();
+    }
 }
 
 void ToolWindow::on_home_button_pressed() {
