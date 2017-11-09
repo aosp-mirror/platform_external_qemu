@@ -29,7 +29,7 @@
 // gyroscope, and magnetometer.
 class Accelerometer3DWidget : public GLWidget {
     Q_OBJECT
-    Q_PROPERTY(glm::quat rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
+    Q_PROPERTY(glm::mat4 rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
     Q_PROPERTY(glm::vec2 position READ position WRITE setPosition NOTIFY positionChanged USER true);
 public:
     enum class OperationMode {
@@ -55,8 +55,8 @@ signals:
 
 public slots:
     // Sets the rotation quaternion.
-    void setRotation(const glm::quat& quat) {
-        mQuat = quat;
+    void setRotation(const glm::mat4& rotation) {
+        mRotation = rotation;
     }
 
     // Sets the X and Y coordinates of the model's origin;
@@ -68,7 +68,7 @@ public slots:
 
 public:
     // Getters for the rotation quaternion and delta.
-    const glm::quat& rotation() const { return mQuat; }
+    const glm::mat4& rotation() const { return mRotation; }
 
     // Returns the X and Y coordinates of the model's origin.
     const glm::vec2& position() const { return mTranslation; }
@@ -106,7 +106,7 @@ private:
     // that corresponds to the given point on the screen.
     glm::vec2 screenToXYPlane(int x, int y) const;
 
-    glm::quat mQuat;
+    glm::mat4 mRotation;
 
     glm::vec2 mTranslation;
     glm::mat4 mPerspective;
