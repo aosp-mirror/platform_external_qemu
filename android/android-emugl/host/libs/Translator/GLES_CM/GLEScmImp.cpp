@@ -20,6 +20,8 @@
 #define GL_APICALL __declspec(dllexport)
 #endif
 #define GL_GLEXT_PROTOTYPES
+#include "android/base/memory/LazyInstance.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "GLEScmContext.h"
 #include "GLEScmValidate.h"
 #include "GLEScmUtils.h"
@@ -58,6 +60,7 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp);
 static GLEScontext* createGLESContext(int maj, int min,
         GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
 static __translatorMustCastToProperFunctionPointerType getProcAddress(const char* procName);
+static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -86,9 +89,12 @@ static GLESiface  s_glesIface = {
     .restoreTexture                   = NULL,
     .deleteRbo                        = NULL,
     .blitFromCurrentReadBufferANDROID = NULL,
+    .fillGLESUsages = fillGLESUsages,
 };
 
 #include <GLcommon/GLESmacros.h>
+
+static android::base::LazyInstance<android_studio::EmulatorGLEScmUsages> gles1usages = {};
 
 extern "C" {
 
@@ -151,6 +157,10 @@ static void setShareGroup(GLEScontext* ctx,ShareGroupPtr grp) {
     if(ctx) {
         ctx->setShareGroup(grp);
     }
+}
+
+static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage) {
+    usage->mutable_gles_1_usages()->CopyFrom(*gles1usages);
 }
 
 GL_API void GL_APIENTRY  glColorPointerWithDataSize( GLint size, GLenum type,
@@ -1401,6 +1411,7 @@ GL_API void GL_APIENTRY  glLightModelxv( GLenum pname, const GLfixed *params) {
 GL_API void GL_APIENTRY  glLightf( GLenum light, GLenum pname, GLfloat param) {
     GET_CTX()
     GLES_CM_TRACE()
+    gles1usages->set_light(true);
     ctx->dispatcher().glLightf(light,pname,param);
 }
 
@@ -2601,6 +2612,7 @@ GL_API void GL_APIENTRY glTexGenfOES (GLenum coord, GLenum pname, GLfloat param)
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::texGen(coord,pname),GL_INVALID_ENUM);
+    gles1usages->set_light(true);
     if (coord == GL_TEXTURE_GEN_STR_OES) {
         ctx->dispatcher().glTexGenf(GL_S,pname,param);
         ctx->dispatcher().glTexGenf(GL_T,pname,param);
@@ -2614,6 +2626,7 @@ GL_API void GL_APIENTRY glTexGenfvOES (GLenum coord, GLenum pname, const GLfloat
     GET_CTX()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::texGen(coord,pname),GL_INVALID_ENUM);
+    gles1usages->set_light(true);
     if (coord == GL_TEXTURE_GEN_STR_OES) {
         ctx->dispatcher().glTexGenfv(GL_S,pname,params);
         ctx->dispatcher().glTexGenfv(GL_T,pname,params);
@@ -2626,24 +2639,28 @@ GL_API void GL_APIENTRY glTexGeniOES (GLenum coord, GLenum pname, GLint param) {
     GET_CTX_CM()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::texGen(coord,pname),GL_INVALID_ENUM);
+    gles1usages->set_light(true);
     ctx->texGeni(coord, pname, param);
 }
 GL_API void GL_APIENTRY glTexGenivOES (GLenum coord, GLenum pname, const GLint *params) {
     GET_CTX_CM()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::texGen(coord,pname),GL_INVALID_ENUM);
+    gles1usages->set_light(true);
     ctx->texGeniv(coord, pname, params);
 }
 GL_API void GL_APIENTRY glTexGenxOES (GLenum coord, GLenum pname, GLfixed param) {
     GET_CTX_CM()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::texGen(coord,pname),GL_INVALID_ENUM);
+    gles1usages->set_light(true);
     ctx->texGenf(coord, pname, X2F(param));
 }
 GL_API void GL_APIENTRY glTexGenxvOES (GLenum coord, GLenum pname, const GLfixed *params) {
     GET_CTX_CM()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::texGen(coord,pname),GL_INVALID_ENUM);
+    gles1usages->set_light(true);
     GLfloat tmpParams[1];
     tmpParams[0] = X2F(params[0]);
     ctx->texGenfv(coord, pname, tmpParams);

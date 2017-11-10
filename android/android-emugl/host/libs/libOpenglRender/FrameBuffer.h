@@ -415,7 +415,8 @@ public:
     int getZrot() const { return m_zRot; }
 
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
-
+    // Fill GLES usage protobuf
+    void fillGLESUsages(android_studio::EmulatorGLESUsages*);
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
