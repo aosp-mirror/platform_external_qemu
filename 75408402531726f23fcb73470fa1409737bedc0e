@@ -308,6 +308,30 @@
     },
     {
       "key": {
+        "uuid": "26ddee1f_ba3ef521",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-10T15:48:09Z",
+      "side": 1,
+      "message": "Thanks for the detailed equations! Can you also add comments for what would be a straightforward way to regenerate those coefficients down there in case we adjust something?",
+      "parentUuid": "a9fc98fb_4e405234",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 22
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0df0256e_a8035978",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
