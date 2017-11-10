@@ -20,6 +20,10 @@
 #include "OpenglRender/Renderer.h"
 #include "OpenglRender/render_api_types.h"
 
+namespace android_studio {
+    class EmulatorGLESUsages;
+}
+
 namespace emugl {
 
 // RenderLib - root interface for the GPU emulation library

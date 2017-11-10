@@ -281,6 +281,11 @@ bool RendererImpl::load(android::base::Stream* stream,
     return res;
 }
 
+void RendererImpl::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
+    auto fb = FrameBuffer::getFB();
+    if (fb) fb->fillGLESUsages(usages);
+}
+
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
     assert(mRenderWindow);
 

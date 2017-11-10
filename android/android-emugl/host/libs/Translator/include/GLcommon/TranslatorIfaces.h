@@ -67,6 +67,10 @@ typedef std::unordered_map<unsigned int, SaveableTexturePtr> SaveableTextureMap;
 class GLEScontext;
 class SaveableTexture;
 
+namespace android_studio {
+    class EmulatorGLESUsages;
+}
+
 typedef struct {
     void (*initGLESx)(bool isGles2Gles);
     GLEScontext*                                    (*createGLESContext)(int majorVersion, int minorVersion, GlobalNameSpace* globalNameSpace, android::base::Stream* stream);
@@ -88,6 +92,7 @@ typedef struct {
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
     void                                            (*blitFromCurrentReadBufferANDROID)(EGLImage);
+    void                                            (*fillGLESUsages)(android_studio::EmulatorGLESUsages*);
 } GLESiface;
 
 class GlLibrary;
