@@ -25,6 +25,10 @@ int physical_parameter_target_get(
     return android_physical_model_get(parameterId, a, b, c);
 }
 
+int coarse_orientation_set(int orientation) {
+    return android_sensors_set_coarse_orientation(orientation, 0.f);
+}
+
 int sensor_override_set(int sensorId, float a, float b, float c) {
     return android_sensors_override_set(sensorId, a, b, c);
 }
@@ -40,6 +44,7 @@ int physical_state_agent_set(const struct QAndroidPhysicalStateAgent* agent) {
 static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
     .setPhysicalParameterTarget = physical_parameter_target_set,
     .getPhysicalParameterTarget = physical_parameter_target_get,
+    .setCoarseOrientation = coarse_orientation_set,
     .setSensorOverride = sensor_override_set,
     .getSensor = sensor_get,
     .setPhysicalStateAgent = physical_state_agent_set};

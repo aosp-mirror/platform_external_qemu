@@ -122,7 +122,8 @@ typedef enum {
 } AndroidCoarseOrientation;
 
 /* change the coarse orientation value */
-extern void android_sensors_set_coarse_orientation( AndroidCoarseOrientation  orient );
+extern int android_sensors_set_coarse_orientation(
+        AndroidCoarseOrientation  orient, float tilt_degrees);
 
 /* get sensor values */
 extern int android_sensors_get( int sensor_id,

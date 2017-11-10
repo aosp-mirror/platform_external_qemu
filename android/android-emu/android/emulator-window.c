@@ -260,6 +260,14 @@ emulator_window_setup( EmulatorWindow*  emulator )
         return;
     }
 
+    // Set the coarse orientation of the modeled device to match the skin
+    // layout at startup by default.
+    const SkinLayout* layout = skin_ui_get_current_layout(emulator->ui);
+    // Historically, the AVD starts up with the screen mostly
+    // vertical, but tilted back 4.75 degrees. Retain that
+    // initial orientation.
+    emulator_window_set_device_coarse_orientation(layout->orientation, 4.75f);
+
     if (emulator->onion) {
         skin_ui_set_onion(emulator->ui,
                           emulator->onion,
@@ -462,34 +470,43 @@ emulator_window_get_layout(EmulatorWindow* emulator)
     return NULL;
 }
 
-bool emulator_window_rotate_90(bool clockwise) {
+void
+emulator_window_set_device_coarse_orientation(SkinRotation orientation,
+        float tilt_degrees)
+{
+    AndroidCoarseOrientation coarseOrientation =
+            ANDROID_COARSE_PORTRAIT;
+    switch (orientation) {
+        case SKIN_ROTATION_0:
+            coarseOrientation = ANDROID_COARSE_PORTRAIT;
+            break;
+        case SKIN_ROTATION_90:
+            coarseOrientation = ANDROID_COARSE_REVERSE_LANDSCAPE;
+            break;
+        case SKIN_ROTATION_180:
+            coarseOrientation = ANDROID_COARSE_REVERSE_PORTRAIT;
+            break;
+        case SKIN_ROTATION_270:
+            coarseOrientation = ANDROID_COARSE_LANDSCAPE;
+            break;
+    }
+    android_sensors_set_coarse_orientation(coarseOrientation, tilt_degrees);
+}
+
+bool
+emulator_window_rotate_90(bool clockwise) {
     if (qemulator->ui) {
         const SkinLayout* layout = clockwise ?
                 skin_ui_get_next_layout(qemulator->ui) :
                 skin_ui_get_prev_layout(qemulator->ui);
-        AndroidCoarseOrientation coarseOrientation =
-                ANDROID_COARSE_PORTRAIT;
-        switch (layout->orientation) {
-            case SKIN_ROTATION_0:
-                coarseOrientation = ANDROID_COARSE_PORTRAIT;
-                break;
-            case SKIN_ROTATION_90:
-                coarseOrientation = ANDROID_COARSE_REVERSE_LANDSCAPE;
-                break;
-            case SKIN_ROTATION_180:
-                coarseOrientation = ANDROID_COARSE_REVERSE_PORTRAIT;
-                break;
-            case SKIN_ROTATION_270:
-                coarseOrientation = ANDROID_COARSE_LANDSCAPE;
-                break;
-        }
-        android_sensors_set_coarse_orientation(coarseOrientation);
+        emulator_window_set_device_coarse_orientation(layout->orientation, 0.f);
         return true;
     }
     return false;
 }
 
-bool emulator_window_rotate(SkinRotation rot) {
+bool
+emulator_window_rotate(SkinRotation rot) {
     if (!qemulator->ui) {
         return false;
     }

@@ -61,9 +61,17 @@ emulator_window_done(EmulatorWindow* emulator);
 SkinLayout*
 emulator_window_get_layout(EmulatorWindow* emulator);
 
+/* Rotates the device underlying the emulator window according to the input,
+ * with the top tilted away from the user by tilt_degrees. */
+void emulator_window_set_device_coarse_orientation(
+        SkinRotation orientation, float tilt_degrees);
+
 /* Rotates the screen by 90 degrees either clockwise or counterclockwise
- * accordint to the input argument. Returns true on success, false otherwise */
+ * according to the input argument. Returns true on success, false otherwise */
 bool emulator_window_rotate_90(bool clockwise);
+
+/* Rotates the emulator UI to match the input rotation, but not the underlying
+ * device.  This should be called in response to a device orientation change. */
 bool emulator_window_rotate(SkinRotation rotation);
 
 /* Start recording the screen. Returns false if recording is already
