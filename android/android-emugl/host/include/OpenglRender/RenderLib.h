@@ -20,6 +20,10 @@
 #include "OpenglRender/Renderer.h"
 #include "OpenglRender/render_api_types.h"
 
+namespace android_studio {
+    class EmulatorGLESUsages;
+}
+
 namespace emugl {
 
 // RenderLib - root interface for the GPU emulation library
@@ -48,6 +52,8 @@ public:
     // Sets the function use to read from the guest
     // physically contiguous DMA region at particular offsets.
     virtual void setDmaOps(emugl_dma_ops) = 0;
+    // Fill GLES usage protobuf
+    virtual void fillGLESUsages(android_studio::EmulatorGLESUsages*) = 0;
 
     // initRenderer - initialize the OpenGL renderer object.
     //

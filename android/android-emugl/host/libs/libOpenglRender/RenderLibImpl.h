@@ -40,6 +40,8 @@ public:
 
     virtual void setDmaOps(emugl_dma_ops) override;
 
+    virtual void fillGLESUsages(android_studio::EmulatorGLESUsages*) override;
+
     virtual RendererPtr initRenderer(int width,
                                      int height,
                                      bool useSubWindow,

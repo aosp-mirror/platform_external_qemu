@@ -73,6 +73,13 @@ void RenderLibImpl::setDmaOps(emugl_dma_ops ops) {
     set_emugl_dma_unlock(ops.unlock);
 }
 
+void RenderLibImpl::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
+    if (!mRenderer.expired()) {
+        auto renderer = mRenderer.lock();
+        renderer->fillGLESUsages(usages);
+    }
+}
+
 RendererPtr RenderLibImpl::initRenderer(int width, int height,
                                         bool useSubWindow, bool egl2egl) {
     if (!mRenderer.expired()) {
