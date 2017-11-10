@@ -123,10 +123,7 @@ void Quickboot::finalize() {
     sInstance = nullptr;
 }
 
-Quickboot::~Quickboot() {
-    mLivenessTimer->stop();
-    mLivenessTimer.reset();
-}
+Quickboot::~Quickboot() { }
 
 void Quickboot::reportSuccessfulLoad(StringView name,
                                      System::WallDuration startTimeMs) {
