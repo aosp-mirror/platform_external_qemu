@@ -22,6 +22,30 @@
       "revId": "b638aea4ac7a6d07d701481a9aae62cd0bb1f113",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ec9aa079_5c8689ec",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-10T16:09:32Z",
+      "side": 1,
+      "message": "It\u0027s good to have the interpolation of this high degree, but also to do it in a way that minimizes oscillation, which could happen when directly solving for high order polynomials.",
+      "parentUuid": "cf649adf_0463c08c",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 55
+      },
+      "revId": "b638aea4ac7a6d07d701481a9aae62cd0bb1f113",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
