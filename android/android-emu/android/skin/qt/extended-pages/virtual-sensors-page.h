@@ -125,7 +125,7 @@ private:
     QTimer mAccelerationTimer;
     bool mIsDragging = false;
     bool mFirstShow = true;
-    SkinRotation mCoarseOrientation;
+    SkinRotation mCoarseOrientation = SKIN_ROTATION_0;
     bool mVirtualSensorsUsed = false;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 
