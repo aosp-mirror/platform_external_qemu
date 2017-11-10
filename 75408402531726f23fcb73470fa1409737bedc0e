@@ -332,6 +332,30 @@
     },
     {
       "key": {
+        "uuid": "d20ea8b0_aa79fa3d",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-10T15:58:05Z",
+      "side": 1,
+      "message": "Also I wonder if we can have just one set of coefficients for a degree \u003c\u003d 4 polynomial by churning out one of those:\n\nhttps://en.wikipedia.org/wiki/Lagrange_polynomial",
+      "parentUuid": "26ddee1f_ba3ef521",
+      "range": {
+        "startLine": 72,
+        "startChar": 8,
+        "endLine": 82,
+        "endChar": 22
+      },
+      "revId": "75408402531726f23fcb73470fa1409737bedc0e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0df0256e_a8035978",
         "filename": "android/android-emu/android/physics/InertialModel.cpp",
         "patchSetId": 1
