@@ -104,7 +104,7 @@ private:
     QTimer mAccelerationTimer;
     QTimer mAccelWidgetRotationUpdateTimer;
     bool mFirstShow = true;
-    SkinRotation mCoarseOrientation;
+    SkinRotation mCoarseOrientation = SKIN_ROTATION_0;
     bool mVirtualSensorsUsed = false;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
 };
