@@ -14,6 +14,9 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
+#include "android/utils/stream.h"
+#include "android/base/files/MemStream.h"
+
 #include <glm/vec3.hpp>
 #include <gtest/gtest.h>
 
@@ -21,6 +24,15 @@
 
 using android::base::TestSystem;
 using android::base::System;
+
+static Stream* asStream(android::base::Stream* stream) {
+    return reinterpret_cast<Stream*>(stream);
+}
+
+#define EXPECT_VEC3_NEAR(e,a,d)\
+EXPECT_NEAR(e.x,a.x,d);\
+EXPECT_NEAR(e.y,a.y,d);\
+EXPECT_NEAR(e.z,a.z,d);
 
 TEST(PhysicalModel, CreateAndDestroy) {
     TestSystem mTestSystem("/", System::kProgramBitness);
@@ -37,14 +49,10 @@ TEST(PhysicalModel, DefaultInertialSensorValues) {
     long measurement_id;
     vec3 accelerometer = physicalModel_getAccelerometer(model,
             &measurement_id);
-    EXPECT_NEAR(0.f, accelerometer.x, 0.001f);
-    EXPECT_NEAR(9.81f, accelerometer.y, 0.001f);
-    EXPECT_NEAR(0.f, accelerometer.z, 0.001f);
+    EXPECT_VEC3_NEAR((vec3{0.f, 9.81f, 0.f}), accelerometer, 0.001f);
 
     vec3 gyro = physicalModel_getGyroscope(model, &measurement_id);
-    EXPECT_NEAR(0.f, gyro.x, 0.001f);
-    EXPECT_NEAR(0.f, gyro.y, 0.001f);
-    EXPECT_NEAR(0.f, gyro.z, 0.001f);
+    EXPECT_VEC3_NEAR((vec3{0.f, 0.f, 0.f}), gyro, 0.001f);
 
     physicalModel_free(model);
 }
@@ -109,9 +117,7 @@ TEST(PhysicalModel, SetTargetPosition) {
     mTestSystem.setUnixTime(1);
     vec3 currentPosition = physicalModel_getTargetPosition(model);
 
-    EXPECT_NEAR(targetPosition.x, currentPosition.x, 0.0001f);
-    EXPECT_NEAR(targetPosition.y, currentPosition.y, 0.0001f);
-    EXPECT_NEAR(targetPosition.z, currentPosition.z, 0.0001f);
+    EXPECT_VEC3_NEAR(targetPosition, currentPosition, 0.0001f);
 
     physicalModel_free(model);
 }
@@ -131,9 +137,7 @@ TEST(PhysicalModel, SetTargetRotation) {
     mTestSystem.setUnixTime(1);
     vec3 currentRotation = physicalModel_getTargetRotation(model);
 
-    EXPECT_NEAR(targetRotation.x, currentRotation.x, 0.0001f);
-    EXPECT_NEAR(targetRotation.y, currentRotation.y, 0.0001f);
-    EXPECT_NEAR(targetRotation.z, currentRotation.z, 0.0001f);
+    EXPECT_VEC3_NEAR(targetRotation, currentRotation, 0.0001f);
 
     physicalModel_free(model);
 }
@@ -174,12 +178,7 @@ TEST(PhysicalModel, GravityAcceleration) {
         vec3 accelerometer = physicalModel_getAccelerometer(model,
                 &measurement_id);
 
-        EXPECT_NEAR(testCase.expected_acceleration.x,
-                    accelerometer.x, 0.01f);
-        EXPECT_NEAR(testCase.expected_acceleration.y,
-                    accelerometer.y, 0.01f);
-        EXPECT_NEAR(testCase.expected_acceleration.z,
-                    accelerometer.z, 0.01f);
+        EXPECT_VEC3_NEAR(testCase.expected_acceleration, accelerometer, 0.01f);
 
         physicalModel_free(model);
     }
@@ -209,9 +208,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
     // the acceleration is expected to be close to zero at this point.
     vec3 currentAcceleration = physicalModel_getAccelerometer(model,
             &measurement_id);
-    EXPECT_NEAR(currentAcceleration.x, 0.f, 0.01f);
-    EXPECT_NEAR(currentAcceleration.y, 9.81f, 0.01f);
-    EXPECT_NEAR(currentAcceleration.z, 0.f, 0.01f);
+    EXPECT_VEC3_NEAR((vec3{0.f, 9.81f, 0.f}), currentAcceleration, 0.01f);
 
     physicalModel_free(model);
 }
@@ -269,9 +266,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
 
     long measurement_id;
     vec3 currentGyro = physicalModel_getGyroscope(model, &measurement_id);
-    EXPECT_NEAR(currentGyro.x, 0.0, 0.000001f);
-    EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
-    EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
+    EXPECT_VEC3_NEAR((vec3 {0.f, 0.f, 0.f}), currentGyro, 0.000001f);
 
     physicalModel_free(model);
 }
@@ -294,9 +289,7 @@ TEST(PhysicalModel, OverrideAccelerometer) {
     long override_measurement_id;
     vec3 sensorOverriddenValue = physicalModel_getAccelerometer(model,
             &override_measurement_id);
-    EXPECT_EQ(overrideValue.x, sensorOverriddenValue.x);
-    EXPECT_EQ(overrideValue.y, sensorOverriddenValue.y);
-    EXPECT_EQ(overrideValue.z, sensorOverriddenValue.z);
+    EXPECT_VEC3_NEAR(overrideValue, sensorOverriddenValue, 0.000001f);
 
     EXPECT_NE(initial_measurement_id, override_measurement_id);
 
@@ -310,12 +303,183 @@ TEST(PhysicalModel, OverrideAccelerometer) {
     long physical_measurement_id;
     vec3 sensorPhysicalValue = physicalModel_getAccelerometer(model,
             &physical_measurement_id);
-    EXPECT_NEAR(0.f, sensorPhysicalValue.x, 0.000001f);
-    EXPECT_NEAR(9.81f, sensorPhysicalValue.y, 0.000001f);
-    EXPECT_NEAR(0.f, sensorPhysicalValue.z, 0.000001f);
+    EXPECT_VEC3_NEAR((vec3 {0.f, 9.81f, 0.f}), sensorPhysicalValue, 0.000001f);
 
     EXPECT_NE(physical_measurement_id, override_measurement_id);
     EXPECT_NE(physical_measurement_id, initial_measurement_id);
 
     physicalModel_free(model);
+}
+
+TEST(PhysicalModel, SaveLoad) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    android::base::MemStream modelStream;
+    Stream* saveStream = asStream(&modelStream);
+
+    physicalModel_save(model, saveStream);
+
+    const uint32_t streamEndMarker = 1923789U;
+    stream_put_be32(saveStream, streamEndMarker);
+
+    physicalModel_free(model);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_load(loadedModel, saveStream);
+
+    EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
+
+    physicalModel_free(loadedModel);
+}
+
+TEST(PhysicalModel, SaveLoadOverrides) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    const vec3 accelOverride = {1.f, 2.f, 3.f};
+    const vec3 gyroOverride = {4.f, 5.f, 6.f};
+    const vec3 magnetometerOverride = {7.f, 8.f, 9.f};
+    const vec3 orientationOverride = {10.f, 11.f, 12.f};
+    const float temperatureOverride = 13.f;
+    const float proximityOverride = 14.f;
+    const float lightOverride = 15.f;
+    const float pressureOverride = 16.f;
+    const float humidityOverride = 17.f;
+    const vec3 magneticUncalibratedOverride = {18.f, 19.f, 20.f};
+    const vec3 gyroUncalibratedOverride = {21.f, 22.f, 23.f};
+
+    physicalModel_overrideAccelerometer(model, accelOverride);
+    physicalModel_overrideGyroscope(model, gyroOverride);
+    physicalModel_overrideMagnetometer(model, magnetometerOverride);
+    physicalModel_overrideOrientation(model, orientationOverride);
+    physicalModel_overrideTemperature(model, temperatureOverride);
+    physicalModel_overrideProximity(model, proximityOverride);
+    physicalModel_overrideLight(model, lightOverride);
+    physicalModel_overridePressure(model, pressureOverride);
+    physicalModel_overrideHumidity(model, humidityOverride);
+    physicalModel_overrideMagnetometerUncalibrated(model,
+            magneticUncalibratedOverride);
+    physicalModel_overrideGyroscopeUncalibrated(model,
+            gyroUncalibratedOverride);
+
+    android::base::MemStream modelStream;
+    Stream* saveStream = asStream(&modelStream);
+
+    physicalModel_save(model, saveStream);
+    physicalModel_free(model);
+
+    const uint32_t streamEndMarker = 349087U;
+    stream_put_be32(saveStream, streamEndMarker);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_load(loadedModel, saveStream);
+
+    EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
+
+    long measurement_id;
+    EXPECT_VEC3_NEAR(accelOverride,
+            physicalModel_getAccelerometer(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_VEC3_NEAR(gyroOverride,
+            physicalModel_getGyroscope(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_VEC3_NEAR(magnetometerOverride,
+            physicalModel_getMagnetometer(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_VEC3_NEAR(orientationOverride,
+            physicalModel_getOrientation(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_NEAR(temperatureOverride,
+            physicalModel_getTemperature(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_NEAR(proximityOverride,
+            physicalModel_getProximity(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_NEAR(lightOverride,
+            physicalModel_getLight(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_NEAR(pressureOverride,
+            physicalModel_getPressure(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_NEAR(humidityOverride,
+            physicalModel_getHumidity(loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_VEC3_NEAR(magneticUncalibratedOverride,
+            physicalModel_getMagnetometerUncalibrated(
+                    loadedModel, &measurement_id),
+            0.00001f);
+    EXPECT_VEC3_NEAR(gyroUncalibratedOverride,
+            physicalModel_getGyroscopeUncalibrated(
+                    loadedModel, &measurement_id),
+            0.00001f);
+
+    physicalModel_free(loadedModel);
+}
+
+TEST(PhysicalModel, SaveLoadTargets) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel* model = physicalModel_new();
+
+    const vec3 positionTarget = {24.f, 25.f, 26.f};
+    const vec3 rotationTarget = {27.f, 28.f, 29.f};
+    const vec3 magneticFieldTarget = {30.f, 31.f, 32.f};
+    const float temperatureTarget = 33.f;
+    const float proximityTarget = 34.f;
+    const float lightTarget = 35.f;
+    const float pressureTarget = 36.f;
+    const float humidityTarget = 37.f;
+
+    // Note: Save/Load should save out target state - interpolation mode should
+    //       not be used, nor relevant (i.e. when loading, the interpolation is
+    //       considered to have finisshed).
+    physicalModel_setTargetPosition(model, positionTarget,
+            PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetRotation(model, rotationTarget,
+            PHYSICAL_INTERPOLATION_SMOOTH);
+    physicalModel_setTargetMagneticField(model, magneticFieldTarget,
+            PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetTemperature(model, temperatureTarget,
+            PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetProximity(model, proximityTarget,
+            PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetLight(model, lightTarget,
+            PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetPressure(model, pressureTarget,
+            PHYSICAL_INTERPOLATION_STEP);
+    physicalModel_setTargetHumidity(model, humidityTarget,
+            PHYSICAL_INTERPOLATION_STEP);
+
+    android::base::MemStream modelStream;
+    Stream* saveStream = asStream(&modelStream);
+
+    physicalModel_save(model, saveStream);
+    physicalModel_free(model);
+
+    const uint32_t streamEndMarker = 3489U;
+    stream_put_be32(saveStream, streamEndMarker);
+
+    PhysicalModel* loadedModel = physicalModel_new();
+    physicalModel_load(loadedModel, saveStream);
+
+    EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
+
+    EXPECT_VEC3_NEAR(positionTarget,
+            physicalModel_getTargetPosition(loadedModel), 0.00001f);
+    EXPECT_VEC3_NEAR(rotationTarget,
+            physicalModel_getTargetRotation(loadedModel), 0.00001f);
+    EXPECT_VEC3_NEAR(magneticFieldTarget,
+            physicalModel_getTargetMagneticField(loadedModel), 0.00001f);
+    EXPECT_NEAR(temperatureTarget,
+            physicalModel_getTargetTemperature(loadedModel), 0.00001f);
+    EXPECT_NEAR(proximityTarget,
+            physicalModel_getTargetProximity(loadedModel), 0.00001f);
+    EXPECT_NEAR(lightTarget,
+            physicalModel_getTargetLight(loadedModel), 0.00001f);
+    EXPECT_NEAR(pressureTarget,
+            physicalModel_getTargetPressure(loadedModel), 0.00001f);
+    EXPECT_NEAR(humidityTarget,
+            physicalModel_getTargetHumidity(loadedModel), 0.00001f);
+
+    physicalModel_free(loadedModel);
 }
