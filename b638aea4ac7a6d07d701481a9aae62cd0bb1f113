@@ -94,6 +94,30 @@
       "revId": "b638aea4ac7a6d07d701481a9aae62cd0bb1f113",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2739ef50_92c3be1f",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-10T19:46:18Z",
+      "side": 1,
+      "message": "Cool! Glad it worked out. I agree, it\u0027s weird having discontinuous acceleration. Thanks for the command.",
+      "parentUuid": "e9cbd0b9_e427d99c",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 55
+      },
+      "revId": "b638aea4ac7a6d07d701481a9aae62cd0bb1f113",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
