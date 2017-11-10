@@ -17,6 +17,7 @@
 #define TRANSLATOR_IFACES_H
 
 #include "android/base/containers/SmallVector.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/ShareGroup.h"
 
@@ -88,6 +89,7 @@ typedef struct {
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
     void                                            (*blitFromCurrentReadBufferANDROID)(EGLImage);
+    void                                            (*fillGLESUsages)(android_studio::EmulatorGLESUsages*);
 } GLESiface;
 
 class GlLibrary;
