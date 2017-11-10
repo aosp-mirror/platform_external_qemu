@@ -62,6 +62,14 @@ public:
     static PhysicalModelImpl* getImpl(PhysicalModel* physicalModel);
 
     /*
+     * Sets the current time of the PhysicalModel simulation.  This time is
+     * used as the current time in calculating all sensor values, along with
+     * the time when target parameter change requests are recorded as taking
+     * place.  Time values must be non-decreasing.
+     */
+    void setCurrentTime(uint64_t time_ns);
+
+    /*
      * Sets the target value for the given physical parameter that the physical
      * model should move towards.
      * Can be called from any thread.
@@ -141,7 +149,6 @@ private:
         mUseOverride[sensor] = true;
         mMeasurementId[sensor]++;
         *overrideMemberPointer = overrideValue;
-        physicalStateStabilized();
     }
 
     /*
@@ -185,6 +192,8 @@ private:
 #undef SENSOR_
 #undef OVERRIDE_NAME
 
+    uint64_t mModelTimeNs = 0L;
+
     PhysicalModel mPhysicalModelInterface;
 };
 
@@ -219,13 +228,26 @@ PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
             nullptr;
 }
 
+void PhysicalModelImpl::setCurrentTime(uint64_t time_ns) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    assert(time_ns >= mModelTimeNs);
+    mModelTimeNs = time_ns;
+    bool isInertialModelStable = mInertialModel.setCurrentTime(time_ns) ==
+            INERTIAL_STATE_STABLE;
+    bool isAmbientModelStable = mAmbientEnvironment.setCurrentTime(time_ns) ==
+            AMBIENT_STATE_STABLE;
+    if (isInertialModelStable && isAmbientModelStable &&
+            mIsPhysicalStateChanging) {
+        physicalStateStabilized();
+    }
+}
+
 void PhysicalModelImpl::setTargetPosition(vec3 position,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mInertialModel.setTargetPosition(toGlm(position), mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 void PhysicalModelImpl::setTargetRotation(vec3 rotation,
@@ -235,7 +257,6 @@ void PhysicalModelImpl::setTargetRotation(vec3 rotation,
     mInertialModel.setTargetRotation(
             glm::quat(glm::radians(toGlm(rotation))), mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 void PhysicalModelImpl::setTargetMagneticField(
@@ -245,7 +266,6 @@ void PhysicalModelImpl::setTargetMagneticField(
     mAmbientEnvironment.setMagneticField(
         field.x, field.y, field.z, mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 void PhysicalModelImpl::setTargetTemperature(
@@ -254,7 +274,6 @@ void PhysicalModelImpl::setTargetTemperature(
     physicalStateChanging();
     mAmbientEnvironment.setTemperature(celsius, mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 void PhysicalModelImpl::setTargetProximity(
@@ -263,7 +282,6 @@ void PhysicalModelImpl::setTargetProximity(
     physicalStateChanging();
     mAmbientEnvironment.setProximity(centimeters, mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 void PhysicalModelImpl::setTargetLight(float lux, PhysicalInterpolation mode) {
@@ -271,7 +289,6 @@ void PhysicalModelImpl::setTargetLight(float lux, PhysicalInterpolation mode) {
     physicalStateChanging();
     mAmbientEnvironment.setLight(lux, mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 void PhysicalModelImpl::setTargetPressure(
@@ -280,7 +297,6 @@ void PhysicalModelImpl::setTargetPressure(
     physicalStateChanging();
     mAmbientEnvironment.setPressure(hPa, mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 void PhysicalModelImpl::setTargetHumidity(
@@ -289,7 +305,6 @@ void PhysicalModelImpl::setTargetHumidity(
     physicalStateChanging();
     mAmbientEnvironment.setHumidity(percentage, mode);
     targetStateChanged();
-    physicalStateStabilized();
 }
 
 vec3 PhysicalModelImpl::getTargetPosition() const {
@@ -607,8 +622,11 @@ SENSORS_LIST
 }
 
 void PhysicalModelImpl::physicalStateChanging() {
-    assert(!mIsPhysicalStateChanging);
-    if (mAgent != nullptr && mAgent->onPhysicalStateChanging != nullptr) {
+    // Note: We only call onPhysicalStateChanging if this is a transition from
+    // stable to changing (i.e. don't call if we get to physicalStateChanging
+    // calls in a row without a physicalStateStabilized call in between).
+    if (!mIsPhysicalStateChanging && mAgent != nullptr &&
+            mAgent->onPhysicalStateChanging != nullptr) {
         mAgent->onPhysicalStateChanging(mAgent->context);
     }
     mIsPhysicalStateChanging = true;
@@ -651,6 +669,13 @@ void physicalModel_free(PhysicalModel* model) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         delete impl;
+    }
+}
+
+void physicalModel_setCurrentTime(PhysicalModel* model, uint64_t time_ns) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        impl->setCurrentTime(time_ns);
     }
 }
 

@@ -52,6 +52,12 @@ PhysicalModel* physicalModel_new();
 /* Destroy and free a physical model */
 void physicalModel_free(PhysicalModel* model);
 
+/*
+ * Update the current time on the physical model. Time values must be
+ * non-decreasing.
+ */
+void physicalModel_setCurrentTime(PhysicalModel* model, uint64_t time_ns);
+
 /* Target setters for all physical parameters */
 #define SET_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) void SET_TARGET_FUNCTION_NAME(z)(\

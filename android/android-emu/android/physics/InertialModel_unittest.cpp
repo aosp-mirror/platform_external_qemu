@@ -24,32 +24,36 @@ using android::physics::InertialModel;
 
 TEST(InertialModel, DefaultPosition) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(1);
+
     InertialModel inertialModel;
+    inertialModel.setCurrentTime(1000000000UL);
+
     EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getPosition());
     EXPECT_EQ(glm::quat(1.f, 0.f, 0.f, 0.f), inertialModel.getRotation());
 }
 
 TEST(InertialModel, DefaultAccelerationAndRotationalVelocity) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(1);
+
     InertialModel inertialModel;
+    inertialModel.setCurrentTime(1000000000UL);
+
     EXPECT_EQ(glm::vec3(0.f, 0.0f, 0.f), inertialModel.getAcceleration());
     EXPECT_EQ(glm::vec3(0.f, 0.f, 0.f), inertialModel.getRotationalVelocity());
 }
 
 TEST(InertialModel, ConvergeToPosition) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
+
     InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+
     glm::vec3 targetPosition(2.0f, 3.0f, 4.0f);
     inertialModel.setTargetPosition(
             targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
-    // After 1 second, check that we are close to the target position.
-    mTestSystem.setUnixTime(1);
+
+    inertialModel.setCurrentTime(1000000000UL);
+
     glm::vec3 currentPosition(inertialModel.getPosition());
     EXPECT_NEAR(targetPosition.x, currentPosition.x, 0.01f);
     EXPECT_NEAR(targetPosition.y, currentPosition.y, 0.01f);
@@ -66,9 +70,10 @@ TEST(InertialModel, AtRestRotationalVelocity) {
 }
 TEST(InertialModel, ZeroAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(1);
+
     InertialModel inertialModel;
+    inertialModel.setCurrentTime(1000000000UL);
+
     glm::vec3 targetPosition(2.0f, 3.0f, 4.0f);
     // at 1 second we move the target to (2, 3, 4)
     inertialModel.setTargetPosition(
@@ -86,14 +91,17 @@ TEST(InertialModel, ZeroAcceleration) {
 
 TEST(InertialModel, ConvergeToRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
+
     InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+
     glm::quat targetRotation(glm::vec3(90.f, 90.f, 90.f));
     inertialModel.setTargetRotation(
             targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
     // After 1 second, check that we are close to the target rotation.
-    mTestSystem.setUnixTime(1);
+    inertialModel.setCurrentTime(1000000000UL);
+
     glm::quat currentRotation(inertialModel.getRotation());
     EXPECT_NEAR(targetRotation.w, currentRotation.w, 0.01f);
     EXPECT_NEAR(targetRotation.x, currentRotation.x, 0.01f);
@@ -103,9 +111,10 @@ TEST(InertialModel, ConvergeToRotation) {
 
 TEST(InertialModel, NonInstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
+
     InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+
     glm::quat startRotation(glm::vec3(0.f, 0.f, 0.f));
     inertialModel.setTargetRotation(
             startRotation, PHYSICAL_INTERPOLATION_STEP);
@@ -121,9 +130,10 @@ TEST(InertialModel, NonInstantaneousRotation) {
 
 TEST(InertialModel, InstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
+
     InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+
     glm::quat startRotation(glm::vec3(0.f, 0.f, 0.f));
     inertialModel.setTargetRotation(
             startRotation, PHYSICAL_INTERPOLATION_STEP);
@@ -135,4 +145,84 @@ TEST(InertialModel, InstantaneousRotation) {
     EXPECT_NEAR(currentGyro.x, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.y, 0.0, 0.000001f);
     EXPECT_NEAR(currentGyro.z, 0.0, 0.000001f);
+}
+
+TEST(InertialModel, SmoothAcceleration) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::vec3 targetPosition (10.0f, 5.0f, 2.0f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetPosition(glm::vec3(0.f), PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetPosition(targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    glm::vec3 integratedVelocity = glm::vec3(0.f);
+    glm::vec3 doubleIntegratedPosition = glm::vec3(0.f);
+
+    glm::vec3 singleIntegratedPosition = glm::vec3(0.f);
+
+    constexpr uint64_t step = 500UL;
+    constexpr float timeIncrement = step / 1000000000.f;
+    for (uint64_t time = step >> 1; time < 500000000; time += step) {
+        inertialModel.setCurrentTime(time);
+        integratedVelocity += timeIncrement * inertialModel.getAcceleration();
+        doubleIntegratedPosition += timeIncrement * integratedVelocity;
+
+        singleIntegratedPosition += timeIncrement * inertialModel.getVelocity();
+    }
+
+    EXPECT_NEAR(doubleIntegratedPosition.x, targetPosition.x, 0.05f);
+    EXPECT_NEAR(doubleIntegratedPosition.y, targetPosition.y, 0.05f);
+    EXPECT_NEAR(doubleIntegratedPosition.z, targetPosition.z, 0.05f);
+
+    EXPECT_NEAR(singleIntegratedPosition.x, targetPosition.x, 0.05f);
+    EXPECT_NEAR(singleIntegratedPosition.y, targetPosition.y, 0.05f);
+    EXPECT_NEAR(singleIntegratedPosition.z, targetPosition.z, 0.05f);
+}
+
+TEST(InertialModel, MultipleTargets) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::vec3 intermediatePosition (8.0f, 25.0f, 4.0f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetPosition(glm::vec3(0.f), PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetPosition(intermediatePosition, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    glm::vec3 integratedVelocity = glm::vec3(0.f);
+    glm::vec3 doubleIntegratedPosition = glm::vec3(0.f);
+
+    glm::vec3 singleIntegratedPosition = glm::vec3(0.f);
+
+    constexpr uint64_t step = 500UL;
+    constexpr float timeIncrement = step / 1000000000.f;
+    uint64_t time = step >> 1;
+    for (; time < 250000000; time += step) {
+        inertialModel.setCurrentTime(time);
+        integratedVelocity += timeIncrement * inertialModel.getAcceleration();
+        doubleIntegratedPosition += timeIncrement * integratedVelocity;
+
+        singleIntegratedPosition += timeIncrement * inertialModel.getVelocity();
+    }
+
+    glm::vec3 targetPosition (-4.0f, 12.0f, 9.0f);
+    inertialModel.setTargetPosition(targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    for (; time < 750000000.f; time += step) {
+        inertialModel.setCurrentTime(time);
+        integratedVelocity += timeIncrement * inertialModel.getAcceleration();
+        doubleIntegratedPosition += timeIncrement * integratedVelocity;
+
+        singleIntegratedPosition += timeIncrement * inertialModel.getVelocity();
+    }
+
+    EXPECT_NEAR(doubleIntegratedPosition.x, targetPosition.x, 0.05f);
+    EXPECT_NEAR(doubleIntegratedPosition.y, targetPosition.y, 0.05f);
+    EXPECT_NEAR(doubleIntegratedPosition.z, targetPosition.z, 0.05f);
+
+    EXPECT_NEAR(singleIntegratedPosition.x, targetPosition.x, 0.05f);
+    EXPECT_NEAR(singleIntegratedPosition.y, targetPosition.y, 0.05f);
+    EXPECT_NEAR(singleIntegratedPosition.z, targetPosition.z, 0.05f);
 }

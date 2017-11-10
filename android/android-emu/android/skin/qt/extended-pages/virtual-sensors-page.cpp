@@ -459,8 +459,7 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
  */
 void VirtualSensorsPage::propagateSlidersChange() {
     updateAccelWidgetFromSliders();
-    updateModelFromAccelWidget(
-        mIsDragging ? PHYSICAL_INTERPOLATION_SMOOTH : PHYSICAL_INTERPOLATION_STEP);
+    updateModelFromAccelWidget( PHYSICAL_INTERPOLATION_SMOOTH );
 }
 
 /*
@@ -498,13 +497,14 @@ void VirtualSensorsPage::updateSlidersFromAccelWidget() {
     mUi->positionYSlider->setValue(pos.y, false);
 }
 
+constexpr float kMetersPerInch = 0.0254f;
 
 /*
  * Send the accel widget's position and rotation to the model as the new
  * targets.
  */
 void VirtualSensorsPage::updateModelFromAccelWidget(PhysicalInterpolation mode) {
-    const glm::vec2& position = mUi->accelWidget->position();
+    const glm::vec2& position = kMetersPerInch * mUi->accelWidget->position();
     const glm::vec3 rotationDegrees(glm::degrees(glm::eulerAngles(
             mUi->accelWidget->rotation())));
 
@@ -522,7 +522,8 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
         glm::vec3 position;
         mSensorsAgent->getPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION,
                 &position.x, &position.y, &position.z);
-        position.z = 0.0f;
+        position = (1.f / kMetersPerInch) * position;
+
         glm::vec3 eulerDegrees;
         mSensorsAgent->getPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
                 &eulerDegrees.x, &eulerDegrees.y, &eulerDegrees.z);
