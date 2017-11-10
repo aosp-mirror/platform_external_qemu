@@ -7,8 +7,9 @@ File fprops = new File(rootDir.getParentFile(), 'external/qemu/source.properties
 Properties props = new Properties()
 props.load(fprops.newDataInputStream())
 
-// Mac emulator now has dependency on haxm 6.2.1
+// Mac/Win emulator now has dependency on haxm 6.2.1
 File fprops_mac = new File(rootDir.getParentFile(), 'external/qemu/mac.source.properties')
+File fprops_win = new File(rootDir.getParentFile(), 'external/qemu/win.source.properties')
 
 task buildDefaultEmulator(type: BuildEmulator) {
     revision = props."Pkg.Revision"
@@ -109,7 +110,8 @@ sdk {
     }
 
     windows {
-        item(fprops) {
+        item(fprops_win) {
+            name 'source.properties'
             notice null
         }
         item('android/android-emu/android/avd/hardware-properties.ini') {
