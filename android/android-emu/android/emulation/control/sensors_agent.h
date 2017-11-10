@@ -33,6 +33,13 @@ typedef struct QAndroidSensorsAgent {
     int (*getPhysicalParameterTarget)(
             int parameterId, float *a, float *b, float *c);
 
+    // Sets the coarse orientation of the modeled device.
+    // Input: |orientation| determines which coarse orientation to use, i.e.
+    //                      ANDROID_COARSE_PORTRAIT,
+    //                      ANDROID_COARSE_LANDSCAPE,
+    //                      etc.
+    int (*setCoarseOrientation)(int orientation);
+
     // Sets the values of a given sensor to the specified override.
     // Input: |sensorId| determines which sensor's values to retrieve, i.e.
     //                   ANDROID_SENSOR_ACCELERATION,
