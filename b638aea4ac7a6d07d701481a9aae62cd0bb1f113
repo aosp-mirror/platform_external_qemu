@@ -46,6 +46,30 @@
       "revId": "b638aea4ac7a6d07d701481a9aae62cd0bb1f113",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "50027a37_ec464234",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-10T19:03:49Z",
+      "side": 1,
+      "message": "I was thinking about how I was doing this and realizing that the two-phase method here was leftover from when I was doing constant accelerations, and with higher-order polynomials this was not necessary at all.  So, I decided to try switching to a single polynomial interpolation, and it seems to work better in terms of being smooth, and is quite a bit simpler.\n\nThe good news is that removing the transition phase gets us down to only 6 givens (initial and target position, velocity, and acceleration) which makes the system of equations much simpler.\n\nThe bad news is that we have to move up in order from two quartic polynomials to a single quintic polynomial (6 equations so we need 6 unknowns).\n\nI\u0027ve tested this a fair amount and empirically it doesn\u0027t seem to run into troublesome oscillation problems.  If at some point we decide we need to not have such a high order polynomial we\u0027d probably have to drop the requirement that acceleration be continuous and then we could go to a cubic polynomial.\n\nI would prefer not to have jump-discontinuities in the acceleration because it would make for significantly greater errors in computing integrated velocity/acceleration, and is probably a little less realistic compared to real physical movement.",
+      "parentUuid": "ec9aa079_5c8689ec",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 55
+      },
+      "revId": "b638aea4ac7a6d07d701481a9aae62cd0bb1f113",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
