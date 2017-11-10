@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cf649adf_0463c08c",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-10T16:06:53Z",
+      "side": 1,
+      "message": "I\u0027ve no idea how to do these here nicely (used to C^2 continuity or less) but there is a paper here that seems promising\n\nhttp://www.rbanchs.com/documents/THFEL_PR07.pdf",
+      "range": {
+        "startLine": 125,
+        "startChar": 0,
+        "endLine": 128,
+        "endChar": 55
+      },
+      "revId": "b638aea4ac7a6d07d701481a9aae62cd0bb1f113",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
