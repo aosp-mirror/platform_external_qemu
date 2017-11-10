@@ -361,13 +361,6 @@ static int vdi_open(BlockDriverState *bs, QDict *options, int flags,
     VdiHeader header;
     size_t bmap_size;
     int ret;
-    Error *local_err = NULL;
-
-    bs->file = bdrv_open_child(NULL, options, "file", bs, &child_file,
-                               false, errp);
-    if (!bs->file) {
-        return -EINVAL;
-    }
 
     logout("\n");
 
@@ -478,12 +471,7 @@ static int vdi_open(BlockDriverState *bs, QDict *options, int flags,
     error_setg(&s->migration_blocker, "The vdi format used by node '%s' "
                "does not support live migration",
                bdrv_get_device_or_node_name(bs));
-    ret = migrate_add_blocker(s->migration_blocker, &local_err);
-    if (local_err) {
-        error_propagate(errp, local_err);
-        error_free(s->migration_blocker);
-        goto fail_free_bmap;
-    }
+    migrate_add_blocker(s->migration_blocker);
 
     qemu_co_mutex_init(&s->write_lock);
 
@@ -763,8 +751,7 @@ static int vdi_create(const char *filename, QemuOpts *opts, Error **errp)
     }
 
     blk = blk_new_open(filename, NULL, NULL,
-                       BDRV_O_RDWR | BDRV_O_RESIZE | BDRV_O_PROTOCOL,
-                       &local_err);
+                       BDRV_O_RDWR | BDRV_O_PROTOCOL, &local_err);
     if (blk == NULL) {
         error_propagate(errp, local_err);
         ret = -EIO;
@@ -892,7 +879,6 @@ static BlockDriver bdrv_vdi = {
     .bdrv_open = vdi_open,
     .bdrv_close = vdi_close,
     .bdrv_reopen_prepare = vdi_reopen_prepare,
-    .bdrv_child_perm          = bdrv_format_default_perms,
     .bdrv_create = vdi_create,
     .bdrv_has_zero_init = bdrv_has_zero_init_1,
     .bdrv_co_get_block_status = vdi_co_get_block_status,

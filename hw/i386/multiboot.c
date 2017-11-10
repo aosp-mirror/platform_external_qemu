@@ -109,7 +109,7 @@ static uint32_t mb_add_cmdline(MultibootState *s, const char *cmdline)
     hwaddr p = s->offset_cmdlines;
     char *b = (char *)s->mb_buf + p;
 
-    memcpy(b, cmdline, strlen(cmdline) + 1);
+    get_opt_value(b, strlen(cmdline) + 1, cmdline);
     s->offset_cmdlines += strlen(b) + 1;
     return s->mb_buf_phys + p;
 }
@@ -287,8 +287,7 @@ int load_multiboot(FWCfgState *fw_cfg,
     mbs.offset_bootloader = mbs.offset_cmdlines + cmdline_len;
 
     if (initrd_filename) {
-        const char *next_initrd;
-        char not_last, tmpbuf[strlen(initrd_filename) + 1];
+        char *next_initrd, not_last;
 
         mbs.offset_mods = mbs.mb_buf_size;
 
@@ -297,24 +296,25 @@ int load_multiboot(FWCfgState *fw_cfg,
             int mb_mod_length;
             uint32_t offs = mbs.mb_buf_size;
 
-            next_initrd = get_opt_value(tmpbuf, sizeof(tmpbuf), initrd_filename);
+            next_initrd = (char *)get_opt_value(NULL, 0, initrd_filename);
             not_last = *next_initrd;
+            *next_initrd = '\0';
             /* if a space comes after the module filename, treat everything
                after that as parameters */
-            hwaddr c = mb_add_cmdline(&mbs, tmpbuf);
-            if ((next_space = strchr(tmpbuf, ' ')))
+            hwaddr c = mb_add_cmdline(&mbs, initrd_filename);
+            if ((next_space = strchr(initrd_filename, ' ')))
                 *next_space = '\0';
-            mb_debug("multiboot loading module: %s\n", tmpbuf);
-            mb_mod_length = get_image_size(tmpbuf);
+            mb_debug("multiboot loading module: %s\n", initrd_filename);
+            mb_mod_length = get_image_size(initrd_filename);
             if (mb_mod_length < 0) {
-                fprintf(stderr, "Failed to open file '%s'\n", tmpbuf);
+                fprintf(stderr, "Failed to open file '%s'\n", initrd_filename);
                 exit(1);
             }
 
             mbs.mb_buf_size = TARGET_PAGE_ALIGN(mb_mod_length + mbs.mb_buf_size);
             mbs.mb_buf = g_realloc(mbs.mb_buf, mbs.mb_buf_size);
 
-            load_image(tmpbuf, (unsigned char *)mbs.mb_buf + offs);
+            load_image(initrd_filename, (unsigned char *)mbs.mb_buf + offs);
             mb_add_mod(&mbs, mbs.mb_buf_phys + offs,
                        mbs.mb_buf_phys + offs + mb_mod_length, c);
 

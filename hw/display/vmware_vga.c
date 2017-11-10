@@ -25,7 +25,7 @@
 #include "qapi/error.h"
 #include "hw/hw.h"
 #include "hw/loader.h"
-#include "hw/display/trace.h"
+#include "trace.h"
 #include "ui/console.h"
 #include "ui/vnc.h"
 #include "hw/pci/pci.h"

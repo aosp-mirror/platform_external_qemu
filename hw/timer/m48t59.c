@@ -29,10 +29,17 @@
 #include "qemu/timer.h"
 #include "sysemu/sysemu.h"
 #include "hw/sysbus.h"
+#include "hw/isa/isa.h"
 #include "exec/address-spaces.h"
 #include "qemu/bcd.h"
 
-#include "m48t59-internal.h"
+//#define DEBUG_NVRAM
+
+#if defined(DEBUG_NVRAM)
+#define NVRAM_PRINTF(fmt, ...) do { printf(fmt , ## __VA_ARGS__); } while (0)
+#else
+#define NVRAM_PRINTF(fmt, ...) do { } while (0)
+#endif
 
 #define TYPE_M48TXX_SYS_BUS "sysbus-m48txx"
 #define M48TXX_SYS_BUS_GET_CLASS(obj) \
@@ -42,12 +49,67 @@
 #define M48TXX_SYS_BUS(obj) \
     OBJECT_CHECK(M48txxSysBusState, (obj), TYPE_M48TXX_SYS_BUS)
 
+#define TYPE_M48TXX_ISA "isa-m48txx"
+#define M48TXX_ISA_GET_CLASS(obj) \
+    OBJECT_GET_CLASS(M48txxISADeviceClass, (obj), TYPE_M48TXX_ISA)
+#define M48TXX_ISA_CLASS(klass) \
+    OBJECT_CLASS_CHECK(M48txxISADeviceClass, (klass), TYPE_M48TXX_ISA)
+#define M48TXX_ISA(obj) \
+    OBJECT_CHECK(M48txxISAState, (obj), TYPE_M48TXX_ISA)
+
+/*
+ * The M48T02, M48T08 and M48T59 chips are very similar. The newer '59 has
+ * alarm and a watchdog timer and related control registers. In the
+ * PPC platform there is also a nvram lock function.
+ */
+
+typedef struct M48txxInfo {
+    const char *isa_name;
+    const char *sysbus_name;
+    uint32_t model; /* 2 = m48t02, 8 = m48t08, 59 = m48t59 */
+    uint32_t size;
+} M48txxInfo;
+
 /*
  * Chipset docs:
  * http://www.st.com/stonline/products/literature/ds/2410/m48t02.pdf
  * http://www.st.com/stonline/products/literature/ds/2411/m48t08.pdf
  * http://www.st.com/stonline/products/literature/od/7001/m48t59y.pdf
  */
+
+typedef struct M48t59State {
+    /* Hardware parameters */
+    qemu_irq IRQ;
+    MemoryRegion iomem;
+    uint32_t size;
+    int32_t base_year;
+    /* RTC management */
+    time_t   time_offset;
+    time_t   stop_time;
+    /* Alarm & watchdog */
+    struct tm alarm;
+    QEMUTimer *alrm_timer;
+    QEMUTimer *wd_timer;
+    /* NVRAM storage */
+    uint8_t *buffer;
+    /* Model parameters */
+    uint32_t model; /* 2 = m48t02, 8 = m48t08, 59 = m48t59 */
+    /* NVRAM storage */
+    uint16_t addr;
+    uint8_t  lock;
+} M48t59State;
+
+typedef struct M48txxISAState {
+    ISADevice parent_obj;
+    M48t59State state;
+    uint32_t io_base;
+    MemoryRegion io;
+} M48txxISAState;
+
+typedef struct M48txxISADeviceClass {
+    ISADeviceClass parent_class;
+    M48txxInfo info;
+} M48txxISADeviceClass;
 
 typedef struct M48txxSysBusState {
     SysBusDevice parent_obj;
@@ -60,17 +122,21 @@ typedef struct M48txxSysBusDeviceClass {
     M48txxInfo info;
 } M48txxSysBusDeviceClass;
 
-static M48txxInfo m48txx_sysbus_info[] = {
+static M48txxInfo m48txx_info[] = {
     {
-        .bus_name = "sysbus-m48t02",
+        .sysbus_name = "sysbus-m48t02",
         .model = 2,
         .size = 0x800,
     },{
-        .bus_name = "sysbus-m48t08",
+        .sysbus_name = "sysbus-m48t08",
         .model = 8,
         .size = 0x2000,
     },{
-        .bus_name = "sysbus-m48t59",
+        .sysbus_name = "sysbus-m48t59",
+        .model = 59,
+        .size = 0x2000,
+    },{
+        .isa_name = "isa-m48t59",
         .model = 59,
         .size = 0x2000,
     }
@@ -182,7 +248,7 @@ static void set_up_watchdog(M48t59State *NVRAM, uint8_t value)
 }
 
 /* Direct access to NVRAM */
-void m48t59_write(M48t59State *NVRAM, uint32_t addr, uint32_t val)
+static void m48t59_write(M48t59State *NVRAM, uint32_t addr, uint32_t val)
 {
     struct tm tm;
     int tmp;
@@ -347,7 +413,7 @@ void m48t59_write(M48t59State *NVRAM, uint32_t addr, uint32_t val)
     }
 }
 
-uint32_t m48t59_read(M48t59State *NVRAM, uint32_t addr)
+static uint32_t m48t59_read(M48t59State *NVRAM, uint32_t addr)
 {
     struct tm tm;
     uint32_t retval = 0xFF;
@@ -449,6 +515,11 @@ uint32_t m48t59_read(M48t59State *NVRAM, uint32_t addr)
        NVRAM_PRINTF("%s: 0x%08x <= 0x%08x\n", __func__, addr, retval);
 
     return retval;
+}
+
+static void m48t59_toggle_lock(M48t59State *NVRAM, int lock)
+{
+    NVRAM->lock ^= 1 << lock;
 }
 
 /* IO access to NVRAM */
@@ -563,12 +634,12 @@ static const VMStateDescription vmstate_m48t59 = {
     .fields = (VMStateField[]) {
         VMSTATE_UINT8(lock, M48t59State),
         VMSTATE_UINT16(addr, M48t59State),
-        VMSTATE_VBUFFER_UINT32(buffer, M48t59State, 0, NULL, size),
+        VMSTATE_VBUFFER_UINT32(buffer, M48t59State, 0, NULL, 0, size),
         VMSTATE_END_OF_LIST()
     }
 };
 
-void m48t59_reset_common(M48t59State *NVRAM)
+static void m48t59_reset_common(M48t59State *NVRAM)
 {
     NVRAM->addr = 0;
     NVRAM->lock = 0;
@@ -579,6 +650,14 @@ void m48t59_reset_common(M48t59State *NVRAM)
         timer_del(NVRAM->wd_timer);
 }
 
+static void m48t59_reset_isa(DeviceState *d)
+{
+    M48txxISAState *isa = M48TXX_ISA(d);
+    M48t59State *NVRAM = &isa->state;
+
+    m48t59_reset_common(NVRAM);
+}
+
 static void m48t59_reset_sysbus(DeviceState *d)
 {
     M48txxSysBusState *sys = M48TXX_SYS_BUS(d);
@@ -587,7 +666,7 @@ static void m48t59_reset_sysbus(DeviceState *d)
     m48t59_reset_common(NVRAM);
 }
 
-const MemoryRegionOps m48t59_io_ops = {
+static const MemoryRegionOps m48t59_io_ops = {
     .read = NVRAM_readb,
     .write = NVRAM_writeb,
     .impl = {
@@ -606,13 +685,14 @@ Nvram *m48t59_init(qemu_irq IRQ, hwaddr mem_base,
     SysBusDevice *s;
     int i;
 
-    for (i = 0; i < ARRAY_SIZE(m48txx_sysbus_info); i++) {
-        if (m48txx_sysbus_info[i].size != size ||
-            m48txx_sysbus_info[i].model != model) {
+    for (i = 0; i < ARRAY_SIZE(m48txx_info); i++) {
+        if (!m48txx_info[i].sysbus_name ||
+            m48txx_info[i].size != size ||
+            m48txx_info[i].model != model) {
             continue;
         }
 
-        dev = qdev_create(NULL, m48txx_sysbus_info[i].bus_name);
+        dev = qdev_create(NULL, m48txx_info[i].sysbus_name);
         qdev_prop_set_int32(dev, "base-year", base_year);
         qdev_init_nofail(dev);
         s = SYS_BUS_DEVICE(dev);
@@ -632,7 +712,31 @@ Nvram *m48t59_init(qemu_irq IRQ, hwaddr mem_base,
     return NULL;
 }
 
-void m48t59_realize_common(M48t59State *s, Error **errp)
+Nvram *m48t59_init_isa(ISABus *bus, uint32_t io_base, uint16_t size,
+                       int base_year, int model)
+{
+    DeviceState *dev;
+    int i;
+
+    for (i = 0; i < ARRAY_SIZE(m48txx_info); i++) {
+        if (!m48txx_info[i].isa_name ||
+            m48txx_info[i].size != size ||
+            m48txx_info[i].model != model) {
+            continue;
+        }
+
+        dev = DEVICE(isa_create(bus, m48txx_info[i].isa_name));
+        qdev_prop_set_uint32(dev, "iobase", io_base);
+        qdev_prop_set_int32(dev, "base-year", base_year);
+        qdev_init_nofail(dev);
+        return NVRAM(dev);
+    }
+
+    assert(false);
+    return NULL;
+}
+
+static void m48t59_realize_common(M48t59State *s, Error **errp)
 {
     s->buffer = g_malloc0(s->size);
     if (s->model == 59) {
@@ -642,6 +746,23 @@ void m48t59_realize_common(M48t59State *s, Error **errp)
     qemu_get_timedate(&s->alarm, 0);
 
     vmstate_register(NULL, -1, &vmstate_m48t59, s);
+}
+
+static void m48t59_isa_realize(DeviceState *dev, Error **errp)
+{
+    M48txxISADeviceClass *u = M48TXX_ISA_GET_CLASS(dev);
+    ISADevice *isadev = ISA_DEVICE(dev);
+    M48txxISAState *d = M48TXX_ISA(dev);
+    M48t59State *s = &d->state;
+
+    s->model = u->info.model;
+    s->size = u->info.size;
+    isa_init_irq(isadev, &s->IRQ, 8);
+    m48t59_realize_common(s, errp);
+    memory_region_init_io(&d->io, OBJECT(dev), &m48t59_io_ops, s, "m48t59", 4);
+    if (d->io_base != 0) {
+        isa_register_ioport(isadev, &d->io, d->io_base);
+    }
 }
 
 static int m48t59_init1(SysBusDevice *dev)
@@ -668,6 +789,51 @@ static int m48t59_init1(SysBusDevice *dev)
     }
 
     return 0;
+}
+
+static uint32_t m48txx_isa_read(Nvram *obj, uint32_t addr)
+{
+    M48txxISAState *d = M48TXX_ISA(obj);
+    return m48t59_read(&d->state, addr);
+}
+
+static void m48txx_isa_write(Nvram *obj, uint32_t addr, uint32_t val)
+{
+    M48txxISAState *d = M48TXX_ISA(obj);
+    m48t59_write(&d->state, addr, val);
+}
+
+static void m48txx_isa_toggle_lock(Nvram *obj, int lock)
+{
+    M48txxISAState *d = M48TXX_ISA(obj);
+    m48t59_toggle_lock(&d->state, lock);
+}
+
+static Property m48t59_isa_properties[] = {
+    DEFINE_PROP_INT32("base-year", M48txxISAState, state.base_year, 0),
+    DEFINE_PROP_UINT32("iobase", M48txxISAState, io_base, 0x74),
+    DEFINE_PROP_END_OF_LIST(),
+};
+
+static void m48txx_isa_class_init(ObjectClass *klass, void *data)
+{
+    DeviceClass *dc = DEVICE_CLASS(klass);
+    NvramClass *nc = NVRAM_CLASS(klass);
+
+    dc->realize = m48t59_isa_realize;
+    dc->reset = m48t59_reset_isa;
+    dc->props = m48t59_isa_properties;
+    nc->read = m48txx_isa_read;
+    nc->write = m48txx_isa_write;
+    nc->toggle_lock = m48txx_isa_toggle_lock;
+}
+
+static void m48txx_isa_concrete_class_init(ObjectClass *klass, void *data)
+{
+    M48txxISADeviceClass *u = M48TXX_ISA_CLASS(klass);
+    M48txxInfo *info = data;
+
+    u->info = *info;
 }
 
 static uint32_t m48txx_sysbus_read(Nvram *obj, uint32_t addr)
@@ -733,6 +899,18 @@ static const TypeInfo m48txx_sysbus_type_info = {
     }
 };
 
+static const TypeInfo m48txx_isa_type_info = {
+    .name = TYPE_M48TXX_ISA,
+    .parent = TYPE_ISA_DEVICE,
+    .instance_size = sizeof(M48txxISAState),
+    .abstract = true,
+    .class_init = m48txx_isa_class_init,
+    .interfaces = (InterfaceInfo[]) {
+        { TYPE_NVRAM },
+        { }
+    }
+};
+
 static void m48t59_register_types(void)
 {
     TypeInfo sysbus_type_info = {
@@ -740,15 +918,29 @@ static void m48t59_register_types(void)
         .class_size = sizeof(M48txxSysBusDeviceClass),
         .class_init = m48txx_sysbus_concrete_class_init,
     };
+    TypeInfo isa_type_info = {
+        .parent = TYPE_M48TXX_ISA,
+        .class_size = sizeof(M48txxISADeviceClass),
+        .class_init = m48txx_isa_concrete_class_init,
+    };
     int i;
 
     type_register_static(&nvram_info);
     type_register_static(&m48txx_sysbus_type_info);
+    type_register_static(&m48txx_isa_type_info);
 
-    for (i = 0; i < ARRAY_SIZE(m48txx_sysbus_info); i++) {
-        sysbus_type_info.name = m48txx_sysbus_info[i].bus_name;
-        sysbus_type_info.class_data = &m48txx_sysbus_info[i];
-        type_register(&sysbus_type_info);
+    for (i = 0; i < ARRAY_SIZE(m48txx_info); i++) {
+        if (m48txx_info[i].sysbus_name) {
+            sysbus_type_info.name = m48txx_info[i].sysbus_name;
+            sysbus_type_info.class_data = &m48txx_info[i];
+            type_register(&sysbus_type_info);
+        }
+
+        if (m48txx_info[i].isa_name) {
+            isa_type_info.name = m48txx_info[i].isa_name;
+            isa_type_info.class_data = &m48txx_info[i];
+            type_register(&isa_type_info);
+        }
     }
 }
 

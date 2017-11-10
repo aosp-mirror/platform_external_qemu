@@ -29,7 +29,6 @@
 #include "cpu.h"
 #include "exec/tb-context.h"
 #include "qemu/bitops.h"
-#include "tcg-mo.h"
 #include "tcg-target.h"
 
 /* XXX: make safe guess about sizes */
@@ -80,15 +79,6 @@ typedef uint64_t tcg_target_ulong;
 #error unsupported
 #endif
 
-/* Oversized TCG guests make things like MTTCG hard
- * as we can't use atomics for cputlb updates.
- */
-#if TARGET_LONG_BITS > TCG_TARGET_REG_BITS
-#define TCG_OVERSIZED_GUEST 1
-#else
-#define TCG_OVERSIZED_GUEST 0
-#endif
-
 #if TCG_TARGET_NB_REGS <= 32
 typedef uint32_t TCGRegSet;
 #elif TCG_TARGET_NB_REGS <= 64
@@ -121,12 +111,7 @@ typedef uint64_t TCGRegSet;
 #define TCG_TARGET_HAS_eqv_i64          0
 #define TCG_TARGET_HAS_nand_i64         0
 #define TCG_TARGET_HAS_nor_i64          0
-#define TCG_TARGET_HAS_clz_i64          0
-#define TCG_TARGET_HAS_ctz_i64          0
-#define TCG_TARGET_HAS_ctpop_i64        0
 #define TCG_TARGET_HAS_deposit_i64      0
-#define TCG_TARGET_HAS_extract_i64      0
-#define TCG_TARGET_HAS_sextract_i64     0
 #define TCG_TARGET_HAS_movcond_i64      0
 #define TCG_TARGET_HAS_add2_i64         0
 #define TCG_TARGET_HAS_sub2_i64         0
@@ -144,12 +129,6 @@ typedef uint64_t TCGRegSet;
 #endif
 #ifndef TCG_TARGET_deposit_i64_valid
 #define TCG_TARGET_deposit_i64_valid(ofs, len) 1
-#endif
-#ifndef TCG_TARGET_extract_i32_valid
-#define TCG_TARGET_extract_i32_valid(ofs, len) 1
-#endif
-#ifndef TCG_TARGET_extract_i64_valid
-#define TCG_TARGET_extract_i64_valid(ofs, len) 1
 #endif
 
 /* Only one of DIV or DIV2 should be defined.  */
@@ -508,6 +487,23 @@ static inline intptr_t QEMU_ARTIFICIAL GET_TCGV_PTR(TCGv_ptr t)
 #define TCG_CALL_DUMMY_TCGV     MAKE_TCGV_I32(-1)
 #define TCG_CALL_DUMMY_ARG      ((TCGArg)(-1))
 
+typedef enum {
+    /* Used to indicate the type of accesses on which ordering
+       is to be ensured.  Modeled after SPARC barriers.  */
+    TCG_MO_LD_LD  = 0x01,
+    TCG_MO_ST_LD  = 0x02,
+    TCG_MO_LD_ST  = 0x04,
+    TCG_MO_ST_ST  = 0x08,
+    TCG_MO_ALL    = 0x0F,  /* OR of the above */
+
+    /* Used to indicate the kind of ordering which is to be ensured by the
+       instruction.  These types are derived from x86/aarch64 instructions.
+       It should be noted that these are different from C11 semantics.  */
+    TCG_BAR_LDAQ  = 0x10,  /* Following ops will not come forward */
+    TCG_BAR_STRL  = 0x20,  /* Previous ops will not be delayed */
+    TCG_BAR_SC    = 0x30,  /* No ops cross barrier; OR of the above */
+} TCGBar;
+
 /* Conditions.  Note that these are laid out for easy manipulation by
    the functions below:
      bit 0 is used for inverting;
@@ -847,7 +843,6 @@ void tcg_dump_op_count(FILE *f, fprintf_function cpu_fprintf);
 
 #define TCG_CT_ALIAS  0x80
 #define TCG_CT_IALIAS 0x40
-#define TCG_CT_NEWREG 0x20 /* output requires a new register */
 #define TCG_CT_REG    0x01
 #define TCG_CT_CONST  0x02 /* any constant of register size */
 
@@ -901,6 +896,8 @@ do {\
     fprintf(stderr, "%s:%d: tcg fatal error\n", __FILE__, __LINE__);\
     abort();\
 } while (0)
+
+void tcg_add_target_add_op_defs(const TCGTargetOpDef *tdefs);
 
 #if UINTPTR_MAX == UINT32_MAX
 #define TCGV_NAT_TO_PTR(n) MAKE_TCGV_PTR(GET_TCGV_I32(n))
@@ -1101,6 +1098,7 @@ static inline unsigned get_mmuidx(TCGMemOpIdx oi)
 #define TB_EXIT_MASK 3
 #define TB_EXIT_IDX0 0
 #define TB_EXIT_IDX1 1
+#define TB_EXIT_ICOUNT_EXPIRED 2
 #define TB_EXIT_REQUESTED 3
 
 #ifdef HAVE_TCG_QEMU_TB_EXEC

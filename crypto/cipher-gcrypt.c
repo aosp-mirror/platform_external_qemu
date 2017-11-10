@@ -29,7 +29,6 @@ bool qcrypto_cipher_supports(QCryptoCipherAlgorithm alg,
 {
     switch (alg) {
     case QCRYPTO_CIPHER_ALG_DES_RFB:
-    case QCRYPTO_CIPHER_ALG_3DES:
     case QCRYPTO_CIPHER_ALG_AES_128:
     case QCRYPTO_CIPHER_ALG_AES_192:
     case QCRYPTO_CIPHER_ALG_AES_256:
@@ -98,10 +97,6 @@ QCryptoCipher *qcrypto_cipher_new(QCryptoCipherAlgorithm alg,
     switch (alg) {
     case QCRYPTO_CIPHER_ALG_DES_RFB:
         gcryalg = GCRY_CIPHER_DES;
-        break;
-
-    case QCRYPTO_CIPHER_ALG_3DES:
-        gcryalg = GCRY_CIPHER_3DES;
         break;
 
     case QCRYPTO_CIPHER_ALG_AES_128:
@@ -205,7 +200,6 @@ QCryptoCipher *qcrypto_cipher_new(QCryptoCipherAlgorithm alg,
         case QCRYPTO_CIPHER_ALG_TWOFISH_256:
             ctx->blocksize = 16;
             break;
-        case QCRYPTO_CIPHER_ALG_3DES:
         case QCRYPTO_CIPHER_ALG_CAST5_128:
             ctx->blocksize = 8;
             break;

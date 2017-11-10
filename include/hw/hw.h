@@ -12,7 +12,11 @@
 #include "hw/irq.h"
 #include "migration/vmstate.h"
 #include "qemu/module.h"
-#include "sysemu/reset.h"
+
+typedef void QEMUResetHandler(void *opaque);
+
+void qemu_register_reset(QEMUResetHandler *func, void *opaque);
+void qemu_unregister_reset(QEMUResetHandler *func, void *opaque);
 
 void QEMU_NORETURN hw_error(const char *fmt, ...) GCC_FMT_ATTR(1, 2);
 

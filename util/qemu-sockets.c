@@ -25,7 +25,6 @@
 #include "qapi/error.h"
 #include "qemu/sockets.h"
 #include "qemu/main-loop.h"
-#include "qapi/clone-visitor.h"
 #include "qapi/qobject-input-visitor.h"
 #include "qapi/qobject-output-visitor.h"
 #include "qapi-visit.h"
@@ -37,10 +36,6 @@
 
 #ifndef AI_V4MAPPED
 # define AI_V4MAPPED 0
-#endif
-
-#ifndef AI_NUMERICSERV
-# define AI_NUMERICSERV 0
 #endif
 
 
@@ -115,8 +110,8 @@ NetworkAddressFamily inet_netfamily(int family)
  * outside scope of this method and not currently handled by
  * callers at all.
  */
-int inet_ai_family_from_address(InetSocketAddress *addr,
-                                Error **errp)
+static int inet_ai_family_from_address(InetSocketAddress *addr,
+                                       Error **errp)
 {
     if (addr->has_ipv6 && addr->has_ipv4 &&
         !addr->ipv6 && !addr->ipv4) {
@@ -146,9 +141,6 @@ static int inet_listen_saddr(InetSocketAddress *saddr,
 
     memset(&ai,0, sizeof(ai));
     ai.ai_flags = AI_PASSIVE;
-    if (saddr->has_numeric && saddr->numeric) {
-        ai.ai_flags |= AI_NUMERICHOST | AI_NUMERICSERV;
-    }
     ai.ai_family = inet_ai_family_from_address(saddr, &err);
     ai.ai_socktype = SOCK_STREAM;
 
@@ -1155,10 +1147,6 @@ int socket_dgram(SocketAddress *remote, SocketAddress *local, Error **errp)
 {
     int fd;
 
-    /*
-     * TODO SOCKET_ADDRESS_KIND_FD when fd is AF_INET or AF_INET6
-     * (although other address families can do SOCK_DGRAM, too)
-     */
     switch (remote->type) {
     case SOCKET_ADDRESS_KIND_INET:
         fd = inet_dgram_saddr(remote->u.inet.data,
@@ -1312,14 +1300,19 @@ char *socket_address_to_string(struct SocketAddress *addr, Error **errp)
 {
     char *buf;
     InetSocketAddress *inet;
+    char host_port[INET6_ADDRSTRLEN + 5 + 4];
 
     switch (addr->type) {
     case SOCKET_ADDRESS_KIND_INET:
         inet = addr->u.inet.data;
         if (strchr(inet->host, ':') == NULL) {
-            buf = g_strdup_printf("%s:%s", inet->host, inet->port);
+            snprintf(host_port, sizeof(host_port), "%s:%s", inet->host,
+                    inet->port);
+            buf = g_strdup(host_port);
         } else {
-            buf = g_strdup_printf("[%s]:%s", inet->host, inet->port);
+            snprintf(host_port, sizeof(host_port), "[%s]:%s", inet->host,
+                    inet->port);
+            buf = g_strdup(host_port);
         }
         break;
 
@@ -1338,38 +1331,9 @@ char *socket_address_to_string(struct SocketAddress *addr, Error **errp)
         break;
 
     default:
-        abort();
+        error_setg(errp, "socket family %d unsupported",
+                   addr->type);
+        return NULL;
     }
     return buf;
-}
-
-SocketAddress *socket_address_crumple(SocketAddressFlat *addr_flat)
-{
-    SocketAddress *addr = g_new(SocketAddress, 1);
-
-    switch (addr_flat->type) {
-    case SOCKET_ADDRESS_FLAT_TYPE_INET:
-        addr->type = SOCKET_ADDRESS_KIND_INET;
-        addr->u.inet.data = QAPI_CLONE(InetSocketAddress,
-                                       &addr_flat->u.inet);
-        break;
-    case SOCKET_ADDRESS_FLAT_TYPE_UNIX:
-        addr->type = SOCKET_ADDRESS_KIND_UNIX;
-        addr->u.q_unix.data = QAPI_CLONE(UnixSocketAddress,
-                                         &addr_flat->u.q_unix);
-        break;
-    case SOCKET_ADDRESS_FLAT_TYPE_VSOCK:
-        addr->type = SOCKET_ADDRESS_KIND_VSOCK;
-        addr->u.vsock.data = QAPI_CLONE(VsockSocketAddress,
-                                        &addr_flat->u.vsock);
-        break;
-    case SOCKET_ADDRESS_FLAT_TYPE_FD:
-        addr->type = SOCKET_ADDRESS_KIND_FD;
-        addr->u.fd.data = QAPI_CLONE(String, &addr_flat->u.fd);
-        break;
-    default:
-        abort();
-    }
-
-    return addr;
 }

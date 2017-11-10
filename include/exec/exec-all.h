@@ -93,118 +93,36 @@ void cpu_address_space_init(CPUState *cpu, AddressSpace *as, int asidx);
  */
 void tlb_flush_page(CPUState *cpu, target_ulong addr);
 /**
- * tlb_flush_page_all_cpus:
- * @cpu: src CPU of the flush
- * @addr: virtual address of page to be flushed
- *
- * Flush one page from the TLB of the specified CPU, for all
- * MMU indexes.
- */
-void tlb_flush_page_all_cpus(CPUState *src, target_ulong addr);
-/**
- * tlb_flush_page_all_cpus_synced:
- * @cpu: src CPU of the flush
- * @addr: virtual address of page to be flushed
- *
- * Flush one page from the TLB of the specified CPU, for all MMU
- * indexes like tlb_flush_page_all_cpus except the source vCPUs work
- * is scheduled as safe work meaning all flushes will be complete once
- * the source vCPUs safe work is complete. This will depend on when
- * the guests translation ends the TB.
- */
-void tlb_flush_page_all_cpus_synced(CPUState *src, target_ulong addr);
-/**
  * tlb_flush:
  * @cpu: CPU whose TLB should be flushed
+ * @flush_global: ignored
  *
- * Flush the entire TLB for the specified CPU. Most CPU architectures
- * allow the implementation to drop entries from the TLB at any time
- * so this is generally safe. If more selective flushing is required
- * use one of the other functions for efficiency.
+ * Flush the entire TLB for the specified CPU.
+ * The flush_global flag is in theory an indicator of whether the whole
+ * TLB should be flushed, or only those entries not marked global.
+ * In practice QEMU does not implement any global/not global flag for
+ * TLB entries, and the argument is ignored.
  */
-void tlb_flush(CPUState *cpu);
-/**
- * tlb_flush_all_cpus:
- * @cpu: src CPU of the flush
- */
-void tlb_flush_all_cpus(CPUState *src_cpu);
-/**
- * tlb_flush_all_cpus_synced:
- * @cpu: src CPU of the flush
- *
- * Like tlb_flush_all_cpus except this except the source vCPUs work is
- * scheduled as safe work meaning all flushes will be complete once
- * the source vCPUs safe work is complete. This will depend on when
- * the guests translation ends the TB.
- */
-void tlb_flush_all_cpus_synced(CPUState *src_cpu);
+void tlb_flush(CPUState *cpu, int flush_global);
 /**
  * tlb_flush_page_by_mmuidx:
  * @cpu: CPU whose TLB should be flushed
  * @addr: virtual address of page to be flushed
- * @idxmap: bitmap of MMU indexes to flush
+ * @...: list of MMU indexes to flush, terminated by a negative value
  *
  * Flush one page from the TLB of the specified CPU, for the specified
  * MMU indexes.
  */
-void tlb_flush_page_by_mmuidx(CPUState *cpu, target_ulong addr,
-                              uint16_t idxmap);
-/**
- * tlb_flush_page_by_mmuidx_all_cpus:
- * @cpu: Originating CPU of the flush
- * @addr: virtual address of page to be flushed
- * @idxmap: bitmap of MMU indexes to flush
- *
- * Flush one page from the TLB of all CPUs, for the specified
- * MMU indexes.
- */
-void tlb_flush_page_by_mmuidx_all_cpus(CPUState *cpu, target_ulong addr,
-                                       uint16_t idxmap);
-/**
- * tlb_flush_page_by_mmuidx_all_cpus_synced:
- * @cpu: Originating CPU of the flush
- * @addr: virtual address of page to be flushed
- * @idxmap: bitmap of MMU indexes to flush
- *
- * Flush one page from the TLB of all CPUs, for the specified MMU
- * indexes like tlb_flush_page_by_mmuidx_all_cpus except the source
- * vCPUs work is scheduled as safe work meaning all flushes will be
- * complete once  the source vCPUs safe work is complete. This will
- * depend on when the guests translation ends the TB.
- */
-void tlb_flush_page_by_mmuidx_all_cpus_synced(CPUState *cpu, target_ulong addr,
-                                              uint16_t idxmap);
+void tlb_flush_page_by_mmuidx(CPUState *cpu, target_ulong addr, ...);
 /**
  * tlb_flush_by_mmuidx:
  * @cpu: CPU whose TLB should be flushed
- * @wait: If true ensure synchronisation by exiting the cpu_loop
- * @idxmap: bitmap of MMU indexes to flush
+ * @...: list of MMU indexes to flush, terminated by a negative value
  *
  * Flush all entries from the TLB of the specified CPU, for the specified
  * MMU indexes.
  */
-void tlb_flush_by_mmuidx(CPUState *cpu, uint16_t idxmap);
-/**
- * tlb_flush_by_mmuidx_all_cpus:
- * @cpu: Originating CPU of the flush
- * @idxmap: bitmap of MMU indexes to flush
- *
- * Flush all entries from all TLBs of all CPUs, for the specified
- * MMU indexes.
- */
-void tlb_flush_by_mmuidx_all_cpus(CPUState *cpu, uint16_t idxmap);
-/**
- * tlb_flush_by_mmuidx_all_cpus_synced:
- * @cpu: Originating CPU of the flush
- * @idxmap: bitmap of MMU indexes to flush
- *
- * Flush all entries from all TLBs of all CPUs, for the specified
- * MMU indexes like tlb_flush_by_mmuidx_all_cpus except except the source
- * vCPUs work is scheduled as safe work meaning all flushes will be
- * complete once  the source vCPUs safe work is complete. This will
- * depend on when the guests translation ends the TB.
- */
-void tlb_flush_by_mmuidx_all_cpus_synced(CPUState *cpu, uint16_t idxmap);
+void tlb_flush_by_mmuidx(CPUState *cpu, ...);
 /**
  * tlb_set_page_with_attrs:
  * @cpu: CPU to add this TLB entry for
@@ -246,45 +164,17 @@ void probe_write(CPUArchState *env, target_ulong addr, int mmu_idx,
 static inline void tlb_flush_page(CPUState *cpu, target_ulong addr)
 {
 }
-static inline void tlb_flush_page_all_cpus(CPUState *src, target_ulong addr)
-{
-}
-static inline void tlb_flush_page_all_cpus_synced(CPUState *src,
-                                                  target_ulong addr)
-{
-}
-static inline void tlb_flush(CPUState *cpu)
-{
-}
-static inline void tlb_flush_all_cpus(CPUState *src_cpu)
-{
-}
-static inline void tlb_flush_all_cpus_synced(CPUState *src_cpu)
-{
-}
-static inline void tlb_flush_page_by_mmuidx(CPUState *cpu,
-                                            target_ulong addr, uint16_t idxmap)
+
+static inline void tlb_flush(CPUState *cpu, int flush_global)
 {
 }
 
-static inline void tlb_flush_by_mmuidx(CPUState *cpu, uint16_t idxmap)
+static inline void tlb_flush_page_by_mmuidx(CPUState *cpu,
+                                            target_ulong addr, ...)
 {
 }
-static inline void tlb_flush_page_by_mmuidx_all_cpus(CPUState *cpu,
-                                                     target_ulong addr,
-                                                     uint16_t idxmap)
-{
-}
-static inline void tlb_flush_page_by_mmuidx_all_cpus_synced(CPUState *cpu,
-                                                            target_ulong addr,
-                                                            uint16_t idxmap)
-{
-}
-static inline void tlb_flush_by_mmuidx_all_cpus(CPUState *cpu, uint16_t idxmap)
-{
-}
-static inline void tlb_flush_by_mmuidx_all_cpus_synced(CPUState *cpu,
-                                                       uint16_t idxmap)
+
+static inline void tlb_flush_by_mmuidx(CPUState *cpu, ...)
 {
 }
 #endif
@@ -430,7 +320,6 @@ static inline void tb_set_jmp_target(TranslationBlock *tb,
 static inline void tb_add_jump(TranslationBlock *tb, int n,
                                TranslationBlock *tb_next)
 {
-    assert(n < ARRAY_SIZE(tb->jmp_list_next));
     if (tb->jmp_list_next[n]) {
         /* Another thread has already done this while we were
          * outside of the lock; nothing to do in this case */
@@ -515,5 +404,9 @@ bool memory_region_is_unassigned(MemoryRegion *mr);
 
 /* vl.c */
 extern int singlestep;
+
+/* cpu-exec.c, accessed with atomic_mb_read/atomic_mb_set */
+extern CPUState *tcg_current_cpu;
+extern bool exit_request;
 
 #endif

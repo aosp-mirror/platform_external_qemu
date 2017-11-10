@@ -143,14 +143,10 @@ done:
 static void scsi_command_complete(void *opaque, int ret)
 {
     SCSIGenericReq *r = (SCSIGenericReq *)opaque;
-    SCSIDevice *s = r->req.dev;
 
     assert(r->req.aiocb != NULL);
     r->req.aiocb = NULL;
-
-    aio_context_acquire(blk_get_aio_context(s->conf.blk));
     scsi_command_complete_noio(r, ret);
-    aio_context_release(blk_get_aio_context(s->conf.blk));
 }
 
 static int execute_command(BlockBackend *blk,
@@ -186,11 +182,9 @@ static void scsi_read_complete(void * opaque, int ret)
     assert(r->req.aiocb != NULL);
     r->req.aiocb = NULL;
 
-    aio_context_acquire(blk_get_aio_context(s->conf.blk));
-
     if (ret || r->req.io_canceled) {
         scsi_command_complete_noio(r, ret);
-        goto done;
+        return;
     }
 
     len = r->io_header.dxfer_len - r->io_header.resid;
@@ -199,7 +193,7 @@ static void scsi_read_complete(void * opaque, int ret)
     r->len = -1;
     if (len == 0) {
         scsi_command_complete_noio(r, 0);
-        goto done;
+        return;
     }
 
     /* Snoop READ CAPACITY output to set the blocksize.  */
@@ -237,14 +231,12 @@ static void scsi_read_complete(void * opaque, int ret)
         assert(max_transfer);
         stl_be_p(&r->buf[8], max_transfer);
         /* Also take care of the opt xfer len. */
-        stl_be_p(&r->buf[12],
-                 MIN_NON_ZERO(max_transfer, ldl_be_p(&r->buf[12])));
+        if (ldl_be_p(&r->buf[12]) > max_transfer) {
+            stl_be_p(&r->buf[12], max_transfer);
+        }
     }
     scsi_req_data(&r->req, len);
     scsi_req_unref(&r->req);
-
-done:
-    aio_context_release(blk_get_aio_context(s->conf.blk));
 }
 
 /* Read more data from scsi device into buffer.  */
@@ -254,7 +246,7 @@ static void scsi_read_data(SCSIRequest *req)
     SCSIDevice *s = r->req.dev;
     int ret;
 
-    DPRINTF("scsi_read_data tag=0x%x\n", req->tag);
+    DPRINTF("scsi_read_data 0x%x\n", req->tag);
 
     /* The request is used as the AIO opaque value, so add a ref.  */
     scsi_req_ref(&r->req);
@@ -280,11 +272,9 @@ static void scsi_write_complete(void * opaque, int ret)
     assert(r->req.aiocb != NULL);
     r->req.aiocb = NULL;
 
-    aio_context_acquire(blk_get_aio_context(s->conf.blk));
-
     if (ret || r->req.io_canceled) {
         scsi_command_complete_noio(r, ret);
-        goto done;
+        return;
     }
 
     if (r->req.cmd.buf[0] == MODE_SELECT && r->req.cmd.buf[4] == 12 &&
@@ -294,9 +284,6 @@ static void scsi_write_complete(void * opaque, int ret)
     }
 
     scsi_command_complete_noio(r, ret);
-
-done:
-    aio_context_release(blk_get_aio_context(s->conf.blk));
 }
 
 /* Write data to a scsi device.  Returns nonzero on failure.
@@ -307,7 +294,7 @@ static void scsi_write_data(SCSIRequest *req)
     SCSIDevice *s = r->req.dev;
     int ret;
 
-    DPRINTF("scsi_write_data tag=0x%x\n", req->tag);
+    DPRINTF("scsi_write_data 0x%x\n", req->tag);
     if (r->len == 0) {
         r->len = r->buflen;
         scsi_req_data(&r->req, r->len);
@@ -342,7 +329,6 @@ static int32_t scsi_send_command(SCSIRequest *req, uint8_t *cmd)
     int ret;
 
 #ifdef DEBUG_SCSI
-    DPRINTF("Command: data=0x%02x", cmd[0]);
     {
         int i;
         for (i = 1; i < r->req.cmd.len; i++) {

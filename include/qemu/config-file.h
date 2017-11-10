@@ -23,4 +23,8 @@ int qemu_read_config_file(const char *filename);
 void qemu_config_parse_qdict(QDict *options, QemuOptsList **lists,
                              Error **errp);
 
+/* Read default QEMU config files
+ */
+int qemu_read_default_config_files(bool userconfig);
+
 #endif /* QEMU_CONFIG_FILE_H */

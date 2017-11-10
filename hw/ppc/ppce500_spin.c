@@ -29,9 +29,9 @@
 
 #include "qemu/osdep.h"
 #include "hw/hw.h"
-#include "hw/sysbus.h"
-#include "sysemu/hw_accel.h"
 #include "sysemu/sysemu.h"
+#include "hw/sysbus.h"
+#include "sysemu/kvm.h"
 #include "e500.h"
 
 #define MAX_CPUS 32
@@ -54,9 +54,9 @@ typedef struct SpinState {
     SpinInfo spin[MAX_CPUS];
 } SpinState;
 
-static void spin_reset(DeviceState *dev)
+static void spin_reset(void *opaque)
 {
-    SpinState *s = E500_SPIN(dev);
+    SpinState *s = opaque;
     int i;
 
     for (i = 0; i < MAX_CPUS; i++) {
@@ -174,28 +174,30 @@ static const MemoryRegionOps spin_rw_ops = {
     .endianness = DEVICE_BIG_ENDIAN,
 };
 
-static void ppce500_spin_initfn(Object *obj)
+static int ppce500_spin_initfn(SysBusDevice *dev)
 {
-    SysBusDevice *dev = SYS_BUS_DEVICE(obj);
     SpinState *s = E500_SPIN(dev);
 
-    memory_region_init_io(&s->iomem, obj, &spin_rw_ops, s,
+    memory_region_init_io(&s->iomem, OBJECT(s), &spin_rw_ops, s,
                           "e500 spin pv device", sizeof(SpinInfo) * MAX_CPUS);
     sysbus_init_mmio(dev, &s->iomem);
+
+    qemu_register_reset(spin_reset, s);
+
+    return 0;
 }
 
 static void ppce500_spin_class_init(ObjectClass *klass, void *data)
 {
-    DeviceClass *dc = DEVICE_CLASS(klass);
+    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
 
-    dc->reset = spin_reset;
+    k->init = ppce500_spin_initfn;
 }
 
 static const TypeInfo ppce500_spin_info = {
     .name          = TYPE_E500_SPIN,
     .parent        = TYPE_SYS_BUS_DEVICE,
     .instance_size = sizeof(SpinState),
-    .instance_init = ppce500_spin_initfn,
     .class_init    = ppce500_spin_class_init,
 };
 

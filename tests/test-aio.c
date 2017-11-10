@@ -128,7 +128,7 @@ static void *test_acquire_thread(void *opaque)
 static void set_event_notifier(AioContext *ctx, EventNotifier *notifier,
                                EventNotifierHandler *handler)
 {
-    aio_set_event_notifier(ctx, notifier, false, handler, NULL);
+    aio_set_event_notifier(ctx, notifier, false, handler);
 }
 
 static void dummy_notifier_read(EventNotifier *n)
@@ -388,7 +388,7 @@ static void test_aio_external_client(void)
     for (i = 1; i < 3; i++) {
         EventNotifierTestData data = { .n = 0, .active = 10, .auto_set = true };
         event_notifier_init(&data.e, false);
-        aio_set_event_notifier(ctx, &data.e, true, event_ready_cb, NULL);
+        aio_set_event_notifier(ctx, &data.e, true, event_ready_cb);
         event_notifier_set(&data.e);
         for (j = 0; j < i; j++) {
             aio_disable_external(ctx);
@@ -835,7 +835,7 @@ int main(int argc, char **argv)
     Error *local_error = NULL;
     GSource *src;
 
-    init_clocks(NULL);
+    init_clocks();
 
     ctx = aio_context_new(&local_error);
     if (!ctx) {

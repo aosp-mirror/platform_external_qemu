@@ -14,7 +14,6 @@
 #include "exec/exec-all.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/cpus.h"
-#include "sysemu/hw_accel.h"
 #include "sysemu/kvm.h"
 #include "hw/i386/apic_internal.h"
 #include "hw/sysbus.h"
@@ -413,12 +412,6 @@ static void patch_instruction(VAPICROMState *s, X86CPU *cpu, target_ulong ip)
     if (!kvm_enabled()) {
         cpu_get_tb_cpu_state(env, &current_pc, &current_cs_base,
                              &current_flags);
-        /* Account this instruction, because we will exit the tb.
-           This is the first instruction in the block. Therefore
-           there is no need in restoring CPU state. */
-        if (use_icount) {
-            --cs->icount_decr.u16.low;
-        }
     }
 
     pause_all_vcpus();
@@ -457,8 +450,8 @@ static void patch_instruction(VAPICROMState *s, X86CPU *cpu, target_ulong ip)
     resume_all_vcpus();
 
     if (!kvm_enabled()) {
-        /* Both tb_lock and iothread_mutex will be reset when
-         *  longjmps back into the cpu_exec loop. */
+        /* tb_lock will be reset when cpu_loop_exit_noexc longjmps
+         * back into the cpu_exec loop. */
         tb_lock();
         tb_gen_code(cs, current_pc, current_cs_base, current_flags, 1);
         cpu_loop_exit_noexc(cs);
@@ -541,6 +534,7 @@ static int patch_hypercalls(VAPICROMState *s)
     uint8_t alternates[2];
     const uint8_t *pattern;
     const uint8_t *patch;
+    int patches = 0;
     off_t pos;
     uint8_t *rom;
 
@@ -571,6 +565,11 @@ static int patch_hypercalls(VAPICROMState *s)
     }
 
     g_free(rom);
+
+    if (patches != 0 && patches != 2) {
+        return -1;
+    }
+
     return 0;
 }
 

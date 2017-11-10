@@ -11,7 +11,7 @@
 #include "hw/sysbus.h"
 #include "sysemu/char.h"
 #include "qemu/log.h"
-#include "hw/char/trace.h"
+#include "trace.h"
 
 #define TYPE_PL011 "pl011"
 #define PL011(obj) OBJECT_CHECK(PL011State, (obj), TYPE_PL011)

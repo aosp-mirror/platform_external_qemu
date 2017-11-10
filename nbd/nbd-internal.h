@@ -120,7 +120,8 @@ struct NBDTLSHandshakeData {
 };
 
 
-void nbd_tls_handshake(QIOTask *task,
+void nbd_tls_handshake(Object *src,
+                       Error *err,
                        void *opaque);
 
 #endif

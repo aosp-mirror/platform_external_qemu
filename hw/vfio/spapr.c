@@ -16,7 +16,7 @@
 #include "hw/vfio/vfio-common.h"
 #include "hw/hw.h"
 #include "qemu/error-report.h"
-#include "hw/vfio/trace.h"
+#include "trace.h"
 
 static bool vfio_prereg_listener_skipped_section(MemoryRegionSection *section)
 {

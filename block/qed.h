@@ -198,9 +198,6 @@ enum {
  */
 typedef void QEDFindClusterFunc(void *opaque, int ret, uint64_t offset, size_t len);
 
-void qed_acquire(BDRVQEDState *s);
-void qed_release(BDRVQEDState *s);
-
 /**
  * Generic callback for chaining async callbacks
  */

@@ -36,7 +36,6 @@ typedef struct virtio_net_conf
     int32_t txburst;
     char *tx;
     uint16_t rx_queue_size;
-    uint16_t mtu;
 } virtio_net_conf;
 
 /* Maximum packet size we can receive from tap device: header + 64k */
@@ -47,7 +46,7 @@ typedef struct VirtIONetQueue {
     VirtQueue *tx_vq;
     QEMUTimer *tx_timer;
     QEMUBH *tx_bh;
-    uint32_t tx_waiting;
+    int tx_waiting;
     struct {
         VirtQueueElement *elem;
     } async_tx;
@@ -68,7 +67,7 @@ typedef struct VirtIONet {
     size_t guest_hdr_len;
     uint32_t host_features;
     uint8_t has_ufo;
-    uint32_t mergeable_rx_bufs;
+    int mergeable_rx_bufs;
     uint8_t promisc;
     uint8_t allmulti;
     uint8_t alluni;

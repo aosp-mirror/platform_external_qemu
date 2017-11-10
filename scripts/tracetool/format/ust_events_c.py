@@ -32,4 +32,4 @@ def generate(events, backend, group):
         ' */',
         '#pragma GCC diagnostic ignored "-Wredundant-decls"',
         '',
-        '#include "trace-ust-all.h"')
+        '#include "generated-ust-provider.h"')

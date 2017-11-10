@@ -6,7 +6,6 @@
 #include "qapi/error.h"
 #include "qemu/timer.h"
 #include "qemu/error-report.h"
-#include "qemu/main-loop.h"
 
 static AioContext *ctx;
 static ThreadPool *pool;
@@ -225,9 +224,15 @@ static void test_cancel_async(void)
 int main(int argc, char **argv)
 {
     int ret;
+    Error *local_error = NULL;
 
-    qemu_init_main_loop(&error_abort);
-    ctx = qemu_get_current_aio_context();
+    init_clocks();
+
+    ctx = aio_context_new(&local_error);
+    if (!ctx) {
+        error_reportf_err(local_error, "Failed to create AIO Context: ");
+        exit(1);
+    }
     pool = aio_get_thread_pool(ctx);
 
     g_test_init(&argc, &argv, NULL);
@@ -240,5 +245,6 @@ int main(int argc, char **argv)
 
     ret = g_test_run();
 
+    aio_context_unref(ctx);
     return ret;
 }

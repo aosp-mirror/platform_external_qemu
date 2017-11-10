@@ -43,14 +43,13 @@
 #define TCG_CT_CONST_XORI  0x400
 #define TCG_CT_CONST_CMPI  0x800
 #define TCG_CT_CONST_ADLI  0x1000
-#define TCG_CT_CONST_ZERO  0x2000
 
 /* Several places within the instruction set 0 means "no register"
    rather than TCG_REG_R0.  */
 #define TCG_REG_NONE    0
 
 /* A scratch register that may be be used throughout the backend.  */
-#define TCG_TMP0        TCG_REG_R1
+#define TCG_TMP0        TCG_REG_R14
 
 #ifndef CONFIG_SOFTMMU
 #define TCG_GUEST_BASE_REG TCG_REG_R13
@@ -133,7 +132,6 @@ typedef enum S390Opcode {
     RRE_DLR     = 0xb997,
     RRE_DSGFR   = 0xb91d,
     RRE_DSGR    = 0xb90d,
-    RRE_FLOGR   = 0xb983,
     RRE_LGBR    = 0xb906,
     RRE_LCGR    = 0xb903,
     RRE_LGFR    = 0xb914,
@@ -336,7 +334,18 @@ static void * const qemu_st_helpers[16] = {
 #endif
 
 static tcg_insn_unit *tb_ret_addr;
-uint64_t s390_facilities;
+
+/* A list of relevant facilities used by this translator.  Some of these
+   are required for proper operation, and these are checked at startup.  */
+
+#define FACILITY_ZARCH_ACTIVE	(1ULL << (63 - 2))
+#define FACILITY_LONG_DISP	(1ULL << (63 - 18))
+#define FACILITY_EXT_IMM	(1ULL << (63 - 21))
+#define FACILITY_GEN_INST_EXT	(1ULL << (63 - 34))
+#define FACILITY_LOAD_ON_COND   (1ULL << (63 - 45))
+#define FACILITY_FAST_BCR_SER   FACILITY_LOAD_ON_COND
+
+static uint64_t facilities;
 
 static void patch_reloc(tcg_insn_unit *code_ptr, int type,
                         intptr_t value, intptr_t addend)
@@ -360,13 +369,19 @@ static void patch_reloc(tcg_insn_unit *code_ptr, int type,
 }
 
 /* parse target specific constraints */
-static const char *target_parse_constraint(TCGArgConstraint *ct,
-                                           const char *ct_str, TCGType type)
+static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
 {
-    switch (*ct_str++) {
+    const char *ct_str = *pct_str;
+
+    switch (ct_str[0]) {
     case 'r':                  /* all registers */
         ct->ct |= TCG_CT_REG;
         tcg_regset_set32(ct->u.regs, 0, 0xffff);
+        break;
+    case 'R':                  /* not R0 */
+        ct->ct |= TCG_CT_REG;
+        tcg_regset_set32(ct->u.regs, 0, 0xffff);
+        tcg_regset_reset_reg(ct->u.regs, TCG_REG_R0);
         break;
     case 'L':                  /* qemu_ld/st constraint */
         ct->ct |= TCG_CT_REG;
@@ -400,13 +415,13 @@ static const char *target_parse_constraint(TCGArgConstraint *ct,
     case 'C':
         ct->ct |= TCG_CT_CONST_CMPI;
         break;
-    case 'Z':
-        ct->ct |= TCG_CT_CONST_ZERO;
-        break;
     default:
-        return NULL;
+        return -1;
     }
-    return ct_str;
+    ct_str++;
+    *pct_str = ct_str;
+
+    return 0;
 }
 
 /* Immediates to be used with logical OR.  This is an optimization only,
@@ -417,7 +432,7 @@ static const char *target_parse_constraint(TCGArgConstraint *ct,
 
 static int tcg_match_ori(TCGType type, tcg_target_long val)
 {
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         if (type == TCG_TYPE_I32) {
             /* All 32-bit ORs can be performed with 1 48-bit insn.  */
             return 1;
@@ -429,7 +444,7 @@ static int tcg_match_ori(TCGType type, tcg_target_long val)
         if (val == (int16_t)val) {
             return 0;
         }
-        if (s390_facilities & FACILITY_EXT_IMM) {
+        if (facilities & FACILITY_EXT_IMM) {
             if (val == (int32_t)val) {
                 return 0;
             }
@@ -446,7 +461,7 @@ static int tcg_match_ori(TCGType type, tcg_target_long val)
 
 static int tcg_match_xori(TCGType type, tcg_target_long val)
 {
-    if ((s390_facilities & FACILITY_EXT_IMM) == 0) {
+    if ((facilities & FACILITY_EXT_IMM) == 0) {
         return 0;
     }
 
@@ -467,7 +482,7 @@ static int tcg_match_xori(TCGType type, tcg_target_long val)
 
 static int tcg_match_cmpi(TCGType type, tcg_target_long val)
 {
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         /* The COMPARE IMMEDIATE instruction is available.  */
         if (type == TCG_TYPE_I32) {
             /* We have a 32-bit immediate and can compare against anything.  */
@@ -496,7 +511,7 @@ static int tcg_match_cmpi(TCGType type, tcg_target_long val)
 
 static int tcg_match_add2i(TCGType type, tcg_target_long val)
 {
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         if (type == TCG_TYPE_I32) {
             return 1;
         } else if (val >= -0xffffffffll && val <= 0xffffffffll) {
@@ -526,7 +541,7 @@ static int tcg_target_const_match(tcg_target_long val, TCGType type,
            general-instruction-extensions, then we have MULTIPLY SINGLE
            IMMEDIATE with a signed 32-bit, otherwise we have only
            MULTIPLY HALFWORD IMMEDIATE, with a signed 16-bit.  */
-        if (s390_facilities & FACILITY_GEN_INST_EXT) {
+        if (facilities & FACILITY_GEN_INST_EXT) {
             return val == (int32_t)val;
         } else {
             return val == (int16_t)val;
@@ -539,8 +554,6 @@ static int tcg_target_const_match(tcg_target_long val, TCGType type,
         return tcg_match_xori(type, val);
     } else if (ct & TCG_CT_CONST_CMPI) {
         return tcg_match_cmpi(type, val);
-    } else if (ct & TCG_CT_CONST_ZERO) {
-        return val == 0;
     }
 
     return 0;
@@ -655,7 +668,7 @@ static void tcg_out_movi(TCGContext *s, TCGType type,
     }
 
     /* Try all 48-bit insns that can load it in one go.  */
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         if (sval == (int32_t)sval) {
             tcg_out_insn(s, RIL, LGFI, ret, sval);
             return;
@@ -681,7 +694,7 @@ static void tcg_out_movi(TCGContext *s, TCGType type,
 
     /* If extended immediates are not present, then we may have to issue
        several instructions to load the low 32 bits.  */
-    if (!(s390_facilities & FACILITY_EXT_IMM)) {
+    if (!(facilities & FACILITY_EXT_IMM)) {
         /* A 32-bit unsigned value can be loaded in 2 insns.  And given
            that the lli_insns loop above did not succeed, we know that
            both insns are required.  */
@@ -714,7 +727,7 @@ static void tcg_out_movi(TCGContext *s, TCGType type,
 
     /* Insert data into the high 32-bits.  */
     uval = uval >> 31 >> 1;
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         if (uval < 0x10000) {
             tcg_out_insn(s, RI, IIHL, ret, uval);
         } else if ((uval & 0xffff) == 0) {
@@ -797,7 +810,7 @@ static void tcg_out_ld_abs(TCGContext *s, TCGType type, TCGReg dest, void *abs)
 {
     intptr_t addr = (intptr_t)abs;
 
-    if ((s390_facilities & FACILITY_GEN_INST_EXT) && !(addr & 1)) {
+    if ((facilities & FACILITY_GEN_INST_EXT) && !(addr & 1)) {
         ptrdiff_t disp = tcg_pcrel_diff(s, abs) >> 1;
         if (disp == (int32_t)disp) {
             if (type == TCG_TYPE_I32) {
@@ -824,7 +837,7 @@ static inline void tcg_out_risbg(TCGContext *s, TCGReg dest, TCGReg src,
 
 static void tgen_ext8s(TCGContext *s, TCGType type, TCGReg dest, TCGReg src)
 {
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         tcg_out_insn(s, RRE, LGBR, dest, src);
         return;
     }
@@ -844,7 +857,7 @@ static void tgen_ext8s(TCGContext *s, TCGType type, TCGReg dest, TCGReg src)
 
 static void tgen_ext8u(TCGContext *s, TCGType type, TCGReg dest, TCGReg src)
 {
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         tcg_out_insn(s, RRE, LLGCR, dest, src);
         return;
     }
@@ -864,7 +877,7 @@ static void tgen_ext8u(TCGContext *s, TCGType type, TCGReg dest, TCGReg src)
 
 static void tgen_ext16s(TCGContext *s, TCGType type, TCGReg dest, TCGReg src)
 {
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         tcg_out_insn(s, RRE, LGHR, dest, src);
         return;
     }
@@ -884,7 +897,7 @@ static void tgen_ext16s(TCGContext *s, TCGType type, TCGReg dest, TCGReg src)
 
 static void tgen_ext16u(TCGContext *s, TCGType type, TCGReg dest, TCGReg src)
 {
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         tcg_out_insn(s, RRE, LLGHR, dest, src);
         return;
     }
@@ -972,7 +985,7 @@ static void tgen_andi(TCGContext *s, TCGType type, TCGReg dest, uint64_t val)
         tgen_ext32u(s, dest, dest);
         return;
     }
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         if ((val & valid) == 0xff) {
             tgen_ext8u(s, TCG_TYPE_I64, dest, dest);
             return;
@@ -993,7 +1006,7 @@ static void tgen_andi(TCGContext *s, TCGType type, TCGReg dest, uint64_t val)
     }
 
     /* Try all 48-bit insns that can perform it in one go.  */
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         for (i = 0; i < 2; i++) {
             tcg_target_ulong mask = ~(0xffffffffull << i*32);
             if (((val | ~valid) & mask) == mask) {
@@ -1002,7 +1015,7 @@ static void tgen_andi(TCGContext *s, TCGType type, TCGReg dest, uint64_t val)
             }
         }
     }
-    if ((s390_facilities & FACILITY_GEN_INST_EXT) && risbg_mask(val)) {
+    if ((facilities & FACILITY_GEN_INST_EXT) && risbg_mask(val)) {
         tgen_andi_risbg(s, dest, dest, val);
         return;
     }
@@ -1032,7 +1045,7 @@ static void tgen64_ori(TCGContext *s, TCGReg dest, tcg_target_ulong val)
         return;
     }
 
-    if (s390_facilities & FACILITY_EXT_IMM) {
+    if (facilities & FACILITY_EXT_IMM) {
         /* Try all 32-bit insns that can perform it in one go.  */
         for (i = 0; i < 4; i++) {
             tcg_target_ulong mask = (0xffffull << i*16);
@@ -1080,43 +1093,33 @@ static void tgen64_xori(TCGContext *s, TCGReg dest, tcg_target_ulong val)
 }
 
 static int tgen_cmp(TCGContext *s, TCGType type, TCGCond c, TCGReg r1,
-                    TCGArg c2, bool c2const, bool need_carry)
+                    TCGArg c2, int c2const)
 {
     bool is_unsigned = is_unsigned_cond(c);
     if (c2const) {
         if (c2 == 0) {
-            if (!(is_unsigned && need_carry)) {
-                if (type == TCG_TYPE_I32) {
-                    tcg_out_insn(s, RR, LTR, r1, r1);
-                } else {
-                    tcg_out_insn(s, RRE, LTGR, r1, r1);
-                }
-                return tcg_cond_to_ltr_cond[c];
-            }
-            /* If we only got here because of load-and-test,
-               and we couldn't use that, then we need to load
-               the constant into a register.  */
-            if (!(s390_facilities & FACILITY_EXT_IMM)) {
-                c2 = TCG_TMP0;
-                tcg_out_movi(s, type, c2, 0);
-                goto do_reg;
-            }
-        }
-        if (is_unsigned) {
             if (type == TCG_TYPE_I32) {
-                tcg_out_insn(s, RIL, CLFI, r1, c2);
+                tcg_out_insn(s, RR, LTR, r1, r1);
             } else {
-                tcg_out_insn(s, RIL, CLGFI, r1, c2);
+                tcg_out_insn(s, RRE, LTGR, r1, r1);
             }
+            return tcg_cond_to_ltr_cond[c];
         } else {
-            if (type == TCG_TYPE_I32) {
-                tcg_out_insn(s, RIL, CFI, r1, c2);
+            if (is_unsigned) {
+                if (type == TCG_TYPE_I32) {
+                    tcg_out_insn(s, RIL, CLFI, r1, c2);
+                } else {
+                    tcg_out_insn(s, RIL, CLGFI, r1, c2);
+                }
             } else {
-                tcg_out_insn(s, RIL, CGFI, r1, c2);
+                if (type == TCG_TYPE_I32) {
+                    tcg_out_insn(s, RIL, CFI, r1, c2);
+                } else {
+                    tcg_out_insn(s, RIL, CGFI, r1, c2);
+                }
             }
         }
     } else {
-    do_reg:
         if (is_unsigned) {
             if (type == TCG_TYPE_I32) {
                 tcg_out_insn(s, RR, CLR, r1, c2);
@@ -1145,7 +1148,7 @@ static void tgen_setcond(TCGContext *s, TCGType type, TCGCond cond,
     do_greater:
         /* The result of a compare has CC=2 for GT and CC=3 unused.
            ADD LOGICAL WITH CARRY considers (CC & 2) the carry bit.  */
-        tgen_cmp(s, type, cond, c1, c2, c2const, true);
+        tgen_cmp(s, type, cond, c1, c2, c2const);
         tcg_out_movi(s, type, dest, 0);
         tcg_out_insn(s, RRE, ALCGR, dest, dest);
         return;
@@ -1216,8 +1219,8 @@ static void tgen_setcond(TCGContext *s, TCGType type, TCGCond cond,
         break;
     }
 
-    cc = tgen_cmp(s, type, cond, c1, c2, c2const, false);
-    if (s390_facilities & FACILITY_LOAD_ON_COND) {
+    cc = tgen_cmp(s, type, cond, c1, c2, c2const);
+    if (facilities & FACILITY_LOAD_ON_COND) {
         /* Emit: d = 0, t = 1, d = (cc ? t : d).  */
         tcg_out_movi(s, TCG_TYPE_I64, dest, 0);
         tcg_out_movi(s, TCG_TYPE_I64, TCG_TMP0, 1);
@@ -1234,12 +1237,12 @@ static void tgen_movcond(TCGContext *s, TCGType type, TCGCond c, TCGReg dest,
                          TCGReg c1, TCGArg c2, int c2const, TCGReg r3)
 {
     int cc;
-    if (s390_facilities & FACILITY_LOAD_ON_COND) {
-        cc = tgen_cmp(s, type, c, c1, c2, c2const, false);
+    if (facilities & FACILITY_LOAD_ON_COND) {
+        cc = tgen_cmp(s, type, c, c1, c2, c2const);
         tcg_out_insn(s, RRF, LOCGR, dest, r3, cc);
     } else {
         c = tcg_invert_cond(c);
-        cc = tgen_cmp(s, type, c, c1, c2, c2const, false);
+        cc = tgen_cmp(s, type, c, c1, c2, c2const);
 
         /* Emit: if (cc) goto over; dest = r3; over:  */
         tcg_out_insn(s, RI, BRC, cc, (4 + 4) >> 1);
@@ -1247,45 +1250,17 @@ static void tgen_movcond(TCGContext *s, TCGType type, TCGCond c, TCGReg dest,
     }
 }
 
-static void tgen_clz(TCGContext *s, TCGReg dest, TCGReg a1,
-                     TCGArg a2, int a2const)
+bool tcg_target_deposit_valid(int ofs, int len)
 {
-    /* Since this sets both R and R+1, we have no choice but to store the
-       result into R0, allowing R1 == TCG_TMP0 to be clobbered as well.  */
-    QEMU_BUILD_BUG_ON(TCG_TMP0 != TCG_REG_R1);
-    tcg_out_insn(s, RRE, FLOGR, TCG_REG_R0, a1);
-
-    if (a2const && a2 == 64) {
-        tcg_out_mov(s, TCG_TYPE_I64, dest, TCG_REG_R0);
-    } else {
-        if (a2const) {
-            tcg_out_movi(s, TCG_TYPE_I64, dest, a2);
-        } else {
-            tcg_out_mov(s, TCG_TYPE_I64, dest, a2);
-        }
-        if (s390_facilities & FACILITY_LOAD_ON_COND) {
-            /* Emit: if (one bit found) dest = r0.  */
-            tcg_out_insn(s, RRF, LOCGR, dest, TCG_REG_R0, 2);
-        } else {
-            /* Emit: if (no one bit found) goto over; dest = r0; over:  */
-            tcg_out_insn(s, RI, BRC, 8, (4 + 4) >> 1);
-            tcg_out_insn(s, RRE, LGR, dest, TCG_REG_R0);
-        }
-    }
+    return (facilities & FACILITY_GEN_INST_EXT) != 0;
 }
 
 static void tgen_deposit(TCGContext *s, TCGReg dest, TCGReg src,
-                         int ofs, int len, int z)
+                         int ofs, int len)
 {
     int lsb = (63 - ofs);
     int msb = lsb - (len - 1);
-    tcg_out_risbg(s, dest, src, msb, lsb, ofs, z);
-}
-
-static void tgen_extract(TCGContext *s, TCGReg dest, TCGReg src,
-                         int ofs, int len)
-{
-    tcg_out_risbg(s, dest, src, 64 - len, 63, 64 - ofs, 1);
+    tcg_out_risbg(s, dest, src, msb, lsb, ofs, 0);
 }
 
 static void tgen_gotoi(TCGContext *s, int cc, tcg_insn_unit *dest)
@@ -1357,7 +1332,7 @@ static void tgen_brcond(TCGContext *s, TCGType type, TCGCond c,
 {
     int cc;
 
-    if (s390_facilities & FACILITY_GEN_INST_EXT) {
+    if (facilities & FACILITY_GEN_INST_EXT) {
         bool is_unsigned = is_unsigned_cond(c);
         bool in_range;
         S390Opcode opc;
@@ -1399,7 +1374,7 @@ static void tgen_brcond(TCGContext *s, TCGType type, TCGCond c,
         }
     }
 
-    cc = tgen_cmp(s, type, c, r1, c2, c2const, false);
+    cc = tgen_cmp(s, type, c, r1, c2, c2const);
     tgen_branch(s, cc, l);
 }
 
@@ -1544,7 +1519,7 @@ static TCGReg tcg_out_tlb_read(TCGContext* s, TCGReg addr_reg, TCGMemOp opc,
     a_off = (a_bits >= s_bits ? 0 : s_mask - a_mask);
     tlb_mask = (uint64_t)TARGET_PAGE_MASK | a_mask;
 
-    if (s390_facilities & FACILITY_GEN_INST_EXT) {
+    if (facilities & FACILITY_GEN_INST_EXT) {
         tcg_out_risbg(s, TCG_REG_R2, addr_reg,
                       64 - CPU_TLB_BITS - CPU_TLB_ENTRY_BITS,
                       63 - CPU_TLB_ENTRY_BITS,
@@ -1815,7 +1790,7 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
                     tcg_out_insn(s, RI, AHI, a0, a2);
                     break;
                 }
-                if (s390_facilities & FACILITY_EXT_IMM) {
+                if (facilities & FACILITY_EXT_IMM) {
                     tcg_out_insn(s, RIL, AFI, a0, a2);
                     break;
                 }
@@ -2011,7 +1986,7 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
                     tcg_out_insn(s, RI, AGHI, a0, a2);
                     break;
                 }
-                if (s390_facilities & FACILITY_EXT_IMM) {
+                if (facilities & FACILITY_EXT_IMM) {
                     if (a2 == (int32_t)a2) {
                         tcg_out_insn(s, RIL, AGFI, a0, a2);
                         break;
@@ -2192,30 +2167,7 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
         break;
 
     OP_32_64(deposit):
-        a0 = args[0], a1 = args[1], a2 = args[2];
-        if (const_args[1]) {
-            tgen_deposit(s, a0, a2, args[3], args[4], 1);
-        } else {
-            /* Since we can't support "0Z" as a constraint, we allow a1 in
-               any register.  Fix things up as if a matching constraint.  */
-            if (a0 != a1) {
-                TCGType type = (opc == INDEX_op_deposit_i64);
-                if (a0 == a2) {
-                    tcg_out_mov(s, type, TCG_TMP0, a2);
-                    a2 = TCG_TMP0;
-                }
-                tcg_out_mov(s, type, a0, a1);
-            }
-            tgen_deposit(s, a0, a2, args[3], args[4], 0);
-        }
-        break;
-
-    OP_32_64(extract):
-        tgen_extract(s, args[0], args[1], args[2], args[3]);
-        break;
-
-    case INDEX_op_clz_i64:
-        tgen_clz(s, args[0], args[1], args[2], const_args[2]);
+        tgen_deposit(s, args[0], args[2], args[3], args[4]);
         break;
 
     case INDEX_op_mb:
@@ -2223,7 +2175,7 @@ static inline void tcg_out_op(TCGContext *s, TCGOpcode opc,
            serialize the instruction stream.  */
         if (args[0] & TCG_MO_ST_LD) {
             tcg_out_insn(s, RR, BCR,
-                         s390_facilities & FACILITY_FAST_BCR_SER ? 14 : 15, 0);
+                         facilities & FACILITY_FAST_BCR_SER ? 14 : 15, 0);
         }
         break;
 
@@ -2264,12 +2216,12 @@ static const TCGTargetOpDef s390_op_defs[] = {
 
     { INDEX_op_neg_i32, { "r", "r" } },
 
-    { INDEX_op_shl_i32, { "r", "0", "ri" } },
-    { INDEX_op_shr_i32, { "r", "0", "ri" } },
-    { INDEX_op_sar_i32, { "r", "0", "ri" } },
+    { INDEX_op_shl_i32, { "r", "0", "Ri" } },
+    { INDEX_op_shr_i32, { "r", "0", "Ri" } },
+    { INDEX_op_sar_i32, { "r", "0", "Ri" } },
 
-    { INDEX_op_rotl_i32, { "r", "r", "ri" } },
-    { INDEX_op_rotr_i32, { "r", "r", "ri" } },
+    { INDEX_op_rotl_i32, { "r", "r", "Ri" } },
+    { INDEX_op_rotr_i32, { "r", "r", "Ri" } },
 
     { INDEX_op_ext8s_i32, { "r", "r" } },
     { INDEX_op_ext8u_i32, { "r", "r" } },
@@ -2285,8 +2237,7 @@ static const TCGTargetOpDef s390_op_defs[] = {
     { INDEX_op_brcond_i32, { "r", "rC" } },
     { INDEX_op_setcond_i32, { "r", "r", "rC" } },
     { INDEX_op_movcond_i32, { "r", "r", "rC", "r", "0" } },
-    { INDEX_op_deposit_i32, { "r", "rZ", "r" } },
-    { INDEX_op_extract_i32, { "r", "r" } },
+    { INDEX_op_deposit_i32, { "r", "0", "r" } },
 
     { INDEX_op_qemu_ld_i32, { "r", "L" } },
     { INDEX_op_qemu_ld_i64, { "r", "L" } },
@@ -2320,12 +2271,12 @@ static const TCGTargetOpDef s390_op_defs[] = {
 
     { INDEX_op_neg_i64, { "r", "r" } },
 
-    { INDEX_op_shl_i64, { "r", "r", "ri" } },
-    { INDEX_op_shr_i64, { "r", "r", "ri" } },
-    { INDEX_op_sar_i64, { "r", "r", "ri" } },
+    { INDEX_op_shl_i64, { "r", "r", "Ri" } },
+    { INDEX_op_shr_i64, { "r", "r", "Ri" } },
+    { INDEX_op_sar_i64, { "r", "r", "Ri" } },
 
-    { INDEX_op_rotl_i64, { "r", "r", "ri" } },
-    { INDEX_op_rotr_i64, { "r", "r", "ri" } },
+    { INDEX_op_rotl_i64, { "r", "r", "Ri" } },
+    { INDEX_op_rotr_i64, { "r", "r", "Ri" } },
 
     { INDEX_op_ext8s_i64, { "r", "r" } },
     { INDEX_op_ext8u_i64, { "r", "r" } },
@@ -2341,8 +2292,6 @@ static const TCGTargetOpDef s390_op_defs[] = {
     { INDEX_op_bswap32_i64, { "r", "r" } },
     { INDEX_op_bswap64_i64, { "r", "r" } },
 
-    { INDEX_op_clz_i64, { "r", "r", "ri" } },
-
     { INDEX_op_add2_i64, { "r", "r", "0", "1", "rA", "r" } },
     { INDEX_op_sub2_i64, { "r", "r", "0", "1", "rA", "r" } },
 
@@ -2350,25 +2299,12 @@ static const TCGTargetOpDef s390_op_defs[] = {
     { INDEX_op_setcond_i64, { "r", "r", "rC" } },
     { INDEX_op_movcond_i64, { "r", "r", "rC", "r", "0" } },
     { INDEX_op_deposit_i64, { "r", "0", "r" } },
-    { INDEX_op_extract_i64, { "r", "r" } },
 
     { INDEX_op_mb, { } },
     { -1 },
 };
 
-static const TCGTargetOpDef *tcg_target_op_def(TCGOpcode op)
-{
-    int i, n = ARRAY_SIZE(s390_op_defs);
-
-    for (i = 0; i < n; ++i) {
-        if (s390_op_defs[i].op == op) {
-            return &s390_op_defs[i];
-        }
-    }
-    return NULL;
-}
-
-static void query_s390_facilities(void)
+static void query_facilities(void)
 {
     unsigned long hwcap = qemu_getauxval(AT_HWCAP);
 
@@ -2379,7 +2315,7 @@ static void query_s390_facilities(void)
         register void *r1 __asm__("1");
 
         /* stfle 0(%r1) */
-        r1 = &s390_facilities;
+        r1 = &facilities;
         asm volatile(".word 0xb2b0,0x1000"
                      : "=r"(r0) : "0"(0), "r"(r1) : "memory", "cc");
     }
@@ -2387,7 +2323,7 @@ static void query_s390_facilities(void)
 
 static void tcg_target_init(TCGContext *s)
 {
-    query_s390_facilities();
+    query_facilities();
 
     tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I32], 0, 0xffff);
     tcg_regset_set32(tcg_target_available_regs[TCG_TYPE_I64], 0, 0xffff);
@@ -2410,6 +2346,8 @@ static void tcg_target_init(TCGContext *s)
     /* XXX many insns can't be used with R0, so we better avoid it for now */
     tcg_regset_set_reg(s->reserved_regs, TCG_REG_R0);
     tcg_regset_set_reg(s->reserved_regs, TCG_REG_CALL_STACK);
+
+    tcg_add_target_add_op_defs(s390_op_defs);
 }
 
 #define FRAME_SIZE  ((int)(TCG_TARGET_CALL_STACK_OFFSET          \

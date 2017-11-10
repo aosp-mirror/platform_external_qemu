@@ -48,7 +48,7 @@ QEMU2_SYSTEM_INCLUDES := \
     $(QEMU2_DEPS_TOP_DIR)/include \
     $(call qemu2-if-linux,$(LOCAL_PATH)/linux-headers) \
     $(LOCAL_PATH)/android-qemu2-glue/config/target-$(QEMU2_TARGET) \
-    $(LOCAL_PATH)/target/$(QEMU2_TARGET_TARGET) \
+    $(LOCAL_PATH)/target-$(QEMU2_TARGET_TARGET) \
     $(LOCAL_PATH)/tcg \
     $(LOCAL_PATH)/tcg/i386 \
 
@@ -96,20 +96,22 @@ endif
 LOCAL_SRC_FILES += \
     stubs/arch-query-cpu-model-baseline.c \
     stubs/arch-query-cpu-model-comparison.c \
+    stubs/arch-query-cpu-model-expansion.c \
     stubs/target-get-monitor-def.c \
     $(call qemu2-if-target,arm arm64 mips mips64,\
-		stubs/arch-query-cpu-model-expansion.c \
         stubs/qmp_pc_dimm_device_list.c \
-		stubs/vmgenid.c \
         ) \
     $(call qemu2-if-target,x86 x86_64,, \
         stubs/pc_madt_cpu_entry.c \
-        hw/smbios/smbios_type_38-stub.c \
+        stubs/smbios_type_38.c \
         stubs/target-monitor-defs.c \
         ) \
     $(call qemu2-if-target,mips mips64, \
         stubs/dump.c \
         stubs/arch-query-cpu-def.c \
+        ) \
+    $(call qemu2-if-linux,, \
+        stubs/vhost.c \
         ) \
 
 LOCAL_SRC_FILES += \

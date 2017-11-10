@@ -29,7 +29,7 @@
 #include "migration/postcopy-ram.h"
 #include "qemu/thread.h"
 #include "qmp-commands.h"
-#include "migration/trace.h"
+#include "trace.h"
 #include "qapi-event.h"
 #include "qom/cpu.h"
 #include "exec/memory.h"
@@ -48,10 +48,6 @@
 /* Time in milliseconds we are allowed to stop the source,
  * for sending the last part */
 #define DEFAULT_MIGRATE_SET_DOWNTIME 300
-
-/* Maximum migrate downtime set to 2000 seconds */
-#define MAX_MIGRATE_DOWNTIME_SECONDS 2000
-#define MAX_MIGRATE_DOWNTIME (MAX_MIGRATE_DOWNTIME_SECONDS * 1000)
 
 /* Default compression thread count */
 #define DEFAULT_MIGRATE_COMPRESS_THREAD_COUNT 8
@@ -110,35 +106,37 @@ MigrationState *migrate_get_current(void)
 
     if (!once) {
         qemu_mutex_init(&current_migration.src_page_req_mutex);
-        current_migration.parameters.tls_creds = g_strdup("");
-        current_migration.parameters.tls_hostname = g_strdup("");
         once = true;
     }
     return &current_migration;
 }
 
+/* For incoming */
+static MigrationIncomingState *mis_current;
+
 MigrationIncomingState *migration_incoming_get_current(void)
 {
-    static bool once;
-    static MigrationIncomingState mis_current;
+    return mis_current;
+}
 
-    if (!once) {
-        mis_current.state = MIGRATION_STATUS_NONE;
-        memset(&mis_current, 0, sizeof(MigrationIncomingState));
-        QLIST_INIT(&mis_current.loadvm_handlers);
-        qemu_mutex_init(&mis_current.rp_mutex);
-        qemu_event_init(&mis_current.main_thread_load_event, false);
-        once = true;
-    }
-    return &mis_current;
+MigrationIncomingState *migration_incoming_state_new(QEMUFile* f)
+{
+    mis_current = g_new0(MigrationIncomingState, 1);
+    mis_current->from_src_file = f;
+    mis_current->state = MIGRATION_STATUS_NONE;
+    QLIST_INIT(&mis_current->loadvm_handlers);
+    qemu_mutex_init(&mis_current->rp_mutex);
+    qemu_event_init(&mis_current->main_thread_load_event, false);
+
+    return mis_current;
 }
 
 void migration_incoming_state_destroy(void)
 {
-    struct MigrationIncomingState *mis = migration_incoming_get_current();
-
-    qemu_event_destroy(&mis->main_thread_load_event);
-    loadvm_free_handlers(mis);
+    qemu_event_destroy(&mis_current->main_thread_load_event);
+    loadvm_free_handlers(mis_current);
+    g_free(mis_current);
+    mis_current = NULL;
 }
 
 
@@ -349,14 +347,6 @@ static void process_incoming_migration_bh(void *opaque)
         exit(EXIT_FAILURE);
     }
 
-    /* If we get an error here, just don't restart the VM yet. */
-    blk_resume_after_migration(&local_err);
-    if (local_err) {
-        error_free(local_err);
-        local_err = NULL;
-        autostart = false;
-    }
-
     /*
      * This must happen after all error conditions are dealt with and
      * we're sure the VM is going to be running on this host.
@@ -392,12 +382,11 @@ static void process_incoming_migration_bh(void *opaque)
 static void process_incoming_migration_co(void *opaque)
 {
     QEMUFile *f = opaque;
-    MigrationIncomingState *mis = migration_incoming_get_current();
+    MigrationIncomingState *mis;
     PostcopyState ps;
     int ret;
 
-    mis->from_src_file = f;
-    mis->largest_page_size = qemu_ram_pagesize_largest();
+    mis = migration_incoming_state_new(f);
     postcopy_state_set(POSTCOPY_INCOMING_NONE);
     migrate_set_state(&mis->state, MIGRATION_STATUS_NONE,
                       MIGRATION_STATUS_ACTIVE);
@@ -468,7 +457,6 @@ void migration_channel_process_incoming(MigrationState *s,
         ioc, object_get_typename(OBJECT(ioc)));
 
     if (s->parameters.tls_creds &&
-        *s->parameters.tls_creds &&
         !object_dynamic_cast(OBJECT(ioc),
                              TYPE_QIO_CHANNEL_TLS)) {
         Error *local_err = NULL;
@@ -491,7 +479,6 @@ void migration_channel_connect(MigrationState *s,
         ioc, object_get_typename(OBJECT(ioc)), hostname);
 
     if (s->parameters.tls_creds &&
-        *s->parameters.tls_creds &&
         !object_dynamic_cast(OBJECT(ioc),
                              TYPE_QIO_CHANNEL_TLS)) {
         Error *local_err = NULL;
@@ -860,11 +847,10 @@ void qmp_migrate_set_parameters(MigrationParameters *params, Error **errp)
         return;
     }
     if (params->has_downtime_limit &&
-        (params->downtime_limit < 0 ||
-         params->downtime_limit > MAX_MIGRATE_DOWNTIME)) {
-        error_setg(errp, "Parameter 'downtime_limit' expects an integer in "
-                         "the range of 0 to %d milliseconds",
-                         MAX_MIGRATE_DOWNTIME);
+        (params->downtime_limit < 0 || params->downtime_limit > 2000000)) {
+        error_setg(errp, QERR_INVALID_PARAMETER_VALUE,
+                   "downtime_limit",
+                   "an integer in the range of 0 to 2000000 milliseconds");
         return;
     }
     if (params->has_x_checkpoint_delay && (params->x_checkpoint_delay < 0)) {
@@ -909,9 +895,6 @@ void qmp_migrate_set_parameters(MigrationParameters *params, Error **errp)
 
     if (params->has_x_checkpoint_delay) {
         s->parameters.x_checkpoint_delay = params->x_checkpoint_delay;
-        if (migration_in_colo_state()) {
-            colo_checkpoint_notify(s);
-        }
     }
 }
 
@@ -1023,16 +1006,6 @@ static void migrate_fd_cancel(MigrationState *s)
     if (s->state == MIGRATION_STATUS_CANCELLING && f) {
         qemu_file_shutdown(f);
     }
-    if (s->state == MIGRATION_STATUS_CANCELLING && s->block_inactive) {
-        Error *local_err = NULL;
-
-        bdrv_invalidate_cache_all(&local_err);
-        if (local_err) {
-            error_report_err(local_err);
-        } else {
-            s->block_inactive = false;
-        }
-    }
 }
 
 void add_migration_state_change_notifier(Notifier *notify)
@@ -1069,31 +1042,6 @@ bool migration_in_postcopy(MigrationState *s)
 bool migration_in_postcopy_after_devices(MigrationState *s)
 {
     return migration_in_postcopy(s) && s->postcopy_after_devices;
-}
-
-bool migration_is_idle(MigrationState *s)
-{
-    if (!s) {
-        s = migrate_get_current();
-    }
-
-    switch (s->state) {
-    case MIGRATION_STATUS_NONE:
-    case MIGRATION_STATUS_CANCELLED:
-    case MIGRATION_STATUS_COMPLETED:
-    case MIGRATION_STATUS_FAILED:
-        return true;
-    case MIGRATION_STATUS_SETUP:
-    case MIGRATION_STATUS_CANCELLING:
-    case MIGRATION_STATUS_ACTIVE:
-    case MIGRATION_STATUS_POSTCOPY_ACTIVE:
-    case MIGRATION_STATUS_COLO:
-        return false;
-    case MIGRATION_STATUS__MAX:
-        g_assert_not_reached();
-    }
-
-    return false;
 }
 
 MigrationState *migrate_init(const MigrationParams *params)
@@ -1138,44 +1086,14 @@ MigrationState *migrate_init(const MigrationParams *params)
 
 static GSList *migration_blockers;
 
-int migrate_add_blocker(Error *reason, Error **errp)
+void migrate_add_blocker(Error *reason)
 {
-    if (only_migratable) {
-        error_propagate(errp, error_copy(reason));
-        error_prepend(errp, "disallowing migration blocker "
-                          "(--only_migratable) for: ");
-        return -EACCES;
-    }
-
-    if (migration_is_idle(NULL)) {
-        migration_blockers = g_slist_prepend(migration_blockers, reason);
-        return 0;
-    }
-
-    error_propagate(errp, error_copy(reason));
-    error_prepend(errp, "disallowing migration blocker (migration in "
-                      "progress) for: ");
-    return -EBUSY;
+    migration_blockers = g_slist_prepend(migration_blockers, reason);
 }
 
 void migrate_del_blocker(Error *reason)
 {
     migration_blockers = g_slist_remove(migration_blockers, reason);
-}
-
-int check_migratable(Object *obj, Error **err)
-{
-    DeviceClass *dc = DEVICE_GET_CLASS(obj);
-    if (only_migratable && dc->vmsd) {
-        if (dc->vmsd->unmigratable) {
-            error_setg(err, "Device %s is not migratable, but "
-                       "--only-migratable was specified",
-                       object_get_typename(obj));
-            return -1;
-        }
-    }
-
-    return 0;
 }
 
 void qmp_migrate_incoming(const char *uri, Error **errp)
@@ -1322,13 +1240,6 @@ void qmp_migrate_set_speed(int64_t value, Error **errp)
 
 void qmp_migrate_set_downtime(double value, Error **errp)
 {
-    if (value < 0 || value > MAX_MIGRATE_DOWNTIME_SECONDS) {
-        error_setg(errp, "Parameter 'downtime_limit' expects an integer in "
-                         "the range of 0 to %d seconds",
-                         MAX_MIGRATE_DOWNTIME_SECONDS);
-        return;
-    }
-
     value *= 1000; /* Convert to milliseconds */
     value = MAX(0, MIN(INT64_MAX, value));
 
@@ -1338,15 +1249,6 @@ void qmp_migrate_set_downtime(double value, Error **errp)
     };
 
     qmp_migrate_set_parameters(&p, errp);
-}
-
-bool migrate_release_ram(void)
-{
-    MigrationState *s;
-
-    s = migrate_get_current();
-
-    return s->enabled_capabilities[MIGRATION_CAPABILITY_RELEASE_RAM];
 }
 
 bool migrate_postcopy_ram(void)
@@ -1653,7 +1555,6 @@ static int postcopy_start(MigrationState *ms, bool *old_vm_running)
     QIOChannelBuffer *bioc;
     QEMUFile *fb;
     int64_t time_at_stop = qemu_clock_get_ms(QEMU_CLOCK_REALTIME);
-    bool restart_block = false;
     migrate_set_state(&ms->state, MIGRATION_STATUS_ACTIVE,
                       MIGRATION_STATUS_POSTCOPY_ACTIVE);
 
@@ -1673,7 +1574,6 @@ static int postcopy_start(MigrationState *ms, bool *old_vm_running)
     if (ret < 0) {
         goto fail;
     }
-    restart_block = true;
 
     /*
      * Cause any non-postcopiable, but iterative devices to
@@ -1730,18 +1630,6 @@ static int postcopy_start(MigrationState *ms, bool *old_vm_running)
 
     /* <><> end of stuff going into the package */
 
-    /* Last point of recovery; as soon as we send the package the destination
-     * can open devices and potentially start running.
-     * Lets just check again we've not got any errors.
-     */
-    ret = qemu_file_get_error(ms->to_dst_file);
-    if (ret) {
-        error_report("postcopy_start: Migration stream errored (pre package)");
-        goto fail_closefb;
-    }
-
-    restart_block = false;
-
     /* Now send that blob */
     if (qemu_savevm_send_packaged(ms->to_dst_file, bioc->data, bioc->usage)) {
         goto fail_closefb;
@@ -1765,10 +1653,6 @@ static int postcopy_start(MigrationState *ms, bool *old_vm_running)
      */
     qemu_savevm_send_ping(ms->to_dst_file, 4);
 
-    if (migrate_release_ram()) {
-        ram_postcopy_migrated_memory_release(ms);
-    }
-
     ret = qemu_file_get_error(ms->to_dst_file);
     if (ret) {
         error_report("postcopy_start: Migration stream errored");
@@ -1783,17 +1667,6 @@ fail_closefb:
 fail:
     migrate_set_state(&ms->state, MIGRATION_STATUS_POSTCOPY_ACTIVE,
                           MIGRATION_STATUS_FAILED);
-    if (restart_block) {
-        /* A failure happened early enough that we know the destination hasn't
-         * accessed block devices, so we're safe to recover.
-         */
-        Error *local_err = NULL;
-
-        bdrv_invalidate_cache_all(&local_err);
-        if (local_err) {
-            error_report_err(local_err);
-        }
-    }
     qemu_mutex_unlock_iothread();
     return -1;
 }
@@ -1832,7 +1705,6 @@ static void migration_completion(MigrationState *s, int current_active_state,
             if (ret >= 0) {
                 qemu_file_set_rate_limit(s->to_dst_file, INT64_MAX);
                 qemu_savevm_state_complete_precopy(s->to_dst_file, false);
-                s->block_inactive = true;
             }
         }
         qemu_mutex_unlock_iothread();
@@ -1883,14 +1755,10 @@ fail_invalidate:
     if (s->state == MIGRATION_STATUS_ACTIVE) {
         Error *local_err = NULL;
 
-        qemu_mutex_lock_iothread();
         bdrv_invalidate_cache_all(&local_err);
         if (local_err) {
             error_report_err(local_err);
-        } else {
-            s->block_inactive = false;
         }
-        qemu_mutex_unlock_iothread();
     }
 
 fail:
@@ -2101,7 +1969,7 @@ void migrate_fd_connect(MigrationState *s)
     }
 
     migrate_compress_threads_create();
-    qemu_thread_create(&s->thread, "live_migration", migration_thread, s,
+    qemu_thread_create(&s->thread, "migration", migration_thread, s,
                        QEMU_THREAD_JOINABLE);
     s->migration_thread_running = true;
 }

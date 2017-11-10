@@ -488,7 +488,7 @@ static void ahci_reg_init(AHCIState *s)
     s->control_regs.cap = (s->ports - 1) |
                           (AHCI_NUM_COMMAND_SLOTS << 8) |
                           (AHCI_SUPPORTED_SPEED_GEN1 << AHCI_SUPPORTED_SPEED) |
-                          HOST_CAP_NCQ | HOST_CAP_AHCI | HOST_CAP_64;
+                          HOST_CAP_NCQ | HOST_CAP_AHCI;
 
     s->control_regs.impl = (1 << s->ports) - 1;
 
@@ -1485,18 +1485,6 @@ void ahci_realize(AHCIState *s, DeviceState *qdev, AddressSpace *as, int ports)
 
 void ahci_uninit(AHCIState *s)
 {
-    int i, j;
-
-    for (i = 0; i < s->ports; i++) {
-        AHCIDevice *ad = &s->dev[i];
-
-        for (j = 0; j < 2; j++) {
-            IDEState *s = &ad->port.ifs[j];
-
-            ide_exit(s);
-        }
-    }
-
     g_free(s->dev);
 }
 

@@ -26,7 +26,6 @@ typedef struct BlockConf {
     /* geometry, not all devices use this */
     uint32_t cyls, heads, secs;
     OnOffAuto wce;
-    bool share_rw;
     BlockdevOnError rerror;
     BlockdevOnError werror;
 } BlockConf;
@@ -54,9 +53,7 @@ static inline unsigned int get_physical_block_exp(BlockConf *conf)
     DEFINE_PROP_UINT32("opt_io_size", _state, _conf.opt_io_size, 0),    \
     DEFINE_PROP_UINT32("discard_granularity", _state, \
                        _conf.discard_granularity, -1), \
-    DEFINE_PROP_ON_OFF_AUTO("write-cache", _state, _conf.wce, \
-                            ON_OFF_AUTO_AUTO), \
-    DEFINE_PROP_BOOL("share-rw", _state, _conf.share_rw, false)
+    DEFINE_PROP_ON_OFF_AUTO("write-cache", _state, _conf.wce, ON_OFF_AUTO_AUTO)
 
 #define DEFINE_BLOCK_CHS_PROPERTIES(_state, _conf)      \
     DEFINE_PROP_UINT32("cyls", _state, _conf.cyls, 0),  \
@@ -76,8 +73,7 @@ void blkconf_geometry(BlockConf *conf, int *trans,
                       unsigned cyls_max, unsigned heads_max, unsigned secs_max,
                       Error **errp);
 void blkconf_blocksizes(BlockConf *conf);
-void blkconf_apply_backend_options(BlockConf *conf, bool readonly,
-                                   bool resizable, Error **errp);
+void blkconf_apply_backend_options(BlockConf *conf);
 
 /* Hard disk geometry */
 

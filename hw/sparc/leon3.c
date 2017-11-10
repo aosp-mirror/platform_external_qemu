@@ -34,7 +34,7 @@
 #include "hw/boards.h"
 #include "hw/loader.h"
 #include "elf.h"
-#include "hw/sparc/trace.h"
+#include "trace.h"
 #include "exec/address-spaces.h"
 
 #include "hw/sparc/grlib.h"

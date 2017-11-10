@@ -9,7 +9,7 @@
 
 #include "qemu/osdep.h"
 #include "cpu.h"
-#include "trace-root.h"
+#include "trace.h"
 #include "trace/control.h"
 #include "translate-all.h"
 
@@ -79,7 +79,7 @@ void trace_event_set_vcpu_state_dynamic(CPUState *vcpu,
     }
 }
 
-static bool adding_first_cpu1(void)
+static bool adding_first_cpu(void)
 {
     CPUState *cpu;
     size_t count = 0;
@@ -90,15 +90,6 @@ static bool adding_first_cpu1(void)
         }
     }
     return true;
-}
-
-static bool adding_first_cpu(void)
-{
-    bool res;
-    cpu_list_lock();
-    res = adding_first_cpu1();
-    cpu_list_unlock();
-    return res;
 }
 
 void trace_init_vcpu(CPUState *vcpu)

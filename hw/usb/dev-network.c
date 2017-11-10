@@ -1324,7 +1324,7 @@ static void usbnet_cleanup(NetClientState *nc)
     s->nic = NULL;
 }
 
-static void usb_net_unrealize(USBDevice *dev, Error **errp)
+static void usb_net_handle_destroy(USBDevice *dev)
 {
     USBNetState *s = (USBNetState *) dev;
 
@@ -1428,7 +1428,7 @@ static void usb_net_class_initfn(ObjectClass *klass, void *data)
     uc->handle_reset   = usb_net_handle_reset;
     uc->handle_control = usb_net_handle_control;
     uc->handle_data    = usb_net_handle_data;
-    uc->unrealize      = usb_net_unrealize;
+    uc->handle_destroy = usb_net_handle_destroy;
     set_bit(DEVICE_CATEGORY_NETWORK, dc->categories);
     dc->fw_name = "network";
     dc->vmsd = &vmstate_usb_net;

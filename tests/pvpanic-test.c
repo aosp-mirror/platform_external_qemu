@@ -27,7 +27,6 @@ static void test_panic(void)
     data = qdict_get_qdict(response, "data");
     g_assert(qdict_haskey(data, "action"));
     g_assert_cmpstr(qdict_get_str(data, "action"), ==, "pause");
-    QDECREF(response);
 }
 
 int main(int argc, char **argv)

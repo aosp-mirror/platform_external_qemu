@@ -41,7 +41,7 @@ struct QEMUWin32AIOState {
     HANDLE hIOCP;
     EventNotifier e;
     int count;
-    AioContext *aio_ctx;
+    bool is_aio_context_attached;
 };
 
 typedef struct QEMUWin32AIOCB {
@@ -86,6 +86,7 @@ static void win32_aio_process_completion(QEMUWin32AIOState *s,
         }
         qemu_vfree(waiocb->buf);
     }
+
 
     waiocb->common.cb(waiocb->common.opaque, ret);
     qemu_aio_unref(waiocb);
@@ -174,16 +175,16 @@ int win32_aio_attach(QEMUWin32AIOState *aio, HANDLE hfile)
 void win32_aio_detach_aio_context(QEMUWin32AIOState *aio,
                                   AioContext *old_context)
 {
-    aio_set_event_notifier(old_context, &aio->e, false, NULL, NULL);
-    aio->aio_ctx = NULL;
+    aio_set_event_notifier(old_context, &aio->e, false, NULL);
+    aio->is_aio_context_attached = false;
 }
 
 void win32_aio_attach_aio_context(QEMUWin32AIOState *aio,
                                   AioContext *new_context)
 {
-    aio->aio_ctx = new_context;
+    aio->is_aio_context_attached = true;
     aio_set_event_notifier(new_context, &aio->e, false,
-                           win32_aio_completion_cb, NULL);
+                           win32_aio_completion_cb);
 }
 
 QEMUWin32AIOState *win32_aio_init(void)
@@ -211,7 +212,7 @@ out_free_state:
 
 void win32_aio_cleanup(QEMUWin32AIOState *aio)
 {
-    assert(!aio->aio_ctx);
+    assert(!aio->is_aio_context_attached);
     CloseHandle(aio->hIOCP);
     event_notifier_cleanup(&aio->e);
     g_free(aio);

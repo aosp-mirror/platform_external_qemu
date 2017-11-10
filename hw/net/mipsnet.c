@@ -1,7 +1,7 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "net/net.h"
-#include "hw/net/trace.h"
+#include "trace.h"
 #include "hw/sysbus.h"
 
 /* MIPSnet register offsets */

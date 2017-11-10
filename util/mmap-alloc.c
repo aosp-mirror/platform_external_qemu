@@ -12,7 +12,6 @@
 
 #include "qemu/osdep.h"
 #include "qemu/mmap-alloc.h"
-#include "qemu/host-utils.h"
 
 #define HUGETLBFS_MAGIC       0x958458f6
 
@@ -34,31 +33,6 @@ size_t qemu_fd_getpagesize(int fd)
         if (ret == 0 && fs.f_type == HUGETLBFS_MAGIC) {
             return fs.f_bsize;
         }
-    }
-#endif
-
-    return getpagesize();
-}
-
-size_t qemu_mempath_getpagesize(const char *mem_path)
-{
-#ifdef CONFIG_LINUX
-    struct statfs fs;
-    int ret;
-
-    do {
-        ret = statfs(mem_path, &fs);
-    } while (ret != 0 && errno == EINTR);
-
-    if (ret != 0) {
-        fprintf(stderr, "Couldn't statfs() memory path: %s\n",
-                strerror(errno));
-        exit(1);
-    }
-
-    if (fs.f_type == HUGETLBFS_MAGIC) {
-        /* It's hugepage, return the huge page size */
-        return fs.f_bsize;
     }
 #endif
 
@@ -87,18 +61,18 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
 #else
     void *ptr = mmap(0, total, PROT_NONE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 #endif
-    size_t offset;
+    size_t offset = QEMU_ALIGN_UP((uintptr_t)ptr, align) - (uintptr_t)ptr;
     void *ptr1;
 
     if (ptr == MAP_FAILED) {
         return MAP_FAILED;
     }
 
-    assert(is_power_of_2(align));
+    /* Make sure align is a power of 2 */
+    assert(!(align & (align - 1)));
     /* Always align to host page size */
     assert(align >= getpagesize());
 
-    offset = QEMU_ALIGN_UP((uintptr_t)ptr, align) - (uintptr_t)ptr;
     ptr1 = mmap(ptr + offset, size, PROT_READ | PROT_WRITE,
                 MAP_FIXED |
                 (fd == -1 ? MAP_ANONYMOUS : 0) |
@@ -109,20 +83,22 @@ void *qemu_ram_mmap(int fd, size_t size, size_t align, bool shared)
         return MAP_FAILED;
     }
 
+    ptr += offset;
+    total -= offset;
+
     if (offset > 0) {
-        munmap(ptr, offset);
+        munmap(ptr - offset, offset);
     }
 
     /*
      * Leave a single PROT_NONE page allocated after the RAM block, to serve as
      * a guard page guarding against potential buffer overflows.
      */
-    total -= offset;
     if (total > size + getpagesize()) {
-        munmap(ptr1 + size + getpagesize(), total - size - getpagesize());
+        munmap(ptr + size + getpagesize(), total - size - getpagesize());
     }
 
-    return ptr1;
+    return ptr;
 }
 
 void qemu_ram_munmap(void *ptr, size_t size)

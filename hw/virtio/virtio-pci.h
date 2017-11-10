@@ -72,10 +72,6 @@ enum {
     VIRTIO_PCI_FLAG_MODERN_PIO_NOTIFY_BIT,
     VIRTIO_PCI_FLAG_DISABLE_PCIE_BIT,
     VIRTIO_PCI_FLAG_PAGE_PER_VQ_BIT,
-    VIRTIO_PCI_FLAG_ATS_BIT,
-    VIRTIO_PCI_FLAG_INIT_DEVERR_BIT,
-    VIRTIO_PCI_FLAG_INIT_LNKCTL_BIT,
-    VIRTIO_PCI_FLAG_INIT_PM_BIT,
 };
 
 /* Need to activate work-arounds for buggy guests at vmstate load. */
@@ -99,18 +95,6 @@ enum {
 /* page per vq flag to be used by split drivers within guests */
 #define VIRTIO_PCI_FLAG_PAGE_PER_VQ \
     (1 << VIRTIO_PCI_FLAG_PAGE_PER_VQ_BIT)
-
-/* address space translation service */
-#define VIRTIO_PCI_FLAG_ATS (1 << VIRTIO_PCI_FLAG_ATS_BIT)
-
-/* Init error enabling flags */
-#define VIRTIO_PCI_FLAG_INIT_DEVERR (1 << VIRTIO_PCI_FLAG_INIT_DEVERR_BIT)
-
-/* Init Link Control register */
-#define VIRTIO_PCI_FLAG_INIT_LNKCTL (1 << VIRTIO_PCI_FLAG_INIT_LNKCTL_BIT)
-
-/* Init Power Management */
-#define VIRTIO_PCI_FLAG_INIT_PM (1 << VIRTIO_PCI_FLAG_INIT_PM_BIT)
 
 typedef struct {
     MSIMessage msg;

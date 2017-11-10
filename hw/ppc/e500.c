@@ -827,12 +827,6 @@ void ppce500_init(MachineState *machine, PPCE500Params *params)
         env = &cpu->env;
         cs = CPU(cpu);
 
-        if (env->mmu_model != POWERPC_MMU_BOOKE206) {
-            fprintf(stderr, "MMU model %i not supported by this machine.\n",
-                env->mmu_model);
-            exit(1);
-        }
-
         if (!firstenv) {
             firstenv = env;
         }
@@ -1055,18 +1049,27 @@ void ppce500_init(MachineState *machine, PPCE500Params *params)
     boot_info->dt_size = dt_size;
 }
 
-static void e500_ccsr_initfn(Object *obj)
+static int e500_ccsr_initfn(SysBusDevice *dev)
 {
-    PPCE500CCSRState *ccsr = CCSR(obj);
-    memory_region_init(&ccsr->ccsr_space, obj, "e500-ccsr",
+    PPCE500CCSRState *ccsr;
+
+    ccsr = CCSR(dev);
+    memory_region_init(&ccsr->ccsr_space, OBJECT(ccsr), "e500-ccsr",
                        MPC8544_CCSRBAR_SIZE);
+    return 0;
+}
+
+static void e500_ccsr_class_init(ObjectClass *klass, void *data)
+{
+    SysBusDeviceClass *k = SYS_BUS_DEVICE_CLASS(klass);
+    k->init = e500_ccsr_initfn;
 }
 
 static const TypeInfo e500_ccsr_info = {
     .name          = TYPE_CCSR,
     .parent        = TYPE_SYS_BUS_DEVICE,
     .instance_size = sizeof(PPCE500CCSRState),
-    .instance_init = e500_ccsr_initfn,
+    .class_init    = e500_ccsr_class_init,
 };
 
 static void e500_register_types(void)

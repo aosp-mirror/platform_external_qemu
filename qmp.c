@@ -18,7 +18,6 @@
 #include "qemu/cutils.h"
 #include "monitor/monitor.h"
 #include "sysemu/sysemu.h"
-#include "qemu/config-file.h"
 #include "qemu/uuid.h"
 #include "qmp-commands.h"
 #include "sysemu/char.h"
@@ -205,12 +204,6 @@ void qmp_cont(Error **errp)
             error_propagate(errp, local_err);
             return;
         }
-    }
-
-    blk_resume_after_migration(&local_err);
-    if (local_err) {
-        error_propagate(errp, local_err);
-        return;
     }
 
     if (runstate_check(RUN_STATE_INMIGRATE)) {
@@ -538,12 +531,12 @@ DevicePropertyInfoList *qmp_device_list_properties(const char *typename,
 
     klass = object_class_dynamic_cast(klass, TYPE_DEVICE);
     if (klass == NULL) {
-        error_setg(errp, QERR_INVALID_PARAMETER_VALUE, "typename", TYPE_DEVICE);
+        error_setg(errp, QERR_INVALID_PARAMETER_VALUE, "name", TYPE_DEVICE);
         return NULL;
     }
 
     if (object_class_is_abstract(klass)) {
-        error_setg(errp, QERR_INVALID_PARAMETER_VALUE, "typename",
+        error_setg(errp, QERR_INVALID_PARAMETER_VALUE, "name",
                    "non-abstract device type");
         return NULL;
     }
@@ -623,7 +616,7 @@ void qmp_add_client(const char *protocol, const char *fdname,
                     bool has_skipauth, bool skipauth, bool has_tls, bool tls,
                     Error **errp)
 {
-    Chardev *s;
+    CharDriverState *s;
     int fd;
 
     fd = monitor_get_fd(cur_mon, fdname, errp);
@@ -681,7 +674,7 @@ void qmp_object_add(const char *type, const char *id,
         pdict = qdict_new();
     }
 
-    v = qobject_input_visitor_new(QOBJECT(pdict));
+    v = qobject_input_visitor_new(QOBJECT(pdict), true);
     obj = user_creatable_add_type(type, id, pdict, v, errp);
     visit_free(v);
     if (obj) {

@@ -435,19 +435,6 @@ int load_elf_as(const char *filename,
                 uint64_t *highaddr, int big_endian, int elf_machine,
                 int clear_lsb, int data_swab, AddressSpace *as)
 {
-    return load_elf_ram(filename, translate_fn, translate_opaque,
-                        pentry, lowaddr, highaddr, big_endian, elf_machine,
-                        clear_lsb, data_swab, as, true);
-}
-
-/* return < 0 if error, otherwise the number of bytes loaded in memory */
-int load_elf_ram(const char *filename,
-                 uint64_t (*translate_fn)(void *, uint64_t),
-                 void *translate_opaque, uint64_t *pentry, uint64_t *lowaddr,
-                 uint64_t *highaddr, int big_endian, int elf_machine,
-                 int clear_lsb, int data_swab, AddressSpace *as,
-                 bool load_rom)
-{
     int fd, data_order, target_data_order, must_swab, ret = ELF_LOAD_FAILED;
     uint8_t e_ident[EI_NIDENT];
 
@@ -486,11 +473,11 @@ int load_elf_ram(const char *filename,
     if (e_ident[EI_CLASS] == ELFCLASS64) {
         ret = load_elf64(filename, fd, translate_fn, translate_opaque, must_swab,
                          pentry, lowaddr, highaddr, elf_machine, clear_lsb,
-                         data_swab, as, load_rom);
+                         data_swab, as);
     } else {
         ret = load_elf32(filename, fd, translate_fn, translate_opaque, must_swab,
                          pentry, lowaddr, highaddr, elf_machine, clear_lsb,
-                         data_swab, as, load_rom);
+                         data_swab, as);
     }
 
  fail:
@@ -540,7 +527,12 @@ static void zfree(void *x, void *addr)
 
 #define DEFLATED	8
 
-ssize_t gunzip(void *dst, size_t dstlen, uint8_t *src, size_t srclen)
+/* This is the usual maximum in uboot, so if a uImage overflows this, it would
+ * overflow on real hardware too. */
+#define UBOOT_MAX_GUNZIP_BYTES (64 << 20)
+
+static ssize_t gunzip(void *dst, size_t dstlen, uint8_t *src,
+                      size_t srclen)
 {
     z_stream s;
     ssize_t dstbytes;
@@ -861,7 +853,7 @@ static void fw_cfg_resized(const char *id, uint64_t length, void *host)
     }
 }
 
-static void *rom_set_mr(Rom *rom, Object *owner, const char *name, bool ro)
+static void *rom_set_mr(Rom *rom, Object *owner, const char *name)
 {
     void *data;
 
@@ -870,7 +862,7 @@ static void *rom_set_mr(Rom *rom, Object *owner, const char *name, bool ro)
                                       rom->datasize, rom->romsize,
                                       fw_cfg_resized,
                                       &error_fatal);
-    memory_region_set_readonly(rom->mr, ro);
+    memory_region_set_readonly(rom->mr, true);
     vmstate_register_ram_global(rom->mr);
 
     data = memory_region_get_ram_ptr(rom->mr);
@@ -950,7 +942,7 @@ int rom_add_file(const char *file, const char *fw_dir,
         snprintf(devpath, sizeof(devpath), "/rom@%s", fw_file_name);
 
         if ((!option_rom || mc->option_rom_has_mr) && mc->rom_file_has_mr) {
-            data = rom_set_mr(rom, OBJECT(fw_cfg), devpath, true);
+            data = rom_set_mr(rom, OBJECT(fw_cfg), devpath);
         } else {
             data = rom->data;
         }
@@ -987,7 +979,7 @@ err:
 MemoryRegion *rom_add_blob(const char *name, const void *blob, size_t len,
                    size_t max_len, hwaddr addr, const char *fw_file_name,
                    FWCfgReadCallback fw_callback, void *callback_opaque,
-                   AddressSpace *as, bool read_only)
+                   AddressSpace *as)
 {
     MachineClass *mc = MACHINE_GET_CLASS(qdev_get_machine());
     Rom *rom;
@@ -1006,14 +998,10 @@ MemoryRegion *rom_add_blob(const char *name, const void *blob, size_t len,
         char devpath[100];
         void *data;
 
-        if (read_only) {
-            snprintf(devpath, sizeof(devpath), "/rom@%s", fw_file_name);
-        } else {
-            snprintf(devpath, sizeof(devpath), "/ram@%s", fw_file_name);
-        }
+        snprintf(devpath, sizeof(devpath), "/rom@%s", fw_file_name);
 
         if (mc->rom_file_has_mr) {
-            data = rom_set_mr(rom, OBJECT(fw_cfg), devpath, read_only);
+            data = rom_set_mr(rom, OBJECT(fw_cfg), devpath);
             mr = rom->mr;
         } else {
             data = rom->data;
@@ -1021,7 +1009,7 @@ MemoryRegion *rom_add_blob(const char *name, const void *blob, size_t len,
 
         fw_cfg_add_file_callback(fw_cfg, fw_file_name,
                                  fw_callback, callback_opaque,
-                                 data, rom->datasize, read_only);
+                                 data, rom->datasize);
     }
     return mr;
 }

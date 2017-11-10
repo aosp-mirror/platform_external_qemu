@@ -50,13 +50,14 @@ struct TestTaskData {
 };
 
 
-static void task_callback(QIOTask *task,
+static void task_callback(Object *source,
+                          Error *err,
                           gpointer opaque)
 {
     struct TestTaskData *data = opaque;
 
-    data->source = qio_task_get_source(task);
-    qio_task_propagate_error(task, &data->err);
+    data->source = source;
+    data->err = err;
 }
 
 
@@ -75,6 +76,7 @@ static void test_task_complete(void)
     g_assert(obj == src);
 
     object_unref(obj);
+    object_unref(src);
 
     g_assert(data.source == obj);
     g_assert(data.err == NULL);
@@ -119,15 +121,15 @@ static void test_task_failure(void)
 
     error_setg(&err, "Some error");
 
-    qio_task_set_error(task, err);
-    qio_task_complete(task);
+    qio_task_abort(task, err);
 
+    error_free(err);
     object_unref(obj);
 
     g_assert(data.source == obj);
     g_assert(data.err == err);
     g_assert(data.freed == false);
-    error_free(data.err);
+
 }
 
 
@@ -140,28 +142,31 @@ struct TestThreadWorkerData {
     GMainLoop *loop;
 };
 
-static void test_task_thread_worker(QIOTask *task,
-                                    gpointer opaque)
+static int test_task_thread_worker(QIOTask *task,
+                                   Error **errp,
+                                   gpointer opaque)
 {
     struct TestThreadWorkerData *data = opaque;
 
     data->worker = g_thread_self();
 
     if (data->fail) {
-        Error *err = NULL;
-        error_setg(&err, "Testing fail");
-        qio_task_set_error(task, err);
+        error_setg(errp, "Testing fail");
+        return -1;
     }
+
+    return 0;
 }
 
 
-static void test_task_thread_callback(QIOTask *task,
+static void test_task_thread_callback(Object *source,
+                                      Error *err,
                                       gpointer opaque)
 {
     struct TestThreadWorkerData *data = opaque;
 
-    data->source = qio_task_get_source(task);
-    qio_task_propagate_error(task, &data->err);
+    data->source = source;
+    data->err = err;
 
     data->complete = g_thread_self();
 
@@ -237,8 +242,6 @@ static void test_task_thread_failure(void)
 
     g_assert(data.source == obj);
     g_assert(data.err != NULL);
-
-    error_free(data.err);
 
     self = g_thread_self();
 

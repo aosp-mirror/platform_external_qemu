@@ -4,6 +4,7 @@
 #include "qemu-common.h"
 #include "qemu/notify.h"
 #include "qemu/host-utils.h"
+#include "sysemu/cpus.h"
 
 #define NANOSECONDS_PER_SECOND 1000000000LL
 
@@ -59,7 +60,7 @@ struct QEMUTimerListGroup {
 };
 
 typedef void QEMUTimerCB(void *opaque);
-typedef void QEMUTimerListNotifyCB(void *opaque, QEMUClockType type);
+typedef void QEMUTimerListNotifyCB(void *opaque);
 
 struct QEMUTimer {
     int64_t expire_time;        /* in nanoseconds */
@@ -132,7 +133,7 @@ bool qemu_clock_has_timers(QEMUClockType type);
  * @type: the clock type
  *
  * Determines whether a clock's default timer list
- * has an expired timer.
+ * has an expired clock.
  *
  * Returns: true if the clock's default timer list has
  * an expired timer
@@ -533,12 +534,6 @@ static inline QEMUTimer *timer_new_tl(QEMUTimerList *timer_list,
  * Create a new timer and associate it with the default
  * timer list for the clock type @type.
  *
- * The default timer list has one special feature: in icount mode,
- * %QEMU_CLOCK_VIRTUAL timers are run in the vCPU thread.  This is
- * not true of other timer lists, which are typically associated
- * with an AioContext---each of them runs its timer callbacks in its own
- * AioContext thread.
- *
  * Returns: a pointer to the timer
  */
 static inline QEMUTimer *timer_new(QEMUClockType type, int scale,
@@ -556,12 +551,6 @@ static inline QEMUTimer *timer_new(QEMUClockType type, int scale,
  * Create a new timer with nanosecond scale on the default timer list
  * associated with the clock.
  *
- * The default timer list has one special feature: in icount mode,
- * %QEMU_CLOCK_VIRTUAL timers are run in the vCPU thread.  This is
- * not true of other timer lists, which are typically associated
- * with an AioContext---each of them runs its timer callbacks in its own
- * AioContext thread.
- *
  * Returns: a pointer to the newly created timer
  */
 static inline QEMUTimer *timer_new_ns(QEMUClockType type, QEMUTimerCB *cb,
@@ -575,12 +564,6 @@ static inline QEMUTimer *timer_new_ns(QEMUClockType type, QEMUTimerCB *cb,
  * @type: the clock type to associate with the timer
  * @cb: the callback to call when the timer expires
  * @opaque: the opaque pointer to pass to the callback
- *
- * The default timer list has one special feature: in icount mode,
- * %QEMU_CLOCK_VIRTUAL timers are run in the vCPU thread.  This is
- * not true of other timer lists, which are typically associated
- * with an AioContext---each of them runs its timer callbacks in its own
- * AioContext thread.
  *
  * Create a new timer with microsecond scale on the default timer list
  * associated with the clock.
@@ -598,12 +581,6 @@ static inline QEMUTimer *timer_new_us(QEMUClockType type, QEMUTimerCB *cb,
  * @type: the clock type to associate with the timer
  * @cb: the callback to call when the timer expires
  * @opaque: the opaque pointer to pass to the callback
- *
- * The default timer list has one special feature: in icount mode,
- * %QEMU_CLOCK_VIRTUAL timers are run in the vCPU thread.  This is
- * not true of other timer lists, which are typically associated
- * with an AioContext---each of them runs its timer callbacks in its own
- * AioContext thread.
  *
  * Create a new timer with millisecond scale on the default timer list
  * associated with the clock.
@@ -633,10 +610,7 @@ void timer_deinit(QEMUTimer *ts);
  *
  * Free a timer (it must not be on the active list)
  */
-static inline void timer_free(QEMUTimer *ts)
-{
-    g_free(ts);
-}
+void timer_free(QEMUTimer *ts);
 
 /**
  * timer_del:
@@ -800,7 +774,7 @@ static inline int64_t qemu_soonest_timeout(int64_t timeout1, int64_t timeout2)
  *
  * Initialise the clock & timer infrastructure
  */
-void init_clocks(QEMUTimerListNotifyCB *notify_cb);
+void init_clocks(void);
 
 int64_t cpu_get_ticks(void);
 /* Caller must hold BQL */
@@ -869,7 +843,6 @@ int64_t cpu_get_icount_raw(void);
 int64_t cpu_get_icount(void);
 int64_t cpu_get_clock(void);
 int64_t cpu_icount_to_ns(int64_t icount);
-void    cpu_update_icount(CPUState *cpu);
 
 /*******************************************/
 /* host CPU ticks (if available) */

@@ -24,7 +24,7 @@
 #include "qapi/error.h"
 #include "qom/object_interfaces.h"
 #include "qemu/base64.h"
-#include "crypto/trace.h"
+#include "trace.h"
 
 
 static void

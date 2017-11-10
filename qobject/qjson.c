@@ -12,7 +12,6 @@
  */
 
 #include "qemu/osdep.h"
-#include "qapi/error.h"
 #include "qapi/qmp/json-lexer.h"
 #include "qapi/qmp/json-parser.h"
 #include "qapi/qmp/json-streamer.h"
@@ -25,17 +24,15 @@ typedef struct JSONParsingState
     JSONMessageParser parser;
     va_list *ap;
     QObject *result;
-    Error *err;
 } JSONParsingState;
 
 static void parse_json(JSONMessageParser *parser, GQueue *tokens)
 {
     JSONParsingState *s = container_of(parser, JSONParsingState, parser);
-
-    s->result = json_parser_parse_err(tokens, s->ap, &s->err);
+    s->result = json_parser_parse(tokens, s->ap);
 }
 
-QObject *qobject_from_jsonv(const char *string, va_list *ap, Error **errp)
+QObject *qobject_from_jsonv(const char *string, va_list *ap)
 {
     JSONParsingState state = {};
 
@@ -46,13 +43,12 @@ QObject *qobject_from_jsonv(const char *string, va_list *ap, Error **errp)
     json_message_parser_flush(&state.parser);
     json_message_parser_destroy(&state.parser);
 
-    error_propagate(errp, state.err);
     return state.result;
 }
 
-QObject *qobject_from_json(const char *string, Error **errp)
+QObject *qobject_from_json(const char *string)
 {
-    return qobject_from_jsonv(string, NULL, errp);
+    return qobject_from_jsonv(string, NULL);
 }
 
 /*
@@ -65,7 +61,7 @@ QObject *qobject_from_jsonf(const char *string, ...)
     va_list ap;
 
     va_start(ap, string);
-    obj = qobject_from_jsonv(string, &ap, &error_abort);
+    obj = qobject_from_jsonv(string, &ap);
     va_end(ap);
 
     assert(obj != NULL);

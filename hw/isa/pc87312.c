@@ -31,7 +31,7 @@
 #include "sysemu/blockdev.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/char.h"
-#include "hw/isa/trace.h"
+#include "trace.h"
 
 
 #define REG_FER 0
@@ -268,7 +268,7 @@ static void pc87312_realize(DeviceState *dev, Error **errp)
     DeviceState *d;
     ISADevice *isa;
     ISABus *bus;
-    Chardev *chr;
+    CharDriverState *chr;
     DriveInfo *drive;
     char name[5];
     int i;

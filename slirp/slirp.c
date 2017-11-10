@@ -110,7 +110,7 @@ static int get_dns_addr(struct in_addr *pdns_addr)
     return 0;
 }
 
-int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
+static int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
 {
     return -1;
 }
@@ -229,7 +229,7 @@ static int get_dns_addr(struct in_addr *pdns_addr)
                                     sizeof(dns_addr), NULL, &dns_addr_time);
 }
 
-int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
+static int get_dns6_addr(struct in6_addr *pdns6_addr, uint32_t *scope_id)
 {
     static struct stat dns6_addr_stat;
 
@@ -917,7 +917,7 @@ void slirp_pollfds_poll(GArray *pollfds, int select_error)
 static void arp_input(Slirp *slirp, const uint8_t *pkt, int pkt_len)
 {
     struct slirp_arphdr *ah = (struct slirp_arphdr *)(pkt + ETH_HLEN);
-    uint8_t arp_reply[MAX(ETH_HLEN + sizeof(struct slirp_arphdr), 64)];
+    uint8_t arp_reply[max(ETH_HLEN + sizeof(struct slirp_arphdr), 64)];
     struct ethhdr *reh = (struct ethhdr *)arp_reply;
     struct slirp_arphdr *rah = (struct slirp_arphdr *)(arp_reply + ETH_HLEN);
     int ar_op;

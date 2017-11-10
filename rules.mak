@@ -7,10 +7,6 @@ MAKEFLAGS += -rR
 
 # Files with this suffixes are final, don't try to generate them
 # using implicit rules
-%/trace-events:
-%.hx:
-%.py:
-%.objs:
 %.d:
 %.h:
 %.c:
@@ -26,13 +22,8 @@ QEMU_CXXFLAGS = -D__STDC_LIMIT_MACROS $(filter-out -Wstrict-prototypes -Wmissing
 # Flags for dependency generation
 QEMU_DGFLAGS += -MMD -MP -MT $@ -MF $(@D)/$(*F).d
 
-# Compiler searches the source file dir first, but in vpath builds
-# we need to make it search the build dir too, before any other
-# explicit search paths. There are two search locations in the build
-# dir, one absolute and the other relative to the compiler working
-# directory. These are the same for target-independent files, but
-# different for target-dependent ones.
-QEMU_LOCAL_INCLUDES = -I$(BUILD_DIR)/$(@D) -I$(@D)
+# Same as -I$(SRC_PATH) -I., but for the nested source/object directories
+QEMU_INCLUDES += -I$(<D) -I$(@D)
 
 WL_U := -Wl,-u,
 find-symbols = $(if $1, $(sort $(shell $(NM) -P -g $1 | $2)))
@@ -66,9 +57,7 @@ expand-objs = $(strip $(sort $(filter %.o,$1)) \
                   $(filter-out %.o %.mo,$1))
 
 %.o: %.c
-	$(call quiet-command,$(CC) $(QEMU_LOCAL_INCLUDES) $(QEMU_INCLUDES) \
-	       $(QEMU_CFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) \
-	       -c -o $@ $<,"CC","$(TARGET_DIR)$@")
+	$(call quiet-command,$(CC) $(QEMU_INCLUDES) $(QEMU_CFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) -c -o $@ $<,"CC","$(TARGET_DIR)$@")
 %.o: %.rc
 	$(call quiet-command,$(WINDRES) -I. -o $@ $<,"RC","$(TARGET_DIR)$@")
 
@@ -81,24 +70,16 @@ LINK = $(call quiet-command, $(LINKPROG) $(QEMU_CFLAGS) $(CFLAGS) $(LDFLAGS) -o 
        $(version-obj-y) $(call extract-libs,$1) $(LIBS),"LINK","$(TARGET_DIR)$@")
 
 %.o: %.S
-	$(call quiet-command,$(CCAS) $(QEMU_LOCAL_INCLUDES) $(QEMU_INCLUDES) \
-	       $(QEMU_CFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) \
-	       -c -o $@ $<,"CCAS","$(TARGET_DIR)$@")
+	$(call quiet-command,$(CCAS) $(QEMU_INCLUDES) $(QEMU_CFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) -c -o $@ $<,"CCAS","$(TARGET_DIR)$@")
 
 %.o: %.cc
-	$(call quiet-command,$(CXX) $(QEMU_LOCAL_INCLUDES) $(QEMU_INCLUDES) \
-	       $(QEMU_CXXFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) \
-	       -c -o $@ $<,"CXX","$(TARGET_DIR)$@")
+	$(call quiet-command,$(CXX) $(QEMU_INCLUDES) $(QEMU_CXXFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) -c -o $@ $<,"CXX","$(TARGET_DIR)$@")
 
 %.o: %.cpp
-	$(call quiet-command,$(CXX) $(QEMU_LOCAL_INCLUDES) $(QEMU_INCLUDES) \
-	       $(QEMU_CXXFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) \
-	       -c -o $@ $<,"CXX","$(TARGET_DIR)$@")
+	$(call quiet-command,$(CXX) $(QEMU_INCLUDES) $(QEMU_CXXFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) -c -o $@ $<,"CXX","$(TARGET_DIR)$@")
 
 %.o: %.m
-	$(call quiet-command,$(OBJCC) $(QEMU_LOCAL_INCLUDES) $(QEMU_INCLUDES) \
-	       $(QEMU_CFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) \
-	       -c -o $@ $<,"OBJC","$(TARGET_DIR)$@")
+	$(call quiet-command,$(OBJCC) $(QEMU_INCLUDES) $(QEMU_CFLAGS) $(QEMU_DGFLAGS) $(CFLAGS) $($@-cflags) -c -o $@ $<,"OBJC","$(TARGET_DIR)$@")
 
 %.o: %.dtrace
 	$(call quiet-command,dtrace -o $@ -G -s $<,"GEN","$(TARGET_DIR)$@")
@@ -211,15 +192,15 @@ clean: clean-timestamp
 # save-vars
 # Usage: $(call save-vars, vars)
 # Save each variable $v in $vars as save-vars-$v, save their object's
-# variables, then clear $v.  saved-vars-$v contains the variables that
-# where saved for the objects, in order to speedup load-vars.
+# variables, then clear $v.
 define save-vars
     $(foreach v,$1,
         $(eval save-vars-$v := $(value $v))
-        $(eval saved-vars-$v := $(foreach o,$($v), \
-            $(if $($o-cflags), $o-cflags $(eval save-vars-$o-cflags := $($o-cflags))$(eval $o-cflags := )) \
-            $(if $($o-libs), $o-libs $(eval save-vars-$o-libs := $($o-libs))$(eval $o-libs := )) \
-            $(if $($o-objs), $o-objs $(eval save-vars-$o-objs := $($o-objs))$(eval $o-objs := ))))
+        $(foreach o,$($v),
+            $(foreach k,cflags libs objs,
+                $(if $($o-$k),
+                    $(eval save-vars-$o-$k := $($o-$k))
+                    $(eval $o-$k := ))))
         $(eval $v := ))
 endef
 
@@ -232,10 +213,12 @@ define load-vars
     $(eval $2-new-value := $(value $2))
     $(foreach v,$1,
         $(eval $v := $(value save-vars-$v))
-        $(foreach o,$(saved-vars-$v),
-            $(eval $o := $(save-vars-$o)) $(eval save-vars-$o := ))
-        $(eval save-vars-$v := )
-        $(eval saved-vars-$v := ))
+        $(foreach o,$($v),
+            $(foreach k,cflags libs objs,
+                $(if $(save-vars-$o-$k),
+                    $(eval $o-$k := $(save-vars-$o-$k))
+                    $(eval save-vars-$o-$k := ))))
+        $(eval save-vars-$v := ))
     $(eval $2 := $(value $2) $($2-new-value))
 endef
 
@@ -378,15 +361,3 @@ define unnest-vars
         $(eval -include $(patsubst %.o,%.d,$(patsubst %.mo,%.d,$($v))))
         $(eval $v := $(filter-out %/,$($v))))
 endef
-
-TEXI2MAN = $(call quiet-command, \
-	perl -Ww -- $(SRC_PATH)/scripts/texi2pod.pl -I docs $< $@.pod && \
-	$(POD2MAN) --section=$(subst .,,$(suffix $@)) --center=" " --release=" " $@.pod > $@, \
-	"GEN","$@")
-
-%.1:
-	$(call TEXI2MAN)
-%.7:
-	$(call TEXI2MAN)
-%.8:
-	$(call TEXI2MAN)

@@ -29,10 +29,6 @@ enum ReplayEvents {
     /* for character device read all event */
     EVENT_CHAR_READ_ALL,
     EVENT_CHAR_READ_ALL_ERROR,
-    /* for audio out event */
-    EVENT_AUDIO_OUT,
-    /* for audio in event */
-    EVENT_AUDIO_IN,
     /* for clock read/writes */
     /* some of greater codes are reserved for clocks */
     EVENT_CLOCK,
@@ -54,7 +50,6 @@ enum ReplayAsyncEventKind {
     REPLAY_ASYNC_EVENT_INPUT_SYNC,
     REPLAY_ASYNC_EVENT_CHAR_READ,
     REPLAY_ASYNC_EVENT_BLOCK,
-    REPLAY_ASYNC_EVENT_NET,
     REPLAY_ASYNC_COUNT
 };
 
@@ -165,15 +160,6 @@ void replay_event_char_read_run(void *opaque);
 void replay_event_char_read_save(void *opaque);
 /*! Reads char event read from the file. */
 void *replay_event_char_read_load(void);
-
-/* Network devices */
-
-/*! Called to run network event. */
-void replay_event_net_run(void *opaque);
-/*! Writes network event to the file. */
-void replay_event_net_save(void *opaque);
-/*! Reads network from the file. */
-void *replay_event_net_load(void);
 
 /* VMState-related functions */
 

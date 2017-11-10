@@ -26,8 +26,7 @@
 #include "qemu/queue.h"
 #include "qemu/atomic.h"
 #include "sysemu/sysemu.h"
-#include "migration/migration.h"
-#include "hw/display/trace.h"
+#include "trace.h"
 
 #include "qxl.h"
 
@@ -307,11 +306,12 @@ void qxl_spice_reset_cursor(PCIQXLDevice *qxl)
 
 static ram_addr_t qxl_rom_size(void)
 {
-#define QXL_REQUIRED_SZ (sizeof(QXLRom) + sizeof(QXLModes) + sizeof(qxl_modes))
-#define QXL_ROM_SZ 8192
+    uint32_t required_rom_size = sizeof(QXLRom) + sizeof(QXLModes) +
+                                 sizeof(qxl_modes);
+    uint32_t rom_size = 8192; /* two pages */
 
-    QEMU_BUILD_BUG_ON(QXL_REQUIRED_SZ > QXL_ROM_SZ);
-    return QXL_ROM_SZ;
+    QEMU_BUILD_BUG_ON(required_rom_size > rom_size);
+    return rom_size;
 }
 
 static void init_qxl_rom(PCIQXLDevice *d)
@@ -478,11 +478,6 @@ static int qxl_track_command(PCIQXLDevice *qxl, struct QXLCommandExt *ext)
             qxl->guest_cursor = ext->cmd.data;
             qemu_mutex_unlock(&qxl->track_lock);
         }
-        if (cmd->type == QXL_CURSOR_HIDE) {
-            qemu_mutex_lock(&qxl->track_lock);
-            qxl->guest_cursor = 0;
-            qemu_mutex_unlock(&qxl->track_lock);
-        }
         break;
     }
     }
@@ -640,30 +635,6 @@ static int interface_get_command(QXLInstance *sin, struct QXLCommandExt *ext)
         qxl->guest_primary.commands++;
         qxl_track_command(qxl, ext);
         qxl_log_command(qxl, "cmd", ext);
-        {
-            /*
-             * Windows 8 drivers place qxl commands in the vram
-             * (instead of the ram) bar.  We can't live migrate such a
-             * guest, so add a migration blocker in case we detect
-             * this, to avoid triggering the assert in pre_save().
-             *
-             * https://cgit.freedesktop.org/spice/win32/qxl-wddm-dod/commit/?id=f6e099db39e7d0787f294d5fd0dce328b5210faa
-             */
-            void *msg = qxl_phys2virt(qxl, ext->cmd.data, ext->group_id);
-            if (msg != NULL && (
-                    msg < (void *)qxl->vga.vram_ptr ||
-                    msg > ((void *)qxl->vga.vram_ptr + qxl->vga.vram_size))) {
-                if (!qxl->migration_blocker) {
-                    Error *local_err = NULL;
-                    error_setg(&qxl->migration_blocker,
-                               "qxl: guest bug: command not in ram bar");
-                    migrate_add_blocker(qxl->migration_blocker, &local_err);
-                    if (local_err) {
-                        error_report_err(local_err);
-                    }
-                }
-            }
-        }
         trace_qxl_ring_command_get(qxl->id, qxl_mode_to_string(qxl->mode));
         return true;
     default:
@@ -1171,7 +1142,6 @@ static void qxl_enter_vga_mode(PCIQXLDevice *d)
     update_displaychangelistener(&d->ssd.dcl, GUI_REFRESH_INTERVAL_DEFAULT);
     qemu_spice_create_host_primary(&d->ssd);
     d->mode = QXL_MODE_VGA;
-    qemu_spice_display_switch(&d->ssd, d->ssd.ds);
     vga_dirty_log_start(&d->vga);
     graphic_hw_update(d->vga.con);
 }
@@ -1260,12 +1230,6 @@ static void qxl_hard_reset(PCIQXLDevice *d, int loadvm)
     }
     qemu_spice_create_host_memslot(&d->ssd);
     qxl_soft_reset(d);
-
-    if (d->migration_blocker) {
-        migrate_del_blocker(d->migration_blocker);
-        error_free(d->migration_blocker);
-        d->migration_blocker = NULL;
-    }
 
     if (startstop) {
         qemu_spice_display_start();

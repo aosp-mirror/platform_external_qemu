@@ -31,7 +31,6 @@ struct MIPSGICTimerState {
     MIPSGICTimerCB *cb;
 };
 
-uint32_t mips_gictimer_get_freq(MIPSGICTimerState *gic);
 uint32_t mips_gictimer_get_sh_count(MIPSGICTimerState *gic);
 void mips_gictimer_store_sh_count(MIPSGICTimerState *gic, uint64_t count);
 uint32_t mips_gictimer_get_vp_compare(MIPSGICTimerState *gictimer,

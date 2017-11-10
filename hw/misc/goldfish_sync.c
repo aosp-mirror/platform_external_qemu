@@ -16,7 +16,7 @@
 #include "qemu-common.h"
 #include "qemu/error-report.h"
 #include "qemu/main-loop.h"
-#include "hw/misc/trace.h"
+#include "trace.h"
 #include "hw/misc/goldfish_sync.h"
 
 #include <assert.h>

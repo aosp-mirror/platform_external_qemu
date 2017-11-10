@@ -20,7 +20,7 @@
 #include "qapi/visitor.h"
 #include "qemu/error-report.h"
 #include "hw/ppc/spapr.h" /* for RTAS return codes */
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 #define DRC_CONTAINER_PATH "/dr-connector"
 #define DRC_INDEX_TYPE_SHIFT 28
@@ -59,7 +59,7 @@ static uint32_t set_isolation_state(sPAPRDRConnector *drc,
     trace_spapr_drc_set_isolation_state(get_index(drc), state);
 
     if (state == SPAPR_DR_ISOLATION_STATE_UNISOLATED) {
-        /* cannot unisolate a non-existent resource, and, or resources
+        /* cannot unisolate a non-existant resource, and, or resources
          * which are in an 'UNUSABLE' allocation state. (PAPR 2.7, 13.5.3.5)
          */
         if (!drc->dev ||
@@ -133,17 +133,6 @@ static uint32_t set_allocation_state(sPAPRDRConnector *drc,
          * result in an RTAS return code of -3 / "no such indicator"
          */
         if (!drc->dev) {
-            return RTAS_OUT_NO_SUCH_INDICATOR;
-        }
-        if (drc->awaiting_release && drc->awaiting_allocation) {
-            /* kernel is acknowledging a previous hotplug event
-             * while we are already removing it.
-             * it's safe to ignore awaiting_allocation here since we know the
-             * situation is predicated on the guest either already having done
-             * so (boot-time hotplug), or never being able to acquire in the
-             * first place (hotplug followed by immediate unplug).
-             */
-            drc->awaiting_allocation_skippable = true;
             return RTAS_OUT_NO_SUCH_INDICATOR;
         }
     }
@@ -337,12 +326,7 @@ static void prop_get_fdt(Object *obj, Visitor *v, const char *name,
                     return;
                 }
             }
-            visit_check_list(v, &err);
             visit_end_list(v, NULL);
-            if (err) {
-                error_propagate(errp, err);
-                return;
-            }
             break;
         }
         default:
@@ -447,11 +431,9 @@ static void detach(sPAPRDRConnector *drc, DeviceState *d,
     }
 
     if (drc->awaiting_allocation) {
-        if (!drc->awaiting_allocation_skippable) {
-            drc->awaiting_release = true;
-            trace_spapr_drc_awaiting_allocation(get_index(drc));
-            return;
-        }
+        drc->awaiting_release = true;
+        trace_spapr_drc_awaiting_allocation(get_index(drc));
+        return;
     }
 
     drc->indicator_state = SPAPR_DR_INDICATOR_STATE_INACTIVE;
@@ -461,7 +443,6 @@ static void detach(sPAPRDRConnector *drc, DeviceState *d,
     }
 
     drc->awaiting_release = false;
-    drc->awaiting_allocation_skippable = false;
     g_free(drc->fdt);
     drc->fdt = NULL;
     drc->fdt_start_offset = 0;

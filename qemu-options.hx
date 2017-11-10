@@ -6,7 +6,7 @@ HXCOMM construct option structures, enums and help message for specified
 HXCOMM architectures.
 HXCOMM HXCOMM can be used for comments, discarded from both texi and C
 
-DEFHEADING(Standard options)
+DEFHEADING(Standard options:)
 STEXI
 @table @option
 ETEXI
@@ -32,6 +32,7 @@ DEF("machine", HAS_ARG, QEMU_OPTION_machine, \
     "                selects emulated machine ('-machine help' for list)\n"
     "                property accel=accel1[:accel2[:...]] selects accelerator\n"
     "                supported accelerators are kvm, xen, tcg (default: tcg)\n"
+    "                kernel_irqchip=on|off controls accelerated irqchip support\n"
     "                kernel_irqchip=on|off|split controls accelerated irqchip support (default=off)\n"
     "                vmport=on|off|auto controls emulation of vmport (default: auto)\n"
     "                kvm_shadow_mem=size of KVM shadow MMU in bytes\n"
@@ -95,26 +96,6 @@ STEXI
 Select CPU model (@code{-cpu help} for list and additional feature selection)
 ETEXI
 
-DEF("accel", HAS_ARG, QEMU_OPTION_accel,
-    "-accel [accel=]accelerator[,thread=single|multi]\n"
-    "               select accelerator ('-accel help for list')\n"
-    "               thread=single|multi (enable multi-threaded TCG)", QEMU_ARCH_ALL)
-STEXI
-@item -accel @var{name}[,prop=@var{value}[,...]]
-@findex -accel
-This is used to enable an accelerator. Depending on the target architecture,
-kvm, xen, or tcg can be available. By default, tcg is used. If there is more
-than one accelerator specified, the next one is used if the previous one fails
-to initialize.
-@table @option
-@item thread=single|multi
-Controls number of TCG threads. When the TCG is multi-threaded there will be one
-thread per vCPU therefor taking advantage of additional host cores. The default
-is to enable multi-threading where both the back-end and front-ends support it and
-no incompatible TCG features have been enabled (e.g. icount/replay).
-@end table
-ETEXI
-
 DEF("smp", HAS_ARG, QEMU_OPTION_smp,
     "-smp [cpus=]n[,maxcpus=cpus][,cores=cores][,threads=threads][,sockets=sockets]\n"
     "                set the number of CPUs to 'n' [default=1]\n"
@@ -138,40 +119,22 @@ specifies the maximum number of hotpluggable CPUs.
 ETEXI
 
 DEF("numa", HAS_ARG, QEMU_OPTION_numa,
-    "-numa node[,mem=size][,cpus=firstcpu[-lastcpu]][,nodeid=node]\n"
-    "-numa node[,memdev=id][,cpus=firstcpu[-lastcpu]][,nodeid=node]\n", QEMU_ARCH_ALL)
+    "-numa node[,mem=size][,cpus=cpu[-cpu]][,nodeid=node]\n"
+    "-numa node[,memdev=id][,cpus=cpu[-cpu]][,nodeid=node]\n", QEMU_ARCH_ALL)
 STEXI
-@item -numa node[,mem=@var{size}][,cpus=@var{firstcpu}[-@var{lastcpu}]][,nodeid=@var{node}]
-@itemx -numa node[,memdev=@var{id}][,cpus=@var{firstcpu}[-@var{lastcpu}]][,nodeid=@var{node}]
+@item -numa node[,mem=@var{size}][,cpus=@var{cpu[-cpu]}][,nodeid=@var{node}]
+@itemx -numa node[,memdev=@var{id}][,cpus=@var{cpu[-cpu]}][,nodeid=@var{node}]
 @findex -numa
-Define a NUMA node and assign RAM and VCPUs to it.
+Simulate a multi node NUMA system. If @samp{mem}, @samp{memdev}
+and @samp{cpus} are omitted, resources are split equally. Also, note
+that the -@option{numa} option doesn't allocate any of the specified
+resources. That is, it just assigns existing resources to NUMA nodes. This
+means that one still has to use the @option{-m}, @option{-smp} options
+to allocate RAM and VCPUs respectively, and possibly @option{-object}
+to specify the memory backend for the @samp{memdev} suboption.
 
-@var{firstcpu} and @var{lastcpu} are CPU indexes. Each
-@samp{cpus} option represent a contiguous range of CPU indexes
-(or a single VCPU if @var{lastcpu} is omitted). A non-contiguous
-set of VCPUs can be represented by providing multiple @samp{cpus}
-options. If @samp{cpus} is omitted on all nodes, VCPUs are automatically
-split between them.
-
-For example, the following option assigns VCPUs 0, 1, 2 and 5 to
-a NUMA node:
-@example
--numa node,cpus=0-2,cpus=5
-@end example
-
-@samp{mem} assigns a given RAM amount to a node. @samp{memdev}
-assigns RAM from a given memory backend device to a node. If
-@samp{mem} and @samp{memdev} are omitted in all nodes, RAM is
-split equally between them.
-
-@samp{mem} and @samp{memdev} are mutually exclusive. Furthermore,
-if one node uses @samp{memdev}, all of them have to use it.
-
-Note that the -@option{numa} option doesn't allocate any of the
-specified resources, it just assigns existing resources to NUMA
-nodes. This means that one still has to use the @option{-m},
-@option{-smp} options to allocate RAM and VCPUs respectively.
-
+@samp{mem} and @samp{memdev} are mutually exclusive.  Furthermore, if one
+node uses @samp{memdev}, all of them have to use it.
 ETEXI
 
 DEF("add-fd", HAS_ARG, QEMU_OPTION_add_fd,
@@ -252,10 +215,7 @@ drive letters depend on the target architecture. The x86 PC uses: a, b
 (floppy 1 and 2), c (first hard disk), d (first CD-ROM), n-p (Etherboot
 from network adapter 1-4), hard disk boot is the default. To apply a
 particular boot order only on the first startup, specify it via
-@option{once}. Note that the @option{order} or @option{once} parameter
-should not be used together with the @option{bootindex} property of
-devices, since the firmware implementations normally do not support both
-at the same time.
+@option{once}.
 
 Interactive boot menus/prompts can be enabled via @option{menu=on} as far
 as firmware/BIOS supports them. The default is non-interactive boot.
@@ -290,7 +250,7 @@ use is discouraged as it may be removed from future versions.
 ETEXI
 
 DEF("m", HAS_ARG, QEMU_OPTION_m,
-    "-m [size=]megs[,slots=n,maxmem=size]\n"
+    "-m[emory] [size=]megs[,slots=n,maxmem=size]\n"
     "                configure guest RAM\n"
     "                size: initial amount of guest memory\n"
     "                slots: number of hotplug slots (default: none)\n"
@@ -518,7 +478,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Block device options)
+DEFHEADING(Block device options:)
 STEXI
 @table @option
 ETEXI
@@ -562,13 +522,6 @@ Use @var{file} as CD-ROM image (you cannot use @option{-hdc} and
 @option{-cdrom} at the same time). You can use the host CD-ROM by
 using @file{/dev/cdrom} as filename (@pxref{host_drives}).
 ETEXI
-
-DEF("blockdev", HAS_ARG, QEMU_OPTION_blockdev,
-    "-blockdev [driver=]driver[,node-name=N][,discard=ignore|unmap]\n"
-    "          [,cache.direct=on|off][,cache.no-flush=on|off]\n"
-    "          [,read-only=on|off][,detect-zeroes=on|off|unmap]\n"
-    "          [,driver specific parameters...]\n"
-    "                configure a block backend\n", QEMU_ARCH_ALL)
 
 DEF("drive", HAS_ARG, QEMU_OPTION_drive,
     "-drive [file=file][,if=type][,bus=n][,unit=m][,media=d][,index=i]\n"
@@ -712,6 +665,11 @@ If you don't specify the "file=" argument, you define an empty drive:
 qemu-system-i386 -drive if=ide,index=1,media=cdrom
 @end example
 
+You can connect a SCSI disk with unit ID 6 on the bus #0:
+@example
+qemu-system-i386 -drive file=file,if=scsi,bus=0,unit=6
+@end example
+
 Instead of @option{-fda}, @option{-fdb}, you can use:
 @example
 qemu-system-i386 -drive file=file,index=0,if=floppy
@@ -782,12 +740,7 @@ ETEXI
 
 DEF("fsdev", HAS_ARG, QEMU_OPTION_fsdev,
     "-fsdev fsdriver,id=id[,path=path,][security_model={mapped-xattr|mapped-file|passthrough|none}]\n"
-    " [,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd]\n"
-    " [[,throttling.bps-total=b]|[[,throttling.bps-read=r][,throttling.bps-write=w]]]\n"
-    " [[,throttling.iops-total=i]|[[,throttling.iops-read=r][,throttling.iops-write=w]]]\n"
-    " [[,throttling.bps-total-max=bm]|[[,throttling.bps-read-max=rm][,throttling.bps-write-max=wm]]]\n"
-    " [[,throttling.iops-total-max=im]|[[,throttling.iops-read-max=irm][,throttling.iops-write-max=iwm]]]\n"
-    " [[,throttling.iops-size=is]]\n",
+    " [,writeout=immediate][,readonly][,socket=socket|sock_fd=sock_fd]\n",
     QEMU_ARCH_ALL)
 
 STEXI
@@ -913,7 +866,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(USB options)
+DEFHEADING(USB options:)
 STEXI
 @table @option
 ETEXI
@@ -977,14 +930,14 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Display options)
+DEFHEADING(Display options:)
 STEXI
 @table @option
 ETEXI
 
 DEF("display", HAS_ARG, QEMU_OPTION_display,
     "-display sdl[,frame=on|off][,alt_grab=on|off][,ctrl_grab=on|off]\n"
-    "            [,window_close=on|off][,gl=on|off]\n"
+    "            [,window_close=on|off][,gl=on|off]|curses|none|\n"
     "-display gtk[,grab_on_hover=on|off][,gl=on|off]|\n"
     "-display vnc=<display>[,<optargs>]\n"
     "-display curses\n"
@@ -1124,7 +1077,7 @@ DEF("spice", HAS_ARG, QEMU_OPTION_spice,
     "       [,streaming-video=[off|all|filter]][,disable-copy-paste]\n"
     "       [,disable-agent-file-xfer][,agent-mouse=[on|off]]\n"
     "       [,playback-compression=[on|off]][,seamless-migration=[on|off]]\n"
-    "       [,gl=[on|off]][,rendernode=<file>]\n"
+    "       [,gl=[on|off]]\n"
     "   enable spice\n"
     "   at least one of {port, tls-port} is mandatory\n",
     QEMU_ARCH_ALL)
@@ -1219,10 +1172,6 @@ Enable/disable spice seamless migration. Default is off.
 @item gl=[on|off]
 Enable/disable OpenGL context. Default is off.
 
-@item rendernode=<file>
-DRM render node for OpenGL rendering. If not specified, it will pick
-the first available. (Since 2.9)
-
 @end table
 ETEXI
 
@@ -1256,12 +1205,12 @@ Select type of VGA card to emulate. Valid values for @var{type} are
 Cirrus Logic GD5446 Video card. All Windows versions starting from
 Windows 95 should recognize and use this graphic card. For optimal
 performances, use 16 bit color depth in the guest and the host OS.
-(This card was the default before QEMU 2.2)
+(This one is the default)
 @item std
 Standard VGA card with Bochs VBE extensions.  If your guest OS
 supports the VESA 2.0 VBE extensions (e.g. Windows XP) and if you want
 to use high resolution modes (>= 1280x1024x16) then you should use
-this option. (This card is the default since QEMU 2.2)
+this option.
 @item vmware
 VMWare SVGA-II compatible adapter. Use it if you have sufficiently
 recent XFree86/XOrg server or Windows guest with a driver for this
@@ -1358,14 +1307,10 @@ is a TCP port number, not a display number.
 @item websocket
 
 Opens an additional TCP listening port dedicated to VNC Websocket connections.
-If a bare @var{websocket} option is given, the Websocket port is
-5700+@var{display}. An alternative port can be specified with the
-syntax @code{websocket}=@var{port}.
-
-If @var{host} is specified connections will only be allowed from this host.
-It is possible to control the websocket listen address independently, using
-the syntax @code{websocket}=@var{host}:@var{port}.
-
+By definition the Websocket port is 5700+@var{display}. If @var{host} is
+specified connections will only be allowed from this host.
+As an alternative the Websocket port could be specified by using
+@code{websocket}=@var{port}.
 If no TLS credentials are provided, the websocket connection runs in
 unencrypted mode. If TLS credentials are provided, the websocket connection
 requires encrypted client connections.
@@ -1514,7 +1459,7 @@ STEXI
 ETEXI
 ARCHHEADING(, QEMU_ARCH_I386)
 
-ARCHHEADING(i386 target only, QEMU_ARCH_I386)
+ARCHHEADING(i386 target only:, QEMU_ARCH_I386)
 STEXI
 @table @option
 ETEXI
@@ -1630,7 +1575,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Network options)
+DEFHEADING(Network options:)
 STEXI
 @table @option
 ETEXI
@@ -2189,7 +2134,7 @@ Example:
 @example
 qemu -m 512 -object memory-backend-file,id=mem,size=512M,mem-path=/hugetlbfs,share=on \
      -numa node,memdev=mem \
-     -chardev socket,id=chr0,path=/path/to/socket \
+     -chardev socket,path=/path/to/socket \
      -netdev type=vhost-user,id=net0,chardev=chr0 \
      -device virtio-net-pci,netdev=net0
 @end example
@@ -2211,7 +2156,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Character device options)
+DEFHEADING(Character device options:)
 STEXI
 
 The general form of a character device option is:
@@ -2496,6 +2441,8 @@ Connect to standard input and standard output of the QEMU process.
 exiting QEMU with the key sequence @key{Control-c}. This option is enabled by
 default, use @option{signal=off} to disable it.
 
+@option{stdio} is not available on Windows hosts.
+
 @item -chardev braille ,id=@var{id}
 
 Connect to a local BrlAPI server. @option{braille} does not take any options.
@@ -2544,7 +2491,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Device URL Syntax)
+DEFHEADING(Device URL Syntax:)
 STEXI
 
 In addition to using normal file images for the emulated storage devices,
@@ -2649,10 +2596,10 @@ Example
 qemu-system-i386 --drive file=sheepdog://192.0.2.1:30000/MyVirtualMachine
 @end example
 
-See also @url{https://sheepdog.github.io/sheepdog/}.
+See also @url{http://http://www.osrg.net/sheepdog/}.
 
 @item GlusterFS
-GlusterFS is a user space distributed file system.
+GlusterFS is an user space distributed file system.
 QEMU supports the use of GlusterFS volumes for hosting VM disk images using
 TCP, Unix Domain Sockets and RDMA transport protocols.
 
@@ -2774,7 +2721,7 @@ STEXI
 @end table
 ETEXI
 
-DEFHEADING(Bluetooth(R) options)
+DEFHEADING(Bluetooth(R) options:)
 STEXI
 @table @option
 ETEXI
@@ -2850,7 +2797,7 @@ ETEXI
 DEFHEADING()
 
 #ifdef CONFIG_TPM
-DEFHEADING(TPM device options)
+DEFHEADING(TPM device options:)
 
 DEF("tpmdev", HAS_ARG, QEMU_OPTION_tpmdev, \
     "-tpmdev passthrough,id=id[,path=path][,cancel-path=path]\n"
@@ -2924,7 +2871,7 @@ DEFHEADING()
 
 #endif
 
-DEFHEADING(Linux/Multiboot boot specific)
+DEFHEADING(Linux/Multiboot boot specific:)
 STEXI
 
 When using these options, you can use a given Linux or Multiboot
@@ -2980,7 +2927,7 @@ STEXI
 ETEXI
 DEFHEADING()
 
-DEFHEADING(Debug/Expert options)
+DEFHEADING(Debug/Expert options:)
 STEXI
 @table @option
 ETEXI
@@ -3081,7 +3028,7 @@ udp::4555@@:4556} to QEMU. Another approach is to use a patched
 version of netcat which can listen to a TCP port and send and receive
 characters via udp.  If you have a patched version of netcat which
 activates telnet remote echo and single char transfer, then you can
-use the following options to set up a netcat redirector to allow
+use the following options to step up a netcat redirector to allow
 telnet on port 5555 to access the QEMU port.
 @table @code
 @item QEMU Options:
@@ -3348,10 +3295,9 @@ DEF("enable-hax", 0, QEMU_OPTION_enable_hax, \
 STEXI
 @item -enable-hax
 @findex -enable-hax
-Enable HAX (Hardware-based Acceleration eXecution) support. This option
-is only available if HAX support is enabled when compiling. HAX is only
-applicable to MAC and Windows platform, and thus does not conflict with
-KVM.
+Enable HAX (Hardware-based Acceleration eXecution) support, used for full
+virtualization support on OS X and Windows.  This option
+is only available if HAX support is enabled when compiling.
 ETEXI
 
 DEF("enable-hvf", 0, QEMU_OPTION_enable_hvf, \
@@ -3474,12 +3420,12 @@ re-inject them.
 ETEXI
 
 DEF("icount", HAS_ARG, QEMU_OPTION_icount, \
-    "-icount [shift=N|auto][,align=on|off][,sleep=on|off,rr=record|replay,rrfile=<filename>,rrsnapshot=<snapshot>]\n" \
+    "-icount [shift=N|auto][,align=on|off][,sleep=on|off,rr=record|replay,rrfile=<filename>]\n" \
     "                enable virtual instruction counter with 2^N clock ticks per\n" \
     "                instruction, enable aligning the host and virtual clocks\n" \
     "                or disable real time cpu sleeping\n", QEMU_ARCH_ALL)
 STEXI
-@item -icount [shift=@var{N}|auto][,rr=record|replay,rrfile=@var{filename},rrsnapshot=@var{snapshot}]
+@item -icount [shift=@var{N}|auto][,rr=record|replay,rrfile=@var{filename}]
 @findex -icount
 Enable virtual instruction counter.  The virtual cpu will execute one
 instruction every 2^@var{N} ns of virtual time.  If @code{auto} is specified
@@ -3512,10 +3458,6 @@ when the shift value is high (how high depends on the host machine).
 When @option{rr} option is specified deterministic record/replay is enabled.
 Replay log is written into @var{filename} file in record mode and
 read from this file in replay mode.
-
-Option rrsnapshot is used to create new vm snapshot named @var{snapshot}
-at the start of execution recording. In replay mode this option is used
-to load the initial VM state.
 ETEXI
 
 DEF("watchdog", HAS_ARG, QEMU_OPTION_watchdog, \
@@ -3660,15 +3602,6 @@ Accept incoming migration as an output from specified external command.
 Wait for the URI to be specified via migrate_incoming.  The monitor can
 be used to change settings (such as migration parameters) prior to issuing
 the migrate_incoming to allow the migration to begin.
-ETEXI
-
-DEF("only-migratable", 0, QEMU_OPTION_only_migratable, \
-    "-only-migratable     allow only migratable devices\n", QEMU_ARCH_ALL)
-STEXI
-@item -only-migratable
-@findex -only-migratable
-Only allow migratable devices. Devices will not be allowed to enter an
-unmigratable state.
 ETEXI
 
 DEF("nodefaults", 0, QEMU_OPTION_nodefaults, \
@@ -3872,14 +3805,7 @@ Dump json-encoded vmstate information for current machine type to file
 in @var{file}
 ETEXI
 
-STEXI
-@end table
-ETEXI
-DEFHEADING()
 DEFHEADING(Generic object creation)
-STEXI
-@table @option
-ETEXI
 
 DEF("object", HAS_ARG, QEMU_OPTION_object,
     "-object TYPENAME[,PROP1=VALUE1,...]\n"

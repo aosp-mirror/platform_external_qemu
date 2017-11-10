@@ -21,7 +21,7 @@
 #include <stdbool.h>
 
 /* Copyright string for -version arguments, About dialogs, etc */
-#define QEMU_COPYRIGHT "Copyright (c) 2003-2017 " \
+#define QEMU_COPYRIGHT "Copyright (c) 2003-2016 " \
     "Fabrice Bellard and the QEMU Project developers"
 
 /* main function, renamed */

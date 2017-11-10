@@ -17,32 +17,32 @@
 using android::qemu2::CharSerialLine;
 using android::SerialLine;
 
-CSerialLine* android_serialline_from_cs(Chardev* dev) {
-    return new CharSerialLine(dev);
+CSerialLine* android_serialline_from_cs(CharDriverState* cs) {
+    return new CharSerialLine(cs);
 }
 
-Chardev* android_serialline_get_cs(CSerialLine* sl) {
+CharDriverState* android_serialline_get_cs(CSerialLine* sl) {
     return static_cast<CharSerialLine*>(sl)->state();
 }
 
 static SerialLine* qemu_serialline_buffer_open(SerialLine* sl) {
-    Chardev* dev = static_cast<CharSerialLine*>(sl)->state();
-    return new CharSerialLine(qemu_chr_open_buffer(dev));
+    CharDriverState* cs = static_cast<CharSerialLine*>(sl)->state();
+    return new CharSerialLine(qemu_chr_open_buffer(cs));
 }
 
 static bool qemu_serialline_pipe_open(SerialLine** pfirst,
                                       SerialLine** psecond) {
-    Chardev* first_dev = nullptr;
-    Chardev* second_dev = nullptr;
+    CharDriverState* first_cs = nullptr;
+    CharDriverState* second_cs = nullptr;
 
-    if (qemu_chr_open_charpipe(&first_dev, &second_dev)) {
+    if (qemu_chr_open_charpipe(&first_cs, &second_cs)) {
         *pfirst = nullptr;
         *psecond = nullptr;
         return false;
     }
 
-    *pfirst = new CharSerialLine(first_dev);
-    *psecond = new CharSerialLine(second_dev);
+    *pfirst = new CharSerialLine(first_cs);
+    *psecond = new CharSerialLine(second_cs);
     return true;
 }
 

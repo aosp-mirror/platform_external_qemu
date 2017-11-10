@@ -970,7 +970,6 @@ static int net_client_init1(const void *object, bool is_netdev, Error **errp)
     const Netdev *netdev;
     const char *name;
     NetClientState *peer = NULL;
-    static bool vlan_warned;
 
     if (is_netdev) {
         netdev = object;
@@ -993,47 +992,47 @@ static int net_client_init1(const void *object, bool is_netdev, Error **errp)
 
         /* Map the old options to the new flat type */
         switch (opts->type) {
-        case NET_LEGACY_OPTIONS_TYPE_NONE:
+        case NET_LEGACY_OPTIONS_KIND_NONE:
             return 0; /* nothing to do */
-        case NET_LEGACY_OPTIONS_TYPE_NIC:
+        case NET_LEGACY_OPTIONS_KIND_NIC:
             legacy.type = NET_CLIENT_DRIVER_NIC;
-            legacy.u.nic = opts->u.nic;
+            legacy.u.nic = *opts->u.nic.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_USER:
+        case NET_LEGACY_OPTIONS_KIND_USER:
             legacy.type = NET_CLIENT_DRIVER_USER;
-            legacy.u.user = opts->u.user;
+            legacy.u.user = *opts->u.user.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_TAP:
+        case NET_LEGACY_OPTIONS_KIND_TAP:
             legacy.type = NET_CLIENT_DRIVER_TAP;
-            legacy.u.tap = opts->u.tap;
+            legacy.u.tap = *opts->u.tap.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_L2TPV3:
+        case NET_LEGACY_OPTIONS_KIND_L2TPV3:
             legacy.type = NET_CLIENT_DRIVER_L2TPV3;
-            legacy.u.l2tpv3 = opts->u.l2tpv3;
+            legacy.u.l2tpv3 = *opts->u.l2tpv3.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_SOCKET:
+        case NET_LEGACY_OPTIONS_KIND_SOCKET:
             legacy.type = NET_CLIENT_DRIVER_SOCKET;
-            legacy.u.socket = opts->u.socket;
+            legacy.u.socket = *opts->u.socket.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_VDE:
+        case NET_LEGACY_OPTIONS_KIND_VDE:
             legacy.type = NET_CLIENT_DRIVER_VDE;
-            legacy.u.vde = opts->u.vde;
+            legacy.u.vde = *opts->u.vde.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_DUMP:
+        case NET_LEGACY_OPTIONS_KIND_DUMP:
             legacy.type = NET_CLIENT_DRIVER_DUMP;
-            legacy.u.dump = opts->u.dump;
+            legacy.u.dump = *opts->u.dump.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_BRIDGE:
+        case NET_LEGACY_OPTIONS_KIND_BRIDGE:
             legacy.type = NET_CLIENT_DRIVER_BRIDGE;
-            legacy.u.bridge = opts->u.bridge;
+            legacy.u.bridge = *opts->u.bridge.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_NETMAP:
+        case NET_LEGACY_OPTIONS_KIND_NETMAP:
             legacy.type = NET_CLIENT_DRIVER_NETMAP;
-            legacy.u.netmap = opts->u.netmap;
+            legacy.u.netmap = *opts->u.netmap.data;
             break;
-        case NET_LEGACY_OPTIONS_TYPE_VHOST_USER:
+        case NET_LEGACY_OPTIONS_KIND_VHOST_USER:
             legacy.type = NET_CLIENT_DRIVER_VHOST_USER;
-            legacy.u.vhost_user = opts->u.vhost_user;
+            legacy.u.vhost_user = *opts->u.vhost_user.data;
             break;
         default:
             abort();
@@ -1048,13 +1047,8 @@ static int net_client_init1(const void *object, bool is_netdev, Error **errp)
 
         /* Do not add to a vlan if it's a nic with a netdev= parameter. */
         if (netdev->type != NET_CLIENT_DRIVER_NIC ||
-            !opts->u.nic.has_netdev) {
+            !opts->u.nic.data->has_netdev) {
             peer = net_hub_add_port(net->has_vlan ? net->vlan : 0, NULL);
-        }
-
-        if (net->has_vlan && !vlan_warned) {
-            error_report("'vlan' is deprecated. Please use 'netdev' instead.");
-            vlan_warned = true;
         }
     }
 

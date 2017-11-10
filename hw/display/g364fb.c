@@ -22,7 +22,7 @@
 #include "qemu/error-report.h"
 #include "ui/console.h"
 #include "ui/pixel_ops.h"
-#include "hw/display/trace.h"
+#include "trace.h"
 #include "hw/sysbus.h"
 
 typedef struct G364State {
@@ -464,7 +464,7 @@ static const VMStateDescription vmstate_g364fb = {
     .minimum_version_id = 1,
     .post_load = g364fb_post_load,
     .fields = (VMStateField[]) {
-        VMSTATE_VBUFFER_UINT32(vram, G364State, 1, NULL, vram_size),
+        VMSTATE_VBUFFER_UINT32(vram, G364State, 1, NULL, 0, vram_size),
         VMSTATE_BUFFER_UNSAFE(color_palette, G364State, 0, 256 * 3),
         VMSTATE_BUFFER_UNSAFE(cursor_palette, G364State, 0, 9),
         VMSTATE_UINT16_ARRAY(cursor, G364State, 512),

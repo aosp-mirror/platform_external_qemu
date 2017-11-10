@@ -1,9 +1,3 @@
-# -*- Mode: Python -*-
-
-##
-# = Other events
-##
-
 ##
 # @SHUTDOWN:
 #
@@ -14,12 +8,6 @@
 # not exit, and a STOP event will eventually follow the SHUTDOWN event
 #
 # Since: 0.12.0
-#
-# Example:
-#
-# <- { "event": "SHUTDOWN",
-#      "timestamp": { "seconds": 1267040730, "microseconds": 682951 } }
-#
 ##
 { 'event': 'SHUTDOWN' }
 
@@ -30,12 +18,6 @@
 # system, such as via ACPI.
 #
 # Since: 0.12.0
-#
-# Example:
-#
-# <- { "event": "POWERDOWN",
-#      "timestamp": { "seconds": 1267040730, "microseconds": 682951 } }
-#
 ##
 { 'event': 'POWERDOWN' }
 
@@ -45,12 +27,6 @@
 # Emitted when the virtual machine is reset
 #
 # Since: 0.12.0
-#
-# Example:
-#
-# <- { "event": "RESET",
-#      "timestamp": { "seconds": 1267041653, "microseconds": 9518 } }
-#
 ##
 { 'event': 'RESET' }
 
@@ -60,12 +36,6 @@
 # Emitted when the virtual machine is stopped
 #
 # Since: 0.12.0
-#
-# Example:
-#
-# <- { "event": "STOP",
-#      "timestamp": { "seconds": 1267041730, "microseconds": 281295 } }
-#
 ##
 { 'event': 'STOP' }
 
@@ -75,12 +45,6 @@
 # Emitted when the virtual machine resumes execution
 #
 # Since: 0.12.0
-#
-# Example:
-#
-# <- { "event": "RESUME",
-#      "timestamp": { "seconds": 1271770767, "microseconds": 582542 } }
-#
 ##
 { 'event': 'RESUME' }
 
@@ -91,12 +55,6 @@
 # which is sometimes called standby state
 #
 # Since: 1.1
-#
-# Example:
-#
-# <- { "event": "SUSPEND",
-#      "timestamp": { "seconds": 1344456160, "microseconds": 309119 } }
-#
 ##
 { 'event': 'SUSPEND' }
 
@@ -109,12 +67,6 @@
 # Note: QEMU shuts down (similar to event @SHUTDOWN) when entering this state
 #
 # Since: 1.2
-#
-# Example:
-#
-# <-   { "event": "SUSPEND_DISK",
-#        "timestamp": { "seconds": 1344456160, "microseconds": 309119 } }
-#
 ##
 { 'event': 'SUSPEND_DISK' }
 
@@ -124,12 +76,6 @@
 # Emitted when the guest has woken up from suspend state and is running
 #
 # Since: 1.1
-#
-# Example:
-#
-# <- { "event": "WAKEUP",
-#      "timestamp": { "seconds": 1344522075, "microseconds": 745528 } }
-#
 ##
 { 'event': 'WAKEUP' }
 
@@ -141,16 +87,7 @@
 # @offset: offset between base RTC clock (as specified by -rtc base), and
 #          new RTC clock value
 #
-# Note: This event is rate-limited.
-#
 # Since: 0.13.0
-#
-# Example:
-#
-# <-   { "event": "RTC_CHANGE",
-#        "data": { "offset": 78 },
-#        "timestamp": { "seconds": 1267020223, "microseconds": 435656 } }
-#
 ##
 { 'event': 'RTC_CHANGE',
   'data': { 'offset': 'int' } }
@@ -165,16 +102,7 @@
 # Note: If action is "reset", "shutdown", or "pause" the WATCHDOG event is
 # followed respectively by the RESET, SHUTDOWN, or STOP events
 #
-# Note: This event is rate-limited.
-#
 # Since: 0.13.0
-#
-# Example:
-#
-# <- { "event": "WATCHDOG",
-#      "data": { "action": "reset" },
-#      "timestamp": { "seconds": 1267061043, "microseconds": 959568 } }
-#
 ##
 { 'event': 'WATCHDOG',
   'data': { 'action': 'WatchdogExpirationAction' } }
@@ -186,19 +114,11 @@
 # At this point, it's safe to reuse the specified device ID. Device removal can
 # be initiated by the guest or by HMP/QMP commands.
 #
-# @device: device name
+# @device: #optional, device name
 #
 # @path: device path
 #
 # Since: 1.5
-#
-# Example:
-#
-# <- { "event": "DEVICE_DELETED",
-#      "data": { "device": "virtio-net-pci-0",
-#                "path": "/machine/peripheral/virtio-net-pci-0" },
-#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
-#
 ##
 { 'event': 'DEVICE_DELETED',
   'data': { '*device': 'str', 'path': 'str' } }
@@ -209,20 +129,11 @@
 # Emitted once until the 'query-rx-filter' command is executed, the first event
 # will always be emitted
 #
-# @name: net client name
+# @name: #optional, net client name
 #
 # @path: device path
 #
 # Since: 1.6
-#
-# Example:
-#
-# <- { "event": "NIC_RX_FILTER_CHANGED",
-#      "data": { "name": "vnet0",
-#                "path": "/machine/peripheral/vnet0/virtio-backend" },
-#      "timestamp": { "seconds": 1368697518, "microseconds": 326866 } }
-#    }
-#
 ##
 { 'event': 'NIC_RX_FILTER_CHANGED',
   'data': { '*name': 'str', 'path': 'str' } }
@@ -240,17 +151,6 @@
 # the authentication ID is not provided
 #
 # Since: 0.13.0
-#
-# Example:
-#
-# <- { "event": "VNC_CONNECTED",
-#      "data": {
-#            "server": { "auth": "sasl", "family": "ipv4",
-#                        "service": "5901", "host": "0.0.0.0" },
-#            "client": { "family": "ipv4", "service": "58425",
-#                        "host": "127.0.0.1" } },
-#      "timestamp": { "seconds": 1262976601, "microseconds": 975795 } }
-#
 ##
 { 'event': 'VNC_CONNECTED',
   'data': { 'server': 'VncServerInfo',
@@ -267,17 +167,6 @@
 # @client: client information
 #
 # Since: 0.13.0
-#
-# Example:
-#
-# <-  { "event": "VNC_INITIALIZED",
-#       "data": {
-#            "server": { "auth": "sasl", "family": "ipv4",
-#                        "service": "5901", "host": "0.0.0.0"},
-#            "client": { "family": "ipv4", "service": "46089",
-#                        "host": "127.0.0.1", "sasl_username": "luiz" } },
-#       "timestamp": { "seconds": 1263475302, "microseconds": 150772 } }
-#
 ##
 { 'event': 'VNC_INITIALIZED',
   'data': { 'server': 'VncServerInfo',
@@ -293,17 +182,6 @@
 # @client: client information
 #
 # Since: 0.13.0
-#
-# Example:
-#
-# <- { "event": "VNC_DISCONNECTED",
-#      "data": {
-#            "server": { "auth": "sasl", "family": "ipv4",
-#                        "service": "5901", "host": "0.0.0.0" },
-#            "client": { "family": "ipv4", "service": "58425",
-#                        "host": "127.0.0.1", "sasl_username": "luiz" } },
-#      "timestamp": { "seconds": 1262976601, "microseconds": 975795 } }
-#
 ##
 { 'event': 'VNC_DISCONNECTED',
   'data': { 'server': 'VncServerInfo',
@@ -319,16 +197,6 @@
 # @client: client information
 #
 # Since: 0.14.0
-#
-# Example:
-#
-# <- { "timestamp": {"seconds": 1290688046, "microseconds": 388707},
-#      "event": "SPICE_CONNECTED",
-#      "data": {
-#        "server": { "port": "5920", "family": "ipv4", "host": "127.0.0.1"},
-#        "client": {"port": "52873", "family": "ipv4", "host": "127.0.0.1"}
-#    }}
-#
 ##
 { 'event': 'SPICE_CONNECTED',
   'data': { 'server': 'SpiceBasicInfo',
@@ -345,18 +213,6 @@
 # @client: client information
 #
 # Since: 0.14.0
-#
-# Example:
-#
-# <- { "timestamp": {"seconds": 1290688046, "microseconds": 417172},
-#      "event": "SPICE_INITIALIZED",
-#      "data": {"server": {"auth": "spice", "port": "5921",
-#                          "family": "ipv4", "host": "127.0.0.1"},
-#               "client": {"port": "49004", "family": "ipv4", "channel-type": 3,
-#                          "connection-id": 1804289383, "host": "127.0.0.1",
-#                          "channel-id": 0, "tls": true}
-#    }}
-#
 ##
 { 'event': 'SPICE_INITIALIZED',
   'data': { 'server': 'SpiceServerInfo',
@@ -372,16 +228,6 @@
 # @client: client information
 #
 # Since: 0.14.0
-#
-# Example:
-#
-# <- { "timestamp": {"seconds": 1290688046, "microseconds": 388707},
-#      "event": "SPICE_DISCONNECTED",
-#      "data": {
-#        "server": { "port": "5920", "family": "ipv4", "host": "127.0.0.1"},
-#        "client": {"port": "52873", "family": "ipv4", "host": "127.0.0.1"}
-#    }}
-#
 ##
 { 'event': 'SPICE_DISCONNECTED',
   'data': { 'server': 'SpiceBasicInfo',
@@ -393,12 +239,6 @@
 # Emitted when SPICE migration has completed
 #
 # Since: 1.3
-#
-# Example:
-#
-# <- { "timestamp": {"seconds": 1290688046, "microseconds": 417172},
-#      "event": "SPICE_MIGRATE_COMPLETED" }
-#
 ##
 { 'event': 'SPICE_MIGRATE_COMPLETED' }
 
@@ -410,13 +250,6 @@
 # @status: @MigrationStatus describing the current migration status.
 #
 # Since: 2.4
-#
-# Example:
-#
-# <- {"timestamp": {"seconds": 1432121972, "microseconds": 744001},
-#     "event": "MIGRATION",
-#     "data": {"status": "completed"} }
-#
 ##
 { 'event': 'MIGRATION',
   'data': {'status': 'MigrationStatus'}}
@@ -430,12 +263,6 @@
 # @pass: An incrementing count (starting at 1 on the first pass)
 #
 # Since: 2.6
-#
-# Example:
-#
-# { "timestamp": {"seconds": 1449669631, "microseconds": 239225},
-#   "event": "MIGRATION_PASS", "data": {"pass": 2} }
-#
 ##
 { 'event': 'MIGRATION_PASS',
   'data': { 'pass': 'int' } }
@@ -445,16 +272,9 @@
 #
 # Emitted when guest executes ACPI _OST method.
 #
-# @info: ACPIOSTInfo type as described in qapi-schema.json
-#
 # Since: 2.1
 #
-# Example:
-#
-# <- { "event": "ACPI_DEVICE_OST",
-#      "data": { "device": "d1", "slot": "0",
-#                "slot-type": "DIMM", "source": 1, "status": 0 } }
-#
+# @info: ACPIOSTInfo type as described in qapi-schema.json
 ##
 { 'event': 'ACPI_DEVICE_OST',
      'data': { 'info': 'ACPIOSTInfo' } }
@@ -467,16 +287,7 @@
 #
 # @actual: actual level of the guest memory balloon in bytes
 #
-# Note: this event is rate-limited.
-#
 # Since: 1.2
-#
-# Example:
-#
-# <- { "event": "BALLOON_CHANGE",
-#      "data": { "actual": 944766976 },
-#      "timestamp": { "seconds": 1267020223, "microseconds": 435656 } }
-#
 ##
 { 'event': 'BALLOON_CHANGE',
   'data': { 'actual': 'int' } }
@@ -488,18 +299,10 @@
 #
 # @action: action that has been taken, currently always "pause"
 #
-# @info: information about a panic (since 2.9)
-#
 # Since: 1.5
-#
-# Example:
-#
-# <- { "event": "GUEST_PANICKED",
-#      "data": { "action": "pause" } }
-#
 ##
 { 'event': 'GUEST_PANICKED',
-  'data': { 'action': 'GuestPanicAction', '*info': 'GuestPanicInformation' } }
+  'data': { 'action': 'GuestPanicAction' } }
 
 ##
 # @QUORUM_FAILURE:
@@ -512,16 +315,7 @@
 #
 # @sectors-count: failed read operation sector count
 #
-# Note: This event is rate-limited.
-#
 # Since: 2.0
-#
-# Example:
-#
-# <- { "event": "QUORUM_FAILURE",
-#      "data": { "reference": "usr1", "sector-num": 345435, "sectors-count": 5 },
-#      "timestamp": { "seconds": 1344522075, "microseconds": 745528 } }
-#
 ##
 { 'event': 'QUORUM_FAILURE',
   'data': { 'reference': 'str', 'sector-num': 'int', 'sectors-count': 'int' } }
@@ -533,7 +327,7 @@
 #
 # @type: quorum operation type (Since 2.6)
 #
-# @error: error message. Only present on failure. This field
+# @error: #optional, error message. Only present on failure. This field
 #         contains a human-readable error message. There are no semantics other
 #         than that the block layer reported an error and clients should not
 #         try to interpret the error string.
@@ -544,26 +338,7 @@
 #
 # @sectors-count: failed read operation sector count
 #
-# Note: This event is rate-limited.
-#
 # Since: 2.0
-#
-# Example:
-#
-# 1. Read operation
-#
-# { "event": "QUORUM_REPORT_BAD",
-#      "data": { "node-name": "node0", "sector-num": 345435, "sectors-count": 5,
-#                "type": "read" },
-#      "timestamp": { "seconds": 1344522075, "microseconds": 745528 } }
-#
-# 2. Flush operation
-#
-# { "event": "QUORUM_REPORT_BAD",
-#      "data": { "node-name": "node0", "sector-num": 0, "sectors-count": 2097120,
-#                "type": "flush", "error": "Broken pipe" },
-#      "timestamp": { "seconds": 1456406829, "microseconds": 291763 } }
-#
 ##
 { 'event': 'QUORUM_REPORT_BAD',
   'data': { 'type': 'QuorumOpType', '*error': 'str', 'node-name': 'str',
@@ -579,13 +354,6 @@
 # @open: true if the guest has opened the virtio-serial port
 #
 # Since: 2.1
-#
-# Example:
-#
-# <- { "event": "VSERPORT_CHANGE",
-#      "data": { "id": "channel0", "open": true },
-#      "timestamp": { "seconds": 1401385907, "microseconds": 422329 } }
-#
 ##
 { 'event': 'VSERPORT_CHANGE',
   'data': { 'id': 'str', 'open': 'bool' } }
@@ -600,15 +368,6 @@
 # @msg: Informative message
 #
 # Since: 2.4
-#
-# Example:
-#
-# <- { "event": "MEM_UNPLUG_ERROR"
-#      "data": { "device": "dimm1",
-#                "msg": "acpi: device unplug for unsupported device"
-#      },
-#      "timestamp": { "seconds": 1265044230, "microseconds": 450486 } }
-#
 ##
 { 'event': 'MEM_UNPLUG_ERROR',
   'data': { 'device': 'str', 'msg': 'str' } }
@@ -620,18 +379,11 @@
 #
 # @result: DumpQueryResult type described in qapi-schema.json.
 #
-# @error: human-readable error string that provides
+# @error: #optional human-readable error string that provides
 #         hint on why dump failed. Only presents on failure. The
 #         user should not try to interpret the error string.
 #
 # Since: 2.6
-#
-# Example:
-#
-# { "event": "DUMP_COMPLETED",
-#   "data": {"result": {"total": 1090650112, "status": "completed",
-#                       "completed": 1090650112} } }
-#
 ##
 { 'event': 'DUMP_COMPLETED' ,
   'data': { 'result': 'DumpQueryResult', '*error': 'str' } }

@@ -41,11 +41,6 @@ def vcpu_transform_args(args, mode):
 
 
 def generate(events, backend, group):
-    if group == "root":
-        header = "trace-root.h"
-    else:
-        header = "trace.h"
-
     events = [e for e in events
               if "disable" not in e.properties]
 
@@ -54,8 +49,8 @@ def generate(events, backend, group):
         '#include "qemu/osdep.h"',
         '#include "qemu-common.h"',
         '#include "cpu.h"',
+        '#include "trace.h"',
         '#include "exec/helper-proto.h"',
-        '#include "%s"' % header,
         '',
         )
 

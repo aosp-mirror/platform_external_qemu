@@ -589,13 +589,6 @@ static const struct SCSIBusInfo usb_msd_scsi_info_bot = {
     .load_request = usb_msd_load_request,
 };
 
-static void usb_msd_unrealize_storage(USBDevice *dev, Error **errp)
-{
-    MSDState *s = USB_STORAGE_DEV(dev);
-
-    object_unref(OBJECT(&s->bus));
-}
-
 static void usb_msd_realize_storage(USBDevice *dev, Error **errp)
 {
     MSDState *s = USB_STORAGE_DEV(dev);
@@ -610,11 +603,7 @@ static void usb_msd_realize_storage(USBDevice *dev, Error **errp)
 
     blkconf_serial(&s->conf, &dev->serial);
     blkconf_blocksizes(&s->conf);
-    blkconf_apply_backend_options(&s->conf, blk_is_read_only(blk), true, &err);
-    if (err) {
-        error_propagate(errp, err);
-        return;
-    }
+    blkconf_apply_backend_options(&s->conf);
 
     /*
      * Hack alert: this pretends to be a block device, but it's really
@@ -644,13 +633,6 @@ static void usb_msd_realize_storage(USBDevice *dev, Error **errp)
     }
     usb_msd_handle_reset(dev);
     s->scsi_dev = scsi_dev;
-}
-
-static void usb_msd_unrealize_bot(USBDevice *dev, Error **errp)
-{
-    MSDState *s = USB_STORAGE_DEV(dev);
-
-    object_unref(OBJECT(&s->bus));
 }
 
 static void usb_msd_realize_bot(USBDevice *dev, Error **errp)
@@ -773,7 +755,6 @@ static void usb_msd_class_initfn_storage(ObjectClass *klass, void *data)
     USBDeviceClass *uc = USB_DEVICE_CLASS(klass);
 
     uc->realize = usb_msd_realize_storage;
-    uc->unrealize = usb_msd_unrealize_storage;
     dc->props = msd_properties;
 }
 
@@ -836,7 +817,6 @@ static void usb_msd_class_initfn_bot(ObjectClass *klass, void *data)
     USBDeviceClass *uc = USB_DEVICE_CLASS(klass);
 
     uc->realize = usb_msd_realize_bot;
-    uc->unrealize = usb_msd_unrealize_bot;
     uc->attached_settable = true;
 }
 

@@ -264,7 +264,7 @@ static void ccid_card_vscard_handle_message(PassthruState *card,
 
 static void ccid_card_vscard_drop_connection(PassthruState *card)
 {
-    Chardev *chr = qemu_chr_fe_get_driver(&card->cs);
+    CharDriverState *chr = qemu_chr_fe_get_driver(&card->cs);
 
     qemu_chr_fe_deinit(&card->cs);
     qemu_chr_delete(chr);

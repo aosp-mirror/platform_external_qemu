@@ -25,7 +25,7 @@
 #include "kvm_ppc.h"
 #include "sysemu/dma.h"
 #include "exec/address-spaces.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
 
 #include "hw/ppc/spapr.h"
 #include "hw/ppc/spapr_vio.h"

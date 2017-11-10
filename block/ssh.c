@@ -601,15 +601,7 @@ static InetSocketAddress *ssh_config(QDict *options, Error **errp)
         goto out;
     }
 
-    /*
-     * FIXME .numeric, .to, .ipv4 or .ipv6 don't work with -drive.
-     * .to doesn't matter, it's ignored anyway.
-     * That's because when @options come from -blockdev or
-     * blockdev_add, members are typed according to the QAPI schema,
-     * but when they come from -drive, they're all QString.  The
-     * visitor expects the former.
-     */
-    iv = qobject_input_visitor_new(crumpled_addr);
+    iv = qobject_input_visitor_new(crumpled_addr, true);
     visit_type_InetSocketAddress(iv, NULL, &inet, &local_error);
     if (local_error) {
         error_propagate(errp, local_error);
@@ -897,14 +889,10 @@ static void restart_coroutine(void *opaque)
 
     DPRINTF("co=%p", co);
 
-    aio_co_wake(co);
+    qemu_coroutine_enter(co);
 }
 
-/* A non-blocking call returned EAGAIN, so yield, ensuring the
- * handlers are set up so that we'll be rescheduled when there is an
- * interesting event on the socket.
- */
-static coroutine_fn void co_yield(BDRVSSHState *s, BlockDriverState *bs)
+static coroutine_fn void set_fd_handler(BDRVSSHState *s, BlockDriverState *bs)
 {
     int r;
     IOHandler *rd_handler = NULL, *wr_handler = NULL;
@@ -923,11 +911,26 @@ static coroutine_fn void co_yield(BDRVSSHState *s, BlockDriverState *bs)
             rd_handler, wr_handler);
 
     aio_set_fd_handler(bdrv_get_aio_context(bs), s->sock,
-                       false, rd_handler, wr_handler, NULL, co);
+                       false, rd_handler, wr_handler, co);
+}
+
+static coroutine_fn void clear_fd_handler(BDRVSSHState *s,
+                                          BlockDriverState *bs)
+{
+    DPRINTF("s->sock=%d", s->sock);
+    aio_set_fd_handler(bdrv_get_aio_context(bs), s->sock,
+                       false, NULL, NULL, NULL);
+}
+
+/* A non-blocking call returned EAGAIN, so yield, ensuring the
+ * handlers are set up so that we'll be rescheduled when there is an
+ * interesting event on the socket.
+ */
+static coroutine_fn void co_yield(BDRVSSHState *s, BlockDriverState *bs)
+{
+    set_fd_handler(s, bs);
     qemu_coroutine_yield();
-    DPRINTF("s->sock=%d - back", s->sock);
-    aio_set_fd_handler(bdrv_get_aio_context(bs), s->sock, false,
-                       NULL, NULL, NULL, NULL);
+    clear_fd_handler(s, bs);
 }
 
 /* SFTP has a function `libssh2_sftp_seek64' which seeks to a position

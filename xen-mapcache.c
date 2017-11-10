@@ -19,7 +19,7 @@
 #include <xen/hvm/params.h>
 
 #include "sysemu/xen-mapcache.h"
-#include "trace-root.h"
+#include "trace.h"
 
 
 //#define MAPCACHE_DEBUG
@@ -163,7 +163,6 @@ static void xen_remap_bucket(MapCacheEntry *entry,
     err = g_malloc0(nb_pfn * sizeof (int));
 
     if (entry->vaddr_base != NULL) {
-        ram_block_notify_remove(entry->vaddr_base, entry->size);
         if (munmap(entry->vaddr_base, entry->size) != 0) {
             perror("unmap fails");
             exit(-1);
@@ -189,7 +188,6 @@ static void xen_remap_bucket(MapCacheEntry *entry,
     entry->valid_mapping = (unsigned long *) g_malloc0(sizeof(unsigned long) *
             BITS_TO_LONGS(size >> XC_PAGE_SHIFT));
 
-    ram_block_notify_add(entry->vaddr_base, entry->size);
     bitmap_zero(entry->valid_mapping, nb_pfn);
     for (i = 0; i < nb_pfn; i++) {
         if (!err[i]) {
@@ -399,7 +397,6 @@ static void xen_invalidate_map_cache_entry_unlocked(uint8_t *buffer)
     }
 
     pentry->next = entry->next;
-    ram_block_notify_remove(entry->vaddr_base, entry->size);
     if (munmap(entry->vaddr_base, entry->size) != 0) {
         perror("unmap fails");
         exit(-1);

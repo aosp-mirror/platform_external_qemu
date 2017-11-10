@@ -11,7 +11,7 @@ $(call set-vpath, $(SRC_PATH):$(BUILD_DIR))
 ifdef CONFIG_LINUX
 QEMU_CFLAGS += -I../linux-headers
 endif
-QEMU_CFLAGS += -I.. -I$(SRC_PATH)/target/$(TARGET_BASE_ARCH) -DNEED_CPU_H
+QEMU_CFLAGS += -I.. -I$(SRC_PATH)/target-$(TARGET_BASE_ARCH) -DNEED_CPU_H
 
 QEMU_CFLAGS+=-I$(SRC_PATH)/include
 
@@ -50,7 +50,6 @@ endif
 
 $(QEMU_PROG).stp-installed: $(BUILD_DIR)/trace-events-all
 	$(call quiet-command,$(TRACETOOL) \
-		--group=all \
 		--format=stap \
 		--backends=$(TRACE_BACKENDS) \
 		--binary=$(bindir)/$(QEMU_PROG) \
@@ -60,7 +59,6 @@ $(QEMU_PROG).stp-installed: $(BUILD_DIR)/trace-events-all
 
 $(QEMU_PROG).stp: $(BUILD_DIR)/trace-events-all
 	$(call quiet-command,$(TRACETOOL) \
-		--group=all \
 		--format=stap \
 		--backends=$(TRACE_BACKENDS) \
 		--binary=$(realpath .)/$(QEMU_PROG) \
@@ -70,7 +68,6 @@ $(QEMU_PROG).stp: $(BUILD_DIR)/trace-events-all
 
 $(QEMU_PROG)-simpletrace.stp: $(BUILD_DIR)/trace-events-all
 	$(call quiet-command,$(TRACETOOL) \
-		--group=all \
 		--format=simpletrace-stap \
 		--backends=$(TRACE_BACKENDS) \
 		--probe-prefix=qemu.$(TARGET_TYPE).$(TARGET_NAME) \
@@ -79,7 +76,6 @@ $(QEMU_PROG)-simpletrace.stp: $(BUILD_DIR)/trace-events-all
 else
 stap:
 endif
-.PHONY: stap
 
 all: $(PROGS) stap
 
@@ -96,11 +92,10 @@ obj-$(CONFIG_TCG_INTERPRETER) += tci.o
 obj-y += tcg/tcg-common.o
 obj-$(CONFIG_TCG_INTERPRETER) += disas/tci.o
 obj-y += fpu/softfloat.o
-obj-y += target/$(TARGET_BASE_ARCH)/
+obj-y += target-$(TARGET_BASE_ARCH)/
 obj-y += disas.o
 obj-y += tcg-runtime.o
 obj-$(call notempty,$(TARGET_XML_FILES)) += gdbstub-xml.o
-obj-$(call lnot,$(CONFIG_HAX)) += hax-stub.o
 obj-$(call lnot,$(CONFIG_KVM)) += kvm-stub.o
 
 obj-$(CONFIG_LIBDECNUMBER) += libdecnumber/decContext.o
@@ -119,7 +114,7 @@ QEMU_CFLAGS+=-I$(SRC_PATH)/linux-user/$(TARGET_ABI_DIR) \
              -I$(SRC_PATH)/linux-user
 
 obj-y += linux-user/
-obj-y += gdbstub.o thunk.o user-exec.o user-exec-stub.o
+obj-y += gdbstub.o thunk.o user-exec.o
 
 endif #CONFIG_LINUX_USER
 
@@ -132,7 +127,7 @@ QEMU_CFLAGS+=-I$(SRC_PATH)/bsd-user -I$(SRC_PATH)/bsd-user/$(TARGET_ABI_DIR) \
 			 -I$(SRC_PATH)/bsd-user/$(HOST_VARIANT_DIR)
 
 obj-y += bsd-user/
-obj-y += gdbstub.o user-exec.o user-exec-stub.o
+obj-y += gdbstub.o user-exec.o
 
 endif #CONFIG_BSD_USER
 
@@ -155,6 +150,17 @@ obj-$(CONFIG_XEN_I386) += xen-hvm.o xen-mapcache.o
 obj-$(call lnot,$(CONFIG_XEN)) += xen-common-stub.o
 obj-$(call lnot,$(CONFIG_XEN_I386)) += xen-hvm-stub.o
 
+# HAX support, only when targetting i386 or x86_64
+ifeq (y,$(CONFIG_HAX))
+ifneq (,$(filter i386 x86_64,$(TARGET_NAME)))
+obj-y += target-i386/hax-all.o target-i386/hax-slot.o
+obj-$(CONFIG_WIN32) += target-i386/hax-windows.o
+obj-$(CONFIG_DARWIN) += target-i386/hax-darwin.o
+else
+obj-y += hax-stub.o
+endif
+endif # CONFIG_HAX
+
 # Hardware support
 ifeq ($(TARGET_NAME), sparc64)
 obj-y += hw/sparc64/
@@ -162,7 +168,7 @@ else
 obj-y += hw/$(TARGET_BASE_ARCH)/
 endif
 
-GENERATED_FILES += hmp-commands.h hmp-commands-info.h
+GENERATED_HEADERS += hmp-commands.h hmp-commands-info.h
 
 endif # CONFIG_SOFTMMU
 
@@ -175,36 +181,31 @@ all-obj-y := $(obj-y)
 target-obj-y :=
 block-obj-y :=
 common-obj-y :=
-chardev-obj-y :=
 include $(SRC_PATH)/Makefile.objs
 dummy := $(call unnest-vars,,target-obj-y)
 target-obj-y-save := $(target-obj-y)
 dummy := $(call unnest-vars,.., \
                block-obj-y \
                block-obj-m \
-               chardev-obj-y \
                crypto-obj-y \
                crypto-aes-obj-y \
                qom-obj-y \
                io-obj-y \
                common-obj-y \
-               common-obj-m \
-               trace-obj-y)
+               common-obj-m)
 target-obj-y := $(target-obj-y-save)
 all-obj-y += $(common-obj-y)
 all-obj-y += $(target-obj-y)
 all-obj-y += $(qom-obj-y)
-all-obj-$(CONFIG_SOFTMMU) += $(block-obj-y) $(chardev-obj-y)
+all-obj-$(CONFIG_SOFTMMU) += $(block-obj-y)
 all-obj-$(CONFIG_USER_ONLY) += $(crypto-aes-obj-y)
 all-obj-$(CONFIG_SOFTMMU) += $(crypto-obj-y)
 all-obj-$(CONFIG_SOFTMMU) += $(io-obj-y)
 
 $(QEMU_PROG_BUILD): config-devices.mak
 
-COMMON_LDADDS = $(trace-obj-y) ../libqemuutil.a ../libqemustub.a
-
 # build either PROG or PROGW
-$(QEMU_PROG_BUILD): $(all-obj-y) $(COMMON_LDADDS)
+$(QEMU_PROG_BUILD): $(all-obj-y) ../libqemuutil.a ../libqemustub.a
 	$(call LINK, $(filter-out %.mak, $^))
 ifdef CONFIG_DARWIN
 	$(call quiet-command,Rez -append $(SRC_PATH)/pc-bios/qemu.rsrc -o $@,"REZ","$(TARGET_DIR)$@")
@@ -238,5 +239,5 @@ ifdef CONFIG_TRACE_SYSTEMTAP
 	$(INSTALL_DATA) $(QEMU_PROG)-simpletrace.stp "$(DESTDIR)$(qemu_datadir)/../systemtap/tapset/$(QEMU_PROG)-simpletrace.stp"
 endif
 
-GENERATED_FILES += config-target.h
-Makefile: $(GENERATED_FILES)
+GENERATED_HEADERS += config-target.h
+Makefile: $(GENERATED_HEADERS)

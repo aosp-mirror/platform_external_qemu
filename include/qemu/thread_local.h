@@ -24,17 +24,17 @@
  * For non-Windows cases it's all compiled back to the regular __thread use.
  */
 
-#if !defined(_WIN32)
+#if !defined(_WIN32) || !defined(CONFIG_WIN32_VISTA_SYNCHRONIZATION)
 
 #define QEMU_THREAD_LOCAL_EXTERN(type, name) extern __thread type name;
 #define QEMU_THREAD_LOCAL_DECLARE(type, name) __thread type name;
-#define QEMU_THREAD_LOCAL_DECLARE_INIT(type, name, init) __thread type name = (init);
+#define QEMU_THREAD_LOCAL_DECLARE_INIT(type, name) __thread type name = (init);
 
 #define QEMU_THREAD_LOCAL_GET(name) (name)
 #define QEMU_THREAD_LOCAL_GET_PTR(name) (&(name))
 #define QEMU_THREAD_LOCAL_SET(name, value) ((name) = (value))
 
-#else  /* _WIN32 */
+#else  /* _WIN32 && CONFIG_WIN32_VISTA_SYNCHRONIZATION */
 
 #include "qemu/notify.h"
 #include "qemu/thread.h"
@@ -147,6 +147,6 @@
         } \
     } while (0)
 
-#endif  /* _WIN32 */
+#endif  /* _WIN32 && CONFIG_WIN32_VISTA_SYNCHRONIZATION */
 
 #endif /* QEMU_THREAD_LOCAL_H */

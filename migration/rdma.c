@@ -29,7 +29,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <rdma/rdma_cma.h>
-#include "migration/trace.h"
+#include "trace.h"
 
 /*
  * Print and error on both the Monitor and the Log file.

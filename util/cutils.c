@@ -181,19 +181,19 @@ int fcntl_setfl(int fd, int flag)
 static int64_t suffix_mul(char suffix, int64_t unit)
 {
     switch (qemu_toupper(suffix)) {
-    case 'B':
+    case QEMU_STRTOSZ_DEFSUFFIX_B:
         return 1;
-    case 'K':
+    case QEMU_STRTOSZ_DEFSUFFIX_KB:
         return unit;
-    case 'M':
+    case QEMU_STRTOSZ_DEFSUFFIX_MB:
         return unit * unit;
-    case 'G':
+    case QEMU_STRTOSZ_DEFSUFFIX_GB:
         return unit * unit * unit;
-    case 'T':
+    case QEMU_STRTOSZ_DEFSUFFIX_TB:
         return unit * unit * unit * unit;
-    case 'P':
+    case QEMU_STRTOSZ_DEFSUFFIX_PB:
         return unit * unit * unit * unit * unit;
-    case 'E':
+    case QEMU_STRTOSZ_DEFSUFFIX_EB:
         return unit * unit * unit * unit * unit * unit;
     }
     return -1;
@@ -205,11 +205,10 @@ static int64_t suffix_mul(char suffix, int64_t unit)
  * in *end, if not NULL. Return -ERANGE on overflow, Return -EINVAL on
  * other error.
  */
-static int do_strtosz(const char *nptr, char **end,
-                      const char default_suffix, int64_t unit,
-                      uint64_t *result)
+int64_t qemu_strtosz_suffix_unit(const char *nptr, char **end,
+                            const char default_suffix, int64_t unit)
 {
-    int retval;
+    int64_t retval = -EINVAL;
     char *endptr;
     unsigned char c;
     int mul_required = 0;
@@ -218,8 +217,7 @@ static int do_strtosz(const char *nptr, char **end,
     errno = 0;
     val = strtod(nptr, &endptr);
     if (isnan(val) || endptr == nptr || errno != 0) {
-        retval = -EINVAL;
-        goto out;
+        goto fail;
     }
     fraction = modf(val, &integral);
     if (fraction != 0) {
@@ -234,204 +232,181 @@ static int do_strtosz(const char *nptr, char **end,
         assert(mul >= 0);
     }
     if (mul == 1 && mul_required) {
-        retval = -EINVAL;
-        goto out;
+        goto fail;
     }
-    /*
-     * Values >= 0xfffffffffffffc00 overflow uint64_t after their trip
-     * through double (53 bits of precision).
-     */
-    if ((val * mul >= 0xfffffffffffffc00) || val < 0) {
+    if ((val * mul >= INT64_MAX) || val < 0) {
         retval = -ERANGE;
-        goto out;
+        goto fail;
     }
-    *result = val * mul;
-    retval = 0;
+    retval = val * mul;
 
-out:
+fail:
     if (end) {
         *end = endptr;
-    } else if (*endptr) {
-        retval = -EINVAL;
     }
 
     return retval;
 }
 
-int qemu_strtosz(const char *nptr, char **end, uint64_t *result)
+int64_t qemu_strtosz_suffix(const char *nptr, char **end,
+                            const char default_suffix)
 {
-    return do_strtosz(nptr, end, 'B', 1024, result);
+    return qemu_strtosz_suffix_unit(nptr, end, default_suffix, 1024);
 }
 
-int qemu_strtosz_MiB(const char *nptr, char **end, uint64_t *result)
+int64_t qemu_strtosz(const char *nptr, char **end)
 {
-    return do_strtosz(nptr, end, 'M', 1024, result);
-}
-
-int qemu_strtosz_metric(const char *nptr, char **end, uint64_t *result)
-{
-    return do_strtosz(nptr, end, 'B', 1000, result);
+    return qemu_strtosz_suffix(nptr, end, QEMU_STRTOSZ_DEFSUFFIX_MB);
 }
 
 /**
- * Helper function for error checking after strtol() and the like
+ * Helper function for qemu_strto*l() functions.
  */
-static int check_strtox_error(const char *nptr, char *ep,
-                              const char **endptr, int libc_errno)
+static int check_strtox_error(const char *p, char *endptr, const char **next,
+                              int err)
 {
-    if (endptr) {
-        *endptr = ep;
+    /* If no conversion was performed, prefer BSD behavior over glibc
+     * behavior.
+     */
+    if (err == 0 && endptr == p) {
+        err = EINVAL;
     }
-
-    /* Turn "no conversion" into an error */
-    if (libc_errno == 0 && ep == nptr) {
+    if (!next && *endptr) {
         return -EINVAL;
     }
-
-    /* Fail when we're expected to consume the string, but didn't */
-    if (!endptr && *ep) {
-        return -EINVAL;
+    if (next) {
+        *next = endptr;
     }
-
-    return -libc_errno;
+    return -err;
 }
 
 /**
- * Convert string @nptr to a long integer, and store it in @result.
+ * QEMU wrappers for strtol(), strtoll(), strtoul(), strotull() C functions.
  *
- * This is a wrapper around strtol() that is harder to misuse.
- * Semantics of @nptr, @endptr, @base match strtol() with differences
- * noted below.
+ * Convert ASCII string @nptr to a long integer value
+ * from the given @base. Parameters @nptr, @endptr, @base
+ * follows same semantics as strtol() C function.
  *
- * @nptr may be null, and no conversion is performed then.
+ * Unlike from strtol() function, if @endptr is not NULL, this
+ * function will return -EINVAL whenever it cannot fully convert
+ * the string in @nptr with given @base to a long. This function returns
+ * the result of the conversion only through the @result parameter.
  *
- * If no conversion is performed, store @nptr in *@endptr and return
- * -EINVAL.
+ * If NULL is passed in @endptr, then the whole string in @ntpr
+ * is a number otherwise it returns -EINVAL.
  *
- * If @endptr is null, and the string isn't fully converted, return
- * -EINVAL.  This is the case when the pointer that would be stored in
- * a non-null @endptr points to a character other than '\0'.
- *
- * If the conversion overflows @result, store LONG_MAX in @result,
- * and return -ERANGE.
- *
- * If the conversion underflows @result, store LONG_MIN in @result,
- * and return -ERANGE.
- *
- * Else store the converted value in @result, and return zero.
+ * RETURN VALUE
+ * Unlike from strtol() function, this wrapper returns either
+ * -EINVAL or the errno set by strtol() function (e.g -ERANGE).
+ * If the conversion overflows, -ERANGE is returned, and @result
+ * is set to the max value of the desired type
+ * (e.g. LONG_MAX, LLONG_MAX, ULONG_MAX, ULLONG_MAX). If the case
+ * of underflow, -ERANGE is returned, and @result is set to the min
+ * value of the desired type. For strtol(), strtoll(), @result is set to
+ * LONG_MIN, LLONG_MIN, respectively, and for strtoul(), strtoull() it
+ * is set to 0.
  */
 int qemu_strtol(const char *nptr, const char **endptr, int base,
                 long *result)
 {
-    char *ep;
-
+    char *p;
+    int err = 0;
     if (!nptr) {
         if (endptr) {
             *endptr = nptr;
         }
-        return -EINVAL;
+        err = -EINVAL;
+    } else {
+        errno = 0;
+        *result = strtol(nptr, &p, base);
+        err = check_strtox_error(nptr, p, endptr, errno);
     }
-
-    errno = 0;
-    *result = strtol(nptr, &ep, base);
-    return check_strtox_error(nptr, ep, endptr, errno);
+    return err;
 }
 
 /**
- * Convert string @nptr to an unsigned long, and store it in @result.
+ * Converts ASCII string to an unsigned long integer.
  *
- * This is a wrapper around strtoul() that is harder to misuse.
- * Semantics of @nptr, @endptr, @base match strtoul() with differences
- * noted below.
+ * If string contains a negative number, value will be converted to
+ * the unsigned representation of the signed value, unless the original
+ * (nonnegated) value would overflow, in this case, it will set @result
+ * to ULONG_MAX, and return ERANGE.
  *
- * @nptr may be null, and no conversion is performed then.
+ * The same behavior holds, for qemu_strtoull() but sets @result to
+ * ULLONG_MAX instead of ULONG_MAX.
  *
- * If no conversion is performed, store @nptr in *@endptr and return
- * -EINVAL.
- *
- * If @endptr is null, and the string isn't fully converted, return
- * -EINVAL.  This is the case when the pointer that would be stored in
- * a non-null @endptr points to a character other than '\0'.
- *
- * If the conversion overflows @result, store ULONG_MAX in @result,
- * and return -ERANGE.
- *
- * Else store the converted value in @result, and return zero.
- *
- * Note that a number with a leading minus sign gets converted without
- * the minus sign, checked for overflow (see above), then negated (in
- * @result's type).  This is exactly how strtoul() works.
+ * See qemu_strtol() documentation for more info.
  */
 int qemu_strtoul(const char *nptr, const char **endptr, int base,
                  unsigned long *result)
 {
-    char *ep;
-
+    char *p;
+    int err = 0;
     if (!nptr) {
         if (endptr) {
             *endptr = nptr;
         }
-        return -EINVAL;
+        err = -EINVAL;
+    } else {
+        errno = 0;
+        *result = strtoul(nptr, &p, base);
+        /* Windows returns 1 for negative out-of-range values.  */
+        if (errno == ERANGE) {
+            *result = -1;
+        }
+        err = check_strtox_error(nptr, p, endptr, errno);
     }
-
-    errno = 0;
-    *result = strtoul(nptr, &ep, base);
-    /* Windows returns 1 for negative out-of-range values.  */
-    if (errno == ERANGE) {
-        *result = -1;
-    }
-    return check_strtox_error(nptr, ep, endptr, errno);
+    return err;
 }
 
 /**
- * Convert string @nptr to an int64_t.
+ * Converts ASCII string to a long long integer.
  *
- * Works like qemu_strtol(), except it stores INT64_MAX on overflow,
- * and INT_MIN on underflow.
+ * See qemu_strtol() documentation for more info.
  */
-int qemu_strtoi64(const char *nptr, const char **endptr, int base,
+int qemu_strtoll(const char *nptr, const char **endptr, int base,
                  int64_t *result)
 {
-    char *ep;
-
+    char *p;
+    int err = 0;
     if (!nptr) {
         if (endptr) {
             *endptr = nptr;
         }
-        return -EINVAL;
+        err = -EINVAL;
+    } else {
+        errno = 0;
+        *result = strtoll(nptr, &p, base);
+        err = check_strtox_error(nptr, p, endptr, errno);
     }
-
-    errno = 0;
-    /* FIXME This assumes int64_t is long long */
-    *result = strtoll(nptr, &ep, base);
-    return check_strtox_error(nptr, ep, endptr, errno);
+    return err;
 }
 
 /**
- * Convert string @nptr to an uint64_t.
+ * Converts ASCII string to an unsigned long long integer.
  *
- * Works like qemu_strtoul(), except it stores UINT64_MAX on overflow.
+ * See qemu_strtol() documentation for more info.
  */
-int qemu_strtou64(const char *nptr, const char **endptr, int base,
+int qemu_strtoull(const char *nptr, const char **endptr, int base,
                   uint64_t *result)
 {
-    char *ep;
-
+    char *p;
+    int err = 0;
     if (!nptr) {
         if (endptr) {
             *endptr = nptr;
         }
-        return -EINVAL;
+        err = -EINVAL;
+    } else {
+        errno = 0;
+        *result = strtoull(nptr, &p, base);
+        /* Windows returns 1 for negative out-of-range values.  */
+        if (errno == ERANGE) {
+            *result = -1;
+        }
+        err = check_strtox_error(nptr, p, endptr, errno);
     }
-
-    errno = 0;
-    /* FIXME This assumes uint64_t is unsigned long long */
-    *result = strtoull(nptr, &ep, base);
-    /* Windows returns 1 for negative out-of-range values.  */
-    if (errno == ERANGE) {
-        *result = -1;
-    }
-    return check_strtox_error(nptr, ep, endptr, errno);
+    return err;
 }
 
 /**

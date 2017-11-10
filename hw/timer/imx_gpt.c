@@ -296,23 +296,18 @@ static uint64_t imx_gpt_read(void *opaque, hwaddr offset, unsigned size)
     return reg_value;
 }
 
-
-static void imx_gpt_reset_common(IMXGPTState *s, bool is_soft_reset)
+static void imx_gpt_reset(DeviceState *dev)
 {
+    IMXGPTState *s = IMX_GPT(dev);
+
     /* stop timer */
     ptimer_stop(s->timer);
 
-    /* Soft reset and hard reset differ only in their handling of the CR
-     * register -- soft reset preserves the values of some bits there.
+    /*
+     * Soft reset doesn't touch some bits; hard reset clears them
      */
-    if (is_soft_reset) {
-        /* Clear all CR bits except those that are preserved by soft reset. */
-        s->cr &= GPT_CR_EN | GPT_CR_ENMOD | GPT_CR_STOPEN | GPT_CR_DOZEN |
-            GPT_CR_WAITEN | GPT_CR_DBGEN |
-            (GPT_CR_CLKSRC_MASK << GPT_CR_CLKSRC_SHIFT);
-    } else {
-        s->cr = 0;
-    }
+    s->cr &= ~(GPT_CR_EN|GPT_CR_ENMOD|GPT_CR_STOPEN|GPT_CR_DOZEN|
+               GPT_CR_WAITEN|GPT_CR_DBGEN);
     s->sr = 0;
     s->pr = 0;
     s->ir = 0;
@@ -338,18 +333,6 @@ static void imx_gpt_reset_common(IMXGPTState *s, bool is_soft_reset)
     }
 }
 
-static void imx_gpt_soft_reset(DeviceState *dev)
-{
-    IMXGPTState *s = IMX_GPT(dev);
-    imx_gpt_reset_common(s, true);
-}
-
-static void imx_gpt_reset(DeviceState *dev)
-{
-    IMXGPTState *s = IMX_GPT(dev);
-    imx_gpt_reset_common(s, false);
-}
-
 static void imx_gpt_write(void *opaque, hwaddr offset, uint64_t value,
                           unsigned size)
 {
@@ -365,7 +348,7 @@ static void imx_gpt_write(void *opaque, hwaddr offset, uint64_t value,
         s->cr = value & ~0x7c14;
         if (s->cr & GPT_CR_SWR) { /* force reset */
             /* handle the reset */
-            imx_gpt_soft_reset(DEVICE(s));
+            imx_gpt_reset(DEVICE(s));
         } else {
             /* set our freq, as the source might have changed */
             imx_gpt_set_freq(s);

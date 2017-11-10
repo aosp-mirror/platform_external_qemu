@@ -16,7 +16,7 @@
 #include "qmp-commands.h"
 #include "qapi/qmp/qerror.h"
 #include "qemu/error-report.h"
-#include "migration/trace.h"
+#include "trace.h"
 
 static QEMUBH *failover_bh;
 static FailoverStatus failover_state;
