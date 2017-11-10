@@ -331,7 +331,6 @@ static void must_send(mach_msg_header_t *head) {
 }
 
 MacSegvHandler::MacSegvHandler(BadAccessCallback f) {
-    fprintf(stderr, "%s: setup\n", __func__);
     // Also constructs and initializes our MachExceptionHandler instance,
     // and starts the exception handling thread.
     sMachExcHandler->macHandler = this;
@@ -342,7 +341,6 @@ MacSegvHandler::MacSegvHandler(BadAccessCallback f) {
 }
 
 MacSegvHandler::~MacSegvHandler() {
-    fprintf(stderr, "%s: teardown\n", __func__);
     clearRegistered();
     sMachExcHandler->teardown(); // Also gets rid of this
 }
