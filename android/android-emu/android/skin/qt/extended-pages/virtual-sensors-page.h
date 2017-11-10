@@ -65,8 +65,6 @@ private slots:
     void onDragStarted();
     void onDragStopped();
 
-    void onSkinLayoutChange(SkinRotation rot);
-
 signals:
     void coarseOrientationChanged(SkinRotation);
     void updateResultingValuesRequired(glm::vec3 acceleration,
@@ -101,16 +99,14 @@ private slots:
     void stopSensorUpdateTimer();
 
 private:
-    void showEvent(QShowEvent*) override;
-
     void resetDeviceRotation(const glm::quat&);
-    void resetDeviceRotationFromSkinLayout(SkinRotation orientation);
 
     void setPhysicalParameterTarget(PhysicalParameter parameter_id,
             PhysicalInterpolation mode,
             double v1,
             double v2 = 0.0,
             double v3 = 0.0);
+    void setCoarseOrientation(AndroidCoarseOrientation orientation);
 
     void onTargetStateChanged();
     void onPhysicalStateChanging();
