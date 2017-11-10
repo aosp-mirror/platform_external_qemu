@@ -15,7 +15,7 @@
 #include "hw/sysbus.h"
 #include "ui/console.h"
 #include "ui/pixel_ops.h"
-#include "hw/display/trace.h"
+#include "trace.h"
 #include "exec/address-spaces.h"
 #include "hw/display/goldfish_fb.h"
 

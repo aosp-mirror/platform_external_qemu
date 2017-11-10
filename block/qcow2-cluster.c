@@ -30,7 +30,7 @@
 #include "block/block_int.h"
 #include "block/qcow2.h"
 #include "qemu/bswap.h"
-#include "block/trace.h"
+#include "trace.h"
 
 int qcow2_grow_l1_table(BlockDriverState *bs, uint64_t min_size,
                         bool exact_size)
@@ -932,7 +932,9 @@ static int handle_dependencies(BlockDriverState *bs, uint64_t guest_offset,
             if (bytes == 0) {
                 /* Wait for the dependency to complete. We need to recheck
                  * the free/allocated clusters when we continue. */
-                qemu_co_queue_wait(&old_alloc->dependent_requests, &s->lock);
+                qemu_co_mutex_unlock(&s->lock);
+                qemu_co_queue_wait(&old_alloc->dependent_requests);
+                qemu_co_mutex_lock(&s->lock);
                 return -EAGAIN;
             }
         }
@@ -1519,10 +1521,12 @@ int qcow2_discard_clusters(BlockDriverState *bs, uint64_t offset,
 
     end_offset = offset + ((uint64_t)nb_sectors << BDRV_SECTOR_BITS);
 
-    /* The caller must cluster-align start; round end down except at EOF */
-    assert(QEMU_IS_ALIGNED(offset, s->cluster_size));
-    if (end_offset != bs->total_sectors * BDRV_SECTOR_SIZE) {
-        end_offset = start_of_cluster(s, end_offset);
+    /* Round start up and end down */
+    offset = align_offset(offset, s->cluster_size);
+    end_offset = start_of_cluster(s, end_offset);
+
+    if (offset > end_offset) {
+        return 0;
     }
 
     nb_clusters = size_to_clusters(s, end_offset - offset);

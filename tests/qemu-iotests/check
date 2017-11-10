@@ -129,8 +129,6 @@ fi
 #    exit 1
 #fi
 
-TIMESTAMP_FILE=check.time-$IMGPROTO-$IMGFMT
-
 tmp="${TEST_DIR}"/$$
 
 _wallclock()
@@ -157,9 +155,9 @@ _wrapup()
         :
     elif $needwrap
     then
-        if [ -f $TIMESTAMP_FILE -a -f $tmp.time ]
+        if [ -f check.time -a -f $tmp.time ]
         then
-            cat $TIMESTAMP_FILE $tmp.time \
+            cat check.time $tmp.time \
             | $AWK_PROG '
         { t[$1] = $2 }
 END        { if (NR > 0) {
@@ -167,7 +165,7 @@ END        { if (NR > 0) {
           }
         }' \
             | sort -n >$tmp.out
-            mv $tmp.out $TIMESTAMP_FILE
+            mv $tmp.out check.time
         fi
 
         if [ -f $tmp.expunged ]
@@ -225,7 +223,7 @@ echo "preamble" > "${TEST_DIR}"/check.sts
 # don't leave old full output behind on a clean run
 rm -f check.full
 
-[ -f $TIMESTAMP_FILE ] || touch $TIMESTAMP_FILE
+[ -f check.time ] || touch check.time
 
 FULL_IMGFMT_DETAILS=`_full_imgfmt_details`
 FULL_IMGPROTO_DETAILS=`_full_imgproto_details`
@@ -279,7 +277,7 @@ do
         # really going to try and run this one
         #
         rm -f $seq.out.bad
-        lasttime=`sed -n -e "/^$seq /s/.* //p" <$TIMESTAMP_FILE`
+        lasttime=`sed -n -e "/^$seq /s/.* //p" <check.time`
         if [ "X$lasttime" != X ]; then
                 echo -n " ${lasttime}s ..."
         else

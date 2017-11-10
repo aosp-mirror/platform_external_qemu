@@ -20,9 +20,7 @@
 #include "hw/virtio/virtio-access.h"
 #include "qemu/iov.h"
 
-static const struct V9fsTransport virtio_9p_transport;
-
-static void virtio_9p_push_and_notify(V9fsPDU *pdu)
+void virtio_9p_push_and_notify(V9fsPDU *pdu)
 {
     V9fsState *s = pdu->s;
     V9fsVirtioState *v = container_of(s, V9fsVirtioState, state);
@@ -128,7 +126,6 @@ static void virtio_9p_device_realize(DeviceState *dev, Error **errp)
     v->config_size = sizeof(struct virtio_9p_config) + strlen(s->fsconf.tag);
     virtio_init(vdev, "virtio-9p", VIRTIO_ID_9P, v->config_size);
     v->vq = virtio_add_queue(vdev, MAX_REQ, handle_9p_output);
-    v9fs_register_transport(s, &virtio_9p_transport);
 
 out:
     return;
@@ -151,8 +148,8 @@ static void virtio_9p_reset(VirtIODevice *vdev)
     v9fs_reset(&v->state);
 }
 
-static ssize_t virtio_pdu_vmarshal(V9fsPDU *pdu, size_t offset,
-                                   const char *fmt, va_list ap)
+ssize_t virtio_pdu_vmarshal(V9fsPDU *pdu, size_t offset,
+                            const char *fmt, va_list ap)
 {
     V9fsState *s = pdu->s;
     V9fsVirtioState *v = container_of(s, V9fsVirtioState, state);
@@ -161,8 +158,8 @@ static ssize_t virtio_pdu_vmarshal(V9fsPDU *pdu, size_t offset,
     return v9fs_iov_vmarshal(elem->in_sg, elem->in_num, offset, 1, fmt, ap);
 }
 
-static ssize_t virtio_pdu_vunmarshal(V9fsPDU *pdu, size_t offset,
-                                     const char *fmt, va_list ap)
+ssize_t virtio_pdu_vunmarshal(V9fsPDU *pdu, size_t offset,
+                              const char *fmt, va_list ap)
 {
     V9fsState *s = pdu->s;
     V9fsVirtioState *v = container_of(s, V9fsVirtioState, state);
@@ -171,36 +168,21 @@ static ssize_t virtio_pdu_vunmarshal(V9fsPDU *pdu, size_t offset,
     return v9fs_iov_vunmarshal(elem->out_sg, elem->out_num, offset, 1, fmt, ap);
 }
 
-/* The size parameter is used by other transports. Do not drop it. */
-static void virtio_init_in_iov_from_pdu(V9fsPDU *pdu, struct iovec **piov,
-                                        unsigned int *pniov, size_t size)
+void virtio_init_iov_from_pdu(V9fsPDU *pdu, struct iovec **piov,
+                              unsigned int *pniov, bool is_write)
 {
     V9fsState *s = pdu->s;
     V9fsVirtioState *v = container_of(s, V9fsVirtioState, state);
     VirtQueueElement *elem = v->elems[pdu->idx];
 
-    *piov = elem->in_sg;
-    *pniov = elem->in_num;
+    if (is_write) {
+        *piov = elem->out_sg;
+        *pniov = elem->out_num;
+    } else {
+        *piov = elem->in_sg;
+        *pniov = elem->in_num;
+    }
 }
-
-static void virtio_init_out_iov_from_pdu(V9fsPDU *pdu, struct iovec **piov,
-                                         unsigned int *pniov)
-{
-    V9fsState *s = pdu->s;
-    V9fsVirtioState *v = container_of(s, V9fsVirtioState, state);
-    VirtQueueElement *elem = v->elems[pdu->idx];
-
-    *piov = elem->out_sg;
-    *pniov = elem->out_num;
-}
-
-static const struct V9fsTransport virtio_9p_transport = {
-    .pdu_vmarshal = virtio_pdu_vmarshal,
-    .pdu_vunmarshal = virtio_pdu_vunmarshal,
-    .init_in_iov_from_pdu = virtio_init_in_iov_from_pdu,
-    .init_out_iov_from_pdu = virtio_init_out_iov_from_pdu,
-    .push_and_notify = virtio_9p_push_and_notify,
-};
 
 /* virtio-9p device */
 

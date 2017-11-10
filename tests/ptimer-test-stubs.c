@@ -108,11 +108,6 @@ QEMUBH *qemu_bh_new(QEMUBHFunc *cb, void *opaque)
     return bh;
 }
 
-void qemu_bh_delete(QEMUBH *bh)
-{
-    g_free(bh);
-}
-
 void replay_bh_schedule_event(QEMUBH *bh)
 {
     bh->cb(bh->opaque);

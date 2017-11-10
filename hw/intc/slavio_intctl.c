@@ -27,7 +27,7 @@
 #include "monitor/monitor.h"
 #include "hw/sysbus.h"
 #include "hw/intc/intc.h"
-#include "hw/intc/trace.h"
+#include "trace.h"
 
 //#define DEBUG_IRQ_COUNT
 

@@ -11,8 +11,7 @@
 #include "qemu/osdep.h"
 #include <glib/gstdio.h>
 #include "contrib/ivshmem-server/ivshmem-server.h"
-#include "libqos/libqos-pc.h"
-#include "libqos/libqos-spapr.h"
+#include "libqos/pci-pc.h"
 #include "libqtest.h"
 #include "qemu-common.h"
 
@@ -41,8 +40,9 @@ static QPCIDevice *get_device(QPCIBus *pcibus)
 }
 
 typedef struct _IVState {
-    QOSState *qs;
+    QTestState *qtest;
     QPCIBar reg_bar, mem_bar;
+    QPCIBus *pcibus;
     QPCIDevice *dev;
 } IVState;
 
@@ -74,7 +74,7 @@ static inline unsigned in_reg(IVState *s, enum Reg reg)
     QTestState *qtest = global_qtest;
     unsigned res;
 
-    global_qtest = s->qs->qts;
+    global_qtest = s->qtest;
     res = qpci_io_readl(s->dev, s->reg_bar, reg);
     g_test_message("*%s -> %x\n", name, res);
     global_qtest = qtest;
@@ -87,7 +87,7 @@ static inline void out_reg(IVState *s, enum Reg reg, unsigned v)
     const char *name = reg2str(reg);
     QTestState *qtest = global_qtest;
 
-    global_qtest = s->qs->qts;
+    global_qtest = s->qtest;
     g_test_message("%x -> *%s\n", v, name);
     qpci_io_writel(s->dev, s->reg_bar, reg, v);
     global_qtest = qtest;
@@ -97,7 +97,7 @@ static inline void read_mem(IVState *s, uint64_t off, void *buf, size_t len)
 {
     QTestState *qtest = global_qtest;
 
-    global_qtest = s->qs->qts;
+    global_qtest = s->qtest;
     qpci_memread(s->dev, s->mem_bar, off, buf, len);
     global_qtest = qtest;
 }
@@ -107,7 +107,7 @@ static inline void write_mem(IVState *s, uint64_t off,
 {
     QTestState *qtest = global_qtest;
 
-    global_qtest = s->qs->qts;
+    global_qtest = s->qtest;
     qpci_memwrite(s->dev, s->mem_bar, off, buf, len);
     global_qtest = qtest;
 }
@@ -115,23 +115,17 @@ static inline void write_mem(IVState *s, uint64_t off,
 static void cleanup_vm(IVState *s)
 {
     g_free(s->dev);
-    qtest_shutdown(s->qs);
+    qpci_free_pc(s->pcibus);
+    qtest_quit(s->qtest);
 }
 
 static void setup_vm_cmd(IVState *s, const char *cmd, bool msix)
 {
     uint64_t barsize;
-    const char *arch = qtest_get_arch();
 
-    if (strcmp(arch, "i386") == 0 || strcmp(arch, "x86_64") == 0) {
-        s->qs = qtest_pc_boot(cmd);
-    } else if (strcmp(arch, "ppc64") == 0) {
-        s->qs = qtest_spapr_boot(cmd);
-    } else {
-        g_printerr("ivshmem-test tests are only available on x86 or ppc64\n");
-        exit(EXIT_FAILURE);
-    }
-    s->dev = get_device(s->qs->pcibus);
+    s->qtest = qtest_start(cmd);
+    s->pcibus = qpci_init_pc(NULL);
+    s->dev = get_device(s->pcibus);
 
     s->reg_bar = qpci_iomap(s->dev, 0, &barsize);
     g_assert_cmpuint(barsize, ==, 256);
@@ -353,7 +347,7 @@ static void test_ivshmem_server(bool msi)
     g_assert_cmpint(vm1, !=, vm2);
 
     /* check number of MSI-X vectors */
-    global_qtest = s1->qs->qts;
+    global_qtest = s1->qtest;
     if (msi) {
         ret = qpci_msix_table_size(s1->dev);
         g_assert_cmpuint(ret, ==, nvectors);
@@ -376,7 +370,7 @@ static void test_ivshmem_server(bool msi)
     g_assert_cmpuint(ret, !=, 0);
 
     /* ping vm1 -> vm2 on vector 1 */
-    global_qtest = s2->qs->qts;
+    global_qtest = s2->qtest;
     if (msi) {
         ret = qpci_msix_pending(s2->dev, 1);
         g_assert_cmpuint(ret, ==, 0);
@@ -418,7 +412,6 @@ static void test_ivshmem_server_irq(void)
 
 static void test_ivshmem_hotplug(void)
 {
-    const char *arch = qtest_get_arch();
     gchar *opts;
 
     qtest_start("");
@@ -426,9 +419,7 @@ static void test_ivshmem_hotplug(void)
     opts = g_strdup_printf("'shm': '%s', 'size': '1M'", tmpshm);
 
     qpci_plug_device_test("ivshmem", "iv1", PCI_SLOT_HP, opts);
-    if (strcmp(arch, "ppc64") != 0) {
-        qpci_unplug_acpi_device_test("iv1", PCI_SLOT_HP);
-    }
+    qpci_unplug_acpi_device_test("iv1", PCI_SLOT_HP);
 
     qtest_end();
     g_free(opts);
@@ -500,7 +491,6 @@ static gchar *mktempshm(int size, int *fd)
 int main(int argc, char **argv)
 {
     int ret, fd;
-    const char *arch = qtest_get_arch();
     gchar dir[] = "/tmp/ivshmem-test.XXXXXX";
 
 #if !GLIB_CHECK_VERSION(2, 31, 0)
@@ -531,10 +521,8 @@ int main(int argc, char **argv)
     qtest_add_func("/ivshmem/memdev", test_ivshmem_memdev);
     if (g_test_slow()) {
         qtest_add_func("/ivshmem/pair", test_ivshmem_pair);
-        if (strcmp(arch, "ppc64") != 0) {
-            qtest_add_func("/ivshmem/server-msi", test_ivshmem_server_msi);
-            qtest_add_func("/ivshmem/server-irq", test_ivshmem_server_irq);
-        }
+        qtest_add_func("/ivshmem/server-msi", test_ivshmem_server_msi);
+        qtest_add_func("/ivshmem/server-irq", test_ivshmem_server_irq);
     }
 
     ret = g_test_run();

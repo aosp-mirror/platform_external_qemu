@@ -276,8 +276,6 @@ static int mig_save_device_bulk(QEMUFile *f, BlkMigDevState *bmds)
     if (bmds->shared_base) {
         qemu_mutex_lock_iothread();
         aio_context_acquire(blk_get_aio_context(bb));
-        /* Skip unallocated sectors; intentionally treats failure as
-         * an allocated sector */
         while (cur_sector < total_sectors &&
                !bdrv_is_allocated(blk_bs(bb), cur_sector,
                                   MAX_IS_ALLOCATED_SEARCH, &nr_sectors)) {
@@ -381,7 +379,7 @@ static void unset_dirty_tracking(void)
     }
 }
 
-static int init_blk_migration(QEMUFile *f)
+static void init_blk_migration(QEMUFile *f)
 {
     BlockDriverState *bs;
     BlkMigDevState *bmds;
@@ -392,8 +390,6 @@ static int init_blk_migration(QEMUFile *f)
         BlkMigDevState *bmds;
         BlockDriverState *bs;
     } *bmds_bs;
-    Error *local_err = NULL;
-    int ret;
 
     block_mig_state.submitted = 0;
     block_mig_state.read_done = 0;
@@ -415,12 +411,11 @@ static int init_blk_migration(QEMUFile *f)
 
         sectors = bdrv_nb_sectors(bs);
         if (sectors <= 0) {
-            ret = sectors;
             goto out;
         }
 
         bmds = g_new0(BlkMigDevState, 1);
-        bmds->blk = blk_new(BLK_PERM_CONSISTENT_READ, BLK_PERM_ALL);
+        bmds->blk = blk_new();
         bmds->blk_name = g_strdup(bdrv_get_device_name(bs));
         bmds->bulk_completed = 0;
         bmds->total_sectors = sectors;
@@ -450,11 +445,7 @@ static int init_blk_migration(QEMUFile *f)
         BlockDriverState *bs = bmds_bs[i].bs;
 
         if (bmds) {
-            ret = blk_insert_bs(bmds->blk, bs, &local_err);
-            if (ret < 0) {
-                error_report_err(local_err);
-                goto out;
-            }
+            blk_insert_bs(bmds->blk, bs);
 
             alloc_aio_bitmap(bmds);
             error_setg(&bmds->blocker, "block device is in use by migration");
@@ -462,10 +453,8 @@ static int init_blk_migration(QEMUFile *f)
         }
     }
 
-    ret = 0;
 out:
     g_free(bmds_bs);
-    return ret;
 }
 
 /* Called with no lock taken.  */
@@ -576,9 +565,6 @@ static int mig_save_device_dirty(QEMUFile *f, BlkMigDevState *bmds,
             }
 
             bdrv_reset_dirty_bitmap(bmds->dirty_bitmap, sector, nr_sectors);
-            sector += nr_sectors;
-            bmds->cur_dirty = sector;
-
             break;
         }
         sector += BDRV_SECTORS_PER_DIRTY_CHUNK;
@@ -719,11 +705,7 @@ static int block_save_setup(QEMUFile *f, void *opaque)
             block_mig_state.submitted, block_mig_state.transferred);
 
     qemu_mutex_lock_iothread();
-    ret = init_blk_migration(f);
-    if (ret < 0) {
-        qemu_mutex_unlock_iothread();
-        return ret;
-    }
+    init_blk_migration(f);
 
     /* start track dirty blocks */
     ret = set_dirty_tracking();

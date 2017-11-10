@@ -6,6 +6,7 @@
 #include "qemu/osdep.h"
 #include <sys/param.h>
 #include <dirent.h>
+#include "qemu-common.h"
 #include "qemu/cutils.h"
 #include "qemu/path.h"
 

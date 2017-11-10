@@ -49,7 +49,7 @@ struct tty_state {
     MemoryRegion iomem;
     qemu_irq irq;
 
-    Chardev *cs;
+    CharDriverState *cs;
     uint64_t ptr;
     uint32_t ptr_len;
     uint32_t ready;

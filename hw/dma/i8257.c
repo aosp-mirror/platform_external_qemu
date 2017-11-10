@@ -26,7 +26,7 @@
 #include "hw/isa/isa.h"
 #include "hw/isa/i8257.h"
 #include "qemu/main-loop.h"
-#include "hw/dma/trace.h"
+#include "trace.h"
 
 #define I8257(obj) \
     OBJECT_CHECK(I8257State, (obj), TYPE_I8257)

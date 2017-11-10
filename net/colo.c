@@ -13,7 +13,7 @@
  */
 
 #include "qemu/osdep.h"
-#include "net/trace.h"
+#include "trace.h"
 #include "net/colo.h"
 
 uint32_t connection_key_hash(const void *opaque)
@@ -147,9 +147,9 @@ void connection_destroy(void *opaque)
     Connection *conn = opaque;
 
     g_queue_foreach(&conn->primary_list, packet_destroy, NULL);
-    g_queue_clear(&conn->primary_list);
+    g_queue_free(&conn->primary_list);
     g_queue_foreach(&conn->secondary_list, packet_destroy, NULL);
-    g_queue_clear(&conn->secondary_list);
+    g_queue_free(&conn->secondary_list);
     g_slice_free(Connection, conn);
 }
 

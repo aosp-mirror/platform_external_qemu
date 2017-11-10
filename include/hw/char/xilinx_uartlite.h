@@ -17,7 +17,7 @@
 
 static inline DeviceState *xilinx_uartlite_create(hwaddr addr,
                                         qemu_irq irq,
-                                        Chardev *chr)
+                                        CharDriverState *chr)
 {
     DeviceState *dev;
     SysBusDevice *s;

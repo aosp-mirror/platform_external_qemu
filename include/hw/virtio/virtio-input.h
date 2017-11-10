@@ -62,10 +62,7 @@ struct VirtIOInput {
     VirtQueue                         *evt, *sts;
     char                              *serial;
 
-    struct {
-        virtio_input_event event;
-        VirtQueueElement *elem;
-    }                                 *queue;
+    virtio_input_event                *queue;
     uint32_t                          qindex, qsize;
 
     bool                              active;

@@ -31,23 +31,18 @@
 #define MSMOUSE_HI2(n) (((n) & 0xc0) >> 6)
 
 typedef struct {
-    Chardev parent;
-
+    CharDriverState *chr;
     QemuInputHandlerState *hs;
     int axis[INPUT_AXIS__MAX];
     bool btns[INPUT_BUTTON__MAX];
     bool btnc[INPUT_BUTTON__MAX];
     uint8_t outbuf[32];
     int outlen;
-} MouseChardev;
+} MouseState;
 
-#define TYPE_CHARDEV_MSMOUSE "chardev-msmouse"
-#define MOUSE_CHARDEV(obj)                                      \
-    OBJECT_CHECK(MouseChardev, (obj), TYPE_CHARDEV_MSMOUSE)
-
-static void msmouse_chr_accept_input(Chardev *chr)
+static void msmouse_chr_accept_input(CharDriverState *chr)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(chr);
+    MouseState *mouse = chr->opaque;
     int len;
 
     len = qemu_chr_be_can_write(chr);
@@ -65,7 +60,7 @@ static void msmouse_chr_accept_input(Chardev *chr)
     }
 }
 
-static void msmouse_queue_event(MouseChardev *mouse)
+static void msmouse_queue_event(MouseState *mouse)
 {
     unsigned char bytes[4] = { 0x40, 0x00, 0x00, 0x00 };
     int dx, dy, count = 3;
@@ -102,7 +97,7 @@ static void msmouse_queue_event(MouseChardev *mouse)
 static void msmouse_input_event(DeviceState *dev, QemuConsole *src,
                                 InputEvent *evt)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(dev);
+    MouseState *mouse = (MouseState *)dev;
     InputMoveEvent *move;
     InputBtnEvent *btn;
 
@@ -126,24 +121,24 @@ static void msmouse_input_event(DeviceState *dev, QemuConsole *src,
 
 static void msmouse_input_sync(DeviceState *dev)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(dev);
-    Chardev *chr = CHARDEV(dev);
+    MouseState *mouse = (MouseState *)dev;
 
     msmouse_queue_event(mouse);
-    msmouse_chr_accept_input(chr);
+    msmouse_chr_accept_input(mouse->chr);
 }
 
-static int msmouse_chr_write(struct Chardev *s, const uint8_t *buf, int len)
+static int msmouse_chr_write (struct CharDriverState *s, const uint8_t *buf, int len)
 {
     /* Ignore writes to mouse port */
     return len;
 }
 
-static void char_msmouse_finalize(Object *obj)
+static void msmouse_chr_free(struct CharDriverState *chr)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(obj);
+    MouseState *mouse = chr->opaque;
 
     qemu_input_handler_unregister(mouse->hs);
+    g_free(mouse);
 }
 
 static QemuInputHandler msmouse_handler = {
@@ -153,38 +148,39 @@ static QemuInputHandler msmouse_handler = {
     .sync  = msmouse_input_sync,
 };
 
-static void msmouse_chr_open(Chardev *chr,
-                             ChardevBackend *backend,
-                             bool *be_opened,
-                             Error **errp)
+static CharDriverState *qemu_chr_open_msmouse(const char *id,
+                                              ChardevBackend *backend,
+                                              ChardevReturn *ret,
+                                              bool *be_opened,
+                                              Error **errp)
 {
-    MouseChardev *mouse = MOUSE_CHARDEV(chr);
+    ChardevCommon *common = backend->u.msmouse.data;
+    MouseState *mouse;
+    CharDriverState *chr;
 
+    chr = qemu_chr_alloc(common, errp);
+    if (!chr) {
+        return NULL;
+    }
+    chr->chr_write = msmouse_chr_write;
+    chr->chr_free = msmouse_chr_free;
+    chr->chr_accept_input = msmouse_chr_accept_input;
     *be_opened = false;
+
+    mouse = g_new0(MouseState, 1);
     mouse->hs = qemu_input_handler_register((DeviceState *)mouse,
                                             &msmouse_handler);
+
+    mouse->chr = chr;
+    chr->opaque = mouse;
+
+    return chr;
 }
-
-static void char_msmouse_class_init(ObjectClass *oc, void *data)
-{
-    ChardevClass *cc = CHARDEV_CLASS(oc);
-
-    cc->open = msmouse_chr_open;
-    cc->chr_write = msmouse_chr_write;
-    cc->chr_accept_input = msmouse_chr_accept_input;
-}
-
-static const TypeInfo char_msmouse_type_info = {
-    .name = TYPE_CHARDEV_MSMOUSE,
-    .parent = TYPE_CHARDEV,
-    .instance_size = sizeof(MouseChardev),
-    .instance_finalize = char_msmouse_finalize,
-    .class_init = char_msmouse_class_init,
-};
 
 static void register_types(void)
 {
-    type_register_static(&char_msmouse_type_info);
+    register_char_driver("msmouse", CHARDEV_BACKEND_KIND_MSMOUSE, NULL,
+                         qemu_chr_open_msmouse);
 }
 
 type_init(register_types);

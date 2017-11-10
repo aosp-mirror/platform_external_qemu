@@ -40,7 +40,6 @@ typedef struct PCIQXLDevice {
     uint32_t           cmdlog;
 
     uint32_t           guest_bug;
-    Error              *migration_blocker;
 
     enum qxl_mode      mode;
     uint32_t           cmdflags;

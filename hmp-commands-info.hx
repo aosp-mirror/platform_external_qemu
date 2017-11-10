@@ -249,9 +249,9 @@ ETEXI
 
     {
         .name       = "mtree",
-        .args_type  = "flatview:-f",
-        .params     = "[-f]",
-        .help       = "show memory tree (-f: dump flat view for address spaces)",
+        .args_type  = "",
+        .params     = "",
+        .help       = "show memory tree",
         .cmd        = hmp_info_mtree,
     },
 
@@ -800,20 +800,6 @@ STEXI
 @findex hotpluggable-cpus
 Show information about hotpluggable CPUs
 ETEXI
-
-STEXI
-@item info vm-generation-id
-@findex vm-generation-id
-Show Virtual Machine Generation ID
-ETEXI
-
-    {
-        .name       = "vm-generation-id",
-        .args_type  = "",
-        .params     = "",
-        .help       = "Show Virtual Machine Generation ID",
-        .cmd = hmp_info_vm_generation_id,
-    },
 
 STEXI
 @end table

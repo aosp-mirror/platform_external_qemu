@@ -257,8 +257,6 @@ struct IntelIOMMUState {
     uint8_t womask[DMAR_REG_SIZE];  /* WO (write only - read returns 0) */
     uint32_t version;
 
-    bool caching_mode;          /* RO - is cap CM enabled? */
-
     dma_addr_t root;                /* Current root table pointer */
     bool root_extended;             /* Type of root table (extended or not) */
     bool dmar_enabled;              /* Set if DMA remapping is enabled */

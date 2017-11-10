@@ -20,7 +20,7 @@
 #include "qemu/osdep.h"
 #include "hw/hw.h"
 #include "hw/sysbus.h"
-#include "hw/char/trace.h"
+#include "trace.h"
 #include "sysemu/char.h"
 
 #include "hw/char/lm32_juart.h"

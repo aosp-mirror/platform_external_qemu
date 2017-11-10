@@ -1,6 +1,5 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
-#include "sysemu/hw_accel.h"
 #include "sysemu/sysemu.h"
 #include "qemu/log.h"
 #include "cpu.h"
@@ -9,7 +8,8 @@
 #include "hw/ppc/spapr.h"
 #include "mmu-hash64.h"
 #include "cpu-models.h"
-#include "hw/ppc/trace.h"
+#include "trace.h"
+#include "sysemu/kvm.h"
 #include "kvm_ppc.h"
 #include "hw/ppc/spapr_ovec.h"
 
@@ -47,12 +47,12 @@ static bool has_spr(PowerPCCPU *cpu, int spr)
     return cpu->env.spr_cb[spr].name != NULL;
 }
 
-static inline bool valid_ptex(PowerPCCPU *cpu, target_ulong ptex)
+static inline bool valid_pte_index(CPUPPCState *env, target_ulong pte_index)
 {
     /*
-     * hash value/pteg group index is normalized by HPT mask
+     * hash value/pteg group index is normalized by htab_mask
      */
-    if (((ptex & ~7ULL) / HPTES_PER_GROUP) & ~ppc_hash64_hpt_mask(cpu)) {
+    if (((pte_index & ~7ULL) / HPTES_PER_GROUP) & ~env->htab_mask) {
         return false;
     }
     return true;
@@ -77,14 +77,15 @@ static bool is_ram_address(sPAPRMachineState *spapr, hwaddr addr)
 static target_ulong h_enter(PowerPCCPU *cpu, sPAPRMachineState *spapr,
                             target_ulong opcode, target_ulong *args)
 {
+    CPUPPCState *env = &cpu->env;
     target_ulong flags = args[0];
-    target_ulong ptex = args[1];
+    target_ulong pte_index = args[1];
     target_ulong pteh = args[2];
     target_ulong ptel = args[3];
     unsigned apshift;
     target_ulong raddr;
-    target_ulong slot;
-    const ppc_hash_pte64_t *hptes;
+    target_ulong index;
+    uint64_t token;
 
     apshift = ppc_hash64_hpte_page_shift_noslb(cpu, pteh, ptel);
     if (!apshift) {
@@ -115,36 +116,36 @@ static target_ulong h_enter(PowerPCCPU *cpu, sPAPRMachineState *spapr,
 
     pteh &= ~0x60ULL;
 
-    if (!valid_ptex(cpu, ptex)) {
+    if (!valid_pte_index(env, pte_index)) {
         return H_PARAMETER;
     }
 
-    slot = ptex & 7ULL;
-    ptex = ptex & ~7ULL;
-
+    index = 0;
     if (likely((flags & H_EXACT) == 0)) {
-        hptes = ppc_hash64_map_hptes(cpu, ptex, HPTES_PER_GROUP);
-        for (slot = 0; slot < 8; slot++) {
-            if (!(ppc_hash64_hpte0(cpu, hptes, slot) & HPTE64_V_VALID)) {
+        pte_index &= ~7ULL;
+        token = ppc_hash64_start_access(cpu, pte_index);
+        for (; index < 8; index++) {
+            if (!(ppc_hash64_load_hpte0(cpu, token, index) & HPTE64_V_VALID)) {
                 break;
             }
         }
-        ppc_hash64_unmap_hptes(cpu, hptes, ptex, HPTES_PER_GROUP);
-        if (slot == 8) {
+        ppc_hash64_stop_access(cpu, token);
+        if (index == 8) {
             return H_PTEG_FULL;
         }
     } else {
-        hptes = ppc_hash64_map_hptes(cpu, ptex + slot, 1);
-        if (ppc_hash64_hpte0(cpu, hptes, 0) & HPTE64_V_VALID) {
-            ppc_hash64_unmap_hptes(cpu, hptes, ptex + slot, 1);
+        token = ppc_hash64_start_access(cpu, pte_index);
+        if (ppc_hash64_load_hpte0(cpu, token, 0) & HPTE64_V_VALID) {
+            ppc_hash64_stop_access(cpu, token);
             return H_PTEG_FULL;
         }
-        ppc_hash64_unmap_hptes(cpu, hptes, ptex, 1);
+        ppc_hash64_stop_access(cpu, token);
     }
 
-    ppc_hash64_store_hpte(cpu, ptex + slot, pteh | HPTE64_V_HPTE_DIRTY, ptel);
+    ppc_hash64_store_hpte(cpu, pte_index + index,
+                          pteh | HPTE64_V_HPTE_DIRTY, ptel);
 
-    args[0] = ptex + slot;
+    args[0] = pte_index + index;
     return H_SUCCESS;
 }
 
@@ -160,17 +161,18 @@ static RemoveResult remove_hpte(PowerPCCPU *cpu, target_ulong ptex,
                                 target_ulong flags,
                                 target_ulong *vp, target_ulong *rp)
 {
-    const ppc_hash_pte64_t *hptes;
+    CPUPPCState *env = &cpu->env;
+    uint64_t token;
     target_ulong v, r;
 
-    if (!valid_ptex(cpu, ptex)) {
+    if (!valid_pte_index(env, ptex)) {
         return REMOVE_PARM;
     }
 
-    hptes = ppc_hash64_map_hptes(cpu, ptex, 1);
-    v = ppc_hash64_hpte0(cpu, hptes, 0);
-    r = ppc_hash64_hpte1(cpu, hptes, 0);
-    ppc_hash64_unmap_hptes(cpu, hptes, ptex, 1);
+    token = ppc_hash64_start_access(cpu, ptex);
+    v = ppc_hash64_load_hpte0(cpu, token, 0);
+    r = ppc_hash64_load_hpte1(cpu, token, 0);
+    ppc_hash64_stop_access(cpu, token);
 
     if ((v & HPTE64_V_VALID) == 0 ||
         ((flags & H_AVPN) && (v & ~0x7fULL) != avpn) ||
@@ -189,11 +191,11 @@ static target_ulong h_remove(PowerPCCPU *cpu, sPAPRMachineState *spapr,
 {
     CPUPPCState *env = &cpu->env;
     target_ulong flags = args[0];
-    target_ulong ptex = args[1];
+    target_ulong pte_index = args[1];
     target_ulong avpn = args[2];
     RemoveResult ret;
 
-    ret = remove_hpte(cpu, ptex, avpn, flags,
+    ret = remove_hpte(cpu, pte_index, avpn, flags,
                       &args[0], &args[1]);
 
     switch (ret) {
@@ -289,19 +291,19 @@ static target_ulong h_protect(PowerPCCPU *cpu, sPAPRMachineState *spapr,
 {
     CPUPPCState *env = &cpu->env;
     target_ulong flags = args[0];
-    target_ulong ptex = args[1];
+    target_ulong pte_index = args[1];
     target_ulong avpn = args[2];
-    const ppc_hash_pte64_t *hptes;
+    uint64_t token;
     target_ulong v, r;
 
-    if (!valid_ptex(cpu, ptex)) {
+    if (!valid_pte_index(env, pte_index)) {
         return H_PARAMETER;
     }
 
-    hptes = ppc_hash64_map_hptes(cpu, ptex, 1);
-    v = ppc_hash64_hpte0(cpu, hptes, 0);
-    r = ppc_hash64_hpte1(cpu, hptes, 0);
-    ppc_hash64_unmap_hptes(cpu, hptes, ptex, 1);
+    token = ppc_hash64_start_access(cpu, pte_index);
+    v = ppc_hash64_load_hpte0(cpu, token, 0);
+    r = ppc_hash64_load_hpte1(cpu, token, 0);
+    ppc_hash64_stop_access(cpu, token);
 
     if ((v & HPTE64_V_VALID) == 0 ||
         ((flags & H_AVPN) && (v & ~0x7fULL) != avpn)) {
@@ -313,35 +315,36 @@ static target_ulong h_protect(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     r |= (flags << 55) & HPTE64_R_PP0;
     r |= (flags << 48) & HPTE64_R_KEY_HI;
     r |= flags & (HPTE64_R_PP | HPTE64_R_N | HPTE64_R_KEY_LO);
-    ppc_hash64_store_hpte(cpu, ptex,
+    ppc_hash64_store_hpte(cpu, pte_index,
                           (v & ~HPTE64_V_VALID) | HPTE64_V_HPTE_DIRTY, 0);
-    ppc_hash64_tlb_flush_hpte(cpu, ptex, v, r);
+    ppc_hash64_tlb_flush_hpte(cpu, pte_index, v, r);
     /* Flush the tlb */
     check_tlb_flush(env, true);
     /* Don't need a memory barrier, due to qemu's global lock */
-    ppc_hash64_store_hpte(cpu, ptex, v | HPTE64_V_HPTE_DIRTY, r);
+    ppc_hash64_store_hpte(cpu, pte_index, v | HPTE64_V_HPTE_DIRTY, r);
     return H_SUCCESS;
 }
 
 static target_ulong h_read(PowerPCCPU *cpu, sPAPRMachineState *spapr,
                            target_ulong opcode, target_ulong *args)
 {
+    CPUPPCState *env = &cpu->env;
     target_ulong flags = args[0];
-    target_ulong ptex = args[1];
+    target_ulong pte_index = args[1];
     uint8_t *hpte;
     int i, ridx, n_entries = 1;
 
-    if (!valid_ptex(cpu, ptex)) {
+    if (!valid_pte_index(env, pte_index)) {
         return H_PARAMETER;
     }
 
     if (flags & H_READ_4) {
         /* Clear the two low order bits */
-        ptex &= ~(3ULL);
+        pte_index &= ~(3ULL);
         n_entries = 4;
     }
 
-    hpte = spapr->htab + (ptex * HASH_PTE_SIZE_64);
+    hpte = env->external_htab + (pte_index * HASH_PTE_SIZE_64);
 
     for (i = 0, ridx = 0; i < n_entries; i++) {
         args[ridx++] = ldq_p(hpte);
@@ -878,103 +881,126 @@ static target_ulong h_set_mode(PowerPCCPU *cpu, sPAPRMachineState *spapr,
     return ret;
 }
 
-#define H_SIGNAL_SYS_RESET_ALL         -1
-#define H_SIGNAL_SYS_RESET_ALLBUTSELF  -2
+typedef struct {
+    uint32_t cpu_version;
+    Error *err;
+} SetCompatState;
 
-static target_ulong h_signal_sys_reset(PowerPCCPU *cpu,
-                                       sPAPRMachineState *spapr,
-                                       target_ulong opcode, target_ulong *args)
+static void do_set_compat(CPUState *cs, run_on_cpu_data arg)
 {
-    target_long target = args[0];
-    CPUState *cs;
+    PowerPCCPU *cpu = POWERPC_CPU(cs);
+    SetCompatState *s = arg.host_ptr;
 
-    if (target < 0) {
-        /* Broadcast */
-        if (target < H_SIGNAL_SYS_RESET_ALLBUTSELF) {
-            return H_PARAMETER;
-        }
+    cpu_synchronize_state(cs);
+    ppc_set_compat(cpu, s->cpu_version, &s->err);
+}
 
-        CPU_FOREACH(cs) {
-            PowerPCCPU *c = POWERPC_CPU(cs);
+#define get_compat_level(cpuver) ( \
+    ((cpuver) == CPU_POWERPC_LOGICAL_2_05) ? 2050 : \
+    ((cpuver) == CPU_POWERPC_LOGICAL_2_06) ? 2060 : \
+    ((cpuver) == CPU_POWERPC_LOGICAL_2_06_PLUS) ? 2061 : \
+    ((cpuver) == CPU_POWERPC_LOGICAL_2_07) ? 2070 : 0)
 
-            if (target == H_SIGNAL_SYS_RESET_ALLBUTSELF) {
-                if (c == cpu) {
-                    continue;
-                }
+static void cas_handle_compat_cpu(PowerPCCPUClass *pcc, uint32_t pvr,
+                                  unsigned max_lvl, unsigned *compat_lvl,
+                                  unsigned *cpu_version)
+{
+    unsigned lvl = get_compat_level(pvr);
+    bool is205, is206, is207;
+
+    if (!lvl) {
+        return;
+    }
+
+    /* If it is a logical PVR, try to determine the highest level */
+    is205 = (pcc->pcr_supported & PCR_COMPAT_2_05) &&
+            (lvl == get_compat_level(CPU_POWERPC_LOGICAL_2_05));
+    is206 = (pcc->pcr_supported & PCR_COMPAT_2_06) &&
+            ((lvl == get_compat_level(CPU_POWERPC_LOGICAL_2_06)) ||
+             (lvl == get_compat_level(CPU_POWERPC_LOGICAL_2_06_PLUS)));
+    is207 = (pcc->pcr_supported & PCR_COMPAT_2_07) &&
+            (lvl == get_compat_level(CPU_POWERPC_LOGICAL_2_07));
+
+    if (is205 || is206 || is207) {
+        if (!max_lvl) {
+            /* User did not set the level, choose the highest */
+            if (*compat_lvl <= lvl) {
+                *compat_lvl = lvl;
+                *cpu_version = pvr;
             }
-            run_on_cpu(cs, spapr_do_system_reset_on_cpu, RUN_ON_CPU_NULL);
+        } else if (max_lvl >= lvl) {
+            /* User chose the level, don't set higher than this */
+            *compat_lvl = lvl;
+            *cpu_version = pvr;
         }
-        return H_SUCCESS;
-
-    } else {
-        /* Unicast */
-        CPU_FOREACH(cs) {
-            if (cpu->cpu_dt_id == target) {
-                run_on_cpu(cs, spapr_do_system_reset_on_cpu, RUN_ON_CPU_NULL);
-                return H_SUCCESS;
-            }
-        }
-        return H_PARAMETER;
     }
 }
 
-static target_ulong h_client_architecture_support(PowerPCCPU *cpu,
+static target_ulong h_client_architecture_support(PowerPCCPU *cpu_,
                                                   sPAPRMachineState *spapr,
                                                   target_ulong opcode,
                                                   target_ulong *args)
 {
     target_ulong list = ppc64_phys_to_real(args[0]);
     target_ulong ov_table;
-    bool explicit_match = false; /* Matched the CPU's real PVR */
-    uint32_t max_compat = cpu->max_compat;
-    uint32_t best_compat = 0;
-    int i;
+    PowerPCCPUClass *pcc = POWERPC_CPU_GET_CLASS(cpu_);
+    CPUState *cs;
+    bool cpu_match = false, cpu_update = true;
+    unsigned old_cpu_version = cpu_->cpu_version;
+    unsigned compat_lvl = 0, cpu_version = 0;
+    unsigned max_lvl = get_compat_level(cpu_->max_compat);
+    int counter;
     sPAPROptionVector *ov5_guest, *ov5_cas_old, *ov5_updates;
 
-    /*
-     * We scan the supplied table of PVRs looking for two things
-     *   1. Is our real CPU PVR in the list?
-     *   2. What's the "best" listed logical PVR
-     */
-    for (i = 0; i < 512; ++i) {
+    /* Parse PVR list */
+    for (counter = 0; counter < 512; ++counter) {
         uint32_t pvr, pvr_mask;
 
         pvr_mask = ldl_be_phys(&address_space_memory, list);
-        pvr = ldl_be_phys(&address_space_memory, list + 4);
-        list += 8;
+        list += 4;
+        pvr = ldl_be_phys(&address_space_memory, list);
+        list += 4;
 
-        if (~pvr_mask & pvr) {
-            break; /* Terminator record */
+        trace_spapr_cas_pvr_try(pvr);
+        if (!max_lvl &&
+            ((cpu_->env.spr[SPR_PVR] & pvr_mask) == (pvr & pvr_mask))) {
+            cpu_match = true;
+            cpu_version = 0;
+        } else if (pvr == cpu_->cpu_version) {
+            cpu_match = true;
+            cpu_version = cpu_->cpu_version;
+        } else if (!cpu_match) {
+            cas_handle_compat_cpu(pcc, pvr, max_lvl, &compat_lvl, &cpu_version);
         }
+        /* Terminator record */
+        if (~pvr_mask & pvr) {
+            break;
+        }
+    }
 
-        if ((cpu->env.spr[SPR_PVR] & pvr_mask) == (pvr & pvr_mask)) {
-            explicit_match = true;
-        } else {
-            if (ppc_check_compat(cpu, pvr, best_compat, max_compat)) {
-                best_compat = pvr;
+    /* Parsing finished */
+    trace_spapr_cas_pvr(cpu_->cpu_version, cpu_match,
+                        cpu_version, pcc->pcr_mask);
+
+    /* Update CPUs */
+    if (old_cpu_version != cpu_version) {
+        CPU_FOREACH(cs) {
+            SetCompatState s = {
+                .cpu_version = cpu_version,
+                .err = NULL,
+            };
+
+            run_on_cpu(cs, do_set_compat, RUN_ON_CPU_HOST_PTR(&s));
+
+            if (s.err) {
+                error_report_err(s.err);
+                return H_HARDWARE;
             }
         }
     }
 
-    if ((best_compat == 0) && (!explicit_match || max_compat)) {
-        /* We couldn't find a suitable compatibility mode, and either
-         * the guest doesn't support "raw" mode for this CPU, or raw
-         * mode is disabled because a maximum compat mode is set */
-        return H_HARDWARE;
-    }
-
-    /* Parsing finished */
-    trace_spapr_cas_pvr(cpu->compat_pvr, explicit_match, best_compat);
-
-    /* Update CPUs */
-    if (cpu->compat_pvr != best_compat) {
-        Error *local_err = NULL;
-
-        ppc_set_compat_all(best_compat, &local_err);
-        if (local_err) {
-            error_report_err(local_err);
-            return H_HARDWARE;
-        }
+    if (!cpu_version) {
+        cpu_update = false;
     }
 
     /* For the future use: here @ov_table points to the first option vector */
@@ -1002,7 +1028,7 @@ static target_ulong h_client_architecture_support(PowerPCCPU *cpu,
 
     if (!spapr->cas_reboot) {
         spapr->cas_reboot =
-            (spapr_h_cas_compose_response(spapr, args[1], args[2],
+            (spapr_h_cas_compose_response(spapr, args[1], args[2], cpu_update,
                                           ov5_updates) != 0);
     }
     spapr_ovec_cleanup(ov5_updates);
@@ -1075,7 +1101,6 @@ static void hypercall_register_types(void)
     /* hcall-splpar */
     spapr_register_hypercall(H_REGISTER_VPA, h_register_vpa);
     spapr_register_hypercall(H_CEDE, h_cede);
-    spapr_register_hypercall(H_SIGNAL_SYS_RESET, h_signal_sys_reset);
 
     /* processor register resource access h-calls */
     spapr_register_hypercall(H_SET_SPRG0, h_set_sprg0);

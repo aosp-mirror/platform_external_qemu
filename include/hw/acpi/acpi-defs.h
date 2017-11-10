@@ -191,8 +191,10 @@ struct AcpiFadtDescriptorRev5_1 {
 
 typedef struct AcpiFadtDescriptorRev5_1 AcpiFadtDescriptorRev5_1;
 
-#define ACPI_FADT_ARM_PSCI_COMPLIANT  (1 << 0)
-#define ACPI_FADT_ARM_PSCI_USE_HVC    (1 << 1)
+enum {
+    ACPI_FADT_ARM_USE_PSCI_G_0_2 = 0,
+    ACPI_FADT_ARM_PSCI_USE_HVC = 1,
+};
 
 /*
  * Serial Port Console Redirection Table (SPCR), Rev. 1.02
@@ -288,7 +290,7 @@ typedef struct AcpiMultipleApicTable AcpiMultipleApicTable;
 #define ACPI_APIC_XRUPT_SOURCE       8
 #define ACPI_APIC_LOCAL_X2APIC       9
 #define ACPI_APIC_LOCAL_X2APIC_NMI      10
-#define ACPI_APIC_GENERIC_CPU_INTERFACE 11
+#define ACPI_APIC_GENERIC_INTERRUPT     11
 #define ACPI_APIC_GENERIC_DISTRIBUTOR   12
 #define ACPI_APIC_GENERIC_MSI_FRAME     13
 #define ACPI_APIC_GENERIC_REDISTRIBUTOR 14
@@ -359,7 +361,7 @@ struct AcpiMadtLocalX2ApicNmi {
 } QEMU_PACKED;
 typedef struct AcpiMadtLocalX2ApicNmi AcpiMadtLocalX2ApicNmi;
 
-struct AcpiMadtGenericCpuInterface {
+struct AcpiMadtGenericInterrupt {
     ACPI_SUB_HEADER_DEF
     uint16_t reserved;
     uint32_t cpu_interface_number;
@@ -376,10 +378,7 @@ struct AcpiMadtGenericCpuInterface {
     uint64_t arm_mpidr;
 } QEMU_PACKED;
 
-typedef struct AcpiMadtGenericCpuInterface AcpiMadtGenericCpuInterface;
-
-/* GICC CPU Interface Flags */
-#define ACPI_MADT_GICC_ENABLED 1
+typedef struct AcpiMadtGenericInterrupt AcpiMadtGenericInterrupt;
 
 struct AcpiMadtGenericDistributor {
     ACPI_SUB_HEADER_DEF
@@ -428,9 +427,21 @@ typedef struct AcpiMadtGenericTranslator AcpiMadtGenericTranslator;
 /*
  * Generic Timer Description Table (GTDT)
  */
-#define ACPI_GTDT_INTERRUPT_MODE_LEVEL    (0 << 0)
-#define ACPI_GTDT_INTERRUPT_MODE_EDGE     (1 << 0)
-#define ACPI_GTDT_CAP_ALWAYS_ON           (1 << 2)
+
+#define ACPI_GTDT_INTERRUPT_MODE        (1 << 0)
+#define ACPI_GTDT_INTERRUPT_POLARITY    (1 << 1)
+#define ACPI_GTDT_ALWAYS_ON             (1 << 2)
+
+/* Triggering */
+
+#define ACPI_LEVEL_SENSITIVE            ((uint8_t) 0x00)
+#define ACPI_EDGE_SENSITIVE             ((uint8_t) 0x01)
+
+/* Polarity */
+
+#define ACPI_ACTIVE_HIGH                ((uint8_t) 0x00)
+#define ACPI_ACTIVE_LOW                 ((uint8_t) 0x01)
+#define ACPI_ACTIVE_BOTH                ((uint8_t) 0x02)
 
 struct AcpiGenericTimerTable {
     ACPI_TABLE_HEADER_DEF
@@ -627,20 +638,8 @@ struct AcpiDmarHardwareUnit {
 } QEMU_PACKED;
 typedef struct AcpiDmarHardwareUnit AcpiDmarHardwareUnit;
 
-/* Type 2: Root Port ATS Capability Reporting Structure */
-struct AcpiDmarRootPortATS {
-    uint16_t type;
-    uint16_t length;
-    uint8_t flags;
-    uint8_t reserved;
-    uint16_t pci_segment;
-    AcpiDmarDeviceScope scope[0];
-} QEMU_PACKED;
-typedef struct AcpiDmarRootPortATS AcpiDmarRootPortATS;
-
 /* Masks for Flags field above */
 #define ACPI_DMAR_INCLUDE_PCI_ALL   1
-#define ACPI_DMAR_ATSR_ALL_PORTS    1
 
 /*
  * Input Output Remapping Table (IORT)

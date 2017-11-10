@@ -1,7 +1,5 @@
 #include "macros.inc"
 
-#define LSBIT(v) ((v) ^ ((v) & ((v) - 1)))
-
 test_suite interrupt
 
 .macro clear_interrupts
@@ -48,17 +46,14 @@ test soft_disabled
     set_vector kernel, 1f
     clear_interrupts
 
-    movi    a2, LSBIT(XCHAL_INTTYPE_MASK_SOFTWARE)
+    movi    a2, 0x80
     wsr     a2, intset
     esync
     rsr     a3, interrupt
-    movi    a4, ~XCHAL_INTTYPE_MASK_TIMER
-    and     a3, a3, a4
     assert  eq, a2, a3
     wsr     a2, intclear
     esync
     rsr     a3, interrupt
-    and     a3, a3, a4
     assert  eqi, a3, 0
     j       2f
 1:
@@ -70,12 +65,10 @@ test soft_intenable
     set_vector kernel, 1f
     clear_interrupts
 
-    movi    a2, LSBIT(XCHAL_INTTYPE_MASK_SOFTWARE)
+    movi    a2, 0x80
     wsr     a2, intset
     esync
     rsr     a3, interrupt
-    movi    a4, ~XCHAL_INTTYPE_MASK_TIMER
-    and     a3, a3, a4
     assert  eq, a2, a3
     rsil    a3, 0
     wsr     a2, intenable
@@ -89,12 +82,10 @@ test soft_rsil
     set_vector kernel, 1f
     clear_interrupts
 
-    movi    a2, LSBIT(XCHAL_INTTYPE_MASK_SOFTWARE)
+    movi    a2, 0x80
     wsr     a2, intset
     esync
     rsr     a3, interrupt
-    movi    a4, ~XCHAL_INTTYPE_MASK_TIMER
-    and     a3, a3, a4
     assert  eq, a2, a3
     wsr     a2, intenable
     rsil    a3, 0
@@ -108,12 +99,10 @@ test soft_waiti
     set_vector kernel, 1f
     clear_interrupts
 
-    movi    a2, LSBIT(XCHAL_INTTYPE_MASK_SOFTWARE)
+    movi    a2, 0x80
     wsr     a2, intset
     esync
     rsr     a3, interrupt
-    movi    a4, ~XCHAL_INTTYPE_MASK_TIMER
-    and     a3, a3, a4
     assert  eq, a2, a3
     wsr     a2, intenable
     waiti   0
@@ -127,12 +116,10 @@ test soft_user
     set_vector user, 2f
     clear_interrupts
 
-    movi    a2, LSBIT(XCHAL_INTTYPE_MASK_SOFTWARE)
+    movi    a2, 0x80
     wsr     a2, intset
     esync
     rsr     a3, interrupt
-    movi    a4, ~XCHAL_INTTYPE_MASK_TIMER
-    and     a3, a3, a4
     assert  eq, a2, a3
     wsr     a2, intenable
 
@@ -152,7 +139,7 @@ test soft_priority
     set_vector level3, 2f
     clear_interrupts
 
-    movi    a2, XCHAL_INTTYPE_MASK_SOFTWARE
+    movi    a2, 0x880
     wsr     a2, intenable
     rsil    a3, 0
     esync
@@ -174,7 +161,7 @@ test eps_epc_rfi
     clear_interrupts
     reset_ps
 
-    movi    a2, XCHAL_INTTYPE_MASK_SOFTWARE
+    movi    a2, 0x880
     wsr     a2, intenable
     rsil    a3, 0
     rsr     a3, ps

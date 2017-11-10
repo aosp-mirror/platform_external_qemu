@@ -749,13 +749,13 @@ static void ivshmem_reset(DeviceState *d)
     }
 }
 
-static int ivshmem_setup_interrupts(IVShmemState *s, Error **errp)
+static int ivshmem_setup_interrupts(IVShmemState *s)
 {
     /* allocate QEMU callback data for receiving interrupts */
     s->msi_vectors = g_malloc0(s->vectors * sizeof(MSIVector));
 
     if (ivshmem_has_feature(s, IVSHMEM_MSI)) {
-        if (msix_init_exclusive_bar(PCI_DEVICE(s), s->vectors, 1, errp)) {
+        if (msix_init_exclusive_bar(PCI_DEVICE(s), s->vectors, 1)) {
             return -1;
         }
 
@@ -840,7 +840,6 @@ static void ivshmem_common_realize(PCIDevice *dev, Error **errp)
     uint8_t *pci_conf;
     uint8_t attr = PCI_BASE_ADDRESS_SPACE_MEMORY |
         PCI_BASE_ADDRESS_MEM_PREFETCH;
-    Error *local_err = NULL;
 
     /* IRQFD requires MSI */
     if (ivshmem_has_feature(s, IVSHMEM_IOEVENTFD) &&
@@ -869,7 +868,7 @@ static void ivshmem_common_realize(PCIDevice *dev, Error **errp)
         s->ivshmem_bar2 = host_memory_backend_get_memory(s->hostmem,
                                                          &error_abort);
     } else {
-        Chardev *chr = qemu_chr_fe_get_driver(&s->server_chr);
+        CharDriverState *chr = qemu_chr_fe_get_driver(&s->server_chr);
         assert(chr);
 
         IVSHMEM_DPRINTF("using shared memory server (socket = %s)\n",
@@ -898,11 +897,14 @@ static void ivshmem_common_realize(PCIDevice *dev, Error **errp)
         qemu_chr_fe_set_handlers(&s->server_chr, ivshmem_can_receive,
                                  ivshmem_read, NULL, s, NULL, true);
 
-        if (ivshmem_setup_interrupts(s, errp) < 0) {
-            error_prepend(errp, "Failed to initialize interrupts: ");
+        if (ivshmem_setup_interrupts(s) < 0) {
+            error_setg(errp, "failed to initialize interrupts");
             return;
         }
     }
+
+    vmstate_register_ram(s->ivshmem_bar2, DEVICE(s));
+    pci_register_bar(PCI_DEVICE(s), 2, attr, s->ivshmem_bar2);
 
     if (s->master == ON_OFF_AUTO_AUTO) {
         s->master = s->vm_id == 0 ? ON_OFF_AUTO_ON : ON_OFF_AUTO_OFF;
@@ -911,16 +913,8 @@ static void ivshmem_common_realize(PCIDevice *dev, Error **errp)
     if (!ivshmem_is_master(s)) {
         error_setg(&s->migration_blocker,
                    "Migration is disabled when using feature 'peer mode' in device 'ivshmem'");
-        migrate_add_blocker(s->migration_blocker, &local_err);
-        if (local_err) {
-            error_propagate(errp, local_err);
-            error_free(s->migration_blocker);
-            return;
-        }
+        migrate_add_blocker(s->migration_blocker);
     }
-
-    vmstate_register_ram(s->ivshmem_bar2, DEVICE(s));
-    pci_register_bar(PCI_DEVICE(s), 2, attr, s->ivshmem_bar2);
 }
 
 static void ivshmem_exit(PCIDevice *dev)
@@ -1267,11 +1261,10 @@ static void ivshmem_realize(PCIDevice *dev, Error **errp)
     if (s->sizearg == NULL) {
         s->legacy_size = 4 << 20; /* 4 MB default */
     } else {
-        int ret;
-        uint64_t size;
-
-        ret = qemu_strtosz_MiB(s->sizearg, NULL, &size);
-        if (ret < 0 || (size_t)size != size || !is_power_of_2(size)) {
+        char *end;
+        int64_t size = qemu_strtosz(s->sizearg, &end);
+        if (size < 0 || (size_t)size != size || *end != '\0'
+            || !is_power_of_2(size)) {
             error_setg(errp, "Invalid size %s", s->sizearg);
             return;
         }

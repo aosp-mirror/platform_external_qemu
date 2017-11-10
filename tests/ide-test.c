@@ -339,7 +339,6 @@ static void test_bmdma_simple_rw(void)
     g_assert(memcmp(buf, cmpbuf, len) == 0);
 
 
-    free_pci_device(dev);
     g_free(buf);
     g_free(cmpbuf);
 }
@@ -370,7 +369,6 @@ static void test_bmdma_short_prdt(void)
                               prdt, ARRAY_SIZE(prdt), NULL);
     g_assert_cmphex(status, ==, 0);
     assert_bit_clear(qpci_io_readb(dev, ide_bar, reg_status), DF | ERR);
-    free_pci_device(dev);
 }
 
 static void test_bmdma_one_sector_short_prdt(void)
@@ -400,7 +398,6 @@ static void test_bmdma_one_sector_short_prdt(void)
                               prdt, ARRAY_SIZE(prdt), NULL);
     g_assert_cmphex(status, ==, 0);
     assert_bit_clear(qpci_io_readb(dev, ide_bar, reg_status), DF | ERR);
-    free_pci_device(dev);
 }
 
 static void test_bmdma_long_prdt(void)
@@ -429,7 +426,6 @@ static void test_bmdma_long_prdt(void)
                               prdt, ARRAY_SIZE(prdt), NULL);
     g_assert_cmphex(status, ==, BM_STS_INTR);
     assert_bit_clear(qpci_io_readb(dev, ide_bar, reg_status), DF | ERR);
-    free_pci_device(dev);
 }
 
 static void test_bmdma_no_busmaster(void)
@@ -453,7 +449,6 @@ static void test_bmdma_no_busmaster(void)
      * in practice. At least we want to be aware of any changes. */
     g_assert_cmphex(status, ==, BM_STS_ACTIVE | BM_STS_INTR);
     assert_bit_clear(qpci_io_readb(dev, ide_bar, reg_status), DF | ERR);
-    free_pci_device(dev);
 }
 
 static void test_bmdma_setup(void)
@@ -530,7 +525,6 @@ static void test_identify(void)
     assert_bit_set(buf[85], 0x20);
 
     ide_test_quit();
-    free_pci_device(dev);
 }
 
 /*
@@ -550,7 +544,6 @@ static void make_dirty(uint8_t device)
 
     guest_buf = guest_alloc(guest_malloc, len);
     buf = g_malloc(len);
-    memset(buf, rand() % 255 + 1, len);
     g_assert(guest_buf);
     g_assert(buf);
 
@@ -569,7 +562,6 @@ static void make_dirty(uint8_t device)
     assert_bit_clear(qpci_io_readb(dev, ide_bar, reg_status), DF | ERR);
 
     g_free(buf);
-    free_pci_device(dev);
 }
 
 static void test_flush(void)
@@ -616,7 +608,6 @@ static void test_flush(void)
     assert_bit_clear(data, BSY | DF | ERR | DRQ);
 
     ide_test_quit();
-    free_pci_device(dev);
 }
 
 static void test_retry_flush(const char *machine)
@@ -667,7 +658,6 @@ static void test_retry_flush(const char *machine)
     assert_bit_clear(data, BSY | DF | ERR | DRQ);
 
     ide_test_quit();
-    free_pci_device(dev);
 }
 
 static void test_flush_nodev(void)
@@ -685,7 +675,6 @@ static void test_flush_nodev(void)
 
     /* Just testing that qemu doesn't crash... */
 
-    free_pci_device(dev);
     ide_test_quit();
 }
 
@@ -752,7 +741,6 @@ static uint8_t ide_wait_clear(uint8_t flag)
     while (true) {
         data = qpci_io_readb(dev, ide_bar, reg_status);
         if (!(data & flag)) {
-            free_pci_device(dev);
             return data;
         }
         if (difftime(time(NULL), st) > 5.0) {
@@ -862,7 +850,6 @@ static void cdrom_pio_impl(int nblocks)
     g_free(pattern);
     g_free(rx);
     test_bmdma_teardown();
-    free_pci_device(dev);
 }
 
 static void test_cdrom_pio(void)

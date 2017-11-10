@@ -107,7 +107,7 @@ static void fsl_imx31_realize(DeviceState *dev, Error **errp)
         };
 
         if (i < MAX_SERIAL_PORTS) {
-            Chardev *chr;
+            CharDriverState *chr;
 
             chr = serial_hds[i];
 

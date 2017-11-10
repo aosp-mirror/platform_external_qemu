@@ -22,6 +22,7 @@
  * THE SOFTWARE.
  */
 #include "qemu/osdep.h"
+#include <curses.h>
 
 #ifndef _WIN32
 #include <sys/ioctl.h>

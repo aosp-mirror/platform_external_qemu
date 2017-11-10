@@ -25,8 +25,7 @@ typedef enum {
 typedef gboolean (*GAChannelCallback)(GIOCondition condition, gpointer opaque);
 
 GAChannel *ga_channel_new(GAChannelMethod method, const gchar *path,
-                          int listen_fd, GAChannelCallback cb,
-                          gpointer opaque);
+                          GAChannelCallback cb, gpointer opaque);
 void ga_channel_free(GAChannel *c);
 GIOStatus ga_channel_read(GAChannel *c, gchar *buf, gsize size, gsize *count);
 GIOStatus ga_channel_write_all(GAChannel *c, const gchar *buf, gsize size);

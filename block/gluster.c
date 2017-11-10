@@ -12,7 +12,6 @@
 #include "block/block_int.h"
 #include "qapi/error.h"
 #include "qapi/qmp/qerror.h"
-#include "qapi/util.h"
 #include "qemu/uri.h"
 #include "qemu/error-report.h"
 #include "qemu/cutils.h"
@@ -152,7 +151,7 @@ static QemuOptsList runtime_type_opts = {
         {
             .name = GLUSTER_OPT_TYPE,
             .type = QEMU_OPT_STRING,
-            .help = "inet|unix",
+            .help = "tcp|unix",
         },
         { /* end of list */ }
     },
@@ -171,14 +170,14 @@ static QemuOptsList runtime_unix_opts = {
     },
 };
 
-static QemuOptsList runtime_inet_opts = {
-    .name = "gluster_inet",
-    .head = QTAILQ_HEAD_INITIALIZER(runtime_inet_opts.head),
+static QemuOptsList runtime_tcp_opts = {
+    .name = "gluster_tcp",
+    .head = QTAILQ_HEAD_INITIALIZER(runtime_tcp_opts.head),
     .desc = {
         {
             .name = GLUSTER_OPT_TYPE,
             .type = QEMU_OPT_STRING,
-            .help = "inet|unix",
+            .help = "tcp|unix",
         },
         {
             .name = GLUSTER_OPT_HOST,
@@ -321,7 +320,7 @@ static int parse_volume_options(BlockdevOptionsGluster *gconf, char *path)
 static int qemu_gluster_parse_uri(BlockdevOptionsGluster *gconf,
                                   const char *filename)
 {
-    SocketAddressFlat *gsconf;
+    GlusterServer *gsconf;
     URI *uri;
     QueryParams *qp = NULL;
     bool is_unix = false;
@@ -332,19 +331,19 @@ static int qemu_gluster_parse_uri(BlockdevOptionsGluster *gconf,
         return -EINVAL;
     }
 
-    gconf->server = g_new0(SocketAddressFlatList, 1);
-    gconf->server->value = gsconf = g_new0(SocketAddressFlat, 1);
+    gconf->server = g_new0(GlusterServerList, 1);
+    gconf->server->value = gsconf = g_new0(GlusterServer, 1);
 
     /* transport */
     if (!uri->scheme || !strcmp(uri->scheme, "gluster")) {
-        gsconf->type = SOCKET_ADDRESS_FLAT_TYPE_INET;
+        gsconf->type = GLUSTER_TRANSPORT_TCP;
     } else if (!strcmp(uri->scheme, "gluster+tcp")) {
-        gsconf->type = SOCKET_ADDRESS_FLAT_TYPE_INET;
+        gsconf->type = GLUSTER_TRANSPORT_TCP;
     } else if (!strcmp(uri->scheme, "gluster+unix")) {
-        gsconf->type = SOCKET_ADDRESS_FLAT_TYPE_UNIX;
+        gsconf->type = GLUSTER_TRANSPORT_UNIX;
         is_unix = true;
     } else if (!strcmp(uri->scheme, "gluster+rdma")) {
-        gsconf->type = SOCKET_ADDRESS_FLAT_TYPE_INET;
+        gsconf->type = GLUSTER_TRANSPORT_TCP;
         error_report("Warning: rdma feature is not supported, falling "
                      "back to tcp");
     } else {
@@ -374,11 +373,11 @@ static int qemu_gluster_parse_uri(BlockdevOptionsGluster *gconf,
         }
         gsconf->u.q_unix.path = g_strdup(qp->p[0].value);
     } else {
-        gsconf->u.inet.host = g_strdup(uri->server ? uri->server : "localhost");
+        gsconf->u.tcp.host = g_strdup(uri->server ? uri->server : "localhost");
         if (uri->port) {
-            gsconf->u.inet.port = g_strdup_printf("%d", uri->port);
+            gsconf->u.tcp.port = g_strdup_printf("%d", uri->port);
         } else {
-            gsconf->u.inet.port = g_strdup_printf("%d", GLUSTER_DEFAULT_PORT);
+            gsconf->u.tcp.port = g_strdup_printf("%d", GLUSTER_DEFAULT_PORT);
         }
     }
 
@@ -396,7 +395,7 @@ static struct glfs *qemu_gluster_glfs_init(BlockdevOptionsGluster *gconf,
     struct glfs *glfs;
     int ret;
     int old_errno;
-    SocketAddressFlatList *server;
+    GlusterServerList *server;
     unsigned long long port;
 
     glfs = glfs_find_preopened(gconf->volume);
@@ -412,27 +411,22 @@ static struct glfs *qemu_gluster_glfs_init(BlockdevOptionsGluster *gconf,
     glfs_set_preopened(gconf->volume, glfs);
 
     for (server = gconf->server; server; server = server->next) {
-        switch (server->value->type) {
-        case SOCKET_ADDRESS_FLAT_TYPE_UNIX:
-            ret = glfs_set_volfile_server(glfs, "unix",
+        if (server->value->type  == GLUSTER_TRANSPORT_UNIX) {
+            ret = glfs_set_volfile_server(glfs,
+                                   GlusterTransport_lookup[server->value->type],
                                    server->value->u.q_unix.path, 0);
-            break;
-        case SOCKET_ADDRESS_FLAT_TYPE_INET:
-            if (parse_uint_full(server->value->u.inet.port, &port, 10) < 0 ||
+        } else {
+            if (parse_uint_full(server->value->u.tcp.port, &port, 10) < 0 ||
                 port > 65535) {
                 error_setg(errp, "'%s' is not a valid port number",
-                           server->value->u.inet.port);
+                           server->value->u.tcp.port);
                 errno = EINVAL;
                 goto out;
             }
-            ret = glfs_set_volfile_server(glfs, "tcp",
-                                   server->value->u.inet.host,
+            ret = glfs_set_volfile_server(glfs,
+                                   GlusterTransport_lookup[server->value->type],
+                                   server->value->u.tcp.host,
                                    (int)port);
-            break;
-        case SOCKET_ADDRESS_FLAT_TYPE_VSOCK:
-        case SOCKET_ADDRESS_FLAT_TYPE_FD:
-        default:
-            abort();
         }
 
         if (ret < 0) {
@@ -450,13 +444,13 @@ static struct glfs *qemu_gluster_glfs_init(BlockdevOptionsGluster *gconf,
         error_setg(errp, "Gluster connection for volume %s, path %s failed"
                          " to connect", gconf->volume, gconf->path);
         for (server = gconf->server; server; server = server->next) {
-            if (server->value->type  == SOCKET_ADDRESS_FLAT_TYPE_UNIX) {
+            if (server->value->type  == GLUSTER_TRANSPORT_UNIX) {
                 error_append_hint(errp, "hint: failed on socket %s ",
                                   server->value->u.q_unix.path);
             } else {
                 error_append_hint(errp, "hint: failed on host %s and port %s ",
-                                  server->value->u.inet.host,
-                                  server->value->u.inet.port);
+                                  server->value->u.tcp.host,
+                                  server->value->u.tcp.port);
             }
         }
 
@@ -480,6 +474,23 @@ out:
     return NULL;
 }
 
+static int qapi_enum_parse(const char *opt)
+{
+    int i;
+
+    if (!opt) {
+        return GLUSTER_TRANSPORT__MAX;
+    }
+
+    for (i = 0; i < GLUSTER_TRANSPORT__MAX; i++) {
+        if (!strcmp(opt, GlusterTransport_lookup[i])) {
+            return i;
+        }
+    }
+
+    return i;
+}
+
 /*
  * Convert the json formatted command line into qapi.
 */
@@ -487,14 +498,14 @@ static int qemu_gluster_parse_json(BlockdevOptionsGluster *gconf,
                                   QDict *options, Error **errp)
 {
     QemuOpts *opts;
-    SocketAddressFlat *gsconf = NULL;
-    SocketAddressFlatList *curr = NULL;
+    GlusterServer *gsconf;
+    GlusterServerList *curr = NULL;
     QDict *backing_options = NULL;
     Error *local_err = NULL;
     char *str = NULL;
     const char *ptr;
     size_t num_servers;
-    int i, type;
+    int i;
 
     /* create opts info from runtime_json_opts list */
     opts = qemu_opts_create(&runtime_json_opts, NULL, 0, &error_abort);
@@ -536,32 +547,25 @@ static int qemu_gluster_parse_json(BlockdevOptionsGluster *gconf,
         }
 
         ptr = qemu_opt_get(opts, GLUSTER_OPT_TYPE);
+        gsconf = g_new0(GlusterServer, 1);
+        gsconf->type = qapi_enum_parse(ptr);
         if (!ptr) {
             error_setg(&local_err, QERR_MISSING_PARAMETER, GLUSTER_OPT_TYPE);
             error_append_hint(&local_err, GERR_INDEX_HINT, i);
             goto out;
 
         }
-        gsconf = g_new0(SocketAddressFlat, 1);
-        if (!strcmp(ptr, "tcp")) {
-            ptr = "inet";       /* accept legacy "tcp" */
-        }
-        type = qapi_enum_parse(SocketAddressFlatType_lookup, ptr,
-                               SOCKET_ADDRESS_FLAT_TYPE__MAX, -1, NULL);
-        if (type != SOCKET_ADDRESS_FLAT_TYPE_INET
-            && type != SOCKET_ADDRESS_FLAT_TYPE_UNIX) {
-            error_setg(&local_err,
-                       "Parameter '%s' may be 'inet' or 'unix'",
-                       GLUSTER_OPT_TYPE);
+        if (gsconf->type == GLUSTER_TRANSPORT__MAX) {
+            error_setg(&local_err, QERR_INVALID_PARAMETER_VALUE,
+                       GLUSTER_OPT_TYPE, "tcp or unix");
             error_append_hint(&local_err, GERR_INDEX_HINT, i);
             goto out;
         }
-        gsconf->type = type;
         qemu_opts_del(opts);
 
-        if (gsconf->type == SOCKET_ADDRESS_FLAT_TYPE_INET) {
-            /* create opts info from runtime_inet_opts list */
-            opts = qemu_opts_create(&runtime_inet_opts, NULL, 0, &error_abort);
+        if (gsconf->type == GLUSTER_TRANSPORT_TCP) {
+            /* create opts info from runtime_tcp_opts list */
+            opts = qemu_opts_create(&runtime_tcp_opts, NULL, 0, &error_abort);
             qemu_opts_absorb_qdict(opts, backing_options, &local_err);
             if (local_err) {
                 goto out;
@@ -574,7 +578,7 @@ static int qemu_gluster_parse_json(BlockdevOptionsGluster *gconf,
                 error_append_hint(&local_err, GERR_INDEX_HINT, i);
                 goto out;
             }
-            gsconf->u.inet.host = g_strdup(ptr);
+            gsconf->u.tcp.host = g_strdup(ptr);
             ptr = qemu_opt_get(opts, GLUSTER_OPT_PORT);
             if (!ptr) {
                 error_setg(&local_err, QERR_MISSING_PARAMETER,
@@ -582,28 +586,28 @@ static int qemu_gluster_parse_json(BlockdevOptionsGluster *gconf,
                 error_append_hint(&local_err, GERR_INDEX_HINT, i);
                 goto out;
             }
-            gsconf->u.inet.port = g_strdup(ptr);
+            gsconf->u.tcp.port = g_strdup(ptr);
 
             /* defend for unsupported fields in InetSocketAddress,
              * i.e. @ipv4, @ipv6  and @to
              */
             ptr = qemu_opt_get(opts, GLUSTER_OPT_TO);
             if (ptr) {
-                gsconf->u.inet.has_to = true;
+                gsconf->u.tcp.has_to = true;
             }
             ptr = qemu_opt_get(opts, GLUSTER_OPT_IPV4);
             if (ptr) {
-                gsconf->u.inet.has_ipv4 = true;
+                gsconf->u.tcp.has_ipv4 = true;
             }
             ptr = qemu_opt_get(opts, GLUSTER_OPT_IPV6);
             if (ptr) {
-                gsconf->u.inet.has_ipv6 = true;
+                gsconf->u.tcp.has_ipv6 = true;
             }
-            if (gsconf->u.inet.has_to) {
+            if (gsconf->u.tcp.has_to) {
                 error_setg(&local_err, "Parameter 'to' not supported");
                 goto out;
             }
-            if (gsconf->u.inet.has_ipv4 || gsconf->u.inet.has_ipv6) {
+            if (gsconf->u.tcp.has_ipv4 || gsconf->u.tcp.has_ipv6) {
                 error_setg(&local_err, "Parameters 'ipv4/ipv6' not supported");
                 goto out;
             }
@@ -628,18 +632,16 @@ static int qemu_gluster_parse_json(BlockdevOptionsGluster *gconf,
         }
 
         if (gconf->server == NULL) {
-            gconf->server = g_new0(SocketAddressFlatList, 1);
+            gconf->server = g_new0(GlusterServerList, 1);
             gconf->server->value = gsconf;
             curr = gconf->server;
         } else {
-            curr->next = g_new0(SocketAddressFlatList, 1);
+            curr->next = g_new0(GlusterServerList, 1);
             curr->next->value = gsconf;
             curr = curr->next;
         }
-        gsconf = NULL;
 
-        QDECREF(backing_options);
-        backing_options = NULL;
+        qdict_del(backing_options, str);
         g_free(str);
         str = NULL;
     }
@@ -648,10 +650,11 @@ static int qemu_gluster_parse_json(BlockdevOptionsGluster *gconf,
 
 out:
     error_propagate(errp, local_err);
-    qapi_free_SocketAddressFlat(gsconf);
     qemu_opts_del(opts);
-    g_free(str);
-    QDECREF(backing_options);
+    if (str) {
+        qdict_del(backing_options, str);
+        g_free(str);
+    }
     errno = EINVAL;
     return -errno;
 }
@@ -680,7 +683,7 @@ static struct glfs *qemu_gluster_init(BlockdevOptionsGluster *gconf,
                              "file.volume=testvol,file.path=/path/a.qcow2"
                              "[,file.debug=9]"
                              "[,file.logfile=/path/filename.log],"
-                             "file.server.0.type=inet,"
+                             "file.server.0.type=tcp,"
                              "file.server.0.host=1.2.3.4,"
                              "file.server.0.port=24007,"
                              "file.server.1.transport=unix,"
@@ -693,6 +696,13 @@ static struct glfs *qemu_gluster_init(BlockdevOptionsGluster *gconf,
     }
 
     return qemu_gluster_glfs_init(gconf, errp);
+}
+
+static void qemu_gluster_complete_aio(void *opaque)
+{
+    GlusterAIOCB *acb = (GlusterAIOCB *)opaque;
+
+    qemu_coroutine_enter(acb->coroutine);
 }
 
 /*
@@ -710,7 +720,7 @@ static void gluster_finish_aiocb(struct glfs_fd *fd, ssize_t ret, void *arg)
         acb->ret = -EIO; /* Partial read/write - fail it */
     }
 
-    aio_co_schedule(acb->aio_context, acb->coroutine);
+    aio_bh_schedule_oneshot(acb->aio_context, qemu_gluster_complete_aio, acb);
 }
 
 static void qemu_gluster_parse_flags(int bdrv_flags, int *open_flags)
@@ -1243,7 +1253,7 @@ static int qemu_gluster_has_zero_init(BlockDriverState *bs)
  * If @start is in a trailing hole or beyond EOF, return -ENXIO.
  * If we can't find out, return a negative errno other than -ENXIO.
  *
- * (Shamefully copied from file-posix.c, only miniscule adaptions.)
+ * (Shamefully copied from raw-posix.c, only miniscule adaptions.)
  */
 static int find_allocation(BlockDriverState *bs, off_t start,
                            off_t *data, off_t *hole)
@@ -1339,7 +1349,7 @@ exit:
  * 'nb_sectors' is the max value 'pnum' should be set to.  If nb_sectors goes
  * beyond the end of the disk image it will be clamped.
  *
- * (Based on raw_co_get_block_status() from file-posix.c.)
+ * (Based on raw_co_get_block_status() from raw-posix.c.)
  */
 static int64_t coroutine_fn qemu_gluster_co_get_block_status(
         BlockDriverState *bs, int64_t sector_num, int nb_sectors, int *pnum,

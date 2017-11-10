@@ -232,7 +232,7 @@ void eth_get_protocols(const struct iovec *iov, int iovcnt,
     }
 }
 
-size_t
+bool
 eth_strip_vlan(const struct iovec *iov, int iovcnt, size_t iovoff,
                uint8_t *new_ehdr_buf,
                uint16_t *payload_offset, uint16_t *tci)
@@ -244,7 +244,7 @@ eth_strip_vlan(const struct iovec *iov, int iovcnt, size_t iovoff,
                                new_ehdr, sizeof(*new_ehdr));
 
     if (copied < sizeof(*new_ehdr)) {
-        return 0;
+        return false;
     }
 
     switch (be16_to_cpu(new_ehdr->h_proto)) {
@@ -254,7 +254,7 @@ eth_strip_vlan(const struct iovec *iov, int iovcnt, size_t iovoff,
                             &vlan_hdr, sizeof(vlan_hdr));
 
         if (copied < sizeof(vlan_hdr)) {
-            return 0;
+            return false;
         }
 
         new_ehdr->h_proto = vlan_hdr.h_proto;
@@ -268,21 +268,18 @@ eth_strip_vlan(const struct iovec *iov, int iovcnt, size_t iovoff,
                                 PKT_GET_VLAN_HDR(new_ehdr), sizeof(vlan_hdr));
 
             if (copied < sizeof(vlan_hdr)) {
-                return 0;
+                return false;
             }
 
             *payload_offset += sizeof(vlan_hdr);
-
-            return sizeof(struct eth_header) + sizeof(struct vlan_header);
-        } else {
-            return sizeof(struct eth_header);
         }
+        return true;
     default:
-        return 0;
+        return false;
     }
 }
 
-size_t
+bool
 eth_strip_vlan_ex(const struct iovec *iov, int iovcnt, size_t iovoff,
                   uint16_t vet, uint8_t *new_ehdr_buf,
                   uint16_t *payload_offset, uint16_t *tci)
@@ -294,7 +291,7 @@ eth_strip_vlan_ex(const struct iovec *iov, int iovcnt, size_t iovoff,
                                new_ehdr, sizeof(*new_ehdr));
 
     if (copied < sizeof(*new_ehdr)) {
-        return 0;
+        return false;
     }
 
     if (be16_to_cpu(new_ehdr->h_proto) == vet) {
@@ -302,17 +299,17 @@ eth_strip_vlan_ex(const struct iovec *iov, int iovcnt, size_t iovoff,
                             &vlan_hdr, sizeof(vlan_hdr));
 
         if (copied < sizeof(vlan_hdr)) {
-            return 0;
+            return false;
         }
 
         new_ehdr->h_proto = vlan_hdr.h_proto;
 
         *tci = be16_to_cpu(vlan_hdr.h_tci);
         *payload_offset = iovoff + sizeof(*new_ehdr) + sizeof(vlan_hdr);
-        return sizeof(struct eth_header);
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 void

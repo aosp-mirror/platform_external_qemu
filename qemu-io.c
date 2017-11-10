@@ -595,17 +595,13 @@ int main(int argc, char **argv)
                 exit(1);
             }
             opts = qemu_opts_to_qdict(qopts, NULL);
-            if (openfile(NULL, flags, writethrough, opts)) {
-                exit(1);
-            }
+            openfile(NULL, flags, writethrough, opts);
         } else {
             if (format) {
                 opts = qdict_new();
                 qdict_put(opts, "driver", qstring_from_str(format));
             }
-            if (openfile(argv[optind], flags, writethrough, opts)) {
-                exit(1);
-            }
+            openfile(argv[optind], flags, writethrough, opts);
         }
     }
     command_loop();

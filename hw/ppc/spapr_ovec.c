@@ -16,8 +16,17 @@
 #include "qemu/bitmap.h"
 #include "exec/address-spaces.h"
 #include "qemu/error-report.h"
-#include "hw/ppc/trace.h"
 #include <libfdt.h>
+
+/* #define DEBUG_SPAPR_OVEC */
+
+#ifdef DEBUG_SPAPR_OVEC
+#define DPRINTFN(fmt, ...) \
+    do { fprintf(stderr, fmt "\n", ## __VA_ARGS__); } while (0)
+#else
+#define DPRINTFN(fmt, ...) \
+    do { } while (0)
+#endif
 
 #define OV_MAXBYTES 256 /* not including length byte */
 #define OV_MAXBITS (OV_MAXBYTES * BITS_PER_BYTE)
@@ -201,7 +210,8 @@ sPAPROptionVector *spapr_ovec_parse_vector(target_ulong table_addr, int vector)
     for (i = 0; i < vector_len; i++) {
         uint8_t entry = ldub_phys(&address_space_memory, addr + i);
         if (entry) {
-            trace_spapr_ovec_parse_vector(vector, i + 1, vector_len, entry);
+            DPRINTFN("read guest vector %2d, byte %3d / %3d: 0x%.2x",
+                     vector, i + 1, vector_len, entry);
             guest_byte_to_bitmap(entry, ov->bitmap, i * BITS_PER_BYTE);
         }
     }
@@ -235,9 +245,10 @@ int spapr_ovec_populate_dt(void *fdt, int fdt_offset,
     for (i = 1; i < vec_len + 1; i++) {
         vec[i] = guest_byte_from_bitmap(ov->bitmap, (i - 1) * BITS_PER_BYTE);
         if (vec[i]) {
-            trace_spapr_ovec_populate_dt(i, vec_len, vec[i]);
+            DPRINTFN("encoding guest vector byte %3d / %3d: 0x%.2x",
+                     i, vec_len, vec[i]);
         }
     }
 
-    return fdt_setprop(fdt, fdt_offset, name, vec, vec_len + 1);
+    return fdt_setprop(fdt, fdt_offset, name, vec, vec_len);
 }

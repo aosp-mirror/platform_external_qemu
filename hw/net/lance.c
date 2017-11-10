@@ -42,7 +42,7 @@
 #include "qemu/sockets.h"
 #include "hw/sparc/sun4m.h"
 #include "pcnet.h"
-#include "hw/net/trace.h"
+#include "trace.h"
 #include "sysemu/sysemu.h"
 
 #define TYPE_LANCE "lance"

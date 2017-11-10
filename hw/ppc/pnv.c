@@ -21,9 +21,8 @@
 #include "qapi/error.h"
 #include "sysemu/sysemu.h"
 #include "sysemu/numa.h"
-#include "sysemu/cpus.h"
 #include "hw/hw.h"
-#include "target/ppc/cpu.h"
+#include "target-ppc/cpu.h"
 #include "qemu/log.h"
 #include "hw/ppc/fdt.h"
 #include "hw/ppc/ppc.h"
@@ -382,7 +381,7 @@ static void ppc_powernv_init(MachineState *machine)
 
     fw_size = load_image_targphys(fw_filename, FW_LOAD_ADDR, FW_MAX_SIZE);
     if (fw_size < 0) {
-        error_report("Could not load OPAL '%s'", fw_filename);
+        hw_error("qemu: could not load OPAL '%s'\n", fw_filename);
         exit(1);
     }
     g_free(fw_filename);
@@ -394,8 +393,8 @@ static void ppc_powernv_init(MachineState *machine)
         kernel_size = load_image_targphys(machine->kernel_filename,
                                           KERNEL_LOAD_ADDR, 0x2000000);
         if (kernel_size < 0) {
-            error_report("Could not load kernel '%s'",
-                         machine->kernel_filename);
+            hw_error("qemu: could not load kernel'%s'\n",
+                     machine->kernel_filename);
             exit(1);
         }
     }
@@ -406,7 +405,7 @@ static void ppc_powernv_init(MachineState *machine)
         pnv->initrd_size = load_image_targphys(machine->initrd_filename,
                                   pnv->initrd_base, 0x10000000); /* 128MB max */
         if (pnv->initrd_size < 0) {
-            error_report("Could not load initial ram disk '%s'",
+            error_report("qemu: could not load initial ram disk '%s'",
                          machine->initrd_filename);
             exit(1);
         }

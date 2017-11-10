@@ -33,7 +33,7 @@
 #include "hw/pci/pci.h"
 #include "hw/sysbus.h"
 #include "hw/qdev-dma.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 
 /* This causes frames to occur 1000x slower */
 //#define OHCI_TIME_WARP 1
@@ -41,8 +41,6 @@
 /* Number of Downstream Ports on the root hub.  */
 
 #define OHCI_MAX_PORTS 15
-
-#define ED_LINK_LIMIT 32
 
 static int64_t usb_frame_time;
 static int64_t usb_bit_time;
@@ -727,7 +725,7 @@ static int ohci_service_iso_td(OHCIState *ohci, struct ohci_ed *ed,
     if (ohci_read_iso_td(ohci, addr, &iso_td)) {
         trace_usb_ohci_iso_td_read_failed(addr);
         ohci_die(ohci);
-        return 1;
+        return 0;
     }
 
     starting_frame = OHCI_BM(iso_td.flags, TD_SF);
@@ -1001,7 +999,7 @@ static int ohci_service_td(OHCIState *ohci, struct ohci_ed *ed)
     if (ohci_read_td(ohci, addr, &td)) {
         trace_usb_ohci_td_read_error(addr);
         ohci_die(ohci);
-        return 1;
+        return 0;
     }
 
     dir = OHCI_BM(ed->flags, ED_D);
@@ -1186,7 +1184,7 @@ static int ohci_service_ed_list(OHCIState *ohci, uint32_t head, int completion)
     uint32_t next_ed;
     uint32_t cur;
     int active;
-    uint32_t link_cnt = 0;
+
     active = 0;
 
     if (head == 0)
@@ -1200,11 +1198,6 @@ static int ohci_service_ed_list(OHCIState *ohci, uint32_t head, int completion)
         }
 
         next_ed = ed.next & OHCI_DPTR_MASK;
-
-        if (++link_cnt > ED_LINK_LIMIT) {
-            ohci_die(ohci);
-            return 0;
-        }
 
         if ((ed.head & OHCI_ED_H) || (ed.flags & OHCI_ED_K)) {
             uint32_t addr;

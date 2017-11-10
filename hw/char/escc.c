@@ -29,7 +29,7 @@
 #include "sysemu/char.h"
 #include "ui/console.h"
 #include "ui/input.h"
-#include "hw/char/trace.h"
+#include "trace.h"
 
 /*
  * Chipset docs:
@@ -689,7 +689,7 @@ static const VMStateDescription vmstate_escc = {
 };
 
 MemoryRegion *escc_init(hwaddr base, qemu_irq irqA, qemu_irq irqB,
-              Chardev *chrA, Chardev *chrB,
+              CharDriverState *chrA, CharDriverState *chrB,
               int clock, int it_shift)
 {
     DeviceState *dev;

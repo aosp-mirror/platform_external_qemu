@@ -53,13 +53,14 @@ struct QIOChannelTLSHandshakeData {
     bool failed;
 };
 
-static void test_tls_handshake_done(QIOTask *task,
+static void test_tls_handshake_done(Object *source,
+                                    Error *err,
                                     gpointer opaque)
 {
     struct QIOChannelTLSHandshakeData *data = opaque;
 
     data->finished = true;
-    data->failed = qio_task_propagate_error(task, NULL);
+    data->failed = err != NULL;
 }
 
 

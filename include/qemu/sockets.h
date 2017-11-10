@@ -38,8 +38,6 @@ int socket_set_fast_reuse(int fd);
  */
 typedef void NonBlockingConnectHandler(int fd, Error *err, void *opaque);
 
-int inet_ai_family_from_address(InetSocketAddress *addr,
-                                Error **errp);
 InetSocketAddress *inet_parse(const char *str, Error **errp);
 int inet_connect(const char *str, Error **errp);
 int inet_connect_saddr(InetSocketAddress *saddr, Error **errp,
@@ -125,16 +123,5 @@ SocketAddress *socket_remote_address(int fd, Error **errp);
  * Returns: the socket address in string format, or NULL on error
  */
 char *socket_address_to_string(struct SocketAddress *addr, Error **errp);
-
-/**
- * socket_address_crumple:
- * @addr_flat: the socket address to crumple
- *
- * Convert SocketAddressFlat to SocketAddress.  Caller is responsible
- * for freeing with qapi_free_SocketAddress().
- *
- * Returns: the argument converted to SocketAddress.
- */
-SocketAddress *socket_address_crumple(SocketAddressFlat *addr_flat);
 
 #endif /* QEMU_SOCKETS_H */

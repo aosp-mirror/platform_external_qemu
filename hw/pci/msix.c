@@ -21,7 +21,6 @@
 #include "hw/pci/pci.h"
 #include "hw/xen/xen.h"
 #include "qemu/range.h"
-#include "qapi/error.h"
 
 #define MSIX_CAP_LENGTH 12
 
@@ -240,31 +239,11 @@ static void msix_mask_all(struct PCIDevice *dev, unsigned nentries)
     }
 }
 
-/*
- * Make PCI device @dev MSI-X capable
- * @nentries is the max number of MSI-X vectors that the device support.
- * @table_bar is the MemoryRegion that MSI-X table structure resides.
- * @table_bar_nr is number of base address register corresponding to @table_bar.
- * @table_offset indicates the offset that the MSI-X table structure starts with
- * in @table_bar.
- * @pba_bar is the MemoryRegion that the Pending Bit Array structure resides.
- * @pba_bar_nr is number of base address register corresponding to @pba_bar.
- * @pba_offset indicates the offset that the Pending Bit Array structure
- * starts with in @pba_bar.
- * Non-zero @cap_pos puts capability MSI-X at that offset in PCI config space.
- * @errp is for returning errors.
- *
- * Return 0 on success; set @errp and return -errno on error:
- * -ENOTSUP means lacking msi support for a msi-capable platform.
- * -EINVAL means capability overlap, happens when @cap_pos is non-zero,
- * also means a programming error, except device assignment, which can check
- * if a real HW is broken.
- */
+/* Initialize the MSI-X structures */
 int msix_init(struct PCIDevice *dev, unsigned short nentries,
               MemoryRegion *table_bar, uint8_t table_bar_nr,
               unsigned table_offset, MemoryRegion *pba_bar,
-              uint8_t pba_bar_nr, unsigned pba_offset, uint8_t cap_pos,
-              Error **errp)
+              uint8_t pba_bar_nr, unsigned pba_offset, uint8_t cap_pos)
 {
     int cap;
     unsigned table_size, pba_size;
@@ -272,12 +251,10 @@ int msix_init(struct PCIDevice *dev, unsigned short nentries,
 
     /* Nothing to do if MSI is not supported by interrupt controller */
     if (!msi_nonbroken) {
-        error_setg(errp, "MSI-X is not supported by interrupt controller");
         return -ENOTSUP;
     }
 
     if (nentries < 1 || nentries > PCI_MSIX_FLAGS_QSIZE + 1) {
-        error_setg(errp, "The number of MSI-X vectors is invalid");
         return -EINVAL;
     }
 
@@ -290,13 +267,10 @@ int msix_init(struct PCIDevice *dev, unsigned short nentries,
         table_offset + table_size > memory_region_size(table_bar) ||
         pba_offset + pba_size > memory_region_size(pba_bar) ||
         (table_offset | pba_offset) & PCI_MSIX_FLAGS_BIRMASK) {
-        error_setg(errp, "table & pba overlap, or they don't fit in BARs,"
-                   " or don't align");
         return -EINVAL;
     }
 
-    cap = pci_add_capability2(dev, PCI_CAP_ID_MSIX,
-                              cap_pos, MSIX_CAP_LENGTH, errp);
+    cap = pci_add_capability(dev, PCI_CAP_ID_MSIX, cap_pos, MSIX_CAP_LENGTH);
     if (cap < 0) {
         return cap;
     }
@@ -333,7 +307,7 @@ int msix_init(struct PCIDevice *dev, unsigned short nentries,
 }
 
 int msix_init_exclusive_bar(PCIDevice *dev, unsigned short nentries,
-                            uint8_t bar_nr, Error **errp)
+                            uint8_t bar_nr)
 {
     int ret;
     char *name;
@@ -365,7 +339,7 @@ int msix_init_exclusive_bar(PCIDevice *dev, unsigned short nentries,
     ret = msix_init(dev, nentries, &dev->msix_exclusive_bar, bar_nr,
                     0, &dev->msix_exclusive_bar,
                     bar_nr, bar_pba_offset,
-                    0, errp);
+                    0);
     if (ret) {
         return ret;
     }
@@ -474,10 +448,8 @@ void msix_notify(PCIDevice *dev, unsigned vector)
 {
     MSIMessage msg;
 
-    if (vector >= dev->msix_entries_nr || !dev->msix_entry_used[vector]) {
+    if (vector >= dev->msix_entries_nr || !dev->msix_entry_used[vector])
         return;
-    }
-
     if (msix_is_masked(dev, vector)) {
         msix_set_pending(dev, vector);
         return;
@@ -512,10 +484,8 @@ void msix_reset(PCIDevice *dev)
 /* Mark vector as used. */
 int msix_vector_use(PCIDevice *dev, unsigned vector)
 {
-    if (vector >= dev->msix_entries_nr) {
+    if (vector >= dev->msix_entries_nr)
         return -EINVAL;
-    }
-
     dev->msix_entry_used[vector]++;
     return 0;
 }
@@ -618,16 +588,12 @@ void msix_unset_vector_notifiers(PCIDevice *dev)
     dev->msix_vector_poll_notifier = NULL;
 }
 
-static int put_msix_state(QEMUFile *f, void *pv, size_t size,
-                          VMStateField *field, QJSON *vmdesc)
+static void put_msix_state(QEMUFile *f, void *pv, size_t size)
 {
     msix_save(pv, f);
-
-    return 0;
 }
 
-static int get_msix_state(QEMUFile *f, void *pv, size_t size,
-                          VMStateField *field)
+static int get_msix_state(QEMUFile *f, void *pv, size_t size)
 {
     msix_load(pv, f);
     return 0;

@@ -135,7 +135,6 @@ typedef struct BDRVCURLState {
     char *cookie;
     bool accept_range;
     AioContext *aio_context;
-    QemuMutex mutex;
     char *username;
     char *password;
     char *proxyusername;
@@ -193,19 +192,19 @@ static int curl_sock_cb(CURL *curl, curl_socket_t fd, int action,
     switch (action) {
         case CURL_POLL_IN:
             aio_set_fd_handler(s->aio_context, fd, false,
-                               curl_multi_read, NULL, NULL, state);
+                               curl_multi_read, NULL, state);
             break;
         case CURL_POLL_OUT:
             aio_set_fd_handler(s->aio_context, fd, false,
-                               NULL, curl_multi_do, NULL, state);
+                               NULL, curl_multi_do, state);
             break;
         case CURL_POLL_INOUT:
             aio_set_fd_handler(s->aio_context, fd, false,
-                               curl_multi_read, curl_multi_do, NULL, state);
+                               curl_multi_read, curl_multi_do, state);
             break;
         case CURL_POLL_REMOVE:
             aio_set_fd_handler(s->aio_context, fd, false,
-                               NULL, NULL, NULL, NULL);
+                               NULL, NULL, NULL);
             break;
     }
 
@@ -334,7 +333,6 @@ static int curl_find_buf(BDRVCURLState *s, size_t start, size_t len,
     return FIND_RET_NONE;
 }
 
-/* Called with s->mutex held.  */
 static void curl_multi_check_completion(BDRVCURLState *s)
 {
     int msgs_in_queue;
@@ -376,9 +374,7 @@ static void curl_multi_check_completion(BDRVCURLState *s)
                         continue;
                     }
 
-                    qemu_mutex_unlock(&s->mutex);
-                    acb->common.cb(acb->common.opaque, -EIO);
-                    qemu_mutex_lock(&s->mutex);
+                    acb->common.cb(acb->common.opaque, -EPROTO);
                     qemu_aio_unref(acb);
                     state->acb[i] = NULL;
                 }
@@ -390,9 +386,9 @@ static void curl_multi_check_completion(BDRVCURLState *s)
     }
 }
 
-/* Called with s->mutex held.  */
-static void curl_multi_do_locked(CURLState *s)
+static void curl_multi_do(void *arg)
 {
+    CURLState *s = (CURLState *)arg;
     CURLSocket *socket, *next_socket;
     int running;
     int r;
@@ -410,23 +406,12 @@ static void curl_multi_do_locked(CURLState *s)
     }
 }
 
-static void curl_multi_do(void *arg)
-{
-    CURLState *s = (CURLState *)arg;
-
-    qemu_mutex_lock(&s->s->mutex);
-    curl_multi_do_locked(s);
-    qemu_mutex_unlock(&s->s->mutex);
-}
-
 static void curl_multi_read(void *arg)
 {
     CURLState *s = (CURLState *)arg;
 
-    qemu_mutex_lock(&s->s->mutex);
-    curl_multi_do_locked(s);
+    curl_multi_do(arg);
     curl_multi_check_completion(s->s);
-    qemu_mutex_unlock(&s->s->mutex);
 }
 
 static void curl_multi_timeout_do(void *arg)
@@ -439,11 +424,9 @@ static void curl_multi_timeout_do(void *arg)
         return;
     }
 
-    qemu_mutex_lock(&s->mutex);
     curl_multi_socket_action(s->multi, CURL_SOCKET_TIMEOUT, 0, &running);
 
     curl_multi_check_completion(s);
-    qemu_mutex_unlock(&s->mutex);
 #else
     abort();
 #endif
@@ -659,7 +642,6 @@ static int curl_open(BlockDriverState *bs, QDict *options, int flags,
     const char *cookie;
     double d;
     const char *secretid;
-    const char *protocol_delimiter;
 
     static int inited = 0;
 
@@ -698,15 +680,6 @@ static int curl_open(BlockDriverState *bs, QDict *options, int flags,
     file = qemu_opt_get(opts, CURL_BLOCK_OPT_URL);
     if (file == NULL) {
         error_setg(errp, "curl block driver requires an 'url' option");
-        goto out_noclean;
-    }
-
-    if (!strstart(file, bs->drv->protocol_name, &protocol_delimiter) ||
-        !strstart(protocol_delimiter, "://", NULL))
-    {
-        error_setg(errp, "%s curl driver cannot handle the URL '%s' (does not "
-                   "start with '%s://')", bs->drv->protocol_name, file,
-                   bs->drv->protocol_name);
         goto out_noclean;
     }
 
@@ -786,7 +759,6 @@ static int curl_open(BlockDriverState *bs, QDict *options, int flags,
     curl_easy_cleanup(state->curl);
     state->curl = NULL;
 
-    qemu_mutex_init(&s->mutex);
     curl_attach_aio_context(bs, bdrv_get_aio_context(bs));
 
     qemu_opts_del(opts);
@@ -812,19 +784,15 @@ static void curl_readv_bh_cb(void *p)
 {
     CURLState *state;
     int running;
-    int ret = -EINPROGRESS;
 
     CURLAIOCB *acb = p;
-    BlockDriverState *bs = acb->common.bs;
-    BDRVCURLState *s = bs->opaque;
+    BDRVCURLState *s = acb->common.bs->opaque;
 
     qemu_bh_delete(acb->bh);
     acb->bh = NULL;
 
     size_t start = acb->sector_num * BDRV_SECTOR_SIZE;
     size_t end;
-
-    qemu_mutex_lock(&s->mutex);
 
     // In case we have the requested data already (e.g. read-ahead),
     // we can just call the callback and be done.
@@ -833,7 +801,7 @@ static void curl_readv_bh_cb(void *p)
             qemu_aio_unref(acb);
             // fall through
         case FIND_RET_WAIT:
-            goto out;
+            return;
         default:
             break;
     }
@@ -841,8 +809,9 @@ static void curl_readv_bh_cb(void *p)
     // No cache found, so let's start a new request
     state = curl_init_state(acb->common.bs, s);
     if (!state) {
-        ret = -EIO;
-        goto out;
+        acb->common.cb(acb->common.opaque, -EIO);
+        qemu_aio_unref(acb);
+        return;
     }
 
     acb->start = 0;
@@ -856,8 +825,9 @@ static void curl_readv_bh_cb(void *p)
     state->orig_buf = g_try_malloc(state->buf_len);
     if (state->buf_len && state->orig_buf == NULL) {
         curl_clean_state(state);
-        ret = -ENOMEM;
-        goto out;
+        acb->common.cb(acb->common.opaque, -ENOMEM);
+        qemu_aio_unref(acb);
+        return;
     }
     state->acb[0] = acb;
 
@@ -870,13 +840,6 @@ static void curl_readv_bh_cb(void *p)
 
     /* Tell curl it needs to kick things off */
     curl_multi_socket_action(s->multi, CURL_SOCKET_TIMEOUT, 0, &running);
-
-out:
-    qemu_mutex_unlock(&s->mutex);
-    if (ret != -EINPROGRESS) {
-        acb->common.cb(acb->common.opaque, ret);
-        qemu_aio_unref(acb);
-    }
 }
 
 static BlockAIOCB *curl_aio_readv(BlockDriverState *bs,
@@ -901,7 +864,6 @@ static void curl_close(BlockDriverState *bs)
 
     DPRINTF("CURL: Close\n");
     curl_detach_aio_context(bs);
-    qemu_mutex_destroy(&s->mutex);
 
     g_free(s->cookie);
     g_free(s->url);

@@ -7,7 +7,7 @@
 #include "qemu/osdep.h"
 #include "qapi/error.h"
 #include "qemu/iov.h"
-#include "hw/input/trace.h"
+#include "trace.h"
 
 #include "hw/qdev.h"
 #include "hw/virtio/virtio.h"
@@ -22,6 +22,7 @@
 void virtio_input_send(VirtIOInput *vinput, virtio_input_event *event)
 {
     VirtQueueElement *elem;
+    unsigned have, need;
     int i, len;
 
     if (!vinput->active) {
@@ -31,10 +32,10 @@ void virtio_input_send(VirtIOInput *vinput, virtio_input_event *event)
     /* queue up events ... */
     if (vinput->qindex == vinput->qsize) {
         vinput->qsize++;
-        vinput->queue = g_realloc(vinput->queue, vinput->qsize *
-                                  sizeof(vinput->queue[0]));
+        vinput->queue = realloc(vinput->queue, vinput->qsize *
+                                sizeof(virtio_input_event));
     }
-    vinput->queue[vinput->qindex++].event = *event;
+    vinput->queue[vinput->qindex++] = *event;
 
     /* ... until we see a report sync ... */
     if (event->type != cpu_to_le16(EV_SYN) ||
@@ -43,24 +44,24 @@ void virtio_input_send(VirtIOInput *vinput, virtio_input_event *event)
     }
 
     /* ... then check available space ... */
-    for (i = 0; i < vinput->qindex; i++) {
-        elem = virtqueue_pop(vinput->evt, sizeof(VirtQueueElement));
-        if (!elem) {
-            while (--i >= 0) {
-                virtqueue_unpop(vinput->evt, vinput->queue[i].elem, 0);
-            }
-            vinput->qindex = 0;
-            trace_virtio_input_queue_full();
-            return;
-        }
-        vinput->queue[i].elem = elem;
+    need = sizeof(virtio_input_event) * vinput->qindex;
+    virtqueue_get_avail_bytes(vinput->evt, &have, NULL, need, 0);
+    if (have < need) {
+        vinput->qindex = 0;
+        trace_virtio_input_queue_full();
+        return;
     }
 
     /* ... and finally pass them to the guest */
     for (i = 0; i < vinput->qindex; i++) {
-        elem = vinput->queue[i].elem;
+        elem = virtqueue_pop(vinput->evt, sizeof(VirtQueueElement));
+        if (!elem) {
+            /* should not happen, we've checked for space beforehand */
+            fprintf(stderr, "%s: Huh?  No vq elem available ...\n", __func__);
+            return;
+        }
         len = iov_from_buf(elem->in_sg, elem->in_num,
-                           0, &vinput->queue[i].event, sizeof(virtio_input_event));
+                           0, vinput->queue+i, sizeof(virtio_input_event));
         virtqueue_push(vinput->evt, elem, len);
         g_free(elem);
     }
@@ -271,8 +272,6 @@ static void virtio_input_finalize(Object *obj)
         QTAILQ_REMOVE(&vinput->cfg_list, cfg, node);
         g_free(cfg);
     }
-
-    g_free(vinput->queue);
 }
 static void virtio_input_device_unrealize(DeviceState *dev, Error **errp)
 {

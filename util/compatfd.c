@@ -15,6 +15,7 @@
 
 #include "qemu/osdep.h"
 #include "qemu-common.h"
+#include "qemu/compatfd.h"
 #include "qemu/thread.h"
 
 #include <sys/syscall.h>

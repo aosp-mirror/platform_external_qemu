@@ -721,10 +721,12 @@ static void patch_reloc(tcg_insn_unit *code_ptr, int type,
  */
 
 /* parse target specific constraints */
-static const char *target_parse_constraint(TCGArgConstraint *ct,
-                                           const char *ct_str, TCGType type)
+static int target_parse_constraint(TCGArgConstraint *ct, const char **pct_str)
 {
-    switch(*ct_str++) {
+    const char *ct_str;
+
+    ct_str = *pct_str;
+    switch(ct_str[0]) {
     case 'r':
         ct->ct |= TCG_CT_REG;
         tcg_regset_set(ct->u.regs, 0xffffffffffffffffull);
@@ -748,9 +750,11 @@ static const char *target_parse_constraint(TCGArgConstraint *ct,
         ct->ct |= TCG_CT_CONST_ZERO;
         break;
     default:
-        return NULL;
+        return -1;
     }
-    return ct_str;
+    ct_str++;
+    *pct_str = ct_str;
+    return 0;
 }
 
 /* test if a constant matches the constraint */
@@ -2348,18 +2352,6 @@ static const TCGTargetOpDef ia64_op_defs[] = {
     { -1 },
 };
 
-static const TCGTargetOpDef *tcg_target_op_def(TCGOpcode op)
-{
-    int i, n = ARRAY_SIZE(ia64_op_defs);
-
-    for (i = 0; i < n; ++i) {
-        if (ia64_op_defs[i].op == op) {
-            return &ia64_op_defs[i];
-        }
-    }
-    return NULL;
-}
-
 /* Generate global QEMU prologue and epilogue code */
 static void tcg_target_qemu_prologue(TCGContext *s)
 {
@@ -2479,4 +2471,6 @@ static void tcg_target_init(TCGContext *s)
     tcg_regset_set_reg(s->reserved_regs, TCG_REG_R5);
     tcg_regset_set_reg(s->reserved_regs, TCG_REG_R6);
     tcg_regset_set_reg(s->reserved_regs, TCG_REG_R7);
+
+    tcg_add_target_add_op_defs(ia64_op_defs);
 }

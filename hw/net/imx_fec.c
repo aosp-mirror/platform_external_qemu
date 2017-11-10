@@ -55,8 +55,6 @@
         } \
     } while (0)
 
-#define IMX_MAX_DESC    1024
-
 static const char *imx_default_reg_name(IMXFECState *s, uint32_t index)
 {
     static char tmp[20];
@@ -404,12 +402,12 @@ static void imx_eth_update(IMXFECState *s)
 
 static void imx_fec_do_tx(IMXFECState *s)
 {
-    int frame_size = 0, descnt = 0;
+    int frame_size = 0;
     uint8_t frame[ENET_MAX_FRAME_SIZE];
     uint8_t *ptr = frame;
     uint32_t addr = s->tx_descriptor;
 
-    while (descnt++ < IMX_MAX_DESC) {
+    while (1) {
         IMXFECBufDesc bd;
         int len;
 
@@ -455,12 +453,12 @@ static void imx_fec_do_tx(IMXFECState *s)
 
 static void imx_enet_do_tx(IMXFECState *s)
 {
-    int frame_size = 0, descnt = 0;
+    int frame_size = 0;
     uint8_t frame[ENET_MAX_FRAME_SIZE];
     uint8_t *ptr = frame;
     uint32_t addr = s->tx_descriptor;
 
-    while (descnt++ < IMX_MAX_DESC) {
+    while (1) {
         IMXENETBufDesc bd;
         int len;
 

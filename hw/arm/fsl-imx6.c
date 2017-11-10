@@ -187,7 +187,7 @@ static void fsl_imx6_realize(DeviceState *dev, Error **errp)
         };
 
         if (i < MAX_SERIAL_PORTS) {
-            Chardev *chr;
+            CharDriverState *chr;
 
             chr = serial_hds[i];
 

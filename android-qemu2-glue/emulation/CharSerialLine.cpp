@@ -23,10 +23,10 @@ extern "C" {
 namespace android {
 namespace qemu2 {
 
-CharSerialLine::CharSerialLine(Chardev* dev) {
+CharSerialLine::CharSerialLine(CharDriverState* cs) {
   mBackend = { 0 };
-  mBackend.chr = dev;
-  dev->be = &mBackend;
+  mBackend.chr = cs;
+  cs->be = &mBackend;
 }
 
 

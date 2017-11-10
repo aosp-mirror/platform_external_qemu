@@ -440,8 +440,6 @@ static void piix4_update_bus_hotplug(PCIBus *pci_bus, void *opaque)
 {
     PIIX4PMState *s = opaque;
 
-    /* pci_bus cannot outlive PIIX4PMState, because /machine keeps it alive
-     * and it's not hot-unpluggable */
     qbus_set_hotplug_handler(BUS(pci_bus), DEVICE(s), &error_abort);
 }
 
@@ -646,8 +644,7 @@ static void piix4_acpi_system_hot_add_init(MemoryRegion *parent,
                                  PIIX4_CPU_HOTPLUG_IO_BASE);
 
     if (s->acpi_memory_hotplug.is_enabled) {
-        acpi_memory_hotplug_init(parent, OBJECT(s), &s->acpi_memory_hotplug,
-                                 ACPI_MEMORY_HOTPLUG_BASE);
+        acpi_memory_hotplug_init(parent, OBJECT(s), &s->acpi_memory_hotplug);
     }
 }
 

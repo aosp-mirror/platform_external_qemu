@@ -108,7 +108,7 @@ static QVirtioPCIDevice *virtio_blk_pci_init(QPCIBus *bus, int slot)
 {
     QVirtioPCIDevice *dev;
 
-    dev = qvirtio_pci_device_find_slot(bus, VIRTIO_ID_BLOCK, slot);
+    dev = qvirtio_pci_device_find(bus, VIRTIO_ID_BLOCK);
     g_assert(dev != NULL);
     g_assert_cmphex(dev->vdev.device_type, ==, VIRTIO_ID_BLOCK);
     g_assert_cmphex(dev->pdev->devfn, ==, ((slot << 3) | PCI_FN));
@@ -296,7 +296,7 @@ static void pci_basic(void)
     /* End test */
     qvirtqueue_cleanup(dev->vdev.bus, &vqpci->vq, qs->alloc);
     qvirtio_pci_device_disable(dev);
-    qvirtio_pci_device_free(dev);
+    g_free(dev);
     qtest_shutdown(qs);
 }
 
@@ -389,7 +389,7 @@ static void pci_indirect(void)
     /* End test */
     qvirtqueue_cleanup(dev->vdev.bus, &vqpci->vq, qs->alloc);
     qvirtio_pci_device_disable(dev);
-    qvirtio_pci_device_free(dev);
+    g_free(dev);
     qtest_shutdown(qs);
 }
 
@@ -409,16 +409,15 @@ static void pci_config(void)
 
     qvirtio_set_driver_ok(&dev->vdev);
 
-    qmp_discard_response("{ 'execute': 'block_resize', "
-                         " 'arguments': { 'device': 'drive0', "
-                         " 'size': %d } }", n_size);
+    qmp("{ 'execute': 'block_resize', 'arguments': { 'device': 'drive0', "
+                                                    " 'size': %d } }", n_size);
     qvirtio_wait_config_isr(&dev->vdev, QVIRTIO_BLK_TIMEOUT_US);
 
     capacity = qvirtio_config_readq(&dev->vdev, 0);
     g_assert_cmpint(capacity, ==, n_size / 512);
 
     qvirtio_pci_device_disable(dev);
-    qvirtio_pci_device_free(dev);
+    g_free(dev);
 
     qtest_shutdown(qs);
 }
@@ -459,9 +458,8 @@ static void pci_msix(void)
 
     qvirtio_set_driver_ok(&dev->vdev);
 
-    qmp_discard_response("{ 'execute': 'block_resize', "
-                         " 'arguments': { 'device': 'drive0', "
-                         " 'size': %d } }", n_size);
+    qmp("{ 'execute': 'block_resize', 'arguments': { 'device': 'drive0', "
+                                                    " 'size': %d } }", n_size);
 
     qvirtio_wait_config_isr(&dev->vdev, QVIRTIO_BLK_TIMEOUT_US);
 
@@ -526,7 +524,7 @@ static void pci_msix(void)
     qvirtqueue_cleanup(dev->vdev.bus, &vqpci->vq, qs->alloc);
     qpci_msix_disable(dev->pdev);
     qvirtio_pci_device_disable(dev);
-    qvirtio_pci_device_free(dev);
+    g_free(dev);
     qtest_shutdown(qs);
 }
 
@@ -642,7 +640,7 @@ static void pci_idx(void)
     qvirtqueue_cleanup(dev->vdev.bus, &vqpci->vq, qs->alloc);
     qpci_msix_disable(dev->pdev);
     qvirtio_pci_device_disable(dev);
-    qvirtio_pci_device_free(dev);
+    g_free(dev);
     qtest_shutdown(qs);
 }
 
@@ -661,7 +659,7 @@ static void pci_hotplug(void)
     dev = virtio_blk_pci_init(qs->pcibus, PCI_SLOT_HP);
     g_assert(dev);
     qvirtio_pci_device_disable(dev);
-    qvirtio_pci_device_free(dev);
+    g_free(dev);
 
     /* unplug secondary disk */
     if (strcmp(arch, "i386") == 0 || strcmp(arch, "x86_64") == 0) {
@@ -693,9 +691,8 @@ static void mmio_basic(void)
 
     test_basic(&dev->vdev, alloc, vq);
 
-    qmp_discard_response("{ 'execute': 'block_resize', "
-                         " 'arguments': { 'device': 'drive0', "
-                         " 'size': %d } }", n_size);
+    qmp("{ 'execute': 'block_resize', 'arguments': { 'device': 'drive0', "
+                                                    " 'size': %d } }", n_size);
 
     qvirtio_wait_queue_isr(&dev->vdev, vq, QVIRTIO_BLK_TIMEOUT_US);
 

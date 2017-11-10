@@ -696,7 +696,6 @@ static void net_init_tap_one(const NetdevTapOptions *tap, NetClientState *peer,
                                  "tap: open vhost char device failed");
                 return;
             }
-            fcntl(vhostfd, F_SETFL, O_NONBLOCK);
         }
         options.opaque = (void *)(uintptr_t)vhostfd;
 
@@ -789,8 +788,8 @@ int net_init_tap(const Netdev *netdev, const char *name,
             return -1;
         }
     } else if (tap->has_fds) {
-        char **fds;
-        char **vhost_fds;
+        char **fds = g_new0(char *, MAX_TAP_QUEUES);
+        char **vhost_fds = g_new0(char *, MAX_TAP_QUEUES);
         int nfds, nvhosts;
 
         if (tap->has_ifname || tap->has_script || tap->has_downscript ||
@@ -801,9 +800,6 @@ int net_init_tap(const Netdev *netdev, const char *name,
                        "are invalid with fds=");
             return -1;
         }
-
-        fds = g_new0(char *, MAX_TAP_QUEUES);
-        vhost_fds = g_new0(char *, MAX_TAP_QUEUES);
 
         nfds = get_fds(tap->fds, fds, MAX_TAP_QUEUES);
         if (tap->has_vhostfds) {

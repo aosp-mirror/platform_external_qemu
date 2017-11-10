@@ -26,7 +26,7 @@
 #include "qemu-common.h"
 #include "qemu/main-loop.h"
 #include "audio.h"
-#include "audio/trace.h"
+#include "trace.h"
 
 #if QEMU_GNUC_PREREQ(4, 3)
 #pragma GCC diagnostic ignored "-Waddress"

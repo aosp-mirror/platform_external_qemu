@@ -1,0 +1,23 @@
+obj-y += translate.o helper.o cpu.o bpt_helper.o
+obj-y += excp_helper.o fpu_helper.o cc_helper.o int_helper.o svm_helper.o
+obj-y += smm_helper.o misc_helper.o mem_helper.o seg_helper.o mpx_helper.o
+obj-y += gdbstub.o
+obj-$(CONFIG_SOFTMMU) += machine.o arch_memory_mapping.o arch_dump.o monitor.o
+obj-$(CONFIG_KVM) += kvm.o hyperv.o
+obj-$(call lnot,$(CONFIG_KVM)) += kvm-stub.o
+ifeq (y,$(CONFIG_HAX))
+obj-y += hax-all.o hax-slot.o
+obj-$(CONFIG_WIN32) += hax-windows.o
+obj-$(CONFIG_DARWIN) += hax-darwin.o
+endif
+ifeq (y,$(CONFIG_HVF))
+obj-y += hvf-all.o
+obj-y += hvf-utils/x86.o
+obj-y += hvf-utils/x86_cpuid.o
+obj-y += hvf-utils/x86_decode.o
+obj-y += hvf-utils/x86_descr.o
+obj-y += hvf-utils/x86_emu.o
+obj-y += hvf-utils/x86_flags.o
+obj-y += hvf-utils/x86_mmu.o
+obj-y += hvf-utils/x86hvf.o
+endif

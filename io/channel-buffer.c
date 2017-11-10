@@ -22,7 +22,7 @@
 #include "io/channel-buffer.h"
 #include "io/channel-watch.h"
 #include "qemu/sockets.h"
-#include "io/trace.h"
+#include "trace.h"
 
 QIOChannelBuffer *
 qio_channel_buffer_new(size_t capacity)

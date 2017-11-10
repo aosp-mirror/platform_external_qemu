@@ -309,6 +309,7 @@ static void raven_realize(PCIDevice *d, Error **errp)
     memory_region_set_readonly(&s->bios, true);
     memory_region_add_subregion(get_system_memory(), (uint32_t)(-BIOS_SIZE),
                                 &s->bios);
+    vmstate_register_ram_global(&s->bios);
     if (s->bios_name) {
         filename = qemu_find_file(QEMU_FILE_TYPE_BIOS, s->bios_name);
         if (filename) {
@@ -327,15 +328,12 @@ static void raven_realize(PCIDevice *d, Error **errp)
                 }
             }
         }
-        g_free(filename);
         if (bios_size < 0 || bios_size > BIOS_SIZE) {
-            memory_region_del_subregion(get_system_memory(), &s->bios);
-            error_setg(errp, "Could not load bios image '%s'", s->bios_name);
-            return;
+            /* FIXME should error_setg() */
+            hw_error("qemu: could not load bios image '%s'\n", s->bios_name);
         }
+        g_free(filename);
     }
-
-    vmstate_register_ram_global(&s->bios);
 }
 
 static const VMStateDescription vmstate_raven = {
@@ -363,6 +361,7 @@ static void raven_class_init(ObjectClass *klass, void *data)
     /*
      * Reason: PCI-facing part of the host bridge, not usable without
      * the host-facing part, which can't be device_add'ed, yet.
+     * Reason: realize() method uses hw_error().
      */
     dc->cannot_instantiate_with_device_add_yet = true;
 }

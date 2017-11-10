@@ -94,7 +94,7 @@ static int cat_open(BlockDriverState *bs, QDict *options, int flags,
         }
         bs->total_sectors += backing->total_sectors;
         s->ends[s->count] = bs->total_sectors;
-        s->backings[s->count] = bdrv_attach_child(bs, backing, "cat", &child_file, &local_err);
+        s->backings[s->count] = bdrv_attach_child(bs, backing, "cat", &child_file);
         s->count++;
         if (end)
             file = end + 1;
@@ -209,7 +209,6 @@ static BlockDriver bdrv_cat = {
     .bdrv_file_open         = cat_open,
     .bdrv_refresh_limits    = cat_refresh_limits,
     .bdrv_close             = cat_close,
-    .bdrv_child_perm        = bdrv_format_default_perms,
 
     .bdrv_co_readv          = cat_co_readv,
     .bdrv_co_writev         = cat_co_writev,

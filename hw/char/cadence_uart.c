@@ -138,10 +138,9 @@ static void fifo_trigger_update(void *opaque)
 {
     CadenceUARTState *s = opaque;
 
-    if (s->r[R_RTOR]) {
-        s->r[R_CISR] |= UART_INTR_TIMEOUT;
-        uart_update_status(s);
-    }
+    s->r[R_CISR] |= UART_INTR_TIMEOUT;
+
+    uart_update_status(s);
 }
 
 static void uart_rx_reset(CadenceUARTState *s)
@@ -503,13 +502,6 @@ static void cadence_uart_init(Object *obj)
 static int cadence_uart_post_load(void *opaque, int version_id)
 {
     CadenceUARTState *s = opaque;
-
-    /* Ensure these two aren't invalid numbers */
-    if (s->r[R_BRGR] < 1 || s->r[R_BRGR] & ~0xFFFF ||
-        s->r[R_BDIV] <= 3 || s->r[R_BDIV] & ~0xFF) {
-        /* Value is invalid, abort */
-        return 1;
-    }
 
     uart_parameters_setup(s);
     uart_update_status(s);

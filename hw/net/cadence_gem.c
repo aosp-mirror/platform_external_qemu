@@ -508,7 +508,7 @@ static void gem_update_int_status(CadenceGEMState *s)
 
     if ((s->num_priority_queues == 1) && s->regs[GEM_ISR]) {
         /* No priority queues, just trigger the interrupt */
-        DB_PRINT("asserting int.\n");
+        DB_PRINT("asserting int.\n", i);
         qemu_set_irq(s->irq[0], 1);
         return;
     }
@@ -896,7 +896,7 @@ static ssize_t gem_receive(NetClientState *nc, const uint8_t *buf, size_t size)
 
     DB_PRINT("config bufsize: %d packet size: %ld\n", rxbufsize, size);
 
-    /* Find which queue we are targeting */
+    /* Find which queue we are targetting */
     q = get_queue_from_screen(s, rxbuf_ptr, rxbufsize);
 
     while (bytes_to_copy) {

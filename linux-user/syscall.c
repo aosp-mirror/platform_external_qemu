@@ -57,8 +57,6 @@ int __clone2(int (*fn)(void *), void *child_stack_base,
 #include <netinet/tcp.h>
 #include <linux/wireless.h>
 #include <linux/icmp.h>
-#include <linux/icmpv6.h>
-#include <linux/errqueue.h>
 #include "qemu-common.h"
 #ifdef CONFIG_TIMERFD
 #include <sys/timerfd.h>
@@ -799,12 +797,6 @@ static uint16_t host_to_target_errno_table[ERRNO_TABLE_SIZE] = {
 #endif
 #ifdef ENOMSG
     [ENOMSG]            = TARGET_ENOMSG,
-#endif
-#ifdef ERKFILL
-    [ERFKILL]           = TARGET_ERFKILL,
-#endif
-#ifdef EHWPOISON
-    [EHWPOISON]         = TARGET_EHWPOISON,
 #endif
 };
 
@@ -1636,11 +1628,6 @@ static inline abi_long host_to_target_sockaddr(abi_ulong target_addr,
         struct sockaddr_ll *target_ll = (struct sockaddr_ll *)target_saddr;
         target_ll->sll_ifindex = tswap32(target_ll->sll_ifindex);
         target_ll->sll_hatype = tswap16(target_ll->sll_hatype);
-    } else if (addr->sa_family == AF_INET6 &&
-               len >= sizeof(struct target_sockaddr_in6)) {
-        struct target_sockaddr_in6 *target_in6 =
-               (struct target_sockaddr_in6 *)target_saddr;
-        target_in6->sin6_scope_id = tswap16(target_in6->sin6_scope_id);
     }
     unlock_user(target_saddr, target_addr, len);
 
@@ -1839,78 +1826,6 @@ static inline abi_long host_to_target_cmsg(struct target_msghdr *target_msgh,
                 __put_user(cred->pid, &target_cred->pid);
                 __put_user(cred->uid, &target_cred->uid);
                 __put_user(cred->gid, &target_cred->gid);
-                break;
-            }
-            default:
-                goto unimplemented;
-            }
-            break;
-
-        case SOL_IP:
-            switch (cmsg->cmsg_type) {
-            case IP_TTL:
-            {
-                uint32_t *v = (uint32_t *)data;
-                uint32_t *t_int = (uint32_t *)target_data;
-
-                __put_user(*v, t_int);
-                break;
-            }
-            case IP_RECVERR:
-            {
-                struct errhdr_t {
-                   struct sock_extended_err ee;
-                   struct sockaddr_in offender;
-                };
-                struct errhdr_t *errh = (struct errhdr_t *)data;
-                struct errhdr_t *target_errh =
-                    (struct errhdr_t *)target_data;
-
-                __put_user(errh->ee.ee_errno, &target_errh->ee.ee_errno);
-                __put_user(errh->ee.ee_origin, &target_errh->ee.ee_origin);
-                __put_user(errh->ee.ee_type,  &target_errh->ee.ee_type);
-                __put_user(errh->ee.ee_code, &target_errh->ee.ee_code);
-                __put_user(errh->ee.ee_pad, &target_errh->ee.ee_pad);
-                __put_user(errh->ee.ee_info, &target_errh->ee.ee_info);
-                __put_user(errh->ee.ee_data, &target_errh->ee.ee_data);
-                host_to_target_sockaddr((unsigned long) &target_errh->offender,
-                    (void *) &errh->offender, sizeof(errh->offender));
-                break;
-            }
-            default:
-                goto unimplemented;
-            }
-            break;
-
-        case SOL_IPV6:
-            switch (cmsg->cmsg_type) {
-            case IPV6_HOPLIMIT:
-            {
-                uint32_t *v = (uint32_t *)data;
-                uint32_t *t_int = (uint32_t *)target_data;
-
-                __put_user(*v, t_int);
-                break;
-            }
-            case IPV6_RECVERR:
-            {
-                struct errhdr6_t {
-                   struct sock_extended_err ee;
-                   struct sockaddr_in6 offender;
-                };
-                struct errhdr6_t *errh = (struct errhdr6_t *)data;
-                struct errhdr6_t *target_errh =
-                    (struct errhdr6_t *)target_data;
-
-                __put_user(errh->ee.ee_errno, &target_errh->ee.ee_errno);
-                __put_user(errh->ee.ee_origin, &target_errh->ee.ee_origin);
-                __put_user(errh->ee.ee_type,  &target_errh->ee.ee_type);
-                __put_user(errh->ee.ee_code, &target_errh->ee.ee_code);
-                __put_user(errh->ee.ee_pad, &target_errh->ee.ee_pad);
-                __put_user(errh->ee.ee_info, &target_errh->ee.ee_info);
-                __put_user(errh->ee.ee_data, &target_errh->ee.ee_data);
-                host_to_target_sockaddr((unsigned long) &target_errh->offender,
-                    (void *) &errh->offender, sizeof(errh->offender));
                 break;
             }
             default:
@@ -2405,8 +2320,6 @@ static abi_long host_to_target_data_link_rtattr(struct rtattr *rtattr)
     case QEMU_IFLA_GROUP:
     case QEMU_IFLA_MASTER:
     case QEMU_IFLA_NUM_VF:
-    case QEMU_IFLA_GSO_MAX_SEGS:
-    case QEMU_IFLA_GSO_MAX_SIZE:
         u32 = RTA_DATA(rtattr);
         *u32 = tswap32(*u32);
         break;
@@ -2847,7 +2760,6 @@ static abi_long do_setsockopt(int sockfd, int level, int optname,
         case IP_PKTINFO:
         case IP_MTU_DISCOVER:
         case IP_RECVERR:
-        case IP_RECVTTL:
         case IP_RECVTOS:
 #ifdef IP_FREEBIND
         case IP_FREEBIND:
@@ -2897,11 +2809,6 @@ static abi_long do_setsockopt(int sockfd, int level, int optname,
         case IPV6_MTU:
         case IPV6_V6ONLY:
         case IPV6_RECVPKTINFO:
-        case IPV6_UNICAST_HOPS:
-        case IPV6_RECVERR:
-        case IPV6_RECVHOPLIMIT:
-        case IPV6_2292HOPLIMIT:
-        case IPV6_CHECKSUM:
             val = 0;
             if (optlen < sizeof(uint32_t)) {
                 return -TARGET_EINVAL;
@@ -2912,50 +2819,6 @@ static abi_long do_setsockopt(int sockfd, int level, int optname,
             ret = get_errno(setsockopt(sockfd, level, optname,
                                        &val, sizeof(val)));
             break;
-        case IPV6_PKTINFO:
-        {
-            struct in6_pktinfo pki;
-
-            if (optlen < sizeof(pki)) {
-                return -TARGET_EINVAL;
-            }
-
-            if (copy_from_user(&pki, optval_addr, sizeof(pki))) {
-                return -TARGET_EFAULT;
-            }
-
-            pki.ipi6_ifindex = tswap32(pki.ipi6_ifindex);
-
-            ret = get_errno(setsockopt(sockfd, level, optname,
-                                       &pki, sizeof(pki)));
-            break;
-        }
-        default:
-            goto unimplemented;
-        }
-        break;
-    case SOL_ICMPV6:
-        switch (optname) {
-        case ICMPV6_FILTER:
-        {
-            struct icmp6_filter icmp6f;
-
-            if (optlen > sizeof(icmp6f)) {
-                optlen = sizeof(icmp6f);
-            }
-
-            if (copy_from_user(&icmp6f, optval_addr, optlen)) {
-                return -TARGET_EFAULT;
-            }
-
-            for (val = 0; val < 8; val++) {
-                icmp6f.data[val] = tswap32(icmp6f.data[val]);
-            }
-
-            ret = get_errno(setsockopt(sockfd, level, optname,
-                                       &icmp6f, optlen));
-            break;
-        }
         default:
             goto unimplemented;
         }
@@ -2963,8 +2826,7 @@ static abi_long do_setsockopt(int sockfd, int level, int optname,
     case SOL_RAW:
         switch (optname) {
         case ICMP_FILTER:
-        case IPV6_CHECKSUM:
-            /* those take an u32 value */
+            /* struct icmp_filter takes an u32 value */
             if (optlen < sizeof(uint32_t)) {
                 return -TARGET_EINVAL;
             }
@@ -5591,8 +5453,6 @@ static IOCTLEntry ioctl_entries[] = {
     { TARGET_ ## cmd, cmd, #cmd, access, 0, {  __VA_ARGS__ } },
 #define IOCTL_SPECIAL(cmd, access, dofn, ...)                      \
     { TARGET_ ## cmd, cmd, #cmd, access, dofn, {  __VA_ARGS__ } },
-#define IOCTL_IGNORE(cmd) \
-    { TARGET_ ## cmd, 0, #cmd },
 #include "ioctls.h"
     { 0, 0, },
 };
@@ -5624,10 +5484,6 @@ static abi_long do_ioctl(int fd, int cmd, abi_long arg)
 #endif
     if (ie->do_ioctl) {
         return ie->do_ioctl(ie, buf_temp, fd, cmd, arg);
-    } else if (!ie->host_cmd) {
-        /* Some architectures define BSD ioctls in their headers
-           that are not implemented in Linux.  */
-        return -TARGET_ENOSYS;
     }
 
     switch(arg_type[0]) {
@@ -7810,7 +7666,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
         break;
 #ifdef TARGET_NR_fork
     case TARGET_NR_fork:
-        ret = get_errno(do_fork(cpu_env, TARGET_SIGCHLD, 0, 0, 0, 0));
+        ret = get_errno(do_fork(cpu_env, SIGCHLD, 0, 0, 0, 0));
         break;
 #endif
 #ifdef TARGET_NR_waitpid
@@ -9475,6 +9331,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
 #ifdef TARGET_NR_socket
     case TARGET_NR_socket:
         ret = do_socket(arg1, arg2, arg3);
+        fd_trans_unregister(ret);
         break;
 #endif
 #ifdef TARGET_NR_socketpair
@@ -10620,8 +10477,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
 #endif
 #ifdef TARGET_NR_vfork
     case TARGET_NR_vfork:
-        ret = get_errno(do_fork(cpu_env,
-                        CLONE_VFORK | CLONE_VM | TARGET_SIGCHLD,
+        ret = get_errno(do_fork(cpu_env, CLONE_VFORK | CLONE_VM | SIGCHLD,
                         0, 0, 0, 0));
         break;
 #endif
@@ -11194,16 +11050,11 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
     case TARGET_NR_mincore:
         {
             void *a;
-            ret = -TARGET_ENOMEM;
-            a = lock_user(VERIFY_READ, arg1, arg2, 0);
-            if (!a) {
-                goto fail;
-            }
             ret = -TARGET_EFAULT;
-            p = lock_user_string(arg3);
-            if (!p) {
+            if (!(a = lock_user(VERIFY_READ, arg1,arg2, 0)))
+                goto efault;
+            if (!(p = lock_user_string(arg3)))
                 goto mincore_fail;
-            }
             ret = get_errno(mincore(a, arg2, p));
             unlock_user(p, arg3, ret);
             mincore_fail:
@@ -11366,7 +11217,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
             arg3 = arg4;
             arg4 = arg5;
         }
-        ret = get_errno(readahead(arg1, target_offset64(arg2, arg3) , arg4));
+        ret = get_errno(readahead(arg1, ((off64_t)arg3 << 32) | arg2, arg4));
 #else
         ret = get_errno(readahead(arg1, arg2, arg3));
 #endif
@@ -11699,8 +11550,7 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
 #ifdef CONFIG_INOTIFY1
 #if defined(TARGET_NR_inotify_init1) && defined(__NR_inotify_init1)
     case TARGET_NR_inotify_init1:
-        ret = get_errno(sys_inotify_init1(target_to_host_bitmask(arg1,
-                                          fcntl_flags_tbl)));
+        ret = get_errno(sys_inotify_init1(arg1));
         break;
 #endif
 #endif
@@ -11721,22 +11571,17 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
     case TARGET_NR_mq_open:
         {
             struct mq_attr posix_mq_attr;
-            struct mq_attr *pposix_mq_attr;
             int host_flags;
 
             host_flags = target_to_host_bitmask(arg2, fcntl_flags_tbl);
-            pposix_mq_attr = NULL;
-            if (arg4) {
-                if (copy_from_user_mq_attr(&posix_mq_attr, arg4) != 0) {
-                    goto efault;
-                }
-                pposix_mq_attr = &posix_mq_attr;
+            if (copy_from_user_mq_attr(&posix_mq_attr, arg4) != 0) {
+                goto efault;
             }
             p = lock_user_string(arg1 - 1);
             if (!p) {
                 goto efault;
             }
-            ret = get_errno(mq_open(p, host_flags, arg3, pposix_mq_attr));
+            ret = get_errno(mq_open(p, host_flags, arg3, &posix_mq_attr));
             unlock_user (p, arg1, 0);
         }
         break;
@@ -12179,14 +12024,10 @@ abi_long do_syscall(void *cpu_env, int num, abi_long arg1,
             timer_t htimer = g_posix_timers[timerid];
             struct itimerspec hspec_new = {{0},}, hspec_old = {{0},};
 
-            if (target_to_host_itimerspec(&hspec_new, arg3)) {
-                goto efault;
-            }
+            target_to_host_itimerspec(&hspec_new, arg3);
             ret = get_errno(
                           timer_settime(htimer, arg2, &hspec_new, &hspec_old));
-            if (arg4 && host_to_target_itimerspec(arg4, &hspec_old)) {
-                goto efault;
-            }
+            host_to_target_itimerspec(arg2, &hspec_old);
         }
         break;
     }

@@ -48,7 +48,7 @@ etraxfs_eth_init(NICInfo *nd, hwaddr base, int phyaddr,
 
 static inline DeviceState *etraxfs_ser_create(hwaddr addr,
                                               qemu_irq irq,
-                                              Chardev *chr)
+                                              CharDriverState *chr)
 {
     DeviceState *dev;
     SysBusDevice *s;

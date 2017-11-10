@@ -17,7 +17,7 @@
 
 static inline DeviceState *pl011_create(hwaddr addr,
                                         qemu_irq irq,
-                                        Chardev *chr)
+                                        CharDriverState *chr)
 {
     DeviceState *dev;
     SysBusDevice *s;
@@ -34,7 +34,7 @@ static inline DeviceState *pl011_create(hwaddr addr,
 
 static inline DeviceState *pl011_luminary_create(hwaddr addr,
                                                  qemu_irq irq,
-                                                 Chardev *chr)
+                                                 CharDriverState *chr)
 {
     DeviceState *dev;
     SysBusDevice *s;

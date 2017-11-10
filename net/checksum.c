@@ -22,22 +22,17 @@
 
 uint32_t net_checksum_add_cont(int len, uint8_t *buf, int seq)
 {
-    uint32_t sum1 = 0, sum2 = 0;
+    uint32_t sum = 0;
     int i;
 
-    for (i = 0; i < len - 1; i += 2) {
-        sum1 += (uint32_t)buf[i];
-        sum2 += (uint32_t)buf[i + 1];
+    for (i = seq; i < seq + len; i++) {
+        if (i & 1) {
+            sum += (uint32_t)buf[i - seq];
+        } else {
+            sum += (uint32_t)buf[i - seq] << 8;
+        }
     }
-    if (i < len) {
-        sum1 += (uint32_t)buf[i];
-    }
-
-    if (seq & 1) {
-        return sum1 + (sum2 << 8);
-    } else {
-        return sum2 + (sum1 << 8);
-    }
+    return sum;
 }
 
 uint16_t net_checksum_finish(uint32_t sum)

@@ -19,17 +19,17 @@ ANDROID_BEGIN_HEADER
 // NOTE: Do not include "qemu-common.h" here because this fails
 //       to compile when included from a C++ file due to other
 //       issues in include/qemu/int28.h. Instead, use the
-typedef struct Chardev Chardev;
+typedef struct CharDriverState CharDriverState;
 
 // Call this during setup to inject QEMU2-specific SerialLine
 // implementation into the process.
 void qemu2_android_serialline_init(void);
 
-// Create a new CSerialLine instance that wraps a Chardev |dev|.
-CSerialLine* android_serialline_from_cs(Chardev* dev);
+// Create a new CSerialLine instance that wraps a CharDriverState |cs|.
+CSerialLine* android_serialline_from_cs(CharDriverState* cs);
 
-// Extract the QEMU2 Chardev instance wrapped by a CSerialLine
+// Extract the QEMU1 CharDriverState instance wrapped by a CSerialLine
 // instance |sl|.
-Chardev* android_serialline_get_cs(CSerialLine* sl);
+CharDriverState* android_serialline_get_cs(CSerialLine* sl);
 
 ANDROID_END_HEADER

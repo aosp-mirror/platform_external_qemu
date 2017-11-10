@@ -51,33 +51,11 @@ void blkconf_blocksizes(BlockConf *conf)
     }
 }
 
-void blkconf_apply_backend_options(BlockConf *conf, bool readonly,
-                                   bool resizable, Error **errp)
+void blkconf_apply_backend_options(BlockConf *conf)
 {
     BlockBackend *blk = conf->blk;
     BlockdevOnError rerror, werror;
-    uint64_t perm, shared_perm;
     bool wce;
-    int ret;
-
-    perm = BLK_PERM_CONSISTENT_READ;
-    if (!readonly) {
-        perm |= BLK_PERM_WRITE;
-    }
-
-    shared_perm = BLK_PERM_CONSISTENT_READ | BLK_PERM_WRITE_UNCHANGED |
-                  BLK_PERM_GRAPH_MOD;
-    if (resizable) {
-        shared_perm |= BLK_PERM_RESIZE;
-    }
-    if (conf->share_rw) {
-        shared_perm |= BLK_PERM_WRITE;
-    }
-
-    ret = blk_set_perm(blk, perm, shared_perm, errp);
-    if (ret < 0) {
-        return;
-    }
 
     switch (conf->wce) {
     case ON_OFF_AUTO_ON:    wce = true; break;

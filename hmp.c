@@ -19,7 +19,6 @@
 #include "net/eth.h"
 #include "sysemu/char.h"
 #include "sysemu/block-backend.h"
-#include "qemu/config-file.h"
 #include "qemu/option.h"
 #include "qemu/timer.h"
 #include "qmp-commands.h"
@@ -1014,14 +1013,8 @@ void hmp_memsave(Monitor *mon, const QDict *qdict)
     const char *filename = qdict_get_str(qdict, "filename");
     uint64_t addr = qdict_get_int(qdict, "val");
     Error *err = NULL;
-    int cpu_index = monitor_get_cpu_index();
 
-    if (cpu_index < 0) {
-        monitor_printf(mon, "No CPU available\n");
-        return;
-    }
-
-    qmp_memsave(addr, size, filename, true, cpu_index, &err);
+    qmp_memsave(addr, size, filename, true, monitor_get_cpu_index(), &err);
     hmp_handle_error(mon, &err);
 }
 
@@ -1344,11 +1337,12 @@ void hmp_migrate_set_parameter(Monitor *mon, const QDict *qdict)
 {
     const char *param = qdict_get_str(qdict, "parameter");
     const char *valuestr = qdict_get_str(qdict, "value");
-    uint64_t valuebw = 0;
+    int64_t valuebw = 0;
     long valueint = 0;
+    char *endp;
     Error *err = NULL;
     bool use_int_value = false;
-    int i, ret;
+    int i;
 
     for (i = 0; i < MIGRATION_PARAMETER__MAX; i++) {
         if (strcmp(param, MigrationParameter_lookup[i]) == 0) {
@@ -1384,9 +1378,9 @@ void hmp_migrate_set_parameter(Monitor *mon, const QDict *qdict)
                 break;
             case MIGRATION_PARAMETER_MAX_BANDWIDTH:
                 p.has_max_bandwidth = true;
-                ret = qemu_strtosz_MiB(valuestr, NULL, &valuebw);
-                if (ret < 0 || valuebw > INT64_MAX
-                    || (size_t)valuebw != valuebw) {
+                valuebw = qemu_strtosz(valuestr, &endp);
+                if (valuebw < 0 || (size_t)valuebw != valuebw
+                    || *endp != '\0') {
                     error_setg(&err, "Invalid size %s", valuestr);
                     goto cleanup;
                 }
@@ -1557,7 +1551,6 @@ void hmp_block_set_io_throttle(Monitor *mon, const QDict *qdict)
 {
     Error *err = NULL;
     BlockIOThrottle throttle = {
-        .has_device = true,
         .device = (char *) qdict_get_str(qdict, "device"),
         .bps = qdict_get_int(qdict, "bps"),
         .bps_rd = qdict_get_int(qdict, "bps_rd"),
@@ -1815,6 +1808,7 @@ void hmp_object_add(Monitor *mon, const QDict *qdict)
 {
     Error *err = NULL;
     QemuOpts *opts;
+    Visitor *v;
     Object *obj = NULL;
 
     opts = qemu_opts_from_qdict(qemu_find_opts("object"), qdict, &err);
@@ -1823,7 +1817,9 @@ void hmp_object_add(Monitor *mon, const QDict *qdict)
         return;
     }
 
-    obj = user_creatable_add_opts(opts, &err);
+    v = opts_visitor_new(opts);
+    obj = user_creatable_add(qdict, v, &err);
+    visit_free(v);
     qemu_opts_del(opts);
 
     if (err) {
@@ -2045,17 +2041,13 @@ void hmp_qemu_io(Monitor *mon, const QDict *qdict)
     const char* device = qdict_get_str(qdict, "device");
     const char* command = qdict_get_str(qdict, "command");
     Error *err = NULL;
-    int ret;
 
     blk = blk_by_name(device);
     if (!blk) {
         BlockDriverState *bs = bdrv_lookup_bs(NULL, device, &err);
         if (bs) {
-            blk = local_blk = blk_new(0, BLK_PERM_ALL);
-            ret = blk_insert_bs(blk, bs, &err);
-            if (ret < 0) {
-                goto fail;
-            }
+            blk = local_blk = blk_new();
+            blk_insert_bs(blk, bs);
         } else {
             goto fail;
         }
@@ -2064,31 +2056,6 @@ void hmp_qemu_io(Monitor *mon, const QDict *qdict)
     aio_context = blk_get_aio_context(blk);
     aio_context_acquire(aio_context);
 
-    /*
-     * Notably absent: Proper permission management. This is sad, but it seems
-     * almost impossible to achieve without changing the semantics and thereby
-     * limiting the use cases of the qemu-io HMP command.
-     *
-     * In an ideal world we would unconditionally create a new BlockBackend for
-     * qemuio_command(), but we have commands like 'reopen' and want them to
-     * take effect on the exact BlockBackend whose name the user passed instead
-     * of just on a temporary copy of it.
-     *
-     * Another problem is that deleting the temporary BlockBackend involves
-     * draining all requests on it first, but some qemu-iotests cases want to
-     * issue multiple aio_read/write requests and expect them to complete in
-     * the background while the monitor has already returned.
-     *
-     * This is also what prevents us from saving the original permissions and
-     * restoring them later: We can't revoke permissions until all requests
-     * have completed, and we don't know when that is nor can we really let
-     * anything else run before we have revoken them to avoid race conditions.
-     *
-     * What happens now is that command() in qemu-io-cmds.c can extend the
-     * permissions if necessary for the qemu-io command. And they simply stay
-     * extended, possibly resulting in a read-only guest device keeping write
-     * permissions. Ugly, but it appears to be the lesser evil.
-     */
     qemuio_command(blk, command);
 
     aio_context_release(aio_context);
@@ -2114,11 +2081,13 @@ void hmp_info_memdev(Monitor *mon, const QDict *qdict)
     MemdevList *m = memdev_list;
     Visitor *v;
     char *str;
+    int i = 0;
+
 
     while (m) {
         v = string_output_visitor_new(false, &str);
         visit_type_uint16List(v, NULL, &m->value->host_nodes, NULL);
-        monitor_printf(mon, "memory backend: %s\n", m->value->id);
+        monitor_printf(mon, "memory backend: %d\n", i);
         monitor_printf(mon, "  size:  %" PRId64 "\n", m->value->size);
         monitor_printf(mon, "  merge: %s\n",
                        m->value->merge ? "true" : "false");
@@ -2134,6 +2103,7 @@ void hmp_info_memdev(Monitor *mon, const QDict *qdict)
         g_free(str);
         visit_free(v);
         m = m->next;
+        i++;
     }
 
     monitor_printf(mon, "\n");
@@ -2183,15 +2153,10 @@ void hmp_info_iothreads(Monitor *mon, const QDict *qdict)
 {
     IOThreadInfoList *info_list = qmp_query_iothreads(NULL);
     IOThreadInfoList *info;
-    IOThreadInfo *value;
 
     for (info = info_list; info; info = info->next) {
-        value = info->value;
-        monitor_printf(mon, "%s:\n", value->id);
-        monitor_printf(mon, "  thread_id=%" PRId64 "\n", value->thread_id);
-        monitor_printf(mon, "  poll-max-ns=%" PRId64 "\n", value->poll_max_ns);
-        monitor_printf(mon, "  poll-grow=%" PRId64 "\n", value->poll_grow);
-        monitor_printf(mon, "  poll-shrink=%" PRId64 "\n", value->poll_shrink);
+        monitor_printf(mon, "%s: thread_id=%" PRId64 "\n",
+                       info->value->id, info->value->thread_id);
     }
 
     qapi_free_IOThreadInfoList(info_list);
@@ -2604,15 +2569,4 @@ void hmp_hotpluggable_cpus(Monitor *mon, const QDict *qdict)
     }
 
     qapi_free_HotpluggableCPUList(saved);
-}
-
-void hmp_info_vm_generation_id(Monitor *mon, const QDict *qdict)
-{
-    Error *err = NULL;
-    GuidInfo *info = qmp_query_vm_generation_id(&err);
-    if (info) {
-        monitor_printf(mon, "%s\n", info->guid);
-    }
-    hmp_handle_error(mon, &err);
-    qapi_free_GuidInfo(info);
 }

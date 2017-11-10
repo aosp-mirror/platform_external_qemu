@@ -28,7 +28,6 @@
 #include "qemu/timer.h"
 #include "sysemu/sysemu.h"
 #include "qemu/cutils.h"
-#include "sysemu/replay.h"
 
 #define AUDIO_CAP "audio"
 #include "audio_int.h"
@@ -1116,12 +1115,13 @@ static int audio_is_timer_needed (void)
 
 static void audio_reset_timer (AudioState *s)
 {
-  if (audio_is_timer_needed()) {
-        timer_mod_anticipate(
-            s->ts, qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + conf.period.ticks);
-  } else {
-        timer_del(s->ts);
-  }
+    if (audio_is_timer_needed ()) {
+        timer_mod_anticipate(s->ts,
+            qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL) + conf.period.ticks);
+    }
+    else {
+        timer_del (s->ts);
+    }
 #ifdef DEBUG_POLL
     struct timeval tv;
     if (gettimeofday(&tv, NULL)) {
@@ -1399,7 +1399,6 @@ static void audio_run_out (AudioState *s)
 
         prev_rpos = hw->rpos;
         played = hw->pcm_ops->run_out (hw, live);
-        replay_audio_out(&played);
         if (audio_bug (AUDIO_FUNC, hw->rpos >= hw->samples)) {
             dolog ("hw->rpos=%d hw->samples=%d played=%d\n",
                    hw->rpos, hw->samples, played);
@@ -1463,12 +1462,9 @@ static void audio_run_in (AudioState *s)
 
     while ((hw = audio_pcm_hw_find_any_enabled_in (hw))) {
         SWVoiceIn *sw;
-        int captured = 0, min;
+        int captured, min;
 
-        if (replay_mode != REPLAY_MODE_PLAY) {
-            captured = hw->pcm_ops->run_in(hw);
-        }
-        replay_audio_in(&captured, hw->conv_buf, &hw->wpos, hw->samples);
+        captured = hw->pcm_ops->run_in (hw);
 
         min = audio_pcm_hw_find_min_in (hw);
         hw->total_samples_captured += captured - min;

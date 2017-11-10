@@ -6,7 +6,7 @@
 #include "qemu/error-report.h"
 #include "sysemu/sysemu.h"
 #include "monitor/monitor.h"
-#include "hw/usb/trace.h"
+#include "trace.h"
 #include "qemu/cutils.h"
 
 static void usb_bus_dev_print(Monitor *mon, DeviceState *qdev, int indent);
@@ -135,12 +135,11 @@ USBDevice *usb_device_find_device(USBDevice *dev, uint8_t addr)
     return NULL;
 }
 
-static void usb_device_unrealize(USBDevice *dev, Error **errp)
+static void usb_device_handle_destroy(USBDevice *dev)
 {
     USBDeviceClass *klass = USB_DEVICE_GET_CLASS(dev);
-
-    if (klass->unrealize) {
-        klass->unrealize(dev, errp);
+    if (klass->handle_destroy) {
+        klass->handle_destroy(dev);
     }
 }
 
@@ -291,7 +290,7 @@ static void usb_qdev_unrealize(DeviceState *qdev, Error **errp)
     if (dev->attached) {
         usb_device_detach(dev);
     }
-    usb_device_unrealize(dev, errp);
+    usb_device_handle_destroy(dev);
     if (dev->port) {
         usb_release_port(dev);
     }

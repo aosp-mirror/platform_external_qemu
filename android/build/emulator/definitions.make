@@ -206,7 +206,7 @@ endef
 #
 define compile-generated-c-source
 SRC:=$(1)
-OBJ:=$$(LOCAL_OBJS_DIR)/$$(SRC:%.c=%.o)
+OBJ:=$$(LOCAL_OBJS_DIR)/$$(notdir $$(SRC:%.c=%.o))
 LOCAL_OBJECTS += $$(OBJ)
 _BUILD_DEPENDENCY_DIRS += $$(dir $$(OBJ))
 $$(OBJ): PRIVATE_CFLAGS := $$(LOCAL_CFLAGS) -I$$(LOCAL_PATH) -I$$(LOCAL_OBJS_DIR)

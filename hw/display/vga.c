@@ -32,10 +32,13 @@
 #include "ui/pixel_ops.h"
 #include "qemu/timer.h"
 #include "hw/xen/xen.h"
-#include "hw/display/trace.h"
+#include "trace.h"
 
+//#define DEBUG_VGA
 //#define DEBUG_VGA_MEM
 //#define DEBUG_VGA_REG
+
+//#define DEBUG_BOCHS_VBE
 
 /* 16 state changes per vertical frame @60 Hz */
 #define VGA_TEXT_CURSOR_PERIOD_MS       (1000 * 2 * 16 / 60)
@@ -425,7 +428,9 @@ uint32_t vga_ioport_read(void *opaque, uint32_t addr)
             break;
         }
     }
-    trace_vga_std_read_io(addr, val);
+#if defined(DEBUG_VGA)
+    printf("VGA: read addr=0x%04x data=0x%02x\n", addr, val);
+#endif
     return val;
 }
 
@@ -438,7 +443,9 @@ void vga_ioport_write(void *opaque, uint32_t addr, uint32_t val)
     if (vga_ioport_invalid(s, addr)) {
         return;
     }
-    trace_vga_std_write_io(addr, val);
+#ifdef DEBUG_VGA
+    printf("VGA: write addr=0x%04x data=0x%02x\n", addr, val);
+#endif
 
     switch(addr) {
     case VGA_ATT_W:
@@ -726,7 +733,9 @@ uint32_t vbe_ioport_read_data(void *opaque, uint32_t addr)
     } else {
         val = 0;
     }
-    trace_vga_vbe_read(s->vbe_index, val);
+#ifdef DEBUG_BOCHS_VBE
+    printf("VBE: read index=0x%x val=0x%x\n", s->vbe_index, val);
+#endif
     return val;
 }
 
@@ -741,7 +750,9 @@ void vbe_ioport_write_data(void *opaque, uint32_t addr, uint32_t val)
     VGACommonState *s = opaque;
 
     if (s->vbe_index <= VBE_DISPI_INDEX_NB) {
-        trace_vga_vbe_write(s->vbe_index, val);
+#ifdef DEBUG_BOCHS_VBE
+        printf("VBE: write index=0x%x val=0x%x\n", s->vbe_index, val);
+#endif
         switch(s->vbe_index) {
         case VBE_DISPI_INDEX_ID:
             if (val == VBE_DISPI_ID0 ||
@@ -1532,9 +1543,17 @@ static void vga_draw_graphic(VGACommonState *s, int full_update)
                     height, format, s->line_offset,
                     s->vram_ptr + (s->start_addr * 4));
             dpy_gfx_replace_surface(s->con, surface);
+#ifdef DEBUG_VGA
+            printf("VGA: Using shared surface for depth=%d swap=%d\n",
+                   depth, byteswap);
+#endif
         } else {
             qemu_console_resize(s->con, disp_width, height);
             surface = qemu_console_surface(s->con);
+#ifdef DEBUG_VGA
+            printf("VGA: Using shadow surface for depth=%d swap=%d\n",
+                   depth, byteswap);
+#endif
         }
         s->last_scr_width = disp_width;
         s->last_scr_height = height;

@@ -376,6 +376,7 @@ EOF
             --enable-vnc \
             --disable-vnc-sasl \
             --disable-werror \
+            --enable-winvista \
             --enable-sdl \
             --with-sdlabi=2.0 \
             --enable-trace-backends=nop \

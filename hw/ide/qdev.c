@@ -31,7 +31,7 @@
 /* --------------------------------- */
 
 static char *idebus_get_fw_dev_path(DeviceState *dev);
-static void idebus_unrealize(BusState *qdev, Error **errp);
+static void idebus_unrealize(DeviceState *qdev, Error **errp);
 
 static Property ide_props[] = {
     DEFINE_PROP_UINT32("unit", IDEDevice, unit, -1),
@@ -43,15 +43,14 @@ static void ide_bus_class_init(ObjectClass *klass, void *data)
     BusClass *k = BUS_CLASS(klass);
 
     k->get_fw_dev_path = idebus_get_fw_dev_path;
-    k->unrealize = idebus_unrealize;
 }
 
-static void idebus_unrealize(BusState *bus, Error **errp)
+static void idebus_unrealize(DeviceState *qdev, Error **errp)
 {
-    IDEBus *ibus = IDE_BUS(bus);
+    IDEBus *bus = DO_UPCAST(IDEBus, qbus, qdev->parent_bus);
 
-    if (ibus->vmstate) {
-        qemu_del_vm_change_state_handler(ibus->vmstate);
+    if (bus->vmstate) {
+        qemu_del_vm_change_state_handler(bus->vmstate);
     }
 }
 
@@ -171,7 +170,7 @@ static int ide_dev_initfn(IDEDevice *dev, IDEDriveKind kind)
             return -1;
         } else {
             /* Anonymous BlockBackend for an empty drive */
-            dev->conf.blk = blk_new(0, BLK_PERM_ALL);
+            dev->conf.blk = blk_new();
         }
     }
 
@@ -197,12 +196,7 @@ static int ide_dev_initfn(IDEDevice *dev, IDEDriveKind kind)
             return -1;
         }
     }
-    blkconf_apply_backend_options(&dev->conf, kind == IDE_CD, kind != IDE_CD,
-                                  &err);
-    if (err) {
-        error_report_err(err);
-        return -1;
-    }
+    blkconf_apply_backend_options(&dev->conf);
 
     if (ide_init_drive(s, dev->conf.blk, kind,
                        dev->version, dev->serial, dev->model, dev->wwn,
@@ -371,6 +365,7 @@ static void ide_device_class_init(ObjectClass *klass, void *data)
     k->init = ide_qdev_init;
     set_bit(DEVICE_CATEGORY_STORAGE, k->categories);
     k->bus_type = TYPE_IDE_BUS;
+    k->unrealize = idebus_unrealize;
     k->props = ide_props;
 }
 

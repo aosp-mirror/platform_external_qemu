@@ -24,7 +24,7 @@
 #include "crypto/tlscreds.h"
 #include "qemu/error-report.h"
 #include "qapi/error.h"
-#include "migration/trace.h"
+#include "trace.h"
 
 static QCryptoTLSCreds *
 migration_tls_get_creds(MigrationState *s,
@@ -61,15 +61,15 @@ migration_tls_get_creds(MigrationState *s,
 }
 
 
-static void migration_tls_incoming_handshake(QIOTask *task,
+static void migration_tls_incoming_handshake(Object *src,
+                                             Error *err,
                                              gpointer opaque)
 {
-    QIOChannel *ioc = QIO_CHANNEL(qio_task_get_source(task));
-    Error *err = NULL;
+    QIOChannel *ioc = QIO_CHANNEL(src);
 
-    if (qio_task_propagate_error(task, &err)) {
+    if (err) {
         trace_migration_tls_incoming_handshake_error(error_get_pretty(err));
-        error_report_err(err);
+        error_report("%s", error_get_pretty(err));
     } else {
         trace_migration_tls_incoming_handshake_complete();
         migration_channel_process_incoming(migrate_get_current(), ioc);
@@ -107,18 +107,17 @@ void migration_tls_channel_process_incoming(MigrationState *s,
 }
 
 
-static void migration_tls_outgoing_handshake(QIOTask *task,
+static void migration_tls_outgoing_handshake(Object *src,
+                                             Error *err,
                                              gpointer opaque)
 {
     MigrationState *s = opaque;
-    QIOChannel *ioc = QIO_CHANNEL(qio_task_get_source(task));
-    Error *err = NULL;
+    QIOChannel *ioc = QIO_CHANNEL(src);
 
-    if (qio_task_propagate_error(task, &err)) {
+    if (err) {
         trace_migration_tls_outgoing_handshake_error(error_get_pretty(err));
         s->to_dst_file = NULL;
         migrate_fd_error(s, err);
-        error_free(err);
     } else {
         trace_migration_tls_outgoing_handshake_complete();
         migration_channel_connect(s, ioc, NULL);
@@ -141,7 +140,7 @@ void migration_tls_channel_connect(MigrationState *s,
         return;
     }
 
-    if (s->parameters.tls_hostname && *s->parameters.tls_hostname) {
+    if (s->parameters.tls_hostname) {
         hostname = s->parameters.tls_hostname;
     }
     if (!hostname) {

@@ -22,7 +22,7 @@
 #include "migration/migration.h"
 #include "migration/qemu-file.h"
 #include "io/channel-socket.h"
-#include "migration/trace.h"
+#include "trace.h"
 
 
 static SocketAddress *tcp_build_address(const char *host_port, Error **errp)
@@ -70,23 +70,22 @@ static void socket_connect_data_free(void *opaque)
     g_free(data);
 }
 
-static void socket_outgoing_migration(QIOTask *task,
+static void socket_outgoing_migration(Object *src,
+                                      Error *err,
                                       gpointer opaque)
 {
     struct SocketConnectData *data = opaque;
-    QIOChannel *sioc = QIO_CHANNEL(qio_task_get_source(task));
-    Error *err = NULL;
+    QIOChannel *sioc = QIO_CHANNEL(src);
 
-    if (qio_task_propagate_error(task, &err)) {
+    if (err) {
         trace_migration_socket_outgoing_error(error_get_pretty(err));
         data->s->to_dst_file = NULL;
         migrate_fd_error(data->s, err);
-        error_free(err);
     } else {
         trace_migration_socket_outgoing_connected(data->hostname);
         migration_channel_connect(data->s, sioc, data->hostname);
     }
-    object_unref(OBJECT(sioc));
+    object_unref(src);
 }
 
 static void socket_start_outgoing_migration(MigrationState *s,

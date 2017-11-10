@@ -26,7 +26,7 @@
 #include "qemu/range.h"
 #include "sysemu/numa.h"
 #include "sysemu/kvm.h"
-#include "hw/mem/trace.h"
+#include "trace.h"
 #include "hw/virtio/vhost.h"
 
 typedef struct pc_dimms_capacity {
