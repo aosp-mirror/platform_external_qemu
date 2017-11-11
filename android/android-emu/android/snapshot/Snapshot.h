@@ -38,11 +38,17 @@ public:
 
     uint64_t diskSize() const { return mSize; }
 
+    // Returns the snapshot's Protobuf.
+    // If Protobuf cannot be read, sets failure reason
+    // and returns null.
+    const emulator_snapshot::Snapshot* getProtobuf();
+
     base::Optional<FailureReason> failureReason() const;
 
     static base::StringView dataDir(const char* name);
 
 private:
+    void loadProtobufOnce();
     bool verifyHost(const emulator_snapshot::Host& host);
     bool verifyConfig(const emulator_snapshot::Config& config);
     bool writeSnapshotToDisk();

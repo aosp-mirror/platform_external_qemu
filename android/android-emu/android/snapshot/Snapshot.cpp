@@ -319,8 +319,23 @@ static bool isUnrecoverableReason(FailureReason reason) {
 }
 
 bool Snapshot::preload() {
+    loadProtobufOnce();
+
+    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
+}
+
+const emulator_snapshot::Snapshot* Snapshot::getProtobuf() {
+    loadProtobufOnce();
+    if (isUnrecoverableReason(
+            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+        return nullptr;
+    }
+    return &mSnapshotPb;
+}
+
+void Snapshot::loadProtobufOnce() {
     if (mSnapshotPb.has_version()) {
-        return true;
+        return;
     }
     const auto file =
             ScopedFd(::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
@@ -328,7 +343,7 @@ bool Snapshot::preload() {
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
         saveFailure(FailureReason::NoSnapshotPb);
-        return false;
+        return;
     }
     mSize = size;
 
@@ -341,23 +356,22 @@ bool Snapshot::preload() {
             });
     if (!fileMap || fileMap.get() == MAP_FAILED) {
         saveFailure(FailureReason::BadSnapshotPb);
-        return false;
+        return;
     }
     if (!mSnapshotPb.ParseFromArray(fileMap.get(), size)) {
         saveFailure(FailureReason::BadSnapshotPb);
-        return false;
+        return;
     }
     if (mSnapshotPb.has_failed_to_load_reason_code() &&
         isUnrecoverableReason(
                 FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        return false;
+        return;
     }
     if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
         saveFailure(FailureReason::IncompatibleVersion);
-        return false;
+        return;
     }
-
-    return true;
+    saveFailure(FailureReason::Empty);
 }
 
 bool Snapshot::load() {

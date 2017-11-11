@@ -200,6 +200,7 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mIsQuickboot = isQuickboot;
     mVmOperations.snapshotLoad(name, this, nullptr);
     mIsQuickboot = false;
+    mLoadedSnapshotFile = (mLoader->status() == OperationStatus::Ok) ? name : "";
     return mLoader->status();
 }
 
@@ -257,6 +258,7 @@ void Snapshotter::onSavingFailed(const char* name, int res) {
 }
 
 bool Snapshotter::onStartLoading(const char* name) {
+    mLoadedSnapshotFile = "";
     CrashReporter::get()->hangDetector().pause(true);
     mCallback(Operation::Load, Stage::Start);
     mSaver.clear();
@@ -281,7 +283,11 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     mCallback(Operation::Load, Stage::End);
-    return mLoader->status() != OperationStatus::Error;
+    if (mLoader->status() == OperationStatus::Error) {
+        return false;
+    }
+    mLoadedSnapshotFile = name;
+    return true;
 }
 
 void Snapshotter::onLoadingFailed(const char* name, int err) {
