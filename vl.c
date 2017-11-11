@@ -253,6 +253,7 @@ int no_hpet = 0;
 int fd_bootchk = 1;
 static int no_reboot;
 int no_shutdown = 0;
+int invalidate_exit_snapshot = 0;
 int cursor_hide = 1;
 int graphic_rotate = 0;
 #ifdef CONFIG_ANDROID
@@ -2141,6 +2142,11 @@ void qemu_system_killed(int signal, pid_t pid)
     qemu_notify_event();
 }
 
+void qemu_system_invalidate_exit_snapshot(void)
+{
+    invalidate_exit_snapshot = 1;
+}
+
 void qemu_system_shutdown_request(void)
 {
     trace_qemu_system_shutdown_request();
@@ -2184,7 +2190,11 @@ static bool main_loop_should_exit(void)
     }
     if (qemu_shutdown_requested()) {
 #ifdef CONFIG_ANDROID
-        androidSnapshot_quickbootSave(NULL);
+        if (invalidate_exit_snapshot) {
+            androidSnapshot_quickbootInvalidate(NULL);
+        } else {
+            androidSnapshot_quickbootSave(NULL);
+        }
 #endif
         qemu_kill_report();
         qapi_event_send_shutdown(&error_abort);
