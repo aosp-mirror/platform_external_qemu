@@ -47,6 +47,9 @@ public:
     void deleteSnapshot(const char* name);
     void onCrashedSnapshot(const char* name);
 
+    // Returns an empty string if the AVD was Cold Booted
+    const std::string& loadedSnapshotFile() { return mLoadedSnapshotFile; }
+
     base::System::Duration lastLoadUptimeMs() const {
         return mLastLoadUptimeMs;
     }
@@ -86,6 +89,7 @@ private:
     android::base::Optional<Saver> mSaver;
     android::base::Optional<Loader> mLoader;
     Callback mCallback;
+    std::string mLoadedSnapshotFile;
 
     base::System::Duration mLastLoadUptimeMs = 0;
 
