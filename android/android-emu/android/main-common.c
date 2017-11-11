@@ -1913,8 +1913,12 @@ bool configAndStartRenderer(
         derror("%s", config.status);
         config_out->openglAlive = 0;
         lastRendererConfig = *config_out;
+        AFREE(api_arch);
+
         return false;
     }
+
+    AFREE(api_arch);
 
     // If the user is using -gpu off (not -gpu guest),
     // or if the API level is lower than 14 (Ice Cream Sandwich)
