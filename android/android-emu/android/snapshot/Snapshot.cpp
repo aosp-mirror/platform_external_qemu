@@ -328,13 +328,27 @@ bool Snapshot::save() {
 }
 
 bool Snapshot::saveFailure(FailureReason reason) {
+    if (reason == FailureReason::Empty) {
+        mLatestFailureReason = reason;
+        // Don't write this to disk
+        return true;
+    }
+    if (reason == mLatestFailureReason) {
+        // Nothing to do
+        return true;
+    }
     mSnapshotPb.set_failed_to_load_reason_code(int64_t(reason));
     if (!mSnapshotPb.has_version()) {
         mSnapshotPb.set_version(kVersion);
     }
     mSnapshotPb.set_invalid_loads(mInvalidLoads);
     mSnapshotPb.set_successful_loads(mSuccessfulLoads);
-    return writeSnapshotToDisk();
+    if (writeSnapshotToDisk()) {
+        // Success
+        mLatestFailureReason = reason;
+        return true;
+    }
+    return false;
 }
 
 static bool isUnrecoverableReason(FailureReason reason) {
@@ -343,8 +357,23 @@ static bool isUnrecoverableReason(FailureReason reason) {
 }
 
 bool Snapshot::preload() {
+    loadProtobufOnce();
+
+    return (mSnapshotPb.has_version() && mSnapshotPb.version() == kVersion);
+}
+
+const emulator_snapshot::Snapshot* Snapshot::getGeneralInfo() {
+    loadProtobufOnce();
+    if (isUnrecoverableReason(
+            FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
+        return nullptr;
+    }
+    return &mSnapshotPb;
+}
+
+void Snapshot::loadProtobufOnce() {
     if (mSnapshotPb.has_version()) {
-        return true;
+        return;
     }
     const auto file =
             ScopedFd(::open(PathUtils::join(mDataDir, "snapshot.pb").c_str(),
@@ -352,7 +381,7 @@ bool Snapshot::preload() {
     System::FileSize size;
     if (!System::get()->fileSize(file.get(), &size)) {
         saveFailure(FailureReason::NoSnapshotPb);
-        return false;
+        return;
     }
     mSize = size;
 
@@ -365,23 +394,22 @@ bool Snapshot::preload() {
             });
     if (!fileMap || fileMap.get() == MAP_FAILED) {
         saveFailure(FailureReason::BadSnapshotPb);
-        return false;
+        return;
     }
     if (!mSnapshotPb.ParseFromArray(fileMap.get(), size)) {
         saveFailure(FailureReason::BadSnapshotPb);
-        return false;
+        return;
     }
     if (mSnapshotPb.has_failed_to_load_reason_code() &&
         isUnrecoverableReason(
                 FailureReason(mSnapshotPb.failed_to_load_reason_code()))) {
-        return false;
+        return;
     }
     if (!mSnapshotPb.has_version() || mSnapshotPb.version() != kVersion) {
         saveFailure(FailureReason::IncompatibleVersion);
-        return false;
+        return;
     }
-
-    return true;
+    // Success
 }
 
 bool Snapshot::load() {
