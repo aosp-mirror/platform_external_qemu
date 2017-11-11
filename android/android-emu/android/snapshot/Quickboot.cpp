@@ -454,6 +454,13 @@ bool Quickboot::save(StringView name) {
     return true;
 }
 
+void Quickboot::invalidate(StringView name) {
+    if (name.empty()) {
+        name = kDefaultBootSnapshot;
+    }
+    Snapshotter::get().deleteSnapshot(name.c_str());
+}
+
 }  // namespace snapshot
 }  // namespace android
 
@@ -463,4 +470,8 @@ bool androidSnapshot_quickbootLoad(const char* name) {
 
 bool androidSnapshot_quickbootSave(const char* name) {
     return android::snapshot::Quickboot::get().save(name);
+}
+
+void androidSnapshot_quickbootInvalidate(const char* name) {
+    android::snapshot::Quickboot::get().invalidate(name);
 }

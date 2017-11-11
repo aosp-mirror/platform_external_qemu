@@ -36,6 +36,7 @@ public:
 
     bool load(base::StringView name);
     bool save(base::StringView name);
+    void invalidate(base::StringView name);
 
 private:
     void reportSuccessfulLoad(base::StringView name,
