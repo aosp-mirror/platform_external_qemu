@@ -2009,6 +2009,7 @@ bool configAndStartRenderer(
     config_out->selectedRenderer =
         emuglConfig_get_current_renderer();
 
+    AFREE(api_arch);
     lastRendererConfig = *config_out;
     return true;
 }
