@@ -47,4 +47,8 @@ void androidSnapshot_delete(const char* name);
 bool androidSnapshot_quickbootLoad(const char* name);
 bool androidSnapshot_quickbootSave(const char* name);
 
+// For when we want to skip quickboot AND skip loading it next time, such as
+// in the case of a power-off and restart.
+void androidSnapshot_quickbootInvalidate(const char* name);
+
 ANDROID_END_HEADER
