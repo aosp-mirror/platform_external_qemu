@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ded61dd9_f18e2cbc",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 288,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-11T00:44:45Z",
+      "side": 1,
+      "message": "Instead of writing to the matrix then overwriting, do:\n\nconst glm::mat4 model_transform \u003d ...;\nconst glm::mat4 model_view_transform \u003d mCameraTransform * model_transform;",
+      "range": {
+        "startLine": 287,
+        "startChar": 4,
+        "endLine": 288,
+        "endChar": 83
+      },
+      "revId": "66c201a8412c095669de329fb3726cdec5cdf6b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "abd495b8_c5171d2c",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-11T00:44:45Z",
+      "side": 1,
+      "message": "I\u0027m not convinced this will have the same result, maybe keep this as quat multiplies and then do a mat4_cast when saving it to mRotation?",
+      "range": {
+        "startLine": 367,
+        "startChar": 8,
+        "endLine": 374,
+        "endChar": 45
+      },
+      "revId": "66c201a8412c095669de329fb3726cdec5cdf6b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "650b65d0_7d767cb0",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-11T00:44:45Z",
+      "side": 1,
+      "message": "Does this get propagated with the PhysicalModel? Booting up the emulator the default orientation doesn\u0027t seem to include this.\n\n(Not important to address in this change, I just noticed it now)",
+      "range": {
+        "startLine": 115,
+        "startChar": 4,
+        "endLine": 120,
+        "endChar": 24
+      },
+      "revId": "66c201a8412c095669de329fb3726cdec5cdf6b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9e947797_d70e537f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-11T00:44:45Z",
+      "side": 1,
+      "message": "Since resetDeviceRotation is still using a quat and mat4_cast, keep this as-is too?",
+      "range": {
+        "startLine": 121,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 64
+      },
+      "revId": "66c201a8412c095669de329fb3726cdec5cdf6b6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
