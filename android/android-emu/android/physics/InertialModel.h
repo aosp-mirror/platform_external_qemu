@@ -67,20 +67,26 @@ public:
      * Gets current simulated state and sensor values of the modeled object at
      * the most recently set current time (from setCurrentTime).
      */
-    glm::vec3 getPosition() const;
-    glm::vec3 getVelocity() const;
-    glm::vec3 getAcceleration() const;
-    glm::quat getRotation() const;
-    glm::vec3 getRotationalVelocity() const;
+    glm::vec3 getPosition(
+            ParameterValue parameterValue=PARAMETER_VALUE_CURRENT) const;
+    glm::vec3 getVelocity(
+            ParameterValue parameterValue=PARAMETER_VALUE_CURRENT) const;
+    glm::vec3 getAcceleration(
+            ParameterValue parameterValue=PARAMETER_VALUE_CURRENT) const;
+    glm::quat getRotation(
+            ParameterValue parameterValue=PARAMETER_VALUE_CURRENT) const;
+    glm::vec3 getRotationalVelocity(
+            ParameterValue parameterValue=PARAMETER_VALUE_CURRENT) const;
 
 private:
     void updateRotations();
 
-    // Helper for calculating the current state given a transform specifying
-    // either the acceleration, velocity, or position, for each phase.
+    // Helper for calculating the current or target state given a transform
+    // specifying either the acceleration, velocity, or position.
     glm::vec3 calculateInertialState(
-            const glm::mat2x3 quinticTransform,
-            const glm::mat4x3 cubicTransform) const;
+            const glm::mat2x3& quinticTransform,
+            const glm::mat4x3& cubicTransform,
+            ParameterValue parameterValue) const;
 
     // Note: Each target interpolation begins at a set time, accelerates at a
     //       for half of the target time, then decelerates for the second half
