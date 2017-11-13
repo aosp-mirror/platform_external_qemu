@@ -15,7 +15,8 @@
   X(EGLBoolean, eglPostLoadAllImages, (EGLDisplay display, EGLStream stream)) \
   X(EGLBoolean, eglPostSaveContext, (EGLDisplay display, EGLConfig config, EGLStream stream)) \
   X(void, eglUseOsEglApi, (EGLBoolean enable)) \
-  X(void, eglSetMaxGLESVersion, (EGLint version)) \
+  X(void, eglSetMaxGLESVersion, (EGLint glesVersion)) \
+  X(void, eglFillUsages, (void* usages)) \
 
 
 #endif  // RENDER_EGL_SNAPSHOT_FUNCTIONS_H

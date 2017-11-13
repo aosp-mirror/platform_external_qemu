@@ -26,7 +26,9 @@
 #include <GLES3/gl3.h>
 #include <GLES3/gl31.h>
 
-#include <OpenglCodecCommon/ErrorLog.h>
+#include "android/base/memory/LazyInstance.h"
+#include "android/metrics/proto/studio_stats.pb.h"
+#include "OpenglCodecCommon/ErrorLog.h"
 #include "GLcommon/SaveableTexture.h"
 #include "GLcommon/TextureData.h"
 #include "GLcommon/TranslatorIfaces.h"
@@ -65,6 +67,7 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
                                       SaveableTexture::loader_t&& loader);
 static void restoreTexture(SaveableTexture* texture);
 static void blitFromCurrentReadBufferANDROID(EGLImage image);
+static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -93,9 +96,12 @@ static GLESiface s_glesIface = {
     .restoreTexture = restoreTexture,
     .deleteRbo = deleteRenderbufferGlobal,
     .blitFromCurrentReadBufferANDROID = blitFromCurrentReadBufferANDROID,
+    .fillGLESUsages = fillGLESUsages,
 };
 
 #include <GLcommon/GLESmacros.h>
+
+static android::base::LazyInstance<android_studio::EmulatorGLESv30Usages> gles30usages = {};
 
 extern "C" {
 
@@ -192,6 +198,10 @@ GL_APICALL GLESiface* GL_APIENTRY __translator_getIfaces(EGLiface* eglIface);
 GLESiface* __translator_getIfaces(EGLiface* eglIface) {
     s_eglIface = eglIface;
     return & s_glesIface;
+}
+
+static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage) {
+    usage->mutable_gles_3_0_usages()->CopyFrom(*gles30usages);
 }
 
 static void blitFromCurrentReadBufferANDROID(EGLImage image) {

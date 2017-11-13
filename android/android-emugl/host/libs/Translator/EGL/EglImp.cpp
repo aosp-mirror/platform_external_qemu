@@ -148,6 +148,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglLoadAllImages(EGLDisplay display,
 EGLAPI EGLBoolean EGLAPIENTRY eglPostLoadAllImages(EGLDisplay display, EGLStream stream);
 EGLAPI void EGLAPIENTRY eglUseOsEglApi(EGLBoolean enable);
 EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version);
+EGLAPI void EGLAPIENTRY eglFillUsages(void* usages);
 }
 
 #define CURRENT_THREAD() do {} while (0);
@@ -1628,4 +1629,17 @@ EGLAPI void EGLAPIENTRY eglSetMaxGLESVersion(EGLint version) {
         g_eglInfo->getIface(GLES_1_1)->setMaxGlesVersion(glesVersion);
     }
     g_eglInfo->getIface(GLES_2_0)->setMaxGlesVersion(glesVersion);
+}
+
+EGLAPI void EGLAPIENTRY eglFillUsages(void* usages) {
+    if (g_eglInfo->getIface(GLES_1_1) &&
+            g_eglInfo->getIface(GLES_1_1)->fillGLESUsages) {
+        g_eglInfo->getIface(GLES_1_1)->fillGLESUsages(
+            (android_studio::EmulatorGLESUsages*)usages);
+    }
+    if (g_eglInfo->getIface(GLES_2_0) &&
+            g_eglInfo->getIface(GLES_2_0)->fillGLESUsages) {
+        g_eglInfo->getIface(GLES_2_0)->fillGLESUsages(
+            (android_studio::EmulatorGLESUsages*)usages);
+    }
 }

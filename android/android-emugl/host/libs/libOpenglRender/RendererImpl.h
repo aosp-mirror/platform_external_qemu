@@ -29,6 +29,10 @@
 #include <utility>
 #include <vector>
 
+namespace android_studio {
+    class EmulatorGLESUsages;
+}
+
 namespace emugl {
 
 class RendererImpl final : public Renderer {
@@ -69,7 +73,7 @@ public:
               const android::snapshot::ITextureSaverPtr& textureSaver) final;
     bool load(android::base::Stream* stream,
               const android::snapshot::ITextureLoaderPtr& textureLoader) final;
-
+    void fillGLESUsages(android_studio::EmulatorGLESUsages*) final;
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 
