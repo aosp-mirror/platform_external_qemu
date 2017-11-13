@@ -649,18 +649,20 @@ static void _hwSensors_getPhysicalParameterValue(HwSensors* h,
                                                  int parameter_id,
                                                  float* a,
                                                  float* b,
-                                                 float* c) {
+                                                 float* c,
+                                                 ParameterValueType parameter_value_type) {
     switch (parameter_id) {
 #define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
 #define TYPE_GET_VALUES_FUNCTION_NAME(x) x##_get_values
-#define GET_TARGET_FUNCTION_NAME(x) physicalModel_getTarget##x
+#define GET_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) case ENUM_NAME(x):\
             TYPE_GET_VALUES_FUNCTION_NAME(w)(\
-                    GET_TARGET_FUNCTION_NAME(z)(h->physical_model),\
+                    GET_PARAMETER_FUNCTION_NAME(z)(h->physical_model,\
+                                                   parameter_value_type),\
                     a, b, c);\
             break;
 PHYSICAL_PARAMETERS_LIST
-#undef SET_TARGET_FUNCTION_NAME
+#undef GET_PARAMETER_FUNCTION_NAME
 #undef TYPE_GET_VALUES_FUNCTION_NAME
 #undef ENUM_NAME
         default:
@@ -973,9 +975,10 @@ extern uint8_t android_sensors_get_sensor_status(int sensor_id) {
     return hw->sensors[sensor_id].enabled;
 }
 
-/* Get a physical model parameter */
+/* Get a physical model parameter target value*/
 extern int android_physical_model_get(
-        int physical_parameter, float* out_a, float* out_b, float* out_c) {
+        int physical_parameter, float* out_a, float* out_b, float* out_c,
+        ParameterValueType parameter_value_type) {
     HwSensors* hw = _sensorsState;
 
     *out_a = 0;
@@ -990,7 +993,7 @@ extern int android_physical_model_get(
     }
 
     _hwSensors_getPhysicalParameterValue(
-            hw, physical_parameter, out_a, out_b, out_c);
+            hw, physical_parameter, out_a, out_b, out_c, parameter_value_type);
 
     return PHYSICAL_PARAMETER_STATUS_OK;
 }

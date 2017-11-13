@@ -104,9 +104,8 @@ TEST(PhysicalModel, NewMeasurementId) {
 
 TEST(PhysicalModel, SetTargetPosition) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
     PhysicalModel *model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 0UL);
     vec3 targetPosition;
     targetPosition.x = 2.0f;
     targetPosition.y = 3.0f;
@@ -114,8 +113,9 @@ TEST(PhysicalModel, SetTargetPosition) {
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_STEP);
 
-    mTestSystem.setUnixTime(1);
-    vec3 currentPosition = physicalModel_getTargetPosition(model);
+    physicalModel_setCurrentTime(model, 500000000UL);
+    vec3 currentPosition = physicalModel_getParameterPosition(model,
+            PARAMETER_VALUE_TYPE_CURRENT);
 
     EXPECT_VEC3_NEAR(targetPosition, currentPosition, 0.0001f);
 
@@ -124,9 +124,8 @@ TEST(PhysicalModel, SetTargetPosition) {
 
 TEST(PhysicalModel, SetTargetRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
     PhysicalModel *model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 0UL);
     vec3 targetRotation;
     targetRotation.x = 45.0f;
     targetRotation.y = 10.0f;
@@ -134,8 +133,9 @@ TEST(PhysicalModel, SetTargetRotation) {
     physicalModel_setTargetRotation(
             model, targetRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    mTestSystem.setUnixTime(1);
-    vec3 currentRotation = physicalModel_getTargetRotation(model);
+    physicalModel_setCurrentTime(model, 500000000UL);
+    vec3 currentRotation = physicalModel_getParameterRotation(model,
+            PARAMETER_VALUE_TYPE_CURRENT);
 
     EXPECT_VEC3_NEAR(targetRotation, currentRotation, 0.0001f);
 
@@ -465,21 +465,37 @@ TEST(PhysicalModel, SaveLoadTargets) {
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
 
     EXPECT_VEC3_NEAR(positionTarget,
-            physicalModel_getTargetPosition(loadedModel), 0.00001f);
+            physicalModel_getParameterPosition(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
     EXPECT_VEC3_NEAR(rotationTarget,
-            physicalModel_getTargetRotation(loadedModel), 0.00001f);
+            physicalModel_getParameterRotation(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
     EXPECT_VEC3_NEAR(magneticFieldTarget,
-            physicalModel_getTargetMagneticField(loadedModel), 0.00001f);
+            physicalModel_getParameterMagneticField(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
     EXPECT_NEAR(temperatureTarget,
-            physicalModel_getTargetTemperature(loadedModel), 0.00001f);
+            physicalModel_getParameterTemperature(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
     EXPECT_NEAR(proximityTarget,
-            physicalModel_getTargetProximity(loadedModel), 0.00001f);
+            physicalModel_getParameterProximity(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
     EXPECT_NEAR(lightTarget,
-            physicalModel_getTargetLight(loadedModel), 0.00001f);
+            physicalModel_getParameterLight(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
     EXPECT_NEAR(pressureTarget,
-            physicalModel_getTargetPressure(loadedModel), 0.00001f);
+            physicalModel_getParameterPressure(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
     EXPECT_NEAR(humidityTarget,
-            physicalModel_getTargetHumidity(loadedModel), 0.00001f);
+            physicalModel_getParameterHumidity(loadedModel,
+                                               PARAMETER_VALUE_TYPE_TARGET),
+            0.00001f);
 
     physicalModel_free(loadedModel);
 }

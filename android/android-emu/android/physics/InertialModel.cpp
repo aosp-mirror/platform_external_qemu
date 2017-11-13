@@ -64,9 +64,9 @@ void InertialModel::setTargetPosition(
         // We ensure that velocity, acceleration, and position are continuously
         // interpolating from the current state.  Here, and throughout, x is the
         // position, v is the velocity, and a is the acceleration.
-        const glm::vec3 x_init = getPosition();
-        const glm::vec3 v_init = getVelocity();
-        const glm::vec3 a_init = getAcceleration();
+        const glm::vec3 x_init = getPosition(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::vec3 v_init = getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::vec3 a_init = getAcceleration(PARAMETER_VALUE_TYPE_CURRENT);
         const glm::vec3 x_target = position;
 
         // constexprs for powers of the state change time which are used
@@ -190,29 +190,37 @@ void InertialModel::setTargetRotation(
     updateRotations();
 }
 
-glm::vec3 InertialModel::getPosition() const {
+glm::vec3 InertialModel::getPosition(
+        ParameterValueType parameterValueType) const {
     return calculateInertialState(
         mPositionQuintic,
-        mPositionCubic);
+        mPositionCubic,
+        parameterValueType);
 }
 
-glm::vec3 InertialModel::getVelocity() const {
+glm::vec3 InertialModel::getVelocity(
+        ParameterValueType parameterValueType) const {
     return calculateInertialState(
         mVelocityQuintic,
-        mVelocityCubic);
+        mVelocityCubic,
+        parameterValueType);
 }
 
-glm::vec3 InertialModel::getAcceleration() const {
+glm::vec3 InertialModel::getAcceleration(
+        ParameterValueType parameterValueType) const {
     return calculateInertialState(
         mAccelerationQuintic,
-        mAccelerationCubic);
+        mAccelerationCubic,
+        parameterValueType);
 }
 
-glm::quat InertialModel::getRotation() const {
+glm::quat InertialModel::getRotation(
+        ParameterValueType parameterValueType) const {
     return mCurrentRotation;
 }
 
-glm::vec3 InertialModel::getRotationalVelocity() const {
+glm::vec3 InertialModel::getRotationalVelocity(
+        ParameterValueType parameterValueType) const {
     return mRotationalVelocity;
 }
 
@@ -262,13 +270,15 @@ void InertialModel::updateRotations() {
 }
 
 glm::vec3 InertialModel::calculateInertialState(
-            const glm::mat2x3 quinticTransform,
-            const glm::mat4x3 cubicTransform) const {
+            const glm::mat2x3& quinticTransform,
+            const glm::mat4x3& cubicTransform,
+            ParameterValueType parameterValueType) const {
     assert(mModelTimeNs >= mStateChangeStartTime);
-    const float time1 = nsToSeconds(
-            (mModelTimeNs < mStateChangeEndTime ?
-                    mModelTimeNs : mStateChangeEndTime) -
-            mStateChangeStartTime);
+    const uint64_t requestedTimeNs =
+            (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT &&
+            mModelTimeNs < mStateChangeEndTime) ?
+                    mModelTimeNs : mStateChangeEndTime;
+    const float time1 = nsToSeconds(requestedTimeNs - mStateChangeStartTime);
     const float time2 = time1 * time1;
     const float time3 = time2 * time1;
     const float time4 = time2 * time2;

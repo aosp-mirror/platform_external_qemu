@@ -67,12 +67,12 @@ PHYSICAL_PARAMETERS_LIST
 #undef SET_TARGET_FUNCTION_NAME
 
 /* Target getters for all physical parameters */
-#define GET_TARGET_FUNCTION_NAME(x) physicalModel_getTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_TARGET_FUNCTION_NAME(z)(\
-        PhysicalModel* model);
+#define GET_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
+#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_PARAMETER_FUNCTION_NAME(z)(\
+        PhysicalModel* model, ParameterValueType parameterValueType);
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
-#undef GET_TARGET_FUNCTION_NAME
+#undef GET_PARAMETER_FUNCTION_NAME
 
 /* Overrides for all sensor values */
 #define OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
