@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8750e85_b38d9206",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 2012,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T16:56:37Z",
+      "side": 1,
+      "message": "there\u0027s a return on line 1916 that skips this call. Could you please add it there, and also move this free() to be right after the last use of |api_arch|? That way it won\u0027t leak if some new return gets in.",
+      "range": {
+        "startLine": 2012,
+        "startChar": 0,
+        "endLine": 2012,
+        "endChar": 20
+      },
+      "revId": "bde1346800bfa99e277ad7882314c1ac33fb4369",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
