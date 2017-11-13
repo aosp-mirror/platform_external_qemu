@@ -43,9 +43,8 @@ TEST(PhysicalModel, CreateAndDestroy) {
 
 TEST(PhysicalModel, DefaultInertialSensorValues) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(1);
     PhysicalModel *model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 1000000000UL);
     long measurement_id;
     vec3 accelerometer = physicalModel_getAccelerometer(model,
             &measurement_id);
@@ -59,13 +58,12 @@ TEST(PhysicalModel, DefaultInertialSensorValues) {
 
 TEST(PhysicalModel, ConstantMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(1);
     PhysicalModel *model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 1000000000UL);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
 
-    mTestSystem.setUnixTime(2);
+    physicalModel_setCurrentTime(model, 2000000000UL);
 
     long measurement_id1;
     physicalModel_getAccelerometer(model, &measurement_id1);
@@ -78,13 +76,12 @@ TEST(PhysicalModel, ConstantMeasurementId) {
 
 TEST(PhysicalModel, NewMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(1);
     PhysicalModel *model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 1000000000UL);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
 
-    mTestSystem.setUnixTime(2);
+    physicalModel_setCurrentTime(model, 2000000000UL);
 
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -159,10 +156,9 @@ const GravityTestCase gravityTestCases[] = {
 
 TEST(PhysicalModel, GravityAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
     for (const auto& testCase : gravityTestCases) {
-        mTestSystem.setUnixTime(1);
         PhysicalModel* model = physicalModel_new();
+        physicalModel_setCurrentTime(model, 1000000000UL);
 
         vec3 targetRotation;
         targetRotation.x = testCase.target_rotation.x;
@@ -172,7 +168,7 @@ TEST(PhysicalModel, GravityAcceleration) {
         physicalModel_setTargetRotation(
                 model, targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
 
-        mTestSystem.setUnixTime(2);
+        physicalModel_setCurrentTime(model, 2000000000UL);;
 
         long measurement_id;
         vec3 accelerometer = physicalModel_getAccelerometer(model,
@@ -186,10 +182,9 @@ TEST(PhysicalModel, GravityAcceleration) {
 
 TEST(PhysicalModel, GravityOnlyAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(1);
 
     PhysicalModel* model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 1000000000UL);
 
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -199,7 +194,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
 
-    mTestSystem.setUnixTime(2);
+    physicalModel_setCurrentTime(model, 2000000000UL);
     // at 2 seconds the target is still at (2, 3, 4);
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_STEP);
@@ -215,9 +210,8 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
 
 TEST(PhysicalModel, NonInstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
     PhysicalModel* model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 0UL);
 
     vec3 startRotation;
     startRotation.x = 0.f;
@@ -226,9 +220,9 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, startRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    mTestSystem.setUnixTime(1);
+    physicalModel_setCurrentTime(model, 1000000000UL);
     vec3 newRotation;
-    newRotation.x = 180.0f;
+    newRotation.x = -0.5f;
     newRotation.y = 0.0f;
     newRotation.z = 0.0f;
     physicalModel_setTargetRotation(
@@ -245,9 +239,8 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
 
 TEST(PhysicalModel, InstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
     PhysicalModel* model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 0UL);
 
     vec3 startRotation;
     startRotation.x = 0.f;
@@ -256,7 +249,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, startRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    mTestSystem.setUnixTime(1);
+    physicalModel_setCurrentTime(model, 1000000000UL);
     vec3 newRotation;
     newRotation.x = 180.0f;
     newRotation.y = 0.0f;
@@ -273,9 +266,8 @@ TEST(PhysicalModel, InstantaneousRotation) {
 
 TEST(PhysicalModel, OverrideAccelerometer) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    mTestSystem.setLiveUnixTime(false);
-    mTestSystem.setUnixTime(0);
     PhysicalModel* model = physicalModel_new();
+    physicalModel_setCurrentTime(model, 0UL);
 
     long initial_measurement_id;
     physicalModel_getAccelerometer(model, &initial_measurement_id);

@@ -16,6 +16,8 @@
 
 #include <gtest/gtest.h>
 
+#include <glm/gtx/euler_angles.hpp>
+
 #include <assert.h>
 
 using android::base::TestSystem;
@@ -118,8 +120,8 @@ TEST(InertialModel, NonInstantaneousRotation) {
     glm::quat startRotation(glm::vec3(0.f, 0.f, 0.f));
     inertialModel.setTargetRotation(
             startRotation, PHYSICAL_INTERPOLATION_STEP);
-    mTestSystem.setUnixTime(1);
-    glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
+    inertialModel.setCurrentTime(1000000000UL);
+    glm::quat newRotation(glm::vec3(-1.0f, 0.0f, 0.0f));
     inertialModel.setTargetRotation(
             newRotation, PHYSICAL_INTERPOLATION_SMOOTH);
     glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
@@ -138,7 +140,7 @@ TEST(InertialModel, InstantaneousRotation) {
     inertialModel.setTargetRotation(
             startRotation, PHYSICAL_INTERPOLATION_STEP);
     mTestSystem.setUnixTime(1);
-    glm::quat newRotation(glm::vec3(180.0f, 0.0f, 0.0f));
+    glm::quat newRotation(glm::vec3(-1.0f, 0.0f, 0.0f));
     inertialModel.setTargetRotation(
             newRotation, PHYSICAL_INTERPOLATION_STEP);
     glm::vec3 currentGyro(inertialModel.getRotationalVelocity());
@@ -228,31 +230,21 @@ TEST(InertialModel, MultipleTargets) {
 }
 
 
-TEST(InertialModel, TargetValues) {
+TEST(InertialModel, TargetPosition) {
     TestSystem testSystem("/", System::kProgramBitness);
 
     const glm::vec3 targetPosition (14.0f, -3.5f, 0.01f);
-    const glm::quat targetRotation (28.f, glm::vec3(0.f, -1.f, 0.f));
 
     InertialModel inertialModel;
     inertialModel.setCurrentTime(0UL);
     inertialModel.setTargetPosition(glm::vec3(0.f), PHYSICAL_INTERPOLATION_STEP);
-    inertialModel.setTargetRotation(glm::quat(), PHYSICAL_INTERPOLATION_STEP);
     inertialModel.setTargetPosition(targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
-    inertialModel.setTargetRotation(targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
 
     const glm::vec3 retrievedTargetPosition =
             inertialModel.getPosition(PARAMETER_VALUE_TYPE_TARGET);
     EXPECT_NEAR(targetPosition.x, retrievedTargetPosition.x, 0.0001f);
     EXPECT_NEAR(targetPosition.y, retrievedTargetPosition.y, 0.0001f);
     EXPECT_NEAR(targetPosition.z, retrievedTargetPosition.z, 0.0001f);
-
-    const glm::quat retrievedTargetRotation =
-            inertialModel.getRotation(PARAMETER_VALUE_TYPE_TARGET);
-    EXPECT_NEAR(targetRotation.x, retrievedTargetRotation.x, 0.0001f);
-    EXPECT_NEAR(targetRotation.y, retrievedTargetRotation.y, 0.0001f);
-    EXPECT_NEAR(targetRotation.z, retrievedTargetRotation.z, 0.0001f);
-    EXPECT_NEAR(targetRotation.w, retrievedTargetRotation.w, 0.0001f);
 }
 
 TEST(InertialModel, CurrentInitialPositionValue) {
@@ -301,9 +293,11 @@ TEST(InertialModel, IntermediateValuesDuringInterpolation) {
         EXPECT_NEAR(measuredVelocity.y, integratedVelocity.y, 0.01f);
         EXPECT_NEAR(measuredVelocity.z, integratedVelocity.z, 0.01f);
 
-        singleIntegratedPosition += timeIncrement * inertialModel.getVelocity();
+        singleIntegratedPosition += timeIncrement *
+                inertialModel.getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
 
-        const glm::vec3 measuredPosition = inertialModel.getPosition();
+        const glm::vec3 measuredPosition =
+                inertialModel.getPosition(PARAMETER_VALUE_TYPE_CURRENT);
         EXPECT_NEAR(measuredPosition.x, doubleIntegratedPosition.x, 0.01f);
         EXPECT_NEAR(measuredPosition.y, doubleIntegratedPosition.y, 0.01f);
         EXPECT_NEAR(measuredPosition.z, doubleIntegratedPosition.z, 0.01f);
@@ -312,4 +306,188 @@ TEST(InertialModel, IntermediateValuesDuringInterpolation) {
         EXPECT_NEAR(measuredPosition.y, singleIntegratedPosition.y, 0.01f);
         EXPECT_NEAR(measuredPosition.z, singleIntegratedPosition.z, 0.01f);
     }
+}
+
+TEST(InertialModel, GyroscopeTotalChange) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::quat initialRotation(glm::eulerAngleXYZ(
+            glm::radians(90.f),
+            glm::radians(90.f),
+            glm::radians(0.f)));
+    glm::quat targetRotation(glm::eulerAngleXYZ(
+            glm::radians(180.f),
+            glm::radians(-45.f),
+            glm::radians(27.f)));
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetRotation(initialRotation, PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetRotation(targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    glm::quat integratedRotation = initialRotation;
+
+    constexpr uint64_t step = 5000UL;
+    constexpr float timeIncrement = step / 1000000000.f;
+    for (uint64_t time = step >> 1; time < 750000000; time += step) {
+        inertialModel.setCurrentTime(time);
+        const glm::vec3 measuredVelocity =
+                inertialModel.getRotationalVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
+                measuredVelocity.x * timeIncrement,
+                measuredVelocity.y * timeIncrement,
+                measuredVelocity.z * timeIncrement);
+
+        integratedRotation = glm::quat_cast(rotationMatrix) * integratedRotation;
+    }
+
+    EXPECT_NEAR(targetRotation.x, integratedRotation.x, 0.001f);
+    EXPECT_NEAR(targetRotation.y, integratedRotation.y, 0.001f);
+    EXPECT_NEAR(targetRotation.z, integratedRotation.z, 0.001f);
+    EXPECT_NEAR(targetRotation.w, integratedRotation.w, 0.001f);
+}
+
+TEST(InertialModel, GyroscopeIntermediateValues) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::quat initialRotation(glm::eulerAngleXYZ(
+            glm::radians(42.f),
+            glm::radians(-34.f),
+            glm::radians(110.f)));
+    glm::quat targetRotation(glm::eulerAngleXYZ(
+            glm::radians(13.f),
+            glm::radians(57.f),
+            glm::radians(-25.f)));
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetRotation(initialRotation, PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetRotation(targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    glm::quat integratedRotation = initialRotation;
+
+    constexpr uint64_t step = 10000UL;
+    constexpr float timeIncrement = step / 1000000000.f;
+    for (uint64_t time = step >> 1; time < 1000000000; time += step) {
+        inertialModel.setCurrentTime(time);
+        const glm::vec3 measuredVelocity =
+                inertialModel.getRotationalVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
+                measuredVelocity.x * timeIncrement,
+                measuredVelocity.y * timeIncrement,
+                measuredVelocity.z * timeIncrement);
+
+        integratedRotation =
+                glm::quat_cast(rotationMatrix) * integratedRotation;
+
+        glm::quat measuredRotation =
+                inertialModel.getRotation(PARAMETER_VALUE_TYPE_CURRENT);
+
+        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.01f);
+        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.01f);
+        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.01f);
+        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.01f);
+    }
+}
+
+TEST(InertialModel, GyroscopeZeroChange) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::quat initialRotation(glm::eulerAngleXYZ(
+            glm::radians(122.f),
+            glm::radians(4.f),
+            glm::radians(10.f)));
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(1000000000UL);
+    inertialModel.setTargetRotation(initialRotation, PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetRotation(initialRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    const glm::vec3 firstMeasuredVelocity =
+            inertialModel.getRotationalVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+    EXPECT_NEAR(0.f, firstMeasuredVelocity.x, 0.0001f);
+    EXPECT_NEAR(0.f, firstMeasuredVelocity.y, 0.0001f);
+    EXPECT_NEAR(0.f, firstMeasuredVelocity.z, 0.0001f);
+
+    inertialModel.setCurrentTime(1000000000UL);
+    inertialModel.setTargetRotation(initialRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    const glm::vec3 secondMeasuredVelocity =
+            inertialModel.getRotationalVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+    EXPECT_NEAR(0.f, secondMeasuredVelocity.x, 0.0001f);
+    EXPECT_NEAR(0.f, secondMeasuredVelocity.y, 0.0001f);
+    EXPECT_NEAR(0.f, secondMeasuredVelocity.z, 0.0001f);
+}
+
+TEST(InertialModel, Gyroscope180Change) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::quat initialRotation(glm::eulerAngleXYZ(
+            glm::radians(0.f),
+            glm::radians(0.f),
+            glm::radians(0.f)));
+
+    glm::quat targetRotation(glm::eulerAngleXYZ(
+            glm::radians(180.f),
+            glm::radians(0.f),
+            glm::radians(0.f)));
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetRotation(initialRotation, PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetRotation(targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    glm::quat integratedRotation = initialRotation;
+
+    constexpr uint64_t step = 10000UL;
+    constexpr float timeIncrement = step / 1000000000.f;
+    for (uint64_t time = step >> 1; time < 1000000000; time += step) {
+        inertialModel.setCurrentTime(time);
+        const glm::vec3 measuredVelocity =
+                inertialModel.getRotationalVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::mat4 rotationMatrix = glm::eulerAngleXYZ(
+                measuredVelocity.x * timeIncrement,
+                measuredVelocity.y * timeIncrement,
+                measuredVelocity.z * timeIncrement);
+
+        integratedRotation =
+                glm::quat_cast(rotationMatrix) * integratedRotation;
+
+        glm::quat measuredRotation =
+                inertialModel.getRotation(PARAMETER_VALUE_TYPE_CURRENT);
+
+        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.01f);
+        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.01f);
+        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.01f);
+        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.01f);
+    }
+}
+
+TEST(InertialModel, GyroscopeNaNTest) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::quat initialRotation(
+            0.0000000109016751f,
+            0.973329246f,
+            -0.0000000339357982f,
+            0.229415923f);
+
+    glm::quat targetRotation(
+            0.0000000325290905f,
+            0.973379254f,
+            -0.0000000325290905f,
+            0.229200378f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetRotation(initialRotation, PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetRotation(targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    glm::quat measuredRotation =
+            inertialModel.getRotation(PARAMETER_VALUE_TYPE_CURRENT);
+
+    EXPECT_TRUE(!std::isnan(measuredRotation.x));
+    EXPECT_TRUE(!std::isnan(measuredRotation.y));
+    EXPECT_TRUE(!std::isnan(measuredRotation.z));
+    EXPECT_TRUE(!std::isnan(measuredRotation.w));
 }

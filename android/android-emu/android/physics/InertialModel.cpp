@@ -20,6 +20,9 @@
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
 
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
+
 namespace android {
 namespace physics {
 
@@ -32,15 +35,20 @@ constexpr float nsToSeconds(uint64_t nanoSeconds) {
 }
 
 /* Fixed state change time for smooth acceleration changes. */
-constexpr float kTargetStateChangeTimeSeconds = 0.5f;
-constexpr uint64_t kTargetStateChangeTimeNs =
-        secondsToNs(kTargetStateChangeTimeSeconds);
+constexpr float kPositionStateChangeTimeSeconds = 0.5f;
+constexpr uint64_t kPositionStateChangeTimeNs =
+        secondsToNs(kPositionStateChangeTimeSeconds);
+
+/* maximum angular velocity in rad/s */
+constexpr float kMaxAngularVelocity = 5.f;
+constexpr float kTargetRotationTime = 0.050f;
 
 InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
     assert(time_ns >= mModelTimeNs);
     mModelTimeNs = time_ns;
 
-    return mModelTimeNs >= mStateChangeEndTime ?
+    return (mModelTimeNs >= mPositionChangeEndTime &&
+            mModelTimeNs >= mRotationChangeEndTime) ?
             INERTIAL_STATE_STABLE : INERTIAL_STATE_CHANGING;
 }
 
@@ -58,8 +66,8 @@ void InertialModel::setTargetPosition(
         mAccelerationCubic = glm::mat4x3(0.f);
         mAccelerationQuintic = glm::mat2x3(0.f);
 
-        mStateChangeStartTime = mModelTimeNs;
-        mStateChangeEndTime = mModelTimeNs + kTargetStateChangeTimeNs;
+        mPositionChangeStartTime = mModelTimeNs;
+        mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
     } else {
         // We ensure that velocity, acceleration, and position are continuously
         // interpolating from the current state.  Here, and throughout, x is the
@@ -71,14 +79,14 @@ void InertialModel::setTargetPosition(
 
         // constexprs for powers of the state change time which are used
         // repeated.
-        constexpr float time_1 = kTargetStateChangeTimeSeconds;
+        constexpr float time_1 = kPositionStateChangeTimeSeconds;
         constexpr float time_2 = time_1 * time_1;
         constexpr float time_3 = time_2 * time_1;
         constexpr float time_4 = time_2 * time_2;
         constexpr float time_5 = time_2 * time_3;
 
         // Computed by solving for quintic movement in
-        // kTargetStateChangeTimeSeconds. Position, Velocity, and Acceleration
+        // kPositionStateChangeTimeSeconds. Position, Velocity, and Acceleration
         // are computed here by solving the system of linear equations created
         // by setting the initial position, velocity, and acceleration to the
         // current values, and the final state to the target position, with no
@@ -95,7 +103,7 @@ void InertialModel::setTargetPosition(
         //     D == quadraticTerm
         //     E == linearTerm
         //     F == constantTerm
-        // t_end == kTargetStateChangeTimeSeconds
+        // t_end == kPositionStateChangeTimeSeconds
         //
         // And this system of equations is solved:
         //
@@ -120,7 +128,7 @@ void InertialModel::setTargetPosition(
         //     x = x_init
         //     v = v_init
         //     a = a_init
-        //     t = kTargetStateChangeTimeSeconds
+        //     t = kPositionStateChangeTimeSeconds
         //     y = x_target
 
         const glm::vec3 quinticTerm = (1.f / (2.f * time_5)) * (
@@ -174,20 +182,29 @@ void InertialModel::setTargetPosition(
                 6.f * cubicTerm,
                 2.f * quadraticTerm);
 
-        mStateChangeStartTime = mModelTimeNs;
-        mStateChangeEndTime = mModelTimeNs + kTargetStateChangeTimeNs;
+        mPositionChangeStartTime = mModelTimeNs;
+        mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
     }
 }
 
 void InertialModel::setTargetRotation(
         glm::quat rotation, PhysicalInterpolation mode) {
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
-        mPreviousRotation = rotation;
+        mInitialRotation = rotation;
     } else {
-        mPreviousRotation = mCurrentRotation;
+        mInitialRotation = getRotation(PARAMETER_VALUE_TYPE_CURRENT);
     }
-    mCurrentRotation = rotation;
-    updateRotations();
+    mRotationChangeStartTime = mModelTimeNs;
+
+    const glm::quat rotationDiff = glm::normalize(
+            rotation * glm::conjugate(mInitialRotation));
+    mRotationAngleRadians = glm::angle(rotationDiff);
+    mRotationAxis = glm::axis(rotationDiff);
+
+    const float minTime = mRotationAngleRadians / kMaxAngularVelocity;
+    mRotationTimeSeconds = std::max(kTargetRotationTime, minTime);
+    mRotationChangeEndTime = mRotationChangeStartTime +
+            secondsToNs(mRotationTimeSeconds);
 }
 
 glm::vec3 InertialModel::getPosition(
@@ -216,69 +233,36 @@ glm::vec3 InertialModel::getAcceleration(
 
 glm::quat InertialModel::getRotation(
         ParameterValueType parameterValueType) const {
-    return mCurrentRotation;
+    float changeFraction = 1.f;
+    if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT &&
+            mModelTimeNs < mRotationChangeEndTime) {
+        changeFraction = nsToSeconds(mModelTimeNs - mRotationChangeStartTime) /
+                mRotationTimeSeconds;
+    }
+    return glm::normalize(glm::angleAxis(mRotationAngleRadians * changeFraction,
+            mRotationAxis) * mInitialRotation);
 }
 
 glm::vec3 InertialModel::getRotationalVelocity(
         ParameterValueType parameterValueType) const {
-    return mRotationalVelocity;
-}
-
-void InertialModel::updateRotations() {
-    const uint64_t currTimeMs = static_cast<uint64_t>(
-        android::base::System::get()->getHighResTimeUs() / 1000);
-
-    if (currTimeMs - mLastRotationUpdateMs > ROTATION_UPDATE_RESET_TIME_MS) {
-        std::fill(mLastUpdateIntervals.begin(),
-                  mLastUpdateIntervals.end(), 0);
+    if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT &&
+            mModelTimeNs < mRotationChangeEndTime) {
+        return (mRotationAngleRadians / mRotationTimeSeconds) * mRotationAxis;
+    } else {
+        return glm::vec3();
     }
-
-    mLastUpdateIntervals[mRotationUpdateTimeWindowElt] =
-        (currTimeMs - mLastRotationUpdateMs);
-    mRotationUpdateTimeWindowElt++;
-
-    if (mRotationUpdateTimeWindowElt >= ROTATION_UPDATE_TIME_WINDOW_SIZE) {
-        mRotationUpdateTimeWindowElt = 0;
-    }
-
-    mUpdateIntervalMs = 0;
-
-    // Filter out window entries where the update interval is
-    // still calculated as 0 due to not being initialized yet.
-    uint64_t nontrivialUpdateIntervals = 0;
-    for (const auto& elt: mLastUpdateIntervals) {
-        mUpdateIntervalMs += elt;
-        if (elt) nontrivialUpdateIntervals++;
-    }
-
-    if (nontrivialUpdateIntervals)
-        mUpdateIntervalMs /= nontrivialUpdateIntervals;
-
-    mLastRotationUpdateMs = currTimeMs;
-
-    const glm::quat rotationDelta =
-            mCurrentRotation * glm::conjugate(mPreviousRotation);
-    const glm::vec3 eulerAngles = glm::eulerAngles(rotationDelta);
-
-    const float gyroUpdateRate = mUpdateIntervalMs < 16 ? 0.016f :
-            mUpdateIntervalMs / 1000.0f;
-
-    // Convert raw UI pitch/roll/yaw delta
-    // to device-space rotation in radians per second.
-    mRotationalVelocity =
-            (eulerAngles * static_cast<float>(M_PI) / (180.f * gyroUpdateRate));
 }
 
 glm::vec3 InertialModel::calculateInertialState(
             const glm::mat2x3& quinticTransform,
             const glm::mat4x3& cubicTransform,
             ParameterValueType parameterValueType) const {
-    assert(mModelTimeNs >= mStateChangeStartTime);
+    assert(mModelTimeNs >= mPositionChangeStartTime);
     const uint64_t requestedTimeNs =
             (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT &&
-            mModelTimeNs < mStateChangeEndTime) ?
-                    mModelTimeNs : mStateChangeEndTime;
-    const float time1 = nsToSeconds(requestedTimeNs - mStateChangeStartTime);
+            mModelTimeNs < mPositionChangeEndTime) ?
+                    mModelTimeNs : mPositionChangeEndTime;
+    const float time1 = nsToSeconds(requestedTimeNs - mPositionChangeStartTime);
     const float time2 = time1 * time1;
     const float time3 = time2 * time1;
     const float time4 = time2 * time2;
