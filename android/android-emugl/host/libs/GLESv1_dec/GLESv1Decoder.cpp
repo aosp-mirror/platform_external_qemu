@@ -34,6 +34,10 @@ static inline void* SafePointerFromUInt(GLuint value) {
 int gles1_decoder_extended_context::initDispatch(
     void *(*getProc)(const char *name, void *userData), void *userData) {
     gles1_server_context_t::initDispatchByName(getProc, userData);
+    // The following could be "not-implemented" in
+    // -gpu swiftshader and -gpu angle.
+    // But we should always have them in
+    // -gpu host and -gpu [swiftshader|angle]_indirect.
     glColorPointerWithDataSize =
             (glColorPointerWithDataSize_server_proc_t)
             getProc("glColorPointerWithDataSize", userData);
@@ -46,10 +50,6 @@ int gles1_decoder_extended_context::initDispatch(
     glVertexPointerWithDataSize =
             (glVertexPointerWithDataSize_server_proc_t)
             getProc("glVertexPointerWithDataSize", userData);
-    assert((void*)glColorPointerWithDataSize != gles1_unimplemented);
-    assert((void*)glNormalPointerWithDataSize != gles1_unimplemented);
-    assert((void*)glTexCoordPointerWithDataSize != gles1_unimplemented);
-    assert((void*)glVertexPointerWithDataSize != gles1_unimplemented);
     return 0;
 }
 
