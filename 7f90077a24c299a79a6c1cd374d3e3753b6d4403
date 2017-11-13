@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0003a48_6700fc8e",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:54:11Z",
+      "side": 1,
+      "message": "A proper fix would be to move the settings initialization out of extended window. This call will force initialization of the whole stack of settings pages, that takes hundreds of milliseconds instead of loading a single configuration value.\n\nThe whole idea of loading settings inside a random window initialization will cause more bugs like this one, or maybe already causing them but we haven\u0027t noticed the bugs yet.",
+      "range": {
+        "startLine": 516,
+        "startChar": 0,
+        "endLine": 516,
+        "endChar": 26
+      },
+      "revId": "7f90077a24c299a79a6c1cd374d3e3753b6d4403",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
