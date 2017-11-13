@@ -92,13 +92,20 @@ public:
     /*
      * Gets current simulated state of the ambient environment.
      */
-    glm::vec3 getMagneticField() const;
-    glm::vec3 getGravity() const;
-    float getTemperature() const;
-    float getProximity() const;
-    float getLight() const;
-    float getPressure() const;
-    float getHumidity() const;
+    glm::vec3 getMagneticField(
+            ParameterValue parameterValue = PARAMETER_VALUE_CURRENT) const;
+    glm::vec3 getGravity(
+            ParameterValue parameterValue = PARAMETER_VALUE_CURRENT) const;
+    float getTemperature(
+            ParameterValue parameterValue = PARAMETER_VALUE_CURRENT) const;
+    float getProximity(
+            ParameterValue parameterValue = PARAMETER_VALUE_CURRENT) const;
+    float getLight(
+            ParameterValue parameterValue = PARAMETER_VALUE_CURRENT) const;
+    float getPressure(
+            ParameterValue parameterValue = PARAMETER_VALUE_CURRENT) const;
+    float getHumidity(
+            ParameterValue parameterValue = PARAMETER_VALUE_CURRENT) const;
 
 private:
     glm::vec3 mMagneticField = glm::vec3(22.0f, 5.9f, 43.1f);

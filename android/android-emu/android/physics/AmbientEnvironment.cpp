@@ -55,31 +55,31 @@ void AmbientEnvironment::setHumidity(float percent, PhysicalInterpolation mode) 
     mHumidity = percent;
 }
 
-glm::vec3 AmbientEnvironment::getMagneticField() const {
+glm::vec3 AmbientEnvironment::getMagneticField(ParameterValue value) const {
     return mMagneticField;
 }
 
-glm::vec3 AmbientEnvironment::getGravity() const {
+glm::vec3 AmbientEnvironment::getGravity(ParameterValue value) const {
     return mGravity;
 }
 
-float AmbientEnvironment::getTemperature() const {
+float AmbientEnvironment::getTemperature(ParameterValue value) const {
     return mTemperature;
 }
 
-float AmbientEnvironment::getProximity() const {
+float AmbientEnvironment::getProximity(ParameterValue value) const {
     return mProximity;
 }
 
-float AmbientEnvironment::getLight() const {
+float AmbientEnvironment::getLight(ParameterValue value) const {
     return mLight;
 }
 
-float AmbientEnvironment::getPressure() const {
+float AmbientEnvironment::getPressure(ParameterValue value) const {
     return mPressure;
 }
 
-float AmbientEnvironment::getHumidity() const {
+float AmbientEnvironment::getHumidity(ParameterValue value) const {
     return mHumidity;
 }
 

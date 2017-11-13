@@ -24,14 +24,22 @@ typedef struct QAndroidSensorsAgent {
     //                      PHYSICAL_PARAMETER_POSITION,
     //                      PHYSICAL_PARAMETER_ROTATITION,
     //                      etc.
+    //        |interpolationMethod| determines which interpolation type to use,
+    //                              i.e.
+    //                              PHYSICAL_INTERPOLATION_SMOOTH,
+    //                              PHYSICAL_INTERPOLATION_STEP
     int (*setPhysicalParameterTarget)(
             int parameterId, float a, float b, float c,
-            int interpolation_method);
+            int interpolationMethod);
 
     // Gets the target values of a given physical parameter.
     // Input: |parameterId| determines which parameter's values to retrieve.
-    int (*getPhysicalParameterTarget)(
-            int parameterId, float *a, float *b, float *c);
+    //        |parameterValue| determines whether to retrieve the parameter's
+    //                         target, or current/instantaneous value, i.e.
+    //                         PARAMETER_VALUE_TARGET,
+    //                         PARAMETER_VALUE_CURRENT
+    int (*getPhysicalParameter)(
+            int parameterId, float *a, float *b, float *c, int parameterValue);
 
     // Sets the values of a given sensor to the specified override.
     // Input: |sensorId| determines which sensor's values to retrieve, i.e.
