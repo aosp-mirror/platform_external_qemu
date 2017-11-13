@@ -22,6 +22,30 @@
       "revId": "59965c3b277403c3d12ba703885c2bb9a3b19091",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c6d29b48_cc979fe4",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-13T23:29:22Z",
+      "side": 1,
+      "message": "Maybe the enum + variables could be changed to parameterType or something so that it\u0027s clear that it\u0027s not a instance of a value but to describe the type of some value.",
+      "parentUuid": "83a46cef_707cecfd",
+      "range": {
+        "startLine": 42,
+        "startChar": 63,
+        "endLine": 42,
+        "endChar": 77
+      },
+      "revId": "59965c3b277403c3d12ba703885c2bb9a3b19091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
