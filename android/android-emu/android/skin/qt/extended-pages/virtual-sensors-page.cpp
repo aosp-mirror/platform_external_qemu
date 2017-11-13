@@ -26,6 +26,7 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 
 #include <array>
 #include <cassert>
@@ -118,7 +119,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     // on_*Slider_valueChanged which just trigger setRotation from default
     // value of Sliders.
     static const glm::quat initialQuat(glm::vec3(glm::radians(-4.75f), 0.00f, 0.00f));
-    mUi->accelWidget->setRotation(initialQuat);
+    mUi->accelWidget->setRotation(glm::mat4_cast(initialQuat));
     updateSlidersFromAccelWidget();
     updateModelFromAccelWidget(PHYSICAL_INTERPOLATION_STEP);
 
@@ -200,7 +201,7 @@ void VirtualSensorsPage::resetDeviceRotationFromSkinLayout(
 void VirtualSensorsPage::resetDeviceRotation(const glm::quat& rotation) {
     if (!mFirstShow) mVirtualSensorsUsed = true;
     mUi->accelWidget->setPosition(glm::vec2(0.0f, 0.0f));
-    mUi->accelWidget->setRotation(rotation);
+    mUi->accelWidget->setRotation(glm::mat4_cast(rotation));
     mUi->accelWidget->update();
 
     // Note: here we do an instantaneous model update.
@@ -471,11 +472,10 @@ void VirtualSensorsPage::updateAccelWidgetFromSliders() {
                        0.f);
     mUi->accelWidget->setPosition(glm::vec2(position));
 
-    const glm::quat rotation(glm::vec3(
+    mUi->accelWidget->setRotation(glm::eulerAngleXYZ(
             glm::radians(mUi->xRotSlider->getValue()),
             glm::radians(mUi->yRotSlider->getValue()),
             glm::radians(mUi->zRotSlider->getValue())));
-    mUi->accelWidget->setRotation(rotation);
 
     mUi->accelWidget->update();
 }
@@ -486,12 +486,15 @@ void VirtualSensorsPage::updateAccelWidgetFromSliders() {
 void VirtualSensorsPage::updateSlidersFromAccelWidget() {
     const glm::vec2& pos = mUi->accelWidget->position();
     glm::vec3 position(pos, 0.0f);
-    const glm::quat& rotation = mUi->accelWidget->rotation();
 
-    glm::vec3 eulerAngles(glm::eulerAngles(rotation));
-    mUi->xRotSlider->setValue(glm::degrees(eulerAngles.x), false);
-    mUi->yRotSlider->setValue(glm::degrees(eulerAngles.y), false);
-    mUi->zRotSlider->setValue(glm::degrees(eulerAngles.z), false);
+    glm::vec3 rotationRadians;
+    glm::extractEulerAngleXYZ(mUi->accelWidget->rotation(),
+            rotationRadians.x, rotationRadians.y, rotationRadians.z);
+    const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
+
+    mUi->xRotSlider->setValue(rotationDegrees.x, false);
+    mUi->yRotSlider->setValue(rotationDegrees.y, false);
+    mUi->zRotSlider->setValue(rotationDegrees.z, false);
 
     mUi->positionXSlider->setValue(pos.x, false);
     mUi->positionYSlider->setValue(pos.y, false);
@@ -505,8 +508,10 @@ constexpr float kMetersPerInch = 0.0254f;
  */
 void VirtualSensorsPage::updateModelFromAccelWidget(PhysicalInterpolation mode) {
     const glm::vec2& position = kMetersPerInch * mUi->accelWidget->position();
-    const glm::vec3 rotationDegrees(glm::degrees(glm::eulerAngles(
-            mUi->accelWidget->rotation())));
+    glm::vec3 rotationRadians;
+    glm::extractEulerAngleXYZ(mUi->accelWidget->rotation(),
+            rotationRadians.x, rotationRadians.y, rotationRadians.z);
+    const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
 
     setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
             position.x, position.y, 0.f);
@@ -528,8 +533,11 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
         mSensorsAgent->getPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION,
                 &eulerDegrees.x, &eulerDegrees.y, &eulerDegrees.z);
 
-        mUi->accelWidget->setPosition(glm::vec2(position.x, position.y));
-        mUi->accelWidget->setRotation(glm::quat(glm::radians(eulerDegrees)));
+        mUi->accelWidget->setPosition(position);
+        mUi->accelWidget->setRotation(glm::eulerAngleXYZ(
+                glm::radians(eulerDegrees.x),
+                glm::radians(eulerDegrees.y),
+                glm::radians(eulerDegrees.z)));
         mUi->accelWidget->update();
 
         mUi->xRotSlider->setValue(eulerDegrees.x, false);

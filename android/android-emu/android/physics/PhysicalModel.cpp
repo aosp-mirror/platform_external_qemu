@@ -17,6 +17,8 @@
 #include "android/physics/PhysicalModel.h"
 
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/vec3.hpp>
 
 #include "android/base/system/System.h"
@@ -254,8 +256,10 @@ void PhysicalModelImpl::setTargetRotation(vec3 rotation,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
-    mInertialModel.setTargetRotation(
-            glm::quat(glm::radians(toGlm(rotation))), mode);
+    mInertialModel.setTargetRotation(glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(rotation.x),
+            glm::radians(rotation.y),
+            glm::radians(rotation.z))), mode);
     targetStateChanged();
 }
 
@@ -314,8 +318,10 @@ vec3 PhysicalModelImpl::getTargetPosition() const {
 
 vec3 PhysicalModelImpl::getTargetRotation() const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return fromGlm(glm::degrees(glm::eulerAngles(
-            mInertialModel.getRotation())));
+    glm::vec3 rotationRadians;
+    glm::extractEulerAngleXYZ(glm::mat4_cast(mInertialModel.getRotation()),
+            rotationRadians.x, rotationRadians.y, rotationRadians.z);
+    return fromGlm(glm::degrees(rotationRadians));
 }
 
 vec3 PhysicalModelImpl::getTargetMagneticField() const {
@@ -383,11 +389,6 @@ SENSORS_LIST
 
 vec3 PhysicalModelImpl::getPhysicalAccelerometer() const {
     //Implementation Note:
-    //Qt's rotation is around fixed axis, in the following
-    //order: z first, x second and y last
-    //refs:
-    //http://doc.qt.io/qt-5/qquaternion.html#fromEulerAngles
-    //
     // Gravity and magnetic vectors as observed by the device.
     // Note how we're applying the *inverse* of the transformation
     // represented by device_rotation_quat to the "absolute" coordinates
