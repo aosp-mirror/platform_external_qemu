@@ -1,0 +1,188 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2e18d4cb_04f1f7a0",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2737,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "nit: no need to start names with underscore - it only makes it easier to accidentally get a forbidden name (names starting with _Uppercase or having __ anywhere are reserved for compiler/standard library)",
+      "range": {
+        "startLine": 2737,
+        "startChar": 11,
+        "endLine": 2737,
+        "endChar": 13
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e81cacdd_5d9747a1",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2752,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "what about:\n\nint count \u003d 0;\nsscanf(widthHeight, \"%\" SCNu32 \"x%\" SCNu32 \"%n\", pWidth, pHeight, \u0026count);\nreturn count \u003d\u003d strlen(widthHeight);\n\n?",
+      "range": {
+        "startLine": 2742,
+        "startChar": 4,
+        "endLine": 2752,
+        "endChar": 5
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5f8b4a04_ebd7170d",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2808,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "looks like you\u0027re just splitting the string by a space character. What about android/base/misc/StringUtils.h, split():\n\nstd::vector\u003cstd::string\u003e splitArgs;\nandroid::base::split(args, \" \", [\u0026splitArgs](StringView s) { if (!s.empty()) splitArgs.push_back(s); });\n\nthis way you don\u0027t need to have a custom limit of the string length, won\u0027t use 16KB of stack space and don\u0027t limit the number of arguments",
+      "range": {
+        "startLine": 2803,
+        "startChar": 0,
+        "endLine": 2808,
+        "endChar": 93
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ec7e2c9_dc0a27de",
+        "filename": "android/android-emu/android/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "generally, duplicating values in comments is usually good for only making them go out of sync with the actual value :)\nInstead it\u0027s better to only put the units here, e.g.:\n\nconst int kMinBitrate \u003d 100000    // kbps\nconst int kMaxTimelimit \u003d 3 * 60; // seconds\n\nAlso please consider using constants instead of macros here - macros sometimes interfere with code in unexpected ways",
+      "range": {
+        "startLine": 16,
+        "startChar": 38,
+        "endLine": 16,
+        "endChar": 41
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c59ce931_d4171393",
+        "filename": "android/android-emu/android/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "use parenthesis - (200 * 1000000)",
+      "range": {
+        "startLine": 17,
+        "startChar": 20,
+        "endLine": 17,
+        "endChar": 33
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "57a2bf2b_74002eaf",
+        "filename": "android/android-emu/android/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "I\u0027m not sure any client PC can handle 200 Mbps :)",
+      "range": {
+        "startLine": 17,
+        "startChar": 20,
+        "endLine": 17,
+        "endChar": 23
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8ea10515_6976e21f",
+        "filename": "android/android-emu/android/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "(200 * 1000 * 1000) ?",
+      "range": {
+        "startLine": 17,
+        "startChar": 26,
+        "endLine": 17,
+        "endChar": 33
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "03c2bdfb_ff30c856",
+        "filename": "android/android-emu/android/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T17:22:40Z",
+      "side": 1,
+      "message": "nit: (3 * 60)",
+      "range": {
+        "startLine": 18,
+        "startChar": 22,
+        "endLine": 18,
+        "endChar": 25
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
