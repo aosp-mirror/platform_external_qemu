@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83a46cef_707cecfd",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-13T23:26:05Z",
+      "side": 1,
+      "message": "I found \"parameterValue\" is ambiguous, but I can\u0027t think of a better name.",
+      "range": {
+        "startLine": 42,
+        "startChar": 63,
+        "endLine": 42,
+        "endChar": 77
+      },
+      "revId": "59965c3b277403c3d12ba703885c2bb9a3b19091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
