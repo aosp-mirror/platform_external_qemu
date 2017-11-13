@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2ead224d_015e4859",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GlobalRenderThread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-11-13T22:01:32Z",
+      "side": 1,
+      "message": "This is probably not what we want. When another thread calls GlobalRenderThread::decode, it should only waits for the cmd decoded gets finished, not all commands in the queue get drained.",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 37
+      },
+      "revId": "02103cad4127c1cdb0b8f6ad1651d83724c7bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
