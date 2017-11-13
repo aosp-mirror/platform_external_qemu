@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "c5c2bd94_f736b8f4",
+        "filename": "android/console.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-13T16:53:24Z",
+      "side": 1,
+      "message": "please don\u0027t include any libraries that aren\u0027t part of emulator\u0027s prebuilts - it won\u0027t build on Mac, or Windows, or a Linux distributions with no such library installed.\nA better fix would be to make sms_utf8_from_message_str() correct for Chinese input - this way it would also fix SMS entered in the UI window",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 19
+      },
+      "revId": "aa44952f1eaa9f1e0f7a70cbf3eeabeac2874f86",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "04b861a5_8df8d38a",
         "filename": "android/console.c",
         "patchSetId": 1
