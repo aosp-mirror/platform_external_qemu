@@ -22,6 +22,30 @@
       "revId": "02103cad4127c1cdb0b8f6ad1651d83724c7bc0a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "84cddd22_7eab88eb",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GlobalRenderThread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-13T23:02:28Z",
+      "side": 1,
+      "message": "Right, we probably want to optimize for calls that don\u0027t have return values.\n\nHowever, even with this unoptimized version, I am not seeing an adverse effect. In effect, it\u0027s the same as if there is a global lock on all GL calls, with a little more copying and context switching. angle_indirect uses it, and has less jank, plus Mac Antutu Garden runs faster with this (and Antutu Garden has many GL API calls per frame compared to most apps).",
+      "parentUuid": "2ead224d_015e4859",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 37
+      },
+      "revId": "02103cad4127c1cdb0b8f6ad1651d83724c7bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
