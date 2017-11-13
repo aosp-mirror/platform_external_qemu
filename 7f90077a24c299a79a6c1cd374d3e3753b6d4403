@@ -22,6 +22,30 @@
       "revId": "7f90077a24c299a79a6c1cd374d3e3753b6d4403",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "55f815fa_ce308322",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 516,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-13T18:20:51Z",
+      "side": 1,
+      "message": "That\u0027s exactly right Yurii. The bug is only for AVD specific settings so far, since we used to only use QSettings for global settings and  on construction will load everything relevant (and that always happens much earlier than even UI initialization).\n\nWe would need to create a static global class that holds AVD specific settings and initialize them early too, preferably in android-qemu*-glue/main.cpp. It\u0027ll be a little tricky since it involves bridging the Qt / non-Qt boundary through skin_winsys code, but it\u0027s nothing that skin_winsys_get_preferred_gles_backend doesn\u0027t demonstrate already.",
+      "parentUuid": "e0003a48_6700fc8e",
+      "range": {
+        "startLine": 516,
+        "startChar": 0,
+        "endLine": 516,
+        "endChar": 26
+      },
+      "revId": "7f90077a24c299a79a6c1cd374d3e3753b6d4403",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
