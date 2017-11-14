@@ -20,9 +20,11 @@ int physical_parameter_target_set(
             parameterId, a, b, c, interpolation_method);
 }
 
-int physical_parameter_target_get(
-        int parameterId, float *a, float *b, float *c) {
-    return android_physical_model_get(parameterId, a, b, c);
+int physical_parameter_get(
+        int parameterId, float *a, float *b, float *c,
+        int parameter_value_type) {
+    return android_physical_model_get(
+            parameterId, a, b, c, parameter_value_type);
 }
 
 int sensor_override_set(int sensorId, float a, float b, float c) {
@@ -39,7 +41,7 @@ int physical_state_agent_set(const struct QAndroidPhysicalStateAgent* agent) {
 
 static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
     .setPhysicalParameterTarget = physical_parameter_target_set,
-    .getPhysicalParameterTarget = physical_parameter_target_get,
+    .getPhysicalParameter = physical_parameter_get,
     .setSensorOverride = sensor_override_set,
     .getSensor = sensor_get,
     .setPhysicalStateAgent = physical_state_agent_set};

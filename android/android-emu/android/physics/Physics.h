@@ -25,4 +25,9 @@ typedef enum {
     PHYSICAL_INTERPOLATION_STEP=1,
 } PhysicalInterpolation;
 
+typedef enum {
+    PARAMETER_VALUE_TYPE_TARGET=0,
+    PARAMETER_VALUE_TYPE_CURRENT=1,
+} ParameterValueType;
+
 ANDROID_END_HEADER

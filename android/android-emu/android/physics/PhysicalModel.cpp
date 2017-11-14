@@ -87,8 +87,9 @@ PHYSICAL_PARAMETERS_LIST
      * Gets current target state of the modeled object.
      * Can be called from any thread.
      */
-#define GET_TARGET_FUNCTION_NAME(x) getTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_TARGET_FUNCTION_NAME(z)() const;
+#define GET_TARGET_FUNCTION_NAME(x) getParameter##x
+#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_TARGET_FUNCTION_NAME(z)(\
+        ParameterValueType parameterValueType) const;
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_FUNCTION_NAME
@@ -311,47 +312,56 @@ void PhysicalModelImpl::setTargetHumidity(
     targetStateChanged();
 }
 
-vec3 PhysicalModelImpl::getTargetPosition() const {
+vec3 PhysicalModelImpl::getParameterPosition(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return fromGlm(mInertialModel.getPosition());
+    return fromGlm(mInertialModel.getPosition(parameterValueType));
 }
 
-vec3 PhysicalModelImpl::getTargetRotation() const {
+vec3 PhysicalModelImpl::getParameterRotation(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     glm::vec3 rotationRadians;
-    glm::extractEulerAngleXYZ(glm::mat4_cast(mInertialModel.getRotation()),
+    glm::extractEulerAngleXYZ(
+            glm::mat4_cast(mInertialModel.getRotation(parameterValueType)),
             rotationRadians.x, rotationRadians.y, rotationRadians.z);
     return fromGlm(glm::degrees(rotationRadians));
 }
 
-vec3 PhysicalModelImpl::getTargetMagneticField() const {
+vec3 PhysicalModelImpl::getParameterMagneticField(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return fromGlm(mAmbientEnvironment.getMagneticField());
+    return fromGlm(mAmbientEnvironment.getMagneticField(parameterValueType));
 }
 
-float PhysicalModelImpl::getTargetTemperature() const {
+float PhysicalModelImpl::getParameterTemperature(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getTemperature();
+    return mAmbientEnvironment.getTemperature(parameterValueType);
 }
 
-float PhysicalModelImpl::getTargetProximity() const {
+float PhysicalModelImpl::getParameterProximity(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getProximity();
+    return mAmbientEnvironment.getProximity(parameterValueType);
 }
 
-float PhysicalModelImpl::getTargetLight() const {
+float PhysicalModelImpl::getParameterLight(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getLight();
+    return mAmbientEnvironment.getLight(parameterValueType);
 }
 
-float PhysicalModelImpl::getTargetPressure() const {
+float PhysicalModelImpl::getParameterPressure(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getPressure();
+    return mAmbientEnvironment.getPressure(parameterValueType);
 }
 
-float PhysicalModelImpl::getTargetHumidity() const {
+float PhysicalModelImpl::getParameterHumidity(
+        ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getHumidity();
+    return mAmbientEnvironment.getHumidity(parameterValueType);
 }
 
 #define GET_FUNCTION_NAME(x) get##x
@@ -506,15 +516,16 @@ void PhysicalModelImpl::save(Stream* f) {
          parameter++) {
         switch (parameter) {
 #define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
-#define GET_TARGET_FUNCTION_NAME(x) getTarget##x
+#define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) case PHYSICAL_PARAMETER_NAME(x): {\
-                w targetValue = GET_TARGET_FUNCTION_NAME(z)();\
+                w targetValue = GET_PARAMETER_FUNCTION_NAME(z)(\
+                        PARAMETER_VALUE_TYPE_TARGET);\
                 writeValueToStream(f, targetValue);\
                 break;\
             }
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
-#undef SET_TARGET_FUNCTION_NAME
+#undef GET_PARAMETER_FUNCTION_NAME
 #undef PHYSICAL_PARAMETER_NAME
             default:
                 assert(false);  // should never happen
@@ -695,14 +706,14 @@ PHYSICAL_PARAMETERS_LIST
 #undef SET_PHYSICAL_TARGET_FUNCTION_NAME
 
 
-#define GET_PHYSICAL_TARGET_FUNCTION_NAME(x) physicalModel_getTarget##x
-#define GET_TARGET_FUNCTION_NAME(x) getTarget##x
-#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_PHYSICAL_TARGET_FUNCTION_NAME(z)(\
-        PhysicalModel* model) {\
+#define GET_PHYSICAL_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
+#define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
+#define PHYSICAL_PARAMETER_(x,y,z,w) w GET_PHYSICAL_PARAMETER_FUNCTION_NAME(z)(\
+        PhysicalModel* model, ParameterValueType parameterValueType) {\
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
     w result;\
     if (impl != nullptr) {\
-        result = impl->GET_TARGET_FUNCTION_NAME(z)();\
+        result = impl->GET_PARAMETER_FUNCTION_NAME(z)(parameterValueType);\
     } else {\
         result = {0.f};\
     }\
@@ -710,8 +721,8 @@ PHYSICAL_PARAMETERS_LIST
 }
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
-#undef SET_TARGET_FUNCTION_NAME
-#undef SET_PHYSICAL_TARGET_FUNCTION_NAME
+#undef GET_PARAMETER_FUNCTION_NAME
+#undef GET_PHYSICAL_PARAMETER_FUNCTION_NAME
 
 #define OVERRIDE_FUNCTION_NAME(x) override##x
 #define PHYSICAL_OVERRIDE_FUNCTION_NAME(x) physicalModel_override##x
