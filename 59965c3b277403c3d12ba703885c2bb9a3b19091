@@ -70,6 +70,30 @@
       "revId": "59965c3b277403c3d12ba703885c2bb9a3b19091",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fb88fb89_c4a6e97e",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-14T17:15:27Z",
+      "side": 1,
+      "message": "Thanks, that works.",
+      "parentUuid": "ce98f948_de800f77",
+      "range": {
+        "startLine": 42,
+        "startChar": 63,
+        "endLine": 42,
+        "endChar": 77
+      },
+      "revId": "59965c3b277403c3d12ba703885c2bb9a3b19091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
