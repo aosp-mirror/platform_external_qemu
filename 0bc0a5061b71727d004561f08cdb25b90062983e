@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "97fc204e_2dfd8b43",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-14T17:24:24Z",
+      "side": 1,
+      "message": "The successful/invalid loads count for the entire snapshot load operation, so I think it\u0027s OK to skip that for when loading just the metadata protobuf.\n\nI think I get that that if there was a failure there, it would get ovewritten by FailureReason::Empty. I\u0027m not really sure how best to address different states of failure for loading protobuf vs loading the entire snapshot, but my knee jerk reaction is that it\u0027s actually a good idea to have the latest error be populated in the file; in the short term, it\u0027s simpler since it does less state changing / disk writes, and in the long term, even if the protobuf loading is successful, in case we ever want to diagnose or show anything about the overall snapshot failing, we will want to preserve that info.",
+      "parentUuid": "fca2901e_767fef27",
+      "range": {
+        "startLine": 374,
+        "startChar": 4,
+        "endLine": 374,
+        "endChar": 15
+      },
+      "revId": "0bc0a5061b71727d004561f08cdb25b90062983e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d602f1ef_8470a169",
         "filename": "android/android-emu/android/snapshot/Snapshot.h",
         "patchSetId": 1
