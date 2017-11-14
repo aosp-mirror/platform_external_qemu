@@ -46,6 +46,30 @@
       "revId": "59965c3b277403c3d12ba703885c2bb9a3b19091",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce98f948_de800f77",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T17:14:24Z",
+      "side": 1,
+      "message": "I considered parameterType but it seems like that\u0027s even more overloaded - e.g. some parameter\u0027s are vectors, some are scalars, etc... so one might consider that to be its type.\n\nI\u0027m not a big fan of parameterValue either though, so I switched it to parameterValueType which I think is a little better (although kind of verbose) since it\u0027s specifying which type of value we want from the parameter.  I still don\u0027t love it but I suppose it\u0027s sensible enough for someone to figure out with the comments.",
+      "parentUuid": "c6d29b48_cc979fe4",
+      "range": {
+        "startLine": 42,
+        "startChar": 63,
+        "endLine": 42,
+        "endChar": 77
+      },
+      "revId": "59965c3b277403c3d12ba703885c2bb9a3b19091",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
