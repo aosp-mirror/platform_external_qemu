@@ -234,6 +234,30 @@
       "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd9a800d_0562cbaa",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-14T17:13:54Z",
+      "side": 1,
+      "message": "I see, interesting. You might want to consider checking if NearClip is set too high as well---a 1.0f value might not play well for how near the camera can get using the new Z translations.",
+      "parentUuid": "3d8e8115_cc905453",
+      "range": {
+        "startLine": 82,
+        "startChar": 44,
+        "endLine": 82,
+        "endChar": 48
+      },
+      "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

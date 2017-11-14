@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a73abe3a_b1c099b2",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-14T17:13:54Z",
+      "side": 1,
+      "message": "Should we tie the Z movement to the camera projection matrix? Another way of doing it that might be worth considering is to maintain camera and phone position / rotations, and always translate along the direction of the camera normalized to the units we prefer. It would do the same thing but avoid inverse operations.",
+      "range": {
+        "startLine": 413,
+        "startChar": 0,
+        "endLine": 414,
+        "endChar": 13
+      },
+      "revId": "28bc98004ec449a5ce9f4c0b8a456570291e1057",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
