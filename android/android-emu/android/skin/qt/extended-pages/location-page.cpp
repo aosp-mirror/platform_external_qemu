@@ -11,6 +11,7 @@
 
 #include "android/skin/qt/extended-pages/location-page.h"
 
+#include "android/base/memory/LazyInstance.h"
 #include "android/emulation/control/location_agent.h"
 #include "android/gps/GpxParser.h"
 #include "android/gps/KmlParser.h"
@@ -31,9 +32,30 @@
 static const double kGplexLon = -122.084;
 static const double kGplexLat =   37.422;
 
+static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
+                              double* pOutLatitude,
+                              double* pOutLongitude,
+                              double* pOutAltitude);
+
+static void sendLocationToDevice(const QAndroidLocationAgent* locAgent);
+
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
-    mUi(new Ui::LocationPage)
+    mUi(new Ui::LocationPage),
+    mUpdateThread([this]() {
+        // update location every 10 seconds, until we exits
+        mUpdateThreadLock.lock();
+        while (!mShouldCloseUpdateThread) {
+            if (mLocationAgent) {
+                sendLocationToDevice(mLocationAgent);
+            }
+            // wait 10 sec
+            mUpdateThreadCv.timedWait(&mUpdateThreadLock,
+                    android::base::System::get()->getUnixTimeUs()
+                    + 10 * 1000 * 1000);
+        }
+        mUpdateThreadLock.unlock();
+    })
 {
     mUi->setupUi(this);
     mTimer.setSingleShot(true);
@@ -91,6 +113,10 @@ LocationPage::LocationPage(QWidget *parent) :
 }
 
 LocationPage::~LocationPage() {
+    mUpdateThreadLock.lock();
+    mShouldCloseUpdateThread = true;
+    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
+    mUpdateThread.wait();
     if (mGeoDataLoader != nullptr) {
         // If there's a loader thread running in the background,
         // ignore all signals from it and wait for it to finish.
@@ -102,13 +128,16 @@ LocationPage::~LocationPage() {
 }
 
 void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
+    mUpdateThreadLock.lock();
     mLocationAgent = agent;
-
     // Show the user the device's current location.
     double curLat, curLon, curAlt;
     getDeviceLocation(mLocationAgent, &curLat, &curLon, &curAlt);
+    updateDisplayedLocation(curLat, curLon, curAlt);
 
-    sendLocationToDevice(mLocationAgent, curLat, curLon, curAlt);
+    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
+
+    mUpdateThread.start(); // no-op if mUpdateThread already started.
 
     // We cannot update the UI here because we are not called from
     // the Qt thread. Emit a signal to do that update.
@@ -175,20 +204,23 @@ void LocationPage::on_loc_sendPointButton_clicked() {
                         .toDouble()));
     }
 
+    mUpdateThreadLock.lock();
     updateDisplayedLocation(mUi->loc_latitudeInput->value(),
                             mUi->loc_longitudeInput->value(),
                             mUi->loc_altitudeInput->text().toDouble());
 
-    sendLocationToDevice(mLocationAgent,
-                         mUi->loc_latitudeInput->value(),
-                         mUi->loc_longitudeInput->value(),
-                         mUi->loc_altitudeInput->text().toDouble());
+    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
 }
 
 void LocationPage::updateDisplayedLocation(double lat, double lon, double alt) {
     QString curLoc = tr("Longitude: %1\nLatitude: %2\nAltitude: %3")
                      .arg(lon, 0, 'f', 4).arg(lat, 0, 'f', 4).arg(alt, 0, 'f', 1);
     mUi->loc_currentLoc->setPlainText(curLoc);
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE, lat);
+    settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, lon);
+    settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE, alt);
+
 }
 
 void LocationPage::on_loc_longitudeInput_valueChanged(double value) {
@@ -443,10 +475,11 @@ void LocationPage::timeout() {
     mUi->loc_pathTable->scrollToItem(currentItem);
     mUi->loc_pathTable->setCurrentItem(currentItem);
 
+    mUpdateThreadLock.lock();
     updateDisplayedLocation(lat, lon, alt);
 
     // Send the command.
-    sendLocationToDevice(mLocationAgent, lat, lon, alt);
+    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
 
     // Go on to the next row
     mRowToSend++;
@@ -520,7 +553,7 @@ void LocationPage::updateControlsAfterLoading() {
 // Get the current location from the device. If that fails, use
 // the saved location from this UI.
 // (static function)
-void LocationPage::getDeviceLocation(const QAndroidLocationAgent* locAgent,
+static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
                                      double* pLatitude,
                                      double* pLongitude,
                                      double* pAltitude)
@@ -546,18 +579,16 @@ void LocationPage::getDeviceLocation(const QAndroidLocationAgent* locAgent,
 
 // Send a GPS location to the device
 // (static function)
-void LocationPage::sendLocationToDevice(const QAndroidLocationAgent* locAgent,
-                                        double latitude,
-                                        double longitude,
-                                        double altitude)
-{
-    QSettings settings;
-    settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE, latitude);
-    settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, longitude);
-    settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE, altitude);
-
+static void sendLocationToDevice(const QAndroidLocationAgent* locAgent) {
     if (locAgent && locAgent->gpsSendLoc) {
         // Send these to the device
+        QSettings settings;
+        double latitude  = settings.value(Ui::Settings::LOCATION_RECENT_LATITUDE,
+                                     kGplexLat).toDouble();
+        double longitude = settings.value(Ui::Settings::LOCATION_RECENT_LONGITUDE,
+                                     kGplexLon).toDouble();
+        double altitude  = settings.value(Ui::Settings::LOCATION_RECENT_ALTITUDE,
+                                     0.0).toDouble();
         timeval timeVal = {};
         gettimeofday(&timeVal, nullptr);
         locAgent->gpsSendLoc(latitude, longitude, altitude, 4, &timeVal);
