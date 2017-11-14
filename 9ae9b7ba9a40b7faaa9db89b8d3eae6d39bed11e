@@ -258,6 +258,30 @@
       "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bac25bfb_244e0621",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T17:19:51Z",
+      "side": 1,
+      "message": "The closest the phone can get is 36 units from the camera (CameraDistance - MaxZ) so near clip of 1 shouldn\u0027t be an issue for clipping",
+      "parentUuid": "cd9a800d_0562cbaa",
+      "range": {
+        "startLine": 82,
+        "startChar": 44,
+        "endLine": 82,
+        "endChar": 48
+      },
+      "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

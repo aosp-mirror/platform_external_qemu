@@ -22,6 +22,30 @@
       "revId": "28bc98004ec449a5ce9f4c0b8a456570291e1057",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2875ed13_ead3f0e3",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T17:19:51Z",
+      "side": 1,
+      "message": "I considered this, but I think that would be undesirable because then users wouldn\u0027t have a good way of doing a pure-z translation which they do currently on the x \u0026 y axes.",
+      "parentUuid": "a73abe3a_b1c099b2",
+      "range": {
+        "startLine": 413,
+        "startChar": 0,
+        "endLine": 414,
+        "endChar": 13
+      },
+      "revId": "28bc98004ec449a5ce9f4c0b8a456570291e1057",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
