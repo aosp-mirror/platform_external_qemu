@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "a2d729ac_e8f8f370",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-14T20:04:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "100835a1_85739b4c",
+      "revId": "30531bb77bb5b5e315128e4b2f05d0b137e452c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cc68bf24_f4691a93",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
         "patchSetId": 1
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "2927dd9b_b6fa2805",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-14T20:04:54Z",
+      "side": 1,
+      "message": "I\u0027ll change this to sqrt(2)/2",
+      "parentUuid": "cc68bf24_f4691a93",
+      "revId": "30531bb77bb5b5e315128e4b2f05d0b137e452c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d5d85748_efeba551",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
         "patchSetId": 1
@@ -47,6 +83,24 @@
       "writtenOn": "2017-11-14T19:13:35Z",
       "side": 1,
       "message": "it looks like \u003d default is preferred in the coding standards.",
+      "revId": "30531bb77bb5b5e315128e4b2f05d0b137e452c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "985bab2c_bb04a714",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-14T20:04:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d5d85748_efeba551",
       "revId": "30531bb77bb5b5e315128e4b2f05d0b137e452c8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
