@@ -11,6 +11,8 @@
 #pragma once
 
 #include "ui_location-page.h"
+#include "android/base/synchronization/ConditionVariable.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/gps/GpsFix.h"
 #include "android/metrics/PeriodicReporter.h"
 #include <QTimer>
@@ -31,15 +33,6 @@ public:
     void setLocationAgent(const QAndroidLocationAgent* agent);
     bool isLoadingGeoData() const { return mNowLoadingGeoData; }
     void requestStopLoadingGeoData() { mGpsNextPopulateIndex = mGpsFixesArray.size(); }
-
-    static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
-                                  double* pOutLatitude,
-                                  double* pOutLongitude,
-                                  double* pOutAltitude);
-    static void sendLocationToDevice(const QAndroidLocationAgent* locAgent,
-                                     double latitude,
-                                     double longitude,
-                                     double altitude);
 
 signals:
     void locationUpdateRequired(double latitude, double longitude, double altitude);
@@ -106,6 +99,10 @@ private:
     bool mLocationUsed = false;
     int mRowToSend;
     android::metrics::PeriodicReporter::TaskToken mMetricsReportingToken;
+    android::base::FunctorThread mUpdateThread;
+    android::base::ConditionVariable mUpdateThreadCv;
+    android::base::Lock mUpdateThreadLock;
+    bool mShouldCloseUpdateThread = false;
 };
 
 class GeoDataLoaderThread : public QThread {
