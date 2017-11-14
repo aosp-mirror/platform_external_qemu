@@ -70,6 +70,30 @@
       "revId": "02103cad4127c1cdb0b8f6ad1651d83724c7bc0a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "41093f1f_1cc179d9",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GlobalRenderThread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-14T01:22:16Z",
+      "side": 1,
+      "message": "Yes, these are all very good optimizations to have. Thanks for the feedback!\n\nAlso, for most GL queries returning values, we may not even have to touch the host driver to get the value back; we just need to ask our own software contexts which won\u0027t have to go do the single render thread to return a value.\n\nThat makes me think we should move all this stuff below the Translator level to GL/EglOs dispatch...",
+      "parentUuid": "853e6767_20959fe5",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 37
+      },
+      "revId": "02103cad4127c1cdb0b8f6ad1651d83724c7bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
