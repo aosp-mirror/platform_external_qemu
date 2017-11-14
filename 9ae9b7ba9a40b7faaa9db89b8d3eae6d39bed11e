@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d9ed7eb9_bc7323e9",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dd14517f_26e28e1f",
+      "range": {
+        "startLine": 270,
+        "startChar": 4,
+        "endLine": 271,
+        "endChar": 44
+      },
+      "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "dfbe004f_d1c48dd4",
         "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-11T02:05:19Z",
       "side": 1,
       "message": "I don\u0027t understand this part of the change, what is MaxZ doing here?",
+      "range": {
+        "startLine": 275,
+        "startChar": 12,
+        "endLine": 278,
+        "endChar": 71
+      },
+      "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "569bf3b1_c6878da5",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T16:05:43Z",
+      "side": 1,
+      "message": "This was leftover from an earlier iteration when I was adjusting the frustum to contain the whole movement-box.  It\u0027s incorrect now, so I removed MaxZ.",
+      "parentUuid": "dfbe004f_d1c48dd4",
       "range": {
         "startLine": 275,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "8cdbc8b5_7d9f38f5",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 392,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T16:05:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d8991984_ec2b05d6",
+      "range": {
+        "startLine": 392,
+        "startChar": 8,
+        "endLine": 392,
+        "endChar": 11
+      },
+      "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "39609260_ed7085c8",
         "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
         "patchSetId": 3
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "98c3f23b_3a884975",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T16:05:43Z",
+      "side": 1,
+      "message": "Thx - updated to do the projection to the plane in camera space.",
+      "parentUuid": "39609260_ed7085c8",
+      "range": {
+        "startLine": 408,
+        "startChar": 4,
+        "endLine": 418,
+        "endChar": 43
+      },
+      "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3ce4791c_9ea7ac6b",
         "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.h",
         "patchSetId": 3
@@ -105,6 +201,30 @@
       "writtenOn": "2017-11-11T02:05:19Z",
       "side": 1,
       "message": "Why is the CameraDistance changing?",
+      "range": {
+        "startLine": 82,
+        "startChar": 44,
+        "endLine": 82,
+        "endChar": 48
+      },
+      "revId": "9ae9b7ba9a40b7faaa9db89b8d3eae6d39bed11e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d8e8115_cc905453",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T16:05:43Z",
+      "side": 1,
+      "message": "The FOV is calculated (already the case before this change) such that at z\u003d0 the phone can be moved over the full x/y plane defined by the mins/maxes above using the full field of view.  Increasing CameraDistance makes the fov adjust such that the z\u003d0 plane will be the same, but will allow the phone to move a greater distance in the +z direction (towards camera) without going out of the FOV.\n\nCameraDistance\u003d20 made the phone disappear when it moved to z\u003d+4 at the x/y extremes.",
+      "parentUuid": "3ce4791c_9ea7ac6b",
       "range": {
         "startLine": 82,
         "startChar": 44,
