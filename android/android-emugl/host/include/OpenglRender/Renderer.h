@@ -22,6 +22,10 @@
 #include <memory>
 #include <string>
 
+namespace android_studio {
+    class EmulatorGLESUsages;
+}
+
 namespace emugl {
 
 // Renderer - an object that manages a single OpenGL window used for drawing
@@ -163,7 +167,8 @@ public:
                       const android::snapshot::ITextureSaverPtr& textureSaver) = 0;
     virtual bool load(android::base::Stream* stream,
                       const android::snapshot::ITextureLoaderPtr& textureLoader) = 0;
-
+    // Fill GLES usage protobuf
+    virtual void fillGLESUsages(android_studio::EmulatorGLESUsages*) = 0;
 protected:
     ~Renderer() = default;
 };

@@ -418,6 +418,14 @@ void android_metrics_report_common_info(bool openglAlive) {
 
         if (android_hw->hw_gpu_enabled) {
             fillGuestGlMetrics(event);
+            if (openglAlive) {
+                const emugl::RendererPtr& renderer =
+                        android_getOpenglesRenderer();
+                if (renderer) {
+                    renderer->fillGLESUsages(event->mutable_emulator_details()
+                            ->mutable_gles_usages());
+                }
+            }
         }
 
         for (const GpuInfo& gpu : globalGpuInfoList().infos) {

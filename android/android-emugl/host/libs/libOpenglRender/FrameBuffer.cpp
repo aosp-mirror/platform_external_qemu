@@ -528,6 +528,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
 }
 
 
+void FrameBuffer::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
+    if (s_egl.eglFillUsages) {
+        s_egl.eglFillUsages(usages);
+    }
+}
+
 static GLESDispatchMaxVersion sMaxGLESVersion = GLES_DISPATCH_MAX_VERSION_2;
 
 // static
