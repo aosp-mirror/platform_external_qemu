@@ -49,6 +49,12 @@ enum BatteryStatus {
 };
 
 typedef struct QAndroidBatteryAgent {
+    // Sets the device uses a battery
+    void (*setHasBattery)(bool hasBattery);
+
+    // Returns whether the device uses a battery
+    bool (*hasBattery)();
+
     // Sets whether the battery is present or not
     void (*setIsBatteryPresent)(bool isPresent);
 

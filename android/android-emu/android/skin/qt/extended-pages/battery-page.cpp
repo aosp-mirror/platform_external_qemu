@@ -76,6 +76,12 @@ void BatteryPage::setBatteryAgent(const QAndroidBatteryAgent* agent) {
             bCharger = mBatteryAgent->charger();
         }
 
+        int chargeLevel = 50;
+        if (mBatteryAgent && mBatteryAgent->chargeLevel) {
+            chargeLevel = mBatteryAgent->chargeLevel();
+        }
+        mUi->bat_levelSlider->setValue(chargeLevel);
+
         chargeIdx = mUi->bat_chargerBox->findData(bCharger);
         if (chargeIdx < 0)
             chargeIdx = 0;  // In case the saved value wasn't found

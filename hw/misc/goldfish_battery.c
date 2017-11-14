@@ -16,6 +16,9 @@
 #include "monitor/monitor.h"
 #include "hw/misc/goldfish_battery.h"
 
+static int sBatteryIsRealized = 0;
+static int sDeviceHasBattery = 0;
+
 #include <assert.h>
 
 enum {
@@ -175,7 +178,7 @@ int goldfish_battery_read_prop(int property)
                                            TYPE_GOLDFISH_BATTERY);
     struct goldfish_battery_state *battery_state = GOLDFISH_BATTERY(dev);
 
-    if (!battery_state || !battery_state->hw_has_battery) {
+    if (!battery_state) {
         return 0;
     }
 
@@ -188,6 +191,9 @@ int goldfish_battery_read_prop(int property)
             break;
         case POWER_SUPPLY_PROP_HEALTH:
             retVal = battery_state->health;
+            break;
+        case POWER_SUPPLY_PROP_HAS_BATTERY:
+            retVal =  battery_state->hw_has_battery;
             break;
         case POWER_SUPPLY_PROP_PRESENT:
             retVal = battery_state->present;
@@ -219,6 +225,15 @@ int goldfish_battery_read_prop(int property)
 
 void goldfish_battery_set_prop(int ac, int property, int value)
 {
+    if (!sBatteryIsRealized) {
+        // The only thing we can set before the battery has been
+        // 'realized' is whether the device uses a battery at all.
+        if (property == POWER_SUPPLY_PROP_HAS_BATTERY) {
+            sDeviceHasBattery = value;
+        }
+        return;
+    }
+
     DeviceState *dev = qdev_find_recursive(sysbus_get_default(),
                                            TYPE_GOLDFISH_BATTERY);
     struct goldfish_battery_state *battery_state = GOLDFISH_BATTERY(dev);
@@ -351,20 +366,27 @@ static void goldfish_battery_realize(DeviceState *dev, Error **errp)
 
     // default values for the battery
     s->ac_online = 1;
-    /* TODO: The Android Emulator gets this attribute from the AVD
-     *       hw-config-defs.h.  For now we hard-code the value to match the
-     *       other values.
-     */
-    s->hw_has_battery = 1;
-    s->status = POWER_SUPPLY_STATUS_CHARGING;
-    s->health = POWER_SUPPLY_HEALTH_GOOD;
-    s->present = 1;     // battery is present
-    s->capacity = 100;   // 100% charged
     s->voltage = 5000000;  // 5 volt
     s->temp = 250;         // 25 celsuis
-    s->charge_counter = 10;
     s->voltage_max = 5000000;  // 5 volt
     s->current_max = 5000000;  // 5 amp
+    if (sDeviceHasBattery) {
+        s->hw_has_battery = 1;
+        s->status = POWER_SUPPLY_STATUS_CHARGING;
+        s->health = POWER_SUPPLY_HEALTH_GOOD;
+        s->present = 1;
+        s->capacity = 100;   // 100% charged
+        s->charge_counter = 10;
+    } else {
+        s->hw_has_battery = 0;
+        s->status = POWER_SUPPLY_STATUS_UNKNOWN;
+        s->health = POWER_SUPPLY_HEALTH_UNKNOWN;
+        s->present = 0;
+        s->capacity = 0;
+        s->charge_counter = 0;
+    }
+
+    sBatteryIsRealized = 1;
 }
 
 static void goldfish_battery_class_init(ObjectClass *klass, void *data)

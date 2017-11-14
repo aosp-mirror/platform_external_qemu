@@ -16,6 +16,14 @@
 #include "qemu/typedefs.h"
 #include "hw/misc/goldfish_battery.h"
 
+static void battery_setHasBattery(bool hasBattery) {
+    goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_HAS_BATTERY, hasBattery);
+}
+
+static bool battery_hasBattery() {
+    return (bool)goldfish_battery_read_prop(POWER_SUPPLY_PROP_HAS_BATTERY);
+}
+
 static void battery_setIsBatteryPresent(bool isPresent) {
     goldfish_battery_set_prop(0, POWER_SUPPLY_PROP_PRESENT, isPresent);
 }
@@ -112,6 +120,8 @@ static enum BatteryStatus battery_status() {
 typedef void (*BatteryDisplayCb)(void* opaque, LineConsumerCallback outputCallback);
 
 static const QAndroidBatteryAgent sQAndroidBatteryAgent = {
+        .setHasBattery = battery_setHasBattery,
+        .hasBattery = battery_hasBattery,
         .setIsBatteryPresent = battery_setIsBatteryPresent,
         .present = battery_present,
         .setIsCharging = battery_setIsCharging,
