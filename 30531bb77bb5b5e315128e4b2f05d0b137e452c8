@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "100835a1_85739b4c",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T19:13:35Z",
+      "side": 1,
+      "message": "I think it would be preferable to include hw-sensors.h and use the parameter ids directly instead of fetching them in this way.  That way you get a compiler warning if there\u0027s a typo or something and it\u0027s better performance.",
+      "revId": "30531bb77bb5b5e315128e4b2f05d0b137e452c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cc68bf24_f4691a93",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T19:13:35Z",
+      "side": 1,
+      "message": "can we either use a constant for sqrt-2/2 here or axis-angle or something so that we don\u0027t have as many big constants... also f on the last argument if we leave it.",
+      "revId": "30531bb77bb5b5e315128e4b2f05d0b137e452c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d5d85748_efeba551",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneCamera.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T19:13:35Z",
+      "side": 1,
+      "message": "it looks like \u003d default is preferred in the coding standards.",
+      "revId": "30531bb77bb5b5e315128e4b2f05d0b137e452c8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
