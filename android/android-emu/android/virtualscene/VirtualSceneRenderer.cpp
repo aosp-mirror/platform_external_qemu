@@ -18,6 +18,7 @@
 
 #include "android/base/ArraySize.h"
 #include "android/utils/debug.h"
+#include "android/virtualscene/VirtualSceneCamera.h"
 #include "android/virtualscene/VirtualSceneTexture.h"
 
 #include <glm/glm.hpp>
@@ -76,10 +77,10 @@ struct Vertex {
 // clang-format off
 // Vertices for a for a quad.
 static constexpr Vertex kQuadVertices[] = {
-    { glm::vec3(-1.0f,  1.0f, 0.0f), glm::vec2(0.0f, 1.0f) },  // top left
-    { glm::vec3( 1.0f,  1.0f, 0.0f), glm::vec2(1.0f, 1.0f) },  // top right
-    { glm::vec3( 1.0f, -1.0f, 0.0f), glm::vec2(1.0f, 0.0f) },  // bottom right
-    { glm::vec3(-1.0f, -1.0f, 0.0f), glm::vec2(0.0f, 0.0f) },  // bottom left
+    { glm::vec3(-5.0f,  5.0f, -5.0f), glm::vec2(0.0f, 0.0f) },  // top left
+    { glm::vec3( 5.0f,  5.0f, -5.0f), glm::vec2(1.0f, 0.0f) },  // top right
+    { glm::vec3( 5.0f, -5.0f, -5.0f), glm::vec2(1.0f, 1.0f) },  // bottom right
+    { glm::vec3(-5.0f, -5.0f, -5.0f), glm::vec2(0.0f, 1.0f) },  // bottom left
 };
 
 static constexpr GLubyte kQuadIndices[] = {
@@ -113,59 +114,26 @@ static constexpr float kPi = 3.14159265358979323846f;
 static constexpr float kPi2 = kPi / 2.00f;
 
 static const CubeSide kCubeSides[] = {
-        {"micro_kitchen1_negz.png",
+        {"micro_kitchen1_negz.png", glm::quat()},
+        {"micro_kitchen1_posz.png",
          glm::angleAxis(kPi, glm::vec3(0.0f, 1.0f, 0.0f))},
-        {"micro_kitchen1_posz.png", glm::quat()},
         {"micro_kitchen1_posx.png",
-         glm::angleAxis(-kPi2, glm::vec3(0.0f, 1.0f, 0.0f))},
-        {"micro_kitchen1_negx.png",
          glm::angleAxis(kPi2, glm::vec3(0.0f, 1.0f, 0.0f))},
+        {"micro_kitchen1_negx.png",
+         glm::angleAxis(-kPi2, glm::vec3(0.0f, 1.0f, 0.0f))},
         {"micro_kitchen1_negy.png",
-         glm::angleAxis(-kPi2, glm::vec3(1.0f, 0.0f, 0.0f))},
+         glm::angleAxis(kPi, glm::vec3(0.0f, 1.0f, 0.0f)) *
+                 glm::angleAxis(-kPi2, glm::vec3(1.0f, 0.0f, 0.0f))},
         {"micro_kitchen1_posy.png",
-         glm::angleAxis(kPi2, glm::vec3(1.0f, 0.0f, 0.0f))},
+         glm::angleAxis(kPi, glm::vec3(0.0f, 1.0f, 0.0f)) *
+                 glm::angleAxis(kPi2, glm::vec3(1.0f, 0.0f, 0.0f))},
 };
-
-static glm::mat4 projectionMatrixForCameraIntrinsics(float width,
-                                                     float height,
-                                                     float fx,
-                                                     float fy,
-                                                     float cx,
-                                                     float cy,
-                                                     float zNear,
-                                                     float zFar) {
-    const float xscale = zNear / fx;
-    const float yscale = zNear / fy;
-    const float xoffset = (cx - (width / 2.0f)) * xscale;
-    // Color camera's coordinates has y pointing downwards so we negate this
-    // term.
-    const float yoffset = -(cy - (height / 2.0f)) * yscale;
-
-    return glm::frustum(xscale * -width / 2.0f - xoffset,
-                        xscale * width / 2.0f - xoffset,
-                        yscale * -height / 2.0f - yoffset,
-                        yscale * height / 2.0f - yoffset, zNear, zFar);
-}
 
 class VirtualSceneRendererImpl {
     DISALLOW_COPY_AND_ASSIGN(VirtualSceneRendererImpl);
 
 public:
     VirtualSceneRendererImpl(const GLESv2Dispatch* gles2) : mGles2(gles2) {
-        mCameraProjection =
-                projectionMatrixForCameraIntrinsics(640.0f,    // width
-                                                    480.0f,    // height
-                                                    478.818f,  // fx
-                                                    478.745f,  // fy
-                                                    320.398f,  // cx
-                                                    241.369f,  // cy
-                                                    0.1f,      // zNear
-                                                    100.0f);   // zFar
-
-        mDefaultView =
-                glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f),   // Camera position
-                            glm::vec3(0.0f, 0.0f, -1.0f),  // Look forward, -z
-                            glm::vec3(0.0f, 1.0f, 0.0f));  // Up vector, +y
     }
 
     bool initialize() {
@@ -351,19 +319,13 @@ public:
     }
 
     void render() {
-        mRotation += kPi / 30.0f / 4.0f;  // Four seconds per rotation.
-        if (mRotation >= kPi * 2.0f) {
-            mRotation -= kPi * 2.0f;
-            mRotateY = !mRotateY;
-        }
-
         mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         mGles2->glClear(GL_COLOR_BUFFER_BIT);
 
         // Transform view by rotation.
-        const glm::mat4 view = (mRotateY ? glm::eulerAngleY(mRotation)
-                                         : glm::eulerAngleX(mRotation)) *
-                               mDefaultView;
+        mCamera.update();
+
+        const glm::mat4 viewProj = mCamera.getViewProjection();
 
         mGles2->glUseProgram(mProgram);
 
@@ -377,13 +339,9 @@ public:
 
         // Build a 10-meter cube around the origin.
         for (size_t i = 0; i < arraySize(kCubeSides); ++i) {
-            const glm::mat4 model =
-                    glm::toMat4(kCubeSides[i].rotation) *
-                    glm::translate(glm::mat4(), glm::vec3(0.0f, 0.0f, 5.0f)) *
-                    glm::eulerAngleY(kPi) *  // Flip since we're rendering at +z
-                    glm::scale(glm::mat4(), glm::vec3(5.0f, 5.0f, 1.0f));
+            const glm::mat4 model = glm::toMat4(kCubeSides[i].rotation);
 
-            const glm::mat4 mvp = mCameraProjection * view * model;
+            const glm::mat4 mvp = viewProj * model;
             mGles2->glUniformMatrix4fv(mMvpLocation, 1, GL_FALSE, &mvp[0][0]);
 
             mGles2->glBindTexture(GL_TEXTURE_2D,
@@ -403,13 +361,9 @@ public:
 private:
     const GLESv2Dispatch* const mGles2;
 
-    float mRotation = 0.0f;
-    bool mRotateY = true;
+    VirtualSceneCamera mCamera;
 
     std::vector<std::unique_ptr<VirtualSceneTexture>> mCubeTextures;
-
-    glm::mat4 mDefaultView;
-    glm::mat4 mCameraProjection;
 
     GLuint mProgram = 0;
     GLuint mVertexBuffer = 0;
