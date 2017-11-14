@@ -46,6 +46,30 @@
       "revId": "02103cad4127c1cdb0b8f6ad1651d83724c7bc0a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "853e6767_20959fe5",
+        "filename": "android/android-emugl/host/libs/libOpenglRender/GlobalRenderThread.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-11-14T01:12:28Z",
+      "side": 1,
+      "message": "For calls with return values, we\u0027d like to notify the original thread as soon as we get the value. Currently, the calling thread is unblocked after all commands in the queue are executed.\n\nThere are lots of advantages if we switching to single render thread. The point is that we\u0027d like to have a good implementation so we get most benefits from it. \n\nAnother follow up improvement will be removing some locks, for example the lock with Angle, after switching to single render thread.",
+      "parentUuid": "84cddd22_7eab88eb",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 127,
+        "endChar": 37
+      },
+      "revId": "02103cad4127c1cdb0b8f6ad1651d83724c7bc0a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
