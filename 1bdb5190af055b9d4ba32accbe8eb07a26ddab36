@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5634b7f1_4670f760",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-14T16:56:25Z",
+      "side": 0,
+      "message": "Possible that not blocking signals here anymore would cause something bad to happen?",
+      "range": {
+        "startLine": 191,
+        "startChar": 0,
+        "endLine": 196,
+        "endChar": 38
+      },
+      "revId": "1bdb5190af055b9d4ba32accbe8eb07a26ddab36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
