@@ -22,6 +22,30 @@
       "revId": "1bdb5190af055b9d4ba32accbe8eb07a26ddab36",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4751ea70_fd2b7aa1",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-14T17:53:36Z",
+      "side": 0,
+      "message": "I believe this should not be a problem.  In the past, we got screen rotate commands that would be processed as onLayout callbacks to the extended-window which would result in the device rotation being updated in response to a layout change, and as I understand, we wanted to block the additional layout after the device update.\n\nNow that all rotations are done by setting the rotation of the model, and letting that flow through to a relayout as necessary, we shouldn\u0027t need to block these.  The virtual sensors page no longer registers a layout listener on the extended window.\n\n...And I believe I\u0027ve tested all of the various ways to initialize and change the coarse orientation.  I\u0027ve attached a debugger and verified that we only get one call to EMulatorQtWindow::rotateSkin for all the ways I\u0027m aware of to change the coarse orientation (tool window rotate buttons, virtual-sensor-page buttons, accel-widget rotation, rotation-sliders rotation, console rotate command, console set accelerometer).  If there are any other tests that you would recommend I\u0027d be happy to try those as well.",
+      "parentUuid": "5634b7f1_4670f760",
+      "range": {
+        "startLine": 191,
+        "startChar": 0,
+        "endLine": 196,
+        "endChar": 38
+      },
+      "revId": "1bdb5190af055b9d4ba32accbe8eb07a26ddab36",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
