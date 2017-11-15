@@ -61,6 +61,9 @@ public:
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
 
+    static bool nativeEverCurrent();
+    static void setNativeCurrent();
+
 private:
     static unsigned int s_nextContextHndl;
     EglDisplay* m_dpy = nullptr;
