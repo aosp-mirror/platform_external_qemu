@@ -1122,9 +1122,9 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
     if(releaseContext) { //releasing current context
        if(prevCtx.get()) {
            g_eglInfo->getIface(prevCtx->version())->flush();
-           if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
-               RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
-           }
+           // if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
+           //     RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
+           // }
            thread->updateInfo(ContextPtr(),dpy,NULL,ShareGroupPtr(),dpy->getManager(prevCtx->version()));
        }
     } else { //assining new context
@@ -1172,12 +1172,27 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         if(prevCtx.get()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
-        if (!dpy->nativeType()->makeCurrent(
-                newReadPtr->native(),
-                newDrawPtr->native(),
-                newCtx->nativeType())) {
-               RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
+
+        if (!EglContext::nativeEverCurrent() ||
+            newDrawPtr->type() == EglSurface::WINDOW ||
+            newReadPtr->type() == EglSurface::WINDOW) {
+        if (!EglContext::nativeEverCurrent()) {
+                // fprintf(stderr, "%s: current because never current before\n", __func__);
         }
+            if (
+            newDrawPtr->type() == EglSurface::WINDOW ||
+            newReadPtr->type() == EglSurface::WINDOW) {
+                // fprintf(stderr, "%s: current because window\n", __func__);
+            }
+            if (!dpy->nativeType()->makeCurrent(
+                        newReadPtr->native(),
+                        newDrawPtr->native(),
+                        newCtx->nativeType())) {
+                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
+            }
+            EglContext::setNativeCurrent();
+        }
+
         //TODO: handle the following errors
         // EGL_BAD_CURRENT_SURFACE , EGL_CONTEXT_LOST  , EGL_BAD_ACCESS
 

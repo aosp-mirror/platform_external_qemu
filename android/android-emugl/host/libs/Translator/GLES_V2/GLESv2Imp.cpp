@@ -121,9 +121,9 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
-    if (ctx->needRestore()) {
+    // if (ctx->needRestore()) {
         ctx->restore();
-    }
+    // }
 }
 
 static GLEScontext* createGLESContext() {

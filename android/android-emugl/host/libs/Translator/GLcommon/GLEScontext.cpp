@@ -378,10 +378,10 @@ void GLEScontext::init() {
 
 void GLEScontext::restore() {
     postLoadRestoreShareGroup();
-    if (m_needRestoreFromSnapshot) {
+    //if (m_needRestoreFromSnapshot) {
         postLoadRestoreCtx();
         m_needRestoreFromSnapshot = false;
-    }
+    //}
 }
 
 bool GLEScontext::needRestore() {
