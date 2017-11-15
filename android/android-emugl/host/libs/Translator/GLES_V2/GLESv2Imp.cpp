@@ -116,14 +116,18 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
     }
+
+    // ctx->unbindAll();
+
     if (!ctx->isInitialized()) {
         ctx->init();
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
-    if (ctx->needRestore()) {
-        ctx->restore();
-    }
+
+    // if (ctx->needRestore()) {
+        // ctx->restore();
+    // }
 }
 
 static GLEScontext* createGLESContext() {
@@ -1236,7 +1240,8 @@ GL_APICALL void  GL_APIENTRY glDrawArrays(GLenum mode, GLint first, GLsizei coun
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!GLESv2Validate::drawMode(mode),GL_INVALID_ENUM);
 
-    if (ctx->vertexAttributesBufferBacked()) {
+    if (0) {
+    //if (ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode);
         ctx->dispatcher().glDrawArrays(mode,first,count);
         s_glDrawPost(ctx, mode);
@@ -1253,8 +1258,9 @@ GL_APICALL void  GL_APIENTRY glDrawElements(GLenum mode, GLsizei count, GLenum t
     SET_ERROR_IF(count < 0,GL_INVALID_VALUE)
     SET_ERROR_IF(!(GLESv2Validate::drawMode(mode) && GLESv2Validate::drawType(type)),GL_INVALID_ENUM);
 
-    if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
-        ctx->vertexAttributesBufferBacked()) {
+    if (0) {
+    //if (ctx->isBindedBuffer(GL_ELEMENT_ARRAY_BUFFER) &&
+    //    ctx->vertexAttributesBufferBacked()) {
         s_glDrawPre(ctx, mode, type);
         ctx->dispatcher().glDrawElements(mode, count, type, indices);
         s_glDrawPost(ctx, mode);
@@ -1291,7 +1297,7 @@ GL_APICALL void  GL_APIENTRY glEnableVertexAttribArray(GLuint index){
     GET_CTX();
     SET_ERROR_IF(!(GLESv2Validate::arrayIndex(ctx,index)),GL_INVALID_VALUE);
     ctx->enableArr(index,true);
-    ctx->dispatcher().glEnableVertexAttribArray(index);
+    //ctx->dispatcher().glEnableVertexAttribArray(index);
 }
 
 GL_APICALL void  GL_APIENTRY glFinish(void){

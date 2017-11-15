@@ -187,6 +187,7 @@ public:
     const Fog& getFogInfo();
 
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void virtualMakeCurrent();
 
 protected:
     virtual void postLoadRestoreCtx() override;
