@@ -101,12 +101,18 @@ public:
         enqueueImpl(std::move(item));
     }
 
+    void enqueueMultiple(const std::vector<Item>& items) {
+        enqueueImplMultiple(items);
+    }
+
 private:
     struct SyncPoint {
         bool signaled = false;
         base::ConditionVariable cv;
     };
     struct Command {
+        Command(const Item& it) :
+            workItem(it) { }
         Command(Item&& it) :
             workItem(std::move(it)) { }
         Command(SyncPoint* sp) :
@@ -120,6 +126,18 @@ private:
         base::AutoLock lock(mLock);
         bool signal = mQueue.empty();
         mQueue.emplace_back(Command(std::move(x)));
+        if (signal) {
+            mCv.signalAndUnlock(&lock);
+        }
+    }
+
+    template <class T>
+    void enqueueImplMultiple(const std::vector<T>& items) {
+        base::AutoLock lock(mLock);
+        bool signal = mQueue.empty();
+        for (auto& it : items) {
+            mQueue.emplace_back(Command(it));
+        }
         if (signal) {
             mCv.signalAndUnlock(&lock);
         }
