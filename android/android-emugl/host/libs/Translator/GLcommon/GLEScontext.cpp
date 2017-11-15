@@ -339,6 +339,7 @@ EGLiface* GLEScontext::eglIface() {
 // static
 void GLEScontext::initEglIface(EGLiface* iface) {
     if (!s_eglIface) s_eglIface = iface;
+    DriverThread::setWorker(s_eglIface->getDriverThreadInfo());
 }
 
 void GLEScontext::initGlobal(EGLiface* iface) {
@@ -1594,6 +1595,7 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
 {
     const char* cstring = (const char*)extensionString;
 
+    fprintf(stderr, "%s: call\n", __func__);
     s_glDispatch.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS,&s_glSupport.maxVertexAttribs);
     s_glDispatch.glGetIntegerv(GL_MAX_CLIP_PLANES,&s_glSupport.maxClipPlane);
     s_glDispatch.glGetIntegerv(GL_MAX_LIGHTS,&s_glSupport.maxLights);

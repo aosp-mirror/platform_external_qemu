@@ -21,6 +21,7 @@
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
+#include "GLcommon/DriverThread.h"
 #include "GLcommon/GLLibrary.h"
 #include "OpenglCodecCommon/ErrorLog.h"
 
@@ -71,7 +72,9 @@ public:
         EglOS::Context(isCoreProfile), mContext(context) {}
 
     ~MacContext() {
-        nsDestroyContext(mContext);
+        DriverThread::callOnDriverThreadSync([this]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+        nsDestroyContext(mContext); });
     }
 
     void* context() const { return mContext; }
@@ -87,8 +90,12 @@ private:
 class MacNativeSupportInfo {
 public:
     MacNativeSupportInfo() :
-        numNativeFormats(getNumPixelFormats()),
-        maxOpenGLProfile((MacOpenGLProfileVersions)setupCoreProfileNativeFormats()) { }
+        numNativeFormats(getNumPixelFormats()) {
+
+            maxOpenGLProfile = (MacOpenGLProfileVersions)DriverThread::callOnDriverThread<int>([]()  {
+                    // fprintf(stderr, "%s: get native format info\n", __func__);
+                    return setupCoreProfileNativeFormats(); });
+        }
     int numNativeFormats = 0;
     MacOpenGLProfileVersions maxOpenGLProfile =
         MAC_OPENGL_PROFILE_LEGACY;
@@ -199,6 +206,7 @@ public:
     virtual void queryConfigs(int renderableType,
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
+        // fprintf(stderr, "%s: call\n", __func__);
         for (int i = 0; i < sSupportInfo->numNativeFormats; i++) {
             pixelFormatToConfig(
                 i,
@@ -217,7 +225,11 @@ public:
 
     virtual bool isValidNativeWin(EGLNativeWindowType win) {
         unsigned int width, height;
-        return nsGetWinDims(win, &width, &height);
+        bool res = DriverThread::callOnDriverThread<bool>([this, win, &width, &height]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+            return nsGetWinDims(win, &width, &height);
+        });
+        return res;
     }
 
     virtual bool checkWindowPixelFormatMatch(
@@ -225,14 +237,23 @@ public:
             const EglOS::PixelFormat* pixelFormat,
             unsigned int* width,
             unsigned int* height) {
-        bool ret = nsGetWinDims(win, width, height);
+        bool ret =
+            DriverThread::callOnDriverThread<bool>([this, win, width, height]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+                    return nsGetWinDims(win, width, height);
+            });
 
         const MacPixelFormat* format = MacPixelFormat::from(pixelFormat);
         int r = format->redSize();
         int g = format->greenSize();
         int b = format->blueSize();
 
-        bool match = nsCheckColor(win, r + g + b);
+        int all = r + g + b;
+        bool match =
+            DriverThread::callOnDriverThread<bool>([this, win, all]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+                    return nsCheckColor(win, all);
+            });
 
         return ret && match;
     }
@@ -261,10 +282,13 @@ public:
             sFinalizedConfigs.get()[key] = nsFormat;
         }
 
+        void* nsContext = DriverThread::callOnDriverThread<void*>([this, nsFormat, macSharedContext]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+                return nsCreateContext(nsFormat, macSharedContext); });
+
         return std::make_shared<MacContext>(
                    isCoreProfile,
-                   nsCreateContext(nsFormat,
-                                   macSharedContext));
+                   nsContext);
     }
 
     virtual EglOS::Surface* createPbufferSurface(
@@ -296,7 +320,10 @@ public:
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
         if (pb) {
-            nsDestroyPBuffer(MacSurface::from(pb)->handle());
+            DriverThread::callOnDriverThreadSync([this, pb]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+                nsDestroyPBuffer(MacSurface::from(pb)->handle());
+            });
         }
         return true;
     }
@@ -304,9 +331,13 @@ public:
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
                              EglOS::Context* ctx) {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         // check for unbind
         if (ctx == NULL && read == NULL && draw == NULL) {
-            nsWindowMakeCurrent(NULL, NULL);
+            // DriverThread::callOnDriverThreadSync([this]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+                nsWindowMakeCurrent(NULL, NULL);
+            // });
             return true;
         }
         else if (ctx == NULL || read == NULL || draw == NULL) {
@@ -320,15 +351,24 @@ public:
         }
         switch (draw->type()) {
         case MacSurface::WINDOW:
-            nsWindowMakeCurrent(MacContext::from(ctx),
-                                MacSurface::from(draw)->handle());
+            // DriverThread::callOnDriverThreadSync([this, ctx, draw]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+                nsWindowMakeCurrent(MacContext::from(ctx),
+                                    MacSurface::from(draw)->handle());
+            // });
             break;
         case MacSurface::PBUFFER:
         {
             MacSurface* macdraw = MacSurface::from(draw);
             int mipmapLevel = macdraw->hasMipmap() ? MAX_PBUFFER_MIPMAP_LEVEL : 0;
-            nsPBufferMakeCurrent(MacContext::from(ctx),
-                                 macdraw->handle(), mipmapLevel);
+
+            // DriverThread::callOnDriverThreadSync([this, ctx, macdraw, mipmapLevel]() {
+                // fprintf(stderr, "%s:%d arrive. set %p current\n", __func__, __LINE__, ctx);
+                nsPBufferMakeCurrent(MacContext::from(ctx),
+                                     macdraw->handle(), mipmapLevel);
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+            // });
+
             break;
         }
         default:
@@ -338,7 +378,10 @@ public:
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
-        nsSwapBuffers();
+        DriverThread::callOnDriverThreadSync([this]() {
+                // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+                nsSwapBuffers();
+        });
     }
 
     EGLNativeDisplayType dpy() const { return mDpy; }

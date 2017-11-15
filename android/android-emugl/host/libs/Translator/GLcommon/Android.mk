@@ -2,6 +2,7 @@ LOCAL_PATH := $(call my-dir)
 
 host_common_SRC_FILES :=     \
      etc.cpp                 \
+     DriverThread.cpp        \
      FramebufferData.cpp     \
      GLBackgroundLoader.cpp  \
      GLDispatch.cpp          \
@@ -19,7 +20,7 @@ host_common_SRC_FILES :=     \
      ScopedGLState.cpp       \
      ShareGroup.cpp          \
      TextureData.cpp         \
-     TextureUtils.cpp
+     TextureUtils.cpp        \
 
 host_GL_COMMON_LINKER_FLAGS :=
 host_common_LDLIBS :=

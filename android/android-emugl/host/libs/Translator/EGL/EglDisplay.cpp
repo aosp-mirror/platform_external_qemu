@@ -314,7 +314,9 @@ void EglDisplay::initConfigurations(int renderableType) {
     if (m_configInitialized) {
         return;
     }
+    fprintf(stderr, "%s: query configs\n", __func__);
     m_idpy->queryConfigs(renderableType, addConfig, this);
+    fprintf(stderr, "%s: query configs end\n", __func__);
 
     for (size_t i = 0; i < m_configs.size(); i++) {
         // ID starts with 1

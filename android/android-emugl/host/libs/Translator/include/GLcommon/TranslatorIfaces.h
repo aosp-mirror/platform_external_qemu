@@ -17,8 +17,10 @@
 #define TRANSLATOR_IFACES_H
 
 #include "android/base/containers/SmallVector.h"
+#include "GLcommon/DriverThread.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/ShareGroup.h"
+#include "GLcommon/ThreadedDispatch.h"
 
 #include <EGL/egl.h>
 #include <GLES/gl.h>
@@ -88,6 +90,7 @@ typedef struct {
     void                                            (*restoreTexture)(SaveableTexture*);
     void                                            (*deleteRbo)(GLuint);
     void                                            (*blitFromCurrentReadBufferANDROID)(EGLImage);
+    ThreadedDispatch*                               (*getThreadedDispatch)();
 } GLESiface;
 
 class GlLibrary;
@@ -122,6 +125,9 @@ struct EGLiface {
     // destroys the surface and context. Returns false if any step of cleanup failed,
     // true otherwise.
     bool (*unbindAndDestroyAuxiliaryContext)(EGLContext context, EGLSurface surface);
+
+    // Gets the common driver thread info.
+    DriverThreadWorker* (*getDriverThreadInfo)();
 };
 
 typedef GLESiface* (*__translator_getGLESIfaceFunc)(const EGLiface*);

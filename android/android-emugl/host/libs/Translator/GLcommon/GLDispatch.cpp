@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 
+#include "GLcommon/DriverThread.h"
 #include "GLcommon/GLDispatch.h"
 #include "GLcommon/GLLibrary.h"
 
@@ -39,7 +40,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
 }
 
 #define LOAD_GL_FUNC(return_type, func_name, signature, args)  do { \
-        if (!func_name) { \
+        if (!func_name##Underlying) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             /*Check alias*/ \
             if (!address) { \
@@ -55,10 +56,10 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
                 if (address) GL_LOG("%s not found, using %sARB", #func_name, #func_name); \
             } \
             if (address) { \
-                func_name = (__typeof__(func_name))(address); \
+                func_name##Underlying = (__typeof__(func_name))(address); \
             } else { \
                 GL_LOG("%s not found", #func_name); \
-                func_name = (__typeof__(func_name))(dummy_##func_name); \
+                func_name##Underlying = (__typeof__(func_name))(dummy_##func_name); \
             } \
         } \
     } while (0);
@@ -67,10 +68,12 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
         if (!func_name) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
-                func_name = (__typeof__(func_name))(address); \
+                func_name##Underlying = (__typeof__(func_name))(address); \
             } \
         } \
     } while (0);
+
+
 
 // Define dummy functions, only for non-extensions.
 
@@ -100,7 +103,8 @@ LIST_GLES_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION)
 emugl::Mutex GLDispatch::s_lock;
 
 #define GL_DISPATCH_DEFINE_POINTER(return_type, function_name, signature, args) \
-    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name) signature = NULL;
+    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name) signature = NULL; \
+    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name##Underlying) signature = NULL;
 
 LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_POINTER, GL_DISPATCH_DEFINE_POINTER)
 
@@ -147,4 +151,78 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
 
     m_isLoaded = true;
     m_version = version;
+
+#define DEFINE_API_FUNC(return_type, func_name, signature, args) \
+    if (func_name##Underlying) { \
+        func_name = func_name##Driverthread; \
+    } else { \
+        func_name = nullptr; \
+    } \
+
+    LIST_GLES_FUNCTIONS(DEFINE_API_FUNC, DEFINE_API_FUNC);
+
+    // fprintf(stderr, "%s: underlying glGetINtegerv %p\n", __func__,
+    //         getGLFuncAddress("glGetIntegerv", glLib));
+
+    // glGetIntegerv = glGetIntegervDriverthread;
 }
+
+// void GLDispatch::glGetIntegervDriverthread(GLenum pname, GLint* params) {
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+//         DriverThread::callOnDriverThread<void>([&]() {
+//     fprintf(stderr, "%s:%d arrive pname 0x%x params %p func %p\n", __func__, __LINE__, pname, params, glGetIntegervUnderlying);
+//     *params = 123;
+//     fprintf(stderr, "%s:%d arrive pname 0x%x params %p func %p\n", __func__, __LINE__, pname, params, glGetIntegervUnderlying);
+//                 glGetIntegervUnderlying(pname, params);
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+//         });
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+// }
+
+#define _Args(...) __VA_ARGS__
+#define STRIP_PARENS(X) X
+#define PASS_PARAMETERS(X) STRIP_PARENS( _Args X )
+
+#define DEFINE_DRIVERTHREAD_FUNC(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC##return_type(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCvoid(return_type, func_name, signature, args) \
+    return_type GLDispatch::func_name##Driverthread signature { \
+        DriverThread::callOnDriverThread<return_type>([&]() { \
+            func_name##Underlying args; \
+        }); } \
+
+#define DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+    return_type GLDispatch::func_name##Driverthread signature { \
+        return DriverThread::callOnDriverThread<return_type>([PASS_PARAMETERS(args)]() { \
+            return func_name##Underlying args; \
+        }); } \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLboolean(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCint(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLint(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLuint(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLenum(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLsync(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLconstubyteptr(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCvoidptr(return_type, func_name, signature, args) \
+    return_type GLDispatch::func_name##Driverthread signature { \
+        return DriverThread::callOnDriverThread<void*>([PASS_PARAMETERS(args)]() { \
+            return func_name##Underlying args; \
+        }); } \
+
+LIST_GLES_FUNCTIONS(DEFINE_DRIVERTHREAD_FUNC, DEFINE_DRIVERTHREAD_FUNC)
