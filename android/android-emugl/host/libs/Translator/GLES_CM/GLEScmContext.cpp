@@ -245,6 +245,10 @@ void GLEScmContext::restoreMatrixStack(const MatrixStack& matrices) {
     }
 }
 
+void GLEScmContext::virtualMakeCurrent() {
+    GLEScontext::virtualMakeCurrent();
+}
+
 void GLEScmContext::postLoadRestoreCtx() {
     if (isInitialized()) {
         if (isCoreProfile()) {
