@@ -30,6 +30,17 @@ bool EglContext::usingSurface(SurfacePtr surface) {
   return surface.get() == m_read.get() || surface.get() == m_draw.get();
 }
 
+static emugl::SmartPtr<EglOS::Context> sRealContext = {};
+static bool everCurrent = false;
+
+bool EglContext::nativeEverCurrent() {
+    return everCurrent;
+}
+
+void EglContext::setNativeCurrent() {
+    everCurrent = true;
+}
+
 EglContext::EglContext(EglDisplay *dpy,
                        uint64_t shareGroupId,
                        EglConfig* config,
@@ -71,17 +82,22 @@ EglContext::EglContext(EglDisplay *dpy,
     }
 
     EglOS::Context* globalSharedContext = dpy->getGlobalSharedContext();
-    m_native =
-        dpy->nativeType()->createContext(
-            m_profileMask,
-            m_config->nativeFormat(),
-            globalSharedContext);
+    if (!sRealContext) {
+        sRealContext =
+            dpy->nativeType()->createContext(
+                m_profileMask,
+                m_config->nativeFormat(),
+                globalSharedContext);
+    }
+
+    m_native = sRealContext;
+    // fprintf(stderr, "%s: native context: %p\n", __func__, m_native.get());
 
     if (m_native) {
         // When loading from a snapshot, the first context within a share group
         // will load share group data.
         m_shareGroup = mngr->attachOrCreateShareGroup(
-                m_native.get(), shareGroupId, stream,
+                this, shareGroupId, stream,
                 [glesCtx](NamedObjectType type,
                           ObjectLocalName localName,
                           android::base::Stream* stream) {
@@ -99,33 +115,6 @@ EglContext::EglContext(EglDisplay *dpy,
 
 EglContext::~EglContext()
 {
-    ThreadInfo* thread = getThreadInfo();
-    // get the current context
-    ContextPtr currentCtx = thread->eglContext;
-    if (currentCtx && !m_dpy->getContext((EGLContext)SafePointerFromUInt(
-                        currentCtx->getHndl()))) {
-        currentCtx.reset();
-    }
-    SurfacePtr currentRead = currentCtx ? currentCtx->read() : nullptr;
-    SurfacePtr currentDraw = currentCtx ? currentCtx->draw() : nullptr;
-    // we need to make the context current before releasing GL resources.
-    // create a dummy surface first
-    EglPbufferSurface pbSurface(m_dpy, m_config);
-    pbSurface.setAttrib(EGL_WIDTH, 1);
-    pbSurface.setAttrib(EGL_HEIGHT, 1);
-    EglOS::PbufferInfo pbInfo;
-    pbSurface.getDim(&pbInfo.width, &pbInfo.height, &pbInfo.largest);
-    pbSurface.getTexInfo(&pbInfo.target, &pbInfo.format);
-    pbInfo.hasMipmap = false;
-    EglOS::Surface* pb = m_dpy->nativeType()->createPbufferSurface(
-            m_config->nativeFormat(), &pbInfo);
-    assert(pb);
-    if (pb) {
-        const bool res = m_dpy->nativeType()->makeCurrent(pb, pb, m_native.get());
-        assert(res);
-        (void)res;
-        pbSurface.setNativePbuffer(pb);
-    }
     //
     // release GL resources. m_shareGroup, m_mngr and m_glesContext hold
     // smart pointers to share groups. We must clean them up when the context
@@ -141,17 +130,6 @@ EglContext::~EglContext()
     // call the client-api to remove the GLES context
     //
     g_eglInfo->getIface(version())->deleteGLESContext(m_glesContext);
-    //
-    // restore the current context
-    //
-    if (currentCtx) {
-        m_dpy->nativeType()->makeCurrent(currentRead->native(),
-                                         currentDraw->native(),
-                                         currentCtx->nativeType());
-    } else {
-        m_dpy->nativeType()->makeCurrent(nullptr, nullptr, nullptr);
-    }
-
 }
 
 void EglContext::setSurfaces(SurfacePtr read,SurfacePtr draw)
