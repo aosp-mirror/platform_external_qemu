@@ -381,7 +381,16 @@ void GLEScontext::init() {
 void GLEScontext::restore() {
     postLoadRestoreShareGroup();
     if (m_needRestoreFromSnapshot) {
-        postLoadRestoreCtx();
+        m_fboNameSpace->postLoadRestore(
+            [this](NamedObjectType p_type, ObjectLocalName p_localName) {
+                if (p_type == NamedObjectType::FRAMEBUFFER) {
+                    return getFBOGlobalName(p_localName);
+                } else {
+                    return m_shareGroup->getGlobalName(p_type, p_localName);
+                }
+            }
+        );
+        virtualMakeCurrent();
         m_needRestoreFromSnapshot = false;
     }
 }
@@ -722,19 +731,9 @@ void GLEScontext::postLoadRestoreShareGroup() {
     m_shareGroup->postLoadRestore();
 }
 
-void GLEScontext::postLoadRestoreCtx() {
+void GLEScontext::virtualMakeCurrent() {
     GLDispatch& dispatcher = GLEScontext::dispatcher();
-
     assert(!m_shareGroup->needRestore());
-    m_fboNameSpace->postLoadRestore(
-            [this](NamedObjectType p_type, ObjectLocalName p_localName) {
-                if (p_type == NamedObjectType::FRAMEBUFFER) {
-                    return getFBOGlobalName(p_localName);
-                } else {
-                    return m_shareGroup->getGlobalName(p_type, p_localName);
-                }
-            }
-        );
 
     // buffer bindings
     auto bindBuffer = [this](GLenum target, GLuint buffer) {
@@ -746,51 +745,73 @@ void GLEScontext::postLoadRestoreCtx() {
 
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
-        this->dispatcher().glBindFramebuffer(target,
-                getFBOGlobalName(buffer));
+        if (!buffer && target == GL_DRAW_FRAMEBUFFER) {
+            this->dispatcher().glBindFramebuffer(target,
+                    m_defaultFBO);
+            if (!m_isViewport) {
+                this->dispatcher().glViewport(0, 0, m_defaultFBOWidth,
+                        m_defaultFBOHeight);
+            }
+            if (!m_isScissor) {
+                this->dispatcher().glScissor(0, 0, m_defaultFBOWidth,
+                        m_defaultFBOHeight);
+            }
+        } else if (!buffer && target == GL_READ_FRAMEBUFFER) {
+            this->dispatcher().glBindFramebuffer(target, m_defaultReadFBO);
+            if (!m_isViewport) {
+                this->dispatcher().glViewport(0, 0, m_defaultFBOWidth,
+                        m_defaultFBOHeight);
+            }
+            if (!m_isScissor) {
+                this->dispatcher().glScissor(0, 0, m_defaultFBOWidth,
+                        m_defaultFBOHeight);
+            }
+        } else {
+            this->dispatcher().glBindFramebuffer(target,
+                    getFBOGlobalName(buffer));
+        }
     };
-    bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
     bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
+    bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
 
     for (unsigned int i = 0; i <= m_maxUsedTexUnit; i++) {
         for (unsigned int j = 0; j < NUM_TEXTURE_TARGETS; j++) {
+            if (isGles2Gles() && j == TEXTURE_2D_MULTISAMPLE) {
+                continue;
+            }
             textureTargetState& texState = m_texState[i][j];
-            if (texState.texture || texState.enabled) {
-                this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
-                GLenum texTarget = GL_TEXTURE_2D;
-                switch (j) {
-                    case TEXTURE_2D:
-                        texTarget = GL_TEXTURE_2D;
-                        break;
-                    case TEXTURE_CUBE_MAP:
-                        texTarget = GL_TEXTURE_CUBE_MAP;
-                        break;
-                    case TEXTURE_2D_ARRAY:
-                        texTarget = GL_TEXTURE_2D_ARRAY;
-                        break;
-                    case TEXTURE_3D:
-                        texTarget = GL_TEXTURE_3D;
-                        break;
-                    case TEXTURE_2D_MULTISAMPLE:
-                        texTarget = GL_TEXTURE_2D_MULTISAMPLE;
-                        break;
-                    default:
-                        fprintf(stderr,
-                                "Warning: unsupported texture target 0x%x.\n",
-                                j);
-                        break;
-                }
-                // TODO: refactor the following line since it is duplicated in
-                // GLESv2Imp and GLEScmImp as well
-                ObjectLocalName texName = texState.texture != 0 ?
-                        texState.texture : getDefaultTextureName(texTarget);
-                this->dispatcher().glBindTexture(
-                        texTarget,
-                        m_shareGroup->getGlobalName(
-                            NamedObjectType::TEXTURE, texName));
-                if (!isCoreProfile() && texState.enabled) {
-                    dispatcher.glEnable(texTarget);
-                }
+            this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
+            GLenum texTarget = GL_TEXTURE_2D;
+            switch (j) {
+                case TEXTURE_2D:
+                    texTarget = GL_TEXTURE_2D;
+                    break;
+                case TEXTURE_CUBE_MAP:
+                    texTarget = GL_TEXTURE_CUBE_MAP;
+                    break;
+                case TEXTURE_2D_ARRAY:
+                    texTarget = GL_TEXTURE_2D_ARRAY;
+                    break;
+                case TEXTURE_3D:
+                    texTarget = GL_TEXTURE_3D;
+                    break;
+                case TEXTURE_2D_MULTISAMPLE:
+                    texTarget = GL_TEXTURE_2D_MULTISAMPLE;
+                    break;
+                default:
+                    fprintf(stderr,
+                            "Warning: unsupported texture target 0x%x.\n",
+                            j);
+                    break;
+            }
+            ObjectLocalName texName = texState.texture != 0 ?
+                    texState.texture : getDefaultTextureName(texTarget);
+            this->dispatcher().glBindTexture(
+                    texTarget,
+                    m_shareGroup->getGlobalName(
+                        NamedObjectType::TEXTURE, texName));
+            if (!isCoreProfile() && !isGles2Gles() && texState.enabled) {
+                dispatcher.glEnable(texTarget);
             }
         }
     }
@@ -873,6 +894,42 @@ void GLEScontext::postLoadRestoreCtx() {
                     err);
         }
     } while (err != 0);
+}
+
+void GLEScontext::virtualUnmakeCurrent() {
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    // https://www.khronos.org/registry/OpenGL-Refpages/es1.1/xhtml/glEnable.xml
+    // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glEnable.xhtml
+    for (auto item : m_glEnableList) {
+        if (item.first == GL_TEXTURE_2D
+                || item.first == GL_TEXTURE_CUBE_MAP_OES) {
+            continue;
+        }
+        switch (item.first) {
+            case GL_DITHER:
+            case GL_MULTISAMPLE:
+                dispatcher.glEnable(item.first);
+                break;
+            case GL_TEXTURE_2D:
+            case GL_TEXTURE_CUBE_MAP_OES:
+                break;
+            default:
+                dispatcher.glDisable(item.first);
+                break;
+        }
+    }
+    // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glPixelStorei.xhtml
+    for (const auto& pixelStore : m_glPixelStoreiList) {
+        switch (pixelStore.first) {
+            case GL_PACK_ALIGNMENT:
+            case GL_UNPACK_ALIGNMENT:
+                dispatcher.glPixelStorei(pixelStore.first, 4);
+                break;
+            default:
+                dispatcher.glPixelStorei(pixelStore.first, 0);
+                break;
+        }
+    }
 }
 
 ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,

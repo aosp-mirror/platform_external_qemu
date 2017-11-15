@@ -25,7 +25,7 @@
 #include <GLES2/gl2.h>
 #include <memory>
 
-#define DEBUG 0
+#define DEBUG 1
 #if DEBUG
 #define D(...) fprintf(stderr, __VA_ARGS__);
 #define CHECK_EGL_ERR                                                 \
@@ -35,6 +35,7 @@
             D("%s: %s %d get egl error %d\n", __FUNCTION__, __FILE__, \
               __LINE__, err);                                         \
     }
+#define PRINT_LINE fprintf(stderr, "%s: %s %d\n", __FUNCTION__, __FILE__, __LINE__);
 #else
 #define D(...) ((void)0);
 #define CHECK_EGL_ERR ((void)0);
@@ -240,7 +241,9 @@ EglOsEglDisplay::EglOsEglDisplay() {
     mDispatcher.eglInitialize(mDisplay, nullptr, nullptr);
     CHECK_EGL_ERR
 #ifdef __linux__
+    PRINT_LINE
     mGlxDisplay = XOpenDisplay(0);
+    PRINT_LINE
 #endif // __linux__
 };
 
@@ -385,8 +388,10 @@ Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
                        EGL_MIPMAP_TEXTURE,
                        info->hasMipmap,
                        EGL_NONE};
+    PRINT_LINE
     EGLSurface surface = mDispatcher.eglCreatePbufferSurface(
             mDisplay, format->mConfigId, attrib);
+    PRINT_LINE
     CHECK_EGL_ERR
     if (surface == EGL_NO_SURFACE) {
         D("create pbuffer surface failed\n");
@@ -398,8 +403,10 @@ Surface* EglOsEglDisplay::createPbufferSurface(const PixelFormat* pixelFormat,
 Surface* EglOsEglDisplay::createWindowSurface(PixelFormat* pf,
                                               EGLNativeWindowType win) {
     D("%s\n", __FUNCTION__);
+    PRINT_LINE
     EGLSurface surface = mDispatcher.eglCreateWindowSurface(
             mDisplay, ((EglOsEglPixelFormat*)pf)->mConfigId, win, nullptr);
+    PRINT_LINE
     CHECK_EGL_ERR
     if (surface == EGL_NO_SURFACE) {
         D("create window surface failed\n");
@@ -431,10 +438,12 @@ bool EglOsEglDisplay::makeCurrent(Surface* read,
         return false;
     }
     D("%s %p\n", __FUNCTION__, ctx ? ctx->context() : nullptr);
+    PRINT_LINE
     bool ret = mDispatcher.eglMakeCurrent(
             mDisplay, drawSfc ? drawSfc->getHndl() : EGL_NO_SURFACE,
             readSfc ? readSfc->getHndl() : EGL_NO_SURFACE,
             ctx ? ctx->context() : EGL_NO_CONTEXT);
+    PRINT_LINE
     if (readSfc) {
         D("make current surface type %d %d\n", readSfc->type(),
           drawSfc->type());
@@ -447,7 +456,9 @@ bool EglOsEglDisplay::makeCurrent(Surface* read,
 void EglOsEglDisplay::swapBuffers(Surface* surface) {
     D("%s\n", __FUNCTION__);
     EglOsEglSurface* sfc = (EglOsEglSurface*)surface;
+    PRINT_LINE
     mDispatcher.eglSwapBuffers(mDisplay, sfc->getHndl());
+    PRINT_LINE
 }
 
 bool EglOsEglDisplay::isValidNativeWin(Surface* win) {
@@ -465,7 +476,11 @@ bool EglOsEglDisplay::isValidNativeWin(EGLNativeWindowType win) {
     Window root;
     int t;
     unsigned int u;
-    return XGetGeometry(mGlxDisplay, win, &root, &t, &t, &u, &u, &u, &u) != 0;
+    PRINT_LINE
+    printf("check win %d\n", (int)win);
+    bool success = XGetGeometry(mGlxDisplay, win, &root, &t, &t, &u, &u, &u, &u) != 0;
+    PRINT_LINE
+    return success;
 #else // __APPLE__
     unsigned int width, height;
     return nsGetWinDims(win, &width, &height);

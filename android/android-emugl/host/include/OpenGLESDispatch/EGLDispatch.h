@@ -34,6 +34,9 @@
 #define RENDER_EGL_DEFINE_TYPE(return_type, function_name, signature) \
     typedef return_type (EGLAPIENTRY *function_name ## _t) signature;
 
+#define RENDER_EGL_DECLARE_UNDERLYING(return_type, function_name, signature) \
+    function_name ## _t function_name##_underlying;
+
 #define RENDER_EGL_DECLARE_MEMBER(return_type, function_name, signature) \
     function_name ## _t function_name;
 
@@ -47,6 +50,10 @@ struct EGLDispatch {
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DECLARE_MEMBER)
+
+    LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DECLARE_UNDERLYING)
+    LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DECLARE_UNDERLYING)
+    LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DECLARE_UNDERLYING)
 };
 
 // Initialize EGLDispatch function. Return true on success, false on failure.

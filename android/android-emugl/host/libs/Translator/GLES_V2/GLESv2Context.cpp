@@ -116,6 +116,8 @@ void GLESv2Context::initDefaultFBO(
 void GLESv2Context::initEmulatedVAO() {
     if (!isCoreProfile()) return;
 
+    if (getVAOGlobalName(0)) return;
+
     // Create emulated default VAO
     genVAOName(0, false);
     dispatcher().glBindVertexArray(getVAOGlobalName(0));
@@ -193,7 +195,7 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
             });
 }
 
-void GLESv2Context::postLoadRestoreCtx() {
+void GLESv2Context::virtualMakeCurrent() {
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     m_useProgramData = shareGroup()->getObjectDataPtr(
             NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
@@ -211,73 +213,86 @@ void GLESv2Context::postLoadRestoreCtx() {
         }
         if (m_glesMajorVersion >= 3) {
             dispatcher.glBindVertexArray(getVAOGlobalName(vaoIte.first));
-        }
-        for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
-            GLESpointer* glesPointer = glesPointerIte.second;
-            // attribute 0 are bound right before draw, no need to bind it here
-            if (glesPointer->getAttribType() == GLESpointer::VALUE
-                    && glesPointerIte.first == 0) {
-                break;
-            }
-            switch (glesPointer->getAttribType()) {
-                case GLESpointer::BUFFER: {
-                    const GLuint globalBufferName = shareGroup()
-                            ->getGlobalName(NamedObjectType::VERTEXBUFFER,
-                                            glesPointer->getBufferName());
-                    if (!globalBufferName) {
-                        continue;
-                    }
-                    glesPointer->restoreBufferObj(getBufferObj);
-                    dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
-                            globalBufferName);
-                    if (glesPointer->isIntPointer()) {
-                        dispatcher.glVertexAttribIPointer(glesPointerIte.first,
-                                glesPointer->getSize(),
-                                glesPointer->getType(),
-                                glesPointer->getStride(),
-                                (GLvoid*)(size_t)glesPointer->getBufferOffset());
-                    } else {
-                        dispatcher.glVertexAttribPointer(glesPointerIte.first,
-                                glesPointer->getSize(),
-                                glesPointer->getType(), glesPointer->isNormalize(),
-                                glesPointer->getStride(),
-                                (GLvoid*)(size_t)glesPointer->getBufferOffset());
-                    }
+        } else {
+            for (const auto& glesPointerIte : *vaoIte.second.arraysMap) {
+                GLESpointer* glesPointer = glesPointerIte.second;
+                // attribute 0 are bound right before draw, no need to bind it
+                if (glesPointer->getAttribType() == GLESpointer::VALUE
+                        && glesPointerIte.first == 0) {
                     break;
                 }
-                case GLESpointer::VALUE:
-                    switch (glesPointer->getValueCount()) {
-                        case 1:
-                            dispatcher.glVertexAttrib1fv(glesPointerIte.first,
-                                    glesPointer->getValues());
-                            break;
-                        case 2:
-                            dispatcher.glVertexAttrib2fv(glesPointerIte.first,
-                                    glesPointer->getValues());
-                            break;
-                        case 3:
-                            dispatcher.glVertexAttrib3fv(glesPointerIte.first,
-                                    glesPointer->getValues());
-                            break;
-                        case 4:
-                            dispatcher.glVertexAttrib4fv(glesPointerIte.first,
-                                    glesPointer->getValues());
-                            break;
+                switch (glesPointer->getAttribType()) {
+                    case GLESpointer::BUFFER: {
+                        const GLuint globalBufferName = shareGroup()
+                            ->getGlobalName(NamedObjectType::VERTEXBUFFER,
+                                    glesPointer->getBufferName());
+                        if (!globalBufferName) {
+                            continue;
+                        }
+                        // glesPointer->restoreBufferObj(getBufferObj);
+                        dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
+                                globalBufferName);
+                        if (glesPointer->isIntPointer()) {
+                            dispatcher.glVertexAttribIPointer(
+                                    glesPointerIte.first,
+                                    glesPointer->getSize(),
+                                    glesPointer->getType(),
+                                    glesPointer->getStride(),
+                                    (GLvoid*)(size_t)glesPointer->
+                                        getBufferOffset());
+                        } else {
+                            dispatcher.glVertexAttribPointer(
+                                    glesPointerIte.first,
+                                    glesPointer->getSize(),
+                                    glesPointer->getType(),
+                                    glesPointer->isNormalize(),
+                                    glesPointer->getStride(),
+                                    (GLvoid*)(size_t)glesPointer->
+                                        getBufferOffset());
+                        }
+                        break;
                     }
-                    break;
-                case GLESpointer::ARRAY:
-                    // client arrays are set up right before draw calls
-                    // so we do nothing here
-                    break;
+                    case GLESpointer::VALUE:
+                        switch (glesPointer->getValueCount()) {
+                            case 1:
+                                dispatcher.glVertexAttrib1fv(
+                                        glesPointerIte.first,
+                                        glesPointer->getValues());
+                                break;
+                            case 2:
+                                dispatcher.glVertexAttrib2fv(
+                                        glesPointerIte.first,
+                                        glesPointer->getValues());
+                                break;
+                            case 3:
+                                dispatcher.glVertexAttrib3fv(
+                                        glesPointerIte.first,
+                                        glesPointer->getValues());
+                                break;
+                            case 4:
+                                dispatcher.glVertexAttrib4fv(
+                                        glesPointerIte.first,
+                                        glesPointer->getValues());
+                                break;
+                        }
+                        break;
+                    case GLESpointer::ARRAY:
+                        // client arrays are set up right before draw calls
+                        // so we do nothing here
+                        break;
+                }
+                if (glesPointer->isEnable()) {
+                    dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+                } else {
+                    dispatcher.glDisableVertexAttribArray(glesPointerIte.first);
+                }
             }
-            if (glesPointer->isEnable()) {
-                dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
-            }
-        }
-        for (size_t i = 0; i < vaoIte.second.bindingState.size(); i++) {
-            const BufferBinding& bufferBinding = vaoIte.second.bindingState[i];
-            if (bufferBinding.divisor) {
-                dispatcher.glVertexAttribDivisor(i, bufferBinding.divisor);
+            for (size_t i = 0; i < vaoIte.second.bindingState.size(); i++) {
+                const BufferBinding& bufferBinding =
+                        vaoIte.second.bindingState[i];
+                if (bufferBinding.divisor) {
+                    dispatcher.glVertexAttribDivisor(i, bufferBinding.divisor);
+                }
             }
         }
     }
@@ -339,7 +354,7 @@ void GLESv2Context::postLoadRestoreCtx() {
         }
     }
 
-    GLEScontext::postLoadRestoreCtx();
+    GLEScontext::virtualMakeCurrent();
 }
 
 ObjectDataPtr GLESv2Context::loadObject(NamedObjectType type,
