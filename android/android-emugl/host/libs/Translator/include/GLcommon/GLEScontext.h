@@ -418,6 +418,11 @@ public:
     // postLoad is triggered after setting up ShareGroup
     virtual void postLoad();
     virtual void restore();
+    virtual void postLoadRestoreShareGroup();
+    virtual void virtualMakeCurrent();
+    // reset all hardware GL states that has been modified by this context but
+    // will not necessary be restored by the next context
+    virtual void virtualUnmakeCurrent();
 
     bool isCoreProfile() const { return m_coreProfile; }
     void setCoreProfile(bool core) { m_coreProfile = core; }
@@ -441,9 +446,6 @@ protected:
         GLint multisamples,
         GLuint* eglSurfaceRBColorId,
         GLuint* eglSurfaceRBDepthId);
-
-    virtual void postLoadRestoreShareGroup();
-    virtual void postLoadRestoreCtx();
 
     static void buildStrings(const char* baseVendor, const char* baseRenderer, const char* baseVersion, const char* version);
 

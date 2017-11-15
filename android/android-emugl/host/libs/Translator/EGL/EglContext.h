@@ -46,7 +46,6 @@ public:
                ObjectNameManager* mngr,
                android::base::Stream* stream);
     bool usingSurface(SurfacePtr surface);
-    EglOS::Context* nativeType() const { return m_native.get(); }
     bool getAttrib(EGLint attrib, EGLint* value);
     const SurfacePtr& read() const { return m_read; };
     const SurfacePtr& draw() const { return m_draw; };
@@ -61,10 +60,13 @@ public:
     void onSave(android::base::Stream* stream);
     void postSave(android::base::Stream* stream);
 
+    static EglOS::Context* getNativeContext();
+    static bool nativeEverCurrent();
+    static void setNativeCurrent();
+
 private:
     static unsigned int s_nextContextHndl;
     EglDisplay* m_dpy = nullptr;
-    emugl::SmartPtr<EglOS::Context> m_native = {};
     EglConfig* m_config = nullptr;
     GLEScontext* m_glesContext = nullptr;
     ShareGroupPtr m_shareGroup;

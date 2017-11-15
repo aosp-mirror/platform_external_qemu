@@ -67,6 +67,12 @@ ErrorHandler::~ErrorHandler() {
 
 int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
                                    XErrorEvent* event) {
+#ifndef NDEBUG
+    char errorstring[128];
+    XGetErrorText(dpy, event->error_code, errorstring, 128);
+    fprintf(stderr, "%s: GLX error: %s\n", __func__, errorstring);
+#endif
+
     s_lastErrorCode = event->error_code;
     return 0;
 }
@@ -442,24 +448,13 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
-        const int attribs[] = {
-            GLX_PBUFFER_WIDTH, info->width,
-            GLX_PBUFFER_HEIGHT, info->height,
-            GLX_LARGEST_PBUFFER, info->largest,
-            None
-        };
-        GLXPbuffer pb = glXCreatePbuffer(
-                mDisplay,
-                GlxPixelFormat::from(pixelFormat),
-                attribs);
-        return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
+        return new GlxSurface(0, GlxSurface::PBUFFER);
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
         if (!pb) {
             return false;
         } else {
-            glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
             return true;
         }
     }
@@ -473,14 +468,19 @@ public:
             // unbind
             retval = glXMakeContextCurrent(mDisplay, 0, 0, NULL);
         }
-        else if (context && read && draw) {
+        else {
             retval = glXMakeContextCurrent(
                     mDisplay,
                     GlxSurface::drawableFor(draw),
                     GlxSurface::drawableFor(read),
                     GlxContext::contextFor(context));
         }
-        return (handler.getLastError() == 0) && retval;
+        auto lastErr = handler.getLastError();
+#ifndef NDEBUG
+        fprintf(stderr, "%s: last err 0x%x retval 0x%x\n",
+                __func__, lastErr, retval);
+#endif
+        return (0 == lastErr) && retval;
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {

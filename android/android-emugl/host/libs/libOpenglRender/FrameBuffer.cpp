@@ -116,61 +116,66 @@ const GLint* getGlesMaxContextAttribs() {
     }
 }
 
-static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
-    EGLConfig config;
-    EGLSurface surface;
-
-    static const GLint configAttribs[] = {EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
-                                          EGL_RENDERABLE_TYPE,
-                                          EGL_OPENGL_ES2_BIT, EGL_NONE};
-
-    int n;
-    if (!s_egl.eglChooseConfig(p_dpy, configAttribs, &config, 1, &n) ||
-        n == 0) {
-        ERR("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
-        return NULL;
-    }
-
-    static const EGLint pbufAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-
-    surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
-    if (surface == EGL_NO_SURFACE) {
-        ERR("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
-        return NULL;
-    }
-
-    EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
-                                            getGlesMaxContextAttribs());
-    if (ctx == EGL_NO_CONTEXT) {
-        ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
-        s_egl.eglDestroySurface(p_dpy, surface);
-        return NULL;
-    }
-
-    if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
-        ERR("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
-        s_egl.eglDestroySurface(p_dpy, surface);
-        s_egl.eglDestroyContext(p_dpy, ctx);
-        return NULL;
-    }
-
-    // the string pointer may become invalid when the context is destroyed
-    const char* s = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
-    char* extString = strdup(s ? s : "");
-
-    // It is rare but some drivers actually fail this...
-    if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
-        ERR("%s: Could not unbind context. Please try updating graphics card "
-            "driver!\n",
-            __FUNCTION__);
-        free(extString);
-        extString = NULL;
-    }
-    s_egl.eglDestroyContext(p_dpy, ctx);
-    s_egl.eglDestroySurface(p_dpy, surface);
-
-    return extString;
-}
+// static char* getGLES2ExtensionString(EGLDisplay p_dpy) {
+//     EGLConfig config;
+//     EGLSurface surface;
+// 
+//     static const GLint configAttribs[] = {EGL_SURFACE_TYPE, EGL_PBUFFER_BIT,
+//                                           EGL_RENDERABLE_TYPE,
+//                                           EGL_OPENGL_ES2_BIT, EGL_NONE};
+// 
+//     int n;
+//     if (!s_egl.eglChooseConfig(p_dpy, configAttribs, &config, 1, &n) ||
+//         n == 0) {
+//         ERR("%s: Could not find GLES 2.x config!\n", __FUNCTION__);
+//         return NULL;
+//     }
+// 
+//     static const EGLint pbufAttribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
+// 
+//     surface = s_egl.eglCreatePbufferSurface(p_dpy, config, pbufAttribs);
+//     if (surface == EGL_NO_SURFACE) {
+//         ERR("%s: Could not create GLES 2.x Pbuffer!\n", __FUNCTION__);
+//         return NULL;
+//     }
+// 
+//     EGLContext ctx = s_egl.eglCreateContext(p_dpy, config, EGL_NO_CONTEXT,
+//                                             getGlesMaxContextAttribs());
+//     if (ctx == EGL_NO_CONTEXT) {
+//         ERR("%s: Could not create GLES 2.x Context!\n", __FUNCTION__);
+//         s_egl.eglDestroySurface(p_dpy, surface);
+//         return NULL;
+//     }
+// 
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+//     if (!s_egl.eglMakeCurrent(p_dpy, surface, surface, ctx)) {
+//         ERR("%s: Could not make GLES 2.x context current!\n", __FUNCTION__);
+//         s_egl.eglDestroySurface(p_dpy, surface);
+//         s_egl.eglDestroyContext(p_dpy, ctx);
+//         return NULL;
+//     }
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+// 
+//     // the string pointer may become invalid when the context is destroyed
+//     const char* s = (const char*)s_gles2.glGetString(GL_EXTENSIONS);
+//     char* extString = strdup(s ? s : "");
+// 
+//     // It is rare but some drivers actually fail this...
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+//     if (!s_egl.eglMakeCurrent(p_dpy, NULL, NULL, NULL)) {
+//         ERR("%s: Could not unbind context. Please try updating graphics card "
+//             "driver!\n",
+//             __FUNCTION__);
+//         free(extString);
+//         extString = NULL;
+//     }
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+//     s_egl.eglDestroyContext(p_dpy, ctx);
+//     s_egl.eglDestroySurface(p_dpy, surface);
+//     fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+// 
+//     return extString;
+// }
 
 // A condition variable needed to wait for framebuffer initialization.
 namespace {
@@ -248,6 +253,7 @@ void FrameBuffer::finalize() {
 
 bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         bool egl2egl) {
+    fprintf(stderr, "%s: begin\n", __func__);
     GL_LOG("FrameBuffer::initialize");
     if (s_theFrameBuffer != NULL) {
         return true;
@@ -323,13 +329,15 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // if GLES2 plugin has loaded - try to make GLES2 context and
     // get GLES2 extension string
     //
-    android::base::ScopedCPtr<char> gles2Extensions(
-            getGLES2ExtensionString(fb->m_eglDisplay));
-    if (!gles2Extensions) {
-        // Could not create GLES2 context - drop GL2 capability
-        ERR("Failed to obtain GLES 2.x extensions string!\n");
-        return false;
-    }
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+    // android::base::ScopedCPtr<char> gles2Extensions(
+    //         getGLES2ExtensionString(fb->m_eglDisplay));
+    // fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
+    // if (!gles2Extensions) {
+    //     // Could not create GLES2 context - drop GL2 capability
+    //     ERR("Failed to obtain GLES 2.x extensions string!\n");
+    //     return false;
+    // }
 
     //
     // Create EGL context for framebuffer post rendering.
@@ -419,9 +427,12 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     GL_LOG("attempting to make context current");
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     // Make the context current
     ScopedBind bind(fb->m_colorBufferHelper);
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     if (!bind.isOk()) {
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
         ERR("Failed to make current\n");
         return false;
     }
@@ -430,9 +441,9 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     //
     // Initilize framebuffer capabilities
     //
-    const bool has_gl_oes_image =
-            emugl::hasExtension(gles2Extensions.get(), "GL_OES_EGL_image");
-    gles2Extensions.reset();
+    const bool has_gl_oes_image = true;
+    //         emugl::hasExtension(gles2Extensions.get(), "GL_OES_EGL_image");
+    // gles2Extensions.reset();
 
     fb->m_caps.has_eglimage_texture_2d = false;
     fb->m_caps.has_eglimage_renderbuffer = false;
@@ -488,6 +499,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Don't fail initialization if no GLES configs exist
     //
 
+    fprintf(stderr, "%s:%d arrive\n", __func__, __LINE__);
     //
     // If no configs at all, exit
     //

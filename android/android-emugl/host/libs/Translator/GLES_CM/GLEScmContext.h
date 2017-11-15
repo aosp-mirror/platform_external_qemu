@@ -187,9 +187,9 @@ public:
     const Fog& getFogInfo();
 
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void virtualMakeCurrent() override;
 
 protected:
-    virtual void postLoadRestoreCtx() override;
 
     static const GLint kMaxTextureUnits = 4;
     static const GLint kMaxMatrixStackSize = 16;

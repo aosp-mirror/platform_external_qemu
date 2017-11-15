@@ -98,6 +98,10 @@ public:
     // Moves the |item| into internal queue for processing.
     void enqueue(Item&& item) { enqueueImpl(std::move(item)); }
 
+    void enqueueMultiple(const std::vector<Item>& items) {
+        enqueueImplMultiple(items);
+    }
+
 private:
     struct SyncPoint {
         bool signaled = false;
@@ -105,6 +109,7 @@ private:
         base::Lock lock;
     };
     struct Command {
+        Command(const Item& it) : hasItem(true), workItem(it) { }
         Command(Item&& it) : hasItem(true), workItem(std::move(it)) {}
         Command(SyncPoint* sp) : hasItem(false), syncPoint(sp) {}
         Command(Command&& other) : hasItem(other.hasItem) {
@@ -132,6 +137,18 @@ private:
         base::AutoLock lock(mLock);
         bool signal = mQueue.empty();
         mQueue.emplace_back(Command(std::move(x)));
+        if (signal) {
+            mCv.signalAndUnlock(&lock);
+        }
+    }
+
+    template <class T>
+    void enqueueImplMultiple(const std::vector<T>& items) {
+        base::AutoLock lock(mLock);
+        bool signal = mQueue.empty();
+        for (auto& it : items) {
+            mQueue.emplace_back(Command(it));
+        }
         if (signal) {
             mCv.signalAndUnlock(&lock);
         }

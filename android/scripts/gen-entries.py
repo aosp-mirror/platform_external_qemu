@@ -28,13 +28,45 @@
 import re
 import sys
 import argparse
+import json
 
 re_func = re.compile(r"""^(.*[\* ])([A-Za-z_][A-Za-z0-9_]*)\((.*)\);$""")
 re_param = re.compile(r"""^(.*[\* ])([A-Za-z_][A-Za-z0-9_]*)$""")
 
+class Var:
+    """Modeling a single parameter of a function."""
+    def __init__(self, typename, callname, datasize_expr, direction):
+        self.typename = typename
+        self.type_is_ptr = True if "*" in typename else False
+        self.callname = callname
+        self.datasize_expr = datasize_expr
+        self.direction = direction
+
+def get_datasize_expr(gldefs, funcname, argname):
+    if gldefs.has_key(funcname):
+        def_entry = gldefs[funcname]
+        if def_entry.has_key("__varinfo__"):
+            varinfo_entry = def_entry["__varinfo__"]
+            if varinfo_entry.has_key(argname):
+                arg_entry = varinfo_entry[argname]
+                if arg_entry.has_key("len"):
+                    return arg_entry["len"]
+    return None
+
+def get_direction(gldefs, funcname, argname):
+    if gldefs.has_key(funcname):
+        def_entry = gldefs[funcname]
+        if def_entry.has_key("__varinfo__"):
+            varinfo_entry = def_entry["__varinfo__"]
+            if varinfo_entry.has_key(argname):
+                arg_entry = varinfo_entry[argname]
+                if arg_entry.has_key("dir"):
+                    return arg_entry["dir"]
+    return None
+
 class Entry:
     """Small class used to model a single DLL entry point."""
-    def __init__(self, func_name, return_type, parameters):
+    def __init__(self, func_name, return_type, parameters, gldefs):
         """Initialize Entry instance. |func_name| is the function name,
            |return_type| its return type, and |parameters| is a list of
            (type,name) tuples from the entry's signature.
@@ -44,6 +76,7 @@ class Entry:
         self.parameters = ""
         self.vartypes = []
         self.varnames = []
+        self.var_infos = []
         self.call = ""
         comma = ""
         for param in parameters:
@@ -51,6 +84,9 @@ class Entry:
             self.varnames.append(param[1])
             self.parameters += "%s%s %s" % (comma, param[0], param[1])
             self.call += "%s%s" % (comma, param[1])
+            datasize_expr = get_datasize_expr(gldefs, self.func_name, param[1])
+            direction = get_direction(gldefs, self.func_name, param[1])
+            self.var_infos.append(Var(param[0], param[1], datasize_expr, direction))
             comma = ", "
 
 def banner_command(argv):
@@ -64,7 +100,7 @@ def banner_command(argv):
     argv[0] = "android/scripts/gen-entries.py"
     return ' '.join(argv)
 
-def parse_entries_file(lines):
+def parse_entries_file(lines, gldefs):
     """Parse an .entries file and return a tuple of:
         entries: list of Entry instances from the file.
         prefix_name: prefix name from the file, or None.
@@ -113,7 +149,7 @@ def parse_entries_file(lines):
                     params.append((param_type.strip(), param_name.strip()))
 
         if not failure:
-            entries.append(Entry(func_name, return_type, params))
+            entries.append(Entry(func_name, return_type, params, gldefs))
 
     return (entries, prefix_name, verbatim, errors)
 
@@ -405,12 +441,52 @@ def gen_symbols(entries, underscore):
     for entry in entries:
         print "%s%s" % (prefix, entry.func_name)
 
-def parse_file(filename, lines, mode):
+def gen_threaded_impl(entries, prefix_name, verbatim, filename):
+    print "// Auto-generated with: %s" % banner_command(sys.argv)
+
+    for entry in entries:
+        if entry.return_type == "void":
+            # Can this be async? Check if no pointers.
+            isAsync = True
+            for vinfo in entry.var_infos:
+                if vinfo.type_is_ptr:
+                    isAsync = False
+
+            if isAsync:
+                print """
+void %s_%s(%s) {
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        %s_dispatch->%s_underlying(%s);
+    });
+}
+""" % (prefix_name, entry.func_name, entry.parameters, prefix_name, entry.func_name, entry.call)
+            else:
+                print """
+void %s_%s(%s) {
+    DriverThread::callOnDriverThreadSync([&]() {
+        %s_dispatch->%s_underlying(%s);
+    });
+}
+""" % (prefix_name, entry.func_name, entry.parameters, prefix_name, entry.func_name, entry.call)
+        else:
+            print """
+%s %s_%s(%s) {
+    return DriverThread::callOnDriverThread<%s>([&]() {
+        return %s_dispatch->%s_underlying(%s);
+    });
+}
+""" % (entry.return_type, prefix_name, entry.func_name, entry.parameters, entry.return_type, prefix_name, entry.func_name, entry.call)
+
+def parse_file(filename, lines, mode, custom_prefix=None, gldefs={}):
     """Generate one of possible outputs from |filename|. |lines| must be a list
        of text lines from the file, and |mode| is one of the --mode option
        values.
     """
-    entries, prefix_name, verbatim, errors = parse_entries_file(lines)
+    entries, prefix_name, verbatim, errors = parse_entries_file(lines, gldefs)
+
+    if custom_prefix:
+        prefix_name = custom_prefix
+
     if errors:
         for error in errors:
             print >> sys.stderr, "ERROR: %s:%s" % (filename, error)
@@ -435,11 +511,14 @@ def parse_file(filename, lines, mode):
         gen_functions_header(entries, prefix_name, verbatim, filename, False)
     elif mode == 'funcargs':
         gen_functions_header(entries, prefix_name, verbatim, filename, True)
+    elif mode == 'threaded_impl':
+        gen_threaded_impl(entries, prefix_name, verbatim, filename)
 
 
 # List of valid --mode option values.
 mode_list = [
-    'def', 'sym', 'translator_passthrough', 'wrapper', 'symbols', '_symbols', 'functions', 'funcargs'
+    'def', 'sym', 'translator_passthrough', 'wrapper', 'symbols', '_symbols', 'functions', 'funcargs',
+    'threaded_impl',
 ]
 
 # Argument parsing.
@@ -461,6 +540,8 @@ the --mode option, which can be:
 """)
 parser.add_argument("--mode", help="Output mode", choices=mode_list)
 parser.add_argument("--output", help="output file")
+parser.add_argument("--custom_prefix", help="custom prefix")
+parser.add_argument("--gldefs", help="JSON file where gl defs can be found for this")
 parser.add_argument("file", help=".entries file path")
 
 args = parser.parse_args()
@@ -472,7 +553,12 @@ if not args.mode:
 if args.output:
     sys.stdout = open(args.output, "w+")
 
+gldefs = {}
+
+if args.gldefs:
+    gldefs = json.loads(open(args.gldefs, "r").read())
+
 if args.file == '--':
-    parse_file("<stdin>", sys.stdin, args.mode)
+    parse_file("<stdin>", sys.stdin, args.mode, args.custom_prefix, gldefs)
 else:
-    parse_file(args.file, open(args.file), args.mode)
+    parse_file(args.file, open(args.file), args.mode, args.custom_prefix, gldefs)
