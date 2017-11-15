@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bbc7955a_427a3ba7",
+        "filename": "android/android-emugl/host/libs/Translator/GLcommon/DriverThread.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2017-11-15T20:58:31Z",
+      "side": 1,
+      "message": "would you write unit tests for some functions in this class?",
+      "range": {
+        "startLine": 18,
+        "startChar": 25,
+        "endLine": 18,
+        "endChar": 26
+      },
+      "revId": "bc7ac90205b98cd889b62d7be1e78c1593a01d85",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
