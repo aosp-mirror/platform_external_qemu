@@ -181,7 +181,8 @@ void SyncThread::doSyncWait(SyncThreadCmd* cmd) {
     EGLint wait_result = 0x0;
 
     DPRINT("wait on sync obj: %p", cmd->fenceSync);
-    wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
+    // wait_result = cmd->fenceSync->wait(kDefaultTimeoutNsecs);
+    wait_result = EGL_CONDITION_SATISFIED_KHR;
 
     DPRINT("done waiting, with wait result=0x%x. "
            "increment timeline (and signal fence)",

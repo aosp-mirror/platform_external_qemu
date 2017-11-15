@@ -379,7 +379,16 @@ void GLEScontext::init() {
 void GLEScontext::restore() {
     postLoadRestoreShareGroup();
     if (m_needRestoreFromSnapshot) {
-        postLoadRestoreCtx();
+        m_fboNameSpace->postLoadRestore(
+            [this](NamedObjectType p_type, ObjectLocalName p_localName) {
+                if (p_type == NamedObjectType::FRAMEBUFFER) {
+                    return getFBOGlobalName(p_localName);
+                } else {
+                    return m_shareGroup->getGlobalName(p_type, p_localName);
+                }
+            }
+        );
+        virtualMakeCurrent();
         m_needRestoreFromSnapshot = false;
     }
 }
@@ -701,19 +710,9 @@ void GLEScontext::postLoadRestoreShareGroup() {
     m_shareGroup->postLoadRestore();
 }
 
-void GLEScontext::postLoadRestoreCtx() {
+void GLEScontext::virtualMakeCurrent() {
     GLDispatch& dispatcher = GLEScontext::dispatcher();
-
     assert(!m_shareGroup->needRestore());
-    m_fboNameSpace->postLoadRestore(
-            [this](NamedObjectType p_type, ObjectLocalName p_localName) {
-                if (p_type == NamedObjectType::FRAMEBUFFER) {
-                    return getFBOGlobalName(p_localName);
-                } else {
-                    return m_shareGroup->getGlobalName(p_type, p_localName);
-                }
-            }
-        );
 
     // buffer bindings
     auto bindBuffer = [this](GLenum target, GLuint buffer) {
@@ -722,67 +721,107 @@ void GLEScontext::postLoadRestoreCtx() {
     };
     bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
     bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
+    CHECK_GL_ERROR
 
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
-        this->dispatcher().glBindFramebuffer(target,
-                getFBOGlobalName(buffer));
+        if (!buffer && target == GL_DRAW_FRAMEBUFFER) {
+            fprintf(stderr, "%s: bind default draw %u\n", __func__, m_defaultFBO);
+            this->dispatcher().glBindFramebuffer(target,
+                    m_defaultFBO);
+            if (!m_isViewport) {
+                fprintf(stderr, "%s: setting viewprot of default fbo\n", __func__);
+                this->dispatcher().glViewport(0, 0, m_defaultFBOWidth, m_defaultFBOHeight);
+            }
+        } else if (!buffer && target == GL_READ_FRAMEBUFFER) {
+            fprintf(stderr, "%s: bind default read %u\n", __func__, m_defaultReadFBO);
+            this->dispatcher().glBindFramebuffer(target, m_defaultReadFBO);
+            if (!m_isViewport) {
+                fprintf(stderr, "%s: setting viewprot of default fbo\n", __func__);
+                this->dispatcher().glViewport(0, 0, m_defaultFBOWidth, m_defaultFBOHeight);
+            }
+        } else {
+            fprintf(stderr, "%s: bind global %u\n", __func__, getFBOGlobalName(buffer));
+            this->dispatcher().glBindFramebuffer(target,
+                    getFBOGlobalName(buffer));
+        }
     };
-    bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
+    CHECK_GL_ERROR
     bindFrameBuffer(GL_DRAW_FRAMEBUFFER, m_drawFramebuffer);
+    bindFrameBuffer(GL_READ_FRAMEBUFFER, m_readFramebuffer);
+    CHECK_GL_ERROR
+    fprintf(stderr, "%s: read draw %u %u\n", __func__, m_readFramebuffer, m_drawFramebuffer);
 
     for (unsigned int i = 0; i <= m_maxUsedTexUnit; i++) {
         for (unsigned int j = 0; j < NUM_TEXTURE_TARGETS; j++) {
+            if (isGles2Gles() && j == TEXTURE_2D_MULTISAMPLE) {
+                continue;
+            }
             textureTargetState& texState = m_texState[i][j];
-            if (texState.texture || texState.enabled) {
-                this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
-                GLenum texTarget = GL_TEXTURE_2D;
-                switch (j) {
-                    case TEXTURE_2D:
-                        texTarget = GL_TEXTURE_2D;
-                        break;
-                    case TEXTURE_CUBE_MAP:
-                        texTarget = GL_TEXTURE_CUBE_MAP;
-                        break;
-                    case TEXTURE_2D_ARRAY:
-                        texTarget = GL_TEXTURE_2D_ARRAY;
-                        break;
-                    case TEXTURE_3D:
-                        texTarget = GL_TEXTURE_3D;
-                        break;
-                    case TEXTURE_2D_MULTISAMPLE:
-                        texTarget = GL_TEXTURE_2D_MULTISAMPLE;
-                        break;
-                    default:
-                        fprintf(stderr,
-                                "Warning: unsupported texture target 0x%x.\n",
-                                j);
-                        break;
-                }
-                // TODO: refactor the following line since it is duplicated in
-                // GLESv2Imp and GLEScmImp as well
+            this->dispatcher().glActiveTexture(i + GL_TEXTURE0);
+            GLenum texTarget = GL_TEXTURE_2D;
+            switch (j) {
+                case TEXTURE_2D:
+                    texTarget = GL_TEXTURE_2D;
+                    break;
+                case TEXTURE_CUBE_MAP:
+                    texTarget = GL_TEXTURE_CUBE_MAP;
+                    break;
+                case TEXTURE_2D_ARRAY:
+                    texTarget = GL_TEXTURE_2D_ARRAY;
+                    break;
+                case TEXTURE_3D:
+                    texTarget = GL_TEXTURE_3D;
+                    break;
+                case TEXTURE_2D_MULTISAMPLE:
+                    texTarget = GL_TEXTURE_2D_MULTISAMPLE;
+                    break;
+                default:
+                    fprintf(stderr,
+                            "Warning: unsupported texture target 0x%x.\n",
+                            j);
+                    break;
+            }
+            CHECK_GL_ERROR
+            //if (texState.texture) {
+            if (1) {
                 ObjectLocalName texName = texState.texture != 0 ?
                         texState.texture : getDefaultTextureName(texTarget);
                 this->dispatcher().glBindTexture(
                         texTarget,
                         m_shareGroup->getGlobalName(
                             NamedObjectType::TEXTURE, texName));
-                if (!isCoreProfile() && texState.enabled) {
+                if (GLenum err = this->dispatcher().glGetError()) { \
+                    fprintf(stderr, "%s: %s %d tex 0x%x get GL error 0x%x\n", \
+                        __FUNCTION__, __FILE__, __LINE__, texTarget, err); \
+                }
+                if (!isCoreProfile() && !isGles2Gles() && texState.enabled) {
                     dispatcher.glEnable(texTarget);
                 }
+                CHECK_GL_ERROR
+            } else {
+                this->dispatcher().glBindTexture(
+                        texTarget, 0);
+                CHECK_GL_ERROR
             }
         }
     }
+    CHECK_GL_ERROR
     dispatcher.glActiveTexture(m_activeTexture + GL_TEXTURE0);
+    CHECK_GL_ERROR
 
     // viewport & scissor
     if (m_isViewport) {
         dispatcher.glViewport(m_viewportX, m_viewportY,
                 m_viewportWidth, m_viewportHeight);
+    } else {
+        fprintf(stderr, "%s: wtf? no viewport\n", __func__);
     }
     if (m_isScissor) {
         dispatcher.glScissor(m_scissorX, m_scissorY,
                 m_scissorWidth, m_scissorHeight);
+    } else {
+        fprintf(stderr, "%s: wtf? no scissor\n", __func__);
     }
     dispatcher.glPolygonOffset(m_polygonOffsetFactor,
             m_polygonOffsetUnits);
@@ -802,10 +841,12 @@ void GLEScontext::postLoadRestoreCtx() {
             enableFunc(item.first);
         }
     }
+    CHECK_GL_ERROR
     dispatcher.glBlendEquationSeparate(m_blendEquationRgb,
             m_blendEquationAlpha);
     dispatcher.glBlendFuncSeparate(m_blendSrcRgb, m_blendDstRgb,
             m_blendSrcAlpha, m_blendDstAlpha);
+    CHECK_GL_ERROR
     for (const auto& pixelStore : m_glPixelStoreiList) {
         dispatcher.glPixelStorei(pixelStore.first, pixelStore.second);
     }
@@ -818,6 +859,7 @@ void GLEScontext::postLoadRestoreCtx() {
     dispatcher.glLineWidth(m_lineWidth);
 
     dispatcher.glSampleCoverage(m_sampleCoverageVal, m_sampleCoverageInvert);
+    CHECK_GL_ERROR
 
     for (int i = 0; i < 2; i++) {
         GLenum face = i == StencilFront ? GL_FRONT
@@ -828,6 +870,7 @@ void GLEScontext::postLoadRestoreCtx() {
         dispatcher.glStencilOpSeparate(face, m_stencilStates[i].m_sfail,
                 m_stencilStates[i].m_dpfail, m_stencilStates[i].m_dppass);
     }
+    CHECK_GL_ERROR
 
     dispatcher.glClearColor(m_clearColorR, m_clearColorG, m_clearColorB,
             m_clearColorA);
@@ -841,6 +884,7 @@ void GLEScontext::postLoadRestoreCtx() {
     dispatcher.glClearStencil(m_clearStencil);
     dispatcher.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB,
             m_colorMaskA);
+    CHECK_GL_ERROR
 
     // report any GL errors when loading from a snapshot
     GLenum err = 0;
@@ -852,6 +896,43 @@ void GLEScontext::postLoadRestoreCtx() {
                     err);
         }
     } while (err != 0);
+}
+
+void GLEScontext::virtualUnmakeCurrent() {
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    // https://www.khronos.org/registry/OpenGL-Refpages/es1.1/xhtml/glEnable.xml
+    // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glEnable.xhtml
+    for (auto item : m_glEnableList) {
+        if (item.first == GL_TEXTURE_2D
+                || item.first == GL_TEXTURE_CUBE_MAP_OES) {
+            continue;
+        }
+        switch (item.first) {
+            case GL_DITHER:
+            case GL_MULTISAMPLE:
+                dispatcher.glEnable(item.first);
+                break;
+            case GL_TEXTURE_2D:
+            case GL_TEXTURE_CUBE_MAP_OES:
+                break;
+            default:
+                dispatcher.glDisable(item.first);
+                break;
+        }
+    }
+    // https://www.khronos.org/registry/OpenGL-Refpages/es3.0/html/glPixelStorei.xhtml
+    for (const auto& pixelStore : m_glPixelStoreiList) {
+        switch (pixelStore.first) {
+            case GL_PACK_ALIGNMENT:
+            case GL_UNPACK_ALIGNMENT:
+                dispatcher.glPixelStorei(pixelStore.first, 4);
+                break;
+            default:
+                dispatcher.glPixelStorei(pixelStore.first, 0);
+                break;
+        }
+    }
+    // TODO: restore viewport and scissor
 }
 
 ObjectDataPtr GLEScontext::loadObject(NamedObjectType type,

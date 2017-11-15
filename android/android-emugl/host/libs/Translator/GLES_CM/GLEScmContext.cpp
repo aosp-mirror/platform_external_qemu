@@ -284,7 +284,7 @@ void GLEScmContext::restoreMatrixStack(const MatrixStack& matrices) {
     }
 }
 
-void GLEScmContext::postLoadRestoreCtx() {
+void GLEScmContext::virtualMakeCurrent() {
     if (isInitialized()) {
         if (isCoreProfile()) {
             m_coreProfileEngine = new CoreProfileEngine(this);
@@ -410,7 +410,7 @@ void GLEScmContext::postLoadRestoreCtx() {
             dispatcher.glFogfv(GL_FOG_COLOR, mFog.color);
         }
     }
-    GLEScontext::postLoadRestoreCtx();
+    GLEScontext::virtualMakeCurrent();
 }
 
 //setting client side arr
