@@ -1,0 +1,337 @@
+#include "GLcommon/DriverThread.h"
+#include "GLcommon/GLEScontext.h"
+
+#include "android/base/memory/LazyInstance.h"
+#include "android/base/synchronization/Lock.h"
+#include "android/base/threads/WorkerThread.h"
+
+#include <GLES3/gl3.h>
+
+#include <stdio.h>
+
+using android::base::AutoLock;
+using android::base::LazyInstance;
+using android::base::Lock;
+using android::base::WorkerThread;
+using android::base::WorkerProcessingResult;
+
+class DriverThreadWorker {
+public:
+    enum CallType {
+        NormalApi = 0,
+        Context = 1,
+    };
+
+    enum ReturnType {
+        Void = 0,
+        Glbool = 1,
+        Glint = 2,
+        Glenum = 3,
+        Glsync = 4,
+        Voidptr = 5,
+        Constglubyteptr = 6,
+    };
+
+    struct Call {
+        CallType callType;
+        ReturnType retType;
+        std::function<void()> funcVoid;
+        std::function<GLboolean()> funcBool;
+        std::function<GLint()> funcInt;
+        std::function<GLenum()> funcEnum;
+        std::function<GLsync()> funcSync;
+        std::function<void*()> funcVoidptr;
+        std::function<const GLubyte*()> funcConstglubyteptr;
+        DriverThread::ContextInfo contextInfo;
+        bool changeContext;
+    };
+
+    DriverThreadWorker() :
+        mWorkerThread([this](Call&& call) { return runOne(call); }) {
+            // fprintf(stderr, "%s: call ctor\n", __func__);
+        mWorkerThread.start();
+    }
+
+    void registerContextQueryCallback(const DriverThread::ContextQueryCallback& c) {
+        mContextQueryCallback = c;
+    }
+
+    void registerContextChangeCallback(const DriverThread::ContextChangeCallback& c) {
+        mContextChangeCallback = c;
+    }
+
+    GLboolean getRetValBoolean() { return mBooleanReturn; }
+    GLint getRetValInt() { return mIntReturn; }
+    GLenum getRetValEnum() { return mEnumReturn; }
+    GLsync getRetValSync() { return mSyncReturn; }
+    void* getRetValVoidptr() { return mVoidptrReturn; }
+    const GLubyte* getRetValConstglubyteptr() { return mConstglubyteptr; }
+
+    WorkerProcessingResult runOne(const Call& call) {
+        if (call.callType == CallType::NormalApi) {
+            switch (call.retType) {
+                case ReturnType::Void:
+                    call.funcVoid();
+                    break;
+                case ReturnType::Glbool:
+                    mBooleanReturn = call.funcBool();
+                    break;
+                case ReturnType::Glint:
+                    mIntReturn = call.funcInt();
+                    break;
+                case ReturnType::Glenum:
+                    mEnumReturn = call.funcEnum();
+                    break;
+                case ReturnType::Glsync:
+                    mSyncReturn = call.funcSync();
+                    break;
+                case ReturnType::Voidptr:
+                    mVoidptrReturn = call.funcVoidptr();
+                    break;
+                case ReturnType::Constglubyteptr:
+                    mConstglubyteptr = call.funcConstglubyteptr();
+                    break;
+                default:
+                    break;
+            }
+        } else if (call.callType == CallType::Context) {
+            mBooleanReturn = true;
+            if (call.contextInfo.context != mCurrContextInfo.context ||
+                call.contextInfo.read != mCurrContextInfo.read ||
+                call.contextInfo.draw != mCurrContextInfo.draw) {
+                if (mContextChangeCallback && call.changeContext) {
+                // fprintf(stderr, "%s: changing from 0x%llx 0x%llx 0x%llx to 0x%llx 0x%llx 0x%llx\n", __func__,
+                //         (unsigned long long)mCurrContextInfo.context,
+                //         (unsigned long long)mCurrContextInfo.read,
+                //         (unsigned long long)mCurrContextInfo.draw,
+                //         (unsigned long long)call.contextInfo.context,
+                //         (unsigned long long)call.contextInfo.read,
+                //         (unsigned long long)call.contextInfo.draw);
+                    mBooleanReturn = mContextChangeCallback(call.contextInfo);
+                }
+            }
+            mCurrContextInfo = call.contextInfo;
+        }
+        return WorkerProcessingResult::Continue;
+    }
+
+    void callCommon_locked(bool changeContext) {
+        Call c;
+        c.callType = CallType::Context;
+        c.changeContext = changeContext;
+        // fprintf(stderr, "%s: %p query context\n", __func__, this);
+        if (mContextQueryCallback) {
+            c.contextInfo = mContextQueryCallback();
+        }
+        mWorkerThread.enqueue(Call(c));
+    }
+
+    bool makeCurrent(const DriverThread::ContextInfo& contextInfo) {
+        AutoLock lock(mLock);
+        Call c;
+        c.callType = CallType::Context;
+        c.changeContext = true;
+        c.contextInfo = contextInfo;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return mBooleanReturn;
+    }
+
+    void callVoid(std::function<void()> f, bool changeContext) {
+        AutoLock lock(mLock);
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Void;
+        c.funcVoid = f;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return void();
+    }
+
+    void callVoidAsync(std::function<void()> f, bool changeContext) {
+        AutoLock lock(mLock);
+
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Void;
+        c.funcVoid = f;
+        mWorkerThread.enqueue(Call(c));
+        return void();
+    }
+
+    GLboolean callBoolean(std::function<GLboolean()> f, bool changeContext) {
+        AutoLock lock(mLock);
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Glbool;
+        c.funcBool = f;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return mBooleanReturn;
+    }
+
+    GLint callInt(std::function<GLint()> f, bool changeContext) {
+        AutoLock lock(mLock);
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Glint;
+        c.funcInt = f;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return mIntReturn;
+    }
+
+    GLenum callEnum(std::function<GLenum()> f, bool changeContext) {
+        AutoLock lock(mLock);
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Glenum;
+        c.funcEnum = f;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return mEnumReturn;
+    }
+
+    GLsync callSync(std::function<GLsync()> f, bool changeContext) {
+        AutoLock lock(mLock);
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Glsync;
+        c.funcSync = f;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return mSyncReturn;
+    }
+
+    void* callVoidptr(std::function<void*()> f, bool changeContext) {
+        AutoLock lock(mLock);
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Voidptr;
+        c.funcVoidptr = f;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return mVoidptrReturn;
+    }
+
+    const GLubyte* callConstglubyteptr(std::function<const GLubyte*()> f, bool changeContext) {
+        AutoLock lock(mLock);
+        callCommon_locked(changeContext);
+        Call c;
+        c.callType = CallType::NormalApi;
+        c.retType = ReturnType::Constglubyteptr;
+        c.funcConstglubyteptr = f;
+        mWorkerThread.enqueue(Call(c));
+        mWorkerThread.waitQueuedItems();
+        return mConstglubyteptr;
+    }
+
+    Lock& lock() { return mLock; }
+
+    void finish() { }
+
+private:
+    WorkerThread<Call> mWorkerThread;
+    GLboolean mBooleanReturn;
+    GLint mIntReturn;
+    GLenum mEnumReturn;
+    GLsync mSyncReturn;
+    void* mVoidptrReturn;
+    const GLubyte* mConstglubyteptr;
+
+    DriverThread::ContextQueryCallback mContextQueryCallback;
+    DriverThread::ContextChangeCallback mContextChangeCallback;
+    DriverThread::ContextInfo mCurrContextInfo;
+
+    Lock mLock;
+};
+
+static DriverThreadWorker* sWorker = nullptr;
+
+void DriverThread::initWorker() {
+    // fprintf(stderr, "%s: call\n", __func__);
+    if (!sWorker) {
+        sWorker = new DriverThreadWorker;
+    }
+}
+
+DriverThreadWorker* DriverThread::getWorker() {
+    return sWorker;
+}
+
+void DriverThread::setWorker(DriverThreadWorker* w) {
+    sWorker = w;
+}
+
+DriverThread::DriverThread() { }
+
+void DriverThread::registerContextQueryCallback(const DriverThread::ContextQueryCallback& c) {
+    if (c) sWorker->registerContextQueryCallback(c);
+}
+
+void DriverThread::registerContextChangeCallback(const DriverThread::ContextChangeCallback& c) {
+    if (c) sWorker->registerContextChangeCallback(c);
+}
+
+bool DriverThread::useDriverThread() { return true; }
+
+template <>
+void DriverThread::callOnDriverThread<void>(std::function<void()> f, bool changeContext) {
+    sWorker->callVoid(f, changeContext);
+}
+
+template <>
+void DriverThread::callOnDriverThreadAsync<void>(std::function<void()> f, bool changeContext) {
+    sWorker->callVoidAsync(f, changeContext);
+}
+
+template <>
+GLboolean DriverThread::callOnDriverThread<GLboolean>(std::function<GLboolean()> f, bool changeContext) {
+    return sWorker->callBoolean(f, changeContext);
+}
+
+template <>
+bool DriverThread::callOnDriverThread<bool>(std::function<bool()> f, bool changeContext) {
+    return sWorker->callBoolean(f, changeContext);
+}
+
+template <>
+GLint DriverThread::callOnDriverThread<GLint>(std::function<GLint()> f, bool changeContext) {
+    return sWorker->callInt(f, changeContext);
+}
+
+template <>
+GLenum DriverThread::callOnDriverThread<GLenum>(std::function<GLenum()> f, bool changeContext) {
+    return sWorker->callEnum(f, changeContext);
+}
+
+template <>
+GLsync DriverThread::callOnDriverThread<GLsync>(std::function<GLsync()> f, bool changeContext) {
+    return sWorker->callSync(f, changeContext);
+}
+
+template <>
+void* DriverThread::callOnDriverThread<void*>(std::function<void*()> f, bool changeContext) {
+    return sWorker->callVoidptr(f, changeContext);
+}
+
+template <>
+const GLubyte* DriverThread::callOnDriverThread<const GLubyte*>(std::function<const  GLubyte*()> f, bool changeContext) {
+    return sWorker->callConstglubyteptr(f, changeContext);
+}
+
+void DriverThread::callOnDriverThreadSync(std::function<void()> f, bool changeContext) {
+    sWorker->callVoid(f, changeContext);
+    sWorker->finish();
+}
+
+bool DriverThread::makeCurrent(const DriverThread::ContextInfo& context) {
+    return sWorker->makeCurrent(context);
+}

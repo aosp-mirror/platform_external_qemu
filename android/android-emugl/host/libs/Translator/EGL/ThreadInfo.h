@@ -28,10 +28,10 @@ struct ThreadInfo {
                     ShareGroupPtr share,
                     ObjectNameManager* manager);
 
-    ContextPtr           eglContext;
+    ContextPtr           eglContext = {};
     EglDisplay*          eglDisplay = nullptr;
     GLEScontext*         glesContext = nullptr;
-    ShareGroupPtr        shareGroup;
+    ShareGroupPtr        shareGroup = {};
     ObjectNameManager*   objManager = nullptr;
 };
 

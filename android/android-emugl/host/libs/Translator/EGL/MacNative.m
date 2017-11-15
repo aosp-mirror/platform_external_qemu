@@ -89,6 +89,7 @@ static const NSOpenGLPixelFormatAttribute core41TestProfile[] = {
 
 int setupCoreProfileNativeFormats() {
 
+    fprintf(stderr, "%s: call\n", __func__);
     NSOpenGLPixelFormat* core41Supported =
         [[NSOpenGLPixelFormat alloc] initWithAttributes: core41TestProfile];
 
