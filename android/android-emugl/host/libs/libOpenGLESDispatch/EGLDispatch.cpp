@@ -15,6 +15,9 @@
 */
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "DriverThread.h"
+#include "ThreadedDispatch.h"
+
 #include "emugl/common/shared_library.h"
 
 #include <stdio.h>
@@ -25,16 +28,16 @@ EGLDispatch s_egl;
 #define DEFAULT_EGL_LIB EMUGL_LIBNAME("EGL_translator")
 
 #define RENDER_EGL_LOAD_FIELD(return_type, function_name, signature) \
-    s_egl. function_name = (function_name ## _t) lib->findSymbol(#function_name); \
+    s_egl. function_name##_underlying = (function_name ## _t) lib->findSymbol(#function_name); \
 
 #define RENDER_EGL_LOAD_FIELD_WITH_EGL(return_type, function_name, signature) \
-    if ((!s_egl. function_name) && s_egl.eglGetProcAddress) s_egl. function_name = \
+    if ((!s_egl. function_name) && s_egl.eglGetProcAddress) s_egl. function_name##_underlying = \
             (function_name ## _t) s_egl.eglGetProcAddress(#function_name); \
 
 #define RENDER_EGL_LOAD_OPTIONAL_FIELD(return_type, function_name, signature) \
-    if (s_egl.eglGetProcAddress) s_egl. function_name = \
+    if (s_egl.eglGetProcAddress) s_egl. function_name##_underlying = \
             (function_name ## _t) s_egl.eglGetProcAddress(#function_name); \
-    if (!s_egl.function_name || !s_egl.eglGetProcAddress) \
+    if (!s_egl.function_name##_underlying || !s_egl.eglGetProcAddress) \
             RENDER_EGL_LOAD_FIELD(return_type, function_name, signature)
 
 bool init_egl_dispatch() {
@@ -51,6 +54,19 @@ bool init_egl_dispatch() {
     LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_LOAD_FIELD_WITH_EGL)
     LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_LOAD_OPTIONAL_FIELD)
     LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_LOAD_FIELD)
+
+#define RENDER_EGL_DEFINE_API(return_type, function_name, signature) \
+    if (s_egl. function_name##_underlying) { \
+        s_egl. function_name = s_egl. function_name##_underlying; \
+    } else { \
+        s_egl. function_name = nullptr; \
+    } \
+
+    LIST_RENDER_EGL_FUNCTIONS(RENDER_EGL_DEFINE_API)
+    LIST_RENDER_EGL_EXTENSIONS_FUNCTIONS(RENDER_EGL_DEFINE_API)
+    LIST_RENDER_EGL_SNAPSHOT_FUNCTIONS(RENDER_EGL_DEFINE_API)
+
+    init_egl_threaded_dispatch(&s_egl);
 
     return true;
 }

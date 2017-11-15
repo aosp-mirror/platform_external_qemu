@@ -1037,13 +1037,7 @@ static EGLContext eglCreateOrLoadContext(EGLDisplay display, EGLConfig config,
                                   profile_mask,
                                   dpy->getManager(glesVersion),
                                   stream));
-    if(ctx->nativeType()) {
-        return dpy->addContext(ctx);
-    } else {
-        iface->deleteGLESContext(glesCtx);
-    }
-
-    return EGL_NO_CONTEXT;
+    return dpy->addContext(ctx);
 }
 
 EGLAPI EGLContext EGLAPIENTRY eglCreateContext(EGLDisplay display, EGLConfig config,
@@ -1122,12 +1116,12 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
     ThreadInfo* thread = getThreadInfo();
     ContextPtr prevCtx = thread->eglContext;
 
+    if (prevCtx.get() && prevCtx != dpy->getContext(context)) {
+        prevCtx->getGlesContext()->virtualUnmakeCurrent();
+    }
     if(releaseContext) { //releasing current context
        if(prevCtx.get()) {
            g_eglInfo->getIface(prevCtx->version())->flush();
-           if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
-               RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
-           }
            thread->updateInfo(ContextPtr(),dpy,NULL,ShareGroupPtr(),dpy->getManager(prevCtx->version()));
        }
     } else { //assining new context
@@ -1175,18 +1169,34 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         if(prevCtx.get()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
-        if (!dpy->nativeType()->makeCurrent(
-                newReadPtr->native(),
-                newDrawPtr->native(),
-                newCtx->nativeType())) {
-               RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
+
+        bool doVirtual = true;
+        if (!EglContext::nativeEverCurrent() ||
+            newDrawPtr->type() == EglSurface::WINDOW ||
+            newReadPtr->type() == EglSurface::WINDOW) {
+            if (!EglContext::nativeEverCurrent()) {
+                if (!dpy->nativeType()->makeCurrent(
+                            newReadPtr->native(),
+                            newDrawPtr->native(),
+                            EglContext::getNativeContext())) {
+                    RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
+                }
+            }
+            if (newDrawPtr->type() == EglSurface::WINDOW ||
+                newReadPtr->type() == EglSurface::WINDOW) {
+                EglContext::setNativeCurrent();
+            }
         }
+
         //TODO: handle the following errors
         // EGL_BAD_CURRENT_SURFACE , EGL_CONTEXT_LOST  , EGL_BAD_ACCESS
 
         thread->updateInfo(newCtx,dpy,newCtx->getGlesContext(),newCtx->getShareGroup(),dpy->getManager(newCtx->version()));
         newCtx->setSurfaces(newReadSrfc,newDrawSrfc);
         g_eglInfo->getIface(newCtx->version())->initContext(newCtx->getGlesContext(),newCtx->getShareGroup());
+        if (doVirtual) {
+            newCtx->getGlesContext()->virtualMakeCurrent();
+        }
         g_eglInfo->sweepDestroySurfaces();
 
         if (newDrawPtr->type() == EglSurface::PBUFFER &&
@@ -1223,6 +1233,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
                     &tmpReadPbSurfacePtr->glRboColor,
                     &tmpReadPbSurfacePtr->glRboDepth);
         }
+
 
         // Initialize the GLES extension function table used in
         // eglGetProcAddress for the context's GLES version if not

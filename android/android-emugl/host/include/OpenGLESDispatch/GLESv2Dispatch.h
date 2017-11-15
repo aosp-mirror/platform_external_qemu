@@ -27,7 +27,9 @@ LIST_GLES2_FUNCTIONS(GLES2_DISPATCH_DEFINE_TYPE,GLES2_DISPATCH_DEFINE_TYPE)
 
 struct GLESv2Dispatch {
 #define GLES2_DISPATCH_DECLARE_POINTER(return_type,func_name,signature,callargs) \
-        func_name ## _t func_name;
+        func_name ## _t func_name; \
+        func_name ## _t func_name##_underlying; \
+
     LIST_GLES2_FUNCTIONS(GLES2_DISPATCH_DECLARE_POINTER,
                          GLES2_DISPATCH_DECLARE_POINTER)
 };
