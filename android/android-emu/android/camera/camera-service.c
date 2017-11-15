@@ -1028,6 +1028,7 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
         return;
     }
 
+#if 0
     if (cc->hal_version == 3) {
         if (!calculate_framebuffer_size(cc->pixel_format, cc->width, cc->height,
                                         &cc->preview_frame_size)) {
@@ -1037,7 +1038,9 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
             return;
         }
     }
-    else {
+    else
+#endif
+    {
         /* TODO: At the moment camera framework in the emulator requires RGB32 pixel
          * format for preview window. So, we need to keep two framebuffers here: one
          * for the video, and another for the preview window. Watch out when this
@@ -1158,6 +1161,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     float r_scale = 1.0f, g_scale = 1.0f, b_scale = 1.0f, exp_comp = 1.0f;
     char tmp[256];
     ClientFrame frame = {};
+    bool use_video_frame_for_preview = false;
 
     /* Sanity check. */
     if (cc->video_frame == NULL) {
@@ -1197,12 +1201,17 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
      * operates with. */
     if ((video_size != 0 && cc->video_frame_size != (size_t)video_size) ||
         (preview_size != 0 && cc->preview_frame_size != (size_t)preview_size)) {
-        E("%s: Frame sizes don't match for camera '%s':\n"
-          "Expected %d for video, and %d for preview. Requested %d, and %d",
-          __FUNCTION__, cc->device_name, cc->video_frame_size,
-          cc->preview_frame_size, video_size, preview_size);
-        _qemu_client_reply_ko(qc, "Frame size mismatch");
-        return;
+        if (cc->hal_version == 3 && preview_size != 0 && preview_size == cc->video_frame_size) {
+            use_video_frame_for_preview = true;
+            D("WORKAROUND: Using video frame for preview.");
+        } else {
+            E("%s: Frame sizes don't match for camera '%s':\n"
+              "Expected %d for video, and %d for preview. Requested %d, and %d",
+              __FUNCTION__, cc->device_name, cc->video_frame_size,
+              cc->preview_frame_size, video_size, preview_size);
+            _qemu_client_reply_ko(qc, "Frame size mismatch");
+            return;
+        }
     }
 
     /*
@@ -1215,14 +1224,14 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
         fbs_num++;
     }
     if (preview_size) {
-        if (cc->hal_version == 3) {
+        if (use_video_frame_for_preview) {
             fbs[fbs_num].pixel_format = cc->pixel_format;
-        }
-        else {
+            fbs[fbs_num].framebuffer = cc->preview_frame;
+        }  else {
             /* TODO: Watch out for preview format changes! */
             fbs[fbs_num].pixel_format = V4L2_PIX_FMT_RGB32;
+            fbs[fbs_num].framebuffer = cc->preview_frame;
         }
-        fbs[fbs_num].framebuffer = cc->preview_frame;
         fbs_num++;
     }
 
