@@ -418,6 +418,7 @@ public:
     // postLoad is triggered after setting up ShareGroup
     virtual void postLoad();
     virtual void restore();
+    virtual void virtualMakeCurrent();
 
     bool isCoreProfile() const { return m_coreProfile; }
     void setCoreProfile(bool core) { m_coreProfile = core; }

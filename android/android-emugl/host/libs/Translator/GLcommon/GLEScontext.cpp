@@ -377,11 +377,11 @@ void GLEScontext::init() {
 }
 
 void GLEScontext::restore() {
-    postLoadRestoreShareGroup();
-    if (m_needRestoreFromSnapshot) {
+    // postLoadRestoreShareGroup();
+    //if (m_needRestoreFromSnapshot) {
         postLoadRestoreCtx();
         m_needRestoreFromSnapshot = false;
-    }
+    //}
 }
 
 bool GLEScontext::needRestore() {
@@ -701,19 +701,30 @@ void GLEScontext::postLoadRestoreShareGroup() {
     m_shareGroup->postLoadRestore();
 }
 
+void GLEScontext::virtualMakeCurrent() {
+    // fprintf(stderr, "%s: call %p\n", __func__, this);
+    auto& gl = dispatcher();
+    gl.glUseProgram(0);
+    gl.glBindVertexArray(getVAOGlobalName(0));
+    gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_defaultFBO);
+    gl.glBindFramebuffer(GL_READ_FRAMEBUFFER, m_defaultReadFBO);
+    restore();
+}
+
 void GLEScontext::postLoadRestoreCtx() {
+    // fprintf(stderr, "%s: call %p common \n", __func__, this);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
 
     assert(!m_shareGroup->needRestore());
-    m_fboNameSpace->postLoadRestore(
-            [this](NamedObjectType p_type, ObjectLocalName p_localName) {
-                if (p_type == NamedObjectType::FRAMEBUFFER) {
-                    return getFBOGlobalName(p_localName);
-                } else {
-                    return m_shareGroup->getGlobalName(p_type, p_localName);
-                }
-            }
-        );
+    // m_fboNameSpace->postLoadRestore(
+    //       [this](NamedObjectType p_type, ObjectLocalName p_localName) {
+    //           if (p_type == NamedObjectType::FRAMEBUFFER) {
+    //               return getFBOGlobalName(p_localName);
+    //           } else {
+    //               return m_shareGroup->getGlobalName(p_type, p_localName);
+    //           }
+    //       }
+    //   );
 
     // buffer bindings
     auto bindBuffer = [this](GLenum target, GLuint buffer) {
@@ -721,7 +732,7 @@ void GLEScontext::postLoadRestoreCtx() {
                 m_shareGroup->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer));
     };
     bindBuffer(GL_ARRAY_BUFFER, m_arrayBuffer);
-    bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
+    // bindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_currVaoState.iboId());
 
     // framebuffer binding
     auto bindFrameBuffer = [this](GLenum target, GLuint buffer) {
