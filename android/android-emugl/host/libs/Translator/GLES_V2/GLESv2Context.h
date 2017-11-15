@@ -94,8 +94,9 @@ public:
     void initEmulatedVAO();
 
     static void setMaxGlesVersion(GLESVersion version);
+    virtual void virtualMakeCurrent();
+
 protected:
-    virtual void postLoadRestoreCtx();
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
 private:
     void setupArrWithDataSize(GLsizei datasize, const GLvoid* arr,

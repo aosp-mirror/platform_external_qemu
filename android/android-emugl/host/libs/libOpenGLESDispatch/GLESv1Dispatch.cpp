@@ -17,6 +17,9 @@
 
 #include "OpenGLESDispatch/EGLDispatch.h"
 
+#include "DriverThread.h"
+#include "ThreadedDispatch.h"
+
 #include "android/utils/debug.h"
 
 #include <stdio.h>
@@ -114,7 +117,10 @@ LIST_GLES12_TR_FUNCTIONS(DEFINE_DUMMY_FUNCTION);
         dispatch_table-> function_name = gles1_dummy_##function_name; \
         } while(0);
 
+static GLESv1Dispatch* lastTable = nullptr;
+
 bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
+    lastTable = dispatch_table;
 
     dispatch_table->underlying_gles2_api = NULL;
 
@@ -146,14 +152,23 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
         // init the GLES dispatch table
         //
 #define LOOKUP_SYMBOL(return_type,function_name,signature,callargs) do { \
-        dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+        dispatch_table-> function_name##_underlying = reinterpret_cast< function_name ## _t >( \
                 s_gles1_lib->findSymbol(#function_name)); \
-            if ((!dispatch_table-> function_name) && s_egl.eglGetProcAddress) \
-            dispatch_table-> function_name = reinterpret_cast< function_name ## _t >( \
+            if ((!dispatch_table-> function_name##_underlying) && s_egl.eglGetProcAddress) \
+            dispatch_table-> function_name##_underlying = reinterpret_cast< function_name ## _t >( \
                 s_egl.eglGetProcAddress(#function_name)); \
         } while(0); \
 
         LIST_GLES1_FUNCTIONS(LOOKUP_SYMBOL,LOOKUP_SYMBOL)
+
+#define DEFINE_API(return_type,function_name,signature, callargs) \
+        if (dispatch_table->function_name##_underlying) { \
+            dispatch_table->function_name = dispatch_table->function_name##_underlying; \
+        }
+
+        LIST_GLES1_FUNCTIONS(DEFINE_API,DEFINE_API)
+
+        init_gles1_threaded_dispatch(dispatch_table);
 
         DPRINT("successful");
 
@@ -211,14 +226,11 @@ bool gles1_dispatch_init(GLESv1Dispatch* dispatch_table) {
 //
 void *gles1_dispatch_get_proc_func(const char *name, void *userData)
 {
-    void* func = NULL;
-    if (s_gles1_lib) {
-        func = (void *)s_gles1_lib->findSymbol(name);
-    }
-    // To make it consistent with the guest, redirect any unsupported functions
-    // to gles1_unimplemented.
-    if (!func) {
-        func = (void *)gles1_unimplemented;
-    }
-    return func;
+
+#define GLES1_DEFINE_GET_PROC(return_type,function_name,signature, callargs) \
+    if (!strcmp(name, #function_name)) { return (void*)lastTable->function_name; }
+
+    LIST_GLES1_FUNCTIONS(GLES1_DEFINE_GET_PROC, GLES1_DEFINE_GET_PROC)
+
+    return nullptr;
 }

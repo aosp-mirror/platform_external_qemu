@@ -8,9 +8,12 @@ $(call emugl-import,libGLESv2_dec libGLESv1_dec)
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/host/libs/Translator/include
 LOCAL_C_INCLUDES += $(EMUGL_PATH)/shared
 
-LOCAL_SRC_FILES := EGLDispatch.cpp \
+LOCAL_SRC_FILES := DriverThread.cpp \
+                   EGLDispatch.cpp \
                    GLESv2Dispatch.cpp \
                    GLESv1Dispatch.cpp \
                    OpenGLDispatchLoader.cpp \
+                   ThreadedDispatch.cpp \
+                   ThreadedDispatchImpl.cpp \
 
 $(call emugl-end-module)

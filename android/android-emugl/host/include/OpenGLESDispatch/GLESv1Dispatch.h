@@ -30,7 +30,9 @@ LIST_GLES1_FUNCTIONS(GLES1_DISPATCH_DEFINE_TYPE,GLES1_DISPATCH_DEFINE_TYPE)
 
 struct GLESv1Dispatch {
 #define GLES1_DISPATCH_DECLARE_POINTER(return_type,func_name,signature,callargs) \
-        func_name ## _t func_name;
+        func_name ## _t func_name; \
+        func_name ## _t func_name##_underlying; \
+
     LIST_GLES1_FUNCTIONS(GLES1_DISPATCH_DECLARE_POINTER,
                          GLES1_DISPATCH_DECLARE_POINTER)
     LIST_GLES12_TR_FUNCTIONS(GLES1_DISPATCH_DECLARE_POINTER)
