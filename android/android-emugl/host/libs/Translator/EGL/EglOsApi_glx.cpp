@@ -19,6 +19,7 @@
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
 #include "emugl/common/shared_library.h"
+#include "GLcommon/DriverThread.h"
 #include "GLcommon/GLLibrary.h"
 
 #include "OpenglCodecCommon/ErrorLog.h"
@@ -53,16 +54,20 @@ int ErrorHandler::s_lastErrorCode = 0;
 emugl::Mutex ErrorHandler::s_lock;
 
 ErrorHandler::ErrorHandler(EGLNativeDisplayType dpy) {
-   emugl::Mutex::AutoLock mutex(s_lock);
-   XSync(dpy,False);
-   s_lastErrorCode = 0;
-   m_oldErrorHandler = XSetErrorHandler(errorHandlerProc);
+   // DriverThread::callOnDriverThreadSync([&]() {
+       emugl::Mutex::AutoLock mutex(s_lock);
+       XSync(dpy,False);
+       s_lastErrorCode = 0;
+       m_oldErrorHandler = XSetErrorHandler(errorHandlerProc);
+   // });
 }
 
 ErrorHandler::~ErrorHandler() {
-   emugl::Mutex::AutoLock mutex(s_lock);
-   XSetErrorHandler(m_oldErrorHandler);
-   s_lastErrorCode = 0;
+   // DriverThread::callOnDriverThreadSync([&]() {
+       emugl::Mutex::AutoLock mutex(s_lock);
+       XSetErrorHandler(m_oldErrorHandler);
+       s_lastErrorCode = 0;
+   // });
 }
 
 int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
@@ -147,6 +152,11 @@ private:
     GLXFBConfig mFbConfig = nullptr;
 };
 
+static bool getFbConfigAttribDriverthread(EGLNativeDisplayType dpy, GLXFBConfig frmt, int param, int* tmp) {
+    return DriverThread::callOnDriverThread<bool>([&]() {
+            return glXGetFBConfigAttrib(dpy, frmt, param, tmp); });
+}
+
 void pixelFormatToConfig(EGLNativeDisplayType dpy,
                          int renderableType,
                          GLXFBConfig frmt,
@@ -157,7 +167,7 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
 
     memset(&info, 0, sizeof(info));
 
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_TRANSPARENT_TYPE, &tmp));
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(dpy, frmt, GLX_TRANSPARENT_TYPE, &tmp));
     if (tmp == GLX_TRANSPARENT_INDEX) {
         return; // not supporting transparent index
     } else if (tmp == GLX_NONE) {
@@ -168,11 +178,11 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     } else {
         info.transparent_type = EGL_TRANSPARENT_RGB;
 
-        EXIT_IF_FALSE(glXGetFBConfigAttrib(
+        EXIT_IF_FALSE(getFbConfigAttribDriverthread(
                 dpy, frmt, GLX_TRANSPARENT_RED_VALUE, &info.trans_red_val));
-        EXIT_IF_FALSE(glXGetFBConfigAttrib(
+        EXIT_IF_FALSE(getFbConfigAttribDriverthread(
                 dpy, frmt, GLX_TRANSPARENT_GREEN_VALUE, &info.trans_green_val));
-        EXIT_IF_FALSE(glXGetFBConfigAttrib(
+        EXIT_IF_FALSE(getFbConfigAttribDriverthread(
                 dpy, frmt, GLX_TRANSPARENT_BLUE_VALUE, &info.trans_blue_val));
     }
 
@@ -180,40 +190,40 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     // filter out single buffer configurations
     //
     int doubleBuffer = 0;
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_DOUBLEBUFFER, &doubleBuffer));
     if (!doubleBuffer) {
         return;
     }
 
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy ,frmt, GLX_RED_SIZE, &info.red_size));
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy ,frmt, GLX_GREEN_SIZE, &info.green_size));
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy ,frmt, GLX_BLUE_SIZE, &info.blue_size));
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy ,frmt, GLX_ALPHA_SIZE, &info.alpha_size));
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy ,frmt, GLX_DEPTH_SIZE, &info.depth_size));
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy ,frmt, GLX_STENCIL_SIZE, &info.stencil_size));
 
     info.renderable_type = renderableType;
     int nativeRenderable = 0;
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_X_RENDERABLE, &nativeRenderable));
     info.native_renderable = !!nativeRenderable;
 
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_X_VISUAL_TYPE, &info.native_visual_type));
 
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_VISUAL_ID, &info.native_visual_id));
 
     //supported surfaces types
     info.surface_type = 0;
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_DRAWABLE_TYPE, &tmp));
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(dpy, frmt, GLX_DRAWABLE_TYPE, &tmp));
     if (tmp & GLX_WINDOW_BIT && info.native_visual_id != 0) {
         info.surface_type |= EGL_WINDOW_BIT;
     } else {
@@ -225,7 +235,7 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     }
 
     info.caveat = 0;
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_CONFIG_CAVEAT, &tmp));
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(dpy, frmt, GLX_CONFIG_CAVEAT, &tmp));
     if (tmp == GLX_NONE) {
         info.caveat = EGL_NONE;
     } else if (tmp == GLX_SLOW_CONFIG) {
@@ -233,21 +243,21 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     } else if (tmp == GLX_NON_CONFORMANT_CONFIG) {
         info.caveat = EGL_NON_CONFORMANT_CONFIG;
     }
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_MAX_PBUFFER_WIDTH, &info.max_pbuffer_width));
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_MAX_PBUFFER_HEIGHT, &info.max_pbuffer_height));
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_MAX_PBUFFER_HEIGHT, &info.max_pbuffer_size));
 
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_LEVEL, &info.frame_buffer_level));
 
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(
             dpy, frmt, GLX_SAMPLES, &info.samples_per_pixel));
 
     // Filter out configs that do not support RGBA
-    EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_RENDER_TYPE, &tmp));
+    EXIT_IF_FALSE(getFbConfigAttribDriverthread(dpy, frmt, GLX_RENDER_TYPE, &tmp));
     if (!(tmp & GLX_RGBA_BIT)) {
         return;
     }
@@ -292,7 +302,9 @@ public:
     GLXContext context() const { return mContext; }
 
     ~GlxContext() {
-        glXDestroyContext(mDisplay, mContext);
+        DriverThread::callOnDriverThreadSync([this]() {
+            glXDestroyContext(mDisplay, mContext);
+        });
     }
 
     static GLXContext contextFor(EglOS::Context* context) {
@@ -324,7 +336,10 @@ public:
                               EglOS::AddConfigCallback* addConfigFunc,
                               void* addConfigOpaque) {
         int n;
-        GLXFBConfig* frmtList = glXGetFBConfigs(mDisplay, 0, &n);
+        GLXFBConfig* frmtList =
+            (GLXFBConfig*)DriverThread::callOnDriverThread<void*>([&]() {
+                    return (void*)glXGetFBConfigs(mDisplay, 0, &n);
+            });
         if (frmtList) {
             mFBConfigs.assign(frmtList, frmtList + n);
             for(int i = 0; i < n; i++) {
@@ -340,9 +355,11 @@ public:
 
         int glxMaj, glxMin;
         bool successQueryVersion =
-            glXQueryVersion(mDisplay,
+            DriverThread::callOnDriverThread<bool>([&]() {
+            return glXQueryVersion(mDisplay,
                             &glxMaj,
                             &glxMin);
+            });
 
         if (successQueryVersion) {
             if (glxMaj < 1 || (glxMaj >= 1 && glxMin < 4)) {
@@ -369,7 +386,9 @@ public:
         int t;
         unsigned int u;
         ErrorHandler handler(mDisplay);
-        if (!XGetGeometry(mDisplay, win, &root, &t, &t, &u, &u, &u, &u)) {
+        bool res = DriverThread::callOnDriverThread<bool>([&]() {
+                return XGetGeometry(mDisplay, win, &root, &t, &t, &u, &u, &u, &u); });
+        if (!res) {
             return false;
         }
         return handler.getLastError() == 0;
@@ -385,11 +404,11 @@ public:
         int r, g, b, x, y;
         GLXFBConfig fbconfig = GlxPixelFormat::from(pixelFormat);
 
-        IS_SUCCESS(glXGetFBConfigAttrib(
+        IS_SUCCESS(getFbConfigAttribDriverthread(
                 mDisplay, fbconfig, GLX_RED_SIZE, &r));
-        IS_SUCCESS(glXGetFBConfigAttrib(
+        IS_SUCCESS(getFbConfigAttribDriverthread(
                 mDisplay, fbconfig, GLX_GREEN_SIZE, &g));
-        IS_SUCCESS(glXGetFBConfigAttrib(
+        IS_SUCCESS(getFbConfigAttribDriverthread(
                 mDisplay, fbconfig, GLX_BLUE_SIZE, &b));
         configDepth = r + g + b;
         Window root;
@@ -412,19 +431,21 @@ public:
 
         GLXContext ctx;
         if (useCoreProfile) {
-            ctx = mCreateContextAttribs(
+            ctx = (GLXContext)DriverThread::callOnDriverThread<void*>([&]() {
+                    return (void*)mCreateContextAttribs(
                         mDisplay,
                         GlxPixelFormat::from(pixelFormat),
                         sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
                         True /* try direct (supposed to fall back to indirect) */,
-                        mCoreProfileCtxAttribs);
+                        mCoreProfileCtxAttribs); });
         } else {
-            ctx = glXCreateNewContext(
+            ctx = (GLXContext)DriverThread::callOnDriverThread<void*>([&]() {
+                    return (void*)glXCreateNewContext(
                     mDisplay,
                     GlxPixelFormat::from(pixelFormat),
                     GLX_RGBA_TYPE,
                     sharedContext ? GlxContext::contextFor(sharedContext) : NULL,
-                    true);
+                    true); });
         }
 
         if (handler.getLastError()) {
@@ -435,7 +456,9 @@ public:
     }
 
     virtual bool destroyContext(EglOS::Context* context) {
+        DriverThread::callOnDriverThreadSync([&]() {
         glXDestroyContext(mDisplay, GlxContext::contextFor(context));
+        });
         return true;
     }
 
@@ -448,10 +471,8 @@ public:
             GLX_LARGEST_PBUFFER, info->largest,
             None
         };
-        GLXPbuffer pb = glXCreatePbuffer(
-                mDisplay,
-                GlxPixelFormat::from(pixelFormat),
-                attribs);
+        GLXPbuffer pb = (GLXPbuffer)DriverThread::callOnDriverThread<unsigned long int>([&]() {
+                return (unsigned long int)glXCreatePbuffer(mDisplay, GlxPixelFormat::from(pixelFormat), attribs); });
         return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
     }
 
@@ -459,7 +480,9 @@ public:
         if (!pb) {
             return false;
         } else {
-            glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
+            DriverThread::callOnDriverThreadSync([&]() {
+                glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
+            });
             return true;
         }
     }
@@ -485,7 +508,9 @@ public:
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
         if (srfc) {
-            glXSwapBuffers(mDisplay, GlxSurface::drawableFor(srfc));
+            DriverThread::callOnDriverThreadSync([&]() {
+                glXSwapBuffers(mDisplay, GlxSurface::drawableFor(srfc));
+            });
         }
     }
 
@@ -512,18 +537,22 @@ private:
         for (int i = 0; i < getNumCoreProfileCtxAttribs(); i++) {
             const int* attribs = getCoreProfileCtxAttribs(i);
             testContext =
-                mCreateContextAttribs(
+                  (GLXContext)DriverThread::callOnDriverThread<void*>([&]() {
+                return (void*)mCreateContextAttribs(
                         mDisplay, mFBConfigs[0],
                         nullptr /* no shared context */,
                         True /* try direct (supposed to fall back to indirect) */,
                         attribs);
+                });
 
             if (testContext) {
                 mCoreProfileSupported = true;
                 mCoreProfileCtxAttribs = attribs;
                 getCoreProfileCtxAttribsVersion(
                     attribs, &mCoreMajorVersion, &mCoreMinorVersion);
-                glXDestroyContext(mDisplay, testContext);
+                DriverThread::callOnDriverThreadSync([&]() {
+                    glXDestroyContext(mDisplay, testContext);
+                });
                 return;
             }
         }
@@ -543,7 +572,9 @@ private:
 class GlxEngine : public EglOS::Engine {
 public:
     virtual EglOS::Display* getDefaultDisplay() {
-        return new GlxDisplay(XOpenDisplay(0));
+        Display* d = (Display*)DriverThread::callOnDriverThread<void*>([&]() {
+                return XOpenDisplay(0); });
+        return new GlxDisplay(d);
     }
 
     virtual GlLibrary* getGlLibrary() {

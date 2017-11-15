@@ -19,6 +19,7 @@
 #include "EglDisplay.h"
 #include "EglOsApi.h"
 
+#include "GLcommon/DriverThread.h"
 #include "GLcommon/GLutils.h"
 #include "emugl/common/lazy_instance.h"
 
@@ -51,6 +52,7 @@ EglGlobalInfo* EglGlobalInfo::getInstance() {
 }
 
 EglGlobalInfo::EglGlobalInfo() {
+    DriverThread::initWorker();
     if (isEgl2Egl()) {
         m_engine = EglOS::getEgl2EglHostInstance();
     } else {

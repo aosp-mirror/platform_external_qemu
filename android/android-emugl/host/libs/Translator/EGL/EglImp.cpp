@@ -20,6 +20,7 @@
 
 #include "android/base/files/Stream.h"
 #include "ThreadInfo.h"
+#include "GLcommon/DriverThread.h"
 #include "GLcommon/GLEScontext.h"
 #include "GLcommon/GLutils.h"
 #include "GLcommon/TextureData.h"
@@ -57,6 +58,7 @@ static bool createAndBindAuxiliaryContext(
     EGLContext* context_out, EGLSurface* surface_out);
 static bool unbindAndDestroyAuxiliaryContext(
     EGLContext context, EGLSurface surface);
+static DriverThreadWorker* getDriverThreadInfo();
 
 #define tls_thread  EglThreadInfo::get()
 
@@ -78,6 +80,7 @@ static const EGLiface s_eglIface = {
     .eglGetGlLibrary = getGlLibrary,
     .createAndBindAuxiliaryContext = createAndBindAuxiliaryContext,
     .unbindAndDestroyAuxiliaryContext = unbindAndDestroyAuxiliaryContext,
+    .getDriverThreadInfo = getDriverThreadInfo,
 };
 
 static void initGLESx(GLESVersion version) {
@@ -295,6 +298,10 @@ static bool unbindAndDestroyAuxiliaryContext(EGLContext context, EGLSurface surf
     return true;
 }
 
+static DriverThreadWorker* getDriverThreadInfo() {
+    return DriverThread::getWorker();
+}
+
 EGLAPI EGLint EGLAPIENTRY eglGetError(void) {
     CURRENT_THREAD();
     EGLint err = tls_thread->getError();
@@ -355,6 +362,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
          RETURN_ERROR(EGL_FALSE,EGL_BAD_DISPLAY);
     }
 
+
     if(major) *major = MAJOR;
     if(minor) *minor = MINOR;
 
@@ -411,6 +419,32 @@ EGLAPI EGLBoolean EGLAPIENTRY eglInitialize(EGLDisplay display, EGLint *major, E
         initGLESx(GLES_3_1);
     }
     dpy->initialize(renderableType);
+
+    fprintf(stderr, "%s: dpy initialized with native %p %p\n", __func__, dpy, dpy->nativeType());
+
+    // now we can register driverthread callbacks
+    DriverThread::registerContextQueryCallback([]() {
+        ThreadInfo* thread = getThreadInfo();
+        ContextPtr currCtx = thread->eglContext;
+        if (currCtx) {
+            return (DriverThread::ContextInfo){
+                (uintptr_t)currCtx->read()->native(),
+                (uintptr_t)currCtx->draw()->native(),
+                (uintptr_t)currCtx->nativeType(),
+            };
+        } else {
+            return (DriverThread::ContextInfo) { 0, 0, 0 };
+        }
+    }); 
+
+    EglDisplay* dpyForDriverThread = g_eglInfo->getDisplay(EGL_DEFAULT_DISPLAY);
+    DriverThread::registerContextChangeCallback([dpyForDriverThread](const DriverThread::ContextInfo& info) {
+            return dpyForDriverThread->nativeType()->makeCurrent(
+                    (EglOS::Surface*)info.read,
+                    (EglOS::Surface*)info.draw,
+                    (EglOS::Context*)info.context);
+            });
+
     return EGL_TRUE;
 }
 
@@ -1122,7 +1156,7 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
     if(releaseContext) { //releasing current context
        if(prevCtx.get()) {
            g_eglInfo->getIface(prevCtx->version())->flush();
-           if(!dpy->nativeType()->makeCurrent(NULL,NULL,NULL)) {
+           if(!DriverThread::makeCurrent({ 0, 0, 0 })) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
            }
            thread->updateInfo(ContextPtr(),dpy,NULL,ShareGroupPtr(),dpy->getManager(prevCtx->version()));
@@ -1172,10 +1206,10 @@ EGLAPI EGLBoolean EGLAPIENTRY eglMakeCurrent(EGLDisplay display,
         if(prevCtx.get()) {
             g_eglInfo->getIface(prevCtx->version())->flush();
         }
-        if (!dpy->nativeType()->makeCurrent(
-                newReadPtr->native(),
-                newDrawPtr->native(),
-                newCtx->nativeType())) {
+        if (!DriverThread::makeCurrent({
+                (uintptr_t)newReadPtr->native(),
+                (uintptr_t)newDrawPtr->native(),
+                (uintptr_t)newCtx->nativeType(), })) {
                RETURN_ERROR(EGL_FALSE,EGL_BAD_ACCESS);
         }
         //TODO: handle the following errors

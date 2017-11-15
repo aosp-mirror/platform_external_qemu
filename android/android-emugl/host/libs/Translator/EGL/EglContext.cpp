@@ -76,6 +76,7 @@ EglContext::EglContext(EglDisplay *dpy,
             m_profileMask,
             m_config->nativeFormat(),
             globalSharedContext);
+    fprintf(stderr, "%s: created new context %p\n", __func__, m_native.get());
 
     if (m_native) {
         // When loading from a snapshot, the first context within a share group

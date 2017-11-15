@@ -39,6 +39,16 @@ class GlLibrary;
 #define GLES_DECLARE_METHOD(return_type, function_name, signature, args) \
     static GL_APICALL return_type (GL_APIENTRY *function_name) signature;
 
+#define GLES_DECLARE_UNDERLYING_METHOD(return_type, function_name, signature, args) \
+    static GL_APICALL return_type (GL_APIENTRY *function_name##Underlying) signature;
+
+#define GLES_DECLARE_DRIVERTHREAD_METHOD(return_type, function_name, signature, args) \
+    static return_type function_name##Driverthread signature;
+
+#define GLES_DECLARE_DRIVERTHREADASYNC_METHOD(return_type, function_name, signature, args) \
+    static return_type function_name##DriverthreadAsync signature;
+
+
 class GLDispatch {
 public:
     // Constructor.
@@ -48,6 +58,10 @@ public:
     void dispatchFuncs(GLESVersion version, GlLibrary* glLib);
     GLESVersion getGLESVersion() const;
 
+    LIST_GLES_FUNCTIONS(GLES_DECLARE_UNDERLYING_METHOD, GLES_DECLARE_UNDERLYING_METHOD)
+    LIST_GLES_FUNCTIONS(GLES_DECLARE_DRIVERTHREAD_METHOD, GLES_DECLARE_DRIVERTHREAD_METHOD)
+    LIST_ASYNC_GL_FUNCTIONS(GLES_DECLARE_DRIVERTHREADASYNC_METHOD)
+    LIST_CUSTOM_ASYNC_GL_FUNCTIONS(GLES_DECLARE_DRIVERTHREADASYNC_METHOD)
     LIST_GLES_FUNCTIONS(GLES_DECLARE_METHOD, GLES_DECLARE_METHOD)
 
 private:
