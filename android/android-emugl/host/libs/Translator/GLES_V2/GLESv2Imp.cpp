@@ -3528,6 +3528,11 @@ GL_APICALL void  GL_APIENTRY glVertexAttribPointer(GLuint index, GLint size, GLe
 
     s_glPrepareVertexAttribPointer(ctx, index, size, type, normalized, stride, ptr, 0, false);
     if (ctx->isBindedBuffer(GL_ARRAY_BUFFER)) {
+        GLint hardwareBuffer = 0;
+        ctx->dispatcher().glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &hardwareBuffer);
+        assert(hardwareBuffer != 0);
+        assert(ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER,
+                ctx->getBuffer(GL_ARRAY_BUFFER)) == hardwareBuffer);
         ctx->dispatcher().glVertexAttribPointer(index, size, type, normalized, stride, ptr);
     }
 }
