@@ -116,6 +116,8 @@ void GLESv2Context::initDefaultFBO(
 void GLESv2Context::initEmulatedVAO() {
     if (!isCoreProfile()) return;
 
+    if (getVAOGlobalName(0)) return;
+
     // Create emulated default VAO
     genVAOName(0, false);
     dispatcher().glBindVertexArray(getVAOGlobalName(0));
@@ -193,7 +195,12 @@ void GLESv2Context::onSave(android::base::Stream* stream) const {
             });
 }
 
+void GLESv2Context::virtualMakeCurrent() {
+    GLEScontext::virtualMakeCurrent();
+}
+
 void GLESv2Context::postLoadRestoreCtx() {
+    fprintf(stderr, "%s: call %p glesv2\n", __func__, this);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     m_useProgramData = shareGroup()->getObjectDataPtr(
             NamedObjectType::SHADER_OR_PROGRAM, m_useProgram);
@@ -227,7 +234,7 @@ void GLESv2Context::postLoadRestoreCtx() {
                     if (!globalBufferName) {
                         continue;
                     }
-                    glesPointer->restoreBufferObj(getBufferObj);
+                    // glesPointer->restoreBufferObj(getBufferObj);
                     dispatcher.glBindBuffer(GL_ARRAY_BUFFER,
                             globalBufferName);
                     if (glesPointer->isIntPointer()) {
@@ -272,6 +279,8 @@ void GLESv2Context::postLoadRestoreCtx() {
             }
             if (glesPointer->isEnable()) {
                 dispatcher.glEnableVertexAttribArray(glesPointerIte.first);
+            } else {
+                dispatcher.glDisableVertexAttribArray(glesPointerIte.first);
             }
         }
         for (size_t i = 0; i < vaoIte.second.bindingState.size(); i++) {

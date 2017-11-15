@@ -131,6 +131,8 @@ public:
     glm::mat4 getTextureMatrix();
 
     virtual void onSave(android::base::Stream* stream) const override;
+    virtual void virtualMakeCurrent();
+
 protected:
     virtual void postLoadRestoreCtx() override;
 
