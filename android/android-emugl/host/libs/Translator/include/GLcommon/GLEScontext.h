@@ -33,6 +33,12 @@
 
 typedef std::unordered_map<GLenum,GLESpointer*>  ArraysMap;
 
+#define CHECK_GL_ERROR \
+    if (GLenum err = this->dispatcher().glGetError()) { \
+        fprintf(stderr, "%s: %s %d get GL error 0x%x\n", \
+            __FUNCTION__, __FILE__, __LINE__, err); \
+    }
+
 enum TextureTarget {
 TEXTURE_2D,
 TEXTURE_CUBE_MAP,
@@ -418,6 +424,7 @@ public:
     // postLoad is triggered after setting up ShareGroup
     virtual void postLoad();
     virtual void restore();
+    virtual void virtualMakeCurrent();
 
     bool isCoreProfile() const { return m_coreProfile; }
     void setCoreProfile(bool core) { m_coreProfile = core; }
