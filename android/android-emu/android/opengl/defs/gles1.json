@@ -1,0 +1,975 @@
+{
+    "glTexGenxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetRenderbufferParameterivOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glNormalPointerData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glGetTexParameterxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(sizeof(GLfixed))"
+            }
+        }
+    },
+    "glExtGetShadersQCOM": {
+        "__varinfo__": {
+            "numShaders": {
+                "len": "(1 * sizeof(GLint))"
+            },
+            "shaders": {
+                "len": "(maxShaders * sizeof(GLuint))"
+            }
+        }
+    },
+    "glLightxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glPointParameterfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glMatrixIndexPointerData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glTexGenfvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glTexEnvxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glFogxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glMultMatrixxOES": {
+        "__varinfo__": {
+            "m": {
+                "len": "(16 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glDeleteTextures": {
+        "__varinfo__": {
+            "textures": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glDrawTexivOES": {
+        "__varinfo__": {
+            "coords": {
+                "len": "(5 * sizeof(GLint))"
+            }
+        }
+    },
+    "glGenRenderbuffersOES": {
+        "__varinfo__": {
+            "renderbuffers": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glQueryMatrixxOES": {
+        "__varinfo__": {
+            "mantissa": {
+                "len": "(16 * sizeof(GLfixed))"
+            },
+            "exponent": {
+                "len": "(16 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glNormalPointerOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glGetTexParameteriv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(sizeof(GLint))"
+            }
+        }
+    },
+    "glGetTexParameterxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glFogfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glFogxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetCompressedTextureFormats": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "formats": {
+                "len": "(count * sizeof(GLint))"
+            }
+        }
+    },
+    "glGenTextures": {
+        "__varinfo__": {
+            "textures": {
+                "dir": "out"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glLightModelxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glCompressedTexSubImage2D": {
+        "__varinfo__": {
+            "data": {
+                "len": "imageSize"
+            }
+        }
+    },
+    "glDiscardFramebufferEXT": {
+        "__varinfo__": {
+            "attachments": {
+                "len": "(numAttachments * sizeof(const GLenum))"
+            }
+        }
+    },
+    "glGetTexGenfvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGenVertexArraysOES": {
+        "__varinfo__": {
+            "arrays": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glGetTexParameterfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glTexCoordPointerData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glCompressedTexImage2D": {
+        "__varinfo__": {
+            "data": {
+                "len": "imageSize"
+            }
+        }
+    },
+    "glPointSizePointerOES": {
+        "__varinfo__": {
+            "pointer": {
+                "len": "(sizeof(unsigned int))"
+            }
+        }
+    },
+    "glExtGetTexSubImageQCOM": {
+        "__varinfo__": {
+            "texels": {
+                "len": "(depth * pixelDataSize(self, width, height, format, type, 0))"
+            }
+        }
+    },
+    "glDrawElementsOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glGetDriverControlsQCOM": {
+        "__varinfo__": {
+            "num": {
+                "len": "(1 * sizeof(GLint))"
+            },
+            "driverControls": {
+                "len": "(size * sizeof(GLuint))"
+            }
+        }
+    },
+    "glGenFramebuffersOES": {
+        "__varinfo__": {
+            "framebuffers": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glLightModelxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetTexEnvfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGetLightfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGetFixedvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glWeightPointerData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glGetTexGenivOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glGetTexGenxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glDrawTexfvOES": {
+        "__varinfo__": {
+            "coords": {
+                "len": "(5 * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glClipPlanefOES": {
+        "__varinfo__": {
+            "equation": {
+                "len": "(4 * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glDeleteFramebuffersOES": {
+        "__varinfo__": {
+            "framebuffers": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glColorPointerOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glPointParameterxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetBufferParameteriv": {
+        "__varinfo__": {
+            "params": {
+                "dir": "out"
+            }
+        }
+    },
+    "glGetFramebufferAttachmentParameterivOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glClipPlanexIMG": {
+        "__varinfo__": {
+            "equation": {
+                "len": "(4 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetClipPlanef": {
+        "__varinfo__": {
+            "eqn": {
+                "len": "(4 * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glBufferSubData": {
+        "__varinfo__": {
+            "data": {
+                "len": "size"
+            }
+        }
+    },
+    "glTexEnvfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGetTexEnvxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glLoadMatrixxOES": {
+        "__varinfo__": {
+            "m": {
+                "len": "(16 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glMatrixIndexPointerOES": {
+        "__varinfo__": {
+            "pointer": {
+                "len": "(sizeof(unsigned int))"
+            }
+        }
+    },
+    "glLightModelfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGetLightxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glNormalPointer": {
+        "__varinfo__": {
+            "pointer": {
+                "len": "(sizeof(unsigned int))"
+            }
+        }
+    },
+    "glGetMaterialxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glDrawElementsData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glClipPlanefIMG": {
+        "__varinfo__": {
+            "equation": {
+                "len": "(4 * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glTexEnvxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetClipPlanexOES": {
+        "__varinfo__": {
+            "eqn": {
+                "len": "(4 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glClipPlanexOES": {
+        "__varinfo__": {
+            "equation": {
+                "len": "(4 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glPointSizePointerOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glTexSubImage2D": {
+        "__varinfo__": {
+            "pixels": {
+                "len": "pixelDataSize(self, width, height, format, type, 0)"
+            }
+        }
+    },
+    "glDeleteFencesNV": {
+        "__varinfo__": {
+            "fences": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        }
+    },
+    "glDrawTexxvOES": {
+        "__varinfo__": {
+            "coords": {
+                "len": "(5 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glLightfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glExtGetRenderbuffersQCOM": {
+        "__varinfo__": {
+            "numRenderbuffers": {
+                "len": "(1 * sizeof(GLint))"
+            },
+            "renderbuffers": {
+                "len": "(maxRenderbuffers * sizeof(GLuint))"
+            }
+        }
+    },
+    "glMaterialxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glReadPixels": {
+        "__varinfo__": {
+            "pixels": {
+                "len": "pixelDataSize(self, width, height, format, type, 1)"
+            }
+        }
+    },
+    "glFinishRoundTrip": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glGetMaterialxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetTexEnvxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glBufferData": {
+        "__varinfo__": {
+            "data": {
+                "len": "size"
+            }
+        }
+    },
+    "glMatrixIndexPointerOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glGetTexEnviv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glTexParameteriv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glGetFloatv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGetMaterialfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGetClipPlanex": {
+        "__varinfo__": {
+            "eqn": {
+                "len": "(4 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetDriverControlStringQCOM": {
+        "__varinfo__": {
+            "driverControlString": {
+                "len": "(1 * sizeof(GLchar))"
+            },
+            "length": {
+                "len": "(1 * sizeof(GLsizei))"
+            }
+        }
+    },
+    "glGetIntegerv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glGetFenceivNV": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glDrawTexsvOES": {
+        "__varinfo__": {
+            "coords": {
+                "len": "(5 * sizeof(GLshort))"
+            }
+        }
+    },
+    "glTexCoordPointer": {
+        "__varinfo__": {
+            "pointer": {
+                "len": "(sizeof(unsigned int))"
+            }
+        }
+    },
+    "glWeightPointerOES": {
+        "__varinfo__": {
+            "pointer": {
+                "len": "(sizeof(unsigned int))"
+            }
+        }
+    },
+    "glWeightPointerOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glTexImage2D": {
+        "__varinfo__": {
+            "pixels": {
+                "len": "pixelDataSize(self, width, height, format, type, 0)"
+            }
+        }
+    },
+    "glExtGetBuffersQCOM": {
+        "__varinfo__": {
+            "numBuffers": {
+                "len": "(1 * sizeof(GLint))"
+            },
+            "buffers": {
+                "len": "(maxBuffers * sizeof(GLuint))"
+            }
+        }
+    },
+    "glExtGetFramebuffersQCOM": {
+        "__varinfo__": {
+            "framebuffers": {
+                "len": "(maxFramebuffers * sizeof(GLuint))"
+            },
+            "numFramebuffers": {
+                "len": "(1 * sizeof(GLint))"
+            }
+        }
+    },
+    "glLoadMatrixx": {
+        "__varinfo__": {
+            "m": {
+                "len": "(16 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glMultMatrixf": {
+        "__varinfo__": {
+            "m": {
+                "len": "(16 * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glMultMatrixx": {
+        "__varinfo__": {
+            "m": {
+                "len": "(16 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glClipPlanex": {
+        "__varinfo__": {
+            "eqn": {
+                "len": "(4 * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glColorPointerData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glLoadMatrixf": {
+        "__varinfo__": {
+            "m": {
+                "len": "(16 * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glExtGetTexturesQCOM": {
+        "__varinfo__": {
+            "textures": {
+                "len": "(maxTextures * sizeof(GLuint))"
+            },
+            "numTextures": {
+                "len": "(1 * sizeof(GLint))"
+            }
+        }
+    },
+    "glTexParameterfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glGenFencesNV": {
+        "__varinfo__": {
+            "fences": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        }
+    },
+    "glDeleteVertexArraysOES": {
+        "__varinfo__": {
+            "arrays": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glTexEnviv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glPointSizePointerData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glExtGetTexLevelParameterivQCOM": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glGenBuffers": {
+        "__varinfo__": {
+            "buffers": {
+                "dir": "out"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glGetClipPlanefOES": {
+        "__varinfo__": {
+            "eqn": {
+                "len": "(4 * sizeof(GLfloat))"
+            }
+        }
+    },
+    "glExtGetProgramsQCOM": {
+        "__varinfo__": {
+            "numPrograms": {
+                "len": "(1 * sizeof(GLint))"
+            },
+            "programs": {
+                "len": "(maxPrograms * sizeof(GLuint))"
+            }
+        }
+    },
+    "glLightxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glGetBooleanv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLboolean))"
+            }
+        }
+    },
+    "glTexParameterxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glTexParameterxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glTexGenivOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLint))"
+            }
+        }
+    },
+    "glGetLightxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glMaterialxvOES": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glClipPlanef": {
+        "__varinfo__": {
+            "equation": {
+                "len": "(4 * sizeof(float))"
+            }
+        }
+    },
+    "glDeleteRenderbuffersOES": {
+        "__varinfo__": {
+            "renderbuffers": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glPointParameterxv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glTexCoordPointerOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glColorPointer": {
+        "__varinfo__": {
+            "pointer": {
+                "len": "(sizeof(unsigned int))"
+            }
+        }
+    },
+    "glDeleteBuffers": {
+        "__varinfo__": {
+            "buffers": {
+                "len": "(n * sizeof(GLuint))"
+            }
+        },
+        "__flags__": {
+            "custom_decoder": 1
+        }
+    },
+    "glVertexPointerOffset": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        }
+    },
+    "glGetFixedv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfixed))"
+            }
+        }
+    },
+    "glVertexPointerData": {
+        "__flags__": {
+            "custom_decoder": 1,
+            "not_api": 1
+        },
+        "__varinfo__": {
+            "data": {
+                "len": "datalen"
+            }
+        }
+    },
+    "glMaterialfv": {
+        "__varinfo__": {
+            "params": {
+                "len": "(glUtilsParamSize(pname) * sizeof(GLfloat))"
+            }
+        }
+    }
+}

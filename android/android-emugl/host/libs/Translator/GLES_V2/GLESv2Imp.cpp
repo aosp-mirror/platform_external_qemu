@@ -116,14 +116,18 @@ static void initContext(GLEScontext* ctx,ShareGroupPtr grp) {
     if (!ctx->shareGroup()) {
         ctx->setShareGroup(grp);
     }
+
+    // ctx->unbindAll();
+
     if (!ctx->isInitialized()) {
         ctx->init();
         glBindTexture(GL_TEXTURE_2D,0);
         glBindTexture(GL_TEXTURE_CUBE_MAP,0);
     }
-    if (ctx->needRestore()) {
-        ctx->restore();
-    }
+
+    // if (ctx->needRestore()) {
+        // ctx->restore();
+    // }
 }
 
 static GLEScontext* createGLESContext() {
