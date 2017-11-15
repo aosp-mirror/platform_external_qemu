@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "OpenGLESDispatch/async_gl_functions.h"
 #include "OpenGLESDispatch/gles_common_functions.h"
 #include "OpenGLESDispatch/gles_extensions_functions.h"
 #include "OpenGLESDispatch/gles1_only_functions.h"

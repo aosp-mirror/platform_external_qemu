@@ -14,6 +14,7 @@
 * limitations under the License.
 */
 
+#include "GLcommon/DriverThread.h"
 #include "GLcommon/GLDispatch.h"
 #include "GLcommon/GLLibrary.h"
 
@@ -39,7 +40,7 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
 }
 
 #define LOAD_GL_FUNC(return_type, func_name, signature, args)  do { \
-        if (!func_name) { \
+        if (!func_name##Underlying) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             /*Check alias*/ \
             if (!address) { \
@@ -55,10 +56,10 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
                 if (address) GL_LOG("%s not found, using %sARB", #func_name, #func_name); \
             } \
             if (address) { \
-                func_name = (__typeof__(func_name))(address); \
+                func_name##Underlying = (__typeof__(func_name))(address); \
             } else { \
                 GL_LOG("%s not found", #func_name); \
-                func_name = (__typeof__(func_name))(dummy_##func_name); \
+                func_name##Underlying = (__typeof__(func_name))(dummy_##func_name); \
             } \
         } \
     } while (0);
@@ -67,10 +68,12 @@ static GL_FUNC_PTR getGLFuncAddress(const char *funcName, GlLibrary* glLib) {
         if (!func_name) { \
             void* address = (void *)getGLFuncAddress(#func_name, glLib); \
             if (address) { \
-                func_name = (__typeof__(func_name))(address); \
+                func_name##Underlying = (__typeof__(func_name))(address); \
             } \
         } \
     } while (0);
+
+
 
 // Define dummy functions, only for non-extensions.
 
@@ -100,7 +103,8 @@ LIST_GLES_FUNCTIONS(DEFINE_DUMMY_FUNCTION, DEFINE_DUMMY_EXTENSION_FUNCTION)
 emugl::Mutex GLDispatch::s_lock;
 
 #define GL_DISPATCH_DEFINE_POINTER(return_type, function_name, signature, args) \
-    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name) signature = NULL;
+    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name) signature = NULL; \
+    GL_APICALL return_type (GL_APIENTRY *GLDispatch::function_name##Underlying) signature = NULL;
 
 LIST_GLES_FUNCTIONS(GL_DISPATCH_DEFINE_POINTER, GL_DISPATCH_DEFINE_POINTER)
 
@@ -147,4 +151,239 @@ void GLDispatch::dispatchFuncs(GLESVersion version, GlLibrary* glLib) {
 
     m_isLoaded = true;
     m_version = version;
+
+#define DEFINE_API_FUNC(return_type, func_name, signature, args) \
+    if (func_name##Underlying) { \
+        func_name = func_name##Driverthread; \
+    } else { \
+        func_name = nullptr; \
+    } \
+
+    LIST_GLES_FUNCTIONS(DEFINE_API_FUNC, DEFINE_API_FUNC);
+
+#define DEFINE_ASYNC_API_FUNC(return_type, func_name, signature, args) \
+    if (func_name##Underlying) { \
+        func_name = func_name##DriverthreadAsync; \
+    } else { \
+        func_name = nullptr; \
+    } \
+
+    LIST_ASYNC_GL_FUNCTIONS(DEFINE_ASYNC_API_FUNC)
+    LIST_CUSTOM_ASYNC_GL_FUNCTIONS(DEFINE_ASYNC_API_FUNC)
+}
+
+#define _Args(...) __VA_ARGS__
+#define STRIP_PARENS(X) X
+#define PASS_PARAMETERS(X) STRIP_PARENS( _Args X )
+
+#define DEFINE_DRIVERTHREAD_FUNC(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC##return_type(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCvoid(return_type, func_name, signature, args) \
+    return_type GLDispatch::func_name##Driverthread signature { \
+        DriverThread::callOnDriverThread<return_type>([&]() { \
+            func_name##Underlying args; \
+        }); } \
+
+#define DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+    return_type GLDispatch::func_name##Driverthread signature { \
+        return DriverThread::callOnDriverThread<return_type>([PASS_PARAMETERS(args)]() { \
+            return func_name##Underlying args; \
+        }); } \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLboolean(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCint(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLint(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLuint(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLenum(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLsync(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCGLconstubyteptr(return_type, func_name, signature, args) \
+    DEFINE_DRIVERTHREAD_FUNC_RET(return_type, func_name, signature, args) \
+
+#define DEFINE_DRIVERTHREAD_FUNCvoidptr(return_type, func_name, signature, args) \
+    return_type GLDispatch::func_name##Driverthread signature { \
+        return DriverThread::callOnDriverThread<void*>([PASS_PARAMETERS(args)]() { \
+            return func_name##Underlying args; \
+        }); } \
+
+LIST_GLES_FUNCTIONS(DEFINE_DRIVERTHREAD_FUNC, DEFINE_DRIVERTHREAD_FUNC)
+
+
+#define DEFINE_DRIVERTHREAD_FUNCvoidAsync(return_type, func_name, signature, args) \
+    return_type GLDispatch::func_name##DriverthreadAsync signature { \
+        DriverThread::callOnDriverThreadAsync<return_type>([=]() { \
+            func_name##Underlying args; \
+        }); } \
+
+LIST_ASYNC_GL_FUNCTIONS(DEFINE_DRIVERTHREAD_FUNCvoidAsync)
+
+// Custom implementations
+void GLDispatch::glBufferDataDriverthreadAsync(GLenum target, GLsizeiptr size, const GLvoid * data, GLenum usage) {
+    std::vector<unsigned char> copiedBuf(data ? size : 0);
+    if (data) {
+        memcpy(copiedBuf.data(), data, size);
+    }
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glBufferDataUnderlying(target, size, data ? copiedBuf.data() : nullptr, usage);
+    });
+}
+
+void GLDispatch::glBufferSubDataDriverthreadAsync(GLenum target, GLintptr offset, GLsizeiptr size, const GLvoid * data) {
+    std::vector<unsigned char> copiedBuf(data ? size : 0);
+    if (data) {
+        memcpy(copiedBuf.data(), data, size);
+    }
+    memcpy(copiedBuf.data(), data, size);
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+            glBufferSubDataUnderlying(target, offset, size, data ? copiedBuf.data() : nullptr);
+    });
+}
+
+// void GLDispatch::glVertexAttribPointerWithDataSizeDriverthreadAsync(GLuint indx, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid* ptr, GLsizei dataSize) {
+//     std::vector<unsigned char> copiedBuf(dataSize);
+//     if (dataSize) {
+//         memcpy(copiedBuf.data(), ptr, dataSize);
+//     }
+//     DriverThread::callOnDriverThreadAsync<void>([=]() {
+//         glVertexAttribPointerWithDataSizeUnderlying(indx, size, type, normalized, stride, dataSize ? copiedBuf.data() : nullptr, dataSize);
+//     });
+// }
+// 
+// void GLDispatch::glBindAttribLocationDriverthreadAsync(GLuint program, GLuint index, const GLchar* name) {
+//     std::vector<unsigned char> copiedBuf(strlen(name) + 1);
+//     memcpy(copiedBuf.data(), name, strlen(name) + 1);
+//     DriverThread::callOnDriverThreadAsync<void>([=]() {
+//         glBindAttribLocationUnderlying(program, index, name);
+//     });
+// }
+
+void GLDispatch::glVertexAttrib1fvDriverthreadAsync(GLuint indx, const GLfloat* values) {
+    std::vector<GLfloat> vals(1); vals[0] = values[0];
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glVertexAttrib1fvUnderlying(indx, vals.data());
+    });
+}
+
+void GLDispatch::glVertexAttrib2fvDriverthreadAsync(GLuint indx, const GLfloat* values) {
+    size_t sz = 2;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), values, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glVertexAttrib2fvUnderlying(indx, vals.data());
+    });
+}
+
+void GLDispatch::glVertexAttrib3fvDriverthreadAsync(GLuint indx, const GLfloat* values) {
+    size_t sz = 3;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), values, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glVertexAttrib3fvUnderlying(indx, vals.data());
+    });
+}
+
+void GLDispatch::glVertexAttrib4fvDriverthreadAsync(GLuint indx, const GLfloat* values) {
+    size_t sz = 4;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), values, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glVertexAttrib4fvUnderlying(indx, vals.data());
+    });
+}
+
+void GLDispatch::glUniform1fvDriverthreadAsync(GLint location, GLsizei count, const GLfloat* v) {
+    size_t sz = 1;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform1fvUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniform2fvDriverthreadAsync(GLint location, GLsizei count, const GLfloat* v) {
+    size_t sz = 2;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform2fvUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniform3fvDriverthreadAsync(GLint location, GLsizei count, const GLfloat* v) {
+    size_t sz = 3;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform3fvUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniform4fvDriverthreadAsync(GLint location, GLsizei count, const GLfloat* v) {
+    size_t sz = 4;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform4fvUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniform1ivDriverthreadAsync(GLint location, GLsizei count, const GLint* v) {
+    size_t sz = 1;
+    std::vector<GLint> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLint));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform1ivUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniform2ivDriverthreadAsync(GLint location, GLsizei count, const GLint* v) {
+    size_t sz = 2;
+    std::vector<GLint> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLint));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform2ivUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniform3ivDriverthreadAsync(GLint location, GLsizei count, const GLint* v) {
+    size_t sz = 3;
+    std::vector<GLint> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLint));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform3ivUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniform4ivDriverthreadAsync(GLint location, GLsizei count, const GLint* v) {
+    size_t sz = 4;
+    std::vector<GLint> vals(sz); memcpy(vals.data(), v, sz * sizeof(GLint));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniform4ivUnderlying(location, count, vals.data());
+    });
+}
+
+void GLDispatch::glUniformMatrix2fvDriverthreadAsync(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
+    size_t sz = 4;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), value, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniformMatrix2fvUnderlying(location, count, transpose, vals.data());
+    });
+}
+
+void GLDispatch::glUniformMatrix3fvDriverthreadAsync(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
+    size_t sz = 9;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), value, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniformMatrix3fvUnderlying(location, count, transpose, vals.data());
+    });
+}
+
+void GLDispatch::glUniformMatrix4fvDriverthreadAsync(GLint location, GLsizei count, GLboolean transpose, const GLfloat* value) {
+    size_t sz = 16;
+    std::vector<GLfloat> vals(sz); memcpy(vals.data(), value, sz * sizeof(GLfloat));
+    DriverThread::callOnDriverThreadAsync<void>([=]() {
+        glUniformMatrix4fvUnderlying(location, count, transpose, vals.data());
+    });
 }

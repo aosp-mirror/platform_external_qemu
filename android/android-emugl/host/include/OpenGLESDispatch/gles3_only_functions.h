@@ -7,13 +7,16 @@
 #include <GLES/gl.h>
 #include <GLES3/gl3.h>
 #include <GLES3/gl3ext.h>
+
+typedef void* voidptr;
+
 #define LIST_GLES3_ONLY_FUNCTIONS(X) \
   X(GLconstubyteptr, glGetStringi, (GLenum name, GLint index), (name, index)) \
   X(void, glGenVertexArrays, (GLsizei n, GLuint* arrays), (n, arrays)) \
   X(void, glBindVertexArray, (GLuint array), (array)) \
   X(void, glDeleteVertexArrays, (GLsizei n, const GLuint * arrays), (n, arrays)) \
   X(GLboolean, glIsVertexArray, (GLuint array), (array)) \
-  X(void *, glMapBufferRange, (GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access), (target, offset, length, access)) \
+  X(voidptr, glMapBufferRange, (GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access), (target, offset, length, access)) \
   X(GLboolean, glUnmapBuffer, (GLenum target), (target)) \
   X(void, glFlushMappedBufferRange, (GLenum target, GLintptr offset, GLsizeiptr length), (target, offset, length)) \
   X(void, glBindBufferRange, (GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size), (target, index, buffer, offset, size)) \
