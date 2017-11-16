@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ef95d13_0b1e77ed",
+        "filename": "android/android-emu/android/physics/InertialModel_unittest.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 261,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-16T23:59:23Z",
+      "side": 1,
+      "message": "nit: trailing whitespace (and in other places)",
+      "range": {
+        "startLine": 261,
+        "startChar": 0,
+        "endLine": 261,
+        "endChar": 4
+      },
+      "revId": "638db69b455dfcb3d76657fbec6c566f94460ca3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
