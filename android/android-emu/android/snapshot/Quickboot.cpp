@@ -219,7 +219,6 @@ void Quickboot::onLivenessTimer() {
                         .c_str(),
                 WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
         Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
-        Snapshotter::get().loader().reportInvalid();
         reportFailedLoad(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
         mVmOps.vmReset();
