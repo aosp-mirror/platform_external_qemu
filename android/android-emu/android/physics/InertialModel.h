@@ -75,6 +75,7 @@ public:
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
     glm::quat getRotation(
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+    // rotational velocity as rotation around (x, y, z) axis in rad/s
     glm::vec3 getRotationalVelocity(
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
 
@@ -104,29 +105,24 @@ private:
     //       second half.  At the end of the decel phase, the velocity and
     //       acceleration will be zero and the position will be as set in the
     //       target.
-    uint64_t mStateChangeStartTime = 0UL;
+    uint64_t mPositionChangeStartTime = 0UL;
     glm::mat2x3 mPositionQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mPositionCubic = glm::mat4x3(0.f);
     glm::mat2x3 mVelocityQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mVelocityCubic = glm::mat4x3(0.f);
     glm::mat2x3 mAccelerationQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mAccelerationCubic = glm::mat4x3(0.f);
-    uint64_t mStateChangeEndTime = 0UL;
+    uint64_t mPositionChangeEndTime = 0UL;
+
+    uint64_t mRotationChangeStartTime = 0UL;
+    glm::quat mInitialRotation = glm::quat();
+    glm::vec3 mRotationAxis = glm::vec3(1.f, 0.f, 0.f);
+    float mRotationAngleRadians = 0.f;
+    float mRotationTimeSeconds = 0.f;
+    uint64_t mRotationChangeEndTime = 0UL;
 
     /* The time to use as current in this model */
     uint64_t mModelTimeNs = 0UL;
-
-    glm::quat mPreviousRotation;
-    glm::quat mCurrentRotation;
-    glm::vec3 mRotationalVelocity = glm::vec3();
-
-    uint64_t mUpdateIntervalMs = 0;
-    uint64_t mLastRotationUpdateMs = 0;
-    static const uint64_t ROTATION_UPDATE_RESET_TIME_MS = 100;
-    static const size_t ROTATION_UPDATE_TIME_WINDOW_SIZE = 8;
-    std::array<uint64_t, ROTATION_UPDATE_TIME_WINDOW_SIZE>
-        mLastUpdateIntervals = {};
-    size_t mRotationUpdateTimeWindowElt = 0;
 };
 
 }  // namespace physics
