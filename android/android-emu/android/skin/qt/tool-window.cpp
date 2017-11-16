@@ -75,8 +75,8 @@ ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
         userActionsCounter->startCountingForExtendedWindow(mWindow);
     }
 
-    if (tw->mUiEmuAgent) {
-        mWindow->setAgent(tw->mUiEmuAgent);
+    if (sUiEmuAgent) {
+        mWindow->setAgent(sUiEmuAgent);
     }
 
     // If extended window is created before the "..." button is pressed, it
@@ -92,6 +92,8 @@ ToolWindow::ExtendedWindowHolder::~ExtendedWindowHolder() {
 
 extern "C" void qemu_system_powerdown_request();
 
+const UiEmuAgent* ToolWindow::sUiEmuAgent = nullptr;
+
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
                        ToolWindow::UIEventRecorderPtr event_recorder,
@@ -100,7 +102,6 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
       mEmulatorWindow(window),
       mExtendedWindow([this] { return std::make_tuple(this); }),
       mVirtualSceneControlWindow(this, parent),
-      mUiEmuAgent(nullptr),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
       mUserActionsCounter(user_actions_counter),
@@ -245,8 +246,8 @@ void ToolWindow::raise() {
 }
 
 void ToolWindow::switchClipboardSharing(bool enabled) {
-    if (mUiEmuAgent && mUiEmuAgent->clipboard) {
-        mUiEmuAgent->clipboard->setEnabled(enabled);
+    if (sUiEmuAgent && sUiEmuAgent->clipboard) {
+        sUiEmuAgent->clipboard->setEnabled(enabled);
     }
 }
 
@@ -551,9 +552,13 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
     setStyleSheet(styleSheet);
 }
 
-void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
-    mUiEmuAgent = agPtr;
+// static
+void ToolWindow::setToolEmuAgentEarly(const UiEmuAgent* agentPtr) {
+    sUiEmuAgent = agentPtr;
+    ExtendedWindow::setAgentEarly(agentPtr);
+}
 
+void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     mVirtualSceneControlWindow.setAgent(agPtr);
     if (mExtendedWindow.hasInstance()) {
         mExtendedWindow.get()->setAgent(agPtr);
@@ -774,7 +779,7 @@ void ToolWindow::onGuestClipboardChanged(QString text) {
 
 void ToolWindow::onHostClipboardChanged() {
     QByteArray bytes = QApplication::clipboard()->text().toUtf8();
-    mUiEmuAgent->clipboard->setGuestClipboardContents(
+    sUiEmuAgent->clipboard->setGuestClipboardContents(
                 (const uint8_t*)bytes.data(), bytes.size());
 }
 

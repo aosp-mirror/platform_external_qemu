@@ -168,13 +168,19 @@ ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
 }
 
+// static
+void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
+    if (agentPtr) {
+        LocationPage::setLocationAgent(agentPtr->location);
+    }
+}
+
 void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
     if (agentPtr) {
         mExtendedUi->cellular_page->setCellularAgent(agentPtr->cellular);
         mExtendedUi->batteryPage->setBatteryAgent(agentPtr->battery);
         mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
-        mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {

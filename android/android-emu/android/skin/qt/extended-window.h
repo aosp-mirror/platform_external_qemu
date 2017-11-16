@@ -56,6 +56,7 @@ public:
 
     ~ExtendedWindow();
 
+    static void setAgentEarly(const UiEmuAgent* agentPtr);
     void setAgent(const UiEmuAgent* agentPtr);
 
     void show();
