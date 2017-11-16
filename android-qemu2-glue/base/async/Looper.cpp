@@ -13,6 +13,7 @@
 
 #include "android/base/Log.h"
 #include "android/base/sockets/SocketUtils.h"
+#include "android/base/system/System.h"
 #include "android-qemu2-glue/base/files/QemuFileStream.h"
 #include "android/utils/stream.h"
 
@@ -30,9 +31,17 @@ extern "C" {
 namespace android {
 namespace qemu {
 
+static bool sSkipTimerOps = false;
+
+void skipTimerOps() {
+    sSkipTimerOps = true;
+}
+
 namespace {
 
 extern "C" void qemu_system_shutdown_request(void);
+
+using android::base::System;
 
 typedef ::android::base::Looper BaseLooper;
 typedef ::android::base::Looper::Timer BaseTimer;
@@ -188,10 +197,16 @@ public:
         }
 
         ~Timer() {
+            if (sSkipTimerOps) return;
             ::timer_free(mTimer);
         }
 
         virtual void startRelative(Duration timeout_ms) {
+            if (sSkipTimerOps) {
+                System::get()->sleepMs(timeout_ms);
+                return;
+            }
+
             if (timeout_ms == kDurationInfinite) {
                 timer_del(mTimer);
             } else {
@@ -202,6 +217,14 @@ public:
         }
 
         virtual void startAbsolute(Duration deadline_ms) {
+            if (sSkipTimerOps) {
+                auto now = System::get()->getHighResTimeUs();
+                if (now < deadline_ms) {
+                    System::get()->sleepMs(deadline_ms - now);
+                }
+                return;
+            }
+
             if (deadline_ms == kDurationInfinite) {
                 timer_del(mTimer);
             } else {
@@ -210,10 +233,12 @@ public:
         }
 
         virtual void stop() {
+            if (sSkipTimerOps) return;
             ::timer_del(mTimer);
         }
 
         virtual bool isActive() const {
+            if (sSkipTimerOps) return false;
             return timer_pending(mTimer);
         }
 
