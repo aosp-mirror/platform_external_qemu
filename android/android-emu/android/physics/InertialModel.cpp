@@ -199,9 +199,16 @@ void InertialModel::setTargetRotation(
     const glm::quat rotationDiff = glm::normalize(
             rotation * glm::conjugate(mInitialRotation));
     mRotationAngleRadians = glm::angle(rotationDiff);
+    if (mRotationAngleRadians >= 0.f) {
+        mRotationAngleRadians -=
+                std::floor((mRotationAngleRadians + M_PI) / (2 * M_PI)) * 2.f * M_PI;
+    } else {
+        mRotationAngleRadians +=
+                std::floor((mRotationAngleRadians - M_PI) / (-2 * M_PI)) * 2.f * M_PI;
+    }
     mRotationAxis = glm::axis(rotationDiff);
 
-    const float minTime = mRotationAngleRadians / kMaxAngularVelocity;
+    const float minTime = std::abs(mRotationAngleRadians) / kMaxAngularVelocity;
     mRotationTimeSeconds = std::max(kTargetRotationTime, minTime);
     mRotationChangeEndTime = mRotationChangeStartTime +
             secondsToNs(mRotationTimeSeconds);
