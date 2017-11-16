@@ -23,5 +23,8 @@ namespace qemu {
 // are different instances!
 android::base::Looper* createLooper();
 
+// Skip timer deletion on exit to prevent crashes in timer_del.
+void skipTimerDeletion();
+
 }  // namespace qemu
 }  // namespace android

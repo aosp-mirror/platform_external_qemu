@@ -30,6 +30,12 @@ extern "C" {
 namespace android {
 namespace qemu {
 
+static bool sSkipTimerDeletion = false;
+
+void skipTimerDeletion() {
+    sSkipTimerDeletion = true;
+}
+
 namespace {
 
 extern "C" void qemu_system_shutdown_request(void);
@@ -188,6 +194,7 @@ public:
         }
 
         ~Timer() {
+            if (sSkipTimerDeletion) return;
             ::timer_free(mTimer);
         }
 
@@ -210,6 +217,7 @@ public:
         }
 
         virtual void stop() {
+            if (sSkipTimerDeletion) return;
             ::timer_del(mTimer);
         }
 
