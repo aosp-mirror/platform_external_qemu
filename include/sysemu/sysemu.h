@@ -56,6 +56,7 @@ void qemu_system_wakeup_request(WakeupReason reason);
 void qemu_system_wakeup_enable(WakeupReason reason, bool enabled);
 void qemu_register_wakeup_notifier(Notifier *notifier);
 void qemu_system_invalidate_exit_snapshot(void);
+void qemu_system_ignore_timer_del(void);
 void qemu_system_shutdown_request(void);
 void qemu_system_powerdown_request(void);
 void qemu_register_powerdown_notifier(Notifier *notifier);
