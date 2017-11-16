@@ -247,6 +247,47 @@ TEST(InertialModel, TargetPosition) {
     EXPECT_NEAR(targetPosition.z, retrievedTargetPosition.z, 0.0001f);
 }
 
+TEST(InertialModel, TargetVelocity) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    const glm::vec3 targetVelocity (10.0f, -5.f, 1.f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetPosition(glm::vec3(0.f), PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetVelocity(targetVelocity, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    inertialModel.setCurrentTime(500000000UL);
+
+    const glm::vec3 retrievedStableVelocity =
+            inertialModel.getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+
+    EXPECT_NEAR(targetVelocity.x, retrievedStableVelocity.x, 0.0001f);
+    EXPECT_NEAR(targetVelocity.y, retrievedStableVelocity.y, 0.0001f);
+    EXPECT_NEAR(targetVelocity.z, retrievedStableVelocity.z, 0.0001f);
+
+    const glm::vec3 retrievedStablePosition =
+            inertialModel.getPosition(PARAMETER_VALUE_TYPE_CURRENT);
+
+    inertialModel.setCurrentTime(1500000000UL);
+
+    const glm::vec3 oneSecondLaterRetrievedVelocity =
+            inertialModel.getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+    EXPECT_NEAR(targetVelocity.x, oneSecondLaterRetrievedVelocity.x, 0.0001f);
+    EXPECT_NEAR(targetVelocity.y, oneSecondLaterRetrievedVelocity.y, 0.0001f);
+    EXPECT_NEAR(targetVelocity.z, oneSecondLaterRetrievedVelocity.z, 0.0001f);
+
+    const glm::vec3 oneSecondLaterRetrievedPosition =
+            inertialModel.getPosition(PARAMETER_VALUE_TYPE_CURRENT);
+
+    EXPECT_NEAR(retrievedStablePosition.x + targetVelocity.x,
+            oneSecondLaterRetrievedPosition.x, 0.0001f);
+    EXPECT_NEAR(retrievedStablePosition.y + targetVelocity.y,
+            oneSecondLaterRetrievedPosition.y, 0.0001f);
+    EXPECT_NEAR(retrievedStablePosition.z + targetVelocity.z,
+            oneSecondLaterRetrievedPosition.z, 0.0001f);
+}
+
 TEST(InertialModel, CurrentInitialPositionValue) {
     TestSystem testSystem("/", System::kProgramBitness);
 

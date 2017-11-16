@@ -39,6 +39,17 @@ constexpr float kPositionStateChangeTimeSeconds = 0.5f;
 constexpr uint64_t kPositionStateChangeTimeNs =
         secondsToNs(kPositionStateChangeTimeSeconds);
 
+constexpr float kStateChangeTime1 = kPositionStateChangeTimeSeconds;
+constexpr float kStateChangeTime2 = kStateChangeTime1 * kStateChangeTime1;
+constexpr float kStateChangeTime3 = kStateChangeTime2 * kStateChangeTime1;
+constexpr float kStateChangeTime4 = kStateChangeTime2 * kStateChangeTime2;
+constexpr float kStateChangeTime5 = kStateChangeTime2 * kStateChangeTime3;
+
+const glm::vec2 kQuinticTimeVec = glm::vec2(
+        kStateChangeTime5, kStateChangeTime4);
+const glm::vec4 kCubicTimeVec = glm::vec4(
+        kStateChangeTime3, kStateChangeTime2, kStateChangeTime1, 1.f);
+
 /* maximum angular velocity in rad/s */
 constexpr float kMaxAngularVelocity = 5.f;
 constexpr float kTargetRotationTime = 0.050f;
@@ -58,16 +69,13 @@ void InertialModel::setTargetPosition(
         // For Step changes, we simply set the transform to immediately take the
         // user to the given position and not reflect any movement-based
         // acceleration or velocity.
-        mPositionCubic = glm::mat4x3(
-                glm::vec3(), glm::vec3(), glm::vec3(), position);
-        mPositionQuintic = glm::mat2x3(0.f);
-        mVelocityCubic = glm::mat4x3(0.f);
-        mVelocityQuintic = glm::mat2x3(0.f);
-        mAccelerationCubic = glm::mat4x3(0.f);
-        mAccelerationQuintic = glm::mat2x3(0.f);
-
-        mPositionChangeStartTime = mModelTimeNs;
-        mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
+        setInertialTransforms(
+                glm::vec3(),
+                glm::vec3(),
+                glm::vec3(),
+                glm::vec3(),
+                glm::vec3(),
+                position);
     } else {
         // We ensure that velocity, acceleration, and position are continuously
         // interpolating from the current state.  Here, and throughout, x is the
@@ -76,14 +84,6 @@ void InertialModel::setTargetPosition(
         const glm::vec3 v_init = getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
         const glm::vec3 a_init = getAcceleration(PARAMETER_VALUE_TYPE_CURRENT);
         const glm::vec3 x_target = position;
-
-        // constexprs for powers of the state change time which are used
-        // repeated.
-        constexpr float time_1 = kPositionStateChangeTimeSeconds;
-        constexpr float time_2 = time_1 * time_1;
-        constexpr float time_3 = time_2 * time_1;
-        constexpr float time_4 = time_2 * time_2;
-        constexpr float time_5 = time_2 * time_3;
 
         // Computed by solving for quintic movement in
         // kPositionStateChangeTimeSeconds. Position, Velocity, and Acceleration
@@ -131,21 +131,21 @@ void InertialModel::setTargetPosition(
         //     t = kPositionStateChangeTimeSeconds
         //     y = x_target
 
-        const glm::vec3 quinticTerm = (1.f / (2.f * time_5)) * (
-                -1.f * time_2 * a_init +
-                -6.f * time_1 * v_init +
+        const glm::vec3 quinticTerm = (1.f / (2.f * kStateChangeTime5)) * (
+                -1.f * kStateChangeTime2 * a_init +
+                -6.f * kStateChangeTime1 * v_init +
                 -12.f * x_init +
                 12.f * x_target);
 
-        const glm::vec3 quarticTerm = (1.f / (2.f * time_4)) * (
-                3.f * time_2 * a_init +
-                16.f * time_1 * v_init +
+        const glm::vec3 quarticTerm = (1.f / (2.f * kStateChangeTime4)) * (
+                3.f * kStateChangeTime2 * a_init +
+                16.f * kStateChangeTime1 * v_init +
                 30.f * x_init +
                 -30.f * x_target);
 
-        const glm::vec3 cubicTerm = (1.f / (2.f * time_3)) * (
-                -3.f * time_2 * a_init +
-                -12.f * time_1 * v_init +
+        const glm::vec3 cubicTerm = (1.f / (2.f * kStateChangeTime3)) * (
+                -3.f * kStateChangeTime2 * a_init +
+                -12.f * kStateChangeTime1 * v_init +
                 -20.f * x_init +
                 20.f * x_target);
 
@@ -155,36 +155,104 @@ void InertialModel::setTargetPosition(
 
         const glm::vec3 constantTerm = x_init;
 
-        mPositionQuintic = glm::mat2x3(
+        setInertialTransforms(
                 quinticTerm,
-                quarticTerm);
-        mPositionCubic = glm::mat4x3(
+                quarticTerm,
                 cubicTerm,
                 quadraticTerm,
                 linearTerm,
                 constantTerm);
-
-        mVelocityQuintic = glm::mat2x3(
-                glm::vec3(0.0f),
-                5.f * quinticTerm);
-        mVelocityCubic = glm::mat4x3(
-                4.f * quarticTerm,
-                3.f * cubicTerm,
-                2.f * quadraticTerm,
-                linearTerm);
-
-        mAccelerationQuintic = glm::mat2x3(
-                glm::vec3(0.0f),
-                glm::vec3(0.0f));
-        mAccelerationCubic = glm::mat4x3(
-                20.f * quinticTerm,
-                12.f * quarticTerm,
-                6.f * cubicTerm,
-                2.f * quadraticTerm);
-
-        mPositionChangeStartTime = mModelTimeNs;
-        mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
     }
+    mPositionChangeStartTime = mModelTimeNs;
+    mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
+}
+
+void InertialModel::setTargetVelocity(
+        glm::vec3 velocity, PhysicalInterpolation mode) {
+    if (mode == PHYSICAL_INTERPOLATION_STEP) {
+        // For Step changes, we simply set the transform to immediately move the
+        // user at a given velocity starting from the current position.
+        setInertialTransforms(
+                glm::vec3(),
+                glm::vec3(),
+                glm::vec3(),
+                glm::vec3(),
+                velocity,
+                getPosition(PARAMETER_VALUE_TYPE_CURRENT));
+    } else {
+        // We ensure that velocity, acceleration, and position are continuously
+        // interpolating from the current state.  Here, and throughout, x is the
+        // position, v is the velocity, and a is the acceleration.
+        const glm::vec3 x_init = getPosition(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::vec3 v_init = getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::vec3 a_init = getAcceleration(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::vec3 v_target = velocity;
+
+        // Computed by solving for quartic movement in
+        // kPositionStateChangeTimeSeconds. Position, Velocity, and Acceleration
+        // are computed here by solving the system of linear equations created
+        // by setting the initial position, velocity, and acceleration to the
+        // current values, and the final state to the target velocity, with no
+        // acceleration.  Note that there is no target position specified.
+        //
+        // Equation of motion is:
+        //
+        // f(t) == At^4 + Bt^3 + Ct^2 + Dt + E
+        //
+        // Where:
+        //     A == quarticTerm
+        //     B == cubicTerm
+        //     C == quadraticTerm
+        //     D == linearTerm
+        //     E == constantTerm
+        // t_end == kPositionStateChangeTimeSeconds
+        //
+        // And this system of equations is solved:
+        //
+        // Initial State:
+        //                 f(0) == x_init
+        //            df/d_t(0) == v_init
+        //           d2f/d2t(0) == a_init
+        // Final State:
+        //         df/dt(t_end) == v_target
+        //       d2f/d2t(t_end) == 0
+        //
+        // These can be solved via the following Mathematica command:
+        // RowReduce[{{0,0,0,0,1,x},
+        //            {0,0,0,1,0,v},
+        //            {0,0,2,0,0,a},
+        //            {4t^3,3t^2,2t,1,0,w},
+        //            {12t^2,6t,2,0,0,0}}]
+        //
+        // Where:
+        //     x = x_init
+        //     v = v_init
+        //     a = a_init
+        //     t = kPositionStateChangeTimeSeconds
+        //     w = v_target
+
+        const glm::vec3 quarticTerm = (1.f / (4.f * kStateChangeTime3)) * (
+                1.f * kStateChangeTime1 * a_init +
+                2.f * v_init +
+                -2.f * v_target);
+        const glm::vec3 cubicTerm = (1.f / (3.f * kStateChangeTime2)) * (
+                -2.f * kStateChangeTime1 * a_init +
+                -3.f * v_init +
+                3.f * v_target);
+        const glm::vec3 quadraticTerm = (1.f / 2.f) * a_init;
+        const glm::vec3 linearTerm = v_init;
+        const glm::vec3 constantTerm = x_init;
+
+        setInertialTransforms(
+                glm::vec3(0.0f),
+                quarticTerm,
+                cubicTerm,
+                quadraticTerm,
+                linearTerm,
+                constantTerm);
+    }
+    mPositionChangeStartTime = mModelTimeNs;
+    mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
 }
 
 void InertialModel::setTargetRotation(
@@ -212,6 +280,7 @@ glm::vec3 InertialModel::getPosition(
     return calculateInertialState(
         mPositionQuintic,
         mPositionCubic,
+        mPositionAfterEndCubic,
         parameterValueType);
 }
 
@@ -220,6 +289,7 @@ glm::vec3 InertialModel::getVelocity(
     return calculateInertialState(
         mVelocityQuintic,
         mVelocityCubic,
+        mVelocityAfterEndCubic,
         parameterValueType);
 }
 
@@ -228,6 +298,7 @@ glm::vec3 InertialModel::getAcceleration(
     return calculateInertialState(
         mAccelerationQuintic,
         mAccelerationCubic,
+        glm::mat4x3(0.f),
         parameterValueType);
 }
 
@@ -253,15 +324,67 @@ glm::vec3 InertialModel::getRotationalVelocity(
     }
 }
 
+void InertialModel::setInertialTransforms(
+        const glm::vec3 quinticCoefficient,
+        const glm::vec3 quarticCoefficient,
+        const glm::vec3 cubicCoefficient,
+        const glm::vec3 quadraticCoefficient,
+        const glm::vec3 linearCoefficient,
+        const glm::vec3 constantCoefficient) {
+    mPositionQuintic = glm::mat2x3(
+            quinticCoefficient,
+            quarticCoefficient);
+    mPositionCubic = glm::mat4x3(
+            cubicCoefficient,
+            quadraticCoefficient,
+            linearCoefficient,
+            constantCoefficient);
+
+    mVelocityQuintic = glm::mat2x3(
+            glm::vec3(0.0f),
+            5.f * quinticCoefficient);
+    mVelocityCubic = glm::mat4x3(
+            4.f * quarticCoefficient,
+            3.f * cubicCoefficient,
+            2.f * quadraticCoefficient,
+            linearCoefficient);
+
+    mAccelerationQuintic = glm::mat2x3(
+            glm::vec3(0.0f),
+            glm::vec3(0.0f));
+    mAccelerationCubic = glm::mat4x3(
+            20.f * quinticCoefficient,
+            12.f * quarticCoefficient,
+            6.f * cubicCoefficient,
+            2.f * quadraticCoefficient);
+
+    glm::vec3 endPosition = mPositionCubic * kCubicTimeVec +
+            mPositionQuintic * kQuinticTimeVec;
+    glm::vec3 endVelocity = mVelocityCubic * kCubicTimeVec +
+            mVelocityQuintic * kQuinticTimeVec;
+
+    mPositionAfterEndCubic = glm::mat4x3(
+            glm::vec3(0.0f),
+            glm::vec3(0.0f),
+            endVelocity,
+            endPosition);
+    mVelocityAfterEndCubic = glm::mat4x3(
+            glm::vec3(0.0f),
+            glm::vec3(0.0f),
+            glm::vec3(0.0f),
+            endVelocity);
+}
+
 glm::vec3 InertialModel::calculateInertialState(
-            const glm::mat2x3& quinticTransform,
-            const glm::mat4x3& cubicTransform,
-            ParameterValueType parameterValueType) const {
+        const glm::mat2x3& quinticTransform,
+        const glm::mat4x3& cubicTransform,
+        const glm::mat4x3& afterEndCubicTransform,
+        ParameterValueType parameterValueType) const {
     assert(mModelTimeNs >= mPositionChangeStartTime);
     const uint64_t requestedTimeNs =
-            (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT &&
-            mModelTimeNs < mPositionChangeEndTime) ?
-                    mModelTimeNs : mPositionChangeEndTime;
+            parameterValueType == PARAMETER_VALUE_TYPE_TARGET ?
+                    mPositionChangeEndTime : mModelTimeNs;
+
     const float time1 = nsToSeconds(requestedTimeNs - mPositionChangeStartTime);
     const float time2 = time1 * time1;
     const float time3 = time2 * time1;
@@ -269,8 +392,10 @@ glm::vec3 InertialModel::calculateInertialState(
     const float time5 = time2 * time3;
     glm::vec2 quinticTimeVec(time5, time4);
     glm::vec4 cubicTimeVec(time3, time2, time1, 1.f);
-    return cubicTransform * cubicTimeVec +
-            quinticTransform * quinticTimeVec;
+
+    return requestedTimeNs < mPositionChangeEndTime ?
+            cubicTransform * cubicTimeVec + quinticTransform * quinticTimeVec :
+            afterEndCubicTransform * cubicTimeVec;
 }
 
 }  // namespace physics

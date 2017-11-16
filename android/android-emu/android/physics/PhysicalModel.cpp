@@ -253,6 +253,14 @@ void PhysicalModelImpl::setTargetPosition(vec3 position,
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetVelocity(vec3 velocity,
+        PhysicalInterpolation mode) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    physicalStateChanging();
+    mInertialModel.setTargetVelocity(toGlm(velocity), mode);
+    targetStateChanged();
+}
+
 void PhysicalModelImpl::setTargetRotation(vec3 rotation,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -316,6 +324,12 @@ vec3 PhysicalModelImpl::getParameterPosition(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return fromGlm(mInertialModel.getPosition(parameterValueType));
+}
+
+vec3 PhysicalModelImpl::getParameterVelocity(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return fromGlm(mInertialModel.getVelocity(parameterValueType));
 }
 
 vec3 PhysicalModelImpl::getParameterRotation(

@@ -59,6 +59,11 @@ public:
     void setTargetPosition(glm::vec3 position, PhysicalInterpolation mode);
 
     /*
+     * Sets the velocity at which the modeled object should start moving.
+     */
+    void setTargetVelocity(glm::vec3 velocity, PhysicalInterpolation mode);
+
+    /*
      * Sets the rotation that the modeled object should move toward.
      */
     void setTargetRotation(glm::quat rotation, PhysicalInterpolation mode);
@@ -82,11 +87,22 @@ public:
 private:
     void updateRotations();
 
+    // Helper for setting the transforms for position, velocity and acceleration
+    // based on the coefficients for quintic motion.
+    void setInertialTransforms(
+            const glm::vec3 quinticCoefficient,
+            const glm::vec3 quarticCoefficient,
+            const glm::vec3 cubicCoefficient,
+            const glm::vec3 quadraticCoefficient,
+            const glm::vec3 linearCoefficient,
+            const glm::vec3 constantCoefficient);
+
     // Helper for calculating the current or target state given a transform
     // specifying either the acceleration, velocity, or position.
     glm::vec3 calculateInertialState(
             const glm::mat2x3& quinticTransform,
             const glm::mat4x3& cubicTransform,
+            const glm::mat4x3& afterEndCubicTransform,
             ParameterValueType parameterValueType) const;
 
     // Note: Each target interpolation begins at a set time, accelerates at a
@@ -113,6 +129,9 @@ private:
     glm::mat2x3 mAccelerationQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mAccelerationCubic = glm::mat4x3(0.f);
     uint64_t mPositionChangeEndTime = 0UL;
+
+    glm::mat4x3 mPositionAfterEndCubic = glm::mat4x3(0.f);
+    glm::mat4x3 mVelocityAfterEndCubic = glm::mat4x3(0.f);
 
     uint64_t mRotationChangeStartTime = 0UL;
     glm::quat mInitialRotation = glm::quat();
