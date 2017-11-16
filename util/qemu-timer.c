@@ -77,6 +77,12 @@ struct QEMUTimerList {
     QemuEvent timers_done_ev;
 };
 
+static bool should_ignore_timer_del = false;
+
+void qemu_system_ignore_timer_del() {
+    should_ignore_timer_del = true;
+}
+
 /**
  * qemu_clock_ptr:
  * @type: type of clock
@@ -407,7 +413,11 @@ static void timerlist_rearm(QEMUTimerList *timer_list)
 /* stop a timer, but do not dealloc it */
 void timer_del(QEMUTimer *ts)
 {
-    QEMUTimerList *timer_list = ts->timer_list;
+    QEMUTimerList *timer_list;
+
+    if (should_ignore_timer_del) return;
+
+    timer_list = ts->timer_list;
 
     if (timer_list) {
         qemu_mutex_lock(&timer_list->active_timers_lock);

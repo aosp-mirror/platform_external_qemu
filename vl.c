@@ -5602,6 +5602,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
 #ifdef CONFIG_ANDROID
     qemu_android_emulation_teardown();
+    qemu_system_ignore_timer_del();
     android_reporting_teardown();
     android_devices_teardown();
 #endif
