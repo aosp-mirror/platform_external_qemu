@@ -491,3 +491,32 @@ TEST(InertialModel, GyroscopeNaNTest) {
     EXPECT_TRUE(!std::isnan(measuredRotation.z));
     EXPECT_TRUE(!std::isnan(measuredRotation.w));
 }
+
+TEST(InertialModel, GyroscopeUseShortPath) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    glm::quat initialRotation(glm::eulerAngleXYZ(
+            glm::radians(0.f),
+            glm::radians(-89.f),
+            glm::radians(0.f)));
+
+    glm::quat targetRotation(glm::eulerAngleXYZ(
+            glm::radians(0.f),
+            glm::radians(-91.f),
+            glm::radians(0.f)));
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetRotation(initialRotation,
+            PHYSICAL_INTERPOLATION_STEP);
+    inertialModel.setTargetRotation(targetRotation,
+            PHYSICAL_INTERPOLATION_SMOOTH);
+
+    // Verify that we don't take the long way around even though glm::angle
+    // would give us the long way as the default angle between the initial and
+    // target rotations.
+    glm::vec3 rotationalVelocity = inertialModel.getRotationalVelocity();
+    EXPECT_NEAR(0.f, rotationalVelocity.x, 0.00001f);
+    EXPECT_GE(-4.f, glm::degrees(rotationalVelocity.y));
+    EXPECT_NEAR(0.f, rotationalVelocity.z, 0.00001f);
+}
