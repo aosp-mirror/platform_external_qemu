@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1190b75_8ca7181b",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-16T22:27:21Z",
+      "side": 1,
+      "message": "The implementation of this is acos(w) * 2, and acos is defined to return a range of [0, pi], so the valid values here are [0, 2pi]\n\nBased on this, the else statement should never be hit.",
+      "range": {
+        "startLine": 201,
+        "startChar": 28,
+        "endLine": 201,
+        "endChar": 52
+      },
+      "revId": "e26a988928f6bc75e656873704a1d151aefa66bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5744bdd2_75217e54",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-16T22:27:21Z",
+      "side": 1,
+      "message": "Based on the above comment, I think this can be simplified to:\n\nif (mRotationAngleRadians \u003e\u003d M_PI) {\n    mRotationAngleRadians -\u003d 2.f * M_PI;\n}",
+      "range": {
+        "startLine": 202,
+        "startChar": 8,
+        "endLine": 202,
+        "endChar": 29
+      },
+      "revId": "e26a988928f6bc75e656873704a1d151aefa66bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aef8db06_1b4da3c0",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 204,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-16T22:27:21Z",
+      "side": 1,
+      "message": "At the boundary condition, when mRotationAngleRadians \u003d Pi, this changes the direction of rotation since f(pi) \u003d pi - 2pi \u003d -pi\n\nI don\u0027t see any tests modified, is there a test for this?  We may want one if this is controlled programmatically so that we don\u0027t accidentally break callers.",
+      "range": {
+        "startLine": 203,
+        "startChar": 8,
+        "endLine": 204,
+        "endChar": 85
+      },
+      "revId": "e26a988928f6bc75e656873704a1d151aefa66bc",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
