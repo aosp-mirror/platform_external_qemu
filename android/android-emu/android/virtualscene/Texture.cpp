@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-#include "android/virtualscene/VirtualSceneTexture.h"
+#include "android/virtualscene/Texture.h"
+#include <string>
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedStdioFile.h"
 #include "android/base/system/System.h"
 #include "android/utils/debug.h"
-#include <string>
 
 #include <png.h>
 
@@ -35,20 +35,17 @@ using android::base::System;
 namespace android {
 namespace virtualscene {
 
-VirtualSceneTexture::VirtualSceneTexture(const GLESv2Dispatch* gles2,
-                                         GLuint textureId)
-    : mGles2(gles2), mTextureId(textureId) {
-}
+Texture::Texture(const GLESv2Dispatch* gles2, GLuint textureId)
+    : mGles2(gles2), mTextureId(textureId) {}
 
-VirtualSceneTexture::~VirtualSceneTexture() {
+Texture::~Texture() {
     if (mGles2) {
         mGles2->glDeleteTextures(1, &mTextureId);
     }
 }
 
-std::unique_ptr<VirtualSceneTexture> VirtualSceneTexture::load(
-        const GLESv2Dispatch* gles2,
-        const char* filename) {
+std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
+                                       const char* filename) {
     GLint maxTextureSize = 0;
     gles2->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
 
@@ -85,18 +82,17 @@ std::unique_ptr<VirtualSceneTexture> VirtualSceneTexture::load(
     }
 #endif
 
-    return std::unique_ptr<VirtualSceneTexture>(
-            new VirtualSceneTexture(gles2, textureId));
+    return std::unique_ptr<Texture>(new Texture(gles2, textureId));
 }
 
-GLuint VirtualSceneTexture::getTextureId() const {
+GLuint Texture::getTextureId() const {
     return mTextureId;
 }
 
-bool VirtualSceneTexture::loadPNG(const char* filename,
-                                  std::vector<uint8_t>& buffer,
-                                  uint32_t* outWidth,
-                                  uint32_t* outHeight) {
+bool Texture::loadPNG(const char* filename,
+                      std::vector<uint8_t>& buffer,
+                      uint32_t* outWidth,
+                      uint32_t* outHeight) {
     *outWidth = 0;
     *outHeight = 0;
 
