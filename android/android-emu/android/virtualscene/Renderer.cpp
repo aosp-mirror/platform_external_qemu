@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-#include "android/virtualscene/VirtualSceneRenderer.h"
+#include "android/virtualscene/Renderer.h"
 
 #include "android/base/ArraySize.h"
 #include "android/utils/debug.h"
-#include "android/virtualscene/VirtualSceneCamera.h"
-#include "android/virtualscene/VirtualSceneTexture.h"
+#include "android/virtualscene/SceneCamera.h"
+#include "android/virtualscene/Texture.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
 
-#include <vector>
 #include <cmath>
+#include <vector>
 
 using namespace android::base;
 
@@ -129,10 +129,9 @@ static const CubeSide kCubeSides[] = {
                  glm::angleAxis(kPi2, glm::vec3(1.0f, 0.0f, 0.0f))},
 };
 
-VirtualSceneRenderer::VirtualSceneRenderer(const GLESv2Dispatch* gles2)
-    : mGles2(gles2) {}
+Renderer::Renderer(const GLESv2Dispatch* gles2) : mGles2(gles2) {}
 
-VirtualSceneRenderer::~VirtualSceneRenderer() {
+Renderer::~Renderer() {
     // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
     mGles2->glDeleteBuffers(1, &mVertexBuffer);
     mVertexBuffer = 0;
@@ -144,10 +143,9 @@ VirtualSceneRenderer::~VirtualSceneRenderer() {
     mProgram = 0;
 }
 
-bool VirtualSceneRenderer::initialize() {
+bool Renderer::initialize() {
     for (const CubeSide& side : kCubeSides) {
-        std::unique_ptr<VirtualSceneTexture> texture =
-                VirtualSceneTexture::load(mGles2, side.texture);
+        std::unique_ptr<Texture> texture = Texture::load(mGles2, side.texture);
         if (!texture) {
             return false;
         }
@@ -220,10 +218,9 @@ bool VirtualSceneRenderer::initialize() {
     return true;
 }
 
-std::unique_ptr<VirtualSceneRenderer> VirtualSceneRenderer::create(
-        const GLESv2Dispatch* gles2) {
-    std::unique_ptr<VirtualSceneRenderer> renderer;
-    renderer.reset(new VirtualSceneRenderer(gles2));
+std::unique_ptr<Renderer> Renderer::create(const GLESv2Dispatch* gles2) {
+    std::unique_ptr<Renderer> renderer;
+    renderer.reset(new Renderer(gles2));
     if (!renderer || !renderer->initialize()) {
         return nullptr;
     }
@@ -231,8 +228,7 @@ std::unique_ptr<VirtualSceneRenderer> VirtualSceneRenderer::create(
     return renderer;
 }
 
-GLuint VirtualSceneRenderer::compileShader(GLenum type,
-                                           const char* shaderSource) {
+GLuint Renderer::compileShader(GLenum type, const char* shaderSource) {
     const GLuint shaderId = mGles2->glCreateShader(type);
 
     mGles2->glShaderSource(shaderId, 1, &shaderSource, nullptr);
@@ -261,7 +257,7 @@ GLuint VirtualSceneRenderer::compileShader(GLenum type,
     return shaderId;
 }
 
-GLuint VirtualSceneRenderer::linkShaders(GLuint vertexId, GLuint fragmentId) {
+GLuint Renderer::linkShaders(GLuint vertexId, GLuint fragmentId) {
     const GLuint programId = mGles2->glCreateProgram();
     mGles2->glAttachShader(programId, vertexId);
     mGles2->glAttachShader(programId, fragmentId);
@@ -290,8 +286,7 @@ GLuint VirtualSceneRenderer::linkShaders(GLuint vertexId, GLuint fragmentId) {
     return programId;
 }
 
-GLint VirtualSceneRenderer::getAttribLocation(GLuint program,
-                                              const char* name) {
+GLint Renderer::getAttribLocation(GLuint program, const char* name) {
     GLint location = mGles2->glGetAttribLocation(program, name);
     if (location < 0) {
         W("%s: Program attrib '%s' not found", __FUNCTION__, name);
@@ -300,8 +295,7 @@ GLint VirtualSceneRenderer::getAttribLocation(GLuint program,
     return location;
 }
 
-GLint VirtualSceneRenderer::getUniformLocation(GLuint program,
-                                               const char* name) {
+GLint Renderer::getUniformLocation(GLuint program, const char* name) {
     GLint location = mGles2->glGetUniformLocation(program, name);
     if (location < 0) {
         W("%s: Program uniform '%s' not found", __FUNCTION__, name);
@@ -310,7 +304,7 @@ GLint VirtualSceneRenderer::getUniformLocation(GLuint program,
     return location;
 }
 
-void VirtualSceneRenderer::render() {
+void Renderer::render() {
     mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT);
 
