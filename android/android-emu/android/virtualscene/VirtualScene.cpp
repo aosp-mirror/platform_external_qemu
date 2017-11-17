@@ -17,7 +17,7 @@
 #include "android/virtualscene/VirtualScene.h"
 
 #include "android/utils/debug.h"
-#include "android/virtualscene/VirtualSceneRenderer.h"
+#include "android/virtualscene/Renderer.h"
 
 using namespace android::base;
 
@@ -31,7 +31,7 @@ namespace virtualscene {
 
 android::base::LazyInstance<android::base::Lock> VirtualScene::mLock =
         LAZY_INSTANCE_INIT;
-VirtualSceneRenderer* VirtualScene::mImpl = nullptr;
+Renderer* VirtualScene::mImpl = nullptr;
 
 bool VirtualScene::initialize(const GLESv2Dispatch* gles2) {
     AutoLock lock(mLock.get());
@@ -40,8 +40,7 @@ bool VirtualScene::initialize(const GLESv2Dispatch* gles2) {
         return false;
     }
 
-    std::unique_ptr<VirtualSceneRenderer> renderer =
-            VirtualSceneRenderer::create(gles2);
+    std::unique_ptr<Renderer> renderer = Renderer::create(gles2);
     if (!renderer) {
         E("VirtualScene failed to construct");
         return false;

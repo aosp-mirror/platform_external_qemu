@@ -24,26 +24,25 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/utils/compiler.h"
-#include "android/virtualscene/VirtualSceneCamera.h"
-#include "android/virtualscene/VirtualSceneTexture.h"
+#include "android/virtualscene/SceneCamera.h"
+#include "android/virtualscene/Texture.h"
 
 namespace android {
 namespace virtualscene {
 
-class VirtualSceneRenderer {
-    DISALLOW_COPY_AND_ASSIGN(VirtualSceneRenderer);
+class Renderer {
+    DISALLOW_COPY_AND_ASSIGN(Renderer);
 
 public:
-    ~VirtualSceneRenderer();
+    ~Renderer();
 
-    // Create a VirtualSceneRenderer.
+    // Create a virtual scene Renderer.
     //
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
     //
-    // Returns a VirtualSceneRenderer instance if the renderer was successfully
-    // created or null if there was an error.
-    static std::unique_ptr<VirtualSceneRenderer> create(
-            const GLESv2Dispatch* gles2);
+    // Returns a Renderer instance if the renderer was successfully created or
+    // null if there was an error.
+    static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2);
 
     // Compile a shader from source.
     // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
@@ -71,18 +70,18 @@ public:
     void render();
 
 private:
-    // Private constructor, use VirtualSceneRenderer::create to create an
+    // Private constructor, use Renderer::create to create an
     // instance.
-    VirtualSceneRenderer(const GLESv2Dispatch* gles2);
+    Renderer(const GLESv2Dispatch* gles2);
 
-    // Initial helper to initialize the VirtualSceneRenderer.
+    // Initial helper to initialize the Renderer.
     bool initialize();
 
     const GLESv2Dispatch* const mGles2;
 
-    VirtualSceneCamera mCamera;
+    SceneCamera mCamera;
 
-    std::vector<std::unique_ptr<VirtualSceneTexture>> mCubeTextures;
+    std::vector<std::unique_ptr<Texture>> mCubeTextures;
 
     GLuint mProgram = 0;
     GLuint mVertexBuffer = 0;
