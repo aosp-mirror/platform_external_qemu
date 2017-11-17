@@ -11,7 +11,6 @@
 #include "android/skin/qt/extended-pages/virtual-sensors-page.h"
 
 #include "android/emulation/control/sensors_agent.h"
-#include "android/emulator-window.h"
 #include "android/hw-sensors.h"
 #include "android/metrics/PeriodicReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
@@ -120,17 +119,6 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->positionZSlider->setRange(Accelerometer3DWidget::MinZ,
                                    Accelerometer3DWidget::MaxZ);
 
-    // Historically, the AVD starts up with the screen mostly
-    // vertical, but tilted back 4.75 degrees. Retain that
-    // initial orientation.
-    // We need to do this after we call setRange since setRange will trigger
-    // on_*Slider_valueChanged which just trigger setRotation from default
-    // value of Sliders.
-    static const glm::quat initialQuat(glm::vec3(glm::radians(-4.75f), 0.00f, 0.00f));
-    mUi->accelWidget->setRotation(glm::mat4_cast(initialQuat));
-    updateSlidersFromAccelWidget();
-    updateModelFromAccelWidget(PHYSICAL_INTERPOLATION_STEP);
-
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
             60 * 10 * 1000,  // reporting period
@@ -153,87 +141,20 @@ VirtualSensorsPage::~VirtualSensorsPage() {
     }
 }
 
-void VirtualSensorsPage::showEvent(QShowEvent*) {
-    auto layout = skin_ui_get_current_layout(emulator_window_get()->ui);
-    if (layout) {
-        resetDeviceRotationFromSkinLayout(layout->orientation);
-    }
-
-    mFirstShow = false;
-}
-
-void VirtualSensorsPage::onSkinLayoutChange(SkinRotation rot) {
-    resetDeviceRotationFromSkinLayout(rot);
-}
-
-void VirtualSensorsPage::resetDeviceRotationFromSkinLayout(
-        SkinRotation orientation) {
-
-    if (mCoarseOrientation == orientation) {
-        return;
-    }
-
-    float rot = 0.0f;
-
-    // NOTE: the "incorrect" angle values
-    // stem from the fact that glm::quat and SKIN_ROTATION_*
-    // disagree on which direction is "positive" (skin uses
-    // a different coordinate system with origin at top left
-    // and X and Y axis pointing right and down respectively).
-    switch (orientation) {
-    case SKIN_ROTATION_0:
-        rot = 0.0f;
-        break;
-    case SKIN_ROTATION_90:
-        rot = -90.0f;
-        break;
-    case SKIN_ROTATION_180:
-        rot = 180.0f;
-        break;
-    case SKIN_ROTATION_270:
-        rot = 90.0f;
-        break;
-    default:
-        assert(0);
-    }
-    // Rotation reset handler notifies the subscribers, and one of the
-    // subscribers is the main window which handles that as a regular
-    // rotation command. As we're already handling a rotation command, that
-    // would make us to handle it again for the second time, which is
-    // very CPU-intensive.
-    QSignalBlocker blockSignals(this);
-    resetDeviceRotation(
-            glm::angleAxis(glm::radians(rot), glm::vec3(0.0f, 0.0f, 1.0f)));
-}
-
-void VirtualSensorsPage::resetDeviceRotation(const glm::quat& rotation) {
-    if (!mFirstShow) mVirtualSensorsUsed = true;
-    mUi->accelWidget->setPosition(glm::vec3());
-    mUi->accelWidget->setRotation(glm::mat4_cast(rotation));
-    mUi->accelWidget->update();
-
-    // Note: here we do an instantaneous model update.
-    updateSlidersFromAccelWidget();
-    updateModelFromAccelWidget(PHYSICAL_INTERPOLATION_STEP);
-}
-
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
-    resetDeviceRotation(glm::quat());
+    setCoarseOrientation(ANDROID_COARSE_PORTRAIT);
 }
 
 void VirtualSensorsPage::on_rotateToLandscape_clicked() {
-    resetDeviceRotation(
-        glm::angleAxis(glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+    setCoarseOrientation(ANDROID_COARSE_LANDSCAPE);
 }
 
 void VirtualSensorsPage::on_rotateToReversePortrait_clicked() {
-    resetDeviceRotation(
-        glm::angleAxis(glm::radians(180.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+    setCoarseOrientation(ANDROID_COARSE_REVERSE_PORTRAIT);
 }
 
 void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
-    resetDeviceRotation(
-        glm::angleAxis(glm::radians(-90.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+    setCoarseOrientation(ANDROID_COARSE_REVERSE_LANDSCAPE);
 }
 
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
@@ -242,11 +163,6 @@ void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
         mSensorsAgent->setPhysicalStateAgent(nullptr);
     }
     mSensorsAgent = agent;
-
-    auto layout = skin_ui_get_current_layout(emulator_window_get()->ui);
-    if (layout) {
-        resetDeviceRotationFromSkinLayout(layout->orientation);
-    }
 
     mSensorsAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
 }
@@ -267,6 +183,14 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
                 static_cast<float>(v3),
                 mode);
         mIsUIModifyingPhysicalState = false;
+    }
+}
+
+// Helper function
+void VirtualSensorsPage::setCoarseOrientation(
+        AndroidCoarseOrientation orientation) {
+    if (mSensorsAgent) {
+        mSensorsAgent->setCoarseOrientation(static_cast<int>(orientation));
     }
 }
 
@@ -643,6 +567,8 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
         }
         if (coarse_orientation != mCoarseOrientation) {
             mCoarseOrientation = coarse_orientation;
+            // Signal to the extended-window to rotate the emulator window
+            // since an orientation has been detected in the sensor values.
             emit(coarseOrientationChanged(mCoarseOrientation));
         }
 
@@ -683,7 +609,6 @@ void VirtualSensorsPage::onDragStarted() {
 
 void VirtualSensorsPage::onDragStopped() {
     mIsDragging = false;
-    propagateSlidersChange();
 }
 
 void VirtualSensorsPage::on_accelModeRotate_toggled() {

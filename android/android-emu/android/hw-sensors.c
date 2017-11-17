@@ -731,7 +731,8 @@ static int _hwSensors_load(Stream* f, QemudService* s, void* opaque) {
 
 /* change the coarse orientation (landscape/portrait) of the emulated device */
 static void _hwSensors_setCoarseOrientation(HwSensors* h,
-                                            AndroidCoarseOrientation orient) {
+                                            AndroidCoarseOrientation orient,
+                                            float tilt_degrees) {
     /* The Android framework computes the orientation by looking at
      * the accelerometer sensor (*not* the orientation sensor !)
      *
@@ -753,7 +754,7 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr, "Setting coarse orientation to portrait\n");
             }
             _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, 0.f,
+                    PHYSICAL_PARAMETER_ROTATION, -tilt_degrees, 0.f, 0.f,
                     PHYSICAL_INTERPOLATION_STEP);
             break;
 
@@ -763,7 +764,7 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                         "Setting coarse orientation to reverse landscape\n");
             }
             _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, -90.f,
+                    PHYSICAL_PARAMETER_ROTATION, 0.f, -tilt_degrees, -90.f,
                     PHYSICAL_INTERPOLATION_STEP);
             break;
 
@@ -773,7 +774,7 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                         "Setting coarse orientation to reverse portrait\n");
             }
             _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, 180.f,
+                    PHYSICAL_PARAMETER_ROTATION, tilt_degrees, 0.f, 180.f,
                     PHYSICAL_INTERPOLATION_STEP);
             break;
 
@@ -782,7 +783,7 @@ static void _hwSensors_setCoarseOrientation(HwSensors* h,
                 fprintf(stderr, "Setting coarse orientation to landscape\n");
             }
             _hwSensors_setPhysicalParameterValue(h,
-                    PHYSICAL_PARAMETER_ROTATION, 0.f, 0.f, 90.f,
+                    PHYSICAL_PARAMETER_ROTATION, 0.f, tilt_degrees, 90.f,
                     PHYSICAL_INTERPOLATION_STEP);
             break;
         default:
@@ -852,7 +853,6 @@ static void _hwSensors_init(HwSensors* h) {
     /* XXX: TODO: Add other tests when we add the corresponding
         * properties to hardware-properties.ini et al. */
 
-    _hwSensors_setCoarseOrientation(h, ANDROID_COARSE_PORTRAIT);
     _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PROXIMITY,
             1.f, 0.f, 0.f, PHYSICAL_INTERPOLATION_STEP);
 }
@@ -884,10 +884,11 @@ void android_hw_sensors_init_remote_controller(void) {
 }
 
 /* change the coarse orientation value */
-extern void android_sensors_set_coarse_orientation(
-        AndroidCoarseOrientation orient) {
+extern int android_sensors_set_coarse_orientation(
+        AndroidCoarseOrientation orient, float tilt_degrees) {
     android_hw_sensors_init();
-    _hwSensors_setCoarseOrientation(_sensorsState, orient);
+    _hwSensors_setCoarseOrientation(_sensorsState, orient, tilt_degrees);
+    return 0;
 }
 
 /* Get sensor name from sensor id */
