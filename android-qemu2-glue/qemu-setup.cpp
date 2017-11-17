@@ -32,6 +32,7 @@
 #include "android-qemu2-glue/emulation/goldfish_sync.h"
 #include "android-qemu2-glue/emulation/VmLock.h"
 #include "android-qemu2-glue/base/async/CpuLooper.h"
+#include "android-qemu2-glue/base/async/Looper.h"
 #include "android-qemu2-glue/looper-qemu.h"
 #include "android-qemu2-glue/android_qemud.h"
 #include "android-qemu2-glue/audio-capturer.h"
@@ -166,5 +167,6 @@ bool qemu_android_emulation_setup() {
 }
 
 void qemu_android_emulation_teardown() {
+    android::qemu::skipTimerOps();
     androidSnapshot_finalize();
 }
