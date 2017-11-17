@@ -27,6 +27,10 @@ namespace {
 
 #define E(...)  fprintf(stderr, __VA_ARGS__)
 
+#ifndef EGL_PRESERVED_RESOURCES
+#define EGL_PRESERVED_RESOURCES 0x3030
+#endif
+
 const GLuint kConfigAttributes[] = {
     EGL_DEPTH_SIZE,     // must be first - see getDepthSize()
     EGL_STENCIL_SIZE,   // must be second - see getStencilSize()
@@ -46,6 +50,7 @@ const GLuint kConfigAttributes[] = {
     EGL_NATIVE_RENDERABLE,
     EGL_NATIVE_VISUAL_ID,
     EGL_NATIVE_VISUAL_TYPE,
+    EGL_PRESERVED_RESOURCES,
     EGL_SAMPLES,
     EGL_SAMPLE_BUFFERS,
     EGL_TRANSPARENT_TYPE,

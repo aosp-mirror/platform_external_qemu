@@ -267,19 +267,26 @@ EglConfig* EglDisplay::addSimplePixelFormat(int red_size,
     return config;
 }
 
-static const int kReservedIdNum = 9;
+static const EGLint kCommonCfgs[][5] = {
+    {5, 6, 5, 0, EGL_DONT_CARE},
+    {8, 8, 8, 0, EGL_DONT_CARE},
+    {8, 8, 8, 8, EGL_DONT_CARE},
+    // The following are multi-sample configs. They have issues with CTS test:
+    // (API26) run cts -m CtsOpenGLTestCases -t
+    // android.opengl.cts.EglConfigTest#testEglConfigs
+    // We disable them until we figure out how to fix that test properly
+    // BUG: 69421199
+    // {5, 6, 5, 0, 2},
+    // {8, 8, 8, 0, 2},
+    // {8, 8, 8, 8, 2},
+    // {5, 6, 5, 0, 4},
+    // {8, 8, 8, 0, 4},
+    // {8, 8, 8, 8, 4},
+};
+
+static constexpr int kReservedIdNum = sizeof(kCommonCfgs) / 5 / sizeof(EGLint);
 
 void EglDisplay::addReservedConfigs() {
-    const EGLint kCommonCfgs[kReservedIdNum][5] = {
-        {5, 6, 5, 0, EGL_DONT_CARE},
-        {8, 8, 8, 0, EGL_DONT_CARE},
-        {8, 8, 8, 8, EGL_DONT_CARE},
-        {5, 6, 5, 0, 2},
-        {8, 8, 8, 0, 2},
-        {8, 8, 8, 8, 2},
-        {5, 6, 5, 0, 4},
-        {8, 8, 8, 0, 4},
-        {8, 8, 8, 8, 4},};
     for (int i = 0; i < kReservedIdNum; i++) {
         EglConfig* cfg = nullptr;
         cfg = addSimplePixelFormat(kCommonCfgs[i][0],
@@ -604,7 +611,7 @@ void EglDisplay::addConfig(void* opaque, const EglOS::ConfigInfo* info) {
         info->blue_size > 8 ||
         info->depth_size < 24 ||
         info->stencil_size < 8 ||
-        info->samples_per_pixel > 4) {
+        info->samples_per_pixel > 0) {
         return;
     }
 
