@@ -4174,7 +4174,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_HVF
             case QEMU_OPTION_enable_hvf:
                 olist = qemu_find_opts("machine");
-                qemu_opts_parse_noisily(olist, "accel=hvf", false);
+                qemu_opts_parse_noisily(olist, "accel=hvf:hax", false);
                 hvf_disable(0);
                 break;
 #endif /* CONFIG_HVF */

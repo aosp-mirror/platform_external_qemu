@@ -96,37 +96,43 @@ struct hvf_accel_state* hvf_state;
 
 int hvf_support = -1;
 
-void assert_hvf_ok(int r) {
-    if (!r) return;
+bool check_hvf_ok(int r) {
+    if (r == HV_SUCCESS) {
+        return true;
+    }
 
     switch (r) {
-      case HV_SUCCESS:
-        fprintf(stderr, "FATAL: HVF error: HV_SUCCESS\n");
-        break;
       case HV_ERROR:
-        fprintf(stderr, "FATAL: HVF error: HV_ERROR\n");
+        fprintf(stderr, "HVF error: HV_ERROR\n");
         break;
       case HV_BUSY:
-        fprintf(stderr, "FATAL: HVF error: HV_BUSY\n");
+        fprintf(stderr, "HVF error: HV_BUSY\n");
         break;
       case HV_BAD_ARGUMENT:
-        fprintf(stderr, "FATAL: HVF error: HV_BAD_ARGUMENT\n");
+        fprintf(stderr, "HVF error: HV_BAD_ARGUMENT\n");
         break;
       case HV_NO_RESOURCES:
-        fprintf(stderr, "FATAL: HVF error: HV_NO_RESOURCES\n");
+        fprintf(stderr, "HVF error: HV_NO_RESOURCES\n");
         break;
       case HV_NO_DEVICE:
-        fprintf(stderr, "FATAL: HVF error: HV_NO_DEVICE\n");
+        fprintf(stderr, "HVF error: HV_NO_DEVICE\n");
         break;
       case HV_UNSUPPORTED:
-        fprintf(stderr, "FATAL: HVF error: HV_UNSUPPORTED\n");
+        fprintf(stderr, "HVF error: HV_UNSUPPORTED\n");
         break;
       default:
-        fprintf(stderr, "FATAL: HVF Unknown error heh\n");
+        fprintf(stderr, "HVF Unknown error 0x%x\n", r);
         break;
     }
+    return false;
+}
+
+void assert_hvf_ok(int r) {
+    if (check_hvf_ok(r)) return;
+
     qemu_abort("HVF fatal error\n");
 }
+
 // Memory slots/////////////////////////////////////////////////////////////////
 
 hvf_slot *hvf_find_overlap_slot(uint64_t start, uint64_t end) {
@@ -1119,7 +1125,11 @@ static int hvf_accel_init(MachineState *ms) {
     int x;
     DPRINTF("%s: call. hv vm create?\n", __func__);
     int r = hv_vm_create(HV_VM_DEFAULT);
-    assert_hvf_ok(r);
+
+    if (!check_hvf_ok(r)) {
+        hv_vm_destroy();
+        return -EINVAL;
+    }
 
     struct hvf_accel_state* s =
         (struct hvf_accel_state*)g_malloc0(sizeof(struct hvf_accel_state));
