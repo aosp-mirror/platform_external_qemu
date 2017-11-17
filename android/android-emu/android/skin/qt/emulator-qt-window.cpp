@@ -739,6 +739,8 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
     }
 }
 
+extern "C" void qemu_system_powerdown_request();
+
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     const bool alreadyClosed = mClosed;
     mClosed = true;
@@ -756,6 +758,24 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         if (!alreadyClosed) {
+            if (android_hw->hw_arc) {
+                // Keep sending power down request to guest every 100ms for 10 seconds
+                // to try to shutdown guest. After 10 seconds, we force close it. This
+                // is used to simulate a power button long press.
+                android::base::ThreadLooper::get()->createTimer(
+                        [](void* opaque, android::base::Looper::Timer* timer) {
+                            static int count = 0;
+                            qemu_system_powerdown_request();
+                            if (count++ < 100) {
+                                qemu_system_powerdown_request();
+                                timer->startRelative(100);
+                            } else {
+                                static_cast<EmulatorQtWindow*>(opaque)->queueQuitEvent();
+                            }
+                        }, this)->startRelative(0);
+                 event->ignore();
+                 return;
+            }
             // we dont want to restore to a state where the
             // framework is shut down by 'adb reboot -p'
             // so skip that step when saving vm on exit
