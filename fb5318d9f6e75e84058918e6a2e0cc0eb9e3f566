@@ -49,6 +49,31 @@
     },
     {
       "key": {
+        "uuid": "37f6a1f6_76dfe1bb",
+        "filename": "android-qemu2-glue/base/async/Looper.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-18T07:23:05Z",
+      "side": 1,
+      "message": "--\n\nThanks, Yurii",
+      "parentUuid": "16cc8c08_98241330",
+      "range": {
+        "startLine": 206,
+        "startChar": 16,
+        "endLine": 206,
+        "endChar": 51
+      },
+      "tag": "mailMessageId\u003d\u003cCAJeUaNCSN3sReouqEc9xn_0w2r7MnfdiWUS4qKMHWVOF2UKOyQ@mail.gmail.com\u003e",
+      "revId": "fb5318d9f6e75e84058918e6a2e0cc0eb9e3f566",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "769dda5a_7a1244d6",
         "filename": "android-qemu2-glue/base/async/Looper.cpp",
         "patchSetId": 6
