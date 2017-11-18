@@ -129,6 +129,7 @@ private:
     glm::mat2x3 mAccelerationQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mAccelerationCubic = glm::mat4x3(0.f);
     uint64_t mPositionChangeEndTime = 0UL;
+    bool mZeroVelocityAfterEndTime = true;
 
     glm::mat4x3 mPositionAfterEndCubic = glm::mat4x3(0.f);
     glm::mat4x3 mVelocityAfterEndCubic = glm::mat4x3(0.f);

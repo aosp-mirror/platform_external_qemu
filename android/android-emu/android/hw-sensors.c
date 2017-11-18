@@ -804,7 +804,7 @@ static void _hwSensors_init(HwSensors* h) {
         physicalModel_free(h->physical_model);
         h->physical_model = NULL;
     }
-    h->physical_model = physicalModel_new();
+    h->physical_model = physicalModel_new(true);
 
     if (android_hw->hw_accelerometer) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
