@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c508b706_0e17c41c",
+        "filename": "android/android-emu/android/virtualscene/VirtualScene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-18T03:23:22Z",
+      "side": 1,
+      "message": "nit: initialize to nullptr?",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 42
+      },
+      "revId": "fb94380297f42f86062bcd54f54618b9b71ff685",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
