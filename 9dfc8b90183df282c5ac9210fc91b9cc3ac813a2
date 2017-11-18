@@ -22,6 +22,30 @@
       "revId": "9dfc8b90183df282c5ac9210fc91b9cc3ac813a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dfc5523c_4b6a013f",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 782,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-11-18T04:58:07Z",
+      "side": 1,
+      "message": "Actually I tried that, only one down side:  if I call \"shutdown\" or \"reboot\" inside chrome os, there is no animation effect. Chrome had some special logic to react to \"repeat\" power event to show some animation when shutdown. But if just call \"shutdown\" from cmdline, there is no such animation.  So a possible solution is: android emulator send something to channel. And inside guest, I have a daemon to \"fake\" such repeat events.. but then it sounds more complex than this.",
+      "parentUuid": "fe8482f7_0a8af84e",
+      "range": {
+        "startLine": 780,
+        "startChar": 0,
+        "endLine": 782,
+        "endChar": 65
+      },
+      "revId": "9dfc8b90183df282c5ac9210fc91b9cc3ac813a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
