@@ -24,36 +24,61 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/utils/compiler.h"
+#include "android/virtualscene/VirtualSceneCamera.h"
+#include "android/virtualscene/VirtualSceneTexture.h"
 
 namespace android {
 namespace virtualscene {
 
-class VirtualSceneRendererImpl;
-
 class VirtualSceneRenderer {
+    DISALLOW_COPY_AND_ASSIGN(VirtualSceneRenderer);
+
 public:
-    // Initialize virtual scene rendering. Callers must have an active EGL
-    // context.
-    // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
+    VirtualSceneRenderer(const GLESv2Dispatch* gles2);
+    ~VirtualSceneRenderer();
+
+    bool initialize();
+
+    // Compile a shader from source.
+    // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
+    // |shaderSource| - Shader source code.
     //
-    // Returns true if initialization succeeded.
-    static bool initialize(const GLESv2Dispatch* gles2);
+    // Returns a non-zero shader handle on success, or zero on failure.
+    // The result must be released with glDeleteShader.
+    GLuint compileShader(GLenum type, const char* shaderSource);
 
-    // Uninitialize virtual scene rendering, may be called on any thread, but
-    // the same EGL context that was active when initialize() was called must be
-    // active. This function modifies the GL state, callers must be resilient to
-    // that.
-    static void uninitialize();
+    // Link a vertex and fragment shader and return a program.
+    // |vertexId| - GL vertex shader handle, must be non-zero.
+    // |fragmentId| - GL fragment shader handle, must be non-zero.
+    //
+    // After this call, it is valid to call glDeleteShader; if the program was
+    // successfully linked the program will keep them alive.
+    //
+    // Returns a non-zero program handle on success, or zero on failure.
+    // The result must be released with glDeleteProgram.
+    GLuint linkShaders(GLuint vertexId, GLuint fragmentId);
 
-    // Render the virtual scene to the currently bound render target. This may
-    // be called on any thread, but the same EGL context that was active when
-    // initialize() was called must be active. This function modifies the GL
-    // state, callers must be resilient to that.
-    static void render();
+    GLint getAttribLocation(GLuint program, const char* name);
+
+    GLint getUniformLocation(GLuint program, const char* name);
+
+    void render();
 
 private:
-    static android::base::LazyInstance<android::base::Lock> mLock;
-    static VirtualSceneRendererImpl* mImpl;
+    const GLESv2Dispatch* const mGles2;
+
+    VirtualSceneCamera mCamera;
+
+    std::vector<std::unique_ptr<VirtualSceneTexture>> mCubeTextures;
+
+    GLuint mProgram = 0;
+    GLuint mVertexBuffer = 0;
+    GLuint mIndexBuffer = 0;
+
+    GLint mPositionLocation = -1;
+    GLint mUvLocation = -1;
+    GLint mTexSamplerLocation = -1;
+    GLint mMvpLocation = -1;
 };
 
 }  // namespace virtualscene
