@@ -40,19 +40,18 @@ bool VirtualScene::initialize(const GLESv2Dispatch* gles2) {
         return false;
     }
 
-    mImpl = new VirtualSceneRenderer(gles2);
-    if (!mImpl) {
+    std::unique_ptr<VirtualSceneRenderer> renderer =
+            VirtualSceneRenderer::create(gles2);
+    if (!renderer) {
         E("VirtualScene failed to construct");
         return false;
     }
 
-    const bool result = mImpl->initialize();
-    if (!result) {
-        delete mImpl;
-        mImpl = nullptr;
-    }
+    // Store the raw pointer instead of the unique_ptr wrapper to prevent
+    // unintented side-effects on process shutdown.
+    mImpl = renderer.release();
 
-    return result;
+    return true;
 }
 
 void VirtualScene::uninitialize() {
