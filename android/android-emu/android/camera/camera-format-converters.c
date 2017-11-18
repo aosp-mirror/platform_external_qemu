@@ -1694,8 +1694,7 @@ static bool valid_libyuv_pixformat(const PIXFormat* desc) {
 
 /* Given a source format and |result_frame| structure, determine if the libyuv
  * fast-path should be used to convert to the destination formats. To use the
- * fast-path, at least one format should be YUV and all formats should be valid
- * libyuv formats.
+ * fast-path, all formats should be valid libyuv formats.
  *
  * Param:
  *  |src_desc| - Source pixel format descriptor, must be non-null.
@@ -1705,10 +1704,8 @@ static bool valid_libyuv_pixformat(const PIXFormat* desc) {
  */
 static bool libyuv_supported(const PIXFormat* src_desc,
                              ClientFrame* result_frame) {
-    // Use libyuv if all of the formats are valid, and if at least one format
-    // is yuv.
+    // Use libyuv if all of the formats are valid.
     bool valid_format = valid_libyuv_pixformat(src_desc);
-    bool has_yuv = (src_desc->format_sel == PIX_FMT_YUV);
 
     int i;
     for (i = 0; i < result_frame->framebuffers_count; ++i) {
@@ -1716,10 +1713,9 @@ static bool libyuv_supported(const PIXFormat* src_desc,
                 result_frame->framebuffers[i].pixel_format);
         valid_format =
                 valid_format && desc != NULL && valid_libyuv_pixformat(desc);
-        has_yuv = has_yuv || (desc->format_sel == PIX_FMT_YUV);
     }
 
-    return valid_format && has_yuv;
+    return valid_format;
 }
 
 /* Convert a V4L2 pixel format into an equivalent libyuv format.
