@@ -34,10 +34,16 @@ class VirtualSceneRenderer {
     DISALLOW_COPY_AND_ASSIGN(VirtualSceneRenderer);
 
 public:
-    VirtualSceneRenderer(const GLESv2Dispatch* gles2);
     ~VirtualSceneRenderer();
 
-    bool initialize();
+    // Create a VirtualSceneRenderer.
+    //
+    // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
+    //
+    // Returns a VirtualSceneRenderer instance if the renderer was successfully
+    // created or null if there was an error.
+    static std::unique_ptr<VirtualSceneRenderer> create(
+            const GLESv2Dispatch* gles2);
 
     // Compile a shader from source.
     // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
@@ -65,6 +71,13 @@ public:
     void render();
 
 private:
+    // Private constructor, use VirtualSceneRenderer::create to create an
+    // instance.
+    VirtualSceneRenderer(const GLESv2Dispatch* gles2);
+
+    // Initial helper to initialize the VirtualSceneRenderer.
+    bool initialize();
+
     const GLESv2Dispatch* const mGles2;
 
     VirtualSceneCamera mCamera;

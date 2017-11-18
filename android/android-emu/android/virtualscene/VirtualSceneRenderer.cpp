@@ -132,6 +132,18 @@ static const CubeSide kCubeSides[] = {
 VirtualSceneRenderer::VirtualSceneRenderer(const GLESv2Dispatch* gles2)
     : mGles2(gles2) {}
 
+VirtualSceneRenderer::~VirtualSceneRenderer() {
+    // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
+    mGles2->glDeleteBuffers(1, &mVertexBuffer);
+    mVertexBuffer = 0;
+
+    mGles2->glDeleteBuffers(1, &mIndexBuffer);
+    mIndexBuffer = 0;
+
+    mGles2->glDeleteProgram(mProgram);
+    mProgram = 0;
+}
+
 bool VirtualSceneRenderer::initialize() {
     for (const CubeSide& side : kCubeSides) {
         std::unique_ptr<VirtualSceneTexture> texture =
@@ -208,16 +220,15 @@ bool VirtualSceneRenderer::initialize() {
     return true;
 }
 
-VirtualSceneRenderer::~VirtualSceneRenderer() {
-    // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
-    mGles2->glDeleteBuffers(1, &mVertexBuffer);
-    mVertexBuffer = 0;
+std::unique_ptr<VirtualSceneRenderer> VirtualSceneRenderer::create(
+        const GLESv2Dispatch* gles2) {
+    std::unique_ptr<VirtualSceneRenderer> renderer;
+    renderer.reset(new VirtualSceneRenderer(gles2));
+    if (!renderer || !renderer->initialize()) {
+        return nullptr;
+    }
 
-    mGles2->glDeleteBuffers(1, &mIndexBuffer);
-    mIndexBuffer = 0;
-
-    mGles2->glDeleteProgram(mProgram);
-    mProgram = 0;
+    return renderer;
 }
 
 GLuint VirtualSceneRenderer::compileShader(GLenum type,
