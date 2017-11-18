@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fe8482f7_0a8af84e",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 782,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-18T03:38:25Z",
+      "side": 1,
+      "message": "🤔\n\nIs there some way to use the cros qemud channel to accomplish this? The guest could read the channel then run some kind of \"reboot -p\" or \"shutdown\" command there, so we don\u0027t have to simulate such an operation here.",
+      "range": {
+        "startLine": 780,
+        "startChar": 0,
+        "endLine": 782,
+        "endChar": 65
+      },
+      "revId": "9dfc8b90183df282c5ac9210fc91b9cc3ac813a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
