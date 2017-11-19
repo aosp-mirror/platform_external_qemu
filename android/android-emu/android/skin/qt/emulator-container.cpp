@@ -211,7 +211,6 @@ void EmulatorContainer::moveEvent(QMoveEvent* event) {
 
 void EmulatorContainer::resizeEvent(QResizeEvent* event) {
     QScrollArea::resizeEvent(event);
-    mEmulatorWindow->toolWindow()->dockMainWindow();
     mEmulatorWindow->simulateZoomedWindowResized(this->viewportSize());
     adjustModalOverlayGeometry();
     adjustMessagesOverlayGeometry();

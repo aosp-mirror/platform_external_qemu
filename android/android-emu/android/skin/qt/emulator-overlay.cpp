@@ -15,6 +15,8 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
 
+#include <QDesktopWidget>
+
 EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
                                  EmulatorContainer* container)
     : QFrame(container),
@@ -97,7 +99,9 @@ void EmulatorOverlay::keyPressEvent(QKeyEvent* event) {
 }
 
 void EmulatorOverlay::keyReleaseEvent(QKeyEvent* event) {
-    if (event->key() == Qt::Key_Control && mMode == OverlayMode::Multitouch) {
+    if (event->key() == Qt::Key_Control && (mMode == OverlayMode::Multitouch ||
+                                            mMode == OverlayMode::Resize       ))
+    {
         hideAndFocusContainer();
     } else {
         mEmulatorWindow->keyReleaseEvent(event);
@@ -110,7 +114,9 @@ void EmulatorOverlay::mouseMoveEvent(QMouseEvent* event) {
                 QRect(mRubberbandOrigin, event->pos())
                         .normalized()
                         .intersected(QRect(0, 0, width(), height())));
-    } else if (mMode == OverlayMode::Multitouch) {
+    } else if (mMode == OverlayMode::Multitouch ||
+               mMode == OverlayMode::Resize)
+    {
         mLastMousePos = event->pos();
         updateTouchPoints(event);
         update();
@@ -174,13 +180,17 @@ void EmulatorOverlay::mouseReleaseEvent(QMouseEvent* event) {
             }
         }
         mRubberBand.hide();
-    } else if (mMode == OverlayMode::Multitouch) {
+    } else if (mMode == OverlayMode::Multitouch ||
+               mMode == OverlayMode::Resize)
+    {
         generateTouchEvents(event);
     }
 }
 
 void EmulatorOverlay::moveEvent(QMoveEvent* event) {
-    if (mMode == OverlayMode::Multitouch) {
+    if (mMode == OverlayMode::Multitouch ||
+        mMode == OverlayMode::Resize)
+    {
         hideAndFocusContainer();
     }
 }
@@ -207,10 +217,11 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
 
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-    QRect bg(QPoint(0, 0), size());
-    painter.fillRect(bg, QColor(255, 255, 255, alpha));
 
     if (mMode == OverlayMode::Multitouch) {
+        QRect bg(QPoint(0, 0), size());
+        painter.fillRect(bg, QColor(255, 255, 255, alpha));
+
         double lerpValue = mIsSwipeGesture ? 1.0 - mLerpValue : mLerpValue;
         QPoint primaryPoint = lerpValue * primaryPinchPoint() +
                               (1.0 - lerpValue) * primarySwipePoint();
@@ -245,6 +256,9 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
             painter.drawLine(
                     QLineF(mMultitouchCenter + delta, secondaryPoint - delta));
         }
+    } else if (mMode == OverlayMode::Resize) {
+        // Draw the dashed-line box to show how big the resized window will be.
+        drawResizeBox(&painter, alpha);
     }
 }
 
@@ -295,6 +309,113 @@ void EmulatorOverlay::showForMultitouch(bool centerTouches) {
     mIsSwipeGesture = false;
 }
 
+void EmulatorOverlay::showForResize(int whichCorner) {
+    QRect screenGeo;
+    QDesktopWidget* desktop = ((QApplication*)QApplication::instance())->desktop();
+    int screenNum = desktop->screenNumber(mContainer);  // Screen holding the app
+
+    if (screenNum < 0) {
+        // No active screen!
+        return;
+    }
+    screenGeo = desktop->screenGeometry(screenNum);
+
+    // Set this widget to the full screen
+    setGeometry(screenGeo);
+
+    // Show and render the frame once before the mode is changed.
+    // This ensures that the first frame of the overlay that is rendered *does
+    // not* show the center point, as this has adverse effects on OSX (it seems
+    // to corrupt the alpha portion of the color buffer, leaving the original
+    // location of the point with a different alpha, resulting in a shadow).
+    show();
+    update();
+
+    mMode = OverlayMode::Resize;
+
+    QPoint mousePosition  = QCursor::pos();
+
+    mResizeCorner = whichCorner;
+    mLastMousePos = mousePosition;
+    mIsSwipeGesture = false;
+}
+
+// Draw a dashed-line box to indicate how big the resized
+// window will be. The box retains the aspect ratio that
+// the AVD has.
+void EmulatorOverlay::drawResizeBox(QPainter* painter, int alpha) {
+    QSize overlaySize = size();
+    QRect bg(QPoint(0, 0), overlaySize);
+    painter->fillRect(bg, QColor(255, 255, 255, alpha));
+
+    QPoint mousePosition = QCursor::pos();
+    QRect deviceGeo = mContainer->geometry();
+
+    // Get the (x,y) and (height x width) of the box.
+    int boxX, boxW;
+    if (mResizeCorner == 0 || mResizeCorner == 3) { // Dragging the left
+        boxW = deviceGeo.width()  - (mousePosition.x() - deviceGeo.x()) - mEmulatorWindow->getRightTransparency();
+    } else { // Dragging the right
+        boxW = mousePosition.x() - deviceGeo.x() - mEmulatorWindow->getLeftTransparency();
+    }
+    if (boxW < 256) boxW = 256;
+
+    int boxY, boxH;
+    if (mResizeCorner == 0 || mResizeCorner == 1) { // Dragging the top
+        boxH = deviceGeo.height() - (mousePosition.y() - deviceGeo.y()) - mEmulatorWindow->getBottomTransparency();
+    } else { // Dragging the bottom
+        boxH = mousePosition.y() - deviceGeo.y() - mEmulatorWindow->getTopTransparency();
+    }
+    if (boxH < 256) boxH = 256;
+
+    // Get the container size
+    int containerW = deviceGeo.width() -
+                              mEmulatorWindow->getLeftTransparency() - mEmulatorWindow->getRightTransparency();
+    int containerH = deviceGeo.height() -
+                              mEmulatorWindow->getTopTransparency() - mEmulatorWindow->getBottomTransparency();
+
+    // Adjust the box size to match the container's aspect ratio
+    QSize boxSize(containerW, containerH);
+    boxSize.scale(boxW, boxH, Qt::KeepAspectRatio);
+    boxW = boxSize.width();
+    boxH = boxSize.height();
+
+    // Compute the box location using this adjusted size
+    if (mResizeCorner == 0 || mResizeCorner == 3) { // Dragging the left
+        boxX = deviceGeo.x() + deviceGeo.width() - mEmulatorWindow->getRightTransparency() - boxW;
+    } else { // Dragging the right
+        boxX = deviceGeo.x() + mEmulatorWindow->getLeftTransparency();
+    }
+    if (mResizeCorner == 0 || mResizeCorner == 1) { // Dragging the top
+        boxY = deviceGeo.y() + deviceGeo.height() - mEmulatorWindow->getBottomTransparency() - boxH;
+    } else { // Dragging the bottom
+        boxY = deviceGeo.y() + mEmulatorWindow->getTopTransparency();
+    }
+
+    // Need to subtract off the screen origin
+    boxX -= x();
+    boxY -= y();
+
+    // Draw the box in solid black
+    QPen pen = painter->pen();
+    pen.setColor(Qt::black);
+    pen.setStyle(Qt::SolidLine);
+    painter->setPen(pen);
+    painter->drawRect(boxX, boxY, boxW, boxH);
+
+    // Draw the box in dashed white with the black showing through
+    pen.setColor(Qt::white);
+    pen.setStyle(Qt::DashLine);
+    painter->setPen(pen);
+    painter->drawRect(boxX, boxY, boxW, boxH);
+}
+
+void EmulatorOverlay::paintForResize(int mouseX, int mouseY){
+    mMode = OverlayMode::Resize;
+    // Trigger a paint event
+    repaint();
+}
+
 void EmulatorOverlay::showForZoom() {
     if (mMode != OverlayMode::Hidden)
         return;
@@ -319,6 +440,14 @@ bool EmulatorOverlay::wasZoomUserHidden() const {
 void EmulatorOverlay::hide() {
     QFrame::hide();
     setMouseTracking(false);
+
+    if (mMode == OverlayMode::Resize) {
+        // Resize mode enlarged the overlay. Put it back to
+        // the container size.
+        setGeometry(mContainer->geometry());
+        mContainer->activateWindow();
+    }
+
     mMode = OverlayMode::Hidden;
 
     if (mReleaseOnClose) {

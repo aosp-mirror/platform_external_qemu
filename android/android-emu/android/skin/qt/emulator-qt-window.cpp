@@ -287,6 +287,10 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mNextIsZoom(false),
       mForwardShortcutsToDevice(false),
       mPrevMousePosition(0, 0),
+      mSkinGapTop(0),
+      mSkinGapRight(0),
+      mSkinGapBottom(0),
+      mSkinGapLeft(0),
       mMainLoopThread(nullptr),
       mAvdWarningBox([this] {
           return std::make_tuple(
@@ -380,9 +384,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mBackingSurface = NULL;
 
     QSettings settings;
-    // TODO: Change the default to 'false' after "resize"
-    //       has been implemented for frameless AVDs.
-    mFrameAlways = settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool();
+    mFrameAlways = settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool();
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
@@ -399,10 +401,16 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_getScreenDimensions);
     QObject::connect(this, &EmulatorQtWindow::getFramePos, this,
                      &EmulatorQtWindow::slot_getFramePos);
+    QObject::connect(this, &EmulatorQtWindow::windowHasFrame, this,
+                     &EmulatorQtWindow::slot_windowHasFrame);
     QObject::connect(this, &EmulatorQtWindow::getWindowPos, this,
                      &EmulatorQtWindow::slot_getWindowPos);
+    QObject::connect(this, &EmulatorQtWindow::getWindowSize, this,
+                     &EmulatorQtWindow::slot_getWindowSize);
     QObject::connect(this, &EmulatorQtWindow::isWindowFullyVisible, this,
                      &EmulatorQtWindow::slot_isWindowFullyVisible);
+    QObject::connect(this, &EmulatorQtWindow::isWindowOffScreen, this,
+                     &EmulatorQtWindow::slot_isWindowOffScreen);
     QObject::connect(this, &EmulatorQtWindow::releaseBitmap, this,
                      &EmulatorQtWindow::slot_releaseBitmap);
     QObject::connect(this, &EmulatorQtWindow::requestClose, this,
@@ -415,6 +423,18 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      &EmulatorQtWindow::slot_setWindowIcon, Qt::QueuedConnection);
     QObject::connect(this, &EmulatorQtWindow::setWindowPos, this,
                      &EmulatorQtWindow::slot_setWindowPos);
+    QObject::connect(this, &EmulatorQtWindow::setWindowSize, this,
+                     &EmulatorQtWindow::slot_setWindowSize);
+    QObject::connect(this, &EmulatorQtWindow::paintWindowOverlayForResize, this,
+                     &EmulatorQtWindow::slot_paintWindowOverlayForResize);
+    QObject::connect(this, &EmulatorQtWindow::setWindowOverlayForResize, this,
+                     &EmulatorQtWindow::slot_setWindowOverlayForResize);
+    QObject::connect(this, &EmulatorQtWindow::clearWindowOverlay, this,
+                     &EmulatorQtWindow::slot_clearWindowOverlay);
+    QObject::connect(this, &EmulatorQtWindow::setWindowCursorResize, this,
+                     &EmulatorQtWindow::slot_setWindowCursorResize);
+    QObject::connect(this, &EmulatorQtWindow::setWindowCursorNormal, this,
+                     &EmulatorQtWindow::slot_setWindowCursorNormal);
     QObject::connect(this, &EmulatorQtWindow::setTitle, this,
                      &EmulatorQtWindow::slot_setWindowTitle);
     QObject::connect(this, &EmulatorQtWindow::showWindow, this,
@@ -895,12 +915,7 @@ void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
 // are running frameless.
 
 void EmulatorQtWindow::maskWindowFrame() {
-    if (!mStartupDone) {
-        // The splash screen is still active. Don't mask that.
-        return;
-    }
-
-    bool haveFrame = (mFrameAlways || mInZoomMode);
+    bool haveFrame = hasFrame();
     Qt::WindowFlags flags = mContainer.windowFlags();
 
     flags &= ~FRAME_WINDOW_FLAGS_MASK;
@@ -925,16 +940,16 @@ void EmulatorQtWindow::maskWindowFrame() {
             mContainer.clearMask();
         }
 #endif
+        // We have a frame. There is no transparent gap around the skin.
+        mSkinGapTop = 0;
+        mSkinGapRight = 0;
     } else {
         // Frameless: Do an intelligent mask.
         // Start by reloading the skin PNG file.
-        char *skinName;
-        char *skinDir;
         mHaveBeenFrameless = true;
-        avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
-        QString skinPath = PathUtils::join(skinDir, skinName, "port_back.png").c_str();
-        QPixmap rawPixmap(skinPath);
-        if ( !rawPixmap.isNull() ) {
+
+        getSkinPixmap();
+        if (mRawSkinPixmap != nullptr) {
             // Rotate the skin to match the emulator window
             QTransform rotater;
             int rotationAmount;
@@ -946,7 +961,7 @@ void EmulatorQtWindow::maskWindowFrame() {
                 default:                 rotationAmount =   0;   break;
             }
             rotater.rotate(rotationAmount);
-            QPixmap rotatedPMap(rawPixmap.transformed(rotater));
+            QPixmap rotatedPMap(mRawSkinPixmap->transformed(rotater));
 
             // Scale the bitmap to the current window size
             int width = mContainer.width();
@@ -954,6 +969,23 @@ void EmulatorQtWindow::maskWindowFrame() {
 
             // Convert from bit map to a mask
             QBitmap bitmap = scaledPixmap.mask();
+            setVisibleExtent(bitmap);
+
+            // Determine if this is a round device.
+            // If this mask is circular, it will be transparent near
+            // the corners of the bounding rectangle. The top left of
+            // the circle will be at (1 - 1/sqrt(2))*diameter = 0.146*w.
+            QImage mapImage = bitmap.toImage();
+            int height = mContainer.height();
+            int opaqueWidth  = width  - mSkinGapLeft - mSkinGapRight;
+            int opaqueHeight = height - mSkinGapTop  - mSkinGapBottom;
+            int xTest = mSkinGapLeft + 0.146 * opaqueWidth  - 4;
+            int yTest = mSkinGapTop  + 0.146 * opaqueHeight - 4;
+            if (mapImage.size().width() > xTest) {
+                // The map is not null. It is round if the test pixel is ones.
+                // (If it is null, it's not doing anything, which is rectangular.)
+                mBackingSurface->isRound = (mapImage.pixel(xTest, yTest) == 0xFFFFFFFF);
+            }
 #ifdef __APPLE__
             // On Mac, the mask is automatically stretched so its
             // rectangular extent is as big as the widget it is
@@ -970,6 +1002,46 @@ void EmulatorQtWindow::maskWindowFrame() {
         }
     }
     mContainer.show();
+    mToolWindow->dockMainWindow();
+
+    SkinEvent* event = new SkinEvent();
+    event->type = kEventScreenChanged;
+    queueSkinEvent(event);
+}
+
+void EmulatorQtWindow::getSkinPixmap() {
+    if (mRawSkinPixmap != nullptr) {
+        // Already exists
+        return;
+    }
+    // We need to read the skin image.
+    // Where is the skin?
+    char *skinName;
+    char *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    // Parse the 'layout' file in the skin directory
+    QString layoutPath = PathUtils::join(skinDir, skinName, "layout").c_str();
+    AConfig* skinConfig = aconfig_node("", "");
+    aconfig_load_file(skinConfig, layoutPath.toStdString().c_str());
+    // Find the first instance of parts/*/background/image
+    AConfig* partsConfig = aconfig_find(skinConfig, "parts");
+    if (partsConfig == nullptr) return; // Failed
+    const char *skinFileName = nullptr;
+    for (AConfig* partNode = partsConfig->first_child;
+                  partNode != NULL;
+                  partNode = partNode->next) {
+        const AConfig* backgroundNode = aconfig_find(partNode, "background");
+        if (backgroundNode == NULL) continue;
+        skinFileName = aconfig_str(backgroundNode, "image", nullptr);
+        if (skinFileName != nullptr && skinFileName[0] != '\0') break;
+    }
+    if (skinFileName == nullptr || skinFileName[0] == '\0') return; // Failed
+
+    QString skinPath = QString(skinDir) + QDir::separator()
+                       + skinName + QDir::separator()
+                       + skinFileName;
+
+    mRawSkinPixmap = new QPixmap(skinPath);
 }
 
 void EmulatorQtWindow::paintEvent(QPaintEvent*) {
@@ -1030,10 +1102,13 @@ void EmulatorQtWindow::setOnTop(bool onTop) {
 void EmulatorQtWindow::setFrameAlways(bool frameAlways)
 {
     mFrameAlways = frameAlways;
-    maskWindowFrame();
     if (mStartupDone) {
+        maskWindowFrame();
         mContainer.show();
     }
+    SkinEvent* event = new SkinEvent();
+    event->type = kEventScreenChanged;
+    queueSkinEvent(event);
 }
 
 void EmulatorQtWindow::setIgnoreWheelEvent(bool ignore) {
@@ -1157,6 +1232,17 @@ WId EmulatorQtWindow::getWindowId() {
     return wid;
 }
 
+void EmulatorQtWindow::slot_getWindowSize(int* ww,
+                                          int* hh,
+                                          QSemaphore* semaphore) {
+    QRect geom = mContainer.geometry();
+
+    *ww = geom.width();
+    *hh = geom.height();
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
 void EmulatorQtWindow::slot_getWindowPos(int* xx,
                                          int* yy,
                                          QSemaphore* semaphore) {
@@ -1167,6 +1253,12 @@ void EmulatorQtWindow::slot_getWindowPos(int* xx,
 
     *xx = geom.x();
     *yy = geom.y();
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_windowHasFrame(bool* outValue, QSemaphore* semaphore) {
+    *outValue = hasFrame();
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -1189,9 +1281,27 @@ void EmulatorQtWindow::slot_isWindowFullyVisible(bool* out_value,
             ((QApplication*)QApplication::instance())->desktop();
     int screenNum =
             desktop->screenNumber(&mContainer);  // Screen holding the app
-    QRect screenGeo = desktop->screenGeometry(screenNum);
 
-    *out_value = screenGeo.contains(mContainer.geometry());
+    if (screenNum < 0) {
+        // Window is not on any screen
+        *out_value = false;
+    } else {
+        QRect screenGeo = desktop->screenGeometry(screenNum);
+        *out_value = screenGeo.contains(mContainer.geometry());
+    }
+
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_isWindowOffScreen(bool* out_value,
+                                              QSemaphore* semaphore) {
+    QDesktopWidget* desktop =
+            ((QApplication*)QApplication::instance())->desktop();
+    int screenNum =
+            desktop->screenNumber(&mContainer);  // Screen holding the app
+
+    *out_value = (screenNum < 0);
 
     if (semaphore != NULL)
         semaphore->release();
@@ -1308,6 +1418,43 @@ void EmulatorQtWindow::slot_setDeviceGeometry(QRect rect,
 
 void EmulatorQtWindow::slot_setWindowPos(int x, int y, QSemaphore* semaphore) {
     mContainer.move(x, y);
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_setWindowSize(int w, int h, QSemaphore* semaphore) {
+    mContainer.resize(w, h);
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_paintWindowOverlayForResize(int mouseX, int mouseY, QSemaphore* semaphore) {
+    mOverlay.paintForResize(mouseX, mouseY);
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_clearWindowOverlay(QSemaphore* semaphore) {
+    mOverlay.hide();
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore) {
+    mOverlay.showForResize(whichCorner);
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_setWindowCursorResize(int whichCorner, QSemaphore* semaphore) {
+    mContainer.setCursor((whichCorner == 0 || whichCorner == 2) ?
+                              Qt::SizeFDiagCursor : Qt::SizeBDiagCursor);
+    if (semaphore != NULL)
+        semaphore->release();
+}
+
+void EmulatorQtWindow::slot_setWindowCursorNormal(QSemaphore* semaphore) {
+    mContainer.setCursor(Qt::ArrowCursor);
     if (semaphore != NULL)
         semaphore->release();
 }
@@ -1953,6 +2100,16 @@ void EmulatorQtWindow::slot_runOnUiThread(RunOnUiThreadFunc f,
         semaphore->release();
 }
 
+bool EmulatorQtWindow::hasFrame() const {
+    if (mFrameAlways || mInZoomMode) {
+        return true;
+    }
+    // Probably frameless. But framed if there's no skin.
+    char *skinName, *skinDir;
+    avdInfo_getSkinInfo(android_avdInfo, &skinName, &skinDir);
+    return (skinDir == NULL);
+}
+
 bool EmulatorQtWindow::isInZoomMode() const {
     return mInZoomMode;
 }
@@ -1995,6 +2152,7 @@ void EmulatorQtWindow::toggleZoomMode() {
         doResize(mContainer.size());
         mOverlay.hide();
     } else {
+        doResize(mContainer.size());
         mOverlay.showForZoom();
     }
     maskWindowFrame();
@@ -2208,4 +2366,59 @@ void EmulatorQtWindow::rotateSkin(SkinRotation rot) {
     SkinEvent* event = createSkinEvent(kEventLayoutRotate);
     event->u.layout_rotation.rotation = rot;
     queueSkinEvent(event);
+}
+
+void EmulatorQtWindow::setVisibleExtent(QBitmap bitMap) {
+    QImage bitImage = bitMap.toImage();
+    int topVisible = -1;
+    for (int row = 0; row < bitImage.height() && topVisible < 0; row++) {
+        for (int col = 0; col < bitImage.width(); col++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                topVisible = row;
+                break;
+            }
+        }
+    }
+    int bottomVisible = -1;
+    for (int row = bitImage.height() - 1; row >= 0 && bottomVisible < 0; row--) {
+        for (int col = 0; col < bitImage.width(); col++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                bottomVisible = row;
+                break;
+            }
+        }
+    }
+
+    int leftVisible = -1;
+    for (int col = 0; col < bitImage.width() && leftVisible < 0; col++) {
+        for (int row = 0; row < bitImage.height(); row++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                leftVisible = col;
+                break;
+            }
+        }
+    }
+    int rightVisible = -1;
+    for (int col = bitImage.width() - 1; col >= 0 && rightVisible < 0; col--) {
+        for (int row = 0; row < bitImage.height(); row++) {
+            if (bitImage.pixelColor(col, row) != Qt::color0) {
+                rightVisible = col;
+                break;
+            }
+        }
+    }
+
+    if (topVisible    < 0 || rightVisible < 0 ||
+        bottomVisible < 0 || leftVisible  < 0   )
+    {
+        mSkinGapTop = 0;
+        mSkinGapRight = 0;
+        mSkinGapBottom = 0;
+        mSkinGapLeft = 0;
+    } else {
+        mSkinGapTop = topVisible;
+        mSkinGapRight = bitImage.width() - 1 - rightVisible;
+        mSkinGapBottom = bitImage.height() - 1 - bottomVisible;
+        mSkinGapLeft = leftVisible;
+    }
 }

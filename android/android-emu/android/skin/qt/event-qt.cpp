@@ -34,3 +34,10 @@ extern bool skin_event_poll(SkinEvent* event) {
     window->pollEvent(event, &retval);
     return retval;
 }
+
+extern void skin_enable_mouse_tracking(bool enable) {
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window) {
+        window->setMouseTracking(enable);
+    }
+}

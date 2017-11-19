@@ -267,6 +267,9 @@ bool skin_ui_process_events(SkinUI* ui) {
     // that it no longer intersects the Qt window at its current size.
     bool ignoreScroll = false;
 
+    // Enable mouse tracking so we can change the cursor when it's at a corner
+    skin_enable_mouse_tracking(true);
+
     while(skin_event_poll(&ev)) {
         switch(ev.type) {
         case kEventForceRedraw:
