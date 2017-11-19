@@ -114,6 +114,8 @@ typedef struct {
 // On failure, i.e. if there are no events, return false.
 extern bool skin_event_poll(SkinEvent* event);
 
+extern void skin_set_mouse_tracking(bool enable);
+
 #ifdef __cplusplus
 }
 #endif

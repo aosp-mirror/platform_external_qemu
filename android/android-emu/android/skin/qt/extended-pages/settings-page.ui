@@ -235,7 +235,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>334</y>
+       <y>258</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -313,7 +313,7 @@
      <property name="geometry">
       <rect>
        <x>324</x>
-       <y>314</y>
+       <y>238</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -327,7 +327,7 @@
       <string notr="true">border: 0px;</string>
      </property>
      <property name="title">
-      <string>Show frame around device</string>
+      <string>Show window frame around device</string>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Title</string>

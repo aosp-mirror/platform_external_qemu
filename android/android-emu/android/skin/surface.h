@@ -31,6 +31,7 @@ extern void          skin_surface_unrefp( SkinSurface*  *psurface );
 
 extern int skin_surface_width(SkinSurface* s);
 extern int skin_surface_height(SkinSurface* s);
+extern int skin_surface_is_round(SkinSurface* s);
 
 /* Create a surface for the given dimensions or source. The "original"
  * dimensions are the dimensions of the original image, while the regular

@@ -461,9 +461,12 @@ void ToolWindow::closeExtendedWindow() {
 void ToolWindow::dockMainWindow() {
     // Align horizontally relative to the main window's frame.
     // Align vertically to its contents.
-
-    move(parentWidget()->frameGeometry().right() + toolGap,
-         parentWidget()->geometry().top());
+    // If we're frameless, adjust for a transparent border
+    // around the skin.
+    move(parentWidget()->frameGeometry().right()
+             + toolGap - mEmulatorWindow->getRightTransparency(),
+         parentWidget()->geometry().top()
+             + mEmulatorWindow->getTopTransparency());
 }
 
 void ToolWindow::raiseMainWindow() {

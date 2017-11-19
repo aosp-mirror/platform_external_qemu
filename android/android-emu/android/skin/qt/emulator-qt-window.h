@@ -162,8 +162,11 @@ signals:
     void getDevicePixelRatio(double* out_dpr, QSemaphore* semaphore = NULL);
     void getScreenDimensions(QRect* out_rect, QSemaphore* semaphore = NULL);
     void getFramePos(int* x, int* y, QSemaphore* semaphore = NULL);
+    void windowHasFrame(bool* outValue, QSemaphore* semaphore = NULL);
     void getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
+    void getWindowSize(int* w, int* h, QSemaphore* semaphore = NULL);
     void isWindowFullyVisible(bool* out_value, QSemaphore* semaphore = NULL);
+    void isWindowOffScreen(bool* out_value, QSemaphore* semaphore = NULL);
     void releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
     void requestClose(QSemaphore* semaphore = NULL);
     void requestUpdate(QRect rect, QSemaphore* semaphore = NULL);
@@ -172,6 +175,12 @@ signals:
                        int size,
                        QSemaphore* semaphore = NULL);
     void setWindowPos(int x, int y, QSemaphore* semaphore = NULL);
+    void setWindowSize(int w, int h, QSemaphore* semaphore = NULL);
+    void paintWindowOverlayForResize(int mouseX, int mouseY, QSemaphore* semaphore = NULL);
+    void setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore = NULL);
+    void clearWindowOverlay(QSemaphore* semaphore = NULL);
+    void setWindowCursorResize(int whichCorner, QSemaphore* semaphore = NULL);
+    void setWindowCursorNormal(QSemaphore* semaphore = NULL);
     void setTitle(QString title, QSemaphore* semaphore = NULL);
     void showWindow(SkinSurface* surface,
                     QRect rect,
@@ -226,6 +235,10 @@ public:
     void zoomOut(const QPoint& focus, const QPoint& viewportFocus);
     void zoomReset();
     void zoomTo(const QPoint& focus, const QSize& rectSize);
+    int  getTopTransparency()    { return mSkinGapTop; }
+    int  getRightTransparency()  { return mSkinGapRight; }
+    int  getBottomTransparency() { return mSkinGapBottom; }
+    int  getLeftTransparency()   { return mSkinGapLeft; }
 
 public slots:
     void rotateSkin(SkinRotation rot);
@@ -248,9 +261,13 @@ private slots:
     void slot_getScreenDimensions(QRect* out_rect,
                                   QSemaphore* semaphore = NULL);
     void slot_getFramePos(int* x, int* y, QSemaphore* semaphore = NULL);
+    void slot_windowHasFrame(bool* outValue, QSemaphore* semaphore = NULL);
     void slot_getWindowPos(int* x, int* y, QSemaphore* semaphore = NULL);
+    void slot_getWindowSize(int* w, int* h, QSemaphore* semaphore = NULL);
     void slot_isWindowFullyVisible(bool* out_value,
                                    QSemaphore* semaphore = NULL);
+    void slot_isWindowOffScreen(bool* out_value,
+                                QSemaphore* semaphore = NULL);
     void slot_releaseBitmap(SkinSurface* s, QSemaphore* sempahore = NULL);
     void slot_requestClose(QSemaphore* semaphore = NULL);
     void slot_requestUpdate(QRect rect, QSemaphore* semaphore = NULL);
@@ -260,6 +277,12 @@ private slots:
                             int size,
                             QSemaphore* semaphore = NULL);
     void slot_setWindowPos(int x, int y, QSemaphore* semaphore = NULL);
+    void slot_setWindowSize(int w, int h, QSemaphore* semaphore = NULL);
+    void slot_paintWindowOverlayForResize(int mouseX, int mouseY, QSemaphore* semaphore = NULL);
+    void slot_clearWindowOverlay(QSemaphore* semaphore = NULL);
+    void slot_setWindowOverlayForResize(int whichCorner, QSemaphore* semaphore = NULL);
+    void slot_setWindowCursorResize(int whichCorner, QSemaphore* semaphore = NULL);
+    void slot_setWindowCursorNormal(QSemaphore* semaphore = NULL);
     void slot_setWindowTitle(QString title,
                              QSemaphore* semaphore = NULL);
     void slot_showWindow(SkinSurface* surface,
@@ -322,6 +345,7 @@ private:
     void forwardGenericEventToEmulator(int type, int code, int value);
     void handleKeyEvent(SkinEventType type, QKeyEvent* event);
     void maskWindowFrame();
+    bool hasFrame() const;
 
     void screenshotDone(android::emulation::ScreenCapturer::Result result);
 
@@ -336,6 +360,8 @@ private:
                      android::emulation::FilePusher::Result result);
 
     void runAdbShellPowerDownAndQuit();
+    void setVisibleExtent(QBitmap bitMap);
+    void getSkinPixmap(); // For masking the skin when frameless
 
     android::base::Looper* mLooper;
     QTimer mStartupTimer;
@@ -347,6 +373,7 @@ private:
 
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
+    QPixmap* mRawSkinPixmap = nullptr; // For masking frameless AVDs
     bool mBackingBitmapChanged = true;
 
     QQueue<SkinEvent*> mSkinEventQueue;
@@ -374,6 +401,12 @@ private:
     bool mNextIsZoom;
     bool mForwardShortcutsToDevice;
     QPoint mPrevMousePosition;
+    // How many rows or columns of the device skin are
+    // tranparent on the four sides?
+    int mSkinGapTop;
+    int mSkinGapRight;
+    int mSkinGapBottom;
+    int mSkinGapLeft;
 
     MainLoopThread* mMainLoopThread;
 
@@ -483,6 +516,7 @@ private:
 struct SkinSurface {
     int id;
     int w, h;
+    int isRound;
     EmulatorQtWindow::Ptr window;
     SkinSurfaceBitmap* bitmap;
 };

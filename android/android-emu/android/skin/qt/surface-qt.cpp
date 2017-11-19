@@ -51,6 +51,11 @@ extern int skin_surface_height(SkinSurface *s)
     return s->h;
 }
 
+extern int skin_surface_is_round(SkinSurface *s)
+{
+    return s->isRound;
+}
+
 extern void skin_surface_unrefp(SkinSurface* *psurface)
 {
     SkinSurface *surf = *psurface;
@@ -82,6 +87,7 @@ static SkinSurface* createSkinSurface(FillBitmapFunc&& fillBitmap) {
         return nullptr;
     }
     s->id = next_id++;
+    s->isRound = 0;
     return s.release();
 }
 
@@ -91,6 +97,7 @@ extern SkinSurface *skin_surface_create(int w, int h, int original_w, int origin
         s->bitmap = new SkinSurfaceBitmap(original_w, original_h);
         s->w = w;
         s->h = h;
+        s->isRound = 0;
     });
 }
 
@@ -99,6 +106,7 @@ extern SkinSurface* skin_surface_create_from_data(const void* data, int size) {
         s->bitmap = new SkinSurfaceBitmap((const unsigned char*)data, size);
         s->w = s->bitmap->size().width();
         s->h = s->bitmap->size().height();
+        s->isRound = 0;
     });
 }
 
@@ -107,6 +115,7 @@ extern SkinSurface* skin_surface_create_from_file(const char* path) {
         s->bitmap = new SkinSurfaceBitmap(path);
         s->w = s->bitmap->size().width();
         s->h = s->bitmap->size().height();
+        s->isRound = 0;
     });
 }
 
@@ -116,6 +125,7 @@ extern SkinSurface* skin_surface_create_derived(SkinSurface* source,
     return createSkinSurface([source, rotation, blend](SkinSurface* s) {
         s->w = source->w;
         s->h = source->h;
+        s->isRound = source->isRound;
         if (rotation == SKIN_ROTATION_90 || rotation == SKIN_ROTATION_270) {
             std::swap(s->w, s->h);
         }

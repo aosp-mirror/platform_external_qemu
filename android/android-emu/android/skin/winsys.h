@@ -41,6 +41,30 @@ void skin_winsys_set_window_pos(int window_x, int window_y);
 // Get main window position.
 void skin_winsys_get_window_pos(int* window_x, int* window_y);
 
+// Set main window size
+void skin_winsys_set_window_size(int window_w, int window_h);
+
+// Get main window size
+void skin_winsys_get_window_size(int* window_w, int* window_h);
+
+// Redraw the overlay during resizing.
+void skin_winsys_paint_overlay_for_resize(int mouse_x, int mouse_y);
+
+// Enable the overlay for use during resizing.
+void skin_winsys_set_window_overlay_for_resize(int which_corner);
+
+// Remove the overlay
+void skin_winsys_clear_window_overlay();
+
+// Set the cursor to a diagonal resizing shape.
+void skin_winsys_set_window_cursor_resize(int which_corner);
+
+// Set the cursor back to normal
+void skin_winsys_set_window_cursor_normal();
+
+// Does the main window have a frame around it?
+bool skin_winsys_window_has_frame();
+
 // Get the main window's frame's position.
 void skin_winsys_get_frame_pos(int* window_x, int* window_y);
 
@@ -52,6 +76,9 @@ void skin_winsys_set_window_title(const char* title);
 
 // Return true iff the main window is fully visible
 bool skin_winsys_is_window_fully_visible(void);
+
+// Return true iff the main window is off screen
+bool skin_winsys_is_window_off_screen(void);
 
 enum WinsysPreferredGlesBackend {
     WINSYS_GLESBACKEND_PREFERENCE_AUTO = 0,
