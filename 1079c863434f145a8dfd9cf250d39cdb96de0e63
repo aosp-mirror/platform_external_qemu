@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e5fcd31c_db49843c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-19T23:17:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d6077e3f_3e1eabec",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 44
+      },
+      "revId": "1079c863434f145a8dfd9cf250d39cdb96de0e63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c1747ce_ed444be8",
         "filename": "android/android-emu/android/skin/event.h",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "15f17393_1265ab24",
+        "filename": "android/android-emu/android/skin/event.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-19T23:17:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c1747ce_ed444be8",
+      "range": {
+        "startLine": 117,
+        "startChar": 12,
+        "endLine": 117,
+        "endChar": 35
+      },
+      "revId": "1079c863434f145a8dfd9cf250d39cdb96de0e63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "46bbeb20_69e9a170",
         "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
         "patchSetId": 1
@@ -59,6 +107,30 @@
       "writtenOn": "2017-10-26T04:44:35Z",
       "side": 1,
       "message": "this block may use some refactoring into smaller functions",
+      "range": {
+        "startLine": 259,
+        "startChar": 5,
+        "endLine": 320,
+        "endChar": 49
+      },
+      "revId": "1079c863434f145a8dfd9cf250d39cdb96de0e63",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e73fc98f_62c17ced",
+        "filename": "android/android-emu/android/skin/qt/emulator-overlay.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 320,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-19T23:17:44Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46bbeb20_69e9a170",
       "range": {
         "startLine": 259,
         "startChar": 5,
