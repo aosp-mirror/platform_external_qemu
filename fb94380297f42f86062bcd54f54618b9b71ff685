@@ -22,6 +22,30 @@
       "revId": "fb94380297f42f86062bcd54f54618b9b71ff685",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "217047cc_92272cb9",
+        "filename": "android/android-emu/android/virtualscene/VirtualScene.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-19T02:00:55Z",
+      "side": 1,
+      "message": "Oh yes, I had switched this to std::unique_ptr but then switched it back, whoops.",
+      "parentUuid": "c508b706_0e17c41c",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 34,
+        "endChar": 42
+      },
+      "revId": "fb94380297f42f86062bcd54f54618b9b71ff685",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
