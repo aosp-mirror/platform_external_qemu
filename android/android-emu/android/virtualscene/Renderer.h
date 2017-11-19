@@ -25,7 +25,10 @@
 #include "android/base/synchronization/Lock.h"
 #include "android/utils/compiler.h"
 #include "android/virtualscene/SceneCamera.h"
+#include "android/virtualscene/SceneObject.h"
 #include "android/virtualscene/Texture.h"
+
+#include <vector>
 
 namespace android {
 namespace virtualscene {
@@ -43,6 +46,9 @@ public:
     // Returns a Renderer instance if the renderer was successfully created or
     // null if there was an error.
     static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2);
+
+    const SceneCamera& getCamera() const;
+    const GLESv2Dispatch* getGLESv2Dispatch();
 
     // Compile a shader from source.
     // |type| - GL shader type, such as GL_VERTEX_SHADER or GL_FRAGMENT_SHADER.
@@ -64,7 +70,6 @@ public:
     GLuint linkShaders(GLuint vertexId, GLuint fragmentId);
 
     GLint getAttribLocation(GLuint program, const char* name);
-
     GLint getUniformLocation(GLuint program, const char* name);
 
     void render();
@@ -77,20 +82,19 @@ private:
     // Initial helper to initialize the Renderer.
     bool initialize();
 
+    // Helper to create a SceneObject from an obj file and texture.
+    // |objFile| - Filename of the obj file to load.
+    // |textureFile| - Filename of the texture to load.
+    //
+    // Returns the SceneObject is loading was successful, or null otherwise.
+    std::unique_ptr<SceneObject> loadSceneObject(const char* objFile,
+                                                 const char* textureFile);
+
     const GLESv2Dispatch* const mGles2;
 
     SceneCamera mCamera;
 
-    std::vector<std::unique_ptr<Texture>> mCubeTextures;
-
-    GLuint mProgram = 0;
-    GLuint mVertexBuffer = 0;
-    GLuint mIndexBuffer = 0;
-
-    GLint mPositionLocation = -1;
-    GLint mUvLocation = -1;
-    GLint mTexSamplerLocation = -1;
-    GLint mMvpLocation = -1;
+    std::vector<std::unique_ptr<SceneObject>> mSceneObjects;
 };
 
 }  // namespace virtualscene
