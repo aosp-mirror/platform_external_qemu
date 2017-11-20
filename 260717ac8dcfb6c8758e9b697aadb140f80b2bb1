@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfaf355b_e0453da9",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 764,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-20T19:33:51Z",
+      "side": 1,
+      "message": "curious why does guest need to get repeated events here. Does it miss some?",
+      "revId": "260717ac8dcfb6c8758e9b697aadb140f80b2bb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e74e1327_f84e0b35",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 765,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-20T19:33:51Z",
+      "side": 1,
+      "message": "I believe Frank has changed the timers to stop calling the callback when emulator is exiting. Please double check and maybe change this code to use QTimer instead.",
+      "range": {
+        "startLine": 765,
+        "startChar": 52,
+        "endLine": 765,
+        "endChar": 63
+      },
+      "revId": "260717ac8dcfb6c8758e9b697aadb140f80b2bb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "88faba34_7094a7af",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 767,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-20T19:33:51Z",
+      "side": 1,
+      "message": "this is easy to forget to reset if it\u0027s ever reused for anything else, or e.g. copy-pasted. IMO it is better to have a static variable outside, pass it as |opaque| and use as a counter here.",
+      "range": {
+        "startLine": 767,
+        "startChar": 28,
+        "endLine": 767,
+        "endChar": 34
+      },
+      "revId": "260717ac8dcfb6c8758e9b697aadb140f80b2bb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "065eacfc_e0735560",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-20T19:33:51Z",
+      "side": 1,
+      "message": "twice in one call?",
+      "range": {
+        "startLine": 768,
+        "startChar": 28,
+        "endLine": 770,
+        "endChar": 64
+      },
+      "revId": "260717ac8dcfb6c8758e9b697aadb140f80b2bb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
