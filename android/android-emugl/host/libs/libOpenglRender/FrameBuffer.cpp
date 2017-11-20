@@ -1764,6 +1764,23 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
     });
 }
 
+void FrameBuffer::getScreenshot(unsigned int* width, unsigned int* height,
+        std::vector<unsigned char>& pixels) {
+    ColorBufferMap::iterator c(m_colorbuffers.find(m_lastPostedColorBuffer));
+    if (c == m_colorbuffers.end()) {
+        *width = 0;
+        *height = 0;
+        pixels.resize(0);
+        return;
+    }
+
+    *width = m_framebufferWidth;
+    *height = m_framebufferHeight;
+    pixels.resize(3 * m_framebufferWidth * m_framebufferHeight);
+    c->second.cb->readPixels(0, 0, *width, *height, GL_RGB, GL_UNSIGNED_BYTE,
+            pixels.data());
+}
+
 void FrameBuffer::onSave(Stream* stream,
                          const android::snapshot::ITextureSaverPtr& textureSaver) {
     // Things we do not need to snapshot:
