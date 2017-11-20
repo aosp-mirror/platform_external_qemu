@@ -140,6 +140,30 @@
       "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dc445170_30ea9cd9",
+        "filename": "android/android-emu/android/virtualscene/SceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-20T17:52:44Z",
+      "side": 1,
+      "message": "FWIW, I\u0027ll send over an implementation of the keyed version, which should at least limit the # faces to the # lines in the list of faces.",
+      "parentUuid": "05ea24e2_6a958fa6",
+      "range": {
+        "startLine": 146,
+        "startChar": 3,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
