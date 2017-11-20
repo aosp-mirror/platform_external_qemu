@@ -116,6 +116,30 @@
       "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "05ea24e2_6a958fa6",
+        "filename": "android/android-emu/android/virtualscene/SceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-20T17:46:08Z",
+      "side": 1,
+      "message": "oh right, I didn\u0027t catch that indices has vert, normal, and uv index.  Probably not worth complicating things to optimize that at this point.",
+      "parentUuid": "07afa9e1_5dc90d69",
+      "range": {
+        "startLine": 146,
+        "startChar": 3,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
