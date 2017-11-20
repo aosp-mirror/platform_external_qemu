@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c9cc336a_d00261a7",
+        "filename": "android/android-emu/android/virtualscene/Renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-20T17:09:21Z",
+      "side": 1,
+      "message": "Are we ever going to load two instances of the same obj with different transformations? SceneObject abstraction currently packs too much data into one for that kind of thing (each associated loading an OBJ file, its transforms, shader program, etc etc)",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 60
+      },
+      "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
