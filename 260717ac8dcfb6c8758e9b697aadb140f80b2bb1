@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "d8cc0782_f8495a41",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 765,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-20T19:36:30Z",
+      "side": 1,
+      "message": "I deactivate them after main loop exits and we are in qemu_android_emulation_teardown, and this is before that, so I think we\u0027re still good.",
+      "parentUuid": "e74e1327_f84e0b35",
+      "range": {
+        "startLine": 765,
+        "startChar": 52,
+        "endLine": 765,
+        "endChar": 63
+      },
+      "revId": "260717ac8dcfb6c8758e9b697aadb140f80b2bb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "88faba34_7094a7af",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 3
