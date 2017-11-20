@@ -503,7 +503,7 @@ private:
         mCreateContextAttribs =
             (CreateContextAttribs)lib->findSymbol("glXCreateContextAttribsARB");
 
-        if (!mCreateContextAttribs) return;
+        if (!mCreateContextAttribs || mFBConfigs.size() == 0) return;
 
         // Ascending index order of context attribs :
         // decreasing GL major/minor version
