@@ -46,6 +46,30 @@
       "revId": "9dfc8b90183df282c5ac9210fc91b9cc3ac813a2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52e84f30_12aeb0b7",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 782,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-20T16:49:51Z",
+      "side": 1,
+      "message": "Ok, then in that case let\u0027s make this more maintainable by putting it out into a separate function and adding a description of a) how it works and the intended animation that shows up in Chrome OS and b) why we want to do this on the host rather than guest.",
+      "parentUuid": "dfc5523c_4b6a013f",
+      "range": {
+        "startLine": 780,
+        "startChar": 0,
+        "endLine": 782,
+        "endChar": 65
+      },
+      "revId": "9dfc8b90183df282c5ac9210fc91b9cc3ac813a2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
