@@ -18,7 +18,7 @@
 
 #include "android/base/memory/LazyInstance.h"
 #include "android/camera/camera-format-converters.h"
-#include "android/virtualscene/VirtualSceneRenderer.h"
+#include "android/virtualscene/VirtualScene.h"
 #include "emugl/common/OpenGLDispatchLoader.h"
 
 #include <vector>
@@ -154,10 +154,10 @@ int VirtualSceneCameraDevice::startCapturing(uint32_t pixelFormat,
     if (initializeEgl()) {
         auto context = makeEglCurrent();
         if (context.isValid()) {
-            if (VirtualSceneRenderer::initialize(mGles2)) {
+            if (VirtualScene::initialize(mGles2)) {
                 succeeded = true;
             } else {
-                E("%s: VirtualSceneRenderer initialize failed", __FUNCTION__);
+                E("%s: VirtualScene initialize failed", __FUNCTION__);
             }
         }
     }
@@ -180,7 +180,7 @@ void VirtualSceneCameraDevice::stopCapturing() {
         // loop when eglMakeCurrent fails.
         auto context = makeEglCurrent();
         if (context.isValid()) {
-            VirtualSceneRenderer::uninitialize();
+            VirtualScene::uninitialize();
         }
     }
 
@@ -211,7 +211,7 @@ int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
 
     mGles2->glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
 
-    VirtualSceneRenderer::render();
+    VirtualScene::render();
     mEglDispatch->eglSwapBuffers(mEglDisplay, mEglSurface);
     mGles2->glReadPixels(0, 0, mFramebufferWidth, mFramebufferHeight, GL_RGBA,
                          GL_UNSIGNED_BYTE, mFramebufferData.data());

@@ -17,7 +17,7 @@
 #pragma once
 
 /*
- * Defines the Virtual Scene Renderer, used by the Virtual Scene Camera
+ * Defines the Virtual Scene, used by the Virtual Scene Camera
  */
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
@@ -28,9 +28,10 @@
 namespace android {
 namespace virtualscene {
 
-class VirtualSceneRendererImpl;
+// Forward declaration.
+class Renderer;
 
-class VirtualSceneRenderer {
+class VirtualScene {
 public:
     // Initialize virtual scene rendering. Callers must have an active EGL
     // context.
@@ -53,7 +54,7 @@ public:
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
-    static VirtualSceneRendererImpl* mImpl;
+    static Renderer* mImpl;
 };
 
 }  // namespace virtualscene

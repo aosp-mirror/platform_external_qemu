@@ -17,8 +17,8 @@
 #pragma once
 
 /*
- * Defines VirtualSceneCamera, which controls the position of the virtual camera
- * in the 3D scene and produces view/projection matrices based on calibration.
+ * Defines SceneCamera, which controls the position of the virtual camera in the
+ * 3D scene and produces view/projection matrices based on calibration.
  */
 
 #include "android/base/Compiler.h"
@@ -29,12 +29,12 @@
 namespace android {
 namespace virtualscene {
 
-class VirtualSceneCamera {
-    DISALLOW_COPY_AND_ASSIGN(VirtualSceneCamera);
+class SceneCamera {
+    DISALLOW_COPY_AND_ASSIGN(SceneCamera);
 
 public:
-    VirtualSceneCamera();
-    ~VirtualSceneCamera();
+    SceneCamera();
+    ~SceneCamera();
 
     void update();
 

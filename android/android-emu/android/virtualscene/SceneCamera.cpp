@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "android/virtualscene/VirtualSceneCamera.h"
+#include "android/virtualscene/SceneCamera.h"
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"
 
@@ -58,7 +58,7 @@ static glm::mat4 poseToOpenGl(glm::quat rotation, glm::vec3 translation) {
     return mat;
 }
 
-VirtualSceneCamera::VirtualSceneCamera() {
+SceneCamera::SceneCamera() {
     mProjection = projectionMatrixForCameraIntrinsics(640.0f,    // width
                                                       480.0f,    // height
                                                       478.818f,  // fx
@@ -80,9 +80,9 @@ VirtualSceneCamera::VirtualSceneCamera() {
     mCameraFromSensors = cameraFromOpenGl * openGlFromSensors;
 }
 
-VirtualSceneCamera::~VirtualSceneCamera() = default;
+SceneCamera::~SceneCamera() = default;
 
-void VirtualSceneCamera::update() {
+void SceneCamera::update() {
     glm::vec3 position;
     android_physical_model_get(PHYSICAL_PARAMETER_POSITION, &position.x,
                                &position.y, &position.z,
@@ -103,7 +103,7 @@ void VirtualSceneCamera::update() {
     mViewFromWorld = mCameraFromSensors * inverseSensorsPose;
 }
 
-glm::mat4 VirtualSceneCamera::getViewProjection() const {
+glm::mat4 SceneCamera::getViewProjection() const {
     return mProjection * mViewFromWorld;
 }
 

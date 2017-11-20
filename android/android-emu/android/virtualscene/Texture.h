@@ -17,8 +17,7 @@
 #pragma once
 
 /*
- * Defines VirtualSceneTexture, which loads images from file and creates OpenGL
- * textures.
+ * Defines Texture, which loads images from file and create OpenGL textures.
  */
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
@@ -31,33 +30,32 @@
 namespace android {
 namespace virtualscene {
 
-class VirtualSceneTexture {
-    DISALLOW_COPY_AND_ASSIGN(VirtualSceneTexture);
+class Texture {
+    DISALLOW_COPY_AND_ASSIGN(Texture);
 
 public:
-    ~VirtualSceneTexture();
+    ~Texture();
 
     // Load a PNG image from a file and create an OpenGL texture from it.
     //
     // The lifetime of the OpenGL texture is determined by the lifetime of the
-    // VirtualSceneTexture class; the texture id will be released when the
-    // VirtualSceneTexture is destroyed.
+    // Texture class; the texture id will be released when the Texture is
+    // destroyed.
     //
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
     // |filename| - Filename to load.
     //
-    // Returns a VirtualSceneTexture instance if the texture could be loaded or
-    // null if there was an error.
-    static std::unique_ptr<VirtualSceneTexture> load(
-            const GLESv2Dispatch* gles2,
-            const char* filename);
+    // Returns a Texture instance if the texture could be loaded or null if
+    // there was an error.
+    static std::unique_ptr<Texture> load(const GLESv2Dispatch* gles2,
+                                         const char* filename);
 
     // Returns the texture id of the loaded texture.
     GLuint getTextureId() const;
 
 private:
-    // Private constructor, use VirtualSceneTexture::load to create an instance.
-    VirtualSceneTexture(const GLESv2Dispatch* gles2, GLuint textureId);
+    // Private constructor, use Texture::load to create an instance.
+    Texture(const GLESv2Dispatch* gles2, GLuint textureId);
 
     static bool loadPNG(const char* filename,
                         std::vector<uint8_t>& buffer,
