@@ -124,6 +124,38 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
     return (void*) data;
 }
 
+void savepng(const char* fn, unsigned int width, unsigned int height,
+        void* pixels) {
+    FILE *fp = fopen(fn, "wb");
+    if (!fp) {
+        LOG("Unable to write to file %s.\n", fn);
+        return;
+    }
+    png_structp p = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL,
+            NULL);
+    png_infop pi = png_create_info_struct(p);
+
+    setjmp(png_jmpbuf(p));
+    png_init_io(p, fp);
+
+    setjmp(png_jmpbuf(p));
+    png_set_IHDR(p, pi, width, height, 8, PNG_COLOR_TYPE_RGB,
+            PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+            PNG_FILTER_TYPE_DEFAULT);
+    png_write_info(p, pi);
+
+    setjmp(png_jmpbuf(p));
+    unsigned int i = 0;
+    for (i = 0; i < height; i++) {
+        png_write_row(p, pixels + i * 3 * width);
+    }
+
+    setjmp(png_jmpbuf(p));
+    png_write_end(p, NULL);
+
+    fclose(fp);
+}
+
 
 typedef struct
 {
