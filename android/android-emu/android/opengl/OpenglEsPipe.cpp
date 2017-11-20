@@ -11,7 +11,9 @@
 #include "android/opengl/OpenglEsPipe.h"
 
 #include "android/base/async/Looper.h"
+#include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/loadpng.h"
 #include "android/opengles.h"
 #include "android/opengles-pipe.h"
 #include "android/opengl/GLProcessPipe.h"
@@ -115,6 +117,17 @@ public:
                 stream->putBe32(OPENGL_SAVE_VERSION);
                 renderer->save(stream,
                                snapshot::Snapshotter::get().saver().textureSaver());
+                // save a screenshot
+                unsigned int width;
+                unsigned int height;
+                std::vector<unsigned char> pixels;
+                renderer->getScreenshot(&width, &height, pixels);
+                if (width > 0 && height > 0) {
+                    std::string fileName = android::base::PathUtils::join(
+                            snapshot::Snapshotter::get().saver().snapshot().
+                            dataDir(), "screenshot.png");
+                    savepng(fileName.c_str(), width, height, pixels.data());
+                }
             } else {
                 stream->putByte(0);
             }

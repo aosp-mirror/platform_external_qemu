@@ -74,6 +74,8 @@ public:
     bool load(android::base::Stream* stream,
               const android::snapshot::ITextureLoaderPtr& textureLoader) final;
     void fillGLESUsages(android_studio::EmulatorGLESUsages*) final;
+    void getScreenshot(unsigned int* width, unsigned int* height,
+            std::vector<unsigned char>& pixels) final;
 private:
     DISALLOW_COPY_ASSIGN_AND_MOVE(RendererImpl);
 

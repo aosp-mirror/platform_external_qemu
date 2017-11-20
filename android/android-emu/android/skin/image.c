@@ -9,7 +9,10 @@
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
 */
+
 #include "android/skin/image.h"
+
+#include "android/loadpng.h"
 #include "android/skin/resource.h"
 
 #include <assert.h>
@@ -139,6 +142,10 @@ skin_image_alloc( SkinImageDesc*  desc, unsigned  hash )
     }
     return image;
 }
+
+extern void *loadWebP(const char *fileName, unsigned *pWidth, unsigned *pHeight);
+extern void *readWebP(const unsigned char*  base, size_t  size,
+                      unsigned *pWidth, unsigned *pHeight);
 
 static int
 skin_image_load( SkinImage*  image )
