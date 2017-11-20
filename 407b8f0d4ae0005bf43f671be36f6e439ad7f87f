@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d6f3b0c2_277d769f",
+        "filename": "android/android-emu/android/virtualscene/Texture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-20T15:23:29Z",
+      "side": 1,
+      "message": "system headers are last, separated by empty line from android headers",
+      "revId": "407b8f0d4ae0005bf43f671be36f6e439ad7f87f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
