@@ -975,7 +975,7 @@ public:
         if (!envGet("SSH_CONNECTION").empty() && !envGet("SSH_CLIENT").empty()) {
             // This can be a remote X11 session, let's check if DISPLAY is set
             // to something uncommon.
-            if (envGet("DISPLAY").size() > 3) {
+            if (envGet("DISPLAY").size() > 2) {
                 if (sessionType) {
                     *sessionType = "X11 Forwarding";
                 }
