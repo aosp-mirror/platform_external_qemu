@@ -109,6 +109,29 @@
       "revId": "260717ac8dcfb6c8758e9b697aadb140f80b2bb1",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a1dd7653_ff41faac",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 770,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-20T19:39:11Z",
+      "side": 1,
+      "message": "honestly I\u0027d prefer this to be a part of the android/emulation/control/vm_operations.h agent",
+      "range": {
+        "startLine": 770,
+        "startChar": 32,
+        "endLine": 770,
+        "endChar": 61
+      },
+      "revId": "260717ac8dcfb6c8758e9b697aadb140f80b2bb1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
