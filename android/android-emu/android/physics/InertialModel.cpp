@@ -58,7 +58,8 @@ InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
     assert(time_ns >= mModelTimeNs);
     mModelTimeNs = time_ns;
 
-    return (mModelTimeNs >= mPositionChangeEndTime &&
+    return (mZeroVelocityAfterEndTime &&
+            mModelTimeNs >= mPositionChangeEndTime &&
             mModelTimeNs >= mRotationChangeEndTime) ?
             INERTIAL_STATE_STABLE : INERTIAL_STATE_CHANGING;
 }
@@ -165,6 +166,7 @@ void InertialModel::setTargetPosition(
     }
     mPositionChangeStartTime = mModelTimeNs;
     mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
+    mZeroVelocityAfterEndTime = true;
 }
 
 void InertialModel::setTargetVelocity(
@@ -253,6 +255,7 @@ void InertialModel::setTargetVelocity(
     }
     mPositionChangeStartTime = mModelTimeNs;
     mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
+    mZeroVelocityAfterEndTime = false;
 }
 
 void InertialModel::setTargetRotation(

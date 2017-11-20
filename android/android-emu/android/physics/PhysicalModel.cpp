@@ -27,6 +27,7 @@
 #include "android/physics/AmbientEnvironment.h"
 #include "android/physics/InertialModel.h"
 #include "android/utils/debug.h"
+#include "android/utils/looper.h"
 #include "android/utils/stream.h"
 
 #include <mutex>
@@ -52,7 +53,7 @@ namespace physics {
  */
 class PhysicalModelImpl {
 public:
-    PhysicalModelImpl();
+    PhysicalModelImpl(bool shouldTick);
     ~PhysicalModelImpl();
 
     /*
@@ -68,6 +69,8 @@ public:
      * used as the current time in calculating all sensor values, along with
      * the time when target parameter change requests are recorded as taking
      * place.  Time values must be non-decreasing.
+     *
+     * Returns whether the physical state is stable or changing at the set time.
      */
     void setCurrentTime(uint64_t time_ns);
 
@@ -130,6 +133,7 @@ PHYSICAL_PARAMETERS_LIST
      * Load the current physical state from the given stream.
      */
     int load(Stream* f);
+
 private:
     /*
      * Getters for non-overridden physical sensor values.
@@ -179,6 +183,11 @@ private:
     void physicalStateStabilized();
     void targetStateChanged();
 
+    /*
+     * Ticks the physical model.
+     */
+    static void tick(void* opaque, LoopTimer* unused);
+
     mutable std::recursive_mutex mMutex;
 
     InertialModel mInertialModel;
@@ -197,6 +206,8 @@ private:
 
     uint64_t mModelTimeNs = 0L;
 
+    LoopTimer* mLoopTimer = nullptr;
+
     PhysicalModel mPhysicalModelInterface;
 };
 
@@ -213,8 +224,16 @@ static vec3 fromGlm(glm::vec3 input) {
     return value;
 }
 
-PhysicalModelImpl::PhysicalModelImpl() {
+PhysicalModelImpl::PhysicalModelImpl(bool shouldTick) {
     mPhysicalModelInterface.opaque = reinterpret_cast<void*>(this);
+
+    if (shouldTick) {
+        mLoopTimer = loopTimer_newWithClock(
+                looper_getForThread(),
+                PhysicalModelImpl::tick,
+                reinterpret_cast<void*>(&mPhysicalModelInterface),
+                LOOPER_CLOCK_VIRTUAL);
+    }
 }
 
 PhysicalModelImpl::~PhysicalModelImpl() {
@@ -655,6 +674,9 @@ void PhysicalModelImpl::physicalStateChanging() {
             mAgent->onPhysicalStateChanging != nullptr) {
         mAgent->onPhysicalStateChanging(mAgent->context);
     }
+    if (mLoopTimer != nullptr) {
+        loopTimer_startRelative(mLoopTimer, 0);
+    }
     mIsPhysicalStateChanging = true;
 }
 
@@ -681,13 +703,29 @@ void PhysicalModelImpl::targetStateChanged() {
     }
 }
 
+void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(
+            reinterpret_cast<PhysicalModel*>(opaque));
+    if (impl != nullptr) {
+        const DurationNs now_ns =
+                looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+        impl->setCurrentTime(now_ns);
+
+        // if the model is still changing, schedule another timer.
+        if (impl->mIsPhysicalStateChanging) {
+            assert(impl->mLoopTimer != nullptr);
+            loopTimer_startRelative(impl->mLoopTimer, 10);
+        }
+    }
+}
+
 }  // namespace physics
 }  // namespace android
 
 using android::physics::PhysicalModelImpl;
 
-PhysicalModel* physicalModel_new() {
-    PhysicalModelImpl* impl = new PhysicalModelImpl();
+PhysicalModel* physicalModel_new(bool shouldTick) {
+    PhysicalModelImpl* impl = new PhysicalModelImpl(shouldTick);
     return impl != nullptr ? impl->getPhysicalModel() : nullptr;
 }
 
@@ -698,7 +736,8 @@ void physicalModel_free(PhysicalModel* model) {
     }
 }
 
-void physicalModel_setCurrentTime(PhysicalModel* model, uint64_t time_ns) {
+void physicalModel_setCurrentTime(
+        PhysicalModel* model, uint64_t time_ns) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->setCurrentTime(time_ns);
