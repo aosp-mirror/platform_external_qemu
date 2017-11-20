@@ -68,6 +68,30 @@
       "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7a1a897f_41e79222",
+        "filename": "android/android-emu/android/virtualscene/SceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-20T17:41:43Z",
+      "side": 1,
+      "message": "It\u0027s often necessary to generate extra vertices from the OBJ file. We cannot use the given indices from the OBJ.\n\nFor example, if you have a cube with texture coords on each face, and the UV map is discontinuous over faces (separate faces in the map), then you need to duplicate all attributes for that vertex to have different UV coords.",
+      "parentUuid": "64d719a6_06b59ad7",
+      "range": {
+        "startLine": 146,
+        "startChar": 3,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
