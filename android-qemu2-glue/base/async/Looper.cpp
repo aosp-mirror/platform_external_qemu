@@ -203,7 +203,6 @@ public:
 
         virtual void startRelative(Duration timeout_ms) {
             if (sSkipTimerOps) {
-                System::get()->sleepMs(timeout_ms);
                 return;
             }
 
@@ -218,10 +217,6 @@ public:
 
         virtual void startAbsolute(Duration deadline_ms) {
             if (sSkipTimerOps) {
-                auto now = System::get()->getHighResTimeUs();
-                if (now < deadline_ms) {
-                    System::get()->sleepMs(deadline_ms - now);
-                }
                 return;
             }
 
