@@ -77,14 +77,7 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     // Show a frame around the device?
     mUi->set_frameAlways->setChecked(
-            // TODO: Set the default to 'false' after "resize"
-            //       has been implemented for frameless AVDs
-            settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool());
-
-    // TODO: Remove these "hide" lines when the frameless implementation is complete
-    // Hide the frameless control for now
-    mUi->set_frameAlwaysTitle->hide();
-    mUi->set_frameAlways->hide();
+            settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool());
 
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)

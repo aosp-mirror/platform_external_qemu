@@ -45,6 +45,8 @@ public:
     void showAsFlash();
 
     void showForMultitouch(bool centerTouches);
+    void showForResize(int whichCorner);
+    void paintForResize(int mouseX, int mouseY);
 
     void showForZoom();
     void showForZoomUserHidden();
@@ -61,6 +63,7 @@ private slots:
 
 private:
     void hideAndFocusContainer();
+    void drawResizeBox(QPainter* painter, int alpha);
 
     void generateTouchEvents(QMouseEvent* event);
     void updateTouchPoints(QMouseEvent* event);
@@ -91,6 +94,8 @@ private:
     bool mIsSwipeGesture;
     bool mReleaseOnClose;
 
+    int  mResizeCorner;
+
     // Multitouch animation values
     QVariantAnimation mTouchPointAnimation;
     double mLerpValue;
@@ -106,5 +111,6 @@ private:
         Multitouch,
         Zoom,
         UserHiddenZoom,
+        Resize,
     } mMode;
 };

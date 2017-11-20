@@ -13,6 +13,7 @@
 #include "android/skin/qt/extended-window.h"
 #include "android/skin/qt/extended-window-styles.h"
 
+#include "android/android.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/main-common.h"
@@ -108,6 +109,8 @@ ExtendedWindow::ExtendedWindow(
     };
 
     setObjectName("ExtendedControls");
+    setWindowTitle(QString("Extended controls - ") + android_hw->avd_name
+                   + ":" + QString::number(android_serial_number_port));
 
     mSidebarButtons.addButton(mExtendedUi->locationButton);
     mSidebarButtons.addButton(mExtendedUi->cellularButton);

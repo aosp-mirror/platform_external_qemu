@@ -215,6 +215,22 @@ extern void skin_winsys_get_window_pos(int *x, int *y)
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
 }
 
+extern void skin_winsys_get_window_size(int *w, int *h)
+{
+    D("skin_winsys_get_frame_size");
+
+    QSemaphore semaphore;
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->getWindowSize(w, h, &semaphore);
+    semaphore.acquire();
+
+    D("%s: size: %d x %d", __FUNCTION__, *w, *h);
+}
+
 extern void skin_winsys_get_frame_pos(int *x, int *y)
 {
     QSemaphore semaphore;
@@ -227,6 +243,22 @@ extern void skin_winsys_get_frame_pos(int *x, int *y)
     semaphore.acquire();
 
     D("%s: x=%d y=%d", __FUNCTION__, *x, *y);
+}
+
+extern bool skin_winsys_window_has_frame()
+{
+    QSemaphore semaphore;
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return false;
+    }
+    bool hasFrame;
+    window->windowHasFrame(&hasFrame, &semaphore);
+    semaphore.acquire();
+
+    D("%s: outValue=%d", __FUNCTION__, hasFrame);
+    return hasFrame;
 }
 
 extern void skin_winsys_set_device_geometry(const SkinRect* rect) {
@@ -262,6 +294,26 @@ extern bool skin_winsys_is_window_fully_visible()
     } else {
         QSemaphore semaphore;
         window->isWindowFullyVisible(&value, &semaphore);
+        semaphore.acquire();
+    }
+    D("%s: result = %s", __FUNCTION__, value ? "true" : "false");
+    return value;
+}
+
+extern bool skin_winsys_is_window_off_screen()
+{
+    D("skin_winsys_is_window_off_screen");
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return true;
+    }
+    bool value;
+    if (onMainQtThread()) {
+        window->isWindowOffScreen(&value);
+    } else {
+        QSemaphore semaphore;
+        window->isWindowOffScreen(&value, &semaphore);
         semaphore.acquire();
     }
     D("%s: result = %s", __FUNCTION__, value ? "true" : "false");
@@ -346,6 +398,66 @@ extern void skin_winsys_set_window_pos(int x, int y)
         return;
     }
     window->setWindowPos(x, y, nullptr);
+}
+
+extern void skin_winsys_set_window_size(int w, int h)
+{
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->setWindowSize(w, h, nullptr);
+}
+
+extern void skin_winsys_set_window_cursor_resize(int which_corner)
+{
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->setWindowCursorResize(which_corner, nullptr);
+}
+
+extern void skin_winsys_paint_overlay_for_resize(int mouse_x, int mouse_y)
+{
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->paintWindowOverlayForResize(mouse_x, mouse_y, nullptr);
+}
+
+extern void skin_winsys_set_window_overlay_for_resize(int which_corner)
+{
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->setWindowOverlayForResize(which_corner, nullptr);
+}
+
+extern void skin_winsys_clear_window_overlay()
+{
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->clearWindowOverlay(nullptr);
+}
+
+extern void skin_winsys_set_window_cursor_normal()
+{
+    EmulatorQtWindow *window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->setWindowCursorNormal(nullptr);
 }
 
 extern void skin_winsys_set_window_title(const char *title)
