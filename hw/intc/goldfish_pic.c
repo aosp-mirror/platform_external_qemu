@@ -57,12 +57,23 @@ struct goldfish_int_state {
 static void goldfish_int_update(struct goldfish_int_state *s)
 {
     uint32_t flags;
+    bool locked = false;
+
+    /* We may already have the BQL if coming from the reset path */
+    if (!qemu_mutex_iothread_locked()) {
+        locked = true;
+        qemu_mutex_lock_iothread();
+    }
 
     flags = (s->level & s->irq_enabled);
     qemu_set_irq(s->parent_irq, flags != 0);
 
     flags = (s->level & s->fiq_enabled);
     qemu_set_irq(s->parent_fiq, flags != 0);
+
+    if (locked) {
+        qemu_mutex_unlock_iothread();
+    }
 }
 
 static int  goldfish_int_load(void* opaque, int  version_id)
