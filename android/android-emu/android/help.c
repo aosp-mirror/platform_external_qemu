@@ -43,6 +43,14 @@ help_studio_params(stralloc_t*  out)
 }
 
 static void
+help_bluetooth(stralloc_t*  out)
+{
+    PRINTF(
+    "  Sets up bluetooth forwarding to the usb device indicated by vendorid:productid.\n\n"
+    );
+}
+
+static void
 help_virtual_device( stralloc_t*  out )
 {
     PRINTF(
