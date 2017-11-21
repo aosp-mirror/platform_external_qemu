@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "7c428436_fb29307d",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 374,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-21T22:09:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96ba1f10_c080fbeb",
+      "range": {
+        "startLine": 374,
+        "startChar": 4,
+        "endLine": 374,
+        "endChar": 15
+      },
+      "revId": "0bc0a5061b71727d004561f08cdb25b90062983e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d602f1ef_8470a169",
         "filename": "android/android-emu/android/snapshot/Snapshot.h",
         "patchSetId": 1
@@ -108,6 +132,30 @@
       "writtenOn": "2017-11-13T16:47:32Z",
       "side": 1,
       "message": "what about calling it differently, not exposing the internals? e.g. getGeneralInfo()",
+      "range": {
+        "startLine": 44,
+        "startChar": 39,
+        "endLine": 44,
+        "endChar": 50
+      },
+      "revId": "0bc0a5061b71727d004561f08cdb25b90062983e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "31938e95_8368ac0b",
+        "filename": "android/android-emu/android/snapshot/Snapshot.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-21T22:09:01Z",
+      "side": 1,
+      "message": "Tell me more. I\u0027m not sure we want to abstract Protobuf.",
+      "parentUuid": "d602f1ef_8470a169",
       "range": {
         "startLine": 44,
         "startChar": 39,
@@ -143,6 +191,30 @@
     },
     {
       "key": {
+        "uuid": "7d1a754e_47a01cda",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-21T22:09:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7dad78f1_f1822c7f",
+      "range": {
+        "startLine": 289,
+        "startChar": 0,
+        "endLine": 289,
+        "endChar": 31
+      },
+      "revId": "0bc0a5061b71727d004561f08cdb25b90062983e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a05edbd6_431112ed",
         "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
         "patchSetId": 1
@@ -166,6 +238,30 @@
     },
     {
       "key": {
+        "uuid": "211375b0_2fea87a5",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 295,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-21T22:09:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a05edbd6_431112ed",
+      "range": {
+        "startLine": 295,
+        "startChar": 3,
+        "endLine": 295,
+        "endChar": 19
+      },
+      "revId": "0bc0a5061b71727d004561f08cdb25b90062983e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11a956c1_345ab4e0",
         "filename": "android/android-emu/android/snapshot/Snapshotter.h",
         "patchSetId": 1
@@ -177,6 +273,30 @@
       "writtenOn": "2017-11-13T16:47:32Z",
       "side": 1,
       "message": "nit: ref?",
+      "range": {
+        "startLine": 51,
+        "startChar": 21,
+        "endLine": 51,
+        "endChar": 22
+      },
+      "revId": "0bc0a5061b71727d004561f08cdb25b90062983e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dda9a98a_24814447",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-21T22:09:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "11a956c1_345ab4e0",
       "range": {
         "startLine": 51,
         "startChar": 21,
