@@ -96,7 +96,6 @@ using android::base::StringView;
 using android::crashreport::CrashReporter;
 using android::emulation::ApkInstaller;
 using android::emulation::FilePusher;
-using android::emulation::ScreenCapturer;
 using std::string;
 using std::vector;
 
@@ -338,7 +337,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                       adbPushProgress(progress, done);
                   });
       }),
-      mScreenCapturer([this] { return std::make_tuple(mAdbInterface->get()); }),
       mInstallDialog([this] {
           return std::make_tuple(this, [this](QProgressDialog* dialog) {
               dialog->setWindowTitle(tr("APK Installer"));
@@ -1600,49 +1598,13 @@ void EmulatorQtWindow::screenshot() {
         return;
     }
 
-    mScreenCapturer->capture(
-            savePath.toStdString(),
-            [this](ScreenCapturer::Result result, StringView filePath) {
-                EmulatorQtWindow::screenshotDone(result);
-            });
-
-    // Display the flash animation immediately as feedback - if it fails, an
-    // error dialog will indicate as such.
-    mOverlay.showAsFlash();
-}
-
-void EmulatorQtWindow::screenshotDone(ScreenCapturer::Result result) {
-    QString msg;
-    switch (result) {
-        case ScreenCapturer::Result::kSuccess:
-            return;
-
-        case ScreenCapturer::Result::kOperationInProgress:
-            msg =
-                    tr("Another screen capture is already in progress.<br/>"
-                       "Please try again later.");
-            break;
-        case ScreenCapturer::Result::kCaptureFailed:
-            msg =
-                    tr("The screenshot could not be captured.<br/>"
-                       "Check settings to verify that your chosen adb path is "
-                       "valid.");
-            break;
-        case ScreenCapturer::Result::kSaveLocationInvalid:
-            msg =
-                    tr("The screenshot save location is invalid.<br/>"
-                       "Check the settings page and ensure the directory "
-                       "exists and is writeable.");
-            break;
-        case ScreenCapturer::Result::kPullFailed:
-            msg = tr("The screenshot could not be loaded from the device.");
-            break;
-        default:
-            msg =
-                    tr("There was an unknown error while capturing the "
-                       "screenshot.");
+    if (!android::emulation::captureScreenshot(savePath.toStdString())) {
+        showErrorDialog(tr("Screenshot failed"), tr("Screenshot"));
+    } else {
+        // Display the flash animation immediately as feedback - if it fails, an
+        // error dialog will indicate as such.
+        mOverlay.showAsFlash();
     }
-    showErrorDialog(msg, tr("Screenshot"));
 }
 
 void EmulatorQtWindow::slot_installCanceled() {
@@ -2134,10 +2096,6 @@ QRect EmulatorQtWindow::deviceGeometry() const {
 
 android::emulation::AdbInterface* EmulatorQtWindow::getAdbInterface() const {
     return mAdbInterface->get();
-}
-
-ScreenCapturer* EmulatorQtWindow::getScreenCapturer() {
-    return mScreenCapturer.ptr();
 }
 
 void EmulatorQtWindow::toggleZoomMode() {

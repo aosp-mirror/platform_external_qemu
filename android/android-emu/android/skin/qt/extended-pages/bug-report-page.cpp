@@ -50,7 +50,6 @@ using android::base::Version;
 using android::base::trim;
 using android::emulation::AdbBugReportServices;
 using android::emulation::AdbInterface;
-using android::emulation::ScreenCapturer;
 
 static const char FILE_BUG_URL[] =
         "https://issuetracker.google.com/issues/new"
@@ -167,7 +166,6 @@ BugreportPage::~BugreportPage() {
 void BugreportPage::initialize(EmulatorQtWindow* eW) {
     mEmulatorWindow = eW;
     mBugReportServices.reset(new AdbBugReportServices(eW->getAdbInterface()));
-    mScreenCapturer = eW->getScreenCapturer();
 }
 
 void BugreportPage::updateTheme() {
@@ -456,49 +454,7 @@ void BugreportPage::loadAvdDetails() {
 }
 
 void BugreportPage::loadScreenshotImage() {
-    static const int MIN_SCREENSHOT_API = 14;
-    static const int DEFAULT_API_LEVEL = 1000;
-    // In case where the screencap doesn't work, bug reporting page should wait
-    // for no longer 10s.
-    static const int SCREEN_CAP_TIMEOUT_MS = 10000;
-    mSavingStates.screenshotSucceed = false;
-    int apiLevel = avdInfo_getApiLevel(android_avdInfo);
-    if (apiLevel == DEFAULT_API_LEVEL || apiLevel < MIN_SCREENSHOT_API) {
-        mUi->bug_screenshotImage->setText(
-                tr("Screenshot is not supported below API 14."));
-        return;
-    }
-    mUi->stackedWidget->setCurrentIndex(1);
-    mScreenCapturer->capture(
-            System::get()->getTempDir(),
-            [this](ScreenCapturer::Result result, StringView filePath) {
-                mUi->stackedWidget->setCurrentIndex(0);
-                if (System::get()->pathIsFile(
-                            mSavingStates.screenshotFilePath)) {
-                    System::get()->deleteFile(mSavingStates.screenshotFilePath);
-                    mSavingStates.screenshotFilePath.clear();
-                }
-                if (result == ScreenCapturer::Result::kSuccess &&
-                    System::get()->pathIsFile(filePath) &&
-                    System::get()->pathCanRead(filePath)) {
-                    mSavingStates.screenshotSucceed = true;
-                    mSavingStates.screenshotFilePath = filePath;
-                    QPixmap image(filePath.c_str());
-
-                    int height = mUi->bug_screenshotImage->height();
-                    int width = mUi->bug_screenshotImage->width();
-                    mUi->bug_screenshotImage->setPixmap(
-                            image.scaled(width, height, Qt::KeepAspectRatio));
-                } else if (result !=
-                           ScreenCapturer::Result::kOperationInProgress) {
-                    // TODO(wdu) Better error handling for failed screen capture
-                    // operation
-                    mUi->bug_screenshotImage->setText(
-                            tr("There was an error while capturing the "
-                               "screenshot."));
-                }
-            },
-            SCREEN_CAP_TIMEOUT_MS);
+    android::emulation::captureScreenshot(System::get()->getTempDir());
 }
 
 bool BugreportPage::eventFilter(QObject* object, QEvent* event) {

@@ -14,67 +14,19 @@
 
 #pragma once
 
-#include "android/base/async/Looper.h"
-#include "android/base/Compiler.h"
-#include "android/base/system/System.h"
-#include "android/base/threads/ParallelTask.h"
-#include "android/emulation/control/AdbInterface.h"
+#include "android/base/StringView.h"
 
-#include <functional>
-#include <string>
-#include <memory>
-#include <vector>
+namespace emugl {
+    class Renderer;
+}
 
 namespace android {
 namespace emulation {
 
-class ScreenCapturer {
-public:
-    enum class Result {
-        kSuccess,
-        kOperationInProgress,
-        kCaptureFailed,
-        kSaveLocationInvalid,
-        kPullFailed,
-        kUnknownError
-    };
-
-    using ResultCallback =
-            std::function<void(Result result,
-                               android::base::StringView filePath)>;
-
-    explicit ScreenCapturer(AdbInterface* adb) : mAdb(adb) {}
-    ~ScreenCapturer();
-
-    // Runs adb commands to capture the screen and pull the screenshot from
-    // the device.
-    // |outputDirectoryPath| should specify the path to the directory
-    // to which the screenshot will be written. |resultCallback| will
-    // be invoked upon completion.
-    void capture(android::base::StringView outputDirectoryPath,
-                 ResultCallback resultCallback,
-                 android::base::System::Duration screenCaptureTimeoutMs =
-                     kScreenCaptureTimeoutMs);
-
-private:
-    void pullScreencap(ResultCallback resultCallback,
-                       android::base::StringView outputDirectoryPath);
-    static const android::base::System::Duration kPullTimeoutMs;
-    static const char kRemoteScreenshotFilePath[];
-    // If you run screencap while using emulator over remote desktop, this can
-    // take... a while.
-    static const android::base::System::Duration kScreenCaptureTimeoutMs =
-        android::base::System::kInfinite;
-
-    AdbInterface* mAdb;
-    AdbCommandPtr mCaptureCommand;
-    AdbCommandPtr mPullCommand;
-    const ResultCallback mResultCallback;
-
-    unsigned mNonDefaultCheckTimeoutForTestMs = 0;
-
-    DISALLOW_COPY_AND_ASSIGN(ScreenCapturer);
-};
+bool captureScreenshot(android::base::StringView outputDirectoryPath);
+// The following one is for testing only
+bool captureScreenshot(emugl::Renderer* renderer,
+        android::base::StringView outputDirectoryPath);
 
 }  // namespace emulation
 }  // namespace android
