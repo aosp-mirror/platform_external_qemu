@@ -15,80 +15,42 @@
 #include "android/emulation/control/ScreenCapturer.h"
 
 #include "android/base/files/PathUtils.h"
-#include "android/base/StringFormat.h"
+#include "android/base/Log.h"
 #include "android/base/system/System.h"
-#include "android/base/threads/Async.h"
+#include "android/loadpng.h"
+#include "android/opengles.h"
 
 namespace android {
 namespace emulation {
 
-using android::base::Looper;
-using android::base::ParallelTask;
-using android::base::StringView;
-using android::base::System;
-using std::string;
-using std::vector;
-
-// static
-const System::Duration ScreenCapturer::kPullTimeoutMs = 5000;
-const char ScreenCapturer::kRemoteScreenshotFilePath[] =
-        "/data/local/tmp/screen.png";
-
-ScreenCapturer::~ScreenCapturer() {
-    if (mCaptureCommand) {
-        mCaptureCommand->cancel();
-    }
-    if (mPullCommand) {
-        mPullCommand->cancel();
-    }
+bool captureScreenshot(android::base::StringView outputDirectoryPath) {
+    const auto& renderer = android_getOpenglesRenderer();
+    return captureScreenshot(renderer.get(), outputDirectoryPath);
 }
 
-void ScreenCapturer::capture(StringView outputDirectoryPath,
-                             ResultCallback resultCallback,
-                             System::Duration screenCaptureTimeoutMs) {
-    if (mCaptureCommand || mPullCommand) {
-        resultCallback(Result::kOperationInProgress, nullptr);
-        return;
+bool captureScreenshot(emugl::Renderer* renderer,
+        android::base::StringView outputDirectoryPath) {
+    if (!renderer) {
+        LOG(WARNING) << "Renderer uninitialized, cannot take screenshots.\n";
+        return false;
     }
-    std::string out_path = outputDirectoryPath;
-    mCaptureCommand =
-        mAdb->runAdbCommand(
-            {"shell", "screencap", "-p", kRemoteScreenshotFilePath },
-            [this, resultCallback, out_path](const OptionalAdbCommandResult& result) {
-                if (!result || result->exit_code) {
-                    resultCallback(Result::kCaptureFailed, nullptr);
-                } else {
-                    pullScreencap(resultCallback, out_path);
-                }
-                mCaptureCommand.reset();
-            },
-            screenCaptureTimeoutMs, false);
-}
-
-void ScreenCapturer::pullScreencap(ResultCallback resultCallback,
-                                   StringView outputDirectoryPath) {
-    if (!System::get()->pathIsDir(outputDirectoryPath) ||
-        !System::get()->pathCanWrite(outputDirectoryPath)) {
-        resultCallback(Result::kSaveLocationInvalid, nullptr);
-    } else {
-        auto fileName =
-            android::base::StringFormat(
-                "Screenshot_%lu.png",
-                static_cast<unsigned long>(System::get()->getUnixTime()));
-        auto filePath =
-                android::base::PathUtils::join(outputDirectoryPath, fileName);
-        mPullCommand = mAdb->runAdbCommand(
-                {"pull", kRemoteScreenshotFilePath, filePath},
-                [this, resultCallback,
-                 filePath](const OptionalAdbCommandResult& result) {
-                    resultCallback((!result || result->exit_code)
-                                           ? Result::kPullFailed
-                                           : Result::kSuccess,
-                                   filePath);
-                    mPullCommand.reset();
-                },
-                kPullTimeoutMs, false);
+    const unsigned int nChannels = 4;
+    unsigned int width;
+    unsigned int height;
+    std::vector<unsigned char> pixels;
+    renderer->getScreenshot(nChannels, &width, &height, pixels);
+    if (width == 0 || height == 0) {
+        return false;
     }
+    // the file name is ~25 characters
+    char fileName[100];
+    int fileNameSize = snprintf(fileName, sizeof(fileName), "Screenshot_%lld.png",
+            (long long int)android::base::System::get()->getUnixTime());
+    assert(fileNameSize < sizeof(fileName));
+    (void)fileNameSize;
+    savepng(android::base::PathUtils::join(outputDirectoryPath, fileName)
+            .c_str(), nChannels, width, height, pixels.data());
+    return true;
 }
 
 }  // namespace emulation
