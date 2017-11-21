@@ -1,3 +1,5 @@
+#include "android/loadpng.h"
+
 #include <png.h>
 
 #include <stdio.h>
@@ -124,8 +126,12 @@ void *loadpng(const char *fn, unsigned *_width, unsigned *_height)
     return (void*) data;
 }
 
-void savepng(const char* fn, unsigned int width, unsigned int height,
-        void* pixels) {
+void savepng(const char* fn, unsigned int nChannels, unsigned int width,
+        unsigned int height, void* pixels) {
+    if (nChannels != 3 && nChannels != 4) {
+        fprintf(stderr, "savepng only support 3 or 4 channel images\n");
+        return;
+    }
     FILE *fp = fopen(fn, "wb");
     if (!fp) {
         LOG("Unable to write to file %s.\n", fn);
@@ -139,7 +145,8 @@ void savepng(const char* fn, unsigned int width, unsigned int height,
     png_init_io(p, fp);
 
     setjmp(png_jmpbuf(p));
-    png_set_IHDR(p, pi, width, height, 8, PNG_COLOR_TYPE_RGB,
+    png_set_IHDR(p, pi, width, height, 8,
+            nChannels == 3 ? PNG_COLOR_TYPE_RGB : PNG_COLOR_TYPE_RGB_ALPHA,
             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
             PNG_FILTER_TYPE_DEFAULT);
     png_write_info(p, pi);
@@ -147,7 +154,7 @@ void savepng(const char* fn, unsigned int width, unsigned int height,
     setjmp(png_jmpbuf(p));
     unsigned int i = 0;
     for (i = 0; i < height; i++) {
-        png_write_row(p, pixels + i * 3 * width);
+        png_write_row(p, pixels + i * nChannels * width);
     }
 
     setjmp(png_jmpbuf(p));

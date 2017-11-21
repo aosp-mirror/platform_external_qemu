@@ -417,8 +417,11 @@ public:
     bool isFastBlitSupported() const { return m_fastBlitSupported; }
     // Fill GLES usage protobuf
     void fillGLESUsages(android_studio::EmulatorGLESUsages*);
-    void getScreenshot(unsigned int* width, unsigned int* height,
-        std::vector<unsigned char>& pixels);
+    // Save a screenshot of the previous frame.
+    // nChannels should be 3 (RGB) or 4 (RGBA).
+    // Note: swiftshader_indirect does not work with 3 channels
+    void getScreenshot(unsigned int nChannels, unsigned int* width,
+            unsigned int* height, std::vector<unsigned char>& pixels);
 private:
     FrameBuffer(int p_width, int p_height, bool useSubWindow);
     HandleType genHandle_locked();
