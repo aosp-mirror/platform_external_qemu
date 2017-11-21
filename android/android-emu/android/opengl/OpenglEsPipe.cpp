@@ -122,10 +122,13 @@ public:
                 android::base::System::Duration screenshotStartTime =
                     android::base::System::get()->getUnixTimeUs();
 #endif
+                // always do 4 channel screenshot because swiftshader_indirect
+                // has issues with 3 channels
+                const unsigned int nChannels = 4;
                 unsigned int width;
                 unsigned int height;
                 std::vector<unsigned char> pixels;
-                renderer->getScreenshot(&width, &height, pixels);
+                renderer->getScreenshot(nChannels, &width, &height, pixels);
 #if SNAPSHOT_PROFILE > 1
                 printf("Screenshot load texture time %lld ms\n",
                         (long long)(android::base::System::get()
@@ -139,7 +142,8 @@ public:
                     std::string fileName = android::base::PathUtils::join(
                             snapshot::Snapshotter::get().saver().snapshot().
                             dataDir(), "screenshot.png");
-                    savepng(fileName.c_str(), width, height, pixels.data());
+                    savepng(fileName.c_str(), nChannels, width, height,
+                            pixels.data());
 #if SNAPSHOT_PROFILE > 1
                     printf("Screenshot png write time %lld ms\n",
                             (long long)(android::base::System::get()

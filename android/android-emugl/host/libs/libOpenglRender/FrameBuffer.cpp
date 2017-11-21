@@ -1764,8 +1764,15 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
     });
 }
 
-void FrameBuffer::getScreenshot(unsigned int* width, unsigned int* height,
-        std::vector<unsigned char>& pixels) {
+void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
+        unsigned int* height, std::vector<unsigned char>& pixels) {
+    if (nChannels != 3 && nChannels != 4) {
+        fprintf(stderr, "Screenshot only support 3(RGB) or 4(RGBA) channels");
+        *width = 0;
+        *height = 0;
+        pixels.resize(0);
+        return;
+    }
     ColorBufferMap::iterator c(m_colorbuffers.find(m_lastPostedColorBuffer));
     if (c == m_colorbuffers.end()) {
         *width = 0;
@@ -1776,8 +1783,9 @@ void FrameBuffer::getScreenshot(unsigned int* width, unsigned int* height,
 
     *width = m_framebufferWidth;
     *height = m_framebufferHeight;
-    pixels.resize(3 * m_framebufferWidth * m_framebufferHeight);
-    c->second.cb->readPixels(0, 0, *width, *height, GL_RGB, GL_UNSIGNED_BYTE,
+    pixels.resize(4 * m_framebufferWidth * m_framebufferHeight);
+    c->second.cb->readPixels(0, 0, *width, *height,
+            nChannels == 3 ? GL_RGB : GL_RGBA, GL_UNSIGNED_BYTE,
             pixels.data());
 }
 

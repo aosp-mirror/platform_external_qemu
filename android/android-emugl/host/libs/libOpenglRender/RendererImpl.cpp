@@ -286,10 +286,10 @@ void RendererImpl::fillGLESUsages(android_studio::EmulatorGLESUsages* usages) {
     if (fb) fb->fillGLESUsages(usages);
 }
 
-void RendererImpl::getScreenshot(unsigned int* width, unsigned int* height,
-        std::vector<unsigned char>& pixels) {
+void RendererImpl::getScreenshot(unsigned int nChannels, unsigned int* width,
+        unsigned int* height, std::vector<unsigned char>& pixels) {
     auto fb = FrameBuffer::getFB();
-    if (fb) fb->getScreenshot(width, height, pixels);
+    if (fb) fb->getScreenshot(nChannels, width, height, pixels);
 }
 
 RendererImpl::HardwareStrings RendererImpl::getHardwareStrings() {
