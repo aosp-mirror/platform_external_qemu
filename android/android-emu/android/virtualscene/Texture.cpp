@@ -68,8 +68,9 @@ std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
     gles2->glBindTexture(GL_TEXTURE_2D, textureId);
     gles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, buffer.data());
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    gles2->glGenerateMipmap(GL_TEXTURE_2D);
+    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     gles2->glBindTexture(GL_TEXTURE_2D, 0);
 
 #ifdef DEBUG
