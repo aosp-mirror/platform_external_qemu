@@ -16,6 +16,24 @@
       "revId": "a1773c08c875a00db96cd1a2153ec44d3a9045e3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ebf0687f_d0b2c9d8",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-21T23:46:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c3827fce_b98605a1",
+      "revId": "a1773c08c875a00db96cd1a2153ec44d3a9045e3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
