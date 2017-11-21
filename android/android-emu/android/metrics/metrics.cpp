@@ -360,6 +360,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::FAST_SNAPSHOT_V1;
         case android::featurecontrol::ScreenRecording:
             return android_studio::EmulatorFeatureFlagState::SCREEN_RECORDING;
+        case android::featurecontrol::VirtualScene:
+            return android_studio::EmulatorFeatureFlagState::VIRTUAL_SCENE;
         case android::featurecontrol::Feature_n_items:
             return android_studio::EmulatorFeatureFlagState::EMULATOR_FEATURE_FLAG_UNSPECIFIED;
     }

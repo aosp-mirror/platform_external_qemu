@@ -24,6 +24,7 @@
 #include "android/camera/camera-format-converters.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/emulation/android_qemud.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"  /* for android_hw */
 #include "android/boot-properties.h"
 #include "android/utils/debug.h"
@@ -367,7 +368,8 @@ _camera_service_init(CameraServiceDesc* csd)
     memset(csd->camera_info, 0, sizeof(CameraInfo) * MAX_CAMERA);
     csd->camera_count = 0;
 
-    if (!strcmp(android_hw->hw_camera_back, "virtualscene")) {
+    if (feature_is_enabled(kFeature_VirtualScene) &&
+        !strcmp(android_hw->hw_camera_back, "virtualscene")) {
         /* Set up virtual scene camera emulation. */
         _virtualscenecamera_setup(csd);
     }

@@ -952,7 +952,8 @@ message EmulatorFeatureFlagState {
     HAXM = 16;
     FAST_SNAPSHOT_V1 = 17;
     SCREEN_RECORDING = 18;
-    // Next tag: 19
+    VIRTUAL_SCENE = 19;
+    // Next tag: 20
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;

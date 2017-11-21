@@ -37,5 +37,7 @@ enum Feature {
 
     ScreenRecording = 19;
 
-    ProtoNumFeatures = 20;
+    VirtualScene = 20;
+
+    ProtoNumFeatures = 21;
 }
