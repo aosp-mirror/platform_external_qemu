@@ -260,6 +260,30 @@
       "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "fd8a9841_d6675690",
+        "filename": "android/android-emu/android/virtualscene/SceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-21T19:46:09Z",
+      "side": 1,
+      "message": "I gave it a try, there\u0027s about a 4x savings, so it\u0027s worth it:\nemulator: loadFromObj: Creating scene object with 3842 vertices, 12867 indices\nemulator: loadFromObj: Creating scene object with 8887 vertices, 36306 indices",
+      "parentUuid": "b6e8a000_87a078a6",
+      "range": {
+        "startLine": 146,
+        "startChar": 3,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
