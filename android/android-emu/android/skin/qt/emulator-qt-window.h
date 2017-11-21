@@ -198,7 +198,6 @@ public:
     WId getWindowId();
 
     android::emulation::AdbInterface* getAdbInterface() const;
-    android::emulation::ScreenCapturer* getScreenCapturer();
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
     void showZoomIfNotUserHidden();
@@ -347,8 +346,6 @@ private:
     void maskWindowFrame();
     bool hasFrame() const;
 
-    void screenshotDone(android::emulation::ScreenCapturer::Result result);
-
     void runAdbInstall(const QString& path);
     void installDone(android::emulation::ApkInstaller::Result result,
                      android::base::StringView errorString);
@@ -451,9 +448,6 @@ private:
             android::emulation::FilePusher::ResultCallback,
             android::emulation::FilePusher::ProgressCallback>
             mFilePusher;
-    android::base::MemberOnDemandT<android::emulation::ScreenCapturer,
-                                   android::emulation::AdbInterface*>
-            mScreenCapturer;
 
     using OnDemandProgressDialog =
             android::base::MemberOnDemandT<CustomInitProgressDialog,
