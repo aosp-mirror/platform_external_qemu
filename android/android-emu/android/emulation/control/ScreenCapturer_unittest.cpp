@@ -18,7 +18,6 @@
 #include "android/base/Compiler.h"
 #include "android/base/system/System.h"
 #include "android/base/testing/TestSystem.h"
-#include "android/emulation/control/TestAdbInterface.h"
 #include "android/utils/path.h"
 
 #include <gtest/gtest.h>
@@ -31,16 +30,11 @@
 
 using android::base::StringView;
 using android::base::System;
-using android::emulation::ScreenCapturer;
-using android::emulation::TestAdbInterface;
 using std::string;
 using std::vector;
 
 class ScreenCapturerTest : public ::testing::Test {
 public:
-    // Convenience typedef.
-    using Result = ScreenCapturer::Result;
-
     ScreenCapturerTest()
         : mTestSystem(PATH_SEP "progdir",
                       System::kProgramBitness,
@@ -50,19 +44,13 @@ public:
     void SetUp() override {
         mInvalidShellCommand = false;
         mHaveResult = false;
-        mTestSystem.setShellCommand(&ScreenCapturerTest::shellCmdHandler,
-                                    this);
         mLooper = new android::base::TestLooper();
-        mAdb.reset(new TestAdbInterface(mLooper, "adb"));
-        mCapturer.reset(new ScreenCapturer(mAdb.get()));
         mTestSystem.getTempRoot()->makeSubDir(PATH_SEP "ScreencapOut");
     }
 
     void TearDown() override {
         // Ensure that no hanging thread makes the object undead at the end of
         // the test.
-        mCapturer.reset();
-        mAdb.reset();
         delete mLooper;
     }
 
@@ -116,13 +104,7 @@ public:
 protected:
     android::base::TestSystem mTestSystem;
     android::base::TestLooper* mLooper;
-    std::unique_ptr<TestAdbInterface> mAdb;
-    std::unique_ptr<ScreenCapturer> mCapturer;
-    bool mCaptureMustSucceed;
-    bool mPullMustSucceed;
-    bool mInvalidShellCommand;
     // Result from the ScreenCapturer callback is saved here.
-    Result mResult = Result::kUnknownError;
     std::atomic_bool mHaveResult;
 
     DISALLOW_COPY_AND_ASSIGN(ScreenCapturerTest);
