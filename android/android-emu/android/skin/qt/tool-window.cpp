@@ -98,6 +98,10 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     setWindowFlags(flag | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     mToolsUi->setupUi(this);
 
+    mToolsUi->mainLayout->setAlignment(Qt::AlignCenter);
+    mToolsUi->winButtonsLayout->setAlignment(Qt::AlignCenter);
+    mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
+
     // Get the latest user selections from the user-config code.
     QSettings settings;
     SettingsTheme theme =
@@ -199,10 +203,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
 
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
-    int tmp_x = mToolsUi->close_button->x();
-    mToolsUi->close_button->move(mToolsUi->minimize_button->x(),
-                                 mToolsUi->close_button->y());
-    mToolsUi->minimize_button->move(tmp_x, mToolsUi->minimize_button->y());
+    auto closeBtn = mToolsUi->winButtonsLayout->takeAt(0);
+    mToolsUi->winButtonsLayout->insertItem(1, closeBtn);
 #endif
 }
 
