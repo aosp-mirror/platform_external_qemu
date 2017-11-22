@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "18b6af7c_e15f4634",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-11-22T19:51:29Z",
+      "side": 1,
+      "message": "why wait so late ?\nand there are at least two pipes, why only reset one ?",
+      "range": {
+        "startLine": 554,
+        "startChar": 20,
+        "endLine": 554,
+        "endChar": 37
+      },
+      "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
