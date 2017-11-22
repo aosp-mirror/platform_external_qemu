@@ -16,8 +16,10 @@
 #include "android/base/async/ScopedSocketWatch.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringView.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/emulation/VmLock.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
@@ -151,6 +153,9 @@ namespace emulation {
 // each other.
 
 using FdWatch = android::base::Looper::FdWatch;
+using android::base::AutoLock;
+using android::base::LazyInstance;
+using android::base::Lock;
 using android::base::ScopedSocketWatch;
 using android::base::StringView;
 
@@ -205,14 +210,30 @@ AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
     if (pipeIt != mPipes.end()) {
         AdbGuestPipe* activePipe = *pipeIt;
         removeAdbGuestPipe(activePipe);
+        mCurrentActivePipe = activePipe;
         return activePipe;
     }
     return nullptr;
 }
 
+void AdbGuestPipe::Service::resetActiveGuestPipeConnection() {
+    if (mCurrentActivePipe->isProxyingData()) {
+        mCurrentActivePipe->resetConnection();
+        mCurrentActivePipe = nullptr;
+    }
+}
+
+void AdbGuestPipe::Service::unregisterActivePipe(AdbGuestPipe* pipe) {
+    if (mCurrentActivePipe == pipe) {
+        mCurrentActivePipe = nullptr;
+    }
+}
+
 AdbGuestPipe::~AdbGuestPipe() {
     DD("%s: [%p] destroyed", __func__, this);
-    CHECK(mState == State::ClosedByGuest);
+    CHECK(mState == State::ClosedByGuest ||
+          mState == State::ClosedByHost);
+    service()->unregisterActivePipe(this);
 }
 
 void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
@@ -335,6 +356,11 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
     DD("%s: [%p] sending reply", __func__, this);
     setReply("ok", State::SendingAcceptReplyOk);
     signalWake(PIPE_WAKE_READ);
+}
+
+void AdbGuestPipe::resetConnection() {
+    mHostSocket.reset();
+    mState = State::ClosedByHost;
 }
 
 // static
