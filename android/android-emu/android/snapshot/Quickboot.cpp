@@ -11,6 +11,7 @@
 
 #include "android/snapshot/Quickboot.h"
 
+#include "android/adb-server.h"
 #include "android/base/Stopwatch.h"
 #include "android/base/StringFormat.h"
 #include "android/base/async/ThreadLooper.h"
@@ -187,6 +188,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
 
 constexpr int kLivenessTimerTimeoutMs = 100;
 constexpr int kBootTimeoutMs = 7 * 1000;
+constexpr int kMaxAdbConnectionRetries = 1;
 
 static int bootTimeoutMs() {
     if (avdInfo_is_x86ish(android_avdInfo)) {
@@ -210,19 +212,30 @@ void Quickboot::onLivenessTimer() {
 
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
-        // The VM hasn't started for long enough since the end of snapshot
-        // loading, let's reset it.
-        mWindow.showMessage(
-                StringFormat("Guest hasn't come online in %d seconds, "
-                             "resetting it and deleting the boot snapshot",
-                             bootTimeoutMs() / 1000)
-                        .c_str(),
-                WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
-        Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
-        reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
-        mVmOps.vmReset();
-        return;
+        if (mAdbConnectionRetries < kMaxAdbConnectionRetries) {
+            mWindow.showMessage(
+                    StringFormat("Guest hasn't come online in %d seconds, "
+                                 "retrying ADB connection",
+                                 bootTimeoutMs() / 1000).c_str(),
+                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+            android_adb_reset_connection();
+            mLoadTimeMs = nowMs;
+            mAdbConnectionRetries++;
+        } else {
+            // The VM hasn't started for long enough since the end of snapshot
+            // loading, let's reset it.
+            mWindow.showMessage(
+                    StringFormat("Guest hasn't come online in %d seconds, "
+                        "resetting it and deleting the boot snapshot",
+                        bootTimeoutMs() / 1000)
+                    .c_str(),
+                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+            Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+            reportFailedLoad(
+                    pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
+            mVmOps.vmReset();
+            return;
+        }
     }
 
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
