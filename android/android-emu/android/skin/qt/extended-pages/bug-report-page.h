@@ -75,7 +75,6 @@ private:
 
     EmulatorQtWindow* mEmulatorWindow;
     std::unique_ptr<android::emulation::AdbBugReportServices> mBugReportServices;
-    android::emulation::ScreenCapturer* mScreenCapturer;
     QMessageBox* mDeviceDetailsDialog;
     bool mFirstShowEvent = true;
     std::unique_ptr<Ui::BugreportPage> mUi;
