@@ -154,6 +154,15 @@ using FdWatch = android::base::Looper::FdWatch;
 using android::base::ScopedSocketWatch;
 using android::base::StringView;
 
+static AdbGuestPipe* sCurrentGuestPipe = nullptr;
+
+void AdbGuestPipe::resetConnections() {
+    if (sCurrentGuestPipe) {
+        sCurrentGuestPipe->onGuestClose(PIPE_CLOSE_ERROR);
+    }
+    sCurrentGuestPipe = nullptr;
+}
+
 #if DEBUG >= 2
 static int bufferBytes(const AndroidPipeBuffer* buffers, int count) {
     int result = 0;
@@ -542,6 +551,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                     mState = State::ProxyingData;
                     // when -verbose, print a message indicating adb is connected
                     DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
+                    sCurrentGuestPipe = this;
                 }
                 return result;
             }
