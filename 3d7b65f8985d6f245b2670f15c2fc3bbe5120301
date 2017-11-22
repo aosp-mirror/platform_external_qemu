@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c9aeccd8_87896181",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-22T18:08:07Z",
+      "side": 1,
+      "message": "Right, but I\u0027ve learned that it may not be a good idea to detect with adb liveness which is flaky and still misses bad snapshot loads that occur in other ways.\n\nBo, can the pipe work without changes in the guest / how do we use the pipe? If it needs guest changes, we can use it conditionally if available, otherwise I\u0027d rather just ask if not paused on the host.",
+      "parentUuid": "be5514df_eadd4086",
+      "range": {
+        "startLine": 203,
+        "startChar": 15,
+        "endLine": 203,
+        "endChar": 26
+      },
+      "revId": "3d7b65f8985d6f245b2670f15c2fc3bbe5120301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "749dcb11_b2a9db3c",
         "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-22T17:41:23Z",
       "side": 1,
       "message": "why? Resetting the vm allows user to continue work, while crashing makes it look really bad and potentially would get into a loop of \"start, save, start-crash, restart, save, start-crash, ...\"\n\nIMO it\u0027s better to create a function to generate and send a dump of a live emulator process, and then proceed with restarting it",
+      "range": {
+        "startLine": 227,
+        "startChar": 0,
+        "endLine": 228,
+        "endChar": 49
+      },
+      "revId": "3d7b65f8985d6f245b2670f15c2fc3bbe5120301",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ce07c454_49aec1fc",
+        "filename": "android/android-emu/android/snapshot/Quickboot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-22T18:08:07Z",
+      "side": 1,
+      "message": "That sounds like a useful function to have, I\u0027ll consider it. Although there could be situations where it is not so safe to cause a reboot (e.g., Studio itself hangs):\n\nhttps://b.corp.google.com/issues/68997267\n\nGenerally I would be more comfortable with rebooting here if we had a more reliable way of detecting whether the emulator is booted. If we got a true signal of isEmulatorBooted I would totally go with a reboot, otherwise it\u0027s just testing ADB flakiness at this point.",
+      "parentUuid": "749dcb11_b2a9db3c",
       "range": {
         "startLine": 227,
         "startChar": 0,
