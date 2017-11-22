@@ -137,6 +137,7 @@
 
 /* Switches */
 #define SW_LID               0
+#define SW_TABLET_MODE       1
 #define SW_HEADPHONE_INSERT  2
 #define SW_MICROPHONE_INSERT 4
 
@@ -185,6 +186,7 @@ typedef struct GoldfishEvDevState {
     bool have_camera;
     bool have_keyboard;
     bool have_keyboard_lid;
+    bool have_tablet_mode;
     bool have_touch;
     bool have_multitouch;
 
