@@ -54,6 +54,7 @@ private:
     const QAndroidVmOperations mVmOps;
     const QAndroidEmulatorWindowAgent mWindow;
 
+    int mAdbConnectionRetries = 0;
     base::System::WallDuration mLoadTimeMs = 0;
     base::System::WallDuration mStartTimeMs =
             base::System::get()->getHighResTimeUs() / 1000;

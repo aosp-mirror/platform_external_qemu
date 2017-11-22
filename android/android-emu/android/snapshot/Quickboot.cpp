@@ -17,6 +17,7 @@
 #include "android/cmdline-option.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/emulation/AdbGuestPipe.h"
 #include "android/globals.h"
 #include "android/metrics/AdbLivenessChecker.h"
 #include "android/metrics/MetricsReporter.h"
@@ -35,6 +36,7 @@ using android::base::StringFormat;
 using android::base::StringView;
 using android::base::System;
 using android::crashreport::CrashReporter;
+using android::emulation::AdbGuestPipe;
 using android::metrics::MetricsReporter;
 namespace pb = android_studio;
 
@@ -187,6 +189,7 @@ void Quickboot::reportSuccessfulSave(StringView name,
 
 constexpr int kLivenessTimerTimeoutMs = 100;
 constexpr int kBootTimeoutMs = 7 * 1000;
+constexpr int kMaxAdbConnectionRetries = 1;
 
 static int bootTimeoutMs() {
     if (avdInfo_is_x86ish(android_avdInfo)) {
@@ -210,19 +213,30 @@ void Quickboot::onLivenessTimer() {
 
     const auto nowMs = System::get()->getHighResTimeUs() / 1000;
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
-        // The VM hasn't started for long enough since the end of snapshot
-        // loading, let's reset it.
-        mWindow.showMessage(
-                StringFormat("Guest hasn't come online in %d seconds, "
-                             "resetting it and deleting the boot snapshot",
-                             bootTimeoutMs() / 1000)
-                        .c_str(),
-                WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
-        Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
-        reportFailedLoad(
-                pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
-        mVmOps.vmReset();
-        return;
+        if (mAdbConnectionRetries < kMaxAdbConnectionRetries) {
+            mWindow.showMessage(
+                    StringFormat("Guest hasn't come online in %d seconds, "
+                                 "retrying ADB connection",
+                                 bootTimeoutMs() / 1000).c_str(),
+                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+            AdbGuestPipe::resetConnections();
+            mLoadTimeMs = nowMs;
+            mAdbConnectionRetries++;
+        } else {
+            // The VM hasn't started for long enough since the end of snapshot
+            // loading, let's reset it.
+            mWindow.showMessage(
+                    StringFormat("Guest hasn't come online in %d seconds, "
+                        "resetting it and deleting the boot snapshot",
+                        bootTimeoutMs() / 1000)
+                    .c_str(),
+                    WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+            Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
+            reportFailedLoad(
+                    pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
+            mVmOps.vmReset();
+            return;
+        }
     }
 
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
