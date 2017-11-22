@@ -200,7 +200,7 @@ void Quickboot::startLivenessMonitor() {
 }
 
 void Quickboot::onLivenessTimer() {
-    if (metrics::AdbLivenessChecker::isEmulatorBooted()) {
+    if (mVmOps.vmIsRunning()) {
         VERBOSE_PRINT(snapshot, "Guest came online in %.3f sec after loading",
                       (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
                               1000.0);
@@ -214,15 +214,18 @@ void Quickboot::onLivenessTimer() {
         // loading, let's reset it.
         mWindow.showMessage(
                 StringFormat("Guest hasn't come online in %d seconds, "
-                             "resetting it and deleting the boot snapshot",
+                             "deleting the boot snapshot",
                              bootTimeoutMs() / 1000)
                         .c_str(),
                 WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
         Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
         reportFailedLoad(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
-        mVmOps.vmReset();
-        return;
+        // Allow user to see the message for a bit.
+        System::get()->sleepMs(3000);
+        // Generate a crash report.
+        CrashReporter::get()->GenerateDumpAndDie(
+            "VM not alive after quickboot load");
     }
 
     mLivenessTimer->startRelative(kLivenessTimerTimeoutMs);
