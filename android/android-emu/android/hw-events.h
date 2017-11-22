@@ -532,6 +532,7 @@ typedef enum {
 
 #define  EVENT_SW_LIST  \
     SW_CODE(LID,               0)  \
+    SW_CODE(TABLET_MODE,       1)  \
     SW_CODE(HEADPHONE_INSERT,  2)  \
     SW_CODE(MICROPHONE_INSERT, 4)
 
