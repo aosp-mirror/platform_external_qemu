@@ -16,8 +16,10 @@
 #include "android/base/async/ScopedSocketWatch.h"
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/Log.h"
+#include "android/base/memory/LazyInstance.h"
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringView.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/emulation/VmLock.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
@@ -151,8 +153,51 @@ namespace emulation {
 // each other.
 
 using FdWatch = android::base::Looper::FdWatch;
+using android::base::AutoLock;
+using android::base::LazyInstance;
+using android::base::Lock;
 using android::base::ScopedSocketWatch;
 using android::base::StringView;
+
+// Tracking active connections
+class ActiveConnection {
+public:
+    ActiveConnection() { }
+
+    void registerActivePipe(AdbGuestPipe* pipe) {
+        AutoLock lock(mLock);
+        mActiveGuestPipe = pipe;
+    }
+
+    void resetActivePipe() {
+        AutoLock lock(mLock);
+        AdbGuestPipe* pipe = mActiveGuestPipe;
+        if (pipe) {
+            // Unregister.
+            mActiveGuestPipe = nullptr;
+            pipe->onGuestClose(PIPE_CLOSE_ERROR);
+        }
+    }
+
+    void unregisterActivePipe(AdbGuestPipe* pipe) {
+        if (!mActiveGuestPipe) return;
+
+        AutoLock lock(mLock);
+        if (pipe == mActiveGuestPipe) {
+            mActiveGuestPipe = nullptr;
+        }
+    }
+
+private:
+    Lock mLock;
+    AdbGuestPipe* mActiveGuestPipe = nullptr;
+};
+
+static LazyInstance<ActiveConnection> sActiveConnection = LAZY_INSTANCE_INIT;
+
+void AdbGuestPipe::resetConnections() {
+    sActiveConnection->resetActivePipe();
+}
 
 #if DEBUG >= 2
 static int bufferBytes(const AndroidPipeBuffer* buffers, int count) {
@@ -213,6 +258,7 @@ AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
 AdbGuestPipe::~AdbGuestPipe() {
     DD("%s: [%p] destroyed", __func__, this);
     CHECK(mState == State::ClosedByGuest);
+    sActiveConnection->unregisterActivePipe(this);
 }
 
 void AdbGuestPipe::onGuestClose(PipeCloseReason reason) {
@@ -542,6 +588,7 @@ int AdbGuestPipe::onGuestSendCommand(const AndroidPipeBuffer* buffers,
                     mState = State::ProxyingData;
                     // when -verbose, print a message indicating adb is connected
                     DINIT("%s: [%p] Adb connected, start proxing data",__func__, this);
+                    sActiveConnection->registerActivePipe(this);
                 }
                 return result;
             }

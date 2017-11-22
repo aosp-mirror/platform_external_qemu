@@ -125,6 +125,8 @@ public:
     // false and closes the socket.
     void onHostConnection(ScopedSocket&& socket);
 
+    static void resetConnections();
+
 private:
     AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
         : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
