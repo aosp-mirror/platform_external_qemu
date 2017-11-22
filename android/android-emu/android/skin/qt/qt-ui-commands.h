@@ -43,6 +43,7 @@ enum class QtUICommand {
     OVERVIEW,
     ROTATE_RIGHT,
     ROTATE_LEFT,
+    TABLET_MODE,
     TOGGLE_TRACKBALL,
 };
 

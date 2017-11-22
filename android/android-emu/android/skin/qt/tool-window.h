@@ -93,6 +93,7 @@ signals:
 
 private:
     void handleUICommand(QtUICommand cmd, bool down);
+    void forwardGenericEventToEmulator(int type, int code, int value);
     void forwardKeyToEmulator(uint32_t keycode, bool down);
 
     // Handle a full key press (down + up) in a single call.
@@ -155,6 +156,7 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
+    void on_tablet_mode_button_toggled(bool checked);
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();
