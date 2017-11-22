@@ -25,6 +25,7 @@
 #include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
+#include "android/hw-events.h"
 #include "android/hw-sensors.h"
 #include "android/main-common.h"
 #include "android/skin/event.h"
@@ -202,6 +203,14 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mExtendedWindowCreateTimer.setSingleShot(true);
     mExtendedWindowCreateTimer.start(10 * 1000);
 
+    if (android_hw->hw_arc) {
+        // Chrome OS doesn't support rotation now.
+        mToolsUi->prev_layout_button->setHidden(true);
+        mToolsUi->next_layout_button->setHidden(true);
+    } else {
+        // Android doesn't support tablet mode now.
+        mToolsUi->tablet_mode_button->setHidden(true);
+    }
 #ifndef Q_OS_MAC
     // Swap minimize and close buttons on non-apple OSes
     auto closeBtn = mToolsUi->winButtonsLayout->takeAt(0);
@@ -395,6 +404,12 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
                 forwardKeyToEmulator(LINUX_KEY_POWER, down);
             }
             break;
+        case QtUICommand::TABLET_MODE:
+            if (android_hw->hw_arc) {
+                forwardGenericEventToEmulator(EV_SW, SW_TABLET_MODE, down);
+                forwardGenericEventToEmulator(EV_SYN, 0, 0);
+            }
+            break;
         case QtUICommand::MENU:
             forwardKeyToEmulator(LINUX_KEY_SOFT1, down);
             break;
@@ -427,6 +442,18 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
         // it in the list of keyboard shortcuts in the Help page.
         default:;
     }
+}
+
+void ToolWindow::forwardGenericEventToEmulator(int type,
+                                               int code,
+                                               int value) {
+    SkinEvent* skin_event = new SkinEvent();
+    skin_event->type = kEventGeneric;
+    SkinEventGenericData& genericData = skin_event->u.generic_event;
+    genericData.type = type;
+    genericData.code = code;
+    genericData.value = value;
+    mEmulatorWindow->queueSkinEvent(skin_event);
 }
 
 void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
@@ -602,6 +629,10 @@ void ToolWindow::on_power_button_pressed() {
 void ToolWindow::on_power_button_released() {
     mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::POWER, false);
+}
+
+void ToolWindow::on_tablet_mode_button_toggled(bool checked) {
+    handleUICommand(QtUICommand::TABLET_MODE, checked);
 }
 
 void ToolWindow::on_volume_up_button_pressed() {
