@@ -70,6 +70,30 @@
       "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b935a52f_112713a1",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-22T22:03:45Z",
+      "side": 1,
+      "message": "Got it. I\u0027ve put it in a class for easier extension.",
+      "parentUuid": "bbdf016a_e53ad1ca",
+      "range": {
+        "startLine": 554,
+        "startChar": 20,
+        "endLine": 554,
+        "endChar": 37
+      },
+      "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
