@@ -101,6 +101,13 @@ public:
 
         AdbGuestPipe* searchForActivePipe();
 
+        // Resets the current ADB guest pipe connection.
+        void resetActiveGuestPipeConnection();
+
+        // For pipes in the middle of deletion to notify the service
+        // that they are gone.
+        void unregisterActivePipe(AdbGuestPipe* pipe);
+
     private:
 
         // remove the pipe from the list
@@ -108,6 +115,7 @@ public:
 
         AdbHostAgent* mHostAgent;
         std::vector<AdbGuestPipe*> mPipes;
+        AdbGuestPipe* mCurrentActivePipe = nullptr;
     };
 
     virtual ~AdbGuestPipe();
@@ -124,6 +132,12 @@ public:
     // |socket| to the pipe. On success, return true, on error return
     // false and closes the socket.
     void onHostConnection(ScopedSocket&& socket);
+
+    bool isProxyingData() const {
+        return mState == State::ProxyingData;
+    }
+
+    void resetConnection();
 
 private:
     AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
