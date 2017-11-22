@@ -2,6 +2,52 @@
   "comments": [
     {
       "key": {
+        "uuid": "caf541e3_5d4c8d16",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-22T22:31:22Z",
+      "side": 1,
+      "message": "please put it into the Service class instead of a static local, it feels like the current active pipe belongs there",
+      "range": {
+        "startLine": 157,
+        "startChar": 21,
+        "endLine": 157,
+        "endChar": 38
+      },
+      "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27c76b59_d8156064",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-22T22:31:22Z",
+      "side": 1,
+      "message": "nit: ideally this should move the pipe into ClosedByHost state and reset the host connection instead of going through a ClosedByGuest state, which is a lie. But it would work too",
+      "range": {
+        "startLine": 161,
+        "startChar": 27,
+        "endLine": 161,
+        "endChar": 39
+      },
+      "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "18b6af7c_e15f4634",
         "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
         "patchSetId": 2
@@ -94,6 +140,29 @@
       "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e2eaee3c_435ab957",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 2
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-22T22:31:22Z",
+      "side": 1,
+      "message": "this looks more like a part of adb-server.h, where we already have the service initialization and functions to connect to adb server process. What about adding  android_adb_service_reconnect() there?",
+      "range": {
+        "startLine": 128,
+        "startChar": 16,
+        "endLine": 128,
+        "endChar": 32
+      },
+      "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
