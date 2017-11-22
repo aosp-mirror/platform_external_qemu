@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "806feeb4_3789004c",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1071888
+      },
+      "writtenOn": "2017-11-22T19:34:28Z",
+      "side": 1,
+      "message": "So it\u0027s hard coded that original closebtn is at 0?\nBTW, I don\u0027t understand why we don\u0027t something like this:\n\nPut minimize first, then close,\n\nAnd only change them on mac os...",
+      "range": {
+        "startLine": 208,
+        "startChar": 42,
+        "endLine": 208,
+        "endChar": 43
+      },
+      "revId": "f784d6adf17569001d3387da9a44a0c7d0caa031",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
