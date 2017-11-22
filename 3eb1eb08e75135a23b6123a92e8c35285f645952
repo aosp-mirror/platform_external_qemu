@@ -22,6 +22,30 @@
       "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ec6cbf9_c8134409",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-22T19:55:08Z",
+      "side": 1,
+      "message": "I\u0027m try to limit risk by focusing on the failing case here which is when a guest pipe starts proxing data here, but doesn\u0027t have any activity thereafter.\n\nWhere would be a better place to put it?\n\nI think it\u0027s also ok to reset just one pipe since the other pipe is only supposed to be the next one in line for a connection or something like that?",
+      "parentUuid": "18b6af7c_e15f4634",
+      "range": {
+        "startLine": 554,
+        "startChar": 20,
+        "endLine": 554,
+        "endChar": 37
+      },
+      "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
