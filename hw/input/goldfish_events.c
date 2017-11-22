@@ -58,6 +58,7 @@ static const GoldfishEventCodeInfo ev_rel_codes_table[] = {
 
 static const GoldfishEventCodeInfo ev_sw_codes_table[] = {
     EV_CODE(SW_LID),
+    EV_CODE(SW_TABLET_MODE),
     EV_CODE(SW_HEADPHONE_INSERT),
     EV_CODE(SW_MICROPHONE_INSERT),
     EV_CODE_END,
@@ -874,6 +875,10 @@ static void goldfish_evdev_realize(DeviceState *dev, Error **errp)
     goldfish_events_set_bit(s, EV_SW, SW_HEADPHONE_INSERT);
     goldfish_events_set_bit(s, EV_SW, SW_MICROPHONE_INSERT);
 
+    if (s->have_tablet_mode) {
+        goldfish_events_set_bit(s, EV_SW, SW_TABLET_MODE);
+    }
+
     if (s->have_keyboard && s->have_keyboard_lid) {
         goldfish_events_set_bit(s, EV_SW, SW_LID);
     }
@@ -901,6 +906,8 @@ static Property goldfish_evdev_props[] = {
     DEFINE_PROP_BOOL("have-keyboard", GoldfishEvDevState, have_keyboard, false),
     DEFINE_PROP_BOOL("have-lidswitch", GoldfishEvDevState,
                      have_keyboard_lid, false),
+    DEFINE_PROP_BOOL("have-tabletmode", GoldfishEvDevState,
+                     have_tablet_mode, false),
     DEFINE_PROP_BOOL("have-touch", GoldfishEvDevState,
                      have_touch, false),
     DEFINE_PROP_BOOL("have-multitouch", GoldfishEvDevState,
