@@ -22,6 +22,30 @@
       "revId": "f784d6adf17569001d3387da9a44a0c7d0caa031",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80ad5b56_223c5771",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-22T19:39:36Z",
+      "side": 1,
+      "message": "0 and 1 are indexes here. We take out an item at index 0 (which is \u0027x\u0027) and insert it to be at index 1 (behind the \u0027minimize\u0027 button)\nIt\u0027s because linux and windows by convention have their close buttons on the right, and mac need to have it on the left side of the window. Our tool window template uses the mac version by default, so #ifndef mac we need to swap those",
+      "parentUuid": "806feeb4_3789004c",
+      "range": {
+        "startLine": 208,
+        "startChar": 42,
+        "endLine": 208,
+        "endChar": 43
+      },
+      "revId": "f784d6adf17569001d3387da9a44a0c7d0caa031",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
