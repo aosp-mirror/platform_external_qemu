@@ -284,6 +284,30 @@
       "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1cd053f9_227a24d0",
+        "filename": "android/android-emu/android/virtualscene/SceneObject.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-22T06:34:44Z",
+      "side": 1,
+      "message": "Awesome, Jeff! Glad it worked for you. Looks good to me.",
+      "parentUuid": "fd8a9841_d6675690",
+      "range": {
+        "startLine": 146,
+        "startChar": 3,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "a00c9b8dab9a1dea59f96b4a8db23ebbefa35cbe",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
