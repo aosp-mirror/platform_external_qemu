@@ -3259,6 +3259,9 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
     }
 
     const int requested_meg = ram_size / (1024 * 1024);
+    // TODO: Fix HAXM so that snapshot save doesn't hang
+    // with values of RAM above 4093.
+    const int hax_snapshot_max_ram = 4093;
 
 #ifdef CONFIG_HAX
     if (hax_enabled()) {
@@ -3269,6 +3272,9 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
         }
         if (ram_size > hax_max_ram) {
             ram_size = hax_max_ram;
+        }
+        if (ram_size > hax_snapshot_max_ram) {
+            ram_size = hax_snapshot_max_ram;
         }
     }
 #endif
