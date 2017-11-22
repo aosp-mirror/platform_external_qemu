@@ -168,6 +168,30 @@
     },
     {
       "key": {
+        "uuid": "f800bf66_341fdfa2",
+        "filename": "android/android-emu/android/snapshot/Snapshot.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-22T06:52:01Z",
+      "side": 1,
+      "message": "Could it be more about the name? getGeneralInfo() sounds more general and closer to its usages than getProtobuf().",
+      "parentUuid": "31938e95_8368ac0b",
+      "range": {
+        "startLine": 44,
+        "startChar": 39,
+        "endLine": 44,
+        "endChar": 50
+      },
+      "revId": "0bc0a5061b71727d004561f08cdb25b90062983e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7dad78f1_f1822c7f",
         "filename": "android/android-emu/android/snapshot/Snapshotter.cpp",
         "patchSetId": 1
