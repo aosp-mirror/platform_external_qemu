@@ -2,6 +2,86 @@
   "comments": [
     {
       "key": {
+        "uuid": "668b6ab4_8df28d40",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "Copyright",
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3c7a651_ea454598",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "Does it really want \u0027execute\u0027?",
+      "range": {
+        "startLine": 29,
+        "startChar": 61,
+        "endLine": 29,
+        "endChar": 65
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a4c565b4_bf86b067",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "0644?",
+      "range": {
+        "startLine": 57,
+        "startChar": 72,
+        "endLine": 57,
+        "endChar": 76
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f6601e3_618ae7ea",
+        "filename": "android/android-emu/android/protobuf/LoadSave.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "Copyright notice",
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "005d8e1d_910df04f",
         "filename": "android/android-emu/android/snapshot/Hierarchy.cpp",
         "patchSetId": 5
@@ -22,6 +102,121 @@
       "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8c9b07eb_14fce002",
+        "filename": "android/android-emu/android/snapshot/PathUtils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "Remove?",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 45,
+        "endChar": 0
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a3c774e7_955c61a3",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "This test also correctly prevents a manually-taken snapshot from having the DefaultBoot as its parent. \nIt might be good for the comment to say that a DefaultBoot snapshot cannot be either a child or a parent.",
+      "range": {
+        "startLine": 310,
+        "startChar": 4,
+        "endLine": 312,
+        "endChar": 61
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78ce9fe4_ec74496b",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "I\u0027m not clear on the reason for having \u0027preload\u0027. Could you add a comment saying when/why this is called?",
+      "range": {
+        "startLine": 339,
+        "startChar": 15,
+        "endLine": 339,
+        "endChar": 22
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "027412ac_386428eb",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "The new Gerrit tell me there\u0027s extra white space here.",
+      "range": {
+        "startLine": 370,
+        "startChar": 0,
+        "endLine": 370,
+        "endChar": 4
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59c7a814_83b0f2d0",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-22T19:59:59Z",
+      "side": 1,
+      "message": "Remove",
+      "range": {
+        "startLine": 451,
+        "startChar": 8,
+        "endLine": 451,
+        "endChar": 86
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
