@@ -46,6 +46,30 @@
       "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bbdf016a_e53ad1ca",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-11-22T20:01:20Z",
+      "side": 1,
+      "message": "ack.\n\nI would prefer to collect all the active/inactive pipes and reset all of them.\n\nhowever it is ok if you leave it as is, but please \nchange the name to sCurrentActiveGuestPipe",
+      "parentUuid": "8ec6cbf9_c8134409",
+      "range": {
+        "startLine": 554,
+        "startChar": 20,
+        "endLine": 554,
+        "endChar": 37
+      },
+      "revId": "3eb1eb08e75135a23b6123a92e8c35285f645952",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
