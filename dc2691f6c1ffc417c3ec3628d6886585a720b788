@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d5f6853b_597dfc9c",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "668b6ab4_8df28d40",
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b3c7a651_ea454598",
         "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
         "patchSetId": 5
@@ -42,6 +60,30 @@
     },
     {
       "key": {
+        "uuid": "36824b91_9c9ba5ba",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b3c7a651_ea454598",
+      "range": {
+        "startLine": 29,
+        "startChar": 61,
+        "endLine": 29,
+        "endChar": 65
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a4c565b4_bf86b067",
         "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
         "patchSetId": 5
@@ -53,6 +95,30 @@
       "writtenOn": "2017-11-22T19:59:59Z",
       "side": 1,
       "message": "0644?",
+      "range": {
+        "startLine": 57,
+        "startChar": 72,
+        "endLine": 57,
+        "endChar": 76
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e1cea2f_c5ecb4d2",
+        "filename": "android/android-emu/android/protobuf/LoadSave.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a4c565b4_bf86b067",
       "range": {
         "startLine": 57,
         "startChar": 72,
@@ -128,6 +194,30 @@
     },
     {
       "key": {
+        "uuid": "ae1a925a_a5ba0efa",
+        "filename": "android/android-emu/android/snapshot/PathUtils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c9b07eb_14fce002",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 45,
+        "endChar": 0
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a3c774e7_955c61a3",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 5
@@ -139,6 +229,30 @@
       "writtenOn": "2017-11-22T19:59:59Z",
       "side": 1,
       "message": "This test also correctly prevents a manually-taken snapshot from having the DefaultBoot as its parent. \nIt might be good for the comment to say that a DefaultBoot snapshot cannot be either a child or a parent.",
+      "range": {
+        "startLine": 310,
+        "startChar": 4,
+        "endLine": 312,
+        "endChar": 61
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cd2d2a3c_570b7b99",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3c774e7_955c61a3",
       "range": {
         "startLine": 310,
         "startChar": 4,
@@ -174,6 +288,30 @@
     },
     {
       "key": {
+        "uuid": "de517c25_efdfe08e",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 339,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "78ce9fe4_ec74496b",
+      "range": {
+        "startLine": 339,
+        "startChar": 15,
+        "endLine": 339,
+        "endChar": 22
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "027412ac_386428eb",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 5
@@ -197,6 +335,30 @@
     },
     {
       "key": {
+        "uuid": "48d46c48_2ddc51d0",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 370,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done (code\u0027s been changed around)",
+      "parentUuid": "027412ac_386428eb",
+      "range": {
+        "startLine": 370,
+        "startChar": 0,
+        "endLine": 370,
+        "endChar": 4
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "59c7a814_83b0f2d0",
         "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
         "patchSetId": 5
@@ -208,6 +370,30 @@
       "writtenOn": "2017-11-22T19:59:59Z",
       "side": 1,
       "message": "Remove",
+      "range": {
+        "startLine": 451,
+        "startChar": 8,
+        "endLine": 451,
+        "endChar": 86
+      },
+      "revId": "dc2691f6c1ffc417c3ec3628d6886585a720b788",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59651337_c647c7cb",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 451,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-23T00:22:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "59c7a814_83b0f2d0",
       "range": {
         "startLine": 451,
         "startChar": 8,
