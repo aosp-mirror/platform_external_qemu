@@ -42,9 +42,9 @@ struct Globals {
 
     void registerServices() {
         // Register adb pipe service.
-        auto service = new AdbGuestPipe::Service(&hostListener);
-        hostListener.setGuestAgent(service);
-        AndroidPipe::Service::add(service);
+        adbGuestPipeService = new AdbGuestPipe::Service(&hostListener);
+        hostListener.setGuestAgent(adbGuestPipeService);
+        AndroidPipe::Service::add(adbGuestPipeService);
 
         // Register adb-debug pipe service.
         android::base::Stream* debugStream = nullptr;
@@ -55,6 +55,7 @@ struct Globals {
                 new android::emulation::AdbDebugPipe::Service(debugStream));
     }
 
+    AdbGuestPipe::Service* adbGuestPipeService = nullptr;
     AdbHostListener hostListener;
 };
 
@@ -89,4 +90,10 @@ void android_adb_server_undo_init(void) {
 void android_adb_service_init(void) {
     // Register adb pipe service.
     sGlobals->registerServices();
+}
+
+void android_adb_reset_connection(void) {
+    if (sGlobals->adbGuestPipeService) {
+        sGlobals->adbGuestPipeService->resetActiveGuestPipeConnection();
+    }
 }
