@@ -30,4 +30,7 @@ extern void android_adb_server_undo_init(void);
 // call to adb_server_init() and before adb_server_undo_init(), if any.
 extern void android_adb_service_init(void);
 
+// Closes all active ADB guest pipes and allows new connections to be made.
+extern void android_adb_reset_connection(void);
+
 ANDROID_END_HEADER
