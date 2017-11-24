@@ -484,6 +484,16 @@ extern void skin_winsys_update_rotation(SkinRotation rotation)
     window->updateRotation(rotation);
 }
 
+extern void skin_winsys_show_virtual_scene_controls(bool show) {
+    D("skin_winsys_show_virtual_scene_controls [%d]", show ? 1 : 0);
+    EmulatorQtWindow* window = EmulatorQtWindow::getInstance();
+    if (window == NULL) {
+        D("%s: Could not get window handle", __FUNCTION__);
+        return;
+    }
+    window->showVirtualSceneControls(show);
+}
+
 extern void skin_winsys_spawn_thread(bool no_window,
                                      StartFunction f,
                                      int argc,
