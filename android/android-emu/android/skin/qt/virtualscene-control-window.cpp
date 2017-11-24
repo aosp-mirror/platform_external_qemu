@@ -12,6 +12,7 @@
 #include "android/skin/qt/virtualscene-control-window.h"
 
 #include "android/skin/qt/qt-settings.h"
+#include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
 
 #include <QDesktopWidget>
@@ -33,9 +34,14 @@ static const float kMovementVelocityMetersPerSecond = 1.0f;
 static const float kMinVerticalRotationDegrees = -80.0f;
 static const float kMaxVerticalRotationDegrees = 80.0f;
 
+static const char* kTextStyleFormatString =
+        "font-size:%1;background-color:transparent;";
+static const char* kHighlightTextStyle = "color:#eee";
+
 VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
                                                      QWidget* parent)
-    : QFrame(parent), mToolWindow(toolWindow), mSizeTweaker(this) {
+    : QFrame(parent), mToolWindow(toolWindow), mSizeTweaker(this), 
+      mControlsUi(new Ui::VirtualSceneControls()) {
     setObjectName("VirtualSceneControlWindow");
 
     Qt::WindowFlags flags =
@@ -61,6 +67,9 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
 #endif  // __linux__
 
     setWindowFlags(flags);
+
+    mControlsUi->setupUi(this);
+    updateHighlightStyle();
 
     setWidth(parent->frameGeometry().width());
     QApplication::instance()->installEventFilter(this);
@@ -92,6 +101,11 @@ bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event) {
     }
 
     return false;
+}
+
+void VirtualSceneControlWindow::updateTheme(const QString& styleSheet) {
+    setStyleSheet(styleSheet);
+    updateHighlightStyle();
 }
 
 void VirtualSceneControlWindow::setAgent(const UiEmuAgent* agentPtr) {
@@ -168,9 +182,10 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
         updateVelocity();
     }
 
-    update();
-
     mCaptureMouse = capture;
+
+    updateHighlightStyle();
+    update();  // Queues a repaint call.
 }
 
 void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
@@ -290,6 +305,34 @@ void VirtualSceneControlWindow::updateMouselook() {
         }
 
         updateVelocity();
+    }
+}
+
+void VirtualSceneControlWindow::updateHighlightStyle() {
+    mControlsUi->instructions->setText(getInfoText());
+
+    QString textStyle =
+            QString(kTextStyleFormatString)
+                    .arg(Ui::stylesheetFontSize(Ui::FontSize::Large));
+    if (mCaptureMouse) {
+        setButtonEnabled(mControlsUi->info_button, SETTINGS_THEME_DARK, true);
+        mControlsUi->instructions->setStyleSheet(textStyle +
+                                                 kHighlightTextStyle);
+    } else {
+        setButtonEnabled(mControlsUi->info_button, getSelectedTheme(), true);
+        mControlsUi->instructions->setStyleSheet(textStyle);
+    }
+}
+
+QString VirtualSceneControlWindow::getInfoText() {
+    if (mCaptureMouse) {
+        return tr("Control view with mouse + WASDQE.");
+    } else {
+#if __APPLE__
+        return tr("Press ⌥ Option to move camera.");
+#else   // __APPLE__
+        return tr("Press Alt to move camera.");
+#endif  // !__APPLE__
     }
 }
 
