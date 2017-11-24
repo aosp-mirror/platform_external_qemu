@@ -22,6 +22,7 @@
 #include "android/skin/qt/size-tweaker.h"
 #include "android/skin/qt/ui-event-recorder.h"
 #include "android/skin/qt/user-actions-counter.h"
+#include "android/skin/qt/virtualscene-control-window.h"
 #include "android/utils/compiler.h"
 
 #include "ui_tools.h"
@@ -67,10 +68,14 @@ public:
     void show();
     void dockMainWindow();
     void raiseMainWindow();
-    void setLastExtendedWindowPane(ExtendedWindowPane pane);
+    void updateTheme(const QString& styleSheet);
 
     void setToolEmuAgent(const UiEmuAgent* agPtr);
     const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
+
+    VirtualSceneControlWindow* virtualSceneControlWindow() {
+        return &mVirtualSceneControlWindow;
+    }
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
@@ -90,6 +95,8 @@ public:
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
+
+    void virtualSceneControlWindowVisible();
 
 private:
     void handleUICommand(QtUICommand cmd, bool down);
@@ -119,6 +126,7 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     android::base::MemberOnDemandT<ExtendedWindowHolder, ToolWindow*>
             mExtendedWindow;
+    VirtualSceneControlWindow mVirtualSceneControlWindow;
     QTimer mExtendedWindowCreateTimer;
     const UiEmuAgent* mUiEmuAgent;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
@@ -135,6 +143,7 @@ private:
 public slots:
     void raise();
     void switchClipboardSharing(bool enabled);
+    void showVirtualSceneControls(bool show);
 
 private slots:
     void on_back_button_pressed();
