@@ -106,14 +106,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
 
     // Get the latest user selections from the user-config code.
-    QSettings settings;
-    SettingsTheme theme =
-            (SettingsTheme)settings.value(Ui::Settings::UI_THEME, 0).toInt();
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        theme = (SettingsTheme)0;
-        settings.setValue(Ui::Settings::UI_THEME, 0);
-    }
-
+    SettingsTheme theme = getSelectedTheme();
     adjustAllButtonsForTheme(theme);
     updateTheme(Ui::stylesheetForTheme(theme));
 

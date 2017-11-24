@@ -128,7 +128,13 @@ QString getRecordingSaveDirectory()
 
 SettingsTheme getSelectedTheme() {
     QSettings settings;
-    return (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
+    SettingsTheme theme =
+            (SettingsTheme)settings.value(Ui::Settings::UI_THEME, SETTINGS_THEME_LIGHT).toInt();
+    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
+        theme = SETTINGS_THEME_LIGHT;
+    }
+
+    return theme;
 }
 
 void adjustAllButtonsForTheme(SettingsTheme theme)
