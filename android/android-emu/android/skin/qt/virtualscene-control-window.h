@@ -27,13 +27,31 @@ public:
     explicit VirtualSceneControlWindow(ToolWindow* toolWindow, QWidget* parent);
     virtual ~VirtualSceneControlWindow();
 
-    void setWidth(int width);
+    bool handleQtKeyEvent(QKeyEvent* event);
 
+    void setWidth(int width);
+    void setCaptureMouse(bool capture);
+
+    bool eventFilter(QObject* target, QEvent* event) override;
+
+    void hideEvent(QHideEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
+private slots:
+    void slot_mousePoller();
+
 private:
+    void updateMouselook();
+
+    QPoint getMouseCaptureCenter();
+
     ToolWindow* mToolWindow = nullptr;
     SizeTweaker mSizeTweaker;
+
+    bool mCaptureMouse = false;
+    QTimer mMousePoller;
+    QPoint mOriginalMousePosition;
+    QPoint mPreviousMousePosition;
 };
