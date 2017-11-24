@@ -22,6 +22,8 @@
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
 
+#include "ui_virtualscene-controls.h"
+
 class ToolWindow;
 
 class VirtualSceneControlWindow : public QFrame {
@@ -32,6 +34,7 @@ public:
     virtual ~VirtualSceneControlWindow();
 
     bool handleQtKeyEvent(QKeyEvent* event);
+    void updateTheme(const QString& styleSheet);
 
     void setAgent(const UiEmuAgent* agentPtr);
     void setWidth(int width);
@@ -49,6 +52,8 @@ private slots:
 
 private:
     void updateMouselook();
+    void updateHighlightStyle();
+    QString getInfoText();
 
     // Returns true if the event was handled.
     bool handleKeyEvent(QKeyEvent* event);
@@ -58,6 +63,7 @@ private:
 
     ToolWindow* mToolWindow = nullptr;
     SizeTweaker mSizeTweaker;
+    std::unique_ptr<Ui::VirtualSceneControls> mControlsUi;
 
     bool mCaptureMouse = false;
     QTimer mMousePoller;

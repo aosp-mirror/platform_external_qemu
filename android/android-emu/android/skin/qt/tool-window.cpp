@@ -531,7 +531,7 @@ void ToolWindow::raiseMainWindow() {
 }
 
 void ToolWindow::updateTheme(const QString& styleSheet) {
-    mVirtualSceneControlWindow.setStyleSheet(styleSheet);
+    mVirtualSceneControlWindow.updateTheme(styleSheet);
     setStyleSheet(styleSheet);
 }
 
