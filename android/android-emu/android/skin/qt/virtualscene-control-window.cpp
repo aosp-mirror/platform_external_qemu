@@ -18,7 +18,9 @@
 #include <QPainter>
 #include <QScreen>
 
+static constexpr int kMousePollIntervalMilliseconds = 16;
 static constexpr int kWindowHeight = 50;
+static const QColor kHighlightColor = QColor(2, 136, 209);
 
 VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
                                                      QWidget* parent)
@@ -50,12 +52,88 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
     setWindowFlags(flags);
 
     setWidth(parent->frameGeometry().width());
+    QApplication::instance()->installEventFilter(this);
+
+    connect(&mMousePoller, SIGNAL(timeout()), this, SLOT(slot_mousePoller()));
 }
 
-VirtualSceneControlWindow::~VirtualSceneControlWindow() = default;
+VirtualSceneControlWindow::~VirtualSceneControlWindow() {
+    QApplication::instance()->removeEventFilter(this);
+}
+
+bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event) {
+    const bool down = event->type() == QEvent::KeyPress;
+
+    // Trigger when the Alt key but no other modifiers is held.
+    if (event->key() == Qt::Key_Alt) {
+        if (down && !mCaptureMouse && event->modifiers() == Qt::AltModifier) {
+            setCaptureMouse(true);
+        } else if (!down && mCaptureMouse) {
+            setCaptureMouse(false);
+        }
+
+        return true;
+    }
+
+    // Look out for other modifier presses and cancel the capture.
+    if (mCaptureMouse && down && event->modifiers() != Qt::AltModifier) {
+        setCaptureMouse(false);
+    }
+
+    return false;
+}
 
 void VirtualSceneControlWindow::setWidth(int width) {
     resize(QSize(width, kWindowHeight));
+}
+
+void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
+    if (capture) {
+        mOriginalMousePosition = QCursor::pos();
+
+        QCursor cursor(Qt::BlankCursor);
+        parentWidget()->activateWindow();
+        parentWidget()->grabMouse(cursor);
+
+        // Move cursor to the center of the window.
+        mPreviousMousePosition = getMouseCaptureCenter();
+        QCursor::setPos(mPreviousMousePosition);
+
+        // Qt only sends mouse move events when the mouse is in the application
+        // bounds, set up a timer to poll for mouse position changes in case the
+        // mouse escapes.
+        mMousePoller.start(kMousePollIntervalMilliseconds);
+    } else {
+        mMousePoller.stop();
+
+        QCursor::setPos(mOriginalMousePosition);
+        parentWidget()->releaseMouse();
+    }
+
+    update();
+
+    mCaptureMouse = capture;
+}
+
+void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
+    QFrame::hide();
+
+    if (mCaptureMouse) {
+        setCaptureMouse(false);
+    }
+}
+
+bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
+    if (mCaptureMouse) {
+        if (event->type() == QEvent::MouseMove) {
+            updateMouselook();
+            return true;
+        } else if (event->type() == QEvent::Wheel) {
+            return true;
+        }
+    }
+
+    return QObject::eventFilter(target, event);
 }
 
 void VirtualSceneControlWindow::keyPressEvent(QKeyEvent* event) {
@@ -67,13 +145,6 @@ void VirtualSceneControlWindow::keyReleaseEvent(QKeyEvent* event) {
 }
 
 void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
-    QPainter p;
-    QPen pen(Qt::SolidLine);
-    pen.setColor(Qt::black);
-    pen.setWidth(1);
-    p.begin(this);
-    p.setPen(pen);
-
     double dpr = 1.0;
     int primary_screen_idx = qApp->desktop()->screenNumber(this);
     if (primary_screen_idx < 0) {
@@ -87,14 +158,42 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
         }
     }
 
+    QRect rect(0, 0, width() - 1, height() - 1);
+
     if (dpr > 1.0) {
         // Normally you'd draw the border with a (0, 0, w-1, h-1) rectangle.
         // However, there's some weirdness going on with high-density displays
         // that makes a single-pixel "slack" appear at the left and bottom
         // of the border. This basically adds 1 to compensate for it.
-        p.drawRect(contentsRect());
-    } else {
-        p.drawRect(QRect(0, 0, width() - 1, height() - 1));
+        rect = contentsRect();
     }
+
+    QPainter p;
+    p.begin(this);
+
+    if (mCaptureMouse) {
+        p.fillRect(rect, kHighlightColor);
+    }
+
+    QPen outlinePen(Qt::SolidLine);
+    outlinePen.setColor(Qt::black);
+    outlinePen.setWidth(1);
+    p.setPen(outlinePen);
+    p.drawRect(rect);
     p.end();
+}
+
+void VirtualSceneControlWindow::slot_mousePoller() {
+    updateMouselook();
+}
+
+void VirtualSceneControlWindow::updateMouselook() {
+    mPreviousMousePosition = getMouseCaptureCenter();
+    QCursor::setPos(mPreviousMousePosition);
+}
+
+QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
+    QWidget* container = parentWidget();
+    return container->pos() +
+           QPoint(container->width() / 2, container->height() / 2);
 }
