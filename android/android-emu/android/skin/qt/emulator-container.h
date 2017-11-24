@@ -55,6 +55,9 @@ signals:
     void showModalOverlay(QString text);
     void hideModalOverlay();
 
+public slots:
+    void virtualSceneControlWindowVisible();
+
 private slots:
     void slot_resizeDone();
     void slot_showModalOverlay(QString text);
