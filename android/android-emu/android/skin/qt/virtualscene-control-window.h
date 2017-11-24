@@ -14,6 +14,8 @@
 #include "android/skin/qt/size-tweaker.h"
 #include "android/ui-emu-agent.h"
 
+#include "ui_virtualscene-controls.h"
+
 #include <QFrame>
 #include <QObject>
 #include <QWidget>
@@ -21,6 +23,8 @@
 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/vec3.hpp>
+
+#include <memory>
 
 class ToolWindow;
 
@@ -32,6 +36,7 @@ public:
     virtual ~VirtualSceneControlWindow();
 
     bool handleQtKeyEvent(QKeyEvent* event);
+    void updateTheme(const QString& styleSheet);
 
     void setAgent(const UiEmuAgent* agentPtr);
     void setWidth(int width);
@@ -49,6 +54,8 @@ private slots:
 
 private:
     void updateMouselook();
+    void updateHighlightStyle();
+    QString getInfoText();
 
     // Returns true if the event was handled.
     bool handleKeyEvent(QKeyEvent* event);
@@ -58,6 +65,7 @@ private:
 
     ToolWindow* mToolWindow = nullptr;
     SizeTweaker mSizeTweaker;
+    std::unique_ptr<Ui::VirtualSceneControls> mControlsUi;
 
     bool mCaptureMouse = false;
     QTimer mMousePoller;
