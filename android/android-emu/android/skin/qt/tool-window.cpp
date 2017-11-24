@@ -545,6 +545,7 @@ void ToolWindow::updateTheme(const QString& styleSheet) {
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     mUiEmuAgent = agPtr;
 
+    mVirtualSceneControlWindow.setAgent(agPtr);
     if (mExtendedWindow.hasInstance()) {
         mExtendedWindow.get()->setAgent(agPtr);
     }

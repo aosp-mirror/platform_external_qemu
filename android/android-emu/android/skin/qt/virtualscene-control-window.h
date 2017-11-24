@@ -12,11 +12,15 @@
 #pragma once
 
 #include "android/skin/qt/size-tweaker.h"
+#include "android/ui-emu-agent.h"
 
 #include <QFrame>
 #include <QObject>
 #include <QWidget>
 #include <QtCore>
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
 
 class ToolWindow;
 
@@ -29,6 +33,7 @@ public:
 
     bool handleQtKeyEvent(QKeyEvent* event);
 
+    void setAgent(const UiEmuAgent* agentPtr);
     void setWidth(int width);
     void setCaptureMouse(bool capture);
 
@@ -45,6 +50,10 @@ private slots:
 private:
     void updateMouselook();
 
+    // Returns true if the event was handled.
+    bool handleKeyEvent(QKeyEvent* event);
+    void updateVelocity();
+
     QPoint getMouseCaptureCenter();
 
     ToolWindow* mToolWindow = nullptr;
@@ -54,4 +63,20 @@ private:
     QTimer mMousePoller;
     QPoint mOriginalMousePosition;
     QPoint mPreviousMousePosition;
+
+    const QAndroidSensorsAgent* mSensorsAgent = nullptr;
+    glm::vec3 mVelocity = glm::vec3();
+    glm::vec3 mEulerRotationRadians = glm::vec3();
+
+    enum KeysHeldIndex {
+        Held_W,
+        Held_A,
+        Held_S,
+        Held_D,
+        Held_Q,
+        Held_E,
+        Held_Count
+    };
+
+    bool mKeysHeld[Held_Count] = {};
 };
