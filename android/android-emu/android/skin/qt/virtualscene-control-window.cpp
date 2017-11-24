@@ -18,9 +18,20 @@
 #include <QPainter>
 #include <QScreen>
 
+#ifdef __APPLE__
+#include <Carbon/Carbon.h>  // For kVK_ANSI_E
+#endif
+
+#include <glm/gtx/euler_angles.hpp>
+
 static constexpr int kMousePollIntervalMilliseconds = 16;
 static constexpr int kWindowHeight = 50;
 static const QColor kHighlightColor = QColor(2, 136, 209);
+
+static const float kPixelsToRotationRadians = static_cast<float>(M_PI / 180.0f);
+static const float kMovementVelocityMetersPerSecond = 1.0f;
+static const float kMinVerticalRotationDegrees = -80.0f;
+static const float kMaxVerticalRotationDegrees = 80.0f;
 
 VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
                                                      QWidget* parent)
@@ -83,13 +94,54 @@ bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event) {
     return false;
 }
 
+void VirtualSceneControlWindow::setAgent(const UiEmuAgent* agentPtr) {
+    mSensorsAgent = agentPtr->sensors;
+}
+
 void VirtualSceneControlWindow::setWidth(int width) {
     resize(QSize(width, kWindowHeight));
+}
+
+// See swing twist decomposition:
+// http://www.euclideanspace.com/maths/geometry/rotations/for/decomposition/
+static glm::quat quaternionTwist(const glm::quat& rotation,
+                                 const glm::vec3& direction) {
+    const glm::vec3 axis = glm::vec3(rotation.x, rotation.y, rotation.z);
+    const glm::vec3 projection = glm::dot(direction, axis) * direction;
+    return glm::normalize(glm::quat(rotation.w, projection));
 }
 
 void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
     if (capture) {
         mOriginalMousePosition = QCursor::pos();
+
+        // Get the starting rotation.
+        if (mSensorsAgent) {
+            glm::vec3 eulerDegrees;
+            mSensorsAgent->getPhysicalParameter(
+                    PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x,
+                    &eulerDegrees.y, &eulerDegrees.z,
+                    PARAMETER_VALUE_TYPE_TARGET);
+
+            // The physical model represents rotation in the X Y Z order, but
+            // for mouselook we need the Y X Z order. Convert the rotation order
+            // via a quaternion and decomposing the rotations.
+            const glm::quat rotation = glm::eulerAngleXYZ(
+                    glm::radians(eulerDegrees.x), glm::radians(eulerDegrees.y),
+                    glm::radians(eulerDegrees.z));
+
+            const glm::quat quatY =
+                    quaternionTwist(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
+            mEulerRotationRadians.y = glm::angle(quatY);
+
+            const glm::quat xzRotation = glm::inverse(quatY) * rotation;
+            mEulerRotationRadians.x = glm::pitch(xzRotation);
+            mEulerRotationRadians.z = glm::roll(xzRotation);
+
+            if (mEulerRotationRadians.x > M_PI) {
+                mEulerRotationRadians.x -= static_cast<float>(2 * M_PI);
+            }
+        }
 
         QCursor cursor(Qt::BlankCursor);
         parentWidget()->activateWindow();
@@ -108,6 +160,12 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
 
         QCursor::setPos(mOriginalMousePosition);
         parentWidget()->releaseMouse();
+
+        // Unset velocity.
+        for (bool& pressed : mKeysHeld) {
+            pressed = false;
+        }
+        updateVelocity();
     }
 
     update();
@@ -124,12 +182,21 @@ void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
 }
 
 bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
+    // TODO(jwmcglynn): Touch the center of the screen when the mouse is
+    // captured. See EmulatorQtWindow::handleMouseEvent
     if (mCaptureMouse) {
         if (event->type() == QEvent::MouseMove) {
             updateMouselook();
             return true;
         } else if (event->type() == QEvent::Wheel) {
             return true;
+        } else if (event->type() == QEvent::KeyPress ||
+                   event->type() == QEvent::KeyRelease) {
+            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            if (handleKeyEvent(keyEvent)) {
+                updateVelocity();
+                return true;
+            }
         }
     }
 
@@ -188,8 +255,111 @@ void VirtualSceneControlWindow::slot_mousePoller() {
 }
 
 void VirtualSceneControlWindow::updateMouselook() {
+    QPoint offset = QCursor::pos() - mPreviousMousePosition;
     mPreviousMousePosition = getMouseCaptureCenter();
     QCursor::setPos(mPreviousMousePosition);
+
+    if (offset.x() != 0 || offset.y() != 0) {
+        mEulerRotationRadians.x -= offset.y() * kPixelsToRotationRadians;
+        mEulerRotationRadians.y -= offset.x() * kPixelsToRotationRadians;
+
+        // Clamp up/down rotation to -80 and +80 degrees, like a FPS camera.
+        if (mEulerRotationRadians.x <
+            glm::radians(kMinVerticalRotationDegrees)) {
+            mEulerRotationRadians.x = glm::radians(kMinVerticalRotationDegrees);
+        } else if (mEulerRotationRadians.x >
+                   glm::radians(kMaxVerticalRotationDegrees)) {
+            mEulerRotationRadians.x = glm::radians(kMaxVerticalRotationDegrees);
+        }
+
+        if (mSensorsAgent) {
+            // Rotations applied in the Y X Z order, but we need to convert to X
+            // Y Z order for the physical model.
+            glm::vec3 rotationRadians;
+            glm::extractEulerAngleXYZ(
+                    glm::eulerAngleYXZ(mEulerRotationRadians.y,
+                                       mEulerRotationRadians.x,
+                                       mEulerRotationRadians.z),
+                    rotationRadians.x, rotationRadians.y, rotationRadians.z);
+            const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
+
+            mSensorsAgent->setPhysicalParameterTarget(
+                    PHYSICAL_PARAMETER_ROTATION, rotationDegrees.x,
+                    rotationDegrees.y, rotationDegrees.z,
+                    PHYSICAL_INTERPOLATION_SMOOTH);
+        }
+
+        updateVelocity();
+    }
+}
+
+bool VirtualSceneControlWindow::handleKeyEvent(QKeyEvent* event) {
+    const bool pressed = event->type() == QEvent::KeyPress;
+
+    switch (event->key()) {
+        case Qt::Key_W:
+            mKeysHeld[Held_W] = pressed;
+            break;
+        case Qt::Key_A:
+            mKeysHeld[Held_A] = pressed;
+            break;
+        case Qt::Key_S:
+            mKeysHeld[Held_S] = pressed;
+            break;
+        case Qt::Key_D:
+            mKeysHeld[Held_D] = pressed;
+            break;
+        case Qt::Key_Q:
+            mKeysHeld[Held_Q] = pressed;
+            break;
+        case Qt::Key_E:
+            mKeysHeld[Held_E] = pressed;
+            break;
+#ifdef __APPLE__
+        case Qt::Key_unknown:
+            // On OS X, when the Alt key is held Qt can't recognize the E key.
+            // Compare the nativeVirtualKey code to see if this is the E key.
+            if (event->nativeVirtualKey() == kVK_ANSI_E) {
+                mKeysHeld[Held_E] = pressed;
+                break;
+            }
+
+// Otherwise fall through.
+#endif
+        default:
+            // Not handled.
+            return false;
+    }
+
+    return true;
+}
+
+void VirtualSceneControlWindow::updateVelocity() {
+    // Moving in an additional direction should not slow down other axes, so
+    // this is intentionally not normalized. As a result, moving along
+    // additional axes increases the overall velocity.
+    const glm::vec3 lookDirectionBaseVelocity(
+            (mKeysHeld[Held_A] ? -1.0f : 0.0f) +
+                    (mKeysHeld[Held_D] ? 1.0f : 0.0f),
+            (mKeysHeld[Held_Q] ? -1.0f : 0.0f) +
+                    (mKeysHeld[Held_E] ? 1.0f : 0.0f),
+            (mKeysHeld[Held_W] ? -1.0f : 0.0f) +
+                    (mKeysHeld[Held_S] ? 1.0f : 0.0f));
+
+    const glm::vec3 velocity = glm::angleAxis(mEulerRotationRadians.y,
+                                              glm::vec3(0.0f, 1.0f, 0.0f)) *
+                               lookDirectionBaseVelocity *
+                               kMovementVelocityMetersPerSecond;
+
+    if (velocity != mVelocity) {
+        mVelocity = velocity;
+
+        if (mSensorsAgent) {
+            mSensorsAgent->setPhysicalParameterTarget(
+                    PHYSICAL_PARAMETER_VELOCITY, velocity.x, velocity.y,
+                    velocity.z, PHYSICAL_INTERPOLATION_SMOOTH);
+        }
+    }
 }
 
 QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
