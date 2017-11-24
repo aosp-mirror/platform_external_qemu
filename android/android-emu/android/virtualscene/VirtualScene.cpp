@@ -16,6 +16,7 @@
 
 #include "android/virtualscene/VirtualScene.h"
 
+#include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/virtualscene/Renderer.h"
 
@@ -46,6 +47,8 @@ bool VirtualScene::initialize(const GLESv2Dispatch* gles2) {
         return false;
     }
 
+    skin_winsys_show_virtual_scene_controls(true);
+
     // Store the raw pointer instead of the unique_ptr wrapper to prevent
     // unintented side-effects on process shutdown.
     mImpl = renderer.release();
@@ -59,6 +62,8 @@ void VirtualScene::uninitialize() {
         E("VirtualScene not initialized");
         return;
     }
+
+    skin_winsys_show_virtual_scene_controls(false);
 
     delete mImpl;
     mImpl = nullptr;
