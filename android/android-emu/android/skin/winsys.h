@@ -122,6 +122,9 @@ void skin_winsys_set_window_icon(const unsigned char* icon_data,
 // Notifies the UI that the orientation has changed.
 void skin_winsys_update_rotation(SkinRotation rotation);
 
+// Notifies the UI that the virtual scene controls should be shown/hidden.
+void skin_winsys_show_virtual_scene_controls(bool show);
+
 // Stop main window and quit program. Must be called from inside event loop.
 void skin_winsys_quit_request(void);
 

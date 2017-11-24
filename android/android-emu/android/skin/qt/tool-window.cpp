@@ -83,6 +83,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     : QFrame(parent),
       mEmulatorWindow(window),
       mExtendedWindow([this] { return std::make_tuple(this); }),
+      mVirtualSceneControlWindow(this, parent),
       mUiEmuAgent(nullptr),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
@@ -114,7 +115,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     }
 
     adjustAllButtonsForTheme(theme);
-    this->setStyleSheet(Ui::stylesheetForTheme(theme));
+    updateTheme(Ui::stylesheetForTheme(theme));
 
     QString default_shortcuts =
             "Ctrl+Shift+L SHOW_PANE_LOCATION\n"
@@ -224,6 +225,9 @@ ToolWindow::~ToolWindow() {
 
 void ToolWindow::raise() {
     QFrame::raise();
+    if (mVirtualSceneControlWindow.isVisible()) {
+        mVirtualSceneControlWindow.raise();
+    }
     if (mTopSwitched) {
         mExtendedWindow.get()->raise();
         mExtendedWindow.get()->activateWindow();
@@ -237,6 +241,14 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
     }
 }
 
+void ToolWindow::showVirtualSceneControls(bool show) {
+    if (show) {
+        mVirtualSceneControlWindow.show();
+    } else {
+        mVirtualSceneControlWindow.hide();
+    }
+}
+
 void ToolWindow::stopExtendedWindowCreation() {
     mExtendedWindowCreateTimer.stop();
     mExtendedWindowCreateTimer.disconnect();
@@ -244,6 +256,7 @@ void ToolWindow::stopExtendedWindowCreation() {
 
 void ToolWindow::hide() {
     QFrame::hide();
+    mVirtualSceneControlWindow.hide();
     if (mExtendedWindow.hasInstance()) {
         mExtendedWindow.get()->hide();
     }
@@ -271,6 +284,10 @@ void ToolWindow::hideEvent(QHideEvent*) {
 void ToolWindow::show() {
     QFrame::show();
     setFixedSize(size());
+
+    if (mVirtualSceneControlWindow.isVisible()) {
+        mVirtualSceneControlWindow.show();
+    }
 
     if (mIsExtendedWindowVisibleOnShow) {
         mExtendedWindow.get()->show();
@@ -496,11 +513,26 @@ void ToolWindow::dockMainWindow() {
              + toolGap - mEmulatorWindow->getRightTransparency(),
          parentWidget()->geometry().top()
              + mEmulatorWindow->getTopTransparency());
+
+    mVirtualSceneControlWindow.setWidth(
+            parentWidget()->frameGeometry().width() -
+            mEmulatorWindow->getLeftTransparency() -
+            mEmulatorWindow->getRightTransparency());
+    mVirtualSceneControlWindow.move(
+            parentWidget()->frameGeometry().left() +
+                    mEmulatorWindow->getLeftTransparency(),
+            parentWidget()->geometry().bottom() -
+                    mEmulatorWindow->getBottomTransparency() + toolGap);
 }
 
 void ToolWindow::raiseMainWindow() {
     mEmulatorWindow->raise();
     mEmulatorWindow->activateWindow();
+}
+
+void ToolWindow::updateTheme(const QString& styleSheet) {
+    mVirtualSceneControlWindow.setStyleSheet(styleSheet);
+    setStyleSheet(styleSheet);
 }
 
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
@@ -723,7 +755,7 @@ void ToolWindow::paintEvent(QPaintEvent*) {
     }
 
     if (dpr > 1.0) {
-        // Normally you'd draw the border with a (0, 0 - w-1, h-1) rectangle.
+        // Normally you'd draw the border with a (0, 0, w-1, h-1) rectangle.
         // However, there's some weirdness going on with high-density displays
         // that makes a single-pixel "slack" appear at the left and bottom
         // of the border. This basically adds 1 to compensate for it.

@@ -296,7 +296,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
     // Apply this style to the extended window (this),
     // and to the main tool-bar.
     this->setStyleSheet(styleString);
-    mToolWindow->setStyleSheet(styleString);
+    mToolWindow->updateTheme(styleString);
     mExtendedUi->rotaryInputPage->updateTheme();
     mExtendedUi->bugreportPage->updateTheme();
     mExtendedUi->recordScreenPage->updateTheme();
