@@ -60,7 +60,7 @@ public:
             bool found = false;
             uint64_t gpa = hva2gpa_call(start, &found);
             if (found) {
-                hv_vm_protect(gpa, length, 0);
+                guest_mem_protect_call(gpa, length, 0);
             }
         }
         mprotect(start, length, PROT_NONE);
@@ -99,10 +99,9 @@ public:
             if (found) {
                 // Restore the mapping because we might have re-mapped above.
                 if (remapNeeded) {
-                    hv_vm_unmap(gpa, length);
-                    hv_vm_map(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                    guest_mem_remap_call(start, gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
                 } else {
-                    hv_vm_protect(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
+                    guest_mem_protect_call(gpa, length, HV_MEMORY_READ | HV_MEMORY_WRITE | HV_MEMORY_EXEC);
                 }
             }
         }
