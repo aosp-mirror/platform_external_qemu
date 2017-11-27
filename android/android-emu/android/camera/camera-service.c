@@ -26,6 +26,7 @@
 #include "android/emulation/android_qemud.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/globals.h"  /* for android_hw */
+#include "android/hw-sensors.h"
 #include "android/boot-properties.h"
 #include "android/utils/debug.h"
 #include "android/utils/misc.h"
@@ -1112,7 +1113,7 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
  *  cc - Queried camera client descriptor.
  *  qc - Qemu client for the emulated camera.
  *  param - Query parameters. Parameters for this query are formatted as such:
- *          video=<size> preview=<size> whiteb=<red>,<green>,<blue> expcomp=<comp>
+ *          video=<size> preview=<size> whiteb=<red>,<green>,<blue> expcomp=<comp> time=<1,0>
  *      where:
  *       - 'video', and 'preview' both must be decimal values, defining size of
  *         requested video, and preview frames respectively. Zero value for any
@@ -1120,6 +1121,8 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
  *       - whiteb contains float values required to calculate whilte balance.
  *       - expcomp contains a float value required to calculate exposure
  *         compensation.
+ *       - time=1 is passed when the image is requesting a response with the
+ *         frame time included.
  */
 static void
 _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
@@ -1133,6 +1136,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     uint64_t tick;
     float r_scale = 1.0f, g_scale = 1.0f, b_scale = 1.0f, exp_comp = 1.0f;
     char tmp[256];
+    int send_frame_time = 0;
     ClientFrame frame = {};
 
     /* Sanity check. */
@@ -1167,6 +1171,10 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
             D("Invalid value '%s' for parameter 'whiteb'", tmp);
             exp_comp = 1.0f;
         }
+    }
+
+    if (get_token_value_int(param, "time", &send_frame_time) < 0) {
+        send_frame_time = 0;
     }
 
     /* Verify that framebuffer sizes match the ones that the started camera
@@ -1204,6 +1212,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     frame.framebuffers = fbs;
     frame.staging_framebuffer = cc->staging_framebuffer;
     frame.staging_framebuffer_size = cc->staging_framebuffer_size;
+    frame.frame_time = 0L;
 
     repeat = cc->read_frame(cc->camera, &frame, r_scale, g_scale, b_scale,
                             exp_comp);
@@ -1248,8 +1257,9 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
      * Build the reply.
      */
 
-    /* Payload includes "ok:" + requested video and preview frames. */
-    payload_size = 3 + video_size + preview_size;
+    /* Payload includes "ok:" + requested video and preview frames + an int64
+     * frame timestamp if requested. */
+    payload_size = 3 + (send_frame_time ? 8 : 0) + video_size + preview_size;
 
     /* Send payload size first. */
     _qemu_client_reply_payload(qc, payload_size);
@@ -1271,6 +1281,14 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
     /* After that send preview frame (if requested). */
     if (preview_size) {
         qemud_client_send(qc, cc->preview_frame, preview_size);
+    }
+
+    // after that send the frame time (if requested). */
+    if (send_frame_time) {
+        int64_t adjusted_time = frame.frame_time +
+                android_sensors_get_time_offset();
+
+        qemud_client_send(qc, (const uint8_t*) &adjusted_time, 8);
     }
 }
 

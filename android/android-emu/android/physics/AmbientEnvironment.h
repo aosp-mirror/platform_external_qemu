@@ -51,7 +51,7 @@ public:
      * with the time when target state change requests are recorded as taking
      * place.  Time values must be non-decreasing.
      */
-    AmbientState setCurrentTime(uint64_t time_ns);
+    AmbientState setCurrentTime(int64_t time_ns);
 
     /*
      * Sets the strength of the ambient magnetic field.
@@ -93,19 +93,26 @@ public:
      * Gets current simulated state of the ambient environment.
      */
     glm::vec3 getMagneticField(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t* timestamp = nullptr) const;
     glm::vec3 getGravity(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t* timestamp = nullptr) const;
     float getTemperature(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t* timestamp = nullptr) const;
     float getProximity(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t* timestamp = nullptr) const;
     float getLight(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t* timestamp = nullptr) const;
     float getPressure(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t* timestamp = nullptr) const;
     float getHumidity(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t* timestamp = nullptr) const;
 
 private:
     glm::vec3 mMagneticField = glm::vec3(22.0f, 5.9f, 43.1f);
@@ -121,6 +128,8 @@ private:
     float mPressure = 0.f;
     /* percent */
     float mHumidity = 0.f;
+
+    int64_t mCurrentTimeNs = 0L;
 };
 
 }  // namespace physics
