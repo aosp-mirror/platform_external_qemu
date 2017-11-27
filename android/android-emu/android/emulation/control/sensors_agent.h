@@ -16,6 +16,8 @@
 
 #include "android/physics/physical_state_agent.h"
 
+#include <stdint.h>
+
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidSensorsAgent {
