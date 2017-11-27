@@ -85,9 +85,11 @@ void RecordScreenPage::setRecordScreenAgent(
 
 void RecordScreenPage::setRecordState(RecordState newState) {
     mState = newState;
+
     switch (mState) {
         case RecordState::Ready:
             mUi->rec_recordOverlayWidget->show();
+            mUi->rec_playerOverlayWidget->hide();
             mUi->rec_timeElapsedWidget->hide();
             mUi->rec_playStopButton->hide();
             mUi->rec_formatSwitch->hide();
@@ -131,12 +133,22 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_formatSwitch->setCurrentIndex(0);
             break;
         }
+        case RecordState::Playing:
+            mUi->rec_playerOverlayWidget->show();
+            // Change the icon on the play/stop button.
+            mUi->rec_playStopButton->show();
+            mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
+            mUi->rec_playStopButton->setProperty("themeIconName", "stop");
+            mUi->rec_saveButton->hide();
+            break;
         case RecordState::Stopped:
             // TODO: Need to only show this when hovering over the video
             // widget, which we don't have yet.
             mUi->rec_recordOverlayWidget->show();
+            mUi->rec_playerOverlayWidget->hide();
             mUi->rec_timeElapsedWidget->hide();
-            mUi->rec_playStopButton->show();
+            // disable play button for now
+            //mUi->rec_playStopButton->show();
             mUi->rec_formatSwitch->show();
             mUi->rec_saveButton->show();
             mUi->rec_timeResLabel->setText(
@@ -147,9 +159,12 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_timeResLabel->show();
             mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
             mUi->rec_recordButton->show();
-            mUi->rec_playStopButton->setEnabled(true);
+            // disable play button for now
+            //mUi->rec_playStopButton->setEnabled(true);
             mUi->rec_formatSwitch->setEnabled(true);
             mUi->rec_saveButton->setEnabled(true);
+            mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+            mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
             break;
         case RecordState::Converting:
         {
@@ -180,8 +195,27 @@ void RecordScreenPage::updateElapsedTime() {
 }
 
 void RecordScreenPage::on_rec_playStopButton_clicked() {
-    QString url = QString("file://%1").arg(mTmpFilePath.c_str());
-    QDesktopServices::openUrl(QUrl(url));
+    if (mState == RecordState::Stopped) {
+        mVideoWidget.reset(new android::videoplayer::VideoPlayerWidget(this));
+        mVideoWidget->setVisible(false);
+        mUi->rec_playerOverlayLayout->addWidget(mVideoWidget.get());
+ 
+        mVideoPlayerNotifier.reset(new android::videoplayer::VideoPlayerNotifier());
+        mVideoPlayer = android::videoplayer::VideoPlayer::create(mTmpFilePath, mVideoWidget.get(), mVideoPlayerNotifier.get());
+        connect(mVideoPlayerNotifier.get(), SIGNAL(updateWidget()), this, SLOT(updateVideoView()));
+        connect(mVideoPlayerNotifier.get(), SIGNAL(videoFinished()), this, SLOT(videoPlayingFinished()));
+
+        mVideoWidget->setVisible(true);
+        mVideoPlayer->scheduleRefresh(20);
+        mVideoPlayer->start();
+        setRecordState(RecordState::Playing);
+    } else if (mState == RecordState::Playing) {
+        mVideoPlayer->stop();
+        mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+        mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
+        // stop call will cause videoPlayingFinished() method to be called
+        // where we update the button state
+    }
 }
 
 void RecordScreenPage::on_rec_recordButton_clicked() {
@@ -358,4 +392,12 @@ void ConvertingTask::run() {
                                             mEndFilename.c_str(),
                                             64 * 1024);
     emit(finished(!rc));
+}
+
+void RecordScreenPage::updateVideoView() {
+    mVideoWidget->repaint();
+}
+
+void RecordScreenPage::videoPlayingFinished() {
+    setRecordState(RecordState::Stopped);
 }

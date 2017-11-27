@@ -80,7 +80,13 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ui-event-recorder.cpp \
     android/skin/qt/user-actions-counter.cpp \
     android/skin/qt/virtualscene-control-window.cpp \
-    android/skin/qt/wavefront-obj-parser.cpp
+    android/skin/qt/wavefront-obj-parser.cpp \
+    android/skin/qt/video-player/Clock.cpp \
+    android/skin/qt/video-player/FrameQueue.cpp \
+    android/skin/qt/video-player/PacketQueue.cpp \
+    android/skin/qt/video-player/VideoPlayer.cpp \
+    android/skin/qt/video-player/VideoPlayerNotifier.cpp \
+    android/skin/qt/video-player/VideoPlayerWidget.cpp
 
 ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/accelerometer-3d-widget.h \
@@ -119,7 +125,9 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/size-tweaker.h \
     android/skin/qt/tool-window.h \
     android/skin/qt/user-actions-counter.h \
-    android/skin/qt/virtualscene-control-window.h
+    android/skin/qt/virtualscene-control-window.h \
+    android/skin/qt/video-player/VideoPlayerNotifier.h \
+    android/skin/qt/video-player/VideoPlayerWidget.h
 
 ANDROID_SKIN_QT_RESOURCES := \
     android/skin/qt/static_resources.qrc \
