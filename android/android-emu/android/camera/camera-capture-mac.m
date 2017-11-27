@@ -142,7 +142,8 @@ FourCCToInternal(uint32_t cm_pix_format)
           fbs_num:(float)
           r_scale:(float)
           g_scale:(float)
-          b_scale:(float)exp_comp;
+          b_scale:(float)
+         exp_comp:(int64_t*)frame_timestamp;
 
 @end
 
@@ -307,7 +308,8 @@ FourCCToInternal(uint32_t cm_pix_format)
      result_frame:(float)
           r_scale:(float)
           g_scale:(float)
-          b_scale:(float)exp_comp {
+          b_scale:(float)
+         exp_comp:(int64_t*)frame_timestamp {
     int res = -1;
 
 
@@ -562,7 +564,8 @@ int camera_device_read_frame(CameraDevice* cd,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp) {
+                             float exp_comp,
+                             int64_t* frame_timestamp) {
     MacCameraDevice* mcd;
 
     /* Sanity checks. */
@@ -581,11 +584,13 @@ int camera_device_read_frame(CameraDevice* cd,
         if (result) return -1;
         mcd->started = 1;
     }
+
     return [mcd->device read_frame:
                       result_frame:
                            r_scale:
                            g_scale:
-                           b_scale:exp_comp];
+                           b_scale:
+                          exp_comp:frame_timestamp];
 }
 
 void

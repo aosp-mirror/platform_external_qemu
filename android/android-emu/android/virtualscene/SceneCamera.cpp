@@ -17,6 +17,7 @@
 #include "android/virtualscene/SceneCamera.h"
 #include "android/hw-sensors.h"
 #include "android/utils/debug.h"
+#include "android/utils/looper.h"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -82,16 +83,19 @@ SceneCamera::SceneCamera() {
 
 SceneCamera::~SceneCamera() = default;
 
-void SceneCamera::update() {
+int64_t SceneCamera::update() {
+    int64_t timestamp =
+                looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+
     glm::vec3 position;
     android_physical_model_get(PHYSICAL_PARAMETER_POSITION, &position.x,
-                               &position.y, &position.z,
-                               PARAMETER_VALUE_TYPE_CURRENT);
+                               &position.y, &position.z, &timestamp,
+                               PARAMETER_VALUE_TYPE_EXACT);
 
     glm::vec3 rotationEuler;
     android_physical_model_get(PHYSICAL_PARAMETER_ROTATION, &rotationEuler.x,
-                               &rotationEuler.y, &rotationEuler.z,
-                               PARAMETER_VALUE_TYPE_CURRENT);
+                               &rotationEuler.y, &rotationEuler.z, &timestamp,
+                               PARAMETER_VALUE_TYPE_EXACT);
 
     const glm::mat4 rotationMat = glm::eulerAngleXYZ(
             glm::radians(rotationEuler.x), glm::radians(rotationEuler.y),
@@ -101,6 +105,8 @@ void SceneCamera::update() {
             glm::inverse(rotationMat) * glm::translate(glm::mat4(), -position);
 
     mViewFromWorld = mCameraFromSensors * inverseSensorsPose;
+
+    return timestamp;
 }
 
 glm::mat4 SceneCamera::getViewProjection() const {

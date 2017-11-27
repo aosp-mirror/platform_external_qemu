@@ -72,7 +72,10 @@ public:
     GLint getAttribLocation(GLuint program, const char* name);
     GLint getUniformLocation(GLuint program, const char* name);
 
-    void render();
+    // Render a frame.
+    //
+    // Returns the timestamp at which the frame was rendered.
+    int64_t render();
 
 private:
     // Private constructor, use Renderer::create to create an
