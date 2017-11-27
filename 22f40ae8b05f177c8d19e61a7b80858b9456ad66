@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7cccc81b_502ac7c0",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-27T20:13:24Z",
+      "side": 1,
+      "message": "does this need to be apple only?",
+      "range": {
+        "startLine": 66,
+        "startChar": 4,
+        "endLine": 66,
+        "endChar": 38
+      },
+      "revId": "22f40ae8b05f177c8d19e61a7b80858b9456ad66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
