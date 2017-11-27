@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "097b6b04_568ec22d",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-27T20:05:49Z",
+      "side": 1,
+      "message": "does this all need to be public?",
+      "revId": "2286fea7a44f78aa3465e3310d8d1d68f96b8577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
