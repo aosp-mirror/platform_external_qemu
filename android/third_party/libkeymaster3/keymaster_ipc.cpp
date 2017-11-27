@@ -25,6 +25,8 @@ extern "C" {
 
 #include <sys/time.h>
 
+#define DEBUG 1
+
 #ifdef DEBUG
 #   define  DD(...)    do { printf("%s:%d: ", __FUNCTION__, __LINE__); printf(__VA_ARGS__); printf("\n");fflush(stdout); } while (0)
 #else
