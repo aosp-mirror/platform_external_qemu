@@ -982,7 +982,8 @@ int camera_device_read_frame(CameraDevice* ccd,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp) {
+                             float exp_comp,
+                             int64_t* frame_timestamp) {
     LinuxCameraDevice* cd;
 
     /* Sanity checks. */
