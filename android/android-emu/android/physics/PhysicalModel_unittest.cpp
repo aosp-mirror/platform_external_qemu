@@ -228,6 +228,8 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, newRotation, PHYSICAL_INTERPOLATION_SMOOTH);
 
+    physicalModel_setCurrentTime(model, 1125000000UL);
+
     long measurement_id;
     vec3 currentGyro = physicalModel_getGyroscope(model, &measurement_id);
     EXPECT_LE(currentGyro.x, -0.01f);
