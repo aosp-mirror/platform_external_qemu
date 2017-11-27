@@ -257,7 +257,9 @@ TEST(InertialModel, TargetVelocity) {
     inertialModel.setTargetPosition(glm::vec3(0.f), PHYSICAL_INTERPOLATION_STEP);
     inertialModel.setTargetVelocity(targetVelocity, PHYSICAL_INTERPOLATION_SMOOTH);
 
-    inertialModel.setCurrentTime(500000000UL);
+    // Retrieve time just before the end to ensure that we hit the case where
+    // the pre-interpolation-finished calculation is used.
+    inertialModel.setCurrentTime(500000000UL - 1UL);
 
     const glm::vec3 retrievedStableVelocity =
             inertialModel.getVelocity(PARAMETER_VALUE_TYPE_CURRENT);

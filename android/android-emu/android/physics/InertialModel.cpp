@@ -373,7 +373,7 @@ void InertialModel::setInertialTransforms(
             glm::vec3(0.0f),
             glm::vec3(0.0f),
             endVelocity,
-            endPosition);
+            endPosition - kStateChangeTime1 * endVelocity);
     mVelocityAfterEndCubic = glm::mat4x3(
             glm::vec3(0.0f),
             glm::vec3(0.0f),
