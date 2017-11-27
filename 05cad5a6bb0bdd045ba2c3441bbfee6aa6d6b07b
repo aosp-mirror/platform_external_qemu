@@ -1,0 +1,107 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a0086250_6810b915",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-27T20:42:33Z",
+      "side": 1,
+      "message": "it might be worth adding a check here that rotation.w/projection aren\u0027t all zero.",
+      "range": {
+        "startLine": 107,
+        "startChar": 36,
+        "endLine": 107,
+        "endChar": 58
+      },
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f998679_618578ed",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-27T20:42:33Z",
+      "side": 1,
+      "message": "It might be worth having a pixels-to-radians scale here so we can tune the rotation rate if we want.",
+      "range": {
+        "startLine": 259,
+        "startChar": 35,
+        "endLine": 259,
+        "endChar": 80
+      },
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c83947e5_dff99883",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-27T20:42:33Z",
+      "side": 1,
+      "message": "nit - 80",
+      "range": {
+        "startLine": 262,
+        "startChar": 37,
+        "endLine": 262,
+        "endChar": 48
+      },
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bb352192_bbc42290",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-27T20:42:33Z",
+      "side": 1,
+      "message": "does glm::eulerAngleYX (or XY if I have the order wrong) not work for composing the angles together properly?",
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2fbf9667_6e027b41",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-11-27T20:42:33Z",
+      "side": 1,
+      "message": "probably also worth adding a constant to tune the velocity here too.",
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
