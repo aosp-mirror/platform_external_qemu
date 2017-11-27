@@ -100,7 +100,8 @@ public:
                   float rScale,
                   float gScale,
                   float bScale,
-                  float expComp);
+                  float expComp,
+                  uint64_t* frameTimestamp);
 
 private:
     // Initialize EGL, returns false on failure.
@@ -203,7 +204,8 @@ int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
                                         float rScale,
                                         float gScale,
                                         float bScale,
-                                        float expComp) {
+                                        float expComp,
+                                        uint64_t* frameTimestamp) {
     auto context = makeEglCurrent();
     if (!context.isValid()) {
         return -1;
@@ -211,7 +213,7 @@ int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
 
     mGles2->glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
 
-    VirtualScene::render();
+    *frameTimestamp = VirtualScene::render();
     mEglDispatch->eglSwapBuffers(mEglDisplay, mEglSurface);
     mGles2->glReadPixels(0, 0, mFramebufferWidth, mFramebufferHeight, GL_RGBA,
                          GL_UNSIGNED_BYTE, mFramebufferData.data());
@@ -372,14 +374,16 @@ int camera_virtualscene_read_frame(CameraDevice* ccd,
                                    float r_scale,
                                    float g_scale,
                                    float b_scale,
-                                   float exp_comp) {
+                                   float exp_comp,
+                                   uint64_t* frame_timestamp) {
     VirtualSceneCameraDevice* cd = toVirtualSceneCameraDevice(ccd);
     if (!cd) {
         E("%s: Invalid camera device descriptor", __FUNCTION__);
         return -1;
     }
 
-    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp);
+    return cd->readFrame(result_frame, r_scale, g_scale, b_scale, exp_comp,
+                         frame_timestamp);
 }
 
 void camera_virtualscene_close(CameraDevice* ccd) {

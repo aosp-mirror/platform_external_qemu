@@ -73,16 +73,21 @@ public:
      * the most recently set current time (from setCurrentTime).
      */
     glm::vec3 getPosition(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            uint64_t *timestamp = nullptr) const;
     glm::vec3 getVelocity(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            uint64_t *timestamp = nullptr) const;
     glm::vec3 getAcceleration(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            uint64_t *timestamp = nullptr) const;
     glm::quat getRotation(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            uint64_t *timestamp = nullptr) const;
     // rotational velocity as rotation around (x, y, z) axis in rad/s
     glm::vec3 getRotationalVelocity(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            uint64_t *timestamp = nullptr) const;
 
 private:
     void updateRotations();
@@ -103,14 +108,16 @@ private:
             const glm::mat2x3& quinticTransform,
             const glm::mat4x3& cubicTransform,
             const glm::mat4x3& afterEndCubicTransform,
-            ParameterValueType parameterValueType) const;
+            ParameterValueType parameterValueType,
+            uint64_t* timestamp) const;
 
     // Helper for calculating the current or target rotational state given a
     // transform specifying either the rotational velocity, or rotation in
     // 4d vector space.
     glm::vec4 calculateRotationalState(
-        const glm::mat4x4& cubicTransform,
-        ParameterValueType parameterValueType) const;
+            const glm::mat4x4& cubicTransform,
+            ParameterValueType parameterValueType,
+            uint64_t* timestamp) const;
 
     // Note: Each target interpolation begins at a set time, accelerates at a
     //       for half of the target time, then decelerates for the second half

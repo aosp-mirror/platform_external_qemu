@@ -125,7 +125,7 @@ FourCCToInternal(uint32_t cm_pix_format)
  * Return:
  *  0 on success, or !=0 on failure.
  */
-- (int)start_capturing:(int)width:(int)height;
+- (int)start_capturing:(int)width :(int)height;
 
 /* Captures a frame from the camera device.
  * Param:
@@ -137,12 +137,13 @@ FourCCToInternal(uint32_t cm_pix_format)
  *  in the device. The client should respond to this value by repeating the
  *  read, rather than reporting an error.
  */
-- (int)read_frame:(ClientFrame*)
-     result_frame:(int)
-          fbs_num:(float)
-          r_scale:(float)
-          g_scale:(float)
-          b_scale:(float)exp_comp;
+- (int)read_frame:(ClientFrame*)result_frame
+        :(int)fbs_num
+        :(float)r_scale
+        :(float)g_scale
+        :(float)b_scale
+        :(float)exp_comp
+        :(uint64_t*)frame_timestamp;
 
 @end
 
@@ -266,7 +267,7 @@ FourCCToInternal(uint32_t cm_pix_format)
     }
 }
 
-- (int)start_capturing:(int)width:(int)height
+- (int)start_capturing:(int)width :(int)height
 {
     D("%s: call. start capture session\n", __func__);
 
@@ -303,11 +304,13 @@ FourCCToInternal(uint32_t cm_pix_format)
     }
 }
 
-- (int)read_frame:(ClientFrame*)
-     result_frame:(float)
-          r_scale:(float)
-          g_scale:(float)
-          b_scale:(float)exp_comp {
+- (int)read_frame:(ClientFrame*)result_frame
+        :(int)fbs_num
+        :(float)r_scale
+        :(float)g_scale
+        :(float)b_scale
+        :(float)exp_comp
+        :(uint64_t*)frame_timestamp {
     int res = -1;
 
 
@@ -562,7 +565,8 @@ int camera_device_read_frame(CameraDevice* cd,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp) {
+                             float exp_comp,
+                             uint64_t* frame_timestamp) {
     MacCameraDevice* mcd;
 
     /* Sanity checks. */
@@ -581,11 +585,13 @@ int camera_device_read_frame(CameraDevice* cd,
         if (result) return -1;
         mcd->started = 1;
     }
-    return [mcd->device read_frame:
-                      result_frame:
-                           r_scale:
-                           g_scale:
-                           b_scale:exp_comp];
+
+    return [mcd->device read_frame:result_frame
+                           r_scale:r_scale
+                           g_scale:g_scale
+                           b_scale:b_scale
+                           exp_comp:exp_comp
+                           frame_timestamp:frame_timestamp];
 }
 
 void

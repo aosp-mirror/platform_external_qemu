@@ -146,7 +146,7 @@ extern uint8_t android_sensors_get_sensor_status( int sensor_id );
 /* Get physical model values */
 extern int android_physical_model_get(
     int physical_parameter, float* out_a, float* out_b, float* out_c,
-    ParameterValueType parameter_value_type);
+    uint64_t* out_timestamp, ParameterValueType parameter_value_type);
 
 /* Set physical model target values */
 extern int android_physical_model_set(

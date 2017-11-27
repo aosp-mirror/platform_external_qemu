@@ -20,6 +20,7 @@ namespace android {
 namespace physics {
 
 AmbientState AmbientEnvironment::setCurrentTime(uint64_t time_ns) {
+    mCurrentTimeNs = time_ns;
     return AMBIENT_STATE_STABLE;
 }
 
@@ -57,31 +58,65 @@ void AmbientEnvironment::setHumidity(
 }
 
 glm::vec3 AmbientEnvironment::getMagneticField(
-        ParameterValueType valueType) const {
+        ParameterValueType valueType,
+        uint64_t* timestamp) const {
+    if (timestamp != nullptr) {
+        *timestamp = mCurrentTimeNs;
+    }
     return mMagneticField;
 }
 
-glm::vec3 AmbientEnvironment::getGravity(ParameterValueType valueType) const {
+glm::vec3 AmbientEnvironment::getGravity(
+        ParameterValueType valueType,
+        uint64_t* timestamp) const {
+    if (timestamp != nullptr) {
+        *timestamp = mCurrentTimeNs;
+    }
     return mGravity;
 }
 
-float AmbientEnvironment::getTemperature(ParameterValueType valueType) const {
+float AmbientEnvironment::getTemperature(
+        ParameterValueType valueType,
+        uint64_t* timestamp) const {
+    if (timestamp != nullptr) {
+        *timestamp = mCurrentTimeNs;
+    }
     return mTemperature;
 }
 
-float AmbientEnvironment::getProximity(ParameterValueType valueType) const {
+float AmbientEnvironment::getProximity(
+        ParameterValueType valueType,
+        uint64_t* timestamp) const {
+    if (timestamp != nullptr) {
+        *timestamp = mCurrentTimeNs;
+    }
     return mProximity;
 }
 
-float AmbientEnvironment::getLight(ParameterValueType valueType) const {
+float AmbientEnvironment::getLight(
+        ParameterValueType valueType,
+        uint64_t* timestamp) const {
+    if (timestamp != nullptr) {
+        *timestamp = mCurrentTimeNs;
+    }
     return mLight;
 }
 
-float AmbientEnvironment::getPressure(ParameterValueType valueType) const {
+float AmbientEnvironment::getPressure(
+        ParameterValueType valueType,
+        uint64_t* timestamp) const {
+    if (timestamp != nullptr) {
+        *timestamp = mCurrentTimeNs;
+    }
     return mPressure;
 }
 
-float AmbientEnvironment::getHumidity(ParameterValueType valueType) const {
+float AmbientEnvironment::getHumidity(
+        ParameterValueType valueType,
+        uint64_t* timestamp) const {
+    if (timestamp != nullptr) {
+        *timestamp = mCurrentTimeNs;
+    }
     return mHumidity;
 }
 

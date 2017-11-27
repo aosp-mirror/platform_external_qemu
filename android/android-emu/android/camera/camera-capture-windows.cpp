@@ -813,6 +813,7 @@ struct CameraCommand {
             float g_scale;
             float b_scale;
             float exp_comp;
+            uint64_t* frame_timestamp;
         } read_frame;
 
         // CAMERA_CMD_CLOSE
@@ -857,7 +858,8 @@ struct CameraCommand {
                 result = cmd_camera_device_read_frame(
                         cmd.read_frame.device, cmd.read_frame.result_frame,
                         cmd.read_frame.r_scale, cmd.read_frame.g_scale,
-                        cmd.read_frame.b_scale, cmd.read_frame.exp_comp);
+                        cmd.read_frame.b_scale, cmd.read_frame.exp_comp,
+                        cmd.read_frame.frame_timestamp);
                 break;
 
             case CAMERA_CMD_CLOSE:
@@ -962,7 +964,8 @@ int camera_device_read_frame(CameraDevice* cd,
                              float r_scale,
                              float g_scale,
                              float b_scale,
-                             float exp_comp) {
+                             float exp_comp,
+                             uint64_t* frame_timestamp) {
     CameraCommand cmd = {};
     cmd.cmd = CAMERA_CMD_READ_FRAME;
     cmd.read_frame.device = cd;
@@ -971,6 +974,7 @@ int camera_device_read_frame(CameraDevice* cd,
     cmd.read_frame.g_scale = g_scale;
     cmd.read_frame.b_scale = b_scale;
     cmd.read_frame.exp_comp = exp_comp;
+    cmd.read_frame.frame_timestamp = frame_timestamp;
 
     return static_cast<int>(sCameraThread->sendCommandAndGetResult(cmd));
 }

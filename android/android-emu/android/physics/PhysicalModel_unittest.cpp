@@ -111,8 +111,12 @@ TEST(PhysicalModel, SetTargetPosition) {
             model, targetPosition, PHYSICAL_INTERPOLATION_STEP);
 
     physicalModel_setCurrentTime(model, 500000000UL);
+    
+    uint64_t timestamp;
     vec3 currentPosition = physicalModel_getParameterPosition(model,
-            PARAMETER_VALUE_TYPE_CURRENT);
+            PARAMETER_VALUE_TYPE_CURRENT, &timestamp);
+
+    EXPECT_EQ(500000000UL, timestamp);
 
     EXPECT_VEC3_NEAR(targetPosition, currentPosition, 0.0001f);
 
@@ -131,8 +135,11 @@ TEST(PhysicalModel, SetTargetRotation) {
             model, targetRotation, PHYSICAL_INTERPOLATION_STEP);
 
     physicalModel_setCurrentTime(model, 500000000UL);
+    uint64_t timestamp;
     vec3 currentRotation = physicalModel_getParameterRotation(model,
-            PARAMETER_VALUE_TYPE_CURRENT);
+            PARAMETER_VALUE_TYPE_CURRENT, &timestamp);
+    
+    EXPECT_EQ(500000000UL, timestamp);
 
     EXPECT_VEC3_NEAR(targetRotation, currentRotation, 0.0001f);
 
@@ -460,35 +467,43 @@ TEST(PhysicalModel, SaveLoadTargets) {
 
     EXPECT_VEC3_NEAR(positionTarget,
             physicalModel_getParameterPosition(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
     EXPECT_VEC3_NEAR(rotationTarget,
             physicalModel_getParameterRotation(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
     EXPECT_VEC3_NEAR(magneticFieldTarget,
             physicalModel_getParameterMagneticField(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
     EXPECT_NEAR(temperatureTarget,
             physicalModel_getParameterTemperature(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
     EXPECT_NEAR(proximityTarget,
             physicalModel_getParameterProximity(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
     EXPECT_NEAR(lightTarget,
             physicalModel_getParameterLight(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
     EXPECT_NEAR(pressureTarget,
             physicalModel_getParameterPressure(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
     EXPECT_NEAR(humidityTarget,
             physicalModel_getParameterHumidity(loadedModel,
-                                               PARAMETER_VALUE_TYPE_TARGET),
+                                               PARAMETER_VALUE_TYPE_TARGET,
+                                               nullptr),
             0.00001f);
 
     physicalModel_free(loadedModel);

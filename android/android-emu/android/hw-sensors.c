@@ -650,6 +650,7 @@ static void _hwSensors_getPhysicalParameterValue(HwSensors* h,
                                                  float* a,
                                                  float* b,
                                                  float* c,
+                                                 uint64_t* timestamp,
                                                  ParameterValueType parameter_value_type) {
     switch (parameter_id) {
 #define ENUM_NAME(x) PHYSICAL_PARAMETER_##x
@@ -658,7 +659,8 @@ static void _hwSensors_getPhysicalParameterValue(HwSensors* h,
 #define PHYSICAL_PARAMETER_(x,y,z,w) case ENUM_NAME(x):\
             TYPE_GET_VALUES_FUNCTION_NAME(w)(\
                     GET_PARAMETER_FUNCTION_NAME(z)(h->physical_model,\
-                                                   parameter_value_type),\
+                                                   parameter_value_type,\
+                                                   timestamp),\
                     a, b, c);\
             break;
 PHYSICAL_PARAMETERS_LIST
@@ -979,7 +981,7 @@ extern uint8_t android_sensors_get_sensor_status(int sensor_id) {
 /* Get a physical model parameter target value*/
 extern int android_physical_model_get(
         int physical_parameter, float* out_a, float* out_b, float* out_c,
-        ParameterValueType parameter_value_type) {
+        uint64_t* out_timestamp, ParameterValueType parameter_value_type) {
     HwSensors* hw = _sensorsState;
 
     *out_a = 0;
@@ -994,7 +996,8 @@ extern int android_physical_model_get(
     }
 
     _hwSensors_getPhysicalParameterValue(
-            hw, physical_parameter, out_a, out_b, out_c, parameter_value_type);
+            hw, physical_parameter, out_a, out_b, out_c, out_timestamp,
+            parameter_value_type);
 
     return PHYSICAL_PARAMETER_STATUS_OK;
 }

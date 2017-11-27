@@ -16,6 +16,8 @@
 
 #include "android/physics/physical_state_agent.h"
 
+#include <stdint.h>
+
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidSensorsAgent {
@@ -41,7 +43,7 @@ typedef struct QAndroidSensorsAgent {
     //                         PARAMETER_VALUE_TYPE_CURRENT
     int (*getPhysicalParameter)(
             int parameterId, float *a, float *b, float *c,
-            int parameterValueType);
+            uint64_t *timestamp, int parameterValueType);
 
     // Sets the coarse orientation of the modeled device.
     // Input: |orientation| determines which coarse orientation to use, i.e.

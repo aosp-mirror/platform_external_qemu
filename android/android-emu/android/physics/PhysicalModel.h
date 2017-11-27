@@ -69,7 +69,8 @@ PHYSICAL_PARAMETERS_LIST
 /* Target getters for all physical parameters */
 #define GET_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) w GET_PARAMETER_FUNCTION_NAME(z)(\
-        PhysicalModel* model, ParameterValueType parameterValueType);
+        PhysicalModel* model, ParameterValueType parameterValueType,\
+        uint64_t* timestamp);
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PARAMETER_FUNCTION_NAME

@@ -92,7 +92,8 @@ PHYSICAL_PARAMETERS_LIST
      */
 #define GET_TARGET_FUNCTION_NAME(x) getParameter##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) w GET_TARGET_FUNCTION_NAME(z)(\
-        ParameterValueType parameterValueType) const;
+        ParameterValueType parameterValueType,\
+        uint64_t* timestamp = nullptr) const;
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef SET_TARGET_FUNCTION_NAME
@@ -340,61 +341,61 @@ void PhysicalModelImpl::setTargetHumidity(
 }
 
 vec3 PhysicalModelImpl::getParameterPosition(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return fromGlm(mInertialModel.getPosition(parameterValueType));
+    return fromGlm(mInertialModel.getPosition(parameterValueType, timestamp));
 }
 
 vec3 PhysicalModelImpl::getParameterVelocity(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return fromGlm(mInertialModel.getVelocity(parameterValueType));
+    return fromGlm(mInertialModel.getVelocity(parameterValueType, timestamp));
 }
 
 vec3 PhysicalModelImpl::getParameterRotation(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     glm::vec3 rotationRadians;
     glm::extractEulerAngleXYZ(
-            glm::mat4_cast(mInertialModel.getRotation(parameterValueType)),
+            glm::mat4_cast(mInertialModel.getRotation(parameterValueType, timestamp)),
             rotationRadians.x, rotationRadians.y, rotationRadians.z);
     return fromGlm(glm::degrees(rotationRadians));
 }
 
 vec3 PhysicalModelImpl::getParameterMagneticField(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return fromGlm(mAmbientEnvironment.getMagneticField(parameterValueType));
+    return fromGlm(mAmbientEnvironment.getMagneticField(parameterValueType, timestamp));
 }
 
 float PhysicalModelImpl::getParameterTemperature(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getTemperature(parameterValueType);
+    return mAmbientEnvironment.getTemperature(parameterValueType, timestamp);
 }
 
 float PhysicalModelImpl::getParameterProximity(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getProximity(parameterValueType);
+    return mAmbientEnvironment.getProximity(parameterValueType, timestamp);
 }
 
 float PhysicalModelImpl::getParameterLight(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getLight(parameterValueType);
+    return mAmbientEnvironment.getLight(parameterValueType, timestamp);
 }
 
 float PhysicalModelImpl::getParameterPressure(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getPressure(parameterValueType);
+    return mAmbientEnvironment.getPressure(parameterValueType, timestamp);
 }
 
 float PhysicalModelImpl::getParameterHumidity(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType, uint64_t* timestamp) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    return mAmbientEnvironment.getHumidity(parameterValueType);
+    return mAmbientEnvironment.getHumidity(parameterValueType, timestamp);
 }
 
 #define GET_FUNCTION_NAME(x) get##x
@@ -762,11 +763,13 @@ PHYSICAL_PARAMETERS_LIST
 #define GET_PHYSICAL_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
 #define GET_PARAMETER_FUNCTION_NAME(x) getParameter##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) w GET_PHYSICAL_PARAMETER_FUNCTION_NAME(z)(\
-        PhysicalModel* model, ParameterValueType parameterValueType) {\
+        PhysicalModel* model, ParameterValueType parameterValueType,\
+        uint64_t* timestamp) {\
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);\
     w result;\
     if (impl != nullptr) {\
-        result = impl->GET_PARAMETER_FUNCTION_NAME(z)(parameterValueType);\
+        result = impl->GET_PARAMETER_FUNCTION_NAME(z)(parameterValueType,\
+                                                      timestamp);\
     } else {\
         result = {0.f};\
     }\
