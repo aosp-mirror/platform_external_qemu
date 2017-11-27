@@ -462,13 +462,13 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
     if (mSensorsAgent != nullptr) {
         glm::vec3 position;
         mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSITION,
-                &position.x, &position.y, &position.z,
+                &position.x, &position.y, &position.z, nullptr,
                 PARAMETER_VALUE_TYPE_TARGET);
         position = (1.f / kMetersPerInch) * position;
 
         glm::vec3 eulerDegrees;
         mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION,
-                &eulerDegrees.x, &eulerDegrees.y, &eulerDegrees.z,
+                &eulerDegrees.x, &eulerDegrees.y, &eulerDegrees.z, nullptr,
                 PARAMETER_VALUE_TYPE_TARGET);
 
         mUi->accelWidget->setPosition(position);
@@ -491,14 +491,14 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
         float temperature;
         mSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_TEMPERATURE, &temperature,
-                &scratch0, &scratch1, PARAMETER_VALUE_TYPE_TARGET);
+                &scratch0, &scratch1, nullptr, PARAMETER_VALUE_TYPE_TARGET);
         mUi->temperatureSensorValueWidget->setValue(temperature);
 
         glm::vec3 magneticField;
         mSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_MAGNETIC_FIELD,
                 &magneticField.x, &magneticField.y, &magneticField.z,
-                PARAMETER_VALUE_TYPE_TARGET);
+                nullptr, PARAMETER_VALUE_TYPE_TARGET);
         mUi->magNorthWidget->setValue(magneticField.x);
         mUi->magEastWidget->setValue(magneticField.y);
         mUi->magVerticalWidget->setValue(magneticField.z);
@@ -507,28 +507,28 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
         mSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_PROXIMITY, &proximity,
                 &scratch0, &scratch1,
-                PARAMETER_VALUE_TYPE_TARGET);
+                nullptr, PARAMETER_VALUE_TYPE_TARGET);
         mUi->proximitySensorValueWidget->setValue(proximity);
 
         float light;
         mSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_LIGHT, &light,
                 &scratch0, &scratch1,
-                PARAMETER_VALUE_TYPE_TARGET);
+                nullptr, PARAMETER_VALUE_TYPE_TARGET);
         mUi->lightSensorValueWidget->setValue(light);
 
         float pressure;
         mSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_PRESSURE, &pressure,
                 &scratch0, &scratch1,
-                PARAMETER_VALUE_TYPE_TARGET);
+                nullptr, PARAMETER_VALUE_TYPE_TARGET);
         mUi->pressureSensorValueWidget->setValue(pressure);
 
         float humidity;
         mSensorsAgent->getPhysicalParameter(
                 PHYSICAL_PARAMETER_HUMIDITY, &humidity,
                 &scratch0, &scratch1,
-                PARAMETER_VALUE_TYPE_TARGET);
+                nullptr, PARAMETER_VALUE_TYPE_TARGET);
         mUi->humiditySensorValueWidget->setValue(humidity);
     }
 }
