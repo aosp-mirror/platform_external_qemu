@@ -136,7 +136,7 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
             glm::vec3 eulerDegrees;
             mSensorsAgent->getPhysicalParameter(
                     PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x,
-                    &eulerDegrees.y, &eulerDegrees.z,
+                    &eulerDegrees.y, &eulerDegrees.z, nullptr,
                     PARAMETER_VALUE_TYPE_TARGET);
 
             // The physical model represents rotation in the X Y Z order, but

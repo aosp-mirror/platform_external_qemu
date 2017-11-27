@@ -90,6 +90,7 @@ int camera_virtualscene_stop_capturing(CameraDevice* cd);
 //                  where to convert the frame.
 // |r_scale|, |g_scale|, |b_scale| - White balance scale.
 // |exp_comp| - Exposure compensation.
+// |frame_timestamp| - The timestamp at which this frame was generated.
 //
 // Returns 0 on success, or non-zero on failure.
 int camera_virtualscene_read_frame(CameraDevice* cd,
@@ -97,7 +98,8 @@ int camera_virtualscene_read_frame(CameraDevice* cd,
                                    float r_scale,
                                    float g_scale,
                                    float b_scale,
-                                   float exp_comp);
+                                   float exp_comp,
+                                   int64_t* frame_timestamp);
 
 // Closes the camera device, which was opened from the camera_virtualscene_open
 // API.
