@@ -28,6 +28,7 @@ typedef enum {
 typedef enum {
     PARAMETER_VALUE_TYPE_TARGET=0,
     PARAMETER_VALUE_TYPE_CURRENT=1,
+    PARAMETER_VALUE_TYPE_EXACT=2,
 } ParameterValueType;
 
 ANDROID_END_HEADER

@@ -581,6 +581,7 @@ int camera_device_read_frame(CameraDevice* cd,
         if (result) return -1;
         mcd->started = 1;
     }
+
     return [mcd->device read_frame:
                       result_frame:
                            r_scale:

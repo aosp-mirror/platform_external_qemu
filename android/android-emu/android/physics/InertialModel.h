@@ -51,7 +51,7 @@ public:
      * requests are recorded as taking place.  Time values must be
      * non-decreasing.
      */
-    InertialState setCurrentTime(uint64_t time_ns);
+    InertialState setCurrentTime(int64_t time_ns);
 
     /*
      * Sets the position that the modeled object should move toward.
@@ -73,16 +73,21 @@ public:
      * the most recently set current time (from setCurrentTime).
      */
     glm::vec3 getPosition(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t *timestamp = nullptr) const;
     glm::vec3 getVelocity(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t *timestamp = nullptr) const;
     glm::vec3 getAcceleration(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t *timestamp = nullptr) const;
     glm::quat getRotation(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t *timestamp = nullptr) const;
     // rotational velocity as rotation around (x, y, z) axis in rad/s
     glm::vec3 getRotationalVelocity(
-            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT,
+            int64_t *timestamp = nullptr) const;
 
 private:
     void updateRotations();
@@ -103,14 +108,16 @@ private:
             const glm::mat2x3& quinticTransform,
             const glm::mat4x3& cubicTransform,
             const glm::mat4x3& afterEndCubicTransform,
-            ParameterValueType parameterValueType) const;
+            ParameterValueType parameterValueType,
+            int64_t* timestamp) const;
 
     // Helper for calculating the current or target rotational state given a
     // transform specifying either the rotational velocity, or rotation in
     // 4d vector space.
     glm::vec4 calculateRotationalState(
-        const glm::mat4x4& cubicTransform,
-        ParameterValueType parameterValueType) const;
+            const glm::mat4x4& cubicTransform,
+            ParameterValueType parameterValueType,
+            int64_t* timestamp) const;
 
     // Note: Each target interpolation begins at a set time, accelerates at a
     //       for half of the target time, then decelerates for the second half
@@ -128,27 +135,27 @@ private:
     //       second half.  At the end of the decel phase, the velocity and
     //       acceleration will be zero and the position will be as set in the
     //       target.
-    uint64_t mPositionChangeStartTime = 0UL;
+    int64_t mPositionChangeStartTime = 0L;
     glm::mat2x3 mPositionQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mPositionCubic = glm::mat4x3(0.f);
     glm::mat2x3 mVelocityQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mVelocityCubic = glm::mat4x3(0.f);
     glm::mat2x3 mAccelerationQuintic = glm::mat2x3(0.f);
     glm::mat4x3 mAccelerationCubic = glm::mat4x3(0.f);
-    uint64_t mPositionChangeEndTime = 0UL;
+    int64_t mPositionChangeEndTime = 0L;
     bool mZeroVelocityAfterEndTime = true;
 
     glm::mat4x3 mPositionAfterEndCubic = glm::mat4x3(0.f);
     glm::mat4x3 mVelocityAfterEndCubic = glm::mat4x3(0.f);
 
-    uint64_t mRotationChangeStartTime = 0UL;
+    int64_t mRotationChangeStartTime = 0L;
     glm::mat4x4 mRotationCubic = glm::mat4x4(
             glm::vec4(), glm::vec4(), glm::vec4(), glm::vec4(0.f, 0.f, 0.f, 1.f));
     glm::mat4x4 mRotationalVelocityCubic = glm::mat4x4(0.f);
-    uint64_t mRotationChangeEndTime = 0UL;
+    int64_t mRotationChangeEndTime = 0L;
 
     /* The time to use as current in this model */
-    uint64_t mModelTimeNs = 0UL;
+    int64_t mModelTimeNs = 0L;
 };
 
 }  // namespace physics
