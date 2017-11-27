@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5aa6226e_193207b4",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-27T23:51:17Z",
+      "side": 1,
+      "message": "I checked the source for glm::normalize, it handles this case:\n\n\t\tT len \u003d length(q);\n\t\tif(len \u003c\u003d T(0)) // Problem\n\t\t\treturn tquat\u003cT, P\u003e(1, 0, 0, 0);",
+      "parentUuid": "a0086250_6810b915",
+      "range": {
+        "startLine": 107,
+        "startChar": 36,
+        "endLine": 107,
+        "endChar": 58
+      },
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "8f998679_618578ed",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-27T20:42:33Z",
       "side": 1,
       "message": "It might be worth having a pixels-to-radians scale here so we can tune the rotation rate if we want.",
+      "range": {
+        "startLine": 259,
+        "startChar": 35,
+        "endLine": 259,
+        "endChar": 80
+      },
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d6c0cc98_e09fd5c1",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 259,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-27T23:51:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8f998679_618578ed",
       "range": {
         "startLine": 259,
         "startChar": 35,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "c05ae5b5_5a6bc25e",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-27T23:51:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c83947e5_dff99883",
+      "range": {
+        "startLine": 262,
+        "startChar": 37,
+        "endLine": 262,
+        "endChar": 48
+      },
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bb352192_bbc42290",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -88,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "2e6a9217_41e2493b",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 277,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-27T23:51:17Z",
+      "side": 1,
+      "message": "Ooo, actually there is! I can use eulerAngleYXZ here and skip round-tripping through a quaternion entirely.  I can\u0027t find an equivalent helper in the other direction, so the code that converts from the physical model to euler angles stays as-is.",
+      "parentUuid": "bb352192_bbc42290",
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2fbf9667_6e027b41",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -99,6 +189,24 @@
       "writtenOn": "2017-11-27T20:42:33Z",
       "side": 1,
       "message": "probably also worth adding a constant to tune the velocity here too.",
+      "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c691341_39c34cbf",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-27T23:51:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2fbf9667_6e027b41",
       "revId": "05cad5a6bb0bdd045ba2c3441bbfee6aa6d6b07b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
