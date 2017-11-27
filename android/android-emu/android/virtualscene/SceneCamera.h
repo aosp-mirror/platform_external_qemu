@@ -36,7 +36,10 @@ public:
     SceneCamera();
     ~SceneCamera();
 
-    void update();
+    // Update the scene camera based on the current physical state.
+    //
+    // Returns the timestamp to which the camera was updated.
+    int64_t update();
 
     glm::mat4 getViewProjection() const;
 
