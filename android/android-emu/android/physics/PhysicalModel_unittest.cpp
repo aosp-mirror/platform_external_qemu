@@ -44,7 +44,7 @@ TEST(PhysicalModel, CreateAndDestroy) {
 TEST(PhysicalModel, DefaultInertialSensorValues) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel *model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id;
     vec3 accelerometer = physicalModel_getAccelerometer(model,
             &measurement_id);
@@ -59,11 +59,11 @@ TEST(PhysicalModel, DefaultInertialSensorValues) {
 TEST(PhysicalModel, ConstantMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel *model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
 
-    physicalModel_setCurrentTime(model, 2000000000UL);
+    physicalModel_setCurrentTime(model, 2000000000L);
 
     long measurement_id1;
     physicalModel_getAccelerometer(model, &measurement_id1);
@@ -77,11 +77,11 @@ TEST(PhysicalModel, ConstantMeasurementId) {
 TEST(PhysicalModel, NewMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel *model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
 
-    physicalModel_setCurrentTime(model, 2000000000UL);
+    physicalModel_setCurrentTime(model, 2000000000L);
 
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -110,7 +110,8 @@ TEST(PhysicalModel, SetTargetPosition) {
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 500000000UL);
+    physicalModel_setCurrentTime(model, 500000000L);
+
     vec3 currentPosition = physicalModel_getParameterPosition(model,
             PARAMETER_VALUE_TYPE_CURRENT);
 
@@ -130,7 +131,7 @@ TEST(PhysicalModel, SetTargetRotation) {
     physicalModel_setTargetRotation(
             model, targetRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 500000000UL);
+    physicalModel_setCurrentTime(model, 500000000L);
     vec3 currentRotation = physicalModel_getParameterRotation(model,
             PARAMETER_VALUE_TYPE_CURRENT);
 
@@ -158,7 +159,7 @@ TEST(PhysicalModel, GravityAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     for (const auto& testCase : gravityTestCases) {
         PhysicalModel* model = physicalModel_new(false);
-        physicalModel_setCurrentTime(model, 1000000000UL);
+        physicalModel_setCurrentTime(model, 1000000000L);
 
         vec3 targetRotation;
         targetRotation.x = testCase.target_rotation.x;
@@ -168,7 +169,7 @@ TEST(PhysicalModel, GravityAcceleration) {
         physicalModel_setTargetRotation(
                 model, targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
 
-        physicalModel_setCurrentTime(model, 2000000000UL);;
+        physicalModel_setCurrentTime(model, 2000000000L);;
 
         long measurement_id;
         vec3 accelerometer = physicalModel_getAccelerometer(model,
@@ -184,7 +185,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
 
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
 
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -194,7 +195,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
 
-    physicalModel_setCurrentTime(model, 2000000000UL);
+    physicalModel_setCurrentTime(model, 2000000000L);
     // at 2 seconds the target is still at (2, 3, 4);
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_STEP);
@@ -211,7 +212,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
 TEST(PhysicalModel, NonInstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 0UL);
+    physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
     startRotation.x = 0.f;
@@ -220,7 +221,7 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, startRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     vec3 newRotation;
     newRotation.x = -0.5f;
     newRotation.y = 0.0f;
@@ -228,7 +229,7 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, newRotation, PHYSICAL_INTERPOLATION_SMOOTH);
 
-    physicalModel_setCurrentTime(model, 1125000000UL);
+    physicalModel_setCurrentTime(model, 1125000000L);
 
     long measurement_id;
     vec3 currentGyro = physicalModel_getGyroscope(model, &measurement_id);
@@ -242,7 +243,7 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
 TEST(PhysicalModel, InstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 0UL);
+    physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
     startRotation.x = 0.f;
@@ -251,7 +252,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, startRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     vec3 newRotation;
     newRotation.x = 180.0f;
     newRotation.y = 0.0f;
@@ -269,7 +270,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
 TEST(PhysicalModel, OverrideAccelerometer) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 0UL);
+    physicalModel_setCurrentTime(model, 0L);
 
     long initial_measurement_id;
     physicalModel_getAccelerometer(model, &initial_measurement_id);
