@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "10677606_369db7c3",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-27T18:34:08Z",
+      "side": 1,
+      "message": "I think this declares that the snapshot PB data is valid. Is that true at this point?",
+      "range": {
+        "startLine": 523,
+        "startChar": 8,
+        "endLine": 523,
+        "endChar": 42
+      },
+      "revId": "1ece7e12f3ba76cc44d942c986e7f396dc47634d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b77173f7_de48661f",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-27T18:34:08Z",
+      "side": 1,
+      "message": "Same as above",
+      "range": {
+        "startLine": 532,
+        "startChar": 8,
+        "endLine": 532,
+        "endChar": 41
+      },
+      "revId": "1ece7e12f3ba76cc44d942c986e7f396dc47634d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a6330393_2a2837b2",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 538,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-11-27T18:34:08Z",
+      "side": 1,
+      "message": "weren\u0027t any\nor\nwere no",
+      "range": {
+        "startLine": 538,
+        "startChar": 20,
+        "endLine": 538,
+        "endChar": 30
+      },
+      "revId": "1ece7e12f3ba76cc44d942c986e7f396dc47634d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
