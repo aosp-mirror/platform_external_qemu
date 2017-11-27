@@ -105,6 +105,13 @@ private:
             const glm::mat4x3& afterEndCubicTransform,
             ParameterValueType parameterValueType) const;
 
+    // Helper for calculating the current or target rotational state given a
+    // transform specifying either the rotational velocity, or rotation in
+    // 4d vector space.
+    glm::vec4 calculateRotationalState(
+        const glm::mat4x4& cubicTransform,
+        ParameterValueType parameterValueType) const;
+
     // Note: Each target interpolation begins at a set time, accelerates at a
     //       for half of the target time, then decelerates for the second half
     //       with each half defined by a quartic polynomial such that the two
@@ -135,10 +142,9 @@ private:
     glm::mat4x3 mVelocityAfterEndCubic = glm::mat4x3(0.f);
 
     uint64_t mRotationChangeStartTime = 0UL;
-    glm::quat mInitialRotation = glm::quat();
-    glm::vec3 mRotationAxis = glm::vec3(1.f, 0.f, 0.f);
-    float mRotationAngleRadians = 0.f;
-    float mRotationTimeSeconds = 0.f;
+    glm::mat4x4 mRotationCubic = glm::mat4x4(
+            glm::vec4(), glm::vec4(), glm::vec4(), glm::vec4(0.f, 0.f, 0.f, 1.f));
+    glm::mat4x4 mRotationalVelocityCubic = glm::mat4x4(0.f);
     uint64_t mRotationChangeEndTime = 0UL;
 
     /* The time to use as current in this model */
