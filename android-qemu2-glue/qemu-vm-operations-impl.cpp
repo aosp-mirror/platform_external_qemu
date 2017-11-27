@@ -18,6 +18,7 @@
 #include "android/base/StringView.h"
 #include "android/emulation/control/callbacks.h"
 #include "android/emulation/control/vm_operations.h"
+#include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/VmLock.h"
 #include "android/snapshot/MemoryWatch.h"
 
@@ -327,7 +328,14 @@ static void set_snapshot_callbacks(void* opaque,
             sSnapshotCallbacks.ramOps.loadRam(sSnapshotCallbacksOpaque, hostRam,
                                               size);
         });
-        set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
+
+        if (android::GetCurrentCpuAccelerator() ==
+            android::CPU_ACCELERATOR_HVF) {
+            set_address_translation_funcs(hvf_hva2gpa, hvf_gpa2hva);
+            set_memory_mapping_funcs(hvf_map_safe, hvf_unmap_safe,
+                                     hvf_protect_safe, hvf_remap_safe);
+        }
+
         migrate_set_file_hooks(&sSaveHooks, &sLoadHooks);
     }
 }
