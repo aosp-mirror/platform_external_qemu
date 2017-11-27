@@ -27,7 +27,7 @@ namespace android {
 namespace physics {
 
 /* Fixed state change time for smooth acceleration changes. */
-constexpr uint64_t kStateChangeTimeNs = secondsToNs(kStateChangeTimeSeconds);
+constexpr int64_t kStateChangeTimeNs = secondsToNs(kStateChangeTimeSeconds);
 
 constexpr float kStateChangeTime1 = kStateChangeTimeSeconds;
 constexpr float kStateChangeTime2 = kStateChangeTime1 * kStateChangeTime1;
@@ -44,7 +44,7 @@ const glm::vec4 kCubicTimeVec = glm::vec4(
 constexpr float kMaxAngularVelocity = 5.f;
 constexpr float kTargetRotationTime = 0.050f;
 
-InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
+InertialState InertialModel::setCurrentTime(int64_t time_ns) {
     assert(time_ns >= mModelTimeNs);
     mModelTimeNs = time_ns;
 
@@ -301,11 +301,13 @@ void InertialModel::setTargetRotation(
 
         const glm::vec4 currentRotation = calculateRotationalState(
                 mRotationCubic,
-                PARAMETER_VALUE_TYPE_CURRENT);
+                PARAMETER_VALUE_TYPE_CURRENT,
+                nullptr);
 
         const glm::vec4 currentRotationalVelocity = calculateRotationalState(
                 mRotationalVelocityCubic,
-                PARAMETER_VALUE_TYPE_CURRENT);
+                PARAMETER_VALUE_TYPE_CURRENT,
+                nullptr);
 
         const float rotationLength = glm::length(currentRotation);
 
@@ -371,37 +373,45 @@ void InertialModel::setTargetRotation(
 }
 
 glm::vec3 InertialModel::getPosition(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType,
+        int64_t *timestamp) const {
     return calculateInertialState(
         mPositionQuintic,
         mPositionCubic,
         mPositionAfterEndCubic,
-        parameterValueType);
+        parameterValueType,
+        timestamp);
 }
 
 glm::vec3 InertialModel::getVelocity(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType,
+        int64_t *timestamp) const {
     return calculateInertialState(
         mVelocityQuintic,
         mVelocityCubic,
         mVelocityAfterEndCubic,
-        parameterValueType);
+        parameterValueType,
+        timestamp);
 }
 
 glm::vec3 InertialModel::getAcceleration(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType,
+        int64_t *timestamp) const {
     return calculateInertialState(
         mAccelerationQuintic,
         mAccelerationCubic,
         glm::mat4x3(0.f),
-        parameterValueType);
+        parameterValueType,
+        timestamp);
 }
 
 glm::quat InertialModel::getRotation(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType,
+        int64_t *timestamp) const {
     const glm::vec4 rotationVec = calculateRotationalState(
             mRotationCubic,
-            parameterValueType);
+            parameterValueType,
+            timestamp);
 
     const glm::quat rotation(
             rotationVec.w, rotationVec.x, rotationVec.y, rotationVec.z);
@@ -410,10 +420,12 @@ glm::quat InertialModel::getRotation(
 }
 
 glm::vec3 InertialModel::getRotationalVelocity(
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType,
+        int64_t *timestamp) const {
     const glm::vec4 rotationVec = calculateRotationalState(
             mRotationCubic,
-            parameterValueType);
+            parameterValueType,
+            timestamp);
     const float rotationVecLength = glm::length(rotationVec);
 
     // Rotation length should not be zero, but it may be possible by driving
@@ -434,7 +446,8 @@ glm::vec3 InertialModel::getRotationalVelocity(
     const glm::vec4 rotationDerivative = (1.f / rotationVecLength) *
             calculateRotationalState(
                     mRotationalVelocityCubic,
-                    parameterValueType);
+                    parameterValueType,
+                    nullptr);
 
     const glm::quat rotationDerivativeQuat = glm::quat(
             rotationDerivative.w,
@@ -505,11 +518,20 @@ glm::vec3 InertialModel::calculateInertialState(
         const glm::mat2x3& quinticTransform,
         const glm::mat4x3& cubicTransform,
         const glm::mat4x3& afterEndCubicTransform,
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType,
+        int64_t* timestamp) const {
     assert(mModelTimeNs >= mPositionChangeStartTime);
-    const uint64_t requestedTimeNs =
+    int64_t requestedTimeNs =
             parameterValueType == PARAMETER_VALUE_TYPE_TARGET ?
                     mPositionChangeEndTime : mModelTimeNs;
+
+    if (timestamp != nullptr) {
+        if (parameterValueType == PARAMETER_VALUE_TYPE_EXACT &&
+            *timestamp > mPositionChangeStartTime) {
+            requestedTimeNs = *timestamp;
+        }
+        *timestamp = requestedTimeNs;
+    }
 
     const float time1 = nsToSeconds(requestedTimeNs - mPositionChangeStartTime);
     const float time2 = time1 * time1;
@@ -526,12 +548,22 @@ glm::vec3 InertialModel::calculateInertialState(
 
 glm::vec4 InertialModel::calculateRotationalState(
         const glm::mat4x4& cubicTransform,
-        ParameterValueType parameterValueType) const {
+        ParameterValueType parameterValueType,
+        int64_t* timestamp) const {
     assert(mModelTimeNs >= mRotationChangeStartTime);
-    const uint64_t requestedTimeNs =
+    int64_t requestedTimeNs =
             parameterValueType == PARAMETER_VALUE_TYPE_TARGET ?
                     mRotationChangeEndTime :
                     std::min(mModelTimeNs, mRotationChangeEndTime);
+
+    if (timestamp != nullptr) {
+        if (parameterValueType == PARAMETER_VALUE_TYPE_EXACT) {
+            requestedTimeNs = std::min(std::max(*timestamp,
+                    mRotationChangeStartTime), mRotationChangeEndTime);
+        } else {
+            *timestamp = requestedTimeNs;
+        }
+    }
 
     const float time1 = nsToSeconds(requestedTimeNs - mRotationChangeStartTime);
     const float time2 = time1 * time1;

@@ -56,7 +56,7 @@ void physicalModel_free(PhysicalModel* model);
  * Update the current time on the physical model. Time values must be
  * non-decreasing.
  */
-void physicalModel_setCurrentTime(PhysicalModel* model, uint64_t time_ns);
+void physicalModel_setCurrentTime(PhysicalModel* model, int64_t time_ns);
 
 /* Target setters for all physical parameters */
 #define SET_TARGET_FUNCTION_NAME(x) physicalModel_setTarget##x
@@ -69,7 +69,8 @@ PHYSICAL_PARAMETERS_LIST
 /* Target getters for all physical parameters */
 #define GET_PARAMETER_FUNCTION_NAME(x) physicalModel_getParameter##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) w GET_PARAMETER_FUNCTION_NAME(z)(\
-        PhysicalModel* model, ParameterValueType parameterValueType);
+        PhysicalModel* model, ParameterValueType parameterValueType,\
+        int64_t* timestamp);
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
 #undef GET_PARAMETER_FUNCTION_NAME

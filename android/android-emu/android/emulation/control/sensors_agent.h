@@ -16,6 +16,8 @@
 
 #include "android/physics/physical_state_agent.h"
 
+#include <stdint.h>
+
 ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidSensorsAgent {
@@ -38,10 +40,16 @@ typedef struct QAndroidSensorsAgent {
     //                         parameter's target, or current/instantaneous
     //                         value, i.e.
     //                         PARAMETER_VALUE_TYPE_TARGET,
-    //                         PARAMETER_VALUE_TYPE_CURRENT
+    //                         PARAMETER_VALUE_TYPE_CURRENT,
+    //                         PARAMETER_VALUE_TYPE_EXACT
+    //        |timestamp| when parameterValueType is EXACT, this parameter value
+    //                    will be retrieved for this specific timestamp. If the
+    //                    parameter value type is anything else, the timestamp
+    //                    at which the value was retrieved will be set in
+    //                    *timestamp.
     int (*getPhysicalParameter)(
             int parameterId, float *a, float *b, float *c,
-            int parameterValueType);
+            int64_t *timestamp, int parameterValueType);
 
     // Sets the coarse orientation of the modeled device.
     // Input: |orientation| determines which coarse orientation to use, i.e.

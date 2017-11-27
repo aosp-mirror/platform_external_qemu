@@ -22,9 +22,9 @@ int physical_parameter_target_set(
 
 int physical_parameter_get(
         int parameterId, float *a, float *b, float *c,
-        int parameter_value_type) {
+        int64_t *timestamp,  int parameter_value_type) {
     return android_physical_model_get(
-            parameterId, a, b, c, parameter_value_type);
+            parameterId, a, b, c, timestamp, parameter_value_type);
 }
 
 int coarse_orientation_set(int orientation) {
