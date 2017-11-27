@@ -162,13 +162,13 @@ GLint Renderer::getUniformLocation(GLuint program, const char* name) {
     return location;
 }
 
-void Renderer::render() {
+int64_t Renderer::render() {
     mGles2->glEnable(GL_DEPTH_TEST);
     mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Transform view by rotation.
-    mCamera.update();
+    int64_t timestamp = mCamera.update();
 
     // Render scene objects.
     for (auto& sceneObject : mSceneObjects) {
@@ -176,6 +176,8 @@ void Renderer::render() {
     }
 
     mGles2->glDisable(GL_DEPTH_TEST);
+
+    return timestamp;
 }
 
 std::unique_ptr<SceneObject> Renderer::loadSceneObject(
