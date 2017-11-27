@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2050f6ea_d2a724be",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-27T17:25:40Z",
+      "side": 1,
+      "message": "should we also wake the guest here if it was waiting?",
+      "range": {
+        "startLine": 363,
+        "startChar": 0,
+        "endLine": 363,
+        "endChar": 33
+      },
+      "revId": "8317d178c1dc009ddb78029cbb1883f8fd68ee7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
