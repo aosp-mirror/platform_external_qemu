@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "556f9a61_af069e2d",
+        "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 344,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-27T23:52:47Z",
+      "side": 1,
+      "message": "This line can be removed, it was copy-pasted and isn\u0027t necessary here.",
+      "range": {
+        "startLine": 344,
+        "startChar": 8,
+        "endLine": 344,
+        "endChar": 46
+      },
+      "revId": "2286fea7a44f78aa3465e3310d8d1d68f96b8577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "097b6b04_568ec22d",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.h",
         "patchSetId": 1
@@ -13,6 +36,24 @@
       "writtenOn": "2017-11-27T20:05:49Z",
       "side": 1,
       "message": "does this all need to be public?",
+      "revId": "2286fea7a44f78aa3465e3310d8d1d68f96b8577",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9898a5b7_bed25bc0",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-27T23:52:47Z",
+      "side": 1,
+      "message": "Nope, will fix.",
+      "parentUuid": "097b6b04_568ec22d",
       "revId": "2286fea7a44f78aa3465e3310d8d1d68f96b8577",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
