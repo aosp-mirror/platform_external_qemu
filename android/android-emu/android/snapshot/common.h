@@ -51,11 +51,11 @@ enum class FailureReason {
     IncompatibleVersion,
     NoRamFile,
     NoTexturesFile,
-    NoSnapshotInImage,
     SnapshotsNotSupported,
 
     UnrecoverableErrorLimit = 10000,
 
+    NoSnapshotInImage,
     ConfigMismatchHostHypervisor,
     ConfigMismatchHostGpu,
     ConfigMismatchRenderer,
