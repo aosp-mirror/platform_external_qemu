@@ -598,6 +598,9 @@ FrameBuffer::postWorkerFunc(const Post& post) {
             m_postWorker->viewport(post.viewport.width,
                                    post.viewport.height);
             break;
+        case PostCmd::Clear:
+            m_postWorker->clear();
+            break;
         default:
             break;
     }
@@ -771,9 +774,16 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
             postCmd.viewport.height = fbh;
             sendPostWorkerCmd(postCmd);
 
+            bool posted = false;
+
             if (m_lastPostedColorBuffer) {
                 GL_LOG("setupSubwindow: draw last posted cb");
-                postImpl(m_lastPostedColorBuffer, false);
+                posted = postImpl(m_lastPostedColorBuffer, false);
+            }
+
+            if (!posted) {
+                postCmd.cmd = PostCmd::Clear;
+                sendPostWorkerCmd(postCmd);
             }
         }
     }
