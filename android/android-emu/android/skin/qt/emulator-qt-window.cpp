@@ -897,6 +897,15 @@ void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
                      event->pos());
 }
 
+void EmulatorQtWindow::leaveEvent(QEvent* event) {
+    // On Mac, the cursor retains its shape even after it
+    // leaves, if it is over our transparent region. Make
+    // sure we're not showing the resize cursor. We can't
+    // resize because we don't get events after the cursor
+    // has left.
+    mContainer.setCursor(Qt::ArrowCursor);
+}
+
 void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
                      event->pos());
