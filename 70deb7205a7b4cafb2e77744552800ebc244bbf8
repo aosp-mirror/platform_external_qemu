@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7ea5eccd_17106310",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T22:27:57Z",
+      "side": 1,
+      "message": "Nit: This can be put back on one line.",
+      "range": {
+        "startLine": 39,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 45
+      },
+      "revId": "70deb7205a7b4cafb2e77744552800ebc244bbf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c572b8ae_d050528e",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 328,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T22:27:57Z",
+      "side": 1,
+      "message": "I\u0027m not a fan of discarding target states, would it be possible to jump to the target rotation instead?",
+      "range": {
+        "startLine": 322,
+        "startChar": 8,
+        "endLine": 328,
+        "endChar": 9
+      },
+      "revId": "70deb7205a7b4cafb2e77744552800ebc244bbf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4dfe281c_a557e734",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 422,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T22:27:57Z",
+      "side": 1,
+      "message": "Potential simplification, which has identical behavior, including the 0-length edge case:\n\nglm::quat rotation(rotation.w, rotation.x, rotation.y, rotation.z);\nreturn glm::normalize(rotation);",
+      "range": {
+        "startLine": 415,
+        "startChar": 4,
+        "endLine": 422,
+        "endChar": 69
+      },
+      "revId": "70deb7205a7b4cafb2e77744552800ebc244bbf8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
