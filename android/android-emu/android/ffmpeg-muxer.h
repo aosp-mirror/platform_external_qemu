@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include "android/screen-recorder.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -39,15 +40,18 @@ typedef struct ffmpeg_recorder ffmpeg_recorder;
 
 // Create an instance of the ffmpeg recorder (mp4 container format)
 // params:
-//   path - the path to save the generated video file which should have .mp4
-//   extension
+//   info - a struct containing recording information
+//   fb_width - the framebuffer width
+//   fb_height - the framebuffer height
 // return:
 //   opaque pointer to the recorder struct, which must be freed by calling
 //   ffmpeg_delete_recorder()
 //   NULL if failed
 //
 // this method is thread safe
-ffmpeg_recorder* ffmpeg_create_recorder(const char* path);
+ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
+                                        int fb_width,
+                                        int fb_height);
 
 //
 // Save the output file and delete the recorder, this method must be called.

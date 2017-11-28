@@ -11,11 +11,17 @@
 #pragma once
 
 #include "ui_record-screen-page.h"
+
+#include "android/screen-recorder.h"
+
 #include <QTimer>
 #include <QWidget>
 #include <memory>
 
 struct QAndroidRecordScreenAgent;
+
+Q_DECLARE_METATYPE(RecordStopStatus);
+
 class RecordScreenPage : public QWidget {
     Q_OBJECT
 public:
@@ -26,16 +32,17 @@ public:
 
     void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
     void updateTheme();
+    void emitRecordingStopped(RecordStopStatus status);
 
 signals:
+    void recordingStopped(RecordStopStatus status);
 
 private slots:
     void on_rec_playStopButton_clicked();
     void on_rec_recordButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
-    void stopRecordingStarted();
-    void stopRecordingFinished(bool success);
+    void slot_recordingStopped(RecordStopStatus status);
     void convertingStarted();
     void convertingFinished(bool success);
 

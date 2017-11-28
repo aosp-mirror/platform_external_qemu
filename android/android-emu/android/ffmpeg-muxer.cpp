@@ -145,6 +145,8 @@ typedef struct ffmpeg_recorder {
     bool have_audio;
     bool started;
     uint64_t start_time;
+    int fb_width;
+    int fb_height;
 } ffmpeg_recorder;
 
 // FFMpeg defines a set of macros for the same purpose, but those don't
@@ -515,11 +517,13 @@ static bool has_suffix(const std::string& str, const std::string& suffix) {
 
 static bool sIsRegistered = false;
 
-ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
+ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
+                                        int fb_width,
+                                        int fb_height) {
     ffmpeg_recorder* recorder = NULL;
     AVFormatContext* oc = NULL;
 
-    if (path == NULL)
+    if (info == NULL || info->fileName == NULL)
         return NULL;
 
     recorder = (ffmpeg_recorder*)malloc(sizeof(ffmpeg_recorder));
@@ -528,7 +532,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     }
 
     memset(recorder, 0, sizeof(ffmpeg_recorder));
-    recorder->path = strdup(path);
+    recorder->path = strdup(info->fileName);
 
     // Initialize libavcodec, and register all codecs and formats. does not hurt
     // to register multiple times
@@ -538,7 +542,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     }
 
     // allocate the output media context
-    avformat_alloc_output_context2(&oc, NULL, NULL, path);
+    avformat_alloc_output_context2(&oc, NULL, NULL, recorder->path);
     if (oc == NULL) {
         free(recorder);
         return NULL;
@@ -547,13 +551,16 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     recorder->oc = oc;
     recorder->start_time = android::base::System::get()->getHighResTimeUs();
 
-    if (has_suffix(path, ".webm")) {
+    if (has_suffix(recorder->path, ".webm")) {
         recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
         recorder->video_st.codec_id = AV_CODEC_ID_VP9;
     } else {
         recorder->audio_st.codec_id = AV_CODEC_ID_AAC;
         recorder->video_st.codec_id = AV_CODEC_ID_H264;
     }
+
+    recorder->fb_width = fb_width;
+    recorder->fb_height = fb_height;
 
     return recorder;
 }
@@ -920,18 +927,18 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     AVCodecContext* c = ost->st->codec;
 
     if (ost->sws_ctx == NULL) {
-        ost->sws_ctx = sws_getContext(c->width, c->height, AV_PIX_FMT_RGBA,
-                                      c->width, c->height, c->pix_fmt,
-                                      SCALE_FLAGS, NULL, NULL, NULL);
+        ost->sws_ctx = sws_getContext(
+                recorder->fb_width, recorder->fb_height, AV_PIX_FMT_RGBA,
+                c->width, c->height, c->pix_fmt, SCALE_FLAGS, NULL, NULL, NULL);
         if (ost->sws_ctx == NULL) {
             derror("Could not initialize the conversion context\n");
             return -1;
         }
     }
 
-    const int linesize[1] = {4 * c->width};
+    const int linesize[1] = {4 * recorder->fb_width};
     sws_scale(ost->sws_ctx, (const uint8_t* const*)&rgb_pixels, linesize, 0,
-              c->height, ost->frame->data, ost->frame->linesize);
+              recorder->fb_height, ost->frame->data, ost->frame->linesize);
 
     uint64_t elapsedUS = android::base::System::get()->getHighResTimeUs() -
                          recorder->start_time;
