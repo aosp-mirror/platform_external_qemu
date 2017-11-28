@@ -3263,7 +3263,7 @@ static bool set_memory_options(uint64_t *ram_slots, ram_addr_t *maxram_size,
 #ifdef CONFIG_HAX
     // TODO: Fix HAXM so that snapshot save doesn't hang
     // with values of RAM above 4093.
-#define HAX_SNAPSHOT_MAX_RAM 4093 * 1024 * 1024
+#define HAX_SNAPSHOT_MAX_RAM 4093ULL * 1024ULL * 1024ULL
     if (hax_enabled()) {
         uint64_t hax_max_ram = 0;
         if (hax_get_max_ram(&hax_max_ram) == 0 && hax_max_ram > 0) {
