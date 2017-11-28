@@ -23,13 +23,16 @@
 namespace android {
 namespace emulation {
 
-bool captureScreenshot(android::base::StringView outputDirectoryPath) {
+bool captureScreenshot(android::base::StringView outputDirectoryPath,
+                       std::string* pOutputFilepath) {
     const auto& renderer = android_getOpenglesRenderer();
-    return captureScreenshot(renderer.get(), outputDirectoryPath);
+    return captureScreenshot(renderer.get(), outputDirectoryPath,
+                             pOutputFilepath);
 }
 
 bool captureScreenshot(emugl::Renderer* renderer,
-        android::base::StringView outputDirectoryPath) {
+                       android::base::StringView outputDirectoryPath,
+                       std::string* pOutputFilepath) {
     if (!renderer) {
         LOG(WARNING) << "Renderer uninitialized, cannot take screenshots.\n";
         return false;
@@ -48,8 +51,13 @@ bool captureScreenshot(emugl::Renderer* renderer,
             (long long int)android::base::System::get()->getUnixTime());
     assert(fileNameSize < sizeof(fileName));
     (void)fileNameSize;
-    savepng(android::base::PathUtils::join(outputDirectoryPath, fileName)
-            .c_str(), nChannels, width, height, pixels.data());
+
+    std::string outputFilePath =
+            android::base::PathUtils::join(outputDirectoryPath, fileName);
+    if (pOutputFilepath) {
+        *pOutputFilepath = outputFilePath;
+    }
+    savepng(outputFilePath.c_str(), nChannels, width, height, pixels.data());
     return true;
 }
 
