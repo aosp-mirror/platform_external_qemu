@@ -1,0 +1,9 @@
+Presubmit-Verified-1: Treehugger Robot <treehugger-gerrit@google.com>
+Verified+1: Tim Psiaki <tpsiaki@google.com>
+Code-Review+1: Tim Psiaki <tpsiaki@google.com>
+Code-Review+2: Jeff McGlynn <jwmcglynn@google.com>
+Submitted-by: Tim Psiaki <tpsiaki@google.com>
+Submitted-at: Tue, 28 Nov 2017 03:58:37 +0000
+Reviewed-on: https://android-review.googlesource.com/548159
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
