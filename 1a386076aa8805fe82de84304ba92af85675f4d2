@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d829124a_721d3f35",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T23:38:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6a457740_c702b0e8",
+      "range": {
+        "startLine": 43,
+        "startChar": 66,
+        "endLine": 43,
+        "endChar": 67
+      },
+      "revId": "1a386076aa8805fe82de84304ba92af85675f4d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ab1c4e8_d8d9fac6",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -41,6 +65,76 @@
         "startChar": 25,
         "endLine": 332,
         "endChar": 26
+      },
+      "revId": "1a386076aa8805fe82de84304ba92af85675f4d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd9ed01a_b6eb6799",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 332,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T23:38:04Z",
+      "side": 1,
+      "message": "Good point.  I did some research, and I think the best solution is to use QChar(0x2325) and string format to insert it.",
+      "parentUuid": "1ab1c4e8_d8d9fac6",
+      "range": {
+        "startLine": 332,
+        "startChar": 25,
+        "endLine": 332,
+        "endChar": 26
+      },
+      "revId": "1a386076aa8805fe82de84304ba92af85675f4d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0de98c37_69b0fc5e",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-controls.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T23:38:04Z",
+      "side": 1,
+      "message": "This string should be updated.",
+      "range": {
+        "startLine": 64,
+        "startChar": 16,
+        "endLine": 64,
+        "endChar": 39
+      },
+      "revId": "1a386076aa8805fe82de84304ba92af85675f4d2",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "68ca9854_b2d82846",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-controls.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T23:38:04Z",
+      "side": 1,
+      "message": "Based on offline discussion, we should remove this button for now.  We haven\u0027t decided what it should do and the feature still works without it.",
+      "range": {
+        "startLine": 71,
+        "startChar": 11,
+        "endLine": 116,
+        "endChar": 15
       },
       "revId": "1a386076aa8805fe82de84304ba92af85675f4d2",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
