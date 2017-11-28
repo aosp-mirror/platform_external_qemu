@@ -361,6 +361,7 @@ void AdbGuestPipe::onHostConnection(ScopedSocket&& socket) {
 void AdbGuestPipe::resetConnection() {
     mHostSocket.reset();
     mState = State::ClosedByHost;
+    signalWake(PIPE_WAKE_CLOSED);
 }
 
 // static

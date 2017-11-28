@@ -60,6 +60,16 @@ void PostWorker::viewport(int width, int height) {
     s_gles2.glViewport(0, 0, m_viewportWidth, m_viewportHeight);
 }
 
+// Called when the subwindow refreshes, but there is no
+// last posted color buffer to show to the user. Instead of
+// displaying whatever happens to be in the back buffer,
+// clear() is useful for outputting consistent colors.
+void PostWorker::clear() {
+    s_gles2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
+                    GL_STENCIL_BUFFER_BIT);
+    s_egl.eglSwapBuffers(mFb->getDisplay(), mFb->getWindowSurface());
+}
+
 PostWorker::~PostWorker() {
     s_egl.eglMakeCurrent(
         mFb->getDisplay(),

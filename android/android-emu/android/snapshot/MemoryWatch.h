@@ -17,10 +17,24 @@
 typedef void* (*gpa2hva_t)(uint64_t gpa, bool* found);
 typedef uint64_t (*hva2gpa_t)(void* hva, bool* found);
 
+typedef int (*guest_mem_map_t)(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
+typedef int (*guest_mem_unmap_t)(uint64_t gpa, uint64_t size);
+typedef int (*guest_mem_protect_t)(uint64_t gpa, uint64_t size, uint64_t flags);
+typedef int (*guest_mem_remap_t)(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
+
 extern hva2gpa_t hva2gpa_call;
 extern gpa2hva_t gpa2hva_call;
 
+extern guest_mem_map_t guest_mem_map_call;
+extern guest_mem_unmap_t guest_mem_unmap_call;
+extern guest_mem_protect_t guest_mem_protect_call;
+extern guest_mem_remap_t guest_mem_remap_call;
+
 void set_address_translation_funcs(hva2gpa_t hva2gpa, gpa2hva_t gpa2hva);
+void set_memory_mapping_funcs(guest_mem_map_t guest_mem_map,
+                              guest_mem_unmap_t guest_mem_unmap,
+                              guest_mem_protect_t guet_mem_protect,
+                              guest_mem_remap_t guet_mem_remap);
 
 namespace android {
 namespace snapshot {

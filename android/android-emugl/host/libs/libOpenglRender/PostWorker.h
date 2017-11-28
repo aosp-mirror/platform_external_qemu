@@ -28,6 +28,10 @@ public:
     // This is called whenever the subwindow needs a refresh (FrameBuffer::setupSubWindow).
     void viewport(int width, int height);
 
+    // clear: blanks out emulator display when refreshing the subwindow
+    // if there is no last posted color buffer to show yet.
+    void clear();
+
 private:
     EGLContext mContext;
     EGLSurface mSurf;

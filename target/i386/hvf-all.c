@@ -196,6 +196,37 @@ uint64_t hvf_hva2gpa(void* hva, bool* found) {
     return 0;
 }
 
+int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
+    pthread_rwlock_wrlock(&mem_lock);
+    int res = hv_vm_map(hva, gpa, size, flags);
+    pthread_rwlock_unlock(&mem_lock);
+    return res;
+}
+
+int hvf_unmap_safe(uint64_t gpa, uint64_t size) {
+    pthread_rwlock_wrlock(&mem_lock);
+    int res = hv_vm_unmap(gpa, size);
+    pthread_rwlock_unlock(&mem_lock);
+    return res;
+}
+
+int hvf_protect_safe(uint64_t gpa, uint64_t size, uint64_t flags) {
+    pthread_rwlock_wrlock(&mem_lock);
+    int res = hv_vm_protect(gpa, size, flags);
+    pthread_rwlock_unlock(&mem_lock);
+    return res;
+}
+
+int hvf_remap_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags) {
+    pthread_rwlock_wrlock(&mem_lock);
+    int res = hv_vm_unmap(gpa, size);
+    check_hvf_ok(res);
+    res = hv_vm_map(hva, gpa, size, flags);
+    check_hvf_ok(res);
+    pthread_rwlock_unlock(&mem_lock);
+    return res;
+}
+
 int __hvf_set_memory(hvf_slot *slot) {
     struct mac_slot *macslot;
     hv_memory_flags_t flags;
@@ -906,10 +937,10 @@ again:
                     pthread_rwlock_wrlock(&mem_lock);
                     bool found = false;
                     void* hva = hvf_gpa2hva(gpa & ~0xfff, &found);
+                    pthread_rwlock_unlock(&mem_lock);
                     if (found) {
                         qemu_ram_load(hva, 4096);
                     }
-                    pthread_rwlock_unlock(&mem_lock);
                 }
                 break;
             }
