@@ -99,7 +99,7 @@ QCheckBox::indicator:unchecked:disabled {
 }
 QPushButton:pressed[ToolWindowButton=true], QPushButton:checked[ToolWindowButton=true] {
     border: none;
-    background: %%TAB_DARKENED_COLOR%%;
+    background: %%TOOL_ON_COLOR%%;
     border-radius: 4px;
 }
 QPushButton:pressed[helpButton=true] {
