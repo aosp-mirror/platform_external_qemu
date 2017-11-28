@@ -51,4 +51,9 @@ void hvf_raise_event(CPUState *cpu);
 void* hvf_gpa2hva(uint64_t gpa, bool* found);
 uint64_t hvf_hva2gpa(void* hva, bool* found);
 
+int hvf_map_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
+int hvf_unmap_safe(uint64_t gpa, uint64_t size);
+int hvf_protect_safe(uint64_t gpa, uint64_t size, uint64_t flags);
+int hvf_remap_safe(void* hva, uint64_t gpa, uint64_t size, uint64_t flags);
+
 #endif /* _HVF_H */
