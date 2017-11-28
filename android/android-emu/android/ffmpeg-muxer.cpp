@@ -89,6 +89,10 @@ struct VideoOutputStream {
     int width;
     int height;
 
+    // user-specified width and height
+    int scaled_width;
+    int scaled_height;
+
     int bit_rate;
     int fps;
 
@@ -515,11 +519,11 @@ static bool has_suffix(const std::string& str, const std::string& suffix) {
 
 static bool sIsRegistered = false;
 
-ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
+ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info) {
     ffmpeg_recorder* recorder = NULL;
     AVFormatContext* oc = NULL;
 
-    if (path == NULL)
+    if (info == NULL || info->filename == NULL)
         return NULL;
 
     recorder = (ffmpeg_recorder*)malloc(sizeof(ffmpeg_recorder));
@@ -528,7 +532,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     }
 
     memset(recorder, 0, sizeof(ffmpeg_recorder));
-    recorder->path = strdup(path);
+    recorder->path = strdup(info->filename);
 
     // Initialize libavcodec, and register all codecs and formats. does not hurt
     // to register multiple times
@@ -538,7 +542,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     }
 
     // allocate the output media context
-    avformat_alloc_output_context2(&oc, NULL, NULL, path);
+    avformat_alloc_output_context2(&oc, NULL, NULL, recorder->path);
     if (oc == NULL) {
         free(recorder);
         return NULL;
@@ -547,7 +551,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     recorder->oc = oc;
     recorder->start_time = android::base::System::get()->getHighResTimeUs();
 
-    if (has_suffix(path, ".webm")) {
+    if (has_suffix(recorder->path, ".webm")) {
         recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
         recorder->video_st.codec_id = AV_CODEC_ID_VP9;
     } else {
@@ -555,6 +559,8 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
         recorder->video_st.codec_id = AV_CODEC_ID_H264;
     }
 
+    recorder->video_st.scaled_width = info->width;
+    recorder->video_st.scaled_height = info->height;
     return recorder;
 }
 
@@ -920,8 +926,9 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     AVCodecContext* c = ost->st->codec;
 
     if (ost->sws_ctx == NULL) {
-        ost->sws_ctx = sws_getContext(c->width, c->height, AV_PIX_FMT_RGBA,
-                                      c->width, c->height, c->pix_fmt,
+        ost->sws_ctx = sws_getContext(c->width, c->height,
+                                      bytesPerPixel == 2 ? AV_PIX_FMT_RGB565 : AV_PIX_FMT_RGBA,
+                                      ost->scaled_width, ost->scaled_height, c->pix_fmt,
                                       SCALE_FLAGS, NULL, NULL, NULL);
         if (ost->sws_ctx == NULL) {
             derror("Could not initialize the conversion context\n");
