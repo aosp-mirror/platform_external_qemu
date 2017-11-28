@@ -22,6 +22,30 @@
       "revId": "22f40ae8b05f177c8d19e61a7b80858b9456ad66",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "daba56b4_d6729e40",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T01:06:06Z",
+      "side": 1,
+      "message": "Conveniently enough, we\u0027re using Alt on all three platforms (just the location of the button is different).  Key_Alt captures all three.",
+      "parentUuid": "7cccc81b_502ac7c0",
+      "range": {
+        "startLine": 66,
+        "startChar": 4,
+        "endLine": 66,
+        "endChar": 38
+      },
+      "revId": "22f40ae8b05f177c8d19e61a7b80858b9456ad66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
