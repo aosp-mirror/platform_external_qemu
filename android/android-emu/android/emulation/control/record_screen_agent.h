@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include "android/screen-recorder.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -20,8 +21,10 @@ ANDROID_BEGIN_HEADER
 
 typedef struct QAndroidRecordScreenAgent {
     // Start recording. Returns false if already recording.
-    // |filename| is the filename to save under.
-    bool (*startRecording)(const char* filename);
+    // |recordingInfo| is the recording information the encoder should use. At
+    // the minimum, the filename cannot be null. For the other parameters, if
+    // the value is invalid, default values will be used in place of them.
+    bool (*startRecording)(const RecordingInfo* recordingInfo);
 
     // Stop recording.
     void (*stopRecording)(void);
