@@ -539,6 +539,7 @@ private:
     enum class PostCmd {
         Post = 0,
         Viewport = 1,
+        Clear = 2,
     };
 
     struct Post {
