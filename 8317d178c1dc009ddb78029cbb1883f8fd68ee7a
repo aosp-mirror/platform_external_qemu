@@ -22,6 +22,30 @@
       "revId": "8317d178c1dc009ddb78029cbb1883f8fd68ee7a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2fadcfea_a7356937",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 6
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-28T01:08:14Z",
+      "side": 1,
+      "message": "Done, seems like that is a good idea to catch more adb flakiness cases.",
+      "parentUuid": "2050f6ea_d2a724be",
+      "range": {
+        "startLine": 363,
+        "startChar": 0,
+        "endLine": 363,
+        "endChar": 33
+      },
+      "revId": "8317d178c1dc009ddb78029cbb1883f8fd68ee7a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
