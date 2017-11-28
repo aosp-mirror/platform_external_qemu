@@ -35,7 +35,7 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
     setAttribute(Qt::WA_TranslucentBackground);
 
 // Without the hint below, X11 window systems will prevent this window from
-// being moved into a position where they are not fully visible. It is required
+// being moved into a position where it is not fully visible. It is required
 // so that when the emulator container is moved partially offscreen, this
 // overlay is "permitted" to follow it offscreen.
 #ifdef __linux__

@@ -192,6 +192,8 @@ signals:
 
     void showMessage(QString text, Ui::OverlayMessageIcon icon, int timeoutMs);
 
+    void showVirtualSceneControls(bool show);
+
 public:
     void pollEvent(SkinEvent* event, bool* hasEvent);
 
