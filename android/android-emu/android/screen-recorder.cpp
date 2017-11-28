@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/screen-recorder.h"
+#include "android/screen-recorder-constants.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
@@ -25,6 +26,9 @@
 #include <atomic>
 
 #define D(...) VERBOSE_PRINT(record, __VA_ARGS__)
+
+// forward declaration
+void _screen_recorder_stop(void);
 
 namespace {
 
@@ -64,14 +68,17 @@ struct Frame {
 };
 
 struct Globals {
-    ffmpeg_recorder* recorder = nullptr;
+    ffmpeg_recorder* recorder{nullptr};
     Thread* frameSenderThread = nullptr;
     Thread* encodingThread = nullptr;
+    std::atomic<Thread*> stopRecordingThread{nullptr};
     int fbWidth = 0;
     int fbHeight = 0;
     bool isGuestMode = false;
+    std::unique_ptr<char[]> filename;
     std::atomic<bool> is_recording{false};
     ::android::base::MessageChannel<Frame*, kMaxFrames> channel;
+    RecordingInfo recordingInfo;
 };
 
 android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
@@ -88,7 +95,8 @@ public:
         unsigned char* px;
         long long timeDeltaMs = 1000 / mFPS;
         long long currTimeMs, newTimeMs;
-        int i = 0;
+        long long maxFrames = mFPS * kMaxTimeLimit; // time limit
+        long long i = 0;
 
         // The assumption here when starting is that sGlobals->frame contains a
         // valid frame when is_recording is true.
@@ -97,12 +105,21 @@ public:
             px = (unsigned char*)gpu_frame_get_record_frame();
             if (px) {
                 Frame* f = new Frame(sGlobals->fbWidth, sGlobals->fbHeight, px);
-                D("sending frame %d\n", i++);
+                D("sending frame %d\n", i);
                 if (!sGlobals->channel.send(f)) {
                     derror("Frame queue full. Frame dropped\n");
                     delete f;
+                } else {
+                    if (++i == maxFrames) {
+                        // time limit reached
+                        D("Time limit reached. Stopping the recording\n");
+                        screen_recorder_stop();
+                        break;
+                    }
                 }
+
             }
+
             // Need to do some calculation here so we are calling
             // gpu_frame_get_record_frame() at mFPS.
             newTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
@@ -152,15 +169,25 @@ public:
         return 0;
     }
 };
+
+// Thread to stop the recording
+class StopRecordingThread : public Thread {
+public:
+    intptr_t main() {
+        _screen_recorder_stop();
+
+        return 0;
+    }
+};
 }  // namespace
 
-void screen_recorder_init(bool isGuestMode, int w, int h) {
+void screen_recorder_init(int isGuestMode, int w, int h) {
     sGlobals->fbWidth = w;
     sGlobals->fbHeight = h;
     sGlobals->isGuestMode = isGuestMode;
 }
 
-bool screen_recorder_start(const char* filename) {
+int screen_recorder_start(const RecordingInfo* info) {
     if (sGlobals->isGuestMode) {
         derror("Recording is only supported in host gpu configuration\n");
         return false;
@@ -171,12 +198,23 @@ bool screen_recorder_start(const char* filename) {
         return false;
     }
 
-    sGlobals->recorder = ffmpeg_create_recorder(filename);
+    sGlobals->recorder = ffmpeg_create_recorder(info);
     if (!sGlobals->recorder) {
         derror("ffmpeg_create_recorder failed\n");
         return false;
     }
     D("created recorder\n");
+
+    sGlobals->filename.reset(new char[strlen(info->filename) + 1]);
+    strcpy(sGlobals->filename.get(), info->filename);
+    sGlobals->recordingInfo.filename = sGlobals->filename.get();
+    sGlobals->recordingInfo.width = info->width;
+    sGlobals->recordingInfo.height = info->height;
+    sGlobals->recordingInfo.bitrate = info->bitrate;
+    sGlobals->recordingInfo.time_limit = info->time_limit;
+    sGlobals->recordingInfo.cb = info->cb;
+    sGlobals->recordingInfo.opaque = info->opaque;
+    sGlobals->stopRecordingThread = nullptr;
 
     // Add the video and audio tracks
     ffmpeg_add_video_track(sGlobals->recorder,
@@ -202,17 +240,37 @@ bool screen_recorder_start(const char* filename) {
 }
 
 void screen_recorder_stop(void) {
-    if (sGlobals->recorder) {
-        sGlobals->is_recording = false;
-        // Need to wait for encoding thread to finish before deleting the
-        // encoder.
-        sGlobals->encodingThread->wait();
-        ffmpeg_delete_recorder(sGlobals->recorder);
-        sGlobals->recorder = nullptr;
-        gpu_frame_set_record_mode(false);
-        // TODO: Need some kind of signal to notify when the video is finished.
-        // Maybe pass a callback here to call later?
-    } else {
+    if (!sGlobals->recorder) {
         derror("Screen recording was never started\n");
+        return;
     }
+
+    auto tmp = new StopRecordingThread();
+    Thread* t = nullptr;
+    if (sGlobals->stopRecordingThread.compare_exchange_strong(t, tmp)) {
+        if (sGlobals->recordingInfo.cb) {
+            sGlobals->recordingInfo.cb(sGlobals->recordingInfo.opaque, 0);
+        }
+        sGlobals->stopRecordingThread.load()->start();
+    } else {
+        derror("Recording already being stopped\n");
+        delete tmp;
+    }
+}
+
+void _screen_recorder_stop(void) {
+    sGlobals->is_recording = false;
+    // Need to wait for encoding thread to finish before deleting the
+    // encoder.
+    sGlobals->encodingThread->wait();
+    ffmpeg_delete_recorder(sGlobals->recorder);
+    gpu_frame_set_record_mode(false);
+    // TODO: Need some kind of signal to notify when the video is finished.
+    // Maybe pass a callback here to call later?
+    if (sGlobals->recordingInfo.cb) {
+        sGlobals->recordingInfo.cb(sGlobals->recordingInfo.opaque, 1);
+    }
+    sGlobals->filename.reset(nullptr);
+    sGlobals->recordingInfo.filename = nullptr;
+    sGlobals->recorder = nullptr;
 }
