@@ -1030,7 +1030,7 @@ extern "C" int main(int argc, char** argv) {
 
     if (!hw->hw_arc) {
         args.add(
-                {"-kernel", hw->kernel_path, "-initrd", hw->disk_ramdisk_path});
+                {"-kernel", hw->kernel_path });
         // add partition parameters with the sequence pre-defined in
         // targetInfo.imagePartitionTypes
         args.add(PartitionParameters::create(hw, avd));
