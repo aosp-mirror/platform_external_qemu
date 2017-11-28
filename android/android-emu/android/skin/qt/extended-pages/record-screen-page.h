@@ -26,14 +26,17 @@ public:
 
     void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
     void updateTheme();
+    void emitRecordingStopped(int success);
 
 signals:
+    void recordingStopped(int success);
 
 private slots:
     void on_rec_playStopButton_clicked();
     void on_rec_recordButton_clicked();
     void on_rec_saveButton_clicked();
     void updateElapsedTime();
+    void slot_recordingStopped(int success);
     void stopRecordingStarted();
     void stopRecordingFinished(bool success);
     void convertingStarted();
