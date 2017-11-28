@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include "android/screen-recorder.h"
 #include "android/utils/compiler.h"
 
 #include <stdbool.h>
@@ -47,7 +48,7 @@ typedef struct ffmpeg_recorder ffmpeg_recorder;
 //   NULL if failed
 //
 // this method is thread safe
-ffmpeg_recorder* ffmpeg_create_recorder(const char* path);
+ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info);
 
 //
 // Save the output file and delete the recorder, this method must be called.
