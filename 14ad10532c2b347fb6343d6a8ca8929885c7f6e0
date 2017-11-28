@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1a6e2f2e_49b45b23",
+        "filename": "android/android-emu/android/skin/qt/tool-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 523,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T19:15:09Z",
+      "side": 1,
+      "message": "It should, good catch.",
+      "parentUuid": "aa9aefd7_6f3f0bb8",
+      "range": {
+        "startLine": 523,
+        "startChar": 40,
+        "endLine": 523,
+        "endChar": 45
+      },
+      "revId": "14ad10532c2b347fb6343d6a8ca8929885c7f6e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "77171535_8d439168",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 3
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "ab7741b4_792f506d",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T19:15:09Z",
+      "side": 1,
+      "message": "Fixed, as well as the location in emulator-overlay.cpp where this copied from.",
+      "parentUuid": "77171535_8d439168",
+      "range": {
+        "startLine": 44,
+        "startChar": 41,
+        "endLine": 44,
+        "endChar": 49
+      },
+      "revId": "14ad10532c2b347fb6343d6a8ca8929885c7f6e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "34e128f1_3972e46d",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 3
@@ -59,6 +107,30 @@
       "writtenOn": "2017-11-28T17:01:21Z",
       "side": 1,
       "message": ", (comma)",
+      "range": {
+        "startLine": 91,
+        "startChar": 54,
+        "endLine": 91,
+        "endChar": 56
+      },
+      "revId": "14ad10532c2b347fb6343d6a8ca8929885c7f6e0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05449640_9e6af7bc",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-11-28T19:15:09Z",
+      "side": 1,
+      "message": "Fixed, as well as the location in tool-window.cpp where this was copied from.",
+      "parentUuid": "34e128f1_3972e46d",
       "range": {
         "startLine": 91,
         "startChar": 54,
