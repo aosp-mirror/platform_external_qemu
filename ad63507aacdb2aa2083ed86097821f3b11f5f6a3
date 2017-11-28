@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "39c71976_9b7c9a3f",
+        "filename": "android/android-emu/android/skin/qt/extended.ui",
+        "patchSetId": 1
+      },
+      "lineNbr": 899,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-11-28T18:43:03Z",
+      "side": 1,
+      "message": "Change this back when you\u0027re done. You can also just turn the \u0027ScreenRecording\u0027 flag on in android/data/advancedFeatures.ini if you have rebased.",
+      "range": {
+        "startLine": 899,
+        "startChar": 15,
+        "endLine": 899,
+        "endChar": 19
+      },
+      "revId": "ad63507aacdb2aa2083ed86097821f3b11f5f6a3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
