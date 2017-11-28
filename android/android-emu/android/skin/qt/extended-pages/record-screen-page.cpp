@@ -39,11 +39,25 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
 
     mTmpFilePath = PathUtils::join(avdInfo_getContentPath(android_avdInfo),
                                    &kTmpMediaName[0]);
+    qRegisterMetaType<RecordStopStatus>();
     QObject::connect(&mTimer, &QTimer::timeout, this,
                      &RecordScreenPage::updateElapsedTime);
+    QObject::connect(this, &RecordScreenPage::recordingStopped, this,
+                     &RecordScreenPage::slot_recordingStopped);
 }
 
 RecordScreenPage::~RecordScreenPage() {}
+
+static void onRecordingStoppedCallback(void* opaque, RecordStopStatus status) {
+    RecordScreenPage* rsInst = (RecordScreenPage*)opaque;
+    if (rsInst) {
+        rsInst->emitRecordingStopped(status);
+    }
+}
+
+void RecordScreenPage::emitRecordingStopped(RecordStopStatus status) {
+    emit(recordingStopped(status));
+}
 
 void RecordScreenPage::setRecordScreenAgent(
         const QAndroidRecordScreenAgent* agent) {
@@ -160,32 +174,33 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
     }
 
     switch (mState) {
-        case RecordState::Ready:
+        case RecordState::Ready: {
             // startRecording() will determine which codec to use based on the
             // file extension.
-            if (mRecordScreenAgent->startRecording(mTmpFilePath.c_str())) {
+            RecordingInfo info = {};
+            info.fileName = mTmpFilePath.c_str();
+            info.cb = &onRecordingStoppedCallback;
+            info.opaque = this;
+            if (mRecordScreenAgent->startRecording(&info)) {
                 newState = RecordState::Recording;
             } else {
                 // User probably started recording from command-line.
                 // TODO: show MessageBox saying "already recording."
             }
             break;
+        }
         case RecordState::Recording:
         {
-            auto thread = new QThread();
-            auto task = new StopRecordingTask(mRecordScreenAgent);
-            task->moveToThread(thread);
-            connect(thread, SIGNAL(started()), task, SLOT(run()));
-            connect(task, SIGNAL(started()), this, SLOT(stopRecordingStarted()));
-            connect(task, SIGNAL(finished(bool)), this, SLOT(stopRecordingFinished(bool)));
-            connect(task, SIGNAL(finished(bool)), thread, SLOT(quit()));
-            connect(thread, SIGNAL(finished()), task, SLOT(deleteLater()));
-            connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-            thread->start();
+            mRecordScreenAgent->stopRecording();
             return;
         }
         case RecordState::Stopped:  // we can combine this state into readystate
-            if (mRecordScreenAgent->startRecording(mTmpFilePath.c_str())) {
+        {
+            RecordingInfo info = {};
+            info.fileName = mTmpFilePath.c_str();
+            info.cb = &onRecordingStoppedCallback;
+            info.opaque = this;
+            if (mRecordScreenAgent->startRecording(&info)) {
                 newState = RecordState::Recording;
             } else {
                 // User probably started recording from command-line.
@@ -193,6 +208,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
             }
             newState = RecordState::Recording;
             break;
+        }
         default:;
     }
 
@@ -265,17 +281,20 @@ void RecordScreenPage::updateTheme() {
     }
 }
 
-void RecordScreenPage::stopRecordingStarted() {
-    setRecordState(RecordState::Stopping);
-}
-
-void RecordScreenPage::stopRecordingFinished(bool success) {
-    if (!success) {
-        QString errStr = tr("An error occurred while recording.");
-        showErrorDialog(errStr, tr("Save Recording"));
+void RecordScreenPage::slot_recordingStopped(RecordStopStatus status) {
+    switch (status) {
+        case RECORD_STOP_INITIATED:
+            setRecordState(RecordState::Stopping);
+            break;
+        case RECORD_STOP_FINISHED:
+            setRecordState(RecordState::Stopped);
+            break;
+        case RECORD_STOP_FAILED:
+            QString errStr = tr("An error occurred while recording.");
+            showErrorDialog(errStr, tr("Save Recording"));
+            setRecordState(RecordState::Ready);
+            break;
     }
-
-    setRecordState(RecordState::Stopped);
 }
 
 void RecordScreenPage::convertingStarted() {
