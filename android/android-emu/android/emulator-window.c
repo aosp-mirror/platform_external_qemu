@@ -21,7 +21,6 @@
 #include "android/hw-sensors.h"
 #include "android/network/globals.h"
 #include "android/opengles.h"
-#include "android/screen-recorder.h"
 #include "android/skin/keycode.h"
 #include "android/skin/winsys.h"
 #include "android/ui-emu-agent.h"
@@ -154,12 +153,12 @@ static void emulator_window_opengles_redraw_window(void) {
     }
 }
 
-bool emulator_window_start_recording(const char* filename) {
-    return screen_recorder_start(filename);
+bool emulator_window_start_recording(const RecordingInfo* info) {
+    return screen_recorder_start(info);
 }
 
 void emulator_window_stop_recording(void) {
-    screen_recorder_stop();
+    screen_recorder_stop_async();
 }
 
 // Used as an emugl callback to get each frame of GPU display.
