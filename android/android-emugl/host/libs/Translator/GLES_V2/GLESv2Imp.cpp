@@ -1559,9 +1559,8 @@ GL_APICALL void  GL_APIENTRY glGetActiveUniform(GLuint program, GLuint index, GL
         SET_ERROR_IF(bufsize < 0, GL_INVALID_VALUE);
 
         ProgramData* pData = (ProgramData*)objData;
-        int hostIdx = pData->getHostUniformLocation(index);
         s_getActiveAttribOrUniform(true, ctx, pData,
-                                   globalProgramName, hostIdx, bufsize, length,
+                                   globalProgramName, index, bufsize, length,
                                    size, type, name);
     }
 }
@@ -2506,7 +2505,8 @@ GL_APICALL void  GL_APIENTRY glGetUniformfv(GLuint program, GLint location, GLfl
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
-        ctx->dispatcher().glGetUniformfv(globalProgramName,location,params);
+        ctx->dispatcher().glGetUniformfv(globalProgramName,
+            pData->getHostUniformLocation(location), params);
     }
 }
 
@@ -2522,7 +2522,8 @@ GL_APICALL void  GL_APIENTRY glGetUniformiv(GLuint program, GLint location, GLin
         SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION);
         ProgramData* pData = (ProgramData *)objData;
         SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION);
-        ctx->dispatcher().glGetUniformiv(globalProgramName,location,params);
+        ctx->dispatcher().glGetUniformiv(globalProgramName,
+            pData->getHostUniformLocation(location), params);
     }
 }
 
@@ -2537,13 +2538,7 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
-        // On core profile, it's possible to have renamed
-        // a bunch of variables to avoid ES -> core name collisions.
-        // Sort it out here.
-        return ctx->dispatcher().glGetUniformLocation(
-            globalProgramName, pData->getTranslatedName(name).c_str());
-        // TODO: Fix uniform location virtualization
-        // return pData->getGuestUniformLocation(name);
+        return pData->getGuestUniformLocation(name);
     }
     return -1;
 }
