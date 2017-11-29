@@ -2537,7 +2537,13 @@ GL_APICALL int GL_APIENTRY glGetUniformLocation(GLuint program, const GLchar* na
         RET_AND_SET_ERROR_IF(objData->getDataType()!=PROGRAM_DATA,GL_INVALID_OPERATION,-1);
         ProgramData* pData = (ProgramData *)objData;
         RET_AND_SET_ERROR_IF(pData->getLinkStatus() != GL_TRUE,GL_INVALID_OPERATION,-1);
-        return  pData->getGuestUniformLocation(name);
+        // On core profile, it's possible to have renamed
+        // a bunch of variables to avoid ES -> core name collisions.
+        // Sort it out here.
+        return ctx->dispatcher().glGetUniformLocation(
+            globalProgramName, pData->getTranslatedName(name).c_str());
+        // TODO: Fix uniform location virtualization
+        // return pData->getGuestUniformLocation(name);
     }
     return -1;
 }

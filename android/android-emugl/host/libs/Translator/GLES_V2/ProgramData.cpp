@@ -225,19 +225,19 @@ std::unordered_map<GLuint, GLUniformDesc> ProgramData::collectUniformInfo() cons
         return uniformsOnSave;
     }
     dispatcher.glGetProgramiv(ProgramName, GL_ACTIVE_UNIFORMS, &uniform_count);
-    std::unique_ptr<char[]> name(new char(nameLength));
+    std::vector<char> name(nameLength, 0);
     for (int i = 0; i < uniform_count; i++) {
         GLint size;
         GLenum type;
         GLsizei length;
         dispatcher.glGetActiveUniform(ProgramName, i, nameLength, &length,
-                &size, &type, name.get());
+                &size, &type, name.data());
         if (size > 1) {
             // Uniform array, drivers may return 'arrayName' or 'arrayName[0]'
             // as the name of the array.
             // Need to append '[arrayIndex]' after 'arrayName' to query the
             // value for each array member.
-            std::string baseName = getBaseName(std::string(name.get()));
+            std::string baseName = getBaseName(std::string(name.data()));
             for (int arrayIndex = 0; arrayIndex < size; arrayIndex++) {
                 std::ostringstream oss;
                 oss << baseName << '[' << arrayIndex << ']';
@@ -245,7 +245,7 @@ std::unordered_map<GLuint, GLUniformDesc> ProgramData::collectUniformInfo() cons
             }
         }
         else {
-            getUniformValue(name.get(), type, uniformsOnSave);
+            getUniformValue(name.data(), type, uniformsOnSave);
         }
     }
     return uniformsOnSave;
@@ -775,13 +775,13 @@ void ProgramData::setLinkStatus(GLint status) {
                 &uniform_count);
         dispatcher.glGetProgramiv(ProgramName, GL_ACTIVE_UNIFORM_MAX_LENGTH,
                 &nameLength);
-        std::unique_ptr<char[]> name(new char(nameLength));
+        std::vector<char> name(nameLength, 0);
         for (int i = 0; i < uniform_count; i++) {
             GLint size;
             GLenum type;
             dispatcher.glGetActiveUniform(ProgramName, i, nameLength, nullptr,
-                    &size, &type, name.get());
-            std::string baseName = getBaseName(std::string(name.get()));
+                    &size, &type, name.data());
+            std::string baseName = getBaseName(std::string(name.data()));
             mUniNameToGuestLoc.emplace(getDetranslatedName(baseName), i);
             mGuestLocToHostLoc.emplace(i, i);
         }
@@ -1000,10 +1000,14 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
 }
 
 int ProgramData::getHostUniformLocation(int guestLocation) {
-    const auto& location = mGuestLocToHostLoc.find(guestLocation);
-    if (location != mGuestLocToHostLoc.end()) {
-        return location->second;
-    } else {
-        return -1;
-    }
+    return guestLocation;
+
+    // TODO: Fix uniform location virtualization on Mac
+    // (black screen; no rendering)
+    // const auto& location = mGuestLocToHostLoc.find(guestLocation);
+    // if (location != mGuestLocToHostLoc.end()) {
+    //     return location->second;
+    // } else {
+    //     return -1;
+    // }
 }
