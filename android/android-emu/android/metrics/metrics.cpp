@@ -348,6 +348,8 @@ static android_studio::EmulatorFeatureFlagState::EmulatorFeatureFlag toClearcutF
             return android_studio::EmulatorFeatureFlagState::PLAY_STORE_IMAGE;
         case android::featurecontrol::LogcatPipe:
             return android_studio::EmulatorFeatureFlagState::LOGCAT_PIPE;
+        case android::featurecontrol::SystemAsRoot:
+            return android_studio::EmulatorFeatureFlagState::SYSTEM_AS_ROOT;
         case android::featurecontrol::HYPERV:
             return android_studio::EmulatorFeatureFlagState::HYPERV;
         case android::featurecontrol::HVF:
