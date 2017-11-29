@@ -23,10 +23,12 @@ namespace emugl {
 namespace android {
 namespace emulation {
 
-bool captureScreenshot(android::base::StringView outputDirectoryPath);
+bool captureScreenshot(android::base::StringView outputDirectoryPath,
+                       std::string* outputFilepath = NULL);
 // The following one is for testing only
 bool captureScreenshot(emugl::Renderer* renderer,
-        android::base::StringView outputDirectoryPath);
+                       android::base::StringView outputDirectoryPath,
+                       std::string* outputFilepath = NULL);
 
 }  // namespace emulation
 }  // namespace android
