@@ -59,11 +59,7 @@ SettingsPage::SettingsPage(QWidget* parent)
     setElidedText(mUi->set_adbPathBox, adbPath);
 
     // Dark/Light theme
-    SettingsTheme theme =
-        static_cast<SettingsTheme>(settings.value(Ui::Settings::UI_THEME, 0).toInt());
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        theme = static_cast<SettingsTheme>(0);
-    }
+    SettingsTheme theme = getSelectedTheme();
     mUi->set_themeBox->setCurrentIndex(static_cast<int>(theme));
 
     connect(mUi->set_forwardShortcutsToDevice, SIGNAL(currentIndexChanged(int)),
