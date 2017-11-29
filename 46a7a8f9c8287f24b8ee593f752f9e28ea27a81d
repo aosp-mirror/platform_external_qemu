@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a71991ab_6e8e86c4",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2798,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-29T23:09:41Z",
+      "side": 1,
+      "message": "nit: line is a bit long, please break it",
+      "revId": "46a7a8f9c8287f24b8ee593f752f9e28ea27a81d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "27c7b997_05859b95",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 2869,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-29T23:09:41Z",
+      "side": 1,
+      "message": "nit: possibly obsolete comment?",
+      "range": {
+        "startLine": 2869,
+        "startChar": 0,
+        "endLine": 2869,
+        "endChar": 79
+      },
+      "revId": "46a7a8f9c8287f24b8ee593f752f9e28ea27a81d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
