@@ -493,7 +493,7 @@ void Snapshot::incrementSuccessfulLoads() {
 }
 
 bool Snapshot::shouldInvalidate() const {
-    // Either there wasn't any successful loads,
+    // Either there weren't any successful loads,
     // or there was more than one invalid load
     // of this snapshot.
     return !mSuccessfulLoads ||
