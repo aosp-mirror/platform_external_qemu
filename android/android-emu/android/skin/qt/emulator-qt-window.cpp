@@ -900,7 +900,7 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
 }
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
-                     event->pos());
+                     event->pos(), event->globalPos());
 }
 
 void EmulatorQtWindow::leaveEvent(QEvent* event) {
@@ -914,12 +914,12 @@ void EmulatorQtWindow::leaveEvent(QEvent* event) {
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
-                     event->pos());
+                     event->pos(), event->globalPos());
 }
 
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
-                     event->pos());
+                     event->pos(), event->globalPos());
 }
 
 // Set the window flags based on whether we should
@@ -1899,12 +1899,15 @@ SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         SkinMouseButtonType button,
                                         const QPoint& pos,
+                                        const QPoint& gPos,
                                         bool skipSync) {
     SkinEvent* skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = button;
     skin_event->u.mouse.skip_sync = skipSync;
     skin_event->u.mouse.x = pos.x();
     skin_event->u.mouse.y = pos.y();
+    skin_event->u.mouse.x_global = gPos.x();
+    skin_event->u.mouse.y_global = gPos.y();
 
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
@@ -2260,18 +2263,18 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
       event->ignore();
     } else {
       if (!mWheelScrollTimer.isActive()) {
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos());
+        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos(), QPoint(0,0));
         mWheelScrollPos = event->pos();
       }
 
       mWheelScrollTimer.start();
       mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-      handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos);
+      handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
     }
 }
 
 void EmulatorQtWindow::wheelScrollTimeout() {
-    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos);
+    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {
