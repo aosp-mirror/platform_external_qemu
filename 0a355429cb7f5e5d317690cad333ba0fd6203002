@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d570fd8_ab678d71",
+        "filename": "android/android-emu/android/test/checkboot.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-11-29T18:56:20Z",
+      "side": 1,
+      "message": "nit: line too long",
+      "range": {
+        "startLine": 36,
+        "startChar": 91,
+        "endLine": 36,
+        "endChar": 105
+      },
+      "revId": "0a355429cb7f5e5d317690cad333ba0fd6203002",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
