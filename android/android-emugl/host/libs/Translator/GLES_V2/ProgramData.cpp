@@ -251,22 +251,22 @@ static std::unordered_map<GLuint, GLuint> collectUniformBlockInfo(GLuint pname) 
 
 static std::vector<std::string> collectTransformFeedbackInfo(GLuint pname) {
     GLint transformFeedbackCount = 0;
-    GLint transformFeedbakMaxLength = 0;
+    GLint transformFeedbackMaxLength = 0;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     dispatcher.glGetProgramiv(pname, GL_TRANSFORM_FEEDBACK_VARYINGS,
             &transformFeedbackCount);
     dispatcher.glGetProgramiv(pname, GL_TRANSFORM_FEEDBACK_VARYING_MAX_LENGTH,
-            &transformFeedbakMaxLength);
+            &transformFeedbackMaxLength);
 
     std::vector<std::string> transformFeedbacks(transformFeedbackCount);
-    std::unique_ptr<char[]> nameBuffer(new char [transformFeedbakMaxLength]);
+    std::unique_ptr<char[]> nameBuffer(new char [transformFeedbackMaxLength + 1]);
 
     for (int i = 0; i < transformFeedbackCount; i++) {
         GLsizei size;
         GLenum type;
 
         dispatcher.glGetTransformFeedbackVarying(pname, i,
-                transformFeedbakMaxLength, nullptr, &size, &type,
+                transformFeedbackMaxLength + 1, nullptr, &size, &type,
                 nameBuffer.get());
         transformFeedbacks[i] = nameBuffer.get();
     }
