@@ -35,11 +35,10 @@ constexpr float nsToSeconds(uint64_t nanoSeconds) {
 }
 
 /* Fixed state change time for smooth acceleration changes. */
-constexpr float kPositionStateChangeTimeSeconds = 0.5f;
-constexpr uint64_t kPositionStateChangeTimeNs =
-        secondsToNs(kPositionStateChangeTimeSeconds);
+constexpr float kStateChangeTimeSeconds = 0.5f;
+constexpr uint64_t kStateChangeTimeNs = secondsToNs(kStateChangeTimeSeconds);
 
-constexpr float kStateChangeTime1 = kPositionStateChangeTimeSeconds;
+constexpr float kStateChangeTime1 = kStateChangeTimeSeconds;
 constexpr float kStateChangeTime2 = kStateChangeTime1 * kStateChangeTime1;
 constexpr float kStateChangeTime3 = kStateChangeTime2 * kStateChangeTime1;
 constexpr float kStateChangeTime4 = kStateChangeTime2 * kStateChangeTime2;
@@ -87,7 +86,7 @@ void InertialModel::setTargetPosition(
         const glm::vec3 x_target = position;
 
         // Computed by solving for quintic movement in
-        // kPositionStateChangeTimeSeconds. Position, Velocity, and Acceleration
+        // kStateChangeTimeSeconds. Position, Velocity, and Acceleration
         // are computed here by solving the system of linear equations created
         // by setting the initial position, velocity, and acceleration to the
         // current values, and the final state to the target position, with no
@@ -104,7 +103,7 @@ void InertialModel::setTargetPosition(
         //     D == quadraticTerm
         //     E == linearTerm
         //     F == constantTerm
-        // t_end == kPositionStateChangeTimeSeconds
+        // t_end == kStateChangeTimeSeconds
         //
         // And this system of equations is solved:
         //
@@ -129,7 +128,7 @@ void InertialModel::setTargetPosition(
         //     x = x_init
         //     v = v_init
         //     a = a_init
-        //     t = kPositionStateChangeTimeSeconds
+        //     t = kStateChangeTimeSeconds
         //     y = x_target
 
         const glm::vec3 quinticTerm = (1.f / (2.f * kStateChangeTime5)) * (
@@ -165,7 +164,7 @@ void InertialModel::setTargetPosition(
                 constantTerm);
     }
     mPositionChangeStartTime = mModelTimeNs;
-    mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
+    mPositionChangeEndTime = mModelTimeNs + kStateChangeTimeNs;
     mZeroVelocityAfterEndTime = true;
 }
 
@@ -191,7 +190,7 @@ void InertialModel::setTargetVelocity(
         const glm::vec3 v_target = velocity;
 
         // Computed by solving for quartic movement in
-        // kPositionStateChangeTimeSeconds. Position, Velocity, and Acceleration
+        // kStateChangeTimeSeconds. Position, Velocity, and Acceleration
         // are computed here by solving the system of linear equations created
         // by setting the initial position, velocity, and acceleration to the
         // current values, and the final state to the target velocity, with no
@@ -207,7 +206,7 @@ void InertialModel::setTargetVelocity(
         //     C == quadraticTerm
         //     D == linearTerm
         //     E == constantTerm
-        // t_end == kPositionStateChangeTimeSeconds
+        // t_end == kStateChangeTimeSeconds
         //
         // And this system of equations is solved:
         //
@@ -230,7 +229,7 @@ void InertialModel::setTargetVelocity(
         //     x = x_init
         //     v = v_init
         //     a = a_init
-        //     t = kPositionStateChangeTimeSeconds
+        //     t = kStateChangeTimeSeconds
         //     w = v_target
 
         const glm::vec3 quarticTerm = (1.f / (4.f * kStateChangeTime3)) * (
@@ -254,31 +253,130 @@ void InertialModel::setTargetVelocity(
                 constantTerm);
     }
     mPositionChangeStartTime = mModelTimeNs;
-    mPositionChangeEndTime = mModelTimeNs + kPositionStateChangeTimeNs;
+    mPositionChangeEndTime = mModelTimeNs + kStateChangeTimeNs;
     mZeroVelocityAfterEndTime = false;
 }
 
 void InertialModel::setTargetRotation(
         glm::quat rotation, PhysicalInterpolation mode) {
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
-        mInitialRotation = rotation;
+        // For Step changes, we simply set the transform to immediately set the
+        // rotation to the target, with zero rotational velocity.
+        mRotationCubic = glm::mat4x4(
+                glm::vec4(0.f),
+                glm::vec4(0.f),
+                glm::vec4(0.f),
+                glm::vec4(rotation.x, rotation.y, rotation.z, rotation.w));
+        mRotationalVelocityCubic = glm::mat4x4(0.f);
     } else {
-        mInitialRotation = getRotation(PARAMETER_VALUE_TYPE_CURRENT);
+        // Computed by solving for cubic movement in 4d space. Position and
+        // Velocity in 4d space are computed here by solving the system of
+        // linear equations created by setting the initial 4d position (i.e.
+        // rotation), and velocity (i.e. rotational velocity) to the current
+        // normalized values, and the final state to the target 4d position,
+        // with zero velocity.
+        //
+        // Equation of motion is:
+        //
+        // f(t) == At^3 + Bt^2 + Ct + D
+        //
+        // Where:
+        //     A == cubicTerm
+        //     B == quadraticTerm
+        //     C == linearTerm
+        //     D == constantTerm
+        // t_end == kRotationStateChangeTimeSeconds
+        //
+        // And this system of equations is solved:
+        //
+        // Initial State:
+        //                 f(0) == x_init
+        //            df/d_t(0) == v_init
+        // Final State:
+        //             f(t_end) == x_target
+        //         df/dt(t_end) == 0
+        //
+        // These can be solved via the following Mathematica command:
+        // RowReduce[{{0,0,0,1,x},
+        //            {0,0,1,0,v},
+        //            {t^3,t^2,t,1,y},
+        //            {3*t^2,2t,1,0,0}}]
+        //
+        // Where:
+        //     x = x_init
+        //     v = v_init
+        //     t = kStateChangeTimeSeconds
+        //     y = x_target
+
+        const glm::vec4 currentRotation = calculateRotationalState(
+                mRotationCubic,
+                PARAMETER_VALUE_TYPE_CURRENT);
+
+        const glm::vec4 currentRotationalVelocity = calculateRotationalState(
+                mRotationalVelocityCubic,
+                PARAMETER_VALUE_TYPE_CURRENT);
+
+        const float rotationLength = glm::length(currentRotation);
+
+        // Rotation length should not be zero, but it may be possible by driving
+        // the inertial model in an extreme way (i.e. well timed oscilations) to
+        // hit this case.  In this case, we will simply do a step to the target.
+        if (rotationLength == 0.f) {
+            mRotationCubic = glm::mat4x4(
+                    glm::vec4(0.f),
+                    glm::vec4(0.f),
+                    glm::vec4(0.f),
+                    glm::vec4(rotation.x, rotation.y, rotation.z, rotation.w));
+            mRotationalVelocityCubic = glm::mat4x4(0.f);
+            return;
+        }
+
+        // Scale rotation and rotational velocity such that the rotation is a unit
+        // quaternion.
+        glm::vec4 x_init = (1.f / rotationLength) * currentRotation;
+        const glm::vec4 scaledRotationalVelocity =
+                (1.f / rotationLength) * currentRotationalVelocity;
+
+        // Component of 4d velocity that is orthogonal to the current 4d normalized
+        // rotation.
+        glm::vec4 v_init = scaledRotationalVelocity -
+                glm::dot(scaledRotationalVelocity, x_init) * x_init;
+
+        const glm::vec4 x_target = glm::vec4(
+                rotation.x, rotation.y, rotation.z, rotation.w);
+
+        if (glm::distance(-x_init, x_target) < glm::distance(x_init, x_target)) {
+            // If x_target is closer to the negation of x_init than x_init, then
+            // negate x_init.
+            x_init = -x_init;
+            v_init = -v_init;
+        }
+
+        const glm::vec4 cubicTerm = (1.f / kStateChangeTime3) * (
+                kStateChangeTime1 * v_init +
+                2.f * x_init +
+                -2.f * x_target);
+        const glm::vec4 quadraticTerm = (1.f / kStateChangeTime2) * (
+                -2.f * kStateChangeTime1 * v_init +
+                -3.f * x_init +
+                3.f * x_target);
+        const glm::vec4 linearTerm = v_init;
+        const glm::vec4 constantTerm = x_init;
+
+        mRotationCubic = glm::mat4x4(
+                cubicTerm,
+                quadraticTerm,
+                linearTerm,
+                constantTerm);
+        mRotationalVelocityCubic = glm::mat4x4(
+                glm::vec4(),
+                3.f * cubicTerm,
+                2.f * quadraticTerm,
+                linearTerm);
     }
+
     mRotationChangeStartTime = mModelTimeNs;
-
-    const glm::quat rotationDiff = glm::normalize(
-            rotation * glm::conjugate(mInitialRotation));
-    mRotationAngleRadians = glm::angle(rotationDiff);
-    if (mRotationAngleRadians > M_PI) {
-        mRotationAngleRadians -= 2.f * M_PI;
-    }
-    mRotationAxis = glm::axis(rotationDiff);
-
-    const float minTime = std::abs(mRotationAngleRadians) / kMaxAngularVelocity;
-    mRotationTimeSeconds = std::max(kTargetRotationTime, minTime);
-    mRotationChangeEndTime = mRotationChangeStartTime +
-            secondsToNs(mRotationTimeSeconds);
+    mRotationChangeEndTime = mModelTimeNs + kStateChangeTimeNs;
 }
 
 glm::vec3 InertialModel::getPosition(
@@ -310,24 +408,55 @@ glm::vec3 InertialModel::getAcceleration(
 
 glm::quat InertialModel::getRotation(
         ParameterValueType parameterValueType) const {
-    float changeFraction = 1.f;
-    if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT &&
-            mModelTimeNs < mRotationChangeEndTime) {
-        changeFraction = nsToSeconds(mModelTimeNs - mRotationChangeStartTime) /
-                mRotationTimeSeconds;
-    }
-    return glm::normalize(glm::angleAxis(mRotationAngleRadians * changeFraction,
-            mRotationAxis) * mInitialRotation);
+    const glm::vec4 rotationVec = calculateRotationalState(
+            mRotationCubic,
+            parameterValueType);
+
+    const glm::quat rotation(
+            rotationVec.w, rotationVec.x, rotationVec.y, rotationVec.z);
+
+    return glm::normalize(rotation);
 }
 
 glm::vec3 InertialModel::getRotationalVelocity(
         ParameterValueType parameterValueType) const {
-    if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT &&
-            mModelTimeNs < mRotationChangeEndTime) {
-        return (mRotationAngleRadians / mRotationTimeSeconds) * mRotationAxis;
-    } else {
-        return glm::vec3();
+    const glm::vec4 rotationVec = calculateRotationalState(
+            mRotationCubic,
+            parameterValueType);
+    const float rotationVecLength = glm::length(rotationVec);
+
+    // Rotation length should not be zero, but it may be possible by driving
+    // the inertial model in an extreme way (i.e. well timed oscilations) to
+    // hit this case.  In this case, we will simply throw away this target
+    // state.
+    if (rotationVecLength == 0.f) {
+        return glm::vec3(0.f);
     }
+
+    const glm::vec4 rotationNormalized = (1.f / rotationVecLength) * rotationVec;
+    const glm::quat rotation = glm::quat(
+            rotationNormalized.w,
+            rotationNormalized.x,
+            rotationNormalized.y,
+            rotationNormalized.z);
+
+    const glm::vec4 rotationDerivative = (1.f / rotationVecLength) *
+            calculateRotationalState(
+                    mRotationalVelocityCubic,
+                    parameterValueType);
+
+    const glm::quat rotationDerivativeQuat = glm::quat(
+            rotationDerivative.w,
+            rotationDerivative.x,
+            rotationDerivative.y,
+            rotationDerivative.z);
+
+    const glm::quat rotationConjugate = glm::conjugate(rotation);
+
+    const glm::quat angularVelocity =
+            2.f * (rotationDerivativeQuat * rotationConjugate);
+
+    return glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z);
 }
 
 void InertialModel::setInertialTransforms(
@@ -402,6 +531,23 @@ glm::vec3 InertialModel::calculateInertialState(
     return requestedTimeNs < mPositionChangeEndTime ?
             cubicTransform * cubicTimeVec + quinticTransform * quinticTimeVec :
             afterEndCubicTransform * cubicTimeVec;
+}
+
+glm::vec4 InertialModel::calculateRotationalState(
+        const glm::mat4x4& cubicTransform,
+        ParameterValueType parameterValueType) const {
+    assert(mModelTimeNs >= mRotationChangeStartTime);
+    const uint64_t requestedTimeNs =
+            parameterValueType == PARAMETER_VALUE_TYPE_TARGET ?
+                    mRotationChangeEndTime :
+                    std::min(mModelTimeNs, mRotationChangeEndTime);
+
+    const float time1 = nsToSeconds(requestedTimeNs - mRotationChangeStartTime);
+    const float time2 = time1 * time1;
+    const float time3 = time2 * time1;
+    const glm::vec4 cubicTimeVec(time3, time2, time1, 1.f);
+
+    return cubicTransform * cubicTimeVec;
 }
 
 }  // namespace physics
