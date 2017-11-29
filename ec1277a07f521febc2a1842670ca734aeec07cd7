@@ -22,6 +22,30 @@
       "revId": "ec1277a07f521febc2a1842670ca734aeec07cd7",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "64ef1470_e2c82124",
+        "filename": "android/android-emu/android/emulation/QemuMiscPipe.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-11-29T17:44:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7fe62183_f3745100",
+      "range": {
+        "startLine": 31,
+        "startChar": 4,
+        "endLine": 31,
+        "endChar": 48
+      },
+      "revId": "ec1277a07f521febc2a1842670ca734aeec07cd7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
