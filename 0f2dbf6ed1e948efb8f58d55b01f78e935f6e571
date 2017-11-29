@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b14d793b_365a654a",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-29T23:37:34Z",
+      "side": 1,
+      "message": "What about making this a non-pointer value of android::base::WorkerThread?  WorkerThread will take care of repeated attempts to stop recording without having to create a new thread each time but is not as complicated as setting up a thred with message queues.\n\nSee FrameBuffer.cpp FrameBuffer constructor with m_readbackThread / m_postThread and m_readbackThread.start/enqueue for examples of usage.",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 54
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a8ac079e_39832cfd",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-29T23:37:34Z",
+      "side": 1,
+      "message": "Could std::string be easier to work with here? It\u0027s part of sGlobals, so it will stay around (Initialize to {} though)",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 37
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
