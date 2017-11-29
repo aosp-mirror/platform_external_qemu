@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "50720bb0_1472395f",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-29T23:21:54Z",
+      "side": 1,
+      "message": "nit: maybe put them on the same line?",
+      "range": {
+        "startLine": 479,
+        "startChar": 0,
+        "endLine": 480,
+        "endChar": 26
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
