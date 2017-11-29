@@ -293,8 +293,6 @@ static std::vector<std::string> collectTransformFeedbackInfo(GLuint pname) {
 void ProgramData::onSave(android::base::Stream* stream, unsigned int globalName) const {
     // The first byte is used to distinguish between program and shader object.
     // It will be loaded outside of this class
-    // TODO: snapshot shader source in program object (in case shaders got
-    // deleted while the program is still alive)
     stream->putByte(LOAD_PROGRAM);
     ObjectData::onSave(stream, globalName);
     auto saveAttribLocs = [](android::base::Stream* stream,
@@ -456,14 +454,15 @@ void ProgramData::restore(ObjectLocalName localName,
                 attribLocs.first.c_str()) == attribLocs.second);
         }
 #endif // DEBUG
+        for (const auto& uniform : mUniNameToGuestLoc) {
+            GLint hostLoc = dispatcher.glGetUniformLocation(globalName,
+                    getTranslatedName(uniform.first).c_str());
+            mGuestLocToHostLoc.emplace(uniform.second, hostLoc);
+        }
         for (const auto& uniformEntry : uniforms) {
             const auto& uniform = uniformEntry.second;
             GLint location = dispatcher.glGetUniformLocation(globalName,
                     getTranslatedName(uniform.mGuestName).c_str());
-            GLint guestLoc = getGuestUniformLocation(uniform.mGuestName.c_str());
-            assert(guestLoc != -1);
-            assert(location != -1);
-            mGuestLocToHostLoc.emplace(guestLoc, location);
             if (location == -1) {
                 // Location changed after loading from a snapshot.
                 // likely a driver bug
@@ -762,6 +761,7 @@ void ProgramData::setLinkStatus(GLint status) {
                 assert(s.shader);
                 s.linkedSource = s.shader->getOriginalSrc();
                 s.linkInfo = s.shader->getShaderLinkInfo();
+                //printf("shader source:\n%s", s.linkedSource.c_str());
             }
         }
         for (const auto &attribLoc : boundAttribLocs) {
@@ -776,15 +776,20 @@ void ProgramData::setLinkStatus(GLint status) {
         dispatcher.glGetProgramiv(ProgramName, GL_ACTIVE_UNIFORM_MAX_LENGTH,
                 &nameLength);
         std::vector<char> name(nameLength, 0);
-        for (int i = 0; i < uniform_count; i++) {
+
+        /*for (int i = 0; i < uniform_count; i++) {
             GLint size;
             GLenum type;
             dispatcher.glGetActiveUniform(ProgramName, i, nameLength, nullptr,
                     &size, &type, name.data());
             std::string baseName = getBaseName(std::string(name.data()));
-            mUniNameToGuestLoc.emplace(getDetranslatedName(baseName), i);
-            mGuestLocToHostLoc.emplace(i, i);
-        }
+            int guestLoc = static_cast<int>(mUniNameToGuestLoc.size());
+            int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
+                baseName.c_str());
+            mUniNameToGuestLoc.emplace(getDetranslatedName(baseName), guestLoc);
+            printf("get uniform %s : %d\n", getDetranslatedName(baseName).c_str(), hostLoc);
+            mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+        }*/
 
     } else {
         for (auto& s : attachedShaders) {
@@ -992,22 +997,34 @@ static bool sCheckVariables(ProgramData* pData,
 }
 
 int ProgramData::getGuestUniformLocation(const char* uniName) {
-    const auto& location = mUniNameToGuestLoc.find(getBaseName(uniName));
-    if (location != mUniNameToGuestLoc.end()) {
-        return location->second;
+    std::string baseName = getBaseName(uniName);
+    const auto& activeLoc = mUniNameToGuestLoc.find(baseName);
+    if (activeLoc != mUniNameToGuestLoc.end()) {
+        return activeLoc->second;
     }
-    return -1;
+    // Inactive uniforms might not be in the list
+    // Insert them now
+    std::string translatedName = getTranslatedName(baseName);
+    GLDispatch& dispatcher = GLEScontext::dispatcher();
+    int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
+        translatedName.c_str());
+    if (hostLoc == -1) {
+        return -1;
+    }
+    int guestLoc = static_cast<int>(mUniNameToGuestLoc.size());
+    mUniNameToGuestLoc.emplace(baseName, guestLoc);
+    printf("get uniform %s (%s) : %d (%d)\n", uniName, translatedName.c_str(), guestLoc, hostLoc);
+    mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+    return guestLoc;
 }
 
 int ProgramData::getHostUniformLocation(int guestLocation) {
-    return guestLocation;
-
     // TODO: Fix uniform location virtualization on Mac
     // (black screen; no rendering)
-    // const auto& location = mGuestLocToHostLoc.find(guestLocation);
-    // if (location != mGuestLocToHostLoc.end()) {
-    //     return location->second;
-    // } else {
-    //     return -1;
-    // }
+    const auto& location = mGuestLocToHostLoc.find(guestLocation);
+    if (location != mGuestLocToHostLoc.end()) {
+        return location->second;
+    } else {
+        return -1;
+    }
 }
