@@ -77,7 +77,7 @@ public:
         return &mVirtualSceneControlWindow;
     }
 
-    bool handleQtKeyEvent(QKeyEvent* event);
+    bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
 
     void closeExtendedWindow();
 

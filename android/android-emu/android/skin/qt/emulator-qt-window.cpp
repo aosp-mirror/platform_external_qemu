@@ -1957,7 +1957,8 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
         }
     }
 
-    bool qtEvent = mToolWindow->handleQtKeyEvent(event);
+    bool qtEvent = mToolWindow->handleQtKeyEvent(
+            event, QtKeyEventSource::EmulatorWindow);
 
     if (mForwardShortcutsToDevice || !qtEvent) {
         forwardKeyEventToEmulator(type, event);

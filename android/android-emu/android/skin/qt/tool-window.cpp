@@ -474,10 +474,10 @@ void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
     mEmulatorWindow->queueSkinEvent(skin_event);
 }
 
-bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
+bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
     // See if this key is handled by the virtual scene control window first.
     if (mVirtualSceneControlWindow.isVisible()) {
-        if (mVirtualSceneControlWindow.handleQtKeyEvent(event)) {
+        if (mVirtualSceneControlWindow.handleQtKeyEvent(event, source)) {
             return true;
         }
     }

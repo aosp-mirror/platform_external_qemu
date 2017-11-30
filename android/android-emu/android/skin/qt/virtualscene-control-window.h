@@ -11,6 +11,7 @@
 
 #pragma once
 
+#include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/size-tweaker.h"
 #include "android/ui-emu-agent.h"
 
@@ -35,7 +36,7 @@ public:
     explicit VirtualSceneControlWindow(ToolWindow* toolWindow, QWidget* parent);
     virtual ~VirtualSceneControlWindow();
 
-    bool handleQtKeyEvent(QKeyEvent* event);
+    bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
     void updateTheme(const QString& styleSheet);
 
     void setAgent(const UiEmuAgent* agentPtr);
