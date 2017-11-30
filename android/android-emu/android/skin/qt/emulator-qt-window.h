@@ -212,6 +212,7 @@ public:
     void handleMouseEvent(SkinEventType type,
                           SkinMouseButtonType button,
                           const QPoint& pos,
+                          const QPoint& gPos,
                           bool skipSync = false);
     void panHorizontal(bool left);
     void panVertical(bool up);
