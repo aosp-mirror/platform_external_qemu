@@ -883,9 +883,9 @@ GL_API void GL_APIENTRY  glFrustumf( GLfloat left, GLfloat right, GLfloat bottom
 }
 
 GL_API void GL_APIENTRY  glFrustumx( GLfixed left, GLfixed right, GLfixed bottom, GLfixed top, GLfixed zNear, GLfixed zFar) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glFrustum(X2F(left),X2F(right),X2F(bottom),X2F(top),X2F(zNear),X2F(zFar));
+    ctx->frustumf(X2F(left),X2F(right),X2F(bottom),X2F(top),X2F(zNear),X2F(zFar));
 }
 
 GL_API void GL_APIENTRY  glGenBuffers( GLsizei n, GLuint *buffers) {
@@ -1207,17 +1207,17 @@ GL_API void GL_APIENTRY  glGetIntegerv( GLenum pname, GLint *params) {
 }
 
 GL_API void GL_APIENTRY  glGetLightfv( GLenum light, GLenum pname, GLfloat *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glGetLightfv(light,pname,params);
+    ctx->getLightfv(light,pname,params);
 }
 
 GL_API void GL_APIENTRY  glGetLightxv( GLenum light, GLenum pname, GLfixed *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat tmpParams[4];
 
-    ctx->dispatcher().glGetLightfv(light,pname,tmpParams);
+    ctx->getLightfv(light,pname,tmpParams);
     switch (pname){
         case GL_AMBIENT:
         case GL_DIFFUSE:
@@ -1243,16 +1243,16 @@ GL_API void GL_APIENTRY  glGetLightxv( GLenum light, GLenum pname, GLfixed *para
 }
 
 GL_API void GL_APIENTRY  glGetMaterialfv( GLenum face, GLenum pname, GLfloat *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glGetMaterialfv(face,pname,params);
+    ctx->getMaterialfv(face,pname,params);
 }
 
 GL_API void GL_APIENTRY  glGetMaterialxv( GLenum face, GLenum pname, GLfixed *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat tmpParams[4];
-    ctx->dispatcher().glGetMaterialfv(face,pname,tmpParams);
+    ctx->getMaterialfv(face,pname,tmpParams);
     switch(pname){
     case GL_AMBIENT:
     case GL_DIFFUSE:
@@ -1375,26 +1375,27 @@ GL_API void GL_APIENTRY  glHint( GLenum target, GLenum mode) {
 }
 
 GL_API void GL_APIENTRY  glLightModelf( GLenum pname, GLfloat param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glLightModelf(pname,param);
+    ctx->lightModelf(pname,param);
 }
 
 GL_API void GL_APIENTRY  glLightModelfv( GLenum pname, const GLfloat *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glLightModelfv(pname,params);
+
+    ctx->lightModelfv(pname,params);
 }
 
 GL_API void GL_APIENTRY  glLightModelx( GLenum pname, GLfixed param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat tmpParam = static_cast<GLfloat>(param);
-    ctx->dispatcher().glLightModelf(pname,tmpParam);
+    ctx->lightModelf(pname,tmpParam);
 }
 
 GL_API void GL_APIENTRY  glLightModelxv( GLenum pname, const GLfixed *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat tmpParams[4];
     if(pname == GL_LIGHT_MODEL_TWO_SIDE) {
@@ -1405,30 +1406,30 @@ GL_API void GL_APIENTRY  glLightModelxv( GLenum pname, const GLfixed *params) {
         }
     }
 
-    ctx->dispatcher().glLightModelfv(pname,tmpParams);
+    ctx->lightModelfv(pname,tmpParams);
 }
 
 GL_API void GL_APIENTRY  glLightf( GLenum light, GLenum pname, GLfloat param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     gles1usages->set_light(true);
-    ctx->dispatcher().glLightf(light,pname,param);
+    ctx->lightf(light,pname,param);
 }
 
 GL_API void GL_APIENTRY  glLightfv( GLenum light, GLenum pname, const GLfloat *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glLightfv(light,pname,params);
+    ctx->lightfv(light,pname,params);
 }
 
 GL_API void GL_APIENTRY  glLightx( GLenum light, GLenum pname, GLfixed param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glLightf(light,pname,X2F(param));
+    ctx->lightf(light,pname,X2F(param));
 }
 
 GL_API void GL_APIENTRY  glLightxv( GLenum light, GLenum pname, const GLfixed *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat tmpParams[4];
 
@@ -1454,7 +1455,7 @@ GL_API void GL_APIENTRY  glLightxv( GLenum light, GLenum pname, const GLfixed *p
                 return;
             }
     }
-    ctx->dispatcher().glLightfv(light,pname,tmpParams);
+    ctx->lightfv(light,pname,tmpParams);
 }
 
 GL_API void GL_APIENTRY  glLineWidth( GLfloat width) {
@@ -1501,32 +1502,36 @@ GL_API void GL_APIENTRY  glLogicOp( GLenum opcode) {
 }
 
 GL_API void GL_APIENTRY  glMaterialf( GLenum face, GLenum pname, GLfloat param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glMaterialf(face,pname,param);
+
+    ctx->materialf(face, pname, param);
 }
 
 GL_API void GL_APIENTRY  glMaterialfv( GLenum face, GLenum pname, const GLfloat *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glMaterialfv(face,pname,params);
+
+    ctx->materialfv(face, pname, params);
 }
 
 GL_API void GL_APIENTRY  glMaterialx( GLenum face, GLenum pname, GLfixed param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glMaterialf(face,pname,X2F(param));
+
+    ctx->materialf(face, pname, X2F(param));
 }
 
 GL_API void GL_APIENTRY  glMaterialxv( GLenum face, GLenum pname, const GLfixed *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     GLfloat tmpParams[4];
 
     for(int i=0; i< 4; i++) {
         tmpParams[i] = X2F(params[i]);
     }
-    ctx->dispatcher().glMaterialfv(face,pname,tmpParams);
+
+    ctx->materialfv(face, pname, tmpParams);
 }
 
 GL_API void GL_APIENTRY  glMatrixMode( GLenum mode) {
@@ -1560,26 +1565,26 @@ GL_API void GL_APIENTRY  glMultiTexCoord4f( GLenum target, GLfloat s, GLfloat t,
     GET_CTX_CM()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::textureEnum(target,ctx->getMaxTexUnits()),GL_INVALID_ENUM);
-    ctx->dispatcher().glMultiTexCoord4f(target,s,t,r,q);
+    ctx->multiTexCoord4f(target, s, t, r, q);
 }
 
 GL_API void GL_APIENTRY  glMultiTexCoord4x( GLenum target, GLfixed s, GLfixed t, GLfixed r, GLfixed q) {
     GET_CTX_CM()
     GLES_CM_TRACE()
     SET_ERROR_IF(!GLEScmValidate::textureEnum(target,ctx->getMaxTexUnits()),GL_INVALID_ENUM);
-    ctx->dispatcher().glMultiTexCoord4f(target,X2F(s),X2F(t),X2F(r),X2F(q));
+    ctx->multiTexCoord4f(target,X2F(s),X2F(t),X2F(r),X2F(q));
 }
 
 GL_API void GL_APIENTRY  glNormal3f( GLfloat nx, GLfloat ny, GLfloat nz) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glNormal3f(nx,ny,nz);
+    ctx->normal3f(nx, ny, nz);
 }
 
 GL_API void GL_APIENTRY  glNormal3x( GLfixed nx, GLfixed ny, GLfixed nz) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glNormal3f(X2F(nx),X2F(ny),X2F(nz));
+    ctx->normal3f(X2F(nx),X2F(ny),X2F(nz));
 }
 
 GL_API void GL_APIENTRY  glNormalPointer( GLenum type, GLsizei stride, const GLvoid *pointer) {
