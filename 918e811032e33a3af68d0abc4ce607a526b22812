@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b9f8f5af_1a4c1e48",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2737,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-11-30T18:50:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2e18d4cb_04f1f7a0",
+      "range": {
+        "startLine": 2737,
+        "startChar": 11,
+        "endLine": 2737,
+        "endChar": 13
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e81cacdd_5d9747a1",
         "filename": "android/android-emu/android/console.cpp",
         "patchSetId": 7
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-13T17:22:40Z",
       "side": 1,
       "message": "what about:\n\nint count \u003d 0;\nsscanf(widthHeight, \"%\" SCNu32 \"x%\" SCNu32 \"%n\", pWidth, pHeight, \u0026count);\nreturn count \u003d\u003d strlen(widthHeight);\n\n?",
+      "range": {
+        "startLine": 2742,
+        "startChar": 4,
+        "endLine": 2752,
+        "endChar": 5
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36d12a96_a363bd25",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2752,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-11-30T18:50:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e81cacdd_5d9747a1",
       "range": {
         "startLine": 2742,
         "startChar": 4,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "ae6db254_dad09a6d",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 7
+      },
+      "lineNbr": 2808,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-11-30T18:50:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f8b4a04_ebd7170d",
+      "range": {
+        "startLine": 2803,
+        "startChar": 0,
+        "endLine": 2808,
+        "endChar": 93
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ec7e2c9_dc0a27de",
         "filename": "android/android-emu/android/screen-recorder-constants.h",
         "patchSetId": 7
@@ -82,6 +154,30 @@
       "writtenOn": "2017-11-13T17:22:40Z",
       "side": 1,
       "message": "generally, duplicating values in comments is usually good for only making them go out of sync with the actual value :)\nInstead it\u0027s better to only put the units here, e.g.:\n\nconst int kMinBitrate \u003d 100000    // kbps\nconst int kMaxTimelimit \u003d 3 * 60; // seconds\n\nAlso please consider using constants instead of macros here - macros sometimes interfere with code in unexpected ways",
+      "range": {
+        "startLine": 16,
+        "startChar": 38,
+        "endLine": 16,
+        "endChar": 41
+      },
+      "revId": "918e811032e33a3af68d0abc4ce607a526b22812",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c1413e8c_e1731026",
+        "filename": "android/android-emu/android/screen-recorder-constants.h",
+        "patchSetId": 7
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-11-30T18:50:46Z",
+      "side": 1,
+      "message": "Done. Moved this file into https://android-review.googlesource.com/c/platform/external/qemu/+/548569",
+      "parentUuid": "9ec7e2c9_dc0a27de",
       "range": {
         "startLine": 16,
         "startChar": 38,
