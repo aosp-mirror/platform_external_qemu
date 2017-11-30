@@ -143,6 +143,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
         params.addFormat("androidboot.android_dt_dir=%s", kSysfsAndroidDtDir);
+    }
+
+    if (isQemu2) {
         if (android::featurecontrol::isEnabled(android::featurecontrol::SystemAsRoot)) {
             params.add("skip_initramfs");
             params.add("rootwait");
