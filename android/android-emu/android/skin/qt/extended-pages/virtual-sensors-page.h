@@ -55,12 +55,14 @@ private slots:
     void propagateAccelWidgetChange();
     void propagateSlidersChange();
 
-    void updateAccelWidgetFromSliders();
-    void updateSlidersFromAccelWidget();
     void updateModelFromAccelWidget(PhysicalInterpolation mode);
+    void updateModelFromSliders(PhysicalInterpolation mode);
     void updateAccelWidgetAndSlidersFromModel();
 
     void updateSensorValuesInUI();
+
+    void onAccelWidgetInteractionStart();
+    void onAccelWidgetInteractionStop();
 
     void onDragStarted();
     void onDragStopped();
@@ -118,9 +120,10 @@ private:
 
     std::unique_ptr<Ui::VirtualSensorsPage> mUi;
     QDoubleValidator mMagFieldValidator;
-    const QAndroidSensorsAgent* mSensorsAgent;
+    const QAndroidSensorsAgent* mSensorsAgent = nullptr;
     QTimer mAccelerationTimer;
-    bool mIsDragging = false;
+    bool mIsAccelWidgetInteracting = false;
+    bool mIsDraggingSlider = false;
     bool mFirstShow = true;
     SkinRotation mCoarseOrientation = SKIN_ROTATION_0;
     bool mVirtualSensorsUsed = false;

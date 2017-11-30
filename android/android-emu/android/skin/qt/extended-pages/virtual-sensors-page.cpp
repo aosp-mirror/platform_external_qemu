@@ -59,11 +59,14 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
     mUi->magEastWidget->setLocale(QLocale::c());
     mUi->magVerticalWidget->setLocale(QLocale::c());
 
-    connect(mUi->accelWidget, SIGNAL(rotationChanged()),
+    connect(mUi->accelWidget, SIGNAL(targetRotationChanged()),
             this, SLOT(propagateAccelWidgetChange()));
-
-    connect(mUi->accelWidget, SIGNAL(positionChanged()),
+    connect(mUi->accelWidget, SIGNAL(targetPositionChanged()),
             this, SLOT(propagateAccelWidgetChange()));
+    connect(mUi->accelWidget, SIGNAL(dragStarted()),
+            this, SLOT(onAccelWidgetInteractionStart()));
+    connect(mUi->accelWidget, SIGNAL(dragStopped()),
+            this, SLOT(onAccelWidgetInteractionStop()));
 
     connect(mUi->positionXSlider, SIGNAL(sliderPressed()),
             this, SLOT(onDragStarted()));
@@ -106,7 +109,7 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent) :
 
     connect(&mAccelerationTimer, SIGNAL(timeout()),
             this, SLOT(updateSensorValuesInUI()));
-    mAccelerationTimer.setInterval(100);
+    mAccelerationTimer.setInterval(33);
     mAccelerationTimer.stop();
 
     mUi->zRotSlider->setRange(-180.0, 180.0);
@@ -165,6 +168,7 @@ void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 
     mSensorsAgent->setPhysicalStateAgent(&mQAndroidPhysicalStateAgent);
+    mUi->accelWidget->setSensorsAgent(agent);
 }
 
 // Helper function
@@ -387,7 +391,6 @@ void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
  * Propagate a UI change from the accel widget to the sliders and model.
  */
 void VirtualSensorsPage::propagateAccelWidgetChange() {
-    updateSlidersFromAccelWidget();
     updateModelFromAccelWidget(PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
@@ -395,45 +398,7 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
  * Propagate a UI change from the sliders to the accel widget and model.
  */
 void VirtualSensorsPage::propagateSlidersChange() {
-    updateAccelWidgetFromSliders();
-    updateModelFromAccelWidget( PHYSICAL_INTERPOLATION_SMOOTH );
-}
-
-/*
- * Send the sliders' position and rotation to the accel widget.
- */
-void VirtualSensorsPage::updateAccelWidgetFromSliders() {
-    glm::vec3 position(mUi->positionXSlider->getValue(),
-                       mUi->positionYSlider->getValue(),
-                       mUi->positionZSlider->getValue());
-    mUi->accelWidget->setPosition(position);
-
-    mUi->accelWidget->setRotation(glm::eulerAngleXYZ(
-            glm::radians(mUi->xRotSlider->getValue()),
-            glm::radians(mUi->yRotSlider->getValue()),
-            glm::radians(mUi->zRotSlider->getValue())));
-
-    mUi->accelWidget->update();
-}
-
-/*
- * Send the accel widget's position and rotation to the sliders.
- */
-void VirtualSensorsPage::updateSlidersFromAccelWidget() {
-    const glm::vec3& position = mUi->accelWidget->position();
-
-    glm::vec3 rotationRadians;
-    glm::extractEulerAngleXYZ(mUi->accelWidget->rotation(),
-            rotationRadians.x, rotationRadians.y, rotationRadians.z);
-    const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
-
-    mUi->xRotSlider->setValue(rotationDegrees.x, false);
-    mUi->yRotSlider->setValue(rotationDegrees.y, false);
-    mUi->zRotSlider->setValue(rotationDegrees.z, false);
-
-    mUi->positionXSlider->setValue(position.x, false);
-    mUi->positionYSlider->setValue(position.y, false);
-    mUi->positionZSlider->setValue(position.z, false);
+    updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
 constexpr float kMetersPerInch = 0.0254f;
@@ -443,9 +408,9 @@ constexpr float kMetersPerInch = 0.0254f;
  * targets.
  */
 void VirtualSensorsPage::updateModelFromAccelWidget(PhysicalInterpolation mode) {
-    const glm::vec3& position = kMetersPerInch * mUi->accelWidget->position();
+    const glm::vec3& position = kMetersPerInch * mUi->accelWidget->targetPosition();
     glm::vec3 rotationRadians;
-    glm::extractEulerAngleXYZ(mUi->accelWidget->rotation(),
+    glm::extractEulerAngleXYZ(mUi->accelWidget->targetRotation(),
             rotationRadians.x, rotationRadians.y, rotationRadians.z);
     const glm::vec3 rotationDegrees = glm::degrees(rotationRadians);
 
@@ -456,35 +421,61 @@ void VirtualSensorsPage::updateModelFromAccelWidget(PhysicalInterpolation mode) 
 }
 
 /*
- * Update the accel widge and sliders to reflect the underlying model state.
+ * Send the slider position and rotation to the model as the new targets.
+ */
+void VirtualSensorsPage::updateModelFromSliders(PhysicalInterpolation mode) {
+    glm::vec3 position(mUi->positionXSlider->getValue() ,
+                       mUi->positionYSlider->getValue(),
+                       mUi->positionZSlider->getValue());
+    position = kMetersPerInch * position;
+
+    const glm::vec3 rotationDegrees(mUi->xRotSlider->getValue(),
+                                    mUi->yRotSlider->getValue(),
+                                    mUi->zRotSlider->getValue());
+
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_POSITION, mode,
+            position.x, position.y, position.z);
+    setPhysicalParameterTarget(PHYSICAL_PARAMETER_ROTATION, mode,
+            rotationDegrees.x, rotationDegrees.y, rotationDegrees.z);
+}
+
+/*
+ * Update the accel widget and sliders to reflect the underlying model state.
  */
 void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
     if (mSensorsAgent != nullptr) {
         glm::vec3 position;
         mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSITION,
                 &position.x, &position.y, &position.z,
-                PARAMETER_VALUE_TYPE_TARGET);
+                PARAMETER_VALUE_TYPE_CURRENT);
         position = (1.f / kMetersPerInch) * position;
 
         glm::vec3 eulerDegrees;
         mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_ROTATION,
                 &eulerDegrees.x, &eulerDegrees.y, &eulerDegrees.z,
-                PARAMETER_VALUE_TYPE_TARGET);
+                PARAMETER_VALUE_TYPE_CURRENT);
 
-        mUi->accelWidget->setPosition(position);
-        mUi->accelWidget->setRotation(glm::eulerAngleXYZ(
+        if (!mIsAccelWidgetInteracting) {
+            // Set the target position and rotation to the current state from
+            // the physical model, so that new interactions will start from the
+            // correct position.
+            mUi->accelWidget->setTargetPosition(position);
+            mUi->accelWidget->setTargetRotation(glm::eulerAngleXYZ(
                 glm::radians(eulerDegrees.x),
                 glm::radians(eulerDegrees.y),
                 glm::radians(eulerDegrees.z)));
-        mUi->accelWidget->update();
+            mUi->accelWidget->update();
+        }
 
-        mUi->xRotSlider->setValue(eulerDegrees.x, false);
-        mUi->yRotSlider->setValue(eulerDegrees.y, false);
-        mUi->zRotSlider->setValue(eulerDegrees.z, false);
+        if (!mIsDraggingSlider) {
+            mUi->xRotSlider->setValue(eulerDegrees.x, false);
+            mUi->yRotSlider->setValue(eulerDegrees.y, false);
+            mUi->zRotSlider->setValue(eulerDegrees.z, false);
 
-        mUi->positionXSlider->setValue(position.x, false);
-        mUi->positionYSlider->setValue(position.y, false);
-        mUi->positionZSlider->setValue(position.z, false);
+            mUi->positionXSlider->setValue(position.x, false);
+            mUi->positionYSlider->setValue(position.y, false);
+            mUi->positionZSlider->setValue(position.z, false);
+        }
 
         float scratch0, scratch1;
 
@@ -538,6 +529,10 @@ void VirtualSensorsPage::updateAccelWidgetAndSlidersFromModel() {
  * inertial model.
  */
 void VirtualSensorsPage::updateSensorValuesInUI() {
+    mIsUpdatingUIFromModel = true;
+    updateAccelWidgetAndSlidersFromModel();
+    mIsUpdatingUIFromModel = false;
+
     if (mSensorsAgent != nullptr) {
         glm::vec3 gravity_vector(0.0f, 9.81f, 0.0f);
 
@@ -603,12 +598,20 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
     }
 }
 
+void VirtualSensorsPage::onAccelWidgetInteractionStart() {
+    mIsAccelWidgetInteracting = true;
+}
+
+void VirtualSensorsPage::onAccelWidgetInteractionStop() {
+    mIsAccelWidgetInteracting = false;
+}
+
 void VirtualSensorsPage::onDragStarted() {
-    mIsDragging = true;
+    mIsDraggingSlider = true;
 }
 
 void VirtualSensorsPage::onDragStopped() {
-    mIsDragging = false;
+    mIsDraggingSlider = false;
 }
 
 void VirtualSensorsPage::on_accelModeRotate_toggled() {
