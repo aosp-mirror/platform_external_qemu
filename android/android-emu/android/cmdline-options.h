@@ -117,6 +117,7 @@ OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
 
 #ifdef __linux__
 OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
+OPT_PARAM( bluetooth, "<vendorid:productid>", "forward bluetooth to vendorid:productid" )
 #endif  // __linux__
 
 OPT_FLAG ( no_audio, "disable audio support" )

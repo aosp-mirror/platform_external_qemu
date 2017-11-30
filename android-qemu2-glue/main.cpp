@@ -20,6 +20,7 @@
 #include "android/avd/hw-config.h"
 #include "android/boot-properties.h"
 #include "android/cmdline-option.h"
+#include "android/config/BluetoothConfig.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/crash-handler.h"
@@ -699,6 +700,15 @@ extern "C" int main(int argc, char** argv) {
         args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
     }
 
+    // Add bluetooth parameters if applicable.
+    char* bluetooth_opts = NULL;
+#ifdef __linux__
+    bluetooth_opts = opts->bluetooth;
+
+#endif
+    android::BluetoothConfig bluetooth(bluetooth_opts);
+    args.add(bluetooth.getParameters());
+
 #ifdef CONFIG_NAND_LIMITS
     args.add2If("-nand-limits", opts->nand_limits);
 #endif
@@ -1229,6 +1239,8 @@ extern "C" int main(int argc, char** argv) {
                 args.add(argv[i]);
             }
         }
+
+        args.add(bluetooth.getQemuParameters());
 
         if (!hw->hw_arc) {
           args.add("-append");
