@@ -1906,8 +1906,9 @@ bool configAndStartRenderer(
     }
 
     if (hw->hw_arc) {
-      memset(&config, 0, sizeof(config));
-      str_reset(&hw->hw_gpu_mode, "off");
+        dprint("Forcing gpu off for Chrome OS");
+        str_reset(&opts->gpu, "off");
+        str_reset(&hw->hw_gpu_mode, "off");
     }
 
     if (!androidEmuglConfigInit(&config,
