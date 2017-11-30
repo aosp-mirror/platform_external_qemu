@@ -922,7 +922,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         char*  initImage = NULL;
 
         do {
-            if (!opts->data && !hw->hw_arc) {
+            if (!opts->data) {
                 dataImage = avdInfo_getDataImagePath(avd);
                 if (dataImage != NULL) {
                     D("autoconfig: -data %s", dataImage);
