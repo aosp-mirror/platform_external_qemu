@@ -26,6 +26,7 @@
 
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <glm/gtc/matrix_inverse.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
@@ -250,6 +251,8 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
             gl.glGetUniformLocation(m_geometryDrawState.program, "projection");
         m_geometryDrawState.modelviewMatrixLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "modelview");
+        m_geometryDrawState.modelviewInvTrLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "modelview_invtr");
         m_geometryDrawState.textureMatrixLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "texture_matrix");
         m_geometryDrawState.textureSamplerLoc =
@@ -261,18 +264,60 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_textures");
         m_geometryDrawState.enableLightingLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_lighting");
+        m_geometryDrawState.enableRescaleNormalLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "enable_rescale_normal");
+        m_geometryDrawState.enableNormalizeLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "enable_normalize");
+        m_geometryDrawState.enableColorMaterialLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "enable_color_material");
         m_geometryDrawState.enableFogLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_fog");
-
         m_geometryDrawState.enableReflectionMapLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_reflection_map");
 
         m_geometryDrawState.textureEnvModeLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "texture_env_mode");
-
         m_geometryDrawState.textureFormatLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "texture_format");
 
+        m_geometryDrawState.materialAmbientLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_ambient");
+        m_geometryDrawState.materialDiffuseLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_diffuse");
+        m_geometryDrawState.materialSpecularLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_specular");
+        m_geometryDrawState.materialEmissiveLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_emissive");
+        m_geometryDrawState.materialSpecularExponentLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_specular_exponent");
+
+        m_geometryDrawState.lightModelSceneAmbientLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_model_scene_ambient");
+        m_geometryDrawState.lightModelTwoSidedLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_model_two_sided");
+
+        m_geometryDrawState.lightEnablesLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_enables");
+        m_geometryDrawState.lightAmbientsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_ambients");
+        m_geometryDrawState.lightDiffusesLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_diffuses");
+        m_geometryDrawState.lightSpecularsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_speculars");
+        m_geometryDrawState.lightPositionsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_positions");
+        m_geometryDrawState.lightDirectionsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_directions");
+        m_geometryDrawState.lightSpotlightExponentsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_spotlight_exponents");
+        m_geometryDrawState.lightSpotlightCutoffAnglesLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_spotlight_cutoff_angles");
+        m_geometryDrawState.lightAttenuationConstsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_consts");
+        m_geometryDrawState.lightAttenuationLinearsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_linears");
+        m_geometryDrawState.lightAttenuationQuadraticsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_quadratics");
     }
 
     if (!m_geometryDrawState.vao) {
@@ -423,7 +468,10 @@ void CoreProfileEngine::setupArrayForDraw(
                                  effectiveStride, nullptr /* no offset into vbo */);
         gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
     } else {
-        if (arrayType == GL_COLOR_ARRAY) {
+        if (arrayType == GL_COLOR_ARRAY ||
+            arrayType == GL_NORMAL_ARRAY ||
+            arrayType == GL_TEXTURE_COORD_ARRAY) {
+
             gl.glEnableVertexAttribArray(attribNum);
             gl.glBindBuffer(GL_ARRAY_BUFFER, getVboFor(arrayType));
 
@@ -432,12 +480,36 @@ void CoreProfileEngine::setupArrayForDraw(
 
             GLint size = 4;
             GLenum dataType = GL_FLOAT;
-            GLsizei stride = 4 * sizeof(float);
-            std::vector<float> data = mCtx->getColor();
-            gl.glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(float), (GLvoid*)&data[0], GL_STREAM_DRAW);
+            std::vector<float> data(4, 0.f);
+            switch (arrayType) {
+                case GL_VERTEX_ARRAY:
+                    size = 4;
+                    fprintf(stderr, "Error: GLES1 does not support immediate vertices\n");
+                    mCtx->setGLerror(GL_INVALID_OPERATION);
+                    break;
+                case GL_COLOR_ARRAY:
+                    size = 4;
+                    data = mCtx->getColor();
+                    break;
+                case GL_NORMAL_ARRAY:
+                    size = 3;
+                    data = mCtx->getNormal();
+                    break;
+                case GL_POINT_SIZE_ARRAY_OES:
+                    data = mCtx->getColor();
+                    break;
+                case GL_TEXTURE_COORD_ARRAY:
+                    size = 4;
+                    data = mCtx->getMultiTexCoord(mCtx->getActiveTextureUnit());
+                    break;
+                default:
+                    break;
+            }
+            GLsizei stride = size * sizeof(float);
+            gl.glBufferData(GL_ARRAY_BUFFER, stride, (GLvoid*)&data[0], GL_STREAM_DRAW);
             gl.glVertexAttribDivisor(attribNum, 1);
             gl.glVertexAttribPointer(attribNum, size, dataType,
-                                     GL_FALSE /* no normalization */,
+                                     GL_FALSE /* normalized */,
                                      stride, nullptr /* no offset into vbo */);
             gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
         } else {
@@ -455,6 +527,18 @@ void CoreProfileEngine::enable(GLenum cap) {
         case GL_TEXTURE_2D:
         case GL_TEXTURE_CUBE_MAP_OES:
         case GL_TEXTURE_GEN_STR_OES:
+        case GL_RESCALE_NORMAL:
+        case GL_NORMALIZE:
+        case GL_LIGHTING:
+        case GL_LIGHT0:
+        case GL_LIGHT1:
+        case GL_LIGHT2:
+        case GL_LIGHT3:
+        case GL_LIGHT4:
+        case GL_LIGHT5:
+        case GL_LIGHT6:
+        case GL_LIGHT7:
+        case GL_COLOR_MATERIAL:
             return;
         default:
             break;
@@ -469,6 +553,18 @@ void CoreProfileEngine::disable(GLenum cap) {
         case GL_TEXTURE_2D:
         case GL_TEXTURE_CUBE_MAP_OES:
         case GL_TEXTURE_GEN_STR_OES:
+        case GL_RESCALE_NORMAL:
+        case GL_NORMALIZE:
+        case GL_LIGHTING:
+        case GL_LIGHT0:
+        case GL_LIGHT1:
+        case GL_LIGHT2:
+        case GL_LIGHT3:
+        case GL_LIGHT4:
+        case GL_LIGHT5:
+        case GL_LIGHT6:
+        case GL_LIGHT7:
+        case GL_COLOR_MATERIAL:
             return;
         default:
             break;
@@ -767,6 +863,7 @@ void CoreProfileEngine::preDrawVertexSetup() {
     glm::mat4 currProjMatrix = mCtx->getProjMatrix();
     glm::mat4 currModelviewMatrix = mCtx->getModelviewMatrix();
     glm::mat4 currTextureMatrix = mCtx->getTextureMatrix();
+    glm::mat4 currModelviewMatrixInvTr = glm::inverseTranspose(currModelviewMatrix);
 
     gl.glBindVertexArray(m_geometryDrawState.vao);
 
@@ -775,6 +872,7 @@ void CoreProfileEngine::preDrawVertexSetup() {
                     m_geometryDrawState.program);
     gl.glUniformMatrix4fv(m_geometryDrawState.projMatrixLoc, 1, GL_FALSE, glm::value_ptr(currProjMatrix));
     gl.glUniformMatrix4fv(m_geometryDrawState.modelviewMatrixLoc, 1, GL_FALSE, glm::value_ptr(currModelviewMatrix));
+    gl.glUniformMatrix4fv(m_geometryDrawState.modelviewInvTrLoc, 1, GL_FALSE, glm::value_ptr(currModelviewMatrixInvTr));
     gl.glUniformMatrix4fv(m_geometryDrawState.textureMatrixLoc, 1, GL_FALSE, glm::value_ptr(currTextureMatrix));
 }
 
@@ -784,11 +882,68 @@ void CoreProfileEngine::postDrawVertexSetup() {
     gl.glBindVertexArray(0);
 }
 
+void CoreProfileEngine::setupLighting() {
+    auto& gl = GLEScontext::dispatcher();
+
+    gl.glUniform1i(m_geometryDrawState.enableLightingLoc,
+                   mCtx->isEnabled(GL_LIGHTING));
+    gl.glUniform1i(m_geometryDrawState.enableRescaleNormalLoc,
+                   mCtx->isEnabled(GL_RESCALE_NORMAL));
+    gl.glUniform1i(m_geometryDrawState.enableNormalizeLoc,
+                   mCtx->isEnabled(GL_NORMALIZE));
+    gl.glUniform1i(m_geometryDrawState.enableColorMaterialLoc,
+                   mCtx->isEnabled(GL_COLOR_MATERIAL));
+
+    const auto& material = mCtx->getMaterialInfo();
+
+    gl.glUniform4fv(m_geometryDrawState.materialAmbientLoc, 1, material.ambient);
+    gl.glUniform4fv(m_geometryDrawState.materialDiffuseLoc, 1, material.diffuse);
+    gl.glUniform4fv(m_geometryDrawState.materialSpecularLoc, 1, material.specular);
+    gl.glUniform4fv(m_geometryDrawState.materialEmissiveLoc, 1, material.emissive);
+    gl.glUniform1f(m_geometryDrawState.materialSpecularExponentLoc, material.specularExponent);
+
+    const auto& lightModel = mCtx->getLightModelInfo();
+
+    gl.glUniform4fv(m_geometryDrawState.lightModelSceneAmbientLoc, 1, lightModel.color);
+    gl.glUniform1i(m_geometryDrawState.lightModelTwoSidedLoc, lightModel.twoSided);
+
+    assert(kMaxLights == GLEScmContext::kMaxLights);
+
+    for (int i = 0; i < GLEScmContext::kMaxLights; i++) {
+        m_lightingBuffer.lightEnables[i] = mCtx->isEnabled(GL_LIGHT0 + i);
+        const auto& light = mCtx->getLightInfo(i);
+        memcpy(m_lightingBuffer.lightAmbients + 4 * i, &light.ambient, 4 * sizeof(GLfloat));
+        memcpy(m_lightingBuffer.lightDiffuses + 4 * i, &light.diffuse, 4 * sizeof(GLfloat));
+        memcpy(m_lightingBuffer.lightSpeculars + 4 * i, &light.specular, 4 * sizeof(GLfloat));
+        memcpy(m_lightingBuffer.lightPositions + 4 * i, &light.position, 4 * sizeof(GLfloat));
+        memcpy(m_lightingBuffer.lightDirections + 3 * i, &light.direction, 3 * sizeof(GLfloat));
+        m_lightingBuffer.spotlightExponents[i] = light.spotlightExponent;
+        m_lightingBuffer.spotlightCutoffAngles[i] = light.spotlightCutoffAngle;
+        m_lightingBuffer.attenuationConsts[i] = light.attenuationConst;
+        m_lightingBuffer.attenuationLinears[i] = light.attenuationLinear;
+        m_lightingBuffer.attenuationQuadratics[i] = light.attenuationQuadratic;
+    }
+
+    gl.glUniform1iv(m_geometryDrawState.lightEnablesLoc, GLEScmContext::kMaxLights, m_lightingBuffer.lightEnables);
+    gl.glUniform4fv(m_geometryDrawState.lightAmbientsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.lightAmbients);
+    gl.glUniform4fv(m_geometryDrawState.lightDiffusesLoc, GLEScmContext::kMaxLights, m_lightingBuffer.lightDiffuses);
+    gl.glUniform4fv(m_geometryDrawState.lightSpecularsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.lightSpeculars);
+    gl.glUniform4fv(m_geometryDrawState.lightPositionsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.lightPositions);
+    gl.glUniform3fv(m_geometryDrawState.lightDirectionsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.lightDirections);
+    gl.glUniform1fv(m_geometryDrawState.lightSpotlightExponentsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.spotlightExponents);
+    gl.glUniform1fv(m_geometryDrawState.lightSpotlightCutoffAnglesLoc, GLEScmContext::kMaxLights, m_lightingBuffer.spotlightCutoffAngles);
+    gl.glUniform1fv(m_geometryDrawState.lightAttenuationConstsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.attenuationConsts);
+    gl.glUniform1fv(m_geometryDrawState.lightAttenuationLinearsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.attenuationLinears);
+    gl.glUniform1fv(m_geometryDrawState.lightAttenuationQuadraticsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.attenuationQuadratics);
+}
+
 void CoreProfileEngine::drawArrays(GLenum type, GLint first, GLsizei count) {
     auto& gl = GLEScontext::dispatcher();
 
     preDrawVertexSetup();
     preDrawTextureUnitEmulation();
+
+    setupLighting();
 
     gl.glDrawArrays(type, first, count);
 
@@ -801,6 +956,8 @@ void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, co
 
     preDrawVertexSetup();
     preDrawTextureUnitEmulation();
+
+    setupLighting();
 
     gl.glDrawElements(mode, count, type, (GLvoid*)0);
 
