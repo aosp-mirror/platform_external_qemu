@@ -1105,6 +1105,154 @@ void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
     }
 }
 
+void GLEScmContext::materialf(GLenum face, GLenum pname, GLfloat param) {
+    if (face != GL_FRONT_AND_BACK) {
+        fprintf(stderr, "GL_INVALID_ENUM: GLES1's glMaterial(f/x) "
+                        "only supports GL_FRONT_AND_BACK for materials.\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+    switch (pname) {
+    case GL_AMBIENT:
+    case GL_DIFFUSE:
+    case GL_AMBIENT_AND_DIFFUSE:
+    case GL_SPECULAR:
+    case GL_EMISSION:
+        fprintf(stderr, "GL_INVALID_ENUM: glMaterial(f/x) only supports "
+                        "GL_SHININESS for single parameter setting.\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    case GL_SHININESS:
+        if (param < 0.0f || param > 128.0f) {
+            fprintf(stderr, "GL_INVALID_VALUE: Invalid specular exponent value %f. "
+                            "Only range [0.0, 128.0] supported.\n", param);
+            setGLerror(GL_INVALID_VALUE);
+            return;
+        }
+        m_material.specularExponent = param;
+        return;
+    }
+
+    fprintf(stderr, "Unknown parameter name 0x%x for glMaterial(f/x)\n", pname);
+    setGLerror(GL_INVALID_ENUM);
+}
+
+void GLEScmContext::materialfv(GLenum face, GLenum pname, const GLfloat* params) {
+    if (face != GL_FRONT_AND_BACK) {
+        fprintf(stderr, "GL_INVALID_ENUM: GLES1's glMaterial(f/x)v "
+                        "only supports GL_FRONT_AND_BACK for materials.\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+    switch (pname) {
+    case GL_AMBIENT:
+        memcpy(&m_material.ambient, params, 4 * sizeof(GLfloat));
+        return;
+    case GL_DIFFUSE:
+        memcpy(&m_material.diffuse, params, 4 * sizeof(GLfloat));
+        return;
+    case GL_AMBIENT_AND_DIFFUSE:
+        memcpy(&m_material.ambient, params, 4 * sizeof(GLfloat));
+        memcpy(&m_material.diffuse, params, 4 * sizeof(GLfloat));
+        return;
+    case GL_SPECULAR:
+        memcpy(&m_material.specular, params, 4 * sizeof(GLfloat));
+        return;
+    case GL_EMISSION:
+        memcpy(&m_material.emissive, params, 4 * sizeof(GLfloat));
+        return;
+    case GL_SHININESS:
+        if (*params < 0.0f || *params > 128.0f) {
+            fprintf(stderr, "GL_INVALID_VALUE: Invalid specular exponent value %f. "
+                            "Only range [0.0, 128.0] supported.\n", *params);
+            setGLerror(GL_INVALID_VALUE);
+            return;
+        }
+        m_material.specularExponent = *params;
+        return;
+    }
+
+    fprintf(stderr, "Unknown parameter name 0x%x for glMaterial(f/x)v.\n", pname);
+    setGLerror(GL_INVALID_ENUM);
+}
+
+void GLEScmContext::getMaterialfv(GLenum face, GLenum pname, GLfloat* params) {
+    if (face != GL_FRONT && face != GL_BACK) {
+        fprintf(stderr, "GL_INVALID_ENUM: glGetMaterial(f/x)v "
+                        "must take GL_FRONT or GL_BACK as face argument\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+    switch (pname) {
+    case GL_AMBIENT:
+        memcpy(params, &m_material.ambient, 4 * sizeof(GLfloat));
+        return;
+    case GL_DIFFUSE:
+        memcpy(params, &m_material.diffuse, 4 * sizeof(GLfloat));
+        return;
+    case GL_SPECULAR:
+        memcpy(params, &m_material.specular, 4 * sizeof(GLfloat));
+        return;
+    case GL_EMISSION:
+        memcpy(params, &m_material.emissive, 4 * sizeof(GLfloat));
+        return;
+    case GL_SHININESS:
+        *params = m_material.specularExponent;
+        return;
+    }
+
+    fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x for glGetMaterial(f/x)v.\n", pname);
+    setGLerror(GL_INVALID_ENUM);
+}
+
+void GLEScmContext::lightModelf(GLenum pname, GLfloat param) {
+    switch (pname) {
+        case GL_LIGHT_MODEL_AMBIENT:
+            fprintf(stderr, "GL_INVALID_ENUM: glLightModelf only supports GL_LIGHT_MODEL_TWO_SIDE.\n");
+            setGLerror(GL_INVALID_ENUM);
+            return;
+        case GL_LIGHT_MODEL_TWO_SIDE:
+            if (param != 1.0f && param != 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glLightModelf only takes 0 or 1 "
+                                "for GL_LIGHT_MODEL_TWO_SIDE, but got %f\n", param);
+                setGLerror(GL_INVALID_VALUE);
+            }
+            m_lightModel.twoSided = param == 1.0f ? true : false;
+            return;
+    }
+
+    fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x for glLightModel(f/x)v.\n", pname);
+    setGLerror(GL_INVALID_ENUM);
+}
+
+void GLEScmContext::lightModelfv(GLenum pname, const GLfloat* params) {
+    switch (pname) {
+        case GL_LIGHT_MODEL_AMBIENT:
+            memcpy(&m_lightModel.color, params, 4 * sizeof(GLfloat));
+            return;
+        case GL_LIGHT_MODEL_TWO_SIDE:
+            if (*params != 1.0f && *params != 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glLightModelf only takes 0 or 1 "
+                                "for GL_LIGHT_MODEL_TWO_SIDE, but got %f\n", *params);
+                setGLerror(GL_INVALID_VALUE);
+            }
+            m_lightModel.twoSided = *params == 1.0f ? true : false;
+            return;
+    }
+
+    fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x for glLightModel(f/x)v.\n", pname);
+    setGLerror(GL_INVALID_ENUM);
+}
+
+void GLEScmContext::lightf(GLenum light, GLenum pname, GLfloat param) {
+}
+
+void GLEScmContext::lightfv(GLenum light, GLenum pname, const GLfloat* params) {
+}
+
+void GLEScmContext::getLightfv(GLenum light, GLenum pname, GLfloat* params) {
+}
+
 void GLEScmContext::enableClientState(GLenum clientState) {
     if (m_coreProfileEngine) {
         core().enableClientState(clientState);

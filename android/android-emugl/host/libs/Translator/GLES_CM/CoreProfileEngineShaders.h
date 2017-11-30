@@ -85,28 +85,9 @@ void main() {
 
 // version, flat,
 const char kGeometryDrawFShaderSrcTemplateCore[] = R"(%s
-precision highp float;
-uniform sampler2D tex_sampler;
-uniform samplerCube tex_cube_sampler;
-uniform bool enable_textures;
-uniform bool enable_lighting;
-uniform bool enable_fog;
+// Defines
+#define kMaxLights 8
 
-uniform bool enable_reflection_map;
-
-uniform int texture_env_mode;
-uniform int texture_format;
-
-in vec4 pos_varying;
-in vec3 normal_varying;
-%s in vec4 color_varying;
-in float pointsize_varying;
-in vec4 texcoord_varying;
-
-out vec4 frag_color;
-
-// Don't use the enum defines, it can result in
-// syntax errors on some GPUs.
 #define kModulate 0x2100
 #define kCombine 0x8570
 #define kReplace 0x1E01
@@ -116,6 +97,50 @@ out vec4 frag_color;
 #define kRGBA 0x1908
 #define kLuminance 0x1909
 #define kLuminanceAlpha 0x190A
+
+precision highp float;
+uniform sampler2D tex_sampler;
+uniform samplerCube tex_cube_sampler;
+uniform bool enable_textures;
+uniform bool enable_lighting;
+uniform bool enable_normalize;
+uniform bool enable_color_material;
+uniform bool enable_fog;
+uniform bool enable_reflection_map;
+
+uniform int texture_env_mode;
+uniform int texture_format;
+
+// material (front+back)
+uniform vec4 material_ambient;
+uniform vec4 material_diffuse;
+uniform vec4 material_specular;
+uniform vec4 material_emissive;
+uniform float material_specular_exponent;
+
+// lights
+uniform vec4 light_model_scene_ambient;
+uniform bool light_model_two_sided;
+
+uniform bool light_enables[kMaxLights];
+uniform vec4 light_ambients[kMaxLights];
+uniform vec4 light_diffuses[kMaxLights];
+uniform vec4 light_speculars[kMaxLights];
+uniform vec4 light_positions[kMaxLights];
+uniform vec3 light_directions[kMaxLights];
+uniform float light_spotlight_exponents[kMaxLights];
+uniform float light_spotlight_cutoff_angles[kMaxLights];
+uniform float light_attenuation_consts[kMaxLights];
+uniform float light_attenuation_linears[kMaxLights];
+uniform float light_attnuation_quadratics[kMaxLights];
+
+in vec4 pos_varying;
+in vec3 normal_varying;
+%s in vec4 color_varying;
+in float pointsize_varying;
+in vec4 texcoord_varying;
+
+out vec4 frag_color;
 
 void main() {
     if (enable_textures) {
