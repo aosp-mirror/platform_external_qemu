@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "949ec4a8_c3190b5b",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 2745,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:46:20Z",
+      "side": 1,
+      "message": "something I realized after writing the previous comment: this could be done more efficiently -\nreturn widthHeight[count] \u003d\u003d \u0027\\0\u0027;",
+      "range": {
+        "startLine": 2745,
+        "startChar": 11,
+        "endLine": 2745,
+        "endChar": 39
+      },
+      "revId": "3f9c2a27631d1e5dbdaada8d444fcca9f476281e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e1c571d_90bf7b52",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 2802,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:46:20Z",
+      "side": 1,
+      "message": "nit: please use std::vector\u003cchar*\u003e here to make it safer and simpler:\nfor (auto\u0026 arg : splitArgs) sarray.push_back(\u0026arg[0]);\nsarray.push_back(nullptr);\n\ngetopt(..., sarray.data(), ...);",
+      "range": {
+        "startLine": 2802,
+        "startChar": 4,
+        "endLine": 2802,
+        "endChar": 37
+      },
+      "revId": "3f9c2a27631d1e5dbdaada8d444fcca9f476281e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
