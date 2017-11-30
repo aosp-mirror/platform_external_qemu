@@ -111,6 +111,30 @@
     },
     {
       "key": {
+        "uuid": "096c357f_0f0adc52",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-11-30T20:49:37Z",
+      "side": 1,
+      "message": "Ah yeah forgot about async that would make it simple to fire off stops many times without a workr thread. I don\u0027t see a way to wait on those to completion though (below: need to wait till the recording is stopped before deletion (maybe put the deletion in the same async thrad (but then itd need to avoid deleting twice, etc)))",
+      "parentUuid": "826bc71e_bf2df2ed",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 15
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "80a3125b_52aa8eef",
         "filename": "android/android-emu/android/screen-recorder.h",
         "patchSetId": 9
