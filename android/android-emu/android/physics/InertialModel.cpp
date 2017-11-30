@@ -35,7 +35,7 @@ constexpr float nsToSeconds(uint64_t nanoSeconds) {
 }
 
 /* Fixed state change time for smooth acceleration changes. */
-constexpr float kStateChangeTimeSeconds = 0.5f;
+constexpr float kStateChangeTimeSeconds = 0.2f;
 constexpr uint64_t kStateChangeTimeNs = secondsToNs(kStateChangeTimeSeconds);
 
 constexpr float kStateChangeTime1 = kStateChangeTimeSeconds;
