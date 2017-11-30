@@ -261,18 +261,60 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_textures");
         m_geometryDrawState.enableLightingLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_lighting");
+        m_geometryDrawState.enableRescaleNormalLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "enable_rescale_normal");
+        m_geometryDrawState.enableNormalizeLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "enable_normalize");
+        m_geometryDrawState.enableColorMaterialLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "enable_color_material");
         m_geometryDrawState.enableFogLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_fog");
-
         m_geometryDrawState.enableReflectionMapLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "enable_reflection_map");
 
         m_geometryDrawState.textureEnvModeLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "texture_env_mode");
-
         m_geometryDrawState.textureFormatLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "texture_format");
 
+        m_geometryDrawState.materialAmbientLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_ambient");
+        m_geometryDrawState.materialDiffuseLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_diffuse");
+        m_geometryDrawState.materialSpecularLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_specular");
+        m_geometryDrawState.materialEmissiveLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_emissive");
+        m_geometryDrawState.materialSpecularExponentLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "material_specular_exponent");
+
+        m_geometryDrawState.lightModelSceneAmbientLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_model_scene_ambient");
+        m_geometryDrawState.lightModelTwoSidedLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_model_two_sided");
+
+        m_geometryDrawState.lightEnablesLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_enables");
+        m_geometryDrawState.lightAmbientsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_ambients");
+        m_geometryDrawState.lightDiffusesLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_diffuses");
+        m_geometryDrawState.lightSpecularsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_speculars");
+        m_geometryDrawState.lightPositionsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_positions");
+        m_geometryDrawState.lightDirectionsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_directions");
+        m_geometryDrawState.lightSpotlightExponentsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_spotlight_exponents");
+        m_geometryDrawState.lightSpotlightCutoffAnglesLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_spotlight_cutoff_angles");
+        m_geometryDrawState.lightAttenuationConstsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_consts");
+        m_geometryDrawState.lightAttenuationLinearsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_linears");
+        m_geometryDrawState.lightAttenuationQuadraticsLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_quadratics");
     }
 
     if (!m_geometryDrawState.vao) {
@@ -455,6 +497,17 @@ void CoreProfileEngine::enable(GLenum cap) {
         case GL_TEXTURE_2D:
         case GL_TEXTURE_CUBE_MAP_OES:
         case GL_TEXTURE_GEN_STR_OES:
+        case GL_NORMALIZE:
+        case GL_LIGHTING:
+        case GL_LIGHT0:
+        case GL_LIGHT1:
+        case GL_LIGHT2:
+        case GL_LIGHT3:
+        case GL_LIGHT4:
+        case GL_LIGHT5:
+        case GL_LIGHT6:
+        case GL_LIGHT7:
+        case GL_COLOR_MATERIAL:
             return;
         default:
             break;
@@ -469,6 +522,17 @@ void CoreProfileEngine::disable(GLenum cap) {
         case GL_TEXTURE_2D:
         case GL_TEXTURE_CUBE_MAP_OES:
         case GL_TEXTURE_GEN_STR_OES:
+        case GL_NORMALIZE:
+        case GL_LIGHTING:
+        case GL_LIGHT0:
+        case GL_LIGHT1:
+        case GL_LIGHT2:
+        case GL_LIGHT3:
+        case GL_LIGHT4:
+        case GL_LIGHT5:
+        case GL_LIGHT6:
+        case GL_LIGHT7:
+        case GL_COLOR_MATERIAL:
             return;
         default:
             break;
@@ -784,11 +848,78 @@ void CoreProfileEngine::postDrawVertexSetup() {
     gl.glBindVertexArray(0);
 }
 
+void CoreProfileEngine::setupLighting() {
+    auto& gl = GLEScontext::dispatcher();
+
+    gl.glUniform1i(m_geometryDrawState.enableLightingLoc,
+                   mCtx->isEnabled(GL_LIGHTING));
+    gl.glUniform1i(m_geometryDrawState.enableRescaleNormalLoc,
+                   mCtx->isEnabled(GL_RESCALE_NORMAL));
+    gl.glUniform1i(m_geometryDrawState.enableNormalizeLoc,
+                   mCtx->isEnabled(GL_NORMALIZE));
+    gl.glUniform1i(m_geometryDrawState.enableColorMaterialLoc,
+                   mCtx->isEnabled(GL_COLOR_MATERIAL));
+
+    const auto& material = mCtx->getMaterialInfo();
+
+    gl.glUniform4fv(m_geometryDrawState.materialAmbientLoc, 1, material.ambient);
+    gl.glUniform4fv(m_geometryDrawState.materialDiffuseLoc, 1, material.diffuse);
+    gl.glUniform4fv(m_geometryDrawState.materialSpecularLoc, 1, material.specular);
+    gl.glUniform4fv(m_geometryDrawState.materialEmissiveLoc, 1, material.emissive);
+    gl.glUniform1f(m_geometryDrawState.materialSpecularExponentLoc, material.specularExponent);
+
+    const auto& lightModel = mCtx->getLightModelInfo();
+
+    gl.glUniform4fv(m_geometryDrawState.lightModelSceneAmbientLoc, 1, lightModel.color);
+    gl.glUniform1i(m_geometryDrawState.lightModelTwoSidedLoc, lightModel.twoSided);
+
+    std::vector<int> lightEnables(GLEScmContext::kMaxLights);
+    std::vector<float> lightAmbients(4 * GLEScmContext::kMaxLights);
+    std::vector<float> lightDiffuses(4 * GLEScmContext::kMaxLights);
+    std::vector<float> lightSpeculars(4 * GLEScmContext::kMaxLights);
+    std::vector<float> lightPositions(4 * GLEScmContext::kMaxLights);
+    std::vector<float> lightDirections(3 * GLEScmContext::kMaxLights);
+    std::vector<float> spotlightExponents(GLEScmContext::kMaxLights);
+    std::vector<float> spotlightCutoffAngles(GLEScmContext::kMaxLights);
+    std::vector<float> attenuationConsts(GLEScmContext::kMaxLights);
+    std::vector<float> attenuationLinears(GLEScmContext::kMaxLights);
+    std::vector<float> attenuationQuadratics(GLEScmContext::kMaxLights);
+
+    for (int i = 0; i < GLEScmContext::kMaxLights; i++) {
+        lightEnables[i] = mCtx->isEnabled(GL_LIGHT0 + i);
+        const auto& light = mCtx->getLightInfo(i);
+        memcpy(lightAmbients.data() + 4 * i, &light.ambient, 4 * sizeof(GLfloat));
+        memcpy(lightDiffuses.data() + 4 * i, &light.diffuse, 4 * sizeof(GLfloat));
+        memcpy(lightSpeculars.data() + 4 * i, &light.specular, 4 * sizeof(GLfloat));
+        memcpy(lightPositions.data() + 4 * i, &light.position, 4 * sizeof(GLfloat));
+        memcpy(lightDirections.data() + 3 * i, &light.direction, 3 * sizeof(GLfloat));
+        spotlightExponents[i] = light.spotlightExponent;
+        spotlightCutoffAngles[i] = light.spotlightCutoffAngle;
+        attenuationConsts[i] = light.attenuationConst;
+        attenuationLinears[i] = light.attenuationLinear;
+        attenuationQuadratics[i] = light.attenuationQuadratic;
+    }
+
+    gl.glUniform1iv(m_geometryDrawState.lightEnablesLoc, GLEScmContext::kMaxLights, lightEnables.data());
+    gl.glUniform4fv(m_geometryDrawState.lightAmbientsLoc, GLEScmContext::kMaxLights, lightAmbients.data());
+    gl.glUniform4fv(m_geometryDrawState.lightDiffusesLoc, GLEScmContext::kMaxLights, lightDiffuses.data());
+    gl.glUniform4fv(m_geometryDrawState.lightSpecularsLoc, GLEScmContext::kMaxLights, lightSpeculars.data());
+    gl.glUniform4fv(m_geometryDrawState.lightPositionsLoc, GLEScmContext::kMaxLights, lightPositions.data());
+    gl.glUniform3fv(m_geometryDrawState.lightDirectionsLoc, GLEScmContext::kMaxLights, lightDirections.data());
+    gl.glUniform1fv(m_geometryDrawState.lightSpotlightExponentsLoc, GLEScmContext::kMaxLights, spotlightExponents.data());
+    gl.glUniform1fv(m_geometryDrawState.lightSpotlightCutoffAnglesLoc, GLEScmContext::kMaxLights, spotlightCutoffAngles.data());
+    gl.glUniform1fv(m_geometryDrawState.lightAttenuationConstsLoc, GLEScmContext::kMaxLights, attenuationConsts.data());
+    gl.glUniform1fv(m_geometryDrawState.lightAttenuationLinearsLoc, GLEScmContext::kMaxLights, attenuationLinears.data());
+    gl.glUniform1fv(m_geometryDrawState.lightAttenuationQuadraticsLoc, GLEScmContext::kMaxLights, attenuationQuadratics.data());
+}
+
 void CoreProfileEngine::drawArrays(GLenum type, GLint first, GLsizei count) {
     auto& gl = GLEScontext::dispatcher();
 
     preDrawVertexSetup();
     preDrawTextureUnitEmulation();
+
+    setupLighting();
 
     gl.glDrawArrays(type, first, count);
 
@@ -801,6 +932,8 @@ void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, co
 
     preDrawVertexSetup();
     preDrawTextureUnitEmulation();
+
+    setupLighting();
 
     gl.glDrawElements(mode, count, type, (GLvoid*)0);
 

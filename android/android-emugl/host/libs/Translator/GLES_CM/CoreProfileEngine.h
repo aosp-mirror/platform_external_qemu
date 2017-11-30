@@ -53,11 +53,35 @@ public:
 
         GLint enableTextureLoc;
         GLint enableLightingLoc;
+        GLint enableRescaleNormalLoc;
+        GLint enableNormalizeLoc;
+        GLint enableColorMaterialLoc;
         GLint enableFogLoc;
         GLint enableReflectionMapLoc;
 
         GLint textureEnvModeLoc;
         GLint textureFormatLoc;
+
+        GLint materialAmbientLoc;
+        GLint materialDiffuseLoc;
+        GLint materialSpecularLoc;
+        GLint materialEmissiveLoc;
+        GLint materialSpecularExponentLoc;
+
+        GLint lightModelSceneAmbientLoc;
+        GLint lightModelTwoSidedLoc;
+
+        GLint lightEnablesLoc;
+        GLint lightAmbientsLoc;
+        GLint lightDiffusesLoc;
+        GLint lightSpecularsLoc;
+        GLint lightPositionsLoc;
+        GLint lightDirectionsLoc;
+        GLint lightSpotlightExponentsLoc;
+        GLint lightSpotlightCutoffAnglesLoc;
+        GLint lightAttenuationConstsLoc;
+        GLint lightAttenuationLinearsLoc;
+        GLint lightAttenuationQuadraticsLoc;
 
         GLuint posVbo;
         GLuint normalVbo;
@@ -93,6 +117,8 @@ public:
 
     void preDrawVertexSetup();
     void postDrawVertexSetup();
+
+    void setupLighting();
 
     // GLES 1 API (deprecated + incompatible with core only)
 

@@ -101,6 +101,16 @@ public:
     void getTexGeniv(GLenum coord, GLenum pname, GLint* params);
     void getTexGenfv(GLenum coord, GLenum pname, GLfloat* params);
 
+    void materialf(GLenum face, GLenum pname, GLfloat param);
+    void materialfv(GLenum face, GLenum pname, const GLfloat* params);
+    void getMaterialfv(GLenum face, GLenum pname, GLfloat* params);
+
+    void lightModelf(GLenum pname, GLfloat param);
+    void lightModelfv(GLenum pname, const GLfloat* params);
+    void lightf(GLenum light, GLenum pname, GLfloat param);
+    void lightfv(GLenum light, GLenum pname, const GLfloat* params);
+    void getLightfv(GLenum light, GLenum pname, GLfloat* params);
+
     void enableClientState(GLenum clientState);
     void disableClientState(GLenum clientState);
 
@@ -130,7 +140,39 @@ public:
     glm::mat4 getModelviewMatrix();
     glm::mat4 getTextureMatrix();
 
+    struct Material {
+        GLfloat ambient[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+        GLfloat diffuse[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
+        GLfloat specular[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat emissive[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat specularExponent = 0.0f;
+    };
+
+    struct LightModel {
+        GLfloat color[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+        bool twoSided = false;
+    };
+
+    struct Light {
+        GLfloat ambient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat diffuse[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat specular[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat position[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+        GLfloat direction[3] = { 0.0f, 0.0f, -1.0f };
+        GLfloat spotlightExponent = 0.0f;
+        GLfloat spotlightCutoffAngle = 180.0f;
+        GLfloat attenuationConst = 1.0f;
+        GLfloat attenuationLinear = 0.0f;
+        GLfloat attenuationQuadratic = 0.0f;
+    };
+
+    static constexpr int kMaxLights = 8;
+    const Material& getMaterialInfo();
+    const LightModel& getLightModelInfo();
+    const Light& getLightInfo(uint32_t lightIndex);
+
     virtual void onSave(android::base::Stream* stream) const override;
+
 protected:
     virtual void postLoadRestoreCtx() override;
 
@@ -185,6 +227,10 @@ private:
     glm::mat4& currMatrix();
     MatrixStack& currMatrixStack();
     void restoreMatrixStack(const MatrixStack& matrices);
+
+    Material m_material;
+    LightModel m_lightModel;
+    Light m_lights[kMaxLights] = {};
 
     // Core profile stuff
     CoreProfileEngine*    m_coreProfileEngine = nullptr;
