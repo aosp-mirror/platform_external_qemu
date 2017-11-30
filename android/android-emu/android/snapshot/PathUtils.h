@@ -16,6 +16,8 @@
 namespace android {
 namespace snapshot {
 
+std::string getSnapshotBaseDir();
+
 std::string getSnapshotDir(const char* snapshotName);
 
 }  // namespace snapshot

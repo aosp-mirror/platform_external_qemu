@@ -39,6 +39,11 @@ AndroidSnapshotStatus androidSnapshot_save(const char* name);
 
 void androidSnapshot_delete(const char* name);
 
+// Returns the name of the snapshot file that was loaded to start
+// the current image.
+// Returns an empty string if the AVD was cold-booted.
+const char* androidSnapshot_loadedSnapshotFile();
+
 // These two functions implement a quickboot feature: load() tries to load from
 // the |name| snapshot (or default one if it is null or empty) and save() saves
 // the current state into it.

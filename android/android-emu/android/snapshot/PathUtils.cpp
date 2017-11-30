@@ -18,9 +18,15 @@
 namespace android {
 namespace snapshot {
 
+std::string getSnapshotBaseDir() {
+    auto avdDir = avdInfo_getContentPath(android_avdInfo);
+    auto path = base::PathUtils::join(avdDir, "snapshots");
+    return path;
+}
+
 std::string getSnapshotDir(const char* snapshotName) {
-    auto dir = avdInfo_getContentPath(android_avdInfo);
-    auto path = base::PathUtils::join(dir, "snapshots", snapshotName);
+    auto baseDir = getSnapshotBaseDir();
+    auto path = base::PathUtils::join(baseDir, snapshotName);
     return path;
 }
 

@@ -200,6 +200,7 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mIsQuickboot = isQuickboot;
     mVmOperations.snapshotLoad(name, this, nullptr);
     mIsQuickboot = false;
+    mLoadedSnapshotFile = (mLoader->status() == OperationStatus::Ok) ? name : "";
     return mLoader->status();
 }
 
@@ -218,6 +219,10 @@ OperationStatus Snapshotter::save(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
+    if (!strcmp(name, mLoadedSnapshotFile.c_str())) {
+        // We're deleting the "loaded" snapshot
+        mLoadedSnapshotFile.clear();
+    }
     mVmOperations.snapshotDelete(name, this, nullptr);
 }
 
@@ -257,6 +262,7 @@ void Snapshotter::onSavingFailed(const char* name, int res) {
 }
 
 bool Snapshotter::onStartLoading(const char* name) {
+    mLoadedSnapshotFile.clear();
     CrashReporter::get()->hangDetector().pause(true);
     mCallback(Operation::Load, Stage::Start);
     mSaver.clear();
@@ -281,7 +287,11 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     mCallback(Operation::Load, Stage::End);
-    return mLoader->status() != OperationStatus::Error;
+    if (mLoader->status() == OperationStatus::Error) {
+        return false;
+    }
+    mLoadedSnapshotFile = name;
+    return true;
 }
 
 void Snapshotter::onLoadingFailed(const char* name, int err) {
@@ -295,6 +305,7 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
     }
     mLoader.emplace(name, -err);
     mLoader->complete(false);
+    mLoadedSnapshotFile.clear();
 }
 
 bool Snapshotter::onStartDelete(const char*) {

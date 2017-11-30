@@ -55,6 +55,10 @@ AndroidSnapshotStatus androidSnapshot_load(const char* name) {
     return AndroidSnapshotStatus(res);
 }
 
+const char* androidSnapshot_loadedSnapshotFile() {
+    return Snapshotter::get().loadedSnapshotFile().c_str();
+}
+
 AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
     return AndroidSnapshotStatus(Snapshotter::get().prepareForSaving(name));
 }
