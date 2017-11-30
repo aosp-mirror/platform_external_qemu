@@ -95,7 +95,6 @@ int moveSubWindow(FBNativeWindowType p_parent_window,
 
     /* Re-add the sub-window to the view hierarchy */
     [[win contentView] addSubview:glView];
-    [win makeKeyAndOrderFront:nil];
 
     return 1;
 }
