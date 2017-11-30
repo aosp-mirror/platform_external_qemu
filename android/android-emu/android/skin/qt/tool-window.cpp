@@ -696,10 +696,12 @@ void ToolWindow::on_overview_button_released() {
 }
 
 void ToolWindow::on_prev_layout_button_clicked() {
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::ROTATE_LEFT);
 }
 
 void ToolWindow::on_next_layout_button_clicked() {
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::ROTATE_RIGHT);
 }
 

@@ -8,24 +8,36 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 
-#include "android/base/system/System.h"
 #include "android/skin/qt/accelerometer-3d-widget.h"
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
+#include "android/base/system/System.h"
+#include "android/emulation/control/sensors_agent.h"
+#include "android/hw-sensors.h"
+#include "android/physics/Physics.h"
 #include "android/skin/qt/gl-common.h"
 #include "android/skin/qt/wavefront-obj-parser.h"
-#include "OpenGLESDispatch/GLESv2Dispatch.h"
 
+#include <glm/gtc/epsilon.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/euler_angles.hpp>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
 
 #include "android/utils/debug.h"
 
-Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent) :
-    GLWidget(parent),
-    mTracking(false),
-    mOperationMode(OperationMode::Rotate) {
+static glm::vec3 clampPosition(glm::vec3 position) {
+    return glm::clamp(
+            position,
+            glm::vec3(Accelerometer3DWidget::MinX, Accelerometer3DWidget::MinY,
+                      Accelerometer3DWidget::MinZ),
+            glm::vec3(Accelerometer3DWidget::MaxX, Accelerometer3DWidget::MaxY,
+                      Accelerometer3DWidget::MaxZ));
+}
+
+Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent)
+    : GLWidget(parent) {
     toggleAA();
 }
 
@@ -45,6 +57,10 @@ Accelerometer3DWidget::~Accelerometer3DWidget() {
             mGLES2->glDeleteTextures(1, &mEnvMap);
         }
     }
+}
+
+void Accelerometer3DWidget::setSensorsAgent(const QAndroidSensorsAgent* agent) {
+    mSensorsAgent = agent;
 }
 
 // Helper function that uploads the data from texture in the file
@@ -126,7 +142,7 @@ bool Accelerometer3DWidget::initGL() {
     mGLES2->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // Clear screen to gray.
-    mGLES2->glClearColor(0.5, 0.5, 0.5  , 1.0);
+    mGLES2->glClearColor(0.5, 0.5, 0.5, 1.0);
 
     // Set up the camera transformation.
     mCameraTransform = glm::lookAt(
@@ -285,15 +301,47 @@ void Accelerometer3DWidget::resizeGL(int w, int h) {
     mPerspectiveInverse = glm::inverse(mPerspective);
 }
 
+constexpr float kMetersPerInch = 0.0254f;
+
 void Accelerometer3DWidget::repaintGL() {
     if (!mGLES2) {
         return;
     }
 
     // Handle repaint event.
+    glm::vec3 position = glm::vec3();
+    glm::mat4 rotation = glm::mat4();
+
+    if (mSensorsAgent) {
+        mSensorsAgent->getPhysicalParameter(
+                PHYSICAL_PARAMETER_POSITION, &position.x, &position.y,
+                &position.z, PARAMETER_VALUE_TYPE_CURRENT);
+        position = (1.f / kMetersPerInch) * position;
+
+        glm::vec3 eulerDegrees;
+        mSensorsAgent->getPhysicalParameter(
+                PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
+                &eulerDegrees.z, PARAMETER_VALUE_TYPE_CURRENT);
+
+        // Clamp the position to the visible range.
+        position = clampPosition(position);
+
+        rotation = glm::eulerAngleXYZ(glm::radians(eulerDegrees.x),
+                                      glm::radians(eulerDegrees.y),
+                                      glm::radians(eulerDegrees.z));
+    }
+
+    if (mOperationMode == OperationMode::Rotate &&
+        quaternionNearEqual(mLastTargetRotation, mTargetRotation)) {
+        rotation = glm::mat4_cast(mLastTargetRotation);
+    } else if (mOperationMode == OperationMode::Move &&
+               vecNearEqual(mLastTargetPosition, mTargetPosition)) {
+        position = mLastTargetPosition;
+    }
+
     // Recompute the model transformation matrix using the given rotations.
     const glm::mat4 model_transform =
-            glm::translate(glm::mat4(), mTranslation) * mRotation;
+            glm::translate(glm::mat4(), position) * rotation;
     const glm::mat4 model_view_transform =
             mCameraTransform * model_transform;
 
@@ -369,7 +417,7 @@ static float clamp(float a, float b, float x) {
     return std::max(a, std::min(b, x));
 }
 
-void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
+void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent* event) {
     if (mTracking && mOperationMode == OperationMode::Rotate) {
         float diff_x = event->x() - mPrevMouseX,
               diff_y = event->y() - mPrevMouseY;
@@ -377,31 +425,52 @@ void Accelerometer3DWidget::mouseMoveEvent(QMouseEvent *event) {
                                      glm::vec3(1.0f, 0.0f, 0.0f)) *
                       glm::angleAxis(glm::radians(diff_x),
                                      glm::vec3(0.0f, 1.0f, 0.0f));
-        mRotation = glm::mat4_cast(q) * mRotation;
+        mTargetRotation = q * mTargetRotation;
+        mLastTargetRotation = mTargetRotation;
         renderFrame();
-        emit(rotationChanged());
+        emit targetRotationChanged();
         mPrevMouseX = event->x();
         mPrevMouseY = event->y();
     } else if (mTracking && mOperationMode == OperationMode::Move) {
         const glm::vec3 vec = screenToWorldCoordinate(event->x(), event->y());
-        const glm::vec3 newLocation = mTranslation + vec - mPrevDragOrigin;
-        mTranslation.x = clamp(MinX, MaxX, newLocation.x);
-        mTranslation.y = clamp(MinY, MaxY, newLocation.y);
+        const glm::vec3 newLocation = mTargetPosition + vec - mPrevDragOrigin;
+        mTargetPosition.x = clamp(MinX, MaxX, newLocation.x);
+        mTargetPosition.y = clamp(MinY, MaxY, newLocation.y);
+        mLastTargetPosition = mTargetPosition;
         renderFrame();
-        emit(positionChanged());
+        emit targetPositionChanged();
         mPrevDragOrigin = vec;
     }
 }
 
-void Accelerometer3DWidget::wheelEvent(QWheelEvent *event) {
+void Accelerometer3DWidget::wheelEvent(QWheelEvent* event) {
     if (mOperationMode == OperationMode::Move) {
         // Note: angleDelta is given in 1/8 degree increments.
         const int angleDeltaDegrees = event->angleDelta().y() / 8;
-        mTranslation.z = clamp(MinZ, MaxZ, mTranslation.z +
-                angleDeltaDegrees * InchesPerWheelDegree);
+        mTargetPosition.z = clamp(
+                MinZ, MaxZ,
+                mTargetPosition.z + angleDeltaDegrees * InchesPerWheelDegree);
+        mLastTargetPosition = mTargetPosition;
         renderFrame();
-        emit(positionChanged());
+        emit targetPositionChanged();
     }
+}
+
+void Accelerometer3DWidget::mousePressEvent(QMouseEvent* event) {
+    mPrevMouseX = event->x();
+    mPrevMouseY = event->y();
+    mPrevDragOrigin = screenToWorldCoordinate(event->x(), event->y());
+    mTracking = true;
+    emit dragStarted();
+}
+
+void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
+    if (mTracking) {
+        mTracking = false;
+        emit dragStopped();
+    }
+
+    emit targetRotationChanged();
 }
 
 glm::vec3 Accelerometer3DWidget::screenToWorldCoordinate(int x, int y) const {
@@ -418,28 +487,8 @@ glm::vec3 Accelerometer3DWidget::screenToWorldCoordinate(int x, int y) const {
     // Move to the current z-translation plane in camera space.
     const glm::vec4 cameraSpacePhonePlaneCoordinate =
             cameraSpaceNearPlaneCoordinate *
-            ((CameraDistance - mTranslation.z) / NearClip);
+            ((CameraDistance - mTargetPosition.z) / NearClip);
 
     // Move plane position to world space.
     return mCameraTransformInverse * cameraSpacePhonePlaneCoordinate;
-}
-
-void Accelerometer3DWidget::mousePressEvent(QMouseEvent *event) {
-    mPrevMouseX = event->x();
-    mPrevMouseY = event->y();
-    mPrevDragOrigin = screenToWorldCoordinate(event->x(), event->y());
-    mTracking = true;
-    if (mOperationMode == OperationMode::Move) {
-        mDragging = true;
-        emit(dragStarted());
-    }
-}
-
-void Accelerometer3DWidget::mouseReleaseEvent(QMouseEvent* event) {
-    mTracking = false;
-    if (mDragging) {
-        mDragging = false;
-        emit(dragStopped());
-    }
-    emit(rotationChanged());
 }
