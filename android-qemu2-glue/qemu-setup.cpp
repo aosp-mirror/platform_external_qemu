@@ -66,13 +66,15 @@ extern "C" void ranchu_device_tree_setup(void *fdt) {
     qemu_fdt_setprop_string(fdt, "/firmware/android/fstab", "compatible", "android,fstab");
 
     char* system_path = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
-    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
-    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "compatible", "android,system");
-    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "dev", system_path);
-    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "fsmgr_flags", "wait");
-    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "mnt_flags", "ro");
-    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "type", "ext4");
-    free(system_path);
+    if (system_path) {
+        qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "compatible", "android,system");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "dev", system_path);
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "fsmgr_flags", "wait");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "mnt_flags", "ro");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "type", "ext4");
+        free(system_path);
+    }
 
     char* vendor_path = avdInfo_getVendorImageDevicePathInGuest(android_avdInfo);
     if (vendor_path) {
