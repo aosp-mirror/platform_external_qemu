@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fc4850d4_a040d0b9",
+        "filename": "android-qemu2-glue/qemu-display-agent-impl.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "what about a vector of callbacks?",
+      "range": {
+        "startLine": 79,
+        "startChar": 2,
+        "endLine": 82,
+        "endChar": 19
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "50720bb0_1472395f",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 10
@@ -22,6 +45,190 @@
       "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08b131c6_d28e7469",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "an enum for RGBA8888/RGB565 + functions to get a needed array size from enum value would be easier to understand, IMO",
+      "range": {
+        "startLine": 135,
+        "startChar": 34,
+        "endLine": 135,
+        "endChar": 37
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c790636a_7f42e9ff",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "please don\u0027t do this, instead add the ANDROID_BEGIN_HEADER / ANDROID_END_HEADER macros to the included header, so it can be used for both C and C++",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 32
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8143ca0_77e20c8f",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "nit: you could make it 8 bytes smaller this way:\n\nint32_t width\nuint16_t height;   // 64 kpixels is enough to everyone ;)\nint16_t bpp;\nuint64_t pt_us;\nunique_ptr\u003c\u003e ...\n\nthis way it will only use three 8-byte slots with no padding in between",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 15
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9725d181_700f86bb",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "nit: not needed",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 5
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0267f7ec_161755a0",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "Frame class doesn\u0027t look like a big thing - it\u0027s 32 bytes now and you can make it to be only 24 bytes big. This way you would save an extra heap allocation - moving a Frame into and out of the message channel is pretty much the same as moving a pointer\n\nyou could also use Optional\u003c\u003e to not change the code much:\n\nOptional\u003cFrame\u003e f;\nif (...)\n   f.emplace(\u003cconstructor parameters\u003e);\n\nif (f)\n   channel.trySend(std::move(*f));",
+      "range": {
+        "startLine": 110,
+        "startChar": 20,
+        "endLine": 110,
+        "endChar": 34
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7dc7a5fe_d0511d65",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "this isn\u0027t guaranteed to sleep as much as you\u0027ve specified. MSDN explicitly states that ::Sleep() API may sleep both less and more than requested\nTo have a precise delay please create a separate abstraction based on waitable timers - https://msdn.microsoft.com/en-us/library/windows/desktop/ms687012(v\u003dvs.85).aspx\n\nBoth Linux and Mac also need some more fine-tuned functions for precise sleeps and to deal with signals:\n\nhttps://linux.die.net/man/3/clock_nanosleep\nhttps://github.com/ChisholmKyle/PosixMachTiming",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 62
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1604c660_3d24be39",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "nit: static, and leading underscore isn\u0027t in our coding style",
+      "range": {
+        "startLine": 208,
+        "startChar": 0,
+        "endLine": 208,
+        "endChar": 4
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0e80ce32_5f4cd80a",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:40:20Z",
+      "side": 1,
+      "message": "very nit: please grab |sGlobals| first into a separate variable. Each \"-\u003e\" on LazyInstance is at least one atomic operation, which is not needed if you do it like this:\n\nauto\u0026 globals \u003d *sGlobals;\nif (globals.\u003c...\u003e) { ... }",
+      "range": {
+        "startLine": 372,
+        "startChar": 4,
+        "endLine": 379,
+        "endChar": 5
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
