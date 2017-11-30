@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "bb44383a_020c07ba",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "nit: make it static and use camelCase() so it\u0027s clear this function isn\u0027t a part of public interface",
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b14d793b_365a654a",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 9
@@ -45,6 +62,184 @@
       "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b8ade62e_11e726e8",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "curious if std::unique_ptr\u003cFrame\u003e would compile here, as it would be a much safer interface",
+      "range": {
+        "startLine": 70,
+        "startChar": 36,
+        "endLine": 70,
+        "endChar": 42
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "826bc71e_bf2df2ed",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "you can use either android/threading/async here or FunctorThread instead or creating a class for each function",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 15
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80a3125b_52aa8eef",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "nit: ..._async() ?",
+      "range": {
+        "startLine": 27,
+        "startChar": 8,
+        "endLine": 27,
+        "endChar": 28
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b863083d_b6915246",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "nit: let\u0027s use camelCase as other variables in this file are already like that",
+      "range": {
+        "startLine": 38,
+        "startChar": 13,
+        "endLine": 38,
+        "endChar": 26
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4be6f412_d9b9d90f",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "how \u0027int\u0027 is better here, and what\u0027s the expected values?",
+      "range": {
+        "startLine": 46,
+        "startChar": 33,
+        "endLine": 46,
+        "endChar": 36
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c081b64c_5421e10f",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "nit: no need to make it extern \"C\" and use unix_naming",
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "58f6adcc_0677cbef",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "nit: IMO it\u0027s better to use some other word here, e.g. \u0027initiated\u0027: \"Initiating the recording stopping\", or something similar. \"Stop started\" is hard to parse in general",
+      "range": {
+        "startLine": 287,
+        "startChar": 31,
+        "endLine": 287,
+        "endChar": 38
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "06827df0_1c20f2c2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-11-30T19:08:00Z",
+      "side": 1,
+      "message": "this parameter would be much better as an enum instead of an int",
+      "range": {
+        "startLine": 291,
+        "startChar": 30,
+        "endLine": 291,
+        "endChar": 43
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
