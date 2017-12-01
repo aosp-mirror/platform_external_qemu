@@ -1657,9 +1657,9 @@ void GLEScontext::initCapsLocked(const GLubyte * extensionString)
     if (strstr(cstring,"GL_SGIS_generate_mipmap ")!=NULL)
         s_glSupport.GL_SGIS_GENERATE_MIPMAP = true;
 
-    if (strstr(cstring,"GL_ARB_ES2_compatibility ")!=NULL
+    /*if (strstr(cstring,"GL_ARB_ES2_compatibility ")!=NULL
             || isGles2Gles())
-        s_glSupport.GL_ARB_ES2_COMPATIBILITY = true;
+        s_glSupport.GL_ARB_ES2_COMPATIBILITY = true;*/
 
     if (strstr(cstring,"GL_OES_standard_derivatives ")!=NULL)
         s_glSupport.GL_OES_STANDARD_DERIVATIVES = true;

@@ -1367,8 +1367,9 @@ GL_API void GL_APIENTRY  glHint( GLenum target, GLenum mode) {
     SET_ERROR_IF(!GLEScmValidate::hintTargetMode(target,mode),GL_INVALID_ENUM);
 
     // No GLES1 hints are supported.
+    ctx->setHint(target, mode);
     if (isGles2Gles() || isCoreProfile()) {
-        ctx->setHint(target, mode);
+        
     } else {
         ctx->dispatcher().glHint(target,mode);
     }
@@ -1900,8 +1901,8 @@ static bool handleMipmapGeneration(GLenum target, GLenum pname, bool param)
     GET_CTX_RET(false)
     GLES_CM_TRACE()
 
-    if(pname == GL_GENERATE_MIPMAP &&
-       (isCoreProfile() || isGles2Gles() || !ctx->isAutoMipmapSupported()))
+    if(pname == GL_GENERATE_MIPMAP /*&&
+       (isCoreProfile() || isGles2Gles() || !ctx->isAutoMipmapSupported())*/)
     {
         TextureData *texData = getTextureTargetData(target);
         if(texData)

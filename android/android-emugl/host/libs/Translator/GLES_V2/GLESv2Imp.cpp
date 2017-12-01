@@ -412,6 +412,7 @@ static void sSetDesktopGLEnable(const GLESv2Context* ctx, bool enable, GLenum ca
 // depending on the internal format and attachment combinations of the
 // framebuffer object.
 static void sUpdateFboEmulation(GLESv2Context* ctx) {
+    return;
     if (ctx->getMajorVersion() < 3 || isGles2Gles()) return;
 
     std::vector<GLenum> colorAttachments(ctx->getCaps()->maxDrawBuffers);
@@ -545,6 +546,7 @@ GL_APICALL void  GL_APIENTRY glBindTexture(GLenum target, GLuint texture){
     // when coming out of the fragment shader.
     // Desktop OpenGL assumes (v, v, v, 1).
     // GL_DEPTH_TEXTURE_MODE can be set to GL_RED to follow the OpenGL ES behavior.
+    return;
     if (!ctx->isCoreProfile() && !isGles2Gles()) {
 #define GL_DEPTH_TEXTURE_MODE 0x884B
         ctx->dispatcher().glTexParameteri(target ,GL_DEPTH_TEXTURE_MODE, GL_RED);
@@ -1197,6 +1199,7 @@ GL_APICALL void  GL_APIENTRY glDisableVertexAttribArray(GLuint index){
 
 // s_glDrawPre/Post() are for draw calls' fast paths.
 static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
+    return;
     if (isGles2Gles()) {
         return;
     }
@@ -1220,6 +1223,7 @@ static void s_glDrawPre(GLESv2Context* ctx, GLenum mode, GLenum type = 0) {
 }
 
 static void s_glDrawPost(GLESv2Context* ctx, GLenum mode) {
+    return;
     if (isGles2Gles()) {
         return;
     }
@@ -2902,10 +2906,10 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
     GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
     // HACK: angle does not like GL_DEPTH_COMPONENT24_OES
-    if (isGles2Gles() && internalformat == GL_DEPTH_COMPONENT24_OES) {
+    if (internalformat == GL_DEPTH_COMPONENT24_OES) {
         internal = GL_DEPTH_COMPONENT16;
     }
-    if (!isGles2Gles() && ctx->getMajorVersion() < 3) {
+    if (ctx->getMajorVersion() < 3) {
         switch (internalformat) {
             case GL_RGB565:
                 internal = GL_RGB;
@@ -3087,7 +3091,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
     s_glInitTexImage2D(target, level, internalformat, width, height, border,
             &format, &type, &internalformat);
 
-    if (!isCompressedFormat && ctx->getMajorVersion() < 3 && !isGles2Gles()) {
+    if (!isCompressedFormat && ctx->getMajorVersion() < 3 /*&& !isGles2Gles()*/) {
         if (type==GL_HALF_FLOAT_OES)
             type = GL_HALF_FLOAT_NV;
         if (pixels==NULL && type==GL_UNSIGNED_SHORT_5_5_5_1)
@@ -3246,8 +3250,8 @@ static int s_getHostLocOrSetError(GLint location) {
     ProgramData* pData = ctx->getUseProgram();
     RET_AND_SET_ERROR_IF(!pData, GL_INVALID_OPERATION, -1);
     int hostLoc = pData->getHostUniformLocation(location);
-    RET_AND_SET_ERROR_IF(hostLoc == -1 && location != -1,
-            GL_INVALID_OPERATION, -1);
+    //RET_AND_SET_ERROR_IF(hostLoc == -1 && location != -1,
+    //        GL_INVALID_OPERATION, -1);
     return hostLoc;
 }
 

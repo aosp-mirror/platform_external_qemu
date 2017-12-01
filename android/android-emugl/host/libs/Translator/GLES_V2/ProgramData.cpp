@@ -374,6 +374,16 @@ void ProgramData::postLoad(const getObjDataPtr_t& getObjDataPtr) {
     }
 }
 
+void ProgramData::printShaders() {
+    for (int i = 0; i < NUM_SHADER_TYPE; i++) {
+        AttachedShader& s = attachedShaders[i];
+        if (s.linkedSource.empty()) {
+            continue;
+        }
+        fprintf(stderr, "shader:\n%s\n", s.linkedSource.c_str());
+    }
+}
+
 void ProgramData::restore(ObjectLocalName localName,
            const getGlobalName_t& getGlobalName) {
     ObjectData::restore(localName, getGlobalName);
@@ -466,6 +476,10 @@ void ProgramData::restore(ObjectLocalName localName,
             if (location == -1) {
                 // Location changed after loading from a snapshot.
                 // likely a driver bug
+                //printShaders();
+                if (uniform.mGuestName == "unity_Lightmap_ST") {
+                    printShaders();
+                }
                 fprintf(stderr,
                         "WARNING: %llu: uniform location changed (%s: %d->%d)\n",
                         localName, uniform.mGuestName.c_str(),
@@ -984,6 +998,7 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
     int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
         translatedName.c_str());
     if (hostLoc == -1) {
+        fprintf(stderr, "uniform %s not found\n", uniName);
         return -1;
     }
     int guestLoc = static_cast<int>(mUniNameToGuestLoc.size());
@@ -995,6 +1010,14 @@ int ProgramData::getGuestUniformLocation(const char* uniName) {
 int ProgramData::getHostUniformLocation(int guestLocation) {
     const auto& location = mGuestLocToHostLoc.find(guestLocation);
     if (location != mGuestLocToHostLoc.end()) {
+        /*if (location->second == -1) {
+            for (const auto& guest : mUniNameToGuestLoc) {
+                if (guest.second == guestLocation) {
+                    fprintf(stderr, "%s (%d) got bad host location\n",
+                            guest.first.c_str(), guestLocation);
+                }
+            }
+        }*/
         return location->second;
     } else {
         return -1;

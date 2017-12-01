@@ -108,6 +108,7 @@ public:
     // It handles location -1 as well
     int getGuestUniformLocation(const char* uniName);
     int getHostUniformLocation(int guestLocation);
+    void printShaders();
 private:
     // linkedAttribLocs stores the attribute locations the guest might
     // know about. It includes all boundAttribLocs before the previous

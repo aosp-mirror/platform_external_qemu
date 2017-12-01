@@ -25,6 +25,61 @@
 
 #include <algorithm>
 
+static void write_bmp(int w, int h, int c, const unsigned char* data,
+        const char* filename) {
+    int filesize = 54 + 3 * w * h;  //w is your image width, h is image height, both int
+
+    unsigned char* img = (unsigned char *)malloc(3*w*h);
+
+    for(int i=0; i<w; i++)
+    {
+        for(int j=0; j<h; j++)
+        {
+            unsigned r, g, b;
+            int x=i;
+            int y=(h-1)-j;
+            if (c == 3 || c == 4) {
+                r = data[(i + j * w) * c];
+                g = data[(i + j * w) * c + 1];
+                b = data[(i + j * w) * c + 2];
+            } else {
+                assert(c == 1);
+                r = g = b = data[i + j * w];
+            }
+            img[(x+y*w)*3+2] = r;
+            img[(x+y*w)*3+1] = g;
+            img[(x+y*w)*3+0] = b;
+        }
+    }
+
+    unsigned char bmpfileheader[14] = {'B','M', 0,0,0,0, 0,0, 0,0, 54,0,0,0};
+    unsigned char bmpinfoheader[40] = {40,0,0,0, 0,0,0,0, 0,0,0,0, 1,0, 24,0};
+    unsigned char bmppad[3] = {0,0,0};
+
+    bmpfileheader[ 2] = (unsigned char)(filesize    );
+    bmpfileheader[ 3] = (unsigned char)(filesize>> 8);
+    bmpfileheader[ 4] = (unsigned char)(filesize>>16);
+    bmpfileheader[ 5] = (unsigned char)(filesize>>24);
+
+    bmpinfoheader[ 4] = (unsigned char)(       w    );
+    bmpinfoheader[ 5] = (unsigned char)(       w>> 8);
+    bmpinfoheader[ 6] = (unsigned char)(       w>>16);
+    bmpinfoheader[ 7] = (unsigned char)(       w>>24);
+    bmpinfoheader[ 8] = (unsigned char)(       h    );
+    bmpinfoheader[ 9] = (unsigned char)(       h>> 8);
+    bmpinfoheader[10] = (unsigned char)(       h>>16);
+    bmpinfoheader[11] = (unsigned char)(       h>>24);
+
+    FILE* f = fopen(filename,"wb");
+    fwrite(bmpfileheader,1,14,f);
+    fwrite(bmpinfoheader,1,40,f);
+    for(int i=0; i<h; i++)
+    {
+        fwrite(img+(w*(h-i-1)*3),3,w,f);
+        fwrite(bmppad,1,(4-(w*3)%4)%4,f);
+    }
+}
+
 static const GLenum kTexParam[] = {
     GL_TEXTURE_MIN_FILTER,
     GL_TEXTURE_MAG_FILTER,
@@ -419,10 +474,10 @@ void SaveableTexture::onSave(
         GLDispatch& dispatcher = GLEScontext::dispatcher();
         assert(dispatcher.glGetIntegerv);
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
-            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+            /*if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
                 pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
                 continue;
-            }
+            }*/
             dispatcher.glGetIntegerv(pixelStoreIndexes[i], &pixelStorePrev[i]);
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
@@ -469,7 +524,7 @@ void SaveableTexture::onSave(
                             imgData.get()[level - 1].m_depth / 2, 1);
                     android::base::SmallFixedVector<unsigned char, 16>& buffer
                         = imgData.get()[level].m_data;
-                    if (!isGles2Gles()) {
+                    /*if (!isGles2Gles()) {
                         GLint glWidth;
                         GLint glHeight;
                         dispatcher.glGetTexLevelParameteriv(target, level,
@@ -478,15 +533,15 @@ void SaveableTexture::onSave(
                                 GL_TEXTURE_HEIGHT, &glHeight);
                         width = static_cast<unsigned int>(glWidth);
                         height = static_cast<unsigned int>(glHeight);
-                    }
+                    }*/
                     if (isDepth) {
-                        if (!isGles2Gles()) {
+                        /*if (!isGles2Gles()) {
                             GLint glDepth;
                             dispatcher.glGetTexLevelParameteriv(target, level,
                                     GL_TEXTURE_DEPTH, &glDepth);
                             depth = static_cast<unsigned int>(std::max(glDepth,
                                     1));
-                        }
+                        }*/
                     } else {
                         depth = 1;
                     }
@@ -504,6 +559,21 @@ void SaveableTexture::onSave(
                         dispatcher.glGetTexImage(target, level,
                                 neededBufferFormat, m_type,
                                 buffer.data());
+                    }
+                    if (depth == 1 && level == 0
+                            && m_type == GL_UNSIGNED_BYTE) {
+                        char nameBuffer[1000];
+                        int len = sprintf(nameBuffer, "tex/tex%d.bmp", m_globalName);
+                        assert(len < 1000);
+                        int channels = 3;
+                        if (m_format == GL_RED || m_format == GL_DEPTH_COMPONENT) {
+                            channels = 1;
+                        }
+                        if (m_format == GL_RGBA) {
+                            channels = 4;
+                        }
+                        write_bmp(width, height, channels,
+                                buffer.data(), nameBuffer);
                     }
                 }
             }
@@ -561,10 +631,10 @@ void SaveableTexture::onSave(
                 });
         // Restore environment
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
-            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+            /*if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
                 pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
                 continue;
-            }
+            }*/
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
                                          pixelStorePrev[i]);
@@ -603,10 +673,10 @@ void SaveableTexture::restore() {
 
         GLint pixelStorePrev[android::base::arraySize(pixelStoreIndexes)];
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
-            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+            /*if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
                 pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
                 continue;
-            }
+            }*/
             dispatcher.glGetIntegerv(pixelStoreIndexes[i], &pixelStorePrev[i]);
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
@@ -767,10 +837,10 @@ void SaveableTexture::restore() {
         m_texParam.clear();
         // Restore environment
         for (int i = 0; i != android::base::arraySize(pixelStoreIndexes); ++i) {
-            if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
+            /*if (isGles2Gles() && pixelStoreIndexes[i] != GL_PACK_ALIGNMENT &&
                 pixelStoreIndexes[i] != GL_UNPACK_ALIGNMENT) {
                 continue;
-            }
+            }*/
             if (pixelStorePrev[i] != pixelStoreDesired[i]) {
                 dispatcher.glPixelStorei(pixelStoreIndexes[i],
                                          pixelStorePrev[i]);
