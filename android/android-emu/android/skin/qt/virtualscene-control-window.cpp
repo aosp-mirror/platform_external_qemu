@@ -81,11 +81,13 @@ VirtualSceneControlWindow::~VirtualSceneControlWindow() {
     QApplication::instance()->removeEventFilter(this);
 }
 
-bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event) {
+bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,
+                                                 QtKeyEventSource source) {
     const bool down = event->type() == QEvent::KeyPress;
 
     // Trigger when the Alt key but no other modifiers is held.
-    if (event->key() == Qt::Key_Alt) {
+    if (event->key() == Qt::Key_Alt &&
+        source != QtKeyEventSource::ExtendedWindow) {
         if (down && !mCaptureMouse && event->modifiers() == Qt::AltModifier) {
             setCaptureMouse(true);
         } else if (!down && mCaptureMouse) {
@@ -219,11 +221,13 @@ bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
 }
 
 void VirtualSceneControlWindow::keyPressEvent(QKeyEvent* event) {
-    mToolWindow->handleQtKeyEvent(event);
+    mToolWindow->handleQtKeyEvent(event,
+                                  QtKeyEventSource::VirtualSceneControlWindow);
 }
 
 void VirtualSceneControlWindow::keyReleaseEvent(QKeyEvent* event) {
-    mToolWindow->handleQtKeyEvent(event);
+    mToolWindow->handleQtKeyEvent(event,
+                                  QtKeyEventSource::VirtualSceneControlWindow);
 }
 
 void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
