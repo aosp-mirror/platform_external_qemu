@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a1e911fa_4bac6459",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T22:20:19Z",
+      "side": 1,
+      "message": "int64?",
+      "range": {
+        "startLine": 1262,
+        "startChar": 71,
+        "endLine": 1262,
+        "endChar": 77
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9edff0bf_0bd3b436",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T22:20:19Z",
+      "side": 1,
+      "message": "When I read exact, I think that this will perform historical lookups and find the sensor values at a specific time-- but since we don\u0027t store historical data, that\u0027s not true.  Instead, it will be valid for from the last setTarget event (if there\u0027s a new setTarget, the result will be invalid).  Implementing historical lookups to support this seems overkill :-)\n\nIs there something else we can do that won\u0027t have this connotation?\n\nLooking at the rest of the review, it looks like this is used to make sure the position/rotation for the virtual camera is at the same time.  Perhaps we could have an option like PARAMETER_VALUE_LAST_UPDATE, and a separate helper to explicitly perform an update @now?  Although there\u0027s a small chance that an update will happen in between position/rotation getters...\n\nAnother idea would be to have a helper that returns position+rotation together.",
+      "range": {
+        "startLine": 44,
+        "startChar": 31,
+        "endLine": 44,
+        "endChar": 57
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "890948da_e4b93eec",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T22:20:19Z",
+      "side": 1,
+      "message": "I\u0027m not a fan of this parameter duality, where the behavior changes depending on the value of another parameter.  Ideally this should be split into two methods:\n\ngetPhysicalParameterCurrent, which returns the timestamp it used.\ngetPhysicalParameterAtTime, which returns the value at a specific time.",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 37
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3469a5b7_016ad3e6",
+        "filename": "android/android-emu/android/physics/AmbientEnvironment.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T22:20:19Z",
+      "side": 1,
+      "message": "0L, or maybe just 0? This is a signed number.",
+      "range": {
+        "startLine": 132,
+        "startChar": 29,
+        "endLine": 132,
+        "endChar": 32
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7d4e2f8_77c6ae47",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T22:20:19Z",
+      "side": 1,
+      "message": "If the timestamp is too early, shouldn\u0027t it clamp to mPositionChangeStartTime instead of returning the current time?  Why is this different than calculateRotationalState?",
+      "range": {
+        "startLine": 530,
+        "startChar": 12,
+        "endLine": 530,
+        "endChar": 49
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "147410df_7c193779",
+        "filename": "android/android-emu/android/physics/InertialModel.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T22:20:19Z",
+      "side": 1,
+      "message": "Nit: * attached to type",
+      "range": {
+        "startLine": 87,
+        "startChar": 19,
+        "endLine": 87,
+        "endChar": 21
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17ca6b71_3002803b",
+        "filename": "android/android-emu/android/physics/InertialModel.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T22:20:19Z",
+      "side": 1,
+      "message": "More signed numbers (this will be my last comment about it, but there are more)",
+      "range": {
+        "startLine": 148,
+        "startChar": 39,
+        "endLine": 148,
+        "endChar": 42
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
