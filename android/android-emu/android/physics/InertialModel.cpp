@@ -45,8 +45,17 @@ constexpr float kMaxAngularVelocity = 5.f;
 constexpr float kTargetRotationTime = 0.050f;
 
 InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
-    assert(time_ns >= mModelTimeNs);
-    mModelTimeNs = time_ns;
+    if (time_ns < mModelTimeNs) {
+        // If time goes backwards, set the position and rotation immediately
+        // to their targets.
+        glm::vec3 targetPosition = getPosition(PARAMETER_VALUE_TYPE_TARGET);
+        glm::quat targetRotation = getRotation(PARAMETER_VALUE_TYPE_TARGET);
+        mModelTimeNs = time_ns;
+        setTargetPosition(targetPosition, PHYSICAL_INTERPOLATION_STEP);
+        setTargetRotation(targetRotation, PHYSICAL_INTERPOLATION_STEP);
+    } else {
+        mModelTimeNs = time_ns;
+    }
 
     return (mZeroVelocityAfterEndTime &&
             mModelTimeNs >= mPositionChangeEndTime &&
