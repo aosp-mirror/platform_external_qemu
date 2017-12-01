@@ -252,7 +252,6 @@ PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
 
 void PhysicalModelImpl::setCurrentTime(uint64_t time_ns) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
-    assert(time_ns >= mModelTimeNs);
     mModelTimeNs = time_ns;
     bool isInertialModelStable = mInertialModel.setCurrentTime(time_ns) ==
             INERTIAL_STATE_STABLE;
