@@ -46,6 +46,30 @@
       "revId": "d08825223118fb6f5341178974c80d78a3589323",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2b1dd248_8b1bbe84",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-01T01:06:52Z",
+      "side": 1,
+      "message": "Awesome find, wow....",
+      "parentUuid": "2a46ed2c_79af4ff3",
+      "range": {
+        "startLine": 532,
+        "startChar": 0,
+        "endLine": 532,
+        "endChar": 34
+      },
+      "revId": "d08825223118fb6f5341178974c80d78a3589323",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
