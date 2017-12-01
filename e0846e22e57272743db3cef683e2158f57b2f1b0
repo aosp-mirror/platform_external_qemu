@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73b0a09c_5521bf81",
+        "filename": "android/android-emu/android/camera/camera-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T18:37:24Z",
+      "side": 1,
+      "message": "Can you add the timestamp to the ClientFrame instead?  That struct contains the rest of the result and the timestamp fits well there.",
+      "range": {
+        "startLine": 112,
+        "startChar": 36,
+        "endLine": 117,
+        "endChar": 62
+      },
+      "revId": "e0846e22e57272743db3cef683e2158f57b2f1b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
