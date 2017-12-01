@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bd36ada2_30d69cf5",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 8
+      },
+      "lineNbr": 1262,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T23:24:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a1e911fa_4bac6459",
+      "range": {
+        "startLine": 1262,
+        "startChar": 71,
+        "endLine": 1262,
+        "endChar": 77
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9edff0bf_0bd3b436",
         "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
         "patchSetId": 8
@@ -45,6 +69,30 @@
       "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "00d43823_ce13dc38",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T23:24:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9edff0bf_0bd3b436",
+      "range": {
+        "startLine": 44,
+        "startChar": 31,
+        "endLine": 44,
+        "endChar": 57
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "bfae80b8_ecb95c6e",
+        "filename": "android/android-emu/android/emulation/control/sensors_agent.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T23:24:19Z",
+      "side": 1,
+      "message": "Refactored to have a custom transform getter that returns a simultaneous position and rotation.",
+      "parentUuid": "890948da_e4b93eec",
+      "range": {
+        "startLine": 45,
+        "startChar": 0,
+        "endLine": 49,
+        "endChar": 37
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3469a5b7_016ad3e6",
         "filename": "android/android-emu/android/physics/AmbientEnvironment.h",
         "patchSetId": 8
@@ -91,6 +163,30 @@
       "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "761bead8_af279215",
+        "filename": "android/android-emu/android/physics/AmbientEnvironment.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T23:24:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3469a5b7_016ad3e6",
+      "range": {
+        "startLine": 132,
+        "startChar": 29,
+        "endLine": 132,
+        "endChar": 32
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "10dd9cd0_dfaadb2c",
+        "filename": "android/android-emu/android/physics/InertialModel.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 530,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T23:24:19Z",
+      "side": 1,
+      "message": "Refactored so this is gone.",
+      "parentUuid": "d7d4e2f8_77c6ae47",
+      "range": {
+        "startLine": 530,
+        "startChar": 12,
+        "endLine": 530,
+        "endChar": 49
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "147410df_7c193779",
         "filename": "android/android-emu/android/physics/InertialModel.h",
         "patchSetId": 8
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "92a8fdba_2c00c45f",
+        "filename": "android/android-emu/android/physics/InertialModel.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T23:24:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "147410df_7c193779",
+      "range": {
+        "startLine": 87,
+        "startChar": 19,
+        "endLine": 87,
+        "endChar": 21
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "17ca6b71_3002803b",
         "filename": "android/android-emu/android/physics/InertialModel.h",
         "patchSetId": 8
@@ -160,6 +304,30 @@
       "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "462802bb_4daf99dc",
+        "filename": "android/android-emu/android/physics/InertialModel.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T23:24:19Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "17ca6b71_3002803b",
+      "range": {
+        "startLine": 148,
+        "startChar": 39,
+        "endLine": 148,
+        "endChar": 42
+      },
+      "revId": "c8f5a4bb41f4a2b770c3dc768bb9003951b94fe4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
