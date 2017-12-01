@@ -22,6 +22,30 @@
       "revId": "d08825223118fb6f5341178974c80d78a3589323",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a46ed2c_79af4ff3",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 532,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-01T00:13:57Z",
+      "side": 1,
+      "message": "I copied and pasted this without understanding, calls around updateAccelWidgetAndSlidersFromModel are all surrounded with this.  Without it, it deadlocks... so I spent some time investigating.\n\nThe reason this was necessary is that updateAccelWidgetAndSlidersFromModel calls setValue on some EditableSliderWidgets (temperatureSensorValueWidget), which emits a valueChanged event, calls setPhysicalParameterTarget, which then propagates back to onPhysicalStateStabilized... and then calls updateAccelWidgetAndSlidersFromModel again.  This flag breaks the cycle.\n\nA better way to solve this is to simply make it so that EditableSliderWidget doesn\u0027t emit a valueChanged event, by passing false to the second parameter of setValue, which breaks the cycle earlier.  I\u0027ve made that change in the next iteration.\n\nInterestingly, this isn\u0027t a problem with the QDoubleSpinBox widgets, because those widgets check to see if the new value is different before emitting.  EditableSliderWidget should probably do this too, but I don\u0027t want to make such a potentially invasive change in this code review.",
+      "parentUuid": "69f10dfa_efff08a9",
+      "range": {
+        "startLine": 532,
+        "startChar": 0,
+        "endLine": 532,
+        "endChar": 34
+      },
+      "revId": "d08825223118fb6f5341178974c80d78a3589323",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
