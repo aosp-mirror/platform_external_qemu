@@ -334,31 +334,56 @@ TEST(InertialModel, IntermediateValuesDuringInterpolation) {
 
     glm::vec3 singleIntegratedPosition = initialPosition;
 
-    constexpr uint64_t step = 50000UL;
-    constexpr float timeIncrement = step / 1000000000.f;
-    for (uint64_t time = step >> 1; time < 500000000; time += step) {
-        inertialModel.setCurrentTime(time);
-        integratedVelocity += timeIncrement * inertialModel.getAcceleration();
-        doubleIntegratedPosition += timeIncrement * integratedVelocity;
+    constexpr uint64_t stepNs = 25000UL;
+    constexpr float timeIncrementSeconds =
+            android::physics::nsToSeconds(stepNs);
+    constexpr uint64_t endTimeNs = android::physics::secondsToNs(
+            android::physics::kStateChangeTimeSeconds);
+    constexpr float epsilon = 0.01f;
+
+    for (uint64_t timeNs = stepNs >> 1; timeNs < endTimeNs; timeNs += stepNs) {
+        inertialModel.setCurrentTime(timeNs);
+        integratedVelocity +=
+                timeIncrementSeconds * inertialModel.getAcceleration();
+        doubleIntegratedPosition += timeIncrementSeconds * integratedVelocity;
 
         const glm::vec3 measuredVelocity = inertialModel.getVelocity();
-        EXPECT_NEAR(measuredVelocity.x, integratedVelocity.x, 0.01f);
-        EXPECT_NEAR(measuredVelocity.y, integratedVelocity.y, 0.01f);
-        EXPECT_NEAR(measuredVelocity.z, integratedVelocity.z, 0.01f);
+        EXPECT_NEAR(measuredVelocity.x, integratedVelocity.x, epsilon);
+        EXPECT_NEAR(measuredVelocity.y, integratedVelocity.y, epsilon);
+        EXPECT_NEAR(measuredVelocity.z, integratedVelocity.z, epsilon);
 
-        singleIntegratedPosition += timeIncrement *
+        singleIntegratedPosition +=
+                timeIncrementSeconds *
                 inertialModel.getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
 
         const glm::vec3 measuredPosition =
                 inertialModel.getPosition(PARAMETER_VALUE_TYPE_CURRENT);
-        EXPECT_NEAR(measuredPosition.x, doubleIntegratedPosition.x, 0.01f);
-        EXPECT_NEAR(measuredPosition.y, doubleIntegratedPosition.y, 0.01f);
-        EXPECT_NEAR(measuredPosition.z, doubleIntegratedPosition.z, 0.01f);
+        EXPECT_NEAR(measuredPosition.x, doubleIntegratedPosition.x, epsilon);
+        EXPECT_NEAR(measuredPosition.y, doubleIntegratedPosition.y, epsilon);
+        EXPECT_NEAR(measuredPosition.z, doubleIntegratedPosition.z, epsilon);
 
-        EXPECT_NEAR(measuredPosition.x, singleIntegratedPosition.x, 0.01f);
-        EXPECT_NEAR(measuredPosition.y, singleIntegratedPosition.y, 0.01f);
-        EXPECT_NEAR(measuredPosition.z, singleIntegratedPosition.z, 0.01f);
+        EXPECT_NEAR(measuredPosition.x, singleIntegratedPosition.x, epsilon);
+        EXPECT_NEAR(measuredPosition.y, singleIntegratedPosition.y, epsilon);
+        EXPECT_NEAR(measuredPosition.z, singleIntegratedPosition.z, epsilon);
     }
+
+    // Validate that the velocity and acceleration are zeroed out at the end.
+    inertialModel.setCurrentTime(endTimeNs);
+    const glm::vec3 measuredAcceleration = inertialModel.getAcceleration();
+    EXPECT_NEAR(measuredAcceleration.x, 0.0f, epsilon);
+    EXPECT_NEAR(measuredAcceleration.y, 0.0f, epsilon);
+    EXPECT_NEAR(measuredAcceleration.z, 0.0f, epsilon);
+
+    const glm::vec3 measuredVelocity = inertialModel.getVelocity();
+    EXPECT_NEAR(measuredVelocity.x, 0.0f, epsilon);
+    EXPECT_NEAR(measuredVelocity.y, 0.0f, epsilon);
+    EXPECT_NEAR(measuredVelocity.z, 0.0f, epsilon);
+
+    const glm::vec3 measuredPosition =
+            inertialModel.getPosition(PARAMETER_VALUE_TYPE_CURRENT);
+    EXPECT_NEAR(measuredPosition.x, targetPosition.x, epsilon);
+    EXPECT_NEAR(measuredPosition.y, targetPosition.y, epsilon);
+    EXPECT_NEAR(measuredPosition.z, targetPosition.z, epsilon);
 }
 
 TEST(InertialModel, GyroscopeTotalChange) {

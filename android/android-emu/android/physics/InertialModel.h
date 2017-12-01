@@ -26,6 +26,16 @@
 namespace android {
 namespace physics {
 
+constexpr uint64_t secondsToNs(float seconds) {
+    return static_cast<uint64_t>(seconds * 1000000000.0);
+}
+
+constexpr float nsToSeconds(uint64_t nanoSeconds) {
+    return static_cast<float>(nanoSeconds / 1000000000.0);
+}
+
+constexpr float kStateChangeTimeSeconds = 0.2f;
+
 typedef enum {
     INERTIAL_STATE_CHANGING=0,
     INERTIAL_STATE_STABLE=1,
