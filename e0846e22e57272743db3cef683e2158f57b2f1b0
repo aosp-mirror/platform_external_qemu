@@ -22,6 +22,30 @@
       "revId": "e0846e22e57272743db3cef683e2158f57b2f1b0",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "58d20b4a_df03f186",
+        "filename": "android/android-emu/android/camera/camera-capture.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-01T19:05:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "73b0a09c_5521bf81",
+      "range": {
+        "startLine": 112,
+        "startChar": 36,
+        "endLine": 117,
+        "endChar": 62
+      },
+      "revId": "e0846e22e57272743db3cef683e2158f57b2f1b0",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
