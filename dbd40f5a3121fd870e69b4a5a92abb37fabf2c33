@@ -70,6 +70,30 @@
       "revId": "dbd40f5a3121fd870e69b4a5a92abb37fabf2c33",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3c3ec7a6_5d8e93db",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-02T01:38:59Z",
+      "side": 1,
+      "message": "Made the buffer part of the class instead.",
+      "parentUuid": "b859c2ca_4e697226",
+      "range": {
+        "startLine": 910,
+        "startChar": 4,
+        "endLine": 910,
+        "endChar": 20
+      },
+      "revId": "dbd40f5a3121fd870e69b4a5a92abb37fabf2c33",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
