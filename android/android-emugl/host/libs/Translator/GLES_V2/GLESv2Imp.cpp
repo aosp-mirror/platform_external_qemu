@@ -3245,10 +3245,7 @@ static int s_getHostLocOrSetError(GLint location) {
     GET_CTX_V2_RET(-1);
     ProgramData* pData = ctx->getUseProgram();
     RET_AND_SET_ERROR_IF(!pData, GL_INVALID_OPERATION, -1);
-    int hostLoc = pData->getHostUniformLocation(location);
-    RET_AND_SET_ERROR_IF(hostLoc == -1 && location != -1,
-            GL_INVALID_OPERATION, -1);
-    return hostLoc;
+    return pData->getHostUniformLocation(location);
 }
 
 GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){

@@ -538,13 +538,29 @@ void SaveableTexture::onSave(
                 break;
         }
         // Snapshot texture param
+        TextureSwizzle emulatedBaseSwizzle;
+        if (isCoreProfile()) {
+            emulatedBaseSwizzle = getSwizzleForEmulatedFormat(m_format);
+        }
         std::unordered_map<GLenum, GLint> texParam;
-        auto saveParam = [this, &texParam, stream, &dispatcher](
+        auto saveParam = [this, &texParam, stream, &dispatcher,
+                emulatedBaseSwizzle](
                 const GLenum* plist, size_t plistSize) {
             GLint param;
-
             for (size_t i = 0; i < plistSize; i++) {
                 dispatcher.glGetTexParameteriv(m_target, plist[i], &param);
+                if (isSwizzleParam(plist[i]) && param != GL_ZERO &&
+                        param != GL_ONE) {
+                    if (param == emulatedBaseSwizzle.toRed) {
+                        param = GL_RED;
+                    } else if (param == emulatedBaseSwizzle.toGreen) {
+                        param = GL_GREEN;
+                    } else if (param == emulatedBaseSwizzle.toBlue) {
+                        param = GL_BLUE;
+                    } else if (param == emulatedBaseSwizzle.toAlpha) {
+                        param = GL_ALPHA;
+                    }
+                }
                 texParam.emplace(plist[i], param);
             }
         };
@@ -761,8 +777,19 @@ void SaveableTexture::restore() {
                 break;
         }
         // Restore tex param
+        TextureSwizzle emulatedBaseSwizzle;
+        if (isCoreProfile()) {
+            emulatedBaseSwizzle = getSwizzleForEmulatedFormat(m_format);
+        }
         for (const auto& param : m_texParam) {
-            dispatcher.glTexParameteri(m_target, param.first, param.second);
+            if (isSwizzleParam(param.first)) {
+                GLenum hostEquivalentSwizzle =
+                    swizzleComponentOf(emulatedBaseSwizzle, param.second);
+                dispatcher.glTexParameteri(m_target, param.first,
+                        hostEquivalentSwizzle);
+            } else {
+                dispatcher.glTexParameteri(m_target, param.first, param.second);
+            }
         }
         m_texParam.clear();
         // Restore environment
