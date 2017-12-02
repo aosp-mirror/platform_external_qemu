@@ -465,11 +465,8 @@ void ProgramData::restore(ObjectLocalName localName,
                     getTranslatedName(uniform.mGuestName).c_str());
             if (location == -1) {
                 // Location changed after loading from a snapshot.
-                // likely a driver bug
-                fprintf(stderr,
-                        "WARNING: %llu: uniform location changed (%s: %d->%d)\n",
-                        localName, uniform.mGuestName.c_str(),
-                        (GLint)uniformEntry.first, location);
+                // likely loading from different GPU backend (and they
+                // optimize out different stuff)
                 continue;
             }
 
