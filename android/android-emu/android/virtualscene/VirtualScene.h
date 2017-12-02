@@ -50,7 +50,9 @@ public:
     // be called on any thread, but the same EGL context that was active when
     // initialize() was called must be active. This function modifies the GL
     // state, callers must be resilient to that.
-    static void render();
+    //
+    // Returns the timestamp at which the frame is rendered.
+    static int64_t render();
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;

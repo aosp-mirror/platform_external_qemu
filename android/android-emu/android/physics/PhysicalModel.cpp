@@ -72,7 +72,7 @@ public:
      *
      * Returns whether the physical state is stable or changing at the set time.
      */
-    void setCurrentTime(uint64_t time_ns);
+    void setCurrentTime(int64_t time_ns);
 
     /*
      * Sets the target value for the given physical parameter that the physical
@@ -117,6 +117,12 @@ PHYSICAL_PARAMETERS_LIST
     SENSORS_LIST
 #undef SENSOR_
 #undef GET_FUNCTION_NAME
+
+    /* Get the physical rotation and translation simulatenousely. */
+    void getTransform(
+            float* out_translation_x, float* out_translation_y, float* out_translation_z,
+            float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
+            int64_t* out_timestamp);
 
     /*
      * Set or unset callbacks used to signal changing state.
@@ -204,7 +210,7 @@ private:
 #undef SENSOR_
 #undef OVERRIDE_NAME
 
-    uint64_t mModelTimeNs = 0L;
+    int64_t mModelTimeNs = 0L;
 
     LoopTimer* mLoopTimer = nullptr;
 
@@ -250,7 +256,7 @@ PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
             nullptr;
 }
 
-void PhysicalModelImpl::setCurrentTime(uint64_t time_ns) {
+void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     mModelTimeNs = time_ns;
     bool isInertialModelStable = mInertialModel.setCurrentTime(time_ns) ==
@@ -483,6 +489,23 @@ vec3 PhysicalModelImpl::getPhysicalGyroscopeUncalibrated() const {
     return fromGlm(glm::conjugate(mInertialModel.getRotation()) *
         mInertialModel.getRotationalVelocity());
 }
+
+void PhysicalModelImpl::getTransform(
+        float* out_translation_x, float* out_translation_y, float* out_translation_z,
+        float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
+        int64_t* out_timestamp) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    const vec3 position = getParameterPosition(PARAMETER_VALUE_TYPE_CURRENT);
+    *out_translation_x = position.x;
+    *out_translation_y = position.y;
+    *out_translation_z = position.z;
+    const vec3 rotation = getParameterRotation(PARAMETER_VALUE_TYPE_CURRENT);
+    *out_rotation_x = rotation.x;
+    *out_rotation_y = rotation.y;
+    *out_rotation_z = rotation.z;
+    *out_timestamp = mModelTimeNs;
+}
+
 
 void PhysicalModelImpl::setPhysicalStateAgent(
         const QAndroidPhysicalStateAgent* agent) {
@@ -736,7 +759,7 @@ void physicalModel_free(PhysicalModel* model) {
 }
 
 void physicalModel_setCurrentTime(
-        PhysicalModel* model, uint64_t time_ns) {
+        PhysicalModel* model, int64_t time_ns) {
     PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
     if (impl != nullptr) {
         impl->setCurrentTime(time_ns);
@@ -805,6 +828,18 @@ SENSORS_LIST
 #undef SENSOR_
 #undef PHYSICAL_GET_FUNCTION_NAME
 #undef GET_FUNCTION_NAME
+
+void physicalModel_getTransform(PhysicalModel* model,
+    float* out_translation_x, float* out_translation_y, float* out_translation_z,
+    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
+    int64_t* out_timestamp) {
+    PhysicalModelImpl* impl = PhysicalModelImpl::getImpl(model);
+    if (impl != nullptr) {
+        impl->getTransform(out_translation_x, out_translation_y, out_translation_z,
+                out_rotation_x, out_rotation_y, out_rotation_z,
+                out_timestamp);
+    }
+}
 
 void physicalModel_setPhysicalStateAgent(PhysicalModel* model,
         const QAndroidPhysicalStateAgent* agent) {

@@ -69,14 +69,14 @@ void VirtualScene::uninitialize() {
     mImpl = nullptr;
 }
 
-void VirtualScene::render() {
+int64_t VirtualScene::render() {
     AutoLock lock(mLock.get());
     if (!mImpl) {
         E("VirtualScene not initialized");
-        return;
+        return 0L;
     }
 
-    mImpl->render();
+    return mImpl->render();
 }
 
 }  // namespace virtualscene
