@@ -538,13 +538,29 @@ void SaveableTexture::onSave(
                 break;
         }
         // Snapshot texture param
+        TextureSwizzle emulatedBaseSwizzle;
+        if (isCoreProfile()) {
+            emulatedBaseSwizzle = getSwizzleForEmulatedFormat(m_format);
+        }
         std::unordered_map<GLenum, GLint> texParam;
-        auto saveParam = [this, &texParam, stream, &dispatcher](
+        auto saveParam = [this, &texParam, stream, &dispatcher,
+                emulatedBaseSwizzle](
                 const GLenum* plist, size_t plistSize) {
             GLint param;
-
             for (size_t i = 0; i < plistSize; i++) {
                 dispatcher.glGetTexParameteriv(m_target, plist[i], &param);
+                if (isSwizzleParam(plist[i]) && param != GL_ZERO &&
+                        param != GL_ONE) {
+                    if (param == emulatedBaseSwizzle.toRed) {
+                        param = GL_RED;
+                    } else if (param == emulatedBaseSwizzle.toGreen) {
+                        param = GL_GREEN;
+                    } else if (param == emulatedBaseSwizzle.toBlue) {
+                        param = GL_BLUE;
+                    } else if (param == emulatedBaseSwizzle.toAlpha) {
+                        param = GL_ALPHA;
+                    }
+                }
                 texParam.emplace(plist[i], param);
             }
         };
@@ -637,17 +653,14 @@ void SaveableTexture::restore() {
         // Get the number of mipmap levels.
         unsigned int numLevels = m_texStorageLevels ? m_texStorageLevels :
                 1 + floor(log2((float)std::max(m_width, m_height)));
+        GLint resultInternalFormat = m_internalFormat;
+        GLenum resultFormat = m_format;
+        if (isCoreProfile() && isCoreProfileEmulatedFormat(m_format)) {
+            resultInternalFormat = getCoreProfileEmulatedInternalFormat(
+                    m_format, m_type);
+            resultFormat = getCoreProfileEmulatedFormat(m_format);
+        }
         if (m_texStorageLevels) {
-            GLint resultInternalFormat = m_internalFormat;
-            GLenum resultFormat = m_format;
-            if (isCoreProfile()) {
-                GLEScontext::prepareCoreProfileEmulatedTexture(
-                        nullptr /* no TextureData */,
-                        false /* not 3D */,
-                        m_target, m_format, m_type,
-                        &resultInternalFormat,
-                        &resultFormat);
-            }
             switch (m_target) {
                 case GL_TEXTURE_2D:
                 case GL_TEXTURE_CUBE_MAP:
@@ -668,7 +681,8 @@ void SaveableTexture::restore() {
         }
 
         auto restoreTex2D =
-                [this, numLevels, &dispatcher](
+                [this, numLevels, resultInternalFormat,
+                resultFormat, &dispatcher](
                         GLenum target,
                         std::unique_ptr<LevelImageData[]>& levelData) {
                     for (unsigned int level = 0; level < numLevels; level++) {
@@ -677,16 +691,6 @@ void SaveableTexture::restore() {
                                         ? nullptr
                                         : levelData[level].m_data.data();
                         if (!level || pixels) {
-                            GLint resultInternalFormat = m_internalFormat;
-                            GLenum resultFormat = m_format;
-                            if (isCoreProfile()) {
-                                GLEScontext::prepareCoreProfileEmulatedTexture(
-                                        nullptr /* no TextureData */,
-                                        false /* not 3D */,
-                                        target, m_format, m_type,
-                                        &resultInternalFormat,
-                                        &resultFormat);
-                            }
                             if (m_texStorageLevels) {
                                 dispatcher.glTexSubImage2D(
                                         target, level, 0, 0,
@@ -704,7 +708,8 @@ void SaveableTexture::restore() {
                     }
                 };
         auto restoreTex3D =
-                [this, numLevels, &dispatcher](
+                [this, numLevels, resultInternalFormat,
+                resultFormat, &dispatcher](
                         GLenum target,
                         std::unique_ptr<LevelImageData[]>& levelData) {
                     for (unsigned int level = 0; level < numLevels; level++) {
@@ -713,16 +718,6 @@ void SaveableTexture::restore() {
                                         ? nullptr
                                         : levelData[level].m_data.data();
                         if (!level || pixels) {
-                            GLint resultInternalFormat = m_internalFormat;
-                            GLenum resultFormat = m_format;
-                            if (isCoreProfile()) {
-                                GLEScontext::prepareCoreProfileEmulatedTexture(
-                                        nullptr /* no TextureData */,
-                                        true /* is 3D */,
-                                        target, m_format, m_type,
-                                        &resultInternalFormat,
-                                        &resultFormat);
-                            }
                             if (m_texStorageLevels) {
                                 dispatcher.glTexSubImage3D(
                                         target, level, 0, 0, 0,
@@ -761,8 +756,19 @@ void SaveableTexture::restore() {
                 break;
         }
         // Restore tex param
+        TextureSwizzle emulatedBaseSwizzle;
+        if (isCoreProfile()) {
+            emulatedBaseSwizzle = getSwizzleForEmulatedFormat(m_format);
+        }
         for (const auto& param : m_texParam) {
-            dispatcher.glTexParameteri(m_target, param.first, param.second);
+            if (isSwizzleParam(param.first)) {
+                GLenum hostEquivalentSwizzle =
+                    swizzleComponentOf(emulatedBaseSwizzle, param.second);
+                dispatcher.glTexParameteri(m_target, param.first,
+                        hostEquivalentSwizzle);
+            } else {
+                dispatcher.glTexParameteri(m_target, param.first, param.second);
+            }
         }
         m_texParam.clear();
         // Restore environment
