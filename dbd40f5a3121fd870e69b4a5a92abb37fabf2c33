@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ac089e4b_f7a1f910",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-02T00:05:12Z",
+      "side": 1,
+      "message": "use int[kMaxLights] instead of vector? same as all below",
+      "range": {
+        "startLine": 910,
+        "startChar": 4,
+        "endLine": 910,
+        "endChar": 20
+      },
+      "revId": "dbd40f5a3121fd870e69b4a5a92abb37fabf2c33",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
