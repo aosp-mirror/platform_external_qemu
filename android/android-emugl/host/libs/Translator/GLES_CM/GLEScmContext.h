@@ -114,6 +114,9 @@ public:
     void multiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q);
     void normal3f(GLfloat nx, GLfloat ny, GLfloat nz);
 
+    void fogf(GLenum pname, GLfloat param);
+    void fogfv(GLenum pname, const GLfloat* params);
+
     void enableClientState(GLenum clientState);
     void disableClientState(GLenum clientState);
 
@@ -169,10 +172,19 @@ public:
         GLfloat attenuationQuadratic = 0.0f;
     };
 
+    struct Fog {
+        GLenum mode = GL_EXP;
+        float density = 1.0f;
+        float start = 0.0f;
+        float end = 1.0f;
+        GLfloat color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    };
+
     static constexpr int kMaxLights = 8;
     const Material& getMaterialInfo();
     const LightModel& getLightModelInfo();
     const Light& getLightInfo(uint32_t lightIndex);
+    const Fog& getFogInfo();
 
     virtual void onSave(android::base::Stream* stream) const override;
 
@@ -234,6 +246,7 @@ private:
     Material mMaterial;
     LightModel mLightModel;
     Light mLights[kMaxLights] = {};
+    Fog mFog = {};
 
     // Core profile stuff
     CoreProfileEngine*    m_coreProfileEngine = nullptr;
