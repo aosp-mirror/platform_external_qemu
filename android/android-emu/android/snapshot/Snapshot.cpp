@@ -483,7 +483,7 @@ bool Snapshot::load() {
         } else {
             // Should match an empty image info
             if (!verifyImageInfo(image.type, path.get(), pb::Image())) {
-                saveFailure(FailureReason::SystemImageChanged);
+                saveFailure(FailureReason::NoSnapshotInImage);
                 return false;
             }
         }
