@@ -445,7 +445,7 @@ bool Quickboot::save(StringView name) {
         return false;
     }
 
-    dprint("Saving state on exit with session uptime %d ms",
+    dprint("Saving state with session uptime %d ms",
            int(sessionUptimeMs));
     Stopwatch sw;
     auto res = Snapshotter::get().save(name.c_str());
