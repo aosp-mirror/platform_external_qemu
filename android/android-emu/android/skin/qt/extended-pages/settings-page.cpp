@@ -15,6 +15,8 @@
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
+#include "android/snapshot/interface.h"
+
 #include <QApplication>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -158,6 +160,8 @@ SettingsPage::SettingsPage(QWidget* parent)
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
     }
+    // Enable SAVE STATE NOW if we won't overwrite the state on exit
+    mUi->set_saveSnapNowButton->setEnabled(saveOnExitChoice != SaveSnapshotOnExit::Always);
 
     // OpenGL ES renderer
     for (int i = 0; i < mUi->set_glesBackendPrefComboBox->count(); i++) {
@@ -341,6 +345,14 @@ void SettingsPage::on_set_saveLocFolderButton_clicked()
     setElidedText(mUi->set_saveLocBox, dirName);
 }
 
+void SettingsPage::on_set_saveSnapNowButton_clicked() {
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+    printf("settings-page.h: Got SAVE STATE NOW\n"); // ??
+    androidSnapshot_quickbootSave(nullptr);
+    printf("settings-page.h: Done saving\n"); // ??
+    QApplication::restoreOverrideCursor();
+}
+
 void SettingsPage::on_set_adbPathButton_clicked() {
     QSettings settings;
     QString adbPath = settings.value(Ui::Settings::ADB_PATH, "").toString();
@@ -471,6 +483,8 @@ void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
             preferenceValue = SaveSnapshotOnExit::Always;
             break;
     }
+    // Enable SAVE STATE NOW if we won't overwrite the state on exit
+    mUi->set_saveSnapNowButton->setEnabled(preferenceValue != SaveSnapshotOnExit::Always);
 
     // Save for only this AVD
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
