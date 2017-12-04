@@ -118,6 +118,30 @@
       "revId": "dbd40f5a3121fd870e69b4a5a92abb37fabf2c33",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9d7558ce_dd9bccd3",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-04T18:44:51Z",
+      "side": 1,
+      "message": "Just having too much allocated on the stack in a function will do it. We really don\u0027t have much space at all for this kind of thing, and there\u0027s no safe way to guarantee the stack size over all machines / compilers.",
+      "parentUuid": "29fde650_371a54af",
+      "range": {
+        "startLine": 910,
+        "startChar": 4,
+        "endLine": 910,
+        "endChar": 20
+      },
+      "revId": "dbd40f5a3121fd870e69b4a5a92abb37fabf2c33",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
