@@ -34,6 +34,7 @@ namespace qemu {
 static bool sSkipTimerOps = false;
 
 void skipTimerOps() {
+    fprintf(stderr, "%s: call\n", __func__);
     sSkipTimerOps = true;
 }
 

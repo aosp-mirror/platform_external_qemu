@@ -284,6 +284,9 @@ void looper_free(Looper* looper);
 void stream_put_timer(Stream* stream, LoopTimer* timer);
 void stream_get_timer(Stream* stream, LoopTimer* timer);
 
+void android_mainLooperRegister(Looper* looper);
+Looper* android_getMainLooper();
+
 /* */
 
 ANDROID_END_HEADER

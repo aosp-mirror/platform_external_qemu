@@ -4645,6 +4645,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     socket_drainer_start(looper_getForThread());
     android_wear_agent_start(looper_getForThread());
+    android_mainLooperRegister(looper_getForThread());
 
     if (!android_hw_file) {
         error_report("Missing -android-hw <file> option!");

@@ -190,3 +190,9 @@ void stream_put_timer(::Stream* stream, LoopTimer* timer) {
 void stream_get_timer(::Stream* stream, LoopTimer* timer) {
     asBaseTimer(timer)->load(reinterpret_cast<android::base::Stream*>(stream));
 }
+
+static Looper* mainLooper = nullptr;
+
+void android_mainLooperRegister(Looper* l) { mainLooper = l; }
+Looper* android_getMainLooper() { return mainLooper; }
+
