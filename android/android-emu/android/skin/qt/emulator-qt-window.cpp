@@ -558,36 +558,23 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         }
     }
 
-    mExitSavingTimer.setSingleShot(true);
-    connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
-        mContainer.showModalOverlay(tr("Saving state..."));
-    });
-
-    mLoadingTimer.setSingleShot(true);
-    connect(&mLoadingTimer, &QTimer::timeout, [this]() {
-        mContainer.showModalOverlay(tr("Loading state..."));
-    });
-
     using android::snapshot::Snapshotter;
     Snapshotter::get().setOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
                 if (stage == Snapshotter::Stage::Start) {
                     runOnUiThread([this, op]() {
-                        auto& timer = op == Snapshotter::Operation::Save
-                                              ? mExitSavingTimer
-                                              : mLoadingTimer;
-                        timer.start(500);
+                        QTimer::singleShot(500, QApplication::instance(),
+                            [this, op]() {
+                                mContainer.showModalOverlay(
+                                    op == Snapshotter::Operation::Save ?
+                                        tr("Saving state...") :
+                                        tr("Loading state...")); });
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
-                        auto& timer = op == Snapshotter::Operation::Save
-                                              ? mExitSavingTimer
-                                              : mLoadingTimer;
-                        timer.stop();
-                        timer.disconnect();
                         mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
@@ -623,10 +610,6 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mStartupDialog.clear();
     }
 
-    mExitSavingTimer.stop();
-    mExitSavingTimer.disconnect();
-    mLoadingTimer.stop();
-    mLoadingTimer.disconnect();
     mContainer.hideModalOverlay();
 
     delete mMainLoopThread;
@@ -804,10 +787,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         event->ignore();
     } else {
-        mExitSavingTimer.stop();
-        mExitSavingTimer.disconnect();
-        mLoadingTimer.stop();
-        mLoadingTimer.disconnect();
         mContainer.hideModalOverlay();
 
         if (mToolWindow) {
