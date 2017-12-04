@@ -142,6 +142,7 @@ GLEScmContext::GLEScmContext(int maj, int min,
         android::base::loadBufferPtr<Material>(stream, &mMaterial);
         android::base::loadBufferPtr<LightModel>(stream, &mLightModel);
         android::base::loadBufferPtr<Light>(stream, mLights);
+        android::base::loadBufferPtr<Fog>(stream, &mFog);
 
     } else {
         m_glesMajorVersion = maj;
@@ -226,6 +227,10 @@ const GLEScmContext::Light& GLEScmContext::getLightInfo(uint32_t lightIndex) {
     return mLights[lightIndex];
 }
 
+const GLEScmContext::Fog& GLEScmContext::getFogInfo() {
+    return mFog;
+}
+
 void GLEScmContext::onSave(android::base::Stream* stream) const {
     GLEScontext::onSave(stream);
     android::base::saveBuffer(stream, mProjMatrices);
@@ -267,6 +272,7 @@ void GLEScmContext::onSave(android::base::Stream* stream) const {
     android::base::saveBuffer<Material>(stream, &mMaterial, 1);
     android::base::saveBuffer<LightModel>(stream, &mLightModel, 1);
     android::base::saveBuffer<Light>(stream, mLights, kMaxLights);
+    android::base::saveBuffer<Fog>(stream, &mFog, 1);
 }
 
 void GLEScmContext::restoreMatrixStack(const MatrixStack& matrices) {
@@ -396,6 +402,12 @@ void GLEScmContext::postLoadRestoreCtx() {
                 dispatcher.glLightf(GL_LIGHT0 + i, GL_LINEAR_ATTENUATION, mLights[i].attenuationLinear);
                 dispatcher.glLightf(GL_LIGHT0 + i, GL_QUADRATIC_ATTENUATION, mLights[i].attenuationQuadratic);
             }
+
+            dispatcher.glFogf(GL_FOG_MODE, (GLfloat)mFog.mode);
+            dispatcher.glFogf(GL_FOG_DENSITY, mFog.density);
+            dispatcher.glFogf(GL_FOG_START, mFog.start);
+            dispatcher.glFogf(GL_FOG_END, mFog.end);
+            dispatcher.glFogfv(GL_FOG_COLOR, mFog.color);
         }
     }
     GLEScontext::postLoadRestoreCtx();
@@ -1497,6 +1509,103 @@ void GLEScmContext::normal3f(GLfloat nx, GLfloat ny, GLfloat nz) {
 
     if (!m_coreProfileEngine) {
         dispatcher().glNormal3f(nx, ny, nz);
+    }
+}
+
+void GLEScmContext::fogf(GLenum pname, GLfloat param) {
+    switch (pname) {
+        case GL_FOG_MODE: {
+            GLenum mode = (GLenum)param;
+            switch (mode) {
+                case GL_EXP:
+                case GL_EXP2:
+                case GL_LINEAR:
+                    mFog.mode = mode;
+                    break;
+                default:
+                    fprintf(stderr, "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
+                                    "for glFog(f/x).\n", mode);
+                    setGLerror(GL_INVALID_ENUM);
+                    break;
+            }
+            break;
+        }
+        case GL_FOG_DENSITY:
+            if (param < 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glFog(f/x): GL_FOG_DENSITY "
+                                "needs to be nonnegative, but got %f\n", param);
+                setGLerror(GL_INVALID_VALUE);
+                return;
+            }
+            mFog.density = param;
+            break;
+        case GL_FOG_START:
+            mFog.start = param;
+            break;
+        case GL_FOG_END:
+            mFog.end = param;
+            break;
+        case GL_FOG_COLOR:
+            fprintf(stderr, "GL_INVALID_ENUM: GL_FOG_COLOR not allowed for glFog(f/x).\n");
+            setGLerror(GL_INVALID_ENUM);
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x "
+                            "for glFog(f/x).\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glFogf(pname, param);
+    }
+}
+
+void GLEScmContext::fogfv(GLenum pname, const GLfloat* params) {
+    switch (pname) {
+        case GL_FOG_MODE: {
+            GLenum mode = (GLenum)params[0];
+            switch (mode) {
+                case GL_EXP:
+                case GL_EXP2:
+                case GL_LINEAR:
+                    mFog.mode = mode;
+                    break;
+                default:
+                    fprintf(stderr, "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
+                                    "for glFog(f/x)v.\n", mode);
+                    setGLerror(GL_INVALID_ENUM);
+                    break;
+            }
+            break;
+        }
+        case GL_FOG_DENSITY:
+            if (params[0] < 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glFog(f/x)v: GL_FOG_DENSITY "
+                                "needs to be nonnegative, but got %f\n", params[0]);
+                setGLerror(GL_INVALID_VALUE);
+                return;
+            }
+            mFog.density = params[0];
+            break;
+        case GL_FOG_START:
+            mFog.start = params[0];
+            break;
+        case GL_FOG_END:
+            mFog.end = params[0];
+            break;
+        case GL_FOG_COLOR:
+            memcpy(&mFog.color, params, 4 * sizeof(GLfloat));
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x "
+                            "for glFog(f/x)v.\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glFogfv(pname, params);
     }
 }
 
