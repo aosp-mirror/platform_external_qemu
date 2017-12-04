@@ -84,6 +84,12 @@ public:
         GLint lightAttenuationLinearsLoc;
         GLint lightAttenuationQuadraticsLoc;
 
+        GLint fogModeLoc;
+        GLint fogDensityLoc;
+        GLint fogStartLoc;
+        GLint fogEndLoc;
+        GLint fogColorLoc;
+
         GLuint posVbo;
         GLuint normalVbo;
         GLuint colorVbo;
@@ -120,6 +126,7 @@ public:
     void postDrawVertexSetup();
 
     void setupLighting();
+    void setupFog();
 
     // GLES 1 API (deprecated + incompatible with core only)
 

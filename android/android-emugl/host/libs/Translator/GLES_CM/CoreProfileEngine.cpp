@@ -318,6 +318,18 @@ const CoreProfileEngine::GeometryDrawState& CoreProfileEngine::getGeometryDrawSt
             gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_linears");
         m_geometryDrawState.lightAttenuationQuadraticsLoc =
             gl.glGetUniformLocation(m_geometryDrawState.program, "light_attenuation_quadratics");
+
+        m_geometryDrawState.fogModeLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "fog_mode");
+        m_geometryDrawState.fogDensityLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "fog_density");
+        m_geometryDrawState.fogStartLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "fog_start");
+        m_geometryDrawState.fogEndLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "fog_end");
+        m_geometryDrawState.fogColorLoc =
+            gl.glGetUniformLocation(m_geometryDrawState.program, "fog_color");
+
     }
 
     if (!m_geometryDrawState.vao) {
@@ -539,6 +551,7 @@ void CoreProfileEngine::enable(GLenum cap) {
         case GL_LIGHT6:
         case GL_LIGHT7:
         case GL_COLOR_MATERIAL:
+        case GL_FOG:
             return;
         default:
             break;
@@ -565,6 +578,7 @@ void CoreProfileEngine::disable(GLenum cap) {
         case GL_LIGHT6:
         case GL_LIGHT7:
         case GL_COLOR_MATERIAL:
+        case GL_FOG:
             return;
         default:
             break;
@@ -937,6 +951,22 @@ void CoreProfileEngine::setupLighting() {
     gl.glUniform1fv(m_geometryDrawState.lightAttenuationQuadraticsLoc, GLEScmContext::kMaxLights, m_lightingBuffer.attenuationQuadratics);
 }
 
+void CoreProfileEngine::setupFog() {
+    auto& gl = GLEScontext::dispatcher();
+
+    gl.glUniform1i(m_geometryDrawState.enableFogLoc,
+                   mCtx->isEnabled(GL_FOG));
+
+    const auto& fogInfo = mCtx->getFogInfo();
+
+    gl.glUniform1i(m_geometryDrawState.fogModeLoc, fogInfo.mode);
+    gl.glUniform1f(m_geometryDrawState.fogDensityLoc, fogInfo.density);
+    gl.glUniform1f(m_geometryDrawState.fogStartLoc, fogInfo.start);
+    gl.glUniform1f(m_geometryDrawState.fogEndLoc, fogInfo.end);
+
+    gl.glUniform4fv(m_geometryDrawState.fogColorLoc, 1, fogInfo.color);
+}
+
 void CoreProfileEngine::drawArrays(GLenum type, GLint first, GLsizei count) {
     auto& gl = GLEScontext::dispatcher();
 
@@ -944,6 +974,7 @@ void CoreProfileEngine::drawArrays(GLenum type, GLint first, GLsizei count) {
     preDrawTextureUnitEmulation();
 
     setupLighting();
+    setupFog();
 
     gl.glDrawArrays(type, first, count);
 
@@ -958,6 +989,7 @@ void CoreProfileEngine::drawElements(GLenum mode, GLsizei count, GLenum type, co
     preDrawTextureUnitEmulation();
 
     setupLighting();
+    setupFog();
 
     gl.glDrawElements(mode, count, type, (GLvoid*)0);
 

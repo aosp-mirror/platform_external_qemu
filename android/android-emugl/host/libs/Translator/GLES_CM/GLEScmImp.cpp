@@ -835,35 +835,35 @@ GL_API void GL_APIENTRY  glFlush( void) {
 }
 
 GL_API void GL_APIENTRY  glFogf( GLenum pname, GLfloat param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glFogf(pname,param);
+    ctx->fogf(pname,param);
 }
 
 GL_API void GL_APIENTRY  glFogfv( GLenum pname, const GLfloat *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glFogfv(pname,params);
+    ctx->fogfv(pname,params);
 }
 
 GL_API void GL_APIENTRY  glFogx( GLenum pname, GLfixed param) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
-    ctx->dispatcher().glFogf(pname,(pname == GL_FOG_MODE)? static_cast<GLfloat>(param):X2F(param));
+    ctx->fogf(pname,(pname == GL_FOG_MODE)? static_cast<GLfloat>(param):X2F(param));
 }
 
 GL_API void GL_APIENTRY  glFogxv( GLenum pname, const GLfixed *params) {
-    GET_CTX()
+    GET_CTX_CM()
     GLES_CM_TRACE()
     if(pname == GL_FOG_MODE) {
         GLfloat tmpParam = static_cast<GLfloat>(params[0]);
-        ctx->dispatcher().glFogfv(pname,&tmpParam);
+        ctx->fogfv(pname,&tmpParam);
     } else {
         GLfloat tmpParams[4];
         for(int i=0; i< 4; i++) {
             tmpParams[i] = X2F(params[i]);
         }
-        ctx->dispatcher().glFogfv(pname,tmpParams);
+        ctx->fogfv(pname,tmpParams);
     }
 
 }
