@@ -118,6 +118,10 @@ const char kGeometryDrawFShaderSrcTemplateCore[] = R"(%s
 #define kLuminance 0x1909
 #define kLuminanceAlpha 0x190A
 
+#define kLinear 0x2601
+#define kExp 0x0800
+#define kExp2 0x0801
+
 precision highp float;
 uniform sampler2D tex_sampler;
 uniform samplerCube tex_cube_sampler;
@@ -153,6 +157,13 @@ uniform float light_attenuation_consts[kMaxLights];
 uniform float light_attenuation_linears[kMaxLights];
 uniform float light_attenuation_quadratics[kMaxLights];
 
+// fog
+uniform int fog_mode;
+uniform float fog_density;
+uniform float fog_start;
+uniform float fog_end;
+uniform vec4 fog_color;
+
 in vec4 pos_varying;
 in vec3 normal_varying;
 %s in vec4 color_varying;
@@ -162,29 +173,31 @@ in vec4 texcoord_varying;
 out vec4 frag_color;
 
 void main() {
+    vec4 currentColor;
+
     if (enable_textures) {
         vec4 textureColor;
         if (enable_reflection_map) {
             textureColor = texture(tex_cube_sampler, reflect(pos_varying.xyz, normalize(normal_varying)));
-            frag_color = textureColor;
+            currentColor = textureColor;
         } else {
             textureColor = texture(tex_sampler, texcoord_varying.xy);
             switch (texture_env_mode) {
             case kReplace:
                 switch (texture_format) {
                 case kAlpha:
-                    frag_color.rgb = color_varying.rgb;
-                    frag_color.a = textureColor.a;
+                    currentColor.rgb = color_varying.rgb;
+                    currentColor.a = textureColor.a;
                     break;
                 case kRGBA:
                 case kLuminanceAlpha:
-                    frag_color.rgba = textureColor.rgba;
+                    currentColor.rgba = textureColor.rgba;
                     break;
                 case kRGB:
                 case kLuminance:
                 default:
-                    frag_color.rgb = textureColor.rgb;
-                    frag_color.a = color_varying.a;
+                    currentColor.rgb = textureColor.rgb;
+                    currentColor.a = color_varying.a;
                     break;
                 }
                 break;
@@ -193,28 +206,28 @@ void main() {
             default:
                 switch (texture_format) {
                 case kAlpha:
-                    frag_color.rgb = color_varying.rgb;
-                    frag_color.a = color_varying.a * textureColor.a;
+                    currentColor.rgb = color_varying.rgb;
+                    currentColor.a = color_varying.a * textureColor.a;
                     break;
                 case kRGBA:
                 case kLuminanceAlpha:
-                    frag_color.rgba = color_varying.rgba * textureColor.rgba;
+                    currentColor.rgba = color_varying.rgba * textureColor.rgba;
                     break;
                 case kRGB:
                 case kLuminance:
                 default:
-                    frag_color.rgb = color_varying.rgb * textureColor.rgb;
-                    frag_color.a = color_varying.a;
+                    currentColor.rgb = color_varying.rgb * textureColor.rgb;
+                    currentColor.a = color_varying.a;
                     break;
                 }
                 break;
             }
         }
     } else {
-        frag_color = color_varying;
+        currentColor = color_varying;
     }
 
-    if (!enable_lighting) return;
+    if (enable_lighting) {
 
     vec4 materialAmbientActual = material_ambient;
     vec4 materialDiffuseActual = material_diffuse;
@@ -290,6 +303,32 @@ void main() {
         lit += contrib;
     }
 
-    frag_color = lit;
+    currentColor = lit;
+
+    }
+
+    if (enable_fog) {
+
+    float eyeDist = -pos_varying.z / pos_varying.w;
+    float f = 1.0;
+    switch (fog_mode) {
+        case kExp:
+            f = exp(-fog_density * eyeDist);
+            break;
+        case kExp2:
+            f = exp(-(pow(fog_density * eyeDist, 2.0)));
+            break;
+        case kLinear:
+            f = (fog_end - eyeDist) / (fog_end - fog_start);
+            break;
+        default:
+            break;
+    }
+
+    currentColor = f * currentColor + (1.0 - f) * fog_color;
+
+    }
+
+    frag_color = currentColor;
 }
 )";
