@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fd11b3a6_b6b7f394",
+        "filename": "android-qemu2-glue/qemu-display-agent-impl.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fc4850d4_a040d0b9",
+      "range": {
+        "startLine": 79,
+        "startChar": 2,
+        "endLine": 82,
+        "endChar": 19
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "50720bb0_1472395f",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 10
@@ -36,6 +60,30 @@
       "writtenOn": "2017-11-29T23:21:54Z",
       "side": 1,
       "message": "nit: maybe put them on the same line?",
+      "range": {
+        "startLine": 479,
+        "startChar": 0,
+        "endLine": 480,
+        "endChar": 26
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17b09a0c_8441e5b1",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 480,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "50720bb0_1472395f",
       "range": {
         "startLine": 479,
         "startChar": 0,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7cb36693_54851938",
+        "filename": "android/android-emu/android/ffmpeg-muxer.h",
+        "patchSetId": 10
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "08b131c6_d28e7469",
+      "range": {
+        "startLine": 135,
+        "startChar": 34,
+        "endLine": 135,
+        "endChar": 37
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c790636a_7f42e9ff",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 10
@@ -82,6 +154,30 @@
       "writtenOn": "2017-11-30T19:40:20Z",
       "side": 1,
       "message": "please don\u0027t do this, instead add the ANDROID_BEGIN_HEADER / ANDROID_END_HEADER macros to the included header, so it can be used for both C and C++",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 32
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d2f84ce8_12e4f6f0",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c790636a_7f42e9ff",
       "range": {
         "startLine": 30,
         "startChar": 0,
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "11322734_d6097463",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b8143ca0_77e20c8f",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 50,
+        "endChar": 15
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9725d181_700f86bb",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 10
@@ -128,6 +248,30 @@
       "writtenOn": "2017-11-30T19:40:20Z",
       "side": 1,
       "message": "nit: not needed",
+      "range": {
+        "startLine": 63,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 5
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd8edc55_f3c2caa2",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9725d181_700f86bb",
       "range": {
         "startLine": 63,
         "startChar": 0,
@@ -163,6 +307,30 @@
     },
     {
       "key": {
+        "uuid": "fdadbb66_9f7b97f4",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0267f7ec_161755a0",
+      "range": {
+        "startLine": 110,
+        "startChar": 20,
+        "endLine": 110,
+        "endChar": 34
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7dc7a5fe_d0511d65",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 10
@@ -174,6 +342,30 @@
       "writtenOn": "2017-11-30T19:40:20Z",
       "side": 1,
       "message": "this isn\u0027t guaranteed to sleep as much as you\u0027ve specified. MSDN explicitly states that ::Sleep() API may sleep both less and more than requested\nTo have a precise delay please create a separate abstraction based on waitable timers - https://msdn.microsoft.com/en-us/library/windows/desktop/ms687012(v\u003dvs.85).aspx\n\nBoth Linux and Mac also need some more fine-tuned functions for precise sleeps and to deal with signals:\n\nhttps://linux.die.net/man/3/clock_nanosleep\nhttps://github.com/ChisholmKyle/PosixMachTiming",
+      "range": {
+        "startLine": 151,
+        "startChar": 0,
+        "endLine": 152,
+        "endChar": 62
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a8289645_72f8f074",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Noted. Im uploading a separate WIP CL to add cross-platform WaitableTimer.",
+      "parentUuid": "7dc7a5fe_d0511d65",
       "range": {
         "startLine": 151,
         "startChar": 0,
@@ -209,6 +401,30 @@
     },
     {
       "key": {
+        "uuid": "0512b2cd_f26d0f06",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1604c660_3d24be39",
+      "range": {
+        "startLine": 208,
+        "startChar": 0,
+        "endLine": 208,
+        "endChar": 4
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0e80ce32_5f4cd80a",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 10
@@ -220,6 +436,30 @@
       "writtenOn": "2017-11-30T19:40:20Z",
       "side": 1,
       "message": "very nit: please grab |sGlobals| first into a separate variable. Each \"-\u003e\" on LazyInstance is at least one atomic operation, which is not needed if you do it like this:\n\nauto\u0026 globals \u003d *sGlobals;\nif (globals.\u003c...\u003e) { ... }",
+      "range": {
+        "startLine": 372,
+        "startChar": 4,
+        "endLine": 379,
+        "endChar": 5
+      },
+      "revId": "39acf2124978ec9eccb9a5a25887ac9ec5e99895",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "47b23363_ce08939a",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-04T21:58:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e80ce32_5f4cd80a",
       "range": {
         "startLine": 372,
         "startChar": 4,
