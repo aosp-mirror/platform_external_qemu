@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "33d8eead_71fc0b6c",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-04T20:23:44Z",
+      "side": 1,
+      "message": "For now, let\u0027s just increment android/android-emu/android/snapshot/Snapshot.cpp \u0027s kVersion variable. That is the one that controls whether or not the snapshot will invalidate.\n\nEven if the version is controlled here, the stream is shared across all snapshottable things, so it could introduce an unwelcome offset somewhere else.",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 32
+      },
+      "revId": "9c6fa584cb26d2889818b0d9efb06bccd135f9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
