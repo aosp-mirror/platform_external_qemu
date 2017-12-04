@@ -22,6 +22,47 @@
       "revId": "9c6fa584cb26d2889818b0d9efb06bccd135f9af",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "952727f7_33022062",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-04T20:56:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33d8eead_71fc0b6c",
+      "range": {
+        "startLine": 60,
+        "startChar": 0,
+        "endLine": 61,
+        "endChar": 32
+      },
+      "revId": "9c6fa584cb26d2889818b0d9efb06bccd135f9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "83bebd50_3d7d92f0",
+        "filename": "android/android-emu/android/camera/camera-service.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 935,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-04T20:56:20Z",
+      "side": 1,
+      "message": "Note: this whole function is just refactored out of _camera_client_start_query unchanged other than returning a result code instead of calling _qemu_client_reply_ok/ko directly.  Sadly the diff doesn\u0027t show this very well.",
+      "revId": "9c6fa584cb26d2889818b0d9efb06bccd135f9af",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
