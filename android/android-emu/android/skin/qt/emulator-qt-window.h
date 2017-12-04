@@ -369,9 +369,6 @@ private:
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
     bool mStartupDone = false;
 
-    QTimer mExitSavingTimer;
-    QTimer mLoadingTimer;
-
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
     QPixmap* mRawSkinPixmap = nullptr; // For masking frameless AVDs
@@ -379,6 +376,10 @@ private:
 
     QQueue<SkinEvent*> mSkinEventQueue;
     android::base::Lock mSkinEventQueueLock;
+
+    // Snapshot state
+    bool mShouldShowSnapshotModalOverlay = false;
+    android::base::Lock mSnapshotStateLock;
 
     ToolWindow* mToolWindow;
     EmulatorContainer mContainer;

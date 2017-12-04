@@ -18,6 +18,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/Optional.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Async.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
@@ -88,8 +89,10 @@
 #include <string>
 #include <vector>
 
+using android::base::AutoLock;
 using android::base::kNullopt;
 using android::base::LazyInstance;
+using android::base::Lock;
 using android::base::makeOptional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
@@ -558,36 +561,31 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         }
     }
 
-    mExitSavingTimer.setSingleShot(true);
-    connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
-        mContainer.showModalOverlay(tr("Saving state..."));
-    });
-
-    mLoadingTimer.setSingleShot(true);
-    connect(&mLoadingTimer, &QTimer::timeout, [this]() {
-        mContainer.showModalOverlay(tr("Loading state..."));
-    });
-
     using android::snapshot::Snapshotter;
     Snapshotter::get().setOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
                 if (stage == Snapshotter::Stage::Start) {
                     runOnUiThread([this, op]() {
-                        auto& timer = op == Snapshotter::Operation::Save
-                                              ? mExitSavingTimer
-                                              : mLoadingTimer;
-                        timer.start(500);
+                        AutoLock lock(mSnapshotStateLock);
+                        mShouldShowSnapshotModalOverlay = true;
+                        QTimer::singleShot(500, QApplication::instance(),
+                            [this, op]() {
+                                AutoLock lock(mSnapshotStateLock);
+                                if (mShouldShowSnapshotModalOverlay) {
+                                    mContainer.showModalOverlay(
+                                        op == Snapshotter::Operation::Save ?
+                                            tr("Saving state...") :
+                                            tr("Loading state..."));
+                                }
+                            });
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
-                        auto& timer = op == Snapshotter::Operation::Save
-                                              ? mExitSavingTimer
-                                              : mLoadingTimer;
-                        timer.stop();
-                        timer.disconnect();
+                        AutoLock lock(mSnapshotStateLock);
+                        mShouldShowSnapshotModalOverlay = false;
                         mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
@@ -623,11 +621,10 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mStartupDialog.clear();
     }
 
-    mExitSavingTimer.stop();
-    mExitSavingTimer.disconnect();
-    mLoadingTimer.stop();
-    mLoadingTimer.disconnect();
+    AutoLock lock(mSnapshotStateLock);
+    mShouldShowSnapshotModalOverlay = false;
     mContainer.hideModalOverlay();
+    lock.unlock();
 
     delete mMainLoopThread;
 }
@@ -804,10 +801,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         event->ignore();
     } else {
-        mExitSavingTimer.stop();
-        mExitSavingTimer.disconnect();
-        mLoadingTimer.stop();
-        mLoadingTimer.disconnect();
         mContainer.hideModalOverlay();
 
         if (mToolWindow) {
