@@ -369,9 +369,6 @@ private:
     android::base::MemberOnDemandT<QProgressDialog, QWidget*> mStartupDialog;
     bool mStartupDone = false;
 
-    QTimer mExitSavingTimer;
-    QTimer mLoadingTimer;
-
     SkinSurface* mBackingSurface;
     QPixmap mScaledBackingImage;
     QPixmap* mRawSkinPixmap = nullptr; // For masking frameless AVDs
