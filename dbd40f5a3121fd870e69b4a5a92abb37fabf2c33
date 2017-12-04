@@ -94,6 +94,30 @@
       "revId": "dbd40f5a3121fd870e69b4a5a92abb37fabf2c33",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "29fde650_371a54af",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngine.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-04T18:37:58Z",
+      "side": 1,
+      "message": "any idea why it stack overflows? usually it is an array out of boundary...",
+      "parentUuid": "3c3ec7a6_5d8e93db",
+      "range": {
+        "startLine": 910,
+        "startChar": 4,
+        "endLine": 910,
+        "endChar": 20
+      },
+      "revId": "dbd40f5a3121fd870e69b4a5a92abb37fabf2c33",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
