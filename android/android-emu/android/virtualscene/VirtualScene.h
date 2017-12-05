@@ -28,8 +28,9 @@
 namespace android {
 namespace virtualscene {
 
-// Forward declaration.
+// Forward declarations.
 class Renderer;
+class Scene;
 
 class VirtualScene {
 public:
@@ -56,7 +57,8 @@ public:
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
-    static Renderer* mImpl;
+    static Renderer* mRenderer;
+    static Scene* mScene;
 };
 
 }  // namespace virtualscene

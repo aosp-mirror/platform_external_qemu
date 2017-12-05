@@ -19,6 +19,7 @@
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/virtualscene/Renderer.h"
+#include "android/virtualscene/Scene.h"
 
 using namespace android::base;
 
@@ -32,52 +33,69 @@ namespace virtualscene {
 
 android::base::LazyInstance<android::base::Lock> VirtualScene::mLock =
         LAZY_INSTANCE_INIT;
-Renderer* VirtualScene::mImpl = nullptr;
+Renderer* VirtualScene::mRenderer = nullptr;
+Scene* VirtualScene::mScene = nullptr;
 
 bool VirtualScene::initialize(const GLESv2Dispatch* gles2,
                               int width, int height) {
     AutoLock lock(mLock.get());
-    if (mImpl) {
+    if (mRenderer || mScene) {
         E("VirtualScene already initialized");
         return false;
     }
 
     std::unique_ptr<Renderer> renderer = Renderer::create(gles2, width, height);
     if (!renderer) {
-        E("VirtualScene failed to construct");
+        E("VirtualScene renderer failed to construct");
+        return false;
+    }
+
+    std::unique_ptr<Scene> scene = Scene::create(*renderer.get());
+    if (!scene) {
+        E("VirtualScene scene failed to load");
         return false;
     }
 
     skin_winsys_show_virtual_scene_controls(true);
 
-    // Store the raw pointer instead of the unique_ptr wrapper to prevent
+    // Store the raw pointers instead of the unique_ptr wrapper to prevent
     // unintented side-effects on process shutdown.
-    mImpl = renderer.release();
+    mRenderer = renderer.release();
+    mScene = scene.release();
 
     return true;
 }
 
 void VirtualScene::uninitialize() {
     AutoLock lock(mLock.get());
-    if (!mImpl) {
+    if (!mRenderer || !mScene) {
         E("VirtualScene not initialized");
         return;
     }
 
     skin_winsys_show_virtual_scene_controls(false);
 
-    delete mImpl;
-    mImpl = nullptr;
+    mScene->unregisterSceneObjects(*mRenderer);
+    delete mScene;
+    mScene = nullptr;
+
+    delete mRenderer;
+    mRenderer = nullptr;
 }
 
 int64_t VirtualScene::render() {
     AutoLock lock(mLock.get());
-    if (!mImpl) {
+    if (!mRenderer || !mScene) {
         E("VirtualScene not initialized");
         return 0L;
     }
 
-    return mImpl->render();
+    std::vector<RenderableObject> renderables;
+    const int64_t timestamp = mScene->update(renderables);
+
+    mRenderer->render(renderables);
+
+    return timestamp;
 }
 
 }  // namespace virtualscene
