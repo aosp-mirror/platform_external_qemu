@@ -28,6 +28,7 @@
 
 #pragma once
 
+#include "android/screen-recorder-constants.h"
 #include "android/screen-recorder.h"
 #include "android/utils/compiler.h"
 
@@ -119,10 +120,12 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
 //    recorder - the recorder instance
-//    rgb_pixels - the byte array for the pixel in RGBA format, each pixel take
-//    4 byte
-//    size - the rgb_pixels array size, it should be exactly as 4 * width *
-//    height
+//    rgb_pixels - the byte array for the pixel. We only support RGBA8888 and
+//    RGB565 format
+//    size - the size of the pixel buffer |rgb_pixels|
+//    ptUs - the presentation time (in microseconds) of the frame.
+//    pixFmt - the pixel format
+//
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -130,7 +133,9 @@ int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
                               const uint8_t* rgb_pixels,
-                              int size);
+                              int size,
+                              uint64_t ptUs,
+                              RecordPixFmt pixFmt);
 
 // convert a mp4 or webm video into animated gif
 // params:
@@ -142,4 +147,7 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
                                    const char* output_video_file,
                                    int gif_bit_rate);
 
+// Returns the pixel size (in bytes) for pixel format |r|. If |r| is not a
+// supported format, then returns -1.
+int get_record_pixel_size(RecordPixFmt r);
 ANDROID_END_HEADER

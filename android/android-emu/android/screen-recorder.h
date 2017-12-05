@@ -14,6 +14,7 @@
 
 #pragma once
 
+#include "android/emulation/control/display_agent.h"
 #include "android/utils/compiler.h"
 #include "android/utils/looper.h"
 
@@ -50,8 +51,12 @@ typedef struct RecordingInfo {
 } RecordingInfo;
 
 // Initializes internal global structure. Call this before doing any recording
-// operations. |w| and |h| are the FrameBuffer width and height.
-extern void screen_recorder_init(bool isGuestMode, int w, int h);
+// operations. |w| and |h| are the FrameBuffer width and height. |dpy_agent| is
+// the display agent for recording in guest mode. If |dpy_agent| is NULL, then
+// the recorder will assume it is in host mode.
+extern void screen_recorder_init(int w,
+                                 int h,
+                                 const QAndroidDisplayAgent* dpy_agent);
 // Starts recording the screen. When stopped, the file will be saved as
 // |info->filename|. Returns true if recorder started recording, false if it
 // failed.
