@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6b7fce0_b25261b2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-05T02:54:18Z",
+      "side": 1,
+      "message": "We don\u0027t need to track onDragStarted/onDragStopped anymore to avoid overriding widgets.  Instead, we track if physical model is animating towards the widget\u0027s target position/rotation and won\u0027t update if it is.",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 98,
+        "endChar": 41
+      },
+      "revId": "05ce98791bd6f508ca7c908d2edc541bcaf59b77",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
