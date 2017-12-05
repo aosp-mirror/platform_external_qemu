@@ -23,16 +23,12 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/Compiler.h"
 #include "android/utils/compiler.h"
-
-#include <string>
-#include <map>
-#include <memory>
+#include "android/virtualscene/Renderer.h"
 
 namespace android {
 namespace virtualscene {
 
 // Forward declarations
-class Renderer;
 class Texture;
 
 class Effect {
@@ -57,27 +53,17 @@ public:
                                                 const char* frag);
 
     // Render the effect on the input texture to a width * height view.
-    void render(const Texture* inputTexture, int width, int height);
+    RenderCommand getRenderCommand(
+            const std::shared_ptr<Texture>& inputTexture);
 
 private:
-    // Private constructor, use Effect::createCopyEffect to create an
+    // Private constructor, use Effect::createEffect to create an
     // instance.
-    Effect(Renderer& renderer);
+    Effect(const std::shared_ptr<Material>& material,
+           const std::shared_ptr<Mesh>& mesh);
 
-    // Initialize the effect with the given fragment shader.
-    bool initialize(const char* frag);
-
-    Renderer& mRenderer;
-
-    GLuint mVertexBuffer = 0;
-    GLuint mIndexBuffer = 0;
-
-    GLuint mProgram = 0;
-
-    GLint mPositionLocation = -1;
-    GLint mUvLocation = -1;
-    GLint mTextureSamplerLocation = -1;
-    GLint mResolutionLocation = -1;
+    std::shared_ptr<Material> mMaterial;
+    std::shared_ptr<Mesh> mMesh;
 };
 
 }  // namespace virtualscene

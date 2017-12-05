@@ -44,8 +44,8 @@ public:
     // |width| - Requested texture width.
     // |height| - Requested texture height.
     //
-    // Returns a RenderTarget instance if the successful or null if
-    // there was an error.
+    // Returns a RenderTarget instance if successful or null if there was an
+    // error.
     static std::unique_ptr<RenderTarget> createTextureTarget(
             const GLESv2Dispatch* gles2, uint32_t width, uint32_t height);
 
@@ -56,8 +56,8 @@ public:
     // |width| - Requested render width.
     // |height| - Requested render height.
     //
-    // Returns a RenderTarget instance if the successful or null if
-    // there was an error.
+    // Returns a RenderTarget instance if successful or null if there was an
+    // error.
     static std::unique_ptr<RenderTarget> createDefault(
             const GLESv2Dispatch* gles2, uint32_t width, uint32_t height);
 
@@ -67,7 +67,7 @@ public:
 
     // Returns the  texture backing this render target, or nullptr if this is
     // not a texture-backed target.
-    const Texture* getTexture() const;
+    const std::shared_ptr<Texture>& getTexture() const;
 
 private:
     // Private constructor, use Texture::load to create an instance.
@@ -77,13 +77,13 @@ private:
                  uint32_t width,
                  uint32_t height);
 
-    void setTexture(std::unique_ptr<Texture>&& texture);
+    void setTexture(const std::shared_ptr<Texture>& texture);
 
     const GLESv2Dispatch* mGles2 = nullptr;
 
     GLuint mFramebuffer;
     GLuint mDepthRenderbuffer;
-    std::unique_ptr<Texture> mTexture;
+    std::shared_ptr<Texture> mTexture;
 
     uint32_t mWidth;
     uint32_t mHeight;

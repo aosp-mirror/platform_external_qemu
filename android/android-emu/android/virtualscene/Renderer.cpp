@@ -18,6 +18,8 @@
 
 #include "android/base/ArraySize.h"
 #include "android/utils/debug.h"
+#include "android/virtualscene/Effect.h"
+#include "android/virtualscene/SceneObject.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -36,10 +38,44 @@ using namespace android::base;
  *                     Renderer routines
  ******************************************************************************/
 
-namespace android {
-namespace virtualscene {
+static constexpr char kTexturedVertexShader[] = R"(
+attribute vec3 in_position;
+attribute vec2 in_uv;
 
-static constexpr char kSimpleFragmentShader[] = R"(
+uniform mat4 u_modelViewProj;
+
+varying vec2 uv;
+
+void main() {
+    uv = in_uv;
+    gl_Position = u_modelViewProj * vec4(in_position, 1.0);
+}
+)";
+
+static constexpr char kTexturedFragmentShader[] = R"(
+precision mediump float;
+varying vec2 uv;
+
+uniform sampler2D tex_sampler;
+
+void main() {
+  gl_FragColor = texture2D(tex_sampler, uv);
+}
+)";
+
+static constexpr char kScreenSpaceVertexShader[] = R"(
+attribute vec3 in_position;
+attribute vec2 in_uv;
+
+varying vec2 uv;
+
+void main() {
+    uv = in_uv;
+    gl_Position = vec4(in_position, 1.0);
+}
+)";
+
+static constexpr char kBlitFragmentShader[] = R"(
 precision mediump float;
 uniform vec2 resolution;
 
@@ -99,6 +135,9 @@ void main() {
 }
 )";
 
+namespace android {
+namespace virtualscene {
+
 static constexpr int kSuperSampleMultiple = 2;
 
 Renderer::Renderer(const GLESv2Dispatch* gles2) : mGles2(gles2) {}
@@ -106,27 +145,6 @@ Renderer::Renderer(const GLESv2Dispatch* gles2) : mGles2(gles2) {}
 Renderer::~Renderer() = default;
 
 bool Renderer::initialize(int width, int height) {
-    const glm::mat4 translation =
-            glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f));
-
-    std::unique_ptr<SceneObject> main = loadSceneObject(
-            "Toren1BD_Main.obj", "Toren1BD_Main_BakedLighting.png");
-    if (!main) {
-        return false;
-    }
-
-    main->setTransform(translation);
-    mSceneObjects.push_back(std::move(main));
-
-    std::unique_ptr<SceneObject> decor = loadSceneObject(
-            "Toren1BD_Decor.obj", "Toren1BD_Decor_BakedLighting.png");
-    if (!decor) {
-        return false;
-    }
-
-    decor->setTransform(translation);
-    mSceneObjects.push_back(std::move(decor));
-
     mRenderWidth = width;
     mRenderHeight = height;
 
@@ -139,9 +157,27 @@ bool Renderer::initialize(int width, int height) {
     std::unique_ptr<Effect> fxaaEffect = Effect::createEffect(*this,
             kFxaaFragmentShader);
     mEffectsChain.push_back(std::move(fxaaEffect));
-    std::unique_ptr<Effect> blitEffect = Effect::createEffect(*this,
-            kSimpleFragmentShader);
+    std::unique_ptr<Effect> blitEffect =
+            Effect::createEffect(*this, kBlitFragmentShader);
     mEffectsChain.push_back(std::move(blitEffect));
+
+    std::unique_ptr<SceneObject> main = loadSceneObject("Toren1BD_Main.obj");
+    if (!main) {
+        return false;
+    }
+    mSceneObjects.push_back(std::move(main));
+
+    std::unique_ptr<SceneObject> decor = loadSceneObject("Toren1BD_Decor.obj");
+    if (!decor) {
+        return false;
+    }
+    mSceneObjects.push_back(std::move(decor));
+
+    std::unique_ptr<SceneObject> tv = loadSceneObject("Toren1BD_TVScreen.obj");
+    if (!tv) {
+        return false;
+    }
+    mSceneObjects.push_back(std::move(tv));
 
     return true;
 }
@@ -163,6 +199,173 @@ const SceneCamera& Renderer::getCamera() const {
 
 const GLESv2Dispatch* Renderer::getGLESv2Dispatch() {
     return mGles2;
+}
+
+std::shared_ptr<Material> Renderer::createMaterialTextured() {
+    if (mMaterialTextured) {
+        return mMaterialTextured;
+    }
+
+    // Compile and setup shaders.
+    const GLuint vertexId =
+            compileShader(GL_VERTEX_SHADER, kTexturedVertexShader);
+    const GLuint fragmentId =
+            compileShader(GL_FRAGMENT_SHADER, kTexturedFragmentShader);
+
+    GLuint program = 0;
+    if (vertexId && fragmentId) {
+        program = linkShaders(vertexId, fragmentId);
+    }
+
+    // Release the shaders, the program will keep their reference alive.
+    mGles2->glDeleteShader(vertexId);
+    mGles2->glDeleteShader(fragmentId);
+
+    if (!program) {
+        // Initialization failed, no program loaded.
+        return nullptr;
+    }
+
+    std::shared_ptr<Material> material;
+    material.reset(new Material(mGles2, program));
+
+    material->mPositionLocation = getAttribLocation(program, "in_position");
+    material->mUvLocation = getAttribLocation(program, "in_uv");
+    material->mTexSamplerLocation = getUniformLocation(program, "tex_sampler");
+    material->mMvpLocation = getUniformLocation(program, "u_modelViewProj");
+
+    mMaterialTextured = material;
+    return material;
+}
+
+std::shared_ptr<Material> Renderer::createMaterialScreenSpace(
+        const char* frag) {
+    // Compile and setup shaders.
+    const GLuint vertexId =
+            compileShader(GL_VERTEX_SHADER, kScreenSpaceVertexShader);
+    const GLuint fragmentId = compileShader(GL_FRAGMENT_SHADER, frag);
+
+    GLuint program = 0;
+    if (vertexId && fragmentId) {
+        program = linkShaders(vertexId, fragmentId);
+    }
+
+    // Release the shaders, the program will keep their reference alive.
+    mGles2->glDeleteShader(vertexId);
+    mGles2->glDeleteShader(fragmentId);
+
+    if (!program) {
+        // Initialization failed, no program loaded.
+        return nullptr;
+    }
+
+    std::shared_ptr<Material> material;
+    material.reset(new Material(mGles2, program));
+
+    material->mPositionLocation = getAttribLocation(program, "in_position");
+    material->mUvLocation = getAttribLocation(program, "in_uv");
+    material->mTexSamplerLocation = getUniformLocation(program, "tex_sampler");
+    material->mResolutionLocation = getUniformLocation(program, "resolution");
+
+    return material;
+}
+
+std::shared_ptr<Mesh> Renderer::createMesh(const VertexPositionUV* vertices,
+                                           size_t verticesSize,
+                                           const GLuint* indices,
+                                           size_t indicesSize) {
+    GLuint vertexBuffer = 0;
+    GLuint indexBuffer = 0;
+
+    mGles2->glGenBuffers(1, &vertexBuffer);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+    mGles2->glBufferData(GL_ARRAY_BUFFER,
+                         verticesSize * sizeof(VertexPositionUV), vertices,
+                         GL_STATIC_DRAW);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    mGles2->glGenBuffers(1, &indexBuffer);
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+    mGles2->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indicesSize * sizeof(GLuint),
+                         indices, GL_STATIC_DRAW);
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+    VertexInfo info;
+    info.hasUV = true;
+    info.vertexSize = sizeof(VertexPositionUV);
+    info.posOffset = offsetof(VertexPositionUV, pos);
+    info.uvOffset = offsetof(VertexPositionUV, uv);
+
+    std::shared_ptr<Mesh> mesh;
+    mesh.reset(new Mesh(mGles2, info, vertexBuffer, indexBuffer, indicesSize));
+
+    return mesh;
+}
+
+int64_t Renderer::render() {
+    mRenderTargets[0]->bind();
+
+    mGles2->glEnable(GL_DEPTH_TEST);
+    mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // Transform view by rotation.
+    int64_t timestamp = mCamera.update();
+
+    // Render scene objects.
+    for (auto& sceneObject : mSceneObjects) {
+        const glm::mat4 mvp =
+                getCamera().getViewProjection() * sceneObject->getTransform();
+
+        for (const RenderCommand& renderCommand :
+             sceneObject->getRenderCommands()) {
+            renderCommandExecute(
+                    renderCommand,
+                    [&](const std::shared_ptr<Material>& material) {
+                        mGles2->glUniformMatrix4fv(material->mMvpLocation, 1,
+                                                   GL_FALSE, &mvp[0][0]);
+                    });
+        }
+    }
+
+    mGles2->glDisable(GL_DEPTH_TEST);
+
+    assert(!mEffectsChain.empty());
+    for (size_t i = 0; i < mEffectsChain.size(); i++) {
+        int superSampleMultiple = kSuperSampleMultiple;
+        if (i == mEffectsChain.size() - 1) {
+            superSampleMultiple = 1;
+            mScreenRenderTarget->bind();
+        } else {
+            mRenderTargets[(i + 1) % 2]->bind();
+        }
+
+        RenderCommand renderCommand = mEffectsChain[i]->getRenderCommand(
+                mRenderTargets[i % 2]->getTexture());
+        renderCommandExecute(
+                renderCommand, [&](const std::shared_ptr<Material>& material) {
+                    mGles2->glUniform2f(
+                            material->mResolutionLocation,
+                            1.f / (superSampleMultiple * mRenderWidth),
+                            1.f / (superSampleMultiple * mRenderHeight));
+                });
+    }
+
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
+    mGles2->glUseProgram(0);
+
+    return timestamp;
+}
+
+std::unique_ptr<SceneObject> Renderer::loadSceneObject(const char* objFile) {
+    std::unique_ptr<SceneObject> obj = SceneObject::loadFromObj(*this, objFile);
+    if (!obj) {
+        return nullptr;
+    }
+
+    return obj;
 }
 
 GLuint Renderer::compileShader(GLenum type, const char* shaderSource) {
@@ -241,56 +444,68 @@ GLint Renderer::getUniformLocation(GLuint program, const char* name) {
     return location;
 }
 
-int64_t Renderer::render() {
-    mRenderTargets[0]->bind();
-
-    mGles2->glEnable(GL_DEPTH_TEST);
-    mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // Transform view by rotation.
-    int64_t timestamp = mCamera.update();
-
-    // Render scene objects.
-    for (auto& sceneObject : mSceneObjects) {
-        sceneObject->render();
+void Renderer::renderCommandExecute(
+        const RenderCommand& renderCommand,
+        RenderCommandParameterCallback parameterCallback) {
+    if (!renderCommand.material || !renderCommand.mesh) {
+        return;
     }
 
-    mGles2->glDisable(GL_DEPTH_TEST);
+    const std::shared_ptr<Material>& material = renderCommand.material;
+    const VertexInfo& vertexInfo = renderCommand.mesh->mVertexInfo;
 
-    assert(mEffectsChain.size() > 0);
-    for (int i = 0; i < mEffectsChain.size(); i++) {
-        int superSampleMultiple = kSuperSampleMultiple;
-        if (i == mEffectsChain.size() - 1) {
-            superSampleMultiple = 1;
-            mScreenRenderTarget->bind();
-        } else {
-            mRenderTargets[(i + 1) % 2]->bind();
-        }
+    mGles2->glUseProgram(material->mProgram);
 
-        mEffectsChain[i]->render(mRenderTargets[i % 2]->getTexture(),
-                                 superSampleMultiple * mRenderWidth,
-                                 superSampleMultiple * mRenderHeight);
+    // Bind the texture if it exists.
+    if (renderCommand.texture) {
+        mGles2->glActiveTexture(GL_TEXTURE0);
+        mGles2->glUniform1i(material->mTexSamplerLocation, 0);
+
+        mGles2->glBindTexture(GL_TEXTURE_2D,
+                              renderCommand.texture->getTextureId());
+    } else {
+        mGles2->glBindTexture(GL_TEXTURE_2D, 0);
     }
 
-    return timestamp;
-}
+    parameterCallback(renderCommand.material);
 
-std::unique_ptr<SceneObject> Renderer::loadSceneObject(
-        const char* objFile,
-        const char* textureFile) {
-    std::unique_ptr<SceneObject> obj = SceneObject::loadFromObj(*this, objFile);
-    if (!obj) {
-        return nullptr;
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, renderCommand.mesh->mVertexBuffer);
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,
+                         renderCommand.mesh->mIndexBuffer);
+
+    // glVertexAttribPointer requires the GL_ARRAY_BUFFER to be bound, keep
+    // it bound until all of the vertex attribs are initialized.
+    if (material->mPositionLocation >= 0) {
+        mGles2->glEnableVertexAttribArray(material->mPositionLocation);
+        mGles2->glVertexAttribPointer(
+                material->mPositionLocation,
+                3,                                               // size
+                GL_FLOAT,                                        // type
+                GL_FALSE,                                        // normalized?
+                vertexInfo.vertexSize,                           // stride
+                reinterpret_cast<void*>(vertexInfo.posOffset));  // offset
     }
 
-    std::unique_ptr<Texture> texture = Texture::load(mGles2, textureFile);
-    if (!texture) {
-        return nullptr;
+    if (material->mUvLocation >= 0 && vertexInfo.hasUV) {
+        mGles2->glEnableVertexAttribArray(material->mUvLocation);
+        mGles2->glVertexAttribPointer(
+                material->mUvLocation,
+                2,                                              // size
+                GL_FLOAT,                                       // type
+                GL_FALSE,                                       // normalized?
+                vertexInfo.vertexSize,                          // stride
+                reinterpret_cast<void*>(vertexInfo.uvOffset));  // offset
     }
 
-    obj->setTexture(std::move(texture));
-    return obj;
+    mGles2->glDrawElements(GL_TRIANGLES, renderCommand.mesh->mIndexCount,
+                           GL_UNSIGNED_INT, nullptr);
+
+    if (material->mPositionLocation >= 0) {
+        mGles2->glDisableVertexAttribArray(material->mPositionLocation);
+    }
+    if (material->mUvLocation >= 0 && vertexInfo.hasUV) {
+        mGles2->glDisableVertexAttribArray(material->mUvLocation);
+    }
 }
 
 }  // namespace virtualscene

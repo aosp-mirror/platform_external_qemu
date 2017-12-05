@@ -39,15 +39,15 @@ RenderTarget::~RenderTarget() {
     }
 }
 
-void RenderTarget::setTexture(std::unique_ptr<Texture>&& texture) {
-    mTexture = std::move(texture);
+void RenderTarget::setTexture(const std::shared_ptr<Texture>& texture) {
+    mTexture = texture;
 }
 
 std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
         const GLESv2Dispatch* gles2,
         uint32_t width,
         uint32_t height) {
-    std::unique_ptr<Texture> texture =
+    std::shared_ptr<Texture> texture =
             Texture::createEmpty(gles2, width, height);
 
     if (!texture) {
@@ -78,7 +78,7 @@ std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
 
     std::unique_ptr<RenderTarget> result(new RenderTarget(gles2,
             framebuffer, depthRenderbuffer, width, height));
-    result->setTexture(std::move(texture));
+    result->setTexture(texture);
     return result;
 }
 
@@ -94,8 +94,8 @@ void RenderTarget::bind() const {
     mGles2->glViewport(0, 0, mWidth, mHeight);
 }
 
-const Texture* RenderTarget::getTexture() const {
-    return mTexture.get();
+const std::shared_ptr<Texture>& RenderTarget::getTexture() const {
+    return mTexture;
 }
 
 }  // namespace virtualscene

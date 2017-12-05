@@ -47,7 +47,7 @@ public:
     //
     // Returns a Texture instance if the texture could be loaded or null if
     // there was an error.
-    static std::unique_ptr<Texture> load(const GLESv2Dispatch* gles2,
+    static std::shared_ptr<Texture> load(const GLESv2Dispatch* gles2,
                                          const char* filename);
 
     // Create an OpenGL texture with the given width and height with storage
@@ -63,7 +63,7 @@ public:
     //
     // Returns a Texture instance if the texture could be created or null if
     // there was an error.
-    static std::unique_ptr<Texture> createEmpty(const GLESv2Dispatch* gles2,
+    static std::shared_ptr<Texture> createEmpty(const GLESv2Dispatch* gles2,
                                                 uint32_t width,
                                                 uint32_t height);
 

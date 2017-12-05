@@ -44,7 +44,7 @@ Texture::~Texture() {
     }
 }
 
-std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
+std::shared_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
                                        const char* filename) {
     std::vector<uint8_t> buffer;
     uint32_t width = 0;
@@ -80,11 +80,12 @@ std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
     }
 #endif
 
-    return std::unique_ptr<Texture>(new Texture(gles2, textureId));
+    return std::shared_ptr<Texture>(new Texture(gles2, textureId));
 }
 
-std::unique_ptr<Texture> Texture::createEmpty(const GLESv2Dispatch* gles2,
-                                            uint32_t width, uint32_t height) {
+std::shared_ptr<Texture> Texture::createEmpty(const GLESv2Dispatch* gles2,
+                                              uint32_t width,
+                                              uint32_t height) {
     if (!isTextureSizeValid(gles2, width, height)) {
         E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
           height, GL_MAX_TEXTURE_SIZE);
@@ -110,7 +111,7 @@ std::unique_ptr<Texture> Texture::createEmpty(const GLESv2Dispatch* gles2,
     }
 #endif
 
-    return std::unique_ptr<Texture>(new Texture(gles2, textureId));
+    return std::shared_ptr<Texture>(new Texture(gles2, textureId));
 }
 
 GLuint Texture::getTextureId() const {

@@ -478,6 +478,8 @@ LOCAL_SRC_FILES := \
     android/utils/sockets.c \
     android/utils/looper.cpp \
     android/virtualscene/Effect.cpp \
+    android/virtualscene/Material.cpp \
+    android/virtualscene/Mesh.cpp \
     android/virtualscene/Renderer.cpp \
     android/virtualscene/RenderTarget.cpp \
     android/virtualscene/SceneCamera.cpp \
