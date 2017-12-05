@@ -16,8 +16,6 @@
 
 #include "android/virtualscene/RenderTarget.h"
 
-#include "android/virtualscene/Texture.h"
-
 namespace android {
 namespace virtualscene {
 
@@ -39,21 +37,15 @@ RenderTarget::~RenderTarget() {
     }
 }
 
-void RenderTarget::setTexture(std::unique_ptr<Texture>&& texture) {
-    mTexture = std::move(texture);
+void RenderTarget::setTexture(const Texture& texture) {
+    mTexture = texture;
 }
 
 std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
         const GLESv2Dispatch* gles2,
+        Texture texture,
         uint32_t width,
         uint32_t height) {
-    std::unique_ptr<Texture> texture =
-            Texture::createEmpty(gles2, width, height);
-
-    if (!texture) {
-        return nullptr;
-    }
-
     GLuint framebuffer;
     gles2->glGenFramebuffers(1, &framebuffer);
     gles2->glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -67,7 +59,8 @@ std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
                                       GL_RENDERBUFFER, depthRenderbuffer);
 
     gles2->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                                   GL_TEXTURE_2D, texture->getTextureId(), 0);
+                                  GL_TEXTURE_2D,
+                                  static_cast<GLuint>(texture.id), 0);
 
     if (gles2->glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
             GL_FRAMEBUFFER_COMPLETE) {
@@ -78,7 +71,7 @@ std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
 
     std::unique_ptr<RenderTarget> result(new RenderTarget(gles2,
             framebuffer, depthRenderbuffer, width, height));
-    result->setTexture(std::move(texture));
+    result->setTexture(texture);
     return result;
 }
 
@@ -94,8 +87,8 @@ void RenderTarget::bind() const {
     mGles2->glViewport(0, 0, mWidth, mHeight);
 }
 
-const Texture* RenderTarget::getTexture() const {
-    return mTexture.get();
+const Texture& RenderTarget::getTexture() const {
+    return mTexture;
 }
 
 }  // namespace virtualscene
