@@ -17,40 +17,25 @@
 #pragma once
 
 /*
- * Defines SceneCamera, which controls the position of the virtual camera in the
- * 3D scene and produces view/projection matrices based on calibration.
+ * Defines TextureUtils, which provides helpers loading texture assets from
+ * file.
  */
 
+#include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/Compiler.h"
 #include "android/utils/compiler.h"
 
-#include <glm/glm.hpp>
+#include <vector>
 
 namespace android {
 namespace virtualscene {
 
-class SceneCamera {
-    DISALLOW_COPY_AND_ASSIGN(SceneCamera);
-
+class TextureUtils {
 public:
-    SceneCamera();
-    ~SceneCamera();
-
-    // Update the scene camera based on the current physical state.
-    void update();
-
-    // Get the view projection matrix for the current frame.
-    glm::mat4 getViewProjection() const;
-
-    // Get the timestamp when the camera was last updated.
-    int64_t getTimestamp() const;
-
-private:
-    int64_t mLastUpdateTime = 0;
-
-    glm::mat4 mProjection = glm::mat4();
-    glm::mat4 mCameraFromSensors = glm::mat4();
-    glm::mat4 mViewFromWorld = glm::mat4();
+    static bool loadPNG(const char* filename,
+                        std::vector<uint8_t>& buffer,
+                        uint32_t* outWidth,
+                        uint32_t* outHeight);
 };
 
 }  // namespace virtualscene

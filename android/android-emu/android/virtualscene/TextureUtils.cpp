@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "android/virtualscene/Texture.h"
+#include "android/virtualscene/TextureUtils.h"
 #include <string>
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/ScopedStdioFile.h"
@@ -35,101 +35,10 @@ using android::base::System;
 namespace android {
 namespace virtualscene {
 
-Texture::Texture(const GLESv2Dispatch* gles2, GLuint textureId)
-    : mGles2(gles2), mTextureId(textureId) {}
-
-Texture::~Texture() {
-    if (mGles2) {
-        mGles2->glDeleteTextures(1, &mTextureId);
-    }
-}
-
-std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
-                                       const char* filename) {
-    std::vector<uint8_t> buffer;
-    uint32_t width = 0;
-    uint32_t height = 0;
-    if (!loadPNG(filename, buffer, &width, &height)) {
-        return nullptr;
-    }
-
-    if (!isTextureSizeValid(gles2, width, height)) {
-        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
-          height, GL_MAX_TEXTURE_SIZE);
-        return nullptr;
-    }
-
-    GLuint textureId;
-    gles2->glGenTextures(1, &textureId);
-    gles2->glBindTexture(GL_TEXTURE_2D, textureId);
-    gles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                        GL_UNSIGNED_BYTE, buffer.data());
-    gles2->glGenerateMipmap(GL_TEXTURE_2D);
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                           GL_LINEAR_MIPMAP_LINEAR);
-    gles2->glBindTexture(GL_TEXTURE_2D, 0);
-
-#ifdef DEBUG
-    // Only check for GL error on debug builds to avoid a potential synchronous
-    // flush.
-    const GLenum error = gles2->glGetError();
-    if (error != GL_NO_ERROR) {
-        E("%s: GL error %d", __FUNCTION__, error);
-        return nullptr;
-    }
-#endif
-
-    return std::unique_ptr<Texture>(new Texture(gles2, textureId));
-}
-
-std::unique_ptr<Texture> Texture::createEmpty(const GLESv2Dispatch* gles2,
-                                            uint32_t width, uint32_t height) {
-    if (!isTextureSizeValid(gles2, width, height)) {
-        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
-          height, GL_MAX_TEXTURE_SIZE);
-        return nullptr;
-    }
-
-    GLuint textureId;
-    gles2->glGenTextures(1, &textureId);
-    gles2->glBindTexture(GL_TEXTURE_2D, textureId);
-    gles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
-                        GL_UNSIGNED_BYTE, 0);
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    gles2->glBindTexture(GL_TEXTURE_2D, 0);
-
-#ifdef DEBUG
-    // Only check for GL error on debug builds to avoid a potential synchronous
-    // flush.
-    const GLenum error = gles2->glGetError();
-    if (error != GL_NO_ERROR) {
-        E("%s: GL error %d", __FUNCTION__, error);
-        return nullptr;
-    }
-#endif
-
-    return std::unique_ptr<Texture>(new Texture(gles2, textureId));
-}
-
-GLuint Texture::getTextureId() const {
-    return mTextureId;
-}
-
-bool Texture::isTextureSizeValid(const GLESv2Dispatch* gles2,
-                                 uint32_t width,
-                                 uint32_t height) {
-    GLint maxTextureSize = 0;
-    gles2->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-    return width != 0 && height != 0 && width <= maxTextureSize &&
-            height <= maxTextureSize;
-}
-
-bool Texture::loadPNG(const char* filename,
-                      std::vector<uint8_t>& buffer,
-                      uint32_t* outWidth,
-                      uint32_t* outHeight) {
+bool TextureUtils::loadPNG(const char* filename,
+                           std::vector<uint8_t>& buffer,
+                           uint32_t* outWidth,
+                           uint32_t* outHeight) {
     *outWidth = 0;
     *outHeight = 0;
 
