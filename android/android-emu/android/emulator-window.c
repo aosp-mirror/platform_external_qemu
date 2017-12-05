@@ -283,9 +283,9 @@ emulator_window_setup( EmulatorWindow*  emulator )
                                     _emulator_window_on_gpu_frame);
     }
 
-    screen_recorder_init(!s_use_emugl_subwindow,
-                         android_hw->hw_lcd_width,
-                         android_hw->hw_lcd_height);
+    screen_recorder_init(
+            android_hw->hw_lcd_width, android_hw->hw_lcd_height,
+            s_use_emugl_subwindow ? NULL : emulator->uiEmuAgent->display);
 
     skin_ui_reset_title(emulator->ui);
 }

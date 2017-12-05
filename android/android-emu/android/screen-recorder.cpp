@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "android/screen-recorder.h"
+#include "android/base/Optional.h"
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/ConditionVariable.h"
 #include "android/base/synchronization/Lock.h"
@@ -20,6 +21,7 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/Async.h"
 #include "android/ffmpeg-muxer.h"
+#include "android/framebuffer.h"
 #include "android/gpu_frame.h"
 #include "android/opengles.h"
 #include "android/screen-recorder-constants.h"
@@ -31,26 +33,29 @@
 
 namespace {
 
+using android::base::AutoLock;
+using android::base::Optional;
+
 // The maximum number of frames we will buffer
 constexpr int kMaxFrames = 16;
 
 // A small structure to model a single frame of the GPU display,
 // as passed between the EmuGL and main loop thread.
 struct Frame {
-    int width;
-    int height;
+    uint16_t width = 0;
+    uint16_t height = 0;
+    RecordPixFmt pix_fmt = RecordPixFmt::INVALID_FMT;
+    uint64_t pt_us = 0;  // presentation time in microseconds
     std::unique_ptr<char[]> pixels;
 
-    Frame(int w, int h, const void* px) :
-            width(w), height(h) {
+    Frame() {}
+    Frame(int w, int h, uint64_t pt, RecordPixFmt p, const void* px)
+        : width(w), height(h), pix_fmt(p), pt_us(pt) {
         if (px) {
-            pixels.reset(new char[w * 4 *h]);
-            ::memcpy(static_cast<void*>(pixels.get()), px, w * 4 * h);
+            int sz = get_record_pixel_size(pix_fmt);
+            pixels.reset(new char[w * sz * h]);
+            ::memcpy(static_cast<void*>(pixels.get()), px, w * sz * h);
         }
-    }
-
-    ~Frame() {
-        pixels.reset();
     }
 };
 
@@ -64,17 +69,55 @@ struct CVInfo {
 
 struct Globals {
     ffmpeg_recorder* recorder = nullptr;
+    QAndroidDisplayAgent displayAgent;
     int fbWidth = 0;
     int fbHeight = 0;
+    int fbBpp = 0;
     bool isGuestMode = false;
     std::string fileName = {};
     std::atomic<RecordState> recordState{RecordState::Ready};
-    ::android::base::MessageChannel<Frame*, kMaxFrames> channel;
+    ::android::base::Lock guestFBLock;
+    int frameCount = 0;
+    std::unique_ptr<Frame> guestFrame;
+    ::android::base::MessageChannel<Frame, kMaxFrames> channel;
     RecordingInfo recordingInfo;
     CVInfo encodingCVInfo;  // Used to signal encoding thread completion
 };
 
 android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
+
+// Callback for guest fb update
+static void screen_recorder_fb_update(void* opaque,
+                                      int x,
+                                      int y,
+                                      int width,
+                                      int height) {
+    auto& globals = *sGlobals;
+    D("[%d] %s(x=%d, y=%d, w=%d, h=%d)", ++globals.frameCount, __func__, x, y,
+      width, height);
+
+    if (width <= 0 || height <= 0)
+        return;
+
+    int w = 0, h = 0, bpp = 0;
+    unsigned char* px = nullptr;
+    globals.displayAgent.getFrameBuffer(&w, &h, nullptr, &bpp, &px);
+    if (!px || w <= 0 || h <= 0) {
+        return;
+    }
+
+    AutoLock lock(globals.guestFBLock);
+
+    if (!globals.guestFrame) {
+        globals.guestFrame.reset(new Frame(
+                w, h, android::base::System::get()->getHighResTimeUs(),
+                RecordPixFmt::RGB565, px));
+    } else if (w == globals.guestFrame->width &&
+               h == globals.guestFrame->height) {
+        memcpy(static_cast<void*>(globals.guestFrame->pixels.get()), px,
+               w * h * get_record_pixel_size(globals.guestFrame->pix_fmt));
+    }
+}
 
 // Two threads: one will be used to get the frames at some fps, and forward them
 // to the second thread for processing. The second thread will be responsible
@@ -82,38 +125,55 @@ android::base::LazyInstance<Globals> sGlobals = LAZY_INSTANCE_INIT;
 
 // Function to fetch the frames
 static intptr_t sendFrames(int fps) {
-    unsigned char* px;
-    long long timeDeltaMs = 1000 / fps;
-    long long currTimeMs, newTimeMs, startMs;
-    long long i = 0;
+    auto& globals = *sGlobals;
+    int i = 0;
 
-    // The assumption here when starting is that sGlobals->frame contains a
-    // valid frame when recordState == Recording.
-    startMs = android::base::System::get()->getHighResTimeUs() / 1000;
-    while (sGlobals->recordState == RecordState::Recording) {
-        currTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
-        px = (unsigned char*)gpu_frame_get_record_frame();
-        if (px) {
-            Frame* f = new Frame(sGlobals->fbWidth, sGlobals->fbHeight, px);
+    // The assumption here when starting is that globals.frame contains a
+    // valid frame when is_recording is true.
+    long long startMs = android::base::System::get()->getHighResTimeUs() / 1000;
+    while (globals.recordState == RecordState::Recording) {
+        long long currTimeMs =
+                android::base::System::get()->getHighResTimeUs() / 1000;
+
+        Optional<Frame> f;
+        if (!globals.isGuestMode) {
+            auto px = (unsigned char*)gpu_frame_get_record_frame();
+            if (px) {
+                f.emplace(globals.fbWidth, globals.fbHeight,
+                          android::base::System::get()->getHighResTimeUs(),
+                          RecordPixFmt::RGBA8888, px);
+            }
+        } else {
+            AutoLock lock(globals.guestFBLock);
+            if (globals.guestFrame) {
+                f.emplace(globals.guestFrame->width, globals.guestFrame->height,
+                          android::base::System::get()->getHighResTimeUs(),
+                          RecordPixFmt::RGB565,
+                          globals.guestFrame->pixels.get());
+            }
+        }
+
+        if (f) {
             D("sending frame %d", i++);
-            if (!sGlobals->channel.send(f)) {
+            if (!globals.channel.trySend(std::move(*f))) {
                 derror("Frame queue full. Frame dropped");
-                delete f;
             }
         }
 
         // Need to do some calculation here so we are calling
-        // gpu_frame_get_record_frame() at |fps|.
-        newTimeMs = android::base::System::get()->getHighResTimeUs() / 1000;
+        // gpu_frame_get_record_frame() at mFPS.
+        long long newTimeMs =
+                android::base::System::get()->getHighResTimeUs() / 1000;
 
         // Stop recording if time limit is reached
-        if (newTimeMs - startMs >= sGlobals->recordingInfo.timeLimit * 1000) {
+        if (newTimeMs - startMs >= globals.recordingInfo.timeLimit * 1000) {
             D("Time limit reached (%lld ms). Stopping the recording",
               newTimeMs - startMs);
             screen_recorder_stop_async();
             break;
         }
 
+        long long timeDeltaMs = 1000 / fps;
         if (newTimeMs - currTimeMs < timeDeltaMs) {
             android::base::System::get()->sleepMs(timeDeltaMs - newTimeMs +
                                                   currTimeMs);
@@ -121,79 +181,97 @@ static intptr_t sendFrames(int fps) {
     }
 
     // Send frame with null data to stop encoding thread.
-    Frame* f = new Frame(0, 0, nullptr);
-    sGlobals->channel.send(f);
+    Frame f;
+    globals.channel.send(std::move(f));
     D("Finished sending frames");
     return 0;
 }
 
 // Function to encode the frames
-static intptr_t encodeFrames() {
-    Frame* f;
+intptr_t encodeFrames() {
+    auto& globals = *sGlobals;
+    Frame f;
     int i = 0;
 
     while (1) {
-        f = nullptr;
-        sGlobals->channel.receive(&f);
-        if (!f || !f->pixels) {
+        globals.channel.receive(&f);
+        if (!f.pixels) {
             D("Received null frame");
-            if (f) {
-                delete f;
-            }
             // We are done recording.
             break;
         }
         D("Received frame %d", i++);
-        ffmpeg_encode_video_frame(sGlobals->recorder,
-                                  (const uint8_t*)f->pixels.get(),
-                                  f->width * f->height * 4);
-        delete f;
+        int pxSize = get_record_pixel_size(f.pix_fmt);
+        ffmpeg_encode_video_frame(
+                globals.recorder, (const uint8_t*)f.pixels.get(),
+                f.width * f.height * pxSize, f.pt_us, f.pix_fmt);
     }
 
     D("Finished encoding");
-    sGlobals->encodingCVInfo.lock.lock();
-    sGlobals->encodingCVInfo.done = true;
-    sGlobals->encodingCVInfo.cv.signal();
-    sGlobals->encodingCVInfo.lock.unlock();
+    auto cvInfo = &globals.encodingCVInfo;
+    cvInfo->lock.lock();
+    cvInfo->done = true;
+    cvInfo->cv.signal();
+    cvInfo->lock.unlock();
 
     return 0;
 }
 
 // Function to stop the recording
 static intptr_t stopRecording() {
-    sGlobals->recordState = RecordState::Stopping;
+    auto& globals = *sGlobals;
+
+    globals.recordState = RecordState::Stopping;
     // Need to wait for encoding thread to finish before deleting the
     // encoder.
-    sGlobals->encodingCVInfo.lock.lock();
-    while (!sGlobals->encodingCVInfo.done) {
-        sGlobals->encodingCVInfo.cv.wait(&sGlobals->encodingCVInfo.lock);
+    globals.encodingCVInfo.lock.lock();
+    while (!globals.encodingCVInfo.done) {
+        globals.encodingCVInfo.cv.wait(&globals.encodingCVInfo.lock);
     }
-    sGlobals->encodingCVInfo.done = false;
-    sGlobals->encodingCVInfo.lock.unlock();
+    globals.encodingCVInfo.done = false;
+    globals.encodingCVInfo.lock.unlock();
 
-    ffmpeg_delete_recorder(sGlobals->recorder);
+    ffmpeg_delete_recorder(globals.recorder);
     gpu_frame_set_record_mode(false);
 
-    if (sGlobals->recordingInfo.cb) {
-        sGlobals->recordingInfo.cb(sGlobals->recordingInfo.opaque,
-                                   RECORD_STOP_FINISHED);
+    if (globals.isGuestMode) {
+        globals.displayAgent.unregisterUpdateListener(
+                &screen_recorder_fb_update);
+        AutoLock lock(globals.guestFBLock);
+        globals.guestFrame.reset(nullptr);
     }
-    sGlobals->recordingInfo.fileName = nullptr;
-    sGlobals->recorder = nullptr;
 
-    sGlobals->recordState = RecordState::Ready;
+    if (globals.recordingInfo.cb) {
+        globals.recordingInfo.cb(globals.recordingInfo.opaque,
+                                 RECORD_STOP_FINISHED);
+    }
+    globals.recordingInfo.fileName = nullptr;
+    globals.recorder = nullptr;
+
+    globals.recordState = RecordState::Ready;
     return 0;
 }
 }  // namespace
 
-void screen_recorder_init(bool isGuestMode, int w, int h) {
-    sGlobals->fbWidth = w;
-    sGlobals->fbHeight = h;
-    sGlobals->isGuestMode = isGuestMode;
+void screen_recorder_init(int w, int h, const QAndroidDisplayAgent* dpy_agent) {
+    auto& globals = *sGlobals;
+
+    globals.fbWidth = w;
+    globals.fbHeight = h;
+    if (dpy_agent) {
+        globals.displayAgent = *dpy_agent;
+        globals.isGuestMode = true;
+    } else {
+        // The host framebuffer is always in a 4 bytes-per-pixel format.
+        // In guest mode, the bpp is set when calling the getFrameBuffer()
+        // method, so just use whatever bpp it gives us.
+    }
+    D("%s(w=%d, h=%d, isGuestMode=%d)", __func__, w, h, globals.isGuestMode);
 }
 
 bool parseRecordingInfo(const RecordingInfo* info) {
-    RecordingInfo* sinfo = &sGlobals->recordingInfo;
+    auto& globals = *sGlobals;
+    RecordingInfo* sinfo = &globals.recordingInfo;
 
     if (info == nullptr) {
         derror("Recording info is null");
@@ -206,10 +284,10 @@ bool parseRecordingInfo(const RecordingInfo* info) {
     }
 
     if (info->width <= 0 || info->height <= 0) {
-        D("Defaulting width and height to %dx%d", sGlobals->fbWidth,
-          sGlobals->fbHeight);
-        sinfo->width = sGlobals->fbWidth;
-        sinfo->height = sGlobals->fbHeight;
+        D("Defaulting width and height to %dx%d", globals.fbWidth,
+          globals.fbHeight);
+        sinfo->width = globals.fbWidth;
+        sinfo->height = globals.fbHeight;
     } else {
         sinfo->width = info->width;
         sinfo->height = info->height;
@@ -233,19 +311,16 @@ bool parseRecordingInfo(const RecordingInfo* info) {
     sinfo->cb = info->cb;
     sinfo->opaque = info->opaque;
 
-    sGlobals->fileName = info->fileName;
-    sinfo->fileName = sGlobals->fileName.c_str();
+    globals.fileName = info->fileName;
+    sinfo->fileName = globals.fileName.c_str();
 
     return true;
 }
 
 int screen_recorder_start(const RecordingInfo* info) {
-    if (sGlobals->isGuestMode) {
-        derror("Recording is only supported in host gpu configuration");
-        return false;
-    }
+    auto& globals = *sGlobals;
 
-    if (sGlobals->recorder) {
+    if (globals.recorder) {
         derror("Recorder already started");
         return false;
     }
@@ -254,26 +329,36 @@ int screen_recorder_start(const RecordingInfo* info) {
         return false;
     }
 
-    sGlobals->recorder = ffmpeg_create_recorder(
-            &sGlobals->recordingInfo, sGlobals->fbWidth, sGlobals->fbHeight);
-    if (!sGlobals->recorder) {
+    globals.frameCount = 0;
+    globals.recorder = ffmpeg_create_recorder(
+            &globals.recordingInfo, globals.fbWidth, globals.fbHeight);
+    if (!globals.recorder) {
         derror("ffmpeg_create_recorder failed");
         return false;
     }
     D("created recorder");
 
     // Add the video and audio tracks
-    ffmpeg_add_video_track(sGlobals->recorder, sGlobals->recordingInfo.width,
-                           sGlobals->recordingInfo.height,
-                           sGlobals->recordingInfo.videoBitrate, kFPS,
+    ffmpeg_add_video_track(globals.recorder, globals.recordingInfo.width,
+                           globals.recordingInfo.height,
+                           globals.recordingInfo.videoBitrate, kFPS,
                            kIntraSpacing);
-    ffmpeg_add_audio_track(sGlobals->recorder, kAudioBitrate, kAudioSampleRate);
+    ffmpeg_add_audio_track(globals.recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks");
 
-    sGlobals->recordState = RecordState::Recording;
+    globals.recordState = RecordState::Recording;
     gpu_frame_set_record_mode(true);
-    android_redrawOpenglesWindow();
 
+    // Force a repost to setup the first frame
+    if (globals.isGuestMode) {
+        globals.displayAgent.registerUpdateListener(&screen_recorder_fb_update,
+                                                    nullptr);
+        qframebuffer_invalidate_all();
+    } else {
+        android_redrawOpenglesWindow();
+    }
+
+    // Start the two threads that will fetch and encode the frames
     auto sendFramesFunc = std::bind(&sendFrames, kFPS);
     android::base::async(sendFramesFunc);
     android::base::async(&encodeFrames);
@@ -281,20 +366,22 @@ int screen_recorder_start(const RecordingInfo* info) {
     return true;
 }
 
-void screen_recorder_stop_async(void) {
-    if (!sGlobals->recorder) {
+void screen_recorder_stop_async() {
+    auto& globals = *sGlobals;
+
+    if (!globals.recorder) {
         derror("Screen recording was never started");
         return;
     }
 
-    if (sGlobals->recordState != RecordState::Recording) {
+    if (globals.recordState != RecordState::Recording) {
         derror("Already stopping the recording");
         return;
     }
 
-    if (sGlobals->recordingInfo.cb) {
-        sGlobals->recordingInfo.cb(sGlobals->recordingInfo.opaque,
-                                   RECORD_STOP_INITIATED);
+    if (globals.recordingInfo.cb) {
+        globals.recordingInfo.cb(globals.recordingInfo.opaque,
+                                 RECORD_STOP_INITIATED);
     }
     android::base::async(&stopRecording);
 }
