@@ -154,7 +154,9 @@ int VirtualSceneCameraDevice::startCapturing(uint32_t pixelFormat,
     if (initializeEgl()) {
         auto context = makeEglCurrent();
         if (context.isValid()) {
-            if (VirtualScene::initialize(mGles2)) {
+            if (VirtualScene::initialize(mGles2,
+                                         frameWidth,
+                                         frameHeight)) {
                 succeeded = true;
             } else {
                 E("%s: VirtualScene initialize failed", __FUNCTION__);
@@ -208,8 +210,6 @@ int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
     if (!context.isValid()) {
         return -1;
     }
-
-    mGles2->glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
 
     resultFrame->frame_time = VirtualScene::render();
     mEglDispatch->eglSwapBuffers(mEglDisplay, mEglSurface);
