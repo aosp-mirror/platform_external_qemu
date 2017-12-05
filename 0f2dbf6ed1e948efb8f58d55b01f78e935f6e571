@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "3f125de0_a103bcbc",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bb44383a_020c07ba",
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b14d793b_365a654a",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 9
@@ -65,6 +83,30 @@
     },
     {
       "key": {
+        "uuid": "a825aec2_1f32fce6",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a8ac079e_39832cfd",
+      "range": {
+        "startLine": 68,
+        "startChar": 0,
+        "endLine": 68,
+        "endChar": 37
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "b8ade62e_11e726e8",
         "filename": "android/android-emu/android/screen-recorder.cpp",
         "patchSetId": 9
@@ -76,6 +118,30 @@
       "writtenOn": "2017-11-30T19:08:00Z",
       "side": 1,
       "message": "curious if std::unique_ptr\u003cFrame\u003e would compile here, as it would be a much safer interface",
+      "range": {
+        "startLine": 70,
+        "startChar": 36,
+        "endLine": 70,
+        "endChar": 42
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8615a750_87bdb511",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Switched to \u003cFrame, kMaxFrames\u003e in https://android-review.googlesource.com/#/c/platform/external/qemu/+/484499/",
+      "parentUuid": "b8ade62e_11e726e8",
       "range": {
         "startLine": 70,
         "startChar": 36,
@@ -135,6 +201,54 @@
     },
     {
       "key": {
+        "uuid": "96d6fd63_fc33fd18",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done.",
+      "parentUuid": "826bc71e_bf2df2ed",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 15
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aafdc515_9e6e08bb",
+        "filename": "android/android-emu/android/screen-recorder.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Yeah, I\u0027ll use a ConditionVariable and wait for a signal for encoding completion.",
+      "parentUuid": "096c357f_0f0adc52",
+      "range": {
+        "startLine": 163,
+        "startChar": 0,
+        "endLine": 173,
+        "endChar": 15
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "80a3125b_52aa8eef",
         "filename": "android/android-emu/android/screen-recorder.h",
         "patchSetId": 9
@@ -146,6 +260,30 @@
       "writtenOn": "2017-11-30T19:08:00Z",
       "side": 1,
       "message": "nit: ..._async() ?",
+      "range": {
+        "startLine": 27,
+        "startChar": 8,
+        "endLine": 27,
+        "endChar": 28
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "429562b9_8f3d1ca6",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "80a3125b_52aa8eef",
       "range": {
         "startLine": 27,
         "startChar": 8,
@@ -181,6 +319,30 @@
     },
     {
       "key": {
+        "uuid": "79e162c8_04e177a4",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b863083d_b6915246",
+      "range": {
+        "startLine": 38,
+        "startChar": 13,
+        "endLine": 38,
+        "endChar": 26
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4be6f412_d9b9d90f",
         "filename": "android/android-emu/android/screen-recorder.h",
         "patchSetId": 9
@@ -192,6 +354,30 @@
       "writtenOn": "2017-11-30T19:08:00Z",
       "side": 1,
       "message": "how \u0027int\u0027 is better here, and what\u0027s the expected values?",
+      "range": {
+        "startLine": 46,
+        "startChar": 33,
+        "endLine": 46,
+        "endChar": 36
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "349b855e_d910036e",
+        "filename": "android/android-emu/android/screen-recorder.h",
+        "patchSetId": 9
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done. Not sure why I wrote this as int in the first place.",
+      "parentUuid": "4be6f412_d9b9d90f",
       "range": {
         "startLine": 46,
         "startChar": 33,
@@ -221,6 +407,24 @@
     },
     {
       "key": {
+        "uuid": "cfa8ea07_de83eee2",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c081b64c_5421e10f",
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "58f6adcc_0677cbef",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
         "patchSetId": 9
@@ -244,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "4fc4615b_a1d5ba28",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "58f6adcc_0677cbef",
+      "range": {
+        "startLine": 287,
+        "startChar": 31,
+        "endLine": 287,
+        "endChar": 38
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "06827df0_1c20f2c2",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
         "patchSetId": 9
@@ -255,6 +483,30 @@
       "writtenOn": "2017-11-30T19:08:00Z",
       "side": 1,
       "message": "this parameter would be much better as an enum instead of an int",
+      "range": {
+        "startLine": 291,
+        "startChar": 30,
+        "endLine": 291,
+        "endChar": 43
+      },
+      "revId": "0f2dbf6ed1e948efb8f58d55b01f78e935f6e571",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7d2edb61_0238d056",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 9
+      },
+      "lineNbr": 291,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-05T06:03:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "06827df0_1c20f2c2",
       "range": {
         "startLine": 291,
         "startChar": 30,
