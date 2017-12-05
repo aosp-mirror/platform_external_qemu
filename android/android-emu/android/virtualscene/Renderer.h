@@ -24,6 +24,8 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/utils/compiler.h"
+#include "android/virtualscene/Effect.h"
+#include "android/virtualscene/RenderTarget.h"
 #include "android/virtualscene/SceneCamera.h"
 #include "android/virtualscene/SceneObject.h"
 #include "android/virtualscene/Texture.h"
@@ -45,7 +47,8 @@ public:
     //
     // Returns a Renderer instance if the renderer was successfully created or
     // null if there was an error.
-    static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2);
+    static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2,
+                                            int width, int height);
 
     const SceneCamera& getCamera() const;
     const GLESv2Dispatch* getGLESv2Dispatch();
@@ -83,7 +86,7 @@ private:
     Renderer(const GLESv2Dispatch* gles2);
 
     // Initial helper to initialize the Renderer.
-    bool initialize();
+    bool initialize(int width, int height);
 
     // Helper to create a SceneObject from an obj file and texture.
     // |objFile| - Filename of the obj file to load.
@@ -98,6 +101,14 @@ private:
     SceneCamera mCamera;
 
     std::vector<std::unique_ptr<SceneObject>> mSceneObjects;
+
+    int mRenderWidth;
+    int mRenderHeight;
+
+    std::unique_ptr<RenderTarget> mRenderTargets[2];
+    std::unique_ptr<RenderTarget> mScreenRenderTarget;
+
+    std::vector<std::unique_ptr<Effect>> mEffectsChain;
 };
 
 }  // namespace virtualscene
