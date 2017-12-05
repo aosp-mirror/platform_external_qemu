@@ -516,8 +516,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     // Keep the singleton framebuffer pointer
     //
     s_theFrameBuffer = fb.release();
-    if (!useSubWindow) {
-        GL_LOG("Not using subwindow");
+    {
         // Nothing else to do - we're ready to rock!
         AutoLock lock(sGlobals->lock);
         sInitialized.store(true, std::memory_order_release);
