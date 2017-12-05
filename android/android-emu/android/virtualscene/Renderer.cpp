@@ -39,11 +39,50 @@ using namespace android::base;
 namespace android {
 namespace virtualscene {
 
+static constexpr char kScreenSpaceVertexShader[] = R"(
+attribute vec2 in_pos;
+attribute vec2 in_uv;
+
+varying vec2 uv;
+
+void main() {
+    uv = in_uv;
+    gl_Position = vec4(in_pos, 0.0, 1.0);
+}
+)";
+
+static constexpr char kSimpleFragmentShader[] = R"(
+precision mediump float;
+varying vec2 uv;
+
+uniform sampler2D tex_sampler;
+
+void main() {
+  gl_FragColor = texture2D(tex_sampler, uv);
+}
+)";
+
+static constexpr GLfloat kScreenQuadVerts[] = {
+    -1.f, -1.f,  0.f,  0.f,
+     1.f, -1.f,  1.f,  0.f,
+     1.f,  1.f,  1.f,  1.f,
+    -1.f,  1.f,  0.f,  1.f,
+};
+
+static constexpr GLubyte kScreenQuadIndices[] = {
+    0, 1, 2,
+    0, 2, 3,
+};
+
 Renderer::Renderer(const GLESv2Dispatch* gles2) : mGles2(gles2) {}
 
-Renderer::~Renderer() = default;
+Renderer::~Renderer() {
+    mGles2->glDeleteTextures(1, &mRenderTexture);
+    mGles2->glDeleteFramebuffers(1, &mRenderFramebuffer);
+    mGles2->glDeleteRenderbuffers(1, &mRenderbufferDepth);
+}
 
-bool Renderer::initialize() {
+bool Renderer::initialize(int width, int height) {
     const glm::mat4 translation =
             glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f));
 
@@ -65,13 +104,79 @@ bool Renderer::initialize() {
     decor->setTransform(translation);
     mSceneObjects.push_back(std::move(decor));
 
+    // Compile and setup shaders.
+    const GLuint vert = compileShader(GL_VERTEX_SHADER,
+                                      kScreenSpaceVertexShader);
+    const GLuint frag = compileShader(GL_FRAGMENT_SHADER,
+                                      kSimpleFragmentShader);
+
+    if (vert && frag) {
+        mScreenQuadProgram = linkShaders(vert, frag);
+    }
+
+    mGles2->glDeleteShader(vert);
+    mGles2->glDeleteShader(frag);
+
+    if (!mScreenQuadProgram) {
+        return false;
+    }
+
+    mPosLocation = getAttribLocation(mScreenQuadProgram, "in_pos");
+    mUvLocation = getAttribLocation(mScreenQuadProgram, "in_uv");
+    mTexSampler = getUniformLocation(mScreenQuadProgram, "tex_sampler");
+
+    mGles2->glGenFramebuffers(1, &mRenderFramebuffer);
+    mGles2->glBindFramebuffer(GL_FRAMEBUFFER, mRenderFramebuffer);
+
+    mGles2->glGenTextures(1, &mRenderTexture);
+    mGles2->glBindTexture(GL_TEXTURE_2D, mRenderTexture);
+    mGles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
+                         GL_UNSIGNED_BYTE, 0);
+
+    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    mGles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    mGles2->glGenRenderbuffers(1, &mRenderbufferDepth);
+    mGles2->glBindRenderbuffer(GL_RENDERBUFFER, mRenderbufferDepth);
+    mGles2->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
+                                  width, height);
+    mGles2->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                      GL_RENDERBUFFER, mRenderbufferDepth);
+
+    mGles2->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+                                   GL_TEXTURE_2D, mRenderTexture, 0);
+
+    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
+
+    if (mGles2->glCheckFramebufferStatus(GL_FRAMEBUFFER) !=
+            GL_FRAMEBUFFER_COMPLETE) {
+        return false;
+    }
+
+    mGles2->glGenBuffers(1, &mScreenQuadVerts);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, mScreenQuadVerts);
+    mGles2->glBufferData(GL_ARRAY_BUFFER, sizeof(kScreenQuadVerts),
+                         kScreenQuadVerts, GL_STATIC_DRAW);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    mGles2->glGenBuffers(1, &mScreenQuadIndices);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, mScreenQuadIndices);
+    mGles2->glBufferData(GL_ARRAY_BUFFER, sizeof(kScreenQuadIndices),
+                         kScreenQuadIndices, GL_STATIC_DRAW);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    mRenderWidth = width;
+    mRenderHeight = height;
+
     return true;
 }
 
-std::unique_ptr<Renderer> Renderer::create(const GLESv2Dispatch* gles2) {
+std::unique_ptr<Renderer> Renderer::create(const GLESv2Dispatch* gles2,
+                                           int width, int height) {
     std::unique_ptr<Renderer> renderer;
     renderer.reset(new Renderer(gles2));
-    if (!renderer || !renderer->initialize()) {
+    if (!renderer || !renderer->initialize(width, height)) {
         return nullptr;
     }
 
@@ -162,7 +267,9 @@ GLint Renderer::getUniformLocation(GLuint program, const char* name) {
     return location;
 }
 
-int64_t Renderer::render() {
+int64_t Renderer::render(int width, int height) {
+    mGles2->glBindFramebuffer(GL_FRAMEBUFFER, mRenderFramebuffer);
+    mGles2->glViewport(0, 0, mRenderWidth, mRenderHeight);
     mGles2->glEnable(GL_DEPTH_TEST);
     mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -175,7 +282,40 @@ int64_t Renderer::render() {
         sceneObject->render();
     }
 
+    mGles2->glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    mGles2->glViewport(0, 0, width, height);
     mGles2->glDisable(GL_DEPTH_TEST);
+
+    mGles2->glUseProgram(mScreenQuadProgram);
+
+    mGles2->glActiveTexture(GL_TEXTURE0);
+    mGles2->glUniform1i(mTexSampler, 0);
+    mGles2->glBindTexture(GL_TEXTURE_2D, mRenderTexture);
+
+    mGles2->glEnableVertexAttribArray(mPosLocation);
+    mGles2->glEnableVertexAttribArray(mUvLocation);
+
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, mScreenQuadVerts);
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mScreenQuadIndices);
+
+    mGles2->glVertexAttribPointer(mPosLocation, 2, GL_FLOAT, GL_FALSE,
+                                  4 * sizeof(GLfloat), 0);
+    mGles2->glVertexAttribPointer(mUvLocation, 2, GL_FLOAT, GL_FALSE,
+                                  4 * sizeof(GLfloat),
+                                  reinterpret_cast<void*>(2 * sizeof(GLfloat)));
+
+    mGles2->glDrawElements(GL_TRIANGLES,
+                           sizeof(kScreenQuadIndices) / sizeof(GLubyte),
+                           GL_UNSIGNED_BYTE, nullptr);
+
+    mGles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    mGles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    mGles2->glDisableVertexAttribArray(mUvLocation);
+    mGles2->glDisableVertexAttribArray(mPosLocation);
+
+    mGles2->glBindTexture(GL_TEXTURE_2D, 0);
+    mGles2->glUseProgram(0);
 
     return timestamp;
 }

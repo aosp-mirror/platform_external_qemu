@@ -154,7 +154,9 @@ int VirtualSceneCameraDevice::startCapturing(uint32_t pixelFormat,
     if (initializeEgl()) {
         auto context = makeEglCurrent();
         if (context.isValid()) {
-            if (VirtualScene::initialize(mGles2)) {
+            if (VirtualScene::initialize(mGles2,
+                                         frameWidth * 2,
+                                         frameHeight * 2)) {
                 succeeded = true;
             } else {
                 E("%s: VirtualScene initialize failed", __FUNCTION__);
@@ -211,7 +213,8 @@ int VirtualSceneCameraDevice::readFrame(ClientFrame* resultFrame,
 
     mGles2->glViewport(0, 0, mFramebufferWidth, mFramebufferHeight);
 
-    resultFrame->frame_time = VirtualScene::render();
+    resultFrame->frame_time = VirtualScene::render(mFramebufferWidth,
+                                                   mFramebufferHeight);
     mEglDispatch->eglSwapBuffers(mEglDisplay, mEglSurface);
     mGles2->glReadPixels(0, 0, mFramebufferWidth, mFramebufferHeight, GL_RGBA,
                          GL_UNSIGNED_BYTE, mFramebufferData.data());

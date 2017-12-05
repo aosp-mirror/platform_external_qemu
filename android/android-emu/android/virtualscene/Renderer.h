@@ -45,7 +45,8 @@ public:
     //
     // Returns a Renderer instance if the renderer was successfully created or
     // null if there was an error.
-    static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2);
+    static std::unique_ptr<Renderer> create(const GLESv2Dispatch* gles2,
+                                            int width, int height);
 
     const SceneCamera& getCamera() const;
     const GLESv2Dispatch* getGLESv2Dispatch();
@@ -75,7 +76,7 @@ public:
     // Render a frame.
     //
     // Returns the timestamp at which the frame was rendered.
-    int64_t render();
+    int64_t render(int width, int height);
 
 private:
     // Private constructor, use Renderer::create to create an
@@ -83,7 +84,7 @@ private:
     Renderer(const GLESv2Dispatch* gles2);
 
     // Initial helper to initialize the Renderer.
-    bool initialize();
+    bool initialize(int width, int height);
 
     // Helper to create a SceneObject from an obj file and texture.
     // |objFile| - Filename of the obj file to load.
@@ -98,6 +99,19 @@ private:
     SceneCamera mCamera;
 
     std::vector<std::unique_ptr<SceneObject>> mSceneObjects;
+
+    int mRenderWidth;
+    int mRenderHeight;
+
+    GLuint mRenderTexture;
+    GLuint mRenderbufferDepth;
+    GLuint mRenderFramebuffer;
+    GLuint mScreenQuadProgram;
+    GLuint mScreenQuadVerts;
+    GLuint mScreenQuadIndices;
+    GLuint mPosLocation;
+    GLuint mUvLocation;
+    GLuint mTexSampler;
 };
 
 }  // namespace virtualscene

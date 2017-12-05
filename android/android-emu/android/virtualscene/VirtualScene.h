@@ -38,7 +38,7 @@ public:
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
     //
     // Returns true if initialization succeeded.
-    static bool initialize(const GLESv2Dispatch* gles2);
+    static bool initialize(const GLESv2Dispatch* gles2, int width, int height);
 
     // Uninitialize virtual scene rendering, may be called on any thread, but
     // the same EGL context that was active when initialize() was called must be
@@ -52,7 +52,7 @@ public:
     // state, callers must be resilient to that.
     //
     // Returns the timestamp at which the frame is rendered.
-    static int64_t render();
+    static int64_t render(int width, int height);
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
