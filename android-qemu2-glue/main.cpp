@@ -1170,7 +1170,8 @@ extern "C" int main(int argc, char** argv) {
                                                      true);
             }
             if (skin_winsys_get_preferred_gles_apilevel() ==
-                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
+                System::get()->getProgramBitness() == 32) {
                 fc::setEnabledOverride(fc::GLESDynamicVersion, false);
             }
 
