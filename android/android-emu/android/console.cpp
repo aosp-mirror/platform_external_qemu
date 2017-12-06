@@ -53,6 +53,7 @@
 #include "config-host.h"
 
 #include <atomic>
+#include <vector>
 
 #include <assert.h>
 #include <ctype.h>
