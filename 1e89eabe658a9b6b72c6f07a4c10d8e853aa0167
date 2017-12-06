@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f709fa11_67ccce81",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-06T00:40:37Z",
+      "side": 1,
+      "message": "can we put these in a shared utility header like maybe Physics.h?  They seem kind of out of place here since virtual-sensor-page also uses them.",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 1
+      },
+      "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a66c7d3c_fbfebc15",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-06T00:40:37Z",
+      "side": 1,
+      "message": "I don\u0027t understand why we\u0027re doing all of these checks for how close the sliders are to the current values, and updating the target position and rotation on the model, but then later checking mIsUIModifyingPhysicalState and calling updateAccelWidgetAndSlidersFromModel?  Isn\u0027t at least the accel widget already updated?",
+      "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4cac99cc_9fd02e50",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-06T00:40:37Z",
+      "side": 1,
+      "message": "it looks like we build this same matrix twice - here and just below as newRotation.",
+      "range": {
+        "startLine": 274,
+        "startChar": 40,
+        "endLine": 276,
+        "endChar": 41
+      },
+      "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
