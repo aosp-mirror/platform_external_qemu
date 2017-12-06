@@ -141,11 +141,11 @@ public:
 #endif
                     std::string fileName = android::base::PathUtils::join(
                             snapshot::Snapshotter::get().saver().snapshot().
-                            dataDir(), "screenshot.png");
-                    savepng(fileName.c_str(), nChannels, width, height,
+                            dataDir(), "screenshot.bmp");
+                    savebmp(fileName.c_str(), nChannels, width, height,
                             pixels.data());
 #if SNAPSHOT_PROFILE > 1
-                    printf("Screenshot png write time %lld ms\n",
+                    printf("Screenshot image write time %lld ms\n",
                             (long long)(android::base::System::get()
                             ->getUnixTimeUs() - pngEncodeStart) / 1000);
 #endif
