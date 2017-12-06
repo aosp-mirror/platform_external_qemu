@@ -39,11 +39,73 @@ using namespace android::base;
 namespace android {
 namespace virtualscene {
 
+static constexpr char kSimpleFragmentShader[] = R"(
+precision mediump float;
+uniform vec2 resolution;
+
+uniform sampler2D tex_sampler;
+
+void main() {
+  gl_FragColor = texture2D(tex_sampler, gl_FragCoord.xy * resolution);
+}
+)";
+
+static constexpr char kFxaaFragmentShader[] = R"(
+precision mediump float;
+uniform sampler2D tex_sampler;
+uniform vec2 resolution;
+
+#define FXAA_MUL  (1.0/8.0)
+#define FXAA_MIN  (1.0/32.0)
+#define FXAA_SPAN 8.0
+
+void main() {
+  vec3 rgbNW = texture2D(tex_sampler, (gl_FragCoord.xy + vec2(-1.0, -1.0)) * resolution).xyz;
+  vec3 rgbNE = texture2D(tex_sampler, (gl_FragCoord.xy + vec2( 1.0, -1.0)) * resolution).xyz;
+  vec3 rgbM = texture2D(tex_sampler, gl_FragCoord.xy * resolution).xyz;
+  vec3 rgbSW = texture2D(tex_sampler, (gl_FragCoord.xy + vec2(-1.0,  1.0)) * resolution).xyz;
+  vec3 rgbSE = texture2D(tex_sampler, (gl_FragCoord.xy + vec2( 1.0,  1.0)) * resolution).xyz;
+
+  vec3 luma = vec3(0.299, 0.587, 0.114);
+  float lumaNW = dot(rgbNW, luma);
+  float lumaNE = dot(rgbNE, luma);
+  float lumaM = dot(rgbM, luma);
+  float lumaSW = dot(rgbSW, luma);
+  float lumaSE = dot(rgbSE, luma);
+
+  vec2 dir = vec2(-((lumaNW + lumaNE) - (lumaSW + lumaSE)),
+                  ((lumaNW + lumaSW) - (lumaNE + lumaSE)));
+
+  float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE) * (0.25 * FXAA_MUL), FXAA_MIN);
+
+  float lumaMin = min(lumaM, min(min(lumaNW, lumaNE), min(lumaSW, lumaSE)));
+  float lumaMax = max(lumaM, max(max(lumaNW, lumaNE), max(lumaSW, lumaSE)));
+
+  float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
+
+  dir = min(vec2( FXAA_SPAN, FXAA_SPAN), max(vec2(-FXAA_SPAN, -FXAA_SPAN), dir * rcpDirMin)) * resolution;
+
+  vec4 rgbA = 0.5 * (texture2D(tex_sampler, gl_FragCoord.xy * resolution + dir * (1.0 / 3.0 - 0.5)) +
+                     texture2D(tex_sampler, gl_FragCoord.xy * resolution + dir * (2.0 / 3.0 - 0.5)));
+  vec4 rgbB = rgbA * 0.5 + 0.25 * (texture2D(tex_sampler, gl_FragCoord.xy * resolution + dir * (0.0 / 3.0 - 0.5)) +
+                                   texture2D(tex_sampler, gl_FragCoord.xy * resolution + dir * (3.0 / 3.0 - 0.5)));
+  float lumaB = dot(rgbB.xyz, luma);
+
+  if ((lumaB < lumaMin) || (lumaB > lumaMax)) {
+      gl_FragColor = rgbA;
+  } else {
+      gl_FragColor = rgbB;
+  }
+}
+)";
+
+static constexpr int kSuperSampleMultiple = 2;
+
 Renderer::Renderer(const GLESv2Dispatch* gles2) : mGles2(gles2) {}
 
 Renderer::~Renderer() = default;
 
-bool Renderer::initialize() {
+bool Renderer::initialize(int width, int height) {
     const glm::mat4 translation =
             glm::translate(glm::mat4(), glm::vec3(0.0f, -1.0f, 0.0f));
 
@@ -65,13 +127,30 @@ bool Renderer::initialize() {
     decor->setTransform(translation);
     mSceneObjects.push_back(std::move(decor));
 
+    mRenderWidth = width;
+    mRenderHeight = height;
+
+    mScreenRenderTarget = RenderTarget::createDefault(mGles2, width, height);
+    mRenderTargets[0] = RenderTarget::createTextureTarget(mGles2,
+            width * kSuperSampleMultiple, height * kSuperSampleMultiple);
+    mRenderTargets[1] = RenderTarget::createTextureTarget(mGles2,
+            width * kSuperSampleMultiple, height * kSuperSampleMultiple);
+
+    std::unique_ptr<Effect> fxaaEffect = Effect::createEffect(*this,
+            kFxaaFragmentShader);
+    mEffectsChain.push_back(std::move(fxaaEffect));
+    std::unique_ptr<Effect> blitEffect = Effect::createEffect(*this,
+            kSimpleFragmentShader);
+    mEffectsChain.push_back(std::move(blitEffect));
+
     return true;
 }
 
-std::unique_ptr<Renderer> Renderer::create(const GLESv2Dispatch* gles2) {
+std::unique_ptr<Renderer> Renderer::create(const GLESv2Dispatch* gles2,
+                                           int width, int height) {
     std::unique_ptr<Renderer> renderer;
     renderer.reset(new Renderer(gles2));
-    if (!renderer || !renderer->initialize()) {
+    if (!renderer || !renderer->initialize(width, height)) {
         return nullptr;
     }
 
@@ -163,6 +242,8 @@ GLint Renderer::getUniformLocation(GLuint program, const char* name) {
 }
 
 int64_t Renderer::render() {
+    mRenderTargets[0]->bind();
+
     mGles2->glEnable(GL_DEPTH_TEST);
     mGles2->glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     mGles2->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -176,6 +257,21 @@ int64_t Renderer::render() {
     }
 
     mGles2->glDisable(GL_DEPTH_TEST);
+
+    assert(mEffectsChain.size() > 0);
+    for (int i = 0; i < mEffectsChain.size(); i++) {
+        int superSampleMultiple = kSuperSampleMultiple;
+        if (i == mEffectsChain.size() - 1) {
+            superSampleMultiple = 1;
+            mScreenRenderTarget->bind();
+        } else {
+            mRenderTargets[(i + 1) % 2]->bind();
+        }
+
+        mEffectsChain[i]->render(mRenderTargets[i % 2]->getTexture(),
+                                 superSampleMultiple * mRenderWidth,
+                                 superSampleMultiple * mRenderHeight);
+    }
 
     return timestamp;
 }

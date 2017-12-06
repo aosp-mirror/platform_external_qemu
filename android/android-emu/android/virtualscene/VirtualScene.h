@@ -38,7 +38,7 @@ public:
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
     //
     // Returns true if initialization succeeded.
-    static bool initialize(const GLESv2Dispatch* gles2);
+    static bool initialize(const GLESv2Dispatch* gles2, int width, int height);
 
     // Uninitialize virtual scene rendering, may be called on any thread, but
     // the same EGL context that was active when initialize() was called must be

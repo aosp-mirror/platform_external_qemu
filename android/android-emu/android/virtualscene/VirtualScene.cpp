@@ -34,14 +34,15 @@ android::base::LazyInstance<android::base::Lock> VirtualScene::mLock =
         LAZY_INSTANCE_INIT;
 Renderer* VirtualScene::mImpl = nullptr;
 
-bool VirtualScene::initialize(const GLESv2Dispatch* gles2) {
+bool VirtualScene::initialize(const GLESv2Dispatch* gles2,
+                              int width, int height) {
     AutoLock lock(mLock.get());
     if (mImpl) {
         E("VirtualScene already initialized");
         return false;
     }
 
-    std::unique_ptr<Renderer> renderer = Renderer::create(gles2);
+    std::unique_ptr<Renderer> renderer = Renderer::create(gles2, width, height);
     if (!renderer) {
         E("VirtualScene failed to construct");
         return false;

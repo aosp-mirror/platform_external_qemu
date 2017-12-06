@@ -46,9 +46,6 @@ Texture::~Texture() {
 
 std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
                                        const char* filename) {
-    GLint maxTextureSize = 0;
-    gles2->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-
     std::vector<uint8_t> buffer;
     uint32_t width = 0;
     uint32_t height = 0;
@@ -56,10 +53,9 @@ std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
         return nullptr;
     }
 
-    if (width == 0 || height == 0 || width > maxTextureSize ||
-        height > maxTextureSize) {
+    if (!isTextureSizeValid(gles2, width, height)) {
         E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
-          height, maxTextureSize);
+          height, GL_MAX_TEXTURE_SIZE);
         return nullptr;
     }
 
@@ -69,8 +65,39 @@ std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
     gles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
                         GL_UNSIGNED_BYTE, buffer.data());
     gles2->glGenerateMipmap(GL_TEXTURE_2D);
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                           GL_LINEAR_MIPMAP_LINEAR);
+    gles2->glBindTexture(GL_TEXTURE_2D, 0);
+
+#ifdef DEBUG
+    // Only check for GL error on debug builds to avoid a potential synchronous
+    // flush.
+    const GLenum error = gles2->glGetError();
+    if (error != GL_NO_ERROR) {
+        E("%s: GL error %d", __FUNCTION__, error);
+        return nullptr;
+    }
+#endif
+
+    return std::unique_ptr<Texture>(new Texture(gles2, textureId));
+}
+
+std::unique_ptr<Texture> Texture::createEmpty(const GLESv2Dispatch* gles2,
+                                            uint32_t width, uint32_t height) {
+    if (!isTextureSizeValid(gles2, width, height)) {
+        E("%s: Invalid texture size, %d x %d, GL_MAX_TEXTURE_SIZE = %d", width,
+          height, GL_MAX_TEXTURE_SIZE);
+        return nullptr;
+    }
+
+    GLuint textureId;
+    gles2->glGenTextures(1, &textureId);
+    gles2->glBindTexture(GL_TEXTURE_2D, textureId);
+    gles2->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+                        GL_UNSIGNED_BYTE, 0);
+    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    gles2->glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     gles2->glBindTexture(GL_TEXTURE_2D, 0);
 
 #ifdef DEBUG
@@ -88,6 +115,15 @@ std::unique_ptr<Texture> Texture::load(const GLESv2Dispatch* gles2,
 
 GLuint Texture::getTextureId() const {
     return mTextureId;
+}
+
+bool Texture::isTextureSizeValid(const GLESv2Dispatch* gles2,
+                                 uint32_t width,
+                                 uint32_t height) {
+    GLint maxTextureSize = 0;
+    gles2->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    return width != 0 && height != 0 && width <= maxTextureSize &&
+            height <= maxTextureSize;
 }
 
 bool Texture::loadPNG(const char* filename,

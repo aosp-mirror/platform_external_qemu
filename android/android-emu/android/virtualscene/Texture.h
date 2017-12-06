@@ -50,12 +50,34 @@ public:
     static std::unique_ptr<Texture> load(const GLESv2Dispatch* gles2,
                                          const char* filename);
 
+    // Create an OpenGL texture with the given width and height with storage
+    // allocated, but no data loaded.
+    //
+    // The lifetime of the OpenGL texture is determined by the lifetime of the
+    // Texture class; the texture id will be released when the Texture is
+    // destroyed.
+    //
+    // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
+    // |width| - Requested texture width.
+    // |height| - Requested texture height.
+    //
+    // Returns a Texture instance if the texture could be created or null if
+    // there was an error.
+    static std::unique_ptr<Texture> createEmpty(const GLESv2Dispatch* gles2,
+                                                uint32_t width,
+                                                uint32_t height);
+
     // Returns the texture id of the loaded texture.
     GLuint getTextureId() const;
 
 private:
     // Private constructor, use Texture::load to create an instance.
     Texture(const GLESv2Dispatch* gles2, GLuint textureId);
+
+    // Checks whether the given height and width are appropriate for a texture.
+    static bool isTextureSizeValid(const GLESv2Dispatch* gles2,
+                                   uint32_t width,
+                                   uint32_t height);
 
     static bool loadPNG(const char* filename,
                         std::vector<uint8_t>& buffer,
