@@ -1,0 +1,124 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2f4d5526_4651489c",
+        "filename": "android/android-emu/android/virtualscene/Effect.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 92,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-06T01:20:38Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "revId": "21b8be685f549e7b7c98ea7bb505f27b639d90da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be8e9bb0_c48c8d79",
+        "filename": "android/android-emu/android/virtualscene/Effect.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-06T01:20:38Z",
+      "side": 1,
+      "message": "nit: trailing whitespace (and below)",
+      "revId": "21b8be685f549e7b7c98ea7bb505f27b639d90da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efb231fd_fdd105fa",
+        "filename": "android/android-emu/android/virtualscene/RenderTarget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-06T01:20:38Z",
+      "side": 1,
+      "message": "This is GLES3 only IIRC. For GLES2 just replace with no-op since only one write attachment is suppored.",
+      "range": {
+        "startLine": 73,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 41
+      },
+      "revId": "21b8be685f549e7b7c98ea7bb505f27b639d90da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a312dc75_a44383c9",
+        "filename": "android/android-emu/android/virtualscene/RenderTarget.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-06T01:20:38Z",
+      "side": 1,
+      "message": "Change to be more descriptive of the glBindFramebuffer / glViewport underneath?",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 14
+      },
+      "revId": "21b8be685f549e7b7c98ea7bb505f27b639d90da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cad0cbc0_55c660fc",
+        "filename": "android/android-emu/android/virtualscene/RenderTarget.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-06T01:20:38Z",
+      "side": 1,
+      "message": "nit: trailing whitespace (and in other files)",
+      "revId": "21b8be685f549e7b7c98ea7bb505f27b639d90da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5412f342_9f437c90",
+        "filename": "android/android-emu/android/virtualscene/Texture.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-06T01:20:38Z",
+      "side": 1,
+      "message": "? vs gles2-\u003e?",
+      "range": {
+        "startLine": 67,
+        "startChar": 4,
+        "endLine": 67,
+        "endChar": 10
+      },
+      "revId": "21b8be685f549e7b7c98ea7bb505f27b639d90da",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
