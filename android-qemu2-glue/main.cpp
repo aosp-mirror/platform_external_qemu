@@ -1209,7 +1209,8 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
-        shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
+        shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
+                                  System::get()->getProgramBitness() == 32;
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
 
