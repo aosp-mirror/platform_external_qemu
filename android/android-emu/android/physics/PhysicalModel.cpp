@@ -495,6 +495,15 @@ void PhysicalModelImpl::getTransform(
         float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
         int64_t* out_timestamp) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
+
+    // Note: when getting the transform, we always update the current time
+    //       so that consumers of this transform get the most up-to-date
+    //       value possible, and so that transform timestamps progress even when
+    //       sensors are not polling.
+    const DurationNs now_ns =
+            looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+    setCurrentTime(now_ns);
+
     const vec3 position = getParameterPosition(PARAMETER_VALUE_TYPE_CURRENT);
     *out_translation_x = position.x;
     *out_translation_y = position.y;
