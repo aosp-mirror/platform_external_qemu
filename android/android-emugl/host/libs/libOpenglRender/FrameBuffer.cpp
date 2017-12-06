@@ -312,6 +312,7 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
     }
 
     fb->m_fastBlitSupported =
+        System::get()->getProgramBitness() != 32 &&
         (dispatchMaxVersion > GLES_DISPATCH_MAX_VERSION_2) &&
         (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
          // TODO: Swiftshader issues 0x502
