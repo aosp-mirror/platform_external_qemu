@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b5a4268_47da1377",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T16:50:47Z",
+      "side": 1,
+      "message": "In the current CL, there\u0027s lots of friend classes and shared_ptrs due to the Meshes/Materials doing double duty as abstract descriptions of how SceneObjects are rendererd in addition to concrete GL rendering state (comments on what I think could work out better are throughout).\n\nI believe we talked out earlier that the Renderer would create the RenderCommands, while SceneObjects would have meshes/materials that are specified at a renderer-agnostic level. That would fix the current issues, and allow us to use different rendering backends underneath.",
+      "range": {
+        "startLine": 10,
+        "startChar": 28,
+        "endLine": 10,
+        "endChar": 72
+      },
+      "revId": "83baa21ec8b9018beb1eb30d5316a7e987647c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c311ead_f4172e47",
+        "filename": "android/android-emu/android/virtualscene/Effect.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T16:50:47Z",
+      "side": 1,
+      "message": "We could also move these issuances of GL calls to Renderer if Renderer explicitly manages the creation of Effects\u0027 materials and meshes.\n\nThat seems difficult at the moment though since Effects seem fundamentally based on fragment shader sources |frag|. However, we could also replace that with an enum and make Renderer own all the Effect-specific shaders as well.",
+      "range": {
+        "startLine": 43,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 70
+      },
+      "revId": "83baa21ec8b9018beb1eb30d5316a7e987647c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e82c4e2f_8b503305",
+        "filename": "android/android-emu/android/virtualscene/Effect.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T16:50:47Z",
+      "side": 1,
+      "message": "update comment?",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 71
+      },
+      "revId": "83baa21ec8b9018beb1eb30d5316a7e987647c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f78288b_09ac880a",
+        "filename": "android/android-emu/android/virtualscene/Mesh.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T16:50:47Z",
+      "side": 1,
+      "message": "Let\u0027s try to keep the issuing of GL calls restricted to Renderer. I understand that this actually triggers if the shared_ptr is last-refed, but with explicit unloading of scene objects, we will be able to release GL resources in the Renderer class as well.",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 37,
+        "endChar": 1
+      },
+      "revId": "83baa21ec8b9018beb1eb30d5316a7e987647c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b601c8df_50e0fbe8",
+        "filename": "android/android-emu/android/virtualscene/Mesh.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T16:50:47Z",
+      "side": 1,
+      "message": "If the Renderer manages lifetime of Mesh / Material objects, we might just make them private internal structs to Renderer, so there\u0027s no need for the \"friend\" keyword, which at least for me is really confusing.",
+      "range": {
+        "startLine": 33,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 26
+      },
+      "revId": "83baa21ec8b9018beb1eb30d5316a7e987647c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4071fe62_0440147c",
+        "filename": "android/android-emu/android/virtualscene/Renderer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 318,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T16:50:47Z",
+      "side": 1,
+      "message": "Looks like from here that scene objects are 1:1 with all of their instances, so if we go with an explicit unload function for scene objects, it will also remove their instances.",
+      "range": {
+        "startLine": 315,
+        "startChar": 0,
+        "endLine": 318,
+        "endChar": 78
+      },
+      "revId": "83baa21ec8b9018beb1eb30d5316a7e987647c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1cedffae_fb5b416d",
+        "filename": "android/android-emu/android/virtualscene/Renderer.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T16:50:47Z",
+      "side": 1,
+      "message": "Something might be up here in regards to ownership/lifetime of materials and meshes.\n\nIn the CL, it\u0027s all shared_ptrs with the apparent meaning being that once we delete all instances of a particular material or mesh, the underlying GL resource also gets freed.\n\nBut, it looks like to create the GL resources, it\u0027s based on an explicit call in Renderer, or in Effect.\n\nI\u0027m also not a big fan of shared_ptr for its implicit behavior. shared_ptr also introduces lots of synchronization and since it\u0027s working in pointers, is not cache friendly.\n\nFor something simpler to start with, since we\u0027re currently just dealing with the one scene OBJ, can we make them non shared_ptr and have an explicit function to unload materials and meshes? Perhaps we can have a method to explicitly unload a SceneObject or Effect if they are currently 1:1 with resources; that way, when the user wants to load a different scene for AR, we just explicitly unload the current set of SceneObjects and load a different set.",
+      "range": {
+        "startLine": 181,
+        "startChar": 4,
+        "endLine": 181,
+        "endChar": 19
+      },
+      "revId": "83baa21ec8b9018beb1eb30d5316a7e987647c54",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
