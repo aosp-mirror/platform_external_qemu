@@ -16,6 +16,8 @@
 
 #include "android/base/StringView.h"
 
+#include <functional>
+
 namespace emugl {
     class Renderer;
 }
@@ -27,6 +29,9 @@ bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL);
 // The following one is for testing only
 bool captureScreenshot(emugl::Renderer* renderer,
+                       std::function<void(int* w, int* h, int* lineSize,
+                            int* bytesPerPixel, uint8_t** frameBufferData)>
+                            getFrameBuffer,
                        android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL);
 
