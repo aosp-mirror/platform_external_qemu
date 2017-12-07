@@ -101,6 +101,19 @@ public:
     void getTexGeniv(GLenum coord, GLenum pname, GLint* params);
     void getTexGenfv(GLenum coord, GLenum pname, GLfloat* params);
 
+    void materialf(GLenum face, GLenum pname, GLfloat param);
+    void materialfv(GLenum face, GLenum pname, const GLfloat* params);
+    void getMaterialfv(GLenum face, GLenum pname, GLfloat* params);
+
+    void lightModelf(GLenum pname, GLfloat param);
+    void lightModelfv(GLenum pname, const GLfloat* params);
+    void lightf(GLenum light, GLenum pname, GLfloat param);
+    void lightfv(GLenum light, GLenum pname, const GLfloat* params);
+    void getLightfv(GLenum light, GLenum pname, GLfloat* params);
+
+    void multiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q);
+    void normal3f(GLfloat nx, GLfloat ny, GLfloat nz);
+
     void enableClientState(GLenum clientState);
     void disableClientState(GLenum clientState);
 
@@ -130,11 +143,43 @@ public:
     glm::mat4 getModelviewMatrix();
     glm::mat4 getTextureMatrix();
 
+    struct Material {
+        GLfloat ambient[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+        GLfloat diffuse[4] = { 0.8f, 0.8f, 0.8f, 1.0f };
+        GLfloat specular[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat emissive[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat specularExponent = 0.0f;
+    };
+
+    struct LightModel {
+        GLfloat color[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+        bool twoSided = false;
+    };
+
+    struct Light {
+        GLfloat ambient[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat diffuse[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat specular[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
+        GLfloat position[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
+        GLfloat direction[3] = { 0.0f, 0.0f, -1.0f };
+        GLfloat spotlightExponent = 0.0f;
+        GLfloat spotlightCutoffAngle = 180.0f;
+        GLfloat attenuationConst = 1.0f;
+        GLfloat attenuationLinear = 0.0f;
+        GLfloat attenuationQuadratic = 0.0f;
+    };
+
+    static constexpr int kMaxLights = 8;
+    const Material& getMaterialInfo();
+    const LightModel& getLightModelInfo();
+    const Light& getLightInfo(uint32_t lightIndex);
+
     virtual void onSave(android::base::Stream* stream) const override;
+
 protected:
     virtual void postLoadRestoreCtx() override;
 
-    static const GLint kMaxTextureUnits = 8;
+    static const GLint kMaxTextureUnits = 4;
     static const GLint kMaxMatrixStackSize = 16;
 
     bool needConvert(GLESConversionArrays& fArrs,GLint first,GLsizei count,GLenum type,const GLvoid* indices,bool direct,GLESpointer* p,GLenum array_id);
@@ -174,7 +219,7 @@ private:
 
     GLValTyped mColor;
     GLValTyped mNormal;
-    std::vector<GLVal> mMultiTexCoord;
+    GLVal mMultiTexCoord[kMaxTextureUnits] = {};
 
     TexUnitEnvs mTexUnitEnvs;
     TexGens mTexGens;
@@ -185,6 +230,10 @@ private:
     glm::mat4& currMatrix();
     MatrixStack& currMatrixStack();
     void restoreMatrixStack(const MatrixStack& matrices);
+
+    Material mMaterial;
+    LightModel mLightModel;
+    Light mLights[kMaxLights] = {};
 
     // Core profile stuff
     CoreProfileEngine*    m_coreProfileEngine = nullptr;
