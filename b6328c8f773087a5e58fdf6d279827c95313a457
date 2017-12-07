@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "83e037b4_8b650935",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-12-07T16:00:58Z",
+      "side": 1,
+      "message": "I could use a little more description here",
+      "range": {
+        "startLine": 7,
+        "startChar": 11,
+        "endLine": 8,
+        "endChar": 0
+      },
+      "revId": "b6328c8f773087a5e58fdf6d279827c95313a457",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e42fd4bd_a4ee1c2a",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 766,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-12-07T16:00:58Z",
+      "side": 1,
+      "message": "separate line",
+      "range": {
+        "startLine": 766,
+        "startChar": 25,
+        "endLine": 766,
+        "endChar": 32
+      },
+      "revId": "b6328c8f773087a5e58fdf6d279827c95313a457",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
