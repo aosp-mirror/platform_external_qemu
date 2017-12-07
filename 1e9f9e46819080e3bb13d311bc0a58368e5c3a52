@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "368e0dff_3d67ed3e",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-07T02:38:37Z",
+      "side": 1,
+      "message": "hmm... is there a lock for it? I am trying to avoid registerUpdateListener() as it does not fit this usage case perfectly.",
+      "parentUuid": "f9965651_55a01c9c",
+      "range": {
+        "startLine": 63,
+        "startChar": 8,
+        "endLine": 64,
+        "endChar": 25
+      },
+      "revId": "1e9f9e46819080e3bb13d311bc0a58368e5c3a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "77bc22a1_a29f768e",
         "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-12-07T01:10:18Z",
       "side": 1,
       "message": "please document the logic of the guest rendering case as to what kinds of inputs are expected. if we are use guest rendering, what are the assumed pixel formats? expected lineSizes and bpps?",
+      "range": {
+        "startLine": 71,
+        "startChar": 14,
+        "endLine": 71,
+        "endChar": 21
+      },
+      "revId": "1e9f9e46819080e3bb13d311bc0a58368e5c3a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f47508c4_8c337f91",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-07T02:38:37Z",
+      "side": 1,
+      "message": "will do",
+      "parentUuid": "77bc22a1_a29f768e",
       "range": {
         "startLine": 71,
         "startChar": 14,
