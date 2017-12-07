@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2840260a_7457b726",
+        "filename": "android/android-emu/android/skin/qt/accelerometer-3d-widget.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-07T19:50:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f709fa11_67ccce81",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 1
+      },
+      "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a66c7d3c_fbfebc15",
         "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
         "patchSetId": 3
@@ -36,6 +60,24 @@
       "writtenOn": "2017-12-06T00:40:37Z",
       "side": 1,
       "message": "I don\u0027t understand why we\u0027re doing all of these checks for how close the sliders are to the current values, and updating the target position and rotation on the model, but then later checking mIsUIModifyingPhysicalState and calling updateAccelWidgetAndSlidersFromModel?  Isn\u0027t at least the accel widget already updated?",
+      "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a616368_e823fe3c",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-07T19:50:25Z",
+      "side": 1,
+      "message": "Ah, updateAccelWidgetAndSlidersFromModel isn\u0027t correct anymore.  onTargetStateChange() updates the accel widget for the target state change, and the other function is more like updateUIFromModelCurrentState, which updates the sliders based on the current state in the physical model.",
+      "parentUuid": "a66c7d3c_fbfebc15",
       "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
@@ -62,6 +104,30 @@
       "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc2d3592_67e90ee4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-07T19:50:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4cac99cc_9fd02e50",
+      "range": {
+        "startLine": 274,
+        "startChar": 40,
+        "endLine": 276,
+        "endChar": 41
+      },
+      "revId": "1e89eabe658a9b6b72c6f07a4c10d8e853aa0167",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
