@@ -22,6 +22,29 @@
       "revId": "1e9f9e46819080e3bb13d311bc0a58368e5c3a52",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "77bc22a1_a29f768e",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T01:10:18Z",
+      "side": 1,
+      "message": "please document the logic of the guest rendering case as to what kinds of inputs are expected. if we are use guest rendering, what are the assumed pixel formats? expected lineSizes and bpps?",
+      "range": {
+        "startLine": 71,
+        "startChar": 14,
+        "endLine": 71,
+        "endChar": 21
+      },
+      "revId": "1e9f9e46819080e3bb13d311bc0a58368e5c3a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
