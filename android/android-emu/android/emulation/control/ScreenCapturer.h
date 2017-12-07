@@ -16,6 +16,8 @@
 
 #include "android/base/StringView.h"
 
+#include <functional>
+
 namespace emugl {
     class Renderer;
 }
@@ -26,7 +28,13 @@ namespace emulation {
 bool captureScreenshot(android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL);
 // The following one is for testing only
+// It loads texture from renderer if renderer is not null.
+// (-gpu host, swiftshader_indirect, angle_indirect)
+// Otherwise loads texture from getFrameBuffer function. (-gpu guest)
 bool captureScreenshot(emugl::Renderer* renderer,
+                       std::function<void(int* w, int* h, int* lineSize,
+                            int* bytesPerPixel, uint8_t** frameBufferData)>
+                            getFrameBuffer,
                        android::base::StringView outputDirectoryPath,
                        std::string* outputFilepath = NULL);
 
