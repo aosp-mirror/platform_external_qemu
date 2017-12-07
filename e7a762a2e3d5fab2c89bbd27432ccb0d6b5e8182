@@ -1,0 +1,280 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1a1d8d1e_07f7a336",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "nit: trailing whitespace (and in other places)",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 4
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06e5d55f_c1e8e5aa",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 366,
+        "startChar": 0,
+        "endLine": 366,
+        "endChar": 27
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c096189_be29496d",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "what is it for? do we always use emptyqueuecond?",
+      "range": {
+        "startLine": 104,
+        "startChar": 58,
+        "endLine": 105,
+        "endChar": 4
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ad3c03df_e3f7b70c",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "This looks like youre accessing a private member of PacketQueue from outside it.",
+      "range": {
+        "startLine": 112,
+        "startChar": 32,
+        "endLine": 112,
+        "endChar": 54
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8fef936b_f3378f7f",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "So it looks like\n\n1. on a change in getSerial (or if we are done with our work (i guess that\u0027s mpacketPending\n2. we try to get more packets from the queue (inner do loop)\n3. we signal a cv (why?) if the queue is empty\n4. we try to get packets from the queue anyway\n5. the \u0027valid data\u0027 condition is pkd.data \u003d\u003d PacketQueue.mFlushPkt.data\n\nI feel like there are a lot of implicit assumptions overall here, especially about how packetqueues work and how we signal that there is extra work available.\n\nAlso, relying on a global static for the packetqueue mflushpkt makes me feel like it is introducing a lot of coupling throughout the system---what is it for anyway?\n\nCan you help clarify what\u0027s going on in this section of code? For example, I\u0027d like to have the functions for queue availability / emptiness / valid work be explicitly spelled out into separate functions so it\u0027s easier to tell what\u0027s going on and change it in the future.\n\nAlso, have you considered using a WorkerThread or MessageQueue? I get that you also have this part where an external user is waiting on the CV here that needs to get signaled, but that can also be packaged up by itself separaetly. It would be great for readability and maintainability if we could simplify it down to one of those classes. Though as it is, I don\u0027t really know if it could be simplified. But it is worth the effort here.",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 0
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed669c4a_69754db2",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "It seems more easier to make this a WorkerThread with two different work items, an audio decode and a video decode. We\u0027d just enqueue { Type::Audio } or { Type::Video, ...} to it.",
+      "range": {
+        "startLine": 57,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 19
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56d71e2c_99f51679",
+        "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "two / only",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 3
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b054583_8f1f5b2c",
+        "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "remove",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 38
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "09b98e70_fe28f614",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "what is the serial for?",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 5
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5c7a85aa_6fe868ef",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "what for?",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 23
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eaa7aef1_aba3fc45",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "this is public so no m prefix. But it also feels pretty mysterious since everything seems synchronized on it.\n\nCan you document more on what this is suppposed to do? Is it for right timing or something?\n\nAren\u0027t we also supposed to access this under a lock? If so, what locks are involved and who can access it concurrently?",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 29
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2334fd59_b9407335",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T07:12:26Z",
+      "side": 1,
+      "message": "is there some other way to do this than using friend?",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 28
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
