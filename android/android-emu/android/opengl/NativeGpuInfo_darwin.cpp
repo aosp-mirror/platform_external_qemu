@@ -87,6 +87,7 @@ static auto GetGPUInfoMac() {
 }
 
 void getGpuInfoListNative(GpuInfoList* out) {
+    fprintf(stderr, "%s: call\n", __func__);
     // This call initializes a pixel format,
     // which should update the IOKit stuff to the
     // correct GPU that will actually be used
@@ -101,6 +102,7 @@ void getGpuInfoListNative(GpuInfoList* out) {
     for (const auto& elt : gpulist) {
         snprintf(vendoridbuf, sizeof(vendoridbuf), "%04x", elt.first);
         snprintf(deviceidbuf, sizeof(deviceidbuf), "%04x", elt.second);
+        fprintf(stderr, "%s: vendor/device id of gpu: %s %s\n", __func__, vendoridbuf, deviceidbuf);
         out->infos.emplace_back(
                 std::string(vendoridbuf), // make -> vendorid
                 std::string(deviceidbuf), // model -> deviceid
@@ -108,4 +110,6 @@ void getGpuInfoListNative(GpuInfoList* out) {
                 "", "", "" // revision, version, renderer blank
                 );
     }
+
+    fprintf(stderr, "%s: number of items in gpu list: %zu\n", __func__, gpulist.size());
 }

@@ -69,7 +69,11 @@ bool androidEmuglConfigInit(EmuglConfig* config,
                       !strcmp(gpuChoice, "host") ||
                       !strcmp(gpuChoice, "on"))) {
 
-         onBlacklist = isHostGpuBlacklisted();
+        if (globalGpuInfoList().infos.size() == 0) {
+            fprintf(stderr, "%s: no gpu info detected, blacklist\n", __func__);
+            onBlacklist = true;
+        }
+        onBlacklist = isHostGpuBlacklisted();
     }
 
     if (avdName) {
