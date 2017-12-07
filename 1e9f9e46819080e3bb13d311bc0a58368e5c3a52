@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9965651_55a01c9c",
+        "filename": "android/android-emu/android/emulation/control/ScreenCapturer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T01:03:38Z",
+      "side": 1,
+      "message": "I think you need to use registerUpdateListener() and call this from the callback, or you might get concurrent read/write.",
+      "range": {
+        "startLine": 63,
+        "startChar": 8,
+        "endLine": 64,
+        "endChar": 25
+      },
+      "revId": "1e9f9e46819080e3bb13d311bc0a58368e5c3a52",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
