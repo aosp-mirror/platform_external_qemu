@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "07f130c4_7db9cd53",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-07T17:04:02Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "83e037b4_8b650935",
+      "range": {
+        "startLine": 7,
+        "startChar": 11,
+        "endLine": 8,
+        "endChar": 0
+      },
+      "revId": "b6328c8f773087a5e58fdf6d279827c95313a457",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e42fd4bd_a4ee1c2a",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 2
