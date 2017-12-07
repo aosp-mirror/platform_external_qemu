@@ -160,6 +160,29 @@
       "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3475990f_0b473d7b",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 705,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:48:20Z",
+      "side": 1,
+      "message": "Unused variable.",
+      "range": {
+        "startLine": 703,
+        "startChar": 4,
+        "endLine": 705,
+        "endChar": 96
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
