@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6dcb75e1_e29655cf",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "1a1d8d1e_07f7a336",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 4
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "06e5d55f_c1e8e5aa",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50667d1e_d7535efe",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 366,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "removed",
+      "parentUuid": "06e5d55f_c1e8e5aa",
+      "range": {
+        "startLine": 366,
+        "startChar": 0,
+        "endLine": 366,
+        "endChar": 27
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -163,6 +211,30 @@
     },
     {
       "key": {
+        "uuid": "7e6a84d8_0669e46b",
+        "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "56d71e2c_99f51679",
+      "range": {
+        "startLine": 38,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 3
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b054583_8f1f5b2c",
         "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
         "patchSetId": 4
@@ -186,6 +258,30 @@
     },
     {
       "key": {
+        "uuid": "25f9a9c7_1d58c7f2",
+        "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8b054583_8f1f5b2c",
+      "range": {
+        "startLine": 46,
+        "startChar": 0,
+        "endLine": 46,
+        "endChar": 38
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "09b98e70_fe28f614",
         "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.cpp",
         "patchSetId": 4
@@ -197,6 +293,30 @@
       "writtenOn": "2017-12-07T07:12:26Z",
       "side": 1,
       "message": "what is the serial for?",
+      "range": {
+        "startLine": 89,
+        "startChar": 0,
+        "endLine": 91,
+        "endChar": 5
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "81e8d429_c7dbec1c",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 91,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "serial is a id to identify the origin, we use it to identify the clock\u0027s source.",
+      "parentUuid": "09b98e70_fe28f614",
       "range": {
         "startLine": 89,
         "startChar": 0,
@@ -232,6 +352,30 @@
     },
     {
       "key": {
+        "uuid": "2817cfc1_1b108b5c",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "Yes, this marks the end of the packet queue. We have a bunch of threads, the top thread is the reading thread, which fetches all packets from the video file, and push all packets to the packet queue. This null packet marks the end of the queue. We are done once we see this special packet.",
+      "parentUuid": "5c7a85aa_6fe868ef",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 123,
+        "endChar": 23
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eaa7aef1_aba3fc45",
         "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.h",
         "patchSetId": 4
@@ -255,6 +399,30 @@
     },
     {
       "key": {
+        "uuid": "c8d6a8b7_1f0efb51",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "This flushtPkt is pretty much a special marker to do some special handling, not for syncing purpose. I will provide more documents once I clean up more of the code.",
+      "parentUuid": "eaa7aef1_aba3fc45",
+      "range": {
+        "startLine": 97,
+        "startChar": 0,
+        "endLine": 97,
+        "endChar": 29
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2334fd59_b9407335",
         "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.h",
         "patchSetId": 4
@@ -275,6 +443,30 @@
       "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "facb138e_37e23694",
+        "filename": "android/android-emu/android/skin/qt/video-player/PacketQueue.h",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T07:56:18Z",
+      "side": 1,
+      "message": "I can remove it, no longer need it, actually, thanks",
+      "parentUuid": "2334fd59_b9407335",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 100,
+        "endChar": 28
+      },
+      "revId": "e7a762a2e3d5fab2c89bbd27432ccb0d6b5e8182",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
