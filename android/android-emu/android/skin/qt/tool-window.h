@@ -92,6 +92,8 @@ public:
     // window and the tool bar. This is how big that gap is.
     static const int toolGap = 10;
 
+    bool shouldClose();
+
 signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
@@ -139,6 +141,7 @@ private:
     SizeTweaker mSizeTweaker;
     bool mTopSwitched = false;
     bool mIsExiting = false;
+    bool mAskedWhetherToSaveSnapshot = false;
 
 public slots:
     void raise();

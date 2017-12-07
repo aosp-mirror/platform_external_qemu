@@ -762,6 +762,11 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+    if (!mToolWindow->shouldClose()) {
+        event->ignore();
+        return;
+    }
+
     const bool alreadyClosed = mClosed;
     mClosed = true;
     crashhandler_exitmode(__FUNCTION__);
