@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2cedb24a_d0d1ea83",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:44:54Z",
+      "side": 1,
+      "message": "Need to return something.",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 3
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f496e3c3_b0d0172c",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:44:54Z",
+      "side": 1,
+      "message": "This is \u0027true\u0027, not sure if that\u0027s what you want.",
+      "range": {
+        "startLine": 99,
+        "startChar": 19,
+        "endLine": 99,
+        "endChar": 21
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "786c61ad_68e6575c",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:44:54Z",
+      "side": 1,
+      "message": "This is \u0027true\u0027, not sure if that\u0027s what you want.",
+      "range": {
+        "startLine": 110,
+        "startChar": 27,
+        "endLine": 110,
+        "endChar": 29
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c72a5ba4_cbab827e",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:44:54Z",
+      "side": 1,
+      "message": "Not used anywhere.",
+      "range": {
+        "startLine": 79,
+        "startChar": 9,
+        "endLine": 79,
+        "endChar": 20
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e543282_eadf7668",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.h",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:44:54Z",
+      "side": 1,
+      "message": "Not used anywhere.",
+      "range": {
+        "startLine": 81,
+        "startChar": 8,
+        "endLine": 81,
+        "endChar": 19
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c155525_60acadbf",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 479,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:44:54Z",
+      "side": 1,
+      "message": "Remove?",
+      "range": {
+        "startLine": 479,
+        "startChar": 9,
+        "endLine": 479,
+        "endChar": 64
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9b9e166b_1d24986c",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 562,
+      "author": {
+        "id": 1128973
+      },
+      "writtenOn": "2017-12-07T22:44:54Z",
+      "side": 1,
+      "message": "Remove?",
+      "range": {
+        "startLine": 562,
+        "startChar": 8,
+        "endLine": 562,
+        "endChar": 98
+      },
+      "revId": "b6bf6ceaa034c27cb675cc30f0a020c6af404b15",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
