@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6fcc76ba_64fa5942",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T17:32:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0d03144c_d7f8ba0b",
+      "range": {
+        "startLine": 68,
+        "startChar": 12,
+        "endLine": 68,
+        "endChar": 58
+      },
+      "revId": "72362d0d2435e2580d797d30beed28af0cf5b56c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e5b3456_d64bcb38",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
         "patchSetId": 5
@@ -36,6 +60,30 @@
       "writtenOn": "2017-12-07T17:25:13Z",
       "side": 1,
       "message": "Don\u0027t need this.",
+      "range": {
+        "startLine": 81,
+        "startChar": 12,
+        "endLine": 81,
+        "endChar": 58
+      },
+      "revId": "72362d0d2435e2580d797d30beed28af0cf5b56c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f3de273_0bae9b61",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T17:32:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8e5b3456_d64bcb38",
       "range": {
         "startLine": 81,
         "startChar": 12,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a970e7be_37509381",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T17:32:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "91ea860b_343e3895",
+      "range": {
+        "startLine": 116,
+        "startChar": 12,
+        "endLine": 116,
+        "endChar": 60
+      },
+      "revId": "72362d0d2435e2580d797d30beed28af0cf5b56c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f28ed195_52ceda98",
         "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
         "patchSetId": 5
@@ -82,6 +154,30 @@
       "writtenOn": "2017-12-07T17:25:13Z",
       "side": 1,
       "message": "?",
+      "range": {
+        "startLine": 128,
+        "startChar": 40,
+        "endLine": 128,
+        "endChar": 65
+      },
+      "revId": "72362d0d2435e2580d797d30beed28af0cf5b56c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "54f94971_13bbe8a4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-07T17:32:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f28ed195_52ceda98",
       "range": {
         "startLine": 128,
         "startChar": 40,
