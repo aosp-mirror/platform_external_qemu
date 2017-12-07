@@ -578,6 +578,7 @@ void ToolWindow::on_back_button_released() {
 // If the user cancels the pop-up, return
 // 'false' to say we should NOT exit now.
 bool ToolWindow::askWhetherToSaveSnapshot() {
+    mAskedWhetherToSaveSnapshot = true;
     mExtendedWindow.get();
     // Check the UI setting
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
@@ -618,6 +619,7 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     int selection = msgBox.exec();
 
     if (selection == QMessageBox::Cancel) {
+        mAskedWhetherToSaveSnapshot = false;
         return false;
     }
 
@@ -629,11 +631,20 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     return true;
 }
 
-void ToolWindow::on_close_button_clicked() {
+bool ToolWindow::shouldClose() {
+    if (mAskedWhetherToSaveSnapshot) return true;
+
     bool actuallyExit = askWhetherToSaveSnapshot();
     if (actuallyExit) {
         parentWidget()->close();
+        return true;
     }
+
+    return false;
+}
+
+void ToolWindow::on_close_button_clicked() {
+    shouldClose();
 }
 
 void ToolWindow::on_home_button_pressed() {
