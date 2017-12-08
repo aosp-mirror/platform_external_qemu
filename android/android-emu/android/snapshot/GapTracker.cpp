@@ -153,10 +153,6 @@ void GenericGapTracker::addLocked(const Range& gap) {
     mEmpty.store(false, std::memory_order_relaxed);
 }
 
-OneSizeGapTracker::OneSizeGapTracker() {
-    mGapStarts.reserve(512); // one memory page
-}
-
 void OneSizeGapTracker::load(base::Stream& in) {
     mGapStarts.clear();
     mCurrentPos = 0;
@@ -233,6 +229,24 @@ void OneSizeGapTracker::add(int64_t start, int size) {
 int64_t OneSizeGapTracker::wastedSpaceImpl() const {
     base::AutoLock lock(mLock);
     return mSize * (mGapStarts.size() - mCurrentPos);
+}
+
+void NullGapTracker::load(base::Stream& in) {
+    GenericGapTracker().load(in);
+}
+
+void NullGapTracker::save(base::Stream& out) {
+    OneSizeGapTracker().save(out);
+}
+
+base::Optional<int64_t> NullGapTracker::allocate(int size) {
+    return {};
+}
+
+void NullGapTracker::add(int64_t start, int size) {}
+
+int64_t NullGapTracker::wastedSpaceImpl() const {
+    return 0;
 }
 
 }  // namespace snapshot

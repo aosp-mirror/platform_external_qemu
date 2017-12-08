@@ -19,13 +19,13 @@
 #include "android/base/synchronization/MessageChannel.h"
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
+#include "android/base/threads/ThreadPool.h"
 #include "android/snapshot/Compressor.h"
 #include "android/snapshot/GapTracker.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/common.h"
 
 #include <array>
-#include <atomic>
 #include <cstdint>
 #include <memory>
 #include <vector>
@@ -55,6 +55,7 @@ public:
 
     void registerBlock(const RamBlock& block);
     void savePage(int64_t blockOffset, int64_t pageOffset, int32_t pageSize);
+    void complete();
     void join();
     bool hasError() const { return mHasError; }
     bool compressed() const {
@@ -103,17 +104,20 @@ private:
         void clear();
     };
 
+    struct WriteInfo {
+        FileIndex::Block::Page* page;
+        const uint8_t* ptr;
+        bool allocated;
+    };
+
     static void calcHash(FileIndex::Block::Page& page,
                          const FileIndex::Block& block,
                          const void* ptr);
 
     void passToSaveHandler(QueuedPageInfo&& pi);
-    base::WorkerProcessingResult savePageInWorker(QueuedPageInfo&& pi);
     bool handlePageSave(QueuedPageInfo&& pi);
     void writeIndex();
-    void writePage(const QueuedPageInfo& pi,
-                   const void* dataPtr,
-                   int32_t dataSize);
+    void writePage(WriteInfo&& wi);
 
     RamLoader* mLoader = nullptr;
     base::StdioStream mStream;
@@ -123,10 +127,10 @@ private:
     bool mHasError = false;
     bool mLoaderOnDemand = false;
     int mLastBlockIndex = 0;
-    std::atomic<int64_t> mCurrentStreamPos{8};
+    int64_t mCurrentStreamPos = 8;
 
-    base::Optional<Compressor<QueuedPageInfo>> mCompressor;
-    base::Optional<base::WorkerThread<QueuedPageInfo>> mSavingWorker;
+    base::Optional<base::ThreadPool<QueuedPageInfo>> mWorkers;
+    base::Optional<base::WorkerThread<WriteInfo>> mWriter;
 
     GapTracker::Ptr mGaps;
 

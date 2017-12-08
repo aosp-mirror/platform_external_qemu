@@ -57,9 +57,23 @@ protected:
     std::atomic<bool> mEmpty{true};
 };
 
+// Could be a useful stub.
+class NullGapTracker final : public GapTracker {
+public:
+    NullGapTracker() = default;
+
+    void load(base::Stream& in) override;;
+    void save(base::Stream& out) override;
+
+    base::Optional<int64_t> allocate(int size) override;
+    void add(int64_t start, int size) override;
+
+    int64_t wastedSpaceImpl() const override;
+};
+
 class OneSizeGapTracker final : public GapTracker {
 public:
-    OneSizeGapTracker();
+    OneSizeGapTracker() = default;
 
     void load(base::Stream& in) override;
     void save(base::Stream& out) override;
