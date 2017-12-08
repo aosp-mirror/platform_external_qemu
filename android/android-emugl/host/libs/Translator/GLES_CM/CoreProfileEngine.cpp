@@ -552,6 +552,8 @@ void CoreProfileEngine::enable(GLenum cap) {
         case GL_LIGHT7:
         case GL_COLOR_MATERIAL:
         case GL_FOG:
+        case GL_POINT_SMOOTH:
+        case GL_ALPHA_TEST:
             return;
         default:
             break;
@@ -579,6 +581,8 @@ void CoreProfileEngine::disable(GLenum cap) {
         case GL_LIGHT7:
         case GL_COLOR_MATERIAL:
         case GL_FOG:
+        case GL_POINT_SMOOTH:
+        case GL_ALPHA_TEST:
             return;
         default:
             break;
