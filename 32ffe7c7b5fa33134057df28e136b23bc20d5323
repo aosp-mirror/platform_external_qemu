@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4ddd03a5_7e64018c",
+        "filename": "android/android-emu/android/main-emugl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1046320
+      },
+      "writtenOn": "2017-12-08T00:25:31Z",
+      "side": 1,
+      "message": "only enable the print when -verbose",
+      "range": {
+        "startLine": 73,
+        "startChar": 20,
+        "endLine": 73,
+        "endChar": 26
+      },
+      "revId": "32ffe7c7b5fa33134057df28e136b23bc20d5323",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
