@@ -17,6 +17,11 @@
 #pragma once
 
 #include "android/utils/compiler.h"
+#ifdef __cplusplus
+#include <glm/gtc/epsilon.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/vec3.hpp>
+#endif  // __cplusplus
 
 ANDROID_BEGIN_HEADER
 
@@ -29,5 +34,20 @@ typedef enum {
     PARAMETER_VALUE_TYPE_TARGET=0,
     PARAMETER_VALUE_TYPE_CURRENT=1,
 } ParameterValueType;
+
+#ifdef __cplusplus
+
+constexpr float kPhysicsEpsilon = 0.001f;
+
+inline bool vecNearEqual(glm::vec3 lhs, glm::vec3 rhs) {
+    return glm::all(glm::epsilonEqual(lhs, rhs, kPhysicsEpsilon));
+}
+
+inline bool quaternionNearEqual(glm::quat lhs, glm::quat rhs) {
+    return glm::all(glm::epsilonEqual(lhs, rhs, kPhysicsEpsilon)) ||
+           glm::all(glm::epsilonEqual(lhs, -rhs, kPhysicsEpsilon));
+}
+
+#endif  // __cplusplus
 
 ANDROID_END_HEADER
