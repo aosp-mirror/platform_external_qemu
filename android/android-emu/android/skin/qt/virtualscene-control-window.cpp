@@ -14,6 +14,7 @@
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
+#include "android/utils/debug.h"
 
 #include <QDesktopWidget>
 #include <QPainter>
@@ -25,6 +26,8 @@
 
 #include <glm/gtx/euler_angles.hpp>
 
+#define W(...) dwarning(__VA_ARGS__)
+
 static constexpr int kMousePollIntervalMilliseconds = 16;
 static constexpr int kWindowHeight = 50;
 static const QColor kHighlightColor = QColor(2, 136, 209);
@@ -33,6 +36,10 @@ static const float kPixelsToRotationRadians = static_cast<float>(M_PI / 180.0f);
 static const float kMovementVelocityMetersPerSecond = 1.0f;
 static const float kMinVerticalRotationDegrees = -80.0f;
 static const float kMaxVerticalRotationDegrees = 80.0f;
+
+static bool gIsFlyCam = false;
+static float gRotationMultiple = 0.5f;
+static float gTranslationMultiple = 1.f;
 
 static const char* kTextStyleFormatString =
         "font-size:%1;background-color:transparent;";
@@ -279,8 +286,8 @@ void VirtualSceneControlWindow::updateMouselook() {
     QCursor::setPos(mPreviousMousePosition);
 
     if (offset.x() != 0 || offset.y() != 0) {
-        mEulerRotationRadians.x -= offset.y() * kPixelsToRotationRadians;
-        mEulerRotationRadians.y -= offset.x() * kPixelsToRotationRadians;
+        mEulerRotationRadians.x -= offset.y() * gRotationMultiple * kPixelsToRotationRadians;
+        mEulerRotationRadians.y -= offset.x() * gRotationMultiple * kPixelsToRotationRadians;
 
         // Clamp up/down rotation to -80 and +80 degrees, like a FPS camera.
         if (mEulerRotationRadians.x <
@@ -360,6 +367,36 @@ bool VirtualSceneControlWindow::handleKeyEvent(QKeyEvent* event) {
         case Qt::Key_E:
             mKeysHeld[Held_E] = pressed;
             break;
+        case Qt::Key_N:
+            if (event->type() == QEvent::KeyPress) {
+                gIsFlyCam = !gIsFlyCam;
+                W("Toggle FlyCam %s", gIsFlyCam ? "On" : "Off");
+            }
+            break;
+        case Qt::Key_K:
+            if (event->type() == QEvent::KeyPress) {
+                gRotationMultiple += 0.01f;
+                W("Rotation Multiple: %f", gRotationMultiple);
+            }
+            break;
+        case Qt::Key_M:
+            if (event->type() == QEvent::KeyPress) {
+                gRotationMultiple -= 0.01f;
+                W("Rotation Multiple: %f", gRotationMultiple);
+            }
+            break;
+        case Qt::Key_O:
+            if (event->type() == QEvent::KeyPress) {
+                gTranslationMultiple += 0.01f;
+                W("Translation Multiple: %f", gTranslationMultiple);
+            }
+            break;
+        case Qt::Key_L:
+            if (event->type() == QEvent::KeyPress) {
+                gTranslationMultiple -= 0.01f;
+                W("Translation Multiple: %f", gTranslationMultiple);
+            }
+            break;
 #ifdef __APPLE__
         case Qt::Key_unknown:
             // On OS X, when the Alt key is held Qt can't recognize the E key.
@@ -383,18 +420,31 @@ void VirtualSceneControlWindow::updateVelocity() {
     // Moving in an additional direction should not slow down other axes, so
     // this is intentionally not normalized. As a result, moving along
     // additional axes increases the overall velocity.
-    const glm::vec3 lookDirectionBaseVelocity(
+    const glm::vec4 lookDirectionBaseVelocity(
             (mKeysHeld[Held_A] ? -1.0f : 0.0f) +
                     (mKeysHeld[Held_D] ? 1.0f : 0.0f),
             (mKeysHeld[Held_Q] ? -1.0f : 0.0f) +
                     (mKeysHeld[Held_E] ? 1.0f : 0.0f),
             (mKeysHeld[Held_W] ? -1.0f : 0.0f) +
-                    (mKeysHeld[Held_S] ? 1.0f : 0.0f));
+                    (mKeysHeld[Held_S] ? 1.0f : 0.0f),
+            1.f);
 
-    const glm::vec3 velocity = glm::angleAxis(mEulerRotationRadians.y,
-                                              glm::vec3(0.0f, 1.0f, 0.0f)) *
-                               lookDirectionBaseVelocity *
-                               kMovementVelocityMetersPerSecond;
+    glm::vec3 velocity;
+    if (gIsFlyCam) {
+        velocity = glm::eulerAngleYXZ(
+                           mEulerRotationRadians.y,
+                           mEulerRotationRadians.x,
+                           mEulerRotationRadians.z) *
+                   lookDirectionBaseVelocity *
+                   gTranslationMultiple *
+                   kMovementVelocityMetersPerSecond;
+    } else {
+        velocity = glm::angleAxis(mEulerRotationRadians.y,
+                    glm::vec3(0.0f, 1.0f, 0.0f)) *
+                   lookDirectionBaseVelocity *
+                   gTranslationMultiple *
+                   kMovementVelocityMetersPerSecond;
+    }
 
     if (velocity != mVelocity) {
         mVelocity = velocity;
