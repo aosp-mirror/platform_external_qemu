@@ -153,10 +153,6 @@ void GenericGapTracker::addLocked(const Range& gap) {
     mEmpty.store(false, std::memory_order_relaxed);
 }
 
-OneSizeGapTracker::OneSizeGapTracker() {
-    mGapStarts.reserve(512); // one memory page
-}
-
 void OneSizeGapTracker::load(base::Stream& in) {
     mGapStarts.clear();
     mCurrentPos = 0;
