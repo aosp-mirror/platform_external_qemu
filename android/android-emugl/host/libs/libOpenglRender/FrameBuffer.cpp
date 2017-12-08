@@ -311,13 +311,13 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         GL_LOG("Async readback not supported");
     }
 
-    fb->m_fastBlitSupported =
-        System::get()->getProgramBitness() != 32 &&
-        (dispatchMaxVersion > GLES_DISPATCH_MAX_VERSION_2) &&
-        (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
-         // TODO: Swiftshader issues 0x502
-         // emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
-         emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
+    fb->m_fastBlitSupported = false;
+        // System::get()->getProgramBitness() != 32 &&
+        // (dispatchMaxVersion > GLES_DISPATCH_MAX_VERSION_2) &&
+        // (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
+        //  // TODO: Swiftshader issues 0x502
+        //  // emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
+        //  emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
 
     //
     // if GLES2 plugin has loaded - try to make GLES2 context and
