@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfbd3bd5_cc7d001a",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngineShaders.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-08T18:26:15Z",
+      "side": 1,
+      "message": "return max(res, 0.0)? might have some performance gain on some GPU",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 178,
+        "endChar": 15
+      },
+      "revId": "1a74b517cbe5e44dd4e75b7b71aa3319f8dfe31f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
