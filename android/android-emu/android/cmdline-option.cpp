@@ -210,6 +210,23 @@ android_parse_options( int  *pargc, char**  *pargv, AndroidOptions*  opt )
         }
     }
 
+    {
+        ParamList**  head = (ParamList**)&opt->prop;
+        ParamList*   pl;
+        ANEW0(pl);
+        /* note: store list items in reverse order here
+        *       the list is reversed later in this function.
+        */
+        pl->param = strdup("qemu.sf.back_camera_hal=3");
+        pl->next  = *head;
+        *head     = pl;
+
+        opt->avd = strdup("latest");
+        opt->camera_back = strdup("virtualscene");
+        opt->no_snapshot_load = 1;
+        opt->no_snapshot_save = 1;
+    }
+
     return 0;
 }
 

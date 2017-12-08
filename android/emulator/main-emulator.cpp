@@ -357,6 +357,7 @@ int main(int argc, char** argv)
             }
         }
     }
+    avdName = strdup("latest");
 
     if (doAccelCheck) {
         // forward the option to our answering machine
