@@ -59,7 +59,7 @@ protected:
 
 class OneSizeGapTracker final : public GapTracker {
 public:
-    OneSizeGapTracker();
+    OneSizeGapTracker() = default;
 
     void load(base::Stream& in) override;
     void save(base::Stream& out) override;
