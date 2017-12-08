@@ -33,6 +33,9 @@ static const char kAvdSubDir[] = "avd";
 // static
 std::string ConfigDirs::getUserDirectory() {
     System* system = System::get();
+
+    return PathUtils::join(system->getLauncherDirectory(), kAndroidSubDir);
+
     std::string home = system->envGet("ANDROID_EMULATOR_HOME");
     if (!home.empty()) {
         return home;
@@ -60,6 +63,8 @@ std::string ConfigDirs::getUserDirectory() {
 // static
 std::string ConfigDirs::getAvdRootDirectory() {
     System* system = System::get();
+
+    return PathUtils::join(getUserDirectory(), kAvdSubDir);
 
     std::string avdRoot = system->envGet("ANDROID_AVD_HOME");
     if ( !avdRoot.empty() && system->pathIsDir(avdRoot) ) {
@@ -107,6 +112,8 @@ std::string ConfigDirs::getAvdRootDirectory() {
 // static
 std::string ConfigDirs::getSdkRootDirectoryByEnv() {
     auto system = System::get();
+
+    return PathUtils::join(system->getLauncherDirectory(), "sdk");
 
     std::string sdkRoot = system->envGet("ANDROID_HOME");
     if ( isValidSdkRoot(sdkRoot) ) {
