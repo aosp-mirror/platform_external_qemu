@@ -172,6 +172,10 @@ in vec4 texcoord_varying;
 
 out vec4 frag_color;
 
+float posDot(vec3 a, vec3 b) {
+    return max(dot(a, b), 0.0);
+}
+
 void main() {
     vec4 currentColor;
 
@@ -232,9 +236,9 @@ void main() {
     vec4 materialAmbientActual = material_ambient;
     vec4 materialDiffuseActual = material_diffuse;
 
-    if (enable_color_material) {
-        materialAmbientActual = color_varying;
-        materialDiffuseActual = color_varying;
+    if (enable_color_material || enable_textures) {
+        materialAmbientActual = currentColor;
+        materialDiffuseActual = currentColor;
     }
 
     vec4 lit = material_emissive +
@@ -255,12 +259,17 @@ void main() {
         float spotAngle = light_spotlight_cutoff_angles[i];
         float spotExponent = light_spotlight_exponents[i];
 
-        vec3 toLight = (lightPos - pos_varying).xyz;
+        vec3 toLight;
+        if (lightPos.w == 0) {
+            toLight = lightPos.xyz;
+        } else {
+            toLight = (lightPos.xyz / lightPos.w - pos_varying.xyz);
+        }
+
         float lightDist = length(toLight);
-        vec3 norm = normalize(normal_varying);
-        vec3 h = toLight + vec3(0.0, 0.0, 1.0);
-        float ndotL = clamp(dot(norm, normalize(toLight)), 0.0, 1.0);
-        float ndoth = clamp(dot(norm, normalize(h)), 0.0, 1.0);
+        vec3 h = normalize(toLight) + vec3(0.0, 0.0, 1.0);
+        float ndotL = posDot(normal_varying, normalize(toLight));
+        float ndoth = posDot(normal_varying, normalize(h));
 
         float specAtt;
 
@@ -273,8 +282,9 @@ void main() {
         float att;
 
         if (lightPos.w != 0.0) {
-            att = 1.0 / (attConst + attLinear * lightDist +
-                                    attQuadratic * lightDist * lightDist);
+            float attDenom = (attConst + attLinear * lightDist +
+                              attQuadratic * lightDist * lightDist);
+            att = 1.0 / attDenom;
         } else {
             att = 1.0;
         }
@@ -283,7 +293,7 @@ void main() {
 
         float spotAngleCos = cos(radians(spotAngle));
         vec3 toSurfaceDir = -normalize(toLight);
-        float spotDot = clamp(dot(toSurfaceDir, normalize(lightDir)), 0.0, 1.0);
+        float spotDot = posDot(toSurfaceDir, normalize(lightDir));
 
         if (spotAngle == 180.0 || lightPos.w == 0.0) {
             spot = 1.0;
@@ -297,8 +307,14 @@ void main() {
 
         vec4 contrib = materialAmbientActual * lightAmbient;
         contrib += ndotL * materialDiffuseActual * lightDiffuse;
-        contrib += specAtt * pow(ndoth, material_specular_exponent) *
-                             material_specular * lightSpecular;
+        if (ndoth > 0.0 && material_specular_exponent > 0.0) {
+            contrib += specAtt * pow(ndoth, material_specular_exponent) *
+                                 material_specular * lightSpecular;
+        } else {
+            if (ndoth > 0.0) {
+                contrib += specAtt * material_specular * lightSpecular;
+            }
+        }
         contrib *= att * spot;
         lit += contrib;
     }
