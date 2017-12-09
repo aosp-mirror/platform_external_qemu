@@ -13,10 +13,12 @@
 #include "android/base/async/Looper.h"
 #include "android/base/files/PathUtils.h"
 #include "android/base/files/StreamSerializing.h"
+#include "android/base/Optional.h"
+#include "android/base/threads/FunctorThread.h"
 #include "android/loadpng.h"
-#include "android/opengles.h"
-#include "android/opengles-pipe.h"
 #include "android/opengl/GLProcessPipe.h"
+#include "android/opengles-pipe.h"
+#include "android/opengles.h"
 #include "android/snapshot/Snapshotter.h"
 
 #ifdef SNAPSHOT_PROFILE
@@ -87,12 +89,14 @@ public:
             }
             int version = stream->getBe32();
             (void)version;
-            renderer->load(stream,
-                           snapshot::Snapshotter::get().loader().textureLoader());
+            renderer->load(
+                    stream,
+                    snapshot::Snapshotter::get().loader().textureLoader());
 #ifdef SNAPSHOT_PROFILE
             printf("OpenglEs preload time: %lld ms\n",
-                    (long long)(android::base::System::get()->getUnixTimeUs()
-                    - mLoadStartTime) / 1000);
+                   (long long)(android::base::System::get()->getUnixTimeUs() -
+                               mLoadStartTime) /
+                           1000);
 #endif
         }
 
@@ -102,8 +106,9 @@ public:
             }
 #ifdef SNAPSHOT_PROFILE
             printf("OpenglEs total load time: %lld ms\n",
-                    (long long)(android::base::System::get()->getUnixTimeUs()
-                    - mLoadStartTime) / 1000);
+                   (long long)(android::base::System::get()->getUnixTimeUs() -
+                               mLoadStartTime) /
+                           1000);
 #endif
         }
 
@@ -115,12 +120,13 @@ public:
                 renderer->pauseAllPreSave();
                 stream->putByte(1);
                 stream->putBe32(OPENGL_SAVE_VERSION);
-                renderer->save(stream,
-                               snapshot::Snapshotter::get().saver().textureSaver());
+                renderer->save(
+                        stream,
+                        snapshot::Snapshotter::get().saver().textureSaver());
                 // save a screenshot
 #if SNAPSHOT_PROFILE > 1
                 android::base::System::Duration screenshotStartTime =
-                    android::base::System::get()->getUnixTimeUs();
+                        android::base::System::get()->getUnixTimeUs();
 #endif
                 // always do 4 channel screenshot because swiftshader_indirect
                 // has issues with 3 channels
@@ -131,30 +137,37 @@ public:
                 renderer->getScreenshot(nChannels, &width, &height, pixels);
 #if SNAPSHOT_PROFILE > 1
                 printf("Screenshot load texture time %lld ms\n",
-                        (long long)(android::base::System::get()
-                        ->getUnixTimeUs() - screenshotStartTime) / 1000);
+                       (long long)(android::base::System::get()
+                                           ->getUnixTimeUs() -
+                                   screenshotStartTime) /
+                               1000);
 #endif
                 if (width > 0 && height > 0) {
+                    mScreenshotSaver.emplace([nChannels, width, height,
+                                              px = std::move(
+                                                      pixels)] {
 #if SNAPSHOT_PROFILE > 1
-                    android::base::System::Duration pngEncodeStart =
-                        android::base::System::get()->getUnixTimeUs();
+                        android::base::System::Duration pngEncodeStart =
+                                android::base::System::get()->getUnixTimeUs();
 #endif
-                    std::string fileName = android::base::PathUtils::join(
-                            snapshot::Snapshotter::get().saver().snapshot().
-                            dataDir(), "screenshot.bmp");
-                    savebmp(fileName.c_str(), nChannels, width, height,
-                            pixels.data());
+                        std::string fileName = android::base::PathUtils::join(
+                                snapshot::Snapshotter::get()
+                                        .saver()
+                                        .snapshot()
+                                        .dataDir(),
+                                "screenshot.png");
+                        savepng(fileName.c_str(), nChannels, width, height,
+                                const_cast<unsigned char*>(px.data()));
 #if SNAPSHOT_PROFILE > 1
-                    printf("Screenshot image write time %lld ms\n",
-                            (long long)(android::base::System::get()
-                            ->getUnixTimeUs() - pngEncodeStart) / 1000);
+                        printf("Screenshot image write time %lld ms\n",
+                               (long long)(android::base::System::get()
+                                                   ->getUnixTimeUs() -
+                                           pngEncodeStart) /
+                                       1000);
 #endif
+                    });
+                    mScreenshotSaver->start();
                 }
-#if SNAPSHOT_PROFILE > 1
-                printf("Screenshot total time %lld ms\n",
-                        (long long)(android::base::System::get()
-                        ->getUnixTimeUs() - screenshotStartTime) / 1000);
-#endif
             } else {
                 stream->putByte(0);
             }
@@ -164,23 +177,30 @@ public:
             if (const auto& renderer = android_getOpenglesRenderer()) {
                 renderer->resumeAll();
             }
+            if (mScreenshotSaver) {
+                mScreenshotSaver->wait();
+                mScreenshotSaver.clear();
+            }
 #ifdef SNAPSHOT_PROFILE
             printf("OpenglEs total save time: %lld ms\n",
-                    (long long)(android::base::System::get()->getUnixTimeUs()
-                    - mSaveStartTime) / 1000);
+                   (long long)(android::base::System::get()->getUnixTimeUs() -
+                               mSaveStartTime) /
+                           1000);
 #endif
         }
 
         virtual AndroidPipe* load(void* hwPipe,
-                              const char* args,
-                              android::base::Stream* stream) override {
+                                  const char* args,
+                                  android::base::Stream* stream) override {
             return createPipe(hwPipe, this, args, stream);
         }
 
     private:
         static AndroidPipe* createPipe(
-                void* hwPipe, Service* service,
-                const char* args, android::base::Stream* loadStream = nullptr) {
+                void* hwPipe,
+                Service* service,
+                const char* args,
+                android::base::Stream* loadStream = nullptr) {
             const auto& renderer = android_getOpenglesRenderer();
             if (!renderer) {
                 // This should never happen, unless there is a bug in the
@@ -197,6 +217,8 @@ public:
             }
             return pipe;
         }
+
+        base::Optional<base::FunctorThread> mScreenshotSaver;
 #ifdef SNAPSHOT_PROFILE
         android::base::System::Duration mSaveStartTime = 0;
         android::base::System::Duration mLoadStartTime = 0;
@@ -206,7 +228,8 @@ public:
     /////////////////////////////////////////////////////////////////////////
     // Constructor, check that |mIsWorking| is true after this call to verify
     // that everything went well.
-    EmuglPipe(void* hwPipe, Service* service,
+    EmuglPipe(void* hwPipe,
+              Service* service,
               const emugl::RendererPtr& renderer,
               android::base::Stream* loadStream = nullptr)
         : AndroidPipe(hwPipe, service) {
@@ -225,10 +248,9 @@ public:
         }
 
         mIsWorking = isWorking;
-        mChannel->setEventCallback(
-                [this](RenderChannel::State events) {
-                    onChannelHostEvent(events);
-                });
+        mChannel->setEventCallback([this](RenderChannel::State events) {
+            onChannelHostEvent(events);
+        });
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -274,8 +296,8 @@ public:
         return ret;
     }
 
-    virtual int onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers)
-            override {
+    virtual int onGuestRecv(AndroidPipeBuffer* buffers,
+                            int numBuffers) override {
         DD("%s", __func__);
 
         // Consume the pipe's dataForReading, then put the next received data
@@ -321,9 +343,9 @@ public:
             const size_t curSize =
                     std::min(buff->size - buffOffset, mDataForReadingLeft);
             memcpy(buff->data + buffOffset,
-                mDataForReading.data() +
-                        (mDataForReading.size() - mDataForReadingLeft),
-                curSize);
+                   mDataForReading.data() +
+                           (mDataForReading.size() - mDataForReadingLeft),
+                   curSize);
 
             len += curSize;
             mDataForReadingLeft -= curSize;
