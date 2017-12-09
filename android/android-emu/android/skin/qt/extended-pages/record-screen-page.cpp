@@ -35,6 +35,12 @@ const char RecordScreenPage::kTmpMediaName[] = "tmp.webm";
 RecordScreenPage::RecordScreenPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::RecordScreenPage) {
     mUi->setupUi(this);
+
+    // Resize format combobox width to the largest item
+    mUi->rec_formatSwitch->setMinimumContentsLength(5);
+    int width = mUi->rec_formatSwitch->minimumSizeHint().width();
+    mUi->rec_formatSwitch->setMinimumWidth(width);
+
     setRecordState(RecordState::Ready);
 
     mTmpFilePath = PathUtils::join(avdInfo_getContentPath(android_avdInfo),
