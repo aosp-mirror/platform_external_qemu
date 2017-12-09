@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-#include "android/virtualscene/VirtualScene.h"
+#include "android/virtualscene/VirtualSceneManager.h"
 
 #include "android/skin/winsys.h"
 #include "android/utils/debug.h"
 #include "android/virtualscene/Renderer.h"
+#include "android/virtualscene/Scene.h"
 
 using namespace android::base;
 
@@ -30,54 +31,69 @@ using namespace android::base;
 namespace android {
 namespace virtualscene {
 
-android::base::LazyInstance<android::base::Lock> VirtualScene::mLock =
+android::base::LazyInstance<android::base::Lock> VirtualSceneManager::mLock =
         LAZY_INSTANCE_INIT;
-Renderer* VirtualScene::mImpl = nullptr;
+Renderer* VirtualSceneManager::mRenderer = nullptr;
+Scene* VirtualSceneManager::mScene = nullptr;
 
-bool VirtualScene::initialize(const GLESv2Dispatch* gles2,
-                              int width, int height) {
+bool VirtualSceneManager::initialize(const GLESv2Dispatch* gles2,
+                                     int width,
+                                     int height) {
     AutoLock lock(mLock.get());
-    if (mImpl) {
-        E("VirtualScene already initialized");
+    if (mRenderer || mScene) {
+        E("VirtualSceneManager already initialized");
         return false;
     }
 
     std::unique_ptr<Renderer> renderer = Renderer::create(gles2, width, height);
     if (!renderer) {
-        E("VirtualScene failed to construct");
+        E("VirtualSceneManager renderer failed to construct");
+        return false;
+    }
+
+    std::unique_ptr<Scene> scene = Scene::create(*renderer.get());
+    if (!scene) {
+        E("VirtualSceneManager scene failed to load");
         return false;
     }
 
     skin_winsys_show_virtual_scene_controls(true);
 
-    // Store the raw pointer instead of the unique_ptr wrapper to prevent
+    // Store the raw pointers instead of the unique_ptr wrapper to prevent
     // unintented side-effects on process shutdown.
-    mImpl = renderer.release();
+    mRenderer = renderer.release();
+    mScene = scene.release();
 
     return true;
 }
 
-void VirtualScene::uninitialize() {
+void VirtualSceneManager::uninitialize() {
     AutoLock lock(mLock.get());
-    if (!mImpl) {
-        E("VirtualScene not initialized");
+    if (!mRenderer || !mScene) {
+        E("VirtualSceneManager not initialized");
         return;
     }
 
     skin_winsys_show_virtual_scene_controls(false);
 
-    delete mImpl;
-    mImpl = nullptr;
+    mScene->releaseSceneObjects(*mRenderer);
+    delete mScene;
+    mScene = nullptr;
+
+    delete mRenderer;
+    mRenderer = nullptr;
 }
 
-int64_t VirtualScene::render() {
+int64_t VirtualSceneManager::render() {
     AutoLock lock(mLock.get());
-    if (!mImpl) {
-        E("VirtualScene not initialized");
+    if (!mRenderer || !mScene) {
+        E("VirtualSceneManager not initialized");
         return 0L;
     }
 
-    return mImpl->render();
+    const int64_t timestamp = mScene->update();
+    mRenderer->render(mScene->getRenderableObjects());
+    return timestamp;
 }
 
 }  // namespace virtualscene

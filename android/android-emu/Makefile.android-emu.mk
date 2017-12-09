@@ -477,13 +477,13 @@ LOCAL_SRC_FILES := \
     android/utils/socket_drainer.cpp \
     android/utils/sockets.c \
     android/utils/looper.cpp \
-    android/virtualscene/Effect.cpp \
     android/virtualscene/Renderer.cpp \
     android/virtualscene/RenderTarget.cpp \
+    android/virtualscene/Scene.cpp \
     android/virtualscene/SceneCamera.cpp \
     android/virtualscene/SceneObject.cpp \
-    android/virtualscene/Texture.cpp \
-    android/virtualscene/VirtualScene.cpp \
+    android/virtualscene/TextureUtils.cpp \
+    android/virtualscene/VirtualSceneManager.cpp \
     android/wear-agent/android_wear_agent.cpp \
     android/wear-agent/WearAgent.cpp \
     android/wear-agent/PairUpWearPhone.cpp \

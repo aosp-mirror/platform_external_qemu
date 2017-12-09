@@ -17,20 +17,19 @@
 #pragma once
 
 /*
- * Defines a render target with all associated gl objects.
+ * Defines a render target with all associated gl objects, used internally by
+ * the Renderer.
  */
 
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/Compiler.h"
 #include "android/utils/compiler.h"
+#include "android/virtualscene/Renderer.h"
 
 #include <memory>
 
 namespace android {
 namespace virtualscene {
-
-// Forward declarations
-class Texture;
 
 class RenderTarget {
     DISALLOW_COPY_AND_ASSIGN(RenderTarget);
@@ -41,13 +40,17 @@ public:
     // Create a Texture backed render target with the given size.
     //
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
+    // |texture| - Destination texture.
     // |width| - Requested texture width.
     // |height| - Requested texture height.
     //
-    // Returns a RenderTarget instance if the successful or null if
-    // there was an error.
+    // Returns a RenderTarget instance if successful or null if there was an
+    // error.
     static std::unique_ptr<RenderTarget> createTextureTarget(
-            const GLESv2Dispatch* gles2, uint32_t width, uint32_t height);
+            const GLESv2Dispatch* gles2,
+            Texture texture,
+            uint32_t width,
+            uint32_t height);
 
     // Create a render target referring to no framebuffer (i.e. use to render to
     // the current display).
@@ -56,8 +59,8 @@ public:
     // |width| - Requested render width.
     // |height| - Requested render height.
     //
-    // Returns a RenderTarget instance if the successful or null if
-    // there was an error.
+    // Returns a RenderTarget instance if successful or null if there was an
+    // error.
     static std::unique_ptr<RenderTarget> createDefault(
             const GLESv2Dispatch* gles2, uint32_t width, uint32_t height);
 
@@ -65,9 +68,9 @@ public:
     // the size set when this RenderTarget was created.
     void bind() const;
 
-    // Returns the  texture backing this render target, or nullptr if this is
-    // not a texture-backed target.
-    const Texture* getTexture() const;
+    // Returns the  texture backing this render target, or an invalid handle if
+    // this is not a texture-backed target.
+    const Texture& getTexture() const;
 
 private:
     // Private constructor, use Texture::load to create an instance.
@@ -77,13 +80,13 @@ private:
                  uint32_t width,
                  uint32_t height);
 
-    void setTexture(std::unique_ptr<Texture>&& texture);
+    void setTexture(const Texture& texture);
 
     const GLESv2Dispatch* mGles2 = nullptr;
 
     GLuint mFramebuffer;
     GLuint mDepthRenderbuffer;
-    std::unique_ptr<Texture> mTexture;
+    Texture mTexture;
 
     uint32_t mWidth;
     uint32_t mHeight;

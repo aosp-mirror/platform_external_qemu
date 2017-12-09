@@ -23,18 +23,18 @@
 #include "OpenGLESDispatch/GLESv2Dispatch.h"
 #include "android/base/Compiler.h"
 #include "android/utils/compiler.h"
-#include "android/virtualscene/Texture.h"
+#include "android/virtualscene/Renderer.h"
 
 #include <glm/glm.hpp>
 
 namespace android {
 namespace virtualscene {
 
-// Forward declarations.
-class Renderer;
-
 class SceneObject {
     DISALLOW_COPY_AND_ASSIGN(SceneObject);
+
+protected:
+    SceneObject();
 
 public:
     ~SceneObject();
@@ -58,40 +58,11 @@ public:
     // Gets the model transform for this object.
     glm::mat4 getTransform() const;
 
-    // Sets the default texture for the object.
-    //
-    // |texture| - Texture object, SceneObject will take ownership and the
-    //             caller's version will be empty after this call.
-    void setTexture(std::unique_ptr<Texture>&& texture);
-
-    // Render the object.
-    void render();
+    const std::vector<Renderable>& getRenderables() const;
 
 private:
-    // Private constructor, use SceneObject::loadFromObj to create an
-    // instance.
-    SceneObject(Renderer& renderer,
-                GLuint vertexBuffer,
-                GLuint indexBuffer,
-                size_t indexCount);
-
-    bool initialize();
-
-    Renderer& mRenderer;
-
     glm::mat4 mTransform = glm::mat4();
-
-    GLuint mVertexBuffer = 0;
-    GLuint mIndexBuffer = 0;
-    size_t mIndexCount = 0;
-    std::unique_ptr<Texture> mTexture;
-
-    GLuint mProgram = 0;
-
-    GLint mPositionLocation = -1;
-    GLint mUvLocation = -1;
-    GLint mTexSamplerLocation = -1;
-    GLint mMvpLocation = -1;
+    std::vector<Renderable> mRenderables;
 };
 
 }  // namespace virtualscene

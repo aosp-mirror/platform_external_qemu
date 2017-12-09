@@ -28,10 +28,11 @@
 namespace android {
 namespace virtualscene {
 
-// Forward declaration.
+// Forward declarations.
 class Renderer;
+class Scene;
 
-class VirtualScene {
+class VirtualSceneManager {
 public:
     // Initialize virtual scene rendering. Callers must have an active EGL
     // context.
@@ -56,7 +57,8 @@ public:
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
-    static Renderer* mImpl;
+    static Renderer* mRenderer;
+    static Scene* mScene;
 };
 
 }  // namespace virtualscene

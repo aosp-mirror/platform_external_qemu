@@ -82,7 +82,7 @@ SceneCamera::SceneCamera() {
 
 SceneCamera::~SceneCamera() = default;
 
-int64_t SceneCamera::update() {
+void SceneCamera::update() {
     int64_t timestamp;
     glm::vec3 position;
     glm::vec3 rotationEuler;
@@ -98,11 +98,15 @@ int64_t SceneCamera::update() {
 
     mViewFromWorld = mCameraFromSensors * inverseSensorsPose;
 
-    return timestamp;
+    mLastUpdateTime = timestamp;
 }
 
 glm::mat4 SceneCamera::getViewProjection() const {
     return mProjection * mViewFromWorld;
+}
+
+int64_t SceneCamera::getTimestamp() const {
+    return mLastUpdateTime;
 }
 
 }  // namespace virtualscene
