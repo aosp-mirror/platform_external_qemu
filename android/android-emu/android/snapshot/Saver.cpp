@@ -134,6 +134,7 @@ void Saver::complete(bool succeeded) {
     if (!mRamSaver || mRamSaver->hasError()) {
         return;
     }
+    mRamSaver->join();
     if (!mTextureSaver ||
         (static_cast<void>(mTextureSaver->done()), mTextureSaver->hasError())) {
         return;

@@ -55,6 +55,7 @@ public:
 
     void registerBlock(const RamBlock& block);
     void savePage(int64_t blockOffset, int64_t pageOffset, int32_t pageSize);
+    void complete();
     void join();
     bool hasError() const { return mHasError; }
     bool compressed() const {

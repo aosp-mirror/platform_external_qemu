@@ -231,5 +231,23 @@ int64_t OneSizeGapTracker::wastedSpaceImpl() const {
     return mSize * (mGapStarts.size() - mCurrentPos);
 }
 
+void NullGapTracker::load(base::Stream& in) {
+    GenericGapTracker().load(in);
+}
+
+void NullGapTracker::save(base::Stream& out) {
+    OneSizeGapTracker().save(out);
+}
+
+base::Optional<int64_t> NullGapTracker::allocate(int size) {
+    return {};
+}
+
+void NullGapTracker::add(int64_t start, int size) {}
+
+int64_t NullGapTracker::wastedSpaceImpl() const {
+    return 0;
+}
+
 }  // namespace snapshot
 }  // namespace android

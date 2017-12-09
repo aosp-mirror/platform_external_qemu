@@ -127,7 +127,7 @@ RamSaver::RamSaver(const std::string& fileName,
     }
 
     mWorkers.emplace(
-            std::max(2, std::min(System::get()->getCpuCoreCount(), 16)),
+            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 16)),
             [this](QueuedPageInfo&& pi) { handlePageSave(std::move(pi)); });
     mWorkers->start();
     mWriter.emplace([this](WriteInfo&& wi) {
@@ -177,6 +177,10 @@ void RamSaver::savePage(int64_t blockOffset,
             passToSaveHandler({mLastBlockIndex, i});
         }
     }
+}
+
+void RamSaver::complete() {
+    mWorkers->done();
 }
 
 static constexpr int kStopMarkerIndex = -1;
