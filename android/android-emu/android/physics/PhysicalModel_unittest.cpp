@@ -466,7 +466,7 @@ TEST(PhysicalModel, SaveLoadTargets) {
     EXPECT_VEC3_NEAR(rotationTarget,
             physicalModel_getParameterRotation(loadedModel,
                                                PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
+            0.0001f);
     EXPECT_VEC3_NEAR(magneticFieldTarget,
             physicalModel_getParameterMagneticField(loadedModel,
                                                PARAMETER_VALUE_TYPE_TARGET),

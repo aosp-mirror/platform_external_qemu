@@ -419,10 +419,10 @@ TEST(InertialModel, GyroscopeTotalChange) {
         integratedRotation = glm::quat_cast(rotationMatrix) * integratedRotation;
     }
 
-    EXPECT_NEAR(targetRotation.x, integratedRotation.x, 0.001f);
-    EXPECT_NEAR(targetRotation.y, integratedRotation.y, 0.001f);
-    EXPECT_NEAR(targetRotation.z, integratedRotation.z, 0.001f);
-    EXPECT_NEAR(targetRotation.w, integratedRotation.w, 0.001f);
+    EXPECT_NEAR(targetRotation.x, integratedRotation.x, 0.0001f);
+    EXPECT_NEAR(targetRotation.y, integratedRotation.y, 0.0001f);
+    EXPECT_NEAR(targetRotation.z, integratedRotation.z, 0.0001f);
+    EXPECT_NEAR(targetRotation.w, integratedRotation.w, 0.0001f);
 }
 
 TEST(InertialModel, GyroscopeIntermediateValues) {
@@ -461,10 +461,10 @@ TEST(InertialModel, GyroscopeIntermediateValues) {
         glm::quat measuredRotation =
                 inertialModel.getRotation(PARAMETER_VALUE_TYPE_CURRENT);
 
-        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.01f);
-        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.01f);
-        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.01f);
-        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.01f);
+        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.0001f);
+        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.0001f);
+        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.0001f);
+        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.0001f);
     }
 }
 
@@ -512,15 +512,15 @@ TEST(InertialModel, GyroscopeIntermediateValuesMultiTarget) {
         glm::quat measuredRotation =
                 inertialModel.getRotation(PARAMETER_VALUE_TYPE_CURRENT);
 
-        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.01f);
-        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.01f);
-        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.01f);
-        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.01f);
+        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.0001f);
+        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.0001f);
+        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.0001f);
+        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.0001f);
     }
-    EXPECT_NEAR(targetRotation1.x, integratedRotation.x, 0.01f);
-    EXPECT_NEAR(targetRotation1.y, integratedRotation.y, 0.01f);
-    EXPECT_NEAR(targetRotation1.z, integratedRotation.z, 0.01f);
-    EXPECT_NEAR(targetRotation1.w, integratedRotation.w, 0.01f);
+    EXPECT_NEAR(targetRotation1.x, integratedRotation.x, 0.0001f);
+    EXPECT_NEAR(targetRotation1.y, integratedRotation.y, 0.0001f);
+    EXPECT_NEAR(targetRotation1.z, integratedRotation.z, 0.0001f);
+    EXPECT_NEAR(targetRotation1.w, integratedRotation.w, 0.0001f);
 }
 
 TEST(InertialModel, GyroscopeZeroChange) {
@@ -589,10 +589,10 @@ TEST(InertialModel, Gyroscope180Change) {
         glm::quat measuredRotation =
                 inertialModel.getRotation(PARAMETER_VALUE_TYPE_CURRENT);
 
-        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.01f);
-        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.01f);
-        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.01f);
-        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.01f);
+        EXPECT_NEAR(measuredRotation.x, integratedRotation.x, 0.0001f);
+        EXPECT_NEAR(measuredRotation.y, integratedRotation.y, 0.0001f);
+        EXPECT_NEAR(measuredRotation.z, integratedRotation.z, 0.0001f);
+        EXPECT_NEAR(measuredRotation.w, integratedRotation.w, 0.0001f);
     }
 }
 
