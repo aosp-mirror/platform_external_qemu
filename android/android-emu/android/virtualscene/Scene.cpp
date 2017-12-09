@@ -34,7 +34,7 @@ using namespace android::base;
 #define D_ACTIVE VERBOSE_CHECK(virtualscene)
 
 static constexpr const char* kObjFiles[] = {
-        "Toren1BD_Main.obj", "Toren1BD_Decor.obj", "Toren1BD_TVScreen.obj",
+        "Toren1BD.obj",
 };
 
 namespace android {
