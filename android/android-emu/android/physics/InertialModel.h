@@ -34,7 +34,7 @@ constexpr float nsToSeconds(uint64_t nanoSeconds) {
     return static_cast<float>(nanoSeconds / 1000000000.0);
 }
 
-constexpr float kStateChangeTimeSeconds = 0.2f;
+constexpr float kStateChangeTimeSeconds = 0.4f;
 
 typedef enum {
     INERTIAL_STATE_CHANGING=0,
@@ -88,6 +88,8 @@ public:
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
     glm::vec3 getAcceleration(
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+    glm::vec3 getJerk(
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
     glm::quat getRotation(
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
     // rotational velocity as rotation around (x, y, z) axis in rad/s
@@ -98,8 +100,10 @@ private:
     void updateRotations();
 
     // Helper for setting the transforms for position, velocity and acceleration
-    // based on the coefficients for quintic motion.
+    // based on the coefficients for heptic motion.
     void setInertialTransforms(
+            const glm::vec3 hepticCoefficient,
+            const glm::vec3 hexicCoefficient,
             const glm::vec3 quinticCoefficient,
             const glm::vec3 quarticCoefficient,
             const glm::vec3 cubicCoefficient,
@@ -110,7 +114,7 @@ private:
     // Helper for calculating the current or target state given a transform
     // specifying either the acceleration, velocity, or position.
     glm::vec3 calculateInertialState(
-            const glm::mat2x3& quinticTransform,
+            const glm::mat4x3& hepticTransform,
             const glm::mat4x3& cubicTransform,
             const glm::mat4x3& afterEndCubicTransform,
             ParameterValueType parameterValueType) const;
@@ -119,6 +123,7 @@ private:
     // transform specifying either the rotational velocity, or rotation in
     // 4d vector space.
     glm::vec4 calculateRotationalState(
+        const glm::mat2x4& quinticTransform,
         const glm::mat4x4& cubicTransform,
         ParameterValueType parameterValueType) const;
 
@@ -139,12 +144,14 @@ private:
     //       acceleration will be zero and the position will be as set in the
     //       target.
     uint64_t mPositionChangeStartTime = 0UL;
-    glm::mat2x3 mPositionQuintic = glm::mat2x3(0.f);
+    glm::mat4x3 mPositionHeptic = glm::mat4x3(0.f);
     glm::mat4x3 mPositionCubic = glm::mat4x3(0.f);
-    glm::mat2x3 mVelocityQuintic = glm::mat2x3(0.f);
+    glm::mat4x3 mVelocityHeptic = glm::mat4x3(0.f);
     glm::mat4x3 mVelocityCubic = glm::mat4x3(0.f);
-    glm::mat2x3 mAccelerationQuintic = glm::mat2x3(0.f);
+    glm::mat4x3 mAccelerationHeptic = glm::mat4x3(0.f);
     glm::mat4x3 mAccelerationCubic = glm::mat4x3(0.f);
+    glm::mat4x3 mJerkHeptic = glm::mat4x3(0.f);
+    glm::mat4x3 mJerkCubic = glm::mat4x3(0.f);
     uint64_t mPositionChangeEndTime = 0UL;
     bool mZeroVelocityAfterEndTime = true;
 
@@ -152,9 +159,13 @@ private:
     glm::mat4x3 mVelocityAfterEndCubic = glm::mat4x3(0.f);
 
     uint64_t mRotationChangeStartTime = 0UL;
+    glm::mat2x4 mRotationQuintic = glm::mat2x4(0.f);
     glm::mat4x4 mRotationCubic = glm::mat4x4(
             glm::vec4(), glm::vec4(), glm::vec4(), glm::vec4(0.f, 0.f, 0.f, 1.f));
+    glm::mat2x4 mRotationalVelocityQuintic = glm::mat2x4(0.f);
     glm::mat4x4 mRotationalVelocityCubic = glm::mat4x4(0.f);
+    glm::mat2x4 mRotationalAccelerationQuintic = glm::mat2x4(0.f);
+    glm::mat4x4 mRotationalAccelerationCubic = glm::mat4x4(0.f);
     uint64_t mRotationChangeEndTime = 0UL;
 
     /* The time to use as current in this model */
