@@ -510,15 +510,11 @@ ifeq ($(BUILD_TARGET_OS),windows)
 endif
 
 LOCAL_COPY_COMMON_PREBUILT_RESOURCES := \
-  virtualscene/Toren1BD/Toren1BD_Decor.mtl \
-  virtualscene/Toren1BD/Toren1BD_Decor.obj \
-  virtualscene/Toren1BD/Toren1BD_Decor_BakedLighting.png \
-  virtualscene/Toren1BD/Toren1BD_Main.mtl \
-  virtualscene/Toren1BD/Toren1BD_Main.obj \
-  virtualscene/Toren1BD/Toren1BD_Main_BakedLighting.png \
-  virtualscene/Toren1BD/Toren1BD_TVScreen.mtl \
-  virtualscene/Toren1BD/Toren1BD_TVScreen.obj \
-  virtualscene/Toren1BD/Toren1BD_TVScreen_Emissive.png \
+  virtualscene/Toren1BD/Toren1BD.mtl \
+  virtualscene/Toren1BD/Toren1BD.obj \
+  virtualscene/Toren1BD/Toren1BD_Decor.png \
+  virtualscene/Toren1BD/Toren1BD_Main.png \
+  virtualscene/Toren1BD/Toren1BD_TV.png \
 
 $(call gen-hw-config-defs)
 $(call end-emulator-library)
