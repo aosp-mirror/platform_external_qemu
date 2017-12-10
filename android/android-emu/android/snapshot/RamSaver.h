@@ -89,6 +89,8 @@ private:
                 bool hashFilled;
                 int64_t filePos;
                 Hash hash;
+
+                bool zeroed() const { return sizeOnDisk == 0; }
             };
             std::vector<Page> pages;
         };

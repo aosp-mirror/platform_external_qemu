@@ -14,6 +14,7 @@
 #include "android/base/Stopwatch.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/memory/OnDemand.h"
 #include "android/base/misc/FileUtils.h"
 #include "android/base/system/System.h"
 #include "android/snapshot/RamLoader.h"
@@ -262,22 +263,24 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
 
     auto ptr = block.ramBlock.hostPtr +
                int64_t(pi.pageIndex) * block.ramBlock.pageSize;
-    base::Optional<bool> isZeroed;
+    auto isZeroed = base::makeOnDemand<bool>([&] {
+        return std::make_tuple(measure(zero_check_time, [&] {
+            return isBufferZeroed(ptr, block.ramBlock.pageSize);
+        }));
+    });
     page.filePos = 0;
     page.same = false;
     page.hashFilled = false;
+    const RamLoader::Page* loaderPage = nullptr;
     if (mLoader) {
-        const RamLoader::Page* loaderPage = mLoader->findPage(
-                pi.blockIndex, block.ramBlock.id, pi.pageIndex);
+        loaderPage = mLoader->findPage(pi.blockIndex, block.ramBlock.id,
+                                       pi.pageIndex);
         assert(loaderPage);
-        if (loaderPage->sizeOnDisk == 0) {
-            isZeroed = measure(zero_check_time, [&] {
-                return isBufferZeroed(ptr, block.ramBlock.pageSize);
-            });
+        if (loaderPage->zeroed()) {
             if (*isZeroed) {
                 ++still0;
                 page.same = true;
-                page.filePos = page.sizeOnDisk = 0;
+                page.sizeOnDisk = 0;
             }
         } else if (mLoader->version() >= 2) {
             calcHash(page, block, ptr);
@@ -288,23 +291,18 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 page.sizeOnDisk = loaderPage->sizeOnDisk;
             }
         }
-        if (!page.same && loaderPage->sizeOnDisk != 0) {
-            measure(gap_tracker_time, [&] {
-                mGaps->add(loaderPage->filePos, loaderPage->sizeOnDisk);
-            });
-        }
     }
     if (page.same) {
         ++same;
     } else {
-        if (!isZeroed) {
-            isZeroed = measure(zero_check_time, [&] {
-                return isBufferZeroed(ptr, block.ramBlock.pageSize);
-            });
-        }
         if (*isZeroed) {
             ++new_zero;
             page.sizeOnDisk = 0;
+            if (loaderPage) {
+                measure(gap_tracker_time, [&] {
+                    mGaps->add(loaderPage->filePos, loaderPage->sizeOnDisk);
+                });
+            }
         } else {
             if (!page.hashFilled) {
                 calcHash(page, block, ptr);
@@ -316,9 +314,37 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                                                     block.ramBlock.pageSize);
                 });
                 page.sizeOnDisk = compressedPage.second;
+                if (loaderPage) {
+                    if (page.sizeOnDisk <= loaderPage->sizeOnDisk) {
+                        page.filePos = loaderPage->filePos;
+                        if (page.sizeOnDisk < loaderPage->sizeOnDisk) {
+                            measure(gap_tracker_time, [&] {
+                                mGaps->add(
+                                        loaderPage->filePos + page.sizeOnDisk,
+                                        loaderPage->sizeOnDisk -
+                                                page.sizeOnDisk);
+                            });
+                        }
+                    } else {
+                        measure(gap_tracker_time, [&] {
+                            mGaps->add(loaderPage->filePos,
+                                       loaderPage->sizeOnDisk);
+                        });
+                    }
+                }
                 mWriter->enqueue({&page, compressedPage.first, true});
             } else {
                 page.sizeOnDisk = block.ramBlock.pageSize;
+                if (loaderPage) {
+                    if (loaderPage->sizeOnDisk == page.sizeOnDisk) {
+                        page.filePos = loaderPage->filePos;
+                    } else {
+                        measure(gap_tracker_time, [&] {
+                            mGaps->add(loaderPage->filePos,
+                                       loaderPage->sizeOnDisk);
+                        });
+                    }
+                }
                 mWriter->enqueue({&page, ptr, false});
             }
         }
@@ -350,7 +376,7 @@ void RamSaver::writeIndex() {
             stream.putPackedNum(uint64_t(
                     compressed ? page.sizeOnDisk
                                : (page.sizeOnDisk / b.ramBlock.pageSize)));
-            if (page.sizeOnDisk) {
+            if (!page.zeroed()) {
                 auto deltaPos = page.filePos - prevFilePos;
                 if (compressed) {
                     deltaPos -= prevPageSizeOnDisk;
@@ -406,16 +432,20 @@ void RamSaver::writeIndex() {
 }
 
 void RamSaver::writePage(WriteInfo&& wi) {
-    if (auto gapPos = measure(gap_tracker_time, [&] {
-            return mGaps ? mGaps->allocate(wi.page->sizeOnDisk)
-                         : base::kNullopt;
-        })) {
-        wi.page->filePos = *gapPos;
-        ++reused;
-    } else {
-        wi.page->filePos = mCurrentStreamPos;
-        mCurrentStreamPos += wi.page->sizeOnDisk;
-        ++appended;
+    if (wi.page->filePos == 0) {
+        if (mGaps) {
+            if (auto gapPos = measure(gap_tracker_time, [&] {
+                    return mGaps->allocate(wi.page->sizeOnDisk);
+                })) {
+                wi.page->filePos = *gapPos;
+                ++reused;
+            }
+        }
+        if (wi.page->filePos == 0) {
+            wi.page->filePos = mCurrentStreamPos;
+            mCurrentStreamPos += wi.page->sizeOnDisk;
+            ++appended;
+        }
     }
 
     measure(write_time, [&] {

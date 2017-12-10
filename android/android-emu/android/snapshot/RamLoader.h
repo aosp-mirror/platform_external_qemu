@@ -171,6 +171,8 @@ struct RamLoader::Page {
         data = other.data;
         return *this;
     }
+
+    bool zeroed() const { return sizeOnDisk == 0; }
 };
 
 }  // namespace snapshot
