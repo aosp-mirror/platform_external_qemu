@@ -79,6 +79,7 @@
 #include "android/utils/filelock.h"
 #include "android/utils/ini.h"
 #include "android/utils/ipaddr.h"
+#include "android/utils/looper.h"
 #include "android/utils/path.h"
 #include "android/utils/socket_drainer.h"
 #include "android/utils/stralloc.h"
@@ -1946,6 +1947,7 @@ int main(int argc, char **argv, char **envp)
 
     socket_drainer_start(looper_getForThread());
     android_wear_agent_start(looper_getForThread());
+    android_registerMainLooper(looper_getForThread());
 
 #ifdef CONFIG_KVM
     /* By default, force auto-detection for kvm */
