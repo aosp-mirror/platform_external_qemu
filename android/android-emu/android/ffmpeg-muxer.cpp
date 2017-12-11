@@ -142,6 +142,7 @@ typedef struct ffmpeg_recorder {
     // A single lock to protect writing audio and video frames to the video file
     mutable android::base::Lock out_pkt_lock;
     bool have_video;
+    bool has_video_frames;
     bool have_audio;
     bool started;
     uint64_t start_time;
@@ -549,6 +550,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
     }
 
     memset(recorder, 0, sizeof(ffmpeg_recorder));
+    recorder->has_video_frames = false;
     recorder->path = strdup(info->fileName);
 
     // Initialize libavcodec, and register all codecs and formats. does not hurt
@@ -582,9 +584,9 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
     return recorder;
 }
 
-void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
+bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     if (recorder == NULL)
-        return;
+        return false;
 
     if (recorder->audio_capturer != NULL) {
         AudioCaptureEngine* engine = AudioCaptureEngine::get();
@@ -648,7 +650,10 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     // close the CodecContexts open when you wrote the header; otherwise
     // av_write_trailer() may try to use memory that was freed on
     // av_codec_close().
-    av_write_trailer(recorder->oc);
+    if (recorder->has_video_frames) {
+        // This crashes on linux if no frames were encoded.
+        av_write_trailer(recorder->oc);
+    }
 
     // Close each codec.
     if (recorder->have_video)
@@ -671,7 +676,10 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     if (recorder->path)
         free(recorder->path);
 
+    bool ret = recorder->has_video_frames;
     free(recorder);
+
+    return ret;
 }
 
 // local helper to start the recording, after tracks are added
@@ -978,6 +986,7 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     ost->frame->pts = (int64_t)(((double)elapsedUS * ost->st->time_base.den) /
                                 1000000.00);
     rc = write_video_frame(recorder, recorder->oc, ost, ost->frame);
+    recorder->has_video_frames = true;
 
     return rc;
 }

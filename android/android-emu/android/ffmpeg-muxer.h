@@ -59,8 +59,9 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
 // params:
 //  recorder: the recorder pointer returned from ffmpeg_create_recorder()
 //
+// returns true if the recording was successful, false otherwise.
 // this method is thread safe
-void ffmpeg_delete_recorder(ffmpeg_recorder* recorder);
+bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder);
 
 // Add an audio track from the specified format, audio track is optional
 // stero audio and PCM format are assumed
