@@ -224,6 +224,10 @@ void  nsPBufferMakeCurrent(void* context,void* nativePBuffer,int level){
             [ctx preBind:1];
             [ctx setPixelBuffer:pbuff cubeMapFace:0 mipMapLevel:level currentVirtualScreen:0];
             [ctx makeCurrentContext];
+        } else {
+            // in this case, pbuffers deprecated and disabled.
+            [ctx preBind:0];
+            [ctx makeCurrentContext];
         }
     }
 }

@@ -348,7 +348,7 @@ prepare_build_for_host () {
         darwin-*)
             OSX_VERSION=$(sw_vers -productVersion)
             OSX_DEPLOYMENT_TARGET=10.8
-            OSX_SDK_SUPPORTED="10.10 10.11 10.12"
+            OSX_SDK_SUPPORTED="10.10 10.11 10.12 10.13"
             OSX_SDK_INSTALLED_LIST=$(xcodebuild -showsdks 2>/dev/null | \
                     grep --color=never macosx | sed -e "s/.*macosx10\.//g" | sort -n | \
                     sed -e 's/^/10./g' | tr '\n' ' ')
