@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "94528f4f_49667915",
+        "filename": "android/android-emu/android/base/threads/Thread_win32.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:56:09Z",
+      "side": 0,
+      "message": "Nice",
+      "range": {
+        "startLine": 64,
+        "startChar": 0,
+        "endLine": 64,
+        "endChar": 32
+      },
+      "revId": "7a8ce149264e1561c2ecfd22dfc29e6188c27876",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
