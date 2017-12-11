@@ -21,6 +21,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
 #include "android/snapshot/Compressor.h"
+#include "android/snapshot/FastReleasePool.h"
 #include "android/snapshot/GapTracker.h"
 #include "android/snapshot/RamLoader.h"
 #include "android/snapshot/common.h"
@@ -138,6 +139,15 @@ private:
 
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
+
+    static const int kCompressBufferCount = 128;
+    using CompressBuffer =
+            std::array<uint8_t, compress::maxCompressedSize(kDefaultPageSize)>;
+    std::unique_ptr<CompressBuffer[]> mCompressBufferMemory;
+    base::Optional<FastReleasePool<CompressBuffer, kCompressBufferCount>>
+            mCompressBuffers;
+
+    base::System* mSystem = base::System::get();
 
 #if SNAPSHOT_PROFILE > 1
     base::System::WallDuration mStartTime =

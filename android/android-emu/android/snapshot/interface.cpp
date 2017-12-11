@@ -11,7 +11,9 @@
 
 #include "android/snapshot/interface.h"
 
+#include "android/snapshot/Loader.h"
 #include "android/snapshot/Snapshotter.h"
+
 #include "android/utils/debug.h"
 
 using android::snapshot::FailureReason;

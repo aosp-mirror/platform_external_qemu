@@ -29,6 +29,9 @@
 namespace android {
 namespace snapshot {
 
+class Saver;
+class Loader;
+
 class Snapshotter final {
     DISALLOW_COPY_AND_ASSIGN(Snapshotter);
 
@@ -86,8 +89,8 @@ private:
 
     QAndroidVmOperations mVmOperations;
     QAndroidEmulatorWindowAgent mWindowAgent;
-    android::base::Optional<Saver> mSaver;
-    android::base::Optional<Loader> mLoader;
+    std::unique_ptr<Saver> mSaver;
+    std::unique_ptr<Loader> mLoader;
     std::vector<Callback> mCallbacks;
     std::string mLoadedSnapshotFile;
 
