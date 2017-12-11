@@ -2963,6 +2963,58 @@ static const CommandDefRec screenrecord_commands[] = {
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                           P R O X Y   C O M M A N D S                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+static int do_proxy_set(ControlClient client, char* args) {
+    if (args == NULL) {
+        control_write(
+                client,
+                "KO: Argument missing\r\n");
+        return -1;
+    }
+
+    if (client->global->proxy_agent->httpProxySet(args) != 0) {
+        control_write(
+                client,
+                "KO: Failed to set proxy\r\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+static int do_proxy_clear(ControlClient client, char* args) {
+    if (client->global->proxy_agent->httpProxySet(NULL) != 0) {
+        control_write(
+                client,
+                "KO: Failed to clear proxy\r\n");
+        return -1;
+    }
+
+    return 0;
+}
+
+static const CommandDefRec proxy_commands[] = {
+        {"set", "set the proxy server to use",
+         "'proxy set http://[username:password@]<machineName>:<port>'\r\n"
+         "\r\nSets an HTTP proxy server for all TCP network connections.\r\n"
+         "\r\nThe 'http://' prefix is optional.\r\n",
+         NULL, do_proxy_set, NULL},
+
+         {"clear", "clear proxy server setting",
+         "'proxy clear' clears any proxy server setting\r\n",
+         NULL, do_proxy_clear, NULL},
+
+
+        {NULL, NULL, NULL, NULL, NULL, NULL}};
+
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                           Q E M U   C O M M A N D S                             ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -3148,6 +3200,9 @@ extern const CommandDefRec main_commands[] = {
 
         {"screenrecord", "Records the emulator's display to a .webm file", NULL,
          NULL, NULL, screenrecord_commands},
+
+        {"proxy", "manage network proxy server settings", NULL,
+         NULL, NULL, proxy_commands},
 
         {NULL, NULL, NULL, NULL, NULL, NULL}};
 
