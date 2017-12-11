@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb0790cf_a4208493",
+        "filename": "android/android-emu/android/skin/qt/video-player/Clock.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "usually get() is reserved for getting global / static instances of a class. Can you rename to something more specific to time, maybe getTime?",
+      "range": {
+        "startLine": 52,
+        "startChar": 14,
+        "endLine": 52,
+        "endChar": 17
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c7814093_6e7d1892",
+        "filename": "android/android-emu/android/skin/qt/video-player/Clock.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "nit: break into multiple lines",
+      "range": {
+        "startLine": 90,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 99
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "59c80836_735d03ba",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "This seems to come up a lot. Is it related to the timestamp of the packet queue changing to signal that there are new packets to decode? Please factor this out into a separate function called PacketQueue::newerThan(serial) (or something) for more understandability.",
+      "range": {
+        "startLine": 103,
+        "startChar": 31,
+        "endLine": 103,
+        "endChar": 70
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f816676a_a02e05cd",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "This is also a very common pattern throughout the code (signaling a struct\u0027s CV) that could use a lot more explicit naming and documentation on why it is important.",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 109,
+        "endChar": 84
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "462eace8_37e63c60",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "Again, please clarify the functions here. This is currently the major thing that could be improved for readability of code.\n\nFactor things like the while loop condition into separate functions that explicitly say what\u0027s going on. I see that this is supposed to retrieve new packets from the packet queue (or something), but it\u0027s not clear why we chose these particular conditions.",
+      "range": {
+        "startLine": 103,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 9
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "591d827e_1e0b5e0f",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "Here\u0027s an example of what I\u0027m talking about: mTmpPkt just makes the reader think that the variable is temporary (and that somewhere down the line there is a more important packet that we are actually decoding), but it is really and critically the current packet to decode.",
+      "range": {
+        "startLine": 128,
+        "startChar": 72,
+        "endLine": 128,
+        "endChar": 79
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f4c1eb1_19f42d50",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "got_frame makes me think that the frame was successfully decoded, but the while condition below makes me think that the whole loop is based on not having a frame? So it\u0027s supposed to loop only once (got_frame || mFinished)? Please put more documentation there.",
+      "range": {
+        "startLine": 176,
+        "startChar": 20,
+        "endLine": 176,
+        "endChar": 30
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "188f0afe_0e24a1ae",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 23
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 178,
+        "startChar": 32,
+        "endLine": 178,
+        "endChar": 44
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "162d424a_e00b0604",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.h",
+        "patchSetId": 23
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-11T15:41:04Z",
+      "side": 1,
+      "message": "recommend renaming the class to DecoderThread or something",
+      "range": {
+        "startLine": 59,
+        "startChar": 6,
+        "endLine": 59,
+        "endChar": 19
+      },
+      "revId": "45273bda458bacf2c7a9f0752c93f83d684880b4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
