@@ -125,10 +125,15 @@ RamSaver::RamSaver(const std::string& fileName,
 
     if (nonzero(mFlags & Flags::Compress)) {
         mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
+
+        auto compressBuffers = new CompressBuffer[kCompressBufferCount];
+        mCompressBufferMemory.reset(compressBuffers);
+        mCompressBuffers.emplace(compressBuffers,
+                                 compressBuffers + kCompressBufferCount);
     }
 
     mWorkers.emplace(
-            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 16)),
+            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 6)),
             [this](QueuedPageInfo&& pi) { handlePageSave(std::move(pi)); });
     mWorkers->start();
     mWriter.emplace([this](WriteInfo&& wi) {
@@ -308,45 +313,40 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
                 calcHash(page, block, ptr);
             }
 
-            if (compressed()) {
-                auto compressedPage = measure(compress_time, [&] {
-                    return CompressorBase::compress(ptr,
-                                                    block.ramBlock.pageSize);
-                });
-                page.sizeOnDisk = compressedPage.second;
-                if (loaderPage) {
-                    if (page.sizeOnDisk <= loaderPage->sizeOnDisk) {
-                        page.filePos = loaderPage->filePos;
-                        if (page.sizeOnDisk < loaderPage->sizeOnDisk) {
-                            measure(gap_tracker_time, [&] {
-                                mGaps->add(
-                                        loaderPage->filePos + page.sizeOnDisk,
-                                        loaderPage->sizeOnDisk -
-                                                page.sizeOnDisk);
-                            });
-                        }
-                    } else {
-                        measure(gap_tracker_time, [&] {
-                            mGaps->add(loaderPage->filePos,
-                                       loaderPage->sizeOnDisk);
-                        });
-                    }
-                }
-                mWriter->enqueue({&page, compressedPage.first, true});
-            } else {
+            WriteInfo wi = {&page, ptr, false};
+            if (!compressed()) {
                 page.sizeOnDisk = block.ramBlock.pageSize;
-                if (loaderPage) {
-                    if (loaderPage->sizeOnDisk == page.sizeOnDisk) {
-                        page.filePos = loaderPage->filePos;
-                    } else {
+            } else {
+                auto buffer = mCompressBuffers->allocate();
+                auto compressedSize = measure(compress_time, [&] {
+                    return compress::compress(ptr, block.ramBlock.pageSize,
+                                              buffer->data(), buffer->size());
+                });
+                assert(compressedSize > 0);
+
+                page.sizeOnDisk = compressedSize;
+                wi.ptr = buffer->data();
+                wi.allocated = true;
+            }
+
+            if (loaderPage) {
+                if (page.sizeOnDisk <= loaderPage->sizeOnDisk) {
+                    page.filePos = loaderPage->filePos;
+                    ++reused;
+                    if (page.sizeOnDisk < loaderPage->sizeOnDisk) {
                         measure(gap_tracker_time, [&] {
-                            mGaps->add(loaderPage->filePos,
-                                       loaderPage->sizeOnDisk);
+                            mGaps->add(
+                                    loaderPage->filePos + page.sizeOnDisk,
+                                    loaderPage->sizeOnDisk - page.sizeOnDisk);
                         });
                     }
+                } else if (!loaderPage->zeroed()) {
+                    measure(gap_tracker_time, [&] {
+                        mGaps->add(loaderPage->filePos, loaderPage->sizeOnDisk);
+                    });
                 }
-                mWriter->enqueue({&page, ptr, false});
             }
+            mWriter->enqueue(std::move(wi));
         }
     }
 
@@ -432,20 +432,18 @@ void RamSaver::writeIndex() {
 }
 
 void RamSaver::writePage(WriteInfo&& wi) {
+    if (mGaps && wi.page->filePos == 0) {
+        if (auto gapPos = measure(gap_tracker_time, [&] {
+                return mGaps->allocate(wi.page->sizeOnDisk);
+            })) {
+            wi.page->filePos = *gapPos;
+            ++reused;
+        }
+    }
     if (wi.page->filePos == 0) {
-        if (mGaps) {
-            if (auto gapPos = measure(gap_tracker_time, [&] {
-                    return mGaps->allocate(wi.page->sizeOnDisk);
-                })) {
-                wi.page->filePos = *gapPos;
-                ++reused;
-            }
-        }
-        if (wi.page->filePos == 0) {
-            wi.page->filePos = mCurrentStreamPos;
-            mCurrentStreamPos += wi.page->sizeOnDisk;
-            ++appended;
-        }
+        wi.page->filePos = mCurrentStreamPos;
+        mCurrentStreamPos += wi.page->sizeOnDisk;
+        ++appended;
     }
 
     measure(write_time, [&] {
@@ -453,7 +451,7 @@ void RamSaver::writePage(WriteInfo&& wi) {
                      wi.page->filePos);
     });
     if (wi.allocated) {
-        delete[] wi.ptr;
+        mCompressBuffers->release((CompressBuffer*)wi.ptr);
     }
 }
 

@@ -14,8 +14,6 @@
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/system/System.h"
-#include "android/snapshot/Loader.h"
-#include "android/snapshot/Saver.h"
 #include "android/snapshot/common.h"
 
 #include "android/emulation/control/vm_operations.h"
@@ -28,6 +26,9 @@
 
 namespace android {
 namespace snapshot {
+
+class Saver;
+class Loader;
 
 class Snapshotter final {
     DISALLOW_COPY_AND_ASSIGN(Snapshotter);
@@ -58,7 +59,9 @@ public:
     Loader& loader() { return *mLoader; }
 
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
-    const QAndroidEmulatorWindowAgent& windowAgent() const { return mWindowAgent; }
+    const QAndroidEmulatorWindowAgent& windowAgent() const {
+        return mWindowAgent;
+    }
 
     // Add a callback that's called on the specific stages of the snapshot
     // operations.
@@ -67,9 +70,7 @@ public:
     using Callback = std::function<void(Operation, Stage)>;
     void addOperationCallback(Callback&& cb);
 
-    bool isQuickboot() const {
-        return mIsQuickboot;
-    }
+    bool isQuickboot() const { return mIsQuickboot; }
 
 private:
     bool onStartSaving(const char* name);
@@ -86,8 +87,8 @@ private:
 
     QAndroidVmOperations mVmOperations;
     QAndroidEmulatorWindowAgent mWindowAgent;
-    android::base::Optional<Saver> mSaver;
-    android::base::Optional<Loader> mLoader;
+    std::unique_ptr<Saver> mSaver;
+    std::unique_ptr<Loader> mLoader;
     std::vector<Callback> mCallbacks;
     std::string mLoadedSnapshotFile;
 
