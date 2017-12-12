@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a1d64b1_004240cb",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T02:05:00Z",
+      "side": 1,
+      "message": "The main functions are avcodec_decode_video2 for video decoding, and avcodec_decode_audio4 for audio. AVPacket is the data input, fetched from PacketQueue. When these two decode functions return, it will tell how much data has been decoded. If there are left overs, we will keep them into mTmpPkt, and continue to decode. got_frame is true is a whole frame is available, which may consume one or more packets. After decoding, the frame may contain a valid pts (presentation timestamp), if not, we call av_frame_get_best_effort_timestamp() to get one",
+      "parentUuid": "dff39992_d0b504c8",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 40
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "db342528_471ae435",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 27
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0ae75272_8d3b2b6e",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T02:05:00Z",
+      "side": 1,
+      "message": "This is indeed the decoder thread. Decoder class does not launch any thread right now, it\u0027s a pure data keeping class, i.e., mThread in Decoder is no longer used. I moved it to this main class here, since it\u0027s more related to other stuff, such as frame queue, and timing info.",
+      "parentUuid": "db342528_471ae435",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 35
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3d84eed7_0d524dbd",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 27
@@ -59,6 +107,30 @@
       "writtenOn": "2017-12-12T01:30:28Z",
       "side": 1,
       "message": "I\u0027d say the decoding and timing related functions in both VideoPlayer and Decoder are the second top source of confusion to non-ffmpeg-experts. Shouldn\u0027t we take care of all decoding and all timing in separate, single classes?",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 167,
+        "endChar": 39
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8389826a_9e4cd51d",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T02:05:00Z",
+      "side": 1,
+      "message": "Again, Decoder mainly provides the decodeFrame() function. Originally, I don\u0027t have Decoder class, I thought splitting into a separate class is more readable.\n\nOnce can decode and render in the same thread, however, to do the best a/v sync, we better perform these tasks in separate threads, so they are totally independent. Of course, this increases the locking/waiting exchanges between queues.\n\nFor example, the audio callback doesn\u0027t like any waiting, if we do decoding there, it will cause the whole system not responding. I\u0027ve played so many different versions of the player, starting from a very simple one (400 lines of code), to the current moderate complicatedly version. It\u0027s very involving, and not very easy to understand the code.",
+      "parentUuid": "3d84eed7_0d524dbd",
       "range": {
         "startLine": 167,
         "startChar": 0,
