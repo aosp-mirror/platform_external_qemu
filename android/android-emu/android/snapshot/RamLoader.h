@@ -53,6 +53,21 @@ public:
     }
     uint64_t diskSize() const { return mDiskSize; }
 
+    // getDuration():
+    // Returns true if there was save with measurable time
+    // (and writes it to |duration| if |duration| is not null),
+    // otherwise returns false.
+    bool getDuration(base::System::Duration* duration) {
+        if (mEndTime < mStartTime) {
+            return false;
+        }
+
+        if (duration) {
+            *duration = mEndTime - mStartTime;
+        }
+        return true;
+    }
+
 private:
     enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
 
@@ -118,9 +133,8 @@ private:
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
 
-#if SNAPSHOT_PROFILE > 1
-    base::System::WallDuration mStartTime;
-#endif
+    base::System::Duration mStartTime = 0;
+    base::System::Duration mEndTime = 0;
 
     // Assumed to be a power of 2 for convenient
     // rounding and aligning

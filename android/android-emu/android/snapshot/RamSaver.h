@@ -50,6 +50,21 @@ public:
     bool compressed() const { return mIndex.flags & int32_t(IndexFlags::CompressedPages); }
     uint64_t diskSize() const { return mDiskSize; }
 
+    // getDuration():
+    // Returns true if there was save with measurable time
+    // (and writes it to |duration| if |duration| is not null),
+    // otherwise returns false.
+    bool getDuration(base::System::Duration* duration) {
+        if (mEndTime < mStartTime) {
+            return false;
+        }
+
+        if (duration) {
+            *duration = mEndTime - mStartTime;
+        }
+        return true;
+    }
+
 private:
     struct QueuedPageInfo {
         int blockIndex;
@@ -108,10 +123,9 @@ private:
     FileIndex mIndex;
     uint64_t mDiskSize = 0;
 
-#if SNAPSHOT_PROFILE > 1
-    base::System::WallDuration mStartTime =
+    base::System::Duration mStartTime =
             base::System::get()->getHighResTimeUs();
-#endif
+    base::System::Duration mEndTime = 0;
 };
 
 }  // namespace snapshot
