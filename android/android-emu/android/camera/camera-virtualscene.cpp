@@ -280,9 +280,9 @@ bool VirtualSceneCameraDevice::initializeEgl() {
     }
 
     // Finally, create a window surface associated with this widget.
-    static const EGLint pbufferAttribs[] = {EGL_WIDTH, mFramebufferWidth,
-                                            EGL_HEIGHT, mFramebufferHeight,
-                                            EGL_NONE};
+    const EGLint pbufferAttribs[] = {EGL_WIDTH, mFramebufferWidth,
+                                     EGL_HEIGHT, mFramebufferHeight,
+                                     EGL_NONE};
     mEglSurface = mEglDispatch->eglCreatePbufferSurface(mEglDisplay, eglConfig,
                                                         pbufferAttribs);
     if (mEglSurface == EGL_NO_SURFACE) {
