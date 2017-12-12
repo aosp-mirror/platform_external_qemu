@@ -61,7 +61,7 @@
 //  // Initialize |i| to 10 on first use:
 //  auto i = makeOnDemand<int>(10);
 //  // Initialize |i| to 10000th prime on first use:
-//  auto i = makeOnDemand<int>([] { return std::make_tuple(calc10000thPrime()); });
+//  auto i = makeOnDemand<int>([]{ return std::make_tuple(calc10000thPrime()); });
 //  // Create a complex object with tons of parameters:
 //  auto obj = makeOnDemand<QWindow>([app, text] {
 //          return std::make_tuple(app, translate(text));
@@ -241,6 +241,10 @@ using MemberOnDemandT = OnDemand<T, std::function<std::tuple<Args...>()>>;
 // A version of OnDemand that's safe to initialize/destroy from multiple
 // threads.
 template <class T, class... Args>
+using AtomicOnDemandT = OnDemand<T,
+                                 internal::TupleHolder<Args...>,
+                                 internal::LazyInstanceState>;
+template <class T, class... Args>
 using AtomicMemberOnDemandT = OnDemand<T,
                                        std::function<std::tuple<Args...>()>,
                                        internal::LazyInstanceState>;
@@ -270,6 +274,26 @@ template <class T, class Arg0, class Arg1, class... Args>
 OnDemandT<T, Arg0, Arg1, Args...> makeOnDemand(Arg0&& arg0,
                                                Arg1&& arg1,
                                                Args&&... args) {
+    return {internal::TupleHolder<Arg0, Arg1, Args...>{
+            std::make_tuple(arg0, arg1, args...)}};
+}
+
+template <class T>
+AtomicOnDemandT<T> makeAtomicOnDemand() {
+    return {{}};
+}
+
+template <class T,
+          class Arg0,
+          class = enable_if_c<!is_callable_with_args<Arg0, void()>::value>>
+AtomicOnDemandT<T, Arg0> makeAtomicOnDemand(Arg0&& arg0) {
+    return {internal::TupleHolder<Arg0>{std::make_tuple(arg0)}};
+}
+
+template <class T, class Arg0, class Arg1, class... Args>
+AtomicOnDemandT<T, Arg0, Arg1, Args...> makeAtomicOnDemand(Arg0&& arg0,
+                                                           Arg1&& arg1,
+                                                           Args&&... args) {
     return {internal::TupleHolder<Arg0, Arg1, Args...>{
             std::make_tuple(arg0, arg1, args...)}};
 }

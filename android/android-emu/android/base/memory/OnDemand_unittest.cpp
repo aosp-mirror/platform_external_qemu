@@ -21,6 +21,7 @@
 using android::base::MemberOnDemandT;
 using android::base::OnDemand;
 using android::base::makeOnDemand;
+using android::base::makeAtomicOnDemand;
 
 namespace {
 
@@ -195,14 +196,14 @@ TEST_F(OnDemandTest, move) {
 
 //
 // Now test how does OnDemand<> behave if constructed/destroyed from multiple
-// threads. (Disabled for now since OnDemand is not thread safe)
+// threads.
 //
 using ThreadPool = android::base::ThreadPool<std::function<void()>>;
 constexpr int kNumThreads = 200;
 
-TEST_F(OnDemandTest, DISABLED_multiConstruct) {
+TEST_F(OnDemandTest, multiConstruct) {
     ThreadPool pool(kNumThreads, [](ThreadPool::Item&& f) { f(); });
-    auto t = makeOnDemand<Test1>(100);
+    auto t = makeAtomicOnDemand<Test1>(100);
     Test1* values[kNumThreads] = {};
     for (int i = 0; i < kNumThreads; ++i) {
         pool.enqueue([&t, i, &values]() {
@@ -223,9 +224,9 @@ TEST_F(OnDemandTest, DISABLED_multiConstruct) {
     }
 }
 
-TEST_F(OnDemandTest, DISABLED_multiDestroy) {
+TEST_F(OnDemandTest, multiDestroy) {
     ThreadPool pool(kNumThreads, [](ThreadPool::Item&& f) { f(); });
-    auto t = makeOnDemand<Test1>(100);
+    auto t = makeAtomicOnDemand<Test1>(100);
     t.get();
     EXPECT_EQ((State{1, 0}), sState);
     for (int i = 0; i < kNumThreads; ++i) {
