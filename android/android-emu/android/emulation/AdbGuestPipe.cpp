@@ -217,7 +217,7 @@ AdbGuestPipe* AdbGuestPipe::Service::searchForActivePipe() {
 }
 
 void AdbGuestPipe::Service::resetActiveGuestPipeConnection() {
-    if (mCurrentActivePipe->isProxyingData()) {
+    if (mCurrentActivePipe && mCurrentActivePipe->isProxyingData()) {
         mCurrentActivePipe->resetConnection();
         mCurrentActivePipe = nullptr;
     }
