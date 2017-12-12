@@ -340,9 +340,10 @@ void RamLoader::readerWorker() {
 
     mIndex.clear();
 
+    mEndTime = base::System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1
     printf("Background loading complete in %.03f ms\n",
-           (base::System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
+           (mEndTime - mStartTime) / 1000.0);
 #endif
 }
 
