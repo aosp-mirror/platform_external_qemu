@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ecb6c985_04a37879",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-12T22:13:13Z",
+      "side": 1,
+      "message": "why not androidSnapshot_quickbootSave()? it has some safety checks.\nAlso it could be nice to disable this button if snapshots are not supported, disabled or something else would prevent us from saving",
+      "range": {
+        "startLine": 354,
+        "startChar": 36,
+        "endLine": 354,
+        "endChar": 73
+      },
+      "revId": "e0ef4c7fe09cef1fd12391a0127172bae9dc7f98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
