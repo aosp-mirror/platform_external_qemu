@@ -118,15 +118,6 @@ void VirtualSceneControlWindow::setWidth(int width) {
     resize(QSize(width, kWindowHeight));
 }
 
-// See swing twist decomposition:
-// http://www.euclideanspace.com/maths/geometry/rotations/for/decomposition/
-static glm::quat quaternionTwist(const glm::quat& rotation,
-                                 const glm::vec3& direction) {
-    const glm::vec3 axis = glm::vec3(rotation.x, rotation.y, rotation.z);
-    const glm::vec3 projection = glm::dot(direction, axis) * direction;
-    return glm::normalize(glm::quat(rotation.w, projection));
-}
-
 void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
     if (capture) {
         mOriginalMousePosition = QCursor::pos();
@@ -146,11 +137,12 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
                     glm::radians(eulerDegrees.x), glm::radians(eulerDegrees.y),
                     glm::radians(eulerDegrees.z));
 
-            const glm::quat quatY =
-                    quaternionTwist(rotation, glm::vec3(0.0f, 1.0f, 0.0f));
-            mEulerRotationRadians.y = glm::angle(quatY);
+            mEulerRotationRadians.y = atan2(rotation.y, rotation.w) * 2.0f;
 
-            const glm::quat xzRotation = glm::inverse(quatY) * rotation;
+            const glm::quat xzRotation =
+                    glm::angleAxis(-mEulerRotationRadians.y,
+                                   glm::vec3(0.0f, 1.0f, 0.0f)) *
+                    rotation;
             mEulerRotationRadians.x = glm::pitch(xzRotation);
             mEulerRotationRadians.z = glm::roll(xzRotation);
 
