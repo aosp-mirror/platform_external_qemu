@@ -15,12 +15,12 @@
 
 #include <QMessageBox>
 
-using Dialog = android::base::MemberOnDemandT<QMessageBox,
-                                              QMessageBox::Icon,
-                                              QString,
-                                              QString,
-                                              QMessageBox::StandardButton,
-                                              QWidget*>;
+using Dialog = android::base::AtomicMemberOnDemandT<QMessageBox,
+                                                    QMessageBox::Icon,
+                                                    QString,
+                                                    QString,
+                                                    QMessageBox::StandardButton,
+                                                    QWidget*>;
 
 static Dialog* sErrorDialog = nullptr;
 

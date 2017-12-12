@@ -60,15 +60,12 @@ public:
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
     const QAndroidEmulatorWindowAgent& windowAgent() const { return mWindowAgent; }
 
-    // Set a callback that's called on the specific stages of the snapshot
+    // Add a callback that's called on the specific stages of the snapshot
     // operations.
-    // Note: currently it only supports a single callback and it's used for
-    //  the UI snapshot handling. Change it to a set of callbacks if you need
-    //  more event listeners.
     enum class Operation { Save, Load };
     enum class Stage { Start, End };
     using Callback = std::function<void(Operation, Stage)>;
-    void setOperationCallback(Callback&& cb);
+    void addOperationCallback(Callback&& cb);
 
     bool isQuickboot() const {
         return mIsQuickboot;
@@ -84,11 +81,13 @@ private:
     bool onStartDelete(const char* name);
     bool onDeletingComplete(const char* name, int res);
 
+    void callCallbacks(Operation op, Stage stage);
+
     QAndroidVmOperations mVmOperations;
     QAndroidEmulatorWindowAgent mWindowAgent;
     android::base::Optional<Saver> mSaver;
     android::base::Optional<Loader> mLoader;
-    Callback mCallback;
+    std::vector<Callback> mCallbacks;
     std::string mLoadedSnapshotFile;
 
     base::System::Duration mLastLoadUptimeMs = 0;
