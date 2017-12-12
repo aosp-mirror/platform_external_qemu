@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "ab953316_1d610d9e",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T03:14:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d16ba2ca_17f984e8",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 35
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3d84eed7_0d524dbd",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 27
@@ -212,6 +236,30 @@
       "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e892caac_c4680ef3",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T03:14:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "72458179_f3a1a985",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 167,
+        "endChar": 39
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
