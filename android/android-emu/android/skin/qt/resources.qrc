@@ -248,7 +248,10 @@
     </qresource>
     <qresource prefix="/all">
         <file alias="error">images/all/error.png</file>
+        <file alias="error_2x">images/all/error_2x.png</file>
         <file alias="info">images/all/info.png</file>
+        <file alias="info_2x">images/all/info_2x.png</file>
         <file alias="warning">images/all/warning.png</file>
+        <file alias="warning_2x">images/all/warning_2x.png</file>
     </qresource>
 </RCC>

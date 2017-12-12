@@ -432,7 +432,10 @@ void EmulatorContainer::adjustMessagesOverlayGeometry() {
         return;
     }
 
-    auto w = std::min(width() - 2 * 15, std::max(300, (width() - 2 * 150)));
+    auto scaleFactor = SizeTweaker::scaleFactor(this).x();
+    auto w = std::min<int>(width() - 2 * 30 * scaleFactor,
+                           std::max<int>(300 * scaleFactor,
+                                         (width() - 2 * 150 * scaleFactor)));
     mMessages->setFixedWidth(w);
     mMessages->adjustSize();
     mMessages->move(mapToGlobal({}) += {(width() - mMessages->width()) / 2, 0});
