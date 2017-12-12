@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dff39992_d0b504c8",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T01:30:28Z",
+      "side": 1,
+      "message": "Can you give an overview of which ffmpeg library functions are used where, and why they need to be split up across Decoder and VideoPlayer?",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 40
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db342528_471ae435",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T01:30:28Z",
+      "side": 1,
+      "message": "isn\u0027t it possible to call this from a different thread anyway? It seems less confusing on balance if we just call this decodeAudio and continue to let the decoder thread call this function.\n\nBest would be to pass a closure to the decoder thread so that it becomes a simple worker thread consuming work items that VideoPlayer produces.\n\nAs is, it can be confusing, at least for a non-ffmpeg wizard like me, to see how all the parts fit together and where each part is used. VideoPlayer and the packet queues seem to have a bunch of state that is used in many locations :/",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 35
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3d84eed7_0d524dbd",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T01:30:28Z",
+      "side": 1,
+      "message": "I\u0027d say the decoding and timing related functions in both VideoPlayer and Decoder are the second top source of confusion to non-ffmpeg-experts. Shouldn\u0027t we take care of all decoding and all timing in separate, single classes?",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 167,
+        "endChar": 39
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
