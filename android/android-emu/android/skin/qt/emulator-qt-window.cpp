@@ -18,6 +18,7 @@
 #include "android/base/memory/LazyInstance.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/base/Optional.h"
+#include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Async.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/CrashReporter.h"
@@ -40,6 +41,7 @@
 #include "android/skin/qt/winsys-qt.h"
 #include "android/skin/rect.h"
 #include "android/snapshot/Snapshotter.h"
+#include "android/test/checkboot.h"
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
@@ -87,8 +89,10 @@
 #include <string>
 #include <vector>
 
+using android::base::AutoLock;
 using android::base::kNullopt;
 using android::base::LazyInstance;
+using android::base::Lock;
 using android::base::makeOptional;
 using android::base::PathUtils;
 using android::base::ScopedCPtr;
@@ -557,36 +561,31 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         }
     }
 
-    mExitSavingTimer.setSingleShot(true);
-    connect(&mExitSavingTimer, &QTimer::timeout, [this]() {
-        mContainer.showModalOverlay(tr("Saving state..."));
-    });
-
-    mLoadingTimer.setSingleShot(true);
-    connect(&mLoadingTimer, &QTimer::timeout, [this]() {
-        mContainer.showModalOverlay(tr("Loading state..."));
-    });
-
     using android::snapshot::Snapshotter;
-    Snapshotter::get().setOperationCallback(
+    Snapshotter::get().addOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
                 if (stage == Snapshotter::Stage::Start) {
                     runOnUiThread([this, op]() {
-                        auto& timer = op == Snapshotter::Operation::Save
-                                              ? mExitSavingTimer
-                                              : mLoadingTimer;
-                        timer.start(500);
+                        AutoLock lock(mSnapshotStateLock);
+                        mShouldShowSnapshotModalOverlay = true;
+                        QTimer::singleShot(500, QApplication::instance(),
+                            [this, op]() {
+                                AutoLock lock(mSnapshotStateLock);
+                                if (mShouldShowSnapshotModalOverlay) {
+                                    mContainer.showModalOverlay(
+                                        op == Snapshotter::Operation::Save ?
+                                            tr("Saving state...") :
+                                            tr("Loading state..."));
+                                }
+                            });
                         if (mToolWindow) {
                             mToolWindow->setEnabled(false);
                         }
                     });
                 } else if (stage == Snapshotter::Stage::End) {
                     runOnUiThread([this, op]() {
-                        auto& timer = op == Snapshotter::Operation::Save
-                                              ? mExitSavingTimer
-                                              : mLoadingTimer;
-                        timer.stop();
-                        timer.disconnect();
+                        AutoLock lock(mSnapshotStateLock);
+                        mShouldShowSnapshotModalOverlay = false;
                         mContainer.hideModalOverlay();
                         if (mToolWindow) {
                             mToolWindow->setEnabled(true);
@@ -622,11 +621,10 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mStartupDialog.clear();
     }
 
-    mExitSavingTimer.stop();
-    mExitSavingTimer.disconnect();
-    mLoadingTimer.stop();
-    mLoadingTimer.disconnect();
+    AutoLock lock(mSnapshotStateLock);
+    mShouldShowSnapshotModalOverlay = false;
     mContainer.hideModalOverlay();
+    lock.unlock();
 
     delete mMainLoopThread;
 }
@@ -764,6 +762,11 @@ void EmulatorQtWindow::slot_gpuWarningMessageAccepted() {
 }
 
 void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
+    if (!mToolWindow->shouldClose()) {
+        event->ignore();
+        return;
+    }
+
     const bool alreadyClosed = mClosed;
     mClosed = true;
     crashhandler_exitmode(__FUNCTION__);
@@ -803,10 +806,6 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
         }
         event->ignore();
     } else {
-        mExitSavingTimer.stop();
-        mExitSavingTimer.disconnect();
-        mLoadingTimer.stop();
-        mLoadingTimer.disconnect();
         mContainer.hideModalOverlay();
 
         if (mToolWindow) {
@@ -900,7 +899,7 @@ void EmulatorQtWindow::keyReleaseEvent(QKeyEvent* event) {
 }
 void EmulatorQtWindow::mouseMoveEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseMotion, getSkinMouseButton(event),
-                     event->pos());
+                     event->pos(), event->globalPos());
 }
 
 void EmulatorQtWindow::leaveEvent(QEvent* event) {
@@ -914,12 +913,12 @@ void EmulatorQtWindow::leaveEvent(QEvent* event) {
 
 void EmulatorQtWindow::mousePressEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseButtonDown, getSkinMouseButton(event),
-                     event->pos());
+                     event->pos(), event->globalPos());
 }
 
 void EmulatorQtWindow::mouseReleaseEvent(QMouseEvent* event) {
     handleMouseEvent(kEventMouseButtonUp, getSkinMouseButton(event),
-                     event->pos());
+                     event->pos(), event->globalPos());
 }
 
 // Set the window flags based on whether we should
@@ -1577,6 +1576,9 @@ void EmulatorQtWindow::showEvent(QShowEvent* event) {
     if (mFirstShowEvent) {
         // moved from android_metrics_start() in metrics.cpp
         android_metrics_start_adb_liveness_checker(mAdbInterface->get());
+        if (android_hw->test_quitAfterBootTimeOut > 0) {
+            android_test_start_boot_complete_timer(android_hw->test_quitAfterBootTimeOut);
+        }
         mFirstShowEvent = false;
     }
 }
@@ -1899,12 +1901,15 @@ SkinMouseButtonType EmulatorQtWindow::getSkinMouseButton(
 void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         SkinMouseButtonType button,
                                         const QPoint& pos,
+                                        const QPoint& gPos,
                                         bool skipSync) {
     SkinEvent* skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = button;
     skin_event->u.mouse.skip_sync = skipSync;
     skin_event->u.mouse.x = pos.x();
     skin_event->u.mouse.y = pos.y();
+    skin_event->u.mouse.x_global = gPos.x();
+    skin_event->u.mouse.y_global = gPos.y();
 
     skin_event->u.mouse.xrel = pos.x() - mPrevMousePosition.x();
     skin_event->u.mouse.yrel = pos.y() - mPrevMousePosition.y();
@@ -1950,7 +1955,8 @@ void EmulatorQtWindow::handleKeyEvent(SkinEventType type, QKeyEvent* event) {
         }
     }
 
-    bool qtEvent = mToolWindow->handleQtKeyEvent(event);
+    bool qtEvent = mToolWindow->handleQtKeyEvent(
+            event, QtKeyEventSource::EmulatorWindow);
 
     if (mForwardShortcutsToDevice || !qtEvent) {
         forwardKeyEventToEmulator(type, event);
@@ -2260,18 +2266,18 @@ void EmulatorQtWindow::wheelEvent(QWheelEvent* event) {
       event->ignore();
     } else {
       if (!mWheelScrollTimer.isActive()) {
-        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos());
+        handleMouseEvent(kEventMouseButtonDown, kMouseButtonLeft, event->pos(), QPoint(0,0));
         mWheelScrollPos = event->pos();
       }
 
       mWheelScrollTimer.start();
       mWheelScrollPos.setY(mWheelScrollPos.y() + event->delta() / 8);
-      handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos);
+      handleMouseEvent(kEventMouseMotion, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
     }
 }
 
 void EmulatorQtWindow::wheelScrollTimeout() {
-    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos);
+    handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft, mWheelScrollPos, QPoint(0,0));
 }
 
 void EmulatorQtWindow::checkAdbVersionAndWarn() {

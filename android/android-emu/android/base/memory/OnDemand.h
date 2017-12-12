@@ -15,8 +15,8 @@
 #pragma once
 
 #include "android/base/Compiler.h"
-#include "android/base/memory/LazyInstance.h"
 #include "android/base/TypeTraits.h"
+#include "android/base/memory/LazyInstance.h"
 
 #include <functional>
 #include <tuple>
@@ -139,9 +139,20 @@ struct TupleHolder {
     std::tuple<Args...>&& operator()() { return std::move(args); }
 };
 
+struct OnDemandState {
+    bool inNoObjectState() const { return !mConstructed; }
+    bool needConstruction() { return !mConstructed; }
+    void doneConstructing() { mConstructed = true; }
+
+    bool needDestruction() { return mConstructed; }
+    void doneDestroying() { mConstructed = false; }
+
+    bool mConstructed = false;
+};
+
 }  // namespace internal
 
-template <class T, class CtorArgsGetter>
+template <class T, class CtorArgsGetter, class State = internal::OnDemandState>
 class OnDemand {
     DISALLOW_COPY_AND_ASSIGN(OnDemand);
 
@@ -210,7 +221,7 @@ private:
             typename std::aligned_storage<sizeof(T),
                                           std::alignment_of<T>::value>::type;
 
-    alignas(double) mutable internal::LazyInstanceState mState = {};
+    alignas(double) mutable State mState = {};
     mutable StorageT mStorage;
     mutable CtorArgsGetter mCtorArgsGetter;
 };
@@ -226,6 +237,13 @@ using OnDemandT = OnDemand<T, internal::TupleHolder<Args...>>;
 // even if it was a lambda or some struct.
 template <class T, class... Args>
 using MemberOnDemandT = OnDemand<T, std::function<std::tuple<Args...>()>>;
+
+// A version of OnDemand that's safe to initialize/destroy from multiple
+// threads.
+template <class T, class... Args>
+using AtomicMemberOnDemandT = OnDemand<T,
+                                       std::function<std::tuple<Args...>()>,
+                                       internal::LazyInstanceState>;
 
 // makeOnDemand() - factory functions for simpler OnDemand<> object creation,
 //                  either from argument list or from a factory function.

@@ -16,6 +16,7 @@
 #include "android/avd/keys.h"
 #include "android/base/ArraySize.h"
 #include "android/emulation/bufprint_config_dirs.h"
+#include "android/featurecontrol/feature_control.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/debug.h"
 #include "android/utils/dirscanner.h"
@@ -1405,6 +1406,9 @@ avdInfo_getVendorImageDevicePathInGuest( const AvdInfo*  i )
 char*
 avdInfo_getSystemImageDevicePathInGuest( const AvdInfo*  i )
 {
+    if (feature_is_enabled(kFeature_SystemAsRoot)) {
+        return NULL;
+    }
     if (is_x86ish(i)) {
         return strdup("/dev/block/pci/pci0000:00/0000:00:03.0/by-name/system");
     } else {

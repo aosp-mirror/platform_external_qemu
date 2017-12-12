@@ -28,17 +28,18 @@
 namespace android {
 namespace virtualscene {
 
-// Forward declaration.
+// Forward declarations.
 class Renderer;
+class Scene;
 
-class VirtualScene {
+class VirtualSceneManager {
 public:
     // Initialize virtual scene rendering. Callers must have an active EGL
     // context.
     // |gles2| - Pointer to GLESv2Dispatch, must be non-null.
     //
     // Returns true if initialization succeeded.
-    static bool initialize(const GLESv2Dispatch* gles2);
+    static bool initialize(const GLESv2Dispatch* gles2, int width, int height);
 
     // Uninitialize virtual scene rendering, may be called on any thread, but
     // the same EGL context that was active when initialize() was called must be
@@ -50,11 +51,14 @@ public:
     // be called on any thread, but the same EGL context that was active when
     // initialize() was called must be active. This function modifies the GL
     // state, callers must be resilient to that.
-    static void render();
+    //
+    // Returns the timestamp at which the frame is rendered.
+    static int64_t render();
 
 private:
     static android::base::LazyInstance<android::base::Lock> mLock;
-    static Renderer* mImpl;
+    static Renderer* mRenderer;
+    static Scene* mScene;
 };
 
 }  // namespace virtualscene

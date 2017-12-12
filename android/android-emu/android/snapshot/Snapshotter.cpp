@@ -15,7 +15,11 @@
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/metrics/StudioConfig.h"
+#include "android/snapshot/Hierarchy.h"
+#include "android/snapshot/Loader.h"
 #include "android/snapshot/Quickboot.h"
+#include "android/snapshot/Saver.h"
+#include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
@@ -73,7 +77,7 @@ bool isBufferZeroed(const void* ptr, int32_t size) {
     return buffer_zero_sse2(ptr, size);
 }
 
-Snapshotter::Snapshotter() : mCallback([](Operation, Stage) {}) {}
+Snapshotter::Snapshotter() = default;
 
 Snapshotter::~Snapshotter() {
     if (mVmOperations.setSnapshotCallbacks) {
@@ -200,7 +204,14 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mIsQuickboot = isQuickboot;
     mVmOperations.snapshotLoad(name, this, nullptr);
     mIsQuickboot = false;
+    mLoadedSnapshotFile = (mLoader->status() == OperationStatus::Ok) ? name : "";
     return mLoader->status();
+}
+
+void Snapshotter::callCallbacks(Operation op, Stage stage) {
+    for (auto&& cb : mCallbacks) {
+        cb(op, stage);
+    }
 }
 
 OperationStatus Snapshotter::prepareForSaving(const char* name) {
@@ -218,6 +229,10 @@ OperationStatus Snapshotter::save(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
+    if (!strcmp(name, mLoadedSnapshotFile.c_str())) {
+        // We're deleting the "loaded" snapshot
+        mLoadedSnapshotFile.clear();
+    }
     mVmOperations.snapshotDelete(name, this, nullptr);
 }
 
@@ -232,7 +247,7 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
-    mCallback(Operation::Save, Stage::Start);
+    callCallbacks(Operation::Save, Stage::Start);
     mLoader.clear();
     if (!mSaver || isComplete(*mSaver)) {
         mSaver.emplace(name);
@@ -248,8 +263,12 @@ bool Snapshotter::onSavingComplete(const char* name, int res) {
     assert(mSaver && name == mSaver->snapshot().name());
     mSaver->complete(res == 0);
     CrashReporter::get()->hangDetector().pause(false);
-    mCallback(Operation::Save, Stage::End);
-    return mSaver->status() != OperationStatus::Error;
+    callCallbacks(Operation::Save, Stage::End);
+    bool good = mSaver->status() != OperationStatus::Error;
+    if (good) {
+        Hierarchy::get()->currentInfo();
+    }
+    return good;
 }
 
 void Snapshotter::onSavingFailed(const char* name, int res) {
@@ -257,8 +276,9 @@ void Snapshotter::onSavingFailed(const char* name, int res) {
 }
 
 bool Snapshotter::onStartLoading(const char* name) {
+    mLoadedSnapshotFile.clear();
     CrashReporter::get()->hangDetector().pause(true);
-    mCallback(Operation::Load, Stage::Start);
+    callCallbacks(Operation::Load, Stage::Start);
     mSaver.clear();
     if (!mLoader || isComplete(*mLoader)) {
         if (mLoader) {
@@ -280,8 +300,13 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
     CrashReporter::get()->hangDetector().pause(false);
     mLastLoadUptimeMs =
             System::Duration(System::get()->getProcessTimes().wallClockMs);
-    mCallback(Operation::Load, Stage::End);
-    return mLoader->status() != OperationStatus::Error;
+    callCallbacks(Operation::Load, Stage::End);
+    if (mLoader->status() == OperationStatus::Error) {
+        return false;
+    }
+    mLoadedSnapshotFile = name;
+    Hierarchy::get()->currentInfo();
+    return true;
 }
 
 void Snapshotter::onLoadingFailed(const char* name, int err) {
@@ -295,6 +320,7 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
     }
     mLoader.emplace(name, -err);
     mLoader->complete(false);
+    mLoadedSnapshotFile.clear();
 }
 
 bool Snapshotter::onStartDelete(const char*) {
@@ -316,8 +342,10 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
     return true;
 }
 
-void Snapshotter::setOperationCallback(Callback&& cb) {
-    mCallback = bool(cb) ? std::move(cb) : [](Operation, Stage) {};
+void Snapshotter::addOperationCallback(Callback&& cb) {
+    if (cb) {
+        mCallbacks.emplace_back(std::move(cb));
+    }
 }
 
 }  // namespace snapshot
