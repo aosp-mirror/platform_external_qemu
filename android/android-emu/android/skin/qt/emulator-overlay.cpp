@@ -45,19 +45,19 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
     mRubberBand.hide();
 
     // Load in higher-resolution images on higher resolution screens
-    if (devicePixelRatio() > 1.5) {
+    if (devicePixelRatioF() >= 1.5) {
         mCenterImage.load(":/multitouch/center_point_2x");
-        mCenterImage.setDevicePixelRatio(devicePixelRatio());
+        mCenterImage.setDevicePixelRatio(devicePixelRatioF());
 
         mTouchImage.load(":/multitouch/touch_point_2x");
-        mTouchImage.setDevicePixelRatio(devicePixelRatio());
+        mTouchImage.setDevicePixelRatio(devicePixelRatioF());
     } else {
         mCenterImage.load(":/multitouch/center_point");
         mTouchImage.load(":/multitouch/touch_point");
     }
 
-    mCenterPointRadius = mCenterImage.width() / devicePixelRatio();
-    mTouchPointRadius = mTouchImage.width() / devicePixelRatio();
+    mCenterPointRadius = mCenterImage.width() / devicePixelRatioF();
+    mTouchPointRadius = mTouchImage.width() / devicePixelRatioF();
 
     mFlashAnimation.setStartValue(250);
     mFlashAnimation.setEndValue(0);

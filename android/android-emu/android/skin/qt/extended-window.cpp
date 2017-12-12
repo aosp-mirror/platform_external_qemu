@@ -286,7 +286,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
 
     // The first part is based on the display's pixel density.
     // Most displays give 1.0; high density displays give 2.0.
-    const double densityFactor = devicePixelRatio();
+    const double densityFactor = devicePixelRatioF();
     QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
 
     // The second part is based on the theme

@@ -218,11 +218,11 @@ void GLWidget::resizeEvent(QResizeEvent* e) {
         makeContextCurrent();
         // Re-create the framebuffer with new size.
         mCanvas.reset(new GLCanvas(
-            nearestPOT(e->size().width() * devicePixelRatio()),
-            nearestPOT(e->size().height() * devicePixelRatio()),
+            nearestPOT(e->size().width() * devicePixelRatioF()),
+            nearestPOT(e->size().height() * devicePixelRatioF()),
             mGLES2));
-        resizeGL(e->size().width() * devicePixelRatio(),
-                 e->size().height() * devicePixelRatio());
+        resizeGL(e->size().width() * devicePixelRatioF(),
+                 e->size().height() * devicePixelRatioF());
         update();
     }
 }
