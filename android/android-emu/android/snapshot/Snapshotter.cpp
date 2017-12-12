@@ -12,9 +12,14 @@
 #include "android/snapshot/Snapshotter.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/StringFormat.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/metrics/AdbLivenessChecker.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/metrics/StudioConfig.h"
+#include "android/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/Quickboot.h"
@@ -32,8 +37,11 @@ extern "C" {
 }
 
 using android::base::LazyInstance;
+using android::base::StringFormat;
 using android::base::System;
 using android::crashreport::CrashReporter;
+using android::metrics::MetricsReporter;
+namespace pb = android_studio;
 
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
@@ -190,6 +198,56 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
     mWindowAgent = windowAgent;
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
 }  // namespace snapshot
+
+static constexpr int kDefaultMessageTimeoutMs = 10000;
+
+static void appendFailedSave(pb::EmulatorSnapshotSaveState state) {
+    MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
+        auto snap = event->mutable_emulator_details()->add_snapshot_loads();
+        snap->set_save_state(state);
+    });
+}
+
+bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
+    const bool shouldTrySaving =
+        metrics::AdbLivenessChecker::isEmulatorBooted();
+
+    if (!shouldTrySaving) {
+        mWindowAgent.showMessage(
+            StringFormat("Emulator not booted (or ADB not online), "
+                         "skipping snapshot save.").c_str(),
+            WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
+        if (reportMetrics) {
+            appendFailedSave(
+                pb::EmulatorSnapshotSaveState::
+                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED);
+        }
+        return false;
+    }
+
+    if (!name) {
+        if (reportMetrics) {
+            appendFailedSave(
+                pb::EmulatorSnapshotSaveState::
+                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NO_SNAPSHOT);
+        }
+        return false;
+    }
+
+    if (!emuglConfig_current_renderer_supports_snapshot()) {
+        dwarning(
+                "Skipping snapshot saving (renderer type '%s' (%d) "
+                "doesn't support snapshotting).",
+                emuglConfig_renderer_to_string(
+                        emuglConfig_get_current_renderer()),
+                int(emuglConfig_get_current_renderer()));
+        appendFailedSave(pb::EmulatorSnapshotSaveState::
+                             EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED);
+        return false;
+    }
+
+    return true;
+}
 
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {

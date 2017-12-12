@@ -64,6 +64,9 @@ AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
+    if (!Snapshotter::get().checkSafeToSave(name)) {
+        return AndroidSnapshotStatus(android::snapshot::OperationStatus::Error);
+    }
     return AndroidSnapshotStatus(Snapshotter::get().save(name));
 }
 

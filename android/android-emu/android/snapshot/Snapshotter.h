@@ -40,6 +40,9 @@ public:
     void initialize(const QAndroidVmOperations& vmOperations,
                     const QAndroidEmulatorWindowAgent& windowAgent);
 
+    void appendSuccessfulSave();
+    bool checkSafeToSave(const char* name, bool reportMetrics = true);
+
     OperationStatus prepareForLoading(const char* name);
     OperationStatus load(bool isQuickboot, const char* name);
     OperationStatus prepareForSaving(const char* name);
