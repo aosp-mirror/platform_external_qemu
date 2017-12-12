@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "735eb770_3acfe038",
+        "filename": "android/android-emu/android/virtualscene/SceneObject.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-12T18:18:51Z",
+      "side": 1,
+      "message": "Else block? materialCheckerboard doesn\u0027t require a texture, right?",
+      "range": {
+        "startLine": 104,
+        "startChar": 17,
+        "endLine": 106,
+        "endChar": 64
+      },
+      "revId": "fed1991a43cbed6827d1883f50206da1409ad79a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2c66bf5e_0941c2c0",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-12T18:18:51Z",
+      "side": 1,
+      "message": "This is converting from int64_t, to double, then back to float.  Does dividing by 1000000000.0f work instead?",
+      "range": {
+        "startLine": 96,
+        "startChar": 12,
+        "endLine": 96,
+        "endChar": 56
+      },
+      "revId": "fed1991a43cbed6827d1883f50206da1409ad79a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
