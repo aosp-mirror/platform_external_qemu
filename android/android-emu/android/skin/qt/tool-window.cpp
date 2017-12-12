@@ -45,6 +45,16 @@
 #include <cassert>
 #include <string>
 
+namespace {
+
+void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
+    button->setIcon(getIconForCurrentTheme(icon));
+    button->setProperty("themeIconName", icon);
+    button->setProperty("toolTip", tip);
+}
+
+}  // namespace
+
 using Ui::Settings::SaveSnapshotOnExit;
 
 ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
@@ -646,8 +656,14 @@ void ToolWindow::on_power_button_released() {
     handleUICommand(QtUICommand::POWER, false);
 }
 
-void ToolWindow::on_tablet_mode_button_toggled(bool checked) {
-    handleUICommand(QtUICommand::TABLET_MODE, checked);
+void ToolWindow::on_tablet_mode_button_clicked() {
+    static bool tablet_mode;
+    mEmulatorWindow->activateWindow();
+    tablet_mode = !tablet_mode;
+    ChangeIcon(mToolsUi->tablet_mode_button,
+               tablet_mode ? "laptop_mode" : "tablet_mode",
+               tablet_mode ? "Switch to laptop mode" : "Switch to tablet mode");
+    handleUICommand(QtUICommand::TABLET_MODE, tablet_mode);
 }
 
 void ToolWindow::on_volume_up_button_pressed() {
