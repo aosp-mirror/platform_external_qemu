@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a25037ae_b4f3e754",
+        "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T16:42:52Z",
+      "side": 1,
+      "message": "possible to av_frame_free twice for the same frame here, either because unref was the last ref already, or it\u0027s going to get freed in VideoPlayer?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 33
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d1d7e83_ecd1876b",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T16:42:52Z",
+      "side": 1,
+      "message": "Best thing to do now is to move all of the low-level state in VideoPlayer and Decoder into a VideoPlayerImpl class declared and defined in this .cpp file.\n\nIdeally VideoPlayer would only implement its public interface and refer to VideoPlayerImpl to do everything else.",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 55
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "16ff47f1_303bd03d",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T16:42:52Z",
+      "side": 1,
+      "message": "Any update on clarifying this yet?",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 9
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f63713fd_d9f3e261",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T16:42:52Z",
+      "side": 1,
+      "message": "You can move all these definitions into the .cpp since it\u0027s already private and no other files will use it. Forward declare the classes Decoder/DecoderThread here, then define them in the .cpp. That way, we can get rid of these duplicate function signatures too.",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 145,
+        "endChar": 19
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "760b6f4d_26e92c0b",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T16:42:52Z",
+      "side": 1,
+      "message": "can you call this mLeftoverPkt?",
+      "range": {
+        "startLine": 163,
+        "startChar": 17,
+        "endLine": 163,
+        "endChar": 24
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3e52d33a_0a5f1416",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T16:42:52Z",
+      "side": 1,
+      "message": "It seems like if you move all of this state into a static VideoPlayerImpl class in VideoPlayer.cpp, you won\u0027t need to declare a Decoder class at all.",
+      "range": {
+        "startLine": 173,
+        "startChar": 1,
+        "endLine": 173,
+        "endChar": 44
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25d93eec_1e219c40",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T16:42:52Z",
+      "side": 1,
+      "message": "We might consider moving all these to an internal VideoPlayerImpl class that is only visible from VideoPlayer.cpp.",
+      "range": {
+        "startLine": 203,
+        "startChar": 4,
+        "endLine": 272,
+        "endChar": 0
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
