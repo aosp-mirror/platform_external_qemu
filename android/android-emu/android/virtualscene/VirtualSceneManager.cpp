@@ -92,7 +92,8 @@ int64_t VirtualSceneManager::render() {
     }
 
     const int64_t timestamp = mScene->update();
-    mRenderer->render(mScene->getRenderableObjects());
+    mRenderer->render(mScene->getRenderableObjects(),
+            timestamp / 1000000000.0f);
     return timestamp;
 }
 
