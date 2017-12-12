@@ -398,6 +398,7 @@ void EmulatorOverlay::drawResizeBox(QPainter* painter, int alpha) {
 
     // Draw the box in solid black
     QPen pen = painter->pen();
+    pen.setWidth(2);
     pen.setColor(Qt::black);
     pen.setStyle(Qt::SolidLine);
     painter->setPen(pen);
@@ -405,7 +406,9 @@ void EmulatorOverlay::drawResizeBox(QPainter* painter, int alpha) {
 
     // Draw the box in dashed white with the black showing through
     pen.setColor(Qt::white);
-    pen.setStyle(Qt::DashLine);
+    QVector<qreal> dashPattern;
+    dashPattern << 4 << 4;
+    pen.setDashPattern(dashPattern);
     painter->setPen(pen);
     painter->drawRect(boxX, boxY, boxW, boxH);
 }
