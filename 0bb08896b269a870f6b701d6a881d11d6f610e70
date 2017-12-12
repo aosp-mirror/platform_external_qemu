@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "693a84a5_b84e7463",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-12-12T16:24:44Z",
+      "side": 1,
+      "message": "We\u0027d like to have these alphabetical by alias.",
+      "range": {
+        "startLine": 34,
+        "startChar": 8,
+        "endLine": 35,
+        "endChar": 69
+      },
+      "revId": "0bb08896b269a870f6b701d6a881d11d6f610e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "732aec2e_beef21d8",
+        "filename": "android/android-emu/android/skin/qt/resources.qrc",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-12-12T16:24:44Z",
+      "side": 1,
+      "message": "Same",
+      "range": {
+        "startLine": 139,
+        "startChar": 7,
+        "endLine": 139,
+        "endChar": 79
+      },
+      "revId": "0bb08896b269a870f6b701d6a881d11d6f610e70",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
