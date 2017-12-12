@@ -145,58 +145,32 @@ void Quickboot::reportSuccessfulLoad(StringView name,
     auto& loader = Snapshotter::get().loader();
     loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
-    const auto onDemandRamEnabled = loader.ramLoader().onDemandEnabled();
-    const auto compressedRam = loader.ramLoader().compressed();
-    const auto compressedTextures = loader.textureLoader()->compressed();
-    const auto size = loader.snapshot().diskSize() +
-                      loader.ramLoader().diskSize() +
-                      loader.textureLoader()->diskSize();
-    MetricsReporter::get().report([onDemandRamEnabled, compressedRam,
-                                   compressedTextures, durationMs, name,
-                                   size](pb::AndroidStudioEvent* event) {
+    auto stats = Snapshotter::get().getLoadStats(name.c_str(), durationMs);
+
+    MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         auto load = event->mutable_emulator_details()->mutable_quickboot_load();
         load->set_state(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
-        load->set_duration_ms(durationMs);
-        load->set_on_demand_ram_enabled(onDemandRamEnabled);
+        load->set_duration_ms(stats.durationMs);
+        load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
         auto snapshot = load->mutable_snapshot();
-        snapshot->set_name(MetricsReporter::get().anonymize(name));
-        if (compressedRam) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
-        }
-        if (compressedTextures) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
-        }
-        snapshot->set_size_bytes(int64_t(size));
+        Snapshotter::fillSnapshotMetrics(snapshot, stats);
     });
 }
 
 void Quickboot::reportSuccessfulSave(StringView name,
                                      System::WallDuration durationMs,
                                      System::WallDuration sessionUptimeMs) {
-    auto& saver = Snapshotter::get().saver();
-    const auto compressedRam = saver.ramSaver().compressed();
-    const auto compressedTextures = saver.textureSaver()->compressed();
-    const auto size = saver.snapshot().diskSize() +
-                      saver.ramSaver().diskSize() +
-                      saver.textureSaver()->diskSize();
-    MetricsReporter::get().report([compressedRam, compressedTextures,
-                                   durationMs, sessionUptimeMs, name,
-                                   size](pb::AndroidStudioEvent* event) {
+    auto stats = Snapshotter::get().getSaveStats(name.c_str(), durationMs);
+
+    MetricsReporter::get().report([stats, sessionUptimeMs](pb::AndroidStudioEvent* event) {
         auto save = event->mutable_emulator_details()->mutable_quickboot_save();
         save->set_state(
                 pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
-        save->set_duration_ms(durationMs);
+        save->set_duration_ms(stats.durationMs);
         save->set_sesion_uptime_ms(sessionUptimeMs);
         auto snapshot = save->mutable_snapshot();
-        snapshot->set_name(MetricsReporter::get().anonymize(name));
-        if (compressedRam) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
-        }
-        if (compressedTextures) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
-        }
-        snapshot->set_size_bytes(int64_t(size));
+        Snapshotter::fillSnapshotMetrics(snapshot, stats);
     });
 }
 
