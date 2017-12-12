@@ -1066,7 +1066,7 @@ void EmulatorQtWindow::paintEvent(QPaintEvent*) {
         if (mBackingBitmapChanged) {
             mScaledBackingImage = QPixmap::fromImage(
                                        mBackingSurface->bitmap->get().scaled(
-                                           r.size() * devicePixelRatio(),
+                                           r.size() * devicePixelRatioF(),
                                            Qt::KeepAspectRatio,
                                            Qt::SmoothTransformation));
             mBackingBitmapChanged = false;
@@ -1205,7 +1205,7 @@ void EmulatorQtWindow::slot_fill(SkinSurface* s,
 
 void EmulatorQtWindow::slot_getDevicePixelRatio(double* out_dpr,
                                                 QSemaphore* semaphore) {
-    *out_dpr = devicePixelRatio();
+    *out_dpr = devicePixelRatioF();
     if (semaphore != NULL)
         semaphore->release();
 }

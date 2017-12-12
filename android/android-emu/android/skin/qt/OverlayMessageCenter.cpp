@@ -38,11 +38,14 @@ OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
     : QFrame(parent), mText(text) {
     setObjectName("OverlayChildWidget");
     setStyleSheet(QString("* { font-size: %1; } #OverlayChildWidget { "
-                          "border-radius: 2px; border-style: outward; "
+                          "border-radius: %2px; border-style: outward; "
                           "border-color: rgba(255, 255, 255, 10%); "
-                          "border-top-width: 1; border-left-width: 1; "
-                          "border-bottom-width: 3; border-right-width: 3; }")
-                          .arg(Ui::stylesheetFontSize(Ui::FontSize::Larger)));
+                          "border-top-width: %3; border-left-width: %3; "
+                          "border-bottom-width: %4; border-right-width: %4; }")
+                          .arg(Ui::stylesheetFontSize(Ui::FontSize::Larger))
+                          .arg(ceil(SizeTweaker::scaleFactor(this).x()))
+                          .arg(ceil(1 * SizeTweaker::scaleFactor(this).x()))
+                          .arg(ceil(3 * SizeTweaker::scaleFactor(this).x())));
     setLayout(new QHBoxLayout(this));
     layout()->setSizeConstraint(QLayout::SetMaximumSize);
     layout()->setContentsMargins(16, 16, 16, 16);
@@ -130,7 +133,8 @@ void OverlayChildWidget::updateDisplayedText() {
     mLabel->setToolTip({});
 }
 
-OverlayMessageCenter::OverlayMessageCenter(QWidget* parent) : QWidget(parent) {
+OverlayMessageCenter::OverlayMessageCenter(QWidget* parent)
+    : QWidget(parent), mSizeTweaker(this) {
 #ifdef __APPLE__
     Qt::WindowFlags flag = Qt::Dialog;
 #else
@@ -224,7 +228,9 @@ QPixmap OverlayMessageCenter::icon(Icon type) {
         return {};
     }
 
-    return QPixmap(QString(":/all/%1").arg(name));
+    auto factor = mSizeTweaker.scaleFactor();
+    const bool highDpi = std::max(factor.x(), factor.y()) >= 1.5;
+    return QPixmap(QString(":/all/%1%2").arg(name).arg(highDpi ? "_2x" : ""));
 }
 
 static const char kDismissProperty[] = "dismissing";
