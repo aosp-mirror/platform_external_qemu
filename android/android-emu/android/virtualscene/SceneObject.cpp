@@ -84,7 +84,6 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
 
     const size_t vertexCount = attrib.vertices.size() / 3;
     const size_t texcoordCount = attrib.texcoords.size() / 2;
-    Material material = renderer.createMaterialTextured();
 
     for (const tinyobj::shape_t& shape : shapes) {
         const tinyobj::mesh_t& mesh = shape.mesh;
@@ -95,9 +94,14 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
         std::vector<GLuint> indices;
         Texture texture;
 
+        bool useCheckerboardMaterial = false;
+
         if (!mesh.material_ids.empty()) {
             const int material_id = mesh.material_ids[0];
             if (material_id >= 0 && material_id < materials.size()) {
+                if (strstr(materials[material_id].diffuse_texname.c_str(), "TV")) {
+                    useCheckerboardMaterial = true;
+                }
                 texture = getOrLoadTexture(
                         materials[material_id].diffuse_texname);
             }
@@ -150,7 +154,9 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
           vertices.size(), indices.size());
 
         Renderable renderable;
-        renderable.material = material;
+        renderable.material = useCheckerboardMaterial ?
+                renderer.createMaterialCheckerboard() :
+                renderer.createMaterialTextured();
         renderable.mesh = renderer.createMesh(result.get(), vertices, indices);
         renderable.texture = texture;
 
