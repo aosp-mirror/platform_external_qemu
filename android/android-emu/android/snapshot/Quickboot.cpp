@@ -45,10 +45,14 @@ namespace android {
 namespace snapshot {
 
 static void reportFailedLoad(
-        pb::EmulatorQuickbootLoad::EmulatorQuickbootLoadState state) {
-    MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
+        pb::EmulatorQuickbootLoad::EmulatorQuickbootLoadState state,
+        FailureReason failureReason) {
+    MetricsReporter::get().report([state, failureReason](pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_load()->set_state(
                 state);
+        event->mutable_emulator_details()->mutable_quickboot_load()->
+            mutable_snapshot()->set_load_failure_reason(
+                (pb::EmulatorSnapshotFailureReason)failureReason);
     });
 }
 
@@ -57,6 +61,16 @@ static void reportFailedSave(
     MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
         event->mutable_emulator_details()->mutable_quickboot_save()->set_state(
                 state);
+        event->mutable_emulator_details()->mutable_quickboot_save()->
+            mutable_snapshot()->set_save_failure_reason(
+                (pb::EmulatorSnapshotFailureReason)FailureReason::Empty);
+    });
+}
+
+static void reportAdbConnectionRetries(uint32_t retries) {
+    MetricsReporter::get().report([retries](pb::AndroidStudioEvent* event) {
+        event->mutable_emulator_details()->mutable_quickboot_load()->
+            set_adb_connection_retries(retries);
     });
 }
 
@@ -131,58 +145,32 @@ void Quickboot::reportSuccessfulLoad(StringView name,
     auto& loader = Snapshotter::get().loader();
     loader.reportSuccessful();
     const auto durationMs = mLoadTimeMs - startTimeMs;
-    const auto onDemandRamEnabled = loader.ramLoader().onDemandEnabled();
-    const auto compressedRam = loader.ramLoader().compressed();
-    const auto compressedTextures = loader.textureLoader()->compressed();
-    const auto size = loader.snapshot().diskSize() +
-                      loader.ramLoader().diskSize() +
-                      loader.textureLoader()->diskSize();
-    MetricsReporter::get().report([onDemandRamEnabled, compressedRam,
-                                   compressedTextures, durationMs, name,
-                                   size](pb::AndroidStudioEvent* event) {
+    auto stats = Snapshotter::get().getLoadStats(name.c_str(), durationMs);
+
+    MetricsReporter::get().report([stats](pb::AndroidStudioEvent* event) {
         auto load = event->mutable_emulator_details()->mutable_quickboot_load();
         load->set_state(
                 pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_SUCCEEDED);
-        load->set_duration_ms(durationMs);
-        load->set_on_demand_ram_enabled(onDemandRamEnabled);
+        load->set_duration_ms(stats.durationMs);
+        load->set_on_demand_ram_enabled(stats.onDemandRamEnabled);
         auto snapshot = load->mutable_snapshot();
-        snapshot->set_name(MetricsReporter::get().anonymize(name));
-        if (compressedRam) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
-        }
-        if (compressedTextures) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
-        }
-        snapshot->set_size_bytes(int64_t(size));
+        Snapshotter::fillSnapshotMetrics(snapshot, stats);
     });
 }
 
 void Quickboot::reportSuccessfulSave(StringView name,
                                      System::WallDuration durationMs,
                                      System::WallDuration sessionUptimeMs) {
-    auto& saver = Snapshotter::get().saver();
-    const auto compressedRam = saver.ramSaver().compressed();
-    const auto compressedTextures = saver.textureSaver()->compressed();
-    const auto size = saver.snapshot().diskSize() +
-                      saver.ramSaver().diskSize() +
-                      saver.textureSaver()->diskSize();
-    MetricsReporter::get().report([compressedRam, compressedTextures,
-                                   durationMs, sessionUptimeMs, name,
-                                   size](pb::AndroidStudioEvent* event) {
+    auto stats = Snapshotter::get().getSaveStats(name.c_str(), durationMs);
+
+    MetricsReporter::get().report([stats, sessionUptimeMs](pb::AndroidStudioEvent* event) {
         auto save = event->mutable_emulator_details()->mutable_quickboot_save();
         save->set_state(
                 pb::EmulatorQuickbootSave::EMULATOR_QUICKBOOT_SAVE_SUCCEEDED);
-        save->set_duration_ms(durationMs);
+        save->set_duration_ms(stats.durationMs);
         save->set_sesion_uptime_ms(sessionUptimeMs);
         auto snapshot = save->mutable_snapshot();
-        snapshot->set_name(MetricsReporter::get().anonymize(name));
-        if (compressedRam) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
-        }
-        if (compressedTextures) {
-            snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
-        }
-        snapshot->set_size_bytes(int64_t(size));
+        Snapshotter::fillSnapshotMetrics(snapshot, stats);
     });
 }
 
@@ -222,6 +210,7 @@ void Quickboot::onLivenessTimer() {
             android_adb_reset_connection();
             mLoadTimeMs = nowMs;
             mAdbConnectionRetries++;
+            reportAdbConnectionRetries(mAdbConnectionRetries);
         } else {
             // The VM hasn't started for long enough since the end of snapshot
             // loading, let's reset it.
@@ -233,7 +222,8 @@ void Quickboot::onLivenessTimer() {
                     WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
             Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
             reportFailedLoad(
-                    pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG);
+                    pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_HUNG,
+                    FailureReason::AdbOffline);
             mVmOps.vmReset();
             return;
         }
@@ -255,7 +245,8 @@ Quickboot::Quickboot(const QAndroidVmOperations& vmOps,
 bool Quickboot::load(StringView name) {
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
         reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                 EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE);
+                                 EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE,
+                         FailureReason::Empty);
     }
     if (name.empty()) {
         name = kDefaultBootSnapshot;
@@ -283,7 +274,8 @@ bool Quickboot::load(StringView name) {
                         ? pb::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_COLD_AVD
                         : pb::EmulatorQuickbootLoad::
-                                  EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE);
+                                  EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE,
+                FailureReason::Empty);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
         mWindow.showMessage(
                 StringFormat("Performing cold boot: selected renderer '%s' "
@@ -293,7 +285,8 @@ bool Quickboot::load(StringView name) {
                         .c_str(),
                 WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                 EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED);
+                                 EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
+                         FailureReason::Empty);
     } else {
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
@@ -326,7 +319,8 @@ bool Quickboot::load(StringView name) {
                                     ? pb::EmulatorQuickbootLoad::
                                               EMULATOR_QUICKBOOT_LOAD_FAILED
                                     : pb::EmulatorQuickbootLoad::
-                                              EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT);
+                                              EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT,
+                            *failureReason);
 
                 } else {
                     mWindow.showMessage(
@@ -338,7 +332,8 @@ bool Quickboot::load(StringView name) {
                     mVmOps.vmReset();
                     Snapshotter::get().loader().reportInvalid();
                     reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                             EMULATOR_QUICKBOOT_LOAD_FAILED);
+                                             EMULATOR_QUICKBOOT_LOAD_FAILED,
+                                     *failureReason);
                 }
             } else {
                 mWindow.showMessage(
@@ -346,7 +341,8 @@ bool Quickboot::load(StringView name) {
                         WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
                 mVmOps.vmReset();
                 reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                         EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT);
+                                         EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT,
+                                 FailureReason::Empty);
             }
         }
     }
