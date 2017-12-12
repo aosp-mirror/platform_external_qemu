@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "e9ab8043_7167c976",
+        "filename": "android/android-emu/android/skin/qt/video-player/Decoder.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T02:28:16Z",
+      "side": 1,
+      "message": "Thanks!",
+      "parentUuid": "7a1d64b1_004240cb",
+      "range": {
+        "startLine": 87,
+        "startChar": 0,
+        "endLine": 87,
+        "endChar": 40
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "db342528_471ae435",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 27
@@ -96,6 +120,30 @@
     },
     {
       "key": {
+        "uuid": "d16ba2ca_17f984e8",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T02:28:16Z",
+      "side": 1,
+      "message": "In that case, if Decoder is just keeping decoding-related data, and it still interacts closely with VideoPlayer through decodeAudio/decodeVideo I think it should be absorbed into VideoPlayer as a private struct, so we don\u0027t have to keep flipping between Decoder and VideoPlayer .cpp to see where things actually happen.\n\nWe can either inline all the Decoder info into VideoPlayer\u0027s class definition, or have that be a class that is declared and defined only in VideoPlayer.cpp (VideoPlayerImpl?) (and then, move other members of VideoPlayer into that class that is only accessible from VideoPlayer.cpp).",
+      "parentUuid": "0ae75272_8d3b2b6e",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 95,
+        "endChar": 35
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3d84eed7_0d524dbd",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 27
@@ -131,6 +179,30 @@
       "side": 1,
       "message": "Again, Decoder mainly provides the decodeFrame() function. Originally, I don\u0027t have Decoder class, I thought splitting into a separate class is more readable.\n\nOnce can decode and render in the same thread, however, to do the best a/v sync, we better perform these tasks in separate threads, so they are totally independent. Of course, this increases the locking/waiting exchanges between queues.\n\nFor example, the audio callback doesn\u0027t like any waiting, if we do decoding there, it will cause the whole system not responding. I\u0027ve played so many different versions of the player, starting from a very simple one (400 lines of code), to the current moderate complicatedly version. It\u0027s very involving, and not very easy to understand the code.",
       "parentUuid": "3d84eed7_0d524dbd",
+      "range": {
+        "startLine": 167,
+        "startChar": 0,
+        "endLine": 167,
+        "endChar": 39
+      },
+      "revId": "854111173c42bec9e93fa3db0691749bfa79899a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72458179_f3a1a985",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 27
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T02:28:16Z",
+      "side": 1,
+      "message": "I think keeping it in the one class is more readable because we don\u0027t gain much by splitting into different classes; in fact there is more overhead getting the pointer to each class from the other and going back and forth between them duplicating functionality.\n\nI completely agree with decoding and rendering in separate threads though. Thanks for the explanation there.",
+      "parentUuid": "8389826a_9e4cd51d",
       "range": {
         "startLine": 167,
         "startChar": 0,
