@@ -228,7 +228,7 @@ color: #f0f0f0</string>
         </size>
        </property>
        <property name="toolTip">
-        <string>Tablet mode</string>
+        <string>Switch to tablet mode</string>
        </property>
        <property name="text">
         <string notr="true"/>
@@ -244,9 +244,6 @@ color: #f0f0f0</string>
         </size>
        </property>
        <property name="flat">
-        <bool>true</bool>
-       </property>
-       <property name="checkable">
         <bool>true</bool>
        </property>
        <property name="report_metrics" stdset="0">

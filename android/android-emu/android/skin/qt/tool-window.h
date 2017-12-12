@@ -165,7 +165,7 @@ private slots:
     void on_volume_up_button_pressed();
     void on_volume_up_button_released();
     void on_zoom_button_clicked();
-    void on_tablet_mode_button_toggled(bool checked);
+    void on_tablet_mode_button_clicked();
 
     void onGuestClipboardChanged(QString text);
     void onHostClipboardChanged();
