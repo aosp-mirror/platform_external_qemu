@@ -562,7 +562,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     }
 
     using android::snapshot::Snapshotter;
-    Snapshotter::get().setOperationCallback(
+    Snapshotter::get().addOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
                 if (stage == Snapshotter::Stage::Start) {
                     runOnUiThread([this, op]() {
