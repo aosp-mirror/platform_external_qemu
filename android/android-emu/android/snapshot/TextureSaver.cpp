@@ -58,9 +58,10 @@ void TextureSaver::done() {
     }
     mIndex.startPosInFile = ftello64(mStream.get());
     writeIndex();
+    mEndTime = System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1
     printf("Texture saving time: %.03f\n",
-           (System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
+           (mEndTime - mStartTime) / 1000.0);
 #endif
     mHasError = ferror(mStream.get()) != 0;
     mFinished = true;
