@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98176cb9_fcb5d097",
+        "filename": "android/android-emu/android/snapshot/FastReleasePool.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T13:56:53Z",
+      "side": 1,
+      "message": "Can you give an example of how to use this class? I\u0027m confused on expectations of who owns the memory T*\u0027s are pointing at. Why not also have an std::array\u003cT, N\u003e where the allocations are backed up and the resources allocated with placement new[] making the allocation handled in this class too?",
+      "range": {
+        "startLine": 58,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 51
+      },
+      "revId": "a7dded5f7da34af690e170103778f9fa42cb7802",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
