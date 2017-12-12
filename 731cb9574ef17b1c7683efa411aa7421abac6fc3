@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bf0952a6_3b2b8e9f",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T13:51:06Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 266,
+        "startChar": 20,
+        "endLine": 266,
+        "endChar": 44
+      },
+      "revId": "731cb9574ef17b1c7683efa411aa7421abac6fc3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4eaeed09_b6943b2a",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 347,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T13:51:06Z",
+      "side": 1,
+      "message": "Seems like there are commmon patterns here that can be extracted to common statements above the if (compressed()); comparing the current page vs loader page\u0027s size and calculating gap size.",
+      "range": {
+        "startLine": 317,
+        "startChar": 0,
+        "endLine": 347,
+        "endChar": 17
+      },
+      "revId": "731cb9574ef17b1c7683efa411aa7421abac6fc3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
