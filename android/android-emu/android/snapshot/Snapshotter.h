@@ -44,6 +44,9 @@ public:
     OperationStatus load(bool isQuickboot, const char* name);
     OperationStatus prepareForSaving(const char* name);
     OperationStatus save(const char* name);
+
+    OperationStatus saveSafe(const char* name);
+
     void deleteSnapshot(const char* name);
     void onCrashedSnapshot(const char* name);
 
@@ -52,6 +55,10 @@ public:
 
     base::System::Duration lastLoadUptimeMs() const {
         return mLastLoadUptimeMs;
+    }
+
+    base::System::Duration lastSaveUptimeMs() const {
+        return mLastSaveUptimeMs;
     }
 
     Saver& saver() { return *mSaver; }
@@ -83,6 +90,12 @@ private:
 
     void callCallbacks(Operation op, Stage stage);
 
+    void appendSuccessfulSave(const char* name,
+                              base::System::Duration durationMs);
+    void showError(const std::string& msg);
+    bool checkSafeToSave(const char* name, bool reportMetrics = true);
+    void handleSafeSave(const char* name, OperationStatus saveStatus, bool reportMetrics = true);
+
     QAndroidVmOperations mVmOperations;
     QAndroidEmulatorWindowAgent mWindowAgent;
     android::base::Optional<Saver> mSaver;
@@ -91,6 +104,11 @@ private:
     std::string mLoadedSnapshotFile;
 
     base::System::Duration mLastLoadUptimeMs = 0;
+    base::System::Duration mLastSaveUptimeMs = 0;
+    android::base::Optional<base::System::Duration> mLastSaveDuration = 0;
+    android::base::Optional<base::System::Duration> mLastRamSaveDuration = 0;
+    android::base::Optional<base::System::Duration> mLastTexturesSaveDuration = 0;
+    android::base::Optional<base::System::Duration> mLastLoadDuration = 0;
 
     bool mIsQuickboot = false;
 };
