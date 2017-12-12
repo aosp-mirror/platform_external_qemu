@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1ce6172b_c80b4ead",
+        "filename": "android/android-emu/android/utils/looper.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2017-12-12T16:19:14Z",
+      "side": 1,
+      "message": "Reminds me that \"the La Brea tar pits\" translates to \"the the tar pits tar pits.\" :)",
+      "range": {
+        "startLine": 287,
+        "startChar": 30,
+        "endLine": 287,
+        "endChar": 50
+      },
+      "revId": "6a8dcc761c1b320f9867b6f6fef4ce62d818f242",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
