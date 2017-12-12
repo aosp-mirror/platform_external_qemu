@@ -34,7 +34,7 @@ constexpr float nsToSeconds(uint64_t nanoSeconds) {
     return static_cast<float>(nanoSeconds / 1000000000.0);
 }
 
-constexpr float kStateChangeTimeSeconds = 0.4f;
+constexpr float kStateChangeTimeSeconds = 0.25f;
 
 typedef enum {
     INERTIAL_STATE_CHANGING=0,
