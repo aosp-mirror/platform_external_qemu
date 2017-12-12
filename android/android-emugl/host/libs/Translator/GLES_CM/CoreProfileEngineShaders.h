@@ -260,7 +260,7 @@ void main() {
         float spotExponent = light_spotlight_exponents[i];
 
         vec3 toLight;
-        if (lightPos.w == 0) {
+        if (lightPos.w == 0.0) {
             toLight = lightPos.xyz;
         } else {
             toLight = (lightPos.xyz / lightPos.w - pos_varying.xyz);
