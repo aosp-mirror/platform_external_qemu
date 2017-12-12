@@ -22,6 +22,30 @@
       "revId": "1a74b517cbe5e44dd4e75b7b71aa3319f8dfe31f",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "699fe479_23e7e046",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_CM/CoreProfileEngineShaders.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T00:56:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bfbd3bd5_cc7d001a",
+      "range": {
+        "startLine": 177,
+        "startChar": 0,
+        "endLine": 178,
+        "endChar": 15
+      },
+      "revId": "1a74b517cbe5e44dd4e75b7b71aa3319f8dfe31f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
