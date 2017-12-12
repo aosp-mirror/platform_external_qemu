@@ -953,6 +953,7 @@ message EmulatorFeatureFlagState {
     FAST_SNAPSHOT_V1 = 17;
     SCREEN_RECORDING = 18;
     VIRTUAL_SCENE = 19;
+    SYSTEM_AS_ROOT = 20;
     // Next tag: 20
   }
   // Which features were enabled by default or through the server-side config.

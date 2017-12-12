@@ -1134,7 +1134,7 @@ static void build_android_dt_aml(Aml *scope,
     Aml *dev = aml_device(dev_name);
     Aml *properties, *dsd;
     char *system_device_in_guest, *vendor_device_in_guest;
-    int npartitions;
+    int npartitions = 0;
 
     aml_append(dev, aml_name_decl("_HID", aml_string(hid_name)));
     aml_append(dev, aml_name_decl("_STR", aml_unicode(str_name)));
@@ -1142,7 +1142,12 @@ static void build_android_dt_aml(Aml *scope,
     /* All AVDs have a system.img. Some also have a vendor.img. */
     system_device_in_guest = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
     vendor_device_in_guest = avdInfo_getVendorImageDevicePathInGuest( android_avdInfo);
-    npartitions = vendor_device_in_guest ? 2 : 1;
+    if (system_device_in_guest) {
+        ++npartitions;
+    }
+    if (vendor_device_in_guest) {
+        ++npartitions;
+    }
     /* 5 properties per partition, plus 2 more "compatible" nodes */
     properties = aml_package(2 + npartitions * 5);
     /* ACPI _DSD does not support nested properties (at least not in a
@@ -1153,16 +1158,18 @@ static void build_android_dt_aml(Aml *scope,
     append_string_property(properties, "android.fstab.compatible",
                            "android,fstab");
 
-    append_string_property(properties, "android.fstab.system.compatible",
+    if (system_device_in_guest) {
+        append_string_property(properties, "android.fstab.system.compatible",
                            "android,system");
-    append_string_property(properties, "android.fstab.system.dev",
+        append_string_property(properties, "android.fstab.system.dev",
                            system_device_in_guest);
-    append_string_property(properties, "android.fstab.system.type", "ext4");
-    append_string_property(properties, "android.fstab.system.mnt_flags", "ro");
-    append_string_property(properties, "android.fstab.system.fsmgr_flags",
+        append_string_property(properties, "android.fstab.system.type", "ext4");
+        append_string_property(properties, "android.fstab.system.mnt_flags", "ro");
+        append_string_property(properties, "android.fstab.system.fsmgr_flags",
                            "wait");
+        free(system_device_in_guest);
+    }
 
-    free(system_device_in_guest);
     if (vendor_device_in_guest) {
         append_string_property(properties, "android.fstab.vendor.compatible",
                                "android,vendor");

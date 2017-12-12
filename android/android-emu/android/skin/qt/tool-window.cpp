@@ -106,14 +106,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mToolsUi->controlsLayout->setAlignment(Qt::AlignCenter);
 
     // Get the latest user selections from the user-config code.
-    QSettings settings;
-    SettingsTheme theme =
-            (SettingsTheme)settings.value(Ui::Settings::UI_THEME, 0).toInt();
-    if (theme < 0 || theme >= SETTINGS_THEME_NUM_ENTRIES) {
-        theme = (SettingsTheme)0;
-        settings.setValue(Ui::Settings::UI_THEME, 0);
-    }
-
+    SettingsTheme theme = getSelectedTheme();
     adjustAllButtonsForTheme(theme);
     updateTheme(Ui::stylesheetForTheme(theme));
 
@@ -481,10 +474,10 @@ void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
     mEmulatorWindow->queueSkinEvent(skin_event);
 }
 
-bool ToolWindow::handleQtKeyEvent(QKeyEvent* event) {
+bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
     // See if this key is handled by the virtual scene control window first.
     if (mVirtualSceneControlWindow.isVisible()) {
-        if (mVirtualSceneControlWindow.handleQtKeyEvent(event)) {
+        if (mVirtualSceneControlWindow.handleQtKeyEvent(event, source)) {
             return true;
         }
     }
@@ -538,7 +531,7 @@ void ToolWindow::raiseMainWindow() {
 }
 
 void ToolWindow::updateTheme(const QString& styleSheet) {
-    mVirtualSceneControlWindow.setStyleSheet(styleSheet);
+    mVirtualSceneControlWindow.updateTheme(styleSheet);
     setStyleSheet(styleSheet);
 }
 
@@ -585,6 +578,7 @@ void ToolWindow::on_back_button_released() {
 // If the user cancels the pop-up, return
 // 'false' to say we should NOT exit now.
 bool ToolWindow::askWhetherToSaveSnapshot() {
+    mAskedWhetherToSaveSnapshot = true;
     mExtendedWindow.get();
     // Check the UI setting
     const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
@@ -625,6 +619,7 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     int selection = msgBox.exec();
 
     if (selection == QMessageBox::Cancel) {
+        mAskedWhetherToSaveSnapshot = false;
         return false;
     }
 
@@ -636,11 +631,20 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
     return true;
 }
 
-void ToolWindow::on_close_button_clicked() {
+bool ToolWindow::shouldClose() {
+    if (mAskedWhetherToSaveSnapshot) return true;
+
     bool actuallyExit = askWhetherToSaveSnapshot();
     if (actuallyExit) {
         parentWidget()->close();
+        return true;
     }
+
+    return false;
+}
+
+void ToolWindow::on_close_button_clicked() {
+    shouldClose();
 }
 
 void ToolWindow::on_home_button_pressed() {
@@ -703,10 +707,12 @@ void ToolWindow::on_overview_button_released() {
 }
 
 void ToolWindow::on_prev_layout_button_clicked() {
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::ROTATE_LEFT);
 }
 
 void ToolWindow::on_next_layout_button_clicked() {
+    mEmulatorWindow->activateWindow();
     handleUICommand(QtUICommand::ROTATE_RIGHT);
 }
 

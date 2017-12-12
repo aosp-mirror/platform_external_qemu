@@ -191,13 +191,29 @@ static void getShaderLinkInfo(ShHandle compilerHandle,
     if (interfaceBlocks) linkInfo->interfaceBlocks = *interfaceBlocks;
 }
 
+static int detectShaderESSLVersion(const char* const* strings) {
+    // Just look at the first line of the first string for now
+    const char* pos = strings[0];
+    const char* linePos = strstr(pos, "\n");
+    const char* versionPos = strstr(pos, "#version");
+    if (!linePos || !versionPos) {
+        // default to ESSL 100
+        return 100;
+    }
+
+    const char* version_end = versionPos + strlen("#version");
+    int wantedESSLVersion;
+    sscanf(version_end, " %d", &wantedESSLVersion);
+    return wantedESSLVersion;
+}
+
 bool translate(bool hostUsesCoreProfile,
-               int esslVersion,
                const char* src,
                GLenum shaderType,
                std::string* outInfolog,
                std::string* outObjCode,
                ShaderLinkInfo* outShaderLinkInfo) {
+    int esslVersion = detectShaderESSLVersion(&src);
 
     // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
     // Use translator after rest of dEQP-GLES31.functional is in a better state.

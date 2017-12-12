@@ -68,6 +68,18 @@ void saveBuffer(Stream* stream, const std::vector<T>& buffer, SaveFunc&& saver) 
     }
 }
 
+template <class T>
+void saveBuffer(Stream* stream, const T* buffer, size_t numElts) {
+    stream->putBe32(numElts);
+    stream->write(buffer, sizeof(T) * numElts);
+}
+
+template <class T>
+void loadBufferPtr(Stream* stream, T* out) {
+    auto len = stream->getBe32();
+    stream->read(out, len * sizeof(T));
+}
+
 template <class T, class LoadFunc>
 void loadBuffer(Stream* stream, std::vector<T>* buffer, LoadFunc&& loader) {
     auto len = stream->getBe32();

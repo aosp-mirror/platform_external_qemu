@@ -16,6 +16,7 @@
 
 #include "android/base/Compiler.h"
 #include "android/base/threads/Types.h"
+#include "android/base/synchronization/Lock.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -110,17 +111,15 @@ private:
     static DWORD WINAPI thread_main(void* arg);
 
     HANDLE mThread = nullptr;
-    DWORD mThreadId = 0;
-    CRITICAL_SECTION mLock;
 #else // !WIN32
     static void* thread_main(void* arg);
 
     pthread_t mThread;
-    pthread_mutex_t mLock;
 #endif
-    int mStackSize;
+    Lock mLock;
     // Access guarded by |mLock|.
     intptr_t mExitStatus = 0;
+    int mStackSize;
     const ThreadFlags mFlags;
     bool mStarted = false;
     // Access guarded by |mLock|.
