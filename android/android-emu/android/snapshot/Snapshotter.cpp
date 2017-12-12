@@ -12,17 +12,25 @@
 #include "android/snapshot/Snapshotter.h"
 
 #include "android/base/memory/LazyInstance.h"
+#include "android/base/Stopwatch.h"
+#include "android/base/StringFormat.h"
 #include "android/crashreport/CrashReporter.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/metrics/AdbLivenessChecker.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/metrics/StudioConfig.h"
+#include "android/opengl/emugl_config.h"
 #include "android/snapshot/Hierarchy.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/Quickboot.h"
 #include "android/snapshot/Saver.h"
 #include "android/snapshot/TextureLoader.h"
+#include "android/snapshot/TextureSaver.h"
 #include "android/snapshot/interface.h"
 #include "android/utils/debug.h"
 #include "android/utils/path.h"
+#include "android/utils/system.h"
 
 #include <cassert>
 #include <utility>
@@ -32,8 +40,12 @@ extern "C" {
 }
 
 using android::base::LazyInstance;
+using android::base::Stopwatch;
+using android::base::StringFormat;
 using android::base::System;
 using android::crashreport::CrashReporter;
+using android::metrics::MetricsReporter;
+namespace pb = android_studio;
 
 // Inspired by QEMU's bufferzero.c implementation, but simplified for the case
 // when checking the whole aligned memory page.
@@ -191,6 +203,22 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
     mVmOperations.setSnapshotCallbacks(this, &kCallbacks);
 }  // namespace snapshot
 
+static constexpr int kDefaultMessageTimeoutMs = 10000;
+
+static void appendFailedSave(pb::EmulatorSnapshotSaveState state) {
+    MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
+        auto snap = event->mutable_emulator_details()->add_snapshot_saves();
+        snap->set_save_state(state);
+    });
+}
+
+static void appendFailedLoad(pb::EmulatorSnapshotLoadState state) {
+    MetricsReporter::get().report([state](pb::AndroidStudioEvent* event) {
+        auto snap = event->mutable_emulator_details()->add_snapshot_loads();
+        snap->set_load_state(state);
+    });
+}
+
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {
         mSaver.clear();
@@ -214,6 +242,182 @@ void Snapshotter::callCallbacks(Operation op, Stage stage) {
     }
 }
 
+void Snapshotter::appendSuccessfulSave(const char* name,
+                                       System::Duration durationMs) {
+    auto& save = saver();
+    const auto compressedRam = save.ramSaver().compressed();
+    const auto compressedTextures = save.textureSaver()->compressed();
+    const auto diskSize = save.snapshot().diskSize();
+    const auto ramSize = save.ramSaver().diskSize();
+    const auto textureSize = save.textureSaver()->diskSize();
+    MetricsReporter::get().report([compressedRam, compressedTextures,
+                                   durationMs, name,
+                                   diskSize, ramSize, textureSize]
+                                  (pb::AndroidStudioEvent* event) {
+        auto snapshot = event->mutable_emulator_details()->add_snapshot_saves();
+        snapshot->set_name(MetricsReporter::get().anonymize(name));
+        if (compressedRam) {
+            snapshot->set_flags(pb::SNAPSHOT_FLAGS_RAM_COMPRESSED_BIT);
+        }
+        if (compressedTextures) {
+            snapshot->set_flags(pb::SNAPSHOT_FLAGS_TEXTURES_COMPRESSED_BIT);
+        }
+        snapshot->set_size_bytes(int64_t(diskSize + ramSize + textureSize));
+
+        snapshot->set_save_state(
+                pb::EmulatorSnapshotSaveState::EMULATOR_SNAPSHOT_SAVE_SUCCEEDED);
+        snapshot->set_save_duration_ms(durationMs);
+        snapshot->set_ram_size_bytes(int64_t(ramSize));
+        snapshot->set_textures_size_bytes(int64_t(textureSize));
+        snapshot->set_save_duration_ms(uint64_t(durationMs));
+        // snapshot->set_ram_save_duration_ms(uint64_t(durationMs));
+    });
+}
+
+void Snapshotter::showError(const std::string& message) {
+    mWindowAgent.showMessage(message.c_str(), WINDOW_MESSAGE_ERROR,
+                             kDefaultMessageTimeoutMs);
+    dwarning(message.c_str());
+}
+
+bool Snapshotter::checkSafeToSave(const char* name, bool reportMetrics) {
+    const bool shouldTrySaving =
+        metrics::AdbLivenessChecker::isEmulatorBooted();
+
+    if (!shouldTrySaving) {
+        showError("Skipping snapshot save: "
+                  "Emulator not booted (or ADB not online)");
+        if (reportMetrics) {
+            appendFailedSave(
+                pb::EmulatorSnapshotSaveState::
+                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NOT_BOOTED);
+        }
+        return false;
+    }
+
+    if (!name) {
+        showError("Skipping snapshot save: "
+                  "Null snapshot name");
+        if (reportMetrics) {
+            appendFailedSave(
+                pb::EmulatorSnapshotSaveState::
+                    EMULATOR_SNAPSHOT_SAVE_SKIPPED_NO_SNAPSHOT);
+        }
+        return false;
+    }
+
+    if (!emuglConfig_current_renderer_supports_snapshot()) {
+        showError(
+            StringFormat("Skipping snapshot save: "
+                         "Renderer type '%s' (%d) "
+                         "doesn't support snapshotting",
+                         emuglConfig_renderer_to_string(
+                                 emuglConfig_get_current_renderer()),
+                         int(emuglConfig_get_current_renderer())));
+        if (reportMetrics) {
+            appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                 EMULATOR_SNAPSHOT_SAVE_SKIPPED_UNSUPPORTED);
+        }
+        return false;
+    }
+
+    return true;
+}
+
+bool Snapshotter::checkSafeToLoad(const char* name, bool reportMetrics) {
+    if (!name) {
+        showError("Skipping snapshot load: "
+                  "Null snapshot name");
+        if (reportMetrics) {
+            appendFailedLoad(pb::EmulatorSnapshotLoadState::
+                                 EMULATOR_SNAPSHOT_LOAD_NO_SNAPSHOT);
+        }
+        return false;
+    }
+
+    if (!emuglConfig_current_renderer_supports_snapshot()) {
+        showError(
+            StringFormat("Skipping snapshot load of '%s': "
+                         "Renderer type '%s' (%d) "
+                         "doesn't support snapshotting",
+                         name,
+                         emuglConfig_renderer_to_string(
+                                 emuglConfig_get_current_renderer()),
+                         int(emuglConfig_get_current_renderer())));
+        if (reportMetrics) {
+            appendFailedLoad(pb::EmulatorSnapshotLoadState::
+                                 EMULATOR_SNAPSHOT_LOAD_SKIPPED_UNSUPPORTED);
+        }
+        return false;
+    }
+    return true;
+}
+
+void Snapshotter::handleGenericSave(const char* name,
+                                    OperationStatus saveStatus,
+                                    bool reportMetrics) {
+    if (saveStatus != OperationStatus::Ok) {
+        showError(
+            StringFormat(
+                "Snapshot save for snapshot '%s' failed. "
+                "Cleaning it out", name));
+        deleteSnapshot(name);
+        if (reportMetrics) {
+            appendFailedSave(pb::EmulatorSnapshotSaveState::
+                                 EMULATOR_SNAPSHOT_SAVE_FAILED);
+        }
+    } else {
+        if (reportMetrics) {
+            appendSuccessfulSave(name,
+                                 mLastSaveDuration ? *mLastSaveDuration : 0);
+        }
+    }
+}
+
+void Snapshotter::handleGenericLoad(const char* name,
+                                    OperationStatus loadStatus,
+                                    bool reportMetrics) {
+    if (loadStatus != OperationStatus::Ok) {
+        // Check if the error is about something done as just a check or
+        // we've started actually loading the VM data
+        if (auto failureReason = loader().snapshot().failureReason()) {
+            if (*failureReason != FailureReason::Empty &&
+                *failureReason < FailureReason::ValidationErrorLimit) {
+                showError(
+                    StringFormat(
+                        "Snapshot '%s' can not be loaded (%d). "
+                        "Continuing current session",
+                        name, int(*failureReason)));
+                if (reportMetrics) {
+                    appendFailedLoad(pb::EmulatorSnapshotLoadState::
+                                         EMULATOR_SNAPSHOT_LOAD_FAILED);
+                }
+            } else {
+                showError(
+                    StringFormat(
+                        "Snapshot '%s' can not be loaded (%d). "
+                        "Fatal error, resetting current session",
+                        name, int(*failureReason)));
+                mVmOperations.vmReset();
+                if (reportMetrics) {
+                    appendFailedLoad(pb::EmulatorSnapshotLoadState::
+                                         EMULATOR_SNAPSHOT_LOAD_FAILED);
+                }
+            }
+        } else {
+            showError(
+                StringFormat(
+                    "Snapshot '%s' can not be loaded (reason not set). "
+                    "Fatal error, resetting current session", name));
+            mVmOperations.vmReset();
+            if (reportMetrics) {
+                appendFailedLoad(pb::EmulatorSnapshotLoadState::
+                                     EMULATOR_SNAPSHOT_LOAD_FAILED);
+            }
+        }
+    }
+}
+
 OperationStatus Snapshotter::prepareForSaving(const char* name) {
     if (mLoader && mLoader->snapshot().name() == name) {
         mLoader.clear();
@@ -224,8 +428,34 @@ OperationStatus Snapshotter::prepareForSaving(const char* name) {
 }
 
 OperationStatus Snapshotter::save(const char* name) {
+    mLastSaveDuration = android::base::kNullopt;
+    mLastSaveUptimeMs =
+        System::Duration(System::get()->getProcessTimes().wallClockMs);
+    Stopwatch sw;
     mVmOperations.snapshotSave(name, this, nullptr);
+    *mLastSaveDuration = sw.elapsedUs() / 1000;
     return mSaver->status();
+}
+
+OperationStatus Snapshotter::saveGeneric(const char* name) {
+    OperationStatus res = OperationStatus::Error;
+    if (checkSafeToSave(name)) {
+        res = save(name);
+        handleGenericSave(name, res);
+    }
+    return res;
+}
+
+OperationStatus Snapshotter::loadGeneric(const char* name) {
+    CrashReporter::get()->addCrashCallback([this, &name]() {
+        Snapshotter::get().onCrashedSnapshot(name);
+    });
+    OperationStatus res = OperationStatus::Error;
+    if (checkSafeToLoad(name)) {
+        res = load(false /* not quickboot */, name);
+        handleGenericLoad(name, res);
+    }
+    return res;
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {

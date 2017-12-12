@@ -55,6 +55,17 @@ RamSaver::~RamSaver() {
     join();
 }
 
+bool RamSaver::getSaveDuration(base::System::Duration* duration) {
+    if (mEndTime < mStartTime) {
+        return false;
+    }
+
+    if (duration) {
+        *duration = mEndTime - mStartTime;
+    }
+    return true;
+}
+
 void RamSaver::registerBlock(const RamBlock& block) {
     mIndex.blocks.push_back({block, {}});
 }
@@ -120,9 +131,11 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
         mHasError = ferror(mStream.get()) != 0;
         mIndex.clear();
 
+        mEndTime = System::get()->getHighResTimeUs() - mStartTime;
+
 #if SNAPSHOT_PROFILE > 1
         printf("RAM saving time: %.03f\n",
-               (System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
+               (mEndTime - mStartTime) / 1000.0);
 #endif
         return false;
     }
