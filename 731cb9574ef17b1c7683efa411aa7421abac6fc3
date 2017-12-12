@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c7cd07c4_4c0222bb",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 266,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-12T17:14:55Z",
+      "side": 1,
+      "message": "we don\u0027t need to know if the page is zeroed in some cases, e.g. when the corresponding loader\u0027s page isn\u0027t zeroed we go straight into hash calculation. if they turn out to be the same |isZeroed| is never used - that\u0027s why I made it on demand-calculated",
+      "parentUuid": "bf0952a6_3b2b8e9f",
+      "range": {
+        "startLine": 266,
+        "startChar": 20,
+        "endLine": 266,
+        "endChar": 44
+      },
+      "revId": "731cb9574ef17b1c7683efa411aa7421abac6fc3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4eaeed09_b6943b2a",
         "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
         "patchSetId": 1
