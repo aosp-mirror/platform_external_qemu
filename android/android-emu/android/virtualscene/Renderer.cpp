@@ -85,6 +85,66 @@ void main() {
 }
 )";
 
+
+static constexpr char kCheckerboardFragmentShader[] = R"(
+precision mediump float;
+varying vec2 uv;
+uniform float u_time;
+
+#define CHECKERBOARD_SQUARE_WIDTH 16.0 // Number of squares across the board.
+#define MOVING_SQUARE_SIZE 2.5 // Width of moving square in checkerboard squares.
+#define VISIBLE_HEIGHT 9.0 // Height where we want the moving square to bounce.
+                           // in checkerboard squares.
+#define COLOR_BLACK vec3(0.0,0.0,0.0)
+#define COLOR_GREY vec3(0.5,0.5,0.5)
+#define COLOR_RED vec3(0.82422,0.03125,0.0)
+#define COLOR_GREEN vec3(0.01172,0.65625,0.0)
+#define MOVING_SQUARE_VELOCITY vec2(1.5,1.5) // Velocity of the moving
+                                             // square expressed in
+                                             // checkerboard squares
+                                             // per second.
+#define CHECKERBOARD_VELOCITY vec2(1.0,1.0/3.0) // Velocity of the checkerboard
+                                                // expressed in checkerboard
+                                                // squares per second.
+#define COLOR_CHANGE_TIME 5.0 // Time between red/green color changes.
+
+void main() {
+  vec2 staticBoardSpacePosition =
+        vec2(uv.x * CHECKERBOARD_SQUARE_WIDTH, uv.y * CHECKERBOARD_SQUARE_WIDTH);
+  vec2 movingBoardSpacePosition =
+        staticBoardSpacePosition +
+        u_time * CHECKERBOARD_VELOCITY;
+  vec3 checkerboardColor = COLOR_BLACK + (mod(
+        floor(mod(movingBoardSpacePosition.x, 2.0)) +
+        floor(mod(movingBoardSpacePosition.y, 2.0)), 2.0)) *
+        (COLOR_GREY - COLOR_BLACK);
+  vec2 totalSquareMovement = MOVING_SQUARE_VELOCITY * u_time;
+  float squareXTravel = CHECKERBOARD_SQUARE_WIDTH - MOVING_SQUARE_SIZE;
+  float squareYTravel = VISIBLE_HEIGHT - MOVING_SQUARE_SIZE;
+  vec2 squarePosition = vec2(
+        mod(totalSquareMovement.x, squareXTravel * 2.0) > squareXTravel ?
+        squareXTravel - mod(totalSquareMovement.x, squareXTravel) :
+        mod(totalSquareMovement.x, squareXTravel),
+        ((CHECKERBOARD_SQUARE_WIDTH - VISIBLE_HEIGHT) / 2.0) +
+        (mod(totalSquareMovement.y, squareYTravel * 2.0) > squareYTravel ?
+        squareYTravel - mod(totalSquareMovement.y, squareYTravel) :
+        mod(totalSquareMovement.y, squareYTravel)));
+  vec3 squareColor = COLOR_GREEN +
+        floor(mod(u_time, COLOR_CHANGE_TIME * 2.0) / COLOR_CHANGE_TIME) *
+        (COLOR_RED - COLOR_GREEN);
+  vec2 posFromSquareOrigin = staticBoardSpacePosition - squarePosition;
+
+  if (posFromSquareOrigin.x >= 0.0 &&
+      posFromSquareOrigin.y >= 0.0 &&
+      posFromSquareOrigin.x < MOVING_SQUARE_SIZE &&
+      posFromSquareOrigin.y < MOVING_SQUARE_SIZE) {
+    gl_FragColor = vec4(squareColor, 1.0);
+  } else {
+    gl_FragColor = vec4(checkerboardColor, 1.0);
+  }
+}
+)";
+
 static constexpr char kFxaaFragmentShader[] = R"(
 precision mediump float;
 uniform sampler2D tex_sampler;
@@ -155,6 +215,7 @@ struct MaterialData {
     GLint texSamplerLocation = -1;
     GLint mvpLocation = -1;
     GLint resolutionLocation = -1;
+    GLint timeLocation = -1;
 };
 
 struct MeshData {
@@ -188,6 +249,7 @@ public:
     // Renderer public API.
     void releaseObjectResources(const SceneObject* sceneObject) override;
 
+    Material createMaterialCheckerboard(const SceneObject* parent) override;
     Material createMaterialTextured() override;
     Material createMaterialScreenSpace(const SceneObject* parent,
                                        const char* frag) override;
@@ -201,7 +263,8 @@ public:
     Texture loadTexture(const SceneObject* parent,
                         const char* filename) override;
 
-    void render(const std::vector<RenderableObject>& renderables) override;
+    void render(const std::vector<RenderableObject>& renderables,
+                float time) override;
 
 private:
     void releaseMaterial(Material material);
@@ -373,6 +436,43 @@ void RendererImpl::releaseObjectResources(const SceneObject* sceneObject) {
     mObjectData.erase(objectDataIt);
 }
 
+Material RendererImpl::createMaterialCheckerboard(const SceneObject* parent) {
+    // Compile and setup shaders.
+    const GLuint vertexId =
+            compileShader(GL_VERTEX_SHADER, kTexturedVertexShader);
+    const GLuint fragmentId =
+            compileShader(GL_FRAGMENT_SHADER, kCheckerboardFragmentShader);
+
+    GLuint program = 0;
+    if (vertexId && fragmentId) {
+        program = linkShaders(vertexId, fragmentId);
+    }
+
+    // Release the shaders, the program will keep their reference alive.
+    mGles2->glDeleteShader(vertexId);
+    mGles2->glDeleteShader(fragmentId);
+
+    if (!program) {
+        // Initialization failed, no program loaded.
+        return Material();
+    }
+
+    MaterialData material;
+    material.program = program;
+    material.positionLocation = getAttribLocation(program, "in_position");
+    material.uvLocation = getAttribLocation(program, "in_uv");
+    material.mvpLocation = getUniformLocation(program, "u_modelViewProj");
+    material.timeLocation = getUniformLocation(program, "u_time");
+
+    const int id = mNextResourceId++;
+    mMaterials[id] = material;
+
+    Material materialHandle;
+    materialHandle.id = id;
+    mObjectData[parent].materials.push_back(materialHandle);
+    return materialHandle;
+}
+
 Material RendererImpl::createMaterialTextured() {
     // Return cached instance if it exists.
     if (mMaterialTextured.isValid()) {
@@ -538,7 +638,8 @@ Texture RendererImpl::loadTexture(const SceneObject* parent,
     return texture;
 }
 
-void RendererImpl::render(const std::vector<RenderableObject>& renderables) {
+void RendererImpl::render(const std::vector<RenderableObject>& renderables,
+                          float time) {
     mRenderTargets[0]->bind();
 
     mGles2->glEnable(GL_DEPTH_TEST);
@@ -552,6 +653,7 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables) {
                               mGles2->glUniformMatrix4fv(
                                       material.mvpLocation, 1, GL_FALSE,
                                       &renderObject.modelViewProj[0][0]);
+                              mGles2->glUniform1f(material.timeLocation, time);
                           });
     }
 
@@ -576,6 +678,7 @@ void RendererImpl::render(const std::vector<RenderableObject>& renderables) {
             mGles2->glUniform2f(material.resolutionLocation,
                                 1.f / (superSampleMultiple * mRenderWidth),
                                 1.f / (superSampleMultiple * mRenderHeight));
+            mGles2->glUniform1f(material.timeLocation, time);
         });
     }
 

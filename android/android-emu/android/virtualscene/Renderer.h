@@ -88,6 +88,13 @@ public:
     // |parent| - SceneObject pointer, used as an opaque identifier.
     virtual void releaseObjectResources(const SceneObject* sceneObject) = 0;
 
+    // Create a standard material for rendering a test checkerboard texture.
+    // This is a standard material and will be automatically cleaned up when the
+    // Renderer is destroyed.
+    //
+    // Returns a Material instance or an invalid value if there was an error.
+    virtual Material createMaterialCheckerboard(const SceneObject* parent) = 0;
+
     // Create a standard material for rendering with a texture. This is a
     // standard material and will be automatically cleaned up when the Renderer
     // is destroyed.
@@ -159,7 +166,8 @@ public:
                                 const char* filename) = 0;
 
     // Render a frame.
-    virtual void render(const std::vector<RenderableObject>& renderables) = 0;
+    virtual void render(const std::vector<RenderableObject>& renderables,
+                        float time) = 0;
 };
 
 }  // namespace virtualscene
