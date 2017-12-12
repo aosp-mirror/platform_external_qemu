@@ -352,6 +352,30 @@
       "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7619ce49_6dc44348",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T20:20:41Z",
+      "side": 1,
+      "message": "That depends on the contact surface between any potential VideoPlayerImpl and VideoPlayer. Since VideoPlayer\u0027s public functions / slots / signals are not too numerous, one can just call something close to VideoPlayerImpl\u0027s versions of the same methods, and VideoPlayerImpl can just refer to mFrameDrop or mAudioBufSize directly without typing any -\u003e or . .",
+      "parentUuid": "a142352c_01697561",
+      "range": {
+        "startLine": 203,
+        "startChar": 4,
+        "endLine": 272,
+        "endChar": 0
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
