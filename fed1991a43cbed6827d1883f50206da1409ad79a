@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9fe50c3c_1472ab21",
+        "filename": "android/android-emu/android/virtualscene/SceneObject.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-12T18:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "735eb770_3acfe038",
+      "range": {
+        "startLine": 104,
+        "startChar": 17,
+        "endLine": 106,
+        "endChar": 64
+      },
+      "revId": "fed1991a43cbed6827d1883f50206da1409ad79a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2c66bf5e_0941c2c0",
         "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "fed1991a43cbed6827d1883f50206da1409ad79a",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5f23af84_1c596def",
+        "filename": "android/android-emu/android/virtualscene/VirtualSceneManager.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-12T18:42:23Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2c66bf5e_0941c2c0",
+      "range": {
+        "startLine": 96,
+        "startChar": 12,
+        "endLine": 96,
+        "endChar": 56
+      },
+      "revId": "fed1991a43cbed6827d1883f50206da1409ad79a",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
