@@ -48,6 +48,30 @@
     },
     {
       "key": {
+        "uuid": "57626add_601f52c1",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T19:33:41Z",
+      "side": 1,
+      "message": "If we don\u0027t this, it\u0027s pretty much two classes, a visible and very simple public one, then a private impl class inside the .cpp file. And the public class will be just like a wrapper, calls into the impl. class. The reason is that you are worried that if VideoPlayer.h is included into other .cpp files, too much depencies?",
+      "parentUuid": "0d1d7e83_ecd1876b",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 55
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "16ff47f1_303bd03d",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 29
@@ -59,6 +83,30 @@
       "writtenOn": "2017-12-12T16:42:52Z",
       "side": 1,
       "message": "Any update on clarifying this yet?",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 9
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "820bdc26_83bad468",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T19:33:41Z",
+      "side": 1,
+      "message": "mEmptyQueueCond is used to control the reading loop in VideoPlayer.cpp (av_read_frame), so we don\u0027t end up pushing too much frames into the packet queue, but if the queue is empty, then we signal it here.\n\nThe flush packet is put here pretty much for future use, in the case of seeking, so we can call avcodec_flush_buffers().\n\nThe serial number is actually related to flush too, which you can ignore. The condition is mainly controlled by mPacketPending and pkt.data !\u003d PacketQueue::sFlushPkt.data, only first packet will be pkt.data \u003d\u003d PacketQueue::sFlushPkt.data for now.",
+      "parentUuid": "16ff47f1_303bd03d",
       "range": {
         "startLine": 82,
         "startChar": 0,
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "9440f4c5_8cebd2f1",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T19:33:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f63713fd_d9f3e261",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 145,
+        "endChar": 19
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "760b6f4d_26e92c0b",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
         "patchSetId": 29
@@ -114,6 +186,30 @@
       "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2716f453_daf459d4",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T19:33:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "760b6f4d_26e92c0b",
+      "range": {
+        "startLine": 163,
+        "startChar": 17,
+        "endLine": 163,
+        "endChar": 24
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     },
     {
       "key": {
@@ -140,6 +236,30 @@
     },
     {
       "key": {
+        "uuid": "a5a4be79_a26a3540",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T19:33:41Z",
+      "side": 1,
+      "message": "I was using a single video player class, I\u0027d like to separate the Decoder class out, so we have more meaningful class names, and easier to maintain. If you look at other video players, they pretty much follow these same naming convention.",
+      "parentUuid": "3e52d33a_0a5f1416",
+      "range": {
+        "startLine": 173,
+        "startChar": 1,
+        "endLine": 173,
+        "endChar": 44
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "25d93eec_1e219c40",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
         "patchSetId": 29
@@ -151,6 +271,30 @@
       "writtenOn": "2017-12-12T16:42:52Z",
       "side": 1,
       "message": "We might consider moving all these to an internal VideoPlayerImpl class that is only visible from VideoPlayer.cpp.",
+      "range": {
+        "startLine": 203,
+        "startChar": 4,
+        "endLine": 272,
+        "endChar": 0
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a142352c_01697561",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.h",
+        "patchSetId": 29
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-12T19:33:41Z",
+      "side": 1,
+      "message": "Since these are all private members, it shouldn\u0027t matter much. I can move all of these to a private class in VideoPlayer.cpp, but it will add a lots of typing for another layer of access, i.e., mVidePlayerImpl-\u003exxx, it probably make code even harder to read",
+      "parentUuid": "25d93eec_1e219c40",
       "range": {
         "startLine": 203,
         "startChar": 4,
