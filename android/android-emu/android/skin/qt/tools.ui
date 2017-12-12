@@ -246,14 +246,11 @@ color: #f0f0f0</string>
        <property name="flat">
         <bool>true</bool>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
        <property name="report_metrics" stdset="0">
         <bool>true</bool>
        </property>
        <property name="themeIconName" stdset="0">
-        <string notr="true">tablet_mode</string>
+        <string notr="true">clamshell_mode</string>
        </property>
        <property name="uiCommand" stdset="0">
         <string>TABLET_MODE</string>
