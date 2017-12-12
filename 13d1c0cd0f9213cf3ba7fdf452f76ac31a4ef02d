@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "785029e9_1a86f375",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T20:17:21Z",
+      "side": 1,
+      "message": "Right, it introduces a lot of dependencies. The more dependencies in a header file, generally the longer compile times will take, and the more unpredictable problems will happen down the line either at compile time or even run time if some macro or other definition from one of the many dependencies silently leaks through.",
+      "parentUuid": "57626add_601f52c1",
+      "range": {
+        "startLine": 41,
+        "startChar": 0,
+        "endLine": 73,
+        "endChar": 55
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "16ff47f1_303bd03d",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 29
@@ -107,6 +131,30 @@
       "side": 1,
       "message": "mEmptyQueueCond is used to control the reading loop in VideoPlayer.cpp (av_read_frame), so we don\u0027t end up pushing too much frames into the packet queue, but if the queue is empty, then we signal it here.\n\nThe flush packet is put here pretty much for future use, in the case of seeking, so we can call avcodec_flush_buffers().\n\nThe serial number is actually related to flush too, which you can ignore. The condition is mainly controlled by mPacketPending and pkt.data !\u003d PacketQueue::sFlushPkt.data, only first packet will be pkt.data \u003d\u003d PacketQueue::sFlushPkt.data for now.",
       "parentUuid": "16ff47f1_303bd03d",
+      "range": {
+        "startLine": 82,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 9
+      },
+      "revId": "13d1c0cd0f9213cf3ba7fdf452f76ac31a4ef02d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a74e4486_318af537",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 29
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-12T20:17:21Z",
+      "side": 1,
+      "message": "Thanks for the explanation. Can you incorporate this into the code so that it\u0027s clear what\u0027s going on? For example, there\u0027s nothing that indicates the flush packet is for future use, that we\u0027re not using it right now, nor it\u0027s meant to be for seeking or what not. I\u0027m only learning about this now, several days after the original review request, whereas this kind of information should have been obvious from the code.\n\nOn the serial: why include it if it\u0027s ignorable? If the flush case is uncommon then we should have a completely separate condition in a separate version of this function.\n\nDefinitely separate the mPacketPending / pkt.data !\u003d PacketQueue.sFlushPkt.data into condition checking subroutines of their own, since that\u0027s what really dictates control flow here. It is even going to change soon, so a separate function is even more called for.",
+      "parentUuid": "820bdc26_83bad468",
       "range": {
         "startLine": 82,
         "startChar": 0,
