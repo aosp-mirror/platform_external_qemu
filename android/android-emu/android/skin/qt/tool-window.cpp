@@ -46,6 +46,15 @@
 #include <cassert>
 #include <string>
 
+namespace {
+
+void ChangeIcon(QPushButton* button, const char* icon) {
+    button->setIcon(getIconForCurrentTheme(icon));
+    button->setProperty("themeIconName", icon);
+}
+
+}  // namespace
+
 using Ui::Settings::SaveSnapshotOnExit;
 
 ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
@@ -676,6 +685,8 @@ void ToolWindow::on_power_button_released() {
 }
 
 void ToolWindow::on_tablet_mode_button_toggled(bool checked) {
+    ChangeIcon(mToolsUi->tablet_mode_button,
+               checked ? "tablet_mode" : "clamshell_mode");
     handleUICommand(QtUICommand::TABLET_MODE, checked);
 }
 
