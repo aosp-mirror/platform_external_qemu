@@ -16,6 +16,7 @@
 #include "android/skin/qt/video-player/VideoPlayer.h"
 #include "android/skin/qt/video-player/VideoPlayerNotifier.h"
 #include "android/skin/qt/video-player/VideoPlayerWidget.h"
+#include "android/skin/qt/video-player/VideoPreview.h"
 
 #include <QTimer>
 #include <QWidget>
@@ -64,6 +65,7 @@ private:
     std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
     std::unique_ptr<android::videoplayer::VideoPlayerNotifier> mVideoPlayerNotifier;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
+    std::unique_ptr<android::videoplayer::VideoPreview> mVideoPreview;
     const QAndroidRecordScreenAgent* mRecordScreenAgent;
     RecordState mState;
     QTimer mTimer;
