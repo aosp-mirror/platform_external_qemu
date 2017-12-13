@@ -96,6 +96,7 @@ public:
     void decodeVideoThread();
 
     void scheduleRefresh(int delayMs);
+    bool showPreviewFrame();
 
 private:
     int play(const char* filename);
@@ -221,6 +222,7 @@ private:
 
     // drop frames when cpu is too slow
     int mFrameDrop = -1;
+    Frame previewFrame;
 
     QTimer mTimer;
 
