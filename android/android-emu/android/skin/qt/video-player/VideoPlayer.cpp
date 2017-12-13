@@ -52,6 +52,176 @@ VideoPlayer::VideoPlayer(VideoPlayerWidget* widget, std::string videoFile)
                      &VideoPlayer::videoRefreshTimer);
 }
 
+bool VideoPlayer::showPreviewFrame() {
+    // Register all formats and codecs
+    av_register_all();
+    avformat_network_init();
+
+    AVFormatContext* fmtCtx = nullptr;
+    if (avformat_open_input(&fmtCtx, mVideoFile.c_str(), NULL, NULL) != 0) {
+        printf("Failed to open video file\n");
+        return false;  // failed to open video file
+    }
+
+    if (avformat_find_stream_info(fmtCtx, NULL) < 0) {
+        printf("Failed to find video stream info\n");
+        return false;  // failed to find stream info
+    }
+
+    // dump video format
+    av_dump_format(fmtCtx, 0, mVideoFile.c_str(), false);
+
+    // Find the first video stream
+    int videoStreamIdx = -1;
+    for (int i = 0; i < fmtCtx->nb_streams; i++) {
+        if (fmtCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
+            videoStreamIdx = i;
+            break;
+        }
+    }
+
+    if (videoStreamIdx == -1) {
+        printf("Couldn't located the video stream\n");
+        return false;  // no audio or video stream found
+    }
+
+
+    AVCodecContext* videoCodecCtx = fmtCtx->streams[videoStreamIdx]->codec;
+
+    // Find the decoder for the video stream
+    AVCodec* videoCodec = avcodec_find_decoder(videoCodecCtx->codec_id);
+    if (videoCodec == nullptr) {
+        printf("Unable to find the video decoder\n");
+        return false;
+    }
+
+    // Open codec
+    if (avcodec_open2(videoCodecCtx, videoCodec, NULL) < 0) {
+        printf("Unable to open the video codec\n");
+        return false;
+    }
+
+    // Calculate the dimensions for the widget
+    int dst_w = videoCodecCtx->width;
+    int dst_h = videoCodecCtx->height;
+    adjustWindowSize(videoCodecCtx, &dst_w, &dst_h);
+
+    // create image convert context
+    AVPixelFormat dst_fmt = AV_PIX_FMT_RGB24;
+    SwsContext* imgConvertCtx =
+            sws_getContext(videoCodecCtx->width, videoCodecCtx->height,
+                           videoCodecCtx->pix_fmt, dst_w, dst_h, dst_fmt,
+                           SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    if (imgConvertCtx == nullptr) {
+        printf("Could not allocate image convert context\n");
+        derror("Could not allocate image convert context");
+        return false;
+    }
+
+    // Get the first valid packet from the video file
+    int ret = 0;
+    int pktnum = 0;
+    int count = 0;
+    int got_frame = 0;
+    AVPacket packet = {0};
+    AVFrame* frame = av_frame_alloc();
+    if (frame == nullptr) {
+        av_free_packet(&packet);
+        printf("Unable to allocate AVFrame\n");
+        return false;
+    }
+    while ((ret = av_read_frame(fmtCtx, &packet)) >= 0) {
+        if (packet.stream_index == videoStreamIdx) {
+            if (packet.data != PacketQueue::sFlushPkt.data) {
+                if (count == pktnum) {
+                    ret = 0;
+                    while (!got_frame) {
+                        // Keep running decoder until we get the first frame
+                        ret = avcodec_decode_video2(videoCodecCtx, frame, &got_frame,
+                                                    &packet);
+                        if (ret < 0) {
+                            // Something went wrong
+                            av_frame_free(&frame);
+                            printf("Unknown error\n");
+                            return false;
+                        }
+                    }
+                    av_free_packet(&packet);
+                    break;
+                }
+            }
+        } else {
+            // stream that we don't handle, simply free and ignore it
+            av_free_packet(&packet);
+        }
+        count++;
+    }
+
+//    if (packet.data == PacketQueue::sFlushPkt.data) {
+//        // no valid frame
+//        printf("No valid frames were found\n");
+//        return false;
+//    }
+    if (!got_frame) {
+        // no valid frame
+        printf("No valid frames were found\n");
+        return false;
+    }
+
+//    AVFrame* frame = av_frame_alloc();
+//    if (frame == nullptr) {
+//        av_free_packet(&packet);
+//        printf("Unable to allocate AVFrame\n");
+//        return false;
+//    }
+
+    // Decode the packet
+//    int got_frame = 0;
+//    ret = avcodec_decode_video2(videoCodecCtx, frame, &got_frame,
+//                                &packet);
+//    av_free_packet(&packet);
+
+//    if (ret > 0) {
+//        ret = 0;
+//        while (!got_frame) {
+//            // Keep running decoder until we get the first frame
+//            ret = avcodec_decode_video2(videoCodecCtx, frame, &got_frame,
+//                                        &packet);
+//            if (ret < 0) {
+//                // Something went wrong
+//                av_frame_free(&frame);
+//                printf("Unknown error\n");
+//                return false;
+//            }
+//        }
+//    }
+//    av_free_packet(&packet);
+
+    // Determine required buffer size and allocate buffer
+    int numBytes = avpicture_get_size(AV_PIX_FMT_RGB24, dst_w,
+                                      dst_h);
+    int headerlen = 0;
+    previewFrame.buf = new unsigned char[numBytes + 64];
+    // simply append a ppm header to become ppm image format
+    headerlen = sprintf((char*)previewFrame.buf, "P6\n%d %d\n255\n",
+                        dst_w, dst_h);
+    previewFrame.headerlen = headerlen;
+    previewFrame.len = numBytes + headerlen;
+
+    // assign appropriate parts of buffer to image planes
+    AVPicture pict;
+    avpicture_fill(&pict, previewFrame.buf + previewFrame.headerlen, AV_PIX_FMT_RGB24,
+                   dst_w, dst_h);
+
+    // Convert the image to RGB format
+    sws_scale(imgConvertCtx, frame->data, frame->linesize, 0,
+              videoCodecCtx->height, pict.data, pict.linesize);
+
+    displayVideoFrame(&previewFrame);
+    av_frame_free(&frame);
+    return true;
+}
+
 void VideoPlayer::run() {
     play(mVideoFile.c_str());
 }
@@ -334,6 +504,7 @@ int VideoPlayer::queuePicture(AVFrame* src_frame,
 void VideoPlayer::displayVideoFrame(Frame* vp) {
     mWidget->setPixelBuffer(vp->buf, vp->len);
 
+    printf("emitting updateWdiget()\n");
     emit updateWidget();
 }
 

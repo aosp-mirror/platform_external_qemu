@@ -131,28 +131,36 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_saveButton->hide();
             break;
         case RecordState::Stopped:
-            // TODO: Need to only show this when hovering over the video
-            // widget, which we don't have yet.
-            mUi->rec_recordOverlayWidget->show();
-            mUi->rec_playerOverlayWidget->hide();
-            mUi->rec_timeElapsedWidget->hide();
+            mUi->rec_playerOverlayWidget->show();
+            // Change the icon on the play/stop button.
             mUi->rec_playStopButton->show();
-            mUi->rec_formatSwitch->show();
-            mUi->rec_saveButton->show();
-            mUi->rec_timeResLabel->setText(
-                    QString("%1s / %2 x %3")
-                            .arg(mSec)
-                            .arg(android_hw->hw_lcd_width)
-                            .arg(android_hw->hw_lcd_height));
-            mUi->rec_timeResLabel->show();
-            mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
-            mUi->rec_recordButton->show();
-            mUi->rec_playStopButton->setEnabled(true);
-            mUi->rec_formatSwitch->setEnabled(true);
-            mUi->rec_saveButton->setEnabled(true);
-            mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
-            mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
+            mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("stop"));
+            mUi->rec_playStopButton->setProperty("themeIconName", "stop");
+            mUi->rec_saveButton->hide();
             break;
+//        case RecordState::Stopped:
+//            // TODO: Need to only show this when hovering over the video
+//            // widget, which we don't have yet.
+//            mUi->rec_recordOverlayWidget->show();
+//            mUi->rec_playerOverlayWidget->hide();
+//            mUi->rec_timeElapsedWidget->hide();
+//            mUi->rec_playStopButton->show();
+//            mUi->rec_formatSwitch->show();
+//            mUi->rec_saveButton->show();
+//            mUi->rec_timeResLabel->setText(
+//                    QString("%1s / %2 x %3")
+//                            .arg(mSec)
+//                            .arg(android_hw->hw_lcd_width)
+//                            .arg(android_hw->hw_lcd_height));
+//            mUi->rec_timeResLabel->show();
+//            mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
+//            mUi->rec_recordButton->show();
+//            mUi->rec_playStopButton->setEnabled(true);
+//            mUi->rec_formatSwitch->setEnabled(true);
+//            mUi->rec_saveButton->setEnabled(true);
+//            mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
+//            mUi->rec_playStopButton->setProperty("themeIconName", "play_arrow");
+//            break;
         case RecordState::Converting:
         {
             SettingsTheme theme = getSelectedTheme();
@@ -327,6 +335,20 @@ void RecordScreenPage::slot_recordingStopped(RecordStopStatus status) {
             break;
         case RECORD_STOP_FINISHED:
             setRecordState(RecordState::Stopped);
+            mVideoWidget.reset(new android::videoplayer::VideoPlayerWidget(this));
+            mVideoWidget->setVisible(false);
+            mUi->rec_playerOverlayLayout->addWidget(mVideoWidget.get());
+
+            mVideoPlayer.reset(new android::videoplayer::VideoPlayer(mVideoWidget.get(), mTmpFilePath));
+            connect(mVideoPlayer.get(), SIGNAL(updateWidget()), this, SLOT(updateVideoView()));
+            mVideoWidget->setVisible(true);
+            printf("calling showPreviewFrame()\n");
+            if (mVideoPlayer->showPreviewFrame()) {
+                printf("preview is successful\n");
+            } else {
+                printf("preview failed\n");
+            }
+
             break;
         case RECORD_STOP_FAILED:
             QString errStr = tr("An error occurred while recording.");
@@ -376,6 +398,7 @@ void ConvertingTask::run() {
 }
 
 void RecordScreenPage::updateVideoView() {
+    printf("repainting video widget\n");
     mVideoWidget->repaint();
 }
 
