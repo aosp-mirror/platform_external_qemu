@@ -311,12 +311,18 @@ void InertialModel::setTargetRotation(
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
         // For Step changes, we simply set the transform to immediately set the
         // rotation to the target, with zero rotational velocity.
+        mRotationQuintic = glm::mat2x4(
+                glm::vec4(0.f),
+                glm::vec4(0.f));
         mRotationCubic = glm::mat4x4(
                 glm::vec4(0.f),
                 glm::vec4(0.f),
                 glm::vec4(0.f),
                 glm::vec4(rotation.x, rotation.y, rotation.z, rotation.w));
+        mRotationalVelocityQuintic = glm::mat2x4(0.f);
         mRotationalVelocityCubic = glm::mat4x4(0.f);
+        mRotationalAccelerationQuintic = glm::mat2x4(0.f);
+        mRotationalAccelerationCubic = glm::mat4x4(0.f);
     } else {
         // Computed by solving for cubic movement in 4d space. Position and
         // Velocity in 4d space are computed here by solving the system of
