@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5241ae4f_84bddc4f",
+        "filename": "android/android-emugl/host/libs/Translator/GLES_V2/GLESv2Imp.cpp",
+        "patchSetId": 18
+      },
+      "lineNbr": 1247,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-13T01:26:09Z",
+      "side": 1,
+      "message": "btw the fast path was working on mac gpu host, at least last time I tried it",
+      "range": {
+        "startLine": 1245,
+        "startChar": 0,
+        "endLine": 1247,
+        "endChar": 32
+      },
+      "revId": "3cef1fe5c69dac46dbd21d3910f72750adc7fbda",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
