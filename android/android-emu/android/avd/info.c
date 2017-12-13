@@ -1145,9 +1145,11 @@ avdInfo_getRanchuKernelPath( const AvdInfo*  i )
         char temp[PATH_MAX], *p = temp, *end = p + sizeof(temp);
         const char* suffix = "";
 
+        /* mips/ranchu holds distinct images for mips & mips32[r5|r6] */
         if (!strcmp(i->targetAbi, "mips32r6")) {
-            /* mips/ranchu holds distinct images for mips & mips32r6 */
             suffix = "-mips32r6";
+        } else if (!strcmp(i->targetAbi, "mips32r5")) {
+            suffix = "-mips32r5";
         }
 
         p = bufprint(temp, end, "%s/prebuilts/qemu-kernel/%s/ranchu/kernel-qemu%s",
