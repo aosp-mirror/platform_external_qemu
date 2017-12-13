@@ -16,9 +16,9 @@
   <widget class="QWidget" name="rec_recordOverlayWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>161</x>
+     <x>20</x>
      <y>24</y>
-     <width>300</width>
+     <width>582</width>
      <height>516</height>
     </rect>
    </property>
@@ -28,7 +28,7 @@
    <widget class="RaisedMaterialButton" name="rec_recordButton">
     <property name="geometry">
      <rect>
-      <x>84</x>
+      <x>225</x>
       <y>240</y>
       <width>132</width>
       <height>36</height>
@@ -64,7 +64,7 @@
    <widget class="QWidget" name="rec_timeElapsedWidget" native="true">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>141</x>
       <y>218</y>
       <width>300</width>
       <height>20</height>
@@ -144,7 +144,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>20</y>
+     <y>24</y>
      <width>582</width>
      <height>516</height>
     </rect>
@@ -335,6 +335,8 @@
     </item>
    </layout>
   </widget>
+ <zorder>rec_playerOverlayWidget</zorder>
+ <zorder>rec_recordOverlayWidget</zorder>
  </widget>
  <customwidgets>
   <customwidget>
