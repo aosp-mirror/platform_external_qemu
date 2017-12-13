@@ -175,6 +175,7 @@ typedef struct {
     PhysicalModel* physical_model;
     HwSensorClient* clients;
     AndroidSensorsPort* sensors_port;
+    int64_t time_offset_ns;
 } HwSensors;
 
 struct HwSensorClient {
@@ -378,6 +379,12 @@ static void _hwSensorClient_tick(void* opaque, LoopTimer* unused) {
 
     char buffer[64];
     int buffer_len =
+            snprintf(buffer, sizeof(buffer), "guest-sync:%" PRId64,
+            ((int64_t)now_ns) + cl->sensors->time_offset_ns);
+    assert(buffer_len < sizeof(buffer));
+    _hwSensorClient_send(cl, (uint8_t*)buffer, buffer_len);
+
+    buffer_len =
             snprintf(buffer, sizeof(buffer), "sync:%" PRId64, now_ns / 1000);
     assert(buffer_len < sizeof(buffer));
     _hwSensorClient_send(cl, (uint8_t*)buffer, buffer_len);
@@ -499,6 +506,24 @@ static void _hwSensorClient_receive(HwSensorClient* cl,
         }
 
         _hwSensorClient_tick(cl, cl->timer);
+        return;
+    }
+
+    /* "time:time_ns" is used to set a synchronization point for sensor
+     * data
+     */
+    if (msglen > 5 && !memcmp(msg, "time:", 5)) {
+        msg += 5;
+        int64_t guest_time_ns;
+        if (sscanf((const char *)msg, "%" PRId64, &guest_time_ns) != 1) { /* should not happen */
+            D("%s: ignore bad 'time' command", __FUNCTION__);
+            return;
+        }
+
+        const DurationNs now_ns =
+                looper_nowNsWithClock(looper_getForThread(), LOOPER_CLOCK_VIRTUAL);
+
+        hw->time_offset_ns = guest_time_ns - now_ns;
         return;
     }
 
@@ -669,6 +694,17 @@ PHYSICAL_PARAMETERS_LIST
             assert(false);  // should never happen
             break;
     }
+}
+
+/* Getter for simulatenous physical rotation and translation */
+static void _hwSensors_getPhysicalTransform(HwSensors* h,
+    float* out_translation_x, float* out_translation_y, float* out_translation_z,
+    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
+    int64_t* out_timestamp) {
+    physicalModel_getTransform(h->physical_model,
+            out_translation_x, out_translation_y, out_translation_z,
+            out_rotation_x, out_rotation_y, out_rotation_z,
+            out_timestamp);
 }
 
 /*
@@ -976,6 +1012,12 @@ extern uint8_t android_sensors_get_sensor_status(int sensor_id) {
     return hw->sensors[sensor_id].enabled;
 }
 
+/* Get guest time offset for sensors */
+extern int64_t android_sensors_get_time_offset() {
+    HwSensors* hw = _sensorsState;
+    return hw->time_offset_ns;
+}
+
 /* Get a physical model parameter target value*/
 extern int android_physical_model_get(
         int physical_parameter, float* out_a, float* out_b, float* out_c,
@@ -995,6 +1037,32 @@ extern int android_physical_model_get(
 
     _hwSensors_getPhysicalParameterValue(
             hw, physical_parameter, out_a, out_b, out_c, parameter_value_type);
+
+    return PHYSICAL_PARAMETER_STATUS_OK;
+}
+
+/* Getter for simulatenous physical rotation and translation */
+extern int android_physical_model_get_transform(
+    float* out_translation_x, float* out_translation_y, float* out_translation_z,
+    float* out_rotation_x, float* out_rotation_y, float* out_rotation_z,
+    int64_t* out_timestamp) {
+    HwSensors* hw = _sensorsState;
+
+    *out_translation_x = 0;
+    *out_translation_y = 0;
+    *out_translation_z = 0;
+    *out_rotation_x = 0;
+    *out_rotation_y = 0;
+    *out_rotation_z = 0;
+
+    if (hw->physical_model == NULL) {
+        return PHYSICAL_PARAMETER_STATUS_NO_SERVICE;
+    }
+
+    _hwSensors_getPhysicalTransform(
+            hw, out_translation_x, out_translation_y, out_translation_z,
+            out_rotation_x, out_rotation_y, out_rotation_z,
+            out_timestamp);
 
     return PHYSICAL_PARAMETER_STATUS_OK;
 }

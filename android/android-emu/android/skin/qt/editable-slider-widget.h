@@ -87,9 +87,9 @@ private slots:
     void lineEditValueChanged();
 
 private:
-    double mValue;
-    double mMinimum;
-    double mMaximum;
+    double mValue = 0.0f;
+    double mMinimum = 0.0f;
+    double mMaximum = 0.0f;
     QHBoxLayout mMainLayout;
     QVBoxLayout mAnnotatedSliderLayout;
     QVBoxLayout mEditBoxLayout;

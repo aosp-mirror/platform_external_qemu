@@ -113,8 +113,7 @@ typedef struct ClientFrameBuffer {
     void*       framebuffer;
 } ClientFrameBuffer;
 
-/* Defines an array of framebuffers, used to convert the frame into the required
- * formats. */
+/* Defines framebuffers and metadata associated with a specific camera frame. */
 typedef struct ClientFrame {
     /* Number of entries in the framebuffers array. */
     uint32_t framebuffers_count;
@@ -129,6 +128,9 @@ typedef struct ClientFrame {
     uint8_t* staging_framebuffer;
     /* Size of the staging_framebuffer, in bytes. */
     size_t staging_framebuffer_size;
+
+    /* The time at which the frame was produced. */
+    int64_t frame_time;
 } ClientFrame;
 
 /* Describes frame dimensions.

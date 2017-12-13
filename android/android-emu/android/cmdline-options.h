@@ -81,6 +81,7 @@ OPT_PARAM( cache_size, "<size>", "cache partition size in MBs" )
 CFG_FLAG ( no_cache, "disable the cache partition" )
 CFG_FLAG ( nocache,  "same as -no-cache" )
 OPT_PARAM( sdcard, "<file>", "SD card image (default <datadir>/sdcard.img")
+CFG_PARAM( quit_after_boot, "<timeout>", "qeuit emulator after guest boots completely, or after timeout in seconds" )
 OPT_PARAM( snapstorage,    "<file>", "file that contains all state snapshots (default <datadir>/snapshots.img)")
 OPT_FLAG ( no_snapstorage, "do not mount a snapshot storage file (this disables all snapshot functionality)" )
 OPT_PARAM( snapshot,       "<name>", "name of snapshot within storage file for auto-start and auto-save (default 'default-boot')" )
@@ -116,6 +117,7 @@ OPT_PARAM( logcat, "<tags>", "enable logcat output with given tags" )
 
 #ifdef __linux__
 OPT_FLAG ( use_system_libs, "Use system libstdc++ instead of bundled one" )
+OPT_PARAM( bluetooth, "<vendorid:productid>", "forward bluetooth to vendorid:productid" )
 #endif  // __linux__
 
 OPT_FLAG ( no_audio, "disable audio support" )

@@ -452,11 +452,11 @@ void EmulatorOverlay::hide() {
 
     if (mReleaseOnClose) {
         mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp, kMouseButtonLeft,
-                                          mPrimaryTouchPoint);
+                                          mPrimaryTouchPoint, QPoint(0, 0));
 
         mEmulatorWindow->handleMouseEvent(kEventMouseButtonUp,
                                           kMouseButtonSecondaryTouch,
-                                          mSecondaryTouchPoint);
+                                          mSecondaryTouchPoint, QPoint(0, 0));
         mReleaseOnClose = false;
     }
 }
@@ -506,9 +506,9 @@ void EmulatorOverlay::generateTouchEvents(QMouseEvent* event) {
 
     if (eventType) {
         mEmulatorWindow->handleMouseEvent(eventType, kMouseButtonLeft,
-                                          mPrimaryTouchPoint, true);
+                                          mPrimaryTouchPoint, QPoint(0, 0), true);
         mEmulatorWindow->handleMouseEvent(eventType, kMouseButtonSecondaryTouch,
-                                          mSecondaryTouchPoint);
+                                          mSecondaryTouchPoint, QPoint(0, 0));
     }
 }
 

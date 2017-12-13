@@ -142,9 +142,12 @@ typedef struct ffmpeg_recorder {
     // A single lock to protect writing audio and video frames to the video file
     mutable android::base::Lock out_pkt_lock;
     bool have_video;
+    bool has_video_frames;
     bool have_audio;
     bool started;
     uint64_t start_time;
+    int fb_width;
+    int fb_height;
 } ffmpeg_recorder;
 
 // FFMpeg defines a set of macros for the same purpose, but those don't
@@ -163,6 +166,17 @@ static std::string avTs2TimeStr(int64_t ts, AVRational* tb) {
 static std::string avErr2Str(int errnum) {
     char res[AV_ERROR_MAX_STRING_SIZE] = {};
     return av_make_error_string(res, AV_ERROR_MAX_STRING_SIZE, errnum);
+}
+
+static AVPixelFormat to_ffmpeg_pix_fmt(RecordPixFmt r) {
+    switch (r) {
+        case RecordPixFmt::RGB565:
+            return AV_PIX_FMT_RGB565;
+        case RecordPixFmt::RGBA8888:
+            return AV_PIX_FMT_RGBA;
+        default:
+            return AV_PIX_FMT_NONE;
+    };
 }
 
 static void log_packet(const AVFormatContext* fmt_ctx, const AVPacket* pkt) {
@@ -465,15 +479,21 @@ static int write_video_frame(ffmpeg_recorder* recorder,
         av_init_packet(&pkt);
 
         // encode the frame
-        D_V("Encoding video frame %d\n", ost->frame_count++);
+        D_V("Encoding video frame %ld\n", ost->frame_count++);
+#if DEBUG_VIDEO
+        auto startUs = android::base::System::get()->getHighResTimeUs();
+#endif
         ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
+        D_V("Time to avcodec_encode_video2: [%lld ms]\n",
+            (long long)(android::base::System::get()->getHighResTimeUs() -
+                        startUs) / 1000);
         if (ret < 0) {
             derror("Error encoding video frame: %s\n", avErr2Str(ret).c_str());
             return ret;
         }
 
         if (got_packet) {
-            D_V("%sWriting frame %d\n",
+            D_V("%sWriting frame %ld\n",
                 (pkt.flags & AV_PKT_FLAG_KEY) ? "(KEY) " : "",
                 ost->write_frame_count++);
 #if DEBUG_VIDEO
@@ -515,11 +535,13 @@ static bool has_suffix(const std::string& str, const std::string& suffix) {
 
 static bool sIsRegistered = false;
 
-ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
+ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
+                                        int fb_width,
+                                        int fb_height) {
     ffmpeg_recorder* recorder = NULL;
     AVFormatContext* oc = NULL;
 
-    if (path == NULL)
+    if (info == NULL || info->fileName == NULL)
         return NULL;
 
     recorder = (ffmpeg_recorder*)malloc(sizeof(ffmpeg_recorder));
@@ -528,7 +550,8 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     }
 
     memset(recorder, 0, sizeof(ffmpeg_recorder));
-    recorder->path = strdup(path);
+    recorder->has_video_frames = false;
+    recorder->path = strdup(info->fileName);
 
     // Initialize libavcodec, and register all codecs and formats. does not hurt
     // to register multiple times
@@ -538,7 +561,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     }
 
     // allocate the output media context
-    avformat_alloc_output_context2(&oc, NULL, NULL, path);
+    avformat_alloc_output_context2(&oc, NULL, NULL, recorder->path);
     if (oc == NULL) {
         free(recorder);
         return NULL;
@@ -547,7 +570,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     recorder->oc = oc;
     recorder->start_time = android::base::System::get()->getHighResTimeUs();
 
-    if (has_suffix(path, ".webm")) {
+    if (has_suffix(recorder->path, ".webm")) {
         recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
         recorder->video_st.codec_id = AV_CODEC_ID_VP9;
     } else {
@@ -555,12 +578,15 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
         recorder->video_st.codec_id = AV_CODEC_ID_H264;
     }
 
+    recorder->fb_width = fb_width;
+    recorder->fb_height = fb_height;
+
     return recorder;
 }
 
-void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
+bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     if (recorder == NULL)
-        return;
+        return false;
 
     if (recorder->audio_capturer != NULL) {
         AudioCaptureEngine* engine = AudioCaptureEngine::get();
@@ -578,7 +604,7 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
                                         NULL, &got_packet);
         if (ret < 0 || !got_packet)
             break;
-        D_V("%s: Writing frame %d\n", __func__,
+        D_V("%s: Writing frame %ld\n", __func__,
             recorder->video_st.write_frame_count++);
         write_frame(recorder, recorder->oc,
                     &recorder->video_st.st->codec->time_base,
@@ -624,7 +650,10 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     // close the CodecContexts open when you wrote the header; otherwise
     // av_write_trailer() may try to use memory that was freed on
     // av_codec_close().
-    av_write_trailer(recorder->oc);
+    if (recorder->has_video_frames) {
+        // This crashes on linux if no frames were encoded.
+        av_write_trailer(recorder->oc);
+    }
 
     // Close each codec.
     if (recorder->have_video)
@@ -647,7 +676,10 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     if (recorder->path)
         free(recorder->path);
 
+    bool ret = recorder->has_video_frames;
     free(recorder);
+
+    return ret;
 }
 
 // local helper to start the recording, after tracks are added
@@ -893,10 +925,11 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
 //    recorder - the recorder instance
-//    rgb_pixels - the byte array for the pixel in RGBA format, each pixel take
-//    4 byte
-//    size - the rgb_pixels array size, it should be exactly as 4 * width *
-//    height
+//    rgb_pixels - the byte array for the pixel
+//    size - the size of the pixel buffer |rgb_pixels|
+//    ptUs - the presentation time (in microseconds) of the frame
+//    pixFmt - the pixel format of |rgb_pixels|
+//
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -904,7 +937,9 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
                               const uint8_t* rgb_pixels,
-                              int size) {
+                              int size,
+                              uint64_t pt_us,
+                              RecordPixFmt pixFmt) {
     if (recorder == NULL)
         return -1;
 
@@ -920,8 +955,14 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     AVCodecContext* c = ost->st->codec;
 
     if (ost->sws_ctx == NULL) {
-        ost->sws_ctx = sws_getContext(c->width, c->height, AV_PIX_FMT_RGBA,
-                                      c->width, c->height, c->pix_fmt,
+        AVPixelFormat avPixFmt = to_ffmpeg_pix_fmt(pixFmt);
+        if (avPixFmt == AV_PIX_FMT_NONE) {
+            derror("Pixel format is not supported");
+            return -1;
+        }
+
+        ost->sws_ctx = sws_getContext(recorder->fb_width, recorder->fb_height,
+                                      avPixFmt, c->width, c->height, c->pix_fmt,
                                       SCALE_FLAGS, NULL, NULL, NULL);
         if (ost->sws_ctx == NULL) {
             derror("Could not initialize the conversion context\n");
@@ -929,15 +970,23 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
         }
     }
 
-    const int linesize[1] = {4 * c->width};
+    const int linesize[1] = {get_record_pixel_size(pixFmt) *
+                             recorder->fb_width};
+#if DEBUG_VIDEO
+    auto startUs = android::base::System::get()->getHighResTimeUs();
+#endif
     sws_scale(ost->sws_ctx, (const uint8_t* const*)&rgb_pixels, linesize, 0,
-              c->height, ost->frame->data, ost->frame->linesize);
+              recorder->fb_height, ost->frame->data, ost->frame->linesize);
+    D_V("Time to sws_scale: [%lld ms]\n",
+        (long long)(android::base::System::get()->getHighResTimeUs() -
+                    startUs) /
+                1000);
 
-    uint64_t elapsedUS = android::base::System::get()->getHighResTimeUs() -
-                         recorder->start_time;
+    uint64_t elapsedUS = pt_us - recorder->start_time;
     ost->frame->pts = (int64_t)(((double)elapsedUS * ost->st->time_base.den) /
                                 1000000.00);
     rc = write_video_frame(recorder, recorder->oc, ost, ost->frame);
+    recorder->has_video_frames = true;
 
     return rc;
 }
@@ -1324,4 +1373,15 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
 
     free_contxts(ifmt_ctx, ofmt_ctx, video_stream_index);
     return ret;
+}
+
+int get_record_pixel_size(RecordPixFmt r) {
+    switch (r) {
+        case RecordPixFmt::RGB565:
+            return 2;
+        case RecordPixFmt::RGBA8888:
+            return 4;
+        default:
+            return -1;
+    }
 }

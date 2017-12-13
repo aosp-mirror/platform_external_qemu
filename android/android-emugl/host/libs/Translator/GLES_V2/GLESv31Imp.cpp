@@ -4,38 +4,45 @@
 // and/or parcel out custom functionality in separate code.
 GL_APICALL void GL_APIENTRY glGetBooleani_v(GLenum target, GLuint index, GLboolean * data) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetBooleani_v);
     ctx->dispatcher().glGetBooleani_v(target, index, data);
 }
 
 GL_APICALL void GL_APIENTRY glMemoryBarrier(GLbitfield barriers) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glMemoryBarrier);
     ctx->dispatcher().glMemoryBarrier(barriers);
 }
 
 GL_APICALL void GL_APIENTRY glMemoryBarrierByRegion(GLbitfield barriers) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glMemoryBarrierByRegion);
     ctx->dispatcher().glMemoryBarrierByRegion(barriers);
 }
 
 GL_APICALL void GL_APIENTRY glGenProgramPipelines(GLsizei n, GLuint * pipelines) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGenProgramPipelines);
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
     ctx->dispatcher().glGenProgramPipelines(n, pipelines);
 }
 
 GL_APICALL void GL_APIENTRY glDeleteProgramPipelines(GLsizei n, const GLuint * pipelines) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDeleteProgramPipelines);
     SET_ERROR_IF(n < 0,GL_INVALID_VALUE);
     ctx->dispatcher().glDeleteProgramPipelines(n, pipelines);
 }
 
 GL_APICALL void GL_APIENTRY glBindProgramPipeline(GLuint pipeline) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glBindProgramPipeline);
     ctx->dispatcher().glBindProgramPipeline(pipeline);
 }
 
 GL_APICALL void GL_APIENTRY glGetProgramPipelineiv(GLuint pipeline, GLenum pname, GLint * params) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetProgramPipelineiv);
     ctx->dispatcher().glGetProgramPipelineiv(pipeline, pname, params);
 
     switch (pname) {
@@ -56,22 +63,26 @@ GL_APICALL void GL_APIENTRY glGetProgramPipelineiv(GLuint pipeline, GLenum pname
 
 GL_APICALL void GL_APIENTRY glGetProgramPipelineInfoLog(GLuint pipeline, GLsizei bufSize, GLsizei * length, GLchar * infoLog) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetProgramPipelineInfoLog);
     ctx->dispatcher().glGetProgramPipelineInfoLog(pipeline, bufSize, length, infoLog);
 }
 
 GL_APICALL void GL_APIENTRY glValidateProgramPipeline(GLuint pipeline) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glValidateProgramPipeline);
     ctx->dispatcher().glValidateProgramPipeline(pipeline);
 }
 
 GL_APICALL GLboolean GL_APIENTRY glIsProgramPipeline(GLuint pipeline) {
     GET_CTX_V2_RET(0);
+    RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glIsProgramPipeline, false);
     GLboolean glIsProgramPipelineRET = ctx->dispatcher().glIsProgramPipeline(pipeline);
     return glIsProgramPipelineRET;
 }
 
 GL_APICALL void GL_APIENTRY glUseProgramStages(GLuint pipeline, GLbitfield stages, GLuint program) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glUseProgramStages);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glUseProgramStages(pipeline, stages, globalProgramName);
@@ -80,6 +91,7 @@ GL_APICALL void GL_APIENTRY glUseProgramStages(GLuint pipeline, GLbitfield stage
 
 GL_APICALL void GL_APIENTRY glActiveShaderProgram(GLuint pipeline, GLuint program) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glActiveShaderProgram);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glActiveShaderProgram(pipeline, globalProgramName);
@@ -88,7 +100,7 @@ GL_APICALL void GL_APIENTRY glActiveShaderProgram(GLuint pipeline, GLuint progra
 
 extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLsizei count, const char ** strings) {
     GET_CTX_V2_RET(0);
-
+    RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glCreateShaderProgramv, 0);
     GLuint glCreateShaderProgramvRET = ctx->dispatcher().glCreateShaderProgramv(type, count, strings);
 
     GLint sep = GL_FALSE;
@@ -109,6 +121,7 @@ extern "C" GL_APICALL GLuint GL_APIENTRY glCreateShaderProgramv(GLenum type, GLs
 
 GL_APICALL void GL_APIENTRY glProgramUniform1f(GLuint program, GLint location, GLfloat v0) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform1f);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform1f(globalProgramName, location, v0);
@@ -117,6 +130,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform1f(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform2f(GLuint program, GLint location, GLfloat v0, GLfloat v1) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform2f);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform2f(globalProgramName, location, v0, v1);
@@ -125,6 +139,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform2f(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform3f(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform3f);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform3f(globalProgramName, location, v0, v1, v2);
@@ -133,6 +148,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform3f(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform4f(GLuint program, GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform4f);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform4f(globalProgramName, location, v0, v1, v2, v3);
@@ -141,6 +157,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform4f(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform1i(GLuint program, GLint location, GLint v0) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform1i);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform1i(globalProgramName, location, v0);
@@ -149,6 +166,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform1i(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform2i(GLuint program, GLint location, GLint v0, GLint v1) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform2i);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform2i(globalProgramName, location, v0, v1);
@@ -157,6 +175,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform2i(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform3i(GLuint program, GLint location, GLint v0, GLint v1, GLint v2) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform3i);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform3i(globalProgramName, location, v0, v1, v2);
@@ -165,6 +184,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform3i(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform4i(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLint v3) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform4i);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform4i(globalProgramName, location, v0, v1, v2, v3);
@@ -173,6 +193,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform4i(GLuint program, GLint location, G
 
 GL_APICALL void GL_APIENTRY glProgramUniform1ui(GLuint program, GLint location, GLuint v0) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform1ui);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform1ui(globalProgramName, location, v0);
@@ -181,6 +202,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform1ui(GLuint program, GLint location, 
 
 extern "C" GL_APICALL void GL_APIENTRY glProgramUniform2ui(GLuint program, GLint location, GLint v0, GLuint v1) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform2ui);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform2ui(globalProgramName, location, v0, v1);
@@ -189,6 +211,7 @@ extern "C" GL_APICALL void GL_APIENTRY glProgramUniform2ui(GLuint program, GLint
 
 extern "C" GL_APICALL void GL_APIENTRY glProgramUniform3ui(GLuint program, GLint location, GLint v0, GLint v1, GLuint v2) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform3ui);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform3ui(globalProgramName, location, v0, v1, v2);
@@ -197,6 +220,7 @@ extern "C" GL_APICALL void GL_APIENTRY glProgramUniform3ui(GLuint program, GLint
 
 extern "C" GL_APICALL void GL_APIENTRY glProgramUniform4ui(GLuint program, GLint location, GLint v0, GLint v1, GLint v2, GLuint v3) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform4ui);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform4ui(globalProgramName, location, v0, v1, v2, v3);
@@ -205,6 +229,7 @@ extern "C" GL_APICALL void GL_APIENTRY glProgramUniform4ui(GLuint program, GLint
 
 GL_APICALL void GL_APIENTRY glProgramUniform1fv(GLuint program, GLint location, GLsizei count, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform1fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform1fv(globalProgramName, location, count, value);
@@ -213,6 +238,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform1fv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform2fv(GLuint program, GLint location, GLsizei count, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform2fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform2fv(globalProgramName, location, count, value);
@@ -221,6 +247,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform2fv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform3fv(GLuint program, GLint location, GLsizei count, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform3fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform3fv(globalProgramName, location, count, value);
@@ -229,6 +256,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform3fv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform4fv(GLuint program, GLint location, GLsizei count, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform4fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform4fv(globalProgramName, location, count, value);
@@ -237,6 +265,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform4fv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform1iv(GLuint program, GLint location, GLsizei count, const GLint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform1iv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform1iv(globalProgramName, location, count, value);
@@ -245,6 +274,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform1iv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform2iv(GLuint program, GLint location, GLsizei count, const GLint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform2iv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform2iv(globalProgramName, location, count, value);
@@ -253,6 +283,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform2iv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform3iv(GLuint program, GLint location, GLsizei count, const GLint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform3iv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform3iv(globalProgramName, location, count, value);
@@ -261,6 +292,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform3iv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform4iv(GLuint program, GLint location, GLsizei count, const GLint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform4iv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform4iv(globalProgramName, location, count, value);
@@ -269,6 +301,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform4iv(GLuint program, GLint location, 
 
 GL_APICALL void GL_APIENTRY glProgramUniform1uiv(GLuint program, GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform1uiv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform1uiv(globalProgramName, location, count, value);
@@ -277,6 +310,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform1uiv(GLuint program, GLint location,
 
 GL_APICALL void GL_APIENTRY glProgramUniform2uiv(GLuint program, GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform2uiv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform2uiv(globalProgramName, location, count, value);
@@ -285,6 +319,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform2uiv(GLuint program, GLint location,
 
 GL_APICALL void GL_APIENTRY glProgramUniform3uiv(GLuint program, GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform3uiv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform3uiv(globalProgramName, location, count, value);
@@ -293,6 +328,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform3uiv(GLuint program, GLint location,
 
 GL_APICALL void GL_APIENTRY glProgramUniform4uiv(GLuint program, GLint location, GLsizei count, const GLuint * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniform4uiv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniform4uiv(globalProgramName, location, count, value);
@@ -301,6 +337,7 @@ GL_APICALL void GL_APIENTRY glProgramUniform4uiv(GLuint program, GLint location,
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix2fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix2fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix2fv(globalProgramName, location, count, transpose, value);
@@ -309,6 +346,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix2fv(GLuint program, GLint loca
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix3fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix3fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix3fv(globalProgramName, location, count, transpose, value);
@@ -317,6 +355,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix3fv(GLuint program, GLint loca
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix4fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix4fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix4fv(globalProgramName, location, count, transpose, value);
@@ -325,6 +364,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix4fv(GLuint program, GLint loca
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix2x3fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix2x3fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix2x3fv(globalProgramName, location, count, transpose, value);
@@ -333,6 +373,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix2x3fv(GLuint program, GLint lo
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix3x2fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix3x2fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix3x2fv(globalProgramName, location, count, transpose, value);
@@ -341,6 +382,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix3x2fv(GLuint program, GLint lo
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix2x4fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix2x4fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix2x4fv(globalProgramName, location, count, transpose, value);
@@ -349,6 +391,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix2x4fv(GLuint program, GLint lo
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix4x2fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix4x2fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix4x2fv(globalProgramName, location, count, transpose, value);
@@ -357,6 +400,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix4x2fv(GLuint program, GLint lo
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix3x4fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix3x4fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix3x4fv(globalProgramName, location, count, transpose, value);
@@ -365,6 +409,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix3x4fv(GLuint program, GLint lo
 
 GL_APICALL void GL_APIENTRY glProgramUniformMatrix4x3fv(GLuint program, GLint location, GLsizei count, GLboolean transpose, const GLfloat * value) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glProgramUniformMatrix4x3fv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glProgramUniformMatrix4x3fv(globalProgramName, location, count, transpose, value);
@@ -373,6 +418,7 @@ GL_APICALL void GL_APIENTRY glProgramUniformMatrix4x3fv(GLuint program, GLint lo
 
 GL_APICALL void GL_APIENTRY glGetProgramInterfaceiv(GLuint program, GLenum programInterface, GLenum pname, GLint * params) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetProgramInterfaceiv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glGetProgramInterfaceiv(globalProgramName, programInterface, pname, params);
@@ -381,6 +427,7 @@ GL_APICALL void GL_APIENTRY glGetProgramInterfaceiv(GLuint program, GLenum progr
 
 GL_APICALL void GL_APIENTRY glGetProgramResourceiv(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount, const GLenum * props, GLsizei bufSize, GLsizei * length, GLint * params) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetProgramResourceiv);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glGetProgramResourceiv(globalProgramName, programInterface, index, propCount, props, bufSize, length, params);
@@ -389,6 +436,7 @@ GL_APICALL void GL_APIENTRY glGetProgramResourceiv(GLuint program, GLenum progra
 
 GL_APICALL GLuint GL_APIENTRY glGetProgramResourceIndex(GLuint program, GLenum programInterface, const char * name) {
     GET_CTX_V2_RET(0);
+    RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetProgramResourceIndex, 0);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         GLuint glGetProgramResourceIndexRET = ctx->dispatcher().glGetProgramResourceIndex(globalProgramName, programInterface, name);
@@ -398,6 +446,7 @@ GL_APICALL GLuint GL_APIENTRY glGetProgramResourceIndex(GLuint program, GLenum p
 
 GL_APICALL GLint GL_APIENTRY glGetProgramResourceLocation(GLuint program, GLenum programInterface, const char * name) {
     GET_CTX_V2_RET(0);
+    RET_AND_SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetProgramResourceLocation, 0);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         GLint glGetProgramResourceLocationRET = ctx->dispatcher().glGetProgramResourceLocation(globalProgramName, programInterface, name);
@@ -407,6 +456,7 @@ GL_APICALL GLint GL_APIENTRY glGetProgramResourceLocation(GLuint program, GLenum
 
 GL_APICALL void GL_APIENTRY glGetProgramResourceName(GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize, GLsizei * length, char * name) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetProgramResourceName);
     if (ctx->shareGroup().get()) {
         const GLuint globalProgramName = ctx->shareGroup()->getGlobalName(NamedObjectType::SHADER_OR_PROGRAM, program);
         ctx->dispatcher().glGetProgramResourceName(globalProgramName, programInterface, index, bufSize, length, name);
@@ -415,6 +465,7 @@ GL_APICALL void GL_APIENTRY glGetProgramResourceName(GLuint program, GLenum prog
 
 GL_APICALL void GL_APIENTRY glBindImageTexture(GLuint unit, GLuint texture, GLint level, GLboolean layered, GLint layer, GLenum access, GLenum format) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glBindImageTexture);
     if (ctx->shareGroup().get()) {
         const GLuint globalTextureName = ctx->shareGroup()->getGlobalName(NamedObjectType::TEXTURE, texture);
         ctx->dispatcher().glBindImageTexture(unit, globalTextureName, level, layered, layer, access, format);
@@ -423,17 +474,19 @@ GL_APICALL void GL_APIENTRY glBindImageTexture(GLuint unit, GLuint texture, GLin
 
 GL_APICALL void GL_APIENTRY glDispatchCompute(GLuint num_groups_x, GLuint num_groups_y, GLuint num_groups_z) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDispatchCompute);
     ctx->dispatcher().glDispatchCompute(num_groups_x, num_groups_y, num_groups_z);
 }
 
 GL_APICALL void GL_APIENTRY glDispatchComputeIndirect(GLintptr indirect) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDispatchComputeIndirect);
     ctx->dispatcher().glDispatchComputeIndirect(indirect);
 }
 
 extern "C" GL_APICALL void GL_APIENTRY glBindVertexBuffer(GLuint bindingindex, GLuint buffer, GLintptr offset, GLintptr stride) {
     GET_CTX_V2();
-
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glBindVertexBuffer);
     ctx->bindIndexedBuffer(0, bindingindex, buffer, offset, 0, stride);
     if (ctx->shareGroup().get()) {
         const GLuint globalBufferName = ctx->shareGroup()->getGlobalName(NamedObjectType::VERTEXBUFFER, buffer);
@@ -443,45 +496,47 @@ extern "C" GL_APICALL void GL_APIENTRY glBindVertexBuffer(GLuint bindingindex, G
 
 GL_APICALL void GL_APIENTRY glVertexAttribBinding(GLuint attribindex, GLuint bindingindex) {
     GET_CTX_V2();
-
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glVertexAttribBinding);
     ctx->setVertexAttribBindingIndex(attribindex, bindingindex);
     ctx->dispatcher().glVertexAttribBinding(attribindex, bindingindex);
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribFormat(GLuint attribindex, GLint size, GLenum type, GLboolean normalized, GLuint relativeoffset) {
     GET_CTX_V2();
-
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glVertexAttribFormat);
     ctx->setVertexAttribFormat(attribindex, size, type, normalized, relativeoffset, false);
     ctx->dispatcher().glVertexAttribFormat(attribindex, size, type, normalized, relativeoffset);
 }
 
 GL_APICALL void GL_APIENTRY glVertexAttribIFormat(GLuint attribindex, GLint size, GLenum type, GLuint relativeoffset) {
     GET_CTX_V2();
-
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glVertexAttribIFormat);
     ctx->setVertexAttribFormat(attribindex, size, type, GL_FALSE, relativeoffset, true);
     ctx->dispatcher().glVertexAttribIFormat(attribindex, size, type, relativeoffset);
 }
 
 GL_APICALL void GL_APIENTRY glVertexBindingDivisor(GLuint bindingindex, GLuint divisor) {
     GET_CTX_V2();
-
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glVertexBindingDivisor);
     ctx->setVertexAttribDivisor(bindingindex, divisor);
     ctx->dispatcher().glVertexBindingDivisor(bindingindex, divisor);
 }
 
 GL_APICALL void GL_APIENTRY glDrawArraysIndirect(GLenum mode, const void * indirect) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDrawArraysIndirect);
     ctx->dispatcher().glDrawArraysIndirect(mode, indirect);
 }
 
 GL_APICALL void GL_APIENTRY glDrawElementsIndirect(GLenum mode, GLenum type, const void * indirect) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glDrawElementsIndirect);
     ctx->dispatcher().glDrawElementsIndirect(mode, type, indirect);
 }
 
 GL_APICALL void GL_APIENTRY glTexStorage2DMultisample(GLenum target, GLsizei samples, GLenum internalformat, GLsizei width, GLsizei height, GLboolean fixedsamplelocations) {
     GET_CTX_V2();
-
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glTexStorage2DMultisample);
     GLint err = GL_NO_ERROR;
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
@@ -492,26 +547,31 @@ GL_APICALL void GL_APIENTRY glTexStorage2DMultisample(GLenum target, GLsizei sam
 
 GL_APICALL void GL_APIENTRY glSampleMaski(GLuint maskNumber, GLbitfield mask) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glSampleMaski);
     ctx->dispatcher().glSampleMaski(maskNumber, mask);
 }
 
 GL_APICALL void GL_APIENTRY glGetMultisamplefv(GLenum pname, GLuint index, GLfloat * val) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetMultisamplefv);
     ctx->dispatcher().glGetMultisamplefv(pname, index, val);
 }
 
 GL_APICALL void GL_APIENTRY glFramebufferParameteri(GLenum target, GLenum pname, GLint param) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glFramebufferParameteri);
     ctx->dispatcher().glFramebufferParameteri(target, pname, param);
 }
 
 GL_APICALL void GL_APIENTRY glGetFramebufferParameteriv(GLenum target, GLenum pname, GLint * params) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetFramebufferParameteriv);
     ctx->dispatcher().glGetFramebufferParameteriv(target, pname, params);
 }
 
 GL_APICALL void GL_APIENTRY glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat * params) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetTexLevelParameterfv);
     ctx->dispatcher().glGetTexLevelParameterfv(target, level, pname, params);
 
     if (!ctx->shareGroup().get()) return;
@@ -543,6 +603,7 @@ GL_APICALL void GL_APIENTRY glGetTexLevelParameterfv(GLenum target, GLint level,
 
 GL_APICALL void GL_APIENTRY glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint * params) {
     GET_CTX_V2();
+    SET_ERROR_IF_DISPATCHER_NOT_SUPPORT(glGetTexLevelParameteriv);
     ctx->dispatcher().glGetTexLevelParameteriv(target, level, pname, params);
 
     if (!ctx->shareGroup().get()) return;

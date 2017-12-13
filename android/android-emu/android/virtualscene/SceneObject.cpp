@@ -23,7 +23,6 @@
 #include "android/virtualscene/Renderer.h"
 
 #include <tiny_obj_loader.h>
-#include <glm/gtx/hash.hpp>
 
 #include <unordered_map>
 #include <vector>
@@ -40,106 +39,21 @@ using android::base::System;
 namespace android {
 namespace virtualscene {
 
-static constexpr char kSimpleVertexShader[] = R"(
-attribute vec3 in_position;
-attribute vec2 in_uv;
-
-uniform mat4 u_modelViewProj;
-
-varying vec2 uv;
-
-void main() {
-    uv = in_uv;
-    gl_Position = u_modelViewProj * vec4(in_position, 1.0);
-}
-)";
-
-static constexpr char kSimpleFragmentShader[] = R"(
-precision mediump float;
-varying vec2 uv;
-
-uniform sampler2D tex_sampler;
-
-void main() {
-  gl_FragColor = texture2D(tex_sampler, uv);
-}
-)";
-
-struct Vertex {
-    glm::vec3 pos;
-    glm::vec2 uv;
-};
-
-bool operator==(const Vertex& lhs, const Vertex& rhs) {
-    return lhs.pos == rhs.pos && lhs.uv == rhs.uv;
-}
-
-struct VertexHash {
-    size_t operator()(const Vertex& v) const {
-        return std::hash<glm::vec3>()(v.pos) ^ std::hash<glm::vec2>()(v.uv);
-    }
-};
-
-SceneObject::SceneObject(Renderer& renderer,
-                         GLuint vertexBuffer,
-                         GLuint indexBuffer,
-                         size_t indexCount)
-    : mRenderer(renderer),
-      mVertexBuffer(vertexBuffer),
-      mIndexBuffer(indexBuffer),
-      mIndexCount(indexCount) {}
-
-SceneObject::~SceneObject() {
-    const GLESv2Dispatch* gles2 = mRenderer.getGLESv2Dispatch();
-
-    if (gles2) {
-        // Clean up outstanding OpenGL handles; releasing a 0 handle no-ops.
-        gles2->glDeleteBuffers(1, &mVertexBuffer);
-        gles2->glDeleteBuffers(1, &mIndexBuffer);
-        gles2->glDeleteProgram(mProgram);
-    }
-}
-
-bool SceneObject::initialize() {
-    const GLESv2Dispatch* gles2 = mRenderer.getGLESv2Dispatch();
-
-    // Compile and setup shaders.
-    const GLuint vertexId =
-            mRenderer.compileShader(GL_VERTEX_SHADER, kSimpleVertexShader);
-    const GLuint fragmentId =
-            mRenderer.compileShader(GL_FRAGMENT_SHADER, kSimpleFragmentShader);
-
-    if (vertexId && fragmentId) {
-        mProgram = mRenderer.linkShaders(vertexId, fragmentId);
-    }
-
-    // Release the shaders, the program will keep their reference alive.
-    gles2->glDeleteShader(vertexId);
-    gles2->glDeleteShader(fragmentId);
-
-    if (!mProgram) {
-        // Initialization failed, no program loaded.
-        return false;
-    }
-
-    mPositionLocation = mRenderer.getAttribLocation(mProgram, "in_position");
-    mUvLocation = mRenderer.getAttribLocation(mProgram, "in_uv");
-    mTexSamplerLocation = mRenderer.getUniformLocation(mProgram, "tex_sampler");
-    mMvpLocation = mRenderer.getUniformLocation(mProgram, "u_modelViewProj");
-
-    return true;
-}
+SceneObject::SceneObject() = default;
+SceneObject::~SceneObject() = default;
 
 std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
                                                       const char* filename) {
     const std::string resourcesDir =
-            PathUtils::join(System::get()->getLauncherDirectory(), "resources");
+            PathUtils::addTrailingDirSeparator(PathUtils::join(
+                    System::get()->getLauncherDirectory(), "resources"));
     const std::string filePath = PathUtils::join(
             System::get()->getLauncherDirectory(), "resources", filename);
 
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> materials;
+    std::unordered_map<std::string, Texture> textures;
 
     std::string err;
     const bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err,
@@ -153,19 +67,45 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
           err.c_str());
     }
 
+    std::unique_ptr<SceneObject> result(new SceneObject());
+
+    auto getOrLoadTexture = [&textures, &renderer,
+                             &result](std::string filename) {
+        auto it = textures.find(filename);
+        if (it == textures.end()) {
+            Texture texture =
+                    renderer.loadTexture(result.get(), filename.c_str());
+            textures[filename] = texture;
+            return texture;
+        }
+
+        return it->second;
+    };
+
     const size_t vertexCount = attrib.vertices.size() / 3;
     const size_t texcoordCount = attrib.texcoords.size() / 2;
-
-    std::vector<Vertex> vertices;
-    std::unordered_map<Vertex, GLuint, VertexHash> existingVertexToIndex;
-    std::vector<GLuint> indices;
+    Material material = renderer.createMaterialTextured();
 
     for (const tinyobj::shape_t& shape : shapes) {
         const tinyobj::mesh_t& mesh = shape.mesh;
 
+        std::vector<VertexPositionUV> vertices;
+        std::unordered_map<VertexPositionUV, GLuint, VertexPositionUVHash>
+                existingVertexToIndex;
+        std::vector<GLuint> indices;
+        Texture texture;
+
+        if (!mesh.material_ids.empty()) {
+            const int material_id = mesh.material_ids[0];
+            if (material_id >= 0 && material_id < materials.size()) {
+                texture = getOrLoadTexture(
+                        materials[material_id].diffuse_texname);
+            }
+        }
+
         for (size_t i = 0; i < mesh.indices.size(); i++) {
             tinyobj::index_t index = mesh.indices[i];
-            Vertex vertex;
+            VertexPositionUV vertex;
 
             if (index.vertex_index < 0 || index.vertex_index >= vertexCount) {
                 E("%s: Error parsing %s, invalid vertex index %d, expected "
@@ -205,39 +145,19 @@ std::unique_ptr<SceneObject> SceneObject::loadFromObj(Renderer& renderer,
                 existingVertexToIndex[vertex] = index;
             }
         }
-    }
 
-    GLuint vertexBuffer = 0;
-    GLuint indexBuffer = 0;
-    const GLESv2Dispatch* gles2 = renderer.getGLESv2Dispatch();
+        D("%s: Creating mesh with %d vertices, %d indices", __FUNCTION__,
+          vertices.size(), indices.size());
 
-    gles2->glGenBuffers(1, &vertexBuffer);
-    gles2->glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-    gles2->glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex),
-                        vertices.data(), GL_STATIC_DRAW);
-    gles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
+        Renderable renderable;
+        renderable.material = material;
+        renderable.mesh = renderer.createMesh(result.get(), vertices, indices);
+        renderable.texture = texture;
 
-    gles2->glGenBuffers(1, &indexBuffer);
-    gles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    gles2->glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                        indices.size() * sizeof(GLuint), indices.data(),
-                        GL_STATIC_DRAW);
-    gles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    D("%s: Creating scene object with %d vertices, %d indices", __FUNCTION__,
-      vertices.size(), indices.size());
-
-    std::unique_ptr<SceneObject> result(new SceneObject(
-            renderer, vertexBuffer, indexBuffer, indices.size()));
-    if (!result->initialize()) {
-        return nullptr;
+        result.get()->mRenderables.emplace_back(std::move(renderable));
     }
 
     return result;
-}
-
-void SceneObject::setTexture(std::unique_ptr<Texture>&& texture) {
-    mTexture = std::move(texture);
 }
 
 void SceneObject::setTransform(const glm::mat4& transform) {
@@ -248,61 +168,8 @@ glm::mat4 SceneObject::getTransform() const {
     return mTransform;
 }
 
-void SceneObject::render() {
-    const GLESv2Dispatch* gles2 = mRenderer.getGLESv2Dispatch();
-
-    gles2->glUseProgram(mProgram);
-
-    // Bind the texture if it exists.
-    if (mTexture) {
-        gles2->glActiveTexture(GL_TEXTURE0);
-        gles2->glUniform1i(mTexSamplerLocation, 0);
-
-        gles2->glBindTexture(GL_TEXTURE_2D, mTexture->getTextureId());
-    } else {
-        gles2->glBindTexture(GL_TEXTURE_2D, 0);
-    }
-
-    const glm::mat4 mvp =
-            mRenderer.getCamera().getViewProjection() * mTransform;
-    gles2->glUniformMatrix4fv(mMvpLocation, 1, GL_FALSE, &mvp[0][0]);
-
-    gles2->glEnableVertexAttribArray(mPositionLocation);
-    gles2->glEnableVertexAttribArray(mUvLocation);
-
-    gles2->glBindBuffer(GL_ARRAY_BUFFER, mVertexBuffer);
-    gles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIndexBuffer);
-
-    // glVertexAttribPointer requires the GL_ARRAY_BUFFER to be bound, keep
-    // it bound until all of the vertex attribs are initialized.
-    if (mPositionLocation >= 0) {
-        gles2->glVertexAttribPointer(
-                mPositionLocation,
-                3,                                                // size
-                GL_FLOAT,                                         // type
-                GL_FALSE,                                         // normalized?
-                sizeof(Vertex),                                   // stride
-                reinterpret_cast<void*>(offsetof(Vertex, pos)));  // offset
-    }
-
-    if (mUvLocation >= 0) {
-        gles2->glVertexAttribPointer(
-                mUvLocation,
-                2,                                               // size
-                GL_FLOAT,                                        // type
-                GL_FALSE,                                        // normalized?
-                sizeof(Vertex),                                  // stride
-                reinterpret_cast<void*>(offsetof(Vertex, uv)));  // offset
-    }
-
-    gles2->glDrawElements(GL_TRIANGLES, mIndexCount, GL_UNSIGNED_INT, nullptr);
-    gles2->glBindBuffer(GL_ARRAY_BUFFER, 0);
-    gles2->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    gles2->glDisableVertexAttribArray(mPositionLocation);
-    gles2->glDisableVertexAttribArray(mUvLocation);
-    gles2->glBindTexture(GL_TEXTURE_2D, 0);
-    gles2->glUseProgram(0);
+const std::vector<Renderable>& SceneObject::getRenderables() const {
+    return mRenderables;
 }
 
 }  // namespace virtualscene

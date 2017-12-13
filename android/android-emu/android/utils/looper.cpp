@@ -15,6 +15,7 @@
 #include "android/base/async/ThreadLooper.h"
 #include "android/base/files/Stream.h"
 #include "android/base/sockets/SocketUtils.h"
+#include "android/base/threads/Async.h"
 
 typedef ::Looper CLooper;
 typedef android::base::Looper BaseLooper;
@@ -189,4 +190,29 @@ void stream_put_timer(::Stream* stream, LoopTimer* timer) {
 
 void stream_get_timer(::Stream* stream, LoopTimer* timer) {
     asBaseTimer(timer)->load(reinterpret_cast<android::base::Stream*>(stream));
+}
+
+static Looper* sMainLooper = nullptr;
+
+void android_registerMainLooper(Looper* looper) {
+    sMainLooper = looper;
+}
+
+Looper* android_getMainLooper() {
+    return sMainLooper;
+}
+
+void android_runOnMainLooper(void (*func)()) {
+    // If this is run from certain threads, it will violate assumptions
+    // that the current thread is not either a Qt event loop or a main loop.
+    // Hence async to move it off whatever is the current thread.
+    android::base::async([func] {
+        android::base::Looper* looper =
+            (android::base::Looper*)(android_getMainLooper());
+        auto timer =
+            looper->createTimer([](void* opaque, android::base::Looper::Timer*)  {
+                ((void (*)())opaque)();
+            }, (void*)func);
+        timer->startRelative(0);
+    });
 }

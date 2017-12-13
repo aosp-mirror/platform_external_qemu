@@ -12,6 +12,8 @@
 
 #pragma once
 
+#include "android/utils/compiler.h"
+
 /* A simple abstract interface to framebuffer displays. this is used to
  * de-couple hardware emulation from final display.
  *
@@ -68,6 +70,7 @@ struct QFrameBuffer {
  */
 #define  DEFAULT_FRAMEBUFFER_DPI   165
 
+ANDROID_BEGIN_HEADER
 
 /* initialize a framebuffer object and allocate its pixel buffer */
 /* this computes phys_width_mm and phys_height_mm assuming a 165 dpi screen */
@@ -222,4 +225,5 @@ qframebuffer_fifo_add( QFrameBuffer*  qfbuff );
 extern QFrameBuffer*
 qframebuffer_fifo_get( void );
 
+ANDROID_END_HEADER
 /* */

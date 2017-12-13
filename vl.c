@@ -173,6 +173,7 @@ int main(int argc, char **argv)
 #include "android/utils/filelock.h"
 #include "android/utils/ini.h"
 #include "android/utils/lineinput.h"
+#include "android/utils/looper.h"
 #include "android/utils/path.h"
 #include "android/utils/property_file.h"
 #include "android/utils/system.h"
@@ -4645,6 +4646,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     socket_drainer_start(looper_getForThread());
     android_wear_agent_start(looper_getForThread());
+    android_registerMainLooper(looper_getForThread());
 
     if (!android_hw_file) {
         error_report("Missing -android-hw <file> option!");

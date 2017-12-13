@@ -145,6 +145,16 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
         params.addFormat("androidboot.android_dt_dir=%s", kSysfsAndroidDtDir);
     }
 
+    if (isQemu2) {
+        if (android::featurecontrol::isEnabled(android::featurecontrol::SystemAsRoot)) {
+            params.add("skip_initramfs");
+            params.add("rootwait");
+            params.add("ro");
+            params.add("init=/init");
+            params.add("root=/dev/vda1");
+        }
+    }
+
     if (avdKernelParameters && avdKernelParameters[0]) {
         params.add(avdKernelParameters);
     }

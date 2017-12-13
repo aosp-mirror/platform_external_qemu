@@ -30,10 +30,8 @@ public:
     virtual void onSave(android::base::Stream* stream, unsigned int globalName) const override;
     virtual void restore(ObjectLocalName localName,
                          const getGlobalName_t& getGlobalName) override;
-    void           setSrc(int esslVersion,
-                          GLsizei count,
-                          const GLchar* const* strings,
-                          const GLint* length);
+    void setSrc(GLsizei count, const GLchar* const* strings,
+            const GLint* length);
     const std::string& getOriginalSrc() const;
     const GLchar** parsedLines();
     void           clear();
@@ -67,7 +65,7 @@ public:
     const char* getCompiledSrc() const { return m_compiledSrc.c_str(); }
 
 private:
-    void convertESSLToGLSL(int esslVersion);
+    void convertESSLToGLSL();
 
     std::string m_originalSrc;
     std::string m_src;

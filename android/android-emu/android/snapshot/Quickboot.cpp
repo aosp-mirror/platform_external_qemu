@@ -214,9 +214,10 @@ void Quickboot::onLivenessTimer() {
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
         if (mAdbConnectionRetries < kMaxAdbConnectionRetries) {
             mWindow.showMessage(
-                    StringFormat("Guest hasn't come online in %d seconds, "
+                    StringFormat("Guest isn't online in %d seconds, "
                                  "retrying ADB connection",
-                                 bootTimeoutMs() / 1000).c_str(),
+                                 int(nowMs - mLoadTimeMs) / 1000)
+                            .c_str(),
                     WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
             android_adb_reset_connection();
             mLoadTimeMs = nowMs;
@@ -225,10 +226,10 @@ void Quickboot::onLivenessTimer() {
             // The VM hasn't started for long enough since the end of snapshot
             // loading, let's reset it.
             mWindow.showMessage(
-                    StringFormat("Guest hasn't come online in %d seconds, "
-                        "resetting it and deleting the boot snapshot",
-                        bootTimeoutMs() / 1000)
-                    .c_str(),
+                    StringFormat("Guest isn't online in %d seconds, "
+                                 "restarting and deleting boot snapshot",
+                                 int(nowMs - mLoadTimeMs) / 1000)
+                            .c_str(),
                     WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
             Snapshotter::get().deleteSnapshot(mLoadedSnapshotName.c_str());
             reportFailedLoad(

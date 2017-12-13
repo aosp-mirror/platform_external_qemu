@@ -145,4 +145,5 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/virtual-sensors-page.ui \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui \
     android/skin/qt/tools.ui \
+    android/skin/qt/virtualscene-controls.ui \
 
