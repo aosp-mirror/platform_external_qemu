@@ -116,6 +116,30 @@
       "revId": "e0ef4c7fe09cef1fd12391a0127172bae9dc7f98",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "35f52590_bbe77adc",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/settings-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-13T01:12:20Z",
+      "side": 1,
+      "message": "Was looking at that and it seems like that requires a metrics revision (+generic snapshot failures to save), so I\u0027ll include that change into the more detailed metrics reporting, and we can merge this cl for now (the androidSnapshot_save should then do more logic by itself so this CL is still good)",
+      "parentUuid": "049d9737_18279162",
+      "range": {
+        "startLine": 354,
+        "startChar": 36,
+        "endLine": 354,
+        "endChar": 73
+      },
+      "revId": "e0ef4c7fe09cef1fd12391a0127172bae9dc7f98",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
