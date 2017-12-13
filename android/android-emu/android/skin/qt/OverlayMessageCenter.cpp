@@ -24,6 +24,7 @@
 #include <QLabel>
 #include <QPointer>
 #include <QStyle>
+#include <QtMath>
 #include <QTextLayout>
 #include <QTimer>
 #include <QVariantAnimation>
@@ -43,9 +44,9 @@ OverlayChildWidget::OverlayChildWidget(OverlayMessageCenter* parent,
                           "border-top-width: %3; border-left-width: %3; "
                           "border-bottom-width: %4; border-right-width: %4; }")
                           .arg(Ui::stylesheetFontSize(Ui::FontSize::Larger))
-                          .arg(ceil(SizeTweaker::scaleFactor(this).x()))
-                          .arg(ceil(1 * SizeTweaker::scaleFactor(this).x()))
-                          .arg(ceil(3 * SizeTweaker::scaleFactor(this).x())));
+                          .arg(qCeil(SizeTweaker::scaleFactor(this).x()))
+                          .arg(qCeil(1 * SizeTweaker::scaleFactor(this).x()))
+                          .arg(qCeil(3 * SizeTweaker::scaleFactor(this).x())));
     setLayout(new QHBoxLayout(this));
     layout()->setSizeConstraint(QLayout::SetMaximumSize);
     layout()->setContentsMargins(16, 16, 16, 16);
