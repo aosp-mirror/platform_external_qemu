@@ -2037,6 +2037,15 @@ void GLEScontext::initDefaultFBO(
         dispatcher().glBindFramebuffer(GL_FRAMEBUFFER, getFBOGlobalName(prevDrawFBOBinding));
     if (prevReadFBOBinding)
         dispatcher().glBindFramebuffer(GL_READ_FRAMEBUFFER, getFBOGlobalName(prevReadFBOBinding));
+
+    // We might be initializing a surfaceless context underneath
+    // where the viewport is initialized to 0x0 width and height.
+    // Set to our wanted pbuffer dimensions if this is the first time
+    // the viewport has been set.
+    if (!m_isViewport) {
+        setViewport(0, 0, width, height);
+        dispatcher().glViewport(0, 0, width, height);
+    }
 }
 
 

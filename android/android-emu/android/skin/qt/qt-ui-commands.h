@@ -47,5 +47,11 @@ enum class QtUICommand {
     TOGGLE_TRACKBALL,
 };
 
+enum class QtKeyEventSource {
+    ExtendedWindow,
+    EmulatorWindow,
+    VirtualSceneControlWindow
+};
+
 bool parseQtUICommand(const QString& string, QtUICommand* command);
 QString getQtUICommandDescription(QtUICommand command);

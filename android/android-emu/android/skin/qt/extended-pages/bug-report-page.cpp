@@ -139,7 +139,6 @@ BugreportPage::BugreportPage(QWidget* parent)
     if (movie->isValid()) {
         movie->start();
         mUi->bug_circularSpinner->setMovie(movie);
-        mUi->bug_circularSpinner2->setMovie(movie);
     }
 
     loadAvdDetails();
@@ -176,7 +175,6 @@ void BugreportPage::updateTheme() {
     if (movie->isValid()) {
         movie->start();
         mUi->bug_circularSpinner->setMovie(movie);
-        mUi->bug_circularSpinner2->setMovie(movie);
     }
 
     mUi->bug_bugReportTextEdit->setStyleSheet(
@@ -209,8 +207,8 @@ void BugreportPage::showEvent(QShowEvent* event) {
         // folder.
         mSavingStates.bugreportSavedSucceed = false;
         loadAdbLogcat();
-        loadScreenshotImage();
         loadAdbBugreport();
+        loadScreenshotImage();
     } else {
         showErrorDialog(tr("The bugreport save location is not set.<br/>"
                            "Check the settings page and ensure the directory "
@@ -454,7 +452,31 @@ void BugreportPage::loadAvdDetails() {
 }
 
 void BugreportPage::loadScreenshotImage() {
-    android::emulation::captureScreenshot(System::get()->getTempDir());
+    // Delete previously taken screenshot if it exists
+    if (System::get()->pathIsFile(mSavingStates.screenshotFilePath)) {
+        System::get()->deleteFile(mSavingStates.screenshotFilePath);
+        mSavingStates.screenshotFilePath.clear();
+    }
+    mSavingStates.screenshotSucceed = false;
+    if (android::emulation::captureScreenshot(
+                System::get()->getTempDir(),
+                &mSavingStates.screenshotFilePath)) {
+        if (System::get()->pathIsFile(mSavingStates.screenshotFilePath) &&
+            System::get()->pathCanRead(mSavingStates.screenshotFilePath)) {
+            mSavingStates.screenshotSucceed = true;
+            QPixmap image(mSavingStates.screenshotFilePath.c_str());
+            int height = mUi->bug_screenshotImage->height();
+            int width = mUi->bug_screenshotImage->width();
+            mUi->bug_screenshotImage->setPixmap(
+                    image.scaled(width, height, Qt::KeepAspectRatio));
+        }
+    } else {
+        // TODO(wdu) Better error handling for failed screen capture
+        // operation
+        mUi->bug_screenshotImage->setText(
+                tr("There was an error while capturing the "
+                   "screenshot."));
+    }
 }
 
 bool BugreportPage::eventFilter(QObject* object, QEvent* event) {

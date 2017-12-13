@@ -83,15 +83,11 @@ SceneCamera::SceneCamera() {
 SceneCamera::~SceneCamera() = default;
 
 void SceneCamera::update() {
+    int64_t timestamp;
     glm::vec3 position;
-    android_physical_model_get(PHYSICAL_PARAMETER_POSITION, &position.x,
-                               &position.y, &position.z,
-                               PARAMETER_VALUE_TYPE_CURRENT);
-
     glm::vec3 rotationEuler;
-    android_physical_model_get(PHYSICAL_PARAMETER_ROTATION, &rotationEuler.x,
-                               &rotationEuler.y, &rotationEuler.z,
-                               PARAMETER_VALUE_TYPE_CURRENT);
+    android_physical_model_get_transform(&position.x, &position.y, &position.z,
+            &rotationEuler.x, &rotationEuler.y, &rotationEuler.z, &timestamp);
 
     const glm::mat4 rotationMat = glm::eulerAngleXYZ(
             glm::radians(rotationEuler.x), glm::radians(rotationEuler.y),
@@ -101,10 +97,16 @@ void SceneCamera::update() {
             glm::inverse(rotationMat) * glm::translate(glm::mat4(), -position);
 
     mViewFromWorld = mCameraFromSensors * inverseSensorsPose;
+
+    mLastUpdateTime = timestamp;
 }
 
 glm::mat4 SceneCamera::getViewProjection() const {
     return mProjection * mViewFromWorld;
+}
+
+int64_t SceneCamera::getTimestamp() const {
+    return mLastUpdateTime;
 }
 
 }  // namespace virtualscene

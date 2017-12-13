@@ -20,6 +20,7 @@
 #include "android/avd/hw-config.h"
 #include "android/boot-properties.h"
 #include "android/cmdline-option.h"
+#include "android/config/BluetoothConfig.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/crash-handler.h"
@@ -311,8 +312,10 @@ static int createUserData(AvdInfo* avd,
             return 1;
         }
 
-        resizeExt4Partition(android_hw->disk_dataPartition_path,
-                            android_hw->disk_dataPartition_size);
+        if (!hw->hw_arc) {
+            resizeExt4Partition(android_hw->disk_dataPartition_path,
+                    android_hw->disk_dataPartition_size);
+        }
     } else {
         derror("Missing initial data partition file: %s",
                hw->disk_dataPartition_initPath);
@@ -699,6 +702,15 @@ extern "C" int main(int argc, char** argv) {
         args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
     }
 
+    // Add bluetooth parameters if applicable.
+    char* bluetooth_opts = NULL;
+#ifdef __linux__
+    bluetooth_opts = opts->bluetooth;
+
+#endif
+    android::BluetoothConfig bluetooth(bluetooth_opts);
+    args.add(bluetooth.getParameters());
+
 #ifdef CONFIG_NAND_LIMITS
     args.add2If("-nand-limits", opts->nand_limits);
 #endif
@@ -861,8 +873,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Create userdata file from init version if needed.
-    if (!hw->hw_arc &&
-        (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
+    if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
       int ret = createUserData(avd, dataPath, hw);
       if (ret != 0)
         return ret;
@@ -1040,7 +1051,7 @@ extern "C" int main(int argc, char** argv) {
         args.add("-drive");
         const char* avd_dir = avdInfo_getContentPath(avd);
         args.addFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP "system.img.qcow2|"
-                       "%s" PATH_SEP "userdata.img|"
+                       "%s" PATH_SEP "userdata-qemu.img|"
                        "%s" PATH_SEP "vendor.img.qcow2", avd_dir, avd_dir, avd_dir);
     }
 
@@ -1117,6 +1128,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidBatteryAgent,
             gQAndroidCellularAgent,
             gQAndroidClipboardAgent,
+            gQAndroidDisplayAgent,
             gQAndroidEmulatorWindowAgent,
             gQAndroidFingerAgent,
             gQAndroidLocationAgent,
@@ -1170,7 +1182,8 @@ extern "C" int main(int argc, char** argv) {
                                                      true);
             }
             if (skin_winsys_get_preferred_gles_apilevel() ==
-                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
+                System::get()->getProgramBitness() == 32) {
                 fc::setEnabledOverride(fc::GLESDynamicVersion, false);
             }
 
@@ -1197,7 +1210,8 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
-        shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
+        shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
+                                  System::get()->getProgramBitness() == 32;
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
 
@@ -1228,6 +1242,8 @@ extern "C" int main(int argc, char** argv) {
                 args.add(argv[i]);
             }
         }
+
+        args.add(bluetooth.getQemuParameters());
 
         if (!hw->hw_arc) {
           args.add("-append");

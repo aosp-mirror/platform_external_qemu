@@ -236,7 +236,7 @@ void ExtendedWindow::closeEvent(QCloseEvent *e) {
 }
 
 void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
-    mToolWindow->handleQtKeyEvent(e);
+    mToolWindow->handleQtKeyEvent(e, QtKeyEventSource::ExtendedWindow);
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
