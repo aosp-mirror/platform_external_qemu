@@ -14,6 +14,7 @@
 
 #include "android/screen-recorder.h"
 #include "android/skin/qt/video-player/VideoPlayer.h"
+#include "android/skin/qt/video-player/VideoPreview.h"
 
 #include <QTimer>
 #include <QWidget>
@@ -60,6 +61,7 @@ private:
     std::unique_ptr<Ui::RecordScreenPage> mUi;
     std::unique_ptr<android::videoplayer::VideoPlayerWidget> mVideoWidget;
     std::unique_ptr<android::videoplayer::VideoPlayer> mVideoPlayer;
+    std::unique_ptr<android::videoplayer::VideoPreview> mVideoPreview;
     const QAndroidRecordScreenAgent* mRecordScreenAgent;
     RecordState mState;
     QTimer mTimer;

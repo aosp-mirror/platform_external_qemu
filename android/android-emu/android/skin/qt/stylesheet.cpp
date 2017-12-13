@@ -241,7 +241,7 @@ struct StylesheetValues {
     QHash<QString, QString> lightValues = {
         {"BOX_COLOR",                       "#e0e0e0"},  // Boundary around SMS text area
         {"BKG_COLOR",                       "#f0f0f0"},  // Main page background
-        {"BKG_COLOR_OVERLAY", "rgba(236,236,236,255)"},  // Overlay background
+        {"BKG_COLOR_OVERLAY", "rgba(236,236,236,175)"},  // Overlay background
         {"BUTTON_BKG_COLOR",                "#F9F9F9"},  // Background of push buttons
         {"BUTTON_COLOR",                    "#757575"},  // Text in push buttons
         {"DISABLED_BUTTON_COLOR",           "#bbbbbb"},  // Text in disabled push buttons
@@ -270,7 +270,7 @@ struct StylesheetValues {
     QHash<QString, QString> darkValues = {
         {"BOX_COLOR",                    "#414a50"},
         {"BKG_COLOR",                    "#273238"},
-        {"BKG_COLOR_OVERLAY", "rgba(35,46,52,255)"},
+        {"BKG_COLOR_OVERLAY", "rgba(35,46,52,175)"},
         {"BUTTON_BKG_COLOR",             "#37474f"},
         {"BUTTON_COLOR",                 "#bec1c3"},
         {"DISABLED_BUTTON_COLOR",        "#5f6162"},
