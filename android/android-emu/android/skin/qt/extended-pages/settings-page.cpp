@@ -12,6 +12,8 @@
 #include "android/skin/qt/extended-pages/settings-page.h"
 
 #include "android/base/files/PathUtils.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -25,6 +27,8 @@
 
 using Ui::Settings::SaveSnapshotOnExit;
 using Ui::Settings::SaveSnapshotOnExitUiOrder;
+using android::metrics::MetricsReporter;
+namespace pb = android_studio;
 
 // Helper function to set the contents of a QLineEdit.
 static void setElidedText(QLineEdit* line_edit, const QString& text) {
@@ -471,15 +475,27 @@ void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
     SaveSnapshotOnExit preferenceValue;
     switch(static_cast<SaveSnapshotOnExitUiOrder>(uiIndex)) {
         case SaveSnapshotOnExitUiOrder::Never:
+            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_no(1 + counts->quickboot_selection_no());
+            });
             preferenceValue = SaveSnapshotOnExit::Never;
             android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         case SaveSnapshotOnExitUiOrder::Ask:
+            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_ask(1 + counts->quickboot_selection_ask());
+            });
             preferenceValue = SaveSnapshotOnExit::Ask;
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             break;
         default:
         case SaveSnapshotOnExitUiOrder::Always:
+            MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+                auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+                counts->set_quickboot_selection_yes(1 + counts->quickboot_selection_yes());
+            });
             android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
             preferenceValue = SaveSnapshotOnExit::Always;
             break;
