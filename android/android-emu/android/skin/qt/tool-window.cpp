@@ -28,6 +28,8 @@
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
 #include "android/main-common.h"
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
 #include "android/skin/qt/emulator-qt-window.h"
@@ -42,6 +44,7 @@
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
+#include "android/utils/system.h"
 
 #include <cassert>
 #include <string>
@@ -57,6 +60,9 @@ void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
 }  // namespace
 
 using Ui::Settings::SaveSnapshotOnExit;
+using android::base::System;
+using android::metrics::MetricsReporter;
+namespace pb = android_studio;
 
 ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
     : mWindow(new ExtendedWindow(tw->mEmulatorWindow,
@@ -616,6 +622,7 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
         return true;
     }
 
+    int64_t startTime = get_uptime_ms();
     QMessageBox msgBox(QMessageBox::Question,
                        tr("Save quick-boot state"),
                        tr("Do you want to save the current state for the next quick boot?"),
@@ -628,14 +635,35 @@ bool ToolWindow::askWhetherToSaveSnapshot() {
 
     int selection = msgBox.exec();
 
+    int64_t endTime = get_uptime_ms();
+    uint64_t dialogTime = endTime - startTime;
+
+    MetricsReporter::get().report([dialogTime](pb::AndroidStudioEvent* event) {
+        auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+        counts->set_quickboot_ask_total_time_ms(
+            dialogTime + counts->quickboot_ask_total_time_ms());
+    });
+
     if (selection == QMessageBox::Cancel) {
+        MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+            auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+            counts->set_quickboot_ask_canceled(1 + counts->quickboot_ask_canceled());
+        });
         mAskedWhetherToSaveSnapshot = false;
         return false;
     }
 
     if (selection == QMessageBox::Yes) {
+        MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+            auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+            counts->set_quickboot_ask_yes(1 + counts->quickboot_ask_yes());
+        });
         android_avdParams->flags &= !AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
     } else {
+        MetricsReporter::get().report([](pb::AndroidStudioEvent* event) {
+            auto counts = event->mutable_emulator_details()->mutable_snapshot_ui_counts();
+            counts->set_quickboot_ask_no(1 + counts->quickboot_ask_no());
+        });
         android_avdParams->flags |= AVDINFO_NO_SNAPSHOT_SAVE_ON_EXIT;
     }
     return true;
