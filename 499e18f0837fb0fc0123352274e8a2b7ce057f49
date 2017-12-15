@@ -46,6 +46,30 @@
       "revId": "499e18f0837fb0fc0123352274e8a2b7ce057f49",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c571b7aa_25c8ac80",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-15T20:40:33Z",
+      "side": 1,
+      "message": "For example to distinguish quickboot save from generic save. Quickboot save calls save() and does its own checks and saveGeneric can do generic snapshot checks and call save(). quickboot save should not necessarily call saveGeneric as the use cases are all different.",
+      "parentUuid": "8370f203_47e30847",
+      "range": {
+        "startLine": 74,
+        "startChar": 20,
+        "endLine": 74,
+        "endChar": 31
+      },
+      "revId": "499e18f0837fb0fc0123352274e8a2b7ce057f49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
