@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7da589f6_cb32f02b",
+        "filename": "android/android-emu/android/console.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-15T17:19:39Z",
+      "side": 1,
+      "message": "nit: 4 space",
+      "range": {
+        "startLine": 158,
+        "startChar": 0,
+        "endLine": 159,
+        "endChar": 8
+      },
+      "revId": "063fe84fa221972ec43fd61cf7d67692338bbcb6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
