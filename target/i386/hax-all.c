@@ -222,6 +222,8 @@ static int hax_get_capability(struct hax_state *hax)
         }
     }
 
+    hax->supports_64bit_ramblock = !!(cap->winfo & HAX_CAP_64BIT_RAMBLOCK);
+
     if (cap->wstatus & HAX_CAP_MEMQUOTA) {
         if (cap->mem_quota < hax->mem_quota) {
             fprintf(stderr, "The VM memory needed exceeds the driver limit.\n");
