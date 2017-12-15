@@ -22,6 +22,30 @@
       "revId": "499e18f0837fb0fc0123352274e8a2b7ce057f49",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8370f203_47e30847",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-15T20:39:24Z",
+      "side": 1,
+      "message": "Yeah saveGeneric is for the interface for generic snapshots which will have moar error checking and metrics reporting, save() is just to straight up save without any checks or extra stuff happening (for devs only)",
+      "parentUuid": "c0bd4ad7_7298b243",
+      "range": {
+        "startLine": 74,
+        "startChar": 20,
+        "endLine": 74,
+        "endChar": 31
+      },
+      "revId": "499e18f0837fb0fc0123352274e8a2b7ce057f49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
