@@ -491,8 +491,10 @@ ln -s "$AOSP_ROOT"/prebuilts "$AOSP_TMPDIR"/prebuilts
 ln -s "$AOSP_ROOT"/external/qemu "$AOSP_TMPDIR"/external/qemu
 ln -s "$AOSP_ROOT"/external/gtest "$AOSP_TMPDIR"/external/gtest
 ln -s "$AOSP_ROOT"/external/google-benchmark "$AOSP_TMPDIR"/external/google-benchmark
+ln -s "$AOSP_ROOT"/external/libyuv "$AOSP_TMPDIR"/external/libyuv
+ln -s "$AOSP_ROOT"/external/tinyobjloader "$AOSP_TMPDIR"/external/tinyobjloader
 
-AOSP_SOURCE_SUBDIRS="external/qemu external/gtest external/google-benchmark"
+AOSP_SOURCE_SUBDIRS="external/qemu external/gtest external/google-benchmark external/libyuv external/tinyobjloader"
 
 for AOSP_SUBDIR in $AOSP_SOURCE_SUBDIRS; do
     extract_subdir_git_history \
@@ -677,6 +679,9 @@ build_darwin_binaries_on () {
     fi
     copy_directory "$AOSP_BUILD_PREBUILTS"/protobuf \
             "$DARWIN_BUILD_PREBUILTS"/protobuf
+
+    copy_directory "$AOSP_BUILD_PREBUILTS"/common/virtualscene \
+            "$DARWIN_BUILD_PREBUILTS"/common/virtualscene
 
     run tar xf "$PKG_FILE" -C "$DARWIN_PKG_DIR" --strip-components 1
 
