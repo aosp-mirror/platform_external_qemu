@@ -70,6 +70,30 @@
       "revId": "499e18f0837fb0fc0123352274e8a2b7ce057f49",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5df80af1_96739bf6",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-15T20:57:15Z",
+      "side": 1,
+      "message": "would you put the comments in the code?",
+      "parentUuid": "c571b7aa_25c8ac80",
+      "range": {
+        "startLine": 74,
+        "startChar": 20,
+        "endLine": 74,
+        "endChar": 31
+      },
+      "revId": "499e18f0837fb0fc0123352274e8a2b7ce057f49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
