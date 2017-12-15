@@ -386,7 +386,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mBackingSurface = NULL;
 
     QSettings settings;
-    mFrameAlways = settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool();
+    mFrameAlways = settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool();
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
