@@ -30,6 +30,7 @@
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
 #include "android/hw-sensors.h"
@@ -142,6 +143,39 @@ static inline const QAndroidVmOperations* vmopers(ControlClient client) {
 
 //////////// Module level globals //////////////////////////
 static ControlGlobalRec _g_global;
+
+// Some commands may be controlled by a feature flag, so we need to check it.
+namespace {
+using android::featurecontrol::Feature;
+
+typedef struct CmdFeatureFlag_
+{
+    const char* name;
+    Feature feature;
+} CmdFeatureFlag;
+
+const CmdFeatureFlag command_flags[] = {
+        {"screenrecord", android::featurecontrol::ScreenRecording},
+        {NULL, android::featurecontrol::Feature_n_items}};
+}  // namespace
+
+static bool
+isCommandEnabled(const char* command_name) {
+    if (command_name == nullptr) {
+        return false;
+    }
+
+    for (int i = 0; command_flags[i].name != nullptr; ++i) {
+        if (!strcmp(command_name, command_flags[i].name)) {
+            return android::featurecontrol::isEnabled(
+                    command_flags[i].feature);
+        }
+    }
+
+    // If passed a command that doesn't have a feature flag,
+    // just enable it.
+    return true;
+}
 
 static int
 control_global_add_redir( ControlGlobal  global,
@@ -472,7 +506,7 @@ static void control_client_do_command(ControlClient client) {
 
     cmd = find_command(line, commands, &cmdend, &args);
 
-    if (cmd == NULL) {
+    if (cmd == NULL || !isCommandEnabled(cmd->names)) {
         control_write(client, "KO: unknown command, try 'help'\r\n");
         return;
     }
@@ -526,7 +560,9 @@ do_help( ControlClient  client, char*  args )
     if (args == NULL) {
         control_write( client, "Android console commands:\r\n" );
         for ( ; cmd->names != NULL; cmd++ ) {
-            control_write( client, "    %s\r\n", cmd->names );
+            if (isCommandEnabled(cmd->names)) {
+                control_write( client, "    %s\r\n", cmd->names );
+            }
         }
         control_write( client, "\r\nTry 'help-verbose' for more description"
                                "\r\nTry 'help <command>' for command-specific help\r\n" );
@@ -539,7 +575,7 @@ do_help( ControlClient  client, char*  args )
 
         line    = args;
         subcmd  = find_command( line, cmd, &end, &args );
-        if (subcmd == NULL) {
+        if (subcmd == NULL || !isCommandEnabled(subcmd->names)) {
             /* Not found. Recurse to print the short list of commands. */
             do_help(client, NULL);
             control_write( client, "\r\nKO: unknown command\r\n" );
@@ -563,7 +599,9 @@ do_help_verbose( ControlClient  client, char*  args )
     /* Dump all commands */
     control_write( client, "Android console command help:\r\n\r\n" );
     for (cmd = client->commands; cmd->names != NULL; cmd++) {
-        control_write( client, "    %-15s  %s\r\n", cmd->names, cmd->abstract );
+        if (isCommandEnabled(cmd->names)) {
+            control_write( client, "    %-15s  %s\r\n", cmd->names, cmd->abstract );
+        }
     }
     control_write( client, "\r\ntry 'help <command>' for command-specific help\r\n" );
     return 0;
