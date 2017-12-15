@@ -364,6 +364,10 @@ OPT_CLANG=
 option_register_var "--clang" OPT_CLANG \
        "Compile using clang when available."
 
+OPT_NO_TESTS=
+option_register_var "--no-tests" OPT_NO_TESTS \
+       "Do not run tests after build completes."
+
 package_builder_register_options
 aosp_prebuilts_dir_register_options
 prebuilts_dir_register_option
@@ -705,6 +709,9 @@ build_darwin_binaries_on () {
     if [ "$OPT_PREBUILT_QEMU2" ]; then
         var_append DARWIN_BUILD_FLAGS "--prebuilt-qemu2"
     fi
+    if [ "$OPT_NO_TESTS" ]; then
+        var_append DARWIN_BUILD_FLAGS "--no-tests"
+    fi
     if [ "$OPT_CRASH_STAGING" ]; then
         var_append DARWIN_BUILD_FLAGS "--crash-staging"
     elif [ "$OPT_CRASH_PROD" ]; then
@@ -785,6 +792,10 @@ fi
 
 if [ "$OPT_PREBUILT_QEMU2" ]; then
     var_append REBUILD_FLAGS "--prebuilt-qemu2"
+fi
+
+if [ "$OPT_NO_TESTS" ]; then
+    var_append REBUILD_FLAGS "--no-tests"
 fi
 
 for SYSTEM in $(convert_host_list_to_os_list $LOCAL_HOST_SYSTEMS); do
