@@ -2113,7 +2113,7 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
     case kEventScreenChanged:
         // Re-setup the OpenGL ES subwindow with a potentially different
         // framebuffer size (e.g., 2x for retina screens).
-        skin_window_show_opengles(window, false);
+        skin_window_show_opengles(window, true);
         break;
 
     default:
