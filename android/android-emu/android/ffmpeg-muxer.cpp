@@ -528,10 +528,12 @@ static void close_video_stream(AVFormatContext* oc, VideoOutputStream* ost) {
     sws_freeContext(ost->sws_ctx);
 }
 
+/*
 static bool has_suffix(const std::string& str, const std::string& suffix) {
     return str.size() >= suffix.size() &&
            str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
+*/
 
 static bool sIsRegistered = false;
 
@@ -567,16 +569,24 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
         return NULL;
     }
 
+    AVOutputFormat* fmt = oc->oformat;
+    // open the output file, if needed
+    if (!(fmt->flags & AVFMT_NOFILE)) {
+        int ret = avio_open(&oc->pb, recorder->path, AVIO_FLAG_WRITE);
+        if (ret < 0) {
+            derror("Could not open '%s': %s\n", recorder->path,
+                   avErr2Str(ret).c_str());
+            avformat_free_context(oc);
+            free(recorder);
+            return NULL;
+        }
+    }
+
     recorder->oc = oc;
     recorder->start_time = android::base::System::get()->getHighResTimeUs();
 
-    if (has_suffix(recorder->path, ".webm")) {
-        recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
-        recorder->video_st.codec_id = AV_CODEC_ID_VP9;
-    } else {
-        recorder->audio_st.codec_id = AV_CODEC_ID_AAC;
-        recorder->video_st.codec_id = AV_CODEC_ID_H264;
-    }
+    recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
+    recorder->video_st.codec_id = AV_CODEC_ID_VP9;
 
     recorder->fb_width = fb_width;
     recorder->fb_height = fb_height;
@@ -697,18 +707,6 @@ static int start_recording(ffmpeg_recorder* recorder) {
 
     av_dump_format(oc, 0, recorder->path, 1);
 
-    AVOutputFormat* fmt = oc->oformat;
-
-    // open the output file, if needed
-    if (!(fmt->flags & AVFMT_NOFILE)) {
-        ret = avio_open(&oc->pb, recorder->path, AVIO_FLAG_WRITE);
-        if (ret < 0) {
-            derror("Could not open '%s': %s\n", recorder->path,
-                   avErr2Str(ret).c_str());
-            free(recorder);
-            return ret;
-        }
-    }
 
     // Write the stream header, if any.
     ret = avformat_write_header(oc, &opt);
