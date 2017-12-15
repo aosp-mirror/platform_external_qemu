@@ -1,0 +1,8 @@
+Code-Review+2: Huan Song <huans@google.com>
+Verified+1: Jim Kaye <jameskaye@google.com>
+Presubmit-Verified+1: Treehugger Robot <treehugger-gerrit@google.com>
+Submitted-by: Jim Kaye <jameskaye@google.com>
+Submitted-at: Fri, 15 Dec 2017 21:44:44 +0000
+Reviewed-on: https://android-review.googlesource.com/570403
+Project: platform/external/qemu
+Branch: refs/heads/emu-master-dev
