@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c0bd4ad7_7298b243",
+        "filename": "android/android-emu/android/snapshot/Snapshotter.h",
+        "patchSetId": 16
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-15T20:36:32Z",
+      "side": 1,
+      "message": "what is the difference between save and saveGeneric? \"generic\" seems to infer generic snapshot?",
+      "range": {
+        "startLine": 74,
+        "startChar": 20,
+        "endLine": 74,
+        "endChar": 31
+      },
+      "revId": "499e18f0837fb0fc0123352274e8a2b7ce057f49",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
