@@ -260,11 +260,8 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
 
     settings.setValue(Ui::Settings::SCREENREC_SAVE_PATH, dirName);
 
-    // move temp recording file
-    // TODO: Copy the file to the save location since the user may want to save
-    // in multiple formats. Since the initial encoding is webm, we need to do a
-    // conversion if the user selects something else.
-    if (ext == "gif") {
+    // Copy the media file to the save location
+    if (ext.toLower() == "gif") {
         auto thread = new QThread();
         auto task = new ConvertingTask(mTmpFilePath, recordingName.toStdString());
         task->moveToThread(thread);
