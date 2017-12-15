@@ -33,6 +33,7 @@ public:
     void setRecordScreenAgent(const QAndroidRecordScreenAgent* agent);
     void updateTheme();
     void emitRecordingStopped(RecordStopStatus status);
+    static bool removeFileIfExists(const QString& file);
 
 signals:
     void recordingStopped(RecordStopStatus status);

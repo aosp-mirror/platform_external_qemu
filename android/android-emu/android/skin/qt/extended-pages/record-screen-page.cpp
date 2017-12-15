@@ -11,15 +11,16 @@
 
 #include "android/skin/qt/extended-pages/record-screen-page.h"
 
-#include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/base/files/PathUtils.h"
 #include "android/emulation/control/record_screen_agent.h"
 #include "android/ffmpeg-muxer.h"
 #include "android/globals.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
+#include "android/skin/qt/extended-pages/record-screen-page-tasks.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
+#include "android/utils/debug.h"
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -52,7 +53,19 @@ RecordScreenPage::RecordScreenPage(QWidget* parent)
                      &RecordScreenPage::slot_recordingStopped);
 }
 
-RecordScreenPage::~RecordScreenPage() {}
+RecordScreenPage::~RecordScreenPage() {
+    // Remove the tmp video file if one exists
+    if (!removeFileIfExists(QString(mTmpFilePath.c_str()))) {
+        derror("Unable to clean up temp media file.");
+    }
+}
+
+bool RecordScreenPage::removeFileIfExists(const QString& file) {
+    if (QFile::exists(file)) {
+        return QFile::remove(file);
+    }
+    return true;
+}
 
 static void onRecordingStoppedCallback(void* opaque, RecordStopStatus status) {
     RecordScreenPage* rsInst = (RecordScreenPage*)opaque;
@@ -263,9 +276,17 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
         connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
         thread->start();
     } else {
-        int rc = rename(mTmpFilePath.c_str(), recordingName.toStdString().c_str());
-        if (rc != 0) {
-            QString errStr = tr("Unknown error while saving<br>") + recordingName;
+        QString errStr;
+
+        if (removeFileIfExists(recordingName)) {
+            if (!QFile::copy(QString(mTmpFilePath.c_str()), recordingName)) {
+                errStr = tr("Unknown error while saving<br>") + recordingName;
+                showErrorDialog(errStr, tr("Save Recording"));
+            }
+        } else {
+            errStr = tr("Unable to remove existing file before copying new "
+                        "file<br>") +
+                     recordingName;
             showErrorDialog(errStr, tr("Save Recording"));
         }
     }
