@@ -76,7 +76,7 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     // Show a frame around the device?
     mUi->set_frameAlways->setChecked(
-            settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool());
+            settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool());
 
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
