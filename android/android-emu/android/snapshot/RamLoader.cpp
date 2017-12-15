@@ -101,16 +101,22 @@ bool RamLoader::start(bool isQuickboot) {
     }
 
     mIsQuickboot = isQuickboot;
-#if SNAPSHOT_PROFILE > 1
+
     mStartTime = base::System::get()->getHighResTimeUs();
-#endif
+
     mWasStarted = true;
     if (!readIndex()) {
         mHasError = true;
         return false;
     }
     if (!mAccessWatch) {
-        return readAllPages();
+        bool res = readAllPages();
+        mEndTime = base::System::get()->getHighResTimeUs();
+#if SNAPSHOT_PROFILE > 1
+        printf("Eager RAM load complete in %.03f ms\n",
+               (mEndTime - mStartTime) / 1000.0);
+#endif
+        return res;
     }
 
     if (!registerPageWatches()) {
@@ -340,9 +346,10 @@ void RamLoader::readerWorker() {
 
     mIndex.clear();
 
+    mEndTime = base::System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1
     printf("Background loading complete in %.03f ms\n",
-           (base::System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
+           (mEndTime - mStartTime) / 1000.0);
 #endif
 }
 

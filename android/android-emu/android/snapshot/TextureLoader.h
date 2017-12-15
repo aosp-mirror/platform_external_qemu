@@ -44,6 +44,7 @@ public:
     virtual bool hasError() const = 0;
     virtual uint64_t diskSize() const = 0;
     virtual bool compressed() const = 0;
+    virtual bool getDuration(base::System::Duration* duration) = 0;
 };
 
 class TextureLoader final : public ITextureLoader {
@@ -65,6 +66,22 @@ public:
             mLoaderThread->wait();
             mLoaderThread.reset();
         }
+        mEndTime = base::System::get()->getHighResTimeUs();
+    }
+
+    // getDuration():
+    // Returns true if there was save with measurable time
+    // (and writes it to |duration| if |duration| is not null),
+    // otherwise returns false.
+    bool getDuration(base::System::Duration* duration) {
+        if (mEndTime < mStartTime) {
+            return false;
+        }
+
+        if (duration) {
+            *duration = mEndTime - mStartTime;
+        }
+        return true;
     }
 
 private:
@@ -78,6 +95,9 @@ private:
     int mVersion = 0;
     uint64_t mDiskSize = 0;
     LoaderThreadPtr mLoaderThread;
+
+    base::System::Duration mStartTime = 0;
+    base::System::Duration mEndTime = 0;
 };
 
 }  // namespace snapshot
