@@ -315,7 +315,7 @@ static void serializeSensorValue(
         Sensor* sensor,
         AndroidSensor sensor_id) {
     long measurement_id = -1L;
-    
+
     switch (sensor_id) {
 #define ENUM_NAME(x) ANDROID_SENSOR_##x
 #define GET_FUNCTION_NAME(x) physicalModel_get##x
@@ -889,6 +889,8 @@ static void _hwSensors_init(HwSensors* h) {
     /* XXX: TODO: Add other tests when we add the corresponding
         * properties to hardware-properties.ini et al. */
 
+    _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PRESSURE,
+            1013.25f, 0.f, 0.f, PHYSICAL_INTERPOLATION_SMOOTH); // One "standard atmosphere"
     _hwSensors_setPhysicalParameterValue(h, PHYSICAL_PARAMETER_PROXIMITY,
             1.f, 0.f, 0.f, PHYSICAL_INTERPOLATION_STEP);
 }
