@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d3cfb05d_299a3beb",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-16T01:40:40Z",
+      "side": 1,
+      "message": "decoded",
+      "range": {
+        "startLine": 224,
+        "startChar": 22,
+        "endLine": 224,
+        "endChar": 29
+      },
+      "revId": "7c30dc9f234bde3c1191f62a8c3872395a2cd36e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71aa7d55_d4e48540",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 36
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-16T01:40:40Z",
+      "side": 1,
+      "message": "And, note that it will not be very hard to make DecoderThreads\u0027 fields part of Decoder; mAudioDecoder here is the decoder itself, while mAudioFrameQueue is already the frame queue referenced by the decoder.",
+      "range": {
+        "startLine": 479,
+        "startChar": 0,
+        "endLine": 485,
+        "endChar": 57
+      },
+      "revId": "7c30dc9f234bde3c1191f62a8c3872395a2cd36e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
