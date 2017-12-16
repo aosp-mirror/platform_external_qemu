@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "fb0dda6b_5bce18d6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/record-screen-page.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-16T02:10:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5fd6340f_df86d9ef",
+      "range": {
+        "startLine": 200,
+        "startChar": 0,
+        "endLine": 200,
+        "endChar": 8
+      },
+      "revId": "930c095af649ed6480b215ec80769b82dfaaa499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eebd180f_9f1fbea0",
         "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
         "patchSetId": 35
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "e3a3ff8e_93d27b80",
+        "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-16T02:10:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eebd180f_9f1fbea0",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 107,
+        "endChar": 60
+      },
+      "revId": "930c095af649ed6480b215ec80769b82dfaaa499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "addc37d2_1eb69bce",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 35
@@ -59,6 +107,30 @@
       "writtenOn": "2017-12-16T01:34:19Z",
       "side": 1,
       "message": "Awesome work with the reorganization Huihong! Having all this in one file makes it much easier to understand at least for me.\n\nHere is the next piece of reorganization: make each Decoder own its decoding thread (even make Decoder subclass our Thread class). Then each decoding thread can have a unique thread function that does only audio or video decoding. It saves on a branch every decode, but more importantly, it increases clarity of the code; we won\u0027t need to make sure that mAudioDecoder does not call the video decoding thread or something.",
+      "range": {
+        "startLine": 221,
+        "startChar": 0,
+        "endLine": 222,
+        "endChar": 56
+      },
+      "revId": "930c095af649ed6480b215ec80769b82dfaaa499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd52724e_6eb350fb",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-16T02:10:41Z",
+      "side": 1,
+      "message": "Yes, that\u0027s the plan. I actually started doing the thread inside decoder class, but somehow it keeps crashing, very weird, once I do it there. I will double check, probably go with a WorkerThread.",
+      "parentUuid": "addc37d2_1eb69bce",
       "range": {
         "startLine": 221,
         "startChar": 0,
@@ -91,6 +163,30 @@
       "revId": "930c095af649ed6480b215ec80769b82dfaaa499",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94547f8e_94b435ff",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 35
+      },
+      "lineNbr": 526,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-16T02:10:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e14f2493_ddacef80",
+      "range": {
+        "startLine": 526,
+        "startChar": 0,
+        "endLine": 526,
+        "endChar": 47
+      },
+      "revId": "930c095af649ed6480b215ec80769b82dfaaa499",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
