@@ -125,6 +125,7 @@ private:
     glm::vec4 calculateRotationalState(
         const glm::mat2x4& quinticTransform,
         const glm::mat4x4& cubicTransform,
+        const glm::mat4x4& afterEndCubicTransform,
         ParameterValueType parameterValueType) const;
 
     // Note: Each target interpolation begins at a set time, accelerates at a
@@ -161,6 +162,8 @@ private:
     uint64_t mRotationChangeStartTime = 0UL;
     glm::mat2x4 mRotationQuintic = glm::mat2x4(0.f);
     glm::mat4x4 mRotationCubic = glm::mat4x4(
+            glm::vec4(), glm::vec4(), glm::vec4(), glm::vec4(0.f, 0.f, 0.f, 1.f));
+    glm::mat4x4 mRotationAfterEndCubic = glm::mat4x4(
             glm::vec4(), glm::vec4(), glm::vec4(), glm::vec4(0.f, 0.f, 0.f, 1.f));
     glm::mat2x4 mRotationalVelocityQuintic = glm::mat2x4(0.f);
     glm::mat4x4 mRotationalVelocityCubic = glm::mat4x4(0.f);

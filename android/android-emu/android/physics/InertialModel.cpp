@@ -319,6 +319,7 @@ void InertialModel::setTargetRotation(
                 glm::vec4(0.f),
                 glm::vec4(0.f),
                 glm::vec4(rotation.x, rotation.y, rotation.z, rotation.w));
+        mRotationAfterEndCubic = mRotationCubic;
         mRotationalVelocityQuintic = glm::mat2x4(0.f);
         mRotationalVelocityCubic = glm::mat4x4(0.f);
         mRotationalAccelerationQuintic = glm::mat2x4(0.f);
@@ -369,16 +370,16 @@ void InertialModel::setTargetRotation(
         //     y = x_target
 
         const glm::vec4 currentRotation = calculateRotationalState(
-                mRotationQuintic, mRotationCubic,
+                mRotationQuintic, mRotationCubic, mRotationAfterEndCubic,
                 PARAMETER_VALUE_TYPE_CURRENT);
 
         const glm::vec4 currentRotationalVelocity = calculateRotationalState(
                 mRotationalVelocityQuintic, mRotationalVelocityCubic,
-                PARAMETER_VALUE_TYPE_CURRENT);
+                glm::mat4x4(0.f), PARAMETER_VALUE_TYPE_CURRENT);
 
         const glm::vec4 currentRotationalAcceleration = calculateRotationalState(
                 mRotationalAccelerationQuintic, mRotationalAccelerationCubic,
-                PARAMETER_VALUE_TYPE_CURRENT);
+                glm::mat4x4(0.f), PARAMETER_VALUE_TYPE_CURRENT);
 
         const float rotationLength = glm::length(currentRotation);
 
@@ -394,6 +395,7 @@ void InertialModel::setTargetRotation(
                     glm::vec4(0.f),
                     glm::vec4(0.f),
                     glm::vec4(rotation.x, rotation.y, rotation.z, rotation.w));
+            mRotationAfterEndCubic = mRotationCubic;
             mRotationalVelocityQuintic = glm::mat2x4(0.f);
             mRotationalVelocityCubic = glm::mat4x4(0.f);
             mRotationalAccelerationQuintic = glm::mat2x4(0.f);
@@ -456,6 +458,11 @@ void InertialModel::setTargetRotation(
                 quadraticTerm,
                 linearTerm,
                 constantTerm);
+        mRotationAfterEndCubic = glm::mat4x4(
+                glm::vec4(0.f),
+                glm::vec4(0.f),
+                glm::vec4(0.f),
+                glm::vec4(rotation.x, rotation.y, rotation.z, rotation.w));
         mRotationalVelocityQuintic = glm::mat2x4(
                 glm::vec4(),
                 5.f * quinticTerm);
@@ -519,6 +526,7 @@ glm::quat InertialModel::getRotation(
     const glm::vec4 rotationVec = calculateRotationalState(
             mRotationQuintic,
             mRotationCubic,
+            mRotationAfterEndCubic,
             parameterValueType);
 
     const glm::quat rotation(
@@ -532,6 +540,7 @@ glm::vec3 InertialModel::getRotationalVelocity(
     const glm::vec4 rotationVec = calculateRotationalState(
             mRotationQuintic,
             mRotationCubic,
+            mRotationAfterEndCubic,
             parameterValueType);
     const float rotationVecLength = glm::length(rotationVec);
 
@@ -554,6 +563,7 @@ glm::vec3 InertialModel::getRotationalVelocity(
             calculateRotationalState(
                     mRotationalVelocityQuintic,
                     mRotationalVelocityCubic,
+                    glm::mat4x4(0.f),
                     parameterValueType);
 
     const glm::vec4 rotationDerivative = scaledDerivative -
@@ -673,22 +683,25 @@ glm::vec3 InertialModel::calculateInertialState(
 glm::vec4 InertialModel::calculateRotationalState(
         const glm::mat2x4& quinticTransform,
         const glm::mat4x4& cubicTransform,
+        const glm::mat4x4& afterEndCubicTransform,
         ParameterValueType parameterValueType) const {
     assert(mModelTimeNs >= mRotationChangeStartTime);
     const uint64_t requestedTimeNs =
             parameterValueType == PARAMETER_VALUE_TYPE_TARGET ?
-                    mRotationChangeEndTime :
-                    std::min(mModelTimeNs, mRotationChangeEndTime);
+                    mRotationChangeEndTime : mModelTimeNs;
 
     const float time1 = nsToSeconds(requestedTimeNs - mRotationChangeStartTime);
     const float time2 = time1 * time1;
     const float time3 = time2 * time1;
-    const float time4 = time2 * time2;
-    const float time5 = time3 * time2;
-    const glm::vec2 quinticTimeVec(time5, time4);
     const glm::vec4 cubicTimeVec(time3, time2, time1, 1.f);
-
-    return quinticTransform * quinticTimeVec + cubicTransform * cubicTimeVec;
+    if (requestedTimeNs < mRotationChangeEndTime) {
+        const float time4 = time2 * time2;
+        const float time5 = time3 * time2;
+        const glm::vec2 quinticTimeVec(time5, time4);
+        return quinticTransform * quinticTimeVec + cubicTransform * cubicTimeVec;
+    } else {
+        return afterEndCubicTransform * cubicTimeVec;
+    }
 }
 
 }  // namespace physics
