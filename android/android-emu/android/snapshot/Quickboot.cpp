@@ -247,20 +247,12 @@ bool Quickboot::load(StringView name) {
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_FEATURE,
                          FailureReason::Empty);
+        return false;
     }
+
     if (name.empty()) {
         name = kDefaultBootSnapshot;
     }
-
-    // Invalidate quickboot snapshot if the crash reporter trips.
-    // It's possible the crash was not due to snapshot load,
-    // but it's better than crashing over and over in
-    // the same load.
-    // Don't try to delete it completely as that is a heavyweight
-    // operation and we are in the middle of crashing.
-    CrashReporter::get()->addCrashCallback([this, &name]() {
-        Snapshotter::get().onCrashedSnapshot(name.c_str());
-    });
 
     if (android_cmdLineOptions->no_snapshot_load) {
         if (!android_hw->fastboot_forceColdBoot) {
@@ -276,6 +268,13 @@ bool Quickboot::load(StringView name) {
                         : pb::EmulatorQuickbootLoad::
                                   EMULATOR_QUICKBOOT_LOAD_COLD_CMDLINE,
                 FailureReason::Empty);
+    } else if (avdInfo_inAndroidBuild(android_avdInfo)) {
+        mWindow.showMessage(
+                StringFormat(
+                    "Performing cold boot: in Android build system").c_str(),
+                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+        reportFailedLoad(pb::EmulatorQuickbootLoad::
+                                 EMULATOR_QUICKBOOT_LOAD_COLD_AVD);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
         mWindow.showMessage(
                 StringFormat("Performing cold boot: selected renderer '%s' "
@@ -288,6 +287,17 @@ bool Quickboot::load(StringView name) {
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
                          FailureReason::Empty);
     } else {
+
+        // Invalidate quickboot snapshot if the crash reporter trips.
+        // It's possible the crash was not due to snapshot load,
+        // but it's better than crashing over and over in
+        // the same load.
+        // Don't try to delete it completely as that is a heavyweight
+        // operation and we are in the middle of crashing.
+        CrashReporter::get()->addCrashCallback([this, &name]() {
+            Snapshotter::get().onCrashedSnapshot(name.c_str());
+        });
+
         const auto startTimeMs = System::get()->getHighResTimeUs() / 1000;
         auto& snapshotter = Snapshotter::get();
         auto res = snapshotter.load(true /* isQuickboot */, name.c_str());
@@ -370,6 +380,12 @@ bool Quickboot::save(StringView name) {
     if (!isEnabled(featurecontrol::FastSnapshotV1)) {
         reportFailedSave(pb::EmulatorQuickbootSave::
                                  EMULATOR_QUICKBOOT_SAVE_DISABLED_FEATURE);
+        return false;
+    }
+
+    if (avdInfo_inAndroidBuild(android_avdInfo)) {
+        reportFailedSave(pb::EmulatorQuickbootSave::
+                                 EMULATOR_QUICKBOOT_SAVE_DISABLED_AVD);
         return false;
     }
 
