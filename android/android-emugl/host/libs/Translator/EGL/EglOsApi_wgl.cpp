@@ -337,12 +337,13 @@ public:
         GetExtensionsStringFunc wglGetExtensionsStringARB =
                 reinterpret_cast<GetExtensionsStringFunc>(
                         this->findFunction("wglGetExtensionsStringARB"));
-        if (!wglGetExtensionsStringARB) {
+        const char* extensionList = nullptr;
+        if (wglGetExtensionsStringARB) {
+            extensionList = wglGetExtensionsStringARB(hdc);
+        } else {
             ERR("%s: Could not find wglGetExtensionsStringARB!\n",
                 __FUNCTION__);
-            return false;
         }
-        const char* extensionList = wglGetExtensionsStringARB(hdc);
         if (!extensionList) {
             extensionList = "";
         }
