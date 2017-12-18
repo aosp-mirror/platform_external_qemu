@@ -69,6 +69,7 @@ enum class FailureReason {
     EmulationEngineFailed,
     RamFailed,
     TexturesFailed,
+    AdbOffline,
 
     InProgressLimit = 30000,
 };

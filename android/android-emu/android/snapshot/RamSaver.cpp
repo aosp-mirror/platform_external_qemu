@@ -120,9 +120,11 @@ bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
         mHasError = ferror(mStream.get()) != 0;
         mIndex.clear();
 
+        mEndTime = System::get()->getHighResTimeUs();
+
 #if SNAPSHOT_PROFILE > 1
         printf("RAM saving time: %.03f\n",
-               (System::get()->getHighResTimeUs() - mStartTime) / 1000.0);
+               (mEndTime - mStartTime) / 1000.0);
 #endif
         return false;
     }
