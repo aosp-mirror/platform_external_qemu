@@ -274,7 +274,8 @@ bool Quickboot::load(StringView name) {
                     "Performing cold boot: in Android build system").c_str(),
                 WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                 EMULATOR_QUICKBOOT_LOAD_COLD_AVD);
+                                 EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
+                         FailureReason::Empty);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
         mWindow.showMessage(
                 StringFormat("Performing cold boot: selected renderer '%s' "
