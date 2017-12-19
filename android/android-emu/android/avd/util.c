@@ -225,7 +225,7 @@ AvdFlavor propertyFile_getAvdFlavor(const FileData* data) {
 
     const char* phone_names[] = {"phone"};
     const char* tv_names[] = {"atv"};
-    const char* wear_names[] = {"aw"};
+    const char* wear_names[] = {"aw", "wear"};
     const char* car_names[] = {"car_emu"};
 
     if (IN_PRODUCT_NAME(data, phone_names)) {

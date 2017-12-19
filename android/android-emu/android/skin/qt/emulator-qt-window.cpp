@@ -34,6 +34,7 @@
 #include "android/opengl/gpuinfo.h"
 #include "android/skin/event.h"
 #include "android/skin/keycode.h"
+#include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/QtLooper.h"
 #include "android/skin/qt/event-serializer.h"
 #include "android/skin/qt/extended-pages/common.h"
@@ -386,7 +387,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mBackingSurface = NULL;
 
     QSettings settings;
-    mFrameAlways = settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool();
+    mFrameAlways =
+        FramelessDetector::isFramelessOk() ?
+            settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
 
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
