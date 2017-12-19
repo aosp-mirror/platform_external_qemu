@@ -343,7 +343,9 @@ int screen_recorder_start(const RecordingInfo* info) {
                            globals.recordingInfo.height,
                            globals.recordingInfo.videoBitrate, kFPS,
                            kIntraSpacing);
-    ffmpeg_add_audio_track(globals.recorder, kAudioBitrate, kAudioSampleRate);
+    // TODO(joshuaduong): Mac crashes frequently when recording with both video
+    // and audio enabled. Disable for now until we find the fix.
+//    ffmpeg_add_audio_track(globals.recorder, kAudioBitrate, kAudioSampleRate);
     D("Added AV tracks");
 
     globals.recordState = RecordState::Recording;
