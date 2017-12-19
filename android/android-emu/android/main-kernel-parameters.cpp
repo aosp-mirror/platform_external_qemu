@@ -56,6 +56,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (isX86ish) {
         params.add("clocksource=pit");
+        // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
+        // in goldfish kernel which caused surfaceflinger hanging in the guest
+        // system. To workaround, start the kernel with no kvmclock. Currently,
+        // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
+        params.add("no-kvmclock");
     }
 
     android::setupVirtualSerialPorts(
