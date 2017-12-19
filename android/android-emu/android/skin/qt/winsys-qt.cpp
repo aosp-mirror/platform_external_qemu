@@ -27,6 +27,7 @@
 #include "android/skin/qt/init-qt.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/utils/setenv.h"
+#include "android/utils/system.h"
 #include "android/main-common-ui.h"
 
 #include <QtCore>
@@ -540,23 +541,32 @@ extern void skin_winsys_init_args(int argc, char** argv) {
 
 extern void skin_winsys_start(bool no_window) {
     GlobalState* g = globalState();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 #ifdef Q_OS_LINUX
     // This call is required to make doing OpenGL stuff on the UI
     // thread safe. The AA_X11InitThreads flag in Qt does not actually
     // work (confirmed by grepping through Qt code).
     XInitThreads();
 #endif
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     skin_winsys_setup_library_paths();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     if (no_window) {
         g->app = new QCoreApplication(g->argc, g->argv);
         EmulatorQtNoWindow::create();
     } else {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         g->app = new QApplication(g->argc, g->argv);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         g->app->setAttribute(Qt::AA_UseHighDpiPixmaps);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         androidQtDefaultInit();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         EmulatorQtWindow::create();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 #ifdef __APPLE__
         // On OS X, Qt automatically generates an application menu with a "Quit"
         // item. For whatever reason, the auto-generated "quit" does not work,

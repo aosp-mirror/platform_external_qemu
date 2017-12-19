@@ -48,6 +48,7 @@
 #include "android/utils/path.h"
 #include "android/utils/bufprint.h"
 #include "android/utils/win32_cmdline_quote.h"
+#include "android/utils/system.h"
 #include "android/version.h"
 
 #include "android/skin/winsys.h"
@@ -237,15 +238,20 @@ int main(int argc, char** argv)
     /* Define ANDROID_EMULATOR_DEBUG to 1 in your environment if you want to
      * see the debug messages from this launcher program.
      */
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     const char* debug = getenv("ANDROID_EMULATOR_DEBUG");
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     if (debug != NULL && *debug && *debug != '0') {
         android_verbose = 1;
     }
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     if (!checkOsVersion()) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         return 1;
     }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
 #ifdef __linux__
     /* Define ANDROID_EMULATOR_USE_SYSTEM_LIBS to 1 in your environment if you
@@ -263,7 +269,9 @@ int main(int argc, char** argv)
      * 3) '-verbose'/'-debug-all'/'-debug all'/'-debug-init'/'-debug init'
      *    to enable verbose mode.
      */
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     for (int nn = 1; nn < argc; nn++) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         const char* opt = argv[nn];
 
         if (!strcmp(opt, "-accel-check")) {
@@ -278,7 +286,9 @@ int main(int argc, char** argv)
 
         // NOTE: Process -help options immediately, ignoring all other
         // parameters.
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         int helpStatus = emulator_parseHelpOption(opt);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         if (helpStatus >= 0) {
             return helpStatus;
         }
@@ -303,7 +313,9 @@ int main(int argc, char** argv)
         if (!strcmp(opt,"-debug") && nn + 1 < argc &&
             (!strcmp(argv[nn + 1], "all") || !strcmp(argv[nn + 1], "init"))) {
             android_verbose = 1;
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
             base_enable_verbose_logs();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         }
 
         if (!strcmp(opt,"-gpu") && nn + 1 < argc) {
@@ -359,38 +371,49 @@ int main(int argc, char** argv)
     }
 
     if (doAccelCheck) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         // forward the option to our answering machine
         auto& sys = *System::get();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         const auto path = sys.findBundledExecutable("emulator-check");
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         if (path.empty()) {
             derror("can't find the emulator-check executable "
                     "(corrupted tools installation?)");
             return -1;
         }
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         System::ProcessExitCode exit_code;
         bool ret = sys.runCommand(
                 {path, "accel"},
                 RunOptions::WaitForCompletion | RunOptions::ShowOutput,
                 System::kInfinite, &exit_code);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         return ret ? exit_code : -1;
     }
 
     if (doListAvds) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         AvdScanner* scanner = avdScanner_new(NULL);
         for (;;) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
             const char* name = avdScanner_next(scanner);
             if (!name) {
                 break;
             }
             printf("%s\n", name);
         }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         avdScanner_free(scanner);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         return 0;
     }
 
     if (doListWebcams) {
+    printf("%s:%d at %lld ms WEBCAM\n", __func__, __LINE__, (long long)get_uptime_ms());
         android_camera_list_webcams();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         return 0;
     }
 
@@ -408,7 +431,9 @@ int main(int argc, char** argv)
         }
     }
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     int hostBitness = android_getHostBitness();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     int wantedBitness = hostBitness;
 
 #if defined(__linux__)
@@ -470,19 +495,27 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     if (cleanUpAvdContent) {
         if (avdName) {
             char* avd_folder = path_getAvdContentPath(avdName);
             if (avd_folder) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
                 clean_up_avd_contents_except_config_ini(avd_folder);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
                 delete_snapshots_at(avd_folder);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
                 free(avd_folder);
             }
         } else if (androidOut) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
             clean_up_android_out(androidOut);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
             delete_snapshots_at(androidOut);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         }
     }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     if (avdArch == NULL) {
         avdArch = "x86";
@@ -527,8 +560,11 @@ int main(int argc, char** argv)
             ranchu = RANCHU_ON;
         } else {
             // Auto-detect which emulation engine to launch.
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
             bool cpuHasRanchu = isCpuArchSupportedByRanchu(avdArch);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
             bool cpuHasGoldfish = isCpuArchSupportedByGoldfish(avdArch);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
             if (cpuHasRanchu) {
                 if (cpuHasGoldfish) {
@@ -536,6 +572,7 @@ int main(int argc, char** argv)
                     // TODO: Deal with -kernel <file>, -systemdir <dir> and platform
                     // builds appropriately. For now this only works reliably for
                     // regular SDK AVD configurations.
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
                     if (checkAvdSystemDirForKernelRanchu(avdName, avdArch,
                                                          androidOut)) {
                         D("Auto-config: -engine qemu2 (based on configuration)\n");
@@ -544,6 +581,7 @@ int main(int argc, char** argv)
                         D("Auto-config: -engine classic (based on configuration)\n");
                         ranchu = RANCHU_OFF;
                     }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
                 } else {
                     D("Auto-config: -engine qemu2 (%s default)\n", avdArch);
                     ranchu = RANCHU_ON;
@@ -558,7 +596,9 @@ int main(int argc, char** argv)
     }
 
     // Sanity checks.
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     if (avdName) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         if (ranchu == RANCHU_OFF && !isCpuArchSupportedByGoldfish(avdArch)) {
             APANIC("CPU Architecture '%s' is not supported by the classic emulator",
                    avdArch);
@@ -567,6 +607,7 @@ int main(int argc, char** argv)
             APANIC("CPU Architecture '%s' is not supported by the QEMU2 emulator",
                    avdArch);
         }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         std::string systemPath = getAvdSystemPath(avdName);
         if (systemPath.empty()) {
             const char* env = getenv("ANDROID_SDK_ROOT");
@@ -580,6 +621,7 @@ int main(int argc, char** argv)
             }
         }
     }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 #ifdef _WIN32
     // Windows version of Qemu1 works only in x86 mode
     if (ranchu == RANCHU_OFF) {
@@ -601,6 +643,7 @@ int main(int argc, char** argv)
     const StringView candidates[] = {progDirSystem, emuDirName, argv0DirName};
     char* emulatorPath = nullptr;
     StringView progDir;
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     for (unsigned int i = 0; i < ARRAY_SIZE(candidates); ++i) {
         D("try dir %s\n", candidates[i].c_str());
         progDir = candidates[i];
@@ -619,6 +662,7 @@ int main(int argc, char** argv)
         }
         emulatorPath = nullptr;
     }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     if (emulatorPath == nullptr) {
         derror("can't find the emulator executable.\n");
@@ -636,14 +680,18 @@ int main(int argc, char** argv)
     /* Setup library paths so that bundled standard shared libraries are picked
      * up by the re-exec'ed emulator
      */
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     updateLibrarySearchPath(wantedBitness, useSystemLibs, progDir.c_str());
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     /* We need to find the location of the GLES emulation shared libraries
      * and modify either LD_LIBRARY_PATH or PATH accordingly
      */
 
     /* Add <lib>/qt/ to the library search path. */
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     androidQtSetupEnv(wantedBitness, progDir.c_str());
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
 #ifdef _WIN32
     // Take care of quoting all parameters before sending them to execv().
@@ -682,6 +730,7 @@ int main(int argc, char** argv)
     // Launch it with the same set of options !
     // Note that on Windows, the first argument must _not_ be quoted or
     // Windows will fail to find the program.
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     safe_execv(emulatorPath, argv);
 
     /* We could not launch the program ! */

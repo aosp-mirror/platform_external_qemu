@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/base/memory/OnDemand.h"
+
 #include <QtCore>
 #include <QFrame>
 #include <QObject>
@@ -78,9 +80,9 @@ private:
     EmulatorContainer* mContainer;
 
     // Zoom-related members
-    QRubberBand mRubberBand;
+    // QRubberBand mRubberBand;
     QPoint mRubberbandOrigin;
-    QPixmap mCursor;
+    // QPixmap mCursor;
 
     // Multitouch-related members
     QImage mCenterImage;

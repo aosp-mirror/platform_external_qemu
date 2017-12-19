@@ -32,6 +32,7 @@
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/path.h"
 #include "android/utils/string.h"
+#include "android/utils/system.h"
 
 #include <assert.h>
 #include <ctype.h>
@@ -321,12 +322,18 @@ bool emulator_parseUiCommandLineOptions(AndroidOptions* opts,
 
 bool emulator_initUserInterface(const AndroidOptions* opts,
                                 const UiEmuAgent* uiEmuAgent) {
+
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     user_config_init();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     assert(s_skinConfig != NULL);
     assert(s_skinPath != NULL);
 
-    return ui_init(s_skinConfig, s_skinPath, opts, uiEmuAgent);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
+    bool res = ui_init(s_skinConfig, s_skinPath, opts, uiEmuAgent);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
+    return res;
 }
 
 // TODO(digit): Remove once QEMU2 uses emulator_initUserInterface().
@@ -338,12 +345,18 @@ ui_init(const AConfig* skinConfig,
 {
     int  win_x, win_y;
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     signal(SIGINT, SIG_DFL);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 #ifndef _WIN32
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     signal(SIGQUIT, SIG_DFL);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 #endif
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     skin_winsys_start(opts->no_window);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     if (opts->no_window) {
 #ifndef _WIN32
@@ -368,27 +381,39 @@ ui_init(const AConfig* skinConfig,
         static const char kIconFile[] = "emulator_icon_128.png";
 #  endif
         size_t icon_size;
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         const unsigned char* icon_data =
                 android_emulator_icon_find(kIconFile, &icon_size);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
         if (icon_data) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
             skin_winsys_set_window_icon(icon_data, icon_size);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         } else {
             derror("Could not find emulator icon resource: %s", kIconFile);
         }
     }
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     user_config_get_window_pos(&win_x, &win_y);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     if (emulator_window_init(emulator_window_get(), skinConfig, skinPath,
                              win_x, win_y, opts, uiEmuAgent) < 0) {
         derror("Could not load emulator skin from '%s'", skinPath);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         return false;
     }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     /* add an onion overlay image if needed */
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     if (opts->onion) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         SkinImage*  onion = skin_image_find_simple( opts->onion );
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
         int         alpha, rotate;
 
         if ( opts->onion_alpha && 1 == sscanf( opts->onion_alpha, "%d", &alpha ) ) {
@@ -405,6 +430,7 @@ ui_init(const AConfig* skinConfig,
         emulator_window_get()->onion_alpha    = alpha;
         emulator_window_get()->onion_rotation = rotate;
     }
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     return true;
 }

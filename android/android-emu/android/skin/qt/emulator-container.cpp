@@ -15,6 +15,7 @@
 #include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/tool-window.h"
 #include "android/utils/debug.h"
+#include "android/utils/system.h"
 
 #include <QApplication>
 #include <QObject>
@@ -38,11 +39,16 @@ static constexpr int kEventBufferSize = 8;
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
     : mEmulatorWindow(window),
       mMessages([this] { return std::make_tuple(this); }) {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     mEventBuffer.reserve(kEventBufferSize);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     setFrameShape(QFrame::NoFrame);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     setWidget(window);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     setMinimumSize({200, 200});
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     // The following hints prevent the minimize/maximize/close buttons from
     // appearing.
@@ -71,6 +77,7 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 
 #endif  // __APPLE__
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     mResizeTimer.setSingleShot(true);
     connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
 
@@ -78,6 +85,7 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
             SLOT(slot_showModalOverlay(QString)));
     connect(this, SIGNAL(hideModalOverlay()), this,
             SLOT(slot_hideModalOverlay()));
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 }
 
 EmulatorContainer::~EmulatorContainer() {

@@ -13,6 +13,8 @@
 #include "android/base/system/System.h"
 #include "android/skin/qt/event-subscriber.h"
 
+#include "android/utils/system.h"
+
 #include <QEvent>
 
 #include <sstream>
@@ -45,7 +47,10 @@ public:
 
     template <typename... Args>
     explicit UIEventRecorder(EventCapturer* ecap, Args&&... args)
-        : EventSubscriber(ecap), mContainer(std::forward<Args>(args)...) {}
+        : EventSubscriber(ecap), mContainer(std::forward<Args>(args)...) {
+        
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
+        }
 
     // Get a const reference to the underelying container with serialized
     // events.

@@ -26,6 +26,7 @@
 #include "android/base/system/Win32UnicodeString.h"
 
 #include "android/utils/path.h"
+#include "android/utils/system.h"
 
 #include <windows.h>
 #include <d3d9.h>
@@ -305,11 +306,14 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
 }
 
 void getGpuInfoListNative(GpuInfoList* gpus) {
+    printf("%s: call\n", __func__);
     if (queryGpuInfoD3D(gpus)) return;
 
     DISPLAY_DEVICEW device = { sizeof(device) };
 
+    printf("getGpuInfoListNative line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     for (int i = 0; EnumDisplayDevicesW(nullptr, i, &device, 0); ++i) {
+    printf("getGpuInfoListNative line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         gpus->addGpu();
         GpuInfo& gpu = gpus->currGpu();
         gpu.os = "W";
@@ -324,12 +328,17 @@ void getGpuInfoListNative(GpuInfoList* gpus) {
         static constexpr StringView prefix = "\\Registry\\Machine\\";
         if (startsWith(Win32UnicodeString::convertToUtf8(device.DeviceKey),
                        prefix)) {
+    printf("getGpuInfoListNative line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
             load_gpu_registry_info(device.DeviceKey + prefix.size(), &gpu);
+    printf("getGpuInfoListNative line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         }
+    printf("getGpuInfoListNative line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         add_predefined_gpu_dlls(&gpu);
+    printf("getGpuInfoListNative line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     }
 
     if (gpus->infos.empty()) {
+    printf("line %d BAD with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         // Everything failed - fall back to the good^Wbad old WMIC command.
         auto gpuInfoWmic = load_gpu_info_wmic();
         parse_gpu_info_list_windows(gpuInfoWmic, gpus);
