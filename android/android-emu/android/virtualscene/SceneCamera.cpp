@@ -70,7 +70,7 @@ SceneCamera::SceneCamera() {
 
     const glm::mat4 openGlFromSensors = poseToOpenGl(
             glm::quat(sqrt(2.0f) / 2.0f, 0.0f, 0.0f, sqrt(2.0f) / 2.0f),
-            glm::vec3(0.03f, 0.06f, -0.002f));
+            glm::vec3(-0.03f, -0.06f, 0.002f));
 
     const glm::mat4 cameraFromOpenGl = glm::mat4(1.0f,  0.0f, 0.0f, 0.0f,
                                                  0.0f, -1.0f, 0.0f, 0.0f,
