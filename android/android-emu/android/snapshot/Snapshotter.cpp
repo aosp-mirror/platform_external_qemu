@@ -233,6 +233,7 @@ OperationStatus Snapshotter::prepareForLoading(const char* name) {
 }
 
 OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
+    fprintf(stderr, "%s: %d name %s\n", __func__, isQuickboot, name);
     mLastLoadDuration = android::base::kNullopt;
     mIsQuickboot = isQuickboot;
     Stopwatch sw;
@@ -642,16 +643,17 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
 }
 
 void Snapshotter::onLoadingFailed(const char* name, int err) {
+    fprintf(stderr, "%s: call\n", __func__);
     assert(err < 0);
     mSaver.clear();
-    if (!mLoader) return;
 
     if (err == -EINVAL) { // corrupted snapshot. abort immediately,
                           // try not to do anything since this could be
                           // in the crash handler
-        mLoader->onInvalidSnapshotLoad();
+        if (mLoader) mLoader->onInvalidSnapshotLoad();
         return;
     }
+
     mLoader.emplace(name, -err);
     mLoader->complete(false);
     mLoadedSnapshotFile.clear();
@@ -668,6 +670,7 @@ bool Snapshotter::onDeletingComplete(const char* name, int res) {
             mSaver.clear();
         }
         if (mLoader && mLoader->snapshot().name() == name) {
+            fprintf(stderr, "%s: deleting ocmplete\n", __func__);
             mLoader.clear();
         }
         path_delete_dir(Snapshot::dataDir(name).c_str());
