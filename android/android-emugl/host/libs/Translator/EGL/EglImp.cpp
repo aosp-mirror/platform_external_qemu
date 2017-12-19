@@ -1555,7 +1555,13 @@ EGLAPI EGLConfig EGLAPIENTRY eglLoadConfig(EGLDisplay display, EGLStream stream)
     VALIDATE_DISPLAY(display);
     android::base::Stream* stm = static_cast<android::base::Stream*>(stream);
     EGLint cfgId = stm->getBe32();
-    return static_cast<EGLConfig>(dpy->getConfig(cfgId));
+    EglConfig* cfg = dpy->getConfig(cfgId);
+    if (!cfg) {
+        fprintf(stderr,
+                "WARNING: EGL config mismatch, fallback to default configs\n");
+        cfg = dpy->getDefaultConfig();
+    }
+    return static_cast<EGLConfig>(cfg);
 }
 
 EGLAPI EGLBoolean EGLAPIENTRY eglSaveAllImages(EGLDisplay display,
