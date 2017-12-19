@@ -114,6 +114,121 @@
       "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e70ef24_98a5e1cb",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 949,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:23:51Z",
+      "side": 1,
+      "message": "nit: what\u0027s 1/fps? 1 FPS? This suggests 0.01 Hz, right? Can you put units? Below, it\u0027s used as a time duration not frequency...",
+      "range": {
+        "startLine": 947,
+        "startChar": 0,
+        "endLine": 949,
+        "endChar": 25
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45dbdd4f_b1296045",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 965,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:23:51Z",
+      "side": 1,
+      "message": "rate should not be equivalent to a time; it feels like a type error. Please rename REFRESH_RATE.",
+      "range": {
+        "startLine": 965,
+        "startChar": 0,
+        "endLine": 965,
+        "endChar": 41
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18bc567b_27daa3fb",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:23:51Z",
+      "side": 1,
+      "message": "Looks like this sets up all the state fresh? Any parts we can keep from previous invocations to make playing multiple videos in a row less janky?",
+      "range": {
+        "startLine": 998,
+        "startChar": 0,
+        "endLine": 998,
+        "endChar": 29
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e785a97_e8754149",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:23:51Z",
+      "side": 1,
+      "message": "? Not sure how this is 10 ms.",
+      "range": {
+        "startLine": 1193,
+        "startChar": 0,
+        "endLine": 1193,
+        "endChar": 25
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eb23ba04_f4b25b49",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:23:51Z",
+      "side": 1,
+      "message": "It looks like there are two operaitons we can factor out when using VideoPlayerWaitInfo: the timed wait and the signal. Can we make them explicit methods of VideoPlayerWaitInfo?",
+      "range": {
+        "startLine": 1195,
+        "startChar": 0,
+        "endLine": 1203,
+        "endChar": 31
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
