@@ -1248,6 +1248,105 @@ message EmulatorSnapshotUICounts {
   // Next for generic snapshot dialog: 1014
 }
 
+// Metrics on camera usage.
+message EmulatorCameraSession {
+  // List of possible camera types.
+  enum EmulatorCameraType {
+    // Unspecified camera source.
+    EMULATOR_CAMERA_TYPE_UNSPECIFIED = 0;
+    // Camera source is the host's webcam.
+    EMULATOR_CAMERA_TYPE_WEBCAM = 1;
+    // Camera source is the virtual scene camera.
+    EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE = 2;
+  }
+
+  // List of possible camera directions.
+  enum EmulatorCameraDirection {
+    // Unspecified direction.
+    EMULATOR_CAMERA_DIRECTION_UNSPECIFIED = 0;
+    // Back-facing camera.
+    EMULATOR_CAMERA_DIRECTION_BACK = 1;
+    // Front-facing camera.
+    EMULATOR_CAMERA_DIRECTION_FRONT = 2;
+  }
+
+  // Camera start result, successful values are positive, failures are negative.
+  enum EmulatorCameraStartResult {
+    // Camera was started successfully.
+    EMULATOR_CAMERA_START_SUCCESS = 0;
+    // The camera was already started.
+    EMULATOR_CAMERA_START_ALREADY_STARTED = 1;
+
+    // Failures.
+    // Camera start failed with an unspecified error.
+    EMULATOR_CAMERA_START_FAILED = -1;
+    // The camera was already started, but the parameters don't match.
+    EMULATOR_CAMERA_START_PARAMETER_MISMATCH = -2;
+    // The requested pixel format is unknown.
+    EMULATOR_CAMERA_START_UNKNOWN_PIXEL_FORMAT = -3;
+    // No pixel conversion available.
+    EMULATOR_CAMERA_START_NO_PIXEL_CONVERSION = -4;
+    // Out of memory when starting the camera.
+    EMULATOR_CAMERA_START_OUT_OF_MEMORY = -5;
+  }
+
+  // The camera source used for the camera session.
+  optional EmulatorCameraType type = 1;
+  // The camera direction.
+  optional EmulatorCameraDirection direction = 2;
+
+  // Width of the camera frame in pixels.
+  optional uint32 width = 3;
+  // Height of the camera frame in pixels.
+  optional uint32 height = 4;
+  // FOURCC pixel format requested.
+  optional fixed32 pixel_format = 5;
+
+  // Camera start result.
+  optional EmulatorCameraStartResult start_result = 6;
+  // How long the camera session took to initialize.
+  optional uint64 startup_time_ms = 7;
+
+  // How long the session was running, in milliseconds.
+  optional uint64 duration_ms = 8;
+  // Average framerate of the camera.
+  optional double average_framerate = 9;
+
+  // set when type = EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE
+  // Name of the virtual scene that is loaded.
+  optional string virtual_scene_name = 10;
+}
+
+// Metrics for virtual scene camera sessions.
+message EmulatorVirtualSceneSession {
+  // How long the session was running, in milliseconds.
+  optional uint64 duration_ms = 1;
+
+  // Minimum sensor update delay in milliseconds.
+  optional uint32 min_sensor_delay_ms = 2;
+  // Total tap count when the camera is running.
+  optional uint32 tap_count = 3;
+  // The number of times the orientation changed during the session.
+  optional uint32 orientation_change_count = 4;
+  // Whether the virtual sensors window was visible at any point during the
+  // session.
+  optional bool virtual_sensors_visible = 5;
+  // How many interactions were performed on the virtual sensors page.
+  optional uint32 virtual_sensors_interaction_count = 6;
+
+  // Invocation count of WASD/Mouselook hotkey.
+  optional uint32 hotkey_invoke_count = 7;
+  // Total time the user was in WASD/Mouselook mode during this session.
+  optional uint64 hotkey_duration_ms = 8;
+  // Taps shortly after a hotkey invoke, to determine how much the user
+  // alternates between modes to tap.
+  optional uint32 taps_after_hotkey_invoke = 9;
+  // Total rotation performed in the virtual scene.
+  optional double total_rotation_radians = 10;
+  // Total translation performed in the virtual scene.
+  optional double total_translation_meters = 11;
+}
+
 // Metrics related to the Emulator.
 message EmulatorDetails {
   // Cpu architecture of the guest.
@@ -1298,7 +1397,11 @@ message EmulatorDetails {
   repeated EmulatorSnapshot snapshot_saves = 25;
   // Metrics on all snapshot UI.
   optional EmulatorSnapshotUICounts snapshot_ui_counts = 26;
-  // Next tag: 27
+  // Metrics on camera usage.
+  optional EmulatorCameraSession camera = 27;
+  // Metrics for virtual scene camera sessions.
+  optional EmulatorVirtualSceneSession virtual_scene = 28;
+  // Next tag: 29
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
