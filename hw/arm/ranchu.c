@@ -185,9 +185,12 @@ static void create_fdt(VirtBoardInfo *vbi)
     qemu_fdt_setprop_string(fdt, "/apb-pclk", "clock-output-names",
                                 "clk24mhz");
     qemu_fdt_setprop_cell(fdt, "/apb-pclk", "phandle", vbi->clock_phandle);
+}
 
+static void mypsci(VirtBoardInfo* vbi) {
     /* No PSCI for TCG yet */
-    if (kvm_enabled()) {
+    void *fdt = vbi->fdt;
+    if (1) {
         uint32_t cpu_suspend_fn;
         uint32_t cpu_off_fn;
         uint32_t cpu_on_fn;
@@ -496,7 +499,6 @@ static void ranchu_init(MachineState *machine)
     }
 
     create_fdt(vbi);
-    fdt_add_timer_nodes(vbi);
 
     for (n = 0; n < smp_cpus; n++) {
         ObjectClass *oc = cpu_class_by_name(TYPE_ARM_CPU, cpu_model);
@@ -507,6 +509,9 @@ static void ranchu_init(MachineState *machine)
             exit(1);
         }
         cpuobj = object_new(object_class_get_name(oc));
+
+        object_property_set_int(cpuobj, QEMU_PSCI_CONDUIT_HVC, "psci-conduit",
+                                NULL);
 
         /* Secondary CPUs start in PSCI powered-down state */
         if (n > 0) {
@@ -520,7 +525,9 @@ static void ranchu_init(MachineState *machine)
 
         object_property_set_bool(cpuobj, true, "realized", NULL);
     }
+    fdt_add_timer_nodes(vbi);
     fdt_add_cpu_nodes(vbi);
+    mypsci(vbi);
 
     memory_region_init_ram(ram, NULL, "ranchu.ram", machine->ram_size,
                            &error_abort);
@@ -545,9 +552,9 @@ static void ranchu_init(MachineState *machine)
     create_simple_device(vbi, pic, RANCHU_GOLDFISH_PIPE, "goldfish_pipe",
                          "google,android-pipe\0"
                          "generic,android-pipe", 2, 0, 0);
-    create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
-                         "google,goldfish-sync\0"
-                         "generic,goldfish-sync", 2, 0, 0);
+//    create_simple_device(vbi, pic, RANCHU_GOLDFISH_SYNC, "goldfish_sync",
+ //                        "google,goldfish-sync\0"
+  //                       "generic,goldfish-sync", 2, 0, 0);
 
     /* Create mmio transports, so the user can create virtio backends
      * (which will be automatically plugged in to the transports). If

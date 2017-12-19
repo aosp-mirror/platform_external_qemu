@@ -950,6 +950,8 @@ extern "C" int main(int argc, char** argv) {
 #else
     args.add(kTarget.qemuCpu);
 #endif
+    args.add("-smp");
+    args.add("cpus=2");
 
     // Set env var to "on" for Intel PMU if the feature is enabled.
     // cpu.c will then read that.
