@@ -13,6 +13,8 @@
 
 #include "android/skin/qt/QtLooperImpl.h"
 
+#include "android/utils/system.h"
+
 #include <QTime>
 
 #include <errno.h>
@@ -169,7 +171,10 @@ private:
 }  // namespace internal
 
 android::base::Looper* createLooper() {
-    return new internal::QtLooper();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
+    auto res = new internal::QtLooper();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
+    return res;
 }
 
 }  // namespace qt

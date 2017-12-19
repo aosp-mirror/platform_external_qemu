@@ -590,11 +590,15 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     process_early_setup(argc, argv);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     android_report_session_phase(ANDROID_SESSION_PHASE_PARSEOPTIONS);
 
     // Start GPU information query to use it later for the renderer seleciton.
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     async_query_host_gpu_start();
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
     const char* executable = argv[0];
     android::ParameterList args = {executable};
@@ -607,10 +611,12 @@ extern "C" int main(int argc, char** argv) {
     gAndroidProxyCB->ProxyUnset = qemu_android_remove_http_proxy;
     qemu_android_init_http_proxy_ops();
 
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     if (!emulator_parseCommonCommandLineOptions(
                 &argc, &argv, kTarget.androidArch,
                 true,  // is_qemu2
                 opts, hw, &android_avdInfo, &exitStatus)) {
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         // Special case for QEMU positional parameters.
         if (exitStatus == EMULATOR_EXIT_STATUS_POSITIONAL_QEMU_PARAMETER) {
             // Copy all QEMU options to |args|, and set |n| to the number
@@ -625,12 +631,14 @@ extern "C" int main(int argc, char** argv) {
             // Skip the translation of command-line options and jump
             // straight to qemu_main().
             enter_qemu_main_loop(args.size(), args.array());
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
             return 0;
         }
 
         // Normal exit.
         return exitStatus;
     }
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
     // just because we know that we're in the new emulator as we got here
     opts->ranchu = 1;
@@ -644,10 +652,12 @@ extern "C" int main(int argc, char** argv) {
     // Before that, check for a snapshot lock to see if there is any pending
     // snapshot operation, in which case we just wait it out.
     const char* snapshotLockFilePath = avdInfo_getSnapshotLockFilePath(avd);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     // 10 seconds
     FileLock* snapshotLock =
         filelock_create_timeout(snapshotLockFilePath,
                                 10000 /* ms */);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     if (!snapshotLock) {
         // Some snapshot operation took too long.
         derror("A snapshot operation for '%s' is pending "
@@ -656,6 +666,7 @@ extern "C" int main(int argc, char** argv) {
         return 1;
     }
 
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     if (filelock_create(coreHwIniPath) == NULL) {
             // The AVD is already in use
             derror("There's another emulator instance running with "
@@ -663,10 +674,13 @@ extern "C" int main(int argc, char** argv) {
                     avdInfo_getName(avd));
             return 1;
     }
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     if (snapshotLock) {
         filelock_release(snapshotLock);
     }
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
     // Update server-based hw config / feature flags.
     // Must be done after emulator_parseCommonCommandLineOptions,
@@ -1120,7 +1134,9 @@ extern "C" int main(int argc, char** argv) {
         args.add2("-usbdevice", "keyboard");
     }
 
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
     // Setup GPU acceleration. This needs to go along with user interface
     // initialization, because we need the selected backend from Qt settings.
@@ -1143,7 +1159,9 @@ extern "C" int main(int argc, char** argv) {
     };
 
     {
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         qemu2_android_serialline_init();
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
         /* Setup SDL UI just before calling the code */
         android::base::Thread::maskAllSignals();
@@ -1153,6 +1171,7 @@ extern "C" int main(int argc, char** argv) {
                get_uptime_ms());
 #endif
         skin_winsys_init_args(argc, argv);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         if (!emulator_initUserInterface(opts, &uiEmuAgent)) {
             return 1;
         }
@@ -1172,6 +1191,7 @@ extern "C" int main(int argc, char** argv) {
             skin_winsys_set_preferred_gles_backend(uiPreferredGlesBackend);
         }
 #endif
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
         // Feature flags-related last-microsecond renderer changes
         {
@@ -1201,8 +1221,10 @@ extern "C" int main(int argc, char** argv) {
         }
 
         RendererConfig rendererConfig;
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         configAndStartRenderer(avd, opts, hw, uiPreferredGlesBackend,
                                &rendererConfig);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
         /* Disable the GLAsyncSwap for ANGLE so far */
         bool shouldDisableAsyncSwap =
@@ -1214,6 +1236,7 @@ extern "C" int main(int argc, char** argv) {
                                   System::get()->getProgramBitness() == 32;
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
         if (shouldDisableAsyncSwap) {
             fc::setEnabledOverride(fc::GLAsyncSwap, false);
@@ -1225,11 +1248,13 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore,
                 true /* isQemu2 */));
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
         if (!kernel_parameters.get()) {
             return 1;
         }
 
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
         /* append the kernel parameters after -qemu */
         std::string append_arg(kernel_parameters.get());
         for (int i = 0; i < argc; ++i) {
@@ -1244,14 +1269,17 @@ extern "C" int main(int argc, char** argv) {
         }
 
         args.add(bluetooth.getQemuParameters());
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
         if (!hw->hw_arc) {
           args.add("-append");
           args.add(append_arg);
         }
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
     // Generate a hardware-qemu.ini for this AVD.
     int ret = genHwIniFile(hw, coreHwIniPath);
@@ -1260,6 +1288,7 @@ extern "C" int main(int argc, char** argv) {
 
     args.add2("-android-hw", coreHwIniPath);
     crashhandler_copy_attachment(CRASH_AVD_HARDWARE_INFO, coreHwIniPath);
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
 
     if (VERBOSE_CHECK(init)) {
         printf("QEMU options list:\n");
@@ -1270,6 +1299,7 @@ extern "C" int main(int argc, char** argv) {
         printf("Concatenated QEMU options:\n %s\n", args.toString().c_str());
     }
 
+    printf("line %d with uptime %lld ms\n", __LINE__, (long long)get_uptime_ms());
     skin_winsys_spawn_thread(opts->no_window, enter_qemu_main_loop, args.size(),
                              args.array());
     skin_winsys_enter_main_loop(opts->no_window);

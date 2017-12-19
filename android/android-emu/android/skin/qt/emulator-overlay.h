@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/base/memory/OnDemand.h"
+
 #include <QtCore>
 #include <QFrame>
 #include <QObject>
@@ -18,6 +20,8 @@
 #include <QTimer>
 #include <QVariantAnimation>
 #include <QWidget>
+
+#include <functional>
 
 class EmulatorQtWindow;
 class EmulatorContainer;
@@ -77,20 +81,27 @@ private:
     EmulatorQtWindow* mEmulatorWindow;
     EmulatorContainer* mContainer;
 
-    // Zoom-related members
-    QRubberBand mRubberBand;
+    // Zoom-related members (must be lazy loaded; will kill HDD's)
+    android::base::MemberOnDemandT<QRubberBand, QRubberBand::Shape, QWidget*> mRubberBand;
+    android::base::MemberOnDemandT<QPixmap, QString> mCursor;
+    // QRubberBand mRubberBand;
+    // QPixmap mCursor;
     QPoint mRubberbandOrigin;
-    QPixmap mCursor;
 
     // Multitouch-related members
-    QImage mCenterImage;
-    QImage mTouchImage;
+    struct MultitouchImages {
+        MultitouchImages(const QString& centerPath, const QString& touchPath, float dpr);
+        QImage centerImage;
+        QImage touchImage;
+        int centerPointRadius;
+        int touchPointRadius;
+    };
+    android::base::MemberOnDemandT<MultitouchImages, QString, QString, float> mMultitouchImages;
+
     QPoint mMultitouchCenter;
     QPoint mPrimaryTouchPoint;
     QPoint mSecondaryTouchPoint;
     QPoint mLastMousePos;
-    int mCenterPointRadius;
-    int mTouchPointRadius;
     bool mIsSwipeGesture;
     bool mReleaseOnClose;
 

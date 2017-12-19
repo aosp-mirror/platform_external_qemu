@@ -46,6 +46,7 @@
 #include "android/ui-emu-agent.h"
 #include "android/utils/eintr_wrapper.h"
 #include "android/utils/filelock.h"
+#include "android/utils/system.h"
 
 #if defined(__APPLE__)
 #include "android/skin/qt/mac-native-window.h"
@@ -276,7 +277,9 @@ void SkinSurfaceBitmap::readImage() {
 ////////////////////////////////////////////////////////////////////////////////
 
 void EmulatorQtWindow::create() {
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     sInstance.get() = Ptr(new EmulatorQtWindow());
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 }
 
 EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
@@ -365,37 +368,49 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       }),
       mStartedAdbStopProcess(false),
       mHaveBeenFrameless(false) {
+
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     qRegisterMetaType<QPainter::CompositionMode>();
     qRegisterMetaType<SkinRotation>();
     qRegisterMetaType<SkinGenericFunction>();
     qRegisterMetaType<RunOnUiThreadFunc>();
     qRegisterMetaType<Ui::OverlayMessageIcon>();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     android::base::ThreadLooper::setLooper(mLooper, true);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     // Start a timer. If the main window doesn't
     // appear before the timer expires, show a
     // pop-up to let the user know we're still
     // working.
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     QObject::connect(&mStartupTimer, &QTimer::timeout, this,
                      &EmulatorQtWindow::slot_startupTick);
     mStartupTimer.setSingleShot(true);
     mStartupTimer.setInterval(500);  // Half a second
     mStartupTimer.start();
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     mBackingSurface = NULL;
 
     QSettings settings;
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     mFrameAlways =
         FramelessDetector::isFramelessOk() ?
             settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true;
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     mToolWindow = new ToolWindow(this, &mContainer, mEventLogger,
                                  mUserActionsCounter);
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     this->setAcceptDrops(true);
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     QObject::connect(mToolWindow, &ToolWindow::virtualSceneControlWindowVisible,
                      &mContainer,
                      &EmulatorContainer::virtualSceneControlWindowVisible);
@@ -471,17 +486,21 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                      SIGNAL(rangeChanged(int, int)), this,
                      SLOT(slot_scrollRangeChanged(int, int)));
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     bool onTop = settings.value(Ui::Settings::ALWAYS_ON_TOP, false).toBool();
     setOnTop(onTop);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     // Our paintEvent() always fills the whole window.
     setAttribute(Qt::WA_OpaquePaintEvent);
     setAttribute(Qt::WA_NoSystemBackground);
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     bool shortcutBool =
             settings.value(Ui::Settings::FORWARD_SHORTCUTS_TO_DEVICE, false)
                     .toBool();
     setForwardShortcutsToDevice(shortcutBool ? 1 : 0);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     initErrorDialog(this);
     setObjectName("MainWindow");
@@ -491,11 +510,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     mUserActionsCounter->startCountingForMainWindow(this);
     mUserActionsCounter->startCountingForToolWindow(mToolWindow);
     mUserActionsCounter->startCountingForOverlayWindow(&mOverlay);
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 
     // The crash reporter will dump the last X UI events.
     // mEventLogger is a shared pointer, capturing its copy inside a lambda
     // ensures that it lives on as long as CrashReporter needs it, even if
     // EmulatorQtWindow is destroyed.
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     auto eventLogger = mEventLogger;
     CrashReporter::get()->addCrashCallback([eventLogger]() {
             eventLogger->stop();
@@ -512,6 +533,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     });
 
     auto userActions = mUserActionsCounter;
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     CrashReporter::get()->addCrashCallback([userActions]() {
         char actions[16] = {};
         snprintf(actions, sizeof(actions) - 1, "%" PRIu64,
@@ -522,6 +544,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         CrashReporter::get()->attachData(filename, actions);
     });
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     std::weak_ptr<android::qt::UserActionsCounter> userActionsWeak(
             mUserActionsCounter);
     using android::metrics::PeriodicReporter;
@@ -543,6 +566,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                 return false;
             });
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     setFrameAlways(mFrameAlways);
 
     mWheelScrollTimer.setInterval(100);
@@ -550,6 +574,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     connect(&mWheelScrollTimer, SIGNAL(timeout()), this,
             SLOT(wheelScrollTimeout()));
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     mIgnoreWheelEvent =
         settings.value(Ui::Settings::DISABLE_MOUSE_WHEEL, false).toBool();
 
@@ -564,6 +589,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
         }
     }
 
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
     using android::snapshot::Snapshotter;
     Snapshotter::get().addOperationCallback(
             [this](Snapshotter::Operation op, Snapshotter::Stage stage) {
@@ -596,6 +622,7 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                     });
                 }
             });
+    printf("%s:%d at %lld ms\n", __func__, __LINE__, (long long)get_uptime_ms());
 }
 
 EmulatorQtWindow::Ptr EmulatorQtWindow::getInstancePtr() {
