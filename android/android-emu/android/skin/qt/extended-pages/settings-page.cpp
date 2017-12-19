@@ -14,6 +14,7 @@
 #include "android/base/files/PathUtils.h"
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
+#include "android/skin/qt/FramelessDetector.h"
 #include "android/skin/qt/error-dialog.h"
 #include "android/skin/qt/extended-pages/common.h"
 #include "android/skin/qt/qt-settings.h"
@@ -80,7 +81,8 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     // Show a frame around the device?
     mUi->set_frameAlways->setChecked(
-            settings.value(Ui::Settings::FRAME_ALWAYS, true).toBool());
+        FramelessDetector::isFramelessOk() ?
+            settings.value(Ui::Settings::FRAME_ALWAYS, false).toBool() : true);
 
 #ifdef __linux__
     // "Always on top" is not supported for Linux (see emulator-qt-window.cpp)
@@ -433,9 +435,10 @@ void SettingsPage::on_set_onTop_toggled(bool checked) {
 
 void SettingsPage::on_set_frameAlways_toggled(bool checked) {
     QSettings settings;
-    settings.setValue(Ui::Settings::FRAME_ALWAYS, checked);
-
-    emit(frameAlwaysChanged(checked));
+    if (FramelessDetector::isFramelessOk()) {
+        settings.setValue(Ui::Settings::FRAME_ALWAYS, checked);
+        emit(frameAlwaysChanged(checked));
+    }
 }
 
 void SettingsPage::on_set_autoFindAdb_toggled(bool checked) {
