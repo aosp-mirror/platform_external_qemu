@@ -1211,6 +1211,91 @@ message EmulatorGLESUsages {
   optional EmulatorGLESv30Usages gles_3_0_usages = 2;
 }
 
+// Metrics on camera usage.
+message EmulatorCameraSession {
+  // List of possible camera types.
+  enum EmulatorCameraType {
+    // Camera source is the host's webcam.
+    EMULATOR_CAMERA_TYPE_WEBCAM = 0;
+    // Camera source is the virtual scene camera.
+    EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE = 1;
+  }
+
+  // Camera start result, successful values are positive, failures are negative.
+  enum EmulatorCameraStartResult {
+    // Camera was started successfully.
+    EMULATOR_CAMERA_START_SUCCESS = 0;
+    // The camera was already started.
+    EMULATOR_CAMERA_START_ALREADY_STARTED = 1;
+
+    // Failures.
+    // Camera start failed with an unspecified error.
+    EMULATOR_CAMERA_START_FAILED = -1;
+    // The camera was already started, but the parameters don't match.
+    EMULATOR_CAMERA_START_PARAMETER_MISMATCH = -2;
+    // The requested pixel format is unknown.
+    EMULATOR_CAMERA_START_UNKNOWN_PIXEL_FORMAT = -3;
+    // No pixel conversion available.
+    EMULATOR_CAMERA_START_NO_PIXEL_CONVERSION = -4;
+    // Out of memory when starting the camera.
+    EMULATOR_CAMERA_START_OUT_OF_MEMORY = -5;
+  }
+
+  // The camera source used for the camera session.
+  optional EmulatorCameraType type = 1;
+
+  // Width of the camera frame in pixels.
+  optional uint32 width = 2;
+  // Height of the camera frame in pixels.
+  optional uint32 height = 3;
+  // FOURCC pixel format requested.
+  optional fixed32 pixel_format = 4;
+
+  // Camera start result.
+  optional EmulatorCameraStartResult start_result = 5;
+  // How long the camera session took to initialize.
+  optional uint64 startup_time_ms = 6;
+
+  // How long the session was running, in milliseconds.
+  optional uint64 duration_ms = 7;
+  // Average framerate of the camera.
+  optional double average_framerate = 8;
+
+  // set when type = EMULATOR_CAMERA_TYPE_VIRTUAL_SCENE
+  // Name of the virtual scene that is loaded.
+  optional string virtual_scene_name = 9;
+}
+
+// Metrics for virtual scene camera sessions.
+message EmulatorVirtualSceneSession {
+  // How long the session was running, in milliseconds.
+  optional uint64 duration_ms = 1;
+
+  // Minimum sensor update delay in milliseconds.
+  optional uint32 min_sensor_delay_ms = 2;
+  // Total tap count when the camera is running.
+  optional uint32 tap_count = 3;
+  // The number of times the orientation changed during the session.
+  optional uint32 orientation_change_count = 4;
+  // Whether the virtual sensors window was visible at any point during the
+  // session.
+  optional bool virtual_sensors_visible = 5;
+  // How many interactions were performed on the virtual sensors page.
+  optional uint32 virtual_sensors_interaction_count = 6;
+
+  // Invocation count of WASD/Mouselook hotkey.
+  optional uint32 hotkey_invoke_count = 7;
+  // Total time the user was in WASD/Mouselook mode during this session.
+  optional uint64 hotkey_duration_ms = 8;
+  // Taps shortly after a hotkey invoke, to determine how much the user
+  // alternates between modes to tap.
+  optional uint32 taps_after_hotkey_invoke = 9;
+  // Total rotation performed in the virtual scene.
+  optional double total_rotation_radians = 10;
+  // Total translation performed in the virtual scene.
+  optional double total_translation_meters = 11;
+}
+
 // Per-session counts of snapshot UI interactions.
 message EmulatorSnapshotUICounts {
   // Quickboot selection for exit behavior
@@ -1298,7 +1383,11 @@ message EmulatorDetails {
   repeated EmulatorSnapshot snapshot_saves = 25;
   // Metrics on all snapshot UI.
   optional EmulatorSnapshotUICounts snapshot_ui_counts = 26;
-  // Next tag: 27
+  // Metrics on camera usage.
+  optional EmulatorCameraSession camera = 27;
+  // Metrics for virtual scene camera sessions.
+  optional EmulatorVirtualSceneSession virtual_scene = 28;
+  // Next tag: 29
 
   // Emulator instance liveness as determined via adb connectivity.
   enum EmulatorAdbLiveness {
@@ -2026,6 +2115,12 @@ message GradleBuildVariant {
   optional CodeShrinkerTool code_shrinker = 17;
   // The method used to run instrumentation tests for this variant.
   optional TestRun.TestExecution test_execution = 18;
+  // The underlying native project system.
+  optional GradleNativeAndroidModule.NativeBuildSystemType native_build_system_type = 19;
+  // The CMake version number if this is a CMake-based build.
+  optional string native_cmake_version = 20;
+  // Per-ABI native build info.
+  repeated NativeBuildConfigInfo native_build_config = 21;
 
   // The nature of this variant.
   // The test variants have an associated tested variant.
@@ -2081,6 +2176,39 @@ message GradleBuildVariant {
     PROGUARD = 1;
     ANDROID_GRADLE_SHRINKER = 2;
     R8 = 3;
+  }
+
+  // Per-variant information about native build
+  message NativeBuildConfigInfo {
+    // Whether the Json generation phase was successful, up-to-date, or failed
+    optional GenerationOutcome outcome = 1;
+    // The ABI that generation is run for
+    optional DeviceInfo.ApplicationBinaryInterface abi = 2;
+    // The Platform API version that generation phase chose
+    optional int32 platform_api_version = 3;
+    // Whether or not this was a debuggable build
+    optional bool debuggable = 4;
+    // Time at the start of generation
+    optional int64 generation_start_ms = 5;
+    // Duration of Json generation
+    optional int64 generation_duration_ms = 6;
+    // Information about individual libraries
+    repeated NativeLibraryInfo libraries = 7;
+
+    enum GenerationOutcome {
+      UNKNOWN_GENERATION_OUTCOME = 0;
+      FAILED = 1;
+      SUCCESS_BUILT = 2;
+      SUCCESS_UP_TO_DATE = 3;
+    }
+  }
+
+  // Per-variant-per-library information about native build
+  message NativeLibraryInfo {
+    optional int32 source_file_count = 1;
+
+    // Whether or not the compiler flags contain -glldb
+    optional bool has_glldb_flag = 2;
   }
 }
 
