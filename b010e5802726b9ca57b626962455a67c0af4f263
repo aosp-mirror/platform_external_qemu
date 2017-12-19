@@ -355,6 +355,30 @@
     },
     {
       "key": {
+        "uuid": "082eeefe_9e5a10fd",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 965,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-19T23:02:33Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98be2f10_aadd1369",
+      "range": {
+        "startLine": 965,
+        "startChar": 0,
+        "endLine": 965,
+        "endChar": 41
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "18bc567b_27daa3fb",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 39
