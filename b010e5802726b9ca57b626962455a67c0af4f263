@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4e99a53d_2ae5018f",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:11:48Z",
+      "side": 1,
+      "message": "Instead of virtual you can make it a nonvirtual method decodeAudioFrame (and decodeVideoFrame below). That will save a virtual function lookup and make it clearer, since we have completely different workerThread funcs anyway.",
+      "range": {
+        "startLine": 126,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 44
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b6877192_4814f35e",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:11:48Z",
+      "side": 1,
+      "message": "nit: rename to workerThreadFunc since it can be confused with the object.",
+      "range": {
+        "startLine": 140,
+        "startChar": 17,
+        "endLine": 140,
+        "endChar": 29
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8efbce3d_b942e71c",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:11:48Z",
+      "side": 1,
+      "message": "nit: change this to check that it is AUDIO type first, then if not, do derror and exit, or even abort. Then the audio decode code can be on the closer indent level to the left and look as important as it really is.",
+      "range": {
+        "startLine": 370,
+        "startChar": 1,
+        "endLine": 371,
+        "endChar": 36
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "99f146e6_cb5cbf3d",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 472,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:11:48Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 471,
+        "startChar": 0,
+        "endLine": 472,
+        "endChar": 36
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94870f5f_6c1cf382",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T16:11:48Z",
+      "side": 1,
+      "message": "?",
+      "range": {
+        "startLine": 494,
+        "startChar": 0,
+        "endLine": 496,
+        "endChar": 17
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
