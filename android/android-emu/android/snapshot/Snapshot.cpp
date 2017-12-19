@@ -283,7 +283,7 @@ base::StringView Snapshot::dataDir(const char* name) {
 
 base::Optional<std::string> Snapshot::parent() {
     auto info = getGeneralInfo();
-    if (!info->has_parent()) return base::kNullopt;
+    if (!info || !info->has_parent()) return base::kNullopt;
     auto parentName = info->parent();
     if (parentName == "") return base::kNullopt;
     return parentName;
