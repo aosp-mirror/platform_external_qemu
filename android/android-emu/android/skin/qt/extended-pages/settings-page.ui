@@ -247,7 +247,7 @@
       </size>
      </property>
      <property name="checked">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="ColorGroup" stdset="0">
       <string>Toggle</string>

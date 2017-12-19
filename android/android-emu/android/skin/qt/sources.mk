@@ -69,6 +69,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/extended-pages/virtual-sensors-page.cpp \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.cpp \
     android/skin/qt/extended-window.cpp \
+    android/skin/qt/FramelessDetector.cpp \
     android/skin/qt/ModalOverlay.cpp \
     android/skin/qt/OverlayMessageCenter.cpp \
     android/skin/qt/qt-ui-commands.cpp \
