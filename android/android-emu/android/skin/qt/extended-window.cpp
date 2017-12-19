@@ -158,6 +158,10 @@ ExtendedWindow::ExtendedWindow(
             SIGNAL(coarseOrientationChanged(SkinRotation)),
             eW,
             SLOT(rotateSkin(SkinRotation)));
+
+    const auto enableClipboardSharing =
+            settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
+    mToolWindow->switchClipboardSharing(enableClipboardSharing);
 }
 
 ExtendedWindow::~ExtendedWindow() {
