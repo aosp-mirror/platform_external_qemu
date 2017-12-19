@@ -331,6 +331,30 @@
     },
     {
       "key": {
+        "uuid": "98be2f10_aadd1369",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 965,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-19T22:56:46Z",
+      "side": 1,
+      "message": "Right; I\u0027m more saying that in order to make it clear what the units are, it should be REFRESH_DURATION to reduce confusion; REFRESH_RATE should be in Hz not seconds.",
+      "parentUuid": "58a01e22_75283623",
+      "range": {
+        "startLine": 965,
+        "startChar": 0,
+        "endLine": 965,
+        "endChar": 41
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "18bc567b_27daa3fb",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 39
