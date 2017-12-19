@@ -378,6 +378,30 @@
     },
     {
       "key": {
+        "uuid": "59cb714e_5c025c32",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-19T22:59:36Z",
+      "side": 1,
+      "message": "Right now, this play() method is private, so the same instance of video player can play only one file. It can\u0027t play multiple video files.\n\nIt\u0027s  a good observation, and I will make the video player to be able to play multiple videos in future releases.",
+      "parentUuid": "18bc567b_27daa3fb",
+      "range": {
+        "startLine": 998,
+        "startChar": 0,
+        "endLine": 998,
+        "endChar": 29
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8e785a97_e8754149",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 39
@@ -401,6 +425,30 @@
     },
     {
       "key": {
+        "uuid": "13795b24_c58cb379",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 1193,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-19T22:59:36Z",
+      "side": 1,
+      "message": "10 ms is an estimate, I tested a few options, 10 msec is a good choice. The reasoning is we don\u0027t want to read too many frames into the queue, so we wait a bit. In the case of packet queue becomes empty, the Decoder will signal this condition.\n\nIn other words, this 10 msec number is not critical, can be difference choices.",
+      "parentUuid": "8e785a97_e8754149",
+      "range": {
+        "startLine": 1193,
+        "startChar": 0,
+        "endLine": 1193,
+        "endChar": 25
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eb23ba04_f4b25b49",
         "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
         "patchSetId": 39
@@ -412,6 +460,30 @@
       "writtenOn": "2017-12-19T16:23:51Z",
       "side": 1,
       "message": "It looks like there are two operaitons we can factor out when using VideoPlayerWaitInfo: the timed wait and the signal. Can we make them explicit methods of VideoPlayerWaitInfo?",
+      "range": {
+        "startLine": 1195,
+        "startChar": 0,
+        "endLine": 1203,
+        "endChar": 31
+      },
+      "revId": "b010e5802726b9ca57b626962455a67c0af4f263",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "978baaeb_055d2aa5",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 39
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2017-12-19T22:59:36Z",
+      "side": 1,
+      "message": "Yes, these patterns are used in many places, since the statements between lock() and unlock() vary, or the conditions vary, not easy to generalize them into methods.",
+      "parentUuid": "eb23ba04_f4b25b49",
       "range": {
         "startLine": 1195,
         "startChar": 0,
