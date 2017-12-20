@@ -29,7 +29,7 @@ static constexpr int kMousePollIntervalMilliseconds = 16;
 static constexpr int kWindowHeight = 50;
 static const QColor kHighlightColor = QColor(2, 136, 209);
 
-static const float kPixelsToRotationRadians = 0.5f * static_cast<float>(M_PI / 180.0f);
+static const float kPixelsToRotationRadians = 0.2f * static_cast<float>(M_PI / 180.0f);
 static const float kMovementVelocityMetersPerSecond = 1.0f;
 static const float kMinVerticalRotationDegrees = -80.0f;
 static const float kMaxVerticalRotationDegrees = 80.0f;

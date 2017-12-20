@@ -338,7 +338,7 @@ TEST(InertialModel, IntermediateValuesDuringInterpolation) {
     constexpr float timeIncrementSeconds =
             android::physics::nsToSeconds(stepNs);
     constexpr uint64_t endTimeNs = android::physics::secondsToNs(
-            android::physics::kStateChangeTimeSeconds);
+            android::physics::kMaxStateChangeTimeSeconds);
     constexpr float epsilon = 0.01f;
 
     for (uint64_t timeNs = stepNs >> 1; timeNs < endTimeNs; timeNs += stepNs) {
@@ -645,7 +645,8 @@ TEST(InertialModel, GyroscopeUseShortPath) {
     inertialModel.setTargetRotation(targetRotation,
             PHYSICAL_INTERPOLATION_SMOOTH);
 
-    inertialModel.setCurrentTime(125000000UL);
+    inertialModel.setCurrentTime(android::physics::secondsToNs(
+            android::physics::kMinStateChangeTimeSeconds / 2.f));
 
     // Verify that we don't take the long way around even though glm::angle
     // would give us the long way as the default angle between the initial and
