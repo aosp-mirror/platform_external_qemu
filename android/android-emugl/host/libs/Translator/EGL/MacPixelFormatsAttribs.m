@@ -135,9 +135,7 @@ NSOpenGLPixelFormatAttribute* getLegacyProfileAttributes() {
 NSOpenGLPixelFormatAttribute* getCoreProfileAttributes() {
     if (sWantedCoreProfileLevel == NSOpenGLProfileVersion4_1Core) {
         return Core4_1;
-    } else if (sWantedCoreProfileLevel == NSOpenGLProfileVersion3_2Core) {
-        return Core3_2;
-    } else {
+    } else { 
         return Legacy;
     }
 }

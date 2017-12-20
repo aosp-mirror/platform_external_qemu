@@ -54,36 +54,12 @@ static const int kCoreProfileConfig_4_1[] = {
     None
 };
 
-static const int kCoreProfileConfig_4_0[] = {
-    GLX_CONTEXT_MAJOR_VERSION_ARB, 4,
-    GLX_CONTEXT_MINOR_VERSION_ARB, 0,
-    GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-    None
-};
-
-static const int kCoreProfileConfig_3_3[] = {
-    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-    GLX_CONTEXT_MINOR_VERSION_ARB, 3,
-    GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-    None
-};
-
-static const int kCoreProfileConfig_3_2[] = {
-    GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
-    GLX_CONTEXT_MINOR_VERSION_ARB, 2,
-    GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_CORE_PROFILE_BIT_ARB,
-    None
-};
-
 static const int* kCoreProfileConfigs[] = {
     kCoreProfileConfig_4_5,
     kCoreProfileConfig_4_4,
     kCoreProfileConfig_4_3,
     kCoreProfileConfig_4_2,
     kCoreProfileConfig_4_1,
-    kCoreProfileConfig_4_0,
-    kCoreProfileConfig_3_3,
-    kCoreProfileConfig_3_2,
 };
 
 // Versions 3.1 and below ignored since they won't

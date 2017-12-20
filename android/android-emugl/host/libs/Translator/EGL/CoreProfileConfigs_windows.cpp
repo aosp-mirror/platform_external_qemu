@@ -56,36 +56,12 @@ static const int kCoreProfileConfig_4_1[] = {
     0
 };
 
-static const int kCoreProfileConfig_4_0[] = {
-    WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-    WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-    0
-};
-
-static const int kCoreProfileConfig_3_3[] = {
-    WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-    WGL_CONTEXT_MINOR_VERSION_ARB, 3,
-    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-    0
-};
-
-static const int kCoreProfileConfig_3_2[] = {
-    WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-    WGL_CONTEXT_MINOR_VERSION_ARB, 2,
-    WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-    0
-};
-
 static const int* kCoreProfileConfigs[] = {
     kCoreProfileConfig_4_5,
     kCoreProfileConfig_4_4,
     kCoreProfileConfig_4_3,
     kCoreProfileConfig_4_2,
     kCoreProfileConfig_4_1,
-    kCoreProfileConfig_4_0,
-    kCoreProfileConfig_3_3,
-    kCoreProfileConfig_3_2,
 };
 
 // Versions 3.1 and below ignored since they won't
