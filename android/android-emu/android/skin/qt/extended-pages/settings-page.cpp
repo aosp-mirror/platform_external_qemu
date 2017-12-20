@@ -31,6 +31,13 @@ using Ui::Settings::SaveSnapshotOnExitUiOrder;
 using android::metrics::MetricsReporter;
 namespace pb = android_studio;
 
+static SaveSnapshotOnExit getSaveOnExitChoice();
+
+// Globally accessable
+bool userSettingIsDontSaveSnapshot() {
+    return getSaveOnExitChoice() == SaveSnapshotOnExit::Never;
+}
+
 // Helper function to set the contents of a QLineEdit.
 static void setElidedText(QLineEdit* line_edit, const QString& text) {
     QFontMetrics font_metrics(line_edit->font());
@@ -129,19 +136,8 @@ SettingsPage::SettingsPage(QWidget* parent)
 
     mUi->set_saveOnExitTitle->setText(QString(tr("Save quick-boot state on exit for AVD: "))
                                    + avdNameWithUnderscores.replace('_', ' '));
-    // This setting belongs to the AVD, not to the entire Emulator.
-    SaveSnapshotOnExit saveOnExitChoice(SaveSnapshotOnExit::Always);
 
-    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
-    if (avdPath) {
-        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
-        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
-
-        saveOnExitChoice = static_cast<SaveSnapshotOnExit>(
-            avdSpecificSettings.value(
-                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
-                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
-    }
+    SaveSnapshotOnExit saveOnExitChoice = getSaveOnExitChoice();
     switch (saveOnExitChoice) {
         case SaveSnapshotOnExit::Always:
             mUi->set_saveSnapshotOnExit->setCurrentIndex(
@@ -515,6 +511,22 @@ void SettingsPage::on_set_saveSnapshotOnExit_currentIndexChanged(int uiIndex) {
         avdSpecificSettings.setValue(Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
                                      static_cast<int>(preferenceValue));
     }
+}
+
+static SaveSnapshotOnExit getSaveOnExitChoice() {
+    // This setting belongs to the AVD, not to the entire Emulator.
+    SaveSnapshotOnExit userChoice(SaveSnapshotOnExit::Always);
+    const char* avdPath = path_getAvdContentPath(android_hw->avd_name);
+    if (avdPath) {
+        QString avdSettingsFile = avdPath + QString(Ui::Settings::PER_AVD_SETTINGS_NAME);
+        QSettings avdSpecificSettings(avdSettingsFile, QSettings::IniFormat);
+
+        userChoice = static_cast<SaveSnapshotOnExit>(
+            avdSpecificSettings.value(
+                Ui::Settings::SAVE_SNAPSHOT_ON_EXIT,
+                static_cast<int>(SaveSnapshotOnExit::Always)).toInt());
+    }
+    return userChoice;
 }
 
 static void set_glesBackend_to(WinsysPreferredGlesBackend v) {
