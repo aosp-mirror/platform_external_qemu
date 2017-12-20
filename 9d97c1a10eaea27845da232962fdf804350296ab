@@ -22,6 +22,30 @@
       "revId": "9d97c1a10eaea27845da232962fdf804350296ab",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8adfb09b_ffb37ddc",
+        "filename": "android/android-emu/android/snapshot/Snapshot.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 278,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-20T12:31:05Z",
+      "side": 1,
+      "message": "I doubt we changed the snapshot protocol, but the reason I generally bump the snapshot version here is that since it\u0027s canary and we only have quick boot snapshots so far, I think it\u0027s OK to de-risk by starting over with a clean slate and not trying to make users test all the cross-emulator-version snapshots in addition to the other changes we introduced since last canary.",
+      "parentUuid": "1b27401d_c36da102",
+      "range": {
+        "startLine": 278,
+        "startChar": 34,
+        "endLine": 278,
+        "endChar": 35
+      },
+      "revId": "9d97c1a10eaea27845da232962fdf804350296ab",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
