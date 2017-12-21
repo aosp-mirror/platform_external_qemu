@@ -50,6 +50,9 @@ public:
     void keyReleaseEvent(QKeyEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
+    void setActive(bool active);
+    bool isActive();
+
 private slots:
     void slot_mousePoller();
 
@@ -72,6 +75,8 @@ private:
     QTimer mMousePoller;
     QPoint mOriginalMousePosition;
     QPoint mPreviousMousePosition;
+
+    bool mIsActive = false;
 
     const QAndroidSensorsAgent* mSensorsAgent = nullptr;
     glm::vec3 mVelocity = glm::vec3();

@@ -273,6 +273,19 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     p.end();
 }
 
+void VirtualSceneControlWindow::setActive(bool active) {
+    mIsActive = active;
+    if (active) {
+        show();
+    } else {
+        hide();
+    }
+}
+
+bool VirtualSceneControlWindow::isActive() {
+    return mIsActive;
+}
+
 void VirtualSceneControlWindow::slot_mousePoller() {
     updateMouselook();
 }
