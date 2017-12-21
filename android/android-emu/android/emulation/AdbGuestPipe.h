@@ -15,11 +15,13 @@
 #include "android/base/async/ScopedSocketWatch.h"
 #include "android/base/StringView.h"
 #include "android/emulation/AndroidPipe.h"
+#include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/featurecontrol/feature_control.h"
 #include "android/featurecontrol/FeatureControl.h"
 
 #include <vector>
+#include <map>
 
 namespace android {
 namespace emulation {
@@ -141,7 +143,8 @@ public:
 
 private:
     AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
-        : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
+        : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent), mReceivedMesg("HOST==>GUEST"),
+          mSendingMesg("HOST<==GUEST"){
         setExpectedGuestCommand("accept", State::WaitingForGuestAcceptCommand);
         mPlayStoreImage = android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage);
     }
@@ -202,6 +205,9 @@ private:
             mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
+
+    android::emulation::AdbMessageSniffer mReceivedMesg;
+    android::emulation::AdbMessageSniffer mSendingMesg;
 };
 
 }  // namespace emulation

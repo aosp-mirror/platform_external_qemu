@@ -52,6 +52,7 @@
 namespace android {
 namespace emulation {
 
+
 // Technical note: full state transition diagram
 //
 // State::WaitingForGuestAcceptCommand:
@@ -283,7 +284,11 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
        bufferBytes(buffers, numBuffers), toString(mState));
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
-        return onGuestRecvData(buffers, numBuffers);
+        int count = onGuestRecvData(buffers, numBuffers);
+        if (android_hw->test_printAdbMessage > 0) {
+            mReceivedMesg.read(buffers, numBuffers, count);
+        }
+        return count;
     } else if (guest_data_partition_mounted == 0 && mPlayStoreImage) {
         return PIPE_ERROR_AGAIN;
     } else if (mState == State::SendingAcceptReplyOk) {
@@ -308,7 +313,11 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
        bufferBytes(buffers, numBuffers), toString(mState));
     if (mState == State::ProxyingData) {
         // Common-case, proxy-ing the data from the guest to the host.
-        return onGuestSendData(buffers, numBuffers);
+        int count = onGuestSendData(buffers, numBuffers);
+        if (android_hw->test_printAdbMessage > 0) {
+            mSendingMesg.read(buffers, numBuffers, count);
+        }
+        return count;
     } else if (mState == State::WaitingForGuestAcceptCommand ||
                mState == State::WaitingForGuestStartCommand) {
         // Waiting command bytes from the guest.
