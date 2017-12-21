@@ -29,6 +29,9 @@
 
 class ToolWindow;
 
+// Design requested a max width of 700 dp.  This is defined here.
+static constexpr int kVirtualSceneControlWindowMaxWidth = 700;
+
 class VirtualSceneControlWindow : public QFrame {
     Q_OBJECT
 
