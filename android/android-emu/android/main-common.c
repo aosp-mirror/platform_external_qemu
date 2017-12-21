@@ -738,6 +738,16 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     if (opts->delay_adb) {
         hw->test_delayAdbTillBootComplete = 1;
+
+    if (opts->print_adb_message) {
+        char*  end;
+        hw->test_printAdbMessage = strtol(opts->print_adb_message, &end, 0);
+        if (hw->test_printAdbMessage <= 0) {
+            derror("-print-adb-message must be followed by a positive number");
+            exit(1);
+        } else {
+            D("Will print adb messages between guest and host");
+        }
     }
 
     /* -partition-size is used to specify the max size of both the system

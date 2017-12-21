@@ -17,6 +17,7 @@
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/synchronization/Lock.h"
 #include "android/base/threads/Thread.h"
+#include "android/emulation/AdbMessageSniffer.h"
 #include "android/emulation/AdbTypes.h"
 #include "android/emulation/AndroidPipe.h"
 #include "android/emulation/CrossSessionSocket.h"
@@ -24,6 +25,7 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
+#include <map>
 
 namespace android {
 namespace emulation {
@@ -157,7 +159,10 @@ private:
     AdbGuestPipe(void* mHwPipe,
                  Service* service,
                  AdbHostAgent* hostAgent,
-                 android::base::Stream* stream);
+                 android::base::Stream* stream,
+                 mReceivedMesg("HOST==>GUEST"),
+                 mSendingMesg("HOST<==GUEST")
+                 );
     void onLoad(android::base::Stream* stream);
 
     // Return current service with the right type.
@@ -218,6 +223,9 @@ private:
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
     std::unique_ptr<android::base::Looper::FdWatch> mFdWatcher;
+
+    android::emulation::AdbMessageSniffer mReceivedMesg;
+    android::emulation::AdbMessageSniffer mSendingMesg;
 };
 
 }  // namespace emulation
