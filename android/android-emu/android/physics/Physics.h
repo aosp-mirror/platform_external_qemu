@@ -33,6 +33,7 @@ typedef enum {
 typedef enum {
     PARAMETER_VALUE_TYPE_TARGET=0,
     PARAMETER_VALUE_TYPE_CURRENT=1,
+    PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION=2,
 } ParameterValueType;
 
 #ifdef __cplusplus
