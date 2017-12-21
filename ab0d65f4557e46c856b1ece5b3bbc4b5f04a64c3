@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "cad60dda_83822a2d",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1087303
+      },
+      "writtenOn": "2017-12-21T23:27:13Z",
+      "side": 0,
+      "message": "we don\u0027t need this now?",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 284,
+        "endChar": 9
+      },
+      "revId": "ab0d65f4557e46c856b1ece5b3bbc4b5f04a64c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
