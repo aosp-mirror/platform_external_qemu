@@ -34,6 +34,9 @@ static std::atomic<int> guest_heart_beat_count {};
 static std::atomic<int> restart_when_stalled {};
 
 static std::atomic<int> num_watchdog {};
+static std::atomic<int> num_hostcts_watchdog {};
+
+extern "C" int get_host_cts_heart_beat_count(void);
 
 namespace android {
 static bool beginWith(const std::vector<uint8_t>& input, const char* keyword) {
@@ -92,6 +95,35 @@ static void watchDogFunction(int sleep_minutes) {
     num_watchdog --;
 }
 
+static void watchHostCtsFunction(int sleep_minutes) {
+    if (sleep_minutes <= 0) return;
+
+    int current = get_host_cts_heart_beat_count();
+
+    num_hostcts_watchdog ++;
+    while (1) {
+        // sleep x minutes
+        base::Thread::sleepMs(sleep_minutes * 60 * 1000);
+        int now = get_host_cts_heart_beat_count();
+        if (now <= 0) continue;
+
+        time_t curtime;
+        time(&curtime);
+        printf("emulator : cts heart beat %d at %s\n", now, ctime(&curtime));
+        fflush(stdout);
+        if (current > 0 && now <= current && restart_when_stalled) {
+            // reboot
+            printf("emulator: host cts seems stalled, reboot now.\n");
+            fflush(stdout);
+            android::base::restartEmulator();
+            break;
+        } else {
+            current = now;
+        }
+    }
+    num_hostcts_watchdog --;
+}
+
 static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
                                          std::vector<uint8_t>* outputp) {
     std::vector<uint8_t> & output = *outputp;
@@ -140,6 +172,10 @@ static void qemuMiscPipeDecodeAndExecute(const std::vector<uint8_t>& input,
 
             if (restart_when_stalled > 0 && num_watchdog == 0) {
                 std::thread{watchDogFunction, 1}.detach();
+            }
+
+            if (android_hw->test_monitorAdb && num_hostcts_watchdog == 0) {
+                std::thread{watchHostCtsFunction, 10}.detach();
             }
         }
 
