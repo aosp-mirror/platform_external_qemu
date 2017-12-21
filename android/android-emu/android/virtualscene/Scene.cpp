@@ -16,6 +16,7 @@
 
 #include "android/virtualscene/Scene.h"
 
+#include "android/camera/camera-metrics.h"
 #include "android/utils/debug.h"
 #include "android/virtualscene/Renderer.h"
 #include "android/virtualscene/SceneObject.h"
@@ -27,6 +28,7 @@
 #include <vector>
 
 using namespace android::base;
+using android::camera::CameraMetrics;
 
 #define E(...) derror(__VA_ARGS__)
 #define W(...) dwarning(__VA_ARGS__)
@@ -54,6 +56,8 @@ std::unique_ptr<Scene> Scene::create(Renderer& renderer) {
 }
 
 bool Scene::initialize(Renderer& renderer) {
+    CameraMetrics::instance().setVirtualSceneName(kObjFiles[0]);
+
     for (const char* objFile : kObjFiles) {
         std::unique_ptr<SceneObject> sceneObject =
                 SceneObject::loadFromObj(renderer, objFile);
