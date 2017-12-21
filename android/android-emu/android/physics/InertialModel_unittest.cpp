@@ -386,6 +386,89 @@ TEST(InertialModel, IntermediateValuesDuringInterpolation) {
     EXPECT_NEAR(measuredPosition.z, targetPosition.z, epsilon);
 }
 
+TEST(InertialModel, AmbientMotion) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    const glm::vec3 initialPosition (0.3f, 0.1f, -2.0f);
+
+    InertialModel inertialModel;
+    constexpr uint64_t startTimeNs = (60UL + 0UL) * 1000000000UL;
+    constexpr uint64_t midTimeNs = (60UL + 2UL) * 1000000000UL;
+    constexpr uint64_t endTimeNs = (60UL + 4UL) * 1000000000UL;
+    inertialModel.setCurrentTime(startTimeNs);
+    inertialModel.setTargetPosition(initialPosition, PHYSICAL_INTERPOLATION_STEP);
+
+    glm::vec3 integratedVelocity = glm::vec3(0.f);
+    glm::vec3 doubleIntegratedPosition = initialPosition;
+
+    glm::vec3 singleIntegratedPosition = initialPosition;
+
+    constexpr uint64_t stepNs = 25000UL;
+    constexpr float timeIncrementSeconds =
+            android::physics::nsToSeconds(stepNs);
+    constexpr float epsilon = 0.001f;
+
+    bool foundNonZeroPosition = false;
+    bool isLatestPositionStable = false;
+
+    inertialModel.setTargetAmbientMotion(0.1f, PHYSICAL_INTERPOLATION_SMOOTH);
+    for (uint64_t timeNs = startTimeNs + (stepNs >> 1); timeNs < endTimeNs; timeNs += stepNs) {
+        isLatestPositionStable = inertialModel.setCurrentTime(timeNs);
+        integratedVelocity +=
+                timeIncrementSeconds * inertialModel.getAcceleration();
+        doubleIntegratedPosition += timeIncrementSeconds * integratedVelocity;
+
+        const glm::vec3 measuredVelocity = inertialModel.getVelocity();
+        EXPECT_NEAR(measuredVelocity.x, integratedVelocity.x, epsilon);
+        EXPECT_NEAR(measuredVelocity.y, integratedVelocity.y, epsilon);
+        EXPECT_NEAR(measuredVelocity.z, integratedVelocity.z, epsilon);
+
+        singleIntegratedPosition +=
+                timeIncrementSeconds *
+                inertialModel.getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
+
+        const glm::vec3 measuredPosition =
+                inertialModel.getPosition(PARAMETER_VALUE_TYPE_CURRENT);
+        EXPECT_NEAR(measuredPosition.x, doubleIntegratedPosition.x, epsilon);
+        EXPECT_NEAR(measuredPosition.y, doubleIntegratedPosition.y, epsilon);
+        EXPECT_NEAR(measuredPosition.z, doubleIntegratedPosition.z, epsilon);
+
+        EXPECT_NEAR(measuredPosition.x, singleIntegratedPosition.x, epsilon);
+        EXPECT_NEAR(measuredPosition.y, singleIntegratedPosition.y, epsilon);
+        EXPECT_NEAR(measuredPosition.z, singleIntegratedPosition.z, epsilon);
+
+        if (glm::distance(initialPosition, measuredPosition) >= 0.01f) {
+            // we're at least as far away from the initial position as one of
+            // the extremes.
+            foundNonZeroPosition = true;
+        }
+
+        if ((timeNs + stepNs) > midTimeNs && timeNs <= midTimeNs) {
+            inertialModel.setTargetAmbientMotion(0.0f, PHYSICAL_INTERPOLATION_SMOOTH);
+        }
+    }
+    EXPECT_TRUE(foundNonZeroPosition);
+    EXPECT_TRUE(isLatestPositionStable);
+
+    // Validate that the velocity and acceleration are zeroed out at the end.
+    inertialModel.setCurrentTime(endTimeNs);
+    const glm::vec3 measuredAcceleration = inertialModel.getAcceleration();
+    EXPECT_NEAR(measuredAcceleration.x, 0.0f, epsilon);
+    EXPECT_NEAR(measuredAcceleration.y, 0.0f, epsilon);
+    EXPECT_NEAR(measuredAcceleration.z, 0.0f, epsilon);
+
+    const glm::vec3 measuredVelocity = inertialModel.getVelocity();
+    EXPECT_NEAR(measuredVelocity.x, 0.0f, epsilon);
+    EXPECT_NEAR(measuredVelocity.y, 0.0f, epsilon);
+    EXPECT_NEAR(measuredVelocity.z, 0.0f, epsilon);
+
+    const glm::vec3 measuredPosition =
+            inertialModel.getPosition(PARAMETER_VALUE_TYPE_CURRENT);
+    EXPECT_NEAR(measuredPosition.x, initialPosition.x, epsilon);
+    EXPECT_NEAR(measuredPosition.y, initialPosition.y, epsilon);
+    EXPECT_NEAR(measuredPosition.z, initialPosition.z, epsilon);
+}
+
 TEST(InertialModel, GyroscopeTotalChange) {
     TestSystem testSystem("/", System::kProgramBitness);
 
