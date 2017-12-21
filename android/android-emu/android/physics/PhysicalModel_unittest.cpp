@@ -14,6 +14,7 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
+#include "android/physics/InertialModel.h"
 #include "android/utils/stream.h"
 #include "android/base/files/MemStream.h"
 
@@ -229,7 +230,9 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, newRotation, PHYSICAL_INTERPOLATION_SMOOTH);
 
-    physicalModel_setCurrentTime(model, 1125000000L);
+    physicalModel_setCurrentTime(model, 1000000000L +
+            android::physics::secondsToNs(
+                    android::physics::kMinStateChangeTimeSeconds / 2.f));
 
     long measurement_id;
     vec3 currentGyro = physicalModel_getGyroscope(model, &measurement_id);

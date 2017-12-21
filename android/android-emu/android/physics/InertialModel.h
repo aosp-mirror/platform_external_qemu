@@ -34,7 +34,8 @@ constexpr float nsToSeconds(uint64_t nanoSeconds) {
     return static_cast<float>(nanoSeconds / 1000000000.0);
 }
 
-constexpr float kStateChangeTimeSeconds = 0.4f;
+constexpr float kMaxStateChangeTimeSeconds = 0.5f;
+constexpr float kMinStateChangeTimeSeconds = 0.05f;
 
 typedef enum {
     INERTIAL_STATE_CHANGING=0,
@@ -102,14 +103,16 @@ private:
     // Helper for setting the transforms for position, velocity and acceleration
     // based on the coefficients for heptic motion.
     void setInertialTransforms(
-            const glm::vec3 hepticCoefficient,
-            const glm::vec3 hexicCoefficient,
-            const glm::vec3 quinticCoefficient,
-            const glm::vec3 quarticCoefficient,
-            const glm::vec3 cubicCoefficient,
-            const glm::vec3 quadraticCoefficient,
-            const glm::vec3 linearCoefficient,
-            const glm::vec3 constantCoefficient);
+            const glm::vec3& hepticCoefficient,
+            const glm::vec3& hexicCoefficient,
+            const glm::vec3& quinticCoefficient,
+            const glm::vec3& quarticCoefficient,
+            const glm::vec3& cubicCoefficient,
+            const glm::vec3& quadraticCoefficient,
+            const glm::vec3& linearCoefficient,
+            const glm::vec3& constantCoefficient,
+            const glm::vec4& hepticTimeVec,
+            const glm::vec4& cubicTimeVec);
 
     // Helper for calculating the current or target state given a transform
     // specifying either the acceleration, velocity, or position.

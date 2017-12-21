@@ -26,26 +26,6 @@
 namespace android {
 namespace physics {
 
-/* Fixed state change time for smooth acceleration changes. */
-constexpr uint64_t kStateChangeTimeNs = secondsToNs(kStateChangeTimeSeconds);
-
-constexpr float kStateChangeTime1 = kStateChangeTimeSeconds;
-constexpr float kStateChangeTime2 = kStateChangeTime1 * kStateChangeTime1;
-constexpr float kStateChangeTime3 = kStateChangeTime2 * kStateChangeTime1;
-constexpr float kStateChangeTime4 = kStateChangeTime2 * kStateChangeTime2;
-constexpr float kStateChangeTime5 = kStateChangeTime2 * kStateChangeTime3;
-constexpr float kStateChangeTime6 = kStateChangeTime3 * kStateChangeTime3;
-constexpr float kStateChangeTime7 = kStateChangeTime3 * kStateChangeTime4;
-
-const glm::vec4 kHepticTimeVec = glm::vec4(
-        kStateChangeTime7, kStateChangeTime6, kStateChangeTime5, kStateChangeTime4);
-const glm::vec4 kCubicTimeVec = glm::vec4(
-        kStateChangeTime3, kStateChangeTime2, kStateChangeTime1, 1.f);
-
-/* maximum angular velocity in rad/s */
-constexpr float kMaxAngularVelocity = 5.f;
-constexpr float kTargetRotationTime = 0.050f;
-
 InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
     if (time_ns < mModelTimeNs) {
         // If time goes backwards, set the position and rotation immediately
@@ -67,7 +47,21 @@ InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
 
 void InertialModel::setTargetPosition(
         glm::vec3 position, PhysicalInterpolation mode) {
+    float transitionTime = kMinStateChangeTimeSeconds;
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
+        const float stateChangeTime1 = transitionTime;
+        const float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
+        const float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
+        const float stateChangeTime4 = stateChangeTime2 * stateChangeTime2;
+        const float stateChangeTime5 = stateChangeTime2 * stateChangeTime3;
+        const float stateChangeTime6 = stateChangeTime3 * stateChangeTime3;
+        const float stateChangeTime7 = stateChangeTime3 * stateChangeTime4;
+
+        const glm::vec4 hepticTimeVec = glm::vec4(
+                stateChangeTime7, stateChangeTime6, stateChangeTime5, stateChangeTime4);
+        const glm::vec4 cubicTimeVec = glm::vec4(
+                stateChangeTime3, stateChangeTime2, stateChangeTime1, 1.f);
+
         // For Step changes, we simply set the transform to immediately take the
         // user to the given position and not reflect any movement-based
         // acceleration or velocity.
@@ -79,7 +73,9 @@ void InertialModel::setTargetPosition(
                 glm::vec3(),
                 glm::vec3(),
                 glm::vec3(),
-                position);
+                position,
+                hepticTimeVec,
+                cubicTimeVec);
     } else {
         // We ensure that velocity, acceleration, jerk, and position are
         // continuously interpolating from the current state.  Here, and
@@ -91,8 +87,31 @@ void InertialModel::setTargetPosition(
         const glm::vec3 j_init = getJerk(PARAMETER_VALUE_TYPE_CURRENT);
         const glm::vec3 x_target = position;
 
+        // Use the square root of distance as the basis for the transition time
+        // in order to have a roughly consistent magnitude acceleration.
+        const float timeScale = sqrt(glm::distance(x_target, x_init));
+        // Use the max time for distances above 10cm.
+        const float maxTimeScale = sqrt(0.1f);
+
+        transitionTime = kMinStateChangeTimeSeconds +
+                (std::min(timeScale, maxTimeScale) / maxTimeScale) *
+                (kMaxStateChangeTimeSeconds - kMinStateChangeTimeSeconds);
+
+        const float stateChangeTime1 = transitionTime;
+        const float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
+        const float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
+        const float stateChangeTime4 = stateChangeTime2 * stateChangeTime2;
+        const float stateChangeTime5 = stateChangeTime2 * stateChangeTime3;
+        const float stateChangeTime6 = stateChangeTime3 * stateChangeTime3;
+        const float stateChangeTime7 = stateChangeTime3 * stateChangeTime4;
+
+        const glm::vec4 hepticTimeVec = glm::vec4(
+                stateChangeTime7, stateChangeTime6, stateChangeTime5, stateChangeTime4);
+        const glm::vec4 cubicTimeVec = glm::vec4(
+                stateChangeTime3, stateChangeTime2, stateChangeTime1, 1.f);
+
         // Computed by solving for heptic movement in
-        // kStateChangeTimeSeconds. Position, Velocity, Acceleration and Jerk
+        // stateChangeTimeSeconds. Position, Velocity, Acceleration and Jerk
         // are computed here by solving the system of linear equations created
         // by setting the initial position, velocity, acceleration and jerk to
         // the current values, and the final state to the target position, with
@@ -111,7 +130,7 @@ void InertialModel::setTargetPosition(
         //     F == quadraticTerm
         //     G == linearTerm
         //     H == constantTerm
-        // t_end == kStateChangeTimeSeconds
+        // t_end == stateChangeTimeSeconds
         //
         // And this system of equations is solved:
         //
@@ -141,34 +160,34 @@ void InertialModel::setTargetPosition(
         //     v = v_init
         //     a = a_init
         //     j = j_init
-        //     t = kStateChangeTimeSeconds
+        //     t = stateChangeTimeSeconds
         //     y = x_target
 
-        const glm::vec3 hepticTerm = (1.f / (6.f * kStateChangeTime7)) * (
-                1.f * kStateChangeTime3 * j_init +
-                12.f * kStateChangeTime2 * a_init +
-                60.f * kStateChangeTime1 * v_init +
+        const glm::vec3 hepticTerm = (1.f / (6.f * stateChangeTime7)) * (
+                1.f * stateChangeTime3 * j_init +
+                12.f * stateChangeTime2 * a_init +
+                60.f * stateChangeTime1 * v_init +
                 120.f * x_init +
                 -120.f * x_target);
 
-        const glm::vec3 hexicTerm = (1.f / (6.f * kStateChangeTime6)) * (
-                -4.f * kStateChangeTime3 * j_init +
-                -45.f * kStateChangeTime2 * a_init +
-                -216.f * kStateChangeTime1 * v_init +
+        const glm::vec3 hexicTerm = (1.f / (6.f * stateChangeTime6)) * (
+                -4.f * stateChangeTime3 * j_init +
+                -45.f * stateChangeTime2 * a_init +
+                -216.f * stateChangeTime1 * v_init +
                 -420.f * x_init +
                 420.f * x_target);
 
-        const glm::vec3 quinticTerm = (1.f / (1.f * kStateChangeTime5)) * (
-                1.f * kStateChangeTime3 * j_init +
-                10.f * kStateChangeTime2 * a_init +
-                45.f * kStateChangeTime1 * v_init +
+        const glm::vec3 quinticTerm = (1.f / (1.f * stateChangeTime5)) * (
+                1.f * stateChangeTime3 * j_init +
+                10.f * stateChangeTime2 * a_init +
+                45.f * stateChangeTime1 * v_init +
                 84.f * x_init +
                 -84.f * x_target);
 
-        const glm::vec3 quarticTerm = (1.f / (3.f * kStateChangeTime4)) * (
-                -2.f * kStateChangeTime3 * j_init +
-                -15.f * kStateChangeTime2 * a_init +
-                -60.f * kStateChangeTime1 * v_init +
+        const glm::vec3 quarticTerm = (1.f / (3.f * stateChangeTime4)) * (
+                -2.f * stateChangeTime3 * j_init +
+                -15.f * stateChangeTime2 * a_init +
+                -60.f * stateChangeTime1 * v_init +
                 -105.f * x_init +
                 105.f * x_target);
 
@@ -188,16 +207,32 @@ void InertialModel::setTargetPosition(
                 cubicTerm,
                 quadraticTerm,
                 linearTerm,
-                constantTerm);
+                constantTerm,
+                hepticTimeVec,
+                cubicTimeVec);
     }
     mPositionChangeStartTime = mModelTimeNs;
-    mPositionChangeEndTime = mModelTimeNs + kStateChangeTimeNs;
+    mPositionChangeEndTime = mModelTimeNs + secondsToNs(transitionTime);
     mZeroVelocityAfterEndTime = true;
 }
 
 void InertialModel::setTargetVelocity(
         glm::vec3 velocity, PhysicalInterpolation mode) {
+    float transitionTime = kMinStateChangeTimeSeconds;
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
+        const float stateChangeTime1 = transitionTime;
+        const float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
+        const float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
+        const float stateChangeTime4 = stateChangeTime2 * stateChangeTime2;
+        const float stateChangeTime5 = stateChangeTime2 * stateChangeTime3;
+        const float stateChangeTime6 = stateChangeTime3 * stateChangeTime3;
+        const float stateChangeTime7 = stateChangeTime3 * stateChangeTime4;
+
+        const glm::vec4 hepticTimeVec = glm::vec4(
+                stateChangeTime7, stateChangeTime6, stateChangeTime5, stateChangeTime4);
+        const glm::vec4 cubicTimeVec = glm::vec4(
+                stateChangeTime3, stateChangeTime2, stateChangeTime1, 1.f);
+
         // For Step changes, we simply set the transform to immediately move the
         // user at a given velocity starting from the current position.
         setInertialTransforms(
@@ -208,7 +243,9 @@ void InertialModel::setTargetVelocity(
                 glm::vec3(),
                 glm::vec3(),
                 velocity,
-                getPosition(PARAMETER_VALUE_TYPE_CURRENT));
+                getPosition(PARAMETER_VALUE_TYPE_CURRENT),
+                hepticTimeVec,
+                cubicTimeVec);
     } else {
         // We ensure that velocity, acceleration, jerk, and position are
         // continuously interpolating from the current state.  Here, and
@@ -220,8 +257,31 @@ void InertialModel::setTargetVelocity(
         const glm::vec3 j_init = getJerk(PARAMETER_VALUE_TYPE_CURRENT);
         const glm::vec3 v_target = velocity;
 
+        // Use the velocity difference as the basis for the transition time
+        // in order to have a roughly consistent magnitude acceleration.
+        const float timeScale = glm::distance(v_init, v_target);
+        // Use the max time for velocity differences above 1m/s.
+        constexpr float maxTimeScale = 1.f;
+
+        transitionTime = kMinStateChangeTimeSeconds +
+                (std::min(timeScale, maxTimeScale) / maxTimeScale) *
+                (kMaxStateChangeTimeSeconds - kMinStateChangeTimeSeconds);
+
+        const float stateChangeTime1 = transitionTime;
+        const float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
+        const float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
+        const float stateChangeTime4 = stateChangeTime2 * stateChangeTime2;
+        const float stateChangeTime5 = stateChangeTime2 * stateChangeTime3;
+        const float stateChangeTime6 = stateChangeTime3 * stateChangeTime3;
+        const float stateChangeTime7 = stateChangeTime3 * stateChangeTime4;
+
+        const glm::vec4 hepticTimeVec = glm::vec4(
+                stateChangeTime7, stateChangeTime6, stateChangeTime5, stateChangeTime4);
+        const glm::vec4 cubicTimeVec = glm::vec4(
+                stateChangeTime3, stateChangeTime2, stateChangeTime1, 1.f);
+
         // Computed by solving for hexic movement in
-        // kStateChangeTimeSeconds. Position, Velocity, Acceleration, and Jerk
+        // stateChangeTimeSeconds. Position, Velocity, Acceleration, and Jerk
         // are computed here by solving the system of linear equations created
         // by setting the initial position, velocity, acceleration and jerk to
         // the current values, and the final state to the target velocity, with
@@ -240,7 +300,7 @@ void InertialModel::setTargetVelocity(
         //     E == quadraticTerm
         //     F == linearTerm
         //     G == constantTerm
-        // t_end == kStateChangeTimeSeconds
+        // t_end == stateChangeTimeSeconds
         //
         // And this system of equations is solved:
         //
@@ -268,22 +328,22 @@ void InertialModel::setTargetVelocity(
         //     v = v_init
         //     a = a_init
         //     j = j_init
-        //     t = kStateChangeTimeSeconds
+        //     t = stateChangeTimeSeconds
         //     w = v_target
 
-        const glm::vec3 hexicTerm = (1.f / (12.f * kStateChangeTime5)) * (
-                -1.f * kStateChangeTime2 * j_init +
-                -6.f * kStateChangeTime1 * a_init +
+        const glm::vec3 hexicTerm = (1.f / (12.f * stateChangeTime5)) * (
+                -1.f * stateChangeTime2 * j_init +
+                -6.f * stateChangeTime1 * a_init +
                 -12.f * v_init +
                 12.f * v_target);
-        const glm::vec3 quinticTerm = (1.f / (10.f * kStateChangeTime4)) * (
-                3.f * kStateChangeTime2 * j_init +
-                16.f * kStateChangeTime1 * a_init +
+        const glm::vec3 quinticTerm = (1.f / (10.f * stateChangeTime4)) * (
+                3.f * stateChangeTime2 * j_init +
+                16.f * stateChangeTime1 * a_init +
                 30.f * v_init +
                 -30.f * v_target);
-        const glm::vec3 quarticTerm = (1.f / (8.f * kStateChangeTime3)) * (
-                -3.f * kStateChangeTime2 * j_init +
-                -12.f * kStateChangeTime1 * a_init +
+        const glm::vec3 quarticTerm = (1.f / (8.f * stateChangeTime3)) * (
+                -3.f * stateChangeTime2 * j_init +
+                -12.f * stateChangeTime1 * a_init +
                 -20.f * v_init +
                 20.f * v_target);
         const glm::vec3 cubicTerm = (1.f / 6.f) * j_init;
@@ -299,15 +359,18 @@ void InertialModel::setTargetVelocity(
                 cubicTerm,
                 quadraticTerm,
                 linearTerm,
-                constantTerm);
+                constantTerm,
+                hepticTimeVec,
+                cubicTimeVec);
     }
     mPositionChangeStartTime = mModelTimeNs;
-    mPositionChangeEndTime = mModelTimeNs + kStateChangeTimeNs;
+    mPositionChangeEndTime = mModelTimeNs + secondsToNs(transitionTime);
     mZeroVelocityAfterEndTime = false;
 }
 
 void InertialModel::setTargetRotation(
         glm::quat rotation, PhysicalInterpolation mode) {
+    float transitionTime = kMinStateChangeTimeSeconds;
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
         // For Step changes, we simply set the transform to immediately set the
         // rotation to the target, with zero rotational velocity.
@@ -366,7 +429,7 @@ void InertialModel::setTargetRotation(
         //     x = x_init
         //     v = v_init
         //     a = a_init
-        //     t = kStateChangeTimeSeconds
+        //     t = stateChangeTimeSeconds
         //     y = x_target
 
         const glm::vec4 currentRotation = calculateRotationalState(
@@ -431,19 +494,37 @@ void InertialModel::setTargetRotation(
             v_init = -v_init;
         }
 
-        const glm::vec4 quinticTerm = (1.f / (2.0f * kStateChangeTime5)) * (
-                -1.f * kStateChangeTime2 * a_init +
-                -6.f * kStateChangeTime1 * v_init +
+        // Use the square root of the rotation distance as the basis for the
+        // transition time in order to have a roughly consistent magnitude of
+        // angular acceleration.
+        const float timeScale = sqrt(glm::distance(x_init, x_target));
+        // Use the max time for transitions of 180 degrees (i.e. distance 2 in
+        // quaternion space).
+        const float maxTimeScale = sqrt(2.f);
+
+        transitionTime = kMinStateChangeTimeSeconds +
+                (std::min(timeScale, maxTimeScale) / maxTimeScale) *
+                (kMaxStateChangeTimeSeconds - kMinStateChangeTimeSeconds);
+
+        const float stateChangeTime1 = transitionTime;
+        const float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
+        const float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
+        const float stateChangeTime4 = stateChangeTime2 * stateChangeTime2;
+        const float stateChangeTime5 = stateChangeTime2 * stateChangeTime3;
+
+        const glm::vec4 quinticTerm = (1.f / (2.0f * stateChangeTime5)) * (
+                -1.f * stateChangeTime2 * a_init +
+                -6.f * stateChangeTime1 * v_init +
                 -12.f * x_init +
                 12.f * x_target);
-        const glm::vec4 quarticTerm = (1.f / (2.0f * kStateChangeTime4)) * (
-                3.f * kStateChangeTime2 * a_init +
-                16.f * kStateChangeTime1 * v_init +
+        const glm::vec4 quarticTerm = (1.f / (2.0f * stateChangeTime4)) * (
+                3.f * stateChangeTime2 * a_init +
+                16.f * stateChangeTime1 * v_init +
                 30.f * x_init +
                 -30.f * x_target);
-        const glm::vec4 cubicTerm = (1.f / (2.0f * kStateChangeTime3)) * (
-                -3.f * kStateChangeTime2 * a_init +
-                -12.f * kStateChangeTime1 * v_init +
+        const glm::vec4 cubicTerm = (1.f / (2.0f * stateChangeTime3)) * (
+                -3.f * stateChangeTime2 * a_init +
+                -12.f * stateChangeTime1 * v_init +
                 -20.f * x_init +
                 20.f * x_target);
         const glm::vec4 quadraticTerm = (1.f / 2.f) * a_init;
@@ -482,7 +563,7 @@ void InertialModel::setTargetRotation(
     }
 
     mRotationChangeStartTime = mModelTimeNs;
-    mRotationChangeEndTime = mModelTimeNs + kStateChangeTimeNs;
+    mRotationChangeEndTime = mModelTimeNs + secondsToNs(transitionTime);
 }
 
 glm::vec3 InertialModel::getPosition(
@@ -584,14 +665,16 @@ glm::vec3 InertialModel::getRotationalVelocity(
 }
 
 void InertialModel::setInertialTransforms(
-        const glm::vec3 hepticCoefficient,
-        const glm::vec3 hexicCoefficient,
-        const glm::vec3 quinticCoefficient,
-        const glm::vec3 quarticCoefficient,
-        const glm::vec3 cubicCoefficient,
-        const glm::vec3 quadraticCoefficient,
-        const glm::vec3 linearCoefficient,
-        const glm::vec3 constantCoefficient) {
+        const glm::vec3& hepticCoefficient,
+        const glm::vec3& hexicCoefficient,
+        const glm::vec3& quinticCoefficient,
+        const glm::vec3& quarticCoefficient,
+        const glm::vec3& cubicCoefficient,
+        const glm::vec3& quadraticCoefficient,
+        const glm::vec3& linearCoefficient,
+        const glm::vec3& constantCoefficient,
+        const glm::vec4& hepticTimeVec,
+        const glm::vec4& cubicTimeVec) {
     mPositionHeptic = glm::mat4x3(
             hepticCoefficient,
             hexicCoefficient,
@@ -636,16 +719,16 @@ void InertialModel::setInertialTransforms(
             24.f * quarticCoefficient,
             6.f * cubicCoefficient);
 
-    glm::vec3 endPosition = mPositionCubic * kCubicTimeVec +
-            mPositionHeptic * kHepticTimeVec;
-    glm::vec3 endVelocity = mVelocityCubic * kCubicTimeVec +
-            mVelocityHeptic * kHepticTimeVec;
+    glm::vec3 endPosition = mPositionCubic * cubicTimeVec +
+            mPositionHeptic * hepticTimeVec;
+    glm::vec3 endVelocity = mVelocityCubic * cubicTimeVec +
+            mVelocityHeptic * hepticTimeVec;
 
     mPositionAfterEndCubic = glm::mat4x3(
             glm::vec3(0.0f),
             glm::vec3(0.0f),
             endVelocity,
-            endPosition - kStateChangeTime1 * endVelocity);
+            endPosition - cubicTimeVec.z * endVelocity);
     mVelocityAfterEndCubic = glm::mat4x3(
             glm::vec3(0.0f),
             glm::vec3(0.0f),
