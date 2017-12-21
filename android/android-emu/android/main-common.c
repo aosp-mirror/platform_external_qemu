@@ -740,6 +740,17 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         hw->test_delayAdbTillBootComplete = 1;
     }
 
+    if (opts->monitor_adb) {
+        char*  end;
+        hw->test_monitorAdb = strtol(opts->monitor_adb, &end, 0);
+        if (hw->test_monitorAdb <= 0) {
+            derror("-monitor-adb must be followed by a positive number");
+            exit(1);
+        } else {
+            D("Will monitor adb messages to the guest");
+        }
+    }
+
     /* -partition-size is used to specify the max size of both the system
      * and data partition sizes.
      */
