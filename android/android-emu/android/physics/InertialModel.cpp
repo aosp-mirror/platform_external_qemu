@@ -41,7 +41,8 @@ InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
 
     return (mZeroVelocityAfterEndTime &&
             mModelTimeNs >= mPositionChangeEndTime &&
-            mModelTimeNs >= mRotationChangeEndTime) ?
+            mModelTimeNs >= mRotationChangeEndTime &&
+            getAmbientMotionBoundsValue(PARAMETER_VALUE_TYPE_CURRENT) == 0.f) ?
             INERTIAL_STATE_STABLE : INERTIAL_STATE_CHANGING;
 }
 
@@ -81,10 +82,10 @@ void InertialModel::setTargetPosition(
         // continuously interpolating from the current state.  Here, and
         // throughout, x is the position, v is the velocity, a is the
         // acceleration and j is the jerk.
-        const glm::vec3 x_init = getPosition(PARAMETER_VALUE_TYPE_CURRENT);
-        const glm::vec3 v_init = getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
-        const glm::vec3 a_init = getAcceleration(PARAMETER_VALUE_TYPE_CURRENT);
-        const glm::vec3 j_init = getJerk(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::vec3 x_init = getPosition(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
+        const glm::vec3 v_init = getVelocity(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
+        const glm::vec3 a_init = getAcceleration(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
+        const glm::vec3 j_init = getJerk(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
         const glm::vec3 x_target = position;
 
         // Use the square root of distance as the basis for the transition time
@@ -243,7 +244,7 @@ void InertialModel::setTargetVelocity(
                 glm::vec3(),
                 glm::vec3(),
                 velocity,
-                getPosition(PARAMETER_VALUE_TYPE_CURRENT),
+                getPosition(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION),
                 hepticTimeVec,
                 cubicTimeVec);
     } else {
@@ -251,10 +252,10 @@ void InertialModel::setTargetVelocity(
         // continuously interpolating from the current state.  Here, and
         // throughout, x is the position, v is the velocity, a is the
         // acceleration and j is the jerk.
-        const glm::vec3 x_init = getPosition(PARAMETER_VALUE_TYPE_CURRENT);
-        const glm::vec3 v_init = getVelocity(PARAMETER_VALUE_TYPE_CURRENT);
-        const glm::vec3 a_init = getAcceleration(PARAMETER_VALUE_TYPE_CURRENT);
-        const glm::vec3 j_init = getJerk(PARAMETER_VALUE_TYPE_CURRENT);
+        const glm::vec3 x_init = getPosition(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
+        const glm::vec3 v_init = getVelocity(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
+        const glm::vec3 a_init = getAcceleration(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
+        const glm::vec3 j_init = getJerk(PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
         const glm::vec3 v_target = velocity;
 
         // Use the velocity difference as the basis for the transition time
@@ -434,15 +435,15 @@ void InertialModel::setTargetRotation(
 
         const glm::vec4 currentRotation = calculateRotationalState(
                 mRotationQuintic, mRotationCubic, mRotationAfterEndCubic,
-                PARAMETER_VALUE_TYPE_CURRENT);
+                PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
 
         const glm::vec4 currentRotationalVelocity = calculateRotationalState(
                 mRotationalVelocityQuintic, mRotationalVelocityCubic,
-                glm::mat4x4(0.f), PARAMETER_VALUE_TYPE_CURRENT);
+                glm::mat4x4(0.f), PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
 
         const glm::vec4 currentRotationalAcceleration = calculateRotationalState(
                 mRotationalAccelerationQuintic, mRotationalAccelerationCubic,
-                glm::mat4x4(0.f), PARAMETER_VALUE_TYPE_CURRENT);
+                glm::mat4x4(0.f), PARAMETER_VALUE_TYPE_CURRENT_NO_AMBIENT_MOTION);
 
         const float rotationLength = glm::length(currentRotation);
 
@@ -566,31 +567,159 @@ void InertialModel::setTargetRotation(
     mRotationChangeEndTime = mModelTimeNs + secondsToNs(transitionTime);
 }
 
+void InertialModel::setTargetAmbientMotion(float bounds,
+                                           PhysicalInterpolation mode) {
+    if (mode == PHYSICAL_INTERPOLATION_STEP) {
+        mAmbientMotionValueQuintic = glm::vec2(0.f);
+        mAmbientMotionValueCubic = glm::vec4(
+                0.f,
+                0.f,
+                0.f,
+                bounds);
+        mAmbientMotionFirstDerivQuintic = glm::vec2(0.f);
+        mAmbientMotionFirstDerivCubic = glm::vec4(0.f);
+        mAmbientMotionSecondDerivQuintic = glm::vec2(0.f);
+        mAmbientMotionSecondDerivCubic = glm::vec4(0.f);
+        mAmbientMotionChangeStartTime = mModelTimeNs;
+        mAmbientMotionChangeEndTime = mModelTimeNs +
+                secondsToNs(kMinStateChangeTimeSeconds);
+    } else {
+        // Ambient motion bounds expansion needs to be differentiable so we can
+        // always compute the acceleration of the ambient motion.  This does the
+        // same polynomial computation as the quintic rotation above with the
+        // same coefficients, but in one dimension instead of 4.
+
+        float x_init = getAmbientMotionBoundsValue(PARAMETER_VALUE_TYPE_CURRENT);
+        float v_init = getAmbientMotionBoundsDeriv(PARAMETER_VALUE_TYPE_CURRENT);
+        float a_init = getAmbientMotionBoundsSecondDeriv(PARAMETER_VALUE_TYPE_CURRENT);
+        float x_target = bounds;
+
+        constexpr float stateChangeTime1 = kMaxStateChangeTimeSeconds;
+        constexpr float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
+        constexpr float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
+        constexpr float stateChangeTime4 = stateChangeTime2 * stateChangeTime2;
+        constexpr float stateChangeTime5 = stateChangeTime2 * stateChangeTime3;
+
+        const float quinticTerm = (1.f / (2.0f * stateChangeTime5)) * (
+                -1.f * stateChangeTime2 * a_init +
+                -6.f * stateChangeTime1 * v_init +
+                -12.f * x_init +
+                12.f * x_target);
+        const float quarticTerm = (1.f / (2.0f * stateChangeTime4)) * (
+                3.f * stateChangeTime2 * a_init +
+                16.f * stateChangeTime1 * v_init +
+                30.f * x_init +
+                -30.f * x_target);
+        const float cubicTerm = (1.f / (2.0f * stateChangeTime3)) * (
+                -3.f * stateChangeTime2 * a_init +
+                -12.f * stateChangeTime1 * v_init +
+                -20.f * x_init +
+                20.f * x_target);
+        const float quadraticTerm = (1.f / 2.f) * a_init;
+        const float linearTerm = v_init;
+        const float constantTerm = x_init;
+
+        mAmbientMotionEndValue = bounds;
+        mAmbientMotionValueQuintic = glm::vec2(
+                quinticTerm,
+                quarticTerm);
+        mAmbientMotionValueCubic = glm::vec4(
+                cubicTerm,
+                quadraticTerm,
+                linearTerm,
+                constantTerm);
+        mAmbientMotionFirstDerivQuintic = glm::vec2(
+                0.f,
+                5.f * quinticTerm);
+        mAmbientMotionFirstDerivCubic = glm::vec4(
+                4.f * quarticTerm,
+                3.f * cubicTerm,
+                2.f * quadraticTerm,
+                linearTerm);
+        mAmbientMotionSecondDerivQuintic = glm::vec2(
+                0.f,
+                0.f);
+        mAmbientMotionSecondDerivCubic = glm::vec4(
+                20.f * quinticTerm,
+                12.f * quarticTerm,
+                6.f * cubicTerm,
+                2.f * quadraticTerm);
+
+        mAmbientMotionChangeStartTime = mModelTimeNs;
+        mAmbientMotionChangeEndTime = mModelTimeNs +
+                secondsToNs(stateChangeTime1);
+    }
+}
+
 glm::vec3 InertialModel::getPosition(
         ParameterValueType parameterValueType) const {
-    return calculateInertialState(
-        mPositionHeptic,
-        mPositionCubic,
-        mPositionAfterEndCubic,
-        parameterValueType);
+    glm::vec3 position = calculateInertialState(
+            mPositionHeptic,
+            mPositionCubic,
+            mPositionAfterEndCubic,
+            parameterValueType);
+    if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT) {
+        double time = mModelTimeNs / 1000000000.0;
+        glm::vec3 f = glm::vec3(sin(kAmbientFrequencyVec.x * time),
+                sin(kAmbientFrequencyVec.y * time),
+                sin(kAmbientFrequencyVec.z * time));
+        glm::vec3 g = glm::vec3(1.f) * getAmbientMotionBoundsValue(PARAMETER_VALUE_TYPE_CURRENT);
+        position += f * g;
+    }
+    return position;
 }
 
 glm::vec3 InertialModel::getVelocity(
         ParameterValueType parameterValueType) const {
-    return calculateInertialState(
+    glm::vec3 velocity = calculateInertialState(
         mVelocityHeptic,
         mVelocityCubic,
         mVelocityAfterEndCubic,
         parameterValueType);
+    if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT) {
+        double time = mModelTimeNs / 1000000000.0;
+        glm::vec3 f = glm::vec3(sin(kAmbientFrequencyVec.x * time),
+                sin(kAmbientFrequencyVec.y * time),
+                sin(kAmbientFrequencyVec.z * time));
+        // Apply the chain rule.
+        glm::vec3 df = glm::vec3(cos(kAmbientFrequencyVec.x * time),
+                cos(kAmbientFrequencyVec.y * time),
+                cos(kAmbientFrequencyVec.z * time)) * kAmbientFrequencyVec;
+        glm::vec3 g = glm::vec3(1.f) * getAmbientMotionBoundsValue(PARAMETER_VALUE_TYPE_CURRENT);
+        glm::vec3 dg = glm::vec3(1.f) * getAmbientMotionBoundsDeriv(PARAMETER_VALUE_TYPE_CURRENT);
+        // Apply the product rule.
+        velocity += f * dg + df * g;
+    }
+    return velocity;
 }
 
 glm::vec3 InertialModel::getAcceleration(
         ParameterValueType parameterValueType) const {
-    return calculateInertialState(
+    glm::vec3 acceleration = calculateInertialState(
         mAccelerationHeptic,
         mAccelerationCubic,
         glm::mat4x3(0.f),
         parameterValueType);
+    if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT) {
+        double time = mModelTimeNs / 1000000000.0;
+        glm::vec3 f = glm::vec3(sin(kAmbientFrequencyVec.x * time),
+                sin(kAmbientFrequencyVec.y * time),
+                sin(kAmbientFrequencyVec.z * time));
+        // Apply the chain rule.
+        glm::vec3 df = glm::vec3(cos(kAmbientFrequencyVec.x * time),
+                cos(kAmbientFrequencyVec.y * time),
+                cos(kAmbientFrequencyVec.z * time)) * kAmbientFrequencyVec;
+        // Apply the chain rule twice.
+        glm::vec3 d2f = glm::vec3(-sinf(kAmbientFrequencyVec.x * time),
+                -sin(kAmbientFrequencyVec.y * time),
+                -sin(kAmbientFrequencyVec.z * time)) * kAmbientFrequencyVec * kAmbientFrequencyVec;
+        glm::vec3 g = glm::vec3(1.f) * getAmbientMotionBoundsValue(PARAMETER_VALUE_TYPE_CURRENT);
+        glm::vec3 dg = glm::vec3(1.f) * getAmbientMotionBoundsDeriv(PARAMETER_VALUE_TYPE_CURRENT);
+        glm::vec3 d2g = glm::vec3(1.f) * getAmbientMotionBoundsSecondDeriv(PARAMETER_VALUE_TYPE_CURRENT);
+        // Apply the product rule twice.
+        acceleration += f * d2g + 2.f * df * dg + d2f * g;
+    }
+    return acceleration;
 }
 
 glm::vec3 InertialModel::getJerk(
@@ -662,6 +791,11 @@ glm::vec3 InertialModel::getRotationalVelocity(
             2.f * (rotationDerivativeQuat * rotationConjugate);
 
     return glm::vec3(angularVelocity.x, angularVelocity.y, angularVelocity.z);
+}
+
+float InertialModel::getAmbientMotion(
+        ParameterValueType parameterValueType) const {
+    return getAmbientMotionBoundsValue(parameterValueType);
 }
 
 void InertialModel::setInertialTransforms(
@@ -784,6 +918,63 @@ glm::vec4 InertialModel::calculateRotationalState(
         return quinticTransform * quinticTimeVec + cubicTransform * cubicTimeVec;
     } else {
         return afterEndCubicTransform * cubicTimeVec;
+    }
+}
+
+float InertialModel::getAmbientMotionBoundsValue(
+        ParameterValueType parameterValueType) const {
+    assert(mModelTimeNs >= mAmbientMotionChangeStartTime);
+    if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
+            mModelTimeNs < mAmbientMotionChangeEndTime) {
+        const float time1 = nsToSeconds(mModelTimeNs - mAmbientMotionChangeStartTime);
+        const float time2 = time1 * time1;
+        const float time3 = time2 * time1;
+        const float time4 = time2 * time2;
+        const float time5 = time3 * time2;
+        const glm::vec4 cubicTimeVec(time3, time2, time1, 1.f);
+        const glm::vec2 quinticTimeVec(time5, time4);
+        return glm::dot(mAmbientMotionValueQuintic, quinticTimeVec) +
+                glm::dot(mAmbientMotionValueCubic, cubicTimeVec);
+    } else {
+        return mAmbientMotionEndValue;
+    }
+}
+
+float InertialModel::getAmbientMotionBoundsDeriv(
+        ParameterValueType parameterValueType) const {
+    assert(mModelTimeNs >= mAmbientMotionChangeStartTime);
+    if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
+            mModelTimeNs < mAmbientMotionChangeEndTime) {
+        const float time1 = nsToSeconds(mModelTimeNs - mAmbientMotionChangeStartTime);
+        const float time2 = time1 * time1;
+        const float time3 = time2 * time1;
+        const float time4 = time2 * time2;
+        const float time5 = time3 * time2;
+        const glm::vec4 cubicTimeVec(time3, time2, time1, 1.f);
+        const glm::vec2 quinticTimeVec(time5, time4);
+        return glm::dot(mAmbientMotionFirstDerivQuintic, quinticTimeVec) +
+                glm::dot(mAmbientMotionFirstDerivCubic, cubicTimeVec);
+    } else {
+        return 0.f;
+    }
+}
+
+float InertialModel::getAmbientMotionBoundsSecondDeriv(
+        ParameterValueType parameterValueType) const {
+    assert(mModelTimeNs >= mAmbientMotionChangeStartTime);
+    if (parameterValueType != PARAMETER_VALUE_TYPE_TARGET &&
+            mModelTimeNs < mAmbientMotionChangeEndTime) {
+        const float time1 = nsToSeconds(mModelTimeNs - mAmbientMotionChangeStartTime);
+        const float time2 = time1 * time1;
+        const float time3 = time2 * time1;
+        const float time4 = time2 * time2;
+        const float time5 = time3 * time2;
+        const glm::vec4 cubicTimeVec(time3, time2, time1, 1.f);
+        const glm::vec2 quinticTimeVec(time5, time4);
+        return glm::dot(mAmbientMotionSecondDerivQuintic, quinticTimeVec) +
+                glm::dot(mAmbientMotionSecondDerivCubic, cubicTimeVec);
+    } else {
+        return 0.f;
     }
 }
 

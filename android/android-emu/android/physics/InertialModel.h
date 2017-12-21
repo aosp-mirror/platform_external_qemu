@@ -37,6 +37,13 @@ constexpr float nsToSeconds(uint64_t nanoSeconds) {
 constexpr float kMaxStateChangeTimeSeconds = 0.5f;
 constexpr float kMinStateChangeTimeSeconds = 0.05f;
 
+// Ambient motion frequency of 0.5Hz.  This is applied directly in the x axis
+// and scaled by 1 / sqrt(2) and 1 / sqrt(3) in y and z axis respectively.
+const float kAmbientFrequency = 0.5f;
+const glm::vec3 kAmbientFrequencyVec =
+        glm::vec3(1.f, 1.f / sqrt(2.f), 1.f / sqrt(3.f)) *
+        kAmbientFrequency * 2.f * 3.14159265f;
+
 typedef enum {
     INERTIAL_STATE_CHANGING=0,
     INERTIAL_STATE_STABLE=1,
@@ -80,6 +87,12 @@ public:
     void setTargetRotation(glm::quat rotation, PhysicalInterpolation mode);
 
     /*
+     * Set the half-width of the bounding box for ambient motion.  Setting this
+     * to zero disables ambient motion.
+     */
+    void setTargetAmbientMotion(float bounds, PhysicalInterpolation mode);
+
+    /*
      * Gets current simulated state and sensor values of the modeled object at
      * the most recently set current time (from setCurrentTime).
      */
@@ -95,6 +108,12 @@ public:
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
     // rotational velocity as rotation around (x, y, z) axis in rad/s
     glm::vec3 getRotationalVelocity(
+            ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
+
+    /*
+     * Gets half the width of the ambient motion bounding box.
+     */
+    float getAmbientMotion(
             ParameterValueType parameterValueType = PARAMETER_VALUE_TYPE_CURRENT) const;
 
 private:
@@ -130,6 +149,11 @@ private:
         const glm::mat4x4& cubicTransform,
         const glm::mat4x4& afterEndCubicTransform,
         ParameterValueType parameterValueType) const;
+
+    // Get the value and derivatives of the ambient motion bounding box size.
+    float getAmbientMotionBoundsValue(ParameterValueType parameterValueType) const;
+    float getAmbientMotionBoundsDeriv(ParameterValueType parameterValueType) const;
+    float getAmbientMotionBoundsSecondDeriv(ParameterValueType parameterValueType) const;
 
     // Note: Each target interpolation begins at a set time, accelerates at a
     //       for half of the target time, then decelerates for the second half
@@ -173,6 +197,16 @@ private:
     glm::mat2x4 mRotationalAccelerationQuintic = glm::mat2x4(0.f);
     glm::mat4x4 mRotationalAccelerationCubic = glm::mat4x4(0.f);
     uint64_t mRotationChangeEndTime = 0UL;
+
+    uint64_t mAmbientMotionChangeStartTime = 0UL;
+    float mAmbientMotionEndValue = 0.f;
+    glm::vec2 mAmbientMotionValueQuintic = glm::vec2(0.f);
+    glm::vec4 mAmbientMotionValueCubic = glm::vec4(0.f);
+    glm::vec2 mAmbientMotionFirstDerivQuintic = glm::vec2(0.f);
+    glm::vec4 mAmbientMotionFirstDerivCubic = glm::vec4(0.f);
+    glm::vec2 mAmbientMotionSecondDerivQuintic = glm::vec2(0.f);
+    glm::vec4 mAmbientMotionSecondDerivCubic = glm::vec4(0.f);
+    uint64_t mAmbientMotionChangeEndTime = 0UL;
 
     /* The time to use as current in this model */
     uint64_t mModelTimeNs = 0UL;
