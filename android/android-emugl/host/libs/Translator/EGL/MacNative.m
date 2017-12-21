@@ -70,6 +70,7 @@ int getAttrListLength(NSOpenGLPixelFormatAttribute* list) {
 }
 
 static const NSOpenGLPixelFormatAttribute core32TestProfile[] = {
+    NSOpenGLPFAAccelerated,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
     NSOpenGLPFADoubleBuffer,
     NSOpenGLPFAColorSize   ,32,
@@ -79,6 +80,8 @@ static const NSOpenGLPixelFormatAttribute core32TestProfile[] = {
 };
 
 static const NSOpenGLPixelFormatAttribute core41TestProfile[] = {
+    NSOpenGLPFAAccelerated,
+    NSOpenGLPFANoRecovery,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
     NSOpenGLPFADoubleBuffer,
     NSOpenGLPFAColorSize   ,32,
