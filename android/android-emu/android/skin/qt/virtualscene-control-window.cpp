@@ -11,6 +11,7 @@
 
 #include "android/skin/qt/virtualscene-control-window.h"
 
+#include "android/featurecontrol/feature_control.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
@@ -18,6 +19,7 @@
 #include <QDesktopWidget>
 #include <QPainter>
 #include <QScreen>
+#include <QTextStream>
 
 #ifdef __APPLE__
 #include <Carbon/Carbon.h>  // For kVK_ANSI_E
@@ -358,6 +360,25 @@ void VirtualSceneControlWindow::virtualSensorsInteraction() {
     ++mVirtualSceneMetrics.virtualSensorsInteractionCount;
 }
 
+void VirtualSceneControlWindow::addShortcutKeysToKeyStore(
+        ShortcutKeyStore<QtUICommand>& keystore) {
+    if (!feature_is_enabled(kFeature_VirtualScene)) {
+        return;
+    }
+
+    QString shortcuts =
+            "Alt+W VIRTUAL_SCENE_MOVE_FORWARD\n"
+            "Alt+A VIRTUAL_SCENE_MOVE_LEFT\n"
+            "Alt+S VIRTUAL_SCENE_MOVE_BACKWARD\n"
+            "Alt+D VIRTUAL_SCENE_MOVE_RIGHT\n"
+            "Alt+Q VIRTUAL_SCENE_MOVE_DOWN\n"
+            "Alt+E VIRTUAL_SCENE_MOVE_UP\n"
+            "Alt VIRTUAL_SCENE_CONTROL\n";
+
+    QTextStream stream(&shortcuts);
+    keystore.populateFromTextStream(stream, parseQtUICommand, true);
+}
+
 void VirtualSceneControlWindow::slot_mousePoller() {
     updateMouselook();
 }
@@ -430,11 +451,11 @@ QString VirtualSceneControlWindow::getInfoText() {
     if (mCaptureMouse) {
         return tr("Control view with mouse + WASDQE.");
     } else {
-#if __APPLE__
-        return tr("Press %1 Option to move camera.").arg(QChar(0x2325));
-#else   // __APPLE__
+#ifdef Q_OS_MAC
+        return tr("Press \u2325 Option to move camera.");
+#else   // Q_OS_MAC
         return tr("Press Alt to move camera.");
-#endif  // !__APPLE__
+#endif  // Q_OS_MAC
     }
 }
 

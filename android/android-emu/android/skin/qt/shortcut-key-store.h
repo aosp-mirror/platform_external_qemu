@@ -15,6 +15,7 @@
 #include <QTextStream>
 #include <QVector>
 #include <QMap>
+#include <QSet>
 
 // Provides a generic way of mapping keyboard shortcuts to commands.
 // CommandType must be DefaultConstructable.
@@ -22,6 +23,7 @@ template <class CommandType>
 class ShortcutKeyStore {
     using Container = QMap<QKeySequence, CommandType>;
     using ReverseContainer = QMap<CommandType, QVector<QKeySequence>>;
+    using ExternalSet = QSet<QKeySequence>;
 public:
     using iterator = typename Container::iterator;
     using const_iterator = typename Container::const_iterator;
@@ -45,7 +47,8 @@ public:
     // the stream until the stream ends or it encounters an error.
     template <class CommandParser = bool(*)(const QString&, CommandType*)>
     void populateFromTextStream(QTextStream& stream,
-                                const CommandParser& command_parser) {
+                                const CommandParser& command_parser,
+                                bool handled_externally=false) {
         QString key_seq_str, command_str;
         while (!stream.atEnd()) {
             stream >> key_seq_str >> command_str;
@@ -57,14 +60,21 @@ public:
                 break;
             } else {
                 add(key_seq, command);
+                if (handled_externally) {
+                    mKeySequencesHandledExternally.insert(key_seq);
+                }
             }
         }
     }
 
     // Explicitly maps the given key sequence to the given command.
-    void add(const QKeySequence& key_seq, const CommandType &command) {
+    void add(const QKeySequence& key_seq, const CommandType &command,
+             bool handled_externally=false) {
         mKeySequenceToCommandMap[key_seq] = command;
         mCommandToKeySequenceMap[command].push_back(key_seq);
+        if (handled_externally) {
+            mKeySequencesHandledExternally.insert(key_seq);
+        }
     }
 
     // If the given key sequence matches that of a command in the store,
@@ -73,7 +83,9 @@ public:
     template <class CommandHandler>
     bool handle(const QKeySequence& key_seq, const CommandHandler& handler) {
         auto it = mKeySequenceToCommandMap.find(key_seq);
-        bool must_call_handler = (it != mKeySequenceToCommandMap.end());
+        bool must_call_handler =
+                !mKeySequencesHandledExternally.contains(key_seq) &&
+                (it != mKeySequenceToCommandMap.end());
         if (must_call_handler) {
             handler(it.value());
         }
@@ -101,5 +113,6 @@ public:
 private:
     Container mKeySequenceToCommandMap;
     ReverseContainer mCommandToKeySequenceMap;
+    ExternalSet mKeySequencesHandledExternally;
 };
 
