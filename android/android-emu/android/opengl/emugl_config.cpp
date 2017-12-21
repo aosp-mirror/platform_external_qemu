@@ -173,6 +173,21 @@ static void setCurrentRenderer(const char* gpuMode) {
     sCurrentRenderer = emuglConfig_get_renderer(gpuMode);
 }
 
+const char* switchAngleSafe() {
+    if (async_query_d3d11_supported()) {
+        return "angle_indirect";
+    } else {
+        fprintf(stderr, "ERROR: Your setup does not support D3D11, "
+                "but D3D11 is optimal for your use case. "
+                "Please update your graphics drivers and Windows to the latest version. "
+                "Windows: please ensure you are running at least "
+                "Windows 7 SP1 with Platform Update, "
+                "Windows 8.1, or Windows 10. "
+                "The desktop native OpenGL renderer has been auto-selected.\n");
+        return "host";
+    }
+}
+
 bool emuglConfig_init(EmuglConfig* config,
                       bool gpu_enabled,
                       const char* gpu_mode,
@@ -277,11 +292,6 @@ bool emuglConfig_init(EmuglConfig* config,
             D("%s: 'swiftshader' mode auto-selected\n", __FUNCTION__);
             gpu_mode = "swiftshader_indirect";
         }
-        else if (!host_set_in_hwconfig && !no_window && !hasUiPreference &&
-                   async_query_host_gpu_AngleWhitelisted()) {
-                gpu_mode = "angle_indirect";
-                D("%s use Angle for Intel GPU HD 3000\n", __FUNCTION__);
-        }
         else if (no_window || (blacklisted && !hasUiPreference)) {
             if (!no_window &&
                 stringVectorContains(sBackendList->names(), "swiftshader")) {
@@ -315,10 +325,10 @@ bool emuglConfig_init(EmuglConfig* config,
         } else {
             switch (uiPreferredBackend) {
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE:
-                    gpu_mode = "angle_indirect";
+                    gpu_mode = switchAngleSafe();
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_ANGLE9:
-                    gpu_mode = "angle9";
+                    gpu_mode = switchAngleSafe();
                     break;
                 case WINSYS_GLESBACKEND_PREFERENCE_SWIFTSHADER:
                     gpu_mode = "swiftshader_indirect";
@@ -342,7 +352,12 @@ bool emuglConfig_init(EmuglConfig* config,
         const std::vector<std::string>& backends = sBackendList->names();
         if (!stringVectorContains(backends, gpu_mode)) {
             std::string error = StringFormat(
-                "Invalid GPU mode '%s', use one of: on off host guest", gpu_mode);
+#ifdef _WIN32
+                "Invalid GPU mode '%s', use one of: host angle_indirect swiftshader_indirect guest off",
+#else
+                "Invalid GPU mode '%s', use one of: host swiftshader_indirect guest off",
+#endif
+                gpu_mode);
             for (size_t n = 0; n < backends.size(); ++n) {
                 error += " ";
                 error += backends[n];

@@ -29,11 +29,24 @@
 
 #include <windows.h>
 #include <d3d9.h>
+#include <d3d11.h>
 
 #include <ctype.h>
 
 #include <algorithm>
 #include <string>
+
+#define DEBUG 0
+
+#if DEBUG
+
+#define D(fmt,...) fprintf(stderr, "%s:%d: " fmt "\n", __func__, __LINE__, ##__VA_ARGS__);
+
+#else
+
+#define D(...) (void)0
+
+#endif
 
 using android::base::makeCustomScopedPtr;
 using android::base::PathUtils;
@@ -268,7 +281,87 @@ void parse_gpu_info_list_windows(const std::string& contents,
     }
 }
 
+typedef HRESULT(WINAPI *d3d11_create_device_t)(IDXGIAdapter *, D3D_DRIVER_TYPE, HMODULE, UINT32, D3D_FEATURE_LEVEL *, UINT, UINT32, ID3D11Device **, D3D_FEATURE_LEVEL *, ID3D11DeviceContext **);
+
+static d3d11_create_device_t d3d11_create_device_fn = 0;
+
+static void queryD3D11Support(GpuInfoList* gpus) {
+    // Query D3D11 capability; create a device without a swap chain.
+    D("Querying D3D11 support...");
+    ID3D11Device* d3d11Device = 0;
+    ID3D11DeviceContext* d3d11DeviceContext = 0;
+
+    HMODULE d3d11Lib = LoadLibrary("d3d11.dll");
+
+    if (!d3d11Lib) {
+        D("D3D11 not in library search path; fail");
+    } else {
+        d3d11_create_device_fn =
+            (d3d11_create_device_t)GetProcAddress(d3d11Lib, "D3D11CreateDevice");
+
+        if (!d3d11_create_device_fn) {
+            D("D3D11 library does not have D3D11CreateDevice; fail");
+        } else {
+            D3D_FEATURE_LEVEL supportedLevel;
+            HRESULT deviceCreateResult = d3d11_create_device_fn(
+                nullptr, // Default adapter
+                D3D_DRIVER_TYPE_HARDWARE,
+                nullptr, // No software rendering module
+                0, // No flags (!)
+                nullptr, // No desired feature levels
+                0,
+                D3D11_SDK_VERSION,
+                &d3d11Device,
+                &supportedLevel,
+                &d3d11DeviceContext);
+
+            switch (deviceCreateResult) {
+                case E_FAIL:
+                    D("Failed to create device (E_FAIL)");
+                    break;
+                case E_INVALIDARG:
+                    D("Failed to create device (E_INVALIDARG)");
+                    break;
+                case E_OUTOFMEMORY:
+                    D("Failed to create device (E_OUTOFMEMORY)");
+                    break;
+                case E_NOTIMPL:
+                    D("Failed to create device (E_NOTIMPL)");
+                    break;
+                case S_FALSE:
+                    D("Failed to create device (S_FALSE)");
+                    break;
+                case S_OK:
+                    D("Successfully created device");
+                    break;
+                default:
+                    D("Unknown error code from D3D11CreateDevice: 0x%lx",
+                      deviceCreateResult);
+            }
+
+            D("D3D11 device created. Got: %p %p", d3d11Device, d3d11DeviceContext);
+            if (deviceCreateResult != S_OK ||
+                supportedLevel < D3D_FEATURE_LEVEL_10_1) {
+                D("ANGLE not supported on this machine. "
+                  "Feature level too low (wanted 0x%x, got 0x%x) ",
+                  D3D_FEATURE_LEVEL_10_1,
+                  supportedLevel);
+            } else {
+                D("ANGLE supported on this machine. Feature level 0x%x",
+                  supportedLevel);
+                gpus->d3d11_support = true;
+            }
+
+            if (deviceCreateResult == S_OK) {
+                if (d3d11Device) { d3d11Device->Release(); }
+                if (d3d11DeviceContext) { d3d11Device->Release(); }
+            }
+        }
+    }
+}
+
 static bool queryGpuInfoD3D(GpuInfoList* gpus) {
+    // Query basic gpu info using D3D9.
     LPDIRECT3D9 pD3D = Direct3DCreate9(D3D_SDK_VERSION);
     UINT numAdapters = pD3D->GetAdapterCount();
 
@@ -294,6 +387,9 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
             snprintf(vendoridBuf, sizeof(vendoridBuf), "%04x", (unsigned int)id.VendorId);
             snprintf(deviceidBuf, sizeof(deviceidBuf), "%04x", (unsigned int)id.DeviceId);
             snprintf(&descriptionBuf[0], MAX_DEVICE_IDENTIFIER_STRING, "%s", id.Description);
+            D("GPU %d: vendorId %s", i, vendoridBuf);
+            D("GPU %d: deviceId %s", i, deviceidBuf);
+            D("GPU %d: descriptionBuf %s", i, &descriptionBuf[0]);
             gpu.make = vendoridBuf;
             gpu.device_id = deviceidBuf;
             gpu.model = &descriptionBuf[0];
@@ -305,6 +401,10 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
 }
 
 void getGpuInfoListNative(GpuInfoList* gpus) {
+    // Check D3D11 ANGLE support here.
+    queryD3D11Support(gpus);
+
+    // Get a list of GPUs with D3D9.
     if (queryGpuInfoD3D(gpus)) return;
 
     DISPLAY_DEVICEW device = { sizeof(device) };
