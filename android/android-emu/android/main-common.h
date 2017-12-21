@@ -52,6 +52,14 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                                             AvdInfo** the_avd,
                                             int* exit_status);
 
+// Handle command-line options and AVD configurations that are dependent on
+// the status of advanced features.  This function will update the content of
+// |hw| based on the values found in |opts| and |avd|, so call this before
+// writing hardware-qemu.img to disk. Return true on success, false otherwise.
+bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
+                                             AvdInfo* avd,
+                                             AndroidHwConfig* hw);
+
 // configAndStartRenderer():
 // Perform renderer configuration based on the host GPU
 // (or guest renderer if applicable), and then start the renderer.
