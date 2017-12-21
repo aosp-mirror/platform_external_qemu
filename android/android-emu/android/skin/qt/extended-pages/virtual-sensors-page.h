@@ -69,6 +69,9 @@ signals:
     void startSensorUpdateTimerRequired();
     void stopSensorUpdateTimerRequired();
 
+public slots:
+    void onVirtualSceneControlsEngaged(bool engaged);
+
 private slots:
     void on_rotateToPortrait_clicked();
     void on_rotateToLandscape_clicked();
@@ -93,7 +96,6 @@ private slots:
 
     void startSensorUpdateTimer();
     void stopSensorUpdateTimer();
-
 private:
     void resetDeviceRotation(const glm::quat&);
 
@@ -127,4 +129,7 @@ private:
     bool mSlidersUseCurrent = true;
     glm::vec3 mSlidersTargetPosition;
     glm::vec3 mSlidersTargetRotation;
+
+    bool mBypassOrientationChecks = false;
+    bool mVirtualSceneControlsEngaged = false;
 };

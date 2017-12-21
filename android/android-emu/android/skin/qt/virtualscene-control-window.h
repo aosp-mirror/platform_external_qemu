@@ -57,6 +57,9 @@ public:
 
     void setActive(bool active);
     bool isActive();
+    
+signals:
+    void virtualSceneControlsEngaged(bool engaged);
 
 private slots:
     void slot_mousePoller();
