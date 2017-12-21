@@ -311,6 +311,7 @@ LOCAL_SRC_FILES := \
     android/emulation/AdbGuestPipe.cpp \
     android/emulation/AdbHostListener.cpp \
     android/emulation/AdbHostServer.cpp \
+    android/emulation/AdbMessageSniffer.cpp \
     android/emulation/AndroidMessagePipe.cpp \
     android/emulation/AndroidPipe.cpp \
     android/emulation/android_pipe_host.cpp \
