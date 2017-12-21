@@ -110,13 +110,21 @@ void HelpPage::initializeKeyboardShortcutList(const ShortcutKeyStore<QtUICommand
             // sequences very well. In this case, "multitouch" is Ctrl and
             // QKeySequence::toString sometimes produces strings with weird
             // characters. To mitigate this problem, we simply hardcode the
-            // string for the "multitouch" key combo.
+            // string for the "multitouch" key combo.  Similarly with the
+            // virtual scene control trigger, we set the key combo directly.
             if (key_sequence_and_command.value() ==
                        QtUICommand::SHOW_MULTITOUCH) {
 #ifdef Q_OS_MAC
                 key_combo = "\u2318";  // Cmd
 #else
                 key_combo = "Ctrl";
+#endif
+            } else if (key_sequence_and_command.value() ==
+                        QtUICommand::VIRTUAL_SCENE_CONTROL) {
+#ifdef Q_OS_MAC
+                key_combo = "\u2325 Option";  // Opt
+#else
+                key_combo = "Alt";
 #endif
             } else {
                 key_combo  = key_sequence_and_command.key().toString(QKeySequence::NativeText);

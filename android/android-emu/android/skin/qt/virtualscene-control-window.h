@@ -12,6 +12,7 @@
 #pragma once
 
 #include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/size-tweaker.h"
 #include "android/ui-emu-agent.h"
 
@@ -58,6 +59,7 @@ public:
     void setActive(bool active);
     bool isActive();
 
+    void addShortcutKeysToKeyStore(ShortcutKeyStore<QtUICommand>& keystore);
 signals:
     void virtualSceneControlsEngaged(bool engaged);
 
