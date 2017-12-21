@@ -285,6 +285,14 @@ void PhysicalModelImpl::setTargetVelocity(vec3 velocity,
     targetStateChanged();
 }
 
+void PhysicalModelImpl::setTargetAmbientMotion(float bounds,
+        PhysicalInterpolation mode) {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    physicalStateChanging();
+    mInertialModel.setTargetAmbientMotion(bounds, mode);
+    targetStateChanged();
+}
+
 void PhysicalModelImpl::setTargetRotation(vec3 rotation,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
@@ -354,6 +362,12 @@ vec3 PhysicalModelImpl::getParameterVelocity(
         ParameterValueType parameterValueType) const {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     return fromGlm(mInertialModel.getVelocity(parameterValueType));
+}
+
+float PhysicalModelImpl::getParameterAmbientMotion(
+        ParameterValueType parameterValueType) const {
+    std::lock_guard<std::recursive_mutex> lock(mMutex);
+    return mInertialModel.getAmbientMotion(parameterValueType);
 }
 
 vec3 PhysicalModelImpl::getParameterRotation(
@@ -514,7 +528,6 @@ void PhysicalModelImpl::getTransform(
     *out_rotation_z = rotation.z;
     *out_timestamp = mModelTimeNs;
 }
-
 
 void PhysicalModelImpl::setPhysicalStateAgent(
         const QAndroidPhysicalStateAgent* agent) {
