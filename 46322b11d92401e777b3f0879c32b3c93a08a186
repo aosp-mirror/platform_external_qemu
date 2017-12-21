@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7be2de90_f3e6155a",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 313,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T22:39:44Z",
+      "side": 1,
+      "message": "I\u0027d like to count continuous interactions more than a single interaction.  This currently counts one interaction per 500ms, so that longer interactions will count more.\n\nmLastInteractionElapsed is super lightweight, it doesn\u0027t fire any events, it just keeps track of the last time that start() was called and returns the elapsed time when queried.",
+      "parentUuid": "0ccc64e6_da6ea2f8",
+      "range": {
+        "startLine": 313,
+        "startChar": 12,
+        "endLine": 313,
+        "endChar": 44
+      },
+      "revId": "46322b11d92401e777b3f0879c32b3c93a08a186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "35b2bc73_b8903eb6",
         "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
         "patchSetId": 1
@@ -71,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "46bc0234_9233ac77",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 197,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T22:39:44Z",
+      "side": 1,
+      "message": "Not intentional, it should be just on start.",
+      "parentUuid": "b720bd0c_c41d7dcb",
+      "range": {
+        "startLine": 197,
+        "startChar": 19,
+        "endLine": 197,
+        "endChar": 36
+      },
+      "revId": "46322b11d92401e777b3f0879c32b3c93a08a186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f2eb790b_b9858acb",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -94,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "5e9c41e2_8b8f449c",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T22:39:44Z",
+      "side": 1,
+      "message": "Yeah, good point.  This is also mixing uint/int since hw-sensors uses an int for it.  I\u0027ll cache this as an int and validate/convert to an uint right before aggregating.",
+      "parentUuid": "f2eb790b_b9858acb",
+      "range": {
+        "startLine": 230,
+        "startChar": 37,
+        "endLine": 230,
+        "endChar": 47
+      },
+      "revId": "46322b11d92401e777b3f0879c32b3c93a08a186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c94c18d6_05523294",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -105,6 +177,30 @@
       "writtenOn": "2017-12-21T22:13:34Z",
       "side": 1,
       "message": "I think we should probably use TARGET or at least the current without ambient motion value in here.",
+      "range": {
+        "startLine": 509,
+        "startChar": 0,
+        "endLine": 514,
+        "endChar": 70
+      },
+      "revId": "46322b11d92401e777b3f0879c32b3c93a08a186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "91eddebd_e1b72333",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 514,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T22:39:44Z",
+      "side": 1,
+      "message": "_TARGET doesn\u0027t work well with velocity-- I\u0027ll use the flag without ambient motion.",
+      "parentUuid": "c94c18d6_05523294",
       "range": {
         "startLine": 509,
         "startChar": 0,
