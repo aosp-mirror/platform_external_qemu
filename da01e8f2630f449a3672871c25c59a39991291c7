@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f7ea631a_be2dae95",
+        "filename": "android/android-emu/android/main-common.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 1864,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-21T17:44:10Z",
+      "side": 1,
+      "message": "nit: line this up with the parameter above",
+      "range": {
+        "startLine": 1863,
+        "startChar": 0,
+        "endLine": 1864,
+        "endChar": 62
+      },
+      "revId": "da01e8f2630f449a3672871c25c59a39991291c7",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
