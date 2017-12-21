@@ -61,7 +61,13 @@ constexpr CommandInfo kCommands[] = {
         INIT_COMMAND(BACK, "Back"),
         INIT_COMMAND(MENU, "Menu"),
         INIT_COMMAND(OVERVIEW, "Overview"),
-        INIT_COMMAND(TOGGLE_TRACKBALL, "Toggle trackball mode (if AVD is configured for it)"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_FORWARD, "Move virtual scene camera forward"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_LEFT, "Move virtual scene camera left"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_BACKWARD, "Move virtual scene camera backward"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_RIGHT, "Move virtual scene camera right"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_DOWN, "Move virtual scene camera down"),
+        INIT_COMMAND(VIRTUAL_SCENE_MOVE_UP, "Move virtual scene camera up"),
+        INIT_COMMAND(VIRTUAL_SCENE_CONTROL, "Enable virtual scene camera controls"),
 };
 
 bool parseQtUICommand(const QString& string, QtUICommand* command) {
