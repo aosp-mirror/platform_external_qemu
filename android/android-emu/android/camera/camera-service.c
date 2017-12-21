@@ -22,6 +22,7 @@
 
 #include "android/camera/camera-capture.h"
 #include "android/camera/camera-format-converters.h"
+#include "android/camera/camera-metrics.h"
 #include "android/camera/camera-virtualscene.h"
 #include "android/emulation/android_qemud.h"
 #include "android/featurecontrol/feature_control.h"
@@ -699,6 +700,8 @@ struct CameraClient
        */
     char command_buffer[MAX_QUERY_MESSAGE_SIZE];
     int  command_buffer_offset;
+    /* Total number of frames rendered, used for metrics. */
+    uint64_t            frame_count;
 };
 
 /* Frees emulated camera client descriptor. */
@@ -907,17 +910,6 @@ _camera_client_query_disconnect(CameraClient* cc,
     _qemu_client_reply_ok(qc, NULL);
 }
 
-typedef enum ClientStartResult ClientStartResult;
-enum ClientStartResult {
-    CLIENT_START_RESULT_SUCCESS = 2,
-    CLIENT_START_RESULT_ALREADY_STARTED = 1,
-    CLIENT_START_RESULT_PARAMETER_MISMATCH = -1,
-    CLIENT_START_RESULT_UNKNOWN_PIXEL_FORMAT = -2,
-    CLIENT_START_RESULT_NO_PIXEL_CONVERSION = -3,
-    CLIENT_START_RESULT_OUT_OF_MEMORY = -4,
-    CLIENT_START_RESULT_FAILED = -5,
-};
-
 /* Start capturing video with the given frame params
  * Param:
  *  cc - Queried camera client descriptor.
@@ -930,6 +922,10 @@ enum ClientStartResult {
  */
 static ClientStartResult
 _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
+    camera_metrics_report_start_session(cc->camera_info->camera_source,
+                                        cc->camera_info->direction, width,
+                                        height, pix_format);
+
     /* After collecting capture parameters lets see if camera has already
      * started, and if so, lets see if parameters match. */
     if (cc->video_frame != NULL) {
@@ -958,6 +954,7 @@ _camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
     cc->height = height;
     cc->pixel_num = cc->width * cc->height;
     cc->frames_cached = 0;
+    cc->frame_count = 0;
 
     /* Make sure that pixel format is known, and calculate video/preview
      * framebuffer size along the lines. */
@@ -1092,8 +1089,13 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
         return;
     }
 
-    ClientStartResult result =_camera_client_start(cc, width, height,
-                                                   pix_format);
+    ClientStartResult result =
+            _camera_client_start(cc, width, height, pix_format);
+    camera_metrics_report_start_result(result);
+
+    if (result < 0) {
+        camera_metrics_report_stop_session(0);
+    }
 
     switch (result) {
         case CLIENT_START_RESULT_SUCCESS:
@@ -1115,7 +1117,7 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
             _qemu_client_reply_ko(qc, "Out of memory");
             break;
         default:
-            E("%s: Unexpected capture result '%s'", __FUNCTION__, result);
+            E("%s: Unexpected capture result '%d'", __FUNCTION__, result);
             // Intentional fallthrough.
         case CLIENT_START_RESULT_FAILED:
             _qemu_client_reply_ko(qc, "Cannot start the camera");
@@ -1149,6 +1151,8 @@ _camera_client_query_stop(CameraClient* cc, QemudClient* qc, const char* param)
 
     free(cc->video_frame);
     cc->video_frame = NULL;
+
+    camera_metrics_report_stop_session(cc->frame_count);
 
     D("%s: Camera device '%s' is now stopped.", __FUNCTION__, cc->device_name);
     _qemu_client_reply_ok(qc, NULL);
@@ -1298,6 +1302,7 @@ _camera_client_query_frame(CameraClient* cc, QemudClient* qc, const char* param)
 
     /* We have cached something... */
     cc->frames_cached = 1;
+    ++cc->frame_count;
 
     /*
      * Build the reply.
@@ -1494,9 +1499,14 @@ static int _camera_client_load(Stream* f, QemudClient* client, void* opaque) {
         int pixel_format = stream_get_be32(f);
         int width = stream_get_be32(f);
         int height = stream_get_be32(f);
-        if (_camera_client_start(cc, width, height, pixel_format) < 0) {
+
+        ClientStartResult result =
+                _camera_client_start(cc, width, height, pixel_format);
+        camera_metrics_report_start_result(result);
+        if (result < 0) {
             D("%s: failed to start camera service required in snapshot.\n",
               __FUNCTION__);
+            camera_metrics_report_stop_session(0);
             return -EIO;
         }
     }

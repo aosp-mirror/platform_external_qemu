@@ -200,4 +200,16 @@ typedef struct CameraDevice {
     void*       opaque;
 } CameraDevice;
 
+enum ClientStartResult {
+    CLIENT_START_RESULT_SUCCESS = 2,
+    CLIENT_START_RESULT_ALREADY_STARTED = 1,
+    CLIENT_START_RESULT_PARAMETER_MISMATCH = -1,
+    CLIENT_START_RESULT_UNKNOWN_PIXEL_FORMAT = -2,
+    CLIENT_START_RESULT_NO_PIXEL_CONVERSION = -3,
+    CLIENT_START_RESULT_OUT_OF_MEMORY = -4,
+    CLIENT_START_RESULT_FAILED = -5,
+};
+
+typedef enum ClientStartResult ClientStartResult;
+
 ANDROID_END_HEADER

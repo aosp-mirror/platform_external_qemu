@@ -289,6 +289,7 @@ LOCAL_SRC_FILES := \
     android/camera/camera-common.cpp \
     android/camera/camera-format-converters.c \
     android/camera/camera-list.cpp \
+    android/camera/camera-metrics.cpp \
     android/camera/camera-service.c \
     android/camera/camera-virtualscene.cpp \
     android/car.cpp \
