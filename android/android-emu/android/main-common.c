@@ -1752,21 +1752,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         hw->vm_heapSize = heapSize;
     }
 
-    if (opts->camera_back) {
-        /* Validate parameter. */
-        if (memcmp(opts->camera_back, "webcam", 6) &&
-            strcmp(opts->camera_back, "emulated") &&
-            strcmp(opts->camera_back, "virtualscene") &&
-            strcmp(opts->camera_back, "none")) {
-            derror("Invalid value for -camera-back <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>', 'virtualscene', "
-                   "or 'none'\n",
-                   opts->camera_back);
-            return false;
-        }
-        str_reset(&hw->hw_camera_back, opts->camera_back);
-    }
-
     if (opts->camera_front) {
         /* Validate parameter. */
         if (memcmp(opts->camera_front, "webcam", 6) &&
@@ -1874,6 +1859,28 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     return true;
 }
 
+bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
+                                             AvdInfo* avd,
+                                             AndroidHwConfig* hw) {
+    if (opts->camera_back) {
+        bool supportsVirtualScene = feature_is_enabled(kFeature_VirtualScene);
+        bool isVirtualScene = !strcmp(opts->camera_back, "virtualscene");
+        /* Validate parameter. */
+        if (memcmp(opts->camera_back, "webcam", 6) &&
+            strcmp(opts->camera_back, "emulated") &&
+            (!isVirtualScene || !supportsVirtualScene) &&
+            strcmp(opts->camera_back, "none")) {
+            derror("Invalid value for -camera-back <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>'%s, "
+                   "or 'none'\n",
+                   opts->camera_back,
+                   supportsVirtualScene? ", 'virtualscene'": "");
+            return false;
+        }
+        str_reset(&hw->hw_camera_back, opts->camera_back);
+    }
+    return true;
+}
 
 static RendererConfig lastRendererConfig;
 
