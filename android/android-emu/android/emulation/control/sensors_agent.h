@@ -64,6 +64,8 @@ typedef struct QAndroidSensorsAgent {
     //                   etc.
     int (*getSensor)(int sensorId, float *a, float *b, float *c);
 
+    // Gets the current sensor update delay in milliseconds.
+    int (*getDelayMs)();
 
     // Sets the agent used to receive callbacks to used to track whether the
     // state of the physical model is currently changing.
