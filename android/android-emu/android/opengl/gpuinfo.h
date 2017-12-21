@@ -34,6 +34,7 @@ void async_query_host_gpu_start();
 bool async_query_host_gpu_blacklisted();
 bool async_query_host_gpu_AngleWhitelisted();
 bool async_query_host_gpu_SyncBlacklisted();
+bool async_query_d3d11_supported();
 
 // Below is the implementation.
 
@@ -100,6 +101,7 @@ public:
     bool blacklist_status = false;
     bool Anglelist_status = false;
     bool SyncBlacklist_status = false;
+    bool d3d11_support = false;
 
     DISALLOW_COPY_ASSIGN_AND_MOVE(GpuInfoList);
 };
