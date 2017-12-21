@@ -159,6 +159,16 @@ ExtendedWindow::ExtendedWindow(
             eW,
             SLOT(rotateSkin(SkinRotation)));
 
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(coarseOrientationChanged(SkinRotation)),
+            tW->virtualSceneControlWindow(),
+            SLOT(orientationChanged(SkinRotation)));
+    connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()),
+            tW->virtualSceneControlWindow(), SLOT(virtualSensorsPageVisible()));
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(virtualSensorsInteraction()),
+            tW->virtualSceneControlWindow(), SLOT(virtualSensorsInteraction()));
+
     const auto enableClipboardSharing =
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
     mToolWindow->switchClipboardSharing(enableClipboardSharing);

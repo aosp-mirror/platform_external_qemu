@@ -29,6 +29,9 @@ static constexpr int kMousePollIntervalMilliseconds = 16;
 static constexpr int kWindowHeight = 50;
 static const QColor kHighlightColor = QColor(2, 136, 209);
 
+static constexpr int kMetricsAggregateIntervalMilliseconds = 1000;
+static constexpr uint64_t kTapAfterHotkeyThresholdMilliseconds = 2000;
+
 static const float kPixelsToRotationRadians = 0.2f * static_cast<float>(M_PI / 180.0f);
 static const float kMovementVelocityMetersPerSecond = 1.0f;
 static const float kMinVerticalRotationDegrees = -80.0f;
@@ -75,6 +78,8 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
     QApplication::instance()->installEventFilter(this);
 
     connect(&mMousePoller, SIGNAL(timeout()), this, SLOT(slot_mousePoller()));
+    connect(&mMetricsAggregateTimer, SIGNAL(timeout()), this,
+            SLOT(slot_metricsAggregator()));
 }
 
 VirtualSceneControlWindow::~VirtualSceneControlWindow() {
@@ -121,6 +126,8 @@ void VirtualSceneControlWindow::setWidth(int width) {
 void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
     if (capture) {
         mOriginalMousePosition = QCursor::pos();
+        ++mMetrics.hotkeyInvokeCount;
+        mMouseCaptureElapsed.start();
 
         // Get the starting rotation.
         if (mSensorsAgent) {
@@ -186,6 +193,13 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
         }
 
         updateVelocity();
+
+        ++mMetrics.hotkeyInvokeCount;
+        mMetrics.hotkeyDurationMs = mMouseCaptureElapsed.isValid()
+                                            ? mMouseCaptureElapsed.elapsed()
+                                            : 0;
+        mMouseCaptureElapsed.invalidate();
+        mLastHotkeyReleaseElapsed.start();
     }
 
     mCaptureMouse = capture;
@@ -194,12 +208,45 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
     update();  // Queues a repaint call.
 }
 
+void VirtualSceneControlWindow::showEvent(QShowEvent* event) {
+    mMetrics = Metrics();
+    mOverallDuration.restart();
+    mMetricsAggregateTimer.start(kMetricsAggregateIntervalMilliseconds);
+    aggregateMovementMetrics(true);
+}
+
 void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
     QFrame::hide();
 
     if (mCaptureMouse) {
         setCaptureMouse(false);
     }
+
+    mMetricsAggregateTimer.stop();
+    slot_metricsAggregator();  // Perform final metrics aggregation.
+
+    android_studio::EmulatorVirtualSceneSession metrics;
+    metrics.set_duration_ms(mOverallDuration.elapsed());
+    if (mMetrics.minSensorDelayMs != UINT32_MAX) {
+        metrics.set_min_sensor_delay_ms(mMetrics.minSensorDelayMs);
+    }
+    metrics.set_tap_count(mMetrics.tapCount);
+    metrics.set_orientation_change_count(mMetrics.orientationChangeCount);
+    metrics.set_virtual_sensors_visible(mMetrics.virtualSensorsVisible);
+    metrics.set_virtual_sensors_interaction_count(
+            mMetrics.virtualSensorsInteractionCount);
+    metrics.set_hotkey_invoke_count(mMetrics.hotkeyInvokeCount);
+    metrics.set_hotkey_duration_ms(mMetrics.hotkeyDurationMs);
+    metrics.set_taps_after_hotkey_invoke(mMetrics.tapsAfterHotkeyInvoke);
+    metrics.set_total_rotation_radians(mMetrics.totalRotationRadians);
+    metrics.set_total_translation_meters(mMetrics.totalTranslationMeters);
+
+    android::metrics::MetricsReporter::get().report(
+            [metrics](android_studio::AndroidStudioEvent* event) {
+                event->mutable_emulator_details()
+                        ->mutable_virtual_scene()
+                        ->CopyFrom(metrics);
+            });
 }
 
 bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
@@ -273,8 +320,44 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     p.end();
 }
 
+void VirtualSceneControlWindow::reportMouseButtonDown() {
+    ++mMetrics.tapCount;
+    if (mLastHotkeyReleaseElapsed.isValid() &&
+        mLastHotkeyReleaseElapsed.elapsed() <
+                kTapAfterHotkeyThresholdMilliseconds) {
+        ++mMetrics.tapsAfterHotkeyInvoke;
+    }
+}
+
+void VirtualSceneControlWindow::orientationChanged(SkinRotation) {
+    ++mMetrics.orientationChangeCount;
+}
+
+void VirtualSceneControlWindow::virtualSensorsPageVisible() {
+    // We receive an event when the virtual sensors page is opened while the
+    // camera is running. If it is opened before the session has started, only
+    // count it if there is an interaction on the page.
+    mMetrics.virtualSensorsVisible = true;
+}
+
+void VirtualSceneControlWindow::virtualSensorsInteraction() {
+    mMetrics.virtualSensorsVisible = true;
+    ++mMetrics.virtualSensorsInteractionCount;
+}
+
 void VirtualSceneControlWindow::slot_mousePoller() {
     updateMouselook();
+}
+
+void VirtualSceneControlWindow::slot_metricsAggregator() {
+    if (mSensorsAgent) {
+        int delayMs = static_cast<uint32_t>(mSensorsAgent->getDelayMs());
+        if (delayMs < mMetrics.minSensorDelayMs) {
+            mMetrics.minSensorDelayMs = delayMs;
+        }
+
+        aggregateMovementMetrics();
+    }
 }
 
 void VirtualSceneControlWindow::updateMouselook() {
@@ -409,6 +492,43 @@ void VirtualSceneControlWindow::updateVelocity() {
                     velocity.z, PHYSICAL_INTERPOLATION_SMOOTH);
         }
     }
+}
+
+void VirtualSceneControlWindow::aggregateMovementMetrics(bool reset) {
+    if (reset) {
+        mMetrics.totalTranslationMeters = 0.0;
+        mMetrics.totalRotationRadians = 0.0;
+    }
+
+    if (!mSensorsAgent) {
+        return;
+    }
+
+    glm::vec3 eulerDegrees;
+    glm::vec3 position;
+    mSensorsAgent->getPhysicalParameter(
+            PHYSICAL_PARAMETER_ROTATION, &eulerDegrees.x, &eulerDegrees.y,
+            &eulerDegrees.z, PARAMETER_VALUE_TYPE_CURRENT);
+    mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSITION,
+                                        &position.x, &position.y, &position.z,
+                                        PARAMETER_VALUE_TYPE_CURRENT);
+
+    const glm::quat rotation = glm::eulerAngleXYZ(glm::radians(eulerDegrees.x),
+                                                  glm::radians(eulerDegrees.y),
+                                                  glm::radians(eulerDegrees.z));
+
+    if (!reset) {
+        mMetrics.totalTranslationMeters +=
+                glm::distance(mLastReportedPosition, position);
+        const double angle =
+                glm::angle(glm::inverse(mLastReportedRotation) * rotation);
+        if (!std::isnan(angle)) {
+            mMetrics.totalRotationRadians += angle;
+        }
+    }
+
+    mLastReportedPosition = position;
+    mLastReportedRotation = rotation;
 }
 
 QPoint VirtualSceneControlWindow::getMouseCaptureCenter() {
