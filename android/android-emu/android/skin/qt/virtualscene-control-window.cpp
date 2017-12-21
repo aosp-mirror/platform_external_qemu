@@ -149,6 +149,10 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
             if (mEulerRotationRadians.x > M_PI) {
                 mEulerRotationRadians.x -= static_cast<float>(2 * M_PI);
             }
+
+            mSensorsAgent->setPhysicalParameterTarget(
+                    PHYSICAL_PARAMETER_AMBIENT_MOTION, 0.005f, 0.f, 0.f,
+                    PHYSICAL_INTERPOLATION_SMOOTH);
         }
 
         QCursor cursor(Qt::BlankCursor);
@@ -173,6 +177,14 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
         for (bool& pressed : mKeysHeld) {
             pressed = false;
         }
+
+        if (mSensorsAgent) {
+            mSensorsAgent->setPhysicalParameterTarget(
+                    PHYSICAL_PARAMETER_AMBIENT_MOTION, 0.f,
+                    0.f, 0.f,
+                    PHYSICAL_INTERPOLATION_SMOOTH);
+        }
+
         updateVelocity();
     }
 
