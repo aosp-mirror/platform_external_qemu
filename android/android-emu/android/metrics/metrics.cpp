@@ -116,6 +116,8 @@ void android_metrics_stop(MetricsStopReason reason) {
 // Start the ADB liveness monitor. call this when GUI starts
 bool android_metrics_start_adb_liveness_checker(
         android::emulation::AdbInterface* adb) {
+    return true;
+
     const std::string& emulatorName = adb->serialString().empty()
                                               ? sGlobalData->emulatorName
                                               : adb->serialString();
