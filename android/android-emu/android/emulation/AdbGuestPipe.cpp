@@ -51,6 +51,196 @@
 namespace android {
 namespace emulation {
 
+AdbMessage::AdbMessage(const char* name):mName(name) {
+    memset(&mPacket, 0, sizeof(apacket));
+    startNewMessage();
+}
+
+AdbMessage::~AdbMessage() {
+}
+
+void AdbMessage::readToBuffer(const AndroidPipeBuffer* buffers, int numBuffers, int count) {
+    mBufferP = mBuffer;
+    for (int i=0; i < numBuffers; ++i) {
+        uint8_t* data = buffers[i].data;
+        int dataSize = buffers[i].size;
+        if (count < dataSize) {
+            memcpy(mBufferP, data, count);
+            return;
+        } else {
+            memcpy(mBufferP, data, dataSize);
+            mBufferP += dataSize;
+            count -= dataSize;
+            if (count == 0) {
+                return;
+            }
+        }
+    }
+}
+
+void AdbMessage::parseBuffer(int bufferLength) {
+    mBufferP = mBuffer;
+    int count = bufferLength;
+    while (count > 0) {
+        if (mState == 0) {
+            count -= readHeader(count);
+        } else { 
+            count -= readPayload(count);
+        }
+    }
+}
+
+int AdbMessage::readHeader(int dataSize) {
+    CHECK( mPacket.data - mCurrPos > 0);
+    int need = sizeof(amessage) - (mCurrPos - (uint8_t*)(&mPacket));
+    if (need > dataSize) {
+        copyFromBuffer(dataSize);
+        return dataSize;
+    } else {
+        copyFromBuffer(need);
+        registerMessage();
+        printMessage();
+        mState = 1;
+        return need;
+    }
+}
+
+void AdbMessage::checkForShellExit() {
+    amessage & msg = mPacket.mesg;
+    if (msg.command == ADB_OPEN) {
+        mPacket.data[msg.data_length] = '\0';
+        const char *purpose = (char*)(mPacket.data);
+        if (strncmp(purpose, "shell", 5)==0) {
+            if (strstr(purpose, ":exit") != NULL) {
+                //found shell exit
+                printf("found shell %s\n", purpose);
+                mPrintQuota.erase(msg.arg0);
+            }
+        }
+    }
+}
+
+int AdbMessage::readPayload(int dataSize) {
+    CHECK(mCurrPos - mPacket.data >= 0);
+    int need = getPayloadSize() - (mCurrPos - mPacket.data);
+    if (need > dataSize) {
+        copyFromBuffer(dataSize);
+        return dataSize;
+    } else {
+        copyFromBuffer(need);
+        checkForShellExit();
+        printPayload();
+        startNewMessage();
+        return need;
+    }
+}
+
+void AdbMessage::read(const AndroidPipeBuffer* buffers, int numBuffers, int count) {
+    if (count <= 0) return;
+    readToBuffer(buffers, numBuffers, count);
+    parseBuffer(count);
+}
+
+int AdbMessage::getPayloadSize() {
+    return mPacket.mesg.data_length;
+}
+
+void AdbMessage::copyFromBuffer(int count) {
+    memcpy(mCurrPos, mBufferP, count);
+    mCurrPos += count;
+    mBufferP += count;
+}
+
+int AdbMessage::getAllowedBytesToPrint(int bytes) {
+    amessage & msg = mPacket.mesg;
+    if (msg.command == ADB_CLSE) return bytes;
+    if (mPrintQuota.find(msg.arg0) == mPrintQuota.end()) {
+        return 0;
+    }
+    if (mPrintQuota[msg.arg0] <= 0) {
+        //too much spam
+        return 0;
+    }
+
+    int allowed = std::min(bytes, mPrintQuota[msg.arg0]);
+    mPrintQuota[msg.arg0] -= allowed;
+    return allowed;
+}
+
+void AdbMessage::printPayload() {
+    amessage & msg = mPacket.mesg;
+    int length = msg.data_length;
+    length = getAllowedBytesToPrint(length);
+    if (length <= 0 ) return;
+    uint8_t* data = mPacket.data;
+    for (int i=0; i < length; ++i) {
+        if (i % 1024 == 0) {
+            printf("%s:", mName);
+        }
+        int ch = data[i];
+        if (isprint(ch)) {
+            printf("%c", ch);
+        } else if (isspace(ch)) {
+            printf("%c", ch);
+        } else {
+            printf(" ");
+        }
+    }
+    printf("\n");
+}
+
+const char* AdbMessage::getCommandName(unsigned code) {
+    switch(code) {
+        case ADB_SYNC:
+            return "SYNC";
+        case ADB_CNXN:
+            return "CNXN";
+        case ADB_OPEN:
+            return "OPEN";
+        case ADB_CLSE:
+            return "CLOSE";
+        case ADB_AUTH:
+            return "AUTH";
+        case ADB_WRTE:
+            return "WRITE";
+        case ADB_OKAY:
+            return "OKAY";
+        default:
+            return "unknown";
+    }
+}
+
+void AdbMessage::registerMessage() {
+    amessage & msg = mPacket.mesg;
+    if (msg.command == ADB_OPEN) {
+        printf("register open %d\n", msg.arg0);
+        mPrintQuota[msg.arg0] = 1024;
+    } else if (msg.command == ADB_CLSE) {
+        printf("un register %d\n", msg.arg0);
+        mPrintQuota.erase((msg.arg0));
+    } else if (mPrintQuota.find(msg.arg0) == mPrintQuota.end()) {
+        printf("first time register %s\n", getCommandName(msg.command));
+        mPrintQuota[msg.arg0] = 1024;
+    }
+}
+
+void AdbMessage::printMessage() {
+    amessage & msg = mPacket.mesg;
+    int allowed = getAllowedBytesToPrint(24);
+    if (allowed <= 0) return;
+
+    printf("%s:command: %s ", mName, getCommandName(msg.command));
+    printf("arg0: %d ", msg.arg0);
+    printf("arg1: %d ", msg.arg1);
+    printf("data length: %d\n", msg.data_length);
+}
+
+void AdbMessage::startNewMessage() {
+    mCurrPos = (uint8_t*)(&mPacket);
+    mState = 0;
+    mBufferP = mBuffer;
+}
+
 // Technical note: full state transition diagram
 //
 // State::WaitingForGuestAcceptCommand:
@@ -282,7 +472,9 @@ int AdbGuestPipe::onGuestRecv(AndroidPipeBuffer* buffers, int numBuffers) {
        bufferBytes(buffers, numBuffers), toString(mState));
     if (mState == State::ProxyingData) {
         // Common case, proxy-ing the data from the host to the guest.
-        return onGuestRecvData(buffers, numBuffers);
+        int count = onGuestRecvData(buffers, numBuffers);
+        mReceivedMesg.read(buffers, numBuffers, count);
+        return count;
     } else if (guest_data_partition_mounted == 0 && mPlayStoreImage) {
         return PIPE_ERROR_AGAIN;
     } else if (mState == State::SendingAcceptReplyOk) {
@@ -307,7 +499,9 @@ int AdbGuestPipe::onGuestSend(const AndroidPipeBuffer* buffers,
        bufferBytes(buffers, numBuffers), toString(mState));
     if (mState == State::ProxyingData) {
         // Common-case, proxy-ing the data from the guest to the host.
-        return onGuestSendData(buffers, numBuffers);
+        int count = onGuestSendData(buffers, numBuffers);
+        mSendingMesg.read(buffers, numBuffers, count);
+        return count;
     } else if (mState == State::WaitingForGuestAcceptCommand ||
                mState == State::WaitingForGuestStartCommand) {
         // Waiting command bytes from the guest.

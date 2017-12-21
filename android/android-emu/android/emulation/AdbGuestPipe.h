@@ -20,9 +20,75 @@
 #include "android/featurecontrol/FeatureControl.h"
 
 #include <vector>
+#include <map>
 
 namespace android {
 namespace emulation {
+
+// AdbMessage wraps around the raw adb message struct
+class AdbMessage {
+public:
+
+#define ADB_SYNC 0x434e5953
+#define ADB_CNXN 0x4e584e43
+#define ADB_OPEN 0x4e45504f
+#define ADB_OKAY 0x59414b4f
+#define ADB_CLSE 0x45534c43
+#define ADB_WRTE 0x45545257
+#define ADB_AUTH 0x48545541
+
+#define ADB_AUTH_TOKEN         1
+#define ADB_AUTH_SIGNATURE     2
+#define ADB_AUTH_RSAPUBLICKEY  3
+#define ADB_VERSION 0x01000000
+
+#define MAX_ADB_MESSAGE_PAYLOAD 262144
+
+struct amessage {
+    unsigned command;       /* command identifier constant      */
+    unsigned arg0;          /* first argument                   */
+    unsigned arg1;          /* second argument                  */
+    unsigned data_length;   /* length of payload (0 is allowed) */
+    unsigned data_check;    /* checksum of data payload         */
+    unsigned magic;         /* command ^ 0xffffffff             */
+};
+
+struct apacket
+{
+    amessage mesg;
+    uint8_t data[MAX_ADB_MESSAGE_PAYLOAD];
+};
+
+    AdbMessage(const char* name);
+    ~AdbMessage();
+
+    void read(const AndroidPipeBuffer*, int numBuffers, int count);
+private:
+    apacket mPacket;
+    int mState;
+    uint8_t* mCurrPos;
+    uint8_t  mBuffer[MAX_ADB_MESSAGE_PAYLOAD + 24];
+    uint8_t* mBufferP;
+    const char* mName;
+    // map target1 to its printing quota: to
+    // avoid printing too much logcat messages
+    // or push/pull messages.
+    std::map<unsigned, int> mPrintQuota;
+
+    void registerMessage();
+    int getAllowedBytesToPrint(int bytes);
+    void checkForShellExit();
+    int getPayloadSize();
+    void copyFromBuffer(int count);
+    int readPayload(int dataSize);
+    void printMessage();
+    void printPayload();
+    const char* getCommandName(unsigned code);
+    void startNewMessage();
+    int readHeader(int inputDataSize);
+    void readToBuffer(const AndroidPipeBuffer* buffers, int numBuffers, int inputDataSize);
+    void parseBuffer(int bufferLength);
+};
 
 // AdbGuestPipe implements an AndroidPipe instance corresponding to the guest
 // connections from the adbd daemon to the 'qemud:adb' service. Each instance
@@ -74,6 +140,7 @@ class AdbGuestPipe : public AndroidPipe {
 public:
     using StringView = ::android::base::StringView;
     using ScopedSocket = ::android::base::ScopedSocket;
+    using AdbMessage = ::android::emulation::AdbMessage;
 
     // AndroidPipe::Service class
     class Service : public AndroidPipe::Service, public AdbGuestAgent {
@@ -141,7 +208,8 @@ public:
 
 private:
     AdbGuestPipe(void* mHwPipe, Service* service, AdbHostAgent* hostAgent)
-        : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent) {
+        : AndroidPipe(mHwPipe, service), mHostAgent(hostAgent), mReceivedMesg("HOST==>GUEST"),
+    mSendingMesg("HOST<==GUEST"){
         setExpectedGuestCommand("accept", State::WaitingForGuestAcceptCommand);
         mPlayStoreImage = android::featurecontrol::isEnabled(android::featurecontrol::PlayStoreImage);
     }
@@ -202,6 +270,9 @@ private:
             mHostSocket;  // current host socket, if connected.
     AdbHostAgent* mHostAgent = nullptr;
     bool mPlayStoreImage = false;
+
+    android::emulation::AdbMessage mReceivedMesg;
+    android::emulation::AdbMessage mSendingMesg;
 };
 
 }  // namespace emulation
