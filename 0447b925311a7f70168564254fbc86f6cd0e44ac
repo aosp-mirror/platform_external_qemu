@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a3d9ec55_b44d7fd4",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T23:52:22Z",
+      "side": 1,
+      "message": "When I was researching adding unicode characters to strings in Qt, the \\u wasn\u0027t recommended for cross-platform code-- but now I see this is done elsewhere, and that it works at least for Q_OS_MAC.\n\nCan you update the instance in the virtual scene controls to use the \\u sequence and change #ifdef __APPLE__ to Q_OS_MAC to align?",
+      "range": {
+        "startLine": 125,
+        "startChar": 30,
+        "endLine": 125,
+        "endChar": 35
+      },
+      "revId": "0447b925311a7f70168564254fbc86f6cd0e44ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50978c16_af508688",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T23:52:22Z",
+      "side": 1,
+      "message": "Is this the right shortcut for Mac?",
+      "range": {
+        "startLine": 304,
+        "startChar": 13,
+        "endLine": 304,
+        "endChar": 16
+      },
+      "revId": "0447b925311a7f70168564254fbc86f6cd0e44ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
