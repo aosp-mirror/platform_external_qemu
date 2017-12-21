@@ -39,6 +39,10 @@ int sensor_get(int sensorId, float *a, float *b, float *c) {
     return android_sensors_get(sensorId, a, b, c);
 }
 
+int sensor_get_delay_ms() {
+    return android_sensors_get_delay_ms();
+}
+
 int physical_state_agent_set(const struct QAndroidPhysicalStateAgent* agent) {
     return android_physical_agent_set(agent);
 }
@@ -49,6 +53,7 @@ static const QAndroidSensorsAgent sQAndroidSensorsAgent = {
     .setCoarseOrientation = coarse_orientation_set,
     .setSensorOverride = sensor_override_set,
     .getSensor = sensor_get,
+    .getDelayMs = sensor_get_delay_ms,
     .setPhysicalStateAgent = physical_state_agent_set};
 const QAndroidSensorsAgent* const gQAndroidSensorsAgent =
     &sQAndroidSensorsAgent;

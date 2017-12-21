@@ -164,6 +164,19 @@ ExtendedWindow::ExtendedWindow(
             mExtendedUi->virtualSensorsPage,
             SLOT(onVirtualSceneControlsEngaged(bool)));
 
+    // The virtual scene control window aggregates metrics when the virtual
+    // scene is active. Route orientation changes and virtual sensors page
+    // events to the control window. Events are discarded unless the window
+    // is active.
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(coarseOrientationChanged(SkinRotation)),
+            tW->virtualSceneControlWindow(),
+            SLOT(orientationChanged(SkinRotation)));
+    connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()),
+            tW->virtualSceneControlWindow(), SLOT(virtualSensorsPageVisible()));
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(virtualSensorsInteraction()),
+            tW->virtualSceneControlWindow(), SLOT(virtualSensorsInteraction()));
 
     const auto enableClipboardSharing =
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();

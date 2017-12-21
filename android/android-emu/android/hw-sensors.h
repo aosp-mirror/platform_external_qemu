@@ -147,6 +147,9 @@ extern uint8_t android_sensors_get_sensor_status( int sensor_id );
 /* Get the host-to-guest time offset */
 extern int64_t android_sensors_get_time_offset();
 
+/* Get the current sensor delay (determines update rate) */
+extern int32_t android_sensors_get_delay_ms();
+
 /* Get physical model values */
 extern int android_physical_model_get(
     int physical_parameter, float* out_a, float* out_b, float* out_c,

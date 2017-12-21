@@ -11,12 +11,16 @@
 
 #pragma once
 
+#include "android/metrics/MetricsReporter.h"
+#include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/qt/qt-ui-commands.h"
 #include "android/skin/qt/size-tweaker.h"
+#include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
 
 #include "ui_virtualscene-controls.h"
 
+#include <QElapsedTimer>
 #include <QFrame>
 #include <QObject>
 #include <QWidget>
@@ -50,6 +54,7 @@ public:
 
     bool eventFilter(QObject* target, QEvent* event) override;
 
+    void showEvent(QShowEvent* event) override;
     void hideEvent(QHideEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
@@ -58,11 +63,19 @@ public:
     void setActive(bool active);
     bool isActive();
 
+    void reportMouseButtonDown();
+
 signals:
     void virtualSceneControlsEngaged(bool engaged);
 
+public slots:
+    void orientationChanged(SkinRotation);
+    void virtualSensorsPageVisible();
+    void virtualSensorsInteraction();
+
 private slots:
     void slot_mousePoller();
+    void slot_metricsAggregator();
 
 private:
     void updateMouselook();
@@ -72,6 +85,7 @@ private:
     // Returns true if the event was handled.
     bool handleKeyEvent(QKeyEvent* event);
     void updateVelocity();
+    void aggregateMovementMetrics(bool reset = false);
 
     QPoint getMouseCaptureCenter();
 
@@ -101,4 +115,29 @@ private:
     };
 
     bool mKeysHeld[Held_Count] = {};
+
+    // Aggregate metrics to determine how the virtual scene window is used.
+    // Metrics are collected while the window is visible, and reported when the
+    // session ends.
+    QTimer mMetricsAggregateTimer;
+    QElapsedTimer mOverallDuration;
+    QElapsedTimer mMouseCaptureElapsed;
+    QElapsedTimer mLastHotkeyReleaseElapsed;
+    glm::quat mLastReportedRotation = glm::quat();
+    glm::vec3 mLastReportedPosition = glm::vec3();
+
+    struct VirtualSceneMetrics {
+        int minSensorDelayMs = INT_MAX;
+        uint32_t tapCount = 0;
+        uint32_t orientationChangeCount = 0;
+        bool virtualSensorsVisible = false;
+        uint32_t virtualSensorsInteractionCount = 0;
+        uint32_t hotkeyInvokeCount = 0;
+        uint64_t hotkeyDurationMs = 0;
+        uint32_t tapsAfterHotkeyInvoke = 0;
+        double totalRotationRadians = 0.0;
+        double totalTranslationMeters = 0.0;
+    };
+
+    VirtualSceneMetrics mVirtualSceneMetrics;
 };
