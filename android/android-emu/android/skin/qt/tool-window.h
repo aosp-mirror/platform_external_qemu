@@ -98,8 +98,6 @@ signals:
     void guestClipboardChanged(QString text);
     void haveClipboardSharingKnown(bool have);
 
-    void virtualSceneControlWindowVisible();
-
 private:
     void handleUICommand(QtUICommand cmd, bool down);
     void forwardGenericEventToEmulator(int type, int code, int value);

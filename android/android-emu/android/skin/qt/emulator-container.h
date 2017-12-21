@@ -55,9 +55,6 @@ signals:
     void showModalOverlay(QString text);
     void hideModalOverlay();
 
-public slots:
-    void virtualSceneControlWindowVisible();
-
 private slots:
     void slot_resizeDone();
     void slot_showModalOverlay(QString text);
@@ -68,6 +65,8 @@ private:
     void startResizeTimer();
     void adjustModalOverlayGeometry();
     void adjustMessagesOverlayGeometry();
+
+    void virtualSceneControlWindowVisible();
 
     EmulatorQtWindow* mEmulatorWindow;
     Ui::ModalOverlay* mModalOverlay = nullptr;

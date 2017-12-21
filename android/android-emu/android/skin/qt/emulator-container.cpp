@@ -257,7 +257,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
 
     if (mEmulatorWindow->toolWindow()
                 ->virtualSceneControlWindow()
-                ->isVisible()) {
+                ->isActive()) {
         virtualSceneControlWindowVisible();
     }
 #endif  // __APPLE__
@@ -338,7 +338,7 @@ void EmulatorContainer::virtualSceneControlWindowVisible() {
     VirtualSceneControlWindow* vsc =
             mEmulatorWindow->toolWindow()->virtualSceneControlWindow();
     Q_ASSERT(vsc);
-    if (isVisible() && vsc->isVisible()) {
+    if (vsc->isActive()) {
         WId wid = effectiveWinId();
         wid = (WId)getNSWindow((void*)wid);
 

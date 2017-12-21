@@ -234,7 +234,7 @@ ToolWindow::~ToolWindow() {
 
 void ToolWindow::raise() {
     QFrame::raise();
-    if (mVirtualSceneControlWindow.isVisible()) {
+    if (mVirtualSceneControlWindow.isActive()) {
         mVirtualSceneControlWindow.raise();
     }
     if (mTopSwitched) {
@@ -251,11 +251,7 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
 }
 
 void ToolWindow::showVirtualSceneControls(bool show) {
-    if (show) {
-        mVirtualSceneControlWindow.show();
-    } else {
-        mVirtualSceneControlWindow.hide();
-    }
+    mVirtualSceneControlWindow.setActive(show);
 }
 
 void ToolWindow::stopExtendedWindowCreation() {
@@ -294,7 +290,7 @@ void ToolWindow::show() {
     QFrame::show();
     setFixedSize(size());
 
-    if (mVirtualSceneControlWindow.isVisible()) {
+    if (mVirtualSceneControlWindow.isActive()) {
         mVirtualSceneControlWindow.show();
     }
 
@@ -492,7 +488,7 @@ void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
 
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
     // See if this key is handled by the virtual scene control window first.
-    if (mVirtualSceneControlWindow.isVisible()) {
+    if (mVirtualSceneControlWindow.isActive()) {
         if (mVirtualSceneControlWindow.handleQtKeyEvent(event, source)) {
             return true;
         }

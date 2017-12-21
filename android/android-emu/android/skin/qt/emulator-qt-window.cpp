@@ -396,9 +396,6 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
 
     this->setAcceptDrops(true);
 
-    QObject::connect(mToolWindow, &ToolWindow::virtualSceneControlWindowVisible,
-                     &mContainer,
-                     &EmulatorContainer::virtualSceneControlWindowVisible);
     QObject::connect(this, &EmulatorQtWindow::showVirtualSceneControls,
                      mToolWindow, &ToolWindow::showVirtualSceneControls);
 
