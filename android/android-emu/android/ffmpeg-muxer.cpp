@@ -214,6 +214,9 @@ static int write_frame(ffmpeg_recorder* recorder,
     log_packet(fmt_ctx, pkt);
 
     android::base::AutoLock lock(recorder->out_pkt_lock);
+    // DO NOT free or unref enc_pkt once interleaved.
+    // av_interleaved_write_frame() will take ownership of the packet once
+    // passed in.
     int rc = av_interleaved_write_frame(fmt_ctx, pkt);
 
     return rc;
@@ -362,7 +365,6 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
         log_packet(oc, &pkt);
 #endif
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
-        av_packet_unref(&pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
                    avErr2Str(ret).c_str());
@@ -500,7 +502,6 @@ static int write_video_frame(ffmpeg_recorder* recorder,
             log_packet(oc, &pkt);
 #endif
             ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
-            av_packet_unref(&pkt);
         } else {
             ret = 0;
         }
@@ -619,7 +620,6 @@ bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         write_frame(recorder, recorder->oc,
                     &recorder->video_st.st->codec->time_base,
                     recorder->video_st.st, &pkt);
-        av_packet_unref(&pkt);
     }
 
     // flush the remaining audio packet
@@ -653,7 +653,6 @@ bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         write_frame(recorder, recorder->oc,
                     &recorder->audio_st.st->codec->time_base,
                     recorder->audio_st.st, &pkt);
-        av_packet_unref(&pkt);
     }
 
     // Write the trailer, if any. The trailer must be written before you
@@ -1103,8 +1102,10 @@ static int encode_write_frame(AVFormatContext* ofmt_ctx,
                          ofmt_ctx->streams[stream_index]->codec->time_base,
                          ofmt_ctx->streams[stream_index]->time_base);
     // mux encoded frame
+    // DO NOT free or unref enc_pkt once interleaved.
+    // av_interleaved_write_frame() will take ownership of the packet once
+    // passed in.
     ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
-    av_packet_unref(&enc_pkt);
     return ret;
 }
 
