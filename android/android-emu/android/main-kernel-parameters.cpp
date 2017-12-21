@@ -41,8 +41,16 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
                                    mem_map ramoops,
-                                   bool isQemu2) {
+                                   bool isQemu2,
+                                   bool isCros) {
     android::ParameterList params;
+    if (isCros) {
+      params.addFormat("ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 "
+                       "cros_legacy cros_debug console=%s",
+                                              opts->show_kernel ? "ttyS0" : "");
+      return params.toCStringCopy();
+    }
+
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
 
     // We always force qemu=1 when running inside QEMU.
