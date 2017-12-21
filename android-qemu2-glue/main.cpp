@@ -685,8 +685,19 @@ extern "C" int main(int argc, char** argv) {
            get_uptime_ms());
 #endif
 
+    if (!emulator_parseFeatureCommandLineOptions(opts, avd, hw)) {
+        return 1;
+    }
+
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
+    }
+
+    // If the virtual scene camera is selected in the avd, but not supported,
+    // use the emulated camera instead.
+    bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
+    if (isVirtualScene && !feature_is_enabled(kFeature_VirtualScene)) {
+        str_reset(&hw->hw_camera_back, "emulated");
     }
 
     if (opts->shared_net_id) {
