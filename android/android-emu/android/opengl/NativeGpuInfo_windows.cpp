@@ -29,6 +29,7 @@
 
 #include <windows.h>
 #include <d3d9.h>
+#include <d3d11.h>
 
 #include <ctype.h>
 
@@ -268,7 +269,12 @@ void parse_gpu_info_list_windows(const std::string& contents,
     }
 }
 
+typedef HRESULT(WINAPI *d3d11_create_device_t)(IDXGIAdapter *, D3D_DRIVER_TYPE, HMODULE, UINT32, D3D_FEATURE_LEVEL *, UINT, UINT32, ID3D11Device **, D3D_FEATURE_LEVEL *, ID3D11DeviceContext **);
+
+static d3d11_create_device_t d3d11_create_device_fn = 0;
 static bool queryGpuInfoD3D(GpuInfoList* gpus) {
+    fprintf(stderr, "%s: call\n", __func__);
+
     LPDIRECT3D9 pD3D = Direct3DCreate9(D3D_SDK_VERSION);
     UINT numAdapters = pD3D->GetAdapterCount();
 
@@ -280,6 +286,37 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
     std::vector<char> descriptionBuf(MAX_DEVICE_IDENTIFIER_STRING + 1, '\0');
 
     if (numAdapters == 0) return false;
+
+    // Query D3D11 capability; create a device without a swap chain.
+
+    ID3D11Device* d3d11Device = 0;
+    ID3D11DeviceContext* d3d11Context = 0;
+    fprintf(stderr, "%s: creating D3D11 device\n", __func__);
+
+    HMODULE d3d11Lib = LoadLibrary("d3d11.dll");
+
+    if (!d3d11Lib) {
+        fprintf(stderr, "%s: d3d11 lib not installed! fail\n", __func__);
+    } else {
+        d3d11_create_device_fn = (d3d11_create_device_t)GetProcAddress(d3d11Lib, "D3D11CreateDevice");
+        if (!d3d11_create_device_fn) {
+            fprintf(stderr, "%s: d3d11 fun not installed! fail\n", __func__);
+        } else {
+            d3d11_create_device_fn(
+                    nullptr,
+                    D3D_DRIVER_TYPE_HARDWARE,
+                    nullptr,
+                    0,
+                    nullptr,
+                    0,
+                    D3D11_SDK_VERSION,
+                    &d3d11Device,
+                    nullptr,
+                    &d3d11Context);
+            fprintf(stderr, "%s: D3D11 device created. Got: %p %p\n", __func__, d3d11Device, d3d11Context);
+        }
+    }
+
 
     // The adapter that is equal to D3DADAPTER_DEFAULT is the primary display adapter.
     // D3DADAPTER_DEFAULT is currently defined to be 0, btw---but this is more future proof
@@ -294,12 +331,16 @@ static bool queryGpuInfoD3D(GpuInfoList* gpus) {
             snprintf(vendoridBuf, sizeof(vendoridBuf), "%04x", (unsigned int)id.VendorId);
             snprintf(deviceidBuf, sizeof(deviceidBuf), "%04x", (unsigned int)id.DeviceId);
             snprintf(&descriptionBuf[0], MAX_DEVICE_IDENTIFIER_STRING, "%s", id.Description);
+            fprintf(stderr, "%s: vendorId %s\n", __func__, vendoridBuf);
+            fprintf(stderr, "%s: deviceId %s\n", __func__, deviceidBuf);
+            fprintf(stderr, "%s: descriptionBuf %s\n", __func__, &descriptionBuf[0]);
             gpu.make = vendoridBuf;
             gpu.device_id = deviceidBuf;
             gpu.model = &descriptionBuf[0];
             return true;
         }
     }
+
 
     return false;
 }
