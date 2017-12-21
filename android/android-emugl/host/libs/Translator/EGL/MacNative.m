@@ -70,6 +70,7 @@ int getAttrListLength(NSOpenGLPixelFormatAttribute* list) {
 }
 
 static const NSOpenGLPixelFormatAttribute core32TestProfile[] = {
+    NSOpenGLPFAAccelerated,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
     NSOpenGLPFADoubleBuffer,
     NSOpenGLPFAColorSize   ,32,
@@ -79,6 +80,8 @@ static const NSOpenGLPixelFormatAttribute core32TestProfile[] = {
 };
 
 static const NSOpenGLPixelFormatAttribute core41TestProfile[] = {
+    NSOpenGLPFAAccelerated,
+    NSOpenGLPFANoRecovery,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
     NSOpenGLPFADoubleBuffer,
     NSOpenGLPFAColorSize   ,32,
@@ -89,14 +92,14 @@ static const NSOpenGLPixelFormatAttribute core41TestProfile[] = {
 
 int setupCoreProfileNativeFormats() {
 
-    NSOpenGLPixelFormat* core41Supported =
-        [[NSOpenGLPixelFormat alloc] initWithAttributes: core41TestProfile];
+    // NSOpenGLPixelFormat* core41Supported =
+    //     [[NSOpenGLPixelFormat alloc] initWithAttributes: core41TestProfile];
 
-    if (core41Supported) {
-        setCoreProfileLevel(NSOpenGLProfileVersion4_1Core);
-        [core41Supported release];
-        return (int)NSOpenGLProfileVersion4_1Core;
-    }
+    // if (core41Supported) {
+    //     setCoreProfileLevel(NSOpenGLProfileVersion4_1Core);
+    //     [core41Supported release];
+    //     return (int)NSOpenGLProfileVersion4_1Core;
+    // }
 
     NSOpenGLPixelFormat* core32Supported =
         [[NSOpenGLPixelFormat alloc] initWithAttributes: core32TestProfile];
@@ -104,9 +107,11 @@ int setupCoreProfileNativeFormats() {
     if (core32Supported) {
         setCoreProfileLevel(NSOpenGLProfileVersion3_2Core);
         [core32Supported release];
+        fprintf(stderr, "%s: available: 3.2 core\n", __func__);
         return (int)NSOpenGLProfileVersion3_2Core;
     }
 
+    fprintf(stderr, "%s: using legacy profile\n", __func__);
     return (int)NSOpenGLProfileVersionLegacy;
 }
 

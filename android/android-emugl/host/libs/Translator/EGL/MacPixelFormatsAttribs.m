@@ -111,12 +111,15 @@ static const NSOpenGLPixelFormatAttribute Legacy[] = {
 };
 
 static const NSOpenGLPixelFormatAttribute Core3_2[] = {
+    NSOpenGLPFAAccelerated,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
     NSOpenGLPFADoubleBuffer,
     0
 };
 
 static const NSOpenGLPixelFormatAttribute Core4_1[] = {
+    NSOpenGLPFAAccelerated,
+    NSOpenGLPFANoRecovery,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
     NSOpenGLPFADoubleBuffer,
     0
@@ -134,8 +137,10 @@ NSOpenGLPixelFormatAttribute* getLegacyProfileAttributes() {
 
 NSOpenGLPixelFormatAttribute* getCoreProfileAttributes() {
     if (sWantedCoreProfileLevel == NSOpenGLProfileVersion4_1Core) {
+        fprintf(stderr, "%s: selected: 4.1 core\n", __func__);
         return Core4_1;
     } else if (sWantedCoreProfileLevel == NSOpenGLProfileVersion3_2Core) {
+        fprintf(stderr, "%s: selected: 3.2 core\n", __func__);
         return Core3_2;
     } else {
         return Legacy;
