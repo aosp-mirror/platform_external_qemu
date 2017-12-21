@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "79e74d49_debdf309",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/virtual-sensors-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 312,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T23:48:51Z",
+      "side": 1,
+      "message": "This appears to be relying on the physical state stabilizing after the controls are disengaged, is there a way to remove that dependency, it may not hold true in the future and could be a source of bugs.\n\nMaybe:\n- Set mBypassOrientationChecks \u003d mVirtualSceneControlsEngaged; in startSensorUpdateTimer()\n- Always set mBypassOrientationChecks to false in stopSensorUpdateTimer(), and do it before calling updateSensorValuesInUI.",
+      "range": {
+        "startLine": 307,
+        "startChar": 4,
+        "endLine": 312,
+        "endChar": 5
+      },
+      "revId": "2a6507d747a2a9ea6910cf80ee14e6a4d7388624",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}

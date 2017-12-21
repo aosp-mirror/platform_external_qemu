@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69abd5c1_18378aca",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-21T23:48:51Z",
+      "side": 1,
+      "message": "I think \"git clang-format\" would format this differently.",
+      "range": {
+        "startLine": 162,
+        "startChar": 4,
+        "endLine": 167,
+        "endChar": 0
+      },
+      "revId": "920dc78065653ca32b6072c5de8e75d314e51c27",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
