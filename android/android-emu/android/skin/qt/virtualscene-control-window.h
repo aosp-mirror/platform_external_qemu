@@ -50,6 +50,9 @@ public:
     void keyReleaseEvent(QKeyEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
+signals:
+    void virtualSceneControlsEngaged(bool engaged);
+
 private slots:
     void slot_mousePoller();
 
