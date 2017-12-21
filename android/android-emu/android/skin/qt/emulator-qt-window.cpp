@@ -1903,6 +1903,10 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         const QPoint& pos,
                                         const QPoint& gPos,
                                         bool skipSync) {
+    if (type == kEventMouseButtonDown) {
+        mToolWindow->virtualSceneControlWindow()->reportMouseButtonDown();
+    }
+
     SkinEvent* skin_event = createSkinEvent(type);
     skin_event->u.mouse.button = button;
     skin_event->u.mouse.skip_sync = skipSync;
