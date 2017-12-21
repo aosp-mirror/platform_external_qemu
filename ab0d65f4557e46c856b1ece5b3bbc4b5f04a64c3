@@ -22,6 +22,30 @@
       "revId": "ab0d65f4557e46c856b1ece5b3bbc4b5f04a64c3",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a320c8a0_dd14475c",
+        "filename": "android/android-emu/android/opengl/emugl_config.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 284,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-21T23:28:40Z",
+      "side": 0,
+      "message": "Yes, we put them on ForceSwiftshader feature flag a while back; this code path hasn\u0027t been exercised in quite a while.",
+      "parentUuid": "cad60dda_83822a2d",
+      "range": {
+        "startLine": 280,
+        "startChar": 0,
+        "endLine": 284,
+        "endChar": 9
+      },
+      "revId": "ab0d65f4557e46c856b1ece5b3bbc4b5f04a64c3",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
