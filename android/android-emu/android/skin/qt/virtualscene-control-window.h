@@ -29,6 +29,11 @@
 
 class ToolWindow;
 
+// Design requested a max width of 700 dp, and offset of 16 from the emulator
+// window.  This is defined here.
+static constexpr int kVirtualSceneControlWindowMaxWidth = 700;
+static constexpr int kVirtualSceneControlWindowOffset = 16;
+
 class VirtualSceneControlWindow : public QFrame {
     Q_OBJECT
 

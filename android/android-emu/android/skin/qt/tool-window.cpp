@@ -530,15 +530,21 @@ void ToolWindow::dockMainWindow() {
          parentWidget()->geometry().top()
              + mEmulatorWindow->getTopTransparency());
 
-    mVirtualSceneControlWindow.setWidth(
+    int parentWidgetWidth =
             parentWidget()->frameGeometry().width() -
             mEmulatorWindow->getLeftTransparency() -
-            mEmulatorWindow->getRightTransparency());
+            mEmulatorWindow->getRightTransparency();
+    int virtualSceneWidgetWidth = std::min(
+            parentWidgetWidth,
+            kVirtualSceneControlWindowMaxWidth);
+    mVirtualSceneControlWindow.setWidth(virtualSceneWidgetWidth);
     mVirtualSceneControlWindow.move(
             parentWidget()->frameGeometry().left() +
-                    mEmulatorWindow->getLeftTransparency(),
+                    mEmulatorWindow->getLeftTransparency() +
+                    (parentWidgetWidth - virtualSceneWidgetWidth) / 2,
             parentWidget()->geometry().bottom() -
-                    mEmulatorWindow->getBottomTransparency() + toolGap);
+                    mEmulatorWindow->getBottomTransparency() +
+                    kVirtualSceneControlWindowOffset);
 }
 
 void ToolWindow::raiseMainWindow() {
