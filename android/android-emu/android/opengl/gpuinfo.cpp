@@ -305,6 +305,10 @@ bool async_query_host_gpu_AngleWhitelisted() {
     return globalGpuInfoList().Anglelist_status;
 }
 
+bool async_query_d3d11_supported() {
+    return globalGpuInfoList().d3d11_support;
+}
+
 bool async_query_host_gpu_SyncBlacklisted() {
     return globalGpuInfoList().SyncBlacklist_status;
 }
