@@ -1776,6 +1776,7 @@ static void loadProcOwnedCollection(Stream* stream, Collection* c) {
 
 void FrameBuffer::getScreenshot(unsigned int nChannels, unsigned int* width,
         unsigned int* height, std::vector<unsigned char>& pixels) {
+    AutoLock mutex(m_lock);
     if (nChannels != 3 && nChannels != 4) {
         fprintf(stderr, "Screenshot only support 3(RGB) or 4(RGBA) channels");
         *width = 0;
