@@ -221,37 +221,7 @@
       <number>0</number>
      </property>
      <widget class="QWidget" name="page">
-      <widget class="EditableSliderWidget" name="zRotSlider" native="true">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>10</y>
-         <width>250</width>
-         <height>50</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="EditableSliderWidget" name="xRotSlider" native="true">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>70</y>
-         <width>250</width>
-         <height>50</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="EditableSliderWidget" name="yRotSlider" native="true">
-       <property name="geometry">
-        <rect>
-         <x>50</x>
-         <y>130</y>
-         <width>250</width>
-         <height>50</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="zRotLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -264,7 +234,17 @@
         <string>Z-Rot</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_2">
+      <widget class="EditableSliderWidget" name="zRotSlider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>10</y>
+         <width>250</width>
+         <height>50</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="xRotLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -277,7 +257,17 @@
         <string>X-Rot</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_3">
+      <widget class="EditableSliderWidget" name="xRotSlider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>70</y>
+         <width>250</width>
+         <height>50</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="yRotLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -290,22 +280,19 @@
         <string>Y-Rot</string>
        </property>
       </widget>
-     </widget>
-     <widget class="QWidget" name="page_2">
-      <widget class="QLabel" name="label_12">
+      <widget class="EditableSliderWidget" name="yRotSlider" native="true">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>80</y>
-         <width>40</width>
-         <height>15</height>
+         <x>50</x>
+         <y>130</y>
+         <width>250</width>
+         <height>50</height>
         </rect>
        </property>
-       <property name="text">
-        <string>Y</string>
-       </property>
       </widget>
-      <widget class="QLabel" name="label_13">
+     </widget>
+     <widget class="QWidget" name="page_2">
+      <widget class="QLabel" name="positionXLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -318,17 +305,27 @@
         <string>X</string>
        </property>
       </widget>
-      <widget class="QLabel" name="label_14">
+      <widget class="EditableSliderWidget" name="positionXSlider" native="true">
+       <property name="geometry">
+        <rect>
+         <x>50</x>
+         <y>10</y>
+         <width>250</width>
+         <height>50</height>
+        </rect>
+       </property>
+      </widget>
+      <widget class="QLabel" name="positionYLabel">
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>140</y>
+         <y>80</y>
          <width>40</width>
          <height>15</height>
         </rect>
        </property>
        <property name="text">
-        <string>Z</string>
+        <string>Y</string>
        </property>
       </widget>
       <widget class="EditableSliderWidget" name="positionYSlider" native="true">
@@ -341,14 +338,17 @@
         </rect>
        </property>
       </widget>
-      <widget class="EditableSliderWidget" name="positionXSlider" native="true">
+      <widget class="QLabel" name="positionZLabel">
        <property name="geometry">
         <rect>
-         <x>50</x>
-         <y>10</y>
-         <width>250</width>
-         <height>50</height>
+         <x>10</x>
+         <y>140</y>
+         <width>40</width>
+         <height>15</height>
         </rect>
+       </property>
+       <property name="text">
+        <string>Z</string>
        </property>
       </widget>
       <widget class="EditableSliderWidget" name="positionZSlider" native="true">
