@@ -1020,6 +1020,21 @@ extern int64_t android_sensors_get_time_offset() {
     return hw->time_offset_ns;
 }
 
+/* Get the current sensor delay (determines update rate) */
+extern int32_t android_sensors_get_delay_ms() {
+    int min_delay = INT32_MAX;
+    HwSensors* hw = _sensorsState;
+    HwSensorClient* client = hw->clients;
+    while (client) {
+        if (client->delay_ms < min_delay) {
+            min_delay = client->delay_ms;
+        }
+        client = client->next;
+    }
+
+    return min_delay;
+}
+
 /* Get a physical model parameter target value*/
 extern int android_physical_model_get(
         int physical_parameter, float* out_a, float* out_b, float* out_c,

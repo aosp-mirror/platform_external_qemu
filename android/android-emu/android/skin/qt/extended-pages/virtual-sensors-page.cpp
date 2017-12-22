@@ -31,6 +31,7 @@
 #include <cassert>
 
 constexpr float kMetersPerInch = 0.0254f;
+constexpr uint64_t kMinInteractionTimeMilliseconds = 500;
 
 VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     : QWidget(parent), mUi(new Ui::VirtualSensorsPage()) {
@@ -109,6 +110,11 @@ VirtualSensorsPage::~VirtualSensorsPage() {
     }
 }
 
+void VirtualSensorsPage::showEvent(QShowEvent* event) {
+    emit windowVisible();
+    mFirstShow = false;
+}
+
 void VirtualSensorsPage::on_rotateToPortrait_clicked() {
     setCoarseOrientation(ANDROID_COARSE_PORTRAIT);
 }
@@ -126,7 +132,6 @@ void VirtualSensorsPage::on_rotateToReverseLandscape_clicked() {
 }
 
 void VirtualSensorsPage::setSensorsAgent(const QAndroidSensorsAgent* agent) {
-
     if (mSensorsAgent != nullptr) {
         mSensorsAgent->setPhysicalStateAgent(nullptr);
     }
@@ -143,6 +148,7 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
         double v1,
         double v2,
         double v3) {
+    reportVirtualSensorsInteraction();
     if (mSensorsAgent) {
         mIsUIModifyingPhysicalState = true;
         mSensorsAgent->setPhysicalParameterTarget(
@@ -158,6 +164,7 @@ void VirtualSensorsPage::setPhysicalParameterTarget(
 // Helper function
 void VirtualSensorsPage::setCoarseOrientation(
         AndroidCoarseOrientation orientation) {
+    reportVirtualSensorsInteraction();
     if (mSensorsAgent) {
         mSensorsAgent->setCoarseOrientation(static_cast<int>(orientation));
     }
@@ -165,7 +172,6 @@ void VirtualSensorsPage::setCoarseOrientation(
 
 void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
         double value) {
-    if (!mFirstShow) mVirtualSensorsUsed = true;
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_TEMPERATURE,
             PHYSICAL_INTERPOLATION_SMOOTH,
@@ -174,7 +180,6 @@ void VirtualSensorsPage::on_temperatureSensorValueWidget_valueChanged(
 
 void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
         double value) {
-    if (!mFirstShow) mVirtualSensorsUsed = true;
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_PROXIMITY,
             PHYSICAL_INTERPOLATION_SMOOTH,
@@ -182,7 +187,6 @@ void VirtualSensorsPage::on_proximitySensorValueWidget_valueChanged(
 }
 
 void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
-    if (!mFirstShow) mVirtualSensorsUsed = true;
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_LIGHT,
             PHYSICAL_INTERPOLATION_SMOOTH,
@@ -191,7 +195,6 @@ void VirtualSensorsPage::on_lightSensorValueWidget_valueChanged(double value) {
 
 void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
     double value) {
-    if (!mFirstShow) mVirtualSensorsUsed = true;
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_PRESSURE,
             PHYSICAL_INTERPOLATION_SMOOTH,
@@ -200,7 +203,6 @@ void VirtualSensorsPage::on_pressureSensorValueWidget_valueChanged(
 
 void VirtualSensorsPage::on_humiditySensorValueWidget_valueChanged(
     double value) {
-    if (!mFirstShow) mVirtualSensorsUsed = true;
     setPhysicalParameterTarget(
             PHYSICAL_PARAMETER_HUMIDITY,
             PHYSICAL_INTERPOLATION_SMOOTH,
@@ -312,6 +314,18 @@ void VirtualSensorsPage::onVirtualSceneControlsEngaged(bool engaged) {
     }
 }
 
+void VirtualSensorsPage::reportVirtualSensorsInteraction() {
+    if (!mFirstShow) {
+        mVirtualSensorsUsed = true;
+        if (!mLastInteractionElapsed.isValid() ||
+            mLastInteractionElapsed.elapsed() >
+                    kMinInteractionTimeMilliseconds) {
+            emit virtualSensorsInteraction();
+            mLastInteractionElapsed.start();
+        }
+    }
+}
+
 void VirtualSensorsPage::onPhysicalStateChanging() {
     emit startSensorUpdateTimerRequired();
 }
@@ -393,6 +407,7 @@ void VirtualSensorsPage::updateResultingValues(glm::vec3 acceleration,
  * Propagate a UI change from the accel widget to the sliders and model.
  */
 void VirtualSensorsPage::propagateAccelWidgetChange() {
+    reportVirtualSensorsInteraction();
     updateModelFromAccelWidget(PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
@@ -400,6 +415,7 @@ void VirtualSensorsPage::propagateAccelWidgetChange() {
  * Propagate a UI change from the sliders to the accel widget and model.
  */
 void VirtualSensorsPage::propagateSlidersChange() {
+    reportVirtualSensorsInteraction();
     updateModelFromSliders(PHYSICAL_INTERPOLATION_SMOOTH);
 }
 
@@ -598,6 +614,7 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
 }
 
 void VirtualSensorsPage::on_accelModeRotate_toggled() {
+    reportVirtualSensorsInteraction();
     if (mUi->accelModeRotate->isChecked()) {
         mUi->accelWidget->setOperationMode(
             Accelerometer3DWidget::OperationMode::Rotate);
@@ -606,6 +623,7 @@ void VirtualSensorsPage::on_accelModeRotate_toggled() {
 }
 
 void VirtualSensorsPage::on_accelModeMove_toggled() {
+    reportVirtualSensorsInteraction();
     if (mUi->accelModeMove->isChecked()) {
         mUi->accelWidget->setOperationMode(
             Accelerometer3DWidget::OperationMode::Move);

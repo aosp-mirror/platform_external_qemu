@@ -20,6 +20,7 @@
 #include "android/skin/rect.h"
 
 #include <QDoubleValidator>
+#include <QElapsedTimer>
 #include <QTimer>
 #include <QWidget>
 
@@ -36,6 +37,8 @@ class VirtualSensorsPage : public QWidget
 public:
     explicit VirtualSensorsPage(QWidget* parent = 0);
     ~VirtualSensorsPage();
+
+    void showEvent(QShowEvent* event) override;
 
     void setSensorsAgent(const QAndroidSensorsAgent* agent);
 
@@ -68,6 +71,8 @@ signals:
                                        glm::vec3 device_magnetic_vector);
     void startSensorUpdateTimerRequired();
     void stopSensorUpdateTimerRequired();
+    void windowVisible();
+    void virtualSensorsInteraction();
 
 public slots:
     void onVirtualSceneControlsEngaged(bool engaged);
@@ -97,6 +102,8 @@ private slots:
     void startSensorUpdateTimer();
     void stopSensorUpdateTimer();
 private:
+    void reportVirtualSensorsInteraction();
+
     void resetDeviceRotation(const glm::quat&);
 
     void setPhysicalParameterTarget(PhysicalParameter parameter_id,
@@ -132,4 +139,5 @@ private:
 
     bool mBypassOrientationChecks = false;
     bool mVirtualSceneControlsEngaged = false;
+    QElapsedTimer mLastInteractionElapsed;
 };
