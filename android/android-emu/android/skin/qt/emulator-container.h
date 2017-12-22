@@ -66,8 +66,6 @@ private:
     void adjustModalOverlayGeometry();
     void adjustMessagesOverlayGeometry();
 
-    void virtualSceneControlWindowVisible();
-
     EmulatorQtWindow* mEmulatorWindow;
     Ui::ModalOverlay* mModalOverlay = nullptr;
     android::base::MemberOnDemandT<Ui::OverlayMessageCenter, QWidget*>
