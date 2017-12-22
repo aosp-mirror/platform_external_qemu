@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "8036480c_0bff034c",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 170,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-22T00:10:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "35b2bc73_b8903eb6",
+      "range": {
+        "startLine": 162,
+        "startChar": 0,
+        "endLine": 170,
+        "endChar": 80
+      },
+      "revId": "46322b11d92401e777b3f0879c32b3c93a08a186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b720bd0c_c41d7dcb",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -224,6 +248,30 @@
       "writtenOn": "2017-12-21T22:13:34Z",
       "side": 1,
       "message": "Is there a way that we can move sensor metrics aggregation out of the virtual scene control window?  It seems odd that all of the virtual sensors page metrics are aggregated here for things that don\u0027t have anything to do with the virtual scene camera.\n\nOk now I see - it looks like this is tracking virtual-scene-control specific metrics for the lifetime of the virtual scene camera.  Can we name it something a little more specific - it seems like that\u0027d be helpful even though it\u0027s nested inside the class.",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 21
+      },
+      "revId": "46322b11d92401e777b3f0879c32b3c93a08a186",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56d0e861_b41f7a7d",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-22T00:10:09Z",
+      "side": 1,
+      "message": "I\u0027ve renamed the class to VirtualSceneMetrics, and the variable to mVirtualSceneMetrics and added a comment.",
+      "parentUuid": "8622c965_1c96152c",
       "range": {
         "startLine": 106,
         "startChar": 0,
