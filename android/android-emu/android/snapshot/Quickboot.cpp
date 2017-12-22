@@ -41,6 +41,8 @@ namespace pb = android_studio;
 
 static constexpr int kDefaultMessageTimeoutMs = 10000;
 
+extern bool userSettingIsDontSaveSnapshot();
+
 namespace android {
 namespace snapshot {
 
@@ -78,44 +80,44 @@ static const char* failureToString(FailureReason failure,
                                    SnapshotOperation op) {
     switch (failure) {
         default:
-            return "Unknown failure";
+            return "unknown failure";
         case FailureReason::BadSnapshotPb:
         case FailureReason::CorruptedData:
-            return "Bad snapshot data";
+            return "bad snapshot data";
         case FailureReason::NoSnapshotPb:
-            return "Missing snapshot files";
+            return "missing snapshot files";
         case FailureReason::IncompatibleVersion:
-            return "Incompatible snapshot version";
+            return "incompatible snapshot version";
         case FailureReason::NoRamFile:
-            return "Missing saved RAM data";
+            return "missing saved RAM data";
         case FailureReason::NoTexturesFile:
-            return "Missing saved textures data";
+            return "missing saved textures data";
         case FailureReason::NoSnapshotInImage:
-            return "Snapshot doesn't exist";
+            return "snapshot doesn't exist";
         case FailureReason::SnapshotsNotSupported:
-            return "Current configuration doesn't support snapshots";
+            return "current configuration doesn't support snapshots";
         case FailureReason::ConfigMismatchHostHypervisor:
-            return "Host hypervisor has changed";
+            return "host hypervisor has changed";
         case FailureReason::ConfigMismatchHostGpu:
-            return "Host GPU has changed";
+            return "host GPU has changed";
         case FailureReason::ConfigMismatchRenderer:
-            return "Different renderer configured";
+            return "different renderer configured";
         case FailureReason::ConfigMismatchFeatures:
-            return "Different emulator features";
+            return "different emulator features";
         case FailureReason::ConfigMismatchAvd:
-            return "Different AVD configuration";
+            return "different AVD configuration";
         case FailureReason::SystemImageChanged:
-            return "System image changed";
+            return "system image changed";
         case FailureReason::InternalError:
-            return "Internal error";
+            return "internal error";
         case FailureReason::EmulationEngineFailed:
-            return "Emulation engine failed";
+            return "emulation engine failed";
         case FailureReason::RamFailed:
             return op == SNAPSHOT_LOAD ? "RAM loading failed"
                                        : "RAM saving failed";
         case FailureReason::TexturesFailed:
-            return op == SNAPSHOT_LOAD ? "Textures loading failed"
-                                       : "Textures saving failed";
+            return op == SNAPSHOT_LOAD ? "textures loading failed"
+                                       : "textures saving failed";
     }
 }
 
@@ -191,7 +193,7 @@ void Quickboot::startLivenessMonitor() {
 
 void Quickboot::onLivenessTimer() {
     if (metrics::AdbLivenessChecker::isEmulatorBooted()) {
-        VERBOSE_PRINT(snapshot, "Guest came online in %.3f sec after loading",
+        VERBOSE_PRINT(snapshot, "Guest came online %.3f sec after loading",
                       (System::get()->getHighResTimeUs() / 1000 - mLoadTimeMs) /
                               1000.0);
         // done here: snapshot loaded fine and emulator's working.
@@ -202,7 +204,7 @@ void Quickboot::onLivenessTimer() {
     if (int64_t(nowMs - mLoadTimeMs) > bootTimeoutMs()) {
         if (mAdbConnectionRetries < kMaxAdbConnectionRetries) {
             mWindow.showMessage(
-                    StringFormat("Guest isn't online in %d seconds, "
+                    StringFormat("Guest isn't online after %d seconds, "
                                  "retrying ADB connection",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
@@ -215,8 +217,8 @@ void Quickboot::onLivenessTimer() {
             // The VM hasn't started for long enough since the end of snapshot
             // loading, let's reset it.
             mWindow.showMessage(
-                    StringFormat("Guest isn't online in %d seconds, "
-                                 "restarting and deleting boot snapshot",
+                    StringFormat("Guest isn't online after %d seconds, "
+                                 "deleting snapshot and restarting",
                                  int(nowMs - mLoadTimeMs) / 1000)
                             .c_str(),
                     WINDOW_MESSAGE_ERROR, kDefaultMessageTimeoutMs);
@@ -258,7 +260,7 @@ bool Quickboot::load(StringView name) {
         if (!android_hw->fastboot_forceColdBoot) {
             // Only display a message if this is a one-time-like thing (command
             // line), and not an AVD option.
-            mWindow.showMessage("Performing cold boot: requested by the user",
+            mWindow.showMessage("Cold boot: requested by the user",
                                 WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
         }
         reportFailedLoad(
@@ -271,14 +273,14 @@ bool Quickboot::load(StringView name) {
     } else if (avdInfo_inAndroidBuild(android_avdInfo)) {
         mWindow.showMessage(
                 StringFormat(
-                    "Performing cold boot: in Android build system").c_str(),
+                    "Cold boot: in Android build system").c_str(),
                 WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
         reportFailedLoad(pb::EmulatorQuickbootLoad::
                                  EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
                          FailureReason::Empty);
     } else if (!emuglConfig_current_renderer_supports_snapshot()) {
         mWindow.showMessage(
-                StringFormat("Performing cold boot: selected renderer '%s' "
+                StringFormat("Cold boot: selected renderer '%s' "
                              "doesn't support snapshots",
                              emuglConfig_renderer_to_string(
                                      emuglConfig_get_current_renderer()))
@@ -288,7 +290,6 @@ bool Quickboot::load(StringView name) {
                                  EMULATOR_QUICKBOOT_LOAD_COLD_UNSUPPORTED,
                          FailureReason::Empty);
     } else {
-
         // Invalidate quickboot snapshot if the crash reporter trips.
         // It's possible the crash was not due to snapshot load,
         // but it's better than crashing over and over in
@@ -310,55 +311,68 @@ bool Quickboot::load(StringView name) {
             mLoadedSnapshotName = name;
             reportSuccessfulLoad(name, startTimeMs);
             startLivenessMonitor();
+        } else if (auto failureReason =
+                        snapshotter.loader().snapshot().failureReason())
+        {
+            // Failed: the error is about something done before the real load
+            // (e.g. condition check)
+            decideFailureReport(failureReason);
         } else {
-            // Check if the error is about something done before the real load
-            // (e.g. condition check) or we've started actually loading the VM
-            // data
-            if (auto failureReason =
-                        snapshotter.loader().snapshot().failureReason()) {
-                if (*failureReason != FailureReason::Empty &&
-                    *failureReason < FailureReason::ValidationErrorLimit) {
-                    mWindow.showMessage(
-                            StringFormat("Performing clean boot: %s",
-                                         failureToString(*failureReason,
-                                                         SNAPSHOT_LOAD))
-                                    .c_str(),
-                            WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
-                    reportFailedLoad(
-                            failureReason < FailureReason::
-                                                    UnrecoverableErrorLimit
-                                    ? pb::EmulatorQuickbootLoad::
-                                              EMULATOR_QUICKBOOT_LOAD_FAILED
-                                    : pb::EmulatorQuickbootLoad::
-                                              EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT,
-                            *failureReason);
-
-                } else {
-                    mWindow.showMessage(
-                            StringFormat("Resetting for clean boot: %s",
-                                         failureToString(*failureReason,
-                                                         SNAPSHOT_LOAD))
-                                    .c_str(),
-                            WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
-                    mVmOps.vmReset();
-                    Snapshotter::get().loader().reportInvalid();
-                    reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                             EMULATOR_QUICKBOOT_LOAD_FAILED,
-                                     *failureReason);
-                }
-            } else {
-                mWindow.showMessage(
-                        "Performing clean boot: snapshot failed to load",
-                        WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
-                mVmOps.vmReset();
-                reportFailedLoad(pb::EmulatorQuickbootLoad::
-                                         EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT,
-                                 FailureReason::Empty);
-            }
+            // Failed: the error is a problem with loading the VM
+            mWindow.showMessage(
+                    "Cold boot: snapshot failed to load",
+                    WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
+            mVmOps.vmReset();
+            reportFailedLoad(pb::EmulatorQuickbootLoad::
+                                     EMULATOR_QUICKBOOT_LOAD_NO_SNAPSHOT,
+                             FailureReason::Empty);
         }
     }
 
     return true;
+}
+
+void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failureReason) {
+    if (*failureReason == FailureReason::Empty ||
+        *failureReason >= FailureReason::ValidationErrorLimit)
+    {
+        // Unknown failure
+        mWindow.showMessage(
+                StringFormat("Resetting for cold boot: %s",
+                             failureToString(*failureReason,
+                                             SNAPSHOT_LOAD))
+                        .c_str(),
+                WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
+        mVmOps.vmReset();
+        Snapshotter::get().loader().reportInvalid();
+        reportFailedLoad(pb::EmulatorQuickbootLoad::
+                                 EMULATOR_QUICKBOOT_LOAD_FAILED,
+                         *failureReason);
+    } else if (*failureReason == FailureReason::NoSnapshotInImage &&
+               userSettingIsDontSaveSnapshot())
+    {
+        // There's no quickboot snapshot and the user is configured
+        // for NO save on exit. Say that is the reason.
+        mWindow.showMessage("Cold boot based on user configuration",
+                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+        reportFailedLoad(pb::EmulatorQuickbootLoad::EMULATOR_QUICKBOOT_LOAD_COLD_AVD,
+                         *failureReason);
+    } else {
+        mWindow.showMessage(
+                StringFormat("Cold boot: %s",
+                             failureToString(*failureReason,
+                                             SNAPSHOT_LOAD))
+                        .c_str(),
+                WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
+        reportFailedLoad(
+                failureReason < FailureReason::
+                                        UnrecoverableErrorLimit
+                        ? pb::EmulatorQuickbootLoad::
+                                  EMULATOR_QUICKBOOT_LOAD_FAILED
+                        : pb::EmulatorQuickbootLoad::
+                                  EMULATOR_QUICKBOOT_LOAD_COLD_OLD_SNAPSHOT,
+                *failureReason);
+    }
 }
 
 bool Quickboot::save(StringView name) {
@@ -369,7 +383,7 @@ bool Quickboot::save(StringView name) {
     if (!shouldTrySaving) {
         // Emulator hasn't booted yet, and this isn't a quickboot-loaded
         // session. Don't save.
-        dwarning("Skipping state saving as emulator not finished booting.");
+        dwarning("Not saving state: emulator hasn't finished booting.");
         reportFailedSave(
                 pb::EmulatorQuickbootSave::
                         EMULATOR_QUICKBOOT_SAVE_SKIPPED_NOT_BOOTED);
@@ -428,7 +442,7 @@ bool Quickboot::save(StringView name) {
             // and the AVD state is different from what could be saved in
             // the default boot snapshot.
             dwarning(
-                    "Cleaning out the default boot snapshot to preserve the "
+                    "Cleaning out the default snapshot to preserve the "
                     "current session (renderer type '%s' (%d) doesn't support "
                     "snapshotting).",
                     emuglConfig_renderer_to_string(
@@ -437,7 +451,7 @@ bool Quickboot::save(StringView name) {
             Snapshotter::get().deleteSnapshot(name.c_str());
         } else {
             dwarning(
-                    "Skipping boot snapshot saving (renderer type '%s' (%d) "
+                    "Not saving snapshot (renderer type '%s' (%d) "
                     "doesn't support snapshotting).",
                     emuglConfig_renderer_to_string(
                             emuglConfig_get_current_renderer()),
@@ -450,7 +464,7 @@ bool Quickboot::save(StringView name) {
 
     if (!ranLongEnoughForSaving) {
         dwarning(
-                "Skipping state saving as emulator ran for just %d "
+                "Not saving state: emulator ran for just %d "
                 "ms (<%d ms)",
                 int(sessionUptimeMs), kMinUptimeForSavingMs);
         reportFailedSave(
