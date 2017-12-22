@@ -71,7 +71,9 @@ public:
     void updateTheme(const QString& styleSheet);
 
     void setToolEmuAgent(const UiEmuAgent* agPtr);
-    const UiEmuAgent* getUiEmuAgent() const { return mUiEmuAgent; }
+
+    static void setToolEmuAgentEarly(const UiEmuAgent* agentPtr);
+    static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
 
     VirtualSceneControlWindow* virtualSceneControlWindow() {
         return &mVirtualSceneControlWindow;
@@ -128,7 +130,6 @@ private:
             mExtendedWindow;
     VirtualSceneControlWindow mVirtualSceneControlWindow;
     QTimer mExtendedWindowCreateTimer;
-    const UiEmuAgent* mUiEmuAgent;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
@@ -140,6 +141,8 @@ private:
     bool mTopSwitched = false;
     bool mIsExiting = false;
     bool mAskedWhetherToSaveSnapshot = false;
+
+    static const UiEmuAgent* sUiEmuAgent;
 
 public slots:
     void raise();
