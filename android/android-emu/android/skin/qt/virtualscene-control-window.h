@@ -14,6 +14,7 @@
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/skin/qt/qt-ui-commands.h"
+#include "android/skin/qt/shortcut-key-store.h"
 #include "android/skin/qt/size-tweaker.h"
 #include "android/skin/rect.h"
 #include "android/ui-emu-agent.h"
@@ -65,6 +66,7 @@ public:
 
     void reportMouseButtonDown();
 
+    void addShortcutKeysToKeyStore(ShortcutKeyStore<QtUICommand>& keystore);
 signals:
     void virtualSceneControlsEngaged(bool engaged);
 

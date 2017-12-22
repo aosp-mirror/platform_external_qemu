@@ -176,6 +176,8 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mShortcutKeyStore.add(QKeySequence(Qt::Key_Control | Qt::ControlModifier),
                           QtUICommand::SHOW_MULTITOUCH);
 
+    mVirtualSceneControlWindow.addShortcutKeysToKeyStore(mShortcutKeyStore);
+
     // Update tool tips on all push buttons.
     const QList<QPushButton*> childButtons =
             findChildren<QPushButton*>(QString(), Qt::FindDirectChildrenOnly);
