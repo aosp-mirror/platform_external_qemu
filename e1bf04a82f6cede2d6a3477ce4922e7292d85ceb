@@ -22,6 +22,30 @@
       "revId": "e1bf04a82f6cede2d6a3477ce4922e7292d85ceb",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "18830db4_604134c6",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/location-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-22T00:24:34Z",
+      "side": 1,
+      "message": "Ah, never mind, it\u0027s just loaded from somewhere else anyway.",
+      "parentUuid": "32511770_4329ec6e",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 68
+      },
+      "revId": "e1bf04a82f6cede2d6a3477ce4922e7292d85ceb",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
