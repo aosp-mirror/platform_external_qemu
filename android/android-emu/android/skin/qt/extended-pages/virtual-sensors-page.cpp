@@ -293,12 +293,23 @@ void VirtualSensorsPage::onTargetStateChanged() {
 }
 
 void VirtualSensorsPage::startSensorUpdateTimer() {
+    mBypassOrientationChecks = mVirtualSceneControlsEngaged;
     mAccelerationTimer.start();
 }
 
 void VirtualSensorsPage::stopSensorUpdateTimer() {
     mAccelerationTimer.stop();
     updateSensorValuesInUI();
+    mBypassOrientationChecks = false;
+}
+
+void VirtualSensorsPage::onVirtualSceneControlsEngaged(bool engaged) {
+    if (engaged) {
+        mBypassOrientationChecks = true;
+        mVirtualSceneControlsEngaged = true;
+    } else {
+        mVirtualSceneControlsEngaged = false;
+    }
 }
 
 void VirtualSensorsPage::onPhysicalStateChanging() {
@@ -526,30 +537,33 @@ void VirtualSensorsPage::updateSensorValuesInUI() {
                 &device_accelerometer.x,
                 &device_accelerometer.y,
                 &device_accelerometer.z);
-        glm::vec3 normalized_accelerometer =
-            glm::normalize(device_accelerometer);
 
-        // Update the "rotation" label according to the current acceleraiton.
-        static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions {
-            std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
-            std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
-            std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
-            std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)
-        };
-        QString rotation_label;
-        SkinRotation coarse_orientation = mCoarseOrientation;
-        for (const auto& v : directions) {
-            if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) <
-                    0.1f) {
-                coarse_orientation = v.second;
-                break;
+        if (!mBypassOrientationChecks) {
+            glm::vec3 normalized_accelerometer =
+                    glm::normalize(device_accelerometer);
+
+            // Update the "rotation" label according to the current acceleraiton.
+            static const std::array<std::pair<glm::vec3, SkinRotation>, 4> directions {
+                std::make_pair(glm::vec3(0.0f, 1.0f, 0.0f), SKIN_ROTATION_0),
+                std::make_pair(glm::vec3(-1.0f, 0.0f, 0.0f), SKIN_ROTATION_90),
+                std::make_pair(glm::vec3(0.0f, -1.0f, 0.0f), SKIN_ROTATION_180),
+                std::make_pair(glm::vec3(1.0f, 0.0f, 0.0f), SKIN_ROTATION_270)
+            };
+            QString rotation_label;
+            SkinRotation coarse_orientation = mCoarseOrientation;
+            for (const auto& v : directions) {
+                if (fabs(glm::dot(normalized_accelerometer, v.first) - 1.f) <
+                        0.1f) {
+                    coarse_orientation = v.second;
+                    break;
+                }
             }
-        }
-        if (coarse_orientation != mCoarseOrientation) {
-            mCoarseOrientation = coarse_orientation;
-            // Signal to the extended-window to rotate the emulator window
-            // since an orientation has been detected in the sensor values.
-            emit(coarseOrientationChanged(mCoarseOrientation));
+            if (coarse_orientation != mCoarseOrientation) {
+                mCoarseOrientation = coarse_orientation;
+                // Signal to the extended-window to rotate the emulator window
+                // since an orientation has been detected in the sensor values.
+                emit(coarseOrientationChanged(mCoarseOrientation));
+            }
         }
 
         glm::vec3 device_magnetometer;

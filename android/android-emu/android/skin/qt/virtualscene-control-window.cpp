@@ -188,6 +188,8 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
         updateVelocity();
     }
 
+    emit(virtualSceneControlsEngaged(capture));
+
     mCaptureMouse = capture;
 
     updateHighlightStyle();
