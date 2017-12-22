@@ -17,13 +17,40 @@
 
 #include <QDesktopWidget>
 
+EmulatorOverlay::MultitouchResources::MultitouchResources(
+    const QString& centerImgPath,
+    const QString& touchImgPath,
+    float dpr) {
+
+    centerImage.load(centerImgPath);
+    touchImage.load(touchImgPath);
+
+    if (dpr > 1.5f) {
+        centerImage.setDevicePixelRatio(dpr);
+        touchImage.setDevicePixelRatio(dpr);
+    }
+
+    centerImageRadius = centerImage.width() / dpr;
+    touchImageRadius = touchImage.width() / dpr;
+}
+
 EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
                                  EmulatorContainer* container)
     : QFrame(container),
       mEmulatorWindow(window),
       mContainer(container),
-      mRubberBand(QRubberBand::Rectangle, this),
-      mCursor(":/cursor/zoom_cursor"),
+      mRubberBand([this] { return std::make_tuple(QRubberBand::Rectangle, this); }),
+      mZoomCursor([this] { return std::make_tuple(":/cursor/zoom_cursor"); }),
+      mMultitouchResources([this] {
+          float dpr = devicePixelRatioF();
+          if (dpr >= 1.5f) {
+            return std::make_tuple(":/multitouch/center_point_2x",
+                                   ":/multitouch/touch_point_2x", dpr);
+          } else {
+            return std::make_tuple(":/multitouch/center_point",
+                                   ":/multitouch/touch_point", dpr);
+          }
+      }),
       mMultitouchCenter(-1, -1),
       mPrimaryTouchPoint(-1, -1),
       mSecondaryTouchPoint(-1, -1),
@@ -41,23 +68,6 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
 #ifdef __linux__
     setWindowFlags(windowFlags() | Qt::X11BypassWindowManagerHint);
 #endif
-
-    mRubberBand.hide();
-
-    // Load in higher-resolution images on higher resolution screens
-    if (devicePixelRatioF() >= 1.5) {
-        mCenterImage.load(":/multitouch/center_point_2x");
-        mCenterImage.setDevicePixelRatio(devicePixelRatioF());
-
-        mTouchImage.load(":/multitouch/touch_point_2x");
-        mTouchImage.setDevicePixelRatio(devicePixelRatioF());
-    } else {
-        mCenterImage.load(":/multitouch/center_point");
-        mTouchImage.load(":/multitouch/touch_point");
-    }
-
-    mCenterPointRadius = mCenterImage.width() / devicePixelRatioF();
-    mTouchPointRadius = mTouchImage.width() / devicePixelRatioF();
 
     mFlashAnimation.setStartValue(250);
     mFlashAnimation.setEndValue(0);
@@ -86,7 +96,9 @@ void EmulatorOverlay::focusOutEvent(QFocusEvent* event) {
 }
 
 void EmulatorOverlay::hideEvent(QHideEvent* event) {
-    mRubberBand.hide();
+    if (mRubberBand.hasInstance()) {
+        mRubberBand->hide();
+    }
 }
 
 void EmulatorOverlay::keyPressEvent(QKeyEvent* event) {
@@ -110,7 +122,7 @@ void EmulatorOverlay::keyReleaseEvent(QKeyEvent* event) {
 
 void EmulatorOverlay::mouseMoveEvent(QMouseEvent* event) {
     if (mMode == OverlayMode::Zoom) {
-        mRubberBand.setGeometry(
+        mRubberBand->setGeometry(
                 QRect(mRubberbandOrigin, event->pos())
                         .normalized()
                         .intersected(QRect(0, 0, width(), height())));
@@ -127,8 +139,8 @@ void EmulatorOverlay::mouseMoveEvent(QMouseEvent* event) {
 void EmulatorOverlay::mousePressEvent(QMouseEvent* event) {
     if (mMode == OverlayMode::Zoom) {
         mRubberbandOrigin = event->pos();
-        mRubberBand.setGeometry(QRect(mRubberbandOrigin, QSize()));
-        mRubberBand.show();
+        mRubberBand->setGeometry(QRect(mRubberbandOrigin, QSize()));
+        mRubberBand->show();
     } else if (mMode == OverlayMode::Multitouch) {
         if (!androidHwConfig_isScreenMultiTouch(android_hw)) {
             showErrorDialog(tr("Your virtual device is not configured for "
@@ -143,7 +155,7 @@ void EmulatorOverlay::mousePressEvent(QMouseEvent* event) {
 
 void EmulatorOverlay::mouseReleaseEvent(QMouseEvent* event) {
     if (mMode == OverlayMode::Zoom) {
-        QRect geom = mRubberBand.geometry();
+        QRect geom = mRubberBand->geometry();
         QPoint localPoint =
                 mEmulatorWindow->mapFromGlobal(mapToGlobal(geom.center()));
 
@@ -179,7 +191,7 @@ void EmulatorOverlay::mouseReleaseEvent(QMouseEvent* event) {
                 mEmulatorWindow->zoomReset();
             }
         }
-        mRubberBand.hide();
+        mRubberBand->hide();
     } else if (mMode == OverlayMode::Multitouch ||
                mMode == OverlayMode::Resize)
     {
@@ -219,6 +231,7 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
     painter.setRenderHint(QPainter::Antialiasing);
 
     if (mMode == OverlayMode::Multitouch) {
+        const auto& mtRes = mMultitouchResources.get();
         QRect bg(QPoint(0, 0), size());
         painter.fillRect(bg, QColor(255, 255, 255, alpha));
 
@@ -228,31 +241,31 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
         QPoint secondaryPoint = lerpValue * secondaryPinchPoint() +
                                 (1.0 - lerpValue) * secondaryTouchPoint();
 
-        painter.translate(-mTouchPointRadius / 2, -mTouchPointRadius / 2);
-        painter.drawImage(primaryPoint, mTouchImage);
-        painter.drawImage(secondaryPoint, mTouchImage);
+        painter.translate(-mtRes.touchImageRadius / 2, -mtRes.touchImageRadius / 2);
+        painter.drawImage(primaryPoint, mtRes.touchImage);
+        painter.drawImage(secondaryPoint, mtRes.touchImage);
         painter.resetTransform();
 
         painter.setOpacity(lerpValue);
-        painter.translate(-mCenterPointRadius / 2, -mCenterPointRadius / 2);
-        painter.drawImage(mMultitouchCenter, mCenterImage);
+        painter.translate(-mtRes.centerImageRadius / 2, -mtRes.centerImageRadius / 2);
+        painter.drawImage(mMultitouchCenter, mtRes.centerImage);
         painter.resetTransform();
 
         painter.setOpacity(.67 * lerpValue);
         painter.setPen(QPen(QColor("#00BEA4")));
 
         QLineF lineToOne = QLineF(QPoint(), primaryPoint - mMultitouchCenter);
-        if (lineToOne.length() > mTouchPointRadius) {
+        if (lineToOne.length() > mtRes.touchImageRadius) {
             QPointF delta =
-                    (lineToOne.unitVector().p2() * (mTouchPointRadius / 2));
+                    (lineToOne.unitVector().p2() * (mtRes.touchImageRadius / 2));
             painter.drawLine(
                     QLineF(mMultitouchCenter + delta, primaryPoint - delta));
         }
 
         QLineF lineToTwo = QLineF(QPoint(), secondaryPoint - mMultitouchCenter);
-        if (lineToTwo.length() > mTouchPointRadius) {
+        if (lineToTwo.length() > mtRes.touchImageRadius) {
             QPointF delta =
-                    (lineToTwo.unitVector().p2() * (mTouchPointRadius / 2));
+                    (lineToTwo.unitVector().p2() * (mtRes.touchImageRadius / 2));
             painter.drawLine(
                     QLineF(mMultitouchCenter + delta, secondaryPoint - delta));
         }
@@ -424,7 +437,7 @@ void EmulatorOverlay::showForZoom() {
         return;
 
     mMode = OverlayMode::Zoom;
-    setCursor(QCursor(mCursor));
+    setCursor(QCursor(mZoomCursor.get()));
     show();
 }
 

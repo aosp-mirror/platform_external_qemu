@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/base/memory/OnDemand.h"
+
 #include <QtCore>
 #include <QFrame>
 #include <QObject>
@@ -18,6 +20,8 @@
 #include <QTimer>
 #include <QVariantAnimation>
 #include <QWidget>
+
+#include <functional>
 
 class EmulatorQtWindow;
 class EmulatorContainer;
@@ -78,25 +82,39 @@ private:
     EmulatorContainer* mContainer;
 
     // Zoom-related members
-    QRubberBand mRubberBand;
+    // (lazy load resources)
+    android::base::MemberOnDemandT<QRubberBand,
+                                   QRubberBand::Shape,
+                                   QWidget*> mRubberBand;
+    android::base::MemberOnDemandT<QPixmap, QString> mZoomCursor;
     QPoint mRubberbandOrigin;
-    QPixmap mCursor;
 
     // Multitouch-related members
-    QImage mCenterImage;
-    QImage mTouchImage;
+    // Multitouch animation values
+    // (lazy load resources and resource-dependent values)
+    struct MultitouchResources {
+        MultitouchResources(const QString& centerImgPath,
+                            const QString& touchImgPath,
+                            float dpr);
+        QImage centerImage;
+        QImage touchImage;;
+        int centerImageRadius;
+        int touchImageRadius;
+    };
+    android::base::MemberOnDemandT<MultitouchResources,
+                                   QString,
+                                   QString,
+                                   float> mMultitouchResources;
     QPoint mMultitouchCenter;
     QPoint mPrimaryTouchPoint;
     QPoint mSecondaryTouchPoint;
     QPoint mLastMousePos;
-    int mCenterPointRadius;
-    int mTouchPointRadius;
     bool mIsSwipeGesture;
     bool mReleaseOnClose;
 
     int  mResizeCorner;
 
-    // Multitouch animation values
+
     QVariantAnimation mTouchPointAnimation;
     double mLerpValue;
 
