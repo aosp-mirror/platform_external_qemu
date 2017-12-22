@@ -264,8 +264,6 @@ void VirtualSceneControlWindow::hideEvent(QHideEvent* event) {
 }
 
 bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
-    // TODO(jwmcglynn): Touch the center of the screen when the mouse is
-    // captured. See EmulatorQtWindow::handleMouseEvent
     if (mCaptureMouse) {
         if (event->type() == QEvent::MouseMove) {
             updateMouselook();
@@ -279,6 +277,9 @@ bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
                 updateVelocity();
                 return true;
             }
+        } else if (event->type() == QEvent::WindowDeactivate &&
+                   target == parentWidget()) {
+            setCaptureMouse(false);
         }
     }
 
@@ -407,6 +408,9 @@ void VirtualSceneControlWindow::slot_metricsAggregator() {
 }
 
 void VirtualSceneControlWindow::updateMouselook() {
+    QCursor cursor(Qt::BlankCursor);
+    parentWidget()->grabMouse(cursor);
+
     QPoint offset = QCursor::pos() - mPreviousMousePosition;
     mPreviousMousePosition = getMouseCaptureCenter();
     QCursor::setPos(mPreviousMousePosition);
