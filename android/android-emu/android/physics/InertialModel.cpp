@@ -26,6 +26,8 @@
 namespace android {
 namespace physics {
 
+constexpr float kEpsilon = 0.0000000001f;
+
 InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
     if (time_ns < mModelTimeNs) {
         // If time goes backwards, set the position and rotation immediately
@@ -42,7 +44,8 @@ InertialState InertialModel::setCurrentTime(uint64_t time_ns) {
     return (mZeroVelocityAfterEndTime &&
             mModelTimeNs >= mPositionChangeEndTime &&
             mModelTimeNs >= mRotationChangeEndTime &&
-            getAmbientMotionBoundsValue(PARAMETER_VALUE_TYPE_CURRENT) == 0.f) ?
+            getAmbientMotionBoundsValue(PARAMETER_VALUE_TYPE_CURRENT) <
+                    kEpsilon) ?
             INERTIAL_STATE_STABLE : INERTIAL_STATE_CHANGING;
 }
 
@@ -366,7 +369,7 @@ void InertialModel::setTargetVelocity(
     }
     mPositionChangeStartTime = mModelTimeNs;
     mPositionChangeEndTime = mModelTimeNs + secondsToNs(transitionTime);
-    mZeroVelocityAfterEndTime = false;
+    mZeroVelocityAfterEndTime = glm::length(velocity) <= kEpsilon;
 }
 
 void InertialModel::setTargetRotation(

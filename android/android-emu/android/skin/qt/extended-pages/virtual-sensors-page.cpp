@@ -300,9 +300,9 @@ void VirtualSensorsPage::startSensorUpdateTimer() {
 }
 
 void VirtualSensorsPage::stopSensorUpdateTimer() {
+    mBypassOrientationChecks = false;
     mAccelerationTimer.stop();
     updateSensorValuesInUI();
-    mBypassOrientationChecks = false;
 }
 
 void VirtualSensorsPage::onVirtualSceneControlsEngaged(bool engaged) {
