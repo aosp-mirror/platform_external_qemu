@@ -22,6 +22,30 @@
       "revId": "0e62750bc76e3030f588d8dbf4a53b5adb82197e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06ca6d46_e7226e35",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1908,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2017-12-22T02:02:18Z",
+      "side": 1,
+      "message": "Currently we don\u0027t load any icons, but we plan to add one.  I\u0027ll file a bug to make this change.",
+      "parentUuid": "5b6f3489_d601bc98",
+      "range": {
+        "startLine": 1907,
+        "startChar": 0,
+        "endLine": 1908,
+        "endChar": 5
+      },
+      "revId": "0e62750bc76e3030f588d8dbf4a53b5adb82197e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
