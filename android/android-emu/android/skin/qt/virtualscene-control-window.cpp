@@ -61,14 +61,6 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
     flags |= Qt::Tool;
 #endif  // !__APPLE__
 
-#ifdef __linux__
-    // Without the hint below, X11 window systems will prevent this window from
-    // being moved into a position where it is not fully visible. It is
-    // required so that when the emulator container is moved partially
-    // offscreen, this window is "permitted" to follow it offscreen.
-    flags |= Qt::X11BypassWindowManagerHint;
-#endif  // __linux__
-
     setWindowFlags(flags);
 
     mControlsUi->setupUi(this);
