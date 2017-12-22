@@ -60,14 +60,10 @@ signals:
 
 public slots:
     // Sets the target rotation.
-    void setTargetRotation(const glm::quat& rotation) {
-        mTargetRotation = rotation;
-    }
+    void setTargetRotation(const glm::quat& rotation);
 
     // Sets the X, Y, and Z coordinates of the model's origin.
-    void setTargetPosition(const glm::vec3& position) {
-        mTargetPosition = position;
-    }
+    void setTargetPosition(const glm::vec3& position);
 
     // Sets the widget's operation mode which determines how it reacts
     // to mose dragging. It may either rotate the model or move it around.
