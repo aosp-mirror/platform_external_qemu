@@ -63,6 +63,14 @@ void Accelerometer3DWidget::setSensorsAgent(const QAndroidSensorsAgent* agent) {
     mSensorsAgent = agent;
 }
 
+void Accelerometer3DWidget::setTargetRotation(const glm::quat& rotation) {
+    mTargetRotation = rotation;
+}
+
+void Accelerometer3DWidget::setTargetPosition(const glm::vec3& position) {
+    mTargetPosition = clampPosition(position);
+}
+
 // Helper function that uploads the data from texture in the file
 // specified by |source_filename| into the texture object bound
 // at |target| using the given |format|. |format| should be
