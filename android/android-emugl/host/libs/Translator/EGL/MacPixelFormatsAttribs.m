@@ -111,12 +111,15 @@ static const NSOpenGLPixelFormatAttribute Legacy[] = {
 };
 
 static const NSOpenGLPixelFormatAttribute Core3_2[] = {
+    NSOpenGLPFAAccelerated,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
     NSOpenGLPFADoubleBuffer,
     0
 };
 
 static const NSOpenGLPixelFormatAttribute Core4_1[] = {
+    NSOpenGLPFAAccelerated,
+    NSOpenGLPFANoRecovery,
     NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion4_1Core,
     NSOpenGLPFADoubleBuffer,
     0
