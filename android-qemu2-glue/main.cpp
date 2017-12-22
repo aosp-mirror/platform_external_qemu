@@ -1036,6 +1036,7 @@ extern "C" int main(int argc, char** argv) {
         // targetInfo.imagePartitionTypes
         args.add(PartitionParameters::create(hw, avd));
     } else {
+        args.add2("-kernel", hw->kernel_path);
         // hw->hw_arc: ChromeOS single disk image, use regular block device
         // instead of virtio block device
         args.add("-drive");
@@ -1213,7 +1214,7 @@ extern "C" int main(int argc, char** argv) {
                 hw->kernel_parameters, rendererConfig.glesMode,
                 rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore,
-                true /* isQemu2 */));
+                true /* isQemu2 */, hw->hw_arc));
 
         if (!kernel_parameters.get()) {
             return 1;
@@ -1232,10 +1233,8 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
-        if (!hw->hw_arc) {
-          args.add("-append");
-          args.add(append_arg);
-        }
+        args.add("-append");
+        args.add(append_arg);
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);
