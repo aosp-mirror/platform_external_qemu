@@ -23,6 +23,7 @@
 
 #ifdef __APPLE__
 #include <Carbon/Carbon.h>  // For kVK_ANSI_E
+#include "android/skin/qt/mac-native-window.h"
 #endif
 
 #include <glm/gtx/euler_angles.hpp>
@@ -204,6 +205,17 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
 }
 
 void VirtualSceneControlWindow::showEvent(QShowEvent* event) {
+#ifdef __APPLE__
+    // See EmulatorContainer::showEvent() for explanation on why this is needed
+    WId parentWid = parentWidget()->effectiveWinId();
+    parentWid = (WId)getNSWindow((void*)parentWid);
+
+    WId wid = effectiveWinId();
+    Q_ASSERT(wid && parentWid);
+    wid = (WId)getNSWindow((void*)wid);
+    nsWindowAdopt((void*)parentWid, (void*)wid);
+#endif
+
     mVirtualSceneMetrics = VirtualSceneMetrics();
     mOverallDuration.restart();
     mMetricsAggregateTimer.start(kMetricsAggregateIntervalMilliseconds);

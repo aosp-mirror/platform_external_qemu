@@ -254,12 +254,6 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
     Q_ASSERT(tool_wid && wid);
     tool_wid = (WId)getNSWindow((void*)tool_wid);
     nsWindowAdopt((void*)wid, (void*)tool_wid);
-
-    if (mEmulatorWindow->toolWindow()
-                ->virtualSceneControlWindow()
-                ->isActive()) {
-        virtualSceneControlWindowVisible();
-    }
 #endif  // __APPLE__
 
     // showEvent() gets called when the emulator is minimized because we are
@@ -331,24 +325,6 @@ Ui::OverlayMessageCenter& EmulatorContainer::messageCenter() {
     connect(mMessages.ptr(), SIGNAL(resized()), this,
             SLOT(slot_messagesResized()), Qt::UniqueConnection);
     return mMessages.get();
-}
-
-void EmulatorContainer::virtualSceneControlWindowVisible() {
-#ifdef __APPLE__
-    VirtualSceneControlWindow* vsc =
-            mEmulatorWindow->toolWindow()->virtualSceneControlWindow();
-    Q_ASSERT(vsc);
-    if (vsc->isActive()) {
-        WId wid = effectiveWinId();
-        wid = (WId)getNSWindow((void*)wid);
-
-        vsc->showNormal();  // force creation of native window id
-        WId vsc_wid = vsc->effectiveWinId();
-        Q_ASSERT(vsc_wid && wid);
-        vsc_wid = (WId)getNSWindow((void*)vsc_wid);
-        nsWindowAdopt((void*)wid, (void*)vsc_wid);
-    }
-#endif  // __APPLE__
 }
 
 #ifdef __linux__
