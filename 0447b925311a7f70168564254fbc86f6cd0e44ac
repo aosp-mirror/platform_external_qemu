@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3362a437_ff134052",
+        "filename": "android/android-emu/android/skin/qt/extended-pages/help-page.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-22T00:10:41Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a3d9ec55_b44d7fd4",
+      "range": {
+        "startLine": 125,
+        "startChar": 30,
+        "endLine": 125,
+        "endChar": 35
+      },
+      "revId": "0447b925311a7f70168564254fbc86f6cd0e44ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "50978c16_af508688",
         "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2017-12-21T23:52:22Z",
       "side": 1,
       "message": "Is this the right shortcut for Mac?",
+      "range": {
+        "startLine": 304,
+        "startChar": 13,
+        "endLine": 304,
+        "endChar": 16
+      },
+      "revId": "0447b925311a7f70168564254fbc86f6cd0e44ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65416416_905abcd5",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2017-12-22T00:10:41Z",
+      "side": 1,
+      "message": "Yeah QT replaces Alt with the Option key (symbol) on Mac.",
+      "parentUuid": "50978c16_af508688",
       "range": {
         "startLine": 304,
         "startChar": 13,
