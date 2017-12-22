@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5b6f3489_d601bc98",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 1908,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-22T00:19:44Z",
+      "side": 1,
+      "message": "Should have said something earlier, but something to consider is making the virtual scene control a MemberOnDemandT like the extended window so that we don\u0027t incur higher emulator startup times, especially on older systems with spinny hard drives, those just die when asked to start the emulator and load an icon file from somewhere for instance.",
+      "range": {
+        "startLine": 1907,
+        "startChar": 0,
+        "endLine": 1908,
+        "endChar": 5
+      },
+      "revId": "0e62750bc76e3030f588d8dbf4a53b5adb82197e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
