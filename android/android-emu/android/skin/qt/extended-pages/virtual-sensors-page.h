@@ -55,6 +55,8 @@ private slots:
     void on_magEastWidget_valueChanged(double value);
     void on_magVerticalWidget_valueChanged(double value);
 
+    void updateTargetState();
+
     void propagateAccelWidgetChange();
     void propagateSlidersChange();
 
@@ -69,6 +71,7 @@ signals:
     void updateResultingValuesRequired(glm::vec3 acceleration,
                                        glm::vec3 gyroscope,
                                        glm::vec3 device_magnetic_vector);
+    void updateTargetStateRequired();
     void startSensorUpdateTimerRequired();
     void stopSensorUpdateTimerRequired();
     void windowVisible();
