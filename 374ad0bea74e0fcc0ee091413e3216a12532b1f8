@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d9bc488c_c0f41021",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-23T19:25:29Z",
+      "side": 1,
+      "message": "It seems like the socket pair waits for new audio packets to come in. However, it seems the message channel alone can do that too. What role does the socket pair play?",
+      "range": {
+        "startLine": 95,
+        "startChar": 12,
+        "endLine": 95,
+        "endChar": 77
+      },
+      "revId": "374ad0bea74e0fcc0ee091413e3216a12532b1f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0bb9529f_38665b04",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-23T19:25:29Z",
+      "side": 1,
+      "message": "this should already block if there are no audio packets incoming. See SyncThread::main for an example of waiting on data with just a message queue.",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 141,
+        "endChar": 44
+      },
+      "revId": "374ad0bea74e0fcc0ee091413e3216a12532b1f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
