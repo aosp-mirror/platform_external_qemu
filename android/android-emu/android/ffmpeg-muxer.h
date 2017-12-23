@@ -114,8 +114,8 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 //   < 0  if failed
 //
 // this method is thread safe
-int ffmpeg_encode_audio_frame(ffmpeg_recorder* recorder,
-                              uint8_t* buffer,
+int ffmpeg_encode_audio_frame(void* opaque,
+                              void* buffer,
                               int size);
 
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
