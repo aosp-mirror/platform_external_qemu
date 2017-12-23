@@ -1088,6 +1088,14 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    // rng
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+    args.add("-device");
+    args.add("virtio-rng-pci");
+#elif defined(TARGET_ARM) || defined(TARGET_ARM64)
+    args.add("-device");
+    args.add("virtio-rng-device");
+#endif
     args.add("-show-cursor");
 
     if (opts->tcpdump) {
