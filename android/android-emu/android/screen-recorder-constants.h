@@ -24,8 +24,11 @@ constexpr int kIntraSpacing = 12;
 constexpr int kFPS = 24;  // fps
 // The audio bitrate
 constexpr int kAudioBitrate = 64 * 1000;  // bps
-// The audio sample rate
-constexpr int kAudioSampleRate = 48000;  // Hz
+// The audio sample rate (44.1 kHz is the qemu audio sample rate)
+constexpr int kAudioSampleRate = 44100;  // Hz
+// The source number of samples per audio frame
+// In Qemu, 512 samples is fixed
+constexpr int kSrcNumSamples = 512;
 
 constexpr int kDefaultVideoBitrate = 4 * 1000 * 1000;  // bps
 constexpr int kDefaultTimeLimit = kMaxTimeLimit;
