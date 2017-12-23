@@ -45,6 +45,29 @@
       "revId": "374ad0bea74e0fcc0ee091413e3216a12532b1f8",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "92a4df8c_6227ef0a",
+        "filename": "android/android-emu/android/audio/AudioCaptureThread.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-23T19:35:55Z",
+      "side": 1,
+      "message": "Currently, each AudioPacket memcpys the buf into a new\u0027d buffer (AudioPacket constructor) that is later delete[]\u0027ed when we are done with it.\n\nIf this is stable already, we might think of making it faster by having a fixed set of memory for audio packets in the beginning (like triple buffering for opengl) (some kind of audio packet pool I guess), that will let us avoid calling new / delete for lots of small data ranges, whose performance is at the whim of the allocator, which means lots of small pauses and stutter.\n\nHere is an example of moving from lots of small buffer allocations to a pool. Yurii has CL where the snapshot RAM compression is changed to having a fixed-size pool of buffers in the beginning, and using FastReleasePool to signal when bytes are available: https://android-review.googlesource.com/c/platform/external/qemu/+/565130 (FastReleasePool: https://android-review.googlesource.com/c/platform/external/qemu/+/565127)",
+      "range": {
+        "startLine": 179,
+        "startChar": 0,
+        "endLine": 179,
+        "endChar": 64
+      },
+      "revId": "374ad0bea74e0fcc0ee091413e3216a12532b1f8",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
