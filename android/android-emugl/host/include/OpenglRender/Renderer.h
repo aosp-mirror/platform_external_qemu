@@ -120,7 +120,7 @@ public:
                                      int fbh,
                                      float dpr,
                                      float zRot,
-                                     bool deleteExisting) = 0;
+                                     bool forceRedraw) = 0;
 
     // destroyOpenGLSubwindow -
     //   destroys the created native subwindow. Once destroyed,

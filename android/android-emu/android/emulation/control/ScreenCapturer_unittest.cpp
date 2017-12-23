@@ -78,7 +78,7 @@ public:
                                      int fbh,
                                      float dpr,
                                      float zRot,
-                                     bool deleteExisting) {
+                                     bool forceRedraw) {
         return false;
     }
     bool destroyOpenGLSubwindow() {

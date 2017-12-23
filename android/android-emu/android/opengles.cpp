@@ -285,7 +285,7 @@ android_stopOpenglesRenderer(bool wait)
 int
 android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                            int fbw, int fbh, float dpr, float rotation,
-                           bool deleteExisting)
+                           bool forceRedraw)
 {
     if (!sRenderer) {
         return -1;
@@ -293,7 +293,7 @@ android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
     FBNativeWindowType win = (FBNativeWindowType)(uintptr_t)window;
     bool success = sRenderer->showOpenGLSubwindow(
             win, wx, wy, ww, wh, fbw, fbh, dpr, rotation,
-                       deleteExisting);
+                       forceRedraw);
     return success ? 0 : -1;
 }
 

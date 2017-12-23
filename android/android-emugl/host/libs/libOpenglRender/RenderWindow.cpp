@@ -95,7 +95,7 @@ struct RenderWindowMessage {
             int fbh;
             float dpr;
             float rotation;
-            bool deleteExisting;
+            bool forceRedraw;
         } subwindow;
 
         // CMD_SET_TRANSLATION;
@@ -179,7 +179,7 @@ struct RenderWindowMessage {
                         msg.subwindow.fbh,
                         msg.subwindow.dpr,
                         msg.subwindow.rotation,
-                        msg.subwindow.deleteExisting);
+                        msg.subwindow.forceRedraw);
                 break;
 
             case CMD_REMOVE_SUBWINDOW:
@@ -430,7 +430,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
                                   int fbh,
                                   float dpr,
                                   float zRot,
-                                  bool deleteExisting) {
+                                  bool forceRedraw) {
     D("Entering mHasSubWindow=%s\n", mHasSubWindow ? "true" : "false");
 
     RenderWindowMessage msg = {};
@@ -444,7 +444,7 @@ bool RenderWindow::setupSubWindow(FBNativeWindowType window,
     msg.subwindow.fbh = fbh;
     msg.subwindow.dpr = dpr;
     msg.subwindow.rotation = zRot;
-    msg.subwindow.deleteExisting = deleteExisting;
+    msg.subwindow.forceRedraw = forceRedraw;
 
     mHasSubWindow = processMessage(msg);
 

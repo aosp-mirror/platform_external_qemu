@@ -1308,7 +1308,7 @@ typedef struct {
     int fbw;
     int fbh;
     float rot;
-    bool deleteExisting;
+    bool forceRedraw;
 } gles_show_data;
 
 static void skin_window_run_opengles_show(void* p) {
@@ -1329,7 +1329,7 @@ static void skin_window_run_opengles_show(void* p) {
                                            data->fbh,
                                            dpr,
                                            data->rot,
-                                           data->deleteExisting);
+                                           data->forceRedraw);
     AFREE(data);
 }
 
@@ -1360,7 +1360,7 @@ skin_window_setup_opengles_subwindow( SkinWindow* window, gles_show_data* data)
 
 /* Show the OpenGL ES framebuffer window */
 static void
-skin_window_show_opengles(SkinWindow* window, bool deleteExisting)
+skin_window_show_opengles(SkinWindow* window, bool forceRedraw)
 {
     ADisplay* disp = window->layout.displays;
 
@@ -1368,7 +1368,7 @@ skin_window_show_opengles(SkinWindow* window, bool deleteExisting)
     ANEW0(data);
     skin_window_setup_opengles_subwindow(window, data);
     data->rot = disp->rotation * 90.;
-    data->deleteExisting = deleteExisting;
+    data->forceRedraw = forceRedraw;
     skin_winsys_run_ui_update(&skin_window_run_opengles_show, data, false);
 }
 

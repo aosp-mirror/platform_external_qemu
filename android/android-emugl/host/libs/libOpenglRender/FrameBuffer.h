@@ -125,7 +125,7 @@ public:
                         int wx, int wy,
                         int ww, int wh,
                         int fbw, int fbh, float dpr, float zRot,
-                        bool deleteExisting);
+                        bool forceRedraw);
 
     // Remove the sub-window created by setupSubWindow(), if any.
     // Return true on success, false otherwise.

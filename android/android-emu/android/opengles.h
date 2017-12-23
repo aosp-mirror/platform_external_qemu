@@ -67,7 +67,7 @@ void android_getOpenglesHardwareStrings(char** vendor,
 
 int android_showOpenglesWindow(void* window, int wx, int wy, int ww, int wh,
                                int fbw, int fbh, float dpr, float rotation,
-                               bool deleteExisting);
+                               bool forceRedraw);
 
 int android_hideOpenglesWindow(void);
 

@@ -650,7 +650,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                  int fbh,
                                  float dpr,
                                  float zRot,
-                                 bool deleteExisting) {
+                                 bool forceRedraw) {
     GL_LOG("Begin setupSubWindow");
     if (!m_useSubWindow) {
         ERR("%s: Cannot create native sub-window in this configuration\n",
@@ -661,7 +661,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     // Do a quick check before even taking the lock - maybe we don't need to
     // do anything here.
 
-    const bool createSubWindow = !m_subWin || deleteExisting;
+    const bool createSubWindow = !m_subWin;
 
     // On Mac, since window coordinates are Y-up and not Y-down, the
     // subwindow may not change dimensions, but because the main window
@@ -680,7 +680,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
                                 );
 
     const bool redrawSubwindow =
-            createSubWindow || moveSubWindow || m_zRot != zRot || m_dpr != dpr;
+            forceRedraw || createSubWindow || moveSubWindow || m_zRot != zRot || m_dpr != dpr;
     if (!createSubWindow && !moveSubWindow && !redrawSubwindow) {
         assert(sInitialized.load(std::memory_order_relaxed));
         GL_LOG("Exit setupSubWindow (nothing to do)");
@@ -692,8 +692,7 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     }
 
 #if SNAPSHOT_PROFILE > 1
-    printf("FrameBuffer::%s(%s): start at %lld ms\n", __func__,
-           deleteExisting ? "deleteExisting" : "keepExisting",
+    printf("FrameBuffer::%s: start at %lld ms\n", __func__,
            (long long)System::get()->getProcessTimes().wallClockMs);
 #endif
 
@@ -703,11 +702,6 @@ bool FrameBuffer::setupSubWindow(FBNativeWindowType p_window,
     printf("FrameBuffer::%s(): got lock at %lld ms\n", __func__,
            (long long)System::get()->getProcessTimes().wallClockMs);
 #endif
-
-    if (deleteExisting) {
-        // TODO: look into reusing the existing native window when possible.
-        removeSubWindow_locked();
-    }
 
     bool success = false;
 
