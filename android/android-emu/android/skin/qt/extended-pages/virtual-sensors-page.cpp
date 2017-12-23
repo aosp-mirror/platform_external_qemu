@@ -67,6 +67,9 @@ VirtualSensorsPage::VirtualSensorsPage(QWidget* parent)
     connect(this, &VirtualSensorsPage::updateResultingValuesRequired,
             this, &VirtualSensorsPage::updateResultingValues);
 
+    connect(this, &VirtualSensorsPage::updateTargetStateRequired,
+            this, &VirtualSensorsPage::updateTargetState);
+
     connect(this, &VirtualSensorsPage::startSensorUpdateTimerRequired,
             this, &VirtualSensorsPage::startSensorUpdateTimer);
 
@@ -260,7 +263,7 @@ void VirtualSensorsPage::on_positionZSlider_valueChanged(double) {
     propagateSlidersChange();
 }
 
-void VirtualSensorsPage::onTargetStateChanged() {
+void VirtualSensorsPage::updateTargetState() {
     glm::vec3 position;
     mSensorsAgent->getPhysicalParameter(PHYSICAL_PARAMETER_POSITION,
                                         &position.x, &position.y, &position.z,
@@ -324,6 +327,10 @@ void VirtualSensorsPage::reportVirtualSensorsInteraction() {
             mLastInteractionElapsed.start();
         }
     }
+}
+
+void VirtualSensorsPage::onTargetStateChanged() {
+    emit updateTargetStateRequired();
 }
 
 void VirtualSensorsPage::onPhysicalStateChanging() {
