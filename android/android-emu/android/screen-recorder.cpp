@@ -159,7 +159,7 @@ static intptr_t sendFrames(int fps) {
         if (f) {
             D("sending frame %d", i++);
             if (!globals.channel.trySend(std::move(*f))) {
-                derror("Frame queue full. Frame dropped");
+                dwarning("Frame queue full. Frame dropped");
             }
         }
 
