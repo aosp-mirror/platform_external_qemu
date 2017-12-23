@@ -87,6 +87,8 @@ private slots:
     void lineEditValueChanged();
 
 private:
+    void updateValidatorStyle(QString colorGroup);
+
     double mValue = 0.0f;
     double mMinimum = 0.0f;
     double mMaximum = 0.0f;
