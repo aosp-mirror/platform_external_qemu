@@ -1363,10 +1363,10 @@ enum {
 #if defined(DEBUG_INTERPRETER)
 #define DEBUG_DISSAS(opc) do {                                                          \
     int i;                                                                              \
-    fprintf(stderr, "%s:%d\t%s pc %u op 0x%x rs %d rt %d rd %d sa %d imm 0x%x\n",       \
-                    __func__, __LINE__, opc, CPU.pc, op, rs, rt, rd, sa, (uint32_t)imm);\
+    fprintf(stderr, "%s:%d\t CPU(%d) %s pc %u op 0x%x rs %d rt %d rd %d sa %d imm 0x%x\n",       \
+                    __func__, __LINE__, cs->cpu_index, opc, CPU->pc, op, rs, rt, rd, sa, (uint32_t)imm);\
     for (i = 0; i < 32; i++) {                                                          \
-        fprintf(stderr, "$%d = 0x" TARGET_FMT_lx " ", i, CPU.gpr_reg[i]);               \
+        fprintf(stderr, "$%d = 0x" TARGET_FMT_lx " ", i, CPU->gpr_reg[i]);               \
         if ((i % 4) == 3) fprintf(stderr, "\n");                                        \
     }                                                                                   \
     fprintf(stderr, "\n");                                                              \
@@ -1376,12 +1376,10 @@ enum {
 #endif
 
 #define DEBUG_ERROR(msg) do {                                                           \
-    fprintf(stderr, "%s:%d\t%s pc %u op 0x%x rs %d rt %d rd %d sa %d imm 0x%x\n",       \
-                    __func__, __LINE__, msg, CPU.pc, op, rs, rt, rd, sa, (uint32_t)imm);\
+    fprintf(stderr, "%s:%d\t CPU(%d) %s pc %u op 0x%x rs %d rt %d rd %d sa %d imm 0x%x\n",       \
+                    __func__, __LINE__, cs->cpu_index, msg, CPU->pc, op, rs, rt, rd, sa, (uint32_t)imm);\
     exit(1);                                                                            \
 } while(0)
-
-CPUInterpreterContext CPU;
 
 static inline hwaddr translate_address(CPUMIPSState *env, target_ulong address) {
 
@@ -1437,35 +1435,36 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
 
     MIPSCPU *cpu = mips_env_get_cpu(env);
     CPUState *cs = CPU(cpu);
+    CPUInterpreterContext *CPU = &(env->CPU);
 
-    CPU.branch_addr = 0;
+    CPU->branch_addr = 0;
 
-    CPU.CP0_EntryLo0 = env->CP0_EntryLo0;
-    CPU.CP0_EntryLo1 = env->CP0_EntryLo1;
-    CPU.CP0_BadVAddr = env->CP0_BadVAddr;
-    CPU.CP0_EntryHi = env->CP0_EntryHi;
-    CPU.CP0_Context = env->CP0_Context;
-    CPU.CP0_XContext = env->CP0_XContext;
-    CPU.CP0_PageMask = env->CP0_PageMask;
-    CPU.CP0_PageGrain = env->CP0_PageGrain;
-    CPU.CP0_PageGrain_rw_bitmask = env->CP0_PageGrain_rw_bitmask;
-    CPU.CP0_Index = env->CP0_Index;
+    CPU->CP0_EntryLo0 = env->CP0_EntryLo0;
+    CPU->CP0_EntryLo1 = env->CP0_EntryLo1;
+    CPU->CP0_BadVAddr = env->CP0_BadVAddr;
+    CPU->CP0_EntryHi = env->CP0_EntryHi;
+    CPU->CP0_Context = env->CP0_Context;
+    CPU->CP0_XContext = env->CP0_XContext;
+    CPU->CP0_PageMask = env->CP0_PageMask;
+    CPU->CP0_PageGrain = env->CP0_PageGrain;
+    CPU->CP0_PageGrain_rw_bitmask = env->CP0_PageGrain_rw_bitmask;
+    CPU->CP0_Index = env->CP0_Index;
 
     for (i = 0; i < MIPS_KSCRATCH_NUM; i++) {
-        CPU.CP0_KScratch[i] = env->CP0_KScratch[i];
+        CPU->CP0_KScratch[i] = env->CP0_KScratch[i];
     }
 
     while (1) {
 
-        op = MASK_OP_MAJOR(code[CPU.pc]);
-        rs = (code[CPU.pc] >> 21) & 0x1f;
-        rt = (code[CPU.pc] >> 16) & 0x1f;
-        rd = (code[CPU.pc] >> 11) & 0x1f;
-        sa = (code[CPU.pc] >> 6) & 0x1f;
-        imm = (int16_t)code[CPU.pc];
-        opcode = code[CPU.pc];
+        op = MASK_OP_MAJOR(code[CPU->pc]);
+        rs = (code[CPU->pc] >> 21) & 0x1f;
+        rt = (code[CPU->pc] >> 16) & 0x1f;
+        rd = (code[CPU->pc] >> 11) & 0x1f;
+        sa = (code[CPU->pc] >> 6) & 0x1f;
+        imm = (int16_t)code[CPU->pc];
+        opcode = code[CPU->pc];
 
-        CPU.pc++;
+        CPU->pc++;
 
         switch (op) {
         case OPC_SPECIAL:
@@ -1476,11 +1475,11 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 DEBUG_DISSAS("Jump");
                 return -2;
             case OPC_SLL:
-                CPU.gpr_reg[rt] = (int32_t)(CPU.gpr_reg[rt] << sa);
+                CPU->gpr_reg[rt] = (int32_t)(CPU->gpr_reg[rt] << sa);
                 DEBUG_DISSAS("sll");
                 break;
             case OPC_SRA:
-                CPU.gpr_reg[rt] = (int32_t)((int32_t)CPU.gpr_reg[rt] >> sa);
+                CPU->gpr_reg[rt] = (int32_t)((int32_t)CPU->gpr_reg[rt] >> sa);
                 DEBUG_DISSAS("sra");
                 break;
             case OPC_SRL:
@@ -1488,13 +1487,13 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     case 1:
                     {
                         uint32_t mask = ~(-1 << sa);
-                        CPU.gpr_reg[rd] = (int32_t)((((uint32_t)CPU.gpr_reg[rt] & mask) << (32 - sa)) |
-                                                   (((uint32_t)CPU.gpr_reg[rt]) >> sa));
+                        CPU->gpr_reg[rd] = (int32_t)((((uint32_t)CPU->gpr_reg[rt] & mask) << (32 - sa)) |
+                                                   (((uint32_t)CPU->gpr_reg[rt]) >> sa));
                         DEBUG_DISSAS("ror");
                         break;
                     }
                     case 0:
-                        CPU.gpr_reg[rt] = (int32_t)((uint32_t)CPU.gpr_reg[rt] >> sa);
+                        CPU->gpr_reg[rt] = (int32_t)((uint32_t)CPU->gpr_reg[rt] >> sa);
                         DEBUG_DISSAS("srl");
                         break;
                     default:
@@ -1505,47 +1504,47 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             case OPC_ROTR:
             {
                 target_ulong mask = ~(-1 << sa);
-                CPU.gpr_reg[rd] = (int32_t)(((CPU.gpr_reg[rt] & mask) << (32 - sa)) |
-                                           (((target_ulong)CPU.gpr_reg[rt]) >> sa));
+                CPU->gpr_reg[rd] = (int32_t)(((CPU->gpr_reg[rt] & mask) << (32 - sa)) |
+                                           (((target_ulong)CPU->gpr_reg[rt]) >> sa));
                 DEBUG_DISSAS("rotr");
                 break;
             }
             case OPC_ADDU:
-                CPU.gpr_reg[rd] = (int32_t)(CPU.gpr_reg[rs] + CPU.gpr_reg[rt]);
+                CPU->gpr_reg[rd] = (int32_t)(CPU->gpr_reg[rs] + CPU->gpr_reg[rt]);
                 DEBUG_DISSAS("addu");
                 break;
             case OPC_SUBU:
-                CPU.gpr_reg[rd] = (int32_t)(CPU.gpr_reg[rs] - CPU.gpr_reg[rt]);
+                CPU->gpr_reg[rd] = (int32_t)(CPU->gpr_reg[rs] - CPU->gpr_reg[rt]);
                 DEBUG_DISSAS("subu");
                 break;
             case OPC_AND:          /* Logic*/
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rs] & CPU.gpr_reg[rt];
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rs] & CPU->gpr_reg[rt];
                 DEBUG_DISSAS("and");
                 break;
             case OPC_OR:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rs] | CPU.gpr_reg[rt];
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rs] | CPU->gpr_reg[rt];
                 DEBUG_DISSAS("or");
                 break;
             case OPC_XOR:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rs] ^ CPU.gpr_reg[rt];
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rs] ^ CPU->gpr_reg[rt];
                 DEBUG_DISSAS("xor");
                 break;
 #if defined(TARGET_MIPS64)
                 /* MIPS64 specific opcodes */
             case OPC_DSLL:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rt] << sa;
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rt] << sa;
                 DEBUG_DISSAS("dsll");
                 break;
             case OPC_DSRA:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rt] >> sa;
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rt] >> sa;
                 DEBUG_DISSAS("dsra");
                 break;
             case OPC_DSLL32:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rt] << (sa + 32);
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rt] << (sa + 32);
                 DEBUG_DISSAS("dsll32");
                 break;
             case OPC_DSRA32:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rt] >> (sa + 32);
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rt] >> (sa + 32);
                 DEBUG_DISSAS("dsra32");
                 break;
             case OPC_DSRL:
@@ -1553,13 +1552,13 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     case 1:
                     {
                         target_ulong mask = ~(-1 << sa);
-                        CPU.gpr_reg[rd] = (((target_ulong)CPU.gpr_reg[rt] & mask) << (64 - sa)) |
-                                          (((target_ulong)CPU.gpr_reg[rt]) >> sa);
+                        CPU->gpr_reg[rd] = (((target_ulong)CPU->gpr_reg[rt] & mask) << (64 - sa)) |
+                                          (((target_ulong)CPU->gpr_reg[rt]) >> sa);
                         DEBUG_DISSAS("dror");
                         break;
                     }
                     case 0:
-                        CPU.gpr_reg[rt] = ((target_ulong)CPU.gpr_reg[rt] >> sa);
+                        CPU->gpr_reg[rt] = ((target_ulong)CPU->gpr_reg[rt] >> sa);
                         DEBUG_DISSAS("dsrl");
                         break;
                     default:
@@ -1570,29 +1569,29 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             case OPC_DROTR:
             {
                 target_ulong mask = ~(-1 << sa);
-                CPU.gpr_reg[rd] = (((target_ulong)CPU.gpr_reg[rt] & mask) << (64 - sa)) |
-                                  (((target_ulong)CPU.gpr_reg[rt]) >> sa);
+                CPU->gpr_reg[rd] = (((target_ulong)CPU->gpr_reg[rt] & mask) << (64 - sa)) |
+                                  (((target_ulong)CPU->gpr_reg[rt]) >> sa);
                 DEBUG_DISSAS("drotr");
                 break;
             }
             case OPC_DROTR32:
             {
                 target_ulong mask = ~(-1 << (sa + 32));
-                CPU.gpr_reg[rd] = (((target_ulong)CPU.gpr_reg[rt] & mask) << (32 - sa)) |
-                                  (((target_ulong)CPU.gpr_reg[rt]) >> (sa + 32));
+                CPU->gpr_reg[rd] = (((target_ulong)CPU->gpr_reg[rt] & mask) << (32 - sa)) |
+                                  (((target_ulong)CPU->gpr_reg[rt]) >> (sa + 32));
                 DEBUG_DISSAS("drotr32");
                 break;
             }
             case OPC_DSRL32:
-                CPU.gpr_reg[rd] = ((target_ulong)CPU.gpr_reg[rt]) >> (sa + 32);
+                CPU->gpr_reg[rd] = ((target_ulong)CPU->gpr_reg[rt]) >> (sa + 32);
                 DEBUG_DISSAS("dsrl32");
                 break;
             case OPC_DADDU:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rs] + CPU.gpr_reg[rt];
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rs] + CPU->gpr_reg[rt];
                 DEBUG_DISSAS("daddu");
                 break;
             case OPC_DSUBU:
-                CPU.gpr_reg[rd] = CPU.gpr_reg[rs] - CPU.gpr_reg[rt];
+                CPU->gpr_reg[rd] = CPU->gpr_reg[rs] - CPU->gpr_reg[rt];
                 DEBUG_DISSAS("dsubu");
                 break;
 #endif
@@ -1609,32 +1608,32 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             switch (op1) {
             case OPC_EXT:
                 mask = (~(-1 << (rd + 1))) << sa;
-                CPU.gpr_reg[rt] = (int32_t)(((target_ulong)(CPU.gpr_reg[rs] & mask)) >> sa);
+                CPU->gpr_reg[rt] = (int32_t)(((target_ulong)(CPU->gpr_reg[rs] & mask)) >> sa);
                 DEBUG_DISSAS("ext");
                 break;
             case OPC_INS:
                 mask = ~(-1 << (rd - sa + 1));
-                CPU.gpr_reg[rt] = (int32_t)((CPU.gpr_reg[rt] & ~(mask << sa)) |
-                                            ((CPU.gpr_reg[rs] & mask) << sa));
+                CPU->gpr_reg[rt] = (int32_t)((CPU->gpr_reg[rt] & ~(mask << sa)) |
+                                            ((CPU->gpr_reg[rs] & mask) << sa));
                 DEBUG_DISSAS("ins");
                 break;
 #if defined(TARGET_MIPS64)
             case OPC_DEXT:
                 mask = (~(-1 << (rd + 1))) << sa;
-                CPU.gpr_reg[rt] = ((target_ulong)(CPU.gpr_reg[rs] & mask)) >> sa |
-                                  (CPU.gpr_reg[rt] & ~((target_ulong)mask >> sa));
+                CPU->gpr_reg[rt] = ((target_ulong)(CPU->gpr_reg[rs] & mask)) >> sa |
+                                  (CPU->gpr_reg[rt] & ~((target_ulong)mask >> sa));
                 DEBUG_DISSAS("dext");
                 break;
             case OPC_DINSM:
                 mask = ~(-1 << ((rd + 32) - sa + 1));
-                CPU.gpr_reg[rt] = (CPU.gpr_reg[rt] & ~(mask << sa)) |
-                                  ((CPU.gpr_reg[rs] & mask) << sa);
+                CPU->gpr_reg[rt] = (CPU->gpr_reg[rt] & ~(mask << sa)) |
+                                  ((CPU->gpr_reg[rs] & mask) << sa);
                 DEBUG_DISSAS("dinsm");
                 break;
             case OPC_DINS:
                 mask = ~(-1 << (rd - sa + 1));
-                CPU.gpr_reg[rt] = (CPU.gpr_reg[rt] & ~(mask << sa)) |
-                                  ((CPU.gpr_reg[rs] & mask) << sa);
+                CPU->gpr_reg[rt] = (CPU->gpr_reg[rt] & ~(mask << sa)) |
+                                  ((CPU->gpr_reg[rs] & mask) << sa);
                 DEBUG_DISSAS("dins");
                 break;
 #endif
@@ -1648,36 +1647,36 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             op1 = MASK_REGIMM(opcode);
             switch (op1) {
             case OPC_BLTZL: /* REGIMM branches */
-                if (CPU.gpr_reg[rs] < 0) {
-                    CPU.branch_addr = CPU.pc + (int32_t)imm;
+                if (CPU->gpr_reg[rs] < 0) {
+                    CPU->branch_addr = CPU->pc + (int32_t)imm;
                     DEBUG_DISSAS("bltzl");
                     continue;
                 } else {
-                    CPU.pc++;
+                    CPU->pc++;
                 }
                 DEBUG_DISSAS("bltzl");
                 break;
             case OPC_BGEZL:
-                if (CPU.gpr_reg[rs] >= 0) {
-                    CPU.branch_addr = CPU.pc + (int32_t)imm;
+                if (CPU->gpr_reg[rs] >= 0) {
+                    CPU->branch_addr = CPU->pc + (int32_t)imm;
                     DEBUG_DISSAS("bgezl");
                     continue;
                 } else {
-                    CPU.pc++;
+                    CPU->pc++;
                 }
                 DEBUG_DISSAS("bgezl");
                 break;
             case OPC_BLTZ:
-                if (CPU.gpr_reg[rs] < 0) {
-                    CPU.branch_addr = CPU.pc + (int32_t)imm;
+                if (CPU->gpr_reg[rs] < 0) {
+                    CPU->branch_addr = CPU->pc + (int32_t)imm;
                     DEBUG_DISSAS("bltz");
                     continue;
                  }
                 DEBUG_DISSAS("bltz");
                 break;
             case OPC_BGEZ:
-                if (CPU.gpr_reg[rs] >= 0) {
-                    CPU.branch_addr = CPU.pc + (int32_t)imm;
+                if (CPU->gpr_reg[rs] >= 0) {
+                    CPU->branch_addr = CPU->pc + (int32_t)imm;
                     DEBUG_DISSAS("bgez");
                     continue;
                 }
@@ -1697,7 +1696,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                         // Context
-                        CPU.gpr_reg[rt] = (int32_t)CPU.CP0_Context;
+                        CPU->gpr_reg[rt] = (int32_t)CPU->CP0_Context;
                         DEBUG_DISSAS("mfc0 Context");
                         break;
                     default:
@@ -1708,11 +1707,11 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 case 5:
                     switch (opcode & 0x7) {
                     case 0:
-                        CPU.gpr_reg[rt] = CPU.CP0_PageMask;
+                        CPU->gpr_reg[rt] = CPU->CP0_PageMask;
                         DEBUG_DISSAS("mfc0 PageMask");
                         break;
                     case 1:
-                        CPU.gpr_reg[rt] = CPU.CP0_PageGrain;
+                        CPU->gpr_reg[rt] = CPU->CP0_PageGrain;
                         DEBUG_DISSAS("mfc0 PageGrain");
                         break;
                     default:
@@ -1723,7 +1722,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                         // BadVAddr
-                        CPU.gpr_reg[rt] = CPU.CP0_BadVAddr;
+                        CPU->gpr_reg[rt] = CPU->CP0_BadVAddr;
                         DEBUG_DISSAS("mfc0 BadVAddr");
                         break;
                     default:
@@ -1734,7 +1733,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 case 13:
                     switch (opcode & 0x7) {
                     case 0:
-                        CPU.gpr_reg[rt] = CPU.CP0_Cause;
+                        CPU->gpr_reg[rt] = CPU->CP0_Cause;
                         DEBUG_DISSAS("mfc0 CP0_Cause");
                         break;
                     default:
@@ -1747,7 +1746,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                         // XContext
-                        CPU.gpr_reg[rt] = CPU.CP0_XContext;
+                        CPU->gpr_reg[rt] = CPU->CP0_XContext;
                         DEBUG_DISSAS("mfc0 XContext");
                         break;
                     default:
@@ -1759,7 +1758,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 case 31:
                     switch(opcode & 0x7) {
                         case 2 ... 7:
-                            CPU.gpr_reg[rt] = (int32_t)CPU.CP0_KScratch[(opcode & 0x7) - 2];
+                            CPU->gpr_reg[rt] = (int32_t)CPU->CP0_KScratch[(opcode & 0x7) - 2];
                             DEBUG_DISSAS("mfc0 KScratch");
                             break;
                         default:
@@ -1778,8 +1777,8 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     case 0:
                     {
                         // EntryLo0
-                        target_ulong rxi = CPU.gpr_reg[rt] & (CPU.CP0_PageGrain & (3u << CP0PG_XIE));
-                        CPU.CP0_EntryLo0 = (CPU.gpr_reg[rt] & ((env->PAMask >> 6) & 0x3FFFFFFF)) |
+                        target_ulong rxi = CPU->gpr_reg[rt] & (CPU->CP0_PageGrain & (3u << CP0PG_XIE));
+                        CPU->CP0_EntryLo0 = (CPU->gpr_reg[rt] & ((env->PAMask >> 6) & 0x3FFFFFFF)) |
                                            (rxi << (CP0EnLo_XI - 30));
                         DEBUG_DISSAS("mtc0 EntryLo0");
                         break;
@@ -1794,8 +1793,8 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     case 0:
                     {
                         // EntryLo1
-                        target_ulong rxi = CPU.gpr_reg[rt] & (CPU.CP0_PageGrain & (3u << CP0PG_XIE));
-                        CPU.CP0_EntryLo1 = (CPU.gpr_reg[rt] & ((env->PAMask >> 6) & 0x3FFFFFFF)) |
+                        target_ulong rxi = CPU->gpr_reg[rt] & (CPU->CP0_PageGrain & (3u << CP0PG_XIE));
+                        CPU->CP0_EntryLo1 = (CPU->gpr_reg[rt] & ((env->PAMask >> 6) & 0x3FFFFFFF)) |
                                            (rxi << (CP0EnLo_XI - 30));
                         DEBUG_DISSAS("mtc0 EntryLo1");
                         break;
@@ -1809,19 +1808,19 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                     {
-                        uint64_t mask = CPU.gpr_reg[rt] >> (TARGET_PAGE_BITS + 1);
-                        if (!(env->insn_flags & ISA_MIPS32R6) || (CPU.gpr_reg[rt] == ~0) ||
+                        uint64_t mask = CPU->gpr_reg[rt] >> (TARGET_PAGE_BITS + 1);
+                        if (!(env->insn_flags & ISA_MIPS32R6) || (CPU->gpr_reg[rt] == ~0) ||
                             (mask == 0x0000 || mask == 0x0003 || mask == 0x000F ||
                              mask == 0x003F || mask == 0x00FF || mask == 0x03FF ||
                              mask == 0x0FFF || mask == 0x3FFF || mask == 0xFFFF)) {
-                            CPU.CP0_PageMask = CPU.gpr_reg[rt] & (0x1FFFFFFF & (TARGET_PAGE_MASK << 1));
+                            CPU->CP0_PageMask = CPU->gpr_reg[rt] & (0x1FFFFFFF & (TARGET_PAGE_MASK << 1));
                         }
                         DEBUG_DISSAS("mtc0 PageMask");
                         break;
                     }
                     case 1:
-                        CPU.CP0_PageGrain = (CPU.gpr_reg[rt] & CPU.CP0_PageGrain_rw_bitmask) |
-                                             (CPU.CP0_PageGrain & ~CPU.CP0_PageGrain_rw_bitmask);
+                        CPU->CP0_PageGrain = (CPU->gpr_reg[rt] & CPU->CP0_PageGrain_rw_bitmask) |
+                                             (CPU->CP0_PageGrain & ~CPU->CP0_PageGrain_rw_bitmask);
                         DEBUG_DISSAS("mtc0 PageGrain");
                         break;
                     default:
@@ -1831,7 +1830,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 case 31:
                     switch(opcode & 0x7) {
                         case 2 ... 7:
-                            CPU.CP0_KScratch[(opcode & 0x7) - 2] = CPU.gpr_reg[rt];
+                            CPU->CP0_KScratch[(opcode & 0x7) - 2] = CPU->gpr_reg[rt];
                             DEBUG_DISSAS("mtc0 KScratch");
                             break;
                         default:
@@ -1850,7 +1849,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                         // Context
-                        CPU.gpr_reg[rt] = CPU.CP0_Context;
+                        CPU->gpr_reg[rt] = CPU->CP0_Context;
                         DEBUG_DISSAS("dmfc0 Context");
                         break;
                     default:
@@ -1861,11 +1860,11 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 case 5:
                     switch (opcode & 0x7) {
                     case 0:
-                        CPU.gpr_reg[rt] = CPU.CP0_PageMask;
+                        CPU->gpr_reg[rt] = CPU->CP0_PageMask;
                         DEBUG_DISSAS("mfc0 PageMask");
                         break;
                     case 1:
-                        CPU.gpr_reg[rt] = CPU.CP0_PageGrain;
+                        CPU->gpr_reg[rt] = CPU->CP0_PageGrain;
                         DEBUG_DISSAS("mfc0 PageGrain");
                         break;
                     default:
@@ -1876,7 +1875,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                         // BadVAddr
-                        CPU.gpr_reg[rt] = CPU.CP0_BadVAddr;
+                        CPU->gpr_reg[rt] = CPU->CP0_BadVAddr;
                         DEBUG_DISSAS("dmfc0 BadVAddr");
                         break;
                     default:
@@ -1888,7 +1887,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                         // XContext
-                        CPU.gpr_reg[rt] = CPU.CP0_XContext;
+                        CPU->gpr_reg[rt] = CPU->CP0_XContext;
                         DEBUG_DISSAS("dmfc0 XContext");
                         break;
                     default:
@@ -1899,7 +1898,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 case 31:
                     switch(opcode & 0x7) {
                         case 2 ... 7:
-                            CPU.gpr_reg[rt] = CPU.CP0_KScratch[(opcode & 0x7) - 2];
+                            CPU->gpr_reg[rt] = CPU->CP0_KScratch[(opcode & 0x7) - 2];
                             DEBUG_DISSAS("dmfc0 KScratch");
                             break;
                         default:
@@ -1918,8 +1917,8 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     case 0:
                     {
                         // EntryLo0
-                        target_ulong rxi = CPU.gpr_reg[rt] & ((CPU.CP0_PageGrain & (3ull << CP0PG_XIE)) << 32);
-                        CPU.CP0_EntryLo0 = (CPU.gpr_reg[rt] & (env->PAMask >> 6)) | rxi;
+                        target_ulong rxi = CPU->gpr_reg[rt] & ((CPU->CP0_PageGrain & (3ull << CP0PG_XIE)) << 32);
+                        CPU->CP0_EntryLo0 = (CPU->gpr_reg[rt] & (env->PAMask >> 6)) | rxi;
                         DEBUG_DISSAS("dmtc0 EntryLo0");
                         break;
 
@@ -1934,8 +1933,8 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     case 0:
                     {
                         // EntryLo1
-                        target_ulong rxi = CPU.gpr_reg[rt] & ((CPU.CP0_PageGrain & (3ull << CP0PG_XIE)) << 32);
-                        CPU.CP0_EntryLo1 = (CPU.gpr_reg[rt] & (env->PAMask >> 6)) | rxi;
+                        target_ulong rxi = CPU->gpr_reg[rt] & ((CPU->CP0_PageGrain & (3ull << CP0PG_XIE)) << 32);
+                        CPU->CP0_EntryLo1 = (CPU->gpr_reg[rt] & (env->PAMask >> 6)) | rxi;
                         DEBUG_DISSAS("dmtc0 EntryLo1");
                         break;
                     }
@@ -1948,19 +1947,19 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                     switch (opcode & 0x7) {
                     case 0:
                     {
-                        uint64_t mask = CPU.gpr_reg[rt] >> (TARGET_PAGE_BITS + 1);
-                        if (!(env->insn_flags & ISA_MIPS32R6) || (CPU.gpr_reg[rt] == ~0) ||
+                        uint64_t mask = CPU->gpr_reg[rt] >> (TARGET_PAGE_BITS + 1);
+                        if (!(env->insn_flags & ISA_MIPS32R6) || (CPU->gpr_reg[rt] == ~0) ||
                             (mask == 0x0000 || mask == 0x0003 || mask == 0x000F ||
                              mask == 0x003F || mask == 0x00FF || mask == 0x03FF ||
                              mask == 0x0FFF || mask == 0x3FFF || mask == 0xFFFF)) {
-                            CPU.CP0_PageMask = CPU.gpr_reg[rt] & (0x1FFFFFFF & (TARGET_PAGE_MASK << 1));
+                            CPU->CP0_PageMask = CPU->gpr_reg[rt] & (0x1FFFFFFF & (TARGET_PAGE_MASK << 1));
                         }
                         DEBUG_DISSAS("mtc0 PageMask");
                         break;
                     }
                     case 1:
-                        CPU.CP0_PageGrain = (CPU.gpr_reg[rt] & CPU.CP0_PageGrain_rw_bitmask) |
-                                             (CPU.CP0_PageGrain & ~CPU.CP0_PageGrain_rw_bitmask);
+                        CPU->CP0_PageGrain = (CPU->gpr_reg[rt] & CPU->CP0_PageGrain_rw_bitmask) |
+                                             (CPU->CP0_PageGrain & ~CPU->CP0_PageGrain_rw_bitmask);
                         DEBUG_DISSAS("mtc0 PageGrain");
                         break;
                     default:
@@ -1970,7 +1969,7 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                 case 31:
                     switch(opcode & 0x7) {
                         case 2 ... 7:
-                            CPU.CP0_KScratch[(opcode & 0x7) - 2] = CPU.gpr_reg[rt];
+                            CPU->CP0_KScratch[(opcode & 0x7) - 2] = CPU->gpr_reg[rt];
                             DEBUG_DISSAS("dmtc0 KScratch");
                             break;
                         default:
@@ -1991,22 +1990,22 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
                         DEBUG_DISSAS("eret");
                         return 0;
                     case OPC_TLBWR:
-                        if (likely(CPU.do_tlbwr)) {
-                            env->CP0_EntryLo0 = CPU.CP0_EntryLo0;
-                            env->CP0_EntryLo1 = CPU.CP0_EntryLo1;
+                        if (likely(CPU->do_tlbwr)) {
+                            env->CP0_EntryLo0 = CPU->CP0_EntryLo0;
+                            env->CP0_EntryLo1 = CPU->CP0_EntryLo1;
                             r4k_helper_tlbwr(env);
                         }
                         DEBUG_DISSAS("tlbwr");
                         break;
                     case OPC_TLBWI:
-                        env->CP0_EntryLo0 = CPU.CP0_EntryLo0;
-                        env->CP0_EntryLo1 = CPU.CP0_EntryLo1;
+                        env->CP0_EntryLo0 = CPU->CP0_EntryLo0;
+                        env->CP0_EntryLo1 = CPU->CP0_EntryLo1;
                         r4k_helper_tlbwi(env);
                         DEBUG_DISSAS("tlbwi");
                         break;
                     case OPC_TLBP:
                         r4k_helper_tlbp(env);
-                        CPU.CP0_Index = env->CP0_Index;
+                        CPU->CP0_Index = env->CP0_Index;
                         DEBUG_DISSAS("tlbp");
                         break;
                     default:
@@ -2020,23 +2019,23 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             }
             break;
         case OPC_ADDIU:
-            CPU.gpr_reg[rt] = CPU.gpr_reg[rs] + imm;
+            CPU->gpr_reg[rt] = CPU->gpr_reg[rs] + imm;
             DEBUG_DISSAS("addiu");
             break;
         case OPC_ANDI: /* Arithmetic with immediate opcode */
-            CPU.gpr_reg[rt] = CPU.gpr_reg[rs] & (uint32_t)imm;
+            CPU->gpr_reg[rt] = CPU->gpr_reg[rs] & (uint32_t)imm;
             DEBUG_DISSAS("andi");
             break;
         case OPC_LUI: /* OPC_AUI */
-            CPU.gpr_reg[rt] = ((int32_t)imm) << 16;
+            CPU->gpr_reg[rt] = ((int32_t)imm) << 16;
             DEBUG_DISSAS("lui");
             break;
         case OPC_ORI:
-            CPU.gpr_reg[rt] = CPU.gpr_reg[rs] | ((uint32_t)imm);
+            CPU->gpr_reg[rt] = CPU->gpr_reg[rs] | ((uint32_t)imm);
             DEBUG_DISSAS("ori");
             break;
         case OPC_XORI:
-            CPU.gpr_reg[rt] = CPU.gpr_reg[rs] ^ ((uint32_t)imm);
+            CPU->gpr_reg[rt] = CPU->gpr_reg[rs] ^ ((uint32_t)imm);
             DEBUG_DISSAS("xori");
             break;
         case OPC_J:
@@ -2046,26 +2045,26 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             return -1;
         /* Branch */
         case OPC_BEQ:
-            if (CPU.gpr_reg[rs] == CPU.gpr_reg[rt]) {
-                CPU.branch_addr = CPU.pc + (int32_t)imm;
+            if (CPU->gpr_reg[rs] == CPU->gpr_reg[rt]) {
+                CPU->branch_addr = CPU->pc + (int32_t)imm;
                 DEBUG_DISSAS("beq");
                 continue;
             }
             DEBUG_DISSAS("beq");
             break;
         case OPC_BEQL:
-            if (CPU.gpr_reg[rs] == CPU.gpr_reg[rt]) {
-                CPU.branch_addr = CPU.pc + (int32_t)imm;
+            if (CPU->gpr_reg[rs] == CPU->gpr_reg[rt]) {
+                CPU->branch_addr = CPU->pc + (int32_t)imm;
                 DEBUG_DISSAS("beql");
                 continue;
             } else {
-                CPU.pc++;
+                CPU->pc++;
             }
             DEBUG_DISSAS("beql");
             break;
         case OPC_BNE:
-            if (CPU.gpr_reg[rs] != CPU.gpr_reg[rt]) {
-                CPU.branch_addr = CPU.pc + (int32_t)imm;
+            if (CPU->gpr_reg[rs] != CPU->gpr_reg[rt]) {
+                CPU->branch_addr = CPU->pc + (int32_t)imm;
                 DEBUG_DISSAS("bne");
                 continue;
             }
@@ -2073,26 +2072,26 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             break;
         case OPC_LW:
         {
-            CPU.gpr_reg[rt] = (int32_t)ldl_phys(cs->as, translate_address(env, CPU.gpr_reg[rs] + imm));
+            CPU->gpr_reg[rt] = (int32_t)ldl_phys(cs->as, translate_address(env, CPU->gpr_reg[rs] + imm));
             DEBUG_DISSAS("lw");
             break;
         }
         case OPC_SW:
-            stl_phys(cs->as, translate_address(env, CPU.gpr_reg[rs] + imm), CPU.gpr_reg[rt]);
+            stl_phys(cs->as, translate_address(env, CPU->gpr_reg[rs] + imm), CPU->gpr_reg[rt]);
             DEBUG_DISSAS("sw");
             break;
     #if defined(TARGET_MIPS64)
         /* MIPS64 opcodes */
         case OPC_LD:
-            CPU.gpr_reg[rt] = ldq_phys(cs->as, translate_address(env, CPU.gpr_reg[rs] + imm));
+            CPU->gpr_reg[rt] = ldq_phys(cs->as, translate_address(env, CPU->gpr_reg[rs] + imm));
             DEBUG_DISSAS("ld");
             break;
         case OPC_SD:
-            stq_phys(cs->as, translate_address(env, CPU.gpr_reg[rs] + imm), CPU.gpr_reg[rt]);
+            stq_phys(cs->as, translate_address(env, CPU->gpr_reg[rs] + imm), CPU->gpr_reg[rt]);
             DEBUG_DISSAS("sd");
             break;
         case OPC_DADDIU:
-            CPU.gpr_reg[rt] = CPU.gpr_reg[rs] + imm;
+            CPU->gpr_reg[rt] = CPU->gpr_reg[rs] + imm;
             DEBUG_DISSAS("daddiu");
             break;
     #endif
@@ -2101,12 +2100,12 @@ int tlb_exception_interpreter(CPUMIPSState *env, uint32_t *code, uint32_t size)
             break;
         }
 
-        if (CPU.branch_addr) {
-            CPU.pc = CPU.branch_addr;
-            CPU.branch_addr = 0;
+        if (CPU->branch_addr) {
+            CPU->pc = CPU->branch_addr;
+            CPU->branch_addr = 0;
         }
 
-        if (CPU.pc >= size) {
+        if (CPU->pc >= size) {
             DEBUG_ERROR("Code buffer Index out of bounds");
             return -3;
         }
