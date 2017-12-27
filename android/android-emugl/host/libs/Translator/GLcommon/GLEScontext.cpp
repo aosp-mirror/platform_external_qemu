@@ -2419,9 +2419,12 @@ GLuint GLEScontext::linkAndValidateProgram(GLuint vshader, GLuint fshader) {
 }
 
 void GLEScontext::setupImageBlitState() {
+    auto& gl = dispatcher();
+    m_blitState.prevSamples = m_blitState.samples;
+    gl.glGetIntegerv(GL_SAMPLE_BUFFERS, (GLint*)&m_blitState.samples);
+
     if (m_blitState.program) return;
 
-    auto& gl = dispatcher();
 
     std::string vshaderSrc =
         isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
@@ -2444,7 +2447,6 @@ void GLEScontext::setupImageBlitState() {
     gl.glGenFramebuffers(1, &m_blitState.resolveFbo);
     gl.glGenTextures(1, &m_blitState.tex);
     gl.glGenVertexArrays(1, &m_blitState.vao);
-    gl.glGetIntegerv(GL_SAMPLE_BUFFERS, (GLint*)&m_blitState.samples);
 }
 
 void GLEScontext::setupImageBlitForTexture(uint32_t width,
@@ -2453,18 +2455,38 @@ void GLEScontext::setupImageBlitForTexture(uint32_t width,
     auto& gl = dispatcher();
     gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
 
+    GLint sizedInternalFormat = GL_RGBA8;
+
+    if (internalFormat != GL_RGBA8 &&
+        internalFormat != GL_RGB8 &&
+        internalFormat != GL_RGB565) {
+        switch (internalFormat) {
+        case GL_RGB:
+            sizedInternalFormat = GL_RGB8;
+            break;
+        case GL_RGBA:
+            sizedInternalFormat = GL_RGBA8;
+            break;
+        default:
+            break;
+        }
+    }
+
     if (width != m_blitState.width || height != m_blitState.height ||
-        internalFormat != m_blitState.internalFormat) {
+        internalFormat != m_blitState.internalFormat ||
+        m_blitState.samples != m_blitState.prevSamples) {
         m_blitState.width = width;
         m_blitState.height = height;
         m_blitState.internalFormat = internalFormat;
 
-        gl.glCopyTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
-                            0, 0, width, height, 0);
         if (m_blitState.samples > 0) {
             gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.resolveFbo);
             gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                     GL_TEXTURE_2D, m_blitState.tex, 0);
+            gl.glTexStorage2D(GL_TEXTURE_2D, 1, sizedInternalFormat, width, height);
+        } else {
+            gl.glCopyTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+                                0, 0, width, height, 0);
         }
     }
 
