@@ -45,10 +45,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    bool isCros) {
     android::ParameterList params;
     if (isCros) {
-      params.addFormat("ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 "
-                       "cros_legacy cros_debug console=%s",
-                                              opts->show_kernel ? "ttyS0" : "");
-      return params.toCStringCopy();
+      std::string cmdline(StringFormat(
+          "ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 "
+          "cros_legacy cros_debug console=%s",
+          opts->show_kernel ? "ttyS0" : ""));
+      return strdup(cmdline.c_str());
     }
 
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
