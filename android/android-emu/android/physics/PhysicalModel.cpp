@@ -95,7 +95,7 @@ PHYSICAL_PARAMETERS_LIST
         ParameterValueType parameterValueType) const;
 PHYSICAL_PARAMETERS_LIST
 #undef PHYSICAL_PARAMETER_
-#undef SET_TARGET_FUNCTION_NAME
+#undef GET_TARGET_FUNCTION_NAME
 
     /*
      * Sets the current override states for each simulated sensor.
