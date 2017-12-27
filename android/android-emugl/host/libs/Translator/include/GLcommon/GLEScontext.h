@@ -634,6 +634,7 @@ private:
         uint32_t height = 0;
         GLint internalFormat = 0;
         uint32_t samples = 0;
+        uint32_t prevSamples = 0;
     };
 
     ImageBlitState m_blitState = {};
