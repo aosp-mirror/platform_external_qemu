@@ -56,21 +56,21 @@ ApkInstaller::~ApkInstaller() {
 bool ApkInstaller::parseOutputForFailure(std::istream& stream,
                                          string* outErrorString) {
     // "adb install" does not return a helpful exit status, so instead we parse
-    // the output of the process looking for:
-    // - "adb: error: failed to copy" in the case that the apk could not be
-    //   copied because the device is full
-    // - "Failure [<some error code>]", in the case that the apk could not be
-    //   installed because of a specific error
+    // the output of the process looking for "Success" or a message we know
+    // indicates some failure.
 
     if (!stream) {
         *outErrorString = kDefaultErrorString;
         return false;
     }
 
+    bool gotSuccess = false;
     string line;
     while (getline(stream, line)) {
-        if (!line.compare(0, 7, "Failure") ||
-            !line.compare(0, 6, "Failed")) {
+        if (!line.compare("Success")) {
+            gotSuccess = true;
+        } else if (!line.compare(0, 7, "Failure") ||
+                   !line.compare(0, 6, "Failed")) {
             auto openBrace = line.find("[");
             auto closeBrace = line.find("]", openBrace + 1);
             if (openBrace != string::npos && closeBrace != string::npos) {
@@ -80,12 +80,28 @@ bool ApkInstaller::parseOutputForFailure(std::istream& stream,
                 *outErrorString = kDefaultErrorString;
             }
             return false;
+        } else if (!line.compare(0, 22, "adb: failed to install")) {
+            auto msgStart = line.find("cmd: ");
+            if (msgStart != string::npos) {
+                msgStart += 5; // Skip "cmd: "
+                *outErrorString = line.substr(msgStart, line.size() - msgStart);
+            } else {
+                *outErrorString = kDefaultErrorString;
+            }
+            return false;
         } else if (!line.compare(0, 26, "adb: error: failed to copy")) {
             *outErrorString = "No space left on device";
+            return false;
+        } else if (!line.compare(0, 21, "error: device offline")) {
+            *outErrorString = "Device offline";
             return false;
         }
     }
 
+    if (!gotSuccess) {
+        *outErrorString = kDefaultErrorString;
+        return false;
+    }
     return true;
 }
 
