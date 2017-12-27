@@ -75,10 +75,15 @@ ProgramData::ProgramData(int glesMaj, int glesMin) :
     IsInUse(false),
     DeleteStatus(false),
     mGlesMajorVersion(glesMaj),
-    mGlesMinorVersion(glesMin) {}
+    mGlesMinorVersion(glesMin) {
+    mGuestLocToHostLoc[-1] = -1;
+}
 
 ProgramData::ProgramData(android::base::Stream* stream) :
     ObjectData(stream) {
+
+    mGuestLocToHostLoc[-1] = -1;
+
     auto loadAttribLocs = [](android::base::Stream* stream) {
                 std::string attrib = stream->getString();
                 GLuint loc = stream->getBe32();
@@ -205,7 +210,7 @@ static std::string getBaseName(const std::string& name) {
     std::string baseName;
     int length = name.length();
     if (length < 3) return name;
-    if (name.compare(length - 3, 3, "[0]") == 0) {
+    if (name.compare(length - 3, 1, "[") == 0) {
         baseName = name.substr(0, length - 3);
     } else {
         baseName = name;
@@ -383,6 +388,7 @@ void ProgramData::restore(ObjectLocalName localName,
     ProgramName = globalName;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     assert(mGuestLocToHostLoc.size() == 0);
+    mGuestLocToHostLoc[-1] = -1;
     if (LinkStatus) {
         // Really, each program name corresponds to 2 programs:
         // the one that is already linked, and the one that is not yet linked.
@@ -752,6 +758,7 @@ void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = status;
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
+    mGuestLocToHostLoc[-1] = -1;
     if (status) {
         for (auto& s : attachedShaders) {
             if (s.localName) {
@@ -969,31 +976,74 @@ static bool sCheckVariables(ProgramData* pData,
     return res;
 }
 
+int sArrIndexOfUniformExpr(const char* name, int* err) {
+    *err = 0;
+    int arrIndex = 0;
+    int namelen = strlen(name);
+    if (name[namelen-1] == ']') {
+        const char *brace = strrchr(name,'[');
+        if (!brace || sscanf(brace+1,"%d",&arrIndex) != 1) {
+            fprintf(stderr, "%s: fail to get arr index. brace %d, scan %d\n", __func__, !brace, sscanf(brace+1,"%d",&arrIndex));
+            *err = 1; return 0;
+        }
+    }
+    return arrIndex;
+}
+
 int ProgramData::getGuestUniformLocation(const char* uniName) {
     std::string baseName = getBaseName(uniName);
-    const auto& activeLoc = mUniNameToGuestLoc.find(baseName);
-    if (activeLoc != mUniNameToGuestLoc.end()) {
-        return activeLoc->second;
-    }
-    // We only insert uniforms at the first time we saw their names
-    std::string translatedName = getTranslatedName(baseName);
-    GLDispatch& dispatcher = GLEScontext::dispatcher();
-    int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
-        translatedName.c_str());
-    if (hostLoc == -1) {
+    int err;
+    int arrIndex = sArrIndexOfUniformExpr(uniName, &err);
+    fprintf(stderr, "%s: arr idnex: %d\n", __func__, arrIndex);
+    if (err) {
+        fprintf(stderr, "%s: oops\n", __func__);
         return -1;
     }
-    int guestLoc = static_cast<int>(mUniNameToGuestLoc.size());
-    mUniNameToGuestLoc.emplace(baseName, guestLoc);
-    mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
-    return guestLoc;
+
+    const auto& activeLoc = mUniNameToGuestLoc.find(baseName);
+    int guestLoc = -1;
+    if (activeLoc != mUniNameToGuestLoc.end()) {
+        if (activeLoc->second != -1) {
+            guestLoc = activeLoc->second + arrIndex;
+            int hostLoc = mGuestLocToHostLoc[activeLoc->second];
+            mGuestLocToHostLoc.emplace(guestLoc, hostLoc + arrIndex);
+        } else {
+            guestLoc = -1;
+        }
+        return guestLoc;
+    } else {
+        // We only insert uniforms at the first time we saw their names
+        std::string translatedName = getTranslatedName(baseName);
+        GLDispatch& dispatcher = GLEScontext::dispatcher();
+        int hostLoc = dispatcher.glGetUniformLocation(ProgramName, translatedName.c_str());
+        if (hostLoc == -1) {
+            fprintf(stderr, "%s: %s not found\n", __func__, translatedName.c_str());
+            return -1;
+        }
+
+        guestLoc = static_cast<int>(mUniNameToGuestLoc.size() * 16);
+        mUniNameToGuestLoc.emplace(baseName, guestLoc);
+        mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+        mGuestLocToHostLoc.emplace(guestLoc + arrIndex, hostLoc + arrIndex);
+        fprintf(stderr, "%s: guest loc: base %d, loc %d host loc: %d\n", __func__,
+                guestLoc, guestLoc + arrIndex, hostLoc);
+        return guestLoc + arrIndex;
+    }
 }
 
 int ProgramData::getHostUniformLocation(int guestLocation) {
     const auto& location = mGuestLocToHostLoc.find(guestLocation);
+        if (guestLocation == -1) {
+            fprintf(stderr, "%s: %d searching\n", __func__, guestLocation);
+        }
     if (location != mGuestLocToHostLoc.end()) {
+        if (guestLocation == -1) {
+            fprintf(stderr, "%s: %d -> %d\n", __func__, guestLocation, location->second);
+        }
         return location->second;
     } else {
-        return -1;
+        // We need to generate GL_INVALID_OPERATION here, so
+        // there's no returning -1 (-1 maps to -1 already)
+        return -2;
     }
 }

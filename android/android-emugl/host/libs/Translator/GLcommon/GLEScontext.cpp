@@ -2452,7 +2452,6 @@ void GLEScontext::setupImageBlitState() {
 void GLEScontext::setupImageBlitForTexture(uint32_t width,
                                            uint32_t height,
                                            GLint internalFormat) {
-    fprintf(stderr, "%s: begin\n", __func__);
     auto& gl = dispatcher();
     gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
 
@@ -2501,7 +2500,6 @@ void GLEScontext::setupImageBlitForTexture(uint32_t width,
         gl.glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height);
     }
 
-    fprintf(stderr, "%s: end\n", __func__);
 }
 
 void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
@@ -2510,7 +2508,6 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
                                                      GLint internalFormat,
                                                      GLenum format,
                                                      GLenum type) {
-    fprintf(stderr, "%s: begin\n", __func__);
     // TODO: these might also matter
     (void)format;
     (void)type;
@@ -2591,7 +2588,6 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     gl.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB, m_colorMaskA);
 
     gl.glFlush();
-    fprintf(stderr, "%s: end\n", __func__);
 }
 
 // Primitive restart emulation
