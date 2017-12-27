@@ -62,10 +62,14 @@ using android::DmaMap;
 
 extern "C" void ranchu_device_tree_setup(void *fdt) {
     /* fstab */
-    qemu_fdt_add_subnode(fdt, "/firmware/android/fstab");
-    qemu_fdt_setprop_string(fdt, "/firmware/android/fstab", "compatible", "android,fstab");
-
     char* system_path = avdInfo_getSystemImageDevicePathInGuest(android_avdInfo);
+    char* vendor_path = avdInfo_getVendorImageDevicePathInGuest(android_avdInfo);
+
+    if (system_path || vendor_path) {
+        qemu_fdt_add_subnode(fdt, "/firmware/android/fstab");
+        qemu_fdt_setprop_string(fdt, "/firmware/android/fstab", "compatible", "android,fstab");
+    }
+
     if (system_path) {
         qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/system");
         qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/system", "compatible", "android,system");
@@ -76,7 +80,6 @@ extern "C" void ranchu_device_tree_setup(void *fdt) {
         free(system_path);
     }
 
-    char* vendor_path = avdInfo_getVendorImageDevicePathInGuest(android_avdInfo);
     if (vendor_path) {
         qemu_fdt_add_subnode(fdt, "/firmware/android/fstab/vendor");
         qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "compatible", "android,vendor");

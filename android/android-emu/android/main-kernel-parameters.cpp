@@ -16,6 +16,7 @@
 #include "android/emulation/ParameterList.h"
 #include "android/emulation/SetupParameters.h"
 #include "android/featurecontrol/FeatureControl.h"
+#include "android/globals.h"
 #include "android/utils/debug.h"
 #include "android/utils/dns.h"
 
@@ -155,7 +156,10 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     if (isQemu2 && isX86ish) {
         // x86 and x86_64 platforms use an alternative Android DT directory that
         // mimics the layout of /proc/device-tree/firmware/android/
-        params.addFormat("androidboot.android_dt_dir=%s", kSysfsAndroidDtDir);
+        if (avdInfo_getSystemImageDevicePathInGuest(android_avdInfo)
+                || avdInfo_getVendorImageDevicePathInGuest(android_avdInfo)) {
+            params.addFormat("androidboot.android_dt_dir=%s", kSysfsAndroidDtDir);
+        }
     }
 
     if (isQemu2) {
