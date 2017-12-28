@@ -706,7 +706,7 @@ GL_APICALL void GL_APIENTRY glRenderbufferStorageMultisample(GLenum target, GLsi
     gles30usages->set_is_used(true);
     gles30usages->set_renderbuffer_storage_multisample(true);
     GLint err = GL_NO_ERROR;
-    internalformat = sPrepareRenderbufferStorage(internalformat, width, height, &err);
+    internalformat = sPrepareRenderbufferStorage(internalformat, width, height, samples, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorageMultisample(target, samples, internalformat, width, height);
 }
@@ -722,7 +722,7 @@ GL_APICALL void GL_APIENTRY glTexStorage2D(GLenum target, GLsizei levels, GLenum
     GLint err = GL_NO_ERROR;
     GLenum format, type;
     GLESv2Validate::getCompatibleFormatTypeForInternalFormat(internalformat, &format, &type);
-    sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, NULL, &type, (GLint*)&internalformat, &err);
+    sPrepareTexImage2D(target, 0, (GLint)internalformat, width, height, 0, format, type, 0, NULL, &type, (GLint*)&internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     TextureData *texData = getTextureTargetData(target);
     texData->texStorageLevels = levels;
