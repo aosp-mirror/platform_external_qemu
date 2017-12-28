@@ -230,10 +230,17 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
+    if (mMode == OverlayMode::Resize) {
+        // Draw the dashed-line box to show how big the resized window will be
+        drawResizeBox(&painter, alpha);
+        return;
+    }
+
+    QRect bg(QPoint(0, 0), size());
+    painter.fillRect(bg, QColor(255, 255, 255, alpha));
+
     if (mMode == OverlayMode::Multitouch) {
         const auto& mtRes = mMultitouchResources.get();
-        QRect bg(QPoint(0, 0), size());
-        painter.fillRect(bg, QColor(255, 255, 255, alpha));
 
         double lerpValue = mIsSwipeGesture ? 1.0 - mLerpValue : mLerpValue;
         QPoint primaryPoint = lerpValue * primaryPinchPoint() +
@@ -269,9 +276,6 @@ void EmulatorOverlay::paintEvent(QPaintEvent* e) {
             painter.drawLine(
                     QLineF(mMultitouchCenter + delta, secondaryPoint - delta));
         }
-    } else if (mMode == OverlayMode::Resize) {
-        // Draw the dashed-line box to show how big the resized window will be.
-        drawResizeBox(&painter, alpha);
     }
 }
 
