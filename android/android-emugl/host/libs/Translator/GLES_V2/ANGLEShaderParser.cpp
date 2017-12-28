@@ -215,23 +215,6 @@ bool translate(bool hostUsesCoreProfile,
                ShaderLinkInfo* outShaderLinkInfo) {
     int esslVersion = detectShaderESSLVersion(&src);
 
-    // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
-    // Use translator after rest of dEQP-GLES31.functional is in a better state.
-    if (esslVersion == 310) {
-        // At least on NVIDIA Quadro K2200 Linux (361.xx),
-        // ARB_ES3_1_compatibility seems to assume incorrectly
-        // that atomic_uint must catch a precision qualifier in ESSL 310.
-        std::string origSrc(src);
-        size_t versionStart = origSrc.find("#version");
-        size_t versionEnd = origSrc.find("\n", versionStart);
-        std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
-        std::string src2 =
-            versionPart + "precision highp atomic_uint;\n" +
-            origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
-        *outObjCode = src2;
-        return true;
-    }
-
     if (!kInitialized) {
         return false;
     }
@@ -254,18 +237,43 @@ bool translate(bool hostUsesCoreProfile,
         return false;
     }
 
-    // Pass in the entire src as 1 string, ask for compiled GLSL object code
-    // and information about all compiled variables.
-    int res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
+    int res;
 
-    // The compilers return references that may not be valid in the future,
-    // and we manually clear them immediately anyway.
-    *outInfolog = std::string(ShGetInfoLog(compilerHandle));
-    *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+    // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
+    // Use translator after rest of dEQP-GLES31.functional is in a better state.
+    if (esslVersion == 310) {
+        // Don't try to get obj code just yet, but at least parse link info.
+        // At least on NVIDIA Quadro K2200 Linux (361.xx),
+        // ARB_ES3_1_compatibility seems to assume incorrectly
+        // that atomic_uint must catch a precision qualifier in ESSL 310.
+        std::string origSrc(src);
 
-    if (outShaderLinkInfo) getShaderLinkInfo(compilerHandle, outShaderLinkInfo);
+        res = ShCompile(compilerHandle, &src, 1, SH_VARIABLES);
+        if (outShaderLinkInfo) getShaderLinkInfo(compilerHandle, outShaderLinkInfo);
 
-    ShClearResults(compilerHandle);
+        size_t versionStart = origSrc.find("#version");
+        size_t versionEnd = origSrc.find("\n", versionStart);
+        std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
+        std::string src2 =
+            versionPart + "precision highp atomic_uint;\n" +
+            origSrc.substr(versionEnd + 1, origSrc.size() - (versionEnd + 1));
+        *outObjCode = src2;
+        return true;
+    } else {
+
+        // Pass in the entire src as 1 string, ask for compiled GLSL object code
+        // and information about all compiled variables.
+        res = ShCompile(compilerHandle, &src, 1, SH_OBJECT_CODE | SH_VARIABLES);
+
+        // The compilers return references that may not be valid in the future,
+        // and we manually clear them immediately anyway.
+        *outInfolog = std::string(ShGetInfoLog(compilerHandle));
+        *outObjCode = std::string(ShGetObjectCode(compilerHandle));
+
+        if (outShaderLinkInfo) getShaderLinkInfo(compilerHandle, outShaderLinkInfo);
+
+        ShClearResults(compilerHandle);
+    }
 
     return res;
 }
