@@ -26,7 +26,8 @@
 
 #define  E(...)    derror(__VA_ARGS__)
 #define  W(...)    dwarning(__VA_ARGS__)
-#define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
+// #define  D(...)    VERBOSE_PRINT(camera,__VA_ARGS__)
+#define  D(...)    fprintf(stderr,__VA_ARGS__)
 
 #import <Accelerate/Accelerate.h>
 #import <AVFoundation/AVFoundation.h>
@@ -285,7 +286,7 @@ FourCCToInternal(uint32_t cm_pix_format)
 
 - (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
-    D("%s: call\n", __func__);
+    D("%s: call--------------------------------------------------------------------------------\n", __func__);
 
     if ( connection == capture_connection ) {
         @synchronized (self) {
@@ -298,7 +299,7 @@ FourCCToInternal(uint32_t cm_pix_format)
 
             CVBufferRelease(to_release);
 
-            D("%s: is correct capture connection\n", __func__);
+            D("%s: is correct capture connection--------------------------------------------------------------------------------\n", __func__);
         }
     }
 }
