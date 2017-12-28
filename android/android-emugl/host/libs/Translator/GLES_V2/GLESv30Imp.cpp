@@ -409,10 +409,75 @@ GL_APICALL void GL_APIENTRY glDrawRangeElements(GLenum mode, GLuint start, GLuin
     }
 }
 
-GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
+// GuestSyncs: Tracks the system-wide set of GL syncs, puts them in a
+// distinguished namespace from EGL syncs. This is in its own class as opposed
+// to a NameSpace because a) no real need to snapshot save/load those and b) it
+// needs to span all contexts and give the same names across the entire system,
+// as sync objects live outside of GL context state.
+// This is to fix dEQP negative_api tests that delete sync object 0x1 but fail due
+// to it colliding with an EGL fence name.
+class GuestSyncs {
+public:
+    GuestSyncs() { }
+
+    GLsync create(GLsync newHostSync) {
+        GLsync res = (GLsync)(uintptr_t)mNameCounter;
+        mSyncs[res] = newHostSync;
+        mNameCounter++;
+        if (!mNameCounter) mNameCounter = 0x1000;
+        return res;
+    }
+
+    GLsync lookupWithError(GLsync guestSync, GLint* err) {
+        *err = GL_NO_ERROR;
+        GLsync host = (GLsync)0x0;
+
+        const auto& it = mSyncs.find(guestSync);
+        if (it == mSyncs.end()) {
+            *err = GL_INVALID_VALUE;
+            return host;
+        } else {
+            host = it->second;
+        }
+        return host;
+    }
+
+    GLsync removeWithError(GLsync guestSyncToDelete, GLint* err) {
+        *err = GL_NO_ERROR;
+        GLsync host = (GLsync)0x0;
+
+        if (!guestSyncToDelete) {
+            return host;
+        }
+
+        const auto& it = mSyncs.find(guestSyncToDelete);
+        if (it == mSyncs.end()) {
+            *err = GL_INVALID_VALUE;
+            return host;
+        } else {
+            host = it->second;
+        }
+
+        mSyncs.erase(it);
+        return host;
+    }
+
+    bool isSync(GLsync guestSync) {
+        return mSyncs.find(guestSync) != mSyncs.end();
+    }
+
+    emugl::Mutex& lock() { return mLock; }
+
+private:
+    std::unordered_map<GLsync, GLsync> mSyncs;
+    mutable emugl::Mutex mLock;
+    uint32_t mNameCounter = 0x1;
+};
+
+static android::base::LazyInstance<GuestSyncs> sSyncs = LAZY_INSTANCE_INIT;
+
+static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags) {
     GET_CTX_V2_RET(0);
-    gles30usages->set_is_used(true);
-    gles30usages->set_fence_sync(true);
     if (!ctx->dispatcher().glFenceSync) {
         ctx->dispatcher().glFinish();
         return (GLsync)0x42;
@@ -421,9 +486,8 @@ GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
     return glFenceSyncRET;
 }
 
-GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
     GET_CTX_V2_RET(GL_WAIT_FAILED);
-    gles30usages->set_is_used(true);
     if (!ctx->dispatcher().glFenceSync) {
         return GL_ALREADY_SIGNALED;
     }
@@ -431,16 +495,15 @@ GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags,
     return glClientWaitSyncRET;
 }
 
-GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+static void internal_glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
     GET_CTX_V2();
-    gles30usages->set_is_used(true);
     if (!ctx->dispatcher().glFenceSync) {
         return;
     }
     ctx->dispatcher().glWaitSync(wait_on, flags, timeout);
 }
 
-GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
+static void internal_glDeleteSync(GLsync to_delete) {
     GET_CTX_V2();
     if (!ctx->dispatcher().glFenceSync) {
         return;
@@ -448,15 +511,66 @@ GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
     ctx->dispatcher().glDeleteSync(to_delete);
 }
 
+GL_APICALL GLsync GL_APIENTRY glFenceSync(GLenum condition, GLbitfield flags) {
+    GET_CTX_V2_RET(0);
+    gles30usages->set_is_used(true);
+    gles30usages->set_fence_sync(true);
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = internal_glFenceSync(condition, flags);
+    GLsync guestSync = sSyncs->create(hostSync);
+    return guestSync;
+}
+
+GL_APICALL GLenum GL_APIENTRY glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+    GET_CTX_V2_RET(GL_WAIT_FAILED);
+    gles30usages->set_is_used(true);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->lookupWithError(wait_on, &err);
+    RET_AND_SET_ERROR_IF(err != GL_NO_ERROR, err, GL_WAIT_FAILED);
+    return internal_glClientWaitSync(hostSync, flags, timeout);
+}
+
+GL_APICALL void GL_APIENTRY glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout) {
+    GET_CTX_V2();
+    gles30usages->set_is_used(true);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->lookupWithError(wait_on, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    internal_glWaitSync(hostSync, flags, timeout);
+}
+
+GL_APICALL void GL_APIENTRY glDeleteSync(GLsync to_delete) {
+    GET_CTX_V2();
+    gles30usages->set_is_used(true);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->removeWithError(to_delete, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    internal_glDeleteSync(hostSync);
+}
+
 GL_APICALL GLboolean GL_APIENTRY glIsSync(GLsync sync) {
     GET_CTX_V2_RET(0);
-    GLboolean glIsSyncRET = ctx->dispatcher().glIsSync(sync);
-    return glIsSyncRET;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    gles30usages->set_is_used(true);
+    return sSyncs->isSync(sync) ? GL_TRUE : GL_FALSE;
 }
 
 GL_APICALL void GL_APIENTRY glGetSynciv(GLsync sync, GLenum pname, GLsizei bufSize, GLsizei * length, GLint * values) {
     GET_CTX_V2();
-    ctx->dispatcher().glGetSynciv(sync, pname, bufSize, length, values);
+    GLint err = GL_NO_ERROR;
+
+    emugl::Mutex::AutoLock lock(sSyncs->lock());
+    GLsync hostSync = sSyncs->lookupWithError(sync, &err);
+    SET_ERROR_IF(err != GL_NO_ERROR, err);
+    ctx->dispatcher().glGetSynciv(hostSync, pname, bufSize, length, values);
 }
 
 GL_APICALL void GL_APIENTRY glDrawBuffers(GLsizei n, const GLenum * bufs) {
