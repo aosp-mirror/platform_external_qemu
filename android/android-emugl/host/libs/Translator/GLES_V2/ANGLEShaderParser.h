@@ -25,6 +25,7 @@ extern ShBuiltInResources kResources;
 
 // For performing link-time validation of shader programs.
 struct ShaderLinkInfo {
+    int esslVersion;
     std::vector<sh::Uniform> uniforms;
     std::vector<sh::Varying> varyings;
     std::vector<sh::Attribute> attributes;
