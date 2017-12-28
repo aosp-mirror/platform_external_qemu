@@ -383,6 +383,7 @@ void ProgramData::restore(ObjectLocalName localName,
     ProgramName = globalName;
     GLDispatch& dispatcher = GLEScontext::dispatcher();
     assert(mGuestLocToHostLoc.size() == 0);
+    mGuestLocToHostLoc[-1] = -1;
     if (LinkStatus) {
         // Really, each program name corresponds to 2 programs:
         // the one that is already linked, and the one that is not yet linked.
@@ -732,6 +733,9 @@ static bool sCheckLimits(ProgramData* pData,
 static bool sCheckVariables(ProgramData* pData,
                             const ANGLEShaderParser::ShaderLinkInfo& a,
                             const ANGLEShaderParser::ShaderLinkInfo& b);
+static void sInitializeUniformLocs(ProgramData* pData,
+                                   const ANGLEShaderParser::ShaderLinkInfo& linkInfo);
+
 bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo =
         frag->getShaderLinkInfo();
@@ -752,12 +756,18 @@ void ProgramData::setLinkStatus(GLint status) {
     LinkStatus = status;
     mUniNameToGuestLoc.clear();
     mGuestLocToHostLoc.clear();
+    mGuestLocToHostLoc[-1] = -1;
     if (status) {
         for (auto& s : attachedShaders) {
             if (s.localName) {
                 assert(s.shader);
                 s.linkedSource = s.shader->getOriginalSrc();
                 s.linkInfo = s.shader->getShaderLinkInfo();
+                mUseUniformLocationVirtualization =
+                    s.linkInfo.esslVersion != 310;
+                if (mUseUniformLocationVirtualization) {
+                    sInitializeUniformLocs(this, s.linkInfo);
+                }
             }
         }
         for (const auto &attribLoc : boundAttribLocs) {
@@ -969,31 +979,99 @@ static bool sCheckVariables(ProgramData* pData,
     return res;
 }
 
+static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBase, const sh::ShaderVariable& var) {
+    bool isArr = var.arraySize > 0;
+    int baseSize = isArr ? var.arraySize : 1;
+
+    if (var.isStruct()) {
+        if (isArr) {
+            for (int k = 0; k < var.arraySize; k++) {
+                for (const auto& field : var.fields) {
+                    std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
+                    snprintf(keyBuf.data(), keyBuf.size(), "%s[%d].%s", keyBase.c_str(), k, field.name.c_str());
+                    sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+                }
+            }
+        } else {
+            for (const auto& field : var.fields) {
+                std::vector<char> keyBuf(keyBase.length() + field.name.length() + 20, 0);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s.%s", keyBase.c_str(), field.name.c_str());
+                sRecursiveLocInitalize(pData, std::string(keyBuf.data()), field);
+            }
+        }
+    } else {
+        for (int k = 0; k < baseSize; k++) {
+            if (k == 0) {
+                std::vector<char> keyBuf(keyBase.length() + 20, 0);
+                std::vector<char> keyBuf2(keyBase.length() + 20, 0);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s", keyBase.c_str());
+                snprintf(keyBuf2.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
+                pData->initGuestUniformLocForKey(keyBuf.data(), keyBuf2.data());
+            } else {
+                std::vector<char> keyBuf(keyBase.length() + 20, 0);
+                snprintf(keyBuf.data(), keyBuf.size(), "%s[%d]", keyBase.c_str(), k);
+                pData->initGuestUniformLocForKey(keyBuf.data());
+            }
+        }
+    }
+}
+
+static void sInitializeUniformLocs(ProgramData* pData,
+                                   const ANGLEShaderParser::ShaderLinkInfo& linkInfo) {
+    for (const auto& var : linkInfo.uniforms) {
+        sRecursiveLocInitalize(pData, var.name, var);
+    }
+}
+
+void ProgramData::initGuestUniformLocForKey(StringView key) {
+    mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
+    mCurrUniformBaseLoc++;
+}
+
+void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
+    mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
+    mUniNameToGuestLoc[key2.c_str()] = mCurrUniformBaseLoc;
+    mCurrUniformBaseLoc++;
+}
+
 int ProgramData::getGuestUniformLocation(const char* uniName) {
-    std::string baseName = getBaseName(uniName);
-    const auto& activeLoc = mUniNameToGuestLoc.find(baseName);
-    if (activeLoc != mUniNameToGuestLoc.end()) {
-        return activeLoc->second;
-    }
-    // We only insert uniforms at the first time we saw their names
-    std::string translatedName = getTranslatedName(baseName);
     GLDispatch& dispatcher = GLEScontext::dispatcher();
-    int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
-        translatedName.c_str());
-    if (hostLoc == -1) {
-        return -1;
+    if (mUseUniformLocationVirtualization) {
+        int guestLoc;
+
+        const auto& activeLoc = mUniNameToGuestLoc.find(uniName);
+
+        if (activeLoc != mUniNameToGuestLoc.end()) {
+            guestLoc = activeLoc->second;
+        } else {
+            guestLoc = -1;
+        }
+
+        std::string translatedName = getTranslatedName(getBaseName(uniName));
+        int hostLoc = dispatcher.glGetUniformLocation(ProgramName,
+                translatedName.c_str());
+        if (hostLoc == -1) {
+            return -1;
+        }
+
+        mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
+        return guestLoc;
+    } else {
+        return dispatcher.glGetUniformLocation(ProgramName, uniName);
     }
-    int guestLoc = static_cast<int>(mUniNameToGuestLoc.size());
-    mUniNameToGuestLoc.emplace(baseName, guestLoc);
-    mGuestLocToHostLoc.emplace(guestLoc, hostLoc);
-    return guestLoc;
 }
 
 int ProgramData::getHostUniformLocation(int guestLocation) {
-    const auto& location = mGuestLocToHostLoc.find(guestLocation);
-    if (location != mGuestLocToHostLoc.end()) {
-        return location->second;
+    if (mUseUniformLocationVirtualization) {
+        if (guestLocation == -1) return -1;
+
+        const auto& location = mGuestLocToHostLoc.find(guestLocation);
+        if (location != mGuestLocToHostLoc.end()) {
+            return location->second;
+        } else {
+            return -2;
+        }
     } else {
-        return -1;
+        return guestLocation;
     }
 }
