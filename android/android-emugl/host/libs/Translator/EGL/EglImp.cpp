@@ -101,6 +101,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display);
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay display, EGLSyncKHR sync, EGLint flags);
 EGLAPI void EGLAPIENTRY eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
 EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
+EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay display, void* fence);
 }  // extern "C"
 
 static const ExtensionDescriptor s_eglExtensions[] = {
@@ -122,6 +123,8 @@ static const ExtensionDescriptor s_eglExtensions[] = {
                 (__eglMustCastToProperFunctionPointerType)eglBlitFromCurrentReadBufferANDROID },
         {"eglSetImageFenceANDROID",
                 (__eglMustCastToProperFunctionPointerType)eglSetImageFenceANDROID },
+        {"eglWaitImageFenceANDROID",
+                (__eglMustCastToProperFunctionPointerType)eglWaitImageFenceANDROID },
 };
 
 static const int s_eglExtensionsSize =
@@ -1476,6 +1479,7 @@ EGLAPI EGLint EGLAPIENTRY eglGetMaxGLESVersion(EGLDisplay display) {
 }
 
 EGLAPI EGLint EGLAPIENTRY eglWaitSyncKHR(EGLDisplay dpy, EGLSyncKHR sync, EGLint flags) {
+    fprintf(stderr, "%s: wait on %p\n", __func__, sync);
     if (g_eglInfo->isEgl2Egl()) {
         return EGL_TRUE;
     }
@@ -1510,6 +1514,11 @@ EGLAPI void* EGLAPIENTRY eglSetImageFenceANDROID(EGLDisplay dpy, EGLImageKHR ima
     GLsync res = iface->fenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     img->sync = res;
     return (void*)res;
+}
+
+EGLAPI void EGLAPIENTRY eglWaitImageFenceANDROID(EGLDisplay dpy, void* fence) {
+    const GLESiface* iface = g_eglInfo->getIface(GLES_2_0);
+    iface->waitSync((GLsync)fence, 0, -1);
 }
 
 /*********************************************************************************/

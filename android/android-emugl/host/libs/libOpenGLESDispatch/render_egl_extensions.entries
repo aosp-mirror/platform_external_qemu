@@ -16,3 +16,4 @@ EGLBoolean eglDestroySyncKHR(EGLDisplay display, EGLSyncKHR sync);
 EGLint eglGetMaxGLESVersion(EGLDisplay display);
 void eglBlitFromCurrentReadBufferANDROID(EGLDisplay display, EGLImageKHR image);
 void* eglSetImageFenceANDROID(EGLDisplay display, EGLImageKHR image);
+void eglWaitImageFenceANDROID(EGLDisplay display, void* fence);

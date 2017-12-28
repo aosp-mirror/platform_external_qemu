@@ -68,6 +68,10 @@ static SaveableTexture* createTexture(GlobalNameSpace* globalNameSpace,
 static void restoreTexture(SaveableTexture* texture);
 static void blitFromCurrentReadBufferANDROID(EGLImage image);
 static void fillGLESUsages(android_studio::EmulatorGLESUsages* usage);
+static GLsync internal_glFenceSync(GLenum condition, GLbitfield flags);
+static GLenum internal_glClientWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
+static void internal_glWaitSync(GLsync wait_on, GLbitfield flags, GLuint64 timeout);
+static void internal_glDeleteSync(GLsync to_delete);
 }
 
 /************************************** GLES EXTENSIONS *********************************************************/
@@ -87,10 +91,10 @@ static GLESiface s_glesIface = {
     .getError = (FUNCPTR_NO_ARGS_RET_INT)glGetError,
     .setShareGroup = setShareGroup,
     .getProcAddress = getProcAddress,
-    .fenceSync = (FUNCPTR_FENCE_SYNC)glFenceSync,
-    .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)glClientWaitSync,
-    .waitSync = (FUNCPTR_WAIT_SYNC)glWaitSync,
-    .deleteSync = (FUNCPTR_DELETE_SYNC)glDeleteSync,
+    .fenceSync = (FUNCPTR_FENCE_SYNC)internal_glFenceSync,
+    .clientWaitSync = (FUNCPTR_CLIENT_WAIT_SYNC)internal_glClientWaitSync,
+    .waitSync = (FUNCPTR_WAIT_SYNC)internal_glWaitSync,
+    .deleteSync = (FUNCPTR_DELETE_SYNC)internal_glDeleteSync,
     .saveTexture = saveTexture,
     .createTexture = createTexture,
     .restoreTexture = restoreTexture,
