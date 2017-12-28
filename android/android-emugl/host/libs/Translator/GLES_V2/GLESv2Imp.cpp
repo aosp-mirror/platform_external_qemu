@@ -744,7 +744,7 @@ GL_APICALL void  GL_APIENTRY glCompressedTexSubImage2D(GLenum target, GLint leve
 }
 
 void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
-        GLsizei width, GLsizei height, GLint border, GLenum* format,
+        GLsizei width, GLsizei height, GLint border, GLint samples, GLenum* format,
         GLenum* type, GLint* internalformat_out) {
     GET_CTX();
 
@@ -773,6 +773,7 @@ void s_glInitTexImage2D(GLenum target, GLint level, GLint internalformat,
             texData->width = width;
             texData->height = height;
             texData->border = border;
+            texData->samples = samples;
             if (format) texData->format = *format;
             if (type) texData->type = *type;
 
@@ -838,7 +839,7 @@ GL_APICALL void  GL_APIENTRY glCopyTexImage2D(GLenum target, GLint level, GLenum
     GLenum format = baseFormatOfInternalFormat((GLint)internalformat);
     GLenum type = accurateTypeOfInternalFormat((GLint)internalformat);
     s_glInitTexImage2D(
-        target, level, internalformat, width, height, border,
+        target, level, internalformat, width, height, border, 0,
         &format, &type, (GLint*)&internalformat);
 
     TextureData* texData = getTextureTargetData(target);
@@ -2902,7 +2903,7 @@ GL_APICALL void  GL_APIENTRY glReleaseShaderCompiler(void){
 }
 
 static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
-        GLsizei height, GLint* err) {
+        GLsizei height, GLint samples, GLint* err) {
     GET_CTX_V2_RET(GL_NONE);
     GLenum internal = internalformat;
     // HACK: angle does not like GL_DEPTH_COMPONENT24_OES
@@ -2935,6 +2936,7 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
     rbData->hostInternalFormat = internal;
     rbData->width = width;
     rbData->height = height;
+    rbData->samples = samples;
 
     //
     // if the renderbuffer was an eglImage target, release
@@ -2950,8 +2952,7 @@ static GLenum sPrepareRenderbufferStorage(GLenum internalformat, GLsizei width,
 GL_APICALL void  GL_APIENTRY glRenderbufferStorage(GLenum target, GLenum internalformat, GLsizei width, GLsizei height){
     GET_CTX();
     GLint err = GL_NO_ERROR;
-    internalformat = sPrepareRenderbufferStorage(internalformat, width, height,
-            &err);
+    internalformat = sPrepareRenderbufferStorage(internalformat, width, height, 0, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
     ctx->dispatcher().glRenderbufferStorage(target,internalformat,width,height);
 }
@@ -3054,7 +3055,7 @@ GL_APICALL void  GL_APIENTRY glStencilOpSeparate(GLenum face, GLenum fail, GLenu
 
 static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalformat,
                                GLsizei width, GLsizei height, GLint border,
-                               GLenum format, GLenum type, const GLvoid* pixels,
+                               GLenum format, GLenum type, GLint samples, const GLvoid* pixels,
                                GLenum* type_out,
                                GLint* internalformat_out,
                                GLint* err_out) {
@@ -3088,7 +3089,7 @@ static void sPrepareTexImage2D(GLenum target, GLsizei level, GLint internalforma
 
     VALIDATE(border != 0,GL_INVALID_VALUE);
 
-    s_glInitTexImage2D(target, level, internalformat, width, height, border,
+    s_glInitTexImage2D(target, level, internalformat, width, height, border, samples,
             &format, &type, &internalformat);
 
     if (!isCompressedFormat && ctx->getMajorVersion() < 3 && !isGles2Gles()) {
@@ -3113,7 +3114,7 @@ GL_APICALL void  GL_APIENTRY glTexImage2D(GLenum target, GLint level, GLint inte
         fprintf(stderr, "%s: got err pre :( 0x%x internal 0x%x format 0x%x type 0x%x\n", __func__, err, internalformat, format, type);
     }
 
-    sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, pixels, &type, &internalformat, &err);
+    sPrepareTexImage2D(target, level, internalformat, width, height, border, format, type, 0, pixels, &type, &internalformat, &err);
     SET_ERROR_IF(err != GL_NO_ERROR, err);
 
     if (isCoreProfile()) {

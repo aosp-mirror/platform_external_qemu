@@ -38,6 +38,7 @@ public:
     GLenum hostInternalFormat = GL_RGBA8;
     GLsizei width = 0;
     GLsizei height = 0;
+    GLint samples = 0;
 };
 
 const int MAX_ATTACH_POINTS = 19;
@@ -64,6 +65,8 @@ public:
                          GLenum *outTarget,
                          ObjectDataPtr *outObj);
 
+    GLint getAttachmentSamples(class GLEScontext* ctx, GLenum attachment);
+    void getAttachmentDimensions(class GLEScontext* ctx, GLenum attachment, GLint* width, GLint* height);
     GLint getAttachmentInternalFormat(class GLEScontext* ctx, GLenum attachment);
 
     void validate(class GLEScontext* ctx);
@@ -78,6 +81,11 @@ public:
 
     void setDrawBuffers(GLsizei n, const GLenum * bufs);
     void setReadBuffers(GLenum src);
+
+    GLenum getReadBuffer() const {
+        return m_readBuffer;
+    }
+
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);
