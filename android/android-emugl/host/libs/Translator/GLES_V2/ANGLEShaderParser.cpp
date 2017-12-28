@@ -170,8 +170,10 @@ bool globalInitialize(
     return true;
 }
 
-static void getShaderLinkInfo(ShHandle compilerHandle,
+static void getShaderLinkInfo(int esslVersion,
+                              ShHandle compilerHandle,
                               ShaderLinkInfo* linkInfo) {
+    linkInfo->esslVersion = esslVersion;
 
     linkInfo->nameMap = *ShGetNameHashingMap(compilerHandle);
     for (const auto& elt : linkInfo->nameMap) {
@@ -218,10 +220,13 @@ bool translate(bool hostUsesCoreProfile,
     // Leverage ARB_ES3_1_compatibility for ESSL 310 for now.
     // Use translator after rest of dEQP-GLES31.functional is in a better state.
     if (esslVersion == 310) {
+        // Don't try to get obj code just yet.
         // At least on NVIDIA Quadro K2200 Linux (361.xx),
         // ARB_ES3_1_compatibility seems to assume incorrectly
         // that atomic_uint must catch a precision qualifier in ESSL 310.
         std::string origSrc(src);
+
+        outShaderLinkInfo->esslVersion = esslVersion;
         size_t versionStart = origSrc.find("#version");
         size_t versionEnd = origSrc.find("\n", versionStart);
         std::string versionPart = origSrc.substr(versionStart, versionEnd - versionStart + 1);
@@ -263,7 +268,7 @@ bool translate(bool hostUsesCoreProfile,
     *outInfolog = std::string(ShGetInfoLog(compilerHandle));
     *outObjCode = std::string(ShGetObjectCode(compilerHandle));
 
-    if (outShaderLinkInfo) getShaderLinkInfo(compilerHandle, outShaderLinkInfo);
+    if (outShaderLinkInfo) getShaderLinkInfo(esslVersion, compilerHandle, outShaderLinkInfo);
 
     ShClearResults(compilerHandle);
 
