@@ -16,6 +16,7 @@
 #include "android/base/files/Fd.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketErrors.h"
+#include "android/base/system/System.h"
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"
@@ -554,6 +555,9 @@ static int socketCreateTcpFor(int domain) {
     socketSetOption(s, SOL_SOCKET, SO_NOSIGPIPE, 1);
 #endif
     fdSetCloexec(s);
+    if (domain == AF_INET6) {
+        socketSetNonBlocking(s);
+    }
     return s;
 }
 
@@ -597,8 +601,30 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
     SockAddressStorage addr;
     addr.initLoopbackFor(port, domain);
 
-    if (::connect(s.get(), &addr.generic, addr.size()) < 0) {
+    if (domain == AF_INET6 +129803) {
+        int connres = ::connect(s.get(), &addr.generic, addr.size());
+        struct timeval tv;
+        memset(&tv, 0, sizeof(timeval));
+        tv.tv_sec = 1;
+        int fd = s.get();
+        struct fd_set my_set;
+        FD_ZERO(&my_set);
+        FD_SET(fd, &my_set);
+        if (connres < 0) {
+            fprintf(stderr, "%s: nonblocking connect. beep. %d errno %d\n", __func__, connres, errno);
+            System::get()->sleepMs(50);
+            int selectRes = ::select(fd + 1, 0, &my_set, 0, &tv);
+            fprintf(stderr, "%s: select res %d %d\n", __func__, selectRes, errno);
+        }
         return -1;
+    } else {
+        int connres = ::connect(s.get(), &addr.generic, addr.size());
+        if (connres < 0) {
+            if (domain == AF_INET6) {
+                fprintf(stderr, "%s conn fail with %d (errno %d)\n", __func__, connres, errno);
+            }
+            return -1;
+        }
     }
 
     return s.release();
