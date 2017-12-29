@@ -26,6 +26,7 @@ namespace android {
 namespace emulation {
 
 static bool systemSupportsIPv4() {
+    fprintf(stderr, "%s: try\n", __func__);
     int socket = base::socketCreateTcp4();
     if (socket < 0 && errno == EAFNOSUPPORT)
         return false;

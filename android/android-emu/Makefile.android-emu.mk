@@ -176,6 +176,7 @@ LOCAL_SRC_FILES := \
     android/utils/property_file.c \
     android/utils/reflist.c \
     android/utils/refset.c \
+    android/utils/sockets.c \
     android/utils/stralloc.c \
     android/utils/stream.cpp \
     android/utils/string.cpp \
