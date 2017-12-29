@@ -68,6 +68,30 @@
       "revId": "a940ddc5d7b6377d84010f29cef257680114cf4b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d63dd6a7_b4df377d",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:51:53Z",
+      "side": 1,
+      "message": "Oops that could be it",
+      "parentUuid": "6f2331b1_33cce731",
+      "range": {
+        "startLine": 633,
+        "startChar": 29,
+        "endLine": 633,
+        "endChar": 48
+      },
+      "revId": "a940ddc5d7b6377d84010f29cef257680114cf4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
