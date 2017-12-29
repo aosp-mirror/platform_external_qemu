@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "669bdebf_e55775c1",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:42:17Z",
+      "side": 1,
+      "message": "When I try this on Mac, select returns \u003e 0 and errno is 36 every time for both v4 and v6, and if I fail the connection because it\u0027s \u003d\u003d 36, adb never ends up being online.",
+      "range": {
+        "startLine": 632,
+        "startChar": 0,
+        "endLine": 632,
+        "endChar": 29
+      },
+      "revId": "a940ddc5d7b6377d84010f29cef257680114cf4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
