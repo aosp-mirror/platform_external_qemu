@@ -22,6 +22,52 @@
       "revId": "a940ddc5d7b6377d84010f29cef257680114cf4b",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f2331b1_33cce731",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T05:46:22Z",
+      "side": 1,
+      "message": "by the spec this error is returned from connect(), not from select()\nerrno is only valid right after the call, so it\u0027s better to check it before calling select()",
+      "range": {
+        "startLine": 633,
+        "startChar": 29,
+        "endLine": 633,
+        "endChar": 48
+      },
+      "revId": "a940ddc5d7b6377d84010f29cef257680114cf4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "de54ef7d_50dfa247",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T05:46:22Z",
+      "side": 1,
+      "message": "you need to convert the error on Windows, as it doesn\u0027t set errno but has a WSAGetLastError() function instead. socket_connect() has that conversion",
+      "range": {
+        "startLine": 633,
+        "startChar": 38,
+        "endLine": 633,
+        "endChar": 48
+      },
+      "revId": "a940ddc5d7b6377d84010f29cef257680114cf4b",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
