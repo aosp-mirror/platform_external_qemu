@@ -287,7 +287,11 @@ void WearAgentImpl::connectToAdbHost() {
     // - make sure the state is updated only after everything else
     // - don't hold locks for too long
 
-    const int socket = socketTcp4LoopbackClient(mAdbHostPort);
+    int socket = socketTcp4LoopbackClient(mAdbHostPort);
+    if (socket < 0) {
+        socket = socketTcp6LoopbackClient(mAdbHostPort);
+    }
+
     if (socket < 0) {
         android::base::AutoLock lock(mSocketLock);
         mSocketOpenState = SocketOpenState::Failed;
