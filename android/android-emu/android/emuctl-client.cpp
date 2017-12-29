@@ -309,6 +309,7 @@ void android_emuctl_client_init(void) {
 
 void android_emuctl_client_connect(int port) {
     android_emuctl_client_disconnect();
+    fprintf(stderr, "%s: connect emuctl client\n", __func__);
     android::base::ScopedSocket sock (
         android::base::socketTcp4LoopbackClient(port));
     android::base::socketSetNonBlocking(sock.get());

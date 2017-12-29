@@ -287,7 +287,13 @@ void WearAgentImpl::connectToAdbHost() {
     // - make sure the state is updated only after everything else
     // - don't hold locks for too long
 
-    const int socket = socketTcp4LoopbackClient(mAdbHostPort);
+    fprintf(stderr, "%s: wear agent try ipv4\n", __func__);
+    int socket = socketTcp4LoopbackClient(mAdbHostPort);
+    if (socket < 0) {
+        fprintf(stderr, "%s: ipv4 failed. ipv6 attempt.\n", __func__);
+        socket = socketTcp6LoopbackClient(mAdbHostPort);
+    }
+
     if (socket < 0) {
         android::base::AutoLock lock(mSocketLock);
         mSocketOpenState = SocketOpenState::Failed;
