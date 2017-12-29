@@ -16,6 +16,7 @@
 #include "android/base/files/Fd.h"
 #include "android/base/sockets/ScopedSocket.h"
 #include "android/base/sockets/SocketErrors.h"
+#include "android/base/system/System.h"
 
 #ifdef _WIN32
 #include "android/base/sockets/Winsock.h"
@@ -554,6 +555,12 @@ static int socketCreateTcpFor(int domain) {
     socketSetOption(s, SOL_SOCKET, SO_NOSIGPIPE, 1);
 #endif
     fdSetCloexec(s);
+
+    // The initial connection needs to be nonblocking since simple configs like
+    // firewalls can make connect() hang. The initial connect() is in a VCPU
+    // thread and we don't really want to hang the entire emulator for usecases
+    // like connecting to adb, so make this socket non-blocking at first.
+    socketSetNonBlocking(s);
     return s;
 }
 
@@ -597,11 +604,39 @@ static int socketTcpLoopbackClientFor(int port, int domain) {
     SockAddressStorage addr;
     addr.initLoopbackFor(port, domain);
 
-    if (::connect(s.get(), &addr.generic, addr.size()) < 0) {
-        return -1;
-    }
+    // Get all our select()-related friends together---
+    // |connres| the result of connect(),
+    // a timeval to hold the timeout |tv|,
+    // and a fd_set |my_set| to specify our socket fd.
+    int connres;
+    struct timeval tv;
+    fd_set my_set;
 
-    return s.release();
+    memset(&tv, 0, sizeof(timeval));
+    FD_ZERO(&my_set);
+
+    // Allow an entire 100ms to connect to "loopback" address :thinkingface:
+    tv.tv_usec = 1000 * 100;
+    int fd = s.get();
+    FD_SET(fd, &my_set);
+
+    connres = ::connect(s.get(), &addr.generic, addr.size());
+    if (connres < 0) {
+        int selectRes = ::select(fd + 1, 0, &my_set, 0, &tv);
+        if (selectRes > 0) {
+            if (domain == AF_INET) {
+                fprintf(stderr, "%s: ipv4 loopback connection success. res %d errno %d\n", __func__, selectRes, errno);
+            } else {
+                fprintf(stderr, "%s: ipv6 loopback connection success, res %d errno %d\n", __func__, selectRes, errno);
+            }
+            socketSetBlocking(fd);
+            return s.release();
+        } else {
+            return -1;
+        }
+    } else {
+        return s.release();
+    }
 }
 
 int socketTcp4LoopbackClient(int port) {
