@@ -1,0 +1,159 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ae691309_5ca64b81",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 562,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:46:53Z",
+      "side": 1,
+      "message": "this should be only done during the connect() call, otherwise clients may get surprised by not blocking in their read() calls",
+      "range": {
+        "startLine": 558,
+        "startChar": 0,
+        "endLine": 562,
+        "endChar": 5
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3be0f194_af2618a8",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:46:53Z",
+      "side": 1,
+      "message": "nit: move these into the ipv6-specific block?",
+      "range": {
+        "startLine": 615,
+        "startChar": 1,
+        "endLine": 621,
+        "endChar": 28
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bdc88388_ac741f57",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:46:53Z",
+      "side": 1,
+      "message": "IMO it\u0027s better to use socket_connect() from utils/sockets.h - it would fix the errno as well as block some signals",
+      "range": {
+        "startLine": 623,
+        "startChar": 20,
+        "endLine": 623,
+        "endChar": 27
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8df6bb1f_9aad92ff",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:46:53Z",
+      "side": 1,
+      "message": "please also check if errno is EINPROGRESS, otherwise something different happened and there\u0027s no sense in waiting for extra 100 ms",
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8929fa74_fb54fa3c",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:46:53Z",
+      "side": 1,
+      "message": "please add the HANDLE_EINTR() macro",
+      "range": {
+        "startLine": 625,
+        "startChar": 30,
+        "endLine": 625,
+        "endChar": 36
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8837ec1e_ca101b41",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:46:53Z",
+      "side": 1,
+      "message": "this should return the socket if the very first connect succeeded at once",
+      "range": {
+        "startLine": 632,
+        "startChar": 8,
+        "endLine": 632,
+        "endChar": 18
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2f87cca1_285bb99f",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:46:53Z",
+      "side": 1,
+      "message": "nit: this is for debugging, I hope? :)",
+      "range": {
+        "startLine": 637,
+        "startChar": 0,
+        "endLine": 637,
+        "endChar": 100
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
