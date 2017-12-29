@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9edbd07c_7f612bf8",
+        "filename": "android/android-emu/android/emulation/control/ApkInstaller.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T19:10:11Z",
+      "side": 1,
+      "message": "nit: android/base/misc/StringUtils.h, startsWith()",
+      "range": {
+        "startLine": 72,
+        "startChar": 19,
+        "endLine": 72,
+        "endChar": 33
+      },
+      "revId": "508054c13221f688a4366e33fe70d07970d8a9ac",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
