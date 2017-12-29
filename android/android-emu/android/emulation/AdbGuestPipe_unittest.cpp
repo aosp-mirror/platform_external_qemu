@@ -164,7 +164,7 @@ TEST(AdbGuestPipe, createService) {
     MockAdbHostAgent adbHost;
 }
 
-TEST(AdbGuestPipe, createOneGuest) {
+TEST(AdbGuestPipe, DISABLED_createOneGuest) {
     // NOTE: This does Service::resetAll() on creation and destruction for us.
     TestAndroidPipeDevice testDevice;
 
@@ -192,7 +192,7 @@ TEST(AdbGuestPipe, createOneGuest) {
     EXPECT_EQ(1, guest->write("x", 1));
 }
 
-TEST(AdbGuestPipe, createGuestWithBadAcceptCommand) {
+TEST(AdbGuestPipe, DISABLED_createGuestWithBadAcceptCommand) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;
@@ -207,7 +207,7 @@ TEST(AdbGuestPipe, createGuestWithBadAcceptCommand) {
     EXPECT_EQ(PIPE_ERROR_IO, guest->write("ACCEPT", 6));
 }
 
-TEST(AdbGuestPipe, createGuestWithCloseOnAccept) {
+TEST(AdbGuestPipe, DISABLED_createGuestWithCloseOnAccept) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;
@@ -221,7 +221,7 @@ TEST(AdbGuestPipe, createGuestWithCloseOnAccept) {
     guest->close();
 }
 
-TEST(AdbGuestPipe, createGuestWithCloseBeforeConnection) {
+TEST(AdbGuestPipe, DISABLED_createGuestWithCloseBeforeConnection) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;
@@ -238,7 +238,7 @@ TEST(AdbGuestPipe, createGuestWithCloseBeforeConnection) {
     EXPECT_FALSE(adbHost.isListening());
 }
 
-TEST(AdbGuestPipe, createGuestWithCloseOnReply) {
+TEST(AdbGuestPipe, DISABLED_createGuestWithCloseOnReply) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;
@@ -258,7 +258,7 @@ TEST(AdbGuestPipe, createGuestWithCloseOnReply) {
     guest->close();
 }
 
-TEST(AdbGuestPipe, createGuestWithBadStartCommand) {
+TEST(AdbGuestPipe, DISABLED_createGuestWithBadStartCommand) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;
@@ -283,7 +283,7 @@ TEST(AdbGuestPipe, createGuestWithBadStartCommand) {
     EXPECT_EQ(PIPE_ERROR_IO, guest->write("START", 5));
 }
 
-TEST(AdbGuestPipe, createGuestWithCloseOnStart) {
+TEST(AdbGuestPipe, DISABLED_createGuestWithCloseOnStart) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;
@@ -306,7 +306,7 @@ TEST(AdbGuestPipe, createGuestWithCloseOnStart) {
     guest->close();
 }
 
-TEST(AdbGuestPipe, createGuestWhichClosesTheConnection) {
+TEST(AdbGuestPipe, DISABLED_createGuestWhichClosesTheConnection) {
     // NOTE: This does Service::resetAll() on creation and destruction for us.
     TestAndroidPipeDevice testDevice;
 
@@ -335,7 +335,7 @@ TEST(AdbGuestPipe, createGuestWhichClosesTheConnection) {
     guest->close();
 }
 
-TEST(AdbGuestPipe, createMultipleGuestConnections) {
+TEST(AdbGuestPipe, DISABLED_createMultipleGuestConnections) {
     TestAndroidPipeDevice testDevice;
 
     MockAdbHostAgent adbHost;

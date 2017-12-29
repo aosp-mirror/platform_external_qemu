@@ -20,6 +20,7 @@
 #include "android/base/sockets/SocketUtils.h"
 #include "android/base/StringView.h"
 #include "android/base/synchronization/Lock.h"
+#include "android/base/threads/Async.h"
 #include "android/emulation/VmLock.h"
 #include "android/globals.h"
 #include "android/utils/debug.h"
@@ -611,7 +612,11 @@ void AdbGuestPipe::waitForHostConnection() {
     // restarted on the host, but could not see the current emulator
     // instance because it's listening on a 'non-standard' ADB port.
     mHostAgent->startListening();
-    mHostAgent->notifyServer();
+
+    // Async notify the server (guard against connect() hangs)
+    android::base::async([this] {
+        mHostAgent->notifyServer();
+    });
 }
 
 }  // namespace emulation
