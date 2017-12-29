@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c040b93_a0ce39bf",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2017-12-29T03:55:56Z",
+      "side": 1,
+      "message": "we\u0027re supposed to prefer ipv6 nowadays, I believe. unfortunately, it\u0027s also the one that\u0027s not always installed.",
+      "range": {
+        "startLine": 35,
+        "startChar": 36,
+        "endLine": 35,
+        "endChar": 60
+      },
+      "revId": "5277e0eaf6050d66215d7b9b8a5389d2863ec401",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
