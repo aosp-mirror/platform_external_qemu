@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ff98533c_f690b961",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 562,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ae691309_5ca64b81",
+      "range": {
+        "startLine": 558,
+        "startChar": 0,
+        "endLine": 562,
+        "endChar": 5
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3be0f194_af2618a8",
         "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
         "patchSetId": 2
@@ -36,6 +60,30 @@
       "writtenOn": "2017-12-29T03:46:53Z",
       "side": 1,
       "message": "nit: move these into the ipv6-specific block?",
+      "range": {
+        "startLine": 615,
+        "startChar": 1,
+        "endLine": 621,
+        "endChar": 28
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c178570f_8af8a6ae",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "Done (common between ipv4 and ipv6 now)",
+      "parentUuid": "3be0f194_af2618a8",
       "range": {
         "startLine": 615,
         "startChar": 1,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "41cca15e_95a5d41d",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 623,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "Ack; imported the signal blocking at least.",
+      "parentUuid": "bdc88388_ac741f57",
+      "range": {
+        "startLine": 623,
+        "startChar": 20,
+        "endLine": 623,
+        "endChar": 27
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8df6bb1f_9aad92ff",
         "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
         "patchSetId": 2
@@ -88,6 +160,24 @@
     },
     {
       "key": {
+        "uuid": "845b10c7_1ee998a2",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 624,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8df6bb1f_9aad92ff",
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8929fa74_fb54fa3c",
         "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
         "patchSetId": 2
@@ -99,6 +189,30 @@
       "writtenOn": "2017-12-29T03:46:53Z",
       "side": 1,
       "message": "please add the HANDLE_EINTR() macro",
+      "range": {
+        "startLine": 625,
+        "startChar": 30,
+        "endLine": 625,
+        "endChar": 36
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "92737f58_da3916d1",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 625,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8929fa74_fb54fa3c",
       "range": {
         "startLine": 625,
         "startChar": 30,
@@ -134,6 +248,30 @@
     },
     {
       "key": {
+        "uuid": "755ce754_6312c8f1",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 632,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8837ec1e_ca101b41",
+      "range": {
+        "startLine": 632,
+        "startChar": 8,
+        "endLine": 632,
+        "endChar": 18
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2f87cca1_285bb99f",
         "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
         "patchSetId": 2
@@ -145,6 +283,30 @@
       "writtenOn": "2017-12-29T03:46:53Z",
       "side": 1,
       "message": "nit: this is for debugging, I hope? :)",
+      "range": {
+        "startLine": 637,
+        "startChar": 0,
+        "endLine": 637,
+        "endChar": 100
+      },
+      "revId": "d12c888ba756fa311df6e336691f4ec6aeb5afaa",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b18eb466_354908ac",
+        "filename": "android/android-emu/android/base/sockets/SocketUtils.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 637,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "Yea, still in the middel of testing it",
+      "parentUuid": "2f87cca1_285bb99f",
       "range": {
         "startLine": 637,
         "startChar": 0,

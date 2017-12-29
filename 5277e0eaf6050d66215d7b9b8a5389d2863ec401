@@ -22,6 +22,30 @@
       "revId": "5277e0eaf6050d66215d7b9b8a5389d2863ec401",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c3b725c6_94c2ccad",
+        "filename": "android/android-emu/android/emulation/AdbHostServer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2017-12-29T05:38:01Z",
+      "side": 1,
+      "message": "The previous behavior seems to be that IPv6 loopback always fails with blocking connect (returns a negative number) (even on my Linux workstation on corp network).\n\nWith this async connection scheme, select() can return a positive number and errno might not be 115 (EINPROGRESS), but from current data collection, adb server on the host flakily does not detect the device and needs a kill-server when using ipv6 (or I\u0027m doing something else wrong with v6 vs v4 select()). This is even after switching the wear agent adb connection (the first emulator-wide loopback connection attempt as far as I can tell) to try ipv6 first as well.\n\nSo, I\u0027m inclined to preserve the previous behavior in this case (where we end up trying ipv4 first), to get more reliability from users in the wild.\n\nWhich is just super sad since ipv6 is supposed to be what we\u0027re moving to and stuff :(",
+      "parentUuid": "7c040b93_a0ce39bf",
+      "range": {
+        "startLine": 35,
+        "startChar": 36,
+        "endLine": 35,
+        "endChar": 60
+      },
+      "revId": "5277e0eaf6050d66215d7b9b8a5389d2863ec401",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
