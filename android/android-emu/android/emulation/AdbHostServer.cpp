@@ -29,9 +29,10 @@ using android::base::StringFormat;
 
 bool AdbHostServer::notify(int adbEmulatorPort, int adbClientPort) {
     // First connect to ADB server.
-    ScopedSocket socket(android::base::socketTcp6LoopbackClient(adbClientPort));
+    ScopedSocket socket(android::base::socketTcp4LoopbackClient(adbClientPort));
     if (!socket.valid()) {
-        socket.reset(android::base::socketTcp4LoopbackClient(adbClientPort));
+        fprintf(stderr, "%s: invalid, trying ipv6\n", __func__);
+        socket.reset(android::base::socketTcp6LoopbackClient(adbClientPort));
     }
     if (!socket.valid()) {
         // This can happen frequently when there is no ADB Server running
