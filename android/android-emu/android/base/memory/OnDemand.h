@@ -86,22 +86,7 @@ namespace internal {
 // using those arguments:
 //    std::tuple<int, char, char*> -> func(tuple<0>, tuple<1>, tuple<2>)
 //
-// This can be done with a simple set of transformations:
-// 1. Generate a class to incapsulate integer sequence 0, 1, ..., <num_args>
-//      Seq<int...> is this class
-//
-// 2. Create a 'maker' class to construct Seq<int...> given only <num_args>
-//    value.
-//      MakeSeq<N, S...> works this way, e.g.
-//
-//      MakeSeq<2> inherits MakeSeq<2 - 1, 2 - 1> == MakeSeq<1, 1>
-//          MakeSeq<1, 1> : MakeSeq<1 - 1, 1 - 1, 1> == MakeSeq<0, 0, 1>
-//          MakeSeq<0, 0, 1> == MakeSeq<0, S...> and defines |type| = Seq<0, 1>
-//
-// 3. Later one can use MakeSeqT alias to quickly create Seq<...>:
-//      MakeSeqT<3> == Seq<0, 1, 2>
-//
-// 4. To call a function with arguments from a tuple one needs to use syntax:
+// To call a function with arguments from a tuple one needs to use syntax:
 //      template <class ... Args>
 //      void call(std::tuple<Args> args) {
 //          call_impl(args, MakeSeqT<sizeof...(Args)>());
@@ -112,23 +97,9 @@ namespace internal {
 //      }
 //
 //  TODO: C++14 gives us std::index_sequence<> in STL, so we'll be able to get
-//        rid of ##1-3.
+//        rid of out custom Seq<> class.
 //        C++17 got std::apply() call to replace all of this altogether.
 //
-
-template <int...>
-struct Seq {};
-
-template <int N, int... S>
-struct MakeSeq : MakeSeq<N - 1, N - 1, S...> {};
-
-template <int... S>
-struct MakeSeq<0, S...> {
-    using type = Seq<S...>;
-};
-
-template <int... S>
-using MakeSeqT = typename MakeSeq<S...>::type;
 
 // If user wants to create an OnDemand<> wrapper with already calculated
 // parameters, this class would hold those and convert them into a tuple
@@ -208,10 +179,10 @@ private:
         using TupleType =
                 typename std::decay<decltype(mCtorArgsGetter())>::type;
         constexpr int tupleSize = std::tuple_size<TupleType>::value;
-        constructImpl(internal::MakeSeqT<tupleSize>());
+        constructImpl(MakeSeqT<tupleSize>());
     }
     template <int... S>
-    void constructImpl(internal::Seq<S...>) const {
+    void constructImpl(Seq<S...>) const {
         auto args = mCtorArgsGetter();
         (void)args;
         new (&mStorage) T(std::move(std::get<S>(std::move(args)))...);
