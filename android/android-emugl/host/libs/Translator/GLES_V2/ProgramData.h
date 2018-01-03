@@ -104,10 +104,15 @@ public:
     std::unordered_map<std::string, GLuint> boundAttribLocs;
     virtual GenNameInfo getGenNameInfo() const override;
     void addProgramName(GLuint name) { ProgramName = name; }
+
     // Virtualize uniform locations
     // It handles location -1 as well
+    void initGuestUniformLocForKey(android::base::StringView key);
+    void initGuestUniformLocForKey(android::base::StringView key,
+                                   android::base::StringView key2);
     int getGuestUniformLocation(const char* uniName);
     int getHostUniformLocation(int guestLocation);
+
 private:
     // linkedAttribLocs stores the attribute locations the guest might
     // know about. It includes all boundAttribLocs before the previous
@@ -133,5 +138,9 @@ private:
 
     std::unordered_map<std::string, int> mUniNameToGuestLoc;
     std::unordered_map<int, int> mGuestLocToHostLoc;
+
+    int mCurrUniformBaseLoc = 0;
+    bool mUseUniformLocationVirtualization = true;
+    bool mUseDirectDriverUniformInfo = false;
 };
 #endif

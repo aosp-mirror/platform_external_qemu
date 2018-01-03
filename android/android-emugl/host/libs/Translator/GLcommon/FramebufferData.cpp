@@ -230,6 +230,52 @@ GLuint FramebufferData::getAttachment(GLenum attachment,
     return m_attachPoints[idx].name;
 }
 
+GLint FramebufferData::getAttachmentSamples(GLEScontext* ctx, GLenum attachment) {
+    int idx = attachmentPointIndex(attachment);
+
+    // Don't expose own attachments.
+    if (m_attachPoints[idx].owned) return 0;
+
+    GLenum target = m_attachPoints[idx].target;
+    GLuint name = m_attachPoints[idx].name;
+
+    if (target == GL_RENDERBUFFER) {
+        RenderbufferData* rbData = (RenderbufferData*)
+            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, name);
+        return rbData ? rbData->samples : 0;
+    } else {
+        TextureData* texData = (TextureData*)
+            ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, name);
+        return texData ? texData->samples : 0;
+    }
+}
+
+void FramebufferData::getAttachmentDimensions(GLEScontext* ctx, GLenum attachment, GLint* width, GLint* height) {
+    int idx = attachmentPointIndex(attachment);
+
+    // Don't expose own attachments.
+    if (m_attachPoints[idx].owned) return;
+
+    GLenum target = m_attachPoints[idx].target;
+    GLuint name = m_attachPoints[idx].name;
+
+    if (target == GL_RENDERBUFFER) {
+        RenderbufferData* rbData = (RenderbufferData*)
+            ctx->shareGroup()->getObjectData(NamedObjectType::RENDERBUFFER, name);
+        if (rbData) {
+            *width = rbData->width;
+            *height = rbData->height;
+        }
+    } else {
+        TextureData* texData = (TextureData*)
+            ctx->shareGroup()->getObjectData(NamedObjectType::TEXTURE, name);
+        if (texData) {
+            *width = texData->width;
+            *height = texData->height;
+        }
+    }
+}
+
 GLint FramebufferData::getAttachmentInternalFormat(GLEScontext* ctx, GLenum attachment) {
     int idx = attachmentPointIndex(attachment);
 

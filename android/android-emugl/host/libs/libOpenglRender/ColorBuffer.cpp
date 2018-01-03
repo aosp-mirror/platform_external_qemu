@@ -492,7 +492,7 @@ GLuint ColorBuffer::scale() {
 
 void ColorBuffer::waitSync() {
     if (m_sync) {
-        s_gles2.glWaitSync(m_sync, 0, GL_TIMEOUT_IGNORED);
+        s_egl.eglWaitImageFenceANDROID(m_display, m_sync);
     }
 }
 
