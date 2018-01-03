@@ -11,92 +11,23 @@
 
 #pragma once
 
-#include "android/base/threads/ThreadPool.h"
-#include "android/base/threads/WorkerThread.h"
-
-#include <cassert>
-#include <functional>
-#include <utility>
-
-//
-// Compressor<ItemKey> - a class to compress generic data using a thread pool.
-//
-// ItemKey is a user-supplied key for the data being compressed, used to
-// identify and handle data after compression.
-
-// |doneCallback| is called on a single separate worker thread for each
-// compressed item.
-//
+#include <cstdint>
+#include "lz4.h"
 
 namespace android {
 namespace snapshot {
+namespace compress {
 
-class CompressorBase {
-protected:
-    CompressorBase() = default;
+int workerCount();
+int32_t compress(const uint8_t* data,
+                 int32_t size,
+                 uint8_t* out,
+                 int32_t outSize);
 
-    // Calculate the preferred number of compress workers.
-    static int workerCount();
-
-    // Compress |data| into a newly allocated buffer.
-    static std::pair<uint8_t*, int32_t> compress(const uint8_t* data,
-                                                 int32_t size);
-};
-
-template <class ItemKey>
-class Compressor : private CompressorBase {
-public:
-    using DoneCallback = std::function<
-            void(ItemKey&& key, const uint8_t* data, int32_t size)>;
-
-    Compressor(DoneCallback&& doneCallback);
-    ~Compressor() { join(); }
-
-    void enqueue(ItemKey&& key, const uint8_t* data, int32_t size) {
-        mCompressWorkers.enqueue({key, data, size});
-    }
-
-    void join() {
-        mCompressWorkers.done();
-        mCompressWorkers.join();
-        mDoneWorker.enqueue({});
-        mDoneWorker.join();
-    }
-
-private:
-    struct Item {
-        ItemKey key;
-        const uint8_t* data;
-        int32_t size;
-    };
-
-    void compress(const Item& item) {
-        const auto compressed = CompressorBase::compress(item.data, item.size);
-        mDoneWorker.enqueue({item.key, compressed.first, compressed.second});
-    }
-    base::WorkerProcessingResult callDone(Item&& item) {
-        if (!item.data) {
-            return base::WorkerProcessingResult::Stop;
-        }
-        mDoneCallback(std::move(item.key), item.data, item.size);
-        delete[] item.data;
-        return base::WorkerProcessingResult::Continue;
-    }
-
-    base::ThreadPool<Item> mCompressWorkers;
-    base::WorkerThread<Item> mDoneWorker;
-    DoneCallback mDoneCallback;
-};
-
-template <class ItemKey>
-Compressor<ItemKey>::Compressor(DoneCallback&& doneCallback)
-    : mCompressWorkers(CompressorBase::workerCount(),
-                       [this](Item&& item) { compress(item); }),
-      mDoneWorker([this](Item&& item) { return callDone(std::move(item)); }),
-      mDoneCallback(std::move(doneCallback)) {
-    mCompressWorkers.start();
-    mDoneWorker.start();
+constexpr int32_t maxCompressedSize(int32_t dataSize) {
+    return LZ4_COMPRESSBOUND(dataSize);
 }
 
+}  // namespace compress
 }  // namespace snapshot
 }  // namespace android
