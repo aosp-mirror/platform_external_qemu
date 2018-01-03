@@ -20,11 +20,14 @@
 namespace android {
 namespace snapshot {
 
+class RamLoader;
+
 class Saver {
     DISALLOW_COPY_AND_ASSIGN(Saver);
 
 public:
-    Saver(const Snapshot& snapshot);
+    Saver(const Snapshot& snapshot, RamLoader* loader,
+          bool isOnExit);
     ~Saver();
 
     RamSaver& ramSaver() { return *mRamSaver; }

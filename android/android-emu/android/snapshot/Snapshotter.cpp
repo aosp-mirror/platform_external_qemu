@@ -188,7 +188,9 @@ void Snapshotter::initialize(const QAndroidVmOperations& vmOperations,
                  auto snapshot = static_cast<Snapshotter*>(opaque);
 
                  auto& loader = snapshot->mLoader;
-                 if (!loader || loader->status() != OperationStatus::Ok) return;
+                 if (!loader || loader->status() != OperationStatus::Ok) {
+                     return;
+                 }
 
                  auto& ramLoader = loader->ramLoader();
                  if (ramLoader.onDemandEnabled() &&
@@ -225,9 +227,9 @@ static void appendFailedLoad(pb::EmulatorSnapshotLoadState state,
 
 OperationStatus Snapshotter::prepareForLoading(const char* name) {
     if (mSaver && mSaver->snapshot().name() == name) {
-        mSaver.clear();
+        mSaver.reset();
     }
-    mLoader.emplace(name);
+    mLoader.reset(new Loader(name));
     mLoader->prepare();
     return mLoader->status();
 }
@@ -239,8 +241,20 @@ OperationStatus Snapshotter::load(bool isQuickboot, const char* name) {
     mVmOperations.snapshotLoad(name, this, nullptr);
     mIsQuickboot = false;
     mLastLoadDuration.emplace(sw.elapsedUs() / 1000);
-    mLoadedSnapshotFile = (mLoader->status() == OperationStatus::Ok) ? name : "";
+    mLoadedSnapshotFile =
+            (mLoader->status() == OperationStatus::Ok) ? name : "";
     return mLoader->status();
+}
+
+void Snapshotter::prepareLoaderForSaving(const char* name) {
+    if (!mLoader) {
+        return;
+    }
+    if (mLoader->snapshot().name() != name) {
+        mLoader.reset();
+    } else if (auto texLoader = mLoader->textureLoader()) {
+        texLoader->join();
+    }
 }
 
 void Snapshotter::callCallbacks(Operation op, Stage stage) {
@@ -521,19 +535,22 @@ void Snapshotter::handleGenericLoad(const char* name,
 }
 
 OperationStatus Snapshotter::prepareForSaving(const char* name) {
-    if (mLoader && mLoader->snapshot().name() == name) {
-        mLoader.clear();
-    }
-    mSaver.emplace(name);
+    prepareLoaderForSaving(name);
+    mSaver.reset(new Saver(
+            name, (mLoader && mLoader->status() != OperationStatus::Error)
+                          ? &mLoader->ramLoader()
+                          : nullptr,
+            mIsOnExit));
     mSaver->prepare();
     return mSaver->status();
 }
 
-OperationStatus Snapshotter::save(const char* name) {
+OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
     mLastSaveDuration = android::base::kNullopt;
     mLastSaveUptimeMs =
         System::Duration(System::get()->getProcessTimes().wallClockMs);
     Stopwatch sw;
+    mIsOnExit = isOnExit;
     mVmOperations.snapshotSave(name, this, nullptr);
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
     return mSaver->status();
@@ -542,7 +559,7 @@ OperationStatus Snapshotter::save(const char* name) {
 OperationStatus Snapshotter::saveGeneric(const char* name) {
     OperationStatus res = OperationStatus::Error;
     if (checkSafeToSave(name)) {
-        res = save(name);
+        res = save(false /* not on exit */, name);
         handleGenericSave(name, res);
     }
     return res;
@@ -561,7 +578,7 @@ OperationStatus Snapshotter::loadGeneric(const char* name) {
 }
 
 void Snapshotter::deleteSnapshot(const char* name) {
-    if (!strcmp(name, mLoadedSnapshotFile.c_str())) {
+    if (name == mLoadedSnapshotFile) {
         // We're deleting the "loaded" snapshot
         mLoadedSnapshotFile.clear();
     }
@@ -572,7 +589,8 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
     // if it's been less than 2 minutes since the load,
     // consider it a snapshot fail.
     if (System::Duration(System::get()->getProcessTimes().wallClockMs) -
-        mLastLoadUptimeMs < kSnapshotCrashThresholdMs) {
+                mLastLoadUptimeMs <
+        kSnapshotCrashThresholdMs) {
         onLoadingFailed(name, -EINVAL);
     }
 }
@@ -580,9 +598,13 @@ void Snapshotter::onCrashedSnapshot(const char* name) {
 bool Snapshotter::onStartSaving(const char* name) {
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Save, Stage::Start);
-    mLoader.clear();
+    prepareLoaderForSaving(name);
     if (!mSaver || isComplete(*mSaver)) {
-        mSaver.emplace(name);
+        mSaver.reset(new Saver(
+                name, (mLoader && mLoader->status() != OperationStatus::Error)
+                              ? &mLoader->ramLoader()
+                              : nullptr,
+                mIsOnExit));
     }
     if (mSaver->status() == OperationStatus::Error) {
         onSavingComplete(name, -1);
@@ -611,12 +633,12 @@ bool Snapshotter::onStartLoading(const char* name) {
     mLoadedSnapshotFile.clear();
     CrashReporter::get()->hangDetector().pause(true);
     callCallbacks(Operation::Load, Stage::Start);
-    mSaver.clear();
+    mSaver.reset();
     if (!mLoader || isComplete(*mLoader)) {
         if (mLoader) {
             mLoader->interrupt();
         }
-        mLoader.emplace(name);
+        mLoader.reset(new Loader(name));
     }
     mLoader->start();
     if (mLoader->status() == OperationStatus::Error) {
@@ -643,16 +665,14 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
 
 void Snapshotter::onLoadingFailed(const char* name, int err) {
     assert(err < 0);
-    mSaver.clear();
-
-    if (err == -EINVAL) { // corrupted snapshot. abort immediately,
-                          // try not to do anything since this could be
-                          // in the crash handler
+    mSaver.reset();
+    if (err == -EINVAL) {  // corrupted snapshot. abort immediately,
+                           // try not to do anything since this could be
+                           // in the crash handler
         if (mLoader) mLoader->onInvalidSnapshotLoad();
         return;
     }
-
-    mLoader.emplace(name, -err);
+    mLoader.reset(new Loader(name, -err));
     mLoader->complete(false);
     mLoadedSnapshotFile.clear();
 }
@@ -665,10 +685,10 @@ bool Snapshotter::onStartDelete(const char*) {
 bool Snapshotter::onDeletingComplete(const char* name, int res) {
     if (res == 0) {
         if (mSaver && mSaver->snapshot().name() == name) {
-            mSaver.clear();
+            mSaver.reset();
         }
         if (mLoader && mLoader->snapshot().name() == name) {
-            mLoader.clear();
+            mLoader.reset();
         }
         path_delete_dir(Snapshot::dataDir(name).c_str());
     }

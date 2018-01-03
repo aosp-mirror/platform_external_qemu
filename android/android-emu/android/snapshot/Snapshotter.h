@@ -14,8 +14,6 @@
 #include "android/base/Compiler.h"
 #include "android/base/Optional.h"
 #include "android/base/system/System.h"
-#include "android/snapshot/Loader.h"
-#include "android/snapshot/Saver.h"
 #include "android/snapshot/common.h"
 
 #include "android/emulation/control/vm_operations.h"
@@ -33,6 +31,9 @@ class EmulatorSnapshot;
 
 namespace android {
 namespace snapshot {
+
+class Saver;
+class Loader;
 
 class Snapshotter final {
     DISALLOW_COPY_AND_ASSIGN(Snapshotter);
@@ -69,7 +70,7 @@ public:
     OperationStatus prepareForLoading(const char* name);
     OperationStatus load(bool isQuickboot, const char* name);
     OperationStatus prepareForSaving(const char* name);
-    OperationStatus save(const char* name);
+    OperationStatus save(bool isOnExit, const char* name);
 
     // Generic snapshot functions. These differ from normal
     // save() / load() in that they perform validation and
@@ -97,7 +98,9 @@ public:
     Loader& loader() { return *mLoader; }
 
     const QAndroidVmOperations& vmOperations() const { return mVmOperations; }
-    const QAndroidEmulatorWindowAgent& windowAgent() const { return mWindowAgent; }
+    const QAndroidEmulatorWindowAgent& windowAgent() const {
+        return mWindowAgent;
+    }
 
     // Add a callback that's called on the specific stages of the snapshot
     // operations.
@@ -106,9 +109,7 @@ public:
     using Callback = std::function<void(Operation, Stage)>;
     void addOperationCallback(Callback&& cb);
 
-    bool isQuickboot() const {
-        return mIsQuickboot;
-    }
+    bool isQuickboot() const { return mIsQuickboot; }
 
 private:
     bool onStartSaving(const char* name);
@@ -120,6 +121,7 @@ private:
     bool onStartDelete(const char* name);
     bool onDeletingComplete(const char* name, int res);
 
+    void prepareLoaderForSaving(const char* name);
     void callCallbacks(Operation op, Stage stage);
 
     void appendSuccessfulSave(const char* name,
@@ -134,8 +136,8 @@ private:
 
     QAndroidVmOperations mVmOperations;
     QAndroidEmulatorWindowAgent mWindowAgent;
-    android::base::Optional<Saver> mSaver;
-    android::base::Optional<Loader> mLoader;
+    std::unique_ptr<Saver> mSaver;
+    std::unique_ptr<Loader> mLoader;
     std::vector<Callback> mCallbacks;
     std::string mLoadedSnapshotFile;
 
@@ -145,6 +147,7 @@ private:
     android::base::Optional<base::System::Duration> mLastLoadDuration = 0;
 
     bool mIsQuickboot = false;
+    bool mIsOnExit = false;
 };
 
 }  // namespace snapshot

@@ -23,6 +23,8 @@
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
+#include "android/snapshot/Loader.h"
+#include "android/snapshot/Saver.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
@@ -476,7 +478,8 @@ bool Quickboot::save(StringView name) {
     dprint("Saving state on exit with session uptime %d ms",
            int(sessionUptimeMs));
     Stopwatch sw;
-    auto res = Snapshotter::get().save(name.c_str());
+    auto res = Snapshotter::get().save(true /* is on exit (so loader can be interrupted) */,
+                                       name.c_str());
     if (res != OperationStatus::Ok) {
         mWindow.showMessage(
                 "State saving failed, cleaning out the snapshot",
