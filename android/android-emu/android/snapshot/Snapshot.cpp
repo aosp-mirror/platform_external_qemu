@@ -219,11 +219,6 @@ bool Snapshot::verifyConfig(const pb::Config& config) {
         saveFailure(FailureReason::ConfigMismatchAvd);
         return false;
     }
-    if (config.has_cpu_core_count() &&
-        config.cpu_core_count() != vmConfig.numberOfCpuCores) {
-        saveFailure(FailureReason::ConfigMismatchAvd);
-        return false;
-    }
     if (config.has_selected_renderer() &&
         config.selected_renderer() != int(emuglConfig_get_current_renderer())) {
 #ifdef ALLOW_CHANGE_RENDERER
