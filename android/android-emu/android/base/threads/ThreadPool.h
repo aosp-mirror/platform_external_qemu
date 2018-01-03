@@ -113,6 +113,8 @@ public:
         mWorkers[currentIndex % mWorkers.size()]->enqueue(std::move(item));
     }
 
+    int numWorkers() const { return mWorkers.size(); }
+
 private:
     Processor mProcessor;
     std::vector<Optional<Worker>> mWorkers;
