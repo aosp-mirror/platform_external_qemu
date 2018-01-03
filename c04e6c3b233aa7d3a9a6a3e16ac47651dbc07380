@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2d07ae95_f613b2ce",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-03T10:23:15Z",
+      "side": 1,
+      "message": "Is there some kind of batching we can do to have more dedicated times to compress, gaptrack, and I/O?\n\nThe more compress pages in flight the more extra RAM used, but we have some handle on the maximum already (the compressed buffer count).\n\nThen we compress just the compressed buffer limit and leave them in flight; we then know the sizes / ranges involved. Gaptrack can then take place for those in a dedicated way on one thread so no need for locking / contention, and possibly smarter ways to to add()/allocate() gaps. They can then dump to either a separate stage to I/O all those in a batch or keep the existing background I/O.",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 229,
+        "endChar": 24
+      },
+      "revId": "c04e6c3b233aa7d3a9a6a3e16ac47651dbc07380",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03d88789_e759a669",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-03T10:23:15Z",
+      "side": 1,
+      "message": "Please move the format string to the incremental stats class, and replace this with something simpler like mIncStats.report()",
+      "range": {
+        "startLine": 399,
+        "startChar": 0,
+        "endLine": 408,
+        "endChar": 39
+      },
+      "revId": "c04e6c3b233aa7d3a9a6a3e16ac47651dbc07380",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
