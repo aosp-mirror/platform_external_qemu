@@ -83,8 +83,6 @@ ToolWindow::ExtendedWindowHolder::~ExtendedWindowHolder() {
     mWindow->deleteLater();
 }
 
-extern "C" void qemu_system_powerdown_request();
-
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
                        ToolWindow::UIEventRecorderPtr event_recorder,
@@ -404,14 +402,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             forwardKeyToEmulator(LINUX_KEY_VOLUMEDOWN, down);
             break;
         case QtUICommand::POWER:
-            if (android_hw->hw_arc) {
-                // Only send out request when user releases key.
-                if (!down) {
-                    qemu_system_powerdown_request();
-                }
-            } else {
-                forwardKeyToEmulator(LINUX_KEY_POWER, down);
-            }
+            forwardKeyToEmulator(LINUX_KEY_POWER, down);
             break;
         case QtUICommand::TABLET_MODE:
             if (android_hw->hw_arc) {
