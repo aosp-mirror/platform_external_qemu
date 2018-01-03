@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8cc62444_2151ddc9",
+        "filename": "android/android-emu/android/snapshot/IncrementalStats.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-03T09:52:24Z",
+      "side": 1,
+      "message": "The printing logic seems needlessly tightly coupled in several places. As of now, the maintainer needs to keep in mind quite a lot of info in mind at one time to make any change to how the sequence of %llu\u0027s in the other file are printed, or even to add any stat to track.\n\nWhat would be simpler, more maintainable (especially with fewer varargs related things) and no less sensitive to performance would be to just have a pre-baked implementation of printing in IncrementalStats.cpp (keep the measure() abstraction, that definitely helps to not have SNAPSHOT_PROFILE macros all over the place) and make it print pre-baked messages. Extensions / modification could then be easily accumulated without having to track the format string in one file and enums / measurements in another.",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 6
+      },
+      "revId": "4d30db7649ec1c4d4fb4751ecf916ace0a46c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
