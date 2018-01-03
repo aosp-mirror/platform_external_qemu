@@ -53,6 +53,7 @@ void InertialModel::setTargetPosition(
         glm::vec3 position, PhysicalInterpolation mode) {
     float transitionTime = kMinStateChangeTimeSeconds;
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
+        transitionTime = 0.f;
         const float stateChangeTime1 = transitionTime;
         const float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
         const float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
@@ -224,6 +225,7 @@ void InertialModel::setTargetVelocity(
         glm::vec3 velocity, PhysicalInterpolation mode) {
     float transitionTime = kMinStateChangeTimeSeconds;
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
+        transitionTime = 0.f;
         const float stateChangeTime1 = transitionTime;
         const float stateChangeTime2 = stateChangeTime1 * stateChangeTime1;
         const float stateChangeTime3 = stateChangeTime1 * stateChangeTime2;
@@ -376,6 +378,7 @@ void InertialModel::setTargetRotation(
         glm::quat rotation, PhysicalInterpolation mode) {
     float transitionTime = kMinStateChangeTimeSeconds;
     if (mode == PHYSICAL_INTERPOLATION_STEP) {
+        transitionTime = 0.f;
         // For Step changes, we simply set the transform to immediately set the
         // rotation to the target, with zero rotational velocity.
         mRotationQuintic = glm::mat2x4(
@@ -584,8 +587,7 @@ void InertialModel::setTargetAmbientMotion(float bounds,
         mAmbientMotionSecondDerivQuintic = glm::vec2(0.f);
         mAmbientMotionSecondDerivCubic = glm::vec4(0.f);
         mAmbientMotionChangeStartTime = mModelTimeNs;
-        mAmbientMotionChangeEndTime = mModelTimeNs +
-                secondsToNs(kMinStateChangeTimeSeconds);
+        mAmbientMotionChangeEndTime = mModelTimeNs;
     } else {
         // Ambient motion bounds expansion needs to be differentiable so we can
         // always compute the acceleration of the ambient motion.  This does the
@@ -677,7 +679,7 @@ glm::vec3 InertialModel::getVelocity(
     glm::vec3 velocity = calculateInertialState(
         mVelocityHeptic,
         mVelocityCubic,
-        mVelocityAfterEndCubic,
+        mZeroVelocityAfterEndTime ? glm::mat4x3(0.f) : mVelocityAfterEndCubic,
         parameterValueType);
     if (parameterValueType == PARAMETER_VALUE_TYPE_CURRENT) {
         double time = mModelTimeNs / 1000000000.0;

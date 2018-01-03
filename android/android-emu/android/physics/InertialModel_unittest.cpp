@@ -739,3 +739,107 @@ TEST(InertialModel, GyroscopeUseShortPath) {
     EXPECT_GE(-4.f, glm::degrees(rotationalVelocity.y));
     EXPECT_NEAR(0.f, rotationalVelocity.z, 0.00001f);
 }
+
+TEST(InertialModel, ManyTargets) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    const glm::vec3 firstPosition (1.0f, 1.0f, 1.0f);
+    const glm::vec3 secondPosition (0.8f, 0.7f, 0.6f);
+    const glm::vec3 finalPosition (0.7f, 0.8f, 0.9f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetPosition(firstPosition, PHYSICAL_INTERPOLATION_STEP);
+
+    for (int i = 0; i < 1000; i++) {
+        inertialModel.setCurrentTime(i * 50000000UL);
+        inertialModel.setTargetPosition(
+                ((i % 1) == 0) ? secondPosition : firstPosition,
+                PHYSICAL_INTERPOLATION_SMOOTH);
+    }
+
+    glm::vec3 position = inertialModel.getPosition();
+    glm::vec3 velocity = inertialModel.getVelocity();
+
+    inertialModel.setCurrentTime(1000UL * 50000000UL);
+    inertialModel.setTargetPosition(finalPosition, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    constexpr uint64_t step = 5000UL;
+    constexpr float timeIncrement = step / 1000000000.f;
+    uint64_t time = 50000000UL * 1000UL + (step >> 1);
+    for (; time < 50000000UL * 1000UL + 500000000UL; time += step) {
+        inertialModel.setCurrentTime(time);
+        velocity += timeIncrement * inertialModel.getAcceleration();
+        position += timeIncrement * velocity;
+    }
+
+    const glm::vec3 measuredPosition = inertialModel.getPosition();
+
+    EXPECT_NEAR(measuredPosition.x, position.x, 0.05f);
+    EXPECT_NEAR(measuredPosition.y, position.y, 0.05f);
+    EXPECT_NEAR(measuredPosition.z, position.z, 0.05f);
+
+    EXPECT_NEAR(finalPosition.x, position.x, 0.05f);
+    EXPECT_NEAR(finalPosition.y, position.y, 0.05f);
+    EXPECT_NEAR(finalPosition.z, position.z, 0.05f);
+}
+
+TEST(InertialModel, ManyTargetVelocities) {
+    TestSystem testSystem("/", System::kProgramBitness);
+
+    const glm::vec3 firstVelocity (1.0f, 1.0f, 1.0f);
+    const glm::vec3 secondVelocity (-1.0f, -1.0f, -1.0f);
+    const glm::vec3 finalPosition (0.7f, 0.8f, 0.9f);
+
+    InertialModel inertialModel;
+    inertialModel.setCurrentTime(0UL);
+    inertialModel.setTargetPosition(finalPosition, PHYSICAL_INTERPOLATION_STEP);
+
+    for (int i = 0; i < 990; i++) {
+        inertialModel.setCurrentTime(i * 50000000UL);
+        inertialModel.setTargetVelocity(
+                ((i % 1) == 0) ? secondVelocity : firstVelocity,
+                PHYSICAL_INTERPOLATION_SMOOTH);
+    }
+
+    inertialModel.setTargetVelocity(glm::vec3(0.0f), PHYSICAL_INTERPOLATION_SMOOTH);
+    inertialModel.setCurrentTime(1000UL * 50000000UL);
+
+    glm::vec3 position = inertialModel.getPosition();
+    glm::vec3 velocity = inertialModel.getVelocity();
+
+    EXPECT_NEAR(0.0f, velocity.x, 0.000001f);
+    EXPECT_NEAR(0.0f, velocity.y, 0.000001f);
+    EXPECT_NEAR(0.0f, velocity.z, 0.000001f);
+
+    inertialModel.setTargetPosition(finalPosition, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    constexpr uint64_t step = 5000UL;
+    constexpr float timeIncrement = step / 1000000000.f;
+    uint64_t time = 50000000UL * 1000UL + (step >> 1);
+    for (; time < 50000000UL * 1000UL + 1000000000UL; time += step) {
+        inertialModel.setCurrentTime(time);
+        velocity += timeIncrement * inertialModel.getAcceleration();
+        position += timeIncrement * velocity;
+    }
+
+    const glm::vec3 measuredPosition = inertialModel.getPosition();
+
+    EXPECT_NEAR(measuredPosition.x, position.x, 0.05f);
+    EXPECT_NEAR(measuredPosition.y, position.y, 0.05f);
+    EXPECT_NEAR(measuredPosition.z, position.z, 0.05f);
+
+    EXPECT_NEAR(finalPosition.x, position.x, 0.05f);
+    EXPECT_NEAR(finalPosition.y, position.y, 0.05f);
+    EXPECT_NEAR(finalPosition.z, position.z, 0.05f);
+
+    const glm::vec3 measuredVelocity = inertialModel.getVelocity();
+
+    EXPECT_NEAR(measuredVelocity.x, velocity.x, 0.01f);
+    EXPECT_NEAR(measuredVelocity.y, velocity.y, 0.01f);
+    EXPECT_NEAR(measuredVelocity.z, velocity.z, 0.01f);
+
+    EXPECT_NEAR(0.0f, measuredVelocity.x, 0.000001f);
+    EXPECT_NEAR(0.0f, measuredVelocity.y, 0.000001f);
+    EXPECT_NEAR(0.0f, measuredVelocity.z, 0.000001f);
+}
