@@ -81,5 +81,7 @@ bool isComplete(const Operation& op) {
 
 bool isBufferZeroed(const void* ptr, int32_t size);
 
+constexpr int32_t kDefaultPageSize = 4096;
+
 }  // namespace snapshot
 }  // namespace android

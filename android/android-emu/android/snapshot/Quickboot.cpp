@@ -23,6 +23,8 @@
 #include "android/metrics/MetricsReporter.h"
 #include "android/metrics/proto/studio_stats.pb.h"
 #include "android/opengl/emugl_config.h"
+#include "android/snapshot/Loader.h"
+#include "android/snapshot/Saver.h"
 #include "android/snapshot/Snapshotter.h"
 #include "android/snapshot/TextureLoader.h"
 #include "android/snapshot/TextureSaver.h"
