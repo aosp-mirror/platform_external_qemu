@@ -11,9 +11,16 @@
 
 #include "android/snapshot/RamSaver.h"
 
+#include "android/base/Stopwatch.h"
 #include "android/base/files/MemStream.h"
 #include "android/base/files/preadwrite.h"
+#include "android/base/memory/OnDemand.h"
+#include "android/base/misc/FileUtils.h"
 #include "android/base/system/System.h"
+#include "android/snapshot/RamLoader.h"
+#include "android/utils/debug.h"
+
+#include "MurmurHash3.h"
 
 #include <algorithm>
 #include <cassert>
@@ -26,29 +33,94 @@ namespace snapshot {
 using android::base::MemStream;
 using android::base::System;
 
+using StatAction = IncrementalStats::Action;
+using StatTime = IncrementalStats::Time;
+
 void RamSaver::FileIndex::clear() {
     decltype(blocks)().swap(blocks);
 }
 
-RamSaver::RamSaver(base::StdioStream&& stream, Flags flags)
-    : mStream(std::move(stream)),
-      mStreamFd(fileno(mStream.get())),
-      mFlags(flags) {
-    // Put a placeholder for the index offset right now.
-    mStream.putBe64(0);
+RamSaver::RamSaver(const std::string& fileName,
+                   Flags preferredFlags,
+                   RamLoader* loader,
+                   bool isOnExit)
+    : mStream(nullptr) {
+    bool incremental = false;
+    if (loader) {
+        // check if we're ok to proceed with incremental saving
+        auto currentGaps = loader->releaseGapTracker();
+        assert(currentGaps);
+        const auto wastedSpace = currentGaps->wastedSpace();
+        if (wastedSpace <= loader->diskSize() * 0.30) {
+            incremental = true;
+            if (isOnExit) {
+                loader->interrupt();
+            } else {
+                loader->join();
+            }
+            mGaps = std::move(currentGaps);
+        } else {
+            loader->join();
+        }
+        VERBOSE_PRINT(snapshot,
+                      "%s incremental RAM saving (currently wasting %llu"
+                      " bytes of %llu bytes (%.2f%%)",
+                      incremental ? "Enabled" : "Disabled",
+                      (unsigned long long)wastedSpace,
+                      (unsigned long long)loader->diskSize(),
+                      wastedSpace * 100.0 / loader->diskSize());
+    }
+
+    if (incremental) {
+        mFlags = loader->compressed() ? RamSaver::Flags::Compress
+                                      : RamSaver::Flags::None;
+        mLoader = loader;
+        mLoaderOnDemand = loader->onDemandEnabled();
+        mStream = base::StdioStream(fopen(fileName.c_str(), "rb+"),
+                                    base::StdioStream::kOwner);
+        if (mStream.get()) {
+            // Seek to the old index position and start overwriting from there.
+            fseeko64(mStream.get(), loader->indexOffset(), SEEK_SET);
+            mCurrentStreamPos = loader->indexOffset();
+        }
+    } else {
+        mFlags = preferredFlags;
+        mStream = base::StdioStream(fopen(fileName.c_str(), "wb"),
+                                    base::StdioStream::kOwner);
+        if (mStream.get()) {
+            // Put a placeholder for the index offset right now.
+            mStream.putBe64(0);
+        }
+    }
+
+    if (!mStream.get()) {
+        mHasError = true;
+        return;
+    }
+
+    mStreamFd = fileno(mStream.get());
+
     if (nonzero(mFlags & Flags::Compress)) {
         mIndex.flags |= int32_t(FileIndex::Flags::CompressedPages);
-        mCompressor.emplace(
-                [this](QueuedPageInfo&& pi, const uint8_t* data, int32_t size) {
-                    writePage(pi, data, size);
-                });
+
+        auto compressBuffers = new CompressBuffer[kCompressBufferCount];
+        mCompressBufferMemory.reset(compressBuffers);
+        mCompressBuffers.emplace(compressBuffers,
+                                 compressBuffers + kCompressBufferCount);
     }
-    if (nonzero(mFlags & Flags::Async)) {
-        mSavingWorker.emplace([this](QueuedPageInfo&& pi) {
-            return savePageInWorker(std::move(pi));
-        });
-        mSavingWorker->start();
-    }
+
+    mWorkers.emplace(
+            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 6)),
+            [this](QueuedPageInfo&& pi) { handlePageSave(std::move(pi)); });
+    mWorkers->start();
+    mWriter.emplace([this](WriteInfo&& wi) {
+        if (!wi.page) {
+            return base::WorkerProcessingResult::Stop;
+        }
+        writePage(std::move(wi));
+        return base::WorkerProcessingResult::Continue;
+    });
+    mWriter->start();
 }
 
 RamSaver::~RamSaver() {
@@ -62,6 +134,13 @@ void RamSaver::registerBlock(const RamBlock& block) {
 void RamSaver::savePage(int64_t blockOffset,
                         int64_t /*pageOffset*/,
                         int32_t /*pageSize*/) {
+    if (mLastBlockIndex < 0) {
+        mLastBlockIndex = 0;
+#if SNAPSHOT_PROFILE > 1
+        printf("From ctor to first savePage: %.03f\n",
+               (mSystem->getHighResTimeUs() - mStartTime) / 1000.0);
+#endif
+    }
     assert(!mIndex.blocks.empty());
     assert(mLastBlockIndex >= 0 && mLastBlockIndex < int(mIndex.blocks.size()));
     if (blockOffset !=
@@ -83,10 +162,15 @@ void RamSaver::savePage(int64_t blockOffset,
         assert(ramBlock.totalSize % ramBlock.pageSize == 0);
         auto numPages = int32_t(ramBlock.totalSize / ramBlock.pageSize);
         mIndex.blocks[size_t(mLastBlockIndex)].pages.resize(size_t(numPages));
+        mIndex.totalPages += numPages;
         for (int32_t i = 0; i != numPages; ++i) {
             passToSaveHandler({mLastBlockIndex, i});
         }
     }
+}
+
+void RamSaver::complete() {
+    mWorkers->done();
 }
 
 static constexpr int kStopMarkerIndex = -1;
@@ -96,83 +180,176 @@ void RamSaver::join() {
         return;
     }
     passToSaveHandler({kStopMarkerIndex, 0});
-    mSavingWorker.clear();
     mJoined = true;
     mIndex.clear();
 }
 
-void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
-    if (mSavingWorker) {
-        mSavingWorker->enqueue(std::move(pi));
-    } else {
-        handlePageSave(std::move(pi));
-    }
+void RamSaver::calcHash(FileIndex::Block::Page& page,
+                        const FileIndex::Block& block,
+                        const void* ptr) {
+    mIncStats.measure(StatTime::Hashing, [&] {
+        MurmurHash3_x64_128(ptr, block.ramBlock.pageSize, 0, page.hash.data());
+        page.hashFilled = true;
+    });
 }
 
-bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
-    if (pi.blockIndex == kStopMarkerIndex) {
-        mCompressor.clear();
-        mIndex.startPosInFile =
-                mCurrentStreamPos.load(std::memory_order_relaxed);
-        fseeko64(mStream.get(), mIndex.startPosInFile, SEEK_SET);
+void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
+    if (pi.blockIndex != kStopMarkerIndex) {
+        mIncStats.count(StatAction::TotalPages);
+
+        // short-cirquit the fastest cases right here.
+        if (mLoader && mLoaderOnDemand) {
+            FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
+            const RamLoader::Page* loaderPage = mLoader->findPage(
+                    pi.blockIndex, block.ramBlock.id, pi.pageIndex);
+            if (loaderPage &&
+                loaderPage->state.load(std::memory_order_relaxed) <
+                        int(RamLoader::State::Filled)) {
+                // not loaded yet: definitely not changed
+                mIncStats.count(StatAction::SamePage);
+                mIncStats.count(StatAction::NotLoadedPage);
+                FileIndex::Block::Page& page =
+                        block.pages[size_t(pi.pageIndex)];
+                page.same = true;
+                page.filePos = loaderPage->filePos;
+                page.sizeOnDisk = loaderPage->sizeOnDisk;
+                if (page.sizeOnDisk) {
+                    if (mLoader->version() >= 2) {
+                        page.hash = loaderPage->hash;
+                        page.hashFilled = true;
+                    } else {
+                        const auto ptr =
+                                block.ramBlock.hostPtr +
+                                int64_t(pi.pageIndex) * block.ramBlock.pageSize;
+                        calcHash(page, block, ptr);
+                    }
+                }
+                return;
+            }
+        }
+        mWorkers->enqueue(std::move(pi));
+    } else {
+        mWorkers.clear();
+        mWriter->enqueue({});
+        mWriter.clear();
+        mIndex.startPosInFile = mCurrentStreamPos;
         writeIndex();
 
-        mHasError = ferror(mStream.get()) != 0;
         mIndex.clear();
 
         mEndTime = System::get()->getHighResTimeUs();
 
 #if SNAPSHOT_PROFILE > 1
-        printf("RAM saving time: %.03f\n",
-               (mEndTime - mStartTime) / 1000.0);
+        printf("RAM saving time: %.03f\n", (mEndTime - mStartTime) / 1000.0);
 #endif
-        return false;
     }
+}
+
+bool RamSaver::handlePageSave(QueuedPageInfo&& pi) {
+    assert(pi.blockIndex != kStopMarkerIndex);
 
     FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
     FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
-    ++mIndex.totalPages;
 
     auto ptr = block.ramBlock.hostPtr +
                int64_t(pi.pageIndex) * block.ramBlock.pageSize;
-    if (isBufferZeroed(ptr, block.ramBlock.pageSize)) {
-        page.sizeOnDisk = 0;
+    auto isZeroed = base::makeOnDemand<bool>([&] {
+        return std::make_tuple(mIncStats.measure(StatTime::ZeroCheck, [&] {
+            return isBufferZeroed(ptr, block.ramBlock.pageSize);
+        }));
+    });
+    page.filePos = 0;
+    page.same = false;
+    page.hashFilled = false;
+    const RamLoader::Page* loaderPage = nullptr;
+    if (mLoader) {
+        loaderPage = mLoader->findPage(pi.blockIndex, block.ramBlock.id,
+                                       pi.pageIndex);
+        assert(loaderPage);
+        if (loaderPage->zeroed()) {
+            if (*isZeroed) {
+                mIncStats.count(StatAction::StillZeroPage);
+                page.same = true;
+                page.sizeOnDisk = 0;
+            }
+        } else if (mLoader->version() >= 2) {
+            calcHash(page, block, ptr);
+            if (page.hash == loaderPage->hash) {
+                mIncStats.count(StatAction::SameHashPage);
+                page.same = true;
+                page.filePos = loaderPage->filePos;
+                page.sizeOnDisk = loaderPage->sizeOnDisk;
+            }
+        }
+    }
+    if (page.same) {
+        mIncStats.count(StatAction::SamePage);
     } else {
-        if (mCompressor) {
-            mCompressor->enqueue(std::move(pi), ptr, block.ramBlock.pageSize);
+        mIncStats.count(StatAction::ChangedPage);
+        if (*isZeroed) {
+            mIncStats.count(StatAction::NewZeroPage);
+            page.sizeOnDisk = 0;
+            if (loaderPage) {
+                mIncStats.measure(StatTime::GapTrackingWorker, [&] {
+                    mGaps->add(loaderPage->filePos, loaderPage->sizeOnDisk);
+                });
+            }
         } else {
-            writePage(pi, ptr, block.ramBlock.pageSize);
+            if (!page.hashFilled) {
+                calcHash(page, block, ptr);
+            }
+
+            WriteInfo wi = {&page, ptr, false};
+            if (!compressed()) {
+                page.sizeOnDisk = block.ramBlock.pageSize;
+            } else {
+                auto buffer = mCompressBuffers->allocate();
+                auto compressedSize =
+                        mIncStats.measure(StatTime::Compressing, [&] {
+                            return compress::compress(
+                                    ptr, block.ramBlock.pageSize,
+                                    buffer->data(), buffer->size());
+                        });
+                assert(compressedSize > 0);
+                if (compressedSize >= block.ramBlock.pageSize) {
+                    // Screw this, the page is better off uncompressed.
+                    page.sizeOnDisk = block.ramBlock.pageSize;
+                    mCompressBuffers->release(buffer);
+                } else {
+                    page.sizeOnDisk = compressedSize;
+                    wi.ptr = buffer->data();
+                    wi.allocated = true;
+                }
+            }
+
+            if (loaderPage) {
+                if (page.sizeOnDisk <= loaderPage->sizeOnDisk) {
+                    page.filePos = loaderPage->filePos;
+                    mIncStats.count(StatAction::ReusedPos);
+                    if (page.sizeOnDisk < loaderPage->sizeOnDisk) {
+                        mIncStats.measure(StatTime::GapTrackingWorker, [&] {
+                            mGaps->add(
+                                    loaderPage->filePos + page.sizeOnDisk,
+                                    loaderPage->sizeOnDisk - page.sizeOnDisk);
+                        });
+                    }
+                } else if (!loaderPage->zeroed()) {
+                    mIncStats.measure(StatTime::GapTrackingWorker, [&] {
+                        mGaps->add(loaderPage->filePos, loaderPage->sizeOnDisk);
+                    });
+                }
+            }
+            mWriter->enqueue(std::move(wi));
         }
     }
 
     return true;
 }
 
-base::WorkerProcessingResult RamSaver::savePageInWorker(QueuedPageInfo&& pi) {
-    if (handlePageSave(std::move(pi))) {
-        return base::WorkerProcessingResult::Continue;
-    }
-    return base::WorkerProcessingResult::Stop;
-}
-
-// Write a (usually) small delta between two numbers to the |stream|. Use the
-// lowest bit as a marker for a negative number.
-static void putDelta(base::Stream* stream, int64_t delta) {
-    if (delta >= 0) {
-        assert((uint64_t(delta) & (1ULL << 63)) == 0);
-        stream->putPackedNum(uint64_t(delta) << 1);
-    } else {
-        assert((uint64_t(-delta) & (1ULL << 63)) == 0);
-        stream->putPackedNum((uint64_t(-delta) << 1) | 1);
-    }
-}
-
 void RamSaver::writeIndex() {
-#if SNAPSHOT_PROFILE > 1
     auto start = mIndex.startPosInFile;
-#endif
 
-    MemStream stream(512 + 2 * mIndex.totalPages);
+    MemStream stream(512 + 16 * mIndex.totalPages);
     bool compressed = (mIndex.flags & int(IndexFlags::CompressedPages)) != 0;
     stream.putBe32(uint32_t(mIndex.version));
     stream.putBe32(uint32_t(mIndex.flags));
@@ -188,7 +365,7 @@ void RamSaver::writeIndex() {
             stream.putPackedNum(uint64_t(
                     compressed ? page.sizeOnDisk
                                : (page.sizeOnDisk / b.ramBlock.pageSize)));
-            if (page.sizeOnDisk) {
+            if (!page.zeroed()) {
                 auto deltaPos = page.filePos - prevFilePos;
                 if (compressed) {
                     deltaPos -= prevPageSizeOnDisk;
@@ -196,32 +373,62 @@ void RamSaver::writeIndex() {
                     assert(deltaPos % b.ramBlock.pageSize == 0);
                     deltaPos /= b.ramBlock.pageSize;
                 }
-                putDelta(&stream, deltaPos);
+                stream.putPackedSignedNum(deltaPos);
+                assert(page.hashFilled);
+                stream.write(page.hash.data(), page.hash.size());
                 prevFilePos = page.filePos;
                 prevPageSizeOnDisk = page.sizeOnDisk;
             }
         }
     }
-    auto end = ftello64(mStream.get()) + stream.writtenSize();
-    mDiskSize = uint64_t(end);
-#if SNAPSHOT_PROFILE > 1
-    printf("RAM: index size: %d bytes\n", int(end - start));
-#endif
 
-    mStream.write(stream.buffer().data(), stream.buffer().size());
-    fseeko64(mStream.get(), 0, SEEK_SET);
-    mStream.putBe64(uint64_t(mIndex.startPosInFile));
+    mIncStats.measure(StatTime::GapTrackingWriter, [&] {
+        incremental() ? mGaps->save(stream) : OneSizeGapTracker().save(stream);
+    });
+
+    auto end = mIncStats.measure(StatTime::Disk, [&] {
+        auto end = mIndex.startPosInFile + stream.writtenSize();
+        mDiskSize = uint64_t(end);
+
+        base::pwrite(mStreamFd, stream.buffer().data(), stream.buffer().size(),
+                     mIndex.startPosInFile);
+        setFileSize(mStreamFd, int64_t(mDiskSize));
+        fseeko64(mStream.get(), 0, SEEK_SET);
+        mStream.putBe64(uint64_t(mIndex.startPosInFile));
+        mHasError = ferror(mStream.get()) != 0;
+        mStream.close();
+        return end;
+    });
+
+    auto bytesWasted = incremental() ? mGaps->wastedSpace() : 0;
+    mIncStats.print(
+            "RAM: index %d, total %lld bytes, wasted %d (compressed: %s)\n",
+            int(end - start), (long long)mDiskSize, int(bytesWasted),
+            compressed ? "yes" : "no");
 }
 
-void RamSaver::writePage(const QueuedPageInfo& pi,
-                         const void* dataPtr,
-                         int32_t dataSize) {
-    FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
-    FileIndex::Block::Page& page = block.pages[size_t(pi.pageIndex)];
-    page.sizeOnDisk = dataSize;
-    page.filePos =
-            mCurrentStreamPos.fetch_add(dataSize, std::memory_order_relaxed);
-    base::pwrite(mStreamFd, dataPtr, size_t(dataSize), page.filePos);
+void RamSaver::writePage(WriteInfo&& wi) {
+    if (incremental() && wi.page->filePos == 0) {
+        if (auto gapPos = mIncStats.measure(StatTime::GapTrackingWriter, [&] {
+                return mGaps->allocate(wi.page->sizeOnDisk);
+            })) {
+            wi.page->filePos = *gapPos;
+            mIncStats.count(StatAction::ReusedPos);
+        }
+    }
+    if (wi.page->filePos == 0) {
+        wi.page->filePos = mCurrentStreamPos;
+        mCurrentStreamPos += wi.page->sizeOnDisk;
+        mIncStats.count(StatAction::AppendedPos);
+    }
+
+    mIncStats.measure(StatTime::Disk, [&] {
+        base::pwrite(mStreamFd, wi.ptr, size_t(wi.page->sizeOnDisk),
+                     wi.page->filePos);
+    });
+    if (wi.allocated) {
+        mCompressBuffers->release((CompressBuffer*)wi.ptr);
+    }
 }
 
 }  // namespace snapshot

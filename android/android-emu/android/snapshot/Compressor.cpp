@@ -16,24 +16,31 @@
 #include "lz4.h"
 
 #include <algorithm>
+#include <cassert>
 #include <utility>
 
 namespace android {
 namespace snapshot {
 
-int CompressorBase::workerCount() {
+namespace compress {
+
+int workerCount() {
     return std::max(2, std::min(4, base::System::get()->getCpuCoreCount() - 1));
 }
 
-std::pair<uint8_t*, int32_t> CompressorBase::compress(const uint8_t* data,
-                                                      int32_t size) {
-    auto outSize = LZ4_COMPRESSBOUND(size);
-    auto out = new uint8_t[size_t(outSize)];
+int32_t compress(const uint8_t* data,
+                 int32_t size,
+                 uint8_t* out,
+                 int32_t outSize) {
+    assert(out);
+    assert(outSize >= maxCompressedSize(size));
     int32_t compressedSize =
             LZ4_compress_fast(reinterpret_cast<const char*>(data),
                               reinterpret_cast<char*>(out), size, outSize, 1);
-    return {out, compressedSize};
+    return compressedSize;
 }
+
+}  // namespace compress
 
 }  // namespace snapshot
 }  // namespace android

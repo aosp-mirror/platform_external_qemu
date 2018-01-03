@@ -44,7 +44,7 @@ public:
     virtual bool hasError() const = 0;
     virtual uint64_t diskSize() const = 0;
     virtual bool compressed() const = 0;
-    virtual bool getDuration(base::System::Duration* duration) = 0;
+    virtual void join() = 0;
 };
 
 class TextureLoader final : public ITextureLoader {
@@ -61,7 +61,7 @@ public:
         mLoaderThread = std::move(thread);
     }
 
-    void join() {
+    void join() override {
         if (mLoaderThread) {
             mLoaderThread->wait();
             mLoaderThread.reset();
