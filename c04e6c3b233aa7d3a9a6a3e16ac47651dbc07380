@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9dc54aea_dd0b7dae",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-03T10:34:54Z",
+      "side": 1,
+      "message": "(this is not to be done in this CL or any near future one, just thinking out loud)",
+      "parentUuid": "2d07ae95_f613b2ce",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 229,
+        "endChar": 24
+      },
+      "revId": "c04e6c3b233aa7d3a9a6a3e16ac47651dbc07380",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "03d88789_e759a669",
         "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
         "patchSetId": 12
