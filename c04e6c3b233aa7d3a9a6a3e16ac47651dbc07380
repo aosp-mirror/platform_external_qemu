@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "869d1fe2_ec178d1a",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T20:11:15Z",
+      "side": 1,
+      "message": "it call can be done via the |mIncStats|, but yeah, not now",
+      "parentUuid": "9dc54aea_dd0b7dae",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 229,
+        "endChar": 24
+      },
+      "revId": "c04e6c3b233aa7d3a9a6a3e16ac47651dbc07380",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "03d88789_e759a669",
         "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
         "patchSetId": 12
@@ -60,6 +84,30 @@
       "writtenOn": "2018-01-03T10:23:15Z",
       "side": 1,
       "message": "Please move the format string to the incremental stats class, and replace this with something simpler like mIncStats.report()",
+      "range": {
+        "startLine": 399,
+        "startChar": 0,
+        "endLine": 408,
+        "endChar": 39
+      },
+      "revId": "c04e6c3b233aa7d3a9a6a3e16ac47651dbc07380",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c6dd814c_01bd5c0b",
+        "filename": "android/android-emu/android/snapshot/RamSaver.cpp",
+        "patchSetId": 12
+      },
+      "lineNbr": 408,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T20:11:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "03d88789_e759a669",
       "range": {
         "startLine": 399,
         "startChar": 0,
