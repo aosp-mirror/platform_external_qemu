@@ -36,8 +36,7 @@
 static constexpr int kEventBufferSize = 8;
 
 EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
-    : mEmulatorWindow(window),
-      mMessages([this] { return std::make_tuple(this); }) {
+    : mEmulatorWindow(window), mMessages(this) {
     mEventBuffer.reserve(kEventBufferSize);
     setFrameShape(QFrame::NoFrame);
     setWidget(window);
@@ -185,9 +184,7 @@ void EmulatorContainer::focusInEvent(QFocusEvent* event) {
     if (mModalOverlay) {
         mModalOverlay->raise();
     }
-    if (mMessages.hasInstance()) {
-        mMessages->raise();
-    }
+    mMessages.ifExists([this] { mMessages->raise(); });
     if (mEmulatorWindow->isInZoomMode()) {
         mEmulatorWindow->showZoomIfNotUserHidden();
     }
@@ -286,9 +283,7 @@ void EmulatorContainer::showEvent(QShowEvent* event) {
         if (mModalOverlay) {
             mModalOverlay->showNormal();
         }
-        if (mMessages.hasInstance()) {
-            mMessages->showNormal();
-        }
+        mMessages.ifExists([&] { mMessages->showNormal(); });
     }
 }
 
