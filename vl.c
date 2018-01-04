@@ -990,6 +990,7 @@ static int create_qcow2_images(void) {
     const char* const image_paths_hw_arc[] = {
         android_hw->disk_systemPartition_initPath,
         android_hw->disk_vendorPartition_initPath,
+        android_hw->disk_dataPartition_path,
     };
     int count = ARRAY_SIZE(image_paths);
     const char* const * images = image_paths;
