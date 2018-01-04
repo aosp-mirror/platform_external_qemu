@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26587812_0ebfb5c3",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T20:29:51Z",
+      "side": 1,
+      "message": "nit: curious why did you remove the AutoLock here",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 36
+      },
+      "revId": "b7d118b852cdc76d9f53d8932629aab493eb1e74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f826b97c_4f3a2d94",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 490,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T20:29:51Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 490,
+        "startChar": 0,
+        "endLine": 490,
+        "endChar": 38
+      },
+      "revId": "b7d118b852cdc76d9f53d8932629aab493eb1e74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
