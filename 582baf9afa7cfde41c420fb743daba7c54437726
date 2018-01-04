@@ -22,6 +22,30 @@
       "revId": "582baf9afa7cfde41c420fb743daba7c54437726",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a7bb20d8_b3253a41",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 715,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-01-04T20:35:36Z",
+      "side": 0,
+      "message": "The caller should destroy it.",
+      "parentUuid": "9965a254_16ac5c9a",
+      "range": {
+        "startLine": 715,
+        "startChar": 8,
+        "endLine": 715,
+        "endChar": 23
+      },
+      "revId": "582baf9afa7cfde41c420fb743daba7c54437726",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }

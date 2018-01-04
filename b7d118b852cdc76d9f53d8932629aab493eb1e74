@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ed3900f5_cb0a3633",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-01-04T20:35:36Z",
+      "side": 1,
+      "message": "No difference, I prefer using explicit calls, as I did in the video player case.",
+      "parentUuid": "26587812_0ebfb5c3",
+      "range": {
+        "startLine": 225,
+        "startChar": 0,
+        "endLine": 230,
+        "endChar": 36
+      },
+      "revId": "b7d118b852cdc76d9f53d8932629aab493eb1e74",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f826b97c_4f3a2d94",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 2
