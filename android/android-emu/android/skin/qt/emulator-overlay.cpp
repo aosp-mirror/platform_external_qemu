@@ -39,8 +39,8 @@ EmulatorOverlay::EmulatorOverlay(EmulatorQtWindow* window,
     : QFrame(container),
       mEmulatorWindow(window),
       mContainer(container),
-      mRubberBand([this] { return std::make_tuple(QRubberBand::Rectangle, this); }),
-      mZoomCursor([this] { return std::make_tuple(":/cursor/zoom_cursor"); }),
+      mRubberBand(QRubberBand::Rectangle, this),
+      mZoomCursor(":/cursor/zoom_cursor"),
       mMultitouchResources([this] {
           float dpr = devicePixelRatioF();
           if (dpr >= 1.5f) {
@@ -96,9 +96,7 @@ void EmulatorOverlay::focusOutEvent(QFocusEvent* event) {
 }
 
 void EmulatorOverlay::hideEvent(QHideEvent* event) {
-    if (mRubberBand.hasInstance()) {
-        mRubberBand->hide();
-    }
+    mRubberBand.ifExists([&] { mRubberBand->hide(); });
 }
 
 void EmulatorOverlay::keyPressEvent(QKeyEvent* event) {

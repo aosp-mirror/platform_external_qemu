@@ -97,7 +97,7 @@ private:
                             const QString& touchImgPath,
                             float dpr);
         QImage centerImage;
-        QImage touchImage;;
+        QImage touchImage;
         int centerImageRadius;
         int touchImageRadius;
     };

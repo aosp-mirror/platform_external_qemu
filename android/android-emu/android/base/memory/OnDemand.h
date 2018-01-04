@@ -60,8 +60,15 @@
 //
 //  // Initialize |i| to 10 on first use:
 //  auto i = makeOnDemand<int>(10);
-//  // Initialize |i| to 10000th prime on first use:
-//  auto i = makeOnDemand<int>([]{ return std::make_tuple(calc10000thPrime()); });
+//  // Initialize |i| to 1000th prime on first use:
+//  auto i = makeOnDemand<int>([]{ return std::make_tuple(calc1000thPrime(); });
+//  // Or simpler:
+//  auto i = makeOnDemand<int>([]{ return calc10000thPrime(); });
+//  });
+//  // Perform some operation only if the on demand object has already been
+//  // created.
+//  i.ifExists([](int& val) { val += 10; });
+//
 //  // Create a complex object with tons of parameters:
 //  auto obj = makeOnDemand<QWindow>([app, text] {
 //          return std::make_tuple(app, translate(text));
@@ -110,6 +117,20 @@ struct TupleHolder {
     std::tuple<Args...>&& operator()() { return std::move(args); }
 };
 
+// A convenience class for the user to be able to return a single constructor
+// argument without wrapping it into a tuple.
+template <class Callable>
+struct TupleCreator {
+    mutable Callable mCallable;
+    using ReturnT = decltype(std::declval<Callable>()());
+
+    TupleCreator(Callable&& c) : mCallable(std::move(c)) {}
+
+    std::tuple<ReturnT> operator()() const {
+        return std::make_tuple(mCallable());
+    }
+};
+
 struct OnDemandState {
     bool inNoObjectState() const { return !mConstructed; }
     bool needConstruction() { return !mConstructed; }
@@ -131,8 +152,6 @@ public:
     OnDemand(CtorArgsGetter&& argsGetter)
         : mCtorArgsGetter(std::move(argsGetter)) {}
 
-    ~OnDemand() { clear(); }
-
     OnDemand(OnDemand&& other)
         : mCtorArgsGetter(std::move(other.mCtorArgsGetter)) {
         if (other.hasInstance()) {
@@ -141,6 +160,33 @@ public:
             other.clear();
         }
     }
+
+    template <class CompatibleArgsGetter,
+              class = enable_if_c<!is_template_instantiation_of<
+                      decltype(std::declval<CompatibleArgsGetter>()()),
+                      std::tuple>::value>>
+    OnDemand(CompatibleArgsGetter&& argsGetter)
+        : OnDemand(CtorArgsGetter([argsGetter = std::move(argsGetter)] {
+              return std::make_tuple(argsGetter());
+          })) {}
+
+    template <class Arg0,
+              class = enable_if_c<!is_callable_with_args<Arg0, void()>::value>>
+    OnDemand(Arg0&& arg0, void* = nullptr)
+        : OnDemand(CtorArgsGetter([arg0 = std::forward<Arg0>(arg0)] {
+              return std::make_tuple(arg0);
+          })) {}
+
+    template <class Arg0, class Arg1, class... Args>
+    OnDemand(Arg0&& arg0, Arg1&& arg1, Args&&... args)
+        : OnDemand(CtorArgsGetter(
+                  [res = std::make_tuple(std::forward<Arg0>(arg0),
+                                         std::forward<Arg1>(arg1),
+                                         std::forward<Args>(args)...)] {
+                      return res;
+                  })) {}
+
+    ~OnDemand() { clear(); }
 
     bool hasInstance() const { return !mState.inNoObjectState(); }
 
@@ -169,6 +215,20 @@ public:
         if (mState.needDestruction()) {
             asT()->~T();
             mState.doneDestroying();
+        }
+    }
+
+    template <class Func, class = enable_if<is_callable_as<Func, void(T&)>>>
+    void ifExists(Func&& f) {
+        if (hasInstance()) {
+            f(*asT());
+        }
+    }
+
+    template <class Func, class = enable_if<is_callable_as<Func, void()>>>
+    void ifExists(Func&& f, void* = nullptr) {
+        if (hasInstance()) {
+            f();
         }
     }
 
@@ -222,9 +282,29 @@ using AtomicMemberOnDemandT = OnDemand<T,
 
 // makeOnDemand() - factory functions for simpler OnDemand<> object creation,
 //                  either from argument list or from a factory function.
+
+// SimpleArgsGetter() returns a single value which is the only constructor
+// argument for T.
 template <class T,
-          class ArgsGetter,
-          class = enable_if<is_callable_with_args<ArgsGetter, void()>>>
+          class SimpleArgsGetter,
+          class = enable_if_c<
+                  is_callable_with_args<SimpleArgsGetter, void()>::value &&
+                  !is_template_instantiation_of<
+                          decltype(std::declval<SimpleArgsGetter>()()),
+                          std::tuple>::value>>
+OnDemand<T, internal::TupleCreator<SimpleArgsGetter>> makeOnDemand(
+        SimpleArgsGetter&& getter) {
+    return {internal::TupleCreator<SimpleArgsGetter>(std::move(getter))};
+}
+
+// ArgsGetter() returns a tuple of constructor arguments for T.
+template <
+        class T,
+        class ArgsGetter,
+        class = enable_if_c<is_callable_with_args<ArgsGetter, void()>::value &&
+                            is_template_instantiation_of<
+                                    decltype(std::declval<ArgsGetter>()()),
+                                    std::tuple>::value>>
 OnDemand<T, ArgsGetter> makeOnDemand(ArgsGetter&& getter) {
     return {std::move(getter)};
 }

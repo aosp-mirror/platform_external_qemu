@@ -98,7 +98,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow([this] { return std::make_tuple(this); }),
+      mExtendedWindow(this),
       mVirtualSceneControlWindow(this, parent),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
@@ -263,9 +263,7 @@ void ToolWindow::stopExtendedWindowCreation() {
 void ToolWindow::hide() {
     QFrame::hide();
     mVirtualSceneControlWindow.hide();
-    if (mExtendedWindow.hasInstance()) {
-        mExtendedWindow.get()->hide();
-    }
+    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
 }
 
 void ToolWindow::closeEvent(QCloseEvent* ce) {
@@ -555,9 +553,7 @@ void ToolWindow::setToolEmuAgentEarly(const UiEmuAgent* agentPtr) {
 
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
     mVirtualSceneControlWindow.setAgent(agPtr);
-    if (mExtendedWindow.hasInstance()) {
-        mExtendedWindow.get()->setAgent(agPtr);
-    }
+    mExtendedWindow.ifExists([&] { mExtendedWindow.get()->setAgent(agPtr); });
 
     if (agPtr->clipboard) {
         connect(this, SIGNAL(guestClipboardChanged(QString)), this,

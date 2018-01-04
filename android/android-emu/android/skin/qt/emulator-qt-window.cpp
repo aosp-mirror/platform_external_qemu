@@ -282,7 +282,7 @@ void EmulatorQtWindow::create() {
 EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     : QFrame(parent),
       mLooper(android::qt::createLooper()),
-      mStartupDialog([this] { return std::make_tuple(this); }),
+      mStartupDialog(this),
       mToolWindow(nullptr),
       mContainer(this),
       mOverlay(this, &mContainer),
@@ -296,14 +296,13 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
       mSkinGapBottom(0),
       mSkinGapLeft(0),
       mMainLoopThread(nullptr),
-      mAvdWarningBox([this] {
-          return std::make_tuple(
-                  QMessageBox::Information, tr("Recommended AVD"),
-                  tr("Running an x86 based Android Virtual Device (AVD) is "
-                     "10x faster.<br/>"
-                     "We strongly recommend creating a new AVD."),
-                  QMessageBox::Ok, this);
-      }),
+      mAvdWarningBox(QMessageBox::Information,
+                     tr("Recommended AVD"),
+                     tr("Running an x86 based Android Virtual Device (AVD) is "
+                        "10x faster.<br/>"
+                        "We strongly recommend creating a new AVD."),
+                     QMessageBox::Ok,
+                     this),
       mGpuWarningBox([this] {
           return std::make_tuple(
                   QMessageBox::Information, tr("GPU Driver Issue"),
@@ -318,20 +317,20 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                                   globalGpuInfoList().dump())),
                   QMessageBox::Ok, this);
       }),
-      mAdbWarningBox([this] {
-          return std::make_tuple(QMessageBox::Warning, tr("Detected ADB"),
-                                 tr(""), QMessageBox::Ok, this);
-      }),
+      mAdbWarningBox(QMessageBox::Warning,
+                     tr("Detected ADB"),
+                     tr(""),
+                     QMessageBox::Ok,
+                     this),
       mEventLogger(
               std::make_shared<UIEventRecorder<android::base::CircularBuffer>>(
                       &mEventCapturer,
                       1000)),
       mUserActionsCounter(new android::qt::UserActionsCounter(&mEventCapturer)),
       mAdbInterface([this] {
-          return std::make_tuple(
-                  android::emulation::AdbInterface::create(mLooper));
+          return android::emulation::AdbInterface::create(mLooper);
       }),
-      mApkInstaller([this] { return std::make_tuple(mAdbInterface->get()); }),
+      mApkInstaller([this] { return mAdbInterface->get(); }),
       mFilePusher([this] {
           return std::make_tuple(
                   mAdbInterface->get(),
@@ -342,27 +341,25 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
                       adbPushProgress(progress, done);
                   });
       }),
-      mInstallDialog([this] {
-          return std::make_tuple(this, [this](QProgressDialog* dialog) {
-              dialog->setWindowTitle(tr("APK Installer"));
-              dialog->setLabelText(tr("Installing APK..."));
-              dialog->setRange(0, 0);  // Makes it a "busy" dialog
-              dialog->setModal(true);
-              dialog->close();
-              QObject::connect(dialog, SIGNAL(canceled()), this,
-                               SLOT(slot_installCanceled()));
-          });
-      }),
-      mPushDialog([this] {
-          return std::make_tuple(this, [this](QProgressDialog* dialog) {
-              dialog->setWindowTitle(tr("File Copy"));
-              dialog->setLabelText(tr("Copying files..."));
-              dialog->setRange(0, kPushProgressBarMax);
-              dialog->close();
-              QObject::connect(dialog, SIGNAL(canceled()), this,
-                               SLOT(slot_adbPushCanceled()));
-          });
-      }),
+      mInstallDialog(this,
+                     [this](QProgressDialog* dialog) {
+                         dialog->setWindowTitle(tr("APK Installer"));
+                         dialog->setLabelText(tr("Installing APK..."));
+                         dialog->setRange(0, 0);  // Makes it a "busy" dialog
+                         dialog->setModal(true);
+                         dialog->close();
+                         QObject::connect(dialog, SIGNAL(canceled()), this,
+                                          SLOT(slot_installCanceled()));
+                     }),
+      mPushDialog(this,
+                  [this](QProgressDialog* dialog) {
+                      dialog->setWindowTitle(tr("File Copy"));
+                      dialog->setLabelText(tr("Copying files..."));
+                      dialog->setRange(0, kPushProgressBarMax);
+                      dialog->close();
+                      QObject::connect(dialog, SIGNAL(canceled()), this,
+                                       SLOT(slot_adbPushCanceled()));
+                  }),
       mStartedAdbStopProcess(false),
       mHaveBeenFrameless(false) {
     qRegisterMetaType<QPainter::CompositionMode>();
@@ -616,10 +613,10 @@ EmulatorQtWindow::~EmulatorQtWindow() {
         mToolWindow = NULL;
     }
 
-    if (mStartupDialog.hasInstance()) {
+    mStartupDialog.ifExists([&] {
         mStartupDialog->hide();
         mStartupDialog.clear();
-    }
+    });
 
     AutoLock lock(mSnapshotStateLock);
     mShouldShowSnapshotModalOverlay = false;
@@ -776,10 +773,10 @@ void EmulatorQtWindow::closeEvent(QCloseEvent* event) {
     // forever.
     mStartupTimer.stop();
     mStartupTimer.disconnect();
-    if (mStartupDialog.hasInstance()) {
+    mStartupDialog.ifExists([&] {
         mStartupDialog->hide();
         mStartupDialog.clear();
-    }
+    });
 
     if (mMainLoopThread && mMainLoopThread->isRunning()) {
         if (!alreadyClosed) {
