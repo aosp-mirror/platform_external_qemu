@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2c90ef2e_7947b863",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe_unittest.cpp",
+        "patchSetId": 10
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T21:36:56Z",
+      "side": 1,
+      "message": "could you please explain in a comment here why there are so many disabled tests and what should one do to re-enable those?",
+      "range": {
+        "startLine": 167,
+        "startChar": 19,
+        "endLine": 167,
+        "endChar": 42
+      },
+      "revId": "1ae7ed7b1ad4101bff68a8bb89e7231711966064",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
