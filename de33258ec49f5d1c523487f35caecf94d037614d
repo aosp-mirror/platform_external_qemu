@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "219004d7_a2eea4c0",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T18:05:28Z",
+      "side": 1,
+      "message": "instead of making it a pointer, please change the create() function to use new for the whole ffmpeg_recorder struct (and delete to free it)\nmalloc didn\u0027t call the lock\u0027s constructor and that\u0027s why it wasn\u0027t working",
+      "range": {
+        "startLine": 143,
+        "startChar": 32,
+        "endLine": 143,
+        "endChar": 46
+      },
+      "revId": "de33258ec49f5d1c523487f35caecf94d037614d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0565a3f1_7072d65b",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 379,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T18:05:28Z",
+      "side": 1,
+      "message": "please remove the commented code",
+      "range": {
+        "startLine": 379,
+        "startChar": 0,
+        "endLine": 379,
+        "endChar": 71
+      },
+      "revId": "de33258ec49f5d1c523487f35caecf94d037614d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
