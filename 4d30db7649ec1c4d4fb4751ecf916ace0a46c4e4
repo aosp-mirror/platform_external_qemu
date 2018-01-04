@@ -22,6 +22,30 @@
       "revId": "4d30db7649ec1c4d4fb4751ecf916ace0a46c4e4",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5eec79f1_24628a50",
+        "filename": "android/android-emu/android/snapshot/IncrementalStats.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T02:28:50Z",
+      "side": 1,
+      "message": "Yeah, I agree totally. Will move all logic here - it took me quite a while to print the message correctly, and I\u0027m sure it will take as much or longer when adding more times/actions",
+      "parentUuid": "8cc62444_2151ddc9",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 6
+      },
+      "revId": "4d30db7649ec1c4d4fb4751ecf916ace0a46c4e4",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
