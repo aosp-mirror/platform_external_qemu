@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a13dea9f_9ff90b09",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1909,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-01-04T16:12:14Z",
+      "side": 1,
+      "message": "seems like this should only report if there\u0027s a virtual scene window already, and avoid forcing creation to happen if not.",
+      "revId": "145209d535610aa43557a0fef2ed9f1f93062cc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "578045e8_3704f781",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-01-04T16:12:14Z",
+      "side": 1,
+      "message": "it would be nice if we didn\u0027t force the virtual scene control window creation when the extended window was created.  Can we move these out to a separate function that is called from here as well as the constructor of the virtualscenecontrolwindow and only connects them after both are lazy-created?",
+      "revId": "145209d535610aa43557a0fef2ed9f1f93062cc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
