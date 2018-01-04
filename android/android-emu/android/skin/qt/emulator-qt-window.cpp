@@ -1903,7 +1903,7 @@ void EmulatorQtWindow::handleMouseEvent(SkinEventType type,
                                         const QPoint& gPos,
                                         bool skipSync) {
     if (type == kEventMouseButtonDown) {
-        mToolWindow->virtualSceneControlWindow()->reportMouseButtonDown();
+        mToolWindow->reportMouseButtonDown();
     }
 
     SkinEvent* skin_event = createSkinEvent(type);
@@ -2102,6 +2102,10 @@ bool EmulatorQtWindow::isInZoomMode() const {
 
 ToolWindow* EmulatorQtWindow::toolWindow() const {
     return mToolWindow;
+}
+
+EmulatorContainer* EmulatorQtWindow::containerWindow() {
+    return &mContainer;
 }
 
 void EmulatorQtWindow::showZoomIfNotUserHidden() {

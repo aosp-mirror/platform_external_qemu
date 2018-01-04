@@ -64,29 +64,17 @@ using android::base::System;
 using android::metrics::MetricsReporter;
 namespace pb = android_studio;
 
-ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
-    : mWindow(new ExtendedWindow(tw->mEmulatorWindow,
-                                 tw,
-                                 &tw->mShortcutKeyStore)) {
-    if (auto recorderPtr = tw->mUIEventRecorder.lock()) {
-        recorderPtr->startRecording(mWindow);
-    }
-    if (auto userActionsCounter = tw->mUserActionsCounter.lock()) {
-        userActionsCounter->startCountingForExtendedWindow(mWindow);
-    }
-
-    if (sUiEmuAgent) {
-        mWindow->setAgent(sUiEmuAgent);
-    }
-
-    // If extended window is created before the "..." button is pressed, it
-    // should be hid until that button is actually pressed.
-    mWindow->hide();
+template <typename T>
+ToolWindow::WindowHolder<T>::WindowHolder(ToolWindow* tw,
+                                          OnCreatedCallback onCreated)
+    : mWindow(new T(tw->mEmulatorWindow, tw)) {
+    (tw->*onCreated)(mWindow);
 }
 
-ToolWindow::ExtendedWindowHolder::~ExtendedWindowHolder() {
-    // ExtendedWindow has slots with subscribers, so use deleteLater()
-    // instead of a regular delete for it.
+template <typename T>
+ToolWindow::WindowHolder<T>::~WindowHolder() {
+    // The window may have slots with subscribers, so use deleteLater() instead
+    // of a regular delete for it.
     mWindow->deleteLater();
 }
 
@@ -98,8 +86,9 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        ToolWindow::UserActionsCounterPtr user_actions_counter)
     : QFrame(parent),
       mEmulatorWindow(window),
-      mExtendedWindow(this),
-      mVirtualSceneControlWindow(this, parent),
+      mExtendedWindow(this, &ToolWindow::onExtendedWindowCreated),
+      mVirtualSceneControlWindow(this,
+                                 &ToolWindow::onVirtualSceneWindowCreated),
       mToolsUi(new Ui::ToolControls),
       mUIEventRecorder(event_recorder),
       mUserActionsCounter(user_actions_counter),
@@ -175,7 +164,7 @@ ToolWindow::ToolWindow(EmulatorQtWindow* window,
     mShortcutKeyStore.add(QKeySequence(Qt::Key_Control | Qt::ControlModifier),
                           QtUICommand::SHOW_MULTITOUCH);
 
-    mVirtualSceneControlWindow.addShortcutKeysToKeyStore(mShortcutKeyStore);
+    VirtualSceneControlWindow::addShortcutKeysToKeyStore(mShortcutKeyStore);
 
     // Update tool tips on all push buttons.
     const QList<QPushButton*> childButtons =
@@ -235,8 +224,9 @@ ToolWindow::~ToolWindow() {
 
 void ToolWindow::raise() {
     QFrame::raise();
-    if (mVirtualSceneControlWindow.isActive()) {
-        mVirtualSceneControlWindow.raise();
+    if (mVirtualSceneControlWindow.hasInstance() &&
+        mVirtualSceneControlWindow.get()->isActive()) {
+        mVirtualSceneControlWindow.get()->raise();
     }
     if (mTopSwitched) {
         mExtendedWindow.get()->raise();
@@ -252,7 +242,7 @@ void ToolWindow::switchClipboardSharing(bool enabled) {
 }
 
 void ToolWindow::showVirtualSceneControls(bool show) {
-    mVirtualSceneControlWindow.setActive(show);
+    mVirtualSceneControlWindow.get()->setActive(show);
 }
 
 void ToolWindow::stopExtendedWindowCreation() {
@@ -260,9 +250,56 @@ void ToolWindow::stopExtendedWindowCreation() {
     mExtendedWindowCreateTimer.disconnect();
 }
 
+void ToolWindow::onExtendedWindowCreated(ExtendedWindow* extendedWindow) {
+    if (sUiEmuAgent) {
+        extendedWindow->setAgent(sUiEmuAgent);
+    }
+
+    if (auto userActionsCounter = mUserActionsCounter.lock()) {
+        userActionsCounter->startCountingForExtendedWindow(extendedWindow);
+    }
+
+    setupSubwindow(extendedWindow);
+
+    mVirtualSceneControlWindow.ifExists([&] {
+        extendedWindow->connectVirtualSceneWindow(
+                mVirtualSceneControlWindow.get().get());
+    });
+}
+
+void ToolWindow::onVirtualSceneWindowCreated(
+        VirtualSceneControlWindow* virtualSceneWindow) {
+    if (sUiEmuAgent) {
+        virtualSceneWindow->setAgent(sUiEmuAgent);
+    }
+
+    if (auto userActionsCounter = mUserActionsCounter.lock()) {
+        userActionsCounter->startCountingForVirtualSceneWindow(
+                virtualSceneWindow);
+    }
+
+    setupSubwindow(virtualSceneWindow);
+
+    mExtendedWindow.ifExists([&] {
+        mExtendedWindow.get()->connectVirtualSceneWindow(virtualSceneWindow);
+    });
+}
+
+void ToolWindow::setupSubwindow(QWidget* window) {
+    if (auto recorderPtr = mUIEventRecorder.lock()) {
+        recorderPtr->startRecording(window);
+    }
+
+    // If window is created before it's activated (for example, before the "..."
+    // button is pressed for the extended window) it should be hid until it is
+    // actually activated.
+    window->hide();
+}
+
 void ToolWindow::hide() {
     QFrame::hide();
-    mVirtualSceneControlWindow.hide();
+    mVirtualSceneControlWindow.ifExists(
+            [&] { mVirtualSceneControlWindow.get()->hide(); });
     mExtendedWindow.ifExists([&] { mExtendedWindow.get()->hide(); });
 }
 
@@ -283,14 +320,17 @@ void ToolWindow::mousePressEvent(QMouseEvent* event) {
 void ToolWindow::hideEvent(QHideEvent*) {
     mIsExtendedWindowVisibleOnShow =
             mExtendedWindow.hasInstance() && mExtendedWindow.get()->isVisible();
+    mIsVirtualSceneWindowVisibleOnShow =
+            mVirtualSceneControlWindow.hasInstance() &&
+            mVirtualSceneControlWindow.get()->isVisible();
 }
 
 void ToolWindow::show() {
     QFrame::show();
     setFixedSize(size());
 
-    if (mVirtualSceneControlWindow.isActive()) {
-        mVirtualSceneControlWindow.show();
+    if (mIsVirtualSceneWindowVisibleOnShow) {
+        mVirtualSceneControlWindow.get()->show();
     }
 
     if (mIsExtendedWindowVisibleOnShow) {
@@ -480,8 +520,9 @@ void ToolWindow::forwardKeyToEmulator(uint32_t keycode, bool down) {
 
 bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
     // See if this key is handled by the virtual scene control window first.
-    if (mVirtualSceneControlWindow.isActive()) {
-        if (mVirtualSceneControlWindow.handleQtKeyEvent(event, source)) {
+    if (mVirtualSceneControlWindow.hasInstance() &&
+        mVirtualSceneControlWindow.get()->isActive()) {
+        if (mVirtualSceneControlWindow.get()->handleQtKeyEvent(event, source)) {
             return true;
         }
     }
@@ -501,6 +542,11 @@ bool ToolWindow::handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source) {
     return h;
 }
 
+void ToolWindow::reportMouseButtonDown() {
+    mVirtualSceneControlWindow.ifExists(
+            [&] { mVirtualSceneControlWindow.get()->reportMouseButtonDown(); });
+}
+
 void ToolWindow::closeExtendedWindow() {
     // If user is clicking the 'x' button like crazy, we may get multiple
     // close events here, so make sure the function doesn't screw the state for
@@ -518,21 +564,8 @@ void ToolWindow::dockMainWindow() {
          parentWidget()->geometry().top()
              + mEmulatorWindow->getTopTransparency());
 
-    int parentWidgetWidth =
-            parentWidget()->frameGeometry().width() -
-            mEmulatorWindow->getLeftTransparency() -
-            mEmulatorWindow->getRightTransparency();
-    int virtualSceneWidgetWidth = std::min(
-            parentWidgetWidth,
-            kVirtualSceneControlWindowMaxWidth);
-    mVirtualSceneControlWindow.setWidth(virtualSceneWidgetWidth);
-    mVirtualSceneControlWindow.move(
-            parentWidget()->frameGeometry().left() +
-                    mEmulatorWindow->getLeftTransparency() +
-                    (parentWidgetWidth - virtualSceneWidgetWidth) / 2,
-            parentWidget()->geometry().bottom() -
-                    mEmulatorWindow->getBottomTransparency() +
-                    kVirtualSceneControlWindowOffset);
+    mVirtualSceneControlWindow.ifExists(
+            [&] { mVirtualSceneControlWindow.get()->dockMainWindow(); });
 }
 
 void ToolWindow::raiseMainWindow() {
@@ -541,7 +574,8 @@ void ToolWindow::raiseMainWindow() {
 }
 
 void ToolWindow::updateTheme(const QString& styleSheet) {
-    mVirtualSceneControlWindow.updateTheme(styleSheet);
+    mVirtualSceneControlWindow.ifExists(
+            [&] { mVirtualSceneControlWindow.get()->updateTheme(styleSheet); });
     setStyleSheet(styleSheet);
 }
 
@@ -552,7 +586,8 @@ void ToolWindow::setToolEmuAgentEarly(const UiEmuAgent* agentPtr) {
 }
 
 void ToolWindow::setToolEmuAgent(const UiEmuAgent* agPtr) {
-    mVirtualSceneControlWindow.setAgent(agPtr);
+    mVirtualSceneControlWindow.ifExists(
+            [&] { mVirtualSceneControlWindow.get()->setAgent(agPtr); });
     mExtendedWindow.ifExists([&] { mExtendedWindow.get()->setAgent(agPtr); });
 
     if (agPtr->clipboard) {

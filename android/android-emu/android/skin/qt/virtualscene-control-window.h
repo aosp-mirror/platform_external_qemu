@@ -32,6 +32,7 @@
 
 #include <memory>
 
+class EmulatorQtWindow;
 class ToolWindow;
 
 // Design requested a max width of 700 dp, and offset of 16 from the emulator
@@ -43,9 +44,11 @@ class VirtualSceneControlWindow : public QFrame {
     Q_OBJECT
 
 public:
-    explicit VirtualSceneControlWindow(ToolWindow* toolWindow, QWidget* parent);
+    explicit VirtualSceneControlWindow(EmulatorQtWindow* emulatorWindow,
+                                       ToolWindow* toolWindow);
     virtual ~VirtualSceneControlWindow();
 
+    void dockMainWindow();
     bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
     void updateTheme(const QString& styleSheet);
 
@@ -66,7 +69,8 @@ public:
 
     void reportMouseButtonDown();
 
-    void addShortcutKeysToKeyStore(ShortcutKeyStore<QtUICommand>& keystore);
+    static void addShortcutKeysToKeyStore(
+            ShortcutKeyStore<QtUICommand>& keystore);
 signals:
     void virtualSceneControlsEngaged(bool engaged);
 
@@ -91,6 +95,7 @@ private:
 
     QPoint getMouseCaptureCenter();
 
+    EmulatorQtWindow* mEmulatorWindow = nullptr;
     ToolWindow* mToolWindow = nullptr;
     SizeTweaker mSizeTweaker;
     std::unique_ptr<Ui::VirtualSceneControls> mControlsUi;
