@@ -140,7 +140,7 @@ typedef struct ffmpeg_recorder {
     VideoOutputStream video_st;
     AudioOutputStream audio_st;
     // A single lock to protect writing audio and video frames to the video file
-    mutable android::base::Lock out_pkt_lock;
+    mutable android::base::Lock *out_pkt_lock;
     bool have_video;
     bool has_video_frames;
     bool have_audio;
@@ -199,6 +199,10 @@ static void log_packet(const AVFormatContext* fmt_ctx, const AVPacket* pkt) {
             avTs2TimeStr(pkt->duration, time_base).c_str(), pkt->stream_index);
 }
 
+static void default_destruct_packet(AVPacket *pkt)
+{
+}
+
 static int write_frame(ffmpeg_recorder* recorder,
                        AVFormatContext* fmt_ctx,
                        const AVRational* time_base,
@@ -207,17 +211,23 @@ static int write_frame(ffmpeg_recorder* recorder,
     // rescale output packet timestamp values from codec to stream timebase
     // av_packet_rescale_ts(pkt, *time_base, st->time_base);
 
+    // b/70627090
+    if (pkt->destruct == NULL) {
+        pkt->destruct = default_destruct_packet;
+    }
+
     pkt->dts = AV_NOPTS_VALUE;
     pkt->stream_index = st->index;
 
     // Write the compressed frame to the media file.
     log_packet(fmt_ctx, pkt);
 
-    android::base::AutoLock lock(recorder->out_pkt_lock);
+    recorder->out_pkt_lock->lock();
     // DO NOT free or unref enc_pkt once interleaved.
     // av_interleaved_write_frame() will take ownership of the packet once
     // passed in.
     int rc = av_interleaved_write_frame(fmt_ctx, pkt);
+    recorder->out_pkt_lock->unlock();
 
     return rc;
 }
@@ -346,24 +356,27 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
         ost->samples_count += dst_nb_samples;
     }
 
-    AVPacket pkt = {0};  // data and size must be 0;
+    AVPacket pkt;
     int got_packet;
 
     D_A("Encoding audio frame %d\n", ost->frame_count++);
     av_init_packet(&pkt);
+    pkt.data = NULL; // data and size must be 0
+    pkt.size = 0;
     ret = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
     if (ret < 0) {
         derror("Error encoding audio frame: %s\n", avErr2Str(ret).c_str());
         return ret;
     }
 
-    if (got_packet) {
+    if (got_packet && pkt.size > 0) {
         D_A("%sWriting audio frame %d\n",
             pkt.flags & AV_PKT_FLAG_KEY ? "(KEY) " : "",
             ost->write_frame_count++);
 #if DEBUG_AUDIO
         log_packet(oc, &pkt);
 #endif
+        //av_packet_rescale_ts(&pkt, c->time_base, ost->st->time_base);
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
@@ -474,12 +487,14 @@ static int write_video_frame(ffmpeg_recorder* recorder,
         pkt.pts = pkt.dts = frame->pts;
         av_packet_rescale_ts(&pkt, c->time_base, ost->st->time_base);
 
-        android::base::AutoLock lock(recorder->out_pkt_lock);
+        recorder->out_pkt_lock->lock();
         ret = av_interleaved_write_frame(oc, &pkt);
+        recorder->out_pkt_lock->unlock();
     } else {
-        AVPacket pkt = {0};
+        AVPacket pkt;
         av_init_packet(&pkt);
-
+        pkt.data = NULL; // data and size must be 0
+        pkt.size = 0;
         // encode the frame
         D_V("Encoding video frame %ld\n", ost->frame_count++);
 #if DEBUG_VIDEO
@@ -494,7 +509,7 @@ static int write_video_frame(ffmpeg_recorder* recorder,
             return ret;
         }
 
-        if (got_packet) {
+        if (got_packet && pkt.size > 0) {
             D_V("%sWriting frame %ld\n",
                 (pkt.flags & AV_PKT_FLAG_KEY) ? "(KEY) " : "",
                 ost->write_frame_count++);
@@ -555,6 +570,7 @@ ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
     memset(recorder, 0, sizeof(ffmpeg_recorder));
     recorder->has_video_frames = false;
     recorder->path = strdup(info->fileName);
+    recorder->out_pkt_lock = new android::base::Lock();
 
     // Initialize libavcodec, and register all codecs and formats. does not hurt
     // to register multiple times
@@ -682,6 +698,9 @@ bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     // free the stream
     avformat_free_context(recorder->oc);
 
+    if (recorder->out_pkt_lock)
+        delete recorder->out_pkt_lock;
+
     if (recorder->path)
         free(recorder->path);
 
@@ -705,7 +724,6 @@ static int start_recording(ffmpeg_recorder* recorder) {
     AVFormatContext* oc = recorder->oc;
 
     av_dump_format(oc, 0, recorder->path, 1);
-
 
     // Write the stream header, if any.
     ret = avformat_write_header(oc, &opt);
