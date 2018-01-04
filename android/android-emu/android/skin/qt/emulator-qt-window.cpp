@@ -952,6 +952,8 @@ void EmulatorQtWindow::maskWindowFrame() {
         // We have a frame. There is no transparent gap around the skin.
         mSkinGapTop = 0;
         mSkinGapRight = 0;
+        mSkinGapBottom = 0;
+        mSkinGapLeft = 0;
     } else {
         // Frameless: Do an intelligent mask.
         // Start by reloading the skin PNG file.
