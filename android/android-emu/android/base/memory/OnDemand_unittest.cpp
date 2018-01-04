@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 
+using android::base::makeAtomicOnDemand;
+using android::base::makeOnDemand;
 using android::base::MemberOnDemandT;
 using android::base::OnDemand;
-using android::base::makeOnDemand;
-using android::base::makeAtomicOnDemand;
 
 namespace {
 
@@ -87,13 +87,24 @@ TEST_F(OnDemandTest, createDestroy1) {
 
 TEST_F(OnDemandTest, createDestroyFun) {
     {
-        auto t = makeOnDemand<Test1>([] { return std::make_tuple(120); });
+        auto t = makeOnDemand<Test1>([] { return 120; });
         EXPECT_EQ((State{0, 0}), sState);
         t.get();
         EXPECT_EQ((State{1, 0}), sState);
         EXPECT_EQ(120, t.get().n);
     }
     EXPECT_EQ((State{1, 1}), sState);
+}
+
+TEST_F(OnDemandTest, createMember) {
+    {
+        MemberOnDemandT<int, int> val{[] { return std::make_tuple(19); }};
+        EXPECT_EQ(*val, 19);
+    }
+    {
+        MemberOnDemandT<int, int> val{[] { return 21; }};
+        EXPECT_EQ(*val, 21);
+    }
 }
 
 TEST_F(OnDemandTest, makeMore) {
@@ -238,4 +249,12 @@ TEST_F(OnDemandTest, multiDestroy) {
 
     EXPECT_TRUE(!t.hasInstance());
     EXPECT_EQ((State{1, 1}), sState);
+}
+
+TEST_F(OnDemandTest, ifExists) {
+    auto a = makeOnDemand<int>();
+    a.ifExists([](int& i) { FAIL(); });
+    *a = 0;
+    a.ifExists([](int& i) { ++i; });
+    EXPECT_EQ(a.get(), 1);
 }
