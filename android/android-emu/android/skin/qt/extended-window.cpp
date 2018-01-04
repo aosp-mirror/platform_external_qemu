@@ -30,8 +30,7 @@
 #include <QDesktopWidget>
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
-    ToolWindow *tW,
-    const ShortcutKeyStore<QtUICommand>* shortcuts) :
+    ToolWindow *tW) :
     QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
@@ -56,7 +55,7 @@ ExtendedWindow::ExtendedWindow(
     setFrameOnTop(this, onTop);
 
     mExtendedUi->setupUi(this);
-    mExtendedUi->helpPage->initialize(shortcuts);
+    mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
@@ -159,7 +158,7 @@ ExtendedWindow::ExtendedWindow(
             eW,
             SLOT(rotateSkin(SkinRotation)));
 
-    connect(mToolWindow->virtualSceneControlWindow(),
+    connect(mToolWindow->getVirtualSceneControlWindow(),
             SIGNAL(virtualSceneControlsEngaged(bool)),
             mExtendedUi->virtualSensorsPage,
             SLOT(onVirtualSceneControlsEngaged(bool)));
@@ -170,13 +169,13 @@ ExtendedWindow::ExtendedWindow(
     // is active.
     connect(mExtendedUi->virtualSensorsPage,
             SIGNAL(coarseOrientationChanged(SkinRotation)),
-            tW->virtualSceneControlWindow(),
+            tW->getVirtualSceneControlWindow(),
             SLOT(orientationChanged(SkinRotation)));
     connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()),
-            tW->virtualSceneControlWindow(), SLOT(virtualSensorsPageVisible()));
+            tW->getVirtualSceneControlWindow(), SLOT(virtualSensorsPageVisible()));
     connect(mExtendedUi->virtualSensorsPage,
             SIGNAL(virtualSensorsInteraction()),
-            tW->virtualSceneControlWindow(), SLOT(virtualSensorsInteraction()));
+            tW->getVirtualSceneControlWindow(), SLOT(virtualSensorsInteraction()));
 
     const auto enableClipboardSharing =
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();

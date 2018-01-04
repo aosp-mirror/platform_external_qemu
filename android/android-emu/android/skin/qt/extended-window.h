@@ -51,8 +51,7 @@ class ExtendedWindow : public QFrame
 public:
     ExtendedWindow(
         EmulatorQtWindow* eW,
-        ToolWindow* tW,
-        const ShortcutKeyStore<QtUICommand>* shortcuts);
+        ToolWindow* tW);
 
     ~ExtendedWindow();
 

@@ -203,6 +203,7 @@ public:
     android::emulation::AdbInterface* getAdbInterface() const;
     bool isInZoomMode() const;
     ToolWindow* toolWindow() const;
+    EmulatorContainer* containerWindow();
     void showZoomIfNotUserHidden();
     QSize containerSize() const;
     QRect deviceGeometry() const;
