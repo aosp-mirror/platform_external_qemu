@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "fcfb0d56_04b9ad95",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T18:08:39Z",
+      "side": 1,
+      "message": "please also change this to be std::string",
+      "range": {
+        "startLine": 137,
+        "startChar": 10,
+        "endLine": 137,
+        "endChar": 14
+      },
+      "revId": "de33258ec49f5d1c523487f35caecf94d037614d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "219004d7_a2eea4c0",
         "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
         "patchSetId": 1
@@ -18,6 +41,29 @@
         "startChar": 32,
         "endLine": 143,
         "endChar": 46
+      },
+      "revId": "de33258ec49f5d1c523487f35caecf94d037614d",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "282b4603_d93df5b7",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-04T18:08:39Z",
+      "side": 1,
+      "message": "even better, add field initializers to all of the ffmpeg_recorder\u0027s members and get rid of memset() completely",
+      "range": {
+        "startLine": 151,
+        "startChar": 2,
+        "endLine": 151,
+        "endChar": 17
       },
       "revId": "de33258ec49f5d1c523487f35caecf94d037614d",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
