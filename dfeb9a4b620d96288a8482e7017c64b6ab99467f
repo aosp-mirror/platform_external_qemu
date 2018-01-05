@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2220205e_3ddb600b",
+        "filename": "android/android-emu/android/ffmpeg-muxer.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 136,
+      "author": {
+        "id": 1136078
+      },
+      "writtenOn": "2018-01-05T00:48:18Z",
+      "side": 1,
+      "message": "Should use class instead of struct. \nSee Google style guide for recommendation. https://engdoc.corp.google.com/eng/doc/devguide/cpp/styleguide.shtml?cl\u003dhead#Structs_vs._Classes \n\nIf you start with a class, it is less likely to have the bug on lock.",
+      "range": {
+        "startLine": 136,
+        "startChar": 24,
+        "endLine": 136,
+        "endChar": 0
+      },
+      "revId": "dfeb9a4b620d96288a8482e7017c64b6ab99467f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
