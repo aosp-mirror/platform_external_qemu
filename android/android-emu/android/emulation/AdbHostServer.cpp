@@ -29,9 +29,9 @@ using android::base::StringFormat;
 
 bool AdbHostServer::notify(int adbEmulatorPort, int adbClientPort) {
     // First connect to ADB server.
-    ScopedSocket socket(android::base::socketTcp6LoopbackClient(adbClientPort));
+    ScopedSocket socket(android::base::socketTcp4LoopbackClient(adbClientPort));
     if (!socket.valid()) {
-        socket.reset(android::base::socketTcp4LoopbackClient(adbClientPort));
+        socket.reset(android::base::socketTcp6LoopbackClient(adbClientPort));
     }
     if (!socket.valid()) {
         // This can happen frequently when there is no ADB Server running
