@@ -656,6 +656,12 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     callCallbacks(Operation::Load, Stage::End);
     if (mLoader->status() == OperationStatus::Error) {
+        auto failureReason = mLoader->snapshot().failureReason();
+        int failureReasonForQemu =
+            (int)(failureReason ?
+                  *failureReason : FailureReason::InternalError);
+        mVmOperations.setFailureReason(
+            name, failureReasonForQemu);
         return false;
     }
     mLoadedSnapshotFile = name;
@@ -675,6 +681,11 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
     mLoader.reset(new Loader(name, -err));
     mLoader->complete(false);
     mLoadedSnapshotFile.clear();
+
+    auto failureReason = mLoader->snapshot().failureReason();
+    mVmOperations.setFailureReason(
+        name, (int)(failureReason ?
+                    *failureReason : errnoToFailure(-err)));
 }
 
 bool Snapshotter::onStartDelete(const char*) {

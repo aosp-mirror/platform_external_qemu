@@ -78,51 +78,6 @@ static void reportAdbConnectionRetries(uint32_t retries) {
     });
 }
 
-static const char* failureToString(FailureReason failure,
-                                   SnapshotOperation op) {
-    switch (failure) {
-        default:
-            return "unknown failure";
-        case FailureReason::BadSnapshotPb:
-        case FailureReason::CorruptedData:
-            return "bad snapshot data";
-        case FailureReason::NoSnapshotPb:
-            return "missing snapshot files";
-        case FailureReason::IncompatibleVersion:
-            return "incompatible snapshot version";
-        case FailureReason::NoRamFile:
-            return "missing saved RAM data";
-        case FailureReason::NoTexturesFile:
-            return "missing saved textures data";
-        case FailureReason::NoSnapshotInImage:
-            return "snapshot doesn't exist";
-        case FailureReason::SnapshotsNotSupported:
-            return "current configuration doesn't support snapshots";
-        case FailureReason::ConfigMismatchHostHypervisor:
-            return "host hypervisor has changed";
-        case FailureReason::ConfigMismatchHostGpu:
-            return "host GPU has changed";
-        case FailureReason::ConfigMismatchRenderer:
-            return "different renderer configured";
-        case FailureReason::ConfigMismatchFeatures:
-            return "different emulator features";
-        case FailureReason::ConfigMismatchAvd:
-            return "different AVD configuration";
-        case FailureReason::SystemImageChanged:
-            return "system image changed";
-        case FailureReason::InternalError:
-            return "internal error";
-        case FailureReason::EmulationEngineFailed:
-            return "emulation engine failed";
-        case FailureReason::RamFailed:
-            return op == SNAPSHOT_LOAD ? "RAM loading failed"
-                                       : "RAM saving failed";
-        case FailureReason::TexturesFailed:
-            return op == SNAPSHOT_LOAD ? "textures loading failed"
-                                       : "textures saving failed";
-    }
-}
-
 constexpr StringView Quickboot::kDefaultBootSnapshot;
 static Quickboot* sInstance = nullptr;
 
@@ -341,8 +296,9 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
         // Unknown failure
         mWindow.showMessage(
                 StringFormat("Resetting for cold boot: %s",
-                             failureToString(*failureReason,
-                                             SNAPSHOT_LOAD))
+                             failureReasonToString(
+                                 *failureReason,
+                                 SNAPSHOT_LOAD))
                         .c_str(),
                 WINDOW_MESSAGE_WARNING, kDefaultMessageTimeoutMs);
         mVmOps.vmReset();
@@ -362,8 +318,9 @@ void Quickboot::decideFailureReport(const base::Optional<FailureReason>& failure
     } else {
         mWindow.showMessage(
                 StringFormat("Cold boot: %s",
-                             failureToString(*failureReason,
-                                             SNAPSHOT_LOAD))
+                             failureReasonToString(
+                                 *failureReason,
+                                 SNAPSHOT_LOAD))
                         .c_str(),
                 WINDOW_MESSAGE_INFO, kDefaultMessageTimeoutMs);
         reportFailedLoad(
