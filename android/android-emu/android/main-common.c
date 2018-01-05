@@ -1497,6 +1497,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     if (opts->snapshot_list) {
+        bool android_snapshot_list_ok = false;
+
         if (opts->snapstorage == NULL) {
             /* Need to find the default snapstorage */
             int inAndroidBuild = 0;
@@ -1509,14 +1511,23 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                 if (inAndroidBuild) {
                     derror("You must use the -snapstorage <file> option to specify a snapshot storage file!\n");
                 } else {
-                    derror("This AVD doesn't have snapshotting enabled!\n");
+                    if (is_qemu2) {
+                        android_snapshot_list_ok = true;
+                    } else {
+                        return false;
+                    }
                 }
-                return false;
+                if (!android_snapshot_list_ok) {
+                    return false;
+                }
             }
         }
-        snapshot_print(opts->snapstorage);
-        *exit_status = 0;
-        return false;
+        if (!android_snapshot_list_ok) {
+            snapshot_print(opts->snapstorage);
+            *exit_status = 0;
+            return false;
+        }
+
     }
 
     // Both |argc| and |argv| have been modified by the big while loop above:

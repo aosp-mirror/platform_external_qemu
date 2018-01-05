@@ -3412,6 +3412,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     int optind;
     const char *optarg;
     const char *loadvm = NULL;
+    bool snapshot_list = false;
     MachineClass *machine_class;
     const char *cpu_model;
     const char *vga_model = NULL;
@@ -4114,6 +4115,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
                 break;
             case QEMU_OPTION_loadvm:
                 loadvm = optarg;
+                break;
+            case QEMU_OPTION_snapshot_list:
+                snapshot_list = true;
                 break;
             case QEMU_OPTION_full_screen:
                 full_screen = 1;
@@ -5411,6 +5415,10 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #ifdef CONFIG_ANDROID
     if (!qemu_android_emulation_setup()) {
         return 1;
+    }
+
+    if (snapshot_list) {
+        androidSnapshot_listStdout();
     }
 
     extern void android_emulator_set_base_port(int);
