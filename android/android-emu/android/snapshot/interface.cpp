@@ -50,3 +50,27 @@ void androidSnapshot_delete(const char* name) {
 int64_t androidSnapshot_lastLoadUptimeMs() {
     return Snapshotter::get().lastLoadUptimeMs();
 }
+
+static int sStdoutLineConsumer(void* opaque, const char* buf, int strlen) {
+    (void)opaque;
+    printf("%s", buf);
+    return strlen;
+}
+
+static int sStderrLineConsumer(void* opaque, const char* buf, int strlen) {
+    (void)opaque;
+    fprintf(stderr, "%s", buf);
+    return strlen;
+}
+
+void androidSnapshot_listStdout() {
+    androidSnapshot_list(nullptr,
+                         sStdoutLineConsumer,
+                         sStderrLineConsumer);
+}
+
+void androidSnapshot_list(void* opaque,
+                          int (*cbOut)(void*, const char*, int),
+                          int (*cbErr)(void*, const char*, int)) {
+    Snapshotter::get().listSnapshots(opaque, cbOut, cbErr);
+}

@@ -56,4 +56,12 @@ bool androidSnapshot_quickbootSave(const char* name);
 // in the case of a power-off and restart.
 void androidSnapshot_quickbootInvalidate(const char* name);
 
+// List snapshots to stdout.
+void androidSnapshot_listStdout();
+
+// List snapshots with a custom callback for consuming the lines.
+void androidSnapshot_list(void* opaque,
+                          int (*cbOut)(void* opaque, const char* buf, int strlen),
+                          int (*cbErr)(void* opaque, const char* buf, int strlen));
+
 ANDROID_END_HEADER

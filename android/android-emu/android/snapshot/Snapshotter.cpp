@@ -568,6 +568,12 @@ void Snapshotter::deleteSnapshot(const char* name) {
     mVmOperations.snapshotDelete(name, this, nullptr);
 }
 
+void Snapshotter::listSnapshots(void* opaque,
+                                int (*cbOut)(void*, const char*, int),
+                                int (*cbErr)(void*, const char*, int)) {
+    mVmOperations.snapshotList(opaque, cbOut, cbErr);
+}
+
 void Snapshotter::onCrashedSnapshot(const char* name) {
     // if it's been less than 2 minutes since the load,
     // consider it a snapshot fail.
