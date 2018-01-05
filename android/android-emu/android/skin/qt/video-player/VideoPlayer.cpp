@@ -1025,7 +1025,7 @@ int VideoPlayerImpl::play() {
     }
 
     // this disables audio playing
-    // audioStream = -1;
+    audioStream = -1;
 
     if (videoStream == -1 && audioStream == -1) {
         return -1;  // no audio or video stream found

@@ -147,8 +147,7 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_playerOverlayWidget->hide();
             mUi->rec_timeElapsedWidget->hide();
-            // disable play button for now
-            //mUi->rec_playStopButton->show();
+            mUi->rec_playStopButton->show();
             mUi->rec_formatSwitch->show();
             mUi->rec_saveButton->show();
             mUi->rec_timeResLabel->setText(
@@ -159,8 +158,7 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mUi->rec_timeResLabel->show();
             mUi->rec_recordButton->setText(QString("RECORD AGAIN"));
             mUi->rec_recordButton->show();
-            // disable play button for now
-            //mUi->rec_playStopButton->setEnabled(true);
+            mUi->rec_playStopButton->setEnabled(true);
             mUi->rec_formatSwitch->setEnabled(true);
             mUi->rec_saveButton->setEnabled(true);
             mUi->rec_playStopButton->setIcon(getIconForCurrentTheme("play_arrow"));
