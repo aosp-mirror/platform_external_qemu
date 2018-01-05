@@ -443,6 +443,8 @@ LOCAL_SRC_FILES := \
     android/snapshot.c \
     android/snapshot/Compressor.cpp \
     android/snapshot/Decompressor.cpp \
+    android/snapshot/GapTracker.cpp \
+    android/snapshot/IncrementalStats.cpp \
     android/snapshot/interface.cpp \
     android/snapshot/Loader.cpp \
     android/snapshot/MemoryWatch_common.cpp \
