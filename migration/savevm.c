@@ -2477,7 +2477,7 @@ int qemu_loadvm(const char* name, const QEMUMessageCallback* messages)
     ret = bdrv_all_find_snapshot(name, &bs);
     if (ret < 0) {
         if (s_snapshot_callbacks.loadvm.on_quick_fail) {
-            s_snapshot_callbacks.loadvm.on_quick_fail(name, ret);
+            s_snapshot_callbacks.loadvm.on_quick_fail(name, -ENOENT);
         }
         messages->err(messages->opaque, NULL,
                      "Device '%s' does not have the requested snapshot '%s'",

@@ -634,6 +634,9 @@ bool Snapshotter::onLoadingComplete(const char* name, int res) {
             System::Duration(System::get()->getProcessTimes().wallClockMs);
     callCallbacks(Operation::Load, Stage::End);
     if (mLoader->status() == OperationStatus::Error) {
+        mVmOperations.setFailureReason(
+            name,
+            (int)mLoader->snapshot().failureReason());
         return false;
     }
     mLoadedSnapshotFile = name;
@@ -655,6 +658,10 @@ void Snapshotter::onLoadingFailed(const char* name, int err) {
     mLoader.emplace(name, -err);
     mLoader->complete(false);
     mLoadedSnapshotFile.clear();
+
+    mVmOperations.setFailureReason(
+        name,
+        (int)mLoader->snapshot().failureReason());
 }
 
 bool Snapshotter::onStartDelete(const char*) {
