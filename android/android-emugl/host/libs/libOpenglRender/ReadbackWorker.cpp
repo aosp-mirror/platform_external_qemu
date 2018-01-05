@@ -92,7 +92,9 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage) {
     lock.unlock();
 
     cb->readbackAsync(mBuffers[readAt]);
-    mFb->doPostCallback(fbImage);
+    if (m_readbackCount > 3) {
+        mFb->doPostCallback(fbImage);
+    }
     m_readbackCount++;
 
     mPrevReadPixelsIndex = readAt;
