@@ -92,7 +92,14 @@ void ReadbackWorker::doNextReadback(ColorBuffer* cb, void* fbImage) {
     lock.unlock();
 
     cb->readbackAsync(mBuffers[readAt]);
-    mFb->doPostCallback(fbImage);
+
+    // It's possible to post callback before any of the async readbacks
+    // have written any data yet, which results in a black frame.  Safer
+    // option to avoid this glitch is to wait until all 3 potential
+    // buffers in our triple buffering setup have had chances to readback.
+    if (m_readbackCount > 3) {
+        mFb->doPostCallback(fbImage);
+    }
     m_readbackCount++;
 
     mPrevReadPixelsIndex = readAt;
