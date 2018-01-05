@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ff90e1cd_b5af2efc",
+        "filename": "android-qemu2-glue/qemu-vm-operations-impl.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-05T19:51:51Z",
+      "side": 1,
+      "message": "Done; PTAL. Also, it involved moving errno and string conversions for failure reasons into a new common.cpp, so they can be used here (while I was there, disambiguated bad pb from bad data)",
+      "parentUuid": "e4ca2f2a_fbd76881",
+      "range": {
+        "startLine": 177,
+        "startChar": 15,
+        "endLine": 177,
+        "endChar": 52
+      },
+      "revId": "303ab07810de05858e8c82743e5e6a2c04865e32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fd3c36e1_d0809d26",
         "filename": "android/android-emu/android/emulation/control/vm_operations.h",
         "patchSetId": 1
@@ -36,6 +60,30 @@
       "writtenOn": "2018-01-05T17:02:32Z",
       "side": 1,
       "message": "nit: typo",
+      "range": {
+        "startLine": 114,
+        "startChar": 31,
+        "endLine": 114,
+        "endChar": 41
+      },
+      "revId": "303ab07810de05858e8c82743e5e6a2c04865e32",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dd3afa81_b845ee92",
+        "filename": "android/android-emu/android/emulation/control/vm_operations.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-05T19:51:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fd3c36e1_d0809d26",
       "range": {
         "startLine": 114,
         "startChar": 31,
