@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "ea60b0b0_5f764ef9",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1909,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-05T02:04:35Z",
+      "side": 1,
+      "message": "Fixed in iteration 2.",
+      "parentUuid": "a13dea9f_9ff90b09",
+      "revId": "145209d535610aa43557a0fef2ed9f1f93062cc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "578045e8_3704f781",
         "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "145209d535610aa43557a0fef2ed9f1f93062cc9",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa968102_cd295c7b",
+        "filename": "android/android-emu/android/skin/qt/extended-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-05T02:04:35Z",
+      "side": 1,
+      "message": "Good point.  I decided to go ahead and add a callback on window creation, and then defer hooking up the signals/slots until both windows are created.",
+      "parentUuid": "578045e8_3704f781",
+      "revId": "145209d535610aa43557a0fef2ed9f1f93062cc9",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
