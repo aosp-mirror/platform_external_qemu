@@ -67,7 +67,7 @@ bool ApkInstaller::parseOutputForFailure(std::istream& stream,
     bool gotSuccess = false;
     string line;
     while (getline(stream, line)) {
-        if (!line.compare("Success")) {
+        if (!line.compare(0, 7, "Success")) {
             gotSuccess = true;
         } else if (!line.compare(0, 7, "Failure") ||
                    !line.compare(0, 6, "Failed")) {
