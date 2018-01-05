@@ -84,6 +84,12 @@ static void set_snapshot_callbacks(void* opaque,
     ; // QEMU1 doesn's support shapshot customizations
 }
 
+// Stub function for QEMU1 failure reasons
+static void set_failure_reason(const char* name, int failureReason) {
+    (void)name;
+    (void)failureReason;
+}
+
 static void get_vm_config(VmConfiguration* out) {
     memset(out, 0, sizeof(*out));
 }
@@ -99,5 +105,6 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
     .snapshotDelete = qemu_snapshot_delete,
     .setSnapshotCallbacks = set_snapshot_callbacks,
     .getVmConfiguration = get_vm_config,
+    .setFailureReason = set_failure_reason,
 };
 const QAndroidVmOperations * const gQAndroidVmOperations = &sQAndroidVmOperations;

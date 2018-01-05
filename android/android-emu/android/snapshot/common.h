@@ -74,6 +74,10 @@ enum class FailureReason {
     InProgressLimit = 30000,
 };
 
+FailureReason errnoToFailure(int error);
+const char* failureReasonToString(FailureReason failure,
+                                  SnapshotOperation op);
+
 template <class Operation>
 bool isComplete(const Operation& op) {
     return op.status() != OperationStatus::NotStarted;
