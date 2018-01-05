@@ -441,6 +441,7 @@ LOCAL_SRC_FILES := \
     android/shaper.c \
     android/snaphost-android.c \
     android/snapshot.c \
+    android/snapshot/common.cpp \
     android/snapshot/Compressor.cpp \
     android/snapshot/Decompressor.cpp \
     android/snapshot/interface.cpp \

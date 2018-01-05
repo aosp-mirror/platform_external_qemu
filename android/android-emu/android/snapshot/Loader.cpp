@@ -23,21 +23,6 @@ using android::base::StdioStream;
 namespace android {
 namespace snapshot {
 
-static FailureReason errnoToFailure(int error) {
-    switch (error) {
-        default:
-        case 0:
-        case 1:
-            return FailureReason::InternalError;
-        case EINVAL:
-            return FailureReason::CorruptedData;
-        case ENOENT:
-            return FailureReason::NoSnapshotInImage;
-        case ENOTSUP:
-            return FailureReason::SnapshotsNotSupported;
-    }
-}
-
 Loader::Loader(const Snapshot& snapshot, int error)
     : mStatus(OperationStatus::Error), mSnapshot(snapshot) {
     if (error) {

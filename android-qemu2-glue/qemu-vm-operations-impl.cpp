@@ -20,6 +20,7 @@
 #include "android/emulation/control/vm_operations.h"
 #include "android/emulation/CpuAccelerator.h"
 #include "android/emulation/VmLock.h"
+#include "android/snapshot/common.h"
 #include "android/snapshot/MemoryWatch.h"
 
 extern "C" {
@@ -130,6 +131,9 @@ private:
 
 }  // namespace
 
+static android::snapshot::FailureReason sFailureReason =
+    android::snapshot::FailureReason::Empty;
+
 static bool qemu_snapshot_list(void* opaque,
                                LineConsumerCallback outConsumer,
                                LineConsumerCallback errConsumer) {
@@ -150,15 +154,52 @@ static bool qemu_snapshot_load(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
     android::RecursiveScopedVmLock vmlock;
+
     bool wasVmRunning = runstate_is_running() != 0;
+
     vm_stop(RUN_STATE_RESTORE_VM);
-    if (qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer)) != 0) {
-        return false;
-    }
+
+    int loadVmRes =
+        qemu_loadvm(name, MessageCallback(opaque, nullptr, errConsumer));
+
+    bool failed = loadVmRes != 0;
+
+    // loadvm may have failed, but try to restart the current vm anyway, to
+    // prevent hanging on generic snapshot load errors such as snapshots not
+    // existing.
+
     if (wasVmRunning) {
-        vm_start();
+        if (failed) {
+
+            std::string failureStr("Snapshot load failure: ");
+
+            failureStr +=
+                android::snapshot::failureReasonToString(
+                    sFailureReason, SNAPSHOT_LOAD);
+
+            failureStr += "\n";
+
+            if (errConsumer) {
+                errConsumer(opaque, failureStr.data(), failureStr.length());
+            }
+
+            if (sFailureReason < android::snapshot::FailureReason::ValidationErrorLimit) {
+                // load failed, but it is OK to resume VM
+                vm_start();
+            } else {
+                // load failed weirdly, don't resume
+                if (errConsumer) {
+                    const char* fatalErrStr = "fatal error, VM stopped.\n";
+                    errConsumer(opaque, fatalErrStr, strlen(fatalErrStr));
+                }
+            }
+        } else {
+            // Normal load, resume
+            vm_start();
+        }
     }
-    return true;
+
+    return !failed;
 }
 
 static bool qemu_snapshot_delete(const char* name,
@@ -367,6 +408,11 @@ static void get_vm_config(VmConfiguration* out) {
     }
 }
 
+static void set_failure_reason(const char* name, int failure_reason) {
+    (void)name; // TODO
+    sFailureReason = (android::snapshot::FailureReason)failure_reason;
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -379,6 +425,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .snapshotDelete = qemu_snapshot_delete,
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .getVmConfiguration = get_vm_config,
+        .setFailureReason = set_failure_reason,
 };
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;
