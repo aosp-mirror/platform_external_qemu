@@ -102,13 +102,28 @@ Frame* FrameQueue::peekReadable() {
     VideoPlayerWaitInfo* pwi = &mWaitInfo;
     pwi->lock.lock();
     pwi->done = false;
-    while (mSize - mRindexShown <= 0 && !pwi->done && mPlayer->isRunning() &&
-           !mPacketQueue->isAbort()) {       
-        pwi->cvDone.wait(&pwi->lock);       
+    while ((mSize - mRindexShown) <= 0 && !pwi->done && mPlayer->isRunning() &&
+           !mPacketQueue->isAbort()) {
+        pwi->cvDone.wait(&pwi->lock);
     }
     pwi->lock.unlock();
 
     if (!mPlayer->isRunning() || mPacketQueue->isAbort()) {
+        return nullptr;
+    }
+
+    return &mQueue[(mRindex + mRindexShown) % mMaxSize];
+}
+
+// no wait, return null if no data
+Frame* FrameQueue::peekReadableNoWait() {
+    bool empty = false;
+    VideoPlayerWaitInfo* pwi = &mWaitInfo;
+    pwi->lock.lock();
+    empty = (mSize - mRindexShown) <= 0;
+    pwi->lock.unlock();
+
+    if (empty || !mPlayer->isRunning() || mPacketQueue->isAbort()) {
         return nullptr;
     }
 
