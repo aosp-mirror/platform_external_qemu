@@ -45,6 +45,16 @@
 #include <cassert>
 #include <string>
 
+namespace {
+
+void ChangeIcon(QPushButton* button, const char* icon, const char* tip) {
+    button->setIcon(getIconForCurrentTheme(icon));
+    button->setProperty("themeIconName", icon);
+    button->setProperty("toolTip", tip);
+}
+
+}  // namespace
+
 using Ui::Settings::SaveSnapshotOnExit;
 
 ToolWindow::ExtendedWindowHolder::ExtendedWindowHolder(ToolWindow* tw)
@@ -72,8 +82,6 @@ ToolWindow::ExtendedWindowHolder::~ExtendedWindowHolder() {
     // instead of a regular delete for it.
     mWindow->deleteLater();
 }
-
-extern "C" void qemu_system_powerdown_request();
 
 ToolWindow::ToolWindow(EmulatorQtWindow* window,
                        QWidget* parent,
@@ -394,14 +402,7 @@ void ToolWindow::handleUICommand(QtUICommand cmd, bool down) {
             forwardKeyToEmulator(LINUX_KEY_VOLUMEDOWN, down);
             break;
         case QtUICommand::POWER:
-            if (android_hw->hw_arc) {
-                // Only send out request when user releases key.
-                if (!down) {
-                    qemu_system_powerdown_request();
-                }
-            } else {
-                forwardKeyToEmulator(LINUX_KEY_POWER, down);
-            }
+            forwardKeyToEmulator(LINUX_KEY_POWER, down);
             break;
         case QtUICommand::TABLET_MODE:
             if (android_hw->hw_arc) {
@@ -646,8 +647,14 @@ void ToolWindow::on_power_button_released() {
     handleUICommand(QtUICommand::POWER, false);
 }
 
-void ToolWindow::on_tablet_mode_button_toggled(bool checked) {
-    handleUICommand(QtUICommand::TABLET_MODE, checked);
+void ToolWindow::on_tablet_mode_button_clicked() {
+    static bool tablet_mode;
+    mEmulatorWindow->activateWindow();
+    tablet_mode = !tablet_mode;
+    ChangeIcon(mToolsUi->tablet_mode_button,
+               tablet_mode ? "laptop_mode" : "tablet_mode",
+               tablet_mode ? "Switch to laptop mode" : "Switch to tablet mode");
+    handleUICommand(QtUICommand::TABLET_MODE, tablet_mode);
 }
 
 void ToolWindow::on_volume_up_button_pressed() {
