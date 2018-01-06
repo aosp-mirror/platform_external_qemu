@@ -80,6 +80,7 @@ ANDROID_SKIN_SOURCES += \
     android/skin/qt/ui-event-recorder.cpp \
     android/skin/qt/user-actions-counter.cpp \
     android/skin/qt/virtualscene-control-window.cpp \
+    android/skin/qt/VirtualSceneInfoDialog.cpp \
     android/skin/qt/wavefront-obj-parser.cpp \
     android/skin/qt/video-player/Clock.cpp \
     android/skin/qt/video-player/FrameQueue.cpp \
@@ -122,6 +123,7 @@ ANDROID_SKIN_QT_MOC_SRC_FILES := \
     android/skin/qt/ModalOverlay.h \
     android/skin/qt/OverlayMessageCenter.h \
     android/skin/qt/QtLooperImpl.h \
+    android/skin/qt/VirtualSceneInfoDialog.h \
     android/skin/qt/size-tweaker.h \
     android/skin/qt/tool-window.h \
     android/skin/qt/user-actions-counter.h \
@@ -155,4 +157,5 @@ ANDROID_SKIN_QT_UI_SRC_FILES := \
     android/skin/qt/extended-pages/car-data-emulation/car-sensor-data.ui \
     android/skin/qt/tools.ui \
     android/skin/qt/virtualscene-controls.ui \
+    android/skin/qt/virtualscene-info-dialog.ui \
 
