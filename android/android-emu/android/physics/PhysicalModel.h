@@ -47,7 +47,9 @@ typedef struct PhysicalModel {
 } PhysicalModel;
 
 /* Allocate and initialize a physical model */
-PhysicalModel* physicalModel_new(bool shouldTick);
+PhysicalModel* physicalModel_new(bool shouldTick,
+                                 const char* filename,
+                                 bool shouldRecord);
 
 /* Destroy and free a physical model */
 void physicalModel_free(PhysicalModel* model);

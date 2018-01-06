@@ -1418,6 +1418,24 @@ help_camera_front(stralloc_t* out)
 }
 
 static void
+help_physics_load(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -physics-load <file> to load a playback file from the specified file path to\n"
+    "  drive physical parameters such as motion and sensor values.\n\n"
+    );
+}
+
+static void
+help_physics_save(stralloc_t* out)
+{
+    PRINTF(
+    "  Use -physics-save <file> to save a playback file containing all physical parameter\n"
+    "  changes from the current emulator session to the specified file path.\n\n"
+    );
+}
+
+static void
 help_webcam_list(stralloc_t* out)
 {
     PRINTF(

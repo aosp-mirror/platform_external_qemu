@@ -12,6 +12,7 @@
 
 #include "android/hw-sensors.h"
 
+#include "android/cmdline-option.h"
 #include "android/emulation/android_qemud.h"
 #include "android/globals.h"
 #include "android/physics/PhysicalModel.h"
@@ -840,7 +841,11 @@ static void _hwSensors_init(HwSensors* h) {
         physicalModel_free(h->physical_model);
         h->physical_model = NULL;
     }
-    h->physical_model = physicalModel_new(true);
+    h->physical_model = physicalModel_new(true,
+            android_cmdLineOptions->physics_save != NULL ?
+            android_cmdLineOptions->physics_save :
+            android_cmdLineOptions->physics_load,
+            android_cmdLineOptions->physics_save != NULL);
 
     if (android_hw->hw_accelerometer) {
         h->sensors[ANDROID_SENSOR_ACCELERATION].enabled = true;
