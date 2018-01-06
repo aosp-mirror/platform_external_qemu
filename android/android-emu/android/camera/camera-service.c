@@ -828,6 +828,107 @@ static bool calculate_video_frame_size(uint32_t format,
     }
 }
 
+
+typedef enum ClientStartResult ClientStartResult;
+enum ClientStartResult {
+    CLIENT_START_RESULT_SUCCESS = 2,
+    CLIENT_START_RESULT_ALREADY_STARTED = 1,
+    CLIENT_START_RESULT_PARAMETER_MISMATCH = -1,
+    CLIENT_START_RESULT_UNKNOWN_PIXEL_FORMAT = -2,
+    CLIENT_START_RESULT_NO_PIXEL_CONVERSION = -3,
+    CLIENT_START_RESULT_OUT_OF_MEMORY = -4,
+    CLIENT_START_RESULT_FAILED = -5,
+};
+
+static ClientStartResult
+_camera_client_start(CameraClient* cc, int width, int height, int pix_format) {
+
+    /* After collecting capture parameters lets see if camera has already
+     * started, and if so, lets see if parameters match. */
+    if (cc->video_frame != NULL) {
+        /* Already started. Match capture parameters. */
+        if (cc->pixel_format != (uint32_t)pix_format ||cc->width != width ||
+            cc->height != height) {
+            /* Parameters match. Succeed the query. */
+            W("%s: Camera '%s' is already started", __FUNCTION__, cc->device_name);
+            return CLIENT_START_RESULT_ALREADY_STARTED;
+        } else {
+            /* Parameters don't match. Fail the query. */
+            E("%s: Camera '%s' is already started, and parameters don't match:\n"
+              "Current %.4s[%dx%d] != requested %.4s[%dx%d]",
+              __FUNCTION__, cc->device_name, (const char*)&cc->pixel_format,
+              cc->width, cc->height, (const char*)&pix_format, width, height);
+            return CLIENT_START_RESULT_PARAMETER_MISMATCH;
+        }
+    }
+
+    /*
+     * Start the camera.
+     */
+
+    /* Save capturing parameters. */
+    cc->pixel_format = pix_format;
+    cc->width = width;
+    cc->height = height;
+    cc->pixel_num = cc->width * cc->height;
+    cc->frames_cached = 0;
+
+    /* Make sure that pixel format is known, and calculate video framebuffer
+     * size along the lines. */
+    if (!calculate_video_frame_size(cc->pixel_format, cc->width,
+                                    cc->height, &cc->video_frame_size)) {
+        E("%s: Unknown pixel format %.4s",
+          __FUNCTION__, (char*)&cc->pixel_format);
+        return CLIENT_START_RESULT_UNKNOWN_PIXEL_FORMAT;
+    }
+
+    /* Make sure that we have a converters between the original camera pixel
+     * format and the one that the client expects. Also a converter must exist
+     * for the preview window pixel format (RGB32) */
+    if (!has_converter(cc->camera_info->pixel_format, cc->pixel_format) ||
+        !has_converter(cc->camera_info->pixel_format, V4L2_PIX_FMT_RGB32)) {
+        E("%s: No conversion exist between %.4s and %.4s (or RGB32) pixel formats",
+          __FUNCTION__, (char*)&cc->camera_info->pixel_format, (char*)&cc->pixel_format);
+        return CLIENT_START_RESULT_NO_PIXEL_CONVERSION;
+    }
+
+    /* TODO: At the moment camera framework in the emulator requires RGB32 pixel
+     * format for preview window. So, we need to keep two framebuffers here: one
+     * for the video, and another for the preview window. Watch out when this
+     * changes (if changes). */
+    cc->preview_frame_size = cc->pixel_num * 4;
+
+    /* Allocate buffer large enough to contain both, video and preview
+     * framebuffers. */
+    cc->video_frame =
+        (uint8_t*)malloc(cc->video_frame_size + cc->preview_frame_size);
+    if (cc->video_frame == NULL) {
+        E("%s: Not enough memory for framebuffers %d + %d",
+          __FUNCTION__, cc->video_frame_size, cc->preview_frame_size);
+        return CLIENT_START_RESULT_OUT_OF_MEMORY;
+    }
+
+    /* Set framebuffer pointers. */
+    cc->preview_frame = (uint16_t*)(cc->video_frame + cc->video_frame_size);
+
+    /* Start the camera. */
+    if (camera_device_start_capturing(cc->camera, cc->camera_info->pixel_format,
+                                      cc->width, cc->height)) {
+        E("%s: Cannot start camera '%s' for %.4s[%dx%d]: %s",
+          __FUNCTION__, cc->device_name, (const char*)&cc->pixel_format,
+          cc->width, cc->height, strerror(errno));
+        free(cc->video_frame);
+        cc->video_frame = NULL;
+        return CLIENT_START_RESULT_FAILED;
+    }
+
+    D("%s: Camera '%s' is now started for %.4s[%dx%d]",
+      __FUNCTION__, cc->device_name, (char*)&cc->pixel_format, cc->width,
+      cc->height);
+
+    return CLIENT_START_RESULT_SUCCESS;
+}
+
 /* Client has queried the client to start capturing video.
  * Param:
  *  cc - Queried camera client descriptor.
@@ -895,96 +996,34 @@ _camera_client_query_start(CameraClient* cc, QemudClient* qc, const char* param)
         return;
     }
 
-    /* After collecting capture parameters lets see if camera has already
-     * started, and if so, lets see if parameters match. */
-    if (cc->video_frame != NULL) {
-        /* Already started. Match capture parameters. */
-        if (cc->pixel_format != (uint32_t)pix_format ||cc->width != width ||
-            cc->height != height) {
-            /* Parameters match. Succeed the query. */
-            W("%s: Camera '%s' is already started", __FUNCTION__, cc->device_name);
-            _qemu_client_reply_ok(qc, "Camera is already started");
-        } else {
-            /* Parameters don't match. Fail the query. */
-            E("%s: Camera '%s' is already started, and parameters don't match:\n"
-              "Current %.4s[%dx%d] != requested %.4s[%dx%d]",
-              __FUNCTION__, cc->device_name, (const char*)&cc->pixel_format,
-              cc->width, cc->height, (const char*)&pix_format, width, height);
-            _qemu_client_reply_ko(qc,
-                "Camera is already started with different capturing parameters");
-        }
-        return;
+    ClientStartResult result = _camera_client_start(cc, width, height, pix_format);
+
+    switch (result) {
+        case CLIENT_START_RESULT_SUCCESS:
+            _qemu_client_reply_ok(qc, NULL);
+            break;
+        case CLIENT_START_RESULT_ALREADY_STARTED:
+            _qemu_client_reply_ko(qc, "Camera is already started");
+            break;
+        case CLIENT_START_RESULT_PARAMETER_MISMATCH:
+            _qemu_client_reply_ko(qc, "Camera is already started with different capturing parameters");
+            break;
+        case CLIENT_START_RESULT_UNKNOWN_PIXEL_FORMAT:
+            _qemu_client_reply_ko(qc, "Pixel format is unknown");
+            break;
+        case CLIENT_START_RESULT_NO_PIXEL_CONVERSION:
+            _qemu_client_reply_ko(qc, "No conversion exist for the requested pixel format");
+            break;
+        case CLIENT_START_RESULT_OUT_OF_MEMORY:
+            _qemu_client_reply_ko(qc, "Out of memory");
+            break;
+        default:
+            E("%s: Unexpected capture result '%s'", __FUNCTION__, result);
+            // Intentional fallthrough
+        case CLIENT_START_RESULT_FAILED:
+            _qemu_client_reply_ko(qc, "Cannot start the camera");
+            break;
     }
-
-    /*
-     * Start the camera.
-     */
-
-    /* Save capturing parameters. */
-    cc->pixel_format = pix_format;
-    cc->width = width;
-    cc->height = height;
-    cc->pixel_num = cc->width * cc->height;
-    cc->frames_cached = 0;
-
-    /* Make sure that pixel format is known, and calculate video framebuffer
-     * size along the lines. */
-    if (!calculate_video_frame_size(cc->pixel_format, cc->width,
-                                    cc->height, &cc->video_frame_size)) {
-        E("%s: Unknown pixel format %.4s",
-          __FUNCTION__, (char*)&cc->pixel_format);
-        _qemu_client_reply_ko(qc, "Pixel format is unknown");
-        return;
-    }
-
-    /* Make sure that we have a converters between the original camera pixel
-     * format and the one that the client expects. Also a converter must exist
-     * for the preview window pixel format (RGB32) */
-    if (!has_converter(cc->camera_info->pixel_format, cc->pixel_format) ||
-        !has_converter(cc->camera_info->pixel_format, V4L2_PIX_FMT_RGB32)) {
-        E("%s: No conversion exist between %.4s and %.4s (or RGB32) pixel formats",
-          __FUNCTION__, (char*)&cc->camera_info->pixel_format, (char*)&cc->pixel_format);
-        _qemu_client_reply_ko(qc, "No conversion exist for the requested pixel format");
-        return;
-    }
-
-    /* TODO: At the moment camera framework in the emulator requires RGB32 pixel
-     * format for preview window. So, we need to keep two framebuffers here: one
-     * for the video, and another for the preview window. Watch out when this
-     * changes (if changes). */
-    cc->preview_frame_size = cc->pixel_num * 4;
-
-    /* Allocate buffer large enough to contain both, video and preview
-     * framebuffers. */
-    cc->video_frame =
-        (uint8_t*)malloc(cc->video_frame_size + cc->preview_frame_size);
-    if (cc->video_frame == NULL) {
-        E("%s: Not enough memory for framebuffers %d + %d",
-          __FUNCTION__, cc->video_frame_size, cc->preview_frame_size);
-        _qemu_client_reply_ko(qc, "Out of memory");
-        return;
-    }
-
-    /* Set framebuffer pointers. */
-    cc->preview_frame = (uint16_t*)(cc->video_frame + cc->video_frame_size);
-
-    /* Start the camera. */
-    if (camera_device_start_capturing(cc->camera, cc->camera_info->pixel_format,
-                                      cc->width, cc->height)) {
-        E("%s: Cannot start camera '%s' for %.4s[%dx%d]: %s",
-          __FUNCTION__, cc->device_name, (const char*)&cc->pixel_format,
-          cc->width, cc->height, strerror(errno));
-        free(cc->video_frame);
-        cc->video_frame = NULL;
-        _qemu_client_reply_ko(qc, "Cannot start the camera");
-        return;
-    }
-
-    D("%s: Camera '%s' is now started for %.4s[%dx%d]",
-      __FUNCTION__, cc->device_name, (char*)&cc->pixel_format, cc->width,
-      cc->height);
-
-    _qemu_client_reply_ok(qc, NULL);
 }
 
 /* Client has queried the client to stop capturing video.
@@ -1290,6 +1329,59 @@ _camera_client_close(void* opaque)
  * Camera service API
  *******************************************************************************/
 
+static void _camera_client_save(Stream* f, QemudClient* client, void* opaque) {
+    CameraClient* cc = (CameraClient*)opaque;
+
+    stream_put_be32(f, cc->camera != NULL ? 1 : 0);
+    stream_put_be32(f, cc->video_frame != NULL ? 1 : 0);
+    if (cc->video_frame != NULL) {
+        stream_put_be32(f, cc->pixel_format);
+        stream_put_be32(f, cc->width);
+        stream_put_be32(f, cc->height);
+    }
+}
+
+static int _camera_client_load(Stream* f, QemudClient* client, void* opaque) {
+    CameraClient* cc = (CameraClient*)opaque;
+
+    int is_camera_connected = stream_get_be32(f);
+    if (is_camera_connected && cc->camera == NULL) {
+        cc->camera = camera_device_open(cc->device_name, cc->inp_channel);
+        if (cc->camera == NULL) {
+            D("%s: failed to start camera service required in snapshot.\n",
+              __FUNCTION__);
+            return -EIO;
+        }
+    }
+
+    // Try to stop the camera if it is already started in order to avoid a frame
+    // size or format mismatch.
+    if (cc->video_frame != NULL) {
+        if (camera_device_stop_capturing(cc->camera) == 0) {
+            free(cc->video_frame);
+            cc->video_frame = NULL;
+        } else {
+            D("%s: failed to stop running camera stream.\n",
+              __FUNCTION__);
+            return -EIO;
+        }
+    }
+
+    int is_camera_started = stream_get_be32(f);
+    if (is_camera_started) {
+        int pixel_format = stream_get_be32(f);
+        int width = stream_get_be32(f);
+        int height = stream_get_be32(f);
+        if (_camera_client_start(cc, width, height, pixel_format) < 0) {
+            D("%s: failed to start camera service required in snapshot.\n",
+              __FUNCTION__);
+            return -EIO;
+        }
+    }
+
+    return 0;
+}
+
 /* Connects a client to the camera service.
  * There are two classes of the client that can connect to the service:
  *  - Camera factory that is insterested only in listing camera devices attached
@@ -1322,7 +1414,7 @@ _camera_service_connect(void*          opaque,
         if (cc != NULL) {
             client = qemud_client_new(serv, channel, client_param, cc,
                                       _camera_client_recv, _camera_client_close,
-                                      NULL, NULL);
+                                      _camera_client_save, _camera_client_load);
         }
     }
 

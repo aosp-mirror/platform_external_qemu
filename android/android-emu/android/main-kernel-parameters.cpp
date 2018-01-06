@@ -41,8 +41,17 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
                                    mem_map ramoops,
-                                   bool isQemu2) {
+                                   bool isQemu2,
+                                   bool isCros) {
     android::ParameterList params;
+    if (isCros) {
+      std::string cmdline(StringFormat(
+          "ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 "
+          "cros_legacy cros_debug console=%s",
+          opts->show_kernel ? "ttyS0" : ""));
+      return strdup(cmdline.c_str());
+    }
+
     bool isX86ish = !strcmp(targetArch, "x86") || !strcmp(targetArch, "x86_64");
 
     // We always force qemu=1 when running inside QEMU.
@@ -56,6 +65,11 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     if (isX86ish) {
         params.add("clocksource=pit");
+        // b/67565886, when cpu core is set to 2, clock_gettime() function hangs
+        // in goldfish kernel which caused surfaceflinger hanging in the guest
+        // system. To workaround, start the kernel with no kvmclock. Currently,
+        // only API 24 and API 25 have kvm clock enabled in goldfish kernel.
+        params.add("no-kvmclock");
     }
 
     android::setupVirtualSerialPorts(
