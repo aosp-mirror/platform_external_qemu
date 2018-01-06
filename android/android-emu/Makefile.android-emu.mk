@@ -75,6 +75,11 @@ include $(_ANDROID_EMU_ROOT)/android/crashreport/proto/CrashReportProto.mk
 # SIM access rules protoc-generated library.
 include $(_ANDROID_EMU_ROOT)/android/telephony/proto/SimAccessRulesProto.mk
 
+###############################################################################
+#
+# Physics protoc-generated library.
+include $(_ANDROID_EMU_ROOT)/android/physics/proto/PhysicsProto.mk
+
 # all includes are like 'android/...', so we need to count on that
 ANDROID_EMU_BASE_INCLUDES := $(_ANDROID_EMU_ROOT)
 ANDROID_EMU_INCLUDES := $(ANDROID_EMU_BASE_INCLUDES) $(METRICS_PROTO_INCLUDES)
@@ -575,6 +580,7 @@ ANDROID_EMU_STATIC_LIBRARIES := \
     $(SNAPSHOT_PROTO_STATIC_LIBRARIES) \
     $(CRASHREPORT_PROTO_STATIC_LIBRARIES) \
     $(SIM_ACCESS_RULES_PROTO_STATIC_LIBRARIES) \
+    $(PHYSICS_PROTO_STATIC_LIBRARIES) \
 
 ANDROID_EMU_LDLIBS := \
     $(ANDROID_EMU_BASE_LDLIBS) \

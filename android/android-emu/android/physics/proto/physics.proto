@@ -1,0 +1,28 @@
+syntax = "proto2";
+
+package emulator_physics;
+
+message TargetCommand {
+    enum PhysicalParameter {
+        POSITION = 0;
+        ROTATION = 1;
+        MAGNETIC_FIELD = 2;
+        TEMPERATURE = 3;
+        PROXIMITY = 4;
+        LIGHT = 5;
+        PRESSURE = 6;
+        HUMIDITY = 7;
+        VELOCITY = 8;
+        AMBIENT_MOTION = 9;
+    }
+
+    enum InterpolationMethod {
+        Smooth = 0;
+        Step = 1;
+    }
+
+    optional PhysicalParameter physical_parameter = 1;
+    optional int64 time = 2;
+    optional InterpolationMethod interpolation_method = 3;
+    repeated float value = 4;
+}
