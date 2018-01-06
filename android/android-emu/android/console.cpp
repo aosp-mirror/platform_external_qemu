@@ -2724,6 +2724,49 @@ static const CommandDefRec sensor_commands[] =
 /********************************************************************************************/
 /********************************************************************************************/
 /*****                                                                                 ******/
+/*****                        P H Y S I C S  C O M M A N D S                           ******/
+/*****                                                                                 ******/
+/********************************************************************************************/
+/********************************************************************************************/
+
+
+/* start recording physical state changes to the given file. */
+static int
+do_physics_record( ControlClient client, char* args ) {
+    return android_physical_model_record(args);
+}
+
+/* start playing physical state changes from the given file. */
+static int
+do_physics_play( ControlClient client, char* args ) {
+    return android_physical_model_playback(args);
+}
+
+/* stop the current recording or playback of physical state changes. */
+static int
+do_physics_stop( ControlClient client, char* args ) {
+    return android_physical_model_stop_record_and_playback();
+}
+
+/* Physics commands for record/playback physics state. */
+static const CommandDefRec physics_commands[] =
+{
+    { "record", "start recording physical state changes.",
+      "'record <filename>': start recording physical state changes to the given file.\r\n",
+      NULL, do_physics_record, NULL },
+    { "play", "start playing physical state changes.",
+      "'play <filename>': start playing physical state changes from the given file.\r\n",
+      NULL, do_physics_play, NULL },
+    { "stop", "stop recording or playing back physical state changes.",
+      "'stop': stop the current recording or playback of physical state changes.\r\n",
+      NULL, do_physics_stop, NULL },
+
+    { NULL, NULL, NULL, NULL, NULL, NULL }
+};
+
+/********************************************************************************************/
+/********************************************************************************************/
+/*****                                                                                 ******/
 /*****                        F I N G E R P R I N T  C O M M A N D S                   ******/
 /*****                                                                                 ******/
 /********************************************************************************************/
@@ -3173,6 +3216,10 @@ extern const CommandDefRec main_commands[] = {
         {"sensor", "manage emulator sensors",
          "allows you to request the emulator sensors\r\n", NULL, NULL,
          sensor_commands},
+
+        {"physics", "manage physical model",
+         "allows you to record and playback physical model state changes\r\n", NULL, NULL,
+         physics_commands},
 
         {"finger", "manage emulator finger print",
          "allows you to touch the emulator finger print sensor\r\n", NULL, NULL,

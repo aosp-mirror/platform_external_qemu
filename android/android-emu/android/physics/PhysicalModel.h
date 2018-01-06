@@ -112,4 +112,19 @@ void physicalModel_save(PhysicalModel* model, Stream* f);
 /* Load the physical model state from the specified stream. */
 int physicalModel_load(PhysicalModel* model, Stream* f);
 
+/* Start recording physical changes to the specified file.
+ * Returns 0 if successful.
+ */
+int physicalModel_record(PhysicalModel* model, const char* filename);
+
+/* Start playing back physical changes from the specified file.
+ * Returns 0 if successful.
+ */
+int physicalModel_playback(PhysicalModel* model, const char* filename);
+
+/* Stop all active recording and playback.
+ * Returns 0 if successful.
+ */
+int physicalModel_stopRecordAndPlayback(PhysicalModel* model);
+
 ANDROID_END_HEADER
