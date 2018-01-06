@@ -151,11 +151,7 @@ void adjustAllButtonsForTheme(SettingsTheme theme)
             // Adjust shadow color for material buttons depending on theme.
             if (RaisedMaterialButton* material_btn =
                     qobject_cast<RaisedMaterialButton*>(pB)) {
-                material_btn
-                    ->shadowEffect()
-                    ->setColor(theme == SETTINGS_THEME_LIGHT ?
-                                   QColor(200, 200, 200) :
-                                   QColor(25, 25, 25));
+                material_btn->setTheme(theme);
             }
         }
     }

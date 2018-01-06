@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "android/skin/qt/extended-pages/common.h"
+
 #include <QGraphicsDropShadowEffect>
 #include <QPushButton>
 
@@ -23,6 +25,7 @@ public:
         mShadowEffect(new QGraphicsDropShadowEffect()) {
         mShadowEffect->setBlurRadius(4.5);
         mShadowEffect->setOffset(1.0, 1.0);
+        setTheme(getSelectedTheme());
         setGraphicsEffect(mShadowEffect);
         connect(this, SIGNAL(pressed()), this, SLOT(onPressed()));
         connect(this, SIGNAL(released()), this, SLOT(onReleased()));
@@ -30,6 +33,20 @@ public:
 
     QGraphicsDropShadowEffect* shadowEffect() { return mShadowEffect; }
     const QGraphicsDropShadowEffect* shadowEffect() const { return mShadowEffect; }
+
+    void setTheme(SettingsTheme theme) {
+        if (!mOverrideTheme) {
+            mShadowEffect->setColor(theme == SETTINGS_THEME_LIGHT
+                                            ? QColor(200, 200, 200)
+                                            : QColor(25, 25, 25));
+        }
+    }
+
+    void setThemeOverride(SettingsTheme theme) {
+        mOverrideTheme = false;
+        setTheme(theme);
+        mOverrideTheme = true;
+    }
 
 private slots:
     void onPressed() {
@@ -42,4 +59,5 @@ private slots:
 
 private:
     QGraphicsDropShadowEffect* mShadowEffect;
+    bool mOverrideTheme = false;
 };

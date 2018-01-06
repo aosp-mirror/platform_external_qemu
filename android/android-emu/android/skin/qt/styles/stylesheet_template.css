@@ -242,6 +242,14 @@ RaisedMaterialButton {
 RaisedMaterialButton:pressed {
     background: %%TAB_DARKENED_COLOR%%;
 }
+RaisedMaterialButton[ColorGroup="RaisedColoredButton"] {
+    padding: 0 16px;
+    color: %%RAISED_COLORED_COLOR%%;
+    background: %%RAISED_COLORED_BKG_COLOR%%
+}
+RaisedMaterialButton[ColorGroup="RaisedColoredButton"]:pressed {
+    background: %%RAISED_COLORED_PRESSED_COLOR%%
+}
 QAbstractSpinBox {
     border-top: 0px;
     border-bottom: 1px solid %%EDIT_COLOR%%;

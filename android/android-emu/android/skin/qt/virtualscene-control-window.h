@@ -106,6 +106,7 @@ private:
     QPoint mPreviousMousePosition;
 
     bool mIsActive = false;
+    bool mShouldShowInfoDialog = true;
 
     const QAndroidSensorsAgent* mSensorsAgent = nullptr;
     glm::vec3 mVelocity = glm::vec3();
