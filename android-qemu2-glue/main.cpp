@@ -734,6 +734,15 @@ extern "C" int main(int argc, char** argv) {
     if (opts->audio && !strcmp(opts->audio, "none"))
         args.add("-no-audio");
 
+    // Generic snapshots command line option
+
+    if (opts->snapshot &&
+        feature_is_enabled(kFeature_FastSnapshotV1)) {
+        if (!opts->no_snapshot_load) {
+            args.add2("-loadvm", opts->snapshot);
+        }
+    }
+
     /** SNAPSHOT STORAGE HANDLING */
 
 #ifdef QEMU2_SNAPSHOT_SUPPORT
@@ -752,8 +761,6 @@ extern "C" int main(int argc, char** argv) {
          * they can change from one invokation to the next and don't really
          * correspond to the hardware configuration itself.
          */
-        if (!opts->no_snapshot_load)
-            args.add2("-loadvm", opts->snapshot);
         if (!opts->no_snapshot_save)
             args.add2("-savevm-on-exit", opts->snapshot);
         if (opts->no_snapshot_update_time)
