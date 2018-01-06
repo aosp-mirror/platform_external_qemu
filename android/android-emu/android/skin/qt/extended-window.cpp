@@ -30,8 +30,7 @@
 #include <QDesktopWidget>
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
-    ToolWindow *tW,
-    const ShortcutKeyStore<QtUICommand>* shortcuts) :
+    ToolWindow *tW) :
     QFrame(nullptr),
     mEmulatorWindow(eW),
     mToolWindow(tW),
@@ -56,7 +55,7 @@ ExtendedWindow::ExtendedWindow(
     setFrameOnTop(this, onTop);
 
     mExtendedUi->setupUi(this);
-    mExtendedUi->helpPage->initialize(shortcuts);
+    mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
@@ -159,25 +158,6 @@ ExtendedWindow::ExtendedWindow(
             eW,
             SLOT(rotateSkin(SkinRotation)));
 
-    connect(mToolWindow->virtualSceneControlWindow(),
-            SIGNAL(virtualSceneControlsEngaged(bool)),
-            mExtendedUi->virtualSensorsPage,
-            SLOT(onVirtualSceneControlsEngaged(bool)));
-
-    // The virtual scene control window aggregates metrics when the virtual
-    // scene is active. Route orientation changes and virtual sensors page
-    // events to the control window. Events are discarded unless the window
-    // is active.
-    connect(mExtendedUi->virtualSensorsPage,
-            SIGNAL(coarseOrientationChanged(SkinRotation)),
-            tW->virtualSceneControlWindow(),
-            SLOT(orientationChanged(SkinRotation)));
-    connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()),
-            tW->virtualSceneControlWindow(), SLOT(virtualSensorsPageVisible()));
-    connect(mExtendedUi->virtualSensorsPage,
-            SIGNAL(virtualSensorsInteraction()),
-            tW->virtualSceneControlWindow(), SLOT(virtualSensorsInteraction()));
-
     const auto enableClipboardSharing =
             settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
     mToolWindow->switchClipboardSharing(enableClipboardSharing);
@@ -256,6 +236,26 @@ void ExtendedWindow::show() {
 void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     show();
     adjustTabs(pane);
+}
+
+void ExtendedWindow::connectVirtualSceneWindow(
+        VirtualSceneControlWindow* virtualSceneWindow) {
+    connect(virtualSceneWindow, SIGNAL(virtualSceneControlsEngaged(bool)),
+            mExtendedUi->virtualSensorsPage,
+            SLOT(onVirtualSceneControlsEngaged(bool)));
+
+    // The virtual scene control window aggregates metrics when the virtual
+    // scene is active. Route orientation changes and virtual sensors page
+    // events to the control window. Events are discarded unless the window
+    // is active.
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(coarseOrientationChanged(SkinRotation)), virtualSceneWindow,
+            SLOT(orientationChanged(SkinRotation)));
+    connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()),
+            virtualSceneWindow, SLOT(virtualSensorsPageVisible()));
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(virtualSensorsInteraction()), virtualSceneWindow,
+            SLOT(virtualSensorsInteraction()));
 }
 
 void ExtendedWindow::closeEvent(QCloseEvent *e) {

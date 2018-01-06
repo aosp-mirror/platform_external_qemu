@@ -39,6 +39,7 @@
 class EmulatorQtWindow;
 class ToolWindow;
 class GeoDataLoaderThread;
+class VirtualSceneControlWindow;
 
 namespace Ui {
     class ExtendedControls;
@@ -49,10 +50,7 @@ class ExtendedWindow : public QFrame
     Q_OBJECT
 
 public:
-    ExtendedWindow(
-        EmulatorQtWindow* eW,
-        ToolWindow* tW,
-        const ShortcutKeyStore<QtUICommand>* shortcuts);
+    ExtendedWindow(EmulatorQtWindow* eW, ToolWindow* tW);
 
     ~ExtendedWindow();
 
@@ -61,6 +59,9 @@ public:
 
     void show();
     void showPane(ExtendedWindowPane pane);
+
+    void connectVirtualSceneWindow(
+            VirtualSceneControlWindow* virtualSceneWindow);
 
 private slots:
     void switchFrameAlways(bool showFrame);

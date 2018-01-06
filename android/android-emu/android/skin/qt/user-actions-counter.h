@@ -42,6 +42,9 @@ public slots:
     void startCountingForExtendedWindow(QObject* target) {
         startCountingMarked(target);
     }
+    void startCountingForVirtualSceneWindow(QObject* target) {
+        startCountingMarked(target);
+    }
 
 private slots:
     // Stops monitoring events from the given target's hierarchy.  This method

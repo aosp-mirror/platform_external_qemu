@@ -12,6 +12,7 @@
 #include "android/skin/qt/virtualscene-control-window.h"
 
 #include "android/featurecontrol/feature_control.h"
+#include "android/skin/qt/emulator-qt-window.h"
 #include "android/skin/qt/qt-settings.h"
 #include "android/skin/qt/stylesheet.h"
 #include "android/skin/qt/tool-window.h"
@@ -44,9 +45,13 @@ static const char* kTextStyleFormatString =
         "font-size:%1;background-color:transparent;";
 static const char* kHighlightTextStyle = "color:#eee";
 
-VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
-                                                     QWidget* parent)
-    : QFrame(parent), mToolWindow(toolWindow), mSizeTweaker(this),
+VirtualSceneControlWindow::VirtualSceneControlWindow(
+        EmulatorQtWindow* emulatorWindow,
+        ToolWindow* toolWindow)
+    : QFrame(emulatorWindow->containerWindow()),
+      mEmulatorWindow(emulatorWindow),
+      mToolWindow(toolWindow),
+      mSizeTweaker(this),
       mControlsUi(new Ui::VirtualSceneControls()) {
     setObjectName("VirtualSceneControlWindow");
 
@@ -67,9 +72,11 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
     setWindowFlags(flags);
 
     mControlsUi->setupUi(this);
-    updateHighlightStyle();
+    dockMainWindow();
 
-    setWidth(parent->frameGeometry().width());
+    SettingsTheme theme = getSelectedTheme();
+    updateTheme(Ui::stylesheetForTheme(theme));
+
     QApplication::instance()->installEventFilter(this);
 
     connect(&mMousePoller, SIGNAL(timeout()), this, SLOT(slot_mousePoller()));
@@ -79,6 +86,26 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(ToolWindow* toolWindow,
 
 VirtualSceneControlWindow::~VirtualSceneControlWindow() {
     QApplication::instance()->removeEventFilter(this);
+}
+
+void VirtualSceneControlWindow::dockMainWindow() {
+    // Align vertically relative to the main window's frame.
+    // Align horizontally relative to its contents.
+    // If we're frameless, adjust for a transparent border
+    // around the skin.
+    const int parentWidgetWidth = parentWidget()->frameGeometry().width() -
+                                  mEmulatorWindow->getLeftTransparency() -
+                                  mEmulatorWindow->getRightTransparency();
+    const int virtualSceneWidgetWidth =
+            std::min(parentWidgetWidth, kVirtualSceneControlWindowMaxWidth);
+
+    setWidth(virtualSceneWidgetWidth);
+    move(parentWidget()->frameGeometry().left() +
+                 mEmulatorWindow->getLeftTransparency() +
+                 (parentWidgetWidth - virtualSceneWidgetWidth) / 2,
+         parentWidget()->geometry().bottom() -
+                 mEmulatorWindow->getBottomTransparency() +
+                 kVirtualSceneControlWindowOffset);
 }
 
 bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,

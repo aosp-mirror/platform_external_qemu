@@ -45,16 +45,19 @@ class ToolWindow : public QFrame {
     using UserActionsCounterPtr =
             std::weak_ptr<android::qt::UserActionsCounter>;
 
-    class ExtendedWindowHolder final {
-        DISALLOW_COPY_AND_ASSIGN(ExtendedWindowHolder);
+    template <typename T>
+    class WindowHolder final {
+        DISALLOW_COPY_AND_ASSIGN(WindowHolder);
+        using OnCreatedCallback = void (ToolWindow::*)(T*);
 
     public:
-        ExtendedWindowHolder(ToolWindow* tw);
-        ~ExtendedWindowHolder();
-        ExtendedWindow* operator->() const { return mWindow; }
+        WindowHolder(ToolWindow* tw, OnCreatedCallback onCreated);
+        ~WindowHolder();
+        T* operator->() const { return mWindow; }
+        T* get() const { return mWindow; }
 
     private:
-        ExtendedWindow* mWindow;
+        T* const mWindow;
     };
 
 public:
@@ -75,11 +78,12 @@ public:
     static void setToolEmuAgentEarly(const UiEmuAgent* agentPtr);
     static const UiEmuAgent* getUiEmuAgent() { return sUiEmuAgent; }
 
-    VirtualSceneControlWindow* virtualSceneControlWindow() {
-        return &mVirtualSceneControlWindow;
+    const ShortcutKeyStore<QtUICommand>* getShortcutKeyStore() {
+        return &mShortcutKeyStore;
     }
 
     bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
+    void reportMouseButtonDown();
 
     void closeExtendedWindow();
 
@@ -113,6 +117,11 @@ private:
 
     void stopExtendedWindowCreation();
 
+    void onExtendedWindowCreated(ExtendedWindow* extendedWindow);
+    void onVirtualSceneWindowCreated(
+            VirtualSceneControlWindow* virtualSceneWindow);
+    void setupSubwindow(QWidget* window);
+
     bool isExiting() const {
         return mIsExiting;
     }
@@ -126,14 +135,21 @@ private:
     virtual void hideEvent(QHideEvent* event) override;
 
     EmulatorQtWindow* mEmulatorWindow;
-    android::base::MemberOnDemandT<ExtendedWindowHolder, ToolWindow*>
+    android::base::MemberOnDemandT<WindowHolder<ExtendedWindow>,
+                                   ToolWindow*,
+                                   void (ToolWindow::*)(ExtendedWindow*)>
             mExtendedWindow;
-    VirtualSceneControlWindow mVirtualSceneControlWindow;
+    android::base::MemberOnDemandT<WindowHolder<VirtualSceneControlWindow>,
+                                   ToolWindow*,
+                                   void (ToolWindow::*)(
+                                           VirtualSceneControlWindow*)>
+            mVirtualSceneControlWindow;
     QTimer mExtendedWindowCreateTimer;
     std::unique_ptr<Ui::ToolControls> mToolsUi;
     bool mStartedAdbStopProcess = false;
     ShortcutKeyStore<QtUICommand> mShortcutKeyStore;
     bool mIsExtendedWindowVisibleOnShow = false;
+    bool mIsVirtualSceneWindowVisibleOnShow = false;
     QString mDetectedAdbPath;
     UIEventRecorderPtr mUIEventRecorder;
     UserActionsCounterPtr mUserActionsCounter;
