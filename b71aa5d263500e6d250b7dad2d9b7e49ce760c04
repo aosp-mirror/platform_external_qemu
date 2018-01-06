@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "809c5439_22cfb67f",
+        "filename": "android/android-emu/android/skin/charmap.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-06T05:07:23Z",
+      "side": 1,
+      "message": "Suggest starting here for the real fix; in the original version of this CL, 51 probably referred to number of items in the charmap.",
+      "range": {
+        "startLine": 199,
+        "startChar": 0,
+        "endLine": 199,
+        "endChar": 7
+      },
+      "revId": "b71aa5d263500e6d250b7dad2d9b7e49ce760c04",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
