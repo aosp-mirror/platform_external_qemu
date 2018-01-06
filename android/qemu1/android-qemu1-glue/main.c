@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
         rendererConfig.bootPropOpenglesVersion, /* ro.opengles.version */
         0ULL, /* glFramebufferSizeBytes */
         mem,
-        false /* isQemu2 */, false /* isCros */);
+        false /* isQemu2 */);
 
     if (hw->hw_cpu_ncore > 1) {
         // Avoid printing this warning all the time because the default

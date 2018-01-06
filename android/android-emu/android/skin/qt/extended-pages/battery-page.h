@@ -36,7 +36,5 @@ private:
 
 private:
     std::unique_ptr<Ui::BatteryPage> mUi;
-
-    // Must be protected by the BQL!
     const QAndroidBatteryAgent* mBatteryAgent;
 };

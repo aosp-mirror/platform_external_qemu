@@ -21,7 +21,6 @@
 #include "uuid.h"
 #include "wipe.h"
 
-#include <private/android_filesystem_config.h>
 #include <sparse/sparse.h>
 
 #include <assert.h>
@@ -253,6 +252,7 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 		dentries[i].mode = _stat.st_mode & (S_ISUID|S_ISGID|S_ISVTX|S_IRWXU|S_IRWXG|S_IRWXO);
 		dentries[i].mtime = _stat.st_mtime;
 		if (fs_config_func != NULL) {
+#ifdef ANDROID
 			uint64_t capabilities;
 			unsigned int mode = 0;
 			unsigned int uid = 0;
@@ -263,6 +263,9 @@ static u32 build_directory_structure(const char *full_path, const char *dir_path
 			dentries[i].uid = uid;
 			dentries[i].gid = gid;
 			dentries[i].capabilities = capabilities;
+#else
+			error("can't set android permissions - built without android support");
+#endif
 		}
 #ifndef USE_MINGW
 		if (sehnd) {
@@ -463,7 +466,7 @@ int make_ext4fs_sparse_fd(int fd, long long len,
 	reset_ext4fs_info();
 	info.len = len;
 
-	return make_ext4fs_internal(fd, NULL, mountpoint, fs_config, 0, 1, 0, 0, sehnd, -1);
+	return make_ext4fs_internal(fd, NULL, mountpoint, NULL, 0, 1, 0, 0, sehnd, -1);
 }
 
 int make_ext4fs(const char *filename, long long len,
@@ -487,7 +490,7 @@ int make_ext4fs_from_dir(const char *filename, const char *dirname,
         return EXIT_FAILURE;
     }
 
-    status = make_ext4fs_internal(fd, dirname, mountpoint, fs_config, 0, 0, 0, 1, sehnd, verbose);
+    status = make_ext4fs_internal(fd, dirname, mountpoint, NULL, 0, 0, 0, 1, sehnd, verbose);
     close(fd);
 
     return status;
