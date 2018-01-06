@@ -173,6 +173,9 @@ OPT_PARAM( camera_back, "<mode>", "set emulation mode for a camera facing back" 
 OPT_PARAM( camera_front, "<mode>", "set emulation mode for a camera facing front" )
 OPT_FLAG( webcam_list, "lists web cameras available for emulation" )
 
+OPT_PARAM( physics_save, "<file>", "save physical parameter changes to the specified file" )
+OPT_PARAM( physics_load, "<file>", "load recorded physical parameter changes from the specified file" )
+
 OPT_PARAM( screen, "<mode>", "set emulated screen mode" )
 
 #ifndef __linux__

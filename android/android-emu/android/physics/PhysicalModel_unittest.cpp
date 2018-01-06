@@ -41,14 +41,14 @@ EXPECT_NEAR(e.z,a.z,d);
 
 TEST(PhysicalModel, CreateAndDestroy) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     EXPECT_NE(model, nullptr);
     physicalModel_free(model);
 }
 
 TEST(PhysicalModel, DefaultInertialSensorValues) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id;
     vec3 accelerometer = physicalModel_getAccelerometer(model,
@@ -63,7 +63,7 @@ TEST(PhysicalModel, DefaultInertialSensorValues) {
 
 TEST(PhysicalModel, ConstantMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
@@ -81,7 +81,7 @@ TEST(PhysicalModel, ConstantMeasurementId) {
 
 TEST(PhysicalModel, NewMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
@@ -106,7 +106,7 @@ TEST(PhysicalModel, NewMeasurementId) {
 
 TEST(PhysicalModel, SetTargetPosition) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0UL);
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -127,7 +127,7 @@ TEST(PhysicalModel, SetTargetPosition) {
 
 TEST(PhysicalModel, SetTargetRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0UL);
     vec3 targetRotation;
     targetRotation.x = 45.0f;
@@ -163,7 +163,7 @@ const GravityTestCase gravityTestCases[] = {
 TEST(PhysicalModel, GravityAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     for (const auto& testCase : gravityTestCases) {
-        PhysicalModel* model = physicalModel_new(false);
+        PhysicalModel* model = physicalModel_new(false, nullptr, false);
         physicalModel_setCurrentTime(model, 1000000000L);
 
         vec3 targetRotation;
@@ -189,7 +189,7 @@ TEST(PhysicalModel, GravityAcceleration) {
 TEST(PhysicalModel, GravityOnlyAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
 
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 1000000000L);
 
     vec3 targetPosition;
@@ -216,7 +216,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
 
 TEST(PhysicalModel, NonInstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
@@ -249,7 +249,7 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
 
 TEST(PhysicalModel, InstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
@@ -276,7 +276,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
 
 TEST(PhysicalModel, OverrideAccelerometer) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0L);
 
     long initial_measurement_id;
@@ -315,7 +315,7 @@ TEST(PhysicalModel, OverrideAccelerometer) {
 
 TEST(PhysicalModel, SaveLoad) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new(false, nullptr, false);
 
     android::base::MemStream modelStream;
     Stream* saveStream = asStream(&modelStream);
@@ -327,7 +327,7 @@ TEST(PhysicalModel, SaveLoad) {
 
     physicalModel_free(model);
 
-    PhysicalModel* loadedModel = physicalModel_new(false);
+    PhysicalModel* loadedModel = physicalModel_new(false, nullptr, false);
     physicalModel_load(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
@@ -337,7 +337,7 @@ TEST(PhysicalModel, SaveLoad) {
 
 TEST(PhysicalModel, SaveLoadOverrides) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new(false, nullptr, false);
 
     const vec3 accelOverride = {1.f, 2.f, 3.f};
     const vec3 gyroOverride = {4.f, 5.f, 6.f};
@@ -374,7 +374,7 @@ TEST(PhysicalModel, SaveLoadOverrides) {
     const uint32_t streamEndMarker = 349087U;
     stream_put_be32(saveStream, streamEndMarker);
 
-    PhysicalModel* loadedModel = physicalModel_new(false);
+    PhysicalModel* loadedModel = physicalModel_new(false, nullptr, false);
     physicalModel_load(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
@@ -421,7 +421,7 @@ TEST(PhysicalModel, SaveLoadOverrides) {
 
 TEST(PhysicalModel, SaveLoadTargets) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel* model = physicalModel_new(false);
+    PhysicalModel* model = physicalModel_new(false, nullptr, false);
 
     const vec3 positionTarget = {24.f, 25.f, 26.f};
     const vec3 rotationTarget = {27.f, 28.f, 29.f};
@@ -461,7 +461,7 @@ TEST(PhysicalModel, SaveLoadTargets) {
     const uint32_t streamEndMarker = 3489U;
     stream_put_be32(saveStream, streamEndMarker);
 
-    PhysicalModel* loadedModel = physicalModel_new(false);
+    PhysicalModel* loadedModel = physicalModel_new(false, nullptr, false);
     physicalModel_load(loadedModel, saveStream);
 
     EXPECT_EQ(streamEndMarker, stream_get_be32(saveStream));
@@ -504,7 +504,7 @@ TEST(PhysicalModel, SaveLoadTargets) {
 
 TEST(PhysicalModel, SetRotatedIMUResults) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0UL);
 
     const vec3 initialRotation {45.0f, 10.0f, 4.0f};
@@ -589,7 +589,7 @@ TEST(PhysicalModel, SetRotatedIMUResults) {
 
 TEST(PhysicalModel, SetRotationIMUResults) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0UL);
 
     vec3 initialRotation {45.0f, 10.0f, 4.0f};
@@ -674,7 +674,7 @@ TEST(PhysicalModel, SetRotationIMUResults) {
 
 TEST(PhysicalModel, MoveWhileRotating) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0UL);
 
     const vec3 initialRotation {45.0f, 10.0f, 4.0f};
@@ -789,7 +789,7 @@ TEST(PhysicalModel, MoveWhileRotating) {
 
 TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
     TestSystem mTestSystem("/", System::kProgramBitness);
-    PhysicalModel *model = physicalModel_new(false);
+    PhysicalModel *model = physicalModel_new(false, nullptr, false);
     physicalModel_setCurrentTime(model, 0UL);
 
     const vec3 initialRotation {45.0f, 10.0f, 4.0f};

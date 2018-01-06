@@ -21,6 +21,8 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/vec3.hpp>
 
+#include "android/base/files/PathUtils.h"
+#include "android/base/files/ScopedStdioFile.h"
 #include "android/base/system/System.h"
 #include "android/emulation/control/sensors_agent.h"
 #include "android/hw-sensors.h"
@@ -30,9 +32,15 @@
 #include "android/utils/looper.h"
 #include "android/utils/stream.h"
 
+#include <cstdio>
 #include <mutex>
 
 #define D(...) VERBOSE_PRINT(sensors, __VA_ARGS__)
+#define E(...) derror(__VA_ARGS__)
+
+using android::base::PathUtils;
+using android::base::ScopedStdioFile;
+using android::base::System;
 
 namespace android {
 namespace physics {
@@ -53,7 +61,9 @@ namespace physics {
  */
 class PhysicalModelImpl {
 public:
-    PhysicalModelImpl(bool shouldTick);
+    PhysicalModelImpl(bool shouldTick,
+                      const char* filename,
+                      bool shouldRecord);
     ~PhysicalModelImpl();
 
     /*
@@ -76,7 +86,7 @@ public:
 
     /*
      * Sets the target value for the given physical parameter that the physical
-     * model should move towards.
+     * model should move towards and records the result.
      * Can be called from any thread.
      */
 #define SET_TARGET_FUNCTION_NAME(x) setTarget##x
@@ -141,6 +151,26 @@ PHYSICAL_PARAMETERS_LIST
     int load(Stream* f);
 
 private:
+    /*
+     * Play a recording from the given stream.  Recordings must be loaded and
+     * started using the constructor.
+     */
+    void playback(const char* filename);
+
+    void setCurrentTimeInternal(int64_t time_ns);
+
+    /*
+     * Sets the target value for the given physical parameter that the physical
+     * model should move towards.
+     * Can be called from any thread.
+     */
+#define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
+#define PHYSICAL_PARAMETER_(x,y,z,w) void SET_TARGET_INTERNAL_FUNCTION_NAME(z)(\
+        w value, PhysicalInterpolation mode);
+PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+#undef SET_TARGET_INTERNAL_FUNCTION_NAME
+
     /*
      * Getters for non-overridden physical sensor values.
      */
@@ -210,6 +240,21 @@ private:
 #undef SENSOR_
 #undef OVERRIDE_NAME
 
+    typedef struct TargetCommand {
+        PhysicalParameter parameter;
+        int64_t modelTime;
+        PhysicalInterpolation mode;
+        union {
+#define PHYSICAL_PARAMETER_(x,y,z,w) w z;
+PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+        };
+    } TargetCommand;
+    std::vector<TargetCommand> mPlaybackCommands;
+    int nextPlaybackIndex = 0;
+
+    ScopedStdioFile recordingSaveFile;
+
     int64_t mModelTimeNs = 0L;
 
     LoopTimer* mLoopTimer = nullptr;
@@ -230,8 +275,25 @@ static vec3 fromGlm(glm::vec3 input) {
     return value;
 }
 
-PhysicalModelImpl::PhysicalModelImpl(bool shouldTick) {
+PhysicalModelImpl::PhysicalModelImpl(bool shouldTick,
+                                     const char* filename,
+                                     bool shouldRecord) {
     mPhysicalModelInterface.opaque = reinterpret_cast<void*>(this);
+
+    if (filename != nullptr) {
+        if (!shouldRecord) {
+            playback(filename);
+        } else {
+            const std::string path = PathUtils::join(
+                System::get()->getHomeDirectory(), filename);
+
+            recordingSaveFile.reset(fopen(path.c_str(), "wb"));
+            if (!recordingSaveFile) {
+                E("%s: Error unable to open physics file %s for writing.  "
+                  "Physical Motion will not be saved.", __FUNCTION__, filename);
+            }
+        }
+    }
 
     if (shouldTick) {
         mLoopTimer = loopTimer_newWithClock(
@@ -258,6 +320,35 @@ PhysicalModelImpl* PhysicalModelImpl::getImpl(PhysicalModel* physicalModel) {
 
 void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
+    while (nextPlaybackIndex < mPlaybackCommands.size() &&
+            time_ns >= mPlaybackCommands[nextPlaybackIndex].modelTime) {
+        setCurrentTimeInternal(mPlaybackCommands[nextPlaybackIndex].modelTime);
+        switch (mPlaybackCommands[nextPlaybackIndex].parameter) {
+#define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
+#define UNION_VALUE_NAME(x) x
+#define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
+#define PHYSICAL_PARAMETER_(x,y,z,w) \
+            case PHYSICAL_PARAMETER_ENUM(x):\
+                SET_TARGET_INTERNAL_FUNCTION_NAME(z)(\
+                        mPlaybackCommands[nextPlaybackIndex].UNION_VALUE_NAME(z),\
+                        mPlaybackCommands[nextPlaybackIndex].mode);\
+                break;
+PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+#undef SET_TARGET_INTERNAL_FUNCTION_NAME
+#undef UNION_VALUE_NAME
+#undef PHYSICAL_PARAMETER_ENUM
+            default:
+                assert(false);  // should never happen
+                break;
+        }
+        nextPlaybackIndex++;
+    }
+
+    setCurrentTimeInternal(time_ns);
+}
+
+void PhysicalModelImpl::setCurrentTimeInternal(int64_t time_ns) {
     mModelTimeNs = time_ns;
     bool isInertialModelStable = mInertialModel.setCurrentTime(time_ns) ==
             INERTIAL_STATE_STABLE;
@@ -269,7 +360,7 @@ void PhysicalModelImpl::setCurrentTime(int64_t time_ns) {
     }
 }
 
-void PhysicalModelImpl::setTargetPosition(vec3 position,
+void PhysicalModelImpl::setTargetInternalPosition(vec3 position,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -277,7 +368,7 @@ void PhysicalModelImpl::setTargetPosition(vec3 position,
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetVelocity(vec3 velocity,
+void PhysicalModelImpl::setTargetInternalVelocity(vec3 velocity,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -285,7 +376,7 @@ void PhysicalModelImpl::setTargetVelocity(vec3 velocity,
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetAmbientMotion(float bounds,
+void PhysicalModelImpl::setTargetInternalAmbientMotion(float bounds,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -293,7 +384,7 @@ void PhysicalModelImpl::setTargetAmbientMotion(float bounds,
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetRotation(vec3 rotation,
+void PhysicalModelImpl::setTargetInternalRotation(vec3 rotation,
         PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -304,7 +395,7 @@ void PhysicalModelImpl::setTargetRotation(vec3 rotation,
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetMagneticField(
+void PhysicalModelImpl::setTargetInternalMagneticField(
         vec3 field, PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -313,7 +404,7 @@ void PhysicalModelImpl::setTargetMagneticField(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetTemperature(
+void PhysicalModelImpl::setTargetInternalTemperature(
         float celsius, PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -321,7 +412,7 @@ void PhysicalModelImpl::setTargetTemperature(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetProximity(
+void PhysicalModelImpl::setTargetInternalProximity(
         float centimeters, PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -329,14 +420,15 @@ void PhysicalModelImpl::setTargetProximity(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetLight(float lux, PhysicalInterpolation mode) {
+void PhysicalModelImpl::setTargetInternalLight(
+        float lux, PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
     mAmbientEnvironment.setLight(lux, mode);
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetPressure(
+void PhysicalModelImpl::setTargetInternalPressure(
         float hPa, PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -344,7 +436,7 @@ void PhysicalModelImpl::setTargetPressure(
     targetStateChanged();
 }
 
-void PhysicalModelImpl::setTargetHumidity(
+void PhysicalModelImpl::setTargetInternalHumidity(
         float percentage, PhysicalInterpolation mode) {
     std::lock_guard<std::recursive_mutex> lock(mMutex);
     physicalStateChanging();
@@ -654,7 +746,7 @@ int PhysicalModelImpl::load(Stream* f) {
          parameter++) {
         switch (parameter) {
 #define PHYSICAL_PARAMETER_NAME(x) PHYSICAL_PARAMETER_##x
-#define SET_TARGET_FUNCTION_NAME(x) setTarget##x
+#define SET_TARGET_FUNCTION_NAME(x) setTargetInternal##x
 #define PHYSICAL_PARAMETER_(x,y,z,w) case PHYSICAL_PARAMETER_NAME(x): {\
                 w value;\
                 readValueFromStream(f, &value);\
@@ -709,6 +801,51 @@ SENSORS_LIST
 
     return 0;
 }
+
+void PhysicalModelImpl::playback(const char* filename) {
+    const std::string path = PathUtils::join(
+            System::get()->getHomeDirectory(), filename);
+
+    ScopedStdioFile fp(fopen(path.c_str(), "rb"));
+    if (!fp) {
+        E("%s: Error unable to open physics file %s for reading.  "
+          "Physical Motion will not be played back.", __FUNCTION__, filename);
+        return;
+    }
+
+    fseek(fp.get(), 0 , SEEK_END);
+    uint64_t numCommands = ftell(fp.get()) / sizeof(TargetCommand);
+    rewind(fp.get());
+    if (numCommands) {
+        mPlaybackCommands.resize(numCommands);
+        fread(mPlaybackCommands.data(), sizeof(TargetCommand), numCommands, fp.get());
+    }
+}
+
+#define SET_TARGET_FUNCTION_NAME(x) setTarget##x
+#define SET_TARGET_INTERNAL_FUNCTION_NAME(x) setTargetInternal##x
+#define PHYSICAL_PARAMETER_ENUM(x) PHYSICAL_PARAMETER_##x
+#define UNION_VALUE_NAME(x) x
+#define PHYSICAL_PARAMETER_(x,y,z,w) void PhysicalModelImpl::SET_TARGET_FUNCTION_NAME(z)(\
+        w value, PhysicalInterpolation mode) {\
+    if (mPlaybackCommands.size() == 0) {\
+        TargetCommand command;\
+        command.parameter = PHYSICAL_PARAMETER_ENUM(x);\
+        command.modelTime = mModelTimeNs;\
+        command.mode = mode;\
+        command.UNION_VALUE_NAME(z) = value;\
+        if (recordingSaveFile) {\
+            fwrite(&command, sizeof(TargetCommand), 1, recordingSaveFile.get());\
+        }\
+        SET_TARGET_INTERNAL_FUNCTION_NAME(z)(value, mode);\
+    }\
+}
+PHYSICAL_PARAMETERS_LIST
+#undef PHYSICAL_PARAMETER_
+#undef UNION_VALUE_NAME
+#undef PHYSICAL_PARAMETER_ENUM
+#undef SET_TARGET_INTERNAL_FUNCTION_NAME
+#undef SET_TARGET_FUNCTION_NAME
 
 void PhysicalModelImpl::physicalStateChanging() {
     // Note: We only call onPhysicalStateChanging if this is a transition from
@@ -768,8 +905,12 @@ void PhysicalModelImpl::tick(void* opaque, LoopTimer* unused) {
 
 using android::physics::PhysicalModelImpl;
 
-PhysicalModel* physicalModel_new(bool shouldTick) {
-    PhysicalModelImpl* impl = new PhysicalModelImpl(shouldTick);
+PhysicalModel* physicalModel_new(bool shouldTick,
+                                 const char* filename,
+                                 bool shouldRecord) {
+    PhysicalModelImpl* impl = new PhysicalModelImpl(shouldTick,
+                                                    filename,
+                                                    shouldRecord);
     return impl != nullptr ? impl->getPhysicalModel() : nullptr;
 }
 
