@@ -116,6 +116,8 @@ public:
     Frame* peekLast();
     Frame* peekWritable();
     Frame* peekReadable();
+    // no wait, return null if no data
+    Frame* peekReadableNoWait();
     void push();
     void next();
     int prev();
