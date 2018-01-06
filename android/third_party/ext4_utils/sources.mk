@@ -19,7 +19,6 @@ LOCAL_SRC_FILES := \
     src/ext4_sb.c \
     src/ext4_utils.c \
     src/extent.c \
-    src/fs_config.c \
     src/indirect.c \
     src/make_ext4fs.c \
     src/sha1.c \

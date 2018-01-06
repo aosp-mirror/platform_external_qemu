@@ -74,30 +74,6 @@ public:
     DISALLOW_COPY_ASSIGN_AND_MOVE(VmLock);
 };
 
-// Convenience class to perform scoped VM locking (but does not try
-// to lock twice).
-class RecursiveScopedVmLock {
-public:
-    RecursiveScopedVmLock(VmLock* vmLock = VmLock::get()) : mVmLock(vmLock) {
-        mShouldLock = !mVmLock->isLockedBySelf();
-        if (mShouldLock) {
-            mVmLock->lock();
-        }
-    }
-
-    ~RecursiveScopedVmLock() {
-        if (mShouldLock) {
-            mVmLock->unlock();
-        }
-    }
-
-    DISALLOW_COPY_ASSIGN_AND_MOVE(RecursiveScopedVmLock);
-
-private:
-    bool mShouldLock = true;
-    VmLock* mVmLock;
-};
-
 // Convenience class to perform scoped VM locking.
 class ScopedVmLock {
 public:

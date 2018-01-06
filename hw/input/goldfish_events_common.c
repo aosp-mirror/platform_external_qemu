@@ -95,11 +95,12 @@ void goldfish_enqueue_event(GoldfishEvDevState *s,
         return;
     }
 
-    if (s->state == STATE_LIVE) {
-        qemu_irq_lower(s->irq);
-        qemu_irq_raise(s->irq);
-    } else {
-        s->state = STATE_BUFFERED;
+    if (s->first == s->last) {
+        if (s->state == STATE_LIVE) {
+            qemu_irq_raise(s->irq);
+        } else {
+            s->state = STATE_BUFFERED;
+        }
     }
 
     s->events[s->last] = type;

@@ -41,7 +41,6 @@ typedef struct mem_map {
 // |ramoops| The memory range that will be used by the ramoops module.
 // |isQemu2| is true to indicate that this is called from QEMU2, otherwise
 // QEMU1 is assumed.
-// |isCros| is true to indicate that it's a Chrome OS image.
 char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    const char* targetArch,
                                    int apiLevel,
@@ -51,7 +50,6 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
                                    int bootPropOpenglesVersion,
                                    uint64_t glFramebufferSizeBytes,
                                    mem_map ramoops,
-                                   bool isQemu2,
-                                   bool isCros);
+                                   bool isQemu2);
 
 ANDROID_END_HEADER
