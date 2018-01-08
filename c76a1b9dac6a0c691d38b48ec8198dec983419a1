@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b6b12f0a_e5b9a7e2",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1511,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-08T20:53:42Z",
+      "side": 1,
+      "message": "nit: remove space (and the spaces in std::max arguments below)",
+      "range": {
+        "startLine": 1511,
+        "startChar": 50,
+        "endLine": 1511,
+        "endChar": 52
+      },
+      "revId": "c76a1b9dac6a0c691d38b48ec8198dec983419a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
