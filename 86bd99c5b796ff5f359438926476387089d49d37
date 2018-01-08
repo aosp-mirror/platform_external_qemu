@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d315c437_1c425339",
+        "filename": "android/android-emu/android/hw-sensors.c",
+        "patchSetId": 3
+      },
+      "lineNbr": 848,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-08T19:28:00Z",
+      "side": 1,
+      "message": "If both physics_load and physics_save are specified, the physics_load is silently discarded.  Maybe log a warning, or better yet error out if both options are specified?\n\nAdditionally, I think this it would be more readable if this was split out into if statements, such as:\n\nif (android_cmdLineOptions-\u003ephysics_save) {\n    // TODO: Check for physics_load and error out here, or error out earlier if both options are specified.\n    h-\u003ephysical_model \u003d physicalModel_new(true, android_cmdLineOptions-\u003ephysics_save, true);\n} else if (android_cmdLineOptions-\u003ephysics_load) {\n    h-\u003ephysical_model \u003d physicalModel_new(true, android_cmdLineOptions-\u003ephysics_load, false);\n} else {\n    h-\u003ephysical_model \u003d physicalModel_new(true, NULL, false);\n}",
+      "range": {
+        "startLine": 845,
+        "startChar": 12,
+        "endLine": 848,
+        "endChar": 56
+      },
+      "revId": "86bd99c5b796ff5f359438926476387089d49d37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db7ac98f_826de4cd",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 747,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-08T19:28:00Z",
+      "side": 1,
+      "message": "!mPlaybackCommands.empty()",
+      "range": {
+        "startLine": 747,
+        "startChar": 26,
+        "endLine": 747,
+        "endChar": 36
+      },
+      "revId": "86bd99c5b796ff5f359438926476387089d49d37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2991aeb3_94bbc7da",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 750,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-08T19:28:00Z",
+      "side": 1,
+      "message": "I don\u0027t think that resize is guaranteed to free the memory.  shrink_to_fit may help, but that\u0027s also not guaranteed.\n\nThe pattern I\u0027ve used before to guarantee it is mPlaybackCommands.swap(std::vector\u003cTargetCommand\u003e());",
+      "range": {
+        "startLine": 750,
+        "startChar": 8,
+        "endLine": 750,
+        "endChar": 36
+      },
+      "revId": "86bd99c5b796ff5f359438926476387089d49d37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "edd81438_d69361a0",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-08T19:28:00Z",
+      "side": 1,
+      "message": "This type of loading isn\u0027t really portable.  TargetCommand may have different padding on different platforms, the endianness may not match, enums may be different size, etc.\n\nHave you considered using the Stream API that is used for snapshots?  I think that StdioStream may be just what you need.",
+      "range": {
+        "startLine": 843,
+        "startChar": 0,
+        "endLine": 849,
+        "endChar": 5
+      },
+      "revId": "86bd99c5b796ff5f359438926476387089d49d37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7435fdf8_bbcacf80",
+        "filename": "android/android-emu/android/physics/PhysicalModel.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 858,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-08T19:28:00Z",
+      "side": 1,
+      "message": "empty()",
+      "range": {
+        "startLine": 858,
+        "startChar": 26,
+        "endLine": 858,
+        "endChar": 37
+      },
+      "revId": "86bd99c5b796ff5f359438926476387089d49d37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d3cba1ea_46093d0c",
+        "filename": "android/android-emu/android/physics/PhysicalModel.h",
+        "patchSetId": 3
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-08T19:28:00Z",
+      "side": 1,
+      "message": "It wasn\u0027t really clear what the caller was doing with this signature, consider changing bools to enums and/or splitting out save and load into separate constructors.\n\nshouldTick -\u003e enum\nCreate physicalModel_new_playback?\nphysicalModel_new_recording?",
+      "range": {
+        "startLine": 50,
+        "startChar": 0,
+        "endLine": 52,
+        "endChar": 52
+      },
+      "revId": "86bd99c5b796ff5f359438926476387089d49d37",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
