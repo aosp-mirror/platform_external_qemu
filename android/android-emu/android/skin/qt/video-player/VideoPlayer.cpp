@@ -1320,7 +1320,7 @@ void VideoPlayerImpl::audioCallback(void* opaque, int len) {
 
     pThis->mAudioWriteBufSize = pThis->mAudioBufSize - pThis->mAudioBufIndex;
 
-    if (!isnan(pThis->mAudioClockValue)) {
+    if (!std::isnan(pThis->mAudioClockValue)) {
         int bytes_per_sec = av_samples_get_buffer_size(NULL, 2, 48000, AV_SAMPLE_FMT_S16, 1);
         pThis->mAudioClock.setAt(pThis->mAudioClockValue - (double)(2 * 512 + pThis->mAudioWriteBufSize) / bytes_per_sec, pThis->mAudioClockSerial, pThis->mAudioCallbackTime / 1000000.0);
         pThis->mExternalClock.syncToSlave(&pThis->mAudioClock);
