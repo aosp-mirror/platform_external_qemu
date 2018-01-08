@@ -1685,8 +1685,6 @@ bool FrameBuffer::postImpl(HandleType p_colorbuffer, bool needLockAndBind) {
                     m_readbackThread.enqueue({ReadbackCmd::Init});
                     m_readbackThread.waitQueuedItems();
                 }
-                // do post callback just once to initialize things
-                doPostCallback(m_fbImage);
             } else {
                 m_readbackWorker->doNextReadback(cb.get(), m_fbImage);
             }
