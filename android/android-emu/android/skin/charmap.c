@@ -11,6 +11,7 @@
 */
 #include "android/skin/charmap.h"
 
+#include "android/base/ArraySize.h"
 #include "android/utils/path.h"
 #include "android/utils/misc.h"
 #include "android/utils/debug.h"
@@ -197,7 +198,7 @@ static const SkinKeyEntry  _qwerty2_keys[] =
 static const SkinCharmap  _default_charmap =
 {
     _qwerty2_keys,
-    51,
+    ARRAY_SIZE(_qwerty2_keys),
     "qwerty2"
 };
 
