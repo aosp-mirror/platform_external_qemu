@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ef2a6c89_9ff0e669",
+        "filename": "android/android-emu/android/skin/qt/video-player/FrameQueue.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-08T20:07:10Z",
+      "side": 1,
+      "message": "this won\u0027t save us from the variables being modified right after the unlock() but before calculating the index in |mQueue|. Instead, create local copies for the |mSize| and |mRindexShown| under a lock, then unlock and use those copies - it\u0027s safe unless someone grabs the same slot before us",
+      "range": {
+        "startLine": 123,
+        "startChar": 3,
+        "endLine": 123,
+        "endChar": 40
+      },
+      "revId": "a6ff302d47884b47cf709824a96625f538f2b5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aea99b02_bd325177",
+        "filename": "android/android-emu/android/skin/qt/video-player/VideoPlayer.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 1302,
+      "author": {
+        "id": 1080076
+      },
+      "writtenOn": "2018-01-08T20:07:10Z",
+      "side": 1,
+      "message": "please use std::string s(len, \u0027\\0\u0027) here and output |s-\u003edata()|",
+      "range": {
+        "startLine": 1297,
+        "startChar": 0,
+        "endLine": 1302,
+        "endChar": 17
+      },
+      "revId": "a6ff302d47884b47cf709824a96625f538f2b5c5",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    }
+  ]
+}
