@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "df58748d_f1c95869",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1511,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-01-08T22:13:58Z",
+      "side": 1,
+      "message": "Done.\nBut IMHO, it\u0027s better to add spaces for readability than to follow the convention strictly.",
+      "parentUuid": "6e22e403_4d8c9e88",
+      "range": {
+        "startLine": 1511,
+        "startChar": 50,
+        "endLine": 1511,
+        "endChar": 52
+      },
+      "revId": "c76a1b9dac6a0c691d38b48ec8198dec983419a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b834298d_0e1549e3",
         "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
         "patchSetId": 1
@@ -60,6 +84,30 @@
       "writtenOn": "2018-01-08T20:59:00Z",
       "side": 1,
       "message": "nit: these casts will give us occasional -+1 pixel resizes, and those aren\u0027t nice :(",
+      "range": {
+        "startLine": 1517,
+        "startChar": 23,
+        "endLine": 1517,
+        "endChar": 29
+      },
+      "revId": "c76a1b9dac6a0c691d38b48ec8198dec983419a1",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c249da9e_94185d24",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1517,
+      "author": {
+        "id": 1074960
+      },
+      "writtenOn": "2018-01-08T22:13:58Z",
+      "side": 1,
+      "message": "Good point. I modified it so the key dimension should be stable and avoid spurious resizes.",
+      "parentUuid": "b834298d_0e1549e3",
       "range": {
         "startLine": 1517,
         "startChar": 23,
