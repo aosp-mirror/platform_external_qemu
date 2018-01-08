@@ -169,7 +169,6 @@ static const SkinKeyEntry  _qwerty2_keys[] =
     { kKeyCodeZ             ,   'z',   'Z',  0xe6,   0xc6,   'z' },
     { kKeyCodeComma         ,   ',',   '<',  0xe7,   0xc7,   ',' },
     { kKeyCodePeriod        ,   '.',   '>',   '.', 0x2026,   '.' },
-    { kKeyCodeAt            ,   '@',   '@',   '@', 0x2022,   '@' },
     { kKeyCodeSlash         ,   '/',   '?',  0xbf,    '?',   '/' },
     { kKeyCodeSpace         ,  0x20,  0x20,   0x9,    0x9,  0x20 },
     { kKeyCodeNewline       ,   0xa,   0xa,   0xa,    0xa,   0xa },
