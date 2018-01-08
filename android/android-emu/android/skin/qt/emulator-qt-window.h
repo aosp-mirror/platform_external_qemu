@@ -389,13 +389,15 @@ private:
 
     // Window flags to use for frameless and framed appearance
 
-    static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (Qt::Window |
-                                                                Qt::FramelessWindowHint);
-    static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (Qt::Window               |
-                                                                Qt::WindowTitleHint      |
-                                                                Qt::CustomizeWindowHint    );
-    static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (FRAMELESS_WINDOW_FLAGS |
-                                                                FRAMED_WINDOW_FLAGS     );
+    static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (  Qt::Window
+                                                                | Qt::NoDropShadowWindowHint
+                                                                | Qt::FramelessWindowHint);
+    static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (  Qt::Window
+                                                                | Qt::NoDropShadowWindowHint
+                                                                | Qt::WindowTitleHint
+                                                                | Qt::CustomizeWindowHint);
+    static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (  FRAMELESS_WINDOW_FLAGS
+                                                                | FRAMED_WINDOW_FLAGS);
 
     QPointF mFocus;
     QPoint mViewportFocus;
