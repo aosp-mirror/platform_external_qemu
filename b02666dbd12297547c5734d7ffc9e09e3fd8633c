@@ -22,6 +22,40 @@
       "revId": "b02666dbd12297547c5734d7ffc9e09e3fd8633c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "55b6ba4a_a03d5675",
+        "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-01-09T22:22:06Z",
+      "side": 1,
+      "message": "is it possible that we show the virtual scene info dialog before the modal overlay and then we\u0027d want to hide it while the modal overlay is showing?  Like what happens if we do a save through the console when the virtual scene info dialog is showing?",
+      "revId": "b02666dbd12297547c5734d7ffc9e09e3fd8633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "32e8842d_9874827e",
+        "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-01-09T22:22:06Z",
+      "side": 1,
+      "message": "It would be nice if the modal overlay and virtual scene info could mostly use the same code paths since as far as I can tell there\u0027s only either one or the other at any given time and most of this file is calling the same functions on whichever one exists..",
+      "revId": "b02666dbd12297547c5734d7ffc9e09e3fd8633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
