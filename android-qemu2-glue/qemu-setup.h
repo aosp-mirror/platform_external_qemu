@@ -37,6 +37,11 @@ extern bool qemu_android_emulation_setup_dns_servers(const char* dns_servers,
 
 extern void ranchu_device_tree_setup(void *fdt);
 
+/* user provided random function: it should not fail
+ */
+
+extern void rng_random_generic_read_random_bytes(void *buf, int size);
+
 /* Call this function after the slirp stack has been initialized, typically
  * by calling net_init_clients() in vl.c, to inject Android-specific features
  * (e.g. custom DNS server list) into the network stack. */
