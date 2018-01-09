@@ -3412,7 +3412,9 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
     int optind;
     const char *optarg;
     const char *loadvm = NULL;
+#ifdef CONFIG_ANDROID
     bool snapshot_list = false;
+#endif
     MachineClass *machine_class;
     const char *cpu_model;
     const char *vga_model = NULL;
@@ -4116,9 +4118,11 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
             case QEMU_OPTION_loadvm:
                 loadvm = optarg;
                 break;
+#ifdef CONFIG_ANDROID
             case QEMU_OPTION_snapshot_list:
                 snapshot_list = true;
                 break;
+#endif
             case QEMU_OPTION_full_screen:
                 full_screen = 1;
                 break;
