@@ -397,6 +397,7 @@ QEMU2_COMMON_SOURCES_windows-x86 := \
     audio/audio_win_int.c \
     audio/dsoundaudio.c \
     audio/winaudio.c \
+    backends/rng-random-generic.c \
     block/file-win32.c \
     block/win32-aio.c \
     chardev/char-console.c \
@@ -411,6 +412,7 @@ QEMU2_COMMON_SOURCES_windows-x86_64 := \
     audio/audio_win_int.c \
     audio/dsoundaudio.c \
     audio/winaudio.c \
+    backends/rng-random-generic.c \
     block/file-win32.c \
     block/win32-aio.c \
     chardev/char-console.c \
