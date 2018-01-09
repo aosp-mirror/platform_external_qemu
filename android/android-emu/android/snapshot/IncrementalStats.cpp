@@ -16,6 +16,9 @@
 namespace android {
 namespace snapshot {
 
+constexpr char IncrementalStats::kActionFormat[];
+constexpr char IncrementalStats::kTimeFormat[];
+
 #if SNAPSHOT_PROFILE > 1
 
 template <class TransformFunc, size_t N, int... Idx>
