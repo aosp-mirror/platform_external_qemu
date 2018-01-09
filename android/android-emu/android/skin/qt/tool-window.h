@@ -85,6 +85,7 @@ public:
     bool handleQtKeyEvent(QKeyEvent* event, QtKeyEventSource source);
     void reportMouseButtonDown();
 
+    bool isExtendedWindowFocused();
     void closeExtendedWindow();
 
     // Observed only on Windows:

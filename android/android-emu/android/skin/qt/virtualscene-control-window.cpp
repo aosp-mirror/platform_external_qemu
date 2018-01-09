@@ -42,8 +42,8 @@ static const float kMinVerticalRotationDegrees = -80.0f;
 static const float kMaxVerticalRotationDegrees = 80.0f;
 
 static const char* kTextStyleFormatString =
-        "font-size:%1;background-color:transparent;";
-static const char* kHighlightTextStyle = "color:#eee";
+        "* { font-size: %1; background-color: transparent; }"
+        "*[ColorGroup=\"Highlight\"] { color: #eee; }";
 
 VirtualSceneControlWindow::VirtualSceneControlWindow(
         EmulatorQtWindow* emulatorWindow,
@@ -76,6 +76,11 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(
 
     SettingsTheme theme = getSelectedTheme();
     updateTheme(Ui::stylesheetForTheme(theme));
+
+    QString textStyle =
+            QString(kTextStyleFormatString)
+                    .arg(Ui::stylesheetFontSize(Ui::FontSize::Large));
+    mControlsUi->instructions->setStyleSheet(textStyle);
 
     QApplication::instance()->installEventFilter(this);
 
@@ -138,7 +143,7 @@ bool VirtualSceneControlWindow::handleQtKeyEvent(QKeyEvent* event,
 
 void VirtualSceneControlWindow::updateTheme(const QString& styleSheet) {
     setStyleSheet(styleSheet);
-    updateHighlightStyle();
+    updateHighlightAndFocusStyle();
 }
 
 void VirtualSceneControlWindow::setAgent(const UiEmuAgent* agentPtr) {
@@ -233,7 +238,7 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
 
     mCaptureMouse = capture;
 
-    updateHighlightStyle();
+    updateHighlightAndFocusStyle();
     update();  // Queues a repaint call.
 }
 
@@ -316,6 +321,16 @@ bool VirtualSceneControlWindow::eventFilter(QObject* target, QEvent* event) {
         }
     }
 
+    if (event->type() == QEvent::WindowActivate ||
+        event->type() == QEvent::WindowDeactivate) {
+        const bool hotkeyAvailable = !mToolWindow->isExtendedWindowFocused();
+        if (hotkeyAvailable != mIsHotkeyAvailable) {
+            mIsHotkeyAvailable = hotkeyAvailable;
+            updateHighlightAndFocusStyle();
+            update();  // Queue a repaint event.
+        }
+    }
+
     return QObject::eventFilter(target, event);
 }
 
@@ -361,7 +376,11 @@ void VirtualSceneControlWindow::paintEvent(QPaintEvent*) {
     }
 
     QPen outlinePen(Qt::SolidLine);
-    outlinePen.setColor(Qt::black);
+    if (mIsHotkeyAvailable) {
+        outlinePen.setColor(Qt::black);
+    } else {
+        outlinePen.setColor(QColor(127, 127, 127));
+    }
     outlinePen.setWidth(1);
     p.setPen(outlinePen);
     p.drawRect(rect);
@@ -487,18 +506,19 @@ void VirtualSceneControlWindow::updateMouselook() {
     }
 }
 
-void VirtualSceneControlWindow::updateHighlightStyle() {
+void VirtualSceneControlWindow::updateHighlightAndFocusStyle() {
     mControlsUi->instructions->setText(getInfoText());
 
-    QString textStyle =
-            QString(kTextStyleFormatString)
-                    .arg(Ui::stylesheetFontSize(Ui::FontSize::Large));
     if (mCaptureMouse) {
-        mControlsUi->instructions->setStyleSheet(textStyle +
-                                                 kHighlightTextStyle);
+        mControlsUi->instructions->setProperty("ColorGroup", "Highlight");
+    } else if (!mIsHotkeyAvailable) {
+        mControlsUi->instructions->setProperty("ColorGroup", "Inactive");
     } else {
-        mControlsUi->instructions->setStyleSheet(textStyle);
+        mControlsUi->instructions->setProperty("ColorGroup", "");
     }
+
+    mControlsUi->instructions->style()->unpolish(mControlsUi->instructions);
+    mControlsUi->instructions->style()->polish(mControlsUi->instructions);
 }
 
 QString VirtualSceneControlWindow::getInfoText() {
