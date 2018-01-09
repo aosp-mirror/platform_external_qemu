@@ -1507,6 +1507,22 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
     showNormal();
     setFixedSize(rect.size());
 
+    if (rect.width() < mContainer.minimumWidth() ||
+        rect.height() < mContainer.minimumHeight())
+    {
+        // We're trying to go smaller than the container will allow.
+        // Increase our size to the container's minimum.
+        double horizIncreaseFactor = (double)(mContainer.minimumWidth()) / rect.width();
+        double vertIncreaseFactor = (double)(mContainer.minimumHeight()) / rect.height();
+        if (horizIncreaseFactor > vertIncreaseFactor) {
+            rect.setWidth(mContainer.minimumWidth());
+            rect.setHeight((int)(horizIncreaseFactor * rect.height()));
+        } else {
+            rect.setWidth((int)(vertIncreaseFactor * rect.width()));
+            rect.setHeight(mContainer.minimumHeight());
+        }
+    }
+
     // If this was the result of a zoom, don't change the overall window size,
     // and adjust the scroll bars to reflect the desired focus point.
     if (mInZoomMode && mNextIsZoom) {
