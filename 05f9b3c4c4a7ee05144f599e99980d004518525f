@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c55427bd_fe46b39e",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 289,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-09T23:52:45Z",
+      "side": 1,
+      "message": "Ever possible for count to exceed max adb payload? Could it slow down all adb operations if we end up waiting in mReceivedMesg.read?",
+      "range": {
+        "startLine": 289,
+        "startChar": 0,
+        "endLine": 289,
+        "endChar": 59
+      },
+      "revId": "05f9b3c4c4a7ee05144f599e99980d004518525f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e3b4533_757f745a",
+        "filename": "android/android-emu/android/emulation/AdbGuestPipe.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-09T23:52:45Z",
+      "side": 1,
+      "message": "Needed?",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 14
+      },
+      "revId": "05f9b3c4c4a7ee05144f599e99980d004518525f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "73e0a79e_847a4ee9",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-09T23:52:45Z",
+      "side": 1,
+      "message": "different versions of adb or older system images ok?",
+      "range": {
+        "startLine": 18,
+        "startChar": 42,
+        "endLine": 18,
+        "endChar": 57
+      },
+      "revId": "05f9b3c4c4a7ee05144f599e99980d004518525f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e9dad95_0a21a882",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.cpp",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-09T23:52:45Z",
+      "side": 1,
+      "message": "nit: trailing whitespace",
+      "range": {
+        "startLine": 66,
+        "startChar": 16,
+        "endLine": 66,
+        "endChar": 17
+      },
+      "revId": "05f9b3c4c4a7ee05144f599e99980d004518525f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "20dd9311_f2f5019a",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-09T23:52:45Z",
+      "side": 1,
+      "message": "Is this guaranteed?",
+      "range": {
+        "startLine": 26,
+        "startChar": 0,
+        "endLine": 26,
+        "endChar": 38
+      },
+      "revId": "05f9b3c4c4a7ee05144f599e99980d004518525f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d142cc6_d2f361b1",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-09T23:52:45Z",
+      "side": 1,
+      "message": "sizeof(amessage)? or sizeof(apacket) for the whole thing.\n\nSo we don\u0027t have magic numbers.\n\n(also why not make this also of type apacket? we end up casting mPacket to uint8_t* later anyway, it\u0027s just more clear that this is a intermediate packet for writing)",
+      "range": {
+        "startLine": 51,
+        "startChar": 47,
+        "endLine": 51,
+        "endChar": 49
+      },
+      "revId": "05f9b3c4c4a7ee05144f599e99980d004518525f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0fc3292b_e4eac465",
+        "filename": "android/android-emu/android/emulation/AdbMessageSniffer.h",
+        "patchSetId": 5
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-09T23:52:45Z",
+      "side": 1,
+      "message": "Would unordered_map also work here? it\u0027s faster.\n\nDoes it need to be protected by a lock? (same goes for others above like mpacket, mBuffer, etc)",
+      "range": {
+        "startLine": 57,
+        "startChar": 4,
+        "endLine": 57,
+        "endChar": 40
+      },
+      "revId": "05f9b3c4c4a7ee05144f599e99980d004518525f",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
