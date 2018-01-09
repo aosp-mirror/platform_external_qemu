@@ -745,11 +745,9 @@ extern "C" int main(int argc, char** argv) {
 
     /** SNAPSHOT STORAGE HANDLING */
 
-#ifdef QEMU2_SNAPSHOT_SUPPORT
     if (opts->snapshot_list) {
         args.add("-snapshot-list");
     }
-#endif  // QEMU2_SNAPSHOT_SUPPORT
 
     /* If we have a valid snapshot storage path */
 
