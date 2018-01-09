@@ -1505,9 +1505,6 @@ avdInfo_initHwConfig(const AvdInfo* i, AndroidHwConfig*  hw, bool isQemu2)
     }
 
     if (hw->hw_arc) {
-        // Chrome OS images do not yet support snapshotting, force
-        // coldboot.
-        hw->fastboot_forceColdBoot = true;
         // Chrome OS has a different graphics pipeline, disable GPU
         // acceleration for now.
         str_reset(&hw->hw_gpu_mode, "off");
