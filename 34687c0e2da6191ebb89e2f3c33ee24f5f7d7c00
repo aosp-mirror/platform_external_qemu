@@ -22,6 +22,30 @@
       "revId": "34687c0e2da6191ebb89e2f3c33ee24f5f7d7c00",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "45556ccd_543b6bd4",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-09T23:23:14Z",
+      "side": 1,
+      "message": "I like it, changed.",
+      "parentUuid": "9c32d903_fdc4c1a2",
+      "range": {
+        "startLine": 412,
+        "startChar": 30,
+        "endLine": 412,
+        "endChar": 63
+      },
+      "revId": "34687c0e2da6191ebb89e2f3c33ee24f5f7d7c00",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
