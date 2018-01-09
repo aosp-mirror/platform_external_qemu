@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9c32d903_fdc4c1a2",
+        "filename": "android/android-emu/android/skin/qt/virtualscene-control-window.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 412,
+      "author": {
+        "id": 1235311
+      },
+      "writtenOn": "2018-01-09T22:28:30Z",
+      "side": 1,
+      "message": "Since we disconnect like this, it might be good to name this slot something like slot_virtualSceneInfoDialogHasBeenSeen or something like that so no one tries to add more stuff to the dialog-hidden slot and expect it to always be called.",
+      "range": {
+        "startLine": 412,
+        "startChar": 30,
+        "endLine": 412,
+        "endChar": 63
+      },
+      "revId": "34687c0e2da6191ebb89e2f3c33ee24f5f7d7c00",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
