@@ -82,6 +82,7 @@ public slots:
 private slots:
     void slot_mousePoller();
     void slot_metricsAggregator();
+    void slot_virtualSceneInfoDialogHasBeenSeen();
 
 private:
     void updateMouselook();

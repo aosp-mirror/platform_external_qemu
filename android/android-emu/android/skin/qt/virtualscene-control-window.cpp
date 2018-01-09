@@ -394,10 +394,24 @@ void VirtualSceneControlWindow::setActive(bool active) {
 
         if (mShouldShowInfoDialog) {
             mEmulatorWindow->containerWindow()->showVirtualSceneInfoDialog();
-            mShouldShowInfoDialog = false;
+
+            connect(mEmulatorWindow->containerWindow(),
+                    SIGNAL(hideVirtualSceneInfoDialog()), this,
+                    SLOT(slot_virtualSceneInfoDialogHasBeenSeen()));
         }
     } else {
         hide();
+
+        // The camera session has ended.  If the info dialog is still open, we
+        // want to show it again next time in case the camera crashed and the
+        // user did not read the dialog.  To accomplish this, disconnect the
+        // hidden event before hiding the window so that we don't unset the
+        // mShouldShowInfoDialog flag when the window hides.
+        disconnect(mEmulatorWindow->containerWindow(),
+                   SIGNAL(hideVirtualSceneInfoDialog()),
+                   this, SLOT(slot_virtualSceneInfoDialogHasBeenSeen()));
+
+        mEmulatorWindow->containerWindow()->hideVirtualSceneInfoDialog();
     }
 }
 
@@ -462,6 +476,12 @@ void VirtualSceneControlWindow::slot_metricsAggregator() {
 
         aggregateMovementMetrics();
     }
+}
+
+void VirtualSceneControlWindow::slot_virtualSceneInfoDialogHasBeenSeen() {
+    // If the window is explicitly hidden, prevent it from being shown again
+    // this session.
+    mShouldShowInfoDialog = false;
 }
 
 void VirtualSceneControlWindow::updateMouselook() {
