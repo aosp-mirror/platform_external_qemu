@@ -547,6 +547,14 @@ void ToolWindow::reportMouseButtonDown() {
             [&] { mVirtualSceneControlWindow.get()->reportMouseButtonDown(); });
 }
 
+bool ToolWindow::isExtendedWindowFocused() {
+    if (mExtendedWindow.hasInstance()) {
+        return mExtendedWindow.get()->isActiveWindow();
+    }
+
+    return false;
+}
+
 void ToolWindow::closeExtendedWindow() {
     // If user is clicking the 'x' button like crazy, we may get multiple
     // close events here, so make sure the function doesn't screw the state for

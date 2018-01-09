@@ -259,7 +259,8 @@ struct StylesheetValues {
         {TAB_SELECTED_COLOR_VAR,            "#f5f5f5"},  // Background of the selected major tab
         {"TAB_DARKENED_COLOR",              "#e6e6e6"},
         {"TABLE_BOTTOM_COLOR",              "#e0e0e0"},
-        {"TEXT_COLOR",                      "#212121"},  // Main page text
+        {"TEXT_COLOR",                "rgb(33,33,33)"},  // Main page text
+        {"INACTIVE_TEXT_COLOR",  "rgba(33,33,33,50%)"},
         {"TITLE_COLOR",                     "#757575"},  // Main page titles
         {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
         {"TOOL_ON_COLOR",                   "#d6d6d6"},  // Main toolbar button ON
@@ -291,7 +292,8 @@ struct StylesheetValues {
         {TAB_SELECTED_COLOR_VAR,         "#313c42"},
         {"TAB_DARKENED_COLOR",           "#20292e"},
         {"TABLE_BOTTOM_COLOR",           "#1d272c"},
-        {"TEXT_COLOR",                   "#eeeeee"},
+        {"TEXT_COLOR",          "rgb(238,238,238)"},
+        {"INACTIVE_TEXT_COLOR", "rgba(238,238,238,50%)"},
         {"TITLE_COLOR",                  "#bec1c3"},
         {"TOOL_COLOR",                   "#00bea4"},
         {"TOOL_ON_COLOR",                "#586670"},

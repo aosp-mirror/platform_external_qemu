@@ -48,6 +48,9 @@
 *[ColorGroup="Overlay"] {
     background: %%BKG_COLOR_OVERLAY%%;
 }
+*[ColorGroup="Inactive"] {
+    color: %%INACTIVE_TEXT_COLOR%%;
+}
 *{
     color: %%TEXT_COLOR%%;
     background-color: %%BKG_COLOR%%;
