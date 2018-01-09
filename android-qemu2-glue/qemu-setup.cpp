@@ -16,6 +16,7 @@
 
 #include "android/android.h"
 #include "android/base/Log.h"
+#include "android/base/files/MemStream.h"
 #include "android/base/memory/ScopedPtr.h"
 #include "android/console.h"
 #include "android/crashreport/CrashReporter.h"
@@ -42,6 +43,8 @@
 #include "android-qemu2-glue/qemu-control-impl.h"
 #include "android-qemu2-glue/snapshot_compression.h"
 
+#include <random>
+
 extern "C" {
 
 #include "qemu/osdep.h"
@@ -51,6 +54,7 @@ extern "C" {
 #include "qemu/thread.h"
 #include "sysemu/device_tree.h"
 #include "sysemu/ranchu.h"
+#include "sysemu/rng-random-generic.h"
 
 // TODO: Remove op_http_proxy global variable.
 extern char* op_http_proxy;
@@ -86,6 +90,20 @@ extern "C" void ranchu_device_tree_setup(void *fdt) {
         qemu_fdt_setprop_string(fdt, "/firmware/android/fstab/vendor", "type", "ext4");
         free(vendor_path);
     }
+}
+
+extern "C" void rng_random_generic_read_random_bytes(void *buf, int size) {
+    if (size <= 0) return;
+
+    android::base::MemStream stream;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> uniform_dist(0,255); //fill a byte
+
+    for (int i=0; i < size; ++i) {
+        stream.putByte(uniform_dist(gen));
+    }
+    stream.read(buf, size);
 }
 
 bool qemu_android_emulation_early_setup() {

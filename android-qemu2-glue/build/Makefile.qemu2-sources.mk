@@ -13,6 +13,7 @@ QEMU2_COMMON_SOURCES := \
     backends/hostmem.c \
     backends/msmouse.c \
     backends/rng-egd.c \
+    backends/rng-random-generic.c \
     backends/rng.c \
     backends/testdev.c \
     backends/tpm.c \
@@ -352,7 +353,6 @@ QEMU2_COMMON_SOURCES := \
 
 QEMU2_COMMON_SOURCES_darwin-x86_64 := \
     audio/coreaudio.c \
-    backends/rng-random.c \
     block/file-posix.c \
     chardev/char-fd.c \
     chardev/char-parallel.c \
@@ -371,7 +371,6 @@ QEMU2_COMMON_SOURCES_linux-x86_64 := \
     audio/audio_pt_int.c \
     audio/paaudio.c \
     backends/hostmem-file.c \
-    backends/rng-random.c \
     block/file-posix.c \
     chardev/char-fd.c \
     chardev/char-parallel.c \
