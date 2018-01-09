@@ -16,6 +16,7 @@
 #include "android/base/threads/FunctorThread.h"
 #include "android/crashreport/crash-handler.h"
 #include "android/emulation/CpuAccelerator.h"
+#include "android/globals.h"
 #include "android/snapshot/MacSegvHandler.h"
 
 #include <signal.h>
@@ -137,6 +138,8 @@ public:
 
 // static
 bool MemoryAccessWatch::isSupported() {
+    // TODO: b/71596968
+    if (android_hw->hw_arc) return false;
     // TODO: HAXM
     return GetCurrentCpuAccelerator() == CPU_ACCELERATOR_HVF;
 }
