@@ -42,6 +42,24 @@
     },
     {
       "key": {
+        "uuid": "47d25e6a_667d813d",
+        "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 386,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-09T23:22:36Z",
+      "side": 1,
+      "message": "Good catch, I confirmed that opening the modal overlay with \"avd snapshot save test\" creates two overlapping overlays.  I\u0027ll hide the virtual scene overlay if a modal overlay appears.",
+      "parentUuid": "55b6ba4a_a03d5675",
+      "revId": "b02666dbd12297547c5734d7ffc9e09e3fd8633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "32e8842d_9874827e",
         "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
         "patchSetId": 1
@@ -53,6 +71,24 @@
       "writtenOn": "2018-01-09T22:22:06Z",
       "side": 1,
       "message": "It would be nice if the modal overlay and virtual scene info could mostly use the same code paths since as far as I can tell there\u0027s only either one or the other at any given time and most of this file is calling the same functions on whichever one exists..",
+      "revId": "b02666dbd12297547c5734d7ffc9e09e3fd8633c",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e75e8850_bff77dfd",
+        "filename": "android/android-emu/android/skin/qt/emulator-container.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 458,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-09T23:22:36Z",
+      "side": 1,
+      "message": "Yeah, the virtual scene info and modal overlay are very similar.  I chose not to merge the code paths for this because I wanted to limit changes to the existing modal overlay, and the two existing overlay types (messages and modal) are also implemented in separate code paths.",
+      "parentUuid": "32e8842d_9874827e",
       "revId": "b02666dbd12297547c5734d7ffc9e09e3fd8633c",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
