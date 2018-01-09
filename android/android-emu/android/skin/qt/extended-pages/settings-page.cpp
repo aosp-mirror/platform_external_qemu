@@ -569,6 +569,14 @@ void SettingsPage::on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index
     }
 }
 
+void SettingsPage::on_set_resetNotifications_pressed() {
+    QSettings settings;
+    settings.remove(Ui::Settings::SHOW_AVD_ARCH_WARNING);
+    settings.remove(Ui::Settings::SHOW_GPU_WARNING);
+    settings.remove(Ui::Settings::SHOW_ADB_WARNING);
+    settings.remove(Ui::Settings::SHOW_VIRTUALSCENE_INFO);
+}
+
 void SettingsPage::on_set_clipboardSharing_toggled(bool checked) {
     // Save it only if the option is enabled - otherwise it means that the
     // feature isn't supported, so no need to overwrite valid saved value.

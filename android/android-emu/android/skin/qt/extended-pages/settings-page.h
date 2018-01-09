@@ -57,6 +57,7 @@ private slots:
     void on_set_saveSnapshotOnExit_currentIndexChanged(int index);
     void on_set_glesBackendPrefComboBox_currentIndexChanged(int index);
     void on_set_glesApiLevelPrefComboBox_currentIndexChanged(int index);
+    void on_set_resetNotifications_pressed();
 
     // HTTP Proxy
     void on_set_hostName_editingFinished();
