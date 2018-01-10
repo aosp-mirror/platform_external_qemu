@@ -973,7 +973,7 @@ int PhysicalModelImpl::stopRecordAndPlayback() {
             command.set_time(mModelTimeNs - mPlaybackAndRecordingStartTimeNs);\
             command.set_interpolation_method(toProto(mode));\
             setProtoValue(&command, value);\
-            assert(mRecordingStream.get());\
+            assert(mRecordingAndPlaybackStream.get());\
             std::string encodedProto;\
             if (command.SerializeToString(&encodedProto)) {\
                 mRecordingAndPlaybackStream->putString(encodedProto);\
