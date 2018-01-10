@@ -18,6 +18,7 @@
 #include "MacNative.h"
 
 #include "android/base/containers/Lookup.h"
+#include "android/base/Profiler.h"
 
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
@@ -29,6 +30,10 @@
 
 #include <numeric>
 #include <unordered_map>
+
+#define PROFILE_SLOW(tag) \
+    android::base::ScopedProfiler __profile_slow(tag, [](const char* tag2, uint64_t elapsedUs) { \
+            if (elapsedUs >= 6000) { fprintf(stderr, "%s: slow. %f ms\n", tag2, elapsedUs / 1000.0f); } }); \
 
 #define MAX_PBUFFER_MIPMAP_LEVEL 1
 
@@ -241,6 +246,7 @@ public:
             EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
+        PROFILE_SLOW("createContext");
 
         void* macSharedContext =
                 sharedContext ? MacContext::from(sharedContext) : NULL;
@@ -270,6 +276,7 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
+        PROFILE_SLOW("createContext");
         GLenum glTexFormat = GL_RGBA, glTexTarget = GL_TEXTURE_2D;
         switch (info->format) {
         case EGL_TEXTURE_RGB:
@@ -295,6 +302,7 @@ public:
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
+        PROFILE_SLOW("createContext");
         if (pb) {
             nsDestroyPBuffer(MacSurface::from(pb)->handle());
         }
@@ -304,6 +312,7 @@ public:
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
                              EglOS::Context* ctx) {
+        PROFILE_SLOW("createContext");
         // check for unbind
         if (ctx == NULL && read == NULL && draw == NULL) {
             nsWindowMakeCurrent(NULL, NULL);
