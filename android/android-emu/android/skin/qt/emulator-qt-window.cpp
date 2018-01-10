@@ -930,6 +930,10 @@ void EmulatorQtWindow::maskWindowFrame() {
     flags &= ~FRAME_WINDOW_FLAGS_MASK;
     flags |= (haveFrame ? FRAMED_WINDOW_FLAGS : FRAMELESS_WINDOW_FLAGS);
 
+    flags |= Qt::WindowSystemMenuHint;
+    flags |= Qt::WindowMinimizeButtonHint;
+    flags |= Qt::WindowMaximizeButtonHint;
+
     mContainer.setWindowFlags(flags);
 
     // Re-generate and apply the mask
