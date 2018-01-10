@@ -26,7 +26,6 @@ EglSurface::~EglSurface(){
         m_dpy->nativeType()->releasePbuffer(m_native);
     }
 
-    delete m_native;
 }
 
 bool  EglSurface::setAttrib(EGLint attrib,EGLint val) {

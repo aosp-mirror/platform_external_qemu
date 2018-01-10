@@ -1007,6 +1007,9 @@ public:
             GetLastError();
             return false;
         }
+
+        if (winpb) delete winpb;
+
         return true;
     }
 
