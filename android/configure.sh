@@ -643,6 +643,13 @@ fi
 mkdir -p $OUT_DIR/lib
 cp -f "$ADVANCED_FEATURE_FILE" "$OUT_DIR/lib/"
 
+ADVANCED_FEATURE_FILE_CANARY="$PROGDIR/data/advancedFeaturesCanary.ini"
+if [ ! -f "$ADVANCED_FEATURE_FILE_CANARY" ]; then
+    panic "Missing Canary advanced feature file: $ADVANCED_FEATURE_FILE_CANARY"
+fi
+mkdir -p $OUT_DIR/lib
+cp -f "$ADVANCED_FEATURE_FILE_CANARY" "$OUT_DIR/lib/"
+
 ###
 ###  Breakpad probe
 ###

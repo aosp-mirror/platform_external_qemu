@@ -20,9 +20,11 @@
 namespace android {
 namespace featurecontrol {
 
-// featurecontrol is used to switch on/off advanced features
-// It loads sdk/tools/advancedFeatures.ini for default values and
-// .android/advancedFeatures.ini for user overriden values.
+// featurecontrol is used to switch on/off advanced features It loads
+// sdk/emulator/lib/advancedFeatures.ini for default values and
+// .android/advancedFeatures.ini for user overriden values.  If on canary
+// update channel, sdk/emulator/lib/advancedFeaturesCanary.ini is used for
+// default values.
 // It is expected to be initialized at the beginning of the emulator.
 // For easier testing, one may also want to pass the override value through
 // command line and call setEnabledOverride. (Command line override not
@@ -31,7 +33,8 @@ namespace featurecontrol {
 // featurecontrol::isEnabled is thread safe, all other methods are not.
 //
 // To add new features, please (1) add it to android/data/advancedFeatures.ini
-// (2) add a new line to FeatureControlDef.h, in the following format:
+// or android/data/advancedFeaturesCanary.ini and (2) add a new line to
+// FeatureControlDef.h, in the following format:
 // FEATURE_CONTROL_ITEM(YOUR_FEATURE_NAME)
 
 void initialize();
