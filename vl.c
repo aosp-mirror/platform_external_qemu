@@ -28,6 +28,7 @@
 #include "qemu/uuid.h"
 #include "block/block_int.h"
 #include "sysemu/ranchu.h"
+#include "sysemu/rng-random-generic.h"
 
 #ifdef CONFIG_SECCOMP
 #include "sysemu/seccomp.h"
@@ -4645,6 +4646,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 #if defined(TARGET_AARCH64) || defined(TARGET_ARM) || defined(TARGET_MIPS)
     qemu_device_tree_setup_callback(ranchu_device_tree_setup);
 #endif
+    qemu_set_rng_random_generic_random_func(rng_random_generic_read_random_bytes);
     if (!qemu_android_emulation_early_setup()) {
         return 1;
     }
