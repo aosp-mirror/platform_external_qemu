@@ -85,8 +85,20 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
             }
         }
         const bool tryIncremental = loader && !loader->hasError();
+        fprintf(stderr, "%s: try? %d has loader? %d err %d\n", __func__, tryIncremental,
+                loader ? 1 : 0,
+                loader ? !loader->hasError() : 0
+                );
+
+        bool resurrectedLoaderIndex = false;
+        if (tryIncremental &&
+            loader->needsIndexReload()) {
+            loader->reloadIndex(ramFile.c_str());
+            resurrectedLoaderIndex = true;
+        }
+
         mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr,
-                          isOnExit);
+                          isOnExit, resurrectedLoaderIndex);
         if (mRamSaver->hasError()) {
             mRamSaver.clear();
             return;

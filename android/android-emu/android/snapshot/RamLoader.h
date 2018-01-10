@@ -48,6 +48,11 @@ public:
     void join();
     void interrupt();
 
+    bool needsIndexReload() {
+        return !mGaps;
+    }
+    bool reloadIndex(const std::string& ramFile);
+
     bool hasError() const { return mHasError; }
     bool onDemandEnabled() const { return mOnDemandEnabled; }
     bool onDemandLoadingComplete() const {
@@ -62,7 +67,14 @@ public:
 
     const Page* findPage(int blockIndex, const char* id, int pageIndex) const;
 
-    GapTracker::Ptr releaseGapTracker() { return std::move(mGaps); }
+    GapTracker::Ptr releaseGapTracker() {
+        if (!mGaps) {
+            fprintf(stderr, "%s: null gap tracker!\n", __func__);
+            readIndex();
+        } else {
+            fprintf(stderr, "%s: has gap tracker!\n", __func__);
+        }
+        return std::move(mGaps); }
 
     bool getDuration(base::System::Duration* duration) {
         if (mEndTime < mStartTime) {
@@ -94,7 +106,7 @@ private:
         void clear();
     };
 
-    bool readIndex();
+    bool readIndex(bool forSave = false);
     void readBlockPages(base::Stream* stream,
                         FileIndex::Blocks::iterator blockIt,
                         bool compressed,

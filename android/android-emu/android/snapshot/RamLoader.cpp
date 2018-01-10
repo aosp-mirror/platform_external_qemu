@@ -51,6 +51,7 @@ RamLoader::RamLoader(base::StdioStream&& stream)
 }
 
 RamLoader::~RamLoader() {
+    fprintf(stderr, "%s: call\n", __func__);
     if (mWasStarted) {
         interruptReading();
         mReaderThread.wait();
@@ -82,6 +83,7 @@ bool RamLoader::start(bool isQuickboot) {
 
     mWasStarted = true;
     if (!readIndex()) {
+        fprintf(stderr, "%s: no index. seterr\n", __func__);
         mHasError = true;
         return false;
     }
@@ -96,6 +98,7 @@ bool RamLoader::start(bool isQuickboot) {
     }
 
     if (!registerPageWatches()) {
+        fprintf(stderr, "%s: no pagewatch. seterr\n", __func__);
         mHasError = true;
         return false;
     }
@@ -106,9 +109,13 @@ bool RamLoader::start(bool isQuickboot) {
 }
 
 void RamLoader::join() {
+    fprintf(stderr, "%s: start\n", __func__);
     mJoining = true;
     mReaderThread.wait();
     mStream.close();
+    fprintf(stderr, "%s: clear ac wat\n", __func__);
+    mAccessWatch.clear();
+    fprintf(stderr, "%s: end\n", __func__);
 }
 
 void RamLoader::interrupt() {
@@ -146,7 +153,10 @@ void RamLoader::zeroOutPage(const Page& page) {
     }
 }
 
-bool RamLoader::readIndex() {
+bool RamLoader::readIndex(bool forSave) {
+    mIndex.pages.clear();
+    fprintf(stderr, "%s: block count %d\n", __func__, mIndex.blocks.size());
+
 #if SNAPSHOT_PROFILE > 1
     auto start = base::System::get()->getHighResTimeUs();
 #endif
@@ -203,6 +213,16 @@ bool RamLoader::readIndex() {
     printf("readIndex() time: %.03f\n",
            (base::System::get()->getHighResTimeUs() - start) / 1000.0);
 #endif
+    return true;
+}
+
+bool RamLoader::reloadIndex(const std::string& name) {
+    fprintf(stderr, "%s: reloading index %s\n", __func__, name.c_str());
+    const auto ramFh = fopen(name.c_str(), "rb");
+    mStream = std::move(base::StdioStream(ramFh, base::StdioStream::kOwner));
+    readIndex(true /* for save */);
+    mStream.close();
+    fprintf(stderr, "%s: reloading index %s done\n", __func__, name.c_str());
     return true;
 }
 
@@ -333,8 +353,6 @@ void RamLoader::readerWorker() {
             mReadDataQueue.send(page);
         }
     }
-
-    mAccessWatch.clear();
 
     mEndTime = base::System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1
@@ -489,6 +507,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
             delete[] buf;
         }
         page.state.store(uint8_t(State::Error));
+        fprintf(stderr, "%s: err, reading page retur less data\n", __func__);
         mHasError = true;
         return false;
     }
@@ -513,6 +532,7 @@ bool RamLoader::readDataFromDisk(Page* pagePtr, uint8_t* preallocatedBuffer) {
                     delete[] decompressed;
                 }
                 page.state.store(uint8_t(State::Error));
+                fprintf(stderr, "%s: err, decompress failed\n", __func__);
                 mHasError = true;
                 return false;
             }
@@ -544,6 +564,9 @@ void RamLoader::fillPageData(Page* pagePtr) {
         bool res = mAccessWatch->fillPage(this->pagePtr(page), pageSize(page),
                                           page.data, mIsQuickboot);
         if (!res) {
+            fprintf(stderr, "%s: fillPage failed somewhere for %p watch %d\n", __func__,
+                    this->pagePtr(page),
+                    mAccessWatch == base::kNullopt ? 0 : 1);
             mHasError = true;
         }
         page.state.store(uint8_t(res ? State::Filled : State::Error),
@@ -593,6 +616,7 @@ bool RamLoader::readAllPages() {
 
     for (Page* page : sortedPages) {
         if (!readDataFromDisk(page, pagePtr(*page))) {
+            fprintf(stderr, "%s: readDataFromDisk failed somewhere\n", __func__);
             mHasError = true;
             return false;
         }
@@ -611,6 +635,7 @@ void RamLoader::startDecompressor() {
         page->data = nullptr;
         if (!res) {
             derror("Decompressing page %p failed", pagePtr(*page));
+            fprintf(stderr, "%s: decompr failed somewhere\n", __func__);
             mHasError = true;
             page->state.store(uint8_t(State::Error));
         }

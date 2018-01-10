@@ -5601,6 +5601,7 @@ static int main_impl(int argc, char** argv, void (*on_main_loop_done)(void))
 
     os_setup_post();
 
+    fprintf(stderr, "%s: start main lop\n", __func__);
     main_loop();
     replay_disable_events();
     iothread_stop_all();

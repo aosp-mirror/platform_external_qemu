@@ -146,8 +146,16 @@ static bool qemu_snapshot_save(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
     android::RecursiveScopedVmLock vmlock;
-    return qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer)) ==
-           0;
+    bool wasVmRunning = runstate_is_running() != 0;
+    vm_stop(RUN_STATE_SAVE_VM);
+
+    int res = qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer));
+
+    if (wasVmRunning) {
+        vm_start();
+    }
+
+    return res == 0;
 }
 
 static bool qemu_snapshot_load(const char* name,

@@ -148,6 +148,9 @@ MemoryAccessWatch::MemoryAccessWatch(AccessCallback&& accessCallback,
                                      IdleCallback&& idleCallback) :
     mImpl(isSupported() ? new Impl(std::move(accessCallback),
                                    std::move(idleCallback)) : nullptr) {
+        if (mImpl) {
+            fprintf(stderr, "%s: has impl\n", __func__);
+        }
     if (isSupported()) {
         sWatch = this;
     }
@@ -171,7 +174,7 @@ void MemoryAccessWatch::doneRegistering() {
 
 bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
-    if (!mImpl) return false;
+    if (!mImpl) { fprintf(stderr, "%s: no impl go away\n", __func__); return false; }
     return mImpl->fillPage(ptr, length, data, isQuickboot);
 }
 

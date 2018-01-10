@@ -53,7 +53,8 @@ public:
     RamSaver(const std::string& fileName,
              Flags preferredFlags,
              RamLoader* loader,
-             bool isOnExit);
+             bool isOnExit,
+             bool resurrectedLoaderIndex);
     ~RamSaver();
 
     void registerBlock(const RamBlock& block);
@@ -147,6 +148,8 @@ private:
     bool mJoined = false;
     bool mHasError = false;
     bool mLoaderOnDemand = false;
+    bool mOnExit = false;
+    bool mResurrectedLoaderIndex = false;
     int mLastBlockIndex = -1;
     int64_t mCurrentStreamPos = 8;
 

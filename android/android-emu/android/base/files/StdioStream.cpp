@@ -59,7 +59,9 @@ ssize_t StdioStream::write(const void* buffer, size_t size) {
 }
 
 void StdioStream::close() {
+    fprintf(stderr, "StdioStream::close call\n", __func__);
     if (mOwnership == kOwner && mFile) {
+        fprintf(stderr, "StdioStream::close my file\n", __func__);
         ::fclose(mFile);
         mFile = nullptr;
     }

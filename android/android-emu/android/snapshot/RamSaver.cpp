@@ -43,8 +43,10 @@ void RamSaver::FileIndex::clear() {
 RamSaver::RamSaver(const std::string& fileName,
                    Flags preferredFlags,
                    RamLoader* loader,
-                   bool isOnExit)
-    : mStream(nullptr) {
+                   bool isOnExit,
+                   bool resurrectedLoaderIndex)
+    : mStream(nullptr), mOnExit(isOnExit),
+      mResurrectedLoaderIndex(resurrectedLoaderIndex) {
     bool incremental = false;
     if (loader) {
         // check if we're ok to proceed with incremental saving
@@ -110,7 +112,7 @@ RamSaver::RamSaver(const std::string& fileName,
     }
 
     mWorkers.emplace(
-            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 6)),
+            std::max(1, std::min(System::get()->getCpuCoreCount() - 1, 1)),
             [this](QueuedPageInfo&& pi) { handlePageSave(std::move(pi)); });
     mWorkers->start();
     mWriter.emplace([this](WriteInfo&& wi) {
@@ -128,6 +130,7 @@ RamSaver::~RamSaver() {
 }
 
 void RamSaver::registerBlock(const RamBlock& block) {
+    fprintf(stderr, "RamSaver::%s call\n", __func__);
     mIndex.blocks.push_back({block, {}});
 }
 
@@ -202,7 +205,7 @@ void RamSaver::passToSaveHandler(QueuedPageInfo&& pi) {
             FileIndex::Block& block = mIndex.blocks[size_t(pi.blockIndex)];
             const RamLoader::Page* loaderPage = mLoader->findPage(
                     pi.blockIndex, block.ramBlock.id, pi.pageIndex);
-            if (loaderPage &&
+            if (loaderPage && !mResurrectedLoaderIndex &&
                 loaderPage->state.load(std::memory_order_relaxed) <
                         int(RamLoader::State::Filled)) {
                 // not loaded yet: definitely not changed
