@@ -15,6 +15,8 @@
 */
 #include "EglOsApi.h"
 
+#include "android/base/Profiler.h"
+
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/shared_library.h"
@@ -37,11 +39,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define PROFILE_SLOW_CALLS 0
+
+#if PROFILE_SLOW_CALLS
+
+#define PROFILE_SLOW(tag) \
+    android::base::ScopedProfiler __scoped_profiler(tag, [](const char* tag2, uint64_t elapsedUs) \
+            { if (elapsedUs >= 0) fprintf(stderr, "%s: slow. %f ms\n", tag2, elapsedUs / 1000.f); }); \
+
+#else
+
+#define PROFILE_SLOW(tag)
+
+#endif
+
 #define IS_TRUE(a) \
         do { if (!(a)) return NULL; } while (0)
 
 #define EXIT_IF_FALSE(a) \
-        do { if (!(a)) return; } while (0)
+        do { if (!(a)) return false; } while (0)
 
 #define DEBUG 0
 #if DEBUG
@@ -472,9 +488,9 @@ public:
             m_hwnd(wnd),
             m_hdc(GetDC(wnd)) {}
 
-    explicit WinSurface(HPBUFFERARB pb, const WglExtensionsDispatch* dispatch) :
+    explicit WinSurface(HPBUFFERARB pb, HDC globalDc, const WglExtensionsDispatch* dispatch) :
             Surface(PBUFFER),
-            m_pb(pb) {
+            m_pb(pb), m_globalDc(globalDc) {
         if (dispatch->wglGetPbufferDCARB) {
             m_hdc = dispatch->wglGetPbufferDCARB(pb);
         }
@@ -488,6 +504,7 @@ public:
 
     HWND getHwnd() const { return m_hwnd; }
     HDC  getDC() const { return m_hdc; }
+    HDC  getGlobalDC() const { return m_globalDc; }
     HPBUFFERARB getPbuffer() const { return m_pb; }
 
     static WinSurface* from(EglOS::Surface* s) {
@@ -498,6 +515,7 @@ private:
     HWND        m_hwnd = nullptr;
     HPBUFFERARB m_pb = nullptr;
     HDC         m_hdc = nullptr;
+    HDC         m_globalDc = nullptr;
 };
 
 class WinContext : public EglOS::Context {
@@ -506,6 +524,7 @@ public:
         mDispatch(dispatch), mCtx(ctx) {}
 
     ~WinContext() {
+        PROFILE_SLOW("~WinContext()");
         if (!mDispatch->wglDeleteContext(mCtx)) {
             fprintf(stderr, "error deleting WGL context! error 0x%x\n",
                     (unsigned)GetLastError());
@@ -730,38 +749,39 @@ bool initPixelFormat(HDC dc, const WglExtensionsDispatch* dispatch) {
     }
 }
 
-void pixelFormatToConfig(WinGlobals* globals,
+bool pixelFormatToConfig(WinGlobals* globals,
                          const WglExtensionsDispatch* dispatch,
                          int renderableType,
                          const PIXELFORMATDESCRIPTOR* frmt,
                          int index,
                          EglOS::AddConfigCallback* addConfigFunc,
-                         void* addConfigOpaque) {
+                         void* addConfigOpaque,
+                         WinPixelFormat** outFrmt) {
     EglOS::ConfigInfo info;
     memset(&info, 0, sizeof(info));
 
     if (frmt->iPixelType != PFD_TYPE_RGBA) {
         D("%s: Not an RGBA type!\n", __FUNCTION__);
-        return; // other formats are not supported yet
+        return false; // other formats are not supported yet
     }
     if (!(frmt->dwFlags & PFD_SUPPORT_OPENGL)) {
         D("%s: No OpenGL support\n", __FUNCTION__);
-        return;
+        return false;
     }
     // NOTE: Software renderers don't always support double-buffering.
     if (dispatch->mIsSystemLib && !(frmt->dwFlags & PFD_DOUBLEBUFFER)) {
         D("%s: No double-buffer support\n", __FUNCTION__);
-        return;
+        return false;
     }
     if ((frmt->dwFlags & (PFD_GENERIC_FORMAT | PFD_NEED_PALETTE)) != 0) {
         //discard generic pixel formats as well as pallete pixel formats
         D("%s: Generic format or needs palette\n", __FUNCTION__);
-        return;
+        return false;
     }
 
     if (!dispatch->wglGetPixelFormatAttribivARB) {
         D("%s: Missing wglGetPixelFormatAttribivARB\n", __FUNCTION__);
-        return;
+        return false;
     }
 
     GLint window = 0, pbuffer = 0;
@@ -785,7 +805,7 @@ void pixelFormatToConfig(WinGlobals* globals,
     }
     if (!info.surface_type) {
         D("%s: Missing surface type\n", __FUNCTION__);
-        return;
+        return false;
     }
 
     //default values
@@ -828,6 +848,7 @@ void pixelFormatToConfig(WinGlobals* globals,
     info.stencil_size = frmt->cStencilBits;
 
     info.frmt = new WinPixelFormat(frmt, index);
+    *outFrmt = (WinPixelFormat*)(info.frmt);
 
     if (!globals->getDefaultNontrivialDC() &&
         info.red_size >= 8) {
@@ -835,6 +856,7 @@ void pixelFormatToConfig(WinGlobals* globals,
     }
 
     (*addConfigFunc)(addConfigOpaque, &info);
+    return true;
 }
 
 class WglDisplay : public EglOS::Display {
@@ -871,14 +893,38 @@ public:
         for (int configId = 1; configId <= maxFormat; configId++) {
             mDispatch->DescribePixelFormat(
                     dpy, configId, sizeof(PIXELFORMATDESCRIPTOR), &pfd);
-            pixelFormatToConfig(
+            WinPixelFormat* resFrmt;
+            if (pixelFormatToConfig(
                     mGlobals,
                     mDispatch,
                     renderableType,
                     &pfd,
                     configId,
                     addConfigFunc,
-                    addConfigOpaque);
+                    addConfigOpaque,
+                    &resFrmt)) {
+
+                // for (int i = 0; i < 20; i++) {
+                //     PROFILE_SLOW("Initial pbuffer add");
+
+                //     HDC dpy = mGlobals->getDummyDC(resFrmt);
+                //     int wglTexTarget = WGL_TEXTURE_2D_ARB;
+                //     int wglTexFormat = WGL_TEXTURE_RGB_ARB;
+
+                //     const int pbAttribs[] = {
+                //         WGL_TEXTURE_TARGET_ARB, wglTexTarget,
+                //         WGL_TEXTURE_FORMAT_ARB, wglTexFormat,
+                //         0
+                //     };
+
+                //     const WglExtensionsDispatch* dispatch = mDispatch;
+                //     HPBUFFERARB pb = dispatch->wglCreatePbufferARB(
+                //             dpy, resFrmt->configId(), 1, 1, pbAttribs);
+                //     EglOS::Surface* newInitialSurf = new WinSurface(pb, dpy, dispatch);
+                //     auto& elts = mInitialPbs[dpy];
+                //     elts.push_back(newInitialSurf);
+                // }
+            }
         }
 
         queryCoreProfileSupport();
@@ -924,6 +970,7 @@ public:
             EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
+        PROFILE_SLOW("createContext");
 
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
         HDC dpy = mGlobals->getDummyDC(format);
@@ -956,63 +1003,91 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
+
+
         const WinPixelFormat* format = WinPixelFormat::from(pixelFormat);
         HDC dpy = mGlobals->getDummyDC(format);
 
-        int wglTexFormat = WGL_NO_TEXTURE_ARB;
-        int wglTexTarget =
-                (info->target == EGL_TEXTURE_2D) ? WGL_TEXTURE_2D_ARB
-                                                 : WGL_NO_TEXTURE_ARB;
-        switch (info->format) {
-        case EGL_TEXTURE_RGB:
-            wglTexFormat = WGL_TEXTURE_RGB_ARB;
-            break;
-        case EGL_TEXTURE_RGBA:
-            wglTexFormat = WGL_TEXTURE_RGBA_ARB;
-            break;
-        }
+        auto& eltsInitial = mInitialPbs[dpy];
+        auto& elts = mFreePbs[dpy];
 
-        const int pbAttribs[] = {
-            WGL_TEXTURE_TARGET_ARB, wglTexTarget,
-            WGL_TEXTURE_FORMAT_ARB, wglTexFormat,
-            0
-        };
+        if (eltsInitial.size() > 0) {
+            PROFILE_SLOW("createPbufferSurface (initial)");
+            EglOS::Surface* res = eltsInitial.back();
+            eltsInitial.pop_back();
+            return res;
+        } else if (elts.size() > 0) {
+            PROFILE_SLOW("createPbufferSurface (freed)");
+            EglOS::Surface* res = elts.back();
+            elts.pop_back();
+            return res;
+        } else {
+            PROFILE_SLOW("createPbufferSurface (new)");
 
-        const WglExtensionsDispatch* dispatch = mDispatch;
-        if (!dispatch->wglCreatePbufferARB) {
-            return NULL;
+            // int wglTexFormat = WGL_NO_TEXTURE_ARB;
+            // int wglTexTarget =
+            //     (info->target == EGL_TEXTURE_2D) ? WGL_TEXTURE_2D_ARB
+            //     : WGL_NO_TEXTURE_ARB;
+            // switch (info->format) {
+            //     case EGL_TEXTURE_RGB:
+            //         wglTexFormat = WGL_TEXTURE_RGB_ARB;
+            //         break;
+            //     case EGL_TEXTURE_RGBA:
+            //         wglTexFormat = WGL_TEXTURE_RGBA_ARB;
+            //         break;
+            // }
+
+            const int pbAttribs[] = {
+                WGL_TEXTURE_TARGET_ARB, WGL_TEXTURE_2D_ARB,
+                WGL_TEXTURE_FORMAT_ARB, WGL_TEXTURE_RGB_ARB,
+                0
+            };
+
+            const WglExtensionsDispatch* dispatch = mDispatch;
+            if (!dispatch->wglCreatePbufferARB) {
+                return NULL;
+            }
+            HPBUFFERARB pb = dispatch->wglCreatePbufferARB(
+                    dpy, format->configId(), 1, 1, pbAttribs);
+            if (!pb) {
+                GetLastError();
+                return NULL;
+            }
+            return new WinSurface(pb, dpy, dispatch);
         }
-        HPBUFFERARB pb = dispatch->wglCreatePbufferARB(
-                dpy, format->configId(), info->width, info->height, pbAttribs);
-        if (!pb) {
-            GetLastError();
-            return NULL;
-        }
-        return new WinSurface(pb, dispatch);
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
+        PROFILE_SLOW("releasePbuffer");
         if (!pb) {
             return false;
         }
         const WglExtensionsDispatch* dispatch = mDispatch;
-        if (!dispatch->wglReleasePbufferDCARB ||
-            !dispatch->wglDestroyPbufferARB) {
-            return false;
-        }
+        // if (!dispatch->wglReleasePbufferDCARB ||
+        //     !dispatch->wglDestroyPbufferARB) {
+        //     return false;
+        // }
         WinSurface* winpb = WinSurface::from(pb);
-        if (!dispatch->wglReleasePbufferDCARB(
-                winpb->getPbuffer(), winpb->getDC()) ||
-            !dispatch->wglDestroyPbufferARB(winpb->getPbuffer())) {
-            GetLastError();
-            return false;
-        }
+
+        WinSurface* forMe = new WinSurface(winpb->getPbuffer(), winpb->getGlobalDC(), dispatch);
+
+        auto& elts = mFreePbs[forMe->getGlobalDC()];
+        elts.push_back((EglOS::Surface*)forMe);
+        // if (!dispatch->wglReleasePbufferDCARB(
+        //         winpb->getPbuffer(), winpb->getDC()) ||
+        //     !dispatch->wglDestroyPbufferARB(winpb->getPbuffer())) {
+        //     GetLastError();
+        //     return false;
+        // }
         return true;
     }
 
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
+
+        PROFILE_SLOW("makeCurrent");
+
         HDC hdcRead = read ? WinSurface::from(read)->getDC() : NULL;
         HDC hdcDraw = draw ? WinSurface::from(draw)->getDC() : NULL;
         HGLRC hdcContext = context ? WinContext::from(context) : 0;
@@ -1103,6 +1178,9 @@ private:
 
     const WglExtensionsDispatch* mDispatch = nullptr;
     WinGlobals* mGlobals = nullptr;
+
+    std::unordered_map<HDC, std::vector<EglOS::Surface* > > mInitialPbs;
+    std::unordered_map<HDC, std::vector<EglOS::Surface* > > mFreePbs;
 };
 
 class WglLibrary : public GlLibrary {

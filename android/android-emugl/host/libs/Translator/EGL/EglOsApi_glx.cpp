@@ -15,6 +15,9 @@
 */
 #include "EglOsApi.h"
 
+#include "android/base/Profiler.h"
+#include "android/base/synchronization/Lock.h"
+
 #include "CoreProfileConfigs.h"
 #include "emugl/common/lazy_instance.h"
 #include "emugl/common/mutex.h"
@@ -28,6 +31,12 @@
 #include <GL/glx.h>
 
 #include <EGL/eglext.h>
+
+#include <unordered_map>
+
+#define PROFILE_SLOW(tag) \
+    android::base::ScopedProfiler __profile_slow(tag, [](const char* tag2, uint64_t elapsed) { \
+            if (elapsed >= 6000) { fprintf(stderr, "%s: slow, %f ms\n", tag2, elapsed / 1000.0f); }}); \
 
 namespace {
 
@@ -65,9 +74,14 @@ ErrorHandler::~ErrorHandler() {
    s_lastErrorCode = 0;
 }
 
+static char errorbuf[4096] = {};
+
 int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
                                    XErrorEvent* event) {
     s_lastErrorCode = event->error_code;
+
+    XGetErrorText(dpy, event->error_code, errorbuf, 4095);
+    fprintf(stderr, "%s: error: %s\n", __func__, errorbuf);
     return 0;
 }
 
@@ -75,7 +89,7 @@ int ErrorHandler::errorHandlerProc(EGLNativeDisplayType dpy,
         do { if (a != Success) return 0; } while (0)
 
 #define EXIT_IF_FALSE(a) \
-        do { if (a != Success) return; } while (0)
+        do { if (a != Success) return false; } while (0)
 
 class GlxLibrary : public GlLibrary {
 public:
@@ -147,7 +161,33 @@ private:
     GLXFBConfig mFbConfig = nullptr;
 };
 
-void pixelFormatToConfig(EGLNativeDisplayType dpy,
+// Implementation of EglOS::Surface based on GLX.
+class GlxSurface : public EglOS::Surface {
+public:
+    GlxSurface(GLXDrawable drawable, GLXFBConfig fbConfig, SurfaceType type) :
+            Surface(type), mFbConfig(fbConfig), mDrawable(drawable) {}
+
+    GLXDrawable drawable() const { return mDrawable; }
+    GLXFBConfig config() const { return mFbConfig; }
+
+    // Helper routine to down-cast an EglOS::Surface and extract
+    // its drawable.
+    static GLXDrawable drawableFor(EglOS::Surface* surface) {
+        return static_cast<GlxSurface*>(surface)->drawable();
+    }
+
+    // Helper routine to down-cast an EglOS::Surface and extract
+    // its config.
+    static GLXFBConfig configFor(EglOS::Surface* surface) {
+        return static_cast<GlxSurface*>(surface)->config();
+    }
+
+private:
+    GLXFBConfig mFbConfig = 0;
+    GLXDrawable mDrawable = 0;
+};
+
+bool pixelFormatToConfig(EGLNativeDisplayType dpy,
                          int renderableType,
                          GLXFBConfig frmt,
                          EglOS::AddConfigCallback* addConfigFunc,
@@ -159,7 +199,7 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
 
     EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_TRANSPARENT_TYPE, &tmp));
     if (tmp == GLX_TRANSPARENT_INDEX) {
-        return; // not supporting transparent index
+        return false; // not supporting transparent index
     } else if (tmp == GLX_NONE) {
         info.transparent_type = EGL_NONE;
         info.trans_red_val = 0;
@@ -183,7 +223,7 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
             dpy, frmt, GLX_DOUBLEBUFFER, &doubleBuffer));
     if (!doubleBuffer) {
-        return;
+        return false;
     }
 
     EXIT_IF_FALSE(glXGetFBConfigAttrib(
@@ -249,37 +289,20 @@ void pixelFormatToConfig(EGLNativeDisplayType dpy,
     // Filter out configs that do not support RGBA
     EXIT_IF_FALSE(glXGetFBConfigAttrib(dpy, frmt, GLX_RENDER_TYPE, &tmp));
     if (!(tmp & GLX_RGBA_BIT)) {
-        return;
+        return false;
     }
     // Filter out configs that do not support depthstencil buffers
     // For dEQP-GLES2.functional.depth_stencil_clear
     // and dEQP-GLES2.usecases.*
     if (info.depth_size == 0 || info.stencil_size == 0) {
-        return;
+        return false;
     }
 
     info.frmt = new GlxPixelFormat(frmt);
-
     (*addConfigFunc)(addConfigOpaque, &info);
+
+    return true;
 }
-
-// Implementation of EglOS::Surface based on GLX.
-class GlxSurface : public EglOS::Surface {
-public:
-    GlxSurface(GLXDrawable drawable, SurfaceType type) :
-            Surface(type), mDrawable(drawable) {}
-
-    GLXDrawable drawable() const { return mDrawable; }
-
-    // Helper routine to down-cast an EglOS::Surface and extract
-    // its drawable.
-    static GLXDrawable drawableFor(EglOS::Surface* surface) {
-        return static_cast<GlxSurface*>(surface)->drawable();
-    }
-
-private:
-    GLXDrawable mDrawable = 0;
-};
 
 // Implementation of EglOS::Context based on GLX.
 class GlxContext : public EglOS::Context {
@@ -292,6 +315,7 @@ public:
     GLXContext context() const { return mContext; }
 
     ~GlxContext() {
+        PROFILE_SLOW("~GlxContext()");
         glXDestroyContext(mDisplay, mContext);
     }
 
@@ -328,12 +352,30 @@ public:
         if (frmtList) {
             mFBConfigs.assign(frmtList, frmtList + n);
             for(int i = 0; i < n; i++) {
-                pixelFormatToConfig(
+                if (pixelFormatToConfig(
                         mDisplay,
                         renderableType,
                         frmtList[i],
                         addConfigFunc,
-                        addConfigOpaque);
+                        addConfigOpaque)) {
+                    for (int i = 0; i < 20; i++) {
+                        PROFILE_SLOW("initial creation");
+                        const int attribs[] = {
+                            GLX_PBUFFER_WIDTH, 1,
+                            GLX_PBUFFER_HEIGHT, 1,
+                            GLX_LARGEST_PBUFFER, 0,
+                            None
+                        };
+                        GLXPbuffer pb = glXCreatePbuffer(
+                                mDisplay,
+                                frmtList[i],
+                                attribs);
+                        EglOS::Surface* newInitial =
+                            new GlxSurface(pb, frmtList[i], GlxSurface::PBUFFER);
+                        auto& curr = mInitialPbufs[frmtList[i]];
+                        curr.push_back(newInitial);
+                    }
+                }
             }
             XFree(frmtList);
         }
@@ -404,7 +446,7 @@ public:
             EGLint profileMask,
             const EglOS::PixelFormat* pixelFormat,
             EglOS::Context* sharedContext) {
-
+        PROFILE_SLOW("createContext");
         bool useCoreProfile = mCoreProfileSupported &&
            (profileMask & EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT_KHR);
 
@@ -435,6 +477,7 @@ public:
     }
 
     virtual bool destroyContext(EglOS::Context* context) {
+        PROFILE_SLOW("destroyContext");
         glXDestroyContext(mDisplay, GlxContext::contextFor(context));
         return true;
     }
@@ -442,24 +485,54 @@ public:
     virtual EglOS::Surface* createPbufferSurface(
             const EglOS::PixelFormat* pixelFormat,
             const EglOS::PbufferInfo* info) {
-        const int attribs[] = {
-            GLX_PBUFFER_WIDTH, info->width,
-            GLX_PBUFFER_HEIGHT, info->height,
-            GLX_LARGEST_PBUFFER, info->largest,
-            None
-        };
-        GLXPbuffer pb = glXCreatePbuffer(
-                mDisplay,
-                GlxPixelFormat::from(pixelFormat),
-                attribs);
-        return pb ? new GlxSurface(pb, GlxSurface::PBUFFER) : NULL;
+        android::base::AutoLock lock(mPbufLock);
+
+        GLXFBConfig config = GlxPixelFormat::from(pixelFormat);
+
+        auto& initialElts = mInitialPbufs[config];
+        auto& freeElts = mFreePbufs[config];
+
+        if (initialElts.size() > 0) {
+            PROFILE_SLOW("createPbufferSurface (initial path)");
+            EglOS::Surface* surf = initialElts.back();
+            initialElts.pop_back();
+            return surf;
+        }
+        else if (freeElts.size() > 0) {
+            PROFILE_SLOW("createPbufferSurface (fast path)");
+            EglOS::Surface* surf = freeElts.back();
+            freeElts.pop_back();
+            return surf;
+        } else {
+            PROFILE_SLOW("createPbufferSurface (slow path)");
+            const int attribs[] = {
+                GLX_PBUFFER_WIDTH, 1,
+                GLX_PBUFFER_HEIGHT, 1,
+                GLX_LARGEST_PBUFFER, 0,
+                None
+            };
+            GLXPbuffer pb = glXCreatePbuffer(
+                    mDisplay,
+                    GlxPixelFormat::from(pixelFormat),
+                    attribs);
+            return pb ? new GlxSurface(pb, GlxPixelFormat::from(pixelFormat), GlxSurface::PBUFFER) : NULL;
+        }
     }
 
     virtual bool releasePbuffer(EglOS::Surface* pb) {
+        android::base::AutoLock lock(mPbufLock);
+        PROFILE_SLOW("releasePbuffer");
         if (!pb) {
             return false;
         } else {
-            glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
+            // glXDestroyPbuffer(mDisplay, GlxSurface::drawableFor(pb));
+            EglOS::Surface* forMe =
+                new GlxSurface(GlxSurface::drawableFor(pb),
+                               GlxSurface::configFor(pb),
+                               GlxSurface::PBUFFER);
+            GLXFBConfig config = GlxSurface::configFor(pb);
+            auto& frees = mFreePbufs[config];
+            frees.push_back(forMe);
             return true;
         }
     }
@@ -467,6 +540,7 @@ public:
     virtual bool makeCurrent(EglOS::Surface* read,
                              EglOS::Surface* draw,
                              EglOS::Context* context) {
+        PROFILE_SLOW("makeCurrent");
         ErrorHandler handler(mDisplay);
         bool retval = false;
         if (!context && !read && !draw) {
@@ -480,7 +554,8 @@ public:
                     GlxSurface::drawableFor(read),
                     GlxContext::contextFor(context));
         }
-        return (handler.getLastError() == 0) && retval;
+        int err = handler.getLastError();
+        return (err == 0) && retval;
     }
 
     virtual void swapBuffers(EglOS::Surface* srfc) {
@@ -538,6 +613,9 @@ private:
 
     X11Display* mDisplay = nullptr;
     std::vector<GLXFBConfig> mFBConfigs;
+    std::unordered_map<GLXFBConfig, std::vector<EglOS::Surface* > > mInitialPbufs;
+    std::unordered_map<GLXFBConfig, std::vector<EglOS::Surface* > > mFreePbufs;
+    android::base::Lock mPbufLock;
 };
 
 class GlxEngine : public EglOS::Engine {
@@ -552,7 +630,7 @@ public:
 
     virtual EglOS::Surface* createWindowSurface(EglOS::PixelFormat* pf,
                                                 EGLNativeWindowType wnd) {
-        return new GlxSurface(wnd, GlxSurface::WINDOW);
+        return new GlxSurface(wnd, 0, GlxSurface::WINDOW);
     }
 };
 
