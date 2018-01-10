@@ -61,6 +61,8 @@ public:
     bool fillPage(void* ptr, size_t length, const void* data,
                   bool isQuickboot);
 
+    void join();
+
 private:
     class Impl;
     std::unique_ptr<Impl> mImpl;

@@ -83,7 +83,11 @@ public:
         assert(mExitFd.get() >= 0);
     }
 
-    ~Impl() { mPagefaultThread.wait(); }
+    void join() { mPagefaultThread.wait(); }
+
+    ~Impl() {
+        join();
+    }
 
     void* readNextPagefaultAddr() const {
         uffd_msg msg;
@@ -223,6 +227,10 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
     // }
     //
     return true;
+}
+
+void MemoryAccessWatch::join() {
+    if (mImpl) { mImpl->join(); }
 }
 
 }  // namespace snapshot

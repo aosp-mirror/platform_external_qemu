@@ -536,11 +536,13 @@ void Snapshotter::handleGenericLoad(const char* name,
 
 OperationStatus Snapshotter::prepareForSaving(const char* name) {
     prepareLoaderForSaving(name);
+    mVmOperations.vmStop();
     mSaver.reset(new Saver(
             name, (mLoader && mLoader->status() != OperationStatus::Error)
                           ? &mLoader->ramLoader()
                           : nullptr,
             mIsOnExit));
+    mVmOperations.vmStart();
     mSaver->prepare();
     return mSaver->status();
 }
@@ -551,6 +553,9 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
         System::Duration(System::get()->getProcessTimes().wallClockMs);
     Stopwatch sw;
     mIsOnExit = isOnExit;
+    if (mIsOnExit) {
+        mVmOperations.setExiting();
+    }
     mVmOperations.snapshotSave(name, this, nullptr);
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
     return mSaver->status();

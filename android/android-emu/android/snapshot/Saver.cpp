@@ -86,10 +86,11 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
         }
 
         const bool tryIncremental =
-            isOnExit && loader && !loader->hasError();
+            isOnExit && loader && !loader->hasError() && loader->hasGaps();
 
         if (loader && !isOnExit) {
             loader->join();
+            loader->invalidateGaps();
         }
 
         mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr,

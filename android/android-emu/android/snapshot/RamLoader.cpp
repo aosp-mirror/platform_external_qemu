@@ -54,7 +54,10 @@ RamLoader::~RamLoader() {
     if (mWasStarted) {
         interruptReading();
         mReaderThread.wait();
-        mAccessWatch.clear();
+        if (mAccessWatch) {
+            mAccessWatch->join();
+            mAccessWatch.clear();
+        }
         assert(hasError() || !mAccessWatch);
     }
 }
@@ -109,7 +112,10 @@ bool RamLoader::start(bool isQuickboot) {
 void RamLoader::join() {
     mJoining = true;
     mReaderThread.wait();
-    mAccessWatch.clear();
+    if (mAccessWatch) {
+        mAccessWatch->join();
+        mAccessWatch.clear();
+    }
     mStream.close();
 }
 
@@ -117,7 +123,10 @@ void RamLoader::interrupt() {
     mReadDataQueue.stop();
     mReadingQueue.stop();
     mReaderThread.wait();
-    mAccessWatch.clear();
+    if (mAccessWatch) {
+        mAccessWatch->join();
+        mAccessWatch.clear();
+    }
     mStream.close();
 }
 
