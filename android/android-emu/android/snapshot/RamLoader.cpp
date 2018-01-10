@@ -54,6 +54,7 @@ RamLoader::~RamLoader() {
     if (mWasStarted) {
         interruptReading();
         mReaderThread.wait();
+        mAccessWatch.clear();
         assert(hasError() || !mAccessWatch);
     }
 }
@@ -108,6 +109,7 @@ bool RamLoader::start(bool isQuickboot) {
 void RamLoader::join() {
     mJoining = true;
     mReaderThread.wait();
+    mAccessWatch.clear();
     mStream.close();
 }
 
@@ -115,6 +117,7 @@ void RamLoader::interrupt() {
     mReadDataQueue.stop();
     mReadingQueue.stop();
     mReaderThread.wait();
+    mAccessWatch.clear();
     mStream.close();
 }
 
@@ -146,7 +149,9 @@ void RamLoader::zeroOutPage(const Page& page) {
     }
 }
 
-bool RamLoader::readIndex() {
+bool RamLoader::readIndex(bool forSave) {
+    mIndex.pages.clear();
+
 #if SNAPSHOT_PROFILE > 1
     auto start = base::System::get()->getHighResTimeUs();
 #endif
@@ -203,6 +208,14 @@ bool RamLoader::readIndex() {
     printf("readIndex() time: %.03f\n",
            (base::System::get()->getHighResTimeUs() - start) / 1000.0);
 #endif
+    return true;
+}
+
+bool RamLoader::reloadIndex(const std::string& name) {
+    const auto ramFh = fopen(name.c_str(), "rb");
+    mStream = std::move(base::StdioStream(ramFh, base::StdioStream::kOwner));
+    readIndex(true /* for save */);
+    mStream.close();
     return true;
 }
 
@@ -333,8 +346,6 @@ void RamLoader::readerWorker() {
             mReadDataQueue.send(page);
         }
     }
-
-    mAccessWatch.clear();
 
     mEndTime = base::System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1

@@ -48,6 +48,11 @@ public:
     void join();
     void interrupt();
 
+    bool needsIndexReload() {
+        return !mGaps;
+    }
+    bool reloadIndex(const std::string& ramFile);
+
     bool hasError() const { return mHasError; }
     bool onDemandEnabled() const { return mOnDemandEnabled; }
     bool onDemandLoadingComplete() const {
@@ -94,7 +99,7 @@ private:
         void clear();
     };
 
-    bool readIndex();
+    bool readIndex(bool forSave = false);
     void readBlockPages(base::Stream* stream,
                         FileIndex::Blocks::iterator blockIt,
                         bool compressed,
