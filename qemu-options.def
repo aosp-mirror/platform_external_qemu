@@ -719,6 +719,11 @@ DEF("loadvm", HAS_ARG, QEMU_OPTION_loadvm, \
 "                start right away with a saved state (loadvm in monitor)\n",
 QEMU_ARCH_ALL)
 
+DEF("snapshot-list", 0, QEMU_OPTION_snapshot_list, \
+"-snapshot-list\n" \
+"                list snapshots of current AVD on startup\n",
+QEMU_ARCH_ALL)
+
 #ifndef _WIN32
 DEF("daemonize", 0, QEMU_OPTION_daemonize, \
 "-daemonize      daemonize QEMU after initializing\n", QEMU_ARCH_ALL)
@@ -922,11 +927,6 @@ DEF("net-tap-script-up", HAS_ARG, QEMU_OPTION_net_tap_script_up,
 
 DEF("net-tap-script-down", HAS_ARG, QEMU_OPTION_net_tap_script_down,
 "-net-tap-script-down <script> script to run when TAP interface goes down\n", QEMU_ARCH_ALL)
-
-DEF("snapshot-list", 0, QEMU_OPTION_snapshot_list, \
-"-snapshot-list\n" \
-"                list snapshots of current AVD on startup\n",
-QEMU_ARCH_ALL)
 
 #endif  // CONFIG_ANDROID
 
