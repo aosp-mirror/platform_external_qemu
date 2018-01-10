@@ -297,6 +297,7 @@ public:
     virtual bool releasePbuffer(EglOS::Surface* pb) {
         if (pb) {
             nsDestroyPBuffer(MacSurface::from(pb)->handle());
+            delete pb;
         }
         return true;
     }
