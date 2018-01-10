@@ -82,10 +82,11 @@ public slots:
 private slots:
     void slot_mousePoller();
     void slot_metricsAggregator();
+    void slot_virtualSceneInfoDialogHasBeenSeen();
 
 private:
     void updateMouselook();
-    void updateHighlightStyle();
+    void updateHighlightAndFocusStyle();
     QString getInfoText();
 
     // Returns true if the event was handled.
@@ -107,6 +108,7 @@ private:
 
     bool mIsActive = false;
     bool mShouldShowInfoDialog = true;
+    bool mIsHotkeyAvailable = true;
 
     const QAndroidSensorsAgent* mSensorsAgent = nullptr;
     glm::vec3 mVelocity = glm::vec3();
