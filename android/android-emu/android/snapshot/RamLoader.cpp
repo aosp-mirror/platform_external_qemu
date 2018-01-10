@@ -54,6 +54,7 @@ RamLoader::~RamLoader() {
     if (mWasStarted) {
         interruptReading();
         mReaderThread.wait();
+        mAccessWatch.clear();
         assert(hasError() || !mAccessWatch);
     }
 }
@@ -108,6 +109,7 @@ bool RamLoader::start(bool isQuickboot) {
 void RamLoader::join() {
     mJoining = true;
     mReaderThread.wait();
+    mAccessWatch.clear();
     mStream.close();
 }
 
@@ -115,6 +117,7 @@ void RamLoader::interrupt() {
     mReadDataQueue.stop();
     mReadingQueue.stop();
     mReaderThread.wait();
+    mAccessWatch.clear();
     mStream.close();
 }
 
@@ -333,8 +336,6 @@ void RamLoader::readerWorker() {
             mReadDataQueue.send(page);
         }
     }
-
-    mAccessWatch.clear();
 
     mEndTime = base::System::get()->getHighResTimeUs();
 #if SNAPSHOT_PROFILE > 1

@@ -55,8 +55,6 @@ RamSaver::RamSaver(const std::string& fileName,
             incremental = true;
             if (isOnExit) {
                 loader->interrupt();
-            } else {
-                loader->join();
             }
             mGaps = std::move(currentGaps);
         } else {

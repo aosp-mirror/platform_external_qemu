@@ -84,7 +84,14 @@ Saver::Saver(const Snapshot& snapshot, RamLoader* loader, bool isOnExit)
                 }
             }
         }
-        const bool tryIncremental = loader && !loader->hasError();
+
+        const bool tryIncremental =
+            isOnExit && loader && !loader->hasError();
+
+        if (loader && !isOnExit) {
+            loader->join();
+        }
+
         mRamSaver.emplace(ramFile, flags, tryIncremental ? loader : nullptr,
                           isOnExit);
         if (mRamSaver->hasError()) {
