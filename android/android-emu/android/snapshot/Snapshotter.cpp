@@ -551,6 +551,9 @@ OperationStatus Snapshotter::save(bool isOnExit, const char* name) {
         System::Duration(System::get()->getProcessTimes().wallClockMs);
     Stopwatch sw;
     mIsOnExit = isOnExit;
+    if (mIsOnExit) {
+        mVmOperations.setExiting();
+    }
     mVmOperations.snapshotSave(name, this, nullptr);
     mLastSaveDuration.emplace(sw.elapsedUs() / 1000);
     return mSaver->status();
