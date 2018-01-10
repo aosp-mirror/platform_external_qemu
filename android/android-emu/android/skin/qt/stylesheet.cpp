@@ -264,6 +264,9 @@ struct StylesheetValues {
         {"TOOL_COLOR",                      "#00bea4"},  // Checkboxes, sliders, etc.
         {"TOOL_ON_COLOR",                   "#d6d6d6"},  // Main toolbar button ON
         {"LINK_COLOR",                      "#0288D1"},  // Highlighted link
+        {"RAISED_COLORED_BKG_COLOR",        "#459388"},  // Colored raised button background color.
+        {"RAISED_COLORED_PRESSED_COLOR",    "#5faca0"},  // Colored raised button pressed color.
+        {"RAISED_COLORED_COLOR",            "#ffffff"},  // Colored raised button text color.
         {THEME_PATH_VAR,                      "light"},  // Icon directory under images/
     };
 
@@ -293,6 +296,9 @@ struct StylesheetValues {
         {"TOOL_COLOR",                   "#00bea4"},
         {"TOOL_ON_COLOR",                "#586670"},
         {"LINK_COLOR",                   "#29B6F6"},
+        {"RAISED_COLORED_BKG_COLOR",     "#459388"},
+        {"RAISED_COLORED_PRESSED_COLOR", "#5faca0"},
+        {"RAISED_COLORED_COLOR",         "#ffffff"},
         {THEME_PATH_VAR,                    "dark"},
     };
 

@@ -82,6 +82,10 @@ VirtualSceneControlWindow::VirtualSceneControlWindow(
     connect(&mMousePoller, SIGNAL(timeout()), this, SLOT(slot_mousePoller()));
     connect(&mMetricsAggregateTimer, SIGNAL(timeout()), this,
             SLOT(slot_metricsAggregator()));
+
+    QSettings settings;
+    mShouldShowInfoDialog =
+            settings.value(Ui::Settings::SHOW_VIRTUALSCENE_INFO, true).toBool();
 }
 
 VirtualSceneControlWindow::~VirtualSceneControlWindow() {
@@ -183,6 +187,8 @@ void VirtualSceneControlWindow::setCaptureMouse(bool capture) {
                     PHYSICAL_PARAMETER_AMBIENT_MOTION, 0.005f, 0.f, 0.f,
                     PHYSICAL_INTERPOLATION_SMOOTH);
         }
+
+        mEmulatorWindow->containerWindow()->hideVirtualSceneInfoDialog();
 
         QCursor cursor(Qt::BlankCursor);
         parentWidget()->activateWindow();
@@ -366,6 +372,11 @@ void VirtualSceneControlWindow::setActive(bool active) {
     mIsActive = active;
     if (active) {
         show();
+
+        if (mShouldShowInfoDialog) {
+            mEmulatorWindow->containerWindow()->showVirtualSceneInfoDialog();
+            mShouldShowInfoDialog = false;
+        }
     } else {
         hide();
     }

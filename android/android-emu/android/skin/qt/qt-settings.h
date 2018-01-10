@@ -35,6 +35,7 @@ constexpr char APP_NAME[] = "Emulator";
 constexpr char SHOW_ADB_WARNING[] = "showAdbWarning";
 constexpr char SHOW_AVD_ARCH_WARNING[] = "showAvdArchWarning";
 constexpr char SHOW_GPU_WARNING[] = "showGpuWarning";
+constexpr char SHOW_VIRTUALSCENE_INFO[] = "showVirtualSceneInfo";
 
 // Note: The "set/" here is because these settings are
 //       associated with "settings-page", not because
