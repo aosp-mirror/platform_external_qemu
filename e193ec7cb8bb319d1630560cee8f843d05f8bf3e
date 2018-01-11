@@ -46,6 +46,30 @@
       "revId": "e193ec7cb8bb319d1630560cee8f843d05f8bf3e",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f615a94_41230362",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 934,
+      "author": {
+        "id": 1128849
+      },
+      "writtenOn": "2018-01-11T22:28:00Z",
+      "side": 1,
+      "message": "It\u0027s like a pair, when you click on taskbar icon, it will toggle show/hide the application window",
+      "parentUuid": "6a1d4911_2f969c3c",
+      "range": {
+        "startLine": 934,
+        "startChar": 0,
+        "endLine": 934,
+        "endChar": 42
+      },
+      "revId": "e193ec7cb8bb319d1630560cee8f843d05f8bf3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": false
     }
   ]
 }
