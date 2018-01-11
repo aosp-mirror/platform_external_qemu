@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "73469073_23f5c78e",
+        "filename": "android/android-emu/android/skin/qt/emulator-qt-window.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 934,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-11T09:59:28Z",
+      "side": 1,
+      "message": "what does the maximize do?",
+      "range": {
+        "startLine": 934,
+        "startChar": 0,
+        "endLine": 934,
+        "endChar": 42
+      },
+      "revId": "e193ec7cb8bb319d1630560cee8f843d05f8bf3e",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
