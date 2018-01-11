@@ -34,6 +34,7 @@ EditableSliderWidget::EditableSliderWidget(QWidget *parent) :
     setValue(static_cast<int>(mSlider.value()/10.0));
 
     // Do some adjustments to child widgets.
+    mSlider.setFocusPolicy(Qt::ClickFocus);
     mMinValueLabel.setAlignment(Qt::AlignLeft | Qt::AlignTop);
     mMaxValueLabel.setAlignment(Qt::AlignRight | Qt::AlignTop);
     mMinValueLabel.setProperty("ColorGroup", "SliderLabel");
@@ -65,7 +66,12 @@ void EditableSliderWidget::setValue(double value, bool emit_signal) {
         QSignalBlocker blocker(mSlider);
         mSlider.setValue(static_cast<int>(mValue * 10.0));
     }
-    mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', 1, '0'));
+
+    if (mLineEditFocused) {
+        mValueChangeIgnored = true;
+    } else {
+        mLineEdit.setText(QString("%1").arg(mValue, 0, 'f', 1, '0'));
+    }
     if (emit_signal) {
         emit valueChanged(mValue);
         emit valueChanged();
@@ -97,6 +103,7 @@ void EditableSliderWidget::sliderValueChanged(int new_value) {
 void EditableSliderWidget::lineEditValueChanged() {
     QString new_value = mLineEdit.text();
     setValue(new_value.toDouble());
+    mValueChangeIgnored = false;
 }
 
 bool EditableSliderWidget::eventFilter(QObject*, QEvent* e) {
@@ -104,13 +111,20 @@ bool EditableSliderWidget::eventFilter(QObject*, QEvent* e) {
         // If the edit box was previously highlighted due to an
         // invalid value, un-highlight it.
         updateValidatorStyle("");
+        mValueChangeIgnored = false;
+        mLineEditFocused = true;
+        mLineEditOriginalValue = mLineEdit.text();
     } else if (e->type() == QEvent::FocusOut) {
+        mLineEditFocused = false;
+
         // When the edit box loses focus, highlight it
         // if it contains an invalid value.
         int dummy;
         QString text = mLineEdit.text();
         if (mLineEdit.validator()->validate(text, dummy) != QValidator::Acceptable) {
             updateValidatorStyle("InvalidInput");
+        } else if (mLineEdit.text() == mLineEditOriginalValue && mValueChangeIgnored) {
+            setValue(mValue);
         }
     }
     return false;
