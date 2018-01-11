@@ -13,6 +13,8 @@
 #include "exec/cpu-defs.h"
 #include "fpu/softfloat.h"
 
+#define TCG_GUEST_DEFAULT_MO (0)
+
 struct CPUMIPSState;
 
 typedef struct r4k_tlb_t r4k_tlb_t;
