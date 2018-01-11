@@ -133,6 +133,7 @@ private:
 
 static android::snapshot::FailureReason sFailureReason =
     android::snapshot::FailureReason::Empty;
+static bool sExiting = false;
 
 static bool qemu_snapshot_list(void* opaque,
                                LineConsumerCallback outConsumer,
@@ -146,8 +147,17 @@ static bool qemu_snapshot_save(const char* name,
                                void* opaque,
                                LineConsumerCallback errConsumer) {
     android::RecursiveScopedVmLock vmlock;
-    return qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer)) ==
-           0;
+    bool wasVmRunning = runstate_is_running() != 0;
+    vm_stop(RUN_STATE_SAVE_VM);
+
+    int res = qemu_savevm(name, MessageCallback(opaque, nullptr, errConsumer));
+
+    if (wasVmRunning &&
+        !sExiting) {
+        vm_start();
+    }
+
+    return res == 0;
 }
 
 static bool qemu_snapshot_load(const char* name,
@@ -413,6 +423,10 @@ static void set_failure_reason(const char* name, int failure_reason) {
     sFailureReason = (android::snapshot::FailureReason)failure_reason;
 }
 
+static void set_exiting() {
+    sExiting = true;
+}
+
 static const QAndroidVmOperations sQAndroidVmOperations = {
         .vmStop = qemu_vm_stop,
         .vmStart = qemu_vm_start,
@@ -426,6 +440,7 @@ static const QAndroidVmOperations sQAndroidVmOperations = {
         .setSnapshotCallbacks = set_snapshot_callbacks,
         .getVmConfiguration = get_vm_config,
         .setFailureReason = set_failure_reason,
+        .setExiting = set_exiting,
 };
 const QAndroidVmOperations* const gQAndroidVmOperations =
         &sQAndroidVmOperations;

@@ -45,7 +45,7 @@ public:
     }
 
     ~Impl() {
-        mBackgroundLoadingThread.wait();
+        join();
     }
 
     static void MacDoAccessCallback(void* ptr) {
@@ -67,6 +67,10 @@ public:
         mprotect(start, length, PROT_NONE);
         mSegvHandler.registerMemoryRange(start, length);
         return true;
+    }
+
+    void join() {
+        mBackgroundLoadingThread.wait();
     }
 
     void doneRegistering() {
@@ -173,6 +177,10 @@ bool MemoryAccessWatch::fillPage(void* ptr, size_t length, const void* data,
                                  bool isQuickboot) {
     if (!mImpl) return false;
     return mImpl->fillPage(ptr, length, data, isQuickboot);
+}
+
+void MemoryAccessWatch::join() {
+    if (mImpl) { mImpl->join(); }
 }
 
 }  // namespace snapshot

@@ -115,6 +115,10 @@ typedef struct QAndroidVmOperations {
     // android::snapshot::FailureReason.
     void (*setFailureReason)(const char* name, int failureReason);
 
+    // Notifies QEMU that the emulator is exiting, can impact how
+    // QEMU snapshot save calls work.
+    void (*setExiting)(void);
+
 } QAndroidVmOperations;
 
 ANDROID_END_HEADER
