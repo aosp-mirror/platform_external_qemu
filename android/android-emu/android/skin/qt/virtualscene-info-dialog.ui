@@ -53,23 +53,24 @@
       </item>
       <item>
        <widget class="QFrame" name="infoFrame">
-        <layout class="QGridLayout" name="gridLayout">
+        <layout class="QVBoxLayout" name="verticalLayout">
          <property name="leftMargin">
-          <number>16</number>
+          <number>24</number>
          </property>
          <property name="topMargin">
-          <number>16</number>
+          <number>24</number>
          </property>
          <property name="rightMargin">
-          <number>16</number>
+          <number>24</number>
          </property>
          <property name="bottomMargin">
-          <number>16</number>
+          <number>24</number>
          </property>
-         <item row="0" column="0">
+         <item>
           <widget class="QLabel" name="titleLabel">
            <property name="font">
             <font>
+             <family>Roboto</family>
              <pointsize>18</pointsize>
              <weight>75</weight>
              <bold>true</bold>
@@ -80,8 +81,154 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
-          <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+         <item>
+          <widget class="QLabel" name="infoLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <family>Roboto</family>
+            </font>
+           </property>
+           <property name="text">
+            <string>Hold Alt to control camera via the following methods:</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QGridLayout" name="infoIconLayout" columnstretch="0,0,1">
+           <property name="bottomMargin">
+            <number>8</number>
+           </property>
+           <property name="spacing">
+            <number>0</number>
+           </property>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>16</width>
+               <height>1</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="mouseInfo">
+             <property name="font">
+              <font>
+               <family>Roboto</family>
+              </font>
+             </property>
+             <property name="text">
+              <string>&lt;b&gt;Rotate&lt;/b&gt; with mouse</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="wasdInfo">
+             <property name="font">
+              <font>
+               <family>Roboto</family>
+              </font>
+             </property>
+             <property name="text">
+              <string>&lt;b&gt;Move&lt;/b&gt; with WASDQE keys</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>1</width>
+               <height>8</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="0">
+            <widget class="QSvgWidget" name="mouseIcon" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>40</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QSvgWidget" name="wasdIcon" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>40</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>40</width>
+               <height>40</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="dontShowAgainCheckbox">
+           <property name="font">
+            <font>
+             <family>Roboto</family>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">spacing: 8px;</string>
+           </property>
+           <property name="text">
+            <string>Don't remind me again</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="buttonLayout" stretch="0,0">
            <item>
             <spacer name="horizontalSpacer">
              <property name="orientation">
@@ -135,29 +282,6 @@
            </item>
           </layout>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="infoLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Hold down Alt and use WASDQE keys to adjust camera position or mouse to change rotation.</string>
-           </property>
-           <property name="wordWrap">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="dontShowAgainCheckbox">
-           <property name="text">
-            <string>Don't remind me again</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </widget>
       </item>
@@ -184,6 +308,12 @@
    <class>RaisedMaterialButton</class>
    <extends>QPushButton</extends>
    <header>android/skin/qt/raised-material-button.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QSvgWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">QSvgWidget</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

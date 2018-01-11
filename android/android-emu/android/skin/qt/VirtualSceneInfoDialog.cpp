@@ -48,6 +48,8 @@ VirtualSceneInfoDialog::VirtualSceneInfoDialog(EmulatorContainer* parent)
 
     mUi->infoLabel->setText(getInfoText());
     mUi->closeButton->setThemeOverride(SETTINGS_THEME_DARK);
+    mUi->wasdIcon->load(QString(":/virtualscene/wasd"));
+    mUi->mouseIcon->load(QString(":/virtualscene/mouse"));
 }
 
 void VirtualSceneInfoDialog::show() {
@@ -139,7 +141,6 @@ QString VirtualSceneInfoDialog::getInfoText() {
     keycode = tr("Alt");
 #endif  // Q_OS_MAC
 
-    return tr("Hold down %1 and use WASDQE keys to adjust camera position or "
-              "mouse to change rotation.")
+    return tr("Hold %1 to control camera via the following methods:")
             .arg(keycode);
 }

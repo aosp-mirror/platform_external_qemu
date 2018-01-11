@@ -248,6 +248,10 @@
         <file alias="frag.glsl">phone-model/frag.glsl</file>
         <file alias="vert.glsl">phone-model/vert.glsl</file>
     </qresource>
+    <qresource prefix="/virtualscene">
+        <file alias="mouse">images/virtualscene/ic_mouse_white_48dp.svg</file>
+        <file alias="wasd">images/virtualscene/ic_wasd_white_48dp.svg</file>
+    </qresource>
     <qresource prefix="/all">
         <file alias="error">images/all/error.png</file>
         <file alias="error_2x">images/all/error_2x.png</file>
