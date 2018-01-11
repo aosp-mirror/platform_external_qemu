@@ -39,6 +39,7 @@ static glm::vec3 clampPosition(glm::vec3 position) {
 Accelerometer3DWidget::Accelerometer3DWidget(QWidget* parent)
     : GLWidget(parent) {
     toggleAA();
+    setFocusPolicy(Qt::ClickFocus);
 }
 
 Accelerometer3DWidget::~Accelerometer3DWidget() {

@@ -101,5 +101,9 @@ private:
     QSlider mSlider;
     QLineEdit mLineEdit;
     QDoubleValidator mLineEditValidator;
+
+    bool mValueChangeIgnored = false;
+    QString mLineEditOriginalValue;
+    bool mLineEditFocused = false;
 };
 
