@@ -53,7 +53,7 @@
       </item>
       <item>
        <widget class="QFrame" name="infoFrame">
-        <layout class="QGridLayout" name="gridLayout">
+        <layout class="QGridLayout" name="gridLayout" columnstretch="0,0">
          <property name="leftMargin">
           <number>16</number>
          </property>
@@ -66,7 +66,55 @@
          <property name="bottomMargin">
           <number>16</number>
          </property>
-         <item row="0" column="0">
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="infoLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text">
+            <string>Hold Alt to control camera via the following methods:</string>
+           </property>
+           <property name="wordWrap">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="wasdIcon">
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="pixmap">
+            <pixmap resource="resources.qrc">:/virtualscene/wasd</pixmap>
+           </property>
+           <property name="scaledContents">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="0" colspan="2">
+          <widget class="QCheckBox" name="dontShowAgainCheckbox">
+           <property name="text">
+            <string>Don't remind me again</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0" colspan="2">
           <widget class="QLabel" name="titleLabel">
            <property name="font">
             <font>
@@ -80,7 +128,7 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="5" column="0" colspan="2">
           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
            <item>
             <spacer name="horizontalSpacer">
@@ -135,26 +183,42 @@
            </item>
           </layout>
          </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="infoLabel">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
+         <item row="2" column="0">
+          <widget class="QLabel" name="mouseIcon">
+           <property name="maximumSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>32</width>
+             <height>32</height>
+            </size>
            </property>
            <property name="text">
-            <string>Hold down Alt and use WASDQE keys to adjust camera position or mouse to change rotation.</string>
+            <string/>
            </property>
-           <property name="wordWrap">
+           <property name="pixmap">
+            <pixmap resource="resources.qrc">:/virtualscene/mouse</pixmap>
+           </property>
+           <property name="scaledContents">
             <bool>true</bool>
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QCheckBox" name="dontShowAgainCheckbox">
+         <item row="2" column="1">
+          <widget class="QLabel" name="mouseInfo">
            <property name="text">
-            <string>Don't remind me again</string>
+            <string>&lt;b&gt;Rotate&lt;/b&gt; with mouse</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="QLabel" name="wasdInfo">
+           <property name="text">
+            <string>&lt;b&gt;Move&lt;/b&gt; with WASDQE keys</string>
            </property>
           </widget>
          </item>
