@@ -391,10 +391,14 @@ private:
 
     static constexpr Qt::WindowFlags FRAMELESS_WINDOW_FLAGS  = (  Qt::Window
                                                                 | Qt::NoDropShadowWindowHint
+                                                                | Qt::WindowMinimizeButtonHint
+                                                                | Qt::WindowMaximizeButtonHint
                                                                 | Qt::FramelessWindowHint);
     static constexpr Qt::WindowFlags FRAMED_WINDOW_FLAGS     = (  Qt::Window
                                                                 | Qt::NoDropShadowWindowHint
                                                                 | Qt::WindowTitleHint
+                                                                | Qt::WindowMinimizeButtonHint
+                                                                | Qt::WindowMaximizeButtonHint
                                                                 | Qt::CustomizeWindowHint);
     static constexpr Qt::WindowFlags FRAME_WINDOW_FLAGS_MASK = (  FRAMELESS_WINDOW_FLAGS
                                                                 | FRAMED_WINDOW_FLAGS);
