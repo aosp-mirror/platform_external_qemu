@@ -30,6 +30,7 @@
 #include "android/cmdline-option.h"
 #include "android/console_auth.h"
 #include "android/crashreport/crash-handler.h"
+#include "android/emulator-window.h"
 #include "android/featurecontrol/FeatureControl.h"
 #include "android/globals.h"
 #include "android/hw-events.h"
@@ -2874,6 +2875,11 @@ static int do_screenrecord_start(ControlClient client, char* args) {
             {"time-limit", required_argument, NULL, 't'},
             {NULL, 0, NULL, 0}};
 
+    if (emulator_window_get()->opts->no_window) {
+        control_write(client, "KO: Screen recording not supported in no-window mode\r\n");
+        return -1;
+    }
+
     if (client->global->record_state != RecordState::Ready) {
         control_write(client, "KO: Recording has already started\r\n");
         return -1;
@@ -2994,6 +3000,11 @@ static int do_screenrecord_start(ControlClient client, char* args) {
 }
 
 static int do_screenrecord_stop(ControlClient client, char* args) {
+    if (emulator_window_get()->opts->no_window) {
+        control_write(client, "KO: Screen recording not supported in no-window mode\r\n");
+        return -1;
+    }
+
     if (client->global->record_state == RecordState::Ready) {
         control_write(client, "KO: No recording has been started.\r\n");
         return -1;
