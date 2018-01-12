@@ -11,6 +11,7 @@
 
 #include "android/snapshot/interface.h"
 
+#include "android/emulation/CpuAccelerator.h"
 #include "android/snapshot/Loader.h"
 #include "android/snapshot/Snapshotter.h"
 
@@ -42,6 +43,11 @@ AndroidSnapshotStatus androidSnapshot_prepareForSaving(const char* name) {
 }
 
 AndroidSnapshotStatus androidSnapshot_save(const char* name) {
+    // TODO: HAXM generic + at-exit snapshot support
+    if (android::GetCurrentCpuAccelerator() ==
+        android::CPU_ACCELERATOR_HAX) {
+        androidSnapshot_setQuickbootSaveNoGood();
+    }
     return AndroidSnapshotStatus(Snapshotter::get().saveGeneric(name));
 }
 
