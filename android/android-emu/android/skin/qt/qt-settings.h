@@ -32,6 +32,8 @@ constexpr char ORG_NAME[] = "Android Open Source Project";
 constexpr char ORG_DOMAIN[] = "android.com";
 constexpr char APP_NAME[] = "Emulator";
 
+// Update SettingsPage::on_set_resetNotifications_pressed when new
+// "don't ask again" settings are added.
 constexpr char SHOW_ADB_WARNING[] = "showAdbWarning";
 constexpr char SHOW_AVD_ARCH_WARNING[] = "showAvdArchWarning";
 constexpr char SHOW_GPU_WARNING[] = "showGpuWarning";
