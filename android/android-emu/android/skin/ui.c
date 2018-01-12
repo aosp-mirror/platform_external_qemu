@@ -365,6 +365,11 @@ bool skin_ui_process_events(SkinUI* ui) {
             skin_window_process_event(ui->window, &ev);
             break;
 
+        case kEventWindowChanged:
+            DE("EVENT: kEventWindowChanged\n");
+            skin_window_process_event(ui->window, &ev);
+            break;
+
         case kEventZoomedWindowResized:
             DE("EVENT: kEventZoomedWindowResized dx=%d dy=%d w=%d h=%d\n",
                ev.u.scroll.x, ev.u.scroll.y, ev.u.scroll.xmax, ev.u.scroll.ymax);
