@@ -963,7 +963,8 @@ message EmulatorFeatureFlagState {
     SCREEN_RECORDING = 18;
     VIRTUAL_SCENE = 19;
     SYSTEM_AS_ROOT = 20;
-    // Next tag: 21
+    IGNORE_HOST_OPENGL_ERRORS = 21;
+    // Next tag: 22
   }
   // Which features were enabled by default or through the server-side config.
   repeated EmulatorFeatureFlag attempted_enabled_feature_flags = 1;
