@@ -368,6 +368,9 @@ EmulatorQtWindow::EmulatorQtWindow(QWidget* parent)
     qRegisterMetaType<RunOnUiThreadFunc>();
     qRegisterMetaType<Ui::OverlayMessageIcon>();
 
+    mOrientation = !strcmp(android_hw->hw_initialOrientation, "landscape") ?
+                       SKIN_ROTATION_270 : SKIN_ROTATION_0;
+
     android::base::ThreadLooper::setLooper(mLooper, true);
     CrashReporter::get()->hangDetector().addWatchedLooper(mLooper);
 
