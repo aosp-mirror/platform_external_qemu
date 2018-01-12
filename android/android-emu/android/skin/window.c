@@ -2116,6 +2116,11 @@ skin_window_process_event(SkinWindow*  window, SkinEvent* ev)
         skin_window_show_opengles(window, true);
         break;
 
+    case kEventWindowChanged:
+        // The window changed (such as a resize or rotation)
+        skin_window_show_opengles(window, false);
+        break;
+
     default:
         ;
     }

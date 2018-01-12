@@ -40,6 +40,7 @@ typedef enum {
     kEventScreenChanged,
     kEventZoomedWindowResized,
     kEventToggleTrackball,
+    kEventWindowChanged,
 } SkinEventType;
 
 typedef enum {
