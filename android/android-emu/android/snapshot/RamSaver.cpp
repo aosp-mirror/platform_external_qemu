@@ -108,7 +108,7 @@ RamSaver::RamSaver(const std::string& fileName,
     }
 
     mWorkers.emplace(
-            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 6)),
+            std::max(2, std::min(System::get()->getCpuCoreCount() - 1, 2)),
             [this](QueuedPageInfo&& pi) { handlePageSave(std::move(pi)); });
     mWorkers->start();
     mWriter.emplace([this](WriteInfo&& wi) {
