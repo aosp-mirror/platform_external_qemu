@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "605a3cc9_bfc1a838",
+        "filename": "android/android-emu/android/skin/ui.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-13T04:05:35Z",
+      "side": 1,
+      "message": "nit: collapse the cases?",
+      "range": {
+        "startLine": 363,
+        "startChar": 0,
+        "endLine": 371,
+        "endChar": 18
+      },
+      "revId": "c1b28b2162db19a9423809799d1c9f5280c82c66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
