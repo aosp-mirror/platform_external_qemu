@@ -51,11 +51,14 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 #ifdef __APPLE__
     // Digging into the Qt source code reveals that if the above flags are set
     // on OSX, the created window will be given a style mask that removes the
-    // resize handles from the window. The hint below is the specific
+    // resize handles from the window. The "Maximize" hint below is the specific
     // customization flag that ensures the window will have resize handles.
-    // So, we add the button for now, then immediately disable it when the
-    // window is first shown.
-    setWindowFlags(this->windowFlags() | Qt::WindowMaximizeButtonHint);
+    // The "Minimize" hint is needed to get the window to respond to our
+    // programmatic minimize operation.
+    // We add "Minimize" and "Maximize" now, then immediately disable them when
+    // the window is first shown.
+    setWindowFlags(this->windowFlags() | Qt::WindowMinimizeButtonHint
+                                       | Qt::WindowMaximizeButtonHint);
 
     // On OS X the native scrollbars disappear when not in use which
     // makes the zoomed-in emulator window look unscrollable. Also, due
@@ -245,8 +248,8 @@ void EmulatorContainer::resizeEvent(QResizeEvent* event) {
 }
 
 void EmulatorContainer::showEvent(QShowEvent* event) {
-// Disable to maximize button on OSX. See the comment in the constructor for an
-// explanation of why this is necessary.
+// Disable the minimize and maximize buttons on OSX. See the comment in the
+// constructor for an explanation of why this is necessary.
 #ifdef __APPLE__
     WId wid = effectiveWinId();
     wid = (WId)getNSWindow((void*)wid);
