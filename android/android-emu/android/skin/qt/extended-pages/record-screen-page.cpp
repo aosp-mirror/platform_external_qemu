@@ -272,7 +272,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
 void RecordScreenPage::on_rec_saveButton_clicked() {
     QSettings settings;
 
-    QString ext = mUi->rec_formatSwitch->currentText();
+    QString ext = mUi->rec_formatSwitch->currentText().toLower();
     QString savePath = QDir::toNativeSeparators(getRecordingSaveDirectory());
     QString recordingName = QFileDialog::getSaveFileName(
             this, tr("Save Recording"),
@@ -296,7 +296,7 @@ void RecordScreenPage::on_rec_saveButton_clicked() {
     settings.setValue(Ui::Settings::SCREENREC_SAVE_PATH, dirName);
 
     // Copy the media file to the save location
-    if (ext.toLower() == "gif") {
+    if (ext == "gif") {
         auto thread = new QThread();
         auto task = new ConvertingTask(mTmpFilePath, recordingName.toStdString());
         task->moveToThread(thread);
