@@ -121,6 +121,13 @@ static void hax_update_mapping(uint64_t start_pa, uint32_t size,
             start_pa += chunk_sz;
             host_va += chunk_sz;
             size -= chunk_sz;
+        } else if (start_pa > entry->start_pa) {
+            chunk_sz = start_pa - entry->start_pa;
+            hax_insert_mapping_before(entry, entry->start_pa, chunk_sz,
+                                      entry->host_va, entry->flags);
+            entry->start_pa += chunk_sz;
+            entry->host_va += chunk_sz;
+            entry->size -= chunk_sz;
         }
         chunk_sz = MIN(size, entry->size);
         if (chunk_sz) {
