@@ -738,7 +738,7 @@ static bool sCheckVariables(ProgramData* pData,
                             const ANGLEShaderParser::ShaderLinkInfo& a,
                             const ANGLEShaderParser::ShaderLinkInfo& b);
 static void sInitializeUniformLocs(ProgramData* pData,
-                                   const ANGLEShaderParser::ShaderLinkInfo& linkInfo);
+                                   const std::vector<sh::ShaderVariable>& uniforms);
 
 bool ProgramData::validateLink(ShaderParser* frag, ShaderParser* vert) {
     const ANGLEShaderParser::ShaderLinkInfo& fragLinkInfo =
@@ -762,19 +762,25 @@ void ProgramData::setLinkStatus(GLint status) {
     mGuestLocToHostLoc.clear();
     mGuestLocToHostLoc[-1] = -1;
     if (status) {
+        std::vector<sh::ShaderVariable> allUniforms;
         for (auto& s : attachedShaders) {
             if (s.localName) {
                 assert(s.shader);
                 s.linkedSource = s.shader->getOriginalSrc();
                 s.linkInfo = s.shader->getShaderLinkInfo();
                 mUseUniformLocationVirtualization =
-                    s.linkInfo.esslVersion != 310;
-                if (isGles2Gles()) {
-                    mUseDirectDriverUniformInfo = true;
-                } else {
-                    sInitializeUniformLocs(this, s.linkInfo);
+                    mUseUniformLocationVirtualization &&
+                    (s.linkInfo.esslVersion != 310);
+                for (const auto& var: s.linkInfo.uniforms) {
+                    allUniforms.push_back(var);
                 }
             }
+        }
+
+        if (isGles2Gles()) {
+            mUseDirectDriverUniformInfo = true;
+        } else {
+            sInitializeUniformLocs(this, allUniforms);
         }
         for (const auto &attribLoc : boundAttribLocs) {
             // overwrite
@@ -1023,21 +1029,69 @@ static void sRecursiveLocInitalize(ProgramData* pData, const std::string& keyBas
 }
 
 static void sInitializeUniformLocs(ProgramData* pData,
-                                   const ANGLEShaderParser::ShaderLinkInfo& linkInfo) {
-    for (const auto& var : linkInfo.uniforms) {
+                                   const std::vector<sh::ShaderVariable>& uniforms) {
+    // initialize in order of indices
+    std::vector<std::string> orderedUniforms;
+    GLint uniform_count;
+    GLint nameLength;
+
+    GLDispatch& gl = GLEScontext::dispatcher();
+    gl.glGetProgramiv(pData->getProgramName(), GL_ACTIVE_UNIFORM_MAX_LENGTH, &nameLength);
+    gl.glGetProgramiv(pData->getProgramName(), GL_ACTIVE_UNIFORMS, &uniform_count);
+
+    std::vector<char> name(nameLength, 0);
+
+    for (int i = 0; i < uniform_count; i++) {
+        GLint size;
+        GLenum type;
+        GLsizei length;
+        gl.glGetActiveUniform(pData->getProgramName(), i, nameLength, &length,
+                &size, &type, name.data());
+        orderedUniforms.push_back(pData->getDetranslatedName(name.data()));
+    }
+
+    std::unordered_map<std::string, size_t> linkInfoUniformsByName;
+
+    size_t i = 0;
+    for (const auto& var : uniforms) {
+        linkInfoUniformsByName[var.name] = i;
+        i++;
+    }
+
+    for (const auto& str : orderedUniforms) {
+        if (linkInfoUniformsByName.find(str) == linkInfoUniformsByName.end()) {
+            fprintf(stderr, "%s: warning: uniform %s not found in map\n", __func__, str.c_str());
+        } else {
+            sRecursiveLocInitalize(pData, str, uniforms[linkInfoUniformsByName[str]]);
+        }
+    }
+
+    for (const auto& var : uniforms) {
         sRecursiveLocInitalize(pData, var.name, var);
     }
 }
 
 void ProgramData::initGuestUniformLocForKey(StringView key) {
-    mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
-    mCurrUniformBaseLoc++;
+    if (mUniNameToGuestLoc.find(key.c_str()) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
+        mCurrUniformBaseLoc++;
+    }
 }
 
 void ProgramData::initGuestUniformLocForKey(StringView key, StringView key2) {
-    mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
-    mUniNameToGuestLoc[key2.c_str()] = mCurrUniformBaseLoc;
-    mCurrUniformBaseLoc++;
+    bool newUniform = false;
+    if (mUniNameToGuestLoc.find(key.c_str()) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key.c_str()] = mCurrUniformBaseLoc;
+        newUniform = true;
+    }
+    if (mUniNameToGuestLoc.find(key2.c_str()) == mUniNameToGuestLoc.end()) {
+        mUniNameToGuestLoc[key2.c_str()] = mCurrUniformBaseLoc;
+        newUniform = true;
+    }
+
+    if (newUniform) {
+        mCurrUniformBaseLoc++;
+    }
 }
 
 int ProgramData::getGuestUniformLocation(const char* uniName) {
