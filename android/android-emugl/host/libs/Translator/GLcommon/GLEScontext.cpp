@@ -2222,18 +2222,11 @@ void main() {
 
 static const char kTexImageEmulationVShaderSrcFlipped[] = R"(
 precision highp float;
+layout (location = 0) in vec2 a_pos;
 out vec2 v_texcoord;
 void main() {
-    const vec2 quad_pos[6] = vec2[6](
-        vec2(0.0, 0.0),
-        vec2(0.0, 1.0),
-        vec2(1.0, 0.0),
-        vec2(0.0, 1.0),
-        vec2(1.0, 0.0),
-        vec2(1.0, 1.0));
-
-    gl_Position = vec4((quad_pos[gl_VertexID] * 2.0) - 1.0, 0.0, 1.0);
-    v_texcoord = quad_pos[gl_VertexID];
+    gl_Position = vec4((a_pos.xy) * 2.0 - 1.0, 0.0, 1.0);
+    v_texcoord = a_pos;
     v_texcoord.y = 1.0 - v_texcoord.y;
 })";
 
@@ -2343,7 +2336,13 @@ void GLEScontext::copyTexImageWithEmulation(
     gl.glDisable(GL_RASTERIZER_DISCARD);
 
     gl.glViewport(0, 0, width, height);
-    gl.glDepthRange(0.0f, 1.0f);
+
+    if (isGles2Gles()) {
+        gl.glDepthRangef(0.0f, 1.0f);
+    } else {
+        gl.glDepthRange(0.0f, 1.0f);
+    }
+
     gl.glColorMask(1, 1, 1, 1);
 
     gl.glBindTexture(GL_TEXTURE_2D, m_textureEmulationTextures[0]);
@@ -2462,7 +2461,6 @@ void GLEScontext::setupImageBlitState() {
 
     if (m_blitState.program) return;
 
-
     std::string vshaderSrc =
         isCoreProfile() ? "#version 330 core\n" : "#version 300 es\n";
     vshaderSrc += kTexImageEmulationVShaderSrcFlipped;
@@ -2484,6 +2482,28 @@ void GLEScontext::setupImageBlitState() {
     gl.glGenFramebuffers(1, &m_blitState.resolveFbo);
     gl.glGenTextures(1, &m_blitState.tex);
     gl.glGenVertexArrays(1, &m_blitState.vao);
+
+    gl.glGenBuffers(1, &m_blitState.vbo);
+    float blitVbo[] = {
+        0.0f, 0.0f,
+        1.0f, 0.0f,
+        0.0f, 1.0f,
+        1.0f, 0.0f,
+        1.0f, 1.0f,
+        0.0f, 1.0f,
+    };
+
+    GLint buf;
+    gl.glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &buf);
+
+    gl.glBindBuffer(GL_ARRAY_BUFFER, m_blitState.vbo);
+    gl.glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), blitVbo, GL_STATIC_DRAW);
+
+    gl.glBindVertexArray(m_blitState.vao);
+    gl.glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
+    gl.glEnableVertexAttribArray(0);
+
+    gl.glBindBuffer(GL_ARRAY_BUFFER, buf);
 }
 
 bool GLEScontext::setupImageBlitForTexture(uint32_t width,
@@ -2506,8 +2526,6 @@ bool GLEScontext::setupImageBlitForTexture(uint32_t width,
             break;
         }
     }
-
-
 
     auto& gl = dispatcher();
     gl.glBindTexture(GL_TEXTURE_2D, m_blitState.tex);
@@ -2534,9 +2552,13 @@ bool GLEScontext::setupImageBlitForTexture(uint32_t width,
             gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                     GL_TEXTURE_2D, m_blitState.tex, 0);
         } else {
-            gl.glCopyTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
-                                0, 0, width, height, 0);
+            gl.glTexImage2D(GL_TEXTURE_2D, 0, sizedInternalFormat, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, 0);
         }
+
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
     GLint rWidth = width;
@@ -2576,6 +2598,8 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
 
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    gl.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     gl.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_blitState.fbo);
     gl.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
@@ -2592,7 +2616,11 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     gl.glDisable(GL_RASTERIZER_DISCARD);
 
     gl.glViewport(0, 0, width, height);
-    gl.glDepthRange(0.0f, 1.0f);
+    if (isGles2Gles()) {
+        gl.glDepthRangef(0.0f, 1.0f);
+    } else {
+        gl.glDepthRange(0.0f, 1.0f);
+    }
     gl.glColorMask(1, 1, 1, 1);
 
     gl.glUseProgram(m_blitState.program);
@@ -2638,7 +2666,11 @@ void GLEScontext::blitFromReadBufferToTextureFlipped(GLuint globalTexObj,
     gl.glViewport(prevViewport[0], prevViewport[1],
                   prevViewport[2], prevViewport[3]);
 
-    gl.glDepthRange(m_zNear, m_zFar);
+    if (isGles2Gles()) {
+        gl.glDepthRangef(m_zNear, m_zFar);
+    } else {
+        gl.glDepthRange(m_zNear, m_zFar);
+    }
 
     gl.glColorMask(m_colorMaskR, m_colorMaskG, m_colorMaskB, m_colorMaskA);
 
