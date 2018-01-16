@@ -74,6 +74,12 @@ EmulatorContainer::EmulatorContainer(EmulatorQtWindow* window)
 
 #endif  // __APPLE__
 
+#ifdef _WIN32
+    // this enables users to click App icon on windows taskbar
+    setWindowFlags(this->windowFlags() | Qt::WindowMinimizeButtonHint
+                                       | Qt::WindowMaximizeButtonHint);
+#endif // _WIN32
+
     mResizeTimer.setSingleShot(true);
     connect(&mResizeTimer, SIGNAL(timeout()), this, SLOT(slot_resizeDone()));
 
