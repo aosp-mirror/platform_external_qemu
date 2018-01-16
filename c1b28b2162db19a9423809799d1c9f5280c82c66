@@ -22,6 +22,30 @@
       "revId": "c1b28b2162db19a9423809799d1c9f5280c82c66",
       "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7651c26f_242f8676",
+        "filename": "android/android-emu/android/skin/ui.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 371,
+      "author": {
+        "id": 1233742
+      },
+      "writtenOn": "2018-01-16T21:27:35Z",
+      "side": 1,
+      "message": "I\u0027d like to keep them separate due to the different DE log lines.  I used this lines to validate that the correct events were being triggered for each scenario.",
+      "parentUuid": "605a3cc9_bfc1a838",
+      "range": {
+        "startLine": 363,
+        "startChar": 0,
+        "endLine": 371,
+        "endChar": 18
+      },
+      "revId": "c1b28b2162db19a9423809799d1c9f5280c82c66",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
     }
   ]
 }
