@@ -315,7 +315,8 @@ bool FrameBuffer::initialize(int width, int height, bool useSubWindow,
         System::get()->getProgramBitness() != 32 &&
         (dispatchMaxVersion > GLES_DISPATCH_MAX_VERSION_2) &&
         (emugl::getRenderer() == SELECTED_RENDERER_HOST ||
-         // TODO: Swiftshader issues 0x502
+         // TODO: Swiftshader has rendering errors (fixed in ToT master
+         // of Swiftshader, but ToT master has other regressions)
          // emugl::getRenderer() == SELECTED_RENDERER_SWIFTSHADER_INDIRECT ||
          emugl::getRenderer() == SELECTED_RENDERER_ANGLE_INDIRECT);
 
