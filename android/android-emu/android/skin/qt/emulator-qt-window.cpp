@@ -1018,8 +1018,9 @@ void EmulatorQtWindow::maskWindowFrame() {
     mContainer.show();
     mToolWindow->dockMainWindow();
 
+    D("%s: kEventWindowChanged", __FUNCTION__);
     SkinEvent* event = new SkinEvent();
-    event->type = kEventScreenChanged;
+    event->type = kEventWindowChanged;
     queueSkinEvent(event);
 }
 
@@ -1120,6 +1121,8 @@ void EmulatorQtWindow::setFrameAlways(bool frameAlways)
         maskWindowFrame();
         mContainer.show();
     }
+
+    D("%s: kEventScreenChanged", __FUNCTION__);
     SkinEvent* event = new SkinEvent();
     event->type = kEventScreenChanged;
     queueSkinEvent(event);
@@ -1568,6 +1571,7 @@ void EmulatorQtWindow::slot_showWindow(SkinSurface* surface,
 
 void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
     if (newScreen != mCurrentScreen) {
+        D("%s: kEventScreenChanged", __FUNCTION__);
         queueSkinEvent(createSkinEvent(kEventScreenChanged));
         mCurrentScreen = newScreen;
     }
@@ -1576,6 +1580,7 @@ void EmulatorQtWindow::onScreenChanged(QScreen* newScreen) {
 void EmulatorQtWindow::onScreenConfigChanged() {
     auto newScreen = window()->windowHandle()->screen();
     if (newScreen != mCurrentScreen) {
+        D("%s: kEventScreenChanged", __FUNCTION__);
         queueSkinEvent(createSkinEvent(kEventScreenChanged));
         mCurrentScreen = newScreen;
     }
