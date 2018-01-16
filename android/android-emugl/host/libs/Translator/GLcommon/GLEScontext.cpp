@@ -320,7 +320,9 @@ GLuint GLEScontext::getVertexArrayObject() const {
 }
 
 bool GLEScontext::vertexAttributesBufferBacked() {
-    for (int i = 0; i < s_glSupport.maxVertexAttribs; i++) {
+    int numVtxAttrib = std::min(s_glSupport.maxVertexAttribs,
+            static_cast<int>(m_currVaoState.bufferBindings().size()));
+    for (int i = 0; i < numVtxAttrib; i++) {
         if (m_currVaoState[i]->isEnable() &&
             !m_currVaoState.bufferBindings()[m_currVaoState[i]->getBindingIndex()].buffer) {
             return false;
