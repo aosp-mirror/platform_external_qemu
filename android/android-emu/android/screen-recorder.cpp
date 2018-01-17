@@ -231,7 +231,7 @@ static intptr_t stopRecording() {
     globals.encodingCVInfo.done = false;
     globals.encodingCVInfo.lock.unlock();
 
-    ffmpeg_delete_recorder(globals.recorder);
+    bool has_frames = ffmpeg_delete_recorder(globals.recorder);
     gpu_frame_set_record_mode(false);
 
     if (globals.isGuestMode) {
@@ -243,7 +243,7 @@ static intptr_t stopRecording() {
 
     if (globals.recordingInfo.cb) {
         globals.recordingInfo.cb(globals.recordingInfo.opaque,
-                                 RECORD_STOP_FINISHED);
+                                 has_frames ? RECORD_STOP_FINISHED : RECORD_STOP_FAILED);
     }
     globals.recordingInfo.fileName = nullptr;
     globals.recorder = nullptr;
