@@ -46,7 +46,7 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
     android::ParameterList params;
     if (isCros) {
       std::string cmdline(StringFormat(
-          "ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 "
+          "ro noresume noswap loglevel=7 noinitrd root=/dev/sda3 no_timer_check"
           "cros_legacy cros_debug console=%s",
           opts->show_kernel ? "ttyS0" : ""));
       return strdup(cmdline.c_str());
@@ -56,6 +56,9 @@ char* emulator_getKernelParameters(const AndroidOptions* opts,
 
     // We always force qemu=1 when running inside QEMU.
     params.add("qemu=1");
+
+    // Disable apic timer check. b/33963880
+    params.add("no_timer_check");
 
     params.addFormat("androidboot.hardware=%s",
                      isQemu2 ? "ranchu" : "goldfish");
