@@ -845,20 +845,40 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                 pipe->command_buffer->status = GOLDFISH_PIPE_ERROR_INVAL;
                 break;
             }
-#if !defined(TARGET_MIPS)
             // All passed buffers are allocated in the same guest process, so
-            // know they all have the same offset from the host address.
-            const ptrdiff_t diffFromGuest =
-                    (intptr_t)buffers[0].data - (intptr_t)rwPtrs[0];
+            // know they all have the same offset from the host address if they
+            // are in the same region: below 4G or over 4G. Use '1' as invalid
+            // value since real offsets always are aligned to page size.
+            ptrdiff_t diffFromGuestBelow4G = 1, diffFromGuestOver4G = 1;
+#if !defined(TARGET_MIPS)
+            int count = 0;
+            int unmapIndex[2];
 #endif
             unsigned i;
-            for (i = 1; i < buffers_count; ++i) {
+            for (i = 0; i < buffers_count; ++i) {
+                if ((rwPtrs[i] <= 0xFFFFFFFF && diffFromGuestBelow4G == 1) ||
+                    (rwPtrs[i] > 0xFFFFFFFF && diffFromGuestOver4G == 1)) {
+                    buffers[i].data =
+                        map_guest_buffer(rwPtrs[i], rwSizes[i], willModifyData);
 #if !defined(TARGET_MIPS)
-                buffers[i].data = (void*)(intptr_t)(rwPtrs[i] + diffFromGuest);
-#else
-                buffers[i].data = map_guest_buffer(
-                                      rwPtrs[i], rwSizes[i], willModifyData);
+                    if (rwPtrs[i] <= 0xFFFFFFFF) {
+                        diffFromGuestBelow4G =
+                            (intptr_t)buffers[i].data - (intptr_t)rwPtrs[i];
+                    } else {
+                        diffFromGuestOver4G =
+                            (intptr_t)buffers[i].data - (intptr_t)rwPtrs[i];
+                    }
+                    unmapIndex[count++] = i;
 #endif
+                } else {
+                    if (rwPtrs[i] <= 0xFFFFFFFF) {
+                        buffers[i].data =
+                            (void*)(intptr_t)(rwPtrs[i] + diffFromGuestBelow4G);
+                    } else {
+                        buffers[i].data =
+                            (void*)(intptr_t)(rwPtrs[i] + diffFromGuestOver4G);
+                    }
+                }
                 buffers[i].size = rwSizes[i];
                 assert(buffers[i].data != NULL);
                 assert(buffers[i].size != 0);
@@ -894,12 +914,16 @@ static void pipeDevice_doCommand_v2(HwPipe* pipe) {
                (willModifyData ? "READ" : "WRITE"), (int)pipe->id,
                (int)buffers_count, pipe->command_buffer->status);
 
-            cpu_physical_memory_unmap(buffers[0].data, buffers[0].size,
-                                      willModifyData, buffers[0].size);
 #if defined(TARGET_MIPS)
-            for (i = 1; i < buffers_count; ++i) {
+            for (i = 0; i < buffers_count; ++i) {
                 cpu_physical_memory_unmap(buffers[i].data, buffers[i].size,
                                           willModifyData, buffers[i].size);
+            }
+#else
+            for (i = 0; i < count; ++i) {
+                const int j = unmapIndex[i];
+                cpu_physical_memory_unmap(buffers[j].data, buffers[j].size,
+                                          willModifyData, buffers[j].size);
             }
 #endif
             break;
