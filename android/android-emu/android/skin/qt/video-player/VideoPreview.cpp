@@ -51,7 +51,24 @@ namespace videoplayer {
 
 VideoPreview::VideoPreview(VideoPlayerWidget* widget, std::string videoFile)
     : mVideoFile(videoFile), mWidget(widget) {
-    getPreviewFrame(mVideoFile, &mPreviewFrame, mWidget);
+    if (!getPreviewFrame(mVideoFile, &mPreviewFrame, mWidget)) {
+        float aspect_ratio = 1.777778;
+        int h = widget->height();
+        int w = ((int)(h * aspect_ratio)) & -3;
+        if (w > widget->width()) {
+            w = widget->width();
+            h = ((int)(w / aspect_ratio)) & -3;
+        }
+
+        int x = (widget->width() - w) / 2;
+        int y = (widget->height() - h) / 2;
+
+        if (widget->width() != w || widget->height() != h) {
+            widget->move(x, y);
+            widget->setFixedSize(w, h);
+            printf("widget(%d, %d, %d, %d)\n", x, y, w, h);
+        }
+    }
 }
 
 VideoPreview::~VideoPreview() {
