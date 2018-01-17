@@ -104,6 +104,7 @@ public:
     std::unordered_map<std::string, GLuint> boundAttribLocs;
     virtual GenNameInfo getGenNameInfo() const override;
     void addProgramName(GLuint name) { ProgramName = name; }
+    GLuint getProgramName() const { return ProgramName; }
 
     // Virtualize uniform locations
     // It handles location -1 as well
