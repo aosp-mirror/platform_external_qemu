@@ -481,7 +481,7 @@ bool androidSnapshot_isQuickbootSaveNoGood() {
 bool androidSnapshot_quickbootSave(const char* name) {
     if (sQuickbootSaveNoGood) {
         fprintf(stderr,
-                "ERROR: On-exit saves for HAXM not supported "
+                "NOTE: On-exit saves for HAXM not supported "
                 "after a mid-run snapshot save. "
                 "Emulator will use the last snapshot if applicable.\n");
         return false;
