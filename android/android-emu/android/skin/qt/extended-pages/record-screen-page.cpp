@@ -106,6 +106,7 @@ void RecordScreenPage::setRecordState(RecordState newState) {
             mVideoWidget->setVisible(false);
             break;
         case RecordState::Recording:
+            fprintf(stderr, "%s: set to recording\n", __func__);
             mUi->rec_recordDotLabel->setPixmap(QPixmap(QString::fromUtf8(":/light/recordCircle")));
             mUi->rec_recordOverlayWidget->show();
             mUi->rec_timeElapsedLabel->setText("0s Recording...");
@@ -220,6 +221,7 @@ void RecordScreenPage::on_rec_playStopButton_clicked() {
 }
 
 void RecordScreenPage::on_rec_recordButton_clicked() {
+    fprintf(stderr, "%s: call\n", __func__);
     RecordState newState = RecordState::Ready;
 
     if (!mRecordScreenAgent) {
@@ -229,6 +231,7 @@ void RecordScreenPage::on_rec_recordButton_clicked() {
 
     switch (mState) {
         case RecordState::Ready: {
+                                fprintf(stderr, "%s: ready\n", __func__);
             // startRecording() will determine which codec to use based on the
             // file extension.
             RecordingInfo info = {};
