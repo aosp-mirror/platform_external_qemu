@@ -768,9 +768,6 @@ void ProgramData::setLinkStatus(GLint status) {
                 assert(s.shader);
                 s.linkedSource = s.shader->getOriginalSrc();
                 s.linkInfo = s.shader->getShaderLinkInfo();
-                mUseUniformLocationVirtualization =
-                    mUseUniformLocationVirtualization &&
-                    (s.linkInfo.esslVersion != 310);
                 for (const auto& var: s.linkInfo.uniforms) {
                     allUniforms.push_back(var);
                 }
