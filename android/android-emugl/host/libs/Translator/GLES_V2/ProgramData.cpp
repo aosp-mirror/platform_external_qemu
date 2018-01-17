@@ -1059,9 +1059,7 @@ static void sInitializeUniformLocs(ProgramData* pData,
     }
 
     for (const auto& str : orderedUniforms) {
-        if (linkInfoUniformsByName.find(str) == linkInfoUniformsByName.end()) {
-            fprintf(stderr, "%s: warning: uniform %s not found in map\n", __func__, str.c_str());
-        } else {
+        if (linkInfoUniformsByName.find(str) != linkInfoUniformsByName.end()) {
             sRecursiveLocInitalize(pData, str, uniforms[linkInfoUniformsByName[str]]);
         }
     }
