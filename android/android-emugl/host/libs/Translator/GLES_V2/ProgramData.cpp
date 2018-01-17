@@ -767,8 +767,7 @@ void ProgramData::setLinkStatus(GLint status) {
                 assert(s.shader);
                 s.linkedSource = s.shader->getOriginalSrc();
                 s.linkInfo = s.shader->getShaderLinkInfo();
-                mUseUniformLocationVirtualization =
-                    s.linkInfo.esslVersion != 310;
+                mUseUniformLocationVirtualization = true;
                 if (isGles2Gles()) {
                     mUseDirectDriverUniformInfo = true;
                 } else {

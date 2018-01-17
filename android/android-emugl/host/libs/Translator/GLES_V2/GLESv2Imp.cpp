@@ -3253,6 +3253,15 @@ static int s_getHostLocOrSetError(GLint location) {
     return pData->getHostUniformLocation(location);
 }
 
+static int s_getHostLocOrSetError(GLuint program,
+        GLint location) {
+    GET_CTX_V2_RET(-1);
+    ProgramData* pData = (ProgramData*)ctx->shareGroup()->getObjectDataPtr(
+            NamedObjectType::SHADER_OR_PROGRAM, program).get();
+    RET_AND_SET_ERROR_IF(!pData, GL_INVALID_OPERATION, -2);
+    return pData->getHostUniformLocation(location);
+}
+
 GL_APICALL void  GL_APIENTRY glUniform1f(GLint location, GLfloat x){
     GET_CTX_V2();
     int hostLoc = s_getHostLocOrSetError(location);
