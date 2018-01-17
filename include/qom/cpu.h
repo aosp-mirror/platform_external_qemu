@@ -406,7 +406,7 @@ struct CPUState {
        size, especially for hosts without large memory offsets.  */
     // HVF
     bool hvf_vcpu_dirty;
-    uint64_t hvf_fd; // fd of vcpu created by HVF
+    uint32_t hvf_fd; // fd of vcpu created by HVF
     // Supporting data structures for VMCS capabilities
     // and x86 emulation state
     struct hvf_vcpu_caps* hvf_caps;
