@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3e37559e_7aaf729c",
+        "filename": "android/android-emu/android/avd/info.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 1139,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-18T06:54:02Z",
+      "side": 1,
+      "message": "do we need to do line 1143+ if with kernel-ranchu-64?",
+      "range": {
+        "startLine": 1137,
+        "startChar": 0,
+        "endLine": 1139,
+        "endChar": 5
+      },
+      "revId": "2ed953a34fbab23b8b9213d0be85043daba385c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9f150b2_b2dddd91",
+        "filename": "android/emulator/main-emulator.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 824,
+      "author": {
+        "id": 1082465
+      },
+      "writtenOn": "2018-01-18T06:54:02Z",
+      "side": 1,
+      "message": "can we count on |n+1|? Better to zero in on the \"x86_64\" part maybe?",
+      "range": {
+        "startLine": 824,
+        "startChar": 34,
+        "endLine": 824,
+        "endChar": 37
+      },
+      "revId": "2ed953a34fbab23b8b9213d0be85043daba385c6",
+      "serverId": "85c56323-6fa9-3386-8a01-6480fb634889",
+      "unresolved": true
+    }
+  ]
+}
