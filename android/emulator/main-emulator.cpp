@@ -90,9 +90,14 @@ static char* getClassicEmulatorPath(const char* progDir,
 
 static char* getQemuExecutablePath(const char* programPath,
                                    const char* avdArch,
+                                   bool force64bitTarget,
                                    int wantedBitness);
 
 static void updateLibrarySearchPath(int wantedBitness, bool useSystemLibs, const char* launcherDir);
+
+static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
+                                             const char* avdArch,
+                                             const char* androidOut);
 
 static bool checkAvdSystemDirForKernelRanchu(const char* avdName,
                                              const char* avdArch,
@@ -622,6 +627,7 @@ int main(int argc, char** argv)
 
     D("emuDirName: '%s'", emuDirName.c_str());
 
+    bool force64bitTarget = is32bitImageOn64bitRanchuKernel(avdName, avdArch, androidOut);
     const StringView candidates[] = {progDirSystem, emuDirName, argv0DirName};
     char* emulatorPath = nullptr;
     StringView progDir;
@@ -631,6 +637,7 @@ int main(int argc, char** argv)
         if (ranchu == RANCHU_ON) {
             emulatorPath = getQemuExecutablePath(progDir.c_str(),
                                                  avdArch,
+                                                 force64bitTarget,
                                                  wantedBitness);
         } else {
             emulatorPath = getClassicEmulatorPath(progDir.c_str(),
@@ -798,22 +805,29 @@ static char* getClassicEmulatorPath(const char* progDir,
 
 // Convert an emulator-specific CPU architecture name |avdArch| into the
 // corresponding QEMU one. Return NULL if unknown.
-static const char* getQemuArch(const char* avdArch) {
+static const char* getQemuArch(const char* avdArch, bool force64bitTarget) {
     static const struct {
         const char* arch;
         const char* qemuArch;
     } kQemuArchs[] = {
         {"arm", "armel"},
         {"arm64", "aarch64"},
+        {"arm64", "aarch64"},
         {"mips", "mipsel"},
         {"mips64", "mips64el"},
+        {"mips64", "mips64el"},
         {"x86","i386"},
+        {"x86_64","x86_64"},
         {"x86_64","x86_64"},
     };
     size_t n;
     for (n = 0; n < ARRAY_SIZE(kQemuArchs); ++n) {
         if (!strcmp(avdArch, kQemuArchs[n].arch)) {
-            return kQemuArchs[n].qemuArch;
+            if (force64bitTarget) {
+                return kQemuArchs[n+1].qemuArch;
+            } else {
+                return kQemuArchs[n].qemuArch;
+            }
         }
     }
     return NULL;
@@ -825,6 +839,7 @@ static const char* getQemuArch(const char* avdArch) {
 // Return NULL in case of error.
 static char* getQemuExecutablePath(const char* progDir,
                                    const char* avdArch,
+                                   bool force64bitTarget,
                                    int wantedBitness) {
 // The host operating system name.
 #ifdef __linux__
@@ -835,7 +850,7 @@ static char* getQemuExecutablePath(const char* progDir,
     static const char kHostOs[] = "windows";
 #endif
     const char* hostArch = (wantedBitness == 64) ? "x86_64" : "x86";
-    const char* qemuArch = getQemuArch(avdArch);
+    const char* qemuArch = getQemuArch(avdArch, force64bitTarget);
     if (!qemuArch) {
         APANIC("QEMU2 emulator does not support %s CPU architecture", avdArch);
     }
@@ -928,6 +943,31 @@ static std::string getAvdSystemPath(const char* avdName) {
          AFREE(systemPath);
     }
     AFREE(sdkRootPath);
+    return result;
+}
+
+// check for 32bit image running on 64bit ranchu kernel
+static bool is32bitImageOn64bitRanchuKernel(const char* avdName,
+                                               const char* avdArch,
+                                               const char* androidOut) {
+    // only appliable to 32bit image
+    if (strcmp(avdArch, "x86") && strcmp(avdArch, "arm") && strcmp(avdArch, "mips")) {
+        return false;
+    }
+
+    bool result = false;
+    char* kernel_file = NULL;
+    if (androidOut) {
+        asprintf(&kernel_file, "%s/kernel-ranchu-64", androidOut);
+    } else {
+        std::string systemImagePath = getAvdSystemPath(avdName);
+        asprintf(&kernel_file, "%s/%s", systemImagePath.c_str(),
+                 "kernel-ranchu-64");
+    }
+    result = path_exists(kernel_file);
+    D("Probing for %s: file %s", kernel_file, result ? "exists" : "missing");
+
+    AFREE(kernel_file);
     return result;
 }
 
