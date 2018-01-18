@@ -57,6 +57,8 @@
 const char*  android_skin_net_speed = NULL;
 const char*  android_skin_net_delay = NULL;
 
+static const char DEFAULT_GUEST_GPU_MODE[] = "swiftshader_indirect";
+
 /***********************************************************************/
 /***********************************************************************/
 /*****                                                             *****/
@@ -1920,10 +1922,15 @@ bool configAndStartRenderer(
                  "until the next system image update. "
                  "Sorry for the inconvenience.");
         if (opts->gpu) {
-            str_reset(&opts->gpu, "swiftshader");
+            str_reset(&opts->gpu, DEFAULT_GUEST_GPU_MODE);
         } else {
-            str_reset(&hw->hw_gpu_mode, "swiftshader");
+            str_reset(&hw->hw_gpu_mode, DEFAULT_GUEST_GPU_MODE);
         }
+    }
+
+    // Map the generic "guest" setting to our default software renderer
+    if (!strcmp(hw->hw_gpu_mode, "guest")) {
+        str_reset(&hw->hw_gpu_mode, DEFAULT_GUEST_GPU_MODE);
     }
 
     if (hw->hw_arc) {
