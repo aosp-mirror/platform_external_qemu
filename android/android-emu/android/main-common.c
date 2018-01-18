@@ -77,6 +77,7 @@ bool android_op_wipe_data = false;
 bool android_op_writable_system = false;
 const char *savevm_on_exit = NULL;
 int guest_data_partition_mounted = 0;
+int guest_boot_completed = 0;
 
 bool emulator_has_network_option = false;
 
@@ -637,6 +638,9 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         if (abi && !strcmp(abi, "mips32r6")) {
             str_reset(&hw->hw_cpu_model, "mips32r6-generic");
             D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
+        } else if (abi && !strcmp(abi, "mips32r5")) {
+            str_reset(&hw->hw_cpu_model, "P5600");
+            D("Auto-config: -qemu -cpu %s", hw->hw_cpu_model);
         }
         AFREE(abi);
     }
@@ -709,6 +713,18 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
 
     if (opts->logcat_output) {
         str_reset(&android_hw->hw_logcatOutput_path, opts->logcat_output);
+    }
+
+    if (opts->quit_after_boot) {
+        char*  end;
+        hw->test_quitAfterBootTimeOut = strtol(opts->quit_after_boot, &end, 0);
+        if (hw->test_quitAfterBootTimeOut <= 0) {
+            derror("-quit-after-boot must be followed by a positive timeout in seconds");
+            exit(1);
+        } else {
+            D("Will quit emulator after guest boots completely, or after %d seconds",
+                    hw->test_quitAfterBootTimeOut);
+        }
     }
 
     /* -partition-size is used to specify the max size of both the system
@@ -909,7 +925,7 @@ static bool emulator_handleCommonEmulatorOptions(AndroidOptions* opts,
         char*  initImage = NULL;
 
         do {
-            if (!opts->data && !hw->hw_arc) {
+            if (!opts->data) {
                 dataImage = avdInfo_getDataImagePath(avd);
                 if (dataImage != NULL) {
                     D("autoconfig: -data %s", dataImage);
@@ -1481,6 +1497,8 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     }
 
     if (opts->snapshot_list) {
+        bool android_snapshot_list_ok = false;
+
         if (opts->snapstorage == NULL) {
             /* Need to find the default snapstorage */
             int inAndroidBuild = 0;
@@ -1493,14 +1511,23 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
                 if (inAndroidBuild) {
                     derror("You must use the -snapstorage <file> option to specify a snapshot storage file!\n");
                 } else {
-                    derror("This AVD doesn't have snapshotting enabled!\n");
+                    if (is_qemu2) {
+                        android_snapshot_list_ok = true;
+                    } else {
+                        return false;
+                    }
                 }
-                return false;
+                if (!android_snapshot_list_ok) {
+                    return false;
+                }
             }
         }
-        snapshot_print(opts->snapstorage);
-        *exit_status = 0;
-        return false;
+        if (!android_snapshot_list_ok) {
+            snapshot_print(opts->snapstorage);
+            *exit_status = 0;
+            return false;
+        }
+
     }
 
     // Both |argc| and |argv| have been modified by the big while loop above:
@@ -1736,21 +1763,6 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
         hw->vm_heapSize = heapSize;
     }
 
-    if (opts->camera_back) {
-        /* Validate parameter. */
-        if (memcmp(opts->camera_back, "webcam", 6) &&
-            strcmp(opts->camera_back, "emulated") &&
-            strcmp(opts->camera_back, "virtualscene") &&
-            strcmp(opts->camera_back, "none")) {
-            derror("Invalid value for -camera-back <mode> parameter: %s\n"
-                   "Valid values are: 'emulated', 'webcam<N>', 'virtualscene', "
-                   "or 'none'\n",
-                   opts->camera_back);
-            return false;
-        }
-        str_reset(&hw->hw_camera_back, opts->camera_back);
-    }
-
     if (opts->camera_front) {
         /* Validate parameter. */
         if (memcmp(opts->camera_front, "webcam", 6) &&
@@ -1858,6 +1870,28 @@ bool emulator_parseCommonCommandLineOptions(int* p_argc,
     return true;
 }
 
+bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
+                                             AvdInfo* avd,
+                                             AndroidHwConfig* hw) {
+    if (opts->camera_back) {
+        bool supportsVirtualScene = feature_is_enabled(kFeature_VirtualScene);
+        bool isVirtualScene = !strcmp(opts->camera_back, "virtualscene");
+        /* Validate parameter. */
+        if (memcmp(opts->camera_back, "webcam", 6) &&
+            strcmp(opts->camera_back, "emulated") &&
+            (!isVirtualScene || !supportsVirtualScene) &&
+            strcmp(opts->camera_back, "none")) {
+            derror("Invalid value for -camera-back <mode> parameter: %s\n"
+                   "Valid values are: 'emulated', 'webcam<N>'%s, "
+                   "or 'none'\n",
+                   opts->camera_back,
+                   supportsVirtualScene? ", 'virtualscene'": "");
+            return false;
+        }
+        str_reset(&hw->hw_camera_back, opts->camera_back);
+    }
+    return true;
+}
 
 static RendererConfig lastRendererConfig;
 
@@ -1893,8 +1927,9 @@ bool configAndStartRenderer(
     }
 
     if (hw->hw_arc) {
-      memset(&config, 0, sizeof(config));
-      str_reset(&hw->hw_gpu_mode, "off");
+        dprint("Forcing gpu off for Chrome OS");
+        str_reset(&opts->gpu, "off");
+        str_reset(&hw->hw_gpu_mode, "off");
     }
 
     if (!androidEmuglConfigInit(&config,

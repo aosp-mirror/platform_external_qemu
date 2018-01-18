@@ -167,6 +167,8 @@ static constexpr android::base::StringView kGLESDynamicVersion_2 = "ANDROID_EMU_
 static constexpr android::base::StringView kGLESDynamicVersion_3_0 = "ANDROID_EMU_gles_max_version_3_0";
 static constexpr android::base::StringView kGLESDynamicVersion_3_1 = "ANDROID_EMU_gles_max_version_3_1";
 
+static constexpr android::base::StringView kGLESNoHostError = "ANDROID_EMU_gles_no_host_error";
+
 static void rcTriggerWait(uint64_t glsync_ptr,
                           uint64_t thread_ptr,
                           uint64_t timeline);
@@ -363,6 +365,11 @@ static EGLint rcGetGLString(EGLenum name, void* buffer, EGLint bufferSize)
         // GLESv2 extensions as well.
         if (maxVersion > GLES_DISPATCH_MAX_VERSION_2) {
             glStr += "GL_OES_vertex_array_object ";
+        }
+
+        if (emugl_feature_is_enabled(android::featurecontrol::IgnoreHostOpenGLErrors)) {
+            glStr += kGLESNoHostError;
+            glStr += " ";
         }
     }
 

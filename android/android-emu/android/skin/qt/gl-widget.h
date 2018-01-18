@@ -71,8 +71,8 @@ protected:
     // new dimensions in pixels.
     virtual void resizeGL(int w, int h) {}
 
-    int realPixelsWidth() const { return std::ceil(width() * devicePixelRatio()); }
-    int realPixelsHeight() const { return std::ceil(height() * devicePixelRatio()); }
+    int realPixelsWidth() const { return std::ceil(width() * devicePixelRatioF()); }
+    int realPixelsHeight() const { return std::ceil(height() * devicePixelRatioF()); }
     void toggleAA() { mEnableAA = !mEnableAA; }
 
 private:

@@ -14,6 +14,7 @@
 
 #include "android/cmdline-option.h"
 #include "android/framebuffer.h"
+#include "android/screen-recorder.h"
 #include "android/skin/file.h"
 #include "android/skin/keyboard.h"
 #include "android/skin/window.h"
@@ -76,7 +77,7 @@ bool emulator_window_rotate(SkinRotation rotation);
 
 /* Start recording the screen. Returns false if recording is already
  * running. */
-bool emulator_window_start_recording(const char* filename);
+bool emulator_window_start_recording(const RecordingInfo* info);
 /* Stop recording the screen. */
 void emulator_window_stop_recording(void);
 

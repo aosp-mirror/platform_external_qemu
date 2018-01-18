@@ -257,6 +257,8 @@ private:
 
     GLsync m_sync = nullptr;
     bool m_fastBlitSupported = false;
+
+    GLenum m_asyncReadbackType = GL_UNSIGNED_BYTE;
 };
 
 typedef emugl::SmartPtr<ColorBuffer> ColorBufferPtr;

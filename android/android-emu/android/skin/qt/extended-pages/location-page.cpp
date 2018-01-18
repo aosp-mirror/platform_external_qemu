@@ -32,23 +32,16 @@
 static const double kGplexLon = -122.084;
 static const double kGplexLat =   37.422;
 
-static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
-                              double* pOutLatitude,
-                              double* pOutLongitude,
-                              double* pOutAltitude);
-
-static void sendLocationToDevice(const QAndroidLocationAgent* locAgent);
+const QAndroidLocationAgent* LocationPage::sLocationAgent = nullptr;
 
 LocationPage::LocationPage(QWidget *parent) :
     QWidget(parent),
     mUi(new Ui::LocationPage),
     mUpdateThread([this]() {
-        // update location every 10 seconds, until we exits
+        // update location every 10 seconds, until we exit
         mUpdateThreadLock.lock();
         while (!mShouldCloseUpdateThread) {
-            if (mLocationAgent) {
-                sendLocationToDevice(mLocationAgent);
-            }
+            sendLocationToDevice();
             // wait 10 sec
             mUpdateThreadCv.timedWait(&mUpdateThreadLock,
                     android::base::System::get()->getUnixTimeUs()
@@ -77,15 +70,16 @@ LocationPage::LocationPage(QWidget *parent) :
 
     setButtonEnabled(mUi->loc_playStopButton, getSelectedTheme(), false);
 
-    // Restore previous values. If there are no previous values, use the
-    // Googleplex's longitude and latitude.
+    // Set the GUI to the current values
+    double curLat, curLon, curAlt;
+    getDeviceLocation(&curLat, &curLon, &curAlt);
+    updateDisplayedLocation(curLat, curLon, curAlt);
+
+    mUi->loc_altitudeInput->setText(QString::number(curAlt, 'f', 1));
+    mUi->loc_latitudeInput->setValue(curLat);
+    mUi->loc_longitudeInput->setValue(curLon);
+
     QSettings settings;
-    double altValue = settings.value(Ui::Settings::LOCATION_ENTERED_ALTITUDE, 0.0).toDouble();
-    mUi->loc_altitudeInput->setText( QString::number(altValue, 'f', 1) );
-    mUi->loc_longitudeInput->setValue(
-            settings.value(Ui::Settings::LOCATION_ENTERED_LONGITUDE, kGplexLon).toDouble());
-    mUi->loc_latitudeInput->setValue(
-            settings.value(Ui::Settings::LOCATION_ENTERED_LATITUDE, kGplexLat).toDouble());
     mUi->loc_playbackSpeed->setCurrentIndex(
             settings.value(Ui::Settings::LOCATION_PLAYBACK_SPEED, 0).toInt());
     mUi->loc_pathTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -96,6 +90,8 @@ LocationPage::LocationPage(QWidget *parent) :
             SLOT(geoDataThreadStarted()),
             SLOT(startupGeoDataThreadFinished(QString, bool, QString)));
     mGeoDataLoader->loadGeoDataFromFile(location_data_file, &mGpsFixesArray);
+
+    mUpdateThread.start();
 
     using android::metrics::PeriodicReporter;
     mMetricsReportingToken = PeriodicReporter::get().addCancelableTask(
@@ -127,21 +123,19 @@ LocationPage::~LocationPage() {
     mUi->loc_pathTable->clear();
 }
 
+// static
 void LocationPage::setLocationAgent(const QAndroidLocationAgent* agent) {
-    mUpdateThreadLock.lock();
-    mLocationAgent = agent;
-    // Show the user the device's current location.
+    sLocationAgent = agent;
+
     double curLat, curLon, curAlt;
-    getDeviceLocation(mLocationAgent, &curLat, &curLon, &curAlt);
-    updateDisplayedLocation(curLat, curLon, curAlt);
+    getDeviceLocation(&curLat, &curLon, &curAlt);
 
-    mUpdateThreadCv.signalAndUnlock(&mUpdateThreadLock);
+    QSettings settings;
+    settings.setValue(Ui::Settings::LOCATION_RECENT_LATITUDE,  curLat);
+    settings.setValue(Ui::Settings::LOCATION_RECENT_LONGITUDE, curLon);
+    settings.setValue(Ui::Settings::LOCATION_RECENT_ALTITUDE,  curAlt);
 
-    mUpdateThread.start(); // no-op if mUpdateThread already started.
-
-    // We cannot update the UI here because we are not called from
-    // the Qt thread. Emit a signal to do that update.
-    emit locationUpdateRequired(curLat, curLon, curAlt);
+    sendLocationToDevice();
 }
 
 void LocationPage::on_loc_GpxKmlButton_clicked()
@@ -553,16 +547,15 @@ void LocationPage::updateControlsAfterLoading() {
 // Get the current location from the device. If that fails, use
 // the saved location from this UI.
 // (static function)
-static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
-                                     double* pLatitude,
+void LocationPage::getDeviceLocation(double* pLatitude,
                                      double* pLongitude,
                                      double* pAltitude)
 {
     bool gotDeviceLoc = false;
 
-    if (locAgent && locAgent->gpsGetLoc) {
+    if (sLocationAgent && sLocationAgent->gpsGetLoc) {
         // Query the device
-        gotDeviceLoc = locAgent->gpsGetLoc(pLatitude, pLongitude, pAltitude, nullptr);
+        gotDeviceLoc = sLocationAgent->gpsGetLoc(pLatitude, pLongitude, pAltitude, nullptr);
     }
 
     if (!gotDeviceLoc) {
@@ -579,8 +572,8 @@ static void getDeviceLocation(const QAndroidLocationAgent* locAgent,
 
 // Send a GPS location to the device
 // (static function)
-static void sendLocationToDevice(const QAndroidLocationAgent* locAgent) {
-    if (locAgent && locAgent->gpsSendLoc) {
+void LocationPage::sendLocationToDevice() {
+    if (sLocationAgent && sLocationAgent->gpsSendLoc) {
         // Send these to the device
         QSettings settings;
         double latitude  = settings.value(Ui::Settings::LOCATION_RECENT_LATITUDE,
@@ -591,7 +584,7 @@ static void sendLocationToDevice(const QAndroidLocationAgent* locAgent) {
                                      0.0).toDouble();
         timeval timeVal = {};
         gettimeofday(&timeVal, nullptr);
-        locAgent->gpsSendLoc(latitude, longitude, altitude, 4, &timeVal);
+        sLocationAgent->gpsSendLoc(latitude, longitude, altitude, 4, &timeVal);
     }
 }
 

@@ -32,9 +32,12 @@ constexpr char ORG_NAME[] = "Android Open Source Project";
 constexpr char ORG_DOMAIN[] = "android.com";
 constexpr char APP_NAME[] = "Emulator";
 
+// Update SettingsPage::on_set_resetNotifications_pressed when new
+// "don't ask again" settings are added.
 constexpr char SHOW_ADB_WARNING[] = "showAdbWarning";
 constexpr char SHOW_AVD_ARCH_WARNING[] = "showAvdArchWarning";
 constexpr char SHOW_GPU_WARNING[] = "showGpuWarning";
+constexpr char SHOW_VIRTUALSCENE_INFO[] = "showVirtualSceneInfo";
 
 // Note: The "set/" here is because these settings are
 //       associated with "settings-page", not because
@@ -44,7 +47,7 @@ constexpr char ADB_PATH[] = "set/adbPath";
 constexpr char AUTO_FIND_ADB[] = "set/autoFindAdb";
 constexpr char ALWAYS_ON_TOP[] = "set/alwaysOnTop";
 constexpr char FORWARD_SHORTCUTS_TO_DEVICE[] = "set/forwardShortcutsToDevice";
-constexpr char FRAME_ALWAYS[] = "set/frameAlways2"; // Do not use "set/frameAlways"
+constexpr char FRAME_ALWAYS[] = "set/frameAlways4"; // Do not use "set/frameAlways" (current version: 4 (for canary, default with frame for Wear devices only, default off for everything else))
 constexpr char SAVE_PATH[] = "set/savePath";
 constexpr char UI_THEME[] = "set/theme";
 constexpr char DISABLE_MOUSE_WHEEL[] = "set/disableMouseWheel";

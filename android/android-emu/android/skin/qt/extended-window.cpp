@@ -30,9 +30,8 @@
 #include <QDesktopWidget>
 ExtendedWindow::ExtendedWindow(
     EmulatorQtWindow *eW,
-    ToolWindow *tW,
-    const ShortcutKeyStore<QtUICommand>* shortcuts) :
-    QFrame(nullptr),
+    ToolWindow *tW) :
+    QFrame(eW->containerWindow()),
     mEmulatorWindow(eW),
     mToolWindow(tW),
     mExtendedUi(new Ui::ExtendedControls),
@@ -56,7 +55,7 @@ ExtendedWindow::ExtendedWindow(
     setFrameOnTop(this, onTop);
 
     mExtendedUi->setupUi(this);
-    mExtendedUi->helpPage->initialize(shortcuts);
+    mExtendedUi->helpPage->initialize(tW->getShortcutKeyStore());
     mExtendedUi->dpadPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->rotaryInputPage->setEmulatorWindow(mEmulatorWindow);
     mExtendedUi->microphonePage->setEmulatorWindow(mEmulatorWindow);
@@ -158,10 +157,21 @@ ExtendedWindow::ExtendedWindow(
             SIGNAL(coarseOrientationChanged(SkinRotation)),
             eW,
             SLOT(rotateSkin(SkinRotation)));
+
+    const auto enableClipboardSharing =
+            settings.value(Ui::Settings::CLIPBOARD_SHARING, true).toBool();
+    mToolWindow->switchClipboardSharing(enableClipboardSharing);
 }
 
 ExtendedWindow::~ExtendedWindow() {
     mExtendedUi->location_page->requestStopLoadingGeoData();
+}
+
+// static
+void ExtendedWindow::setAgentEarly(const UiEmuAgent* agentPtr) {
+    if (agentPtr) {
+        LocationPage::setLocationAgent(agentPtr->location);
+    }
 }
 
 void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
@@ -170,7 +180,6 @@ void ExtendedWindow::setAgent(const UiEmuAgent* agentPtr) {
         mExtendedUi->batteryPage->setBatteryAgent(agentPtr->battery);
         mExtendedUi->telephonyPage->setTelephonyAgent(agentPtr->telephony);
         mExtendedUi->finger_page->setFingerAgent(agentPtr->finger);
-        mExtendedUi->location_page->setLocationAgent(agentPtr->location);
         mExtendedUi->settingsPage->setHttpProxyAgent(agentPtr->proxy);
         mExtendedUi->virtualSensorsPage->setSensorsAgent(agentPtr->sensors);
         if (avdInfo_getAvdFlavor(android_avdInfo) == AVD_ANDROID_AUTO) {
@@ -229,6 +238,26 @@ void ExtendedWindow::showPane(ExtendedWindowPane pane) {
     adjustTabs(pane);
 }
 
+void ExtendedWindow::connectVirtualSceneWindow(
+        VirtualSceneControlWindow* virtualSceneWindow) {
+    connect(virtualSceneWindow, SIGNAL(virtualSceneControlsEngaged(bool)),
+            mExtendedUi->virtualSensorsPage,
+            SLOT(onVirtualSceneControlsEngaged(bool)));
+
+    // The virtual scene control window aggregates metrics when the virtual
+    // scene is active. Route orientation changes and virtual sensors page
+    // events to the control window. Events are discarded unless the window
+    // is active.
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(coarseOrientationChanged(SkinRotation)), virtualSceneWindow,
+            SLOT(orientationChanged(SkinRotation)));
+    connect(mExtendedUi->virtualSensorsPage, SIGNAL(windowVisible()),
+            virtualSceneWindow, SLOT(virtualSensorsPageVisible()));
+    connect(mExtendedUi->virtualSensorsPage,
+            SIGNAL(virtualSensorsInteraction()), virtualSceneWindow,
+            SLOT(virtualSensorsInteraction()));
+}
+
 void ExtendedWindow::closeEvent(QCloseEvent *e) {
     // Merely hide the window the widget is closed, do not destroy state.
     e->ignore();
@@ -236,7 +265,7 @@ void ExtendedWindow::closeEvent(QCloseEvent *e) {
 }
 
 void ExtendedWindow::keyPressEvent(QKeyEvent* e) {
-    mToolWindow->handleQtKeyEvent(e);
+    mToolWindow->handleQtKeyEvent(e, QtKeyEventSource::ExtendedWindow);
 }
 
 // Tab buttons. Each raises its stacked pane to the top.
@@ -286,7 +315,7 @@ void ExtendedWindow::switchToTheme(SettingsTheme theme) {
 
     // The first part is based on the display's pixel density.
     // Most displays give 1.0; high density displays give 2.0.
-    const double densityFactor = devicePixelRatio();
+    const double densityFactor = devicePixelRatioF();
     QString styleString = Ui::fontStylesheet(densityFactor > 1.5);
 
     // The second part is based on the theme

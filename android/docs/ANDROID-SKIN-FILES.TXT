@@ -25,7 +25,7 @@ General File Format:
 
 Each "skin" has a unique name and corresponds to a directory filled with
 various files. All skins are located under a parent "skin-dir" directory.
-You can use the '-skin-dir <path>' and '-skin <name>' options when starting
+You can use the '-skindir <path>' and '-skin <name>' options when starting
 the emulator to specify them. This will instruct the program to look into
 
     <path>/<name>/

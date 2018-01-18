@@ -40,6 +40,7 @@ typedef enum {
     kEventScreenChanged,
     kEventZoomedWindowResized,
     kEventToggleTrackball,
+    kEventWindowChanged,
 } SkinEventType;
 
 typedef enum {
@@ -69,6 +70,8 @@ typedef struct {
     int y;
     int xrel;
     int yrel;
+    int x_global;
+    int y_global;
     int button;
     int skip_sync;
 } SkinEventMouseData;

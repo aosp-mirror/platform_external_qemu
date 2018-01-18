@@ -14,10 +14,15 @@
 #include "android/base/testing/TestSystem.h"
 #include "android/base/testing/TestTempDir.h"
 
+#include "android/physics/InertialModel.h"
+#include "android/physics/physical_state_agent.h"
 #include "android/utils/stream.h"
 #include "android/base/files/MemStream.h"
+#include "android/base/Debug.h"
 
 #include <glm/vec3.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <gtest/gtest.h>
 
 #include <assert.h>
@@ -44,7 +49,7 @@ TEST(PhysicalModel, CreateAndDestroy) {
 TEST(PhysicalModel, DefaultInertialSensorValues) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel *model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id;
     vec3 accelerometer = physicalModel_getAccelerometer(model,
             &measurement_id);
@@ -59,11 +64,11 @@ TEST(PhysicalModel, DefaultInertialSensorValues) {
 TEST(PhysicalModel, ConstantMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel *model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
 
-    physicalModel_setCurrentTime(model, 2000000000UL);
+    physicalModel_setCurrentTime(model, 2000000000L);
 
     long measurement_id1;
     physicalModel_getAccelerometer(model, &measurement_id1);
@@ -77,11 +82,11 @@ TEST(PhysicalModel, ConstantMeasurementId) {
 TEST(PhysicalModel, NewMeasurementId) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel *model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     long measurement_id0;
     physicalModel_getAccelerometer(model, &measurement_id0);
 
-    physicalModel_setCurrentTime(model, 2000000000UL);
+    physicalModel_setCurrentTime(model, 2000000000L);
 
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -110,7 +115,8 @@ TEST(PhysicalModel, SetTargetPosition) {
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 500000000UL);
+    physicalModel_setCurrentTime(model, 500000000L);
+
     vec3 currentPosition = physicalModel_getParameterPosition(model,
             PARAMETER_VALUE_TYPE_CURRENT);
 
@@ -130,7 +136,7 @@ TEST(PhysicalModel, SetTargetRotation) {
     physicalModel_setTargetRotation(
             model, targetRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 500000000UL);
+    physicalModel_setCurrentTime(model, 500000000L);
     vec3 currentRotation = physicalModel_getParameterRotation(model,
             PARAMETER_VALUE_TYPE_CURRENT);
 
@@ -158,7 +164,7 @@ TEST(PhysicalModel, GravityAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     for (const auto& testCase : gravityTestCases) {
         PhysicalModel* model = physicalModel_new(false);
-        physicalModel_setCurrentTime(model, 1000000000UL);
+        physicalModel_setCurrentTime(model, 1000000000L);
 
         vec3 targetRotation;
         targetRotation.x = testCase.target_rotation.x;
@@ -168,7 +174,7 @@ TEST(PhysicalModel, GravityAcceleration) {
         physicalModel_setTargetRotation(
                 model, targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
 
-        physicalModel_setCurrentTime(model, 2000000000UL);;
+        physicalModel_setCurrentTime(model, 2000000000L);;
 
         long measurement_id;
         vec3 accelerometer = physicalModel_getAccelerometer(model,
@@ -184,7 +190,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
     TestSystem mTestSystem("/", System::kProgramBitness);
 
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
 
     vec3 targetPosition;
     targetPosition.x = 2.0f;
@@ -194,7 +200,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
 
-    physicalModel_setCurrentTime(model, 2000000000UL);
+    physicalModel_setCurrentTime(model, 2000000000L);
     // at 2 seconds the target is still at (2, 3, 4);
     physicalModel_setTargetPosition(
             model, targetPosition, PHYSICAL_INTERPOLATION_STEP);
@@ -211,7 +217,7 @@ TEST(PhysicalModel, GravityOnlyAcceleration) {
 TEST(PhysicalModel, NonInstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 0UL);
+    physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
     startRotation.x = 0.f;
@@ -220,13 +226,17 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, startRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     vec3 newRotation;
     newRotation.x = -0.5f;
     newRotation.y = 0.0f;
     newRotation.z = 0.0f;
     physicalModel_setTargetRotation(
             model, newRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+
+    physicalModel_setCurrentTime(model, 1000000000L +
+            android::physics::secondsToNs(
+                    android::physics::kMinStateChangeTimeSeconds / 2.f));
 
     long measurement_id;
     vec3 currentGyro = physicalModel_getGyroscope(model, &measurement_id);
@@ -240,7 +250,7 @@ TEST(PhysicalModel, NonInstantaneousRotation) {
 TEST(PhysicalModel, InstantaneousRotation) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 0UL);
+    physicalModel_setCurrentTime(model, 0L);
 
     vec3 startRotation;
     startRotation.x = 0.f;
@@ -249,7 +259,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
     physicalModel_setTargetRotation(
             model, startRotation, PHYSICAL_INTERPOLATION_STEP);
 
-    physicalModel_setCurrentTime(model, 1000000000UL);
+    physicalModel_setCurrentTime(model, 1000000000L);
     vec3 newRotation;
     newRotation.x = 180.0f;
     newRotation.y = 0.0f;
@@ -267,7 +277,7 @@ TEST(PhysicalModel, InstantaneousRotation) {
 TEST(PhysicalModel, OverrideAccelerometer) {
     TestSystem mTestSystem("/", System::kProgramBitness);
     PhysicalModel* model = physicalModel_new(false);
-    physicalModel_setCurrentTime(model, 0UL);
+    physicalModel_setCurrentTime(model, 0L);
 
     long initial_measurement_id;
     physicalModel_getAccelerometer(model, &initial_measurement_id);
@@ -463,7 +473,7 @@ TEST(PhysicalModel, SaveLoadTargets) {
     EXPECT_VEC3_NEAR(rotationTarget,
             physicalModel_getParameterRotation(loadedModel,
                                                PARAMETER_VALUE_TYPE_TARGET),
-            0.00001f);
+            0.0001f);
     EXPECT_VEC3_NEAR(magneticFieldTarget,
             physicalModel_getParameterMagneticField(loadedModel,
                                                PARAMETER_VALUE_TYPE_TARGET),
@@ -490,4 +500,424 @@ TEST(PhysicalModel, SaveLoadTargets) {
             0.00001f);
 
     physicalModel_free(loadedModel);
+}
+
+TEST(PhysicalModel, SetRotatedIMUResults) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel *model = physicalModel_new(false);
+    physicalModel_setCurrentTime(model, 0UL);
+
+    const vec3 initialRotation {45.0f, 10.0f, 4.0f};
+
+    physicalModel_setTargetRotation(
+            model, initialRotation, PHYSICAL_INTERPOLATION_STEP);
+
+    const vec3 initialPosition {2.0f, 3.0f, 4.0f};
+    physicalModel_setTargetPosition(
+            model, initialPosition, PHYSICAL_INTERPOLATION_STEP);
+
+    const glm::quat quaternionRotation = glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(initialRotation.x),
+            glm::radians(initialRotation.y),
+            glm::radians(initialRotation.z)));
+
+    uint64_t time = 500000000UL;
+    const uint64_t stepNs = 1000UL;
+
+    const vec3 targetPosition {1.0f, 2.0f, 3.0f};
+
+    static int testContext;
+    static bool targetStateChanged = false;
+    static bool physicalStateChanging = false;
+    const QAndroidPhysicalStateAgent agent = {
+        .onTargetStateChanged = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            targetStateChanged = true;
+        },
+        .onPhysicalStateChanging = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = true;
+        },
+        .onPhysicalStateStabilized = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = false;
+        },
+        .context = &testContext};
+
+    physicalModel_setCurrentTime(model, time);
+    physicalModel_setPhysicalStateAgent(model, &agent);
+    EXPECT_FALSE(physicalStateChanging);
+    physicalModel_setTargetPosition(
+            model, targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
+    EXPECT_TRUE(targetStateChanged);
+    EXPECT_TRUE(physicalStateChanging);
+    targetStateChanged = false;
+
+    const glm::vec3 gravity(0.f, 9.81f, 0.f);
+
+    glm::vec3 velocity(0.f);
+    glm::vec3 position(initialPosition.x, initialPosition.y, initialPosition.z);
+    const float stepSeconds = android::physics::nsToSeconds(stepNs);
+    long prevMeasurementId = -1;
+    time += stepNs / 2;
+    while (physicalStateChanging) {
+        physicalModel_setCurrentTime(model, time);
+        long measurementId;
+        const vec3 measuredAcceleration = physicalModel_getAccelerometer(
+                model, &measurementId);
+        EXPECT_NE(prevMeasurementId, measurementId);
+        prevMeasurementId = measurementId;
+        const glm::vec3 acceleration(
+                measuredAcceleration.x,
+                measuredAcceleration.y,
+                measuredAcceleration.z);
+        velocity += (quaternionRotation * acceleration - gravity) *
+                stepSeconds;
+        position += velocity * stepSeconds;
+        time += stepNs;
+    }
+
+    const vec3 integratedPosition {position.x, position.y, position.z};
+
+    EXPECT_VEC3_NEAR(targetPosition, integratedPosition, 0.01f);
+
+    EXPECT_FALSE(targetStateChanged);
+    physicalModel_setPhysicalStateAgent(model, nullptr);
+
+    physicalModel_free(model);
+}
+
+TEST(PhysicalModel, SetRotationIMUResults) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel *model = physicalModel_new(false);
+    physicalModel_setCurrentTime(model, 0UL);
+
+    vec3 initialRotation {45.0f, 10.0f, 4.0f};
+
+    physicalModel_setTargetRotation(
+            model, initialRotation, PHYSICAL_INTERPOLATION_STEP);
+
+    uint64_t time = 0UL;
+    const uint64_t stepNs = 5000UL;
+
+    vec3 targetRotation {-10.0f, 20.0f, 45.0f};
+
+    static int testContext;
+    static bool targetStateChanged = false;
+    static bool physicalStateChanging = false;
+    const QAndroidPhysicalStateAgent agent = {
+        .onTargetStateChanged = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            targetStateChanged = true;
+        },
+        .onPhysicalStateChanging = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = true;
+        },
+        .onPhysicalStateStabilized = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = false;
+        },
+        .context = &testContext};
+    physicalModel_setPhysicalStateAgent(model, &agent);
+
+    physicalModel_setTargetRotation(
+            model, targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+    EXPECT_TRUE(targetStateChanged);
+    EXPECT_TRUE(physicalStateChanging);
+    targetStateChanged = false;
+
+    glm::quat rotation = glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(initialRotation.x),
+            glm::radians(initialRotation.y),
+            glm::radians(initialRotation.z)));
+    const float stepSeconds = android::physics::nsToSeconds(stepNs);
+    long prevMeasurementId = -1;
+    time += stepNs / 2;
+    while (physicalStateChanging) {
+        physicalModel_setCurrentTime(model, time);
+        long measurementId;
+        const vec3 measuredGyroscope = physicalModel_getGyroscope(
+                model, &measurementId);
+        EXPECT_NE(prevMeasurementId, measurementId);
+        prevMeasurementId = measurementId;
+        const glm::vec3 deviceSpaceRotationalVelocity(
+                measuredGyroscope.x,
+                measuredGyroscope.y,
+                measuredGyroscope.z);
+        const glm::vec3 rotationalVelocity =
+                rotation * deviceSpaceRotationalVelocity;
+        const glm::mat4 deltaRotationMatrix = glm::eulerAngleXYZ(
+                rotationalVelocity.x * stepSeconds,
+                rotationalVelocity.y * stepSeconds,
+                rotationalVelocity.z * stepSeconds);
+
+        rotation = glm::quat_cast(deltaRotationMatrix) * rotation;
+        time += stepNs;
+    }
+
+    const glm::quat targetRotationQuat = glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(targetRotation.x),
+            glm::radians(targetRotation.y),
+            glm::radians(targetRotation.z)));
+
+    EXPECT_NEAR(targetRotationQuat.x, rotation.x, 0.0001f);
+    EXPECT_NEAR(targetRotationQuat.y, rotation.y, 0.0001f);
+    EXPECT_NEAR(targetRotationQuat.z, rotation.z, 0.0001f);
+    EXPECT_NEAR(targetRotationQuat.w, rotation.w, 0.0001f);
+
+    EXPECT_FALSE(targetStateChanged);
+    physicalModel_setPhysicalStateAgent(model, nullptr);
+
+    physicalModel_free(model);
+}
+
+TEST(PhysicalModel, MoveWhileRotating) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel *model = physicalModel_new(false);
+    physicalModel_setCurrentTime(model, 0UL);
+
+    const vec3 initialRotation {45.0f, 10.0f, 4.0f};
+
+    physicalModel_setTargetRotation(
+            model, initialRotation, PHYSICAL_INTERPOLATION_STEP);
+
+    const vec3 initialPosition {2.0f, 3.0f, 4.0f};
+    physicalModel_setTargetPosition(
+            model, initialPosition, PHYSICAL_INTERPOLATION_STEP);
+
+    uint64_t time = 0UL;
+    const uint64_t stepNs = 5000UL;
+
+    const vec3 targetPosition {1.0f, 2.0f, 3.0f};
+    const vec3 targetRotation {-10.0f, 20.0f, 45.0f};
+
+    static int testContext;
+    static bool targetStateChanged = false;
+    static bool physicalStateChanging = false;
+    const QAndroidPhysicalStateAgent agent = {
+        .onTargetStateChanged = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            targetStateChanged = true;
+        },
+        .onPhysicalStateChanging = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = true;
+        },
+        .onPhysicalStateStabilized = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = false;
+        },
+        .context = &testContext};
+    physicalModel_setPhysicalStateAgent(model, &agent);
+
+    physicalModel_setTargetRotation(
+            model, targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+    physicalModel_setTargetPosition(
+            model, targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
+    EXPECT_TRUE(targetStateChanged);
+    EXPECT_TRUE(physicalStateChanging);
+    targetStateChanged = false;
+
+    glm::quat rotation = glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(initialRotation.x),
+            glm::radians(initialRotation.y),
+            glm::radians(initialRotation.z)));
+    const glm::vec3 gravity(0.f, 9.81f, 0.f);
+    glm::vec3 velocity(0.f);
+    glm::vec3 position(initialPosition.x, initialPosition.y, initialPosition.z);
+
+    const float stepSeconds = android::physics::nsToSeconds(stepNs);
+    long prevGyroMeasurementId = -1;
+    long prevAccelMeasurementId = -1;
+    time += stepNs / 2;
+    while (physicalStateChanging) {
+        physicalModel_setCurrentTime(model, time);
+        long gyroMeasurementId;
+        const vec3 measuredGyroscope = physicalModel_getGyroscope(
+                model, &gyroMeasurementId);
+        EXPECT_NE(prevGyroMeasurementId, gyroMeasurementId);
+        prevGyroMeasurementId = gyroMeasurementId;
+        const glm::vec3 deviceSpaceRotationalVelocity(
+                measuredGyroscope.x,
+                measuredGyroscope.y,
+                measuredGyroscope.z);
+        const glm::vec3 rotationalVelocity =
+                rotation * deviceSpaceRotationalVelocity;
+        const glm::mat4 deltaRotationMatrix = glm::eulerAngleXYZ(
+                rotationalVelocity.x * stepSeconds,
+                rotationalVelocity.y * stepSeconds,
+                rotationalVelocity.z * stepSeconds);
+
+        rotation = glm::quat_cast(deltaRotationMatrix) * rotation;
+
+        long accelMeasurementId;
+        const vec3 measuredAcceleration = physicalModel_getAccelerometer(
+                model, &accelMeasurementId);
+        EXPECT_NE(prevAccelMeasurementId, accelMeasurementId);
+        prevAccelMeasurementId = accelMeasurementId;
+        const glm::vec3 acceleration(measuredAcceleration.x,
+                                     measuredAcceleration.y,
+                                     measuredAcceleration.z);
+        velocity += (rotation * acceleration - gravity) *
+                stepSeconds;
+        position += velocity * stepSeconds;
+
+        time += stepNs;
+    }
+
+    const glm::quat targetRotationQuat = glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(targetRotation.x),
+            glm::radians(targetRotation.y),
+            glm::radians(targetRotation.z)));
+
+    EXPECT_NEAR(targetRotationQuat.x, rotation.x, 0.0001f);
+    EXPECT_NEAR(targetRotationQuat.y, rotation.y, 0.0001f);
+    EXPECT_NEAR(targetRotationQuat.z, rotation.z, 0.0001f);
+    EXPECT_NEAR(targetRotationQuat.w, rotation.w, 0.0001f);
+
+    vec3 integratedPosition {position.x, position.y, position.z};
+
+    EXPECT_VEC3_NEAR(targetPosition, integratedPosition, 0.001f);
+
+    EXPECT_FALSE(targetStateChanged);
+    physicalModel_setPhysicalStateAgent(model, nullptr);
+
+    physicalModel_free(model);
+}
+
+
+TEST(PhysicalModel, SetVelocityAndPositionWhileRotating) {
+    TestSystem mTestSystem("/", System::kProgramBitness);
+    PhysicalModel *model = physicalModel_new(false);
+    physicalModel_setCurrentTime(model, 0UL);
+
+    const vec3 initialRotation {45.0f, 10.0f, 4.0f};
+
+    physicalModel_setTargetRotation(
+            model, initialRotation, PHYSICAL_INTERPOLATION_STEP);
+
+    const vec3 initialPosition {2.0f, 3.0f, 4.0f};
+    physicalModel_setTargetPosition(
+            model, initialPosition, PHYSICAL_INTERPOLATION_STEP);
+
+    vec3 intermediateVelocity {1.0f, 1.0f, 1.0f};
+
+    uint64_t time = 0UL;
+    const uint64_t stepNs = 5000UL;
+
+    const vec3 targetPosition {1.0f, 2.0f, 3.0f};
+
+    const vec3 intermediateRotation {100.0f, -30.0f, -10.0f};
+
+    const vec3 targetRotation {-10.0f, 20.0f, 45.0f};
+
+    static int testContext;
+    static bool targetStateChanged = false;
+    static bool physicalStateChanging = false;
+    const QAndroidPhysicalStateAgent agent = {
+        .onTargetStateChanged = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            targetStateChanged = true;
+        },
+        .onPhysicalStateChanging = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = true;
+        },
+        .onPhysicalStateStabilized = [](void* context) {
+            EXPECT_EQ(context, &testContext);
+            physicalStateChanging = false;
+        },
+        .context = &testContext};
+    physicalModel_setPhysicalStateAgent(model, &agent);
+
+    physicalModel_setTargetRotation(
+            model, intermediateRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+    physicalModel_setTargetVelocity(
+            model, intermediateVelocity, PHYSICAL_INTERPOLATION_SMOOTH);
+    EXPECT_TRUE(targetStateChanged);
+    EXPECT_TRUE(physicalStateChanging);
+    targetStateChanged = false;
+
+    glm::quat rotation = glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(initialRotation.x),
+            glm::radians(initialRotation.y),
+            glm::radians(initialRotation.z)));
+    const glm::vec3 gravity(0.f, 9.81f, 0.f);
+    glm::vec3 velocity(0.f);
+    glm::vec3 position(initialPosition.x, initialPosition.y, initialPosition.z);
+
+    const float stepSeconds = android::physics::nsToSeconds(stepNs);
+    long prevGyroMeasurementId = -1;
+    long prevAccelMeasurementId = -1;
+    time += stepNs / 2;
+    int stepsRemainingAfterStable = 10;
+    while (physicalStateChanging || stepsRemainingAfterStable > 0) {
+        if (!physicalStateChanging) {
+          stepsRemainingAfterStable--;
+        }
+        if (time < 500000000 && time + stepNs >= 500000000) {
+            physicalModel_setTargetRotation(
+                    model, targetRotation, PHYSICAL_INTERPOLATION_SMOOTH);
+            physicalModel_setTargetPosition(
+                    model, targetPosition, PHYSICAL_INTERPOLATION_SMOOTH);
+            EXPECT_TRUE(targetStateChanged);
+            targetStateChanged = false;
+        }
+        physicalModel_setCurrentTime(model, time);
+        long gyroMeasurementId;
+        const vec3 measuredGyroscope = physicalModel_getGyroscope(
+                model, &gyroMeasurementId);
+        if (physicalStateChanging) {
+            EXPECT_NE(prevGyroMeasurementId, gyroMeasurementId);
+        }
+        prevGyroMeasurementId = gyroMeasurementId;
+        const glm::vec3 deviceSpaceRotationalVelocity(
+                measuredGyroscope.x,
+                measuredGyroscope.y,
+                measuredGyroscope.z);
+        const glm::vec3 rotationalVelocity =
+                rotation * deviceSpaceRotationalVelocity;
+        const glm::mat4 deltaRotationMatrix = glm::eulerAngleXYZ(
+                rotationalVelocity.x * stepSeconds,
+                rotationalVelocity.y * stepSeconds,
+                rotationalVelocity.z * stepSeconds);
+
+        rotation = glm::quat_cast(deltaRotationMatrix) * rotation;
+
+        long accelMeasurementId;
+        const vec3 measuredAcceleration = physicalModel_getAccelerometer(
+                model, &accelMeasurementId);
+        if (physicalStateChanging) {
+            EXPECT_NE(prevAccelMeasurementId, accelMeasurementId);
+        }
+        prevAccelMeasurementId = accelMeasurementId;
+        const glm::vec3 acceleration(measuredAcceleration.x,
+                               measuredAcceleration.y,
+                               measuredAcceleration.z);
+        velocity += (rotation * acceleration - gravity) *
+                stepSeconds;
+        position += velocity * stepSeconds;
+
+        time += stepNs;
+    }
+
+    const glm::quat targetRotationQuat = glm::toQuat(glm::eulerAngleXYZ(
+            glm::radians(targetRotation.x),
+            glm::radians(targetRotation.y),
+            glm::radians(targetRotation.z)));
+
+    EXPECT_NEAR(targetRotationQuat.x, rotation.x, 0.001f);
+    EXPECT_NEAR(targetRotationQuat.y, rotation.y, 0.001f);
+    EXPECT_NEAR(targetRotationQuat.z, rotation.z, 0.001f);
+    EXPECT_NEAR(targetRotationQuat.w, rotation.w, 0.001f);
+
+    const vec3 integratedPosition {position.x, position.y, position.z};
+
+    EXPECT_VEC3_NEAR(targetPosition, integratedPosition, 0.01f);
+
+    EXPECT_FALSE(targetStateChanged);
+    physicalModel_setPhysicalStateAgent(model, nullptr);
+
+    physicalModel_free(model);
 }

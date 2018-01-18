@@ -22,6 +22,8 @@
 #include <array>
 #include <string>
 
+struct QAndroidSensorsAgent;
+
 // A widget that displays a 3D model of a device and lets the user
 // manipulate its rotation and position.
 // The changes in rotation and position can be used to
@@ -29,8 +31,9 @@
 // gyroscope, and magnetometer.
 class Accelerometer3DWidget : public GLWidget {
     Q_OBJECT
-    Q_PROPERTY(glm::mat4 rotation READ rotation WRITE setRotation NOTIFY rotationChanged USER true);
-    Q_PROPERTY(glm::vec3 position READ position WRITE setPosition NOTIFY positionChanged USER true);
+
+    Q_PROPERTY(glm::quat targetRotation READ targetRotation WRITE setTargetRotation NOTIFY targetRotationChanged USER true);
+    Q_PROPERTY(glm::vec3 targetPosition READ targetPosition WRITE setTargetPosition NOTIFY targetPositionChanged USER true);
 public:
     enum class OperationMode {
         Rotate,
@@ -40,12 +43,14 @@ public:
      Accelerometer3DWidget(QWidget *parent = 0);
     ~Accelerometer3DWidget();
 
+    void setSensorsAgent(const QAndroidSensorsAgent* agent);
+
 signals:
     // Emitted when the model's rotation changes.
-    void rotationChanged();
+    void targetRotationChanged();
 
     // Emitted when the position of the model changes.
-    void positionChanged();
+    void targetPositionChanged();
 
     // Emitted when the user begins dragging the model.
     void dragStarted();
@@ -54,13 +59,11 @@ signals:
     void dragStopped();
 
 public slots:
-    // Sets the rotation quaternion.
-    void setRotation(const glm::mat4& rotation) {
-        mRotation = rotation;
-    }
+    // Sets the target rotation.
+    void setTargetRotation(const glm::quat& rotation);
 
-    // Sets the X, Y and Z coordinates of the model's origin;
-    void setPosition(const glm::vec3& pos) { mTranslation = pos; }
+    // Sets the X, Y, and Z coordinates of the model's origin.
+    void setTargetPosition(const glm::vec3& position);
 
     // Sets the widget's operation mode which determines how it reacts
     // to mose dragging. It may either rotate the model or move it around.
@@ -68,10 +71,10 @@ public slots:
 
 public:
     // Getters for the rotation quaternion and delta.
-    const glm::mat4& rotation() const { return mRotation; }
+    const glm::quat& targetRotation() const { return mTargetRotation; }
 
     // Returns the X, Y and Z coordinates of the model's origin.
-    const glm::vec3& position() const { return mTranslation; }
+    const glm::vec3& targetPosition() const { return mTargetPosition; }
 
     static constexpr float MaxX = 7.f;
     static constexpr float MinX = -7.f;
@@ -85,7 +88,6 @@ public:
     // Each 15 degree wheel movement should move 0.2 of an inch.
     static constexpr float InchesPerWheelDegree = 2.f / 150.f;
 
-
 protected:
     // This is called once, after the GL context is created, to do some one-off
     // setup work.
@@ -98,10 +100,10 @@ protected:
     void repaintGL() override;
 
     // This is called every time the mouse is moved.
-    void mouseMoveEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
     // This is called every time the mouse wheel is moved.
-    void wheelEvent(QWheelEvent *event) override;
-    void mousePressEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
 
 private:
@@ -113,9 +115,14 @@ private:
     // that corresponds to the given point on the screen.
     glm::vec3 screenToWorldCoordinate(int x, int y) const;
 
-    glm::mat4 mRotation;
+    const QAndroidSensorsAgent* mSensorsAgent = nullptr;
 
-    glm::vec3 mTranslation;
+    glm::quat mTargetRotation = glm::quat();
+    glm::vec3 mTargetPosition = glm::vec3();
+
+    glm::quat mLastTargetRotation = glm::quat();
+    glm::vec3 mLastTargetPosition = glm::vec3();
+
     glm::mat4 mPerspective;
     glm::mat4 mPerspectiveInverse;
     glm::mat4 mCameraTransform;
@@ -134,10 +141,9 @@ private:
     GLuint mVertexNormalAttribute;
     GLuint mVertexUVAttribute;
 
-    int mPrevMouseX;
-    int mPrevMouseY;
+    int mPrevMouseX = 0;
+    int mPrevMouseY = 0;
     glm::vec3 mPrevDragOrigin;
-    bool mTracking;
-    bool mDragging;
-    OperationMode mOperationMode;
+    bool mTracking = false;
+    OperationMode mOperationMode = OperationMode::Rotate;
 };

@@ -106,7 +106,7 @@ struct VideoOutputStream {
     struct SwsContext* sws_ctx;
 };
 
-typedef struct AudioOutputStream {
+struct AudioOutputStream {
     AVStream* st;
 
     AVCodecID codec_id;
@@ -131,21 +131,25 @@ typedef struct AudioOutputStream {
     int audio_leftover_len;
 
     struct SwrContext* swr_ctx;
-} AudioOutputStream;
+};
 
-typedef struct ffmpeg_recorder {
-    char* path;
-    FfmpegAudioCapturer* audio_capturer;
-    AVFormatContext* oc;
+class ffmpeg_recorder {
+public:
+    std::string path;
+    FfmpegAudioCapturer* audio_capturer = nullptr;
+    AVFormatContext* oc = nullptr;
     VideoOutputStream video_st;
     AudioOutputStream audio_st;
     // A single lock to protect writing audio and video frames to the video file
     mutable android::base::Lock out_pkt_lock;
-    bool have_video;
-    bool have_audio;
-    bool started;
-    uint64_t start_time;
-} ffmpeg_recorder;
+    bool have_video = false;
+    bool has_video_frames = false;
+    bool have_audio = false;
+    bool started = false;
+    uint64_t start_time = 0ll;
+    int fb_width = 0;
+    int fb_height = 0;
+};
 
 // FFMpeg defines a set of macros for the same purpose, but those don't
 // compile in C++ mode.
@@ -163,6 +167,17 @@ static std::string avTs2TimeStr(int64_t ts, AVRational* tb) {
 static std::string avErr2Str(int errnum) {
     char res[AV_ERROR_MAX_STRING_SIZE] = {};
     return av_make_error_string(res, AV_ERROR_MAX_STRING_SIZE, errnum);
+}
+
+static AVPixelFormat to_ffmpeg_pix_fmt(RecordPixFmt r) {
+    switch (r) {
+        case RecordPixFmt::RGB565:
+            return AV_PIX_FMT_RGB565;
+        case RecordPixFmt::RGBA8888:
+            return AV_PIX_FMT_RGBA;
+        default:
+            return AV_PIX_FMT_NONE;
+    };
 }
 
 static void log_packet(const AVFormatContext* fmt_ctx, const AVPacket* pkt) {
@@ -190,17 +205,18 @@ static int write_frame(ffmpeg_recorder* recorder,
                        const AVRational* time_base,
                        AVStream* st,
                        AVPacket* pkt) {
-    // rescale output packet timestamp values from codec to stream timebase
-    // av_packet_rescale_ts(pkt, *time_base, st->time_base);
-
     pkt->dts = AV_NOPTS_VALUE;
     pkt->stream_index = st->index;
 
     // Write the compressed frame to the media file.
     log_packet(fmt_ctx, pkt);
 
-    android::base::AutoLock lock(recorder->out_pkt_lock);
+    recorder->out_pkt_lock.lock();
+    // DO NOT free or unref enc_pkt once interleaved.
+    // av_interleaved_write_frame() will take ownership of the packet once
+    // passed in.
     int rc = av_interleaved_write_frame(fmt_ctx, pkt);
+    recorder->out_pkt_lock.unlock();
 
     return rc;
 }
@@ -329,26 +345,28 @@ static int write_audio_frame(ffmpeg_recorder* recorder,
         ost->samples_count += dst_nb_samples;
     }
 
-    AVPacket pkt = {0};  // data and size must be 0;
+    AVPacket pkt;
     int got_packet;
 
     D_A("Encoding audio frame %d\n", ost->frame_count++);
     av_init_packet(&pkt);
+    pkt.data = NULL; // data and size must be 0
+    pkt.size = 0;
     ret = avcodec_encode_audio2(c, &pkt, frame, &got_packet);
     if (ret < 0) {
         derror("Error encoding audio frame: %s\n", avErr2Str(ret).c_str());
         return ret;
     }
 
-    if (got_packet) {
+    if (got_packet && pkt.size > 0) {
         D_A("%sWriting audio frame %d\n",
             pkt.flags & AV_PKT_FLAG_KEY ? "(KEY) " : "",
             ost->write_frame_count++);
 #if DEBUG_AUDIO
         log_packet(oc, &pkt);
 #endif
+
         ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
-        av_packet_unref(&pkt);
         if (ret < 0) {
             derror("Error while writing audio frame: %s\n",
                    avErr2Str(ret).c_str());
@@ -458,29 +476,36 @@ static int write_video_frame(ffmpeg_recorder* recorder,
         pkt.pts = pkt.dts = frame->pts;
         av_packet_rescale_ts(&pkt, c->time_base, ost->st->time_base);
 
-        android::base::AutoLock lock(recorder->out_pkt_lock);
+        recorder->out_pkt_lock.lock();
         ret = av_interleaved_write_frame(oc, &pkt);
+        recorder->out_pkt_lock.unlock();
     } else {
-        AVPacket pkt = {0};
+        AVPacket pkt;
         av_init_packet(&pkt);
-
+        pkt.data = NULL; // data and size must be 0
+        pkt.size = 0;
         // encode the frame
-        D_V("Encoding video frame %d\n", ost->frame_count++);
+        D_V("Encoding video frame %ld\n", ost->frame_count++);
+#if DEBUG_VIDEO
+        auto startUs = android::base::System::get()->getHighResTimeUs();
+#endif
         ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
+        D_V("Time to avcodec_encode_video2: [%lld ms]\n",
+            (long long)(android::base::System::get()->getHighResTimeUs() -
+                        startUs) / 1000);
         if (ret < 0) {
             derror("Error encoding video frame: %s\n", avErr2Str(ret).c_str());
             return ret;
         }
 
-        if (got_packet) {
-            D_V("%sWriting frame %d\n",
+        if (got_packet && pkt.size > 0) {
+            D_V("%sWriting frame %ld\n",
                 (pkt.flags & AV_PKT_FLAG_KEY) ? "(KEY) " : "",
                 ost->write_frame_count++);
 #if DEBUG_VIDEO
             log_packet(oc, &pkt);
 #endif
             ret = write_frame(recorder, oc, &c->time_base, ost->st, &pkt);
-            av_packet_unref(&pkt);
         } else {
             ret = 0;
         }
@@ -508,27 +533,28 @@ static void close_video_stream(AVFormatContext* oc, VideoOutputStream* ost) {
     sws_freeContext(ost->sws_ctx);
 }
 
+/*
 static bool has_suffix(const std::string& str, const std::string& suffix) {
     return str.size() >= suffix.size() &&
            str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 }
+*/
 
 static bool sIsRegistered = false;
 
-ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
-    ffmpeg_recorder* recorder = NULL;
-    AVFormatContext* oc = NULL;
-
-    if (path == NULL)
+ffmpeg_recorder* ffmpeg_create_recorder(const RecordingInfo* info,
+                                        int fb_width,
+                                        int fb_height) {
+    if (info == NULL || info->fileName == NULL)
         return NULL;
 
-    recorder = (ffmpeg_recorder*)malloc(sizeof(ffmpeg_recorder));
+    ffmpeg_recorder* recorder = new ffmpeg_recorder();
     if (recorder == NULL) {
         return NULL;
     }
 
-    memset(recorder, 0, sizeof(ffmpeg_recorder));
-    recorder->path = strdup(path);
+    recorder->has_video_frames = false;
+    recorder->path = info->fileName;
 
     // Initialize libavcodec, and register all codecs and formats. does not hurt
     // to register multiple times
@@ -538,29 +564,41 @@ ffmpeg_recorder* ffmpeg_create_recorder(const char* path) {
     }
 
     // allocate the output media context
-    avformat_alloc_output_context2(&oc, NULL, NULL, path);
+    AVFormatContext* oc = NULL;
+    avformat_alloc_output_context2(&oc, NULL, NULL, recorder->path.c_str());
     if (oc == NULL) {
-        free(recorder);
+        delete recorder;
         return NULL;
+    }
+
+    AVOutputFormat* fmt = oc->oformat;
+    // open the output file, if needed
+    if (!(fmt->flags & AVFMT_NOFILE)) {
+        int ret = avio_open(&oc->pb, recorder->path.c_str(), AVIO_FLAG_WRITE);
+        if (ret < 0) {
+            derror("Could not open '%s': %s\n", recorder->path.c_str(),
+                   avErr2Str(ret).c_str());
+            avformat_free_context(oc);
+            delete recorder;
+            return NULL;
+        }
     }
 
     recorder->oc = oc;
     recorder->start_time = android::base::System::get()->getHighResTimeUs();
 
-    if (has_suffix(path, ".webm")) {
-        recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
-        recorder->video_st.codec_id = AV_CODEC_ID_VP9;
-    } else {
-        recorder->audio_st.codec_id = AV_CODEC_ID_AAC;
-        recorder->video_st.codec_id = AV_CODEC_ID_H264;
-    }
+    recorder->audio_st.codec_id = AV_CODEC_ID_VORBIS;
+    recorder->video_st.codec_id = AV_CODEC_ID_VP9;
+
+    recorder->fb_width = fb_width;
+    recorder->fb_height = fb_height;
 
     return recorder;
 }
 
-void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
+bool ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     if (recorder == NULL)
-        return;
+        return false;
 
     if (recorder->audio_capturer != NULL) {
         AudioCaptureEngine* engine = AudioCaptureEngine::get();
@@ -578,12 +616,11 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
                                         NULL, &got_packet);
         if (ret < 0 || !got_packet)
             break;
-        D_V("%s: Writing frame %d\n", __func__,
+        D_V("%s: Writing frame %ld\n", __func__,
             recorder->video_st.write_frame_count++);
         write_frame(recorder, recorder->oc,
                     &recorder->video_st.st->codec->time_base,
                     recorder->video_st.st, &pkt);
-        av_packet_unref(&pkt);
     }
 
     // flush the remaining audio packet
@@ -617,14 +654,16 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
         write_frame(recorder, recorder->oc,
                     &recorder->audio_st.st->codec->time_base,
                     recorder->audio_st.st, &pkt);
-        av_packet_unref(&pkt);
     }
 
     // Write the trailer, if any. The trailer must be written before you
     // close the CodecContexts open when you wrote the header; otherwise
     // av_write_trailer() may try to use memory that was freed on
     // av_codec_close().
-    av_write_trailer(recorder->oc);
+    if (recorder->has_video_frames) {
+        // This crashes on linux if no frames were encoded.
+        av_write_trailer(recorder->oc);
+    }
 
     // Close each codec.
     if (recorder->have_video)
@@ -644,10 +683,11 @@ void ffmpeg_delete_recorder(ffmpeg_recorder* recorder) {
     // free the stream
     avformat_free_context(recorder->oc);
 
-    if (recorder->path)
-        free(recorder->path);
+    bool ret = recorder->has_video_frames;
 
-    free(recorder);
+    delete recorder;
+
+    return ret;
 }
 
 // local helper to start the recording, after tracks are added
@@ -663,27 +703,13 @@ static int start_recording(ffmpeg_recorder* recorder) {
 
     AVFormatContext* oc = recorder->oc;
 
-    av_dump_format(oc, 0, recorder->path, 1);
-
-    AVOutputFormat* fmt = oc->oformat;
-
-    // open the output file, if needed
-    if (!(fmt->flags & AVFMT_NOFILE)) {
-        ret = avio_open(&oc->pb, recorder->path, AVIO_FLAG_WRITE);
-        if (ret < 0) {
-            derror("Could not open '%s': %s\n", recorder->path,
-                   avErr2Str(ret).c_str());
-            free(recorder);
-            return ret;
-        }
-    }
+    av_dump_format(oc, 0, recorder->path.c_str(), 1);
 
     // Write the stream header, if any.
     ret = avformat_write_header(oc, &opt);
     if (ret < 0) {
         derror("Error occurred when opening output file: %s\n",
                avErr2Str(ret).c_str());
-        free(recorder);
         return ret;
     }
 
@@ -893,10 +919,11 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // Encode and write a video frame (in 32-bit RGBA format) to the recoder
 // params:
 //    recorder - the recorder instance
-//    rgb_pixels - the byte array for the pixel in RGBA format, each pixel take
-//    4 byte
-//    size - the rgb_pixels array size, it should be exactly as 4 * width *
-//    height
+//    rgb_pixels - the byte array for the pixel
+//    size - the size of the pixel buffer |rgb_pixels|
+//    ptUs - the presentation time (in microseconds) of the frame
+//    pixFmt - the pixel format of |rgb_pixels|
+//
 // return:
 //   0    if successful
 //   < 0  if failed
@@ -904,7 +931,9 @@ int ffmpeg_add_video_track(ffmpeg_recorder* recorder,
 // this method is thread safe
 int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
                               const uint8_t* rgb_pixels,
-                              int size) {
+                              int size,
+                              uint64_t pt_us,
+                              RecordPixFmt pixFmt) {
     if (recorder == NULL)
         return -1;
 
@@ -920,8 +949,14 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
     AVCodecContext* c = ost->st->codec;
 
     if (ost->sws_ctx == NULL) {
-        ost->sws_ctx = sws_getContext(c->width, c->height, AV_PIX_FMT_RGBA,
-                                      c->width, c->height, c->pix_fmt,
+        AVPixelFormat avPixFmt = to_ffmpeg_pix_fmt(pixFmt);
+        if (avPixFmt == AV_PIX_FMT_NONE) {
+            derror("Pixel format is not supported");
+            return -1;
+        }
+
+        ost->sws_ctx = sws_getContext(recorder->fb_width, recorder->fb_height,
+                                      avPixFmt, c->width, c->height, c->pix_fmt,
                                       SCALE_FLAGS, NULL, NULL, NULL);
         if (ost->sws_ctx == NULL) {
             derror("Could not initialize the conversion context\n");
@@ -929,15 +964,23 @@ int ffmpeg_encode_video_frame(ffmpeg_recorder* recorder,
         }
     }
 
-    const int linesize[1] = {4 * c->width};
+    const int linesize[1] = {get_record_pixel_size(pixFmt) *
+                             recorder->fb_width};
+#if DEBUG_VIDEO
+    auto startUs = android::base::System::get()->getHighResTimeUs();
+#endif
     sws_scale(ost->sws_ctx, (const uint8_t* const*)&rgb_pixels, linesize, 0,
-              c->height, ost->frame->data, ost->frame->linesize);
+              recorder->fb_height, ost->frame->data, ost->frame->linesize);
+    D_V("Time to sws_scale: [%lld ms]\n",
+        (long long)(android::base::System::get()->getHighResTimeUs() -
+                    startUs) /
+                1000);
 
-    uint64_t elapsedUS = android::base::System::get()->getHighResTimeUs() -
-                         recorder->start_time;
+    uint64_t elapsedUS = pt_us - recorder->start_time;
     ost->frame->pts = (int64_t)(((double)elapsedUS * ost->st->time_base.den) /
                                 1000000.00);
     rc = write_video_frame(recorder, recorder->oc, ost, ost->frame);
+    recorder->has_video_frames = true;
 
     return rc;
 }
@@ -1056,8 +1099,10 @@ static int encode_write_frame(AVFormatContext* ofmt_ctx,
                          ofmt_ctx->streams[stream_index]->codec->time_base,
                          ofmt_ctx->streams[stream_index]->time_base);
     // mux encoded frame
+    // DO NOT free or unref enc_pkt once interleaved.
+    // av_interleaved_write_frame() will take ownership of the packet once
+    // passed in.
     ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
-    av_packet_unref(&enc_pkt);
     return ret;
 }
 
@@ -1289,8 +1334,31 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
         if (got_frame) {
             frame->pts = av_frame_get_best_effort_timestamp(frame);
             // correct invalid pts in the rare cases
-            if (frame->pts <= last_pts)
-                frame->pts = last_pts + 1;
+
+            // Need to check the scaled value if the output time_base has a
+            // smaller resolution than the input time_base
+            if (ofmt_ctx->streams[stream_index]->codec->time_base.den >
+                ofmt_ctx->streams[stream_index]->time_base.den) {
+                int64_t last_scaled_pts = -1;
+                int64_t scaled_pts = av_rescale_q(frame->pts,
+                                          ofmt_ctx->streams[stream_index]->codec->time_base,
+                                          ofmt_ctx->streams[stream_index]->time_base);
+
+                if (last_pts > 0) {
+                    last_scaled_pts = av_rescale_q(last_pts,
+                                                   ofmt_ctx->streams[stream_index]->codec->time_base,
+                                                   ofmt_ctx->streams[stream_index]->time_base);
+                }
+                if (scaled_pts <= last_scaled_pts) {
+                    frame->pts = av_rescale_q(last_scaled_pts + 1,
+                                              ofmt_ctx->streams[stream_index]->time_base,
+                                              ofmt_ctx->streams[stream_index]->codec->time_base);
+                }
+            } else {
+                if (frame->pts <= last_pts) {
+                    frame->pts = last_pts + 1;
+                }
+            }
             last_pts = frame->pts;
             if (sws_ctx != NULL)
                 sws_scale(sws_ctx, frame->data, frame->linesize, 0,
@@ -1324,4 +1392,15 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
 
     free_contxts(ifmt_ctx, ofmt_ctx, video_stream_index);
     return ret;
+}
+
+int get_record_pixel_size(RecordPixFmt r) {
+    switch (r) {
+        case RecordPixFmt::RGB565:
+            return 2;
+        case RecordPixFmt::RGBA8888:
+            return 4;
+        default:
+            return -1;
+    }
 }

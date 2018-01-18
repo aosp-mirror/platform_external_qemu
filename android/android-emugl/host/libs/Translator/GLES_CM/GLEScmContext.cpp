@@ -42,7 +42,7 @@ void GLEScmContext::init() {
     if(!m_initialized) {
         GLEScontext::init();
 
-        m_texCoords = new GLESpointer[s_glSupport.maxTexUnits];
+        m_texCoords = new GLESpointer[kMaxTextureUnits];
         m_currVaoState[GL_TEXTURE_COORD_ARRAY]  = &m_texCoords[m_clientActiveTexture];
 
         if (isCoreProfile()) {
@@ -137,6 +137,13 @@ GLEScmContext::GLEScmContext(int maj, int min,
             m_currVaoState[GL_TEXTURE_COORD_ARRAY] =
                     &m_texCoords[m_clientActiveTexture];
         }
+
+        android::base::loadBufferPtr<GLVal>(stream, mMultiTexCoord);
+        android::base::loadBufferPtr<Material>(stream, &mMaterial);
+        android::base::loadBufferPtr<LightModel>(stream, &mLightModel);
+        android::base::loadBufferPtr<Light>(stream, mLights);
+        android::base::loadBufferPtr<Fog>(stream, &mFog);
+
     } else {
         m_glesMajorVersion = maj;
         m_glesMinorVersion = min;
@@ -168,6 +175,16 @@ GLEScmContext::GLEScmContext(int maj, int min,
             mTexUnitEnvs[i][GL_COMBINE_ALPHA].val.intVal[0] = GL_REPLACE;
             mTexUnitEnvs[i][GL_COMBINE_ALPHA].type = GL_INT;
         }
+
+        // GL_LIGHT0 starts off as white
+        mLights[0].diffuse[0] = 1.0f;
+        mLights[0].diffuse[1] = 1.0f;
+        mLights[0].diffuse[2] = 1.0f;
+        mLights[0].diffuse[3] = 1.0f;
+        mLights[0].specular[0] = 1.0f;
+        mLights[0].specular[1] = 1.0f;
+        mLights[0].specular[2] = 1.0f;
+        mLights[0].specular[3] = 1.0f;
     }
 }
 
@@ -196,6 +213,22 @@ GLEScmContext::~GLEScmContext(){
         delete m_coreProfileEngine;
         m_coreProfileEngine = NULL;
     }
+}
+
+const GLEScmContext::Material& GLEScmContext::getMaterialInfo() {
+    return mMaterial;
+}
+
+const GLEScmContext::LightModel& GLEScmContext::getLightModelInfo() {
+    return mLightModel;
+}
+
+const GLEScmContext::Light& GLEScmContext::getLightInfo(uint32_t lightIndex) {
+    return mLights[lightIndex];
+}
+
+const GLEScmContext::Fog& GLEScmContext::getFogInfo() {
+    return mFog;
 }
 
 void GLEScmContext::onSave(android::base::Stream* stream) const {
@@ -229,11 +262,17 @@ void GLEScmContext::onSave(android::base::Stream* stream) const {
         stream->putBe32(mShadeModel);
         stream->write((void*)&mColor, sizeof(mColor));
         stream->write((void*)&mNormal, sizeof(mNormal));
-        stream->putBe32(s_glSupport.maxTexUnits);
-        for (uint32_t i = 0; i < s_glSupport.maxTexUnits; i++) {
+        stream->putBe32(kMaxTextureUnits);
+        for (uint32_t i = 0; i < kMaxTextureUnits; i++) {
             m_texCoords[i].onSave(stream);
         }
     }
+
+    android::base::saveBuffer<GLVal>(stream, mMultiTexCoord, kMaxTextureUnits);
+    android::base::saveBuffer<Material>(stream, &mMaterial, 1);
+    android::base::saveBuffer<LightModel>(stream, &mLightModel, 1);
+    android::base::saveBuffer<Light>(stream, mLights, kMaxLights);
+    android::base::saveBuffer<Fog>(stream, &mFog, 1);
 }
 
 void GLEScmContext::restoreMatrixStack(const MatrixStack& matrices) {
@@ -270,7 +309,7 @@ void GLEScmContext::postLoadRestoreCtx() {
                 if (array.first == GL_TEXTURE_COORD_ARRAY) continue;
                 array.second->restoreBufferObj(getBufferObj);
             }
-            for (uint32_t i = 0; i < s_glSupport.maxTexUnits; i++) {
+            for (uint32_t i = 0; i < kMaxTextureUnits; i++) {
                 m_texCoords[i].restoreBufferObj(getBufferObj);
             }
             dispatcher.glMatrixMode(mCurrMatrixMode);
@@ -286,7 +325,7 @@ void GLEScmContext::postLoadRestoreCtx() {
                 }
             }
 
-            for (int i = 0; i < s_glSupport.maxTexUnits; i++) {
+            for (int i = 0; i < kMaxTextureUnits; i++) {
                 GLESpointer* texcoord = m_texCoords + i;
                 dispatcher.glClientActiveTexture(i + GL_TEXTURE0);
                 if (texcoord->isEnable()) {
@@ -341,6 +380,34 @@ void GLEScmContext::postLoadRestoreCtx() {
                             mNormal.type);
                     break;
             }
+
+            dispatcher.glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mMaterial.ambient);
+            dispatcher.glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mMaterial.diffuse);
+            dispatcher.glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mMaterial.specular);
+            dispatcher.glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION, mMaterial.emissive);
+            dispatcher.glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, mMaterial.specularExponent);
+
+            dispatcher.glLightModelfv(GL_LIGHT_MODEL_AMBIENT, mLightModel.color);
+            dispatcher.glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, mLightModel.twoSided);
+
+            for (int i = 0; i < kMaxLights; i++) {
+                dispatcher.glLightfv(GL_LIGHT0 + i, GL_AMBIENT, mLights[i].ambient);
+                dispatcher.glLightfv(GL_LIGHT0 + i, GL_DIFFUSE, mLights[i].diffuse);
+                dispatcher.glLightfv(GL_LIGHT0 + i, GL_SPECULAR, mLights[i].specular);
+                dispatcher.glLightfv(GL_LIGHT0 + i, GL_POSITION, mLights[i].position);
+                dispatcher.glLightfv(GL_LIGHT0 + i, GL_SPOT_DIRECTION, mLights[i].direction);
+                dispatcher.glLightf(GL_LIGHT0 + i, GL_SPOT_EXPONENT, mLights[i].spotlightExponent);
+                dispatcher.glLightf(GL_LIGHT0 + i, GL_SPOT_CUTOFF, mLights[i].spotlightCutoffAngle);
+                dispatcher.glLightf(GL_LIGHT0 + i, GL_CONSTANT_ATTENUATION, mLights[i].attenuationConst);
+                dispatcher.glLightf(GL_LIGHT0 + i, GL_LINEAR_ATTENUATION, mLights[i].attenuationLinear);
+                dispatcher.glLightf(GL_LIGHT0 + i, GL_QUADRATIC_ATTENUATION, mLights[i].attenuationQuadratic);
+            }
+
+            dispatcher.glFogf(GL_FOG_MODE, (GLfloat)mFog.mode);
+            dispatcher.glFogf(GL_FOG_DENSITY, mFog.density);
+            dispatcher.glFogf(GL_FOG_START, mFog.start);
+            dispatcher.glFogf(GL_FOG_END, mFog.end);
+            dispatcher.glFogfv(GL_FOG_COLOR, mFog.color);
         }
     }
     GLEScontext::postLoadRestoreCtx();
@@ -399,12 +466,8 @@ void GLEScmContext::setupArraysPointers(GLESConversionArrays& cArrs,GLint first,
 
     unsigned int activeTexture = m_clientActiveTexture + GL_TEXTURE0;
 
-    s_lock.lock();
-    int maxTexUnits = s_glSupport.maxTexUnits;
-    s_lock.unlock();
-
     //converting all texture coords arrays
-    for(int i=0; i< maxTexUnits;i++) {
+    for(int i=0; i< kMaxTextureUnits;i++) {
 
         unsigned int tex = GL_TEXTURE0+i;
         setClientActiveTexture(tex);
@@ -662,7 +725,7 @@ void GLEScmContext::initExtensionString() {
 }
 
 int GLEScmContext::getMaxTexUnits() {
-    return getCaps()->maxTexUnits;
+    return kMaxTextureUnits;
 }
 
 bool GLEScmContext::glGetBooleanv(GLenum pname, GLboolean *params)
@@ -1102,6 +1165,447 @@ void GLEScmContext::getTexGenfv(GLenum coord, GLenum pname, GLfloat* params) {
         } else {
             dispatcher().glGetTexGenfv(coord,pname,params);
         }
+    }
+}
+
+void GLEScmContext::materialf(GLenum face, GLenum pname, GLfloat param) {
+    if (face != GL_FRONT_AND_BACK) {
+        fprintf(stderr, "GL_INVALID_ENUM: GLES1's glMaterial(f/x) "
+                        "only supports GL_FRONT_AND_BACK for materials.\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+    switch (pname) {
+    case GL_AMBIENT:
+    case GL_DIFFUSE:
+    case GL_AMBIENT_AND_DIFFUSE:
+    case GL_SPECULAR:
+    case GL_EMISSION:
+        fprintf(stderr, "GL_INVALID_ENUM: glMaterial(f/x) only supports "
+                        "GL_SHININESS for single parameter setting.\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    case GL_SHININESS:
+        if (param < 0.0f || param > 128.0f) {
+            fprintf(stderr, "GL_INVALID_VALUE: Invalid specular exponent value %f. "
+                            "Only range [0.0, 128.0] supported.\n", param);
+            setGLerror(GL_INVALID_VALUE);
+            return;
+        }
+        mMaterial.specularExponent = param;
+        break;
+    default:
+        fprintf(stderr, "Unknown parameter name 0x%x for glMaterial(f/x)\n", pname);
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glMaterialf(face, pname, param);
+    }
+}
+
+void GLEScmContext::materialfv(GLenum face, GLenum pname, const GLfloat* params) {
+    if (face != GL_FRONT_AND_BACK) {
+        fprintf(stderr, "GL_INVALID_ENUM: GLES1's glMaterial(f/x)v "
+                        "only supports GL_FRONT_AND_BACK for materials.\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    switch (pname) {
+    case GL_AMBIENT:
+        memcpy(&mMaterial.ambient, params, 4 * sizeof(GLfloat));
+        break;
+    case GL_DIFFUSE:
+        memcpy(&mMaterial.diffuse, params, 4 * sizeof(GLfloat));
+        break;
+    case GL_AMBIENT_AND_DIFFUSE:
+        memcpy(&mMaterial.ambient, params, 4 * sizeof(GLfloat));
+        memcpy(&mMaterial.diffuse, params, 4 * sizeof(GLfloat));
+        break;
+    case GL_SPECULAR:
+        memcpy(&mMaterial.specular, params, 4 * sizeof(GLfloat));
+        break;
+    case GL_EMISSION:
+        memcpy(&mMaterial.emissive, params, 4 * sizeof(GLfloat));
+        break;
+    case GL_SHININESS:
+        if (*params < 0.0f || *params > 128.0f) {
+            fprintf(stderr, "GL_INVALID_VALUE: Invalid specular exponent value %f. "
+                            "Only range [0.0, 128.0] supported.\n", *params);
+            setGLerror(GL_INVALID_VALUE);
+            return;
+        }
+        mMaterial.specularExponent = *params;
+        break;
+    default:
+        fprintf(stderr, "Unknown parameter name 0x%x for glMaterial(f/x)v.\n", pname);
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glMaterialfv(face, pname, params);
+    }
+}
+
+void GLEScmContext::getMaterialfv(GLenum face, GLenum pname, GLfloat* params) {
+    if (face != GL_FRONT && face != GL_BACK) {
+        fprintf(stderr, "GL_INVALID_ENUM: glGetMaterial(f/x)v "
+                        "must take GL_FRONT or GL_BACK as face argument\n");
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    switch (pname) {
+    case GL_AMBIENT:
+        memcpy(params, &mMaterial.ambient, 4 * sizeof(GLfloat));
+        break;
+    case GL_DIFFUSE:
+        memcpy(params, &mMaterial.diffuse, 4 * sizeof(GLfloat));
+        break;
+    case GL_SPECULAR:
+        memcpy(params, &mMaterial.specular, 4 * sizeof(GLfloat));
+        break;
+    case GL_EMISSION:
+        memcpy(params, &mMaterial.emissive, 4 * sizeof(GLfloat));
+        break;
+    case GL_SHININESS:
+        *params = mMaterial.specularExponent;
+        break;
+    default:
+        fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x for glGetMaterial(f/x)v.\n", pname);
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glGetMaterialfv(face, pname, params);
+    }
+}
+
+void GLEScmContext::lightModelf(GLenum pname, GLfloat param) {
+    switch (pname) {
+        case GL_LIGHT_MODEL_AMBIENT:
+            fprintf(stderr, "GL_INVALID_ENUM: glLightModelf only supports GL_LIGHT_MODEL_TWO_SIDE.\n");
+            setGLerror(GL_INVALID_ENUM);
+            return;
+        case GL_LIGHT_MODEL_TWO_SIDE:
+            if (param != 1.0f && param != 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glLightModelf only takes 0 or 1 "
+                                "for GL_LIGHT_MODEL_TWO_SIDE, but got %f\n", param);
+                setGLerror(GL_INVALID_VALUE);
+            }
+            mLightModel.twoSided = param == 1.0f ? true : false;
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x for glLightModel(f/x)v.\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glLightModelf(pname, param);
+    }
+}
+
+void GLEScmContext::lightModelfv(GLenum pname, const GLfloat* params) {
+    switch (pname) {
+        case GL_LIGHT_MODEL_AMBIENT:
+            memcpy(&mLightModel.color, params, 4 * sizeof(GLfloat));
+            break;
+        case GL_LIGHT_MODEL_TWO_SIDE:
+            if (*params != 1.0f && *params != 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glLightModelf only takes 0 or 1 "
+                                "for GL_LIGHT_MODEL_TWO_SIDE, but got %f\n", *params);
+                setGLerror(GL_INVALID_VALUE);
+            }
+            mLightModel.twoSided = *params == 1.0f ? true : false;
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x for glLightModel(f/x)v.\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glLightModelfv(pname, params);
+    }
+}
+
+void GLEScmContext::lightf(GLenum light, GLenum pname, GLfloat param) {
+    uint32_t lightIndex = light - GL_LIGHT0;
+
+    if (lightIndex >= kMaxLights) {
+        fprintf(stderr, "GL_INVALID_ENUM: Exceeded max lights for glLight(f/x) (wanted %u)\n",
+                lightIndex);
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    switch (pname) {
+        case GL_AMBIENT:
+        case GL_DIFFUSE:
+        case GL_SPECULAR:
+        case GL_POSITION:
+        case GL_SPOT_DIRECTION:
+            fprintf(stderr, "GL_INVALID_ENUM: Invalid parameter name 0x%x "
+                            "for glLight(f/x). Needs glLight(f/x)v.\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+        case GL_SPOT_EXPONENT:
+            mLights[lightIndex].spotlightExponent = param;
+            break;
+        case GL_SPOT_CUTOFF:
+            mLights[lightIndex].spotlightCutoffAngle = param;
+            break;
+        case GL_CONSTANT_ATTENUATION:
+            mLights[lightIndex].attenuationConst = param;
+            break;
+        case GL_LINEAR_ATTENUATION:
+            mLights[lightIndex].attenuationLinear = param;
+            break;
+        case GL_QUADRATIC_ATTENUATION:
+            mLights[lightIndex].attenuationQuadratic = param;
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x "
+                            "for glLight(f/x).\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glLightf(light, pname, param);
+    }
+}
+
+void GLEScmContext::lightfv(GLenum light, GLenum pname, const GLfloat* params) {
+    uint32_t lightIndex = light - GL_LIGHT0;
+
+    if (lightIndex >= kMaxLights) {
+        fprintf(stderr, "GL_INVALID_ENUM: Exceeded max lights for "
+                        "glLight(f/x)v (wanted %u)\n",
+                lightIndex);
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    switch (pname) {
+        case GL_AMBIENT:
+            memcpy(&mLights[lightIndex].ambient, params, 4 * sizeof(GLfloat));
+            break;
+        case GL_DIFFUSE:
+            memcpy(&mLights[lightIndex].diffuse, params, 4 * sizeof(GLfloat));
+            break;
+        case GL_SPECULAR:
+            memcpy(&mLights[lightIndex].specular, params, 4 * sizeof(GLfloat));
+            break;
+        case GL_POSITION:
+            memcpy(&mLights[lightIndex].position, params, 4 * sizeof(GLfloat));
+            break;
+        case GL_SPOT_DIRECTION:
+            memcpy(&mLights[lightIndex].direction, params, 3 * sizeof(GLfloat));
+            break;
+        case GL_SPOT_EXPONENT:
+            mLights[lightIndex].spotlightExponent = *params;
+            break;
+        case GL_SPOT_CUTOFF:
+            mLights[lightIndex].spotlightCutoffAngle = *params;
+            break;
+        case GL_CONSTANT_ATTENUATION:
+            mLights[lightIndex].attenuationConst = *params;
+            break;
+        case GL_LINEAR_ATTENUATION:
+            mLights[lightIndex].attenuationLinear = *params;
+            break;
+        case GL_QUADRATIC_ATTENUATION:
+            mLights[lightIndex].attenuationQuadratic = *params;
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x "
+                            "for glLight(f/x).\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glLightfv(light, pname, params);
+    }
+}
+
+void GLEScmContext::getLightfv(GLenum light, GLenum pname, GLfloat* params) {
+    uint32_t lightIndex = light - GL_LIGHT0;
+
+    if (lightIndex >= kMaxLights) {
+        fprintf(stderr, "GL_INVALID_ENUM: Exceeded max lights for "
+                        "glGetLight(f/x)v (wanted %u)\n",
+                lightIndex);
+        setGLerror(GL_INVALID_ENUM);
+        return;
+    }
+
+    switch (pname) {
+        case GL_AMBIENT:
+            memcpy(params, &mLights[lightIndex].ambient, 4 * sizeof(GLfloat));
+            break;
+        case GL_DIFFUSE:
+            memcpy(params, &mLights[lightIndex].diffuse, 4 * sizeof(GLfloat));
+            break;
+        case GL_SPECULAR:
+            memcpy(params, &mLights[lightIndex].specular, 4 * sizeof(GLfloat));
+            break;
+        case GL_POSITION:
+            memcpy(params, &mLights[lightIndex].position, 4 * sizeof(GLfloat));
+            break;
+        case GL_SPOT_DIRECTION:
+            memcpy(params, &mLights[lightIndex].direction, 3 * sizeof(GLfloat));
+            break;
+        case GL_SPOT_EXPONENT:
+            *params = mLights[lightIndex].spotlightExponent;
+            break;
+        case GL_SPOT_CUTOFF:
+            *params = mLights[lightIndex].spotlightCutoffAngle;
+            break;
+        case GL_CONSTANT_ATTENUATION:
+            *params = mLights[lightIndex].attenuationConst;
+            break;
+        case GL_LINEAR_ATTENUATION:
+            *params = mLights[lightIndex].attenuationLinear;
+            break;
+        case GL_QUADRATIC_ATTENUATION:
+            *params = mLights[lightIndex].attenuationQuadratic;
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x "
+                            "for glGetLight(f/x).\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glGetLightfv(light, pname, params);
+    }
+}
+
+void GLEScmContext::multiTexCoord4f(GLenum target, GLfloat s, GLfloat t, GLfloat r, GLfloat q) {
+
+    mMultiTexCoord[target - GL_TEXTURE0].floatVal[0] = s;
+    mMultiTexCoord[target - GL_TEXTURE0].floatVal[1] = t;
+    mMultiTexCoord[target - GL_TEXTURE0].floatVal[2] = q;
+    mMultiTexCoord[target - GL_TEXTURE0].floatVal[3] = r;
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glMultiTexCoord4f(target, s, t, r, q);
+    }
+}
+
+void GLEScmContext::normal3f(GLfloat nx, GLfloat ny, GLfloat nz) {
+    mNormal.type = GL_FLOAT;
+    mNormal.val.floatVal[0] = nx;
+    mNormal.val.floatVal[1] = ny;
+    mNormal.val.floatVal[2] = nz;
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glNormal3f(nx, ny, nz);
+    }
+}
+
+void GLEScmContext::fogf(GLenum pname, GLfloat param) {
+    switch (pname) {
+        case GL_FOG_MODE: {
+            GLenum mode = (GLenum)param;
+            switch (mode) {
+                case GL_EXP:
+                case GL_EXP2:
+                case GL_LINEAR:
+                    mFog.mode = mode;
+                    break;
+                default:
+                    fprintf(stderr, "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
+                                    "for glFog(f/x).\n", mode);
+                    setGLerror(GL_INVALID_ENUM);
+                    break;
+            }
+            break;
+        }
+        case GL_FOG_DENSITY:
+            if (param < 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glFog(f/x): GL_FOG_DENSITY "
+                                "needs to be nonnegative, but got %f\n", param);
+                setGLerror(GL_INVALID_VALUE);
+                return;
+            }
+            mFog.density = param;
+            break;
+        case GL_FOG_START:
+            mFog.start = param;
+            break;
+        case GL_FOG_END:
+            mFog.end = param;
+            break;
+        case GL_FOG_COLOR:
+            fprintf(stderr, "GL_INVALID_ENUM: GL_FOG_COLOR not allowed for glFog(f/x).\n");
+            setGLerror(GL_INVALID_ENUM);
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x "
+                            "for glFog(f/x).\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glFogf(pname, param);
+    }
+}
+
+void GLEScmContext::fogfv(GLenum pname, const GLfloat* params) {
+    switch (pname) {
+        case GL_FOG_MODE: {
+            GLenum mode = (GLenum)params[0];
+            switch (mode) {
+                case GL_EXP:
+                case GL_EXP2:
+                case GL_LINEAR:
+                    mFog.mode = mode;
+                    break;
+                default:
+                    fprintf(stderr, "GL_INVALID_ENUM: Unknown GL_FOG_MODE 0x%x "
+                                    "for glFog(f/x)v.\n", mode);
+                    setGLerror(GL_INVALID_ENUM);
+                    break;
+            }
+            break;
+        }
+        case GL_FOG_DENSITY:
+            if (params[0] < 0.0f) {
+                fprintf(stderr, "GL_INVALID_VALUE: glFog(f/x)v: GL_FOG_DENSITY "
+                                "needs to be nonnegative, but got %f\n", params[0]);
+                setGLerror(GL_INVALID_VALUE);
+                return;
+            }
+            mFog.density = params[0];
+            break;
+        case GL_FOG_START:
+            mFog.start = params[0];
+            break;
+        case GL_FOG_END:
+            mFog.end = params[0];
+            break;
+        case GL_FOG_COLOR:
+            memcpy(&mFog.color, params, 4 * sizeof(GLfloat));
+            break;
+        default:
+            fprintf(stderr, "GL_INVALID_ENUM: Unknown parameter name 0x%x "
+                            "for glFog(f/x)v.\n", pname);
+            setGLerror(GL_INVALID_ENUM);
+            return;
+    }
+
+    if (!m_coreProfileEngine) {
+        dispatcher().glFogfv(pname, params);
     }
 }
 

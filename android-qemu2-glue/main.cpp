@@ -20,6 +20,7 @@
 #include "android/avd/hw-config.h"
 #include "android/boot-properties.h"
 #include "android/cmdline-option.h"
+#include "android/config/BluetoothConfig.h"
 #include "android/constants.h"
 #include "android/cpu_accelerator.h"
 #include "android/crashreport/crash-handler.h"
@@ -311,8 +312,10 @@ static int createUserData(AvdInfo* avd,
             return 1;
         }
 
-        resizeExt4Partition(android_hw->disk_dataPartition_path,
-                            android_hw->disk_dataPartition_size);
+        if (!hw->hw_arc) {
+            resizeExt4Partition(android_hw->disk_dataPartition_path,
+                    android_hw->disk_dataPartition_size);
+        }
     } else {
         derror("Missing initial data partition file: %s",
                hw->disk_dataPartition_initPath);
@@ -682,8 +685,19 @@ extern "C" int main(int argc, char** argv) {
            get_uptime_ms());
 #endif
 
+    if (!emulator_parseFeatureCommandLineOptions(opts, avd, hw)) {
+        return 1;
+    }
+
     if (!emulator_parseUiCommandLineOptions(opts, avd, hw)) {
         return 1;
+    }
+
+    // If the virtual scene camera is selected in the avd, but not supported,
+    // use the emulated camera instead.
+    bool isVirtualScene = !strcmp(hw->hw_camera_back, "virtualscene");
+    if (isVirtualScene && !feature_is_enabled(kFeature_VirtualScene)) {
+        str_reset(&hw->hw_camera_back, "emulated");
     }
 
     if (opts->shared_net_id) {
@@ -699,6 +713,15 @@ extern "C" int main(int argc, char** argv) {
         args.addFormat("net.shared_net_ip=10.1.2.%ld", shared_net_id);
     }
 
+    // Add bluetooth parameters if applicable.
+    char* bluetooth_opts = NULL;
+#ifdef __linux__
+    bluetooth_opts = opts->bluetooth;
+
+#endif
+    android::BluetoothConfig bluetooth(bluetooth_opts);
+    args.add(bluetooth.getParameters());
+
 #ifdef CONFIG_NAND_LIMITS
     args.add2If("-nand-limits", opts->nand_limits);
 #endif
@@ -711,7 +734,20 @@ extern "C" int main(int argc, char** argv) {
     if (opts->audio && !strcmp(opts->audio, "none"))
         args.add("-no-audio");
 
+    // Generic snapshots command line option
+
+    if (opts->snapshot &&
+        feature_is_enabled(kFeature_FastSnapshotV1)) {
+        if (!opts->no_snapshot_load) {
+            args.add2("-loadvm", opts->snapshot);
+        }
+    }
+
     /** SNAPSHOT STORAGE HANDLING */
+
+    if (opts->snapshot_list) {
+        args.add("-snapshot-list");
+    }
 
     /* If we have a valid snapshot storage path */
 
@@ -723,8 +759,6 @@ extern "C" int main(int argc, char** argv) {
          * they can change from one invokation to the next and don't really
          * correspond to the hardware configuration itself.
          */
-        if (!opts->no_snapshot_load)
-            args.add2("-loadvm", opts->snapshot);
         if (!opts->no_snapshot_save)
             args.add2("-savevm-on-exit", opts->snapshot);
         if (opts->no_snapshot_update_time)
@@ -861,8 +895,7 @@ extern "C" int main(int argc, char** argv) {
     }
 
     // Create userdata file from init version if needed.
-    if (!hw->hw_arc &&
-        (android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
+    if ((android_op_wipe_data || !path_exists(hw->disk_dataPartition_path))) {
       int ret = createUserData(avd, dataPath, hw);
       if (ret != 0)
         return ret;
@@ -1035,12 +1068,13 @@ extern "C" int main(int argc, char** argv) {
         // targetInfo.imagePartitionTypes
         args.add(PartitionParameters::create(hw, avd));
     } else {
+        args.add2("-kernel", hw->kernel_path);
         // hw->hw_arc: ChromeOS single disk image, use regular block device
         // instead of virtio block device
         args.add("-drive");
         const char* avd_dir = avdInfo_getContentPath(avd);
         args.addFormat("index=0,format=raw,id=system,file=cat:%s" PATH_SEP "system.img.qcow2|"
-                       "%s" PATH_SEP "userdata.img|"
+                       "%s" PATH_SEP "userdata-qemu.img.qcow2|"
                        "%s" PATH_SEP "vendor.img.qcow2", avd_dir, avd_dir, avd_dir);
     }
 
@@ -1065,6 +1099,14 @@ extern "C" int main(int argc, char** argv) {
     args.add("-device");
     args.addFormat("%s,netdev=mynet", kTarget.networkDeviceType);
 
+    // rng
+#if defined(TARGET_X86_64) || defined(TARGET_I386)
+    args.add("-device");
+    args.add("virtio-rng-pci");
+#else
+    args.add("-device");
+    args.add("virtio-rng-device");
+#endif
     args.add("-show-cursor");
 
     if (opts->tcpdump) {
@@ -1101,12 +1143,13 @@ extern "C" int main(int argc, char** argv) {
     }
 
     if (hw->hw_arc) {
-        /* We don't use goldfish_fb in cros. just use virtio vga now */
+        /* We don't use goldfish_fb in cros. Just use virtio vga now */
         args.add2("-vga", "virtio");
 
-        /* We don't use goldfish_events in cros. just use usb devices now */
+        /* We don't use goldfish_events for touch events in cros.
+         * Just use usb device now.
+         */
         args.add2("-usbdevice", "tablet");
-        args.add2("-usbdevice", "keyboard");
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGPU);
@@ -1117,6 +1160,7 @@ extern "C" int main(int argc, char** argv) {
             gQAndroidBatteryAgent,
             gQAndroidCellularAgent,
             gQAndroidClipboardAgent,
+            gQAndroidDisplayAgent,
             gQAndroidEmulatorWindowAgent,
             gQAndroidFingerAgent,
             gQAndroidLocationAgent,
@@ -1170,7 +1214,8 @@ extern "C" int main(int argc, char** argv) {
                                                      true);
             }
             if (skin_winsys_get_preferred_gles_apilevel() ==
-                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT) {
+                WINSYS_GLESAPILEVEL_PREFERENCE_COMPAT ||
+                System::get()->getProgramBitness() == 32) {
                 fc::setEnabledOverride(fc::GLESDynamicVersion, false);
             }
 
@@ -1197,7 +1242,8 @@ extern "C" int main(int argc, char** argv) {
                 rendererConfig.selectedRenderer == SELECTED_RENDERER_ANGLE9;
         // Features to disable or enable depending on rendering backend
         // and gpu make/model/version
-        shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3);
+        shouldDisableAsyncSwap |= !strncmp("arm", kTarget.androidArch, 3) ||
+                                  System::get()->getProgramBitness() == 32;
         shouldDisableAsyncSwap = shouldDisableAsyncSwap ||
                                  async_query_host_gpu_SyncBlacklisted();
 
@@ -1210,7 +1256,7 @@ extern "C" int main(int argc, char** argv) {
                 hw->kernel_parameters, rendererConfig.glesMode,
                 rendererConfig.bootPropOpenglesVersion,
                 rendererConfig.glFramebufferSizeBytes, pstore,
-                true /* isQemu2 */));
+                true /* isQemu2 */, hw->hw_arc));
 
         if (!kernel_parameters.get()) {
             return 1;
@@ -1229,10 +1275,10 @@ extern "C" int main(int argc, char** argv) {
             }
         }
 
-        if (!hw->hw_arc) {
-          args.add("-append");
-          args.add(append_arg);
-        }
+        args.add(bluetooth.getQemuParameters());
+
+        args.add("-append");
+        args.add(append_arg);
     }
 
     android_report_session_phase(ANDROID_SESSION_PHASE_INITGENERAL);

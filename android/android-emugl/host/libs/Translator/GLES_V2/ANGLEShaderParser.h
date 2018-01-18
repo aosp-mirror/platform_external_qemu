@@ -25,6 +25,7 @@ extern ShBuiltInResources kResources;
 
 // For performing link-time validation of shader programs.
 struct ShaderLinkInfo {
+    int esslVersion;
     std::vector<sh::Uniform> uniforms;
     std::vector<sh::Varying> varyings;
     std::vector<sh::Attribute> attributes;
@@ -51,7 +52,7 @@ bool globalInitialize(
         int maxDualSourceDrawBuffers);
 
 bool translate(bool hostUsesCoreProfile,
-               int esslVersion, const char* src, GLenum shaderType,
+               const char* src, GLenum shaderType,
                std::string* outInfolog, std::string* outObjCode,
                ShaderLinkInfo* outShaderLinkInfo);
 }

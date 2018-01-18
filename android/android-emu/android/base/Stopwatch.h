@@ -31,11 +31,48 @@ public:
     static double sec(System::WallDuration us) {
         return us / 1000000.0;
     }
+    static double ms(System::WallDuration us) {
+        return us / 1000.0;
+    }
 
 private:
     System::WallDuration mStartUs;
 };
 
+
+// A class for convenient time tracking in a scope.
+template <class Counter>
+class RaiiTimeTracker final {
+    DISALLOW_COPY_ASSIGN_AND_MOVE(RaiiTimeTracker);
+public:
+    RaiiTimeTracker(Counter& time) : mTime(time) {}
+    ~RaiiTimeTracker() { mTime += mSw.elapsedUs(); }
+
+private:
+    Stopwatch mSw;
+    Counter& mTime;
+};
+
+//
+// A utility function to measure the time taken by the passed function |func|.
+// Adds the elapsed time to the |time| parameter, returns exactly the same value
+// as |func| returned.
+// Usage:
+//
+//      int elapsedUs = 0;
+//      measure(elapsedUs, [] { longRunningFunc1(); });
+//      auto result = measure(elapsedUs, [&] { return longFunc2(); });
+//      printf(..., elapsedUs);
+//
+
+template <class Counter, class Func>
+auto measure(Counter& time, Func&& f) -> decltype(f()) {
+    RaiiTimeTracker<Counter> rtt(time);
+    return f();
+}
+
+
+// Some macros to have standard format of time measurements printed out.
 #define STOPWATCH_PRINT_SPLIT(sw) \
     fprintf(stderr, "%s:%d %.03f ms\n", __func__, __LINE__, (sw).restartUs() / 1000.0f);
 

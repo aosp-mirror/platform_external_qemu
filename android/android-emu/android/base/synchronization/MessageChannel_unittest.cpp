@@ -203,5 +203,26 @@ TEST(MessageChannel, WaitForEmpty) {
     thread.join();
 }
 
+TEST(MessageChannel, MoveOnly) {
+    using Ptr = std::unique_ptr<int>;
+    using Channel = MessageChannel<Ptr, 1>;
+    Channel c;
+    Ptr in(new int(10));
+    c.send(std::move(in));
+    ASSERT_FALSE(in);
+    Ptr out;
+    ASSERT_TRUE(c.receive(&out));
+    ASSERT_TRUE(out);
+    EXPECT_EQ(10, *out);
+
+    // Fill in the channel and make sure failed trySend() leaves the input
+    // parameter untouched.
+    c.send({});
+    Ptr in2(new int(2));
+    EXPECT_FALSE(c.trySend(std::move(in2)));
+    ASSERT_TRUE(in2);
+    EXPECT_EQ(2, *in2);
+}
+
 }  // namespace base
 }  // namespace android

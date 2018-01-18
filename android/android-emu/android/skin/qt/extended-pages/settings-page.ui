@@ -438,8 +438,8 @@
     <widget class="QCheckBox" name="set_onTop">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>410</y>
+       <x>324</x>
+       <y>334</y>
        <width>211</width>
        <height>24</height>
       </rect>
@@ -463,8 +463,8 @@
     <widget class="QGroupBox" name="set_onTopTitle">
      <property name="geometry">
       <rect>
-       <x>20</x>
-       <y>390</y>
+       <x>324</x>
+       <y>314</y>
        <width>211</width>
        <height>21</height>
       </rect>
@@ -582,30 +582,6 @@
       <bool>false</bool>
      </property>
     </widget>
-    <widget class="QGroupBox" name="saveOnExitTitle">
-     <property name="geometry">
-      <rect>
-       <x>20</x>
-       <y>314</y>
-       <width>281</width>
-       <height>21</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <family>Roboto</family>
-      </font>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="title">
-      <string>Save quick-boot state on exit for this AVD</string>
-     </property>
-     <property name="ColorGroup" stdset="0">
-      <string>Title</string>
-     </property>
-    </widget>
     <widget class="QComboBox" name="set_saveSnapshotOnExit">
      <property name="geometry">
       <rect>
@@ -644,6 +620,86 @@
        <string>Ask</string>
       </property>
      </item>
+    </widget>
+    <widget class="RaisedMaterialButton" name="set_saveSnapNowButton">
+     <property name="geometry">
+      <rect>
+       <x>169</x>
+       <y>370</y>
+       <width>132</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>SAVE NOW</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="set_saveOnExitTitle">
+     <property name="geometry">
+      <rect>
+       <x>20</x>
+       <y>293</y>
+       <width>281</width>
+       <height>42</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Save quick-boot state on exit for this AVD</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+     </property>
+     <property name="wordWrap">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Title</string>
+     </property>
+    </widget>
+    <widget class="RaisedMaterialButton" name="set_resetNotifications">
+     <property name="geometry">
+      <rect>
+       <x>324</x>
+       <y>383</y>
+       <width>280</width>
+       <height>36</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Roboto</family>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>RESET NOTIFICATION PREFERENCES</string>
+     </property>
+     <property name="flat">
+      <bool>true</bool>
+     </property>
+     <property name="ColorGroup" stdset="0">
+      <string>Button</string>
+     </property>
+     <property name="report_metrics" stdset="0">
+      <bool>false</bool>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="tab_2">
@@ -1183,8 +1239,11 @@
   <tabstop>set_adbPathButton</tabstop>
   <tabstop>set_clipboardSharing</tabstop>
   <tabstop>set_crashReportPrefComboBox</tabstop>
-  <tabstop>set_onTop</tabstop>
+  <tabstop>set_disableMouseWheel</tabstop>
   <tabstop>set_frameAlways</tabstop>
+  <tabstop>set_saveSnapshotOnExit</tabstop>
+  <tabstop>set_saveSnapNowButton</tabstop>
+  <tabstop>set_onTop</tabstop>
   <tabstop>set_useStudio</tabstop>
   <tabstop>set_noProxy</tabstop>
   <tabstop>set_manualConfig</tabstop>

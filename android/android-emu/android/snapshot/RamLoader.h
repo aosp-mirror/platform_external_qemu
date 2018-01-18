@@ -18,11 +18,14 @@
 #include "android/base/system/System.h"
 #include "android/base/threads/FunctorThread.h"
 #include "android/base/threads/ThreadPool.h"
+#include "android/snapshot/GapTracker.h"
 #include "android/snapshot/MemoryWatch.h"
 #include "android/snapshot/common.h"
 
+#include <array>
 #include <atomic>
 #include <cstdint>
+#include <utility>
 #include <vector>
 
 namespace android {
@@ -32,6 +35,9 @@ class RamLoader {
     DISALLOW_COPY_AND_ASSIGN(RamLoader);
 
 public:
+    enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
+    struct Page;
+
     RamLoader(base::StdioStream&& stream);
     ~RamLoader();
 
@@ -39,12 +45,13 @@ public:
     void registerBlock(const RamBlock& block);
     bool start(bool isQuickboot);
     bool wasStarted() const { return mWasStarted; }
-
-    void join(); // Finishes the current load.
-    void interrupt();  // Cancels the current load.
+    void join();
+    void interrupt();
 
     bool hasError() const { return mHasError; }
-    bool onDemandEnabled() const { return mAccessWatch; }
+    void invalidateGaps() { mGaps.reset(nullptr); }
+    bool hasGaps() const { return mGaps ? 1 : 0; }
+    bool onDemandEnabled() const { return mOnDemandEnabled; }
     bool onDemandLoadingComplete() const {
         return mLoadingCompleted.load(std::memory_order_relaxed);
     }
@@ -52,11 +59,25 @@ public:
         return (mIndex.flags & IndexFlags::CompressedPages) != 0;
     }
     uint64_t diskSize() const { return mDiskSize; }
+    int version() const { return mVersion; }
+    uint64_t indexOffset() const { return mIndexPos; }
+
+    const Page* findPage(int blockIndex, const char* id, int pageIndex) const;
+
+    GapTracker::Ptr releaseGapTracker() { return std::move(mGaps); }
+
+    bool getDuration(base::System::Duration* duration) {
+        if (mEndTime < mStartTime) {
+            return false;
+        }
+
+        if (duration) {
+            *duration = mEndTime - mStartTime;
+        }
+        return true;
+    }
 
 private:
-    enum class State : uint8_t { Empty, Reading, Read, Filling, Filled, Error };
-
-    struct Page;
     using Pages = std::vector<Page>;
 
     struct FileIndex {
@@ -110,21 +131,24 @@ private:
     Pages::iterator mBackgroundPageIt;
     bool mSentEndOfPagesMarker = false;
     bool mJoining = false;
+    bool mOnDemandEnabled = false;
     base::MessageChannel<Page*, 32> mReadingQueue;
     base::MessageChannel<Page*, 32> mReadDataQueue;
 
     base::Optional<base::ThreadPool<Page*>> mDecompressor;
 
     FileIndex mIndex;
+    GapTracker::Ptr mGaps;
     uint64_t mDiskSize = 0;
+    uint64_t mIndexPos = 0;
+    int mVersion = 0;
 
-#if SNAPSHOT_PROFILE > 1
-    base::System::WallDuration mStartTime;
-#endif
+    base::System::Duration mStartTime = 0;
+    base::System::Duration mEndTime = 0;
 
     // Assumed to be a power of 2 for convenient
     // rounding and aligning
-    uint64_t mPageSize = 4096;
+    uint64_t mPageSize = kDefaultPageSize;
     // Flag to stop lazy RAM loading if loading has
     // completed.
     std::atomic<bool> mLoadingCompleted{false};
@@ -132,6 +156,36 @@ private:
     // Whether or not this ram load is part of
     // quickboot load.
     bool mIsQuickboot = false;
+};
+
+struct RamLoader::Page {
+    std::atomic<uint8_t> state{uint8_t(State::Empty)};
+    uint16_t blockIndex;
+    uint32_t sizeOnDisk;
+    uint64_t filePos;
+    std::array<char, 16> hash;
+    uint8_t* data;
+
+    Page() = default;
+    Page(RamLoader::State state) : state(uint8_t(state)) {}
+    Page(Page&& other)
+        : state(other.state.load(std::memory_order_relaxed)),
+          blockIndex(other.blockIndex),
+          sizeOnDisk(other.sizeOnDisk),
+          filePos(other.filePos),
+          data(other.data) {}
+
+    Page& operator=(Page&& other) {
+        state.store(other.state.load(std::memory_order_relaxed),
+                    std::memory_order_relaxed);
+        blockIndex = other.blockIndex;
+        sizeOnDisk = other.sizeOnDisk;
+        filePos = other.filePos;
+        data = other.data;
+        return *this;
+    }
+
+    bool zeroed() const { return sizeOnDisk == 0; }
 };
 
 }  // namespace snapshot

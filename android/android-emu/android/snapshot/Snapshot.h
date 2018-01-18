@@ -17,6 +17,7 @@
 #include "android/snapshot/proto/snapshot.pb.h"
 
 #include <string>
+#include <vector>
 
 namespace android {
 namespace snapshot {
@@ -24,6 +25,8 @@ namespace snapshot {
 class Snapshot final {
 public:
     Snapshot(const char* name);
+
+    static std::vector<Snapshot> getExistingSnapshots();
 
     base::StringView name() const { return mName; }
     base::StringView dataDir() const { return mDataDir; }
@@ -38,11 +41,19 @@ public:
 
     uint64_t diskSize() const { return mSize; }
 
+    // Returns the snapshot's Protobuf holding its metadata.
+    // If Protobuf cannot be read, sets failure reason
+    // and returns null.
+    const emulator_snapshot::Snapshot* getGeneralInfo();
+
     base::Optional<FailureReason> failureReason() const;
 
     static base::StringView dataDir(const char* name);
 
+    base::Optional<std::string> parent();
+
 private:
+    void loadProtobufOnce();
     bool verifyHost(const emulator_snapshot::Host& host);
     bool verifyConfig(const emulator_snapshot::Config& config);
     bool writeSnapshotToDisk();
@@ -53,6 +64,7 @@ private:
     uint64_t mSize = 0;
     int32_t mInvalidLoads = 0;
     int32_t mSuccessfulLoads = 0;
+    FailureReason mLatestFailureReason = FailureReason::Empty;
 };
 
 inline bool operator==(const Snapshot& l, const Snapshot& r) {

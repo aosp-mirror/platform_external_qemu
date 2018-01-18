@@ -378,6 +378,7 @@ int   socket_send_oob( int  fd, const void*  buf, int  buflen );
 int   socket_sendto( int  fd, const void*  buf, int  buflen, const SockAddress*  to );
 
 int   socket_connect( int  fd, const SockAddress*  address );
+int   socket_connect_posix( int  fd, const void *address, uint32_t address_len);
 int   socket_bind( int  fd, const SockAddress*  address );
 int   socket_get_address( int  fd, SockAddress*  address );
 int   socket_get_peer_address( int  fd, SockAddress*  address );

@@ -16,6 +16,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_PROTO_SOURCES := \
     $(SNAPSHOTPROTO_DIR)/snapshot.proto \
+    $(SNAPSHOTPROTO_DIR)/snapshot_deps.proto \
 
 $(call end-emulator-library)
 
