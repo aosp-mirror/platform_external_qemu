@@ -57,6 +57,8 @@
 const char*  android_skin_net_speed = NULL;
 const char*  android_skin_net_delay = NULL;
 
+static const char DEFAULT_SOFTWARE_GPU_MODE[] = "swiftshader_indirect";
+
 /***********************************************************************/
 /***********************************************************************/
 /*****                                                             *****/
@@ -1896,8 +1898,9 @@ bool emulator_parseFeatureCommandLineOptions(AndroidOptions* opts,
 static RendererConfig lastRendererConfig;
 
 static bool isGuestRendererChoice(const char* choice) {
-    return choice && (!strcmp(choice, "off") ||
-                       !strcmp(choice, "guest"));
+    return choice && (!strcmp(choice, "off")   ||
+                      !strcmp(choice, "guest") ||
+                      !strcmp(choice, "software"));
 }
 
 bool configAndStartRenderer(
@@ -1920,10 +1923,15 @@ bool configAndStartRenderer(
                  "until the next system image update. "
                  "Sorry for the inconvenience.");
         if (opts->gpu) {
-            str_reset(&opts->gpu, "swiftshader");
+            str_reset(&opts->gpu, DEFAULT_SOFTWARE_GPU_MODE);
         } else {
-            str_reset(&hw->hw_gpu_mode, "swiftshader");
+            str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
         }
+    }
+
+    // Map the generic "software" setting to our default software renderer
+    if (!strcmp(hw->hw_gpu_mode, "software")) {
+        str_reset(&hw->hw_gpu_mode, DEFAULT_SOFTWARE_GPU_MODE);
     }
 
     if (hw->hw_arc) {
