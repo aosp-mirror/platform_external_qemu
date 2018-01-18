@@ -189,6 +189,22 @@ void FramebufferData::restore(ObjectLocalName localName,
     }
 }
 
+void FramebufferData::makeTextureDirty(const getObjDataPtr_t& getObjDataPtr) {
+    if (!hasBeenBoundAtLeastOnce()) return;
+    for (int i = 0; i < MAX_ATTACH_POINTS; i++) {
+        auto& attachPoint = m_attachPoints[i];
+        if (!attachPoint.name || attachPoint.owned || attachPoint.obj) {
+            // If not bound to a texture, do nothing
+            continue;
+        }
+        TextureData* texData = (TextureData*)getObjDataPtr(
+            NamedObjectType::TEXTURE, attachPoint.name).get();
+        if (texData) {
+            texData->makeDirty();
+        }
+    }
+}
+
 void FramebufferData::setAttachment(GLenum attachment,
                GLenum target,
                GLuint name,

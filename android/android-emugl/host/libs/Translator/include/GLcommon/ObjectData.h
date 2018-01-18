@@ -50,8 +50,8 @@ public:
             ObjectLocalName p_localName, android::base::Stream* stream)>
                 loadObject_t;
     typedef std::function<const ObjectDataPtr(NamedObjectType,
-            ObjectLocalName)> getObjDataPtr_t;
-    typedef std::function<int(NamedObjectType, ObjectLocalName)>
+            ObjectLocalName)> const getObjDataPtr_t;
+    typedef std::function<int(NamedObjectType, ObjectLocalName)> const
             getGlobalName_t;
     // postLoad: setup references after loading all ObjectData from snapshot
     // in one share group

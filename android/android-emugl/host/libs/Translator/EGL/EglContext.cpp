@@ -191,5 +191,6 @@ void EglContext::onSave(android::base::Stream* stream) {
 }
 
 void EglContext::postSave(android::base::Stream* stream) {
+    m_glesContext->postSave(stream);
     m_shareGroup->postSave(stream);
 }
