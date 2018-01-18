@@ -414,7 +414,7 @@ void EmulatorContainer::slot_showVirtualSceneInfoDialog() {
     } else {
         mVirtualSceneInfo = new VirtualSceneInfoDialog(this);
         connect(mVirtualSceneInfo, SIGNAL(closeButtonPressed()), this,
-                SLOT(slot_hideVirtualSceneInfoDialog()));
+                SIGNAL(hideVirtualSceneInfoDialog()));
 
         adjustVirtualSceneDialogGeometry();
 
