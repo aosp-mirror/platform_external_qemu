@@ -1334,8 +1334,31 @@ int ffmpeg_convert_to_animated_gif(const char* input_video_file,
         if (got_frame) {
             frame->pts = av_frame_get_best_effort_timestamp(frame);
             // correct invalid pts in the rare cases
-            if (frame->pts <= last_pts)
-                frame->pts = last_pts + 1;
+
+            // Need to check the scaled value if the output time_base has a
+            // smaller resolution than the input time_base
+            if (ofmt_ctx->streams[stream_index]->codec->time_base.den >
+                ofmt_ctx->streams[stream_index]->time_base.den) {
+                int64_t last_scaled_pts = -1;
+                int64_t scaled_pts = av_rescale_q(frame->pts,
+                                          ofmt_ctx->streams[stream_index]->codec->time_base,
+                                          ofmt_ctx->streams[stream_index]->time_base);
+
+                if (last_pts > 0) {
+                    last_scaled_pts = av_rescale_q(last_pts,
+                                                   ofmt_ctx->streams[stream_index]->codec->time_base,
+                                                   ofmt_ctx->streams[stream_index]->time_base);
+                }
+                if (scaled_pts <= last_scaled_pts) {
+                    frame->pts = av_rescale_q(last_scaled_pts + 1,
+                                              ofmt_ctx->streams[stream_index]->time_base,
+                                              ofmt_ctx->streams[stream_index]->codec->time_base);
+                }
+            } else {
+                if (frame->pts <= last_pts) {
+                    frame->pts = last_pts + 1;
+                }
+            }
             last_pts = frame->pts;
             if (sws_ctx != NULL)
                 sws_scale(sws_ctx, frame->data, frame->linesize, 0,
