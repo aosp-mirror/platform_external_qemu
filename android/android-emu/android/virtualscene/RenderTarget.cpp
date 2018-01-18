@@ -53,10 +53,10 @@ std::unique_ptr<RenderTarget> RenderTarget::createTextureTarget(
     GLuint depthRenderbuffer;
     gles2->glGenRenderbuffers(1, &depthRenderbuffer);
     gles2->glBindRenderbuffer(GL_RENDERBUFFER, depthRenderbuffer);
-    gles2->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT,
-                                  width, height);
+    gles2->glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, width,
+                                 height);
     gles2->glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                                      GL_RENDERBUFFER, depthRenderbuffer);
+                                     GL_RENDERBUFFER, depthRenderbuffer);
 
     gles2->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                                   GL_TEXTURE_2D,
