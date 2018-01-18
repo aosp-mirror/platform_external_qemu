@@ -60,6 +60,12 @@ void RenderbufferData::restore(ObjectLocalName localName,
             height);
 }
 
+void RenderbufferData::makeTextureDirty() {
+    if (saveableTexture) {
+        saveableTexture->makeDirty();
+    }
+}
+
 static GLenum s_index2Attachment(int idx);
 
 FramebufferData::FramebufferData(GLuint name) : ObjectData(FRAMEBUFFER_DATA)
@@ -186,6 +192,22 @@ void FramebufferData::restore(ObjectLocalName localName,
     }
     if (dispatcher.glReadBuffer) {
         dispatcher.glReadBuffer(m_readBuffer);
+    }
+}
+
+void FramebufferData::makeTextureDirty(const getObjDataPtr_t& getObjDataPtr) {
+    if (!hasBeenBoundAtLeastOnce()) return;
+    for (int i = 0; i < MAX_ATTACH_POINTS; i++) {
+        auto& attachPoint = m_attachPoints[i];
+        if (!attachPoint.name || attachPoint.owned || attachPoint.obj) {
+            // If not bound to a texture, do nothing
+            continue;
+        }
+        TextureData* texData = (TextureData*)getObjDataPtr(
+            NamedObjectType::TEXTURE, attachPoint.name).get();
+        if (texData) {
+            texData->makeDirty();
+        }
     }
 }
 

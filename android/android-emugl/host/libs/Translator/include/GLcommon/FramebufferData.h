@@ -22,6 +22,9 @@
 #include <GLES3/gl3.h>
 #include <vector>
 
+class SaveableTexture;
+typedef std::shared_ptr<SaveableTexture> SaveableTexturePtr;
+
 class RenderbufferData : public ObjectData
 {
 public:
@@ -31,9 +34,12 @@ public:
                 unsigned int globalName) const override;
     void restore(ObjectLocalName localName,
                  const getGlobalName_t& getGlobalName) override;
+    // Mark the texture handles dirty
+    void makeTextureDirty();
     GLuint attachedFB = 0;
     GLenum attachedPoint = 0;
     NamedObjectPtr eglImageGlobalTexObject = 0;
+    SaveableTexturePtr saveableTexture = {};
     GLenum internalformat = GL_RGBA8;
     GLenum hostInternalFormat = GL_RGBA8;
     GLsizei width = 0;
@@ -86,6 +92,8 @@ public:
         return m_readBuffer;
     }
 
+    // Mark the texture handles dirty
+    void makeTextureDirty(const getObjDataPtr_t& getObjDataPtr);
 private:
     inline int attachmentPointIndex(GLenum attachment);
     void detachObject(int idx);

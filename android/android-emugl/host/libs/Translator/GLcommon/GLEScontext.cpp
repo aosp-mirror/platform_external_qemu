@@ -697,6 +697,25 @@ void GLEScontext::onSave(android::base::Stream* stream) const {
     // do not save m_vaoNameSpace
 }
 
+void GLEScontext::postSave(android::base::Stream* stream) const {
+    (void)stream;
+    // We need to mark the textures dirty, for those that has been bound to
+    // a potential render target.
+    for (ObjectDataMap::const_iterator it = m_fboNameSpace->objDataMapBegin();
+        it != m_fboNameSpace->objDataMapEnd();
+        it ++) {
+        FramebufferData* fbData = (FramebufferData*)it->second.get();
+        fbData->makeTextureDirty([this](NamedObjectType p_type,
+            ObjectLocalName p_localName) {
+                if (p_type == NamedObjectType::FRAMEBUFFER) {
+                    return this->getFBODataPtr(p_localName);
+                } else {
+                    return m_shareGroup->getObjectDataPtr(p_type, p_localName);
+                }
+            });
+    }
+}
+
 void GLEScontext::postLoadRestoreShareGroup() {
     m_shareGroup->postLoadRestore();
 }
@@ -2111,19 +2130,19 @@ void GLEScontext::deleteFBO(ObjectLocalName p_localName) {
     m_fboNameSpace->deleteName(p_localName);
 }
 
-FramebufferData* GLEScontext::getFBOData(ObjectLocalName p_localName) {
+FramebufferData* GLEScontext::getFBOData(ObjectLocalName p_localName) const {
     return (FramebufferData*)getFBODataPtr(p_localName).get();
 }
 
-ObjectDataPtr GLEScontext::getFBODataPtr(ObjectLocalName p_localName) {
+ObjectDataPtr GLEScontext::getFBODataPtr(ObjectLocalName p_localName) const {
     return m_fboNameSpace->getObjectDataPtr(p_localName);
 }
 
-unsigned int GLEScontext::getFBOGlobalName(ObjectLocalName p_localName) {
+unsigned int GLEScontext::getFBOGlobalName(ObjectLocalName p_localName) const {
     return m_fboNameSpace->getGlobalName(p_localName);
 }
 
-ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) {
+ObjectLocalName GLEScontext::getFBOLocalName(unsigned int p_globalName) const {
     return m_fboNameSpace->getLocalName(p_globalName);
 }
 

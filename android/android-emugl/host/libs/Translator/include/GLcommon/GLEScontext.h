@@ -379,10 +379,10 @@ public:
     void setDefaultFBODrawBuffer(GLenum buffer);
     void setDefaultFBOReadBuffer(GLenum buffer);
     void deleteFBO(ObjectLocalName p_localName);
-    FramebufferData* getFBOData(ObjectLocalName p_localName);
-    ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName);
-    unsigned int getFBOGlobalName(ObjectLocalName p_localName);
-    ObjectLocalName getFBOLocalName(unsigned int p_globalName);
+    FramebufferData* getFBOData(ObjectLocalName p_localName) const;
+    ObjectDataPtr getFBODataPtr(ObjectLocalName p_localName) const;
+    unsigned int getFBOGlobalName(ObjectLocalName p_localName) const;
+    ObjectLocalName getFBOLocalName(unsigned int p_globalName) const;
     int queryCurrFboBits(ObjectLocalName localFboName, GLenum pname);
 
     // Texture emulation
@@ -413,6 +413,7 @@ public:
 
     // Snapshot save
     virtual void onSave(android::base::Stream* stream) const;
+    virtual void postSave(android::base::Stream* stream) const;
     virtual ObjectDataPtr loadObject(NamedObjectType type,
             ObjectLocalName localName, android::base::Stream* stream) const;
     // postLoad is triggered after setting up ShareGroup
