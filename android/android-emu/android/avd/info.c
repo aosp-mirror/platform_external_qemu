@@ -1132,9 +1132,14 @@ avdInfo_getKernelPath( const AvdInfo*  i )
 char*
 avdInfo_getRanchuKernelPath( const AvdInfo*  i )
 {
-    const char* imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU ];
-
+    const char* imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU64 ];
     char*  kernelPath = _avdInfo_getContentOrSdkFilePath(i, imageName);
+    if (kernelPath) {
+        return kernelPath;
+    }
+
+    imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU ];
+
 
     do {
         if (kernelPath || !i->inAndroidBuild)

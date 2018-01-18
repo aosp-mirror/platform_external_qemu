@@ -58,6 +58,7 @@ ANDROID_BEGIN_HEADER
 #define  AVD_IMAGE_LIST \
     _AVD_IMG(KERNEL,"kernel-qemu","kernel") \
     _AVD_IMG(KERNELRANCHU,"kernel-ranchu","kernel") \
+    _AVD_IMG(KERNELRANCHU64,"kernel-ranchu-64","kernel") \
     _AVD_IMG(RAMDISK,"ramdisk.img","ramdisk") \
     _AVD_IMG(INITSYSTEM,"system.img","init system") \
     _AVD_IMG(INITVENDOR,"vendor.img","init vendor") \
