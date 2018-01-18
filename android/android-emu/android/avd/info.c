@@ -1132,10 +1132,18 @@ avdInfo_getKernelPath( const AvdInfo*  i )
 char*
 avdInfo_getRanchuKernelPath( const AvdInfo*  i )
 {
-    const char* imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU ];
-
+    const char* imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU64 ];
     char*  kernelPath = _avdInfo_getContentOrSdkFilePath(i, imageName);
+    if (kernelPath) {
+        return kernelPath;
+    }
 
+    imageName = _imageFileNames[ AVD_IMAGE_KERNELRANCHU ];
+    kernelPath = _avdInfo_getContentOrSdkFilePath(i, imageName);
+
+    //old flow, checks the prebuilds/qemu-kernel, ignore //32bit-image-on-64bit scenario:
+    //the build process should have a copy of kernel-ranchu/kernel-ranchu-64 in the
+    //android out already,and will be handled by _avdInfo_getContentOrSdkFilePath()
     do {
         if (kernelPath || !i->inAndroidBuild)
             break;
